@@ -1,0 +1,42 @@
+name: Bug report
+description: Report a reproducible Angmoo public-source defect
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: Reports may be written in English or Korean. 한국어와 영어 모두 사용할 수 있습니다. Do not include credentials, private user data, or unredacted logs.
+  - type: input
+    id: revision
+    attributes:
+      label: Revision
+      description: Commit SHA or release version
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Observed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Synthetic reproduction
+      description: Minimal steps using fake credentials and synthetic data
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety
+      options:
+        - label: I removed credentials, personal data, and production logs.
+          required: true

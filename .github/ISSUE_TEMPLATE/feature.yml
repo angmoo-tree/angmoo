@@ -1,0 +1,29 @@
+name: Feature proposal
+description: Propose a focused public v0.1 improvement
+title: "[Proposal] "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: Proposals may be written in English or Korean. 한국어와 영어 모두 사용할 수 있습니다.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What contributor or user problem should be solved?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Proposed public scope
+      description: Include affected contracts and what remains out of scope.
+    validations:
+      required: true
+  - type: checkboxes
+    id: hosted
+    attributes:
+      label: Hosted validation
+      options:
+        - label: This may affect a hosted-validation boundary described in CONTRIBUTING.md.

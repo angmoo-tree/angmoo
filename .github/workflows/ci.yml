@@ -1,0 +1,290 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONUTF8: "1"
+
+jobs:
+  backend-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: pgvector/pgvector@sha256:1d533553fefe4f12e5d80c7b80622ba0c382abb5758856f52983d8789179f0fb
+        env:
+          POSTGRES_DB: angmoo
+          POSTGRES_USER: angmoo
+          POSTGRES_PASSWORD: angmoo-dev-only
+        ports:
+          - 55432:5432
+        options: >-
+          --health-cmd "pg_isready -U angmoo -d angmoo"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 30
+    env:
+      APP_ENV: test
+      APP_SECRET: synthetic-ci-app-secret-that-is-not-used-in-production
+      DATABASE_URL: postgresql+psycopg://angmoo:angmoo-dev-only@127.0.0.1:55432/angmoo
+      AGENT_ACTIVITY_ENGINE: langgraph
+      SERVER_LLM_ENGINE: direct
+      RESIDENT_TICK_SCHEDULER_ENABLED: "false"
+      POST_IMAGE_JOB_WORKER_ENABLED: "false"
+      POLLINATIONS_SERVICE_IMAGE_ENABLED: "false"
+      CREDENTIAL_ENCRYPTION_PROVIDER: local
+      SECURITY_CONCURRENCY_DATABASE_URL: postgresql+psycopg://angmoo:angmoo-dev-only@127.0.0.1:55432/angmoo
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
+        with:
+          version: "0.11.9"
+          enable-cache: false
+      - name: Install locked backend dependencies
+        run: uv sync --frozen
+        working-directory: backend
+      - name: Compile and migrate
+        run: |
+          uv run python -m compileall -q app
+          uv run alembic upgrade head
+        working-directory: backend
+      - name: Preserve approved M3 test nodes
+        run: uv run python ../scripts/check_test_node_baseline.py
+        working-directory: backend
+      - name: Run public test suite
+        run: |
+          uv run python -m pytest -q tests \
+            --ignore=tests/test_admin_operations.py \
+            --ignore=tests/test_openclaw_gateway.py \
+            --ignore=tests/test_inject_replicate_token_for_catgirl.py
+        working-directory: backend
+      - name: Verify public route inventory and contracts
+        run: |
+          uv run python ../scripts/generate_public_route_inventory.py --check
+          uv run python ../scripts/verify_m4_contracts.py
+        working-directory: backend
+
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: "22"
+      - uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093
+        with:
+          version: "10.33.2"
+          run_install: false
+      - name: Install locked frontend dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: frontend
+      - name: Lint
+        run: pnpm lint
+        working-directory: frontend
+      - name: Build public profile offline
+        env:
+          NEXT_PUBLIC_EXPERIMENTAL_IMAGE_ENABLED: "false"
+          NEXT_PUBLIC_PRIVATE_ADMIN_ENABLED: "false"
+        run: pnpm build
+        working-directory: frontend
+      - name: Build private feature profile
+        env:
+          NEXT_PUBLIC_EXPERIMENTAL_IMAGE_ENABLED: "true"
+          NEXT_PUBLIC_PRIVATE_ADMIN_ENABLED: "true"
+        run: pnpm build
+        working-directory: frontend
+      - name: Reject remote build-time font and CSS image dependencies
+        shell: bash
+        run: |
+          if grep -R -n 'next/font' frontend/src ||
+             grep -R -n -E 'url\([^)]*https?://' frontend/src; then
+            echo "Remote build-time frontend dependency found"
+            exit 1
+          fi
+
+  quickstart:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
+        with:
+          version: "0.11.9"
+          enable-cache: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: "22"
+      - uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093
+        with:
+          version: "10.33.2"
+          run_install: false
+      - name: Export clean public source
+        shell: bash
+        run: |
+          policy=backend/security/m4_private_export_policy.json
+          if [[ ! -f "$policy" ]]; then
+            policy=security/public_export_policy.json
+          fi
+          python scripts/build_public_candidate.py \
+            --repo-root . \
+            --ref HEAD \
+            --policy "$policy" \
+            --destination "$RUNNER_TEMP/angmoo-public" \
+            --report "$RUNNER_TEMP/quickstart-export.json" \
+            --fresh-git
+      - name: Follow public quickstart
+        shell: bash
+        run: |
+          set -euo pipefail
+          candidate="$RUNNER_TEMP/angmoo-public"
+          cd "$candidate"
+          cleanup() {
+            docker compose down --volumes >/dev/null 2>&1 || true
+            [[ -n "${backend_pid:-}" ]] && kill "$backend_pid" >/dev/null 2>&1 || true
+            [[ -n "${frontend_pid:-}" ]] && kill "$frontend_pid" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          cp backend/.env.example backend/.env
+          cp frontend/.env.example frontend/.env.local
+          docker compose up -d db
+          uv sync --frozen --directory backend
+          uv run --directory backend alembic upgrade head
+          uv run --directory backend uvicorn app.public_main:app --host 127.0.0.1 --port 8080 >"$RUNNER_TEMP/backend.log" 2>&1 &
+          backend_pid=$!
+          pnpm --dir frontend install --frozen-lockfile
+          pnpm --dir frontend lint
+          NEXT_PUBLIC_EXPERIMENTAL_IMAGE_ENABLED=false NEXT_PUBLIC_PRIVATE_ADMIN_ENABLED=false pnpm --dir frontend build
+          pnpm --dir frontend exec next dev -H 127.0.0.1 -p 3000 >"$RUNNER_TEMP/frontend.log" 2>&1 &
+          frontend_pid=$!
+          for attempt in {1..60}; do
+            curl --fail --silent http://127.0.0.1:8080/health >/dev/null && break
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8080/health >/dev/null
+          for attempt in {1..60}; do
+            curl --fail --silent http://127.0.0.1:3000/ >/dev/null && break
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:3000/ >/dev/null
+          uv run --directory backend python ../scripts/quickstart_smoke.py \
+            --backend-url http://127.0.0.1:8080 \
+            --frontend-url http://127.0.0.1:3000 \
+            --bootstrap-local-session
+          if grep -E 'https?://(generativelanguage|api\.pollinations|api\.replicate)' "$RUNNER_TEMP/backend.log"; then
+            echo "Provider request found in quickstart log"
+            exit 1
+          fi
+
+  security-export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
+        with:
+          version: "0.11.9"
+          enable-cache: false
+      - name: Install scanner dependencies
+        run: uv sync --frozen
+        working-directory: backend
+      - name: Export and self-export
+        shell: bash
+        run: |
+          python scripts/check_ci_policy.py
+          if [[ -f scripts/generate_public_export_policies.py ]]; then
+            uv run --directory backend python ../scripts/generate_public_export_policies.py --check
+          fi
+          policy=backend/security/m4_private_export_policy.json
+          if [[ ! -f "$policy" ]]; then
+            policy=security/public_export_policy.json
+          fi
+          python scripts/build_public_candidate.py \
+            --repo-root . --ref HEAD --policy "$policy" \
+            --destination "$RUNNER_TEMP/candidate" \
+            --report "$RUNNER_TEMP/export.json" --fresh-git
+          python "$RUNNER_TEMP/candidate/scripts/build_public_candidate.py" \
+            --repo-root "$RUNNER_TEMP/candidate" --ref HEAD \
+            --policy "$RUNNER_TEMP/candidate/security/public_export_policy.json" \
+            --destination "$RUNNER_TEMP/self-export" \
+            --report "$RUNNER_TEMP/self-export.json" --fresh-git
+          python - "$RUNNER_TEMP/export.json" "$RUNNER_TEMP/self-export.json" <<'PY'
+          import json, sys
+          first, second = (json.load(open(path, encoding="utf-8")) for path in sys.argv[1:])
+          for key in ("candidate_content_sha256", "candidate_manifest_sha256", "fresh_git_tree"):
+              if first[key] != second[key]:
+                  raise SystemExit(f"self-export drift: {key}")
+          PY
+      - name: Scan candidate
+        shell: bash
+        run: |
+          uv run --directory backend python ../scripts/security_secret_scan.py \
+            --root "$RUNNER_TEMP/candidate" \
+            --allowlist "$RUNNER_TEMP/candidate/backend/security/secret_scan_allowlist.json" \
+            --asset-manifest "$RUNNER_TEMP/candidate/backend/security/asset_manifest.json"
+          python "$RUNNER_TEMP/candidate/scripts/check_public_docs.py" \
+            --root "$RUNNER_TEMP/candidate"
+      - name: Verify and run Gitleaks
+        shell: bash
+        run: |
+          archive="$RUNNER_TEMP/gitleaks.tar.gz"
+          curl --fail --location --silent --show-error \
+            https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz \
+            --output "$archive"
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  $archive" | sha256sum --check
+          mkdir "$RUNNER_TEMP/gitleaks"
+          tar -xzf "$archive" -C "$RUNNER_TEMP/gitleaks" gitleaks
+          "$RUNNER_TEMP/gitleaks/gitleaks" dir "$RUNNER_TEMP/candidate" \
+            --config "$RUNNER_TEMP/candidate/.gitleaks.toml" --redact --no-banner
+          "$RUNNER_TEMP/gitleaks/gitleaks" git "$RUNNER_TEMP/candidate" \
+            --config "$RUNNER_TEMP/candidate/.gitleaks.toml" --redact --no-banner
+
+  dependency-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
+        with:
+          version: "0.11.9"
+          enable-cache: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: "22"
+      - uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093
+        with:
+          version: "10.33.2"
+          run_install: false
+      - name: Install locked dependencies
+        run: |
+          uv sync --frozen
+          cd ../frontend
+          pnpm install --frozen-lockfile
+        working-directory: backend
+      - name: Audit vulnerabilities
+        run: |
+          uv audit --locked
+          corepack pnpm@11.17.0 --dir ../frontend audit --prod --audit-level high
+        working-directory: backend
+      - name: Verify dependency licenses and notice
+        shell: bash
+        run: |
+          notice=../public/THIRD_PARTY_NOTICES.md
+          if [[ ! -f "$notice" ]]; then
+            notice=../THIRD_PARTY_NOTICES.md
+          fi
+          uv run python ../scripts/check_dependency_licenses.py \
+            --repo-root .. --check-notice "$notice"
+        working-directory: backend

@@ -1,0 +1,50 @@
+title = "Angmoo public secret scanning"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "angmoo-local-bot-token"
+description = "Angmoo Local Bot bearer token"
+regex = '''\bangmoo_local_[A-Za-z0-9_-]{24,}\b'''
+keywords = ["angmoo_local_"]
+tags = ["angmoo", "token"]
+
+[[rules]]
+id = "angmoo-credential-envelope"
+description = "Serialized Angmoo credential envelope"
+regex = '''\b(?:dev-v1|oci-kms-v1):[A-Za-z0-9+/=_-]{32,}\b'''
+keywords = ["dev-v1:", "oci-kms-v1:"]
+tags = ["angmoo", "credential"]
+
+[[rules]]
+id = "angmoo-sensitive-env-value"
+description = "Non-placeholder Angmoo security environment value"
+regex = '''(?im)^[ \t]*(APP_SECRET|CREDENTIAL_ENCRYPTION_LOCAL_KEY|POLLINATIONS_API_KEY|POLLINATIONS_SERVICE_IMAGE_API_KEY|REPLICATE_IMAGE_API_TOKEN|TURNSTILE_SECRET_KEY)[ \t]*=[ \t]*["']?([A-Za-z0-9+/=_-]{20,})'''
+secretGroup = 2
+entropy = 3.2
+keywords = [
+  "APP_SECRET",
+  "CREDENTIAL_ENCRYPTION_LOCAL_KEY",
+  "POLLINATIONS_API_KEY",
+  "POLLINATIONS_SERVICE_IMAGE_API_KEY",
+  "REPLICATE_IMAGE_API_TOKEN",
+  "TURNSTILE_SECRET_KEY",
+]
+tags = ["angmoo", "env"]
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Exact synthetic canaries exercise scanner tests"
+condition = "AND"
+regexTarget = "line"
+paths = ['''backend/tests/test_security_secret_scan\.py''']
+regexes = ['''(?:AIza1234567890[1]234567890|sk-1234567890[1]2345678901234)''']
+
+[[allowlists]]
+targetRules = ["angmoo-sensitive-env-value"]
+description = "Documented local-only APP_SECRET placeholder"
+condition = "AND"
+regexTarget = "secret"
+paths = ['''backend/\.env\.example''']
+regexes = ['''replace-with-a-long-local-development-secret''']

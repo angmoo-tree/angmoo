@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "account_deletion": {
+    "delete_private": [
+      "agent_activity_logs",
+      "agent_activity_settings",
+      "agent_creation_drafts",
+      "agent_daypart_memory_events",
+      "agent_feed_cues",
+      "agent_image_generation_settings",
+      "agent_local_keys",
+      "agent_public_action_executions",
+      "agent_relationship_points",
+      "agent_runs",
+      "auth_sessions",
+      "character_lore_chunks",
+      "character_lore_sources",
+      "character_message_settings",
+      "character_states",
+      "llm_credentials",
+      "local_bot_action_quota_buckets",
+      "local_bot_read_quota_buckets",
+      "message_messages",
+      "message_threads",
+      "notifications",
+      "post_image_generation_jobs",
+      "post_image_quota_reservations",
+      "post_likes",
+      "post_reports",
+      "post_reposts",
+      "profile_follows",
+      "profile_image_candidates",
+      "profile_image_quota_reservations",
+      "user_message_preferences"
+    ],
+    "scrub": [
+      "admin_audit_logs",
+      "characters",
+      "users"
+    ],
+    "unlink": [
+      "agent_slots",
+      "site_operation_banners",
+      "site_operation_settings"
+    ],
+    "retain_public": [
+      "comments",
+      "post_media",
+      "posts",
+      "tree_comments",
+      "tree_posts"
+    ],
+    "retain_temporary_security_control": [
+      "auth_external_verification_reservations",
+      "auth_google_signup_grants",
+      "auth_login_throttle_buckets",
+      "community_mutation_quota_buckets",
+      "lore_parser_leases"
+    ]
+  },
+  "character_deletion": {
+    "delete_private": [
+      "agent_activity_logs",
+      "agent_activity_settings",
+      "agent_daypart_memory_events",
+      "agent_feed_cues",
+      "agent_image_generation_settings",
+      "agent_local_keys",
+      "agent_public_action_executions",
+      "agent_relationship_points",
+      "agent_runs",
+      "character_lore_chunks",
+      "character_lore_sources",
+      "character_message_settings",
+      "character_states",
+      "llm_credentials",
+      "local_bot_action_quota_buckets",
+      "local_bot_read_quota_buckets",
+      "message_messages",
+      "message_threads",
+      "notifications",
+      "post_image_generation_jobs",
+      "post_image_quota_reservations",
+      "post_likes",
+      "post_reposts",
+      "profile_follows",
+      "profile_image_candidates",
+      "profile_image_quota_reservations"
+    ],
+    "scrub": [
+      "characters"
+    ],
+    "unlink": [
+      "agent_slots",
+      "user_message_preferences"
+    ],
+    "retain_public": [
+      "comments",
+      "post_media",
+      "posts",
+      "tree_comments",
+      "tree_posts"
+    ],
+    "unaffected_account_or_operations": [
+      "admin_audit_logs",
+      "agent_creation_drafts",
+      "auth_external_verification_reservations",
+      "auth_google_signup_grants",
+      "auth_sessions",
+      "auth_login_throttle_buckets",
+      "community_mutation_quota_buckets",
+      "lore_parser_leases",
+      "post_reports",
+      "site_operation_banners",
+      "site_operation_settings",
+      "users"
+    ]
+  }
+}

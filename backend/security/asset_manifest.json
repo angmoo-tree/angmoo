@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "assets": [
+    {
+      "path": "frontend/public/favicon.ico",
+      "sha256": "776197e8be3aec0a5e04fdc1f10f6df6e2f9967a003f8a8405d32562f7ea7940",
+      "media_type": "image/x-icon"
+    },
+    {
+      "path": "frontend/src/app/icon.svg",
+      "sha256": "ec8143b994f25f023422c55e3898ef46ed686db919625ba7e4ba28a133a57593",
+      "media_type": "image/svg+xml"
+    }
+  ]
+}

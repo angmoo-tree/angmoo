@@ -1,0 +1,145 @@
+# Third-party notices
+
+This inventory is generated from the locked Angmoo dependencies.
+Package authors retain all rights granted by their respective licenses.
+
+## Python packages (77)
+
+- `alembic 1.18.4` — MIT
+- `annotated-doc 0.0.4` — MIT
+- `annotated-types 0.7.0` — OSI Approved :: MIT License
+- `anyio 4.13.0` — MIT
+- `certifi 2026.4.22` — MPL-2.0
+- `cffi 2.0.0` — MIT
+- `charset-normalizer 3.4.7` — MIT
+- `circuitbreaker 2.1.3` — BSD-3-Clause
+- `click 8.3.3` — BSD-3-Clause
+- `colorama 0.4.6` — OSI Approved :: BSD License
+- `crc32c 2.8` — LGPL-2.1-or-later
+- `cryptography 49.0.0` — Apache-2.0 OR BSD-3-Clause
+- `distro 1.9.0` — Apache License, Version 2.0
+- `fastapi 0.139.2` — MIT
+- `google-auth 2.53.0` — Apache 2.0
+- `google-genai 2.8.0` — Apache-2.0
+- `greenlet 3.5.0` — MIT AND PSF-2.0
+- `h11 0.16.0` — MIT
+- `httpcore 1.0.9` — BSD-3-Clause
+- `httpx 0.28.1` — BSD-3-Clause
+- `idna 3.18` — BSD-3-Clause
+- `iniconfig 2.3.0` — MIT
+- `jsonpatch 1.33` — Modified BSD License
+- `jsonpointer 3.1.1` — Modified BSD License
+- `langchain-core 1.4.3` — MIT
+- `langchain-protocol 0.0.16` — MIT
+- `langgraph 1.2.2` — MIT
+- `langgraph-checkpoint 4.1.1` — MIT
+- `langgraph-prebuilt 1.1.0` — MIT
+- `langgraph-sdk 0.3.15` — MIT
+- `langsmith 0.10.10` — MIT
+- `lxml 6.1.1` — BSD-3-Clause
+- `mako 1.3.12` — MIT
+- `markupsafe 3.0.3` — BSD-3-Clause
+- `numpy 2.4.6` — BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0
+- `oci 2.182.1` — Universal Permissive License 1.0 or Apache License 2.0
+- `orjson 3.11.9` — MPL-2.0 AND (Apache-2.0 OR MIT)
+- `ormsgpack 1.12.2` — Apache-2.0 OR MIT
+- `packaging 26.2` — Apache-2.0 OR BSD-2-Clause
+- `pgvector 0.4.2` — MIT
+- `pillow 12.3.0` — MIT-CMU
+- `pluggy 1.6.0` — MIT
+- `psycopg 3.3.4` — LGPL-3.0-only
+- `psycopg-binary 3.3.4` — LGPL-3.0-only
+- `pyasn1 0.6.4` — BSD-2-Clause
+- `pyasn1-modules 0.4.2` — BSD
+- `pycparser 3.0` — BSD-3-Clause
+- `pydantic 2.13.4` — MIT
+- `pydantic-core 2.46.4` — MIT
+- `pydantic-settings 2.14.2` — MIT
+- `pygments 2.20.0` — BSD-2-Clause
+- `pyjwt 2.13.0` — MIT
+- `pyopenssl 26.3.0` — Apache License, Version 2.0
+- `pypdf 6.14.2` — BSD-3-Clause
+- `pytest 9.0.3` — MIT
+- `python-dateutil 2.9.0.post0` — Dual License
+- `python-docx 1.2.0` — MIT
+- `python-dotenv 1.2.2` — BSD-3-Clause
+- `python-multipart 0.0.32` — Apache-2.0
+- `pytz 2026.2` — MIT
+- `pyyaml 6.0.3` — MIT
+- `requests 2.34.2` — Apache-2.0
+- `requests-toolbelt 1.0.0` — Apache 2.0
+- `six 1.17.0` — MIT
+- `sniffio 1.3.1` — MIT OR Apache-2.0
+- `sqlalchemy 2.0.49` — MIT
+- `starlette 1.3.1` — BSD-3-Clause
+- `tenacity 9.1.4` — Apache 2.0
+- `typing-extensions 4.15.0` — PSF-2.0
+- `typing-inspection 0.4.2` — MIT
+- `tzdata 2026.2` — Apache-2.0
+- `urllib3 2.7.0` — MIT
+- `uuid-utils 0.16.0` — BSD-3-Clause
+- `uvicorn 0.46.0` — BSD-3-Clause
+- `websockets 16.0` — BSD-3-Clause
+- `xxhash 3.7.0` — BSD
+- `zstandard 0.25.0` — BSD-3-Clause
+
+## JavaScript production packages (56)
+
+- `@babel/code-frame 7.29.0` — MIT
+- `@babel/compat-data 7.29.3` — MIT
+- `@babel/core 7.29.0` — MIT
+- `@babel/generator 7.29.1` — MIT
+- `@babel/helper-compilation-targets 7.28.6` — MIT
+- `@babel/helper-globals 7.28.0` — MIT
+- `@babel/helper-module-imports 7.28.6` — MIT
+- `@babel/helper-module-transforms 7.28.6` — MIT
+- `@babel/helper-string-parser 7.27.1` — MIT
+- `@babel/helper-validator-identifier 7.28.5` — MIT
+- `@babel/helper-validator-option 7.27.1` — MIT
+- `@babel/helpers 7.29.2` — MIT
+- `@babel/parser 7.29.3` — MIT
+- `@babel/template 7.28.6` — MIT
+- `@babel/traverse 7.29.0` — MIT
+- `@babel/types 7.29.0` — MIT
+- `@img/colour 1.1.0` — MIT
+- `@jridgewell/gen-mapping 0.3.13` — MIT
+- `@jridgewell/remapping 2.3.5` — MIT
+- `@jridgewell/resolve-uri 3.1.2` — MIT
+- `@jridgewell/sourcemap-codec 1.5.5` — MIT
+- `@jridgewell/trace-mapping 0.3.31` — MIT
+- `@next/env 16.2.11` — MIT
+- `@swc/helpers 0.5.15` — Apache-2.0
+- `baseline-browser-mapping 2.10.29` — Apache-2.0
+- `browserslist 4.28.2` — MIT
+- `caniuse-lite 1.0.30001792` — CC-BY-4.0
+- `client-only 0.0.1` — MIT
+- `convert-source-map 2.0.0` — MIT
+- `debug 4.4.3` — MIT
+- `detect-libc 2.1.2` — Apache-2.0
+- `electron-to-chromium 1.5.353` — ISC
+- `escalade 3.2.0` — MIT
+- `gensync 1.0.0-beta.2` — MIT
+- `js-tokens 4.0.0` — MIT
+- `jsesc 3.1.0` — MIT
+- `json5 2.2.3` — MIT
+- `lru-cache 5.1.1` — ISC
+- `lucide-react 1.14.0` — ISC
+- `ms 2.1.3` — MIT
+- `nanoid 3.3.12` — MIT
+- `next 16.2.11` — MIT
+- `node-releases 2.0.38` — MIT
+- `picocolors 1.1.1` — ISC
+- `postcss 8.5.18` — MIT
+- `react 19.2.4` — MIT
+- `react-dom 19.2.4` — MIT
+- `scheduler 0.27.0` — MIT
+- `semver 6.3.1` — ISC
+- `semver 7.8.5` — ISC
+- `sharp 0.35.0` — Apache-2.0
+- `source-map-js 1.2.1` — BSD-3-Clause
+- `styled-jsx 5.1.6` — MIT
+- `tslib 2.8.1` — 0BSD
+- `update-browserslist-db 1.2.3` — MIT
+- `yallist 3.1.1` — ISC
+
+This notice does not replace license text distributed by an individual dependency.

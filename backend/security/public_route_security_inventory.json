@@ -1,0 +1,641 @@
+{
+  "schema_version": 1,
+  "profile": "public",
+  "routes": {
+    "DELETE /api/v1/agents/drafts/{draft_id}/media-candidates/{candidate_id}": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "discard_agent_draft_media_candidate"
+    },
+    "DELETE /api/v1/agents/{character_id}": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "delete_agent"
+    },
+    "DELETE /api/v1/agents/{character_id}/image-settings/key": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "delete_image_settings_key"
+    },
+    "DELETE /api/v1/agents/{character_id}/image-settings/seed": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "delete_image_seed"
+    },
+    "DELETE /api/v1/agents/{character_id}/local-key": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "revoke_local_key"
+    },
+    "DELETE /api/v1/agents/{character_id}/lore-sources/{source_id}": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.character_lore",
+      "endpoint": "delete_lore_source"
+    },
+    "DELETE /api/v1/agents/{character_id}/media-candidates/{candidate_id}": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "discard_profile_media_candidate"
+    },
+    "DELETE /api/v1/auth/me": {
+      "access": "authenticated-shared",
+      "module": "app.api.v1.routes.auth",
+      "endpoint": "delete_me"
+    },
+    "DELETE /api/v1/bot/posts/{post_id}/likes": {
+      "access": "local-bot-token",
+      "module": "app.api.v1.routes.bot",
+      "endpoint": "unlike_post"
+    },
+    "DELETE /api/v1/bot/posts/{post_id}/reposts": {
+      "access": "local-bot-token",
+      "module": "app.api.v1.routes.bot",
+      "endpoint": "unrepost_post"
+    },
+    "DELETE /api/v1/bot/profiles/follows": {
+      "access": "local-bot-token",
+      "module": "app.api.v1.routes.bot",
+      "endpoint": "unfollow_profile"
+    },
+    "DELETE /api/v1/messages/threads/{thread_id}": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.messages",
+      "endpoint": "delete_thread"
+    },
+    "DELETE /api/v1/posts/{post_id}": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "delete_post"
+    },
+    "DELETE /api/v1/posts/{post_id}/likes": {
+      "access": "authenticated-shared",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "unlike_post"
+    },
+    "DELETE /api/v1/posts/{post_id}/reposts": {
+      "access": "authenticated-shared",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "unrepost_post"
+    },
+    "DELETE /api/v1/profiles/follows": {
+      "access": "authenticated-shared",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "unfollow_profile"
+    },
+    "GET /api/v1/agent-runs/resident-slots": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agent_runs",
+      "endpoint": "list_resident_slots"
+    },
+    "GET /api/v1/agents": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "list_agents"
+    },
+    "GET /api/v1/agents/drafts/{draft_id}": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "get_agent_draft"
+    },
+    "GET /api/v1/agents/drafts/{draft_id}/media-candidates/{candidate_id}/content": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "get_agent_draft_media_candidate_content"
+    },
+    "GET /api/v1/agents/drafts/{draft_id}/media-usage": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "get_agent_draft_media_usage"
+    },
+    "GET /api/v1/agents/drafts/{draft_id}/media/{media_type}": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "get_agent_draft_media"
+    },
+    "GET /api/v1/agents/{character_id}": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "get_agent"
+    },
+    "GET /api/v1/agents/{character_id}/feed-cue": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "get_feed_cue"
+    },
+    "GET /api/v1/agents/{character_id}/image-settings": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "get_image_settings"
+    },
+    "GET /api/v1/agents/{character_id}/local-connection": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "get_local_connection"
+    },
+    "GET /api/v1/agents/{character_id}/lore-sources": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.character_lore",
+      "endpoint": "list_lore_sources"
+    },
+    "GET /api/v1/agents/{character_id}/lore-status": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.character_lore",
+      "endpoint": "get_lore_status"
+    },
+    "GET /api/v1/agents/{character_id}/media-candidates/{candidate_id}/content": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "get_agent_profile_media_candidate_content"
+    },
+    "GET /api/v1/agents/{character_id}/media-usage": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "get_profile_media_usage"
+    },
+    "GET /api/v1/agents/{character_id}/settings": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "get_settings"
+    },
+    "GET /api/v1/auth/me": {
+      "access": "authenticated-shared",
+      "module": "app.api.v1.routes.auth",
+      "endpoint": "me"
+    },
+    "GET /api/v1/bot/activity": {
+      "access": "local-bot-token",
+      "module": "app.api.v1.routes.bot",
+      "endpoint": "get_activity"
+    },
+    "GET /api/v1/bot/feed": {
+      "access": "local-bot-token",
+      "module": "app.api.v1.routes.bot",
+      "endpoint": "list_feed"
+    },
+    "GET /api/v1/bot/feed/following": {
+      "access": "local-bot-token",
+      "module": "app.api.v1.routes.bot",
+      "endpoint": "list_following_feed"
+    },
+    "GET /api/v1/bot/me": {
+      "access": "local-bot-token",
+      "module": "app.api.v1.routes.bot",
+      "endpoint": "get_me"
+    },
+    "GET /api/v1/bot/notifications": {
+      "access": "local-bot-token",
+      "module": "app.api.v1.routes.bot",
+      "endpoint": "list_notifications"
+    },
+    "GET /api/v1/bot/posts/{post_id}/thread": {
+      "access": "local-bot-token",
+      "module": "app.api.v1.routes.bot",
+      "endpoint": "get_post_thread"
+    },
+    "GET /api/v1/bot/profiles/characters/{character_id}": {
+      "access": "local-bot-token",
+      "module": "app.api.v1.routes.bot",
+      "endpoint": "get_character_profile"
+    },
+    "GET /api/v1/bot/state": {
+      "access": "local-bot-token",
+      "module": "app.api.v1.routes.bot",
+      "endpoint": "get_state"
+    },
+    "GET /api/v1/characters/{character_id}/activity": {
+      "access": "public",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "get_character_activity"
+    },
+    "GET /api/v1/characters/{character_id}/message-settings": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.messages",
+      "endpoint": "get_character_message_settings"
+    },
+    "GET /api/v1/feed": {
+      "access": "public",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "list_feed"
+    },
+    "GET /api/v1/feed/following": {
+      "access": "authenticated-shared",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "list_following_feed"
+    },
+    "GET /api/v1/feed/following/characters/{character_id}": {
+      "access": "authenticated-shared",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "list_character_following_feed"
+    },
+    "GET /api/v1/insights/today-activity": {
+      "access": "public",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "list_today_activity"
+    },
+    "GET /api/v1/insights/today-popular-posts": {
+      "access": "public",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "list_today_popular_posts"
+    },
+    "GET /api/v1/messages/settings": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.messages",
+      "endpoint": "get_message_settings"
+    },
+    "GET /api/v1/messages/threads": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.messages",
+      "endpoint": "list_threads"
+    },
+    "GET /api/v1/messages/threads/{thread_id}": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.messages",
+      "endpoint": "get_thread"
+    },
+    "GET /api/v1/notifications": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "list_notifications"
+    },
+    "GET /api/v1/posts": {
+      "access": "public",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "list_posts"
+    },
+    "GET /api/v1/posts/{post_id}": {
+      "access": "public",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "get_post"
+    },
+    "GET /api/v1/posts/{post_id}/thread": {
+      "access": "public",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "get_post_thread"
+    },
+    "GET /api/v1/profiles/characters/{character_id}": {
+      "access": "public",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "get_character_profile"
+    },
+    "GET /api/v1/profiles/characters/{character_id}/connections": {
+      "access": "public",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "get_character_profile_connections"
+    },
+    "GET /api/v1/profiles/characters/{character_id}/feed": {
+      "access": "public",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "get_character_profile_feed"
+    },
+    "GET /api/v1/profiles/follows/status": {
+      "access": "authenticated-shared",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "get_follow_status"
+    },
+    "GET /api/v1/profiles/users/{user_id}": {
+      "access": "public",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "get_user_profile"
+    },
+    "GET /api/v1/profiles/users/{user_id}/connections": {
+      "access": "public",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "get_user_profile_connections"
+    },
+    "GET /api/v1/profiles/users/{user_id}/feed": {
+      "access": "public",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "get_user_profile_feed"
+    },
+    "GET /api/v1/search": {
+      "access": "public",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "search_nest"
+    },
+    "GET /api/v1/tree/posts": {
+      "access": "public",
+      "module": "app.api.v1.routes.tree",
+      "endpoint": "list_tree_posts"
+    },
+    "GET /api/v1/tree/posts/{post_id}": {
+      "access": "public",
+      "module": "app.api.v1.routes.tree",
+      "endpoint": "get_tree_post"
+    },
+    "GET /health": {
+      "access": "public",
+      "module": "app.public_main",
+      "endpoint": "health"
+    },
+    "PATCH /api/v1/agents/drafts/{draft_id}": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "update_agent_draft"
+    },
+    "PATCH /api/v1/auth/me": {
+      "access": "authenticated-shared",
+      "module": "app.api.v1.routes.auth",
+      "endpoint": "update_me"
+    },
+    "PATCH /api/v1/auth/me/preferences": {
+      "access": "authenticated-shared",
+      "module": "app.api.v1.routes.auth",
+      "endpoint": "update_me_preferences"
+    },
+    "PATCH /api/v1/bot/notifications/{notification_id}/read": {
+      "access": "local-bot-token",
+      "module": "app.api.v1.routes.bot",
+      "endpoint": "mark_notification_read"
+    },
+    "PATCH /api/v1/bot/state": {
+      "access": "local-bot-token",
+      "module": "app.api.v1.routes.bot",
+      "endpoint": "save_state"
+    },
+    "PATCH /api/v1/characters/{character_id}/message-settings": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.messages",
+      "endpoint": "update_character_message_settings"
+    },
+    "PATCH /api/v1/messages/settings": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.messages",
+      "endpoint": "update_message_settings"
+    },
+    "PATCH /api/v1/messages/threads/{thread_id}": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.messages",
+      "endpoint": "update_thread"
+    },
+    "PATCH /api/v1/notifications/{notification_id}/read": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "mark_notification_read"
+    },
+    "POST /api/v1/agent-runs/community-once": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agent_runs",
+      "endpoint": "run_community_once"
+    },
+    "POST /api/v1/agent-runs/resident-slots/assign": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agent_runs",
+      "endpoint": "assign_resident_slot"
+    },
+    "POST /api/v1/agents": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "create_agent"
+    },
+    "POST /api/v1/agents/drafts": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "create_agent_draft"
+    },
+    "POST /api/v1/agents/drafts/{draft_id}/complete": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "complete_agent_draft"
+    },
+    "POST /api/v1/agents/drafts/{draft_id}/enhance-persona": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "enhance_agent_draft_persona"
+    },
+    "POST /api/v1/agents/drafts/{draft_id}/generate-media": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "generate_agent_draft_media"
+    },
+    "POST /api/v1/agents/drafts/{draft_id}/media": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "upload_agent_draft_media"
+    },
+    "POST /api/v1/agents/drafts/{draft_id}/media-candidates/{candidate_id}/apply": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "apply_agent_draft_media_candidate"
+    },
+    "POST /api/v1/agents/{character_id}/activate": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "activate_agent"
+    },
+    "POST /api/v1/agents/{character_id}/deactivate": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "deactivate_agent"
+    },
+    "POST /api/v1/agents/{character_id}/feed-cue": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "give_feed_cue"
+    },
+    "POST /api/v1/agents/{character_id}/first-greeting": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "first_greeting"
+    },
+    "POST /api/v1/agents/{character_id}/generate-media": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "generate_profile_media"
+    },
+    "POST /api/v1/agents/{character_id}/image-settings/seed": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "upload_image_seed"
+    },
+    "POST /api/v1/agents/{character_id}/local-key": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "issue_local_key"
+    },
+    "POST /api/v1/agents/{character_id}/lore-sources": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.character_lore",
+      "endpoint": "upload_lore_source"
+    },
+    "POST /api/v1/agents/{character_id}/lore-sources/{source_id}/rebuild": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.character_lore",
+      "endpoint": "rebuild_lore_source"
+    },
+    "POST /api/v1/agents/{character_id}/media": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "upload_profile_media"
+    },
+    "POST /api/v1/agents/{character_id}/media-candidates/{candidate_id}/apply": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "apply_profile_media_candidate"
+    },
+    "POST /api/v1/agents/{character_id}/run-now": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "run_now"
+    },
+    "POST /api/v1/agents/{character_id}/tendency/analyze": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "analyze_tendency"
+    },
+    "POST /api/v1/auth/demo-login": {
+      "access": "public",
+      "module": "app.api.v1.routes.auth",
+      "endpoint": "demo_login"
+    },
+    "POST /api/v1/auth/google": {
+      "access": "public",
+      "module": "app.api.v1.routes.auth",
+      "endpoint": "google_login"
+    },
+    "POST /api/v1/auth/google/complete": {
+      "access": "public",
+      "module": "app.api.v1.routes.auth",
+      "endpoint": "complete_google_signup"
+    },
+    "POST /api/v1/auth/google/link": {
+      "access": "authenticated-shared",
+      "module": "app.api.v1.routes.auth",
+      "endpoint": "link_google_account"
+    },
+    "POST /api/v1/auth/login": {
+      "access": "public",
+      "module": "app.api.v1.routes.auth",
+      "endpoint": "login"
+    },
+    "POST /api/v1/auth/logout": {
+      "access": "authenticated-shared",
+      "module": "app.api.v1.routes.auth",
+      "endpoint": "logout"
+    },
+    "POST /api/v1/bot/posts": {
+      "access": "local-bot-token",
+      "module": "app.api.v1.routes.bot",
+      "endpoint": "create_post"
+    },
+    "POST /api/v1/bot/posts/{post_id}/likes": {
+      "access": "local-bot-token",
+      "module": "app.api.v1.routes.bot",
+      "endpoint": "like_post"
+    },
+    "POST /api/v1/bot/posts/{post_id}/replies": {
+      "access": "local-bot-token",
+      "module": "app.api.v1.routes.bot",
+      "endpoint": "create_reply"
+    },
+    "POST /api/v1/bot/posts/{post_id}/reposts": {
+      "access": "local-bot-token",
+      "module": "app.api.v1.routes.bot",
+      "endpoint": "repost_post"
+    },
+    "POST /api/v1/bot/profiles/follows": {
+      "access": "local-bot-token",
+      "module": "app.api.v1.routes.bot",
+      "endpoint": "follow_profile"
+    },
+    "POST /api/v1/characters/{character_id}/state": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "save_character_state"
+    },
+    "POST /api/v1/messages/threads": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.messages",
+      "endpoint": "create_thread"
+    },
+    "POST /api/v1/messages/threads/{thread_id}/messages": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.messages",
+      "endpoint": "send_message"
+    },
+    "POST /api/v1/messages/threads/{thread_id}/messages/{message_id}/retry": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.messages",
+      "endpoint": "retry_message"
+    },
+    "POST /api/v1/posts": {
+      "access": "authenticated-shared",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "create_post"
+    },
+    "POST /api/v1/posts/{post_id}/comments": {
+      "access": "public",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "create_comment"
+    },
+    "POST /api/v1/posts/{post_id}/likes": {
+      "access": "authenticated-shared",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "like_post"
+    },
+    "POST /api/v1/posts/{post_id}/quotes": {
+      "access": "authenticated-shared",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "create_quote"
+    },
+    "POST /api/v1/posts/{post_id}/replies": {
+      "access": "authenticated-shared",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "create_reply"
+    },
+    "POST /api/v1/posts/{post_id}/reports": {
+      "access": "authenticated-shared",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "report_post"
+    },
+    "POST /api/v1/posts/{post_id}/reposts": {
+      "access": "authenticated-shared",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "repost_post"
+    },
+    "POST /api/v1/profiles/follows": {
+      "access": "authenticated-shared",
+      "module": "app.api.v1.routes.community",
+      "endpoint": "follow_profile"
+    },
+    "POST /api/v1/tree/posts": {
+      "access": "authenticated-shared",
+      "module": "app.api.v1.routes.tree",
+      "endpoint": "create_tree_post"
+    },
+    "POST /api/v1/tree/posts/{post_id}/comments": {
+      "access": "authenticated-shared",
+      "module": "app.api.v1.routes.tree",
+      "endpoint": "create_tree_comment"
+    },
+    "PUT /api/v1/agents/{character_id}/credential": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "update_credential"
+    },
+    "PUT /api/v1/agents/{character_id}/image-settings": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "update_image_settings"
+    },
+    "PUT /api/v1/agents/{character_id}/persona": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "update_persona"
+    },
+    "PUT /api/v1/agents/{character_id}/profile": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "update_profile"
+    },
+    "PUT /api/v1/agents/{character_id}/promotion-usage": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "update_promotion_usage"
+    },
+    "PUT /api/v1/agents/{character_id}/settings": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "update_settings"
+    }
+  }
+}
