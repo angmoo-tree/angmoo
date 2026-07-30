@@ -10,6 +10,7 @@ from urllib.parse import unquote
 
 
 REQUIRED = {
+    ".github/PULL_REQUEST_TEMPLATE.md",
     "README.md",
     "README.ko.md",
     "LICENSE",
@@ -45,6 +46,8 @@ REQUIRED_MARKERS = {
     "CONTRIBUTING.md": (
         "Issues and pull requests may be written in English or Korean",
         "`requires-hosted-validation`",
+        "`hosted-fast`",
+        "This classification does not start",
     ),
     "CONTRIBUTING.ko.md": (
         "한국어와 영어 모두 사용할 수 있습니다",
@@ -53,6 +56,12 @@ REQUIRED_MARKERS = {
         "## Branch, commit과 Pull Request",
         "## Hosted validation",
         "`requires-hosted-validation`",
+        "`hosted-fast`",
+        "private workflow",
+    ),
+    ".github/PULL_REQUEST_TEMPLATE.md": (
+        "Hosted impact classification",
+        "Public pull requests never receive private source or credentials",
     ),
     "SECURITY.md": (
         "GitHub Private Vulnerability Reporting",
