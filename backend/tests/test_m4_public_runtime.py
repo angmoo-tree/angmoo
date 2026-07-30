@@ -15,6 +15,12 @@ from app.public_main import (
     validate_public_runtime_settings,
 )
 from app.services import agent_runs as agent_run_service
+from app.services.hosted_configuration import (
+    HOSTED_EXTENSION_CONTRACT_VERSION,
+    HostedConfigurationRegistrationError,
+    get_hosted_prompt,
+    get_hosted_setting,
+)
 from app.services.runtime_boundary import (
     OpenClawGatewayClient,
     ResidentRuntimeUnavailableError,
@@ -139,6 +145,65 @@ def test_hosted_backend_extension_registers_router_and_hooks_once(
     asyncio.run(run())
 
     assert calls == ["startup", "shutdown"]
+
+
+def test_hosted_configuration_is_scoped_to_hosted_lifespan(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(settings, "SEED_DEMO_DATA", False)
+
+    class FakeSettingsProvider:
+        name = "fake-settings"
+
+        def get_setting(self, key: str) -> object | None:
+            return {"runtime": "hosted"}.get(key)
+
+    class FakePromptProvider:
+        name = "fake-prompts"
+
+        def get_prompt(self, key: str) -> str | None:
+            return {"resident": "hosted prompt"}.get(key)
+
+    extension = HostedBackendExtension(
+        name="test-hosted-configuration",
+        settings_provider=FakeSettingsProvider(),
+        prompt_provider=FakePromptProvider(),
+    )
+    hosted_app = create_app(
+        extension,
+        lifespan_handler=create_lifespan(
+            extension,
+            security_validator=lambda: None,
+        ),
+    )
+
+    assert HOSTED_EXTENSION_CONTRACT_VERSION == 2
+    assert get_hosted_setting("runtime") is None
+    assert get_hosted_prompt("resident") is None
+
+    async def run() -> None:
+        async with hosted_app.router.lifespan_context(hosted_app):
+            assert get_hosted_setting("runtime") == "hosted"
+            assert get_hosted_prompt("resident") == "hosted prompt"
+
+    asyncio.run(run())
+
+    assert get_hosted_setting("runtime") is None
+    assert get_hosted_prompt("resident") is None
+
+
+def test_hosted_extension_rejects_partial_configuration() -> None:
+    class FakeSettingsProvider:
+        name = "fake-settings"
+
+        def get_setting(self, key: str) -> object | None:
+            return None
+
+    with pytest.raises(HostedConfigurationRegistrationError):
+        HostedBackendExtension(
+            name="partial-configuration",
+            settings_provider=FakeSettingsProvider(),
+        )
 
 
 @pytest.mark.parametrize("field", ["routers", "startup_hooks", "shutdown_hooks"])

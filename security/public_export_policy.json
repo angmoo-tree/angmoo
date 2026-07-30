@@ -711,6 +711,10 @@
       "destination": "backend/app/services/external_auth_verification.py"
     },
     {
+      "source": "backend/app/services/hosted_configuration.py",
+      "destination": "backend/app/services/hosted_configuration.py"
+    },
+    {
       "source": "backend/app/services/image_prompt_safety.py",
       "destination": "backend/app/services/image_prompt_safety.py"
     },
