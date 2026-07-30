@@ -228,7 +228,7 @@ jobs:
       - name: Export and self-export
         shell: bash
         run: |
-          uv run --directory backend python ../scripts/check_ci_policy.py
+          uv run --project backend python scripts/check_ci_policy.py
           if [[ -f scripts/generate_public_export_policies.py ]]; then
             uv run --directory backend python ../scripts/generate_public_export_policies.py --check
           fi
