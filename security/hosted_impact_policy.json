@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "severity_order": [
+    "public-only",
+    "hosted-fast",
+    "hosted-full"
+  ],
+  "rules": [
+    {
+      "classification": "hosted-full",
+      "exact": [
+        ".github/dependabot.yml",
+        ".gitleaks.toml",
+        "backend/app/api/deps.py",
+        "backend/app/api/v1/routes/agent_runs.py",
+        "backend/app/api/v1/routes/agents.py",
+        "backend/app/api/v1/routes/auth.py",
+        "backend/app/api/v1/routes/bot.py",
+        "backend/app/api/v1/routes/character_lore.py",
+        "backend/app/services/auth.py",
+        "backend/app/services/character_lore.py",
+        "backend/app/services/community_abuse_quota.py",
+        "backend/app/services/external_auth_verification.py",
+        "backend/app/services/hosted_configuration.py",
+        "backend/app/services/image_provider.py",
+        "backend/app/services/image_prompt_safety.py",
+        "backend/app/services/langgraph_resident.py",
+        "backend/app/services/lore_parser_quota.py",
+        "backend/app/services/local_bot_quota.py",
+        "backend/app/services/post_image_job_worker.py",
+        "backend/app/services/prompt_safety.py",
+        "backend/app/services/resident_contracts.py",
+        "backend/app/services/resident_tick_scheduler.py",
+        "backend/app/services/redaction.py",
+        "backend/app/services/service_image_key.py",
+        "backend/app/services/startup_security.py",
+        "backend/pyproject.toml",
+        "backend/uv.lock",
+        "compose.yml",
+        "frontend/next.config.ts",
+        "frontend/package.json",
+        "frontend/pnpm-lock.yaml"
+      ],
+      "prefixes": [
+        ".github/workflows/",
+        "backend/app/alembic/",
+        "backend/app/credentials/",
+        "backend/app/models/",
+        "backend/app/providers/",
+        "backend/security/",
+        "scripts/",
+        "security/"
+      ]
+    },
+    {
+      "classification": "hosted-fast",
+      "exact": [
+        "CONTRIBUTING.ko.md",
+        "CONTRIBUTING.md",
+        "README.ko.md",
+        "README.md",
+        "SECURITY.md"
+      ],
+      "prefixes": [
+        "backend/",
+        "docs/public/",
+        "frontend/"
+      ]
+    },
+    {
+      "classification": "public-only",
+      "exact": [
+        ".github/PULL_REQUEST_TEMPLATE.md",
+        ".gitignore",
+        "BRANDING.md",
+        "CODE_OF_CONDUCT.md",
+        "LICENSE",
+        "NOTICE",
+        "THIRD_PARTY_NOTICES.md"
+      ],
+      "prefixes": [
+        ".github/ISSUE_TEMPLATE/"
+      ]
+    }
+  ]
+}

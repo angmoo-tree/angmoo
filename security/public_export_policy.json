@@ -999,6 +999,10 @@
       "destination": "backend/tests/test_provider_response_limits.py"
     },
     {
+      "source": "backend/tests/test_phase4_hosted_impact.py",
+      "destination": "backend/tests/test_phase4_hosted_impact.py"
+    },
+    {
       "source": "backend/tests/test_public_activity_security.py",
       "destination": "backend/tests/test_public_activity_security.py"
     },
@@ -1511,6 +1515,10 @@
       "destination": "scripts/check_ci_policy.py"
     },
     {
+      "source": "scripts/classify_hosted_impact.py",
+      "destination": "scripts/classify_hosted_impact.py"
+    },
+    {
       "source": "scripts/check_dependency_licenses.py",
       "destination": "scripts/check_dependency_licenses.py"
     },
@@ -1537,6 +1545,10 @@
     {
       "source": "scripts/verify_m4_contracts.py",
       "destination": "scripts/verify_m4_contracts.py"
+    },
+    {
+      "source": "security/hosted_impact_policy.json",
+      "destination": "security/hosted_impact_policy.json"
     },
     {
       "source": "security/public_export_policy.json",

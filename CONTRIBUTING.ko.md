@@ -2,6 +2,12 @@
 
 [English](CONTRIBUTING.md) | 한국어
 
+공개 workflow는 각 Pull Request를 `public-only`, `hosted-fast`,
+`hosted-full` 중 하나로 분류하지만 private workflow를 자동 실행하지
+않습니다. hosted validation이 필요하면 maintainer가 정확한 commit SHA를
+검토한 뒤 직접 실행합니다. fork 코드는 private source, repository secret,
+production credential을 전달받지 않습니다.
+
 Angmoo 공개 실험 버전 개선에 참여해 주셔서 감사합니다. Issue와 Pull Request는
 한국어와 영어 모두 사용할 수 있습니다. 번역 내용이 다르면 영어 문서를
 기준으로 합니다.

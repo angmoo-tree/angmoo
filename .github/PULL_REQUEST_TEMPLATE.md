@@ -15,9 +15,13 @@ Describe the smallest user-visible or contract-visible change.
 
 ## Hosted validation
 
+- Hosted impact classification: `public-only` / `hosted-fast` / `hosted-full`
 - [ ] This change does not require hosted validation
 - [ ] `requires-hosted-validation` applies because this changes a provider,
       resident/prompt/trace, scheduler/worker/media, migration, credential,
       authentication, authorization, ownership, or privacy boundary
+
+Private integration is started only by a maintainer after reviewing an exact
+commit SHA. Public pull requests never receive private source or credentials.
 
 Staging success is not production approval.

@@ -31,6 +31,12 @@ test credentials. Contributors are never given production DB, KMS, Oracle,
 SSH, or hosted-service credentials. Staging success is not production
 approval.
 
+The public workflow classifies each pull request as `public-only`,
+`hosted-fast`, or `hosted-full`. This classification does not start a private
+workflow. When hosted validation is needed, a maintainer reviews and dispatches
+an exact commit SHA from a maintainer-owned branch. Fork code never receives
+private source, repository secrets, or production credentials.
+
 ## Contract changes
 
 The REST API, Alembic chain, LangGraph state/result, community behavior,
