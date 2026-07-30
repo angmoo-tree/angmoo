@@ -15,6 +15,13 @@ from app.core.request_limits import RequestBodyLimitMiddleware
 from app.core.public_media import mount_public_media
 from app.core.startup_security import validate_startup_security
 from app.cruds.community import seed_demo_data
+from app.services.hosted_configuration import (
+    HostedConfigurationRegistrationError,
+    HostedPromptProvider,
+    HostedSettingsProvider,
+    register_hosted_configuration,
+    unregister_hosted_configuration,
+)
 
 
 class PublicRuntimeConfigurationError(RuntimeError):
@@ -38,6 +45,8 @@ class HostedBackendExtension:
     routers: tuple[APIRouter, ...] = ()
     startup_hooks: tuple[HostedLifecycleHook, ...] = ()
     shutdown_hooks: tuple[HostedLifecycleHook, ...] = ()
+    settings_provider: HostedSettingsProvider | None = None
+    prompt_provider: HostedPromptProvider | None = None
 
     def __post_init__(self) -> None:
         if not self.name.strip():
@@ -47,6 +56,12 @@ class HostedBackendExtension:
         _reject_duplicates("router", self.routers)
         _reject_duplicates("startup hook", self.startup_hooks)
         _reject_duplicates("shutdown hook", self.shutdown_hooks)
+        if (self.settings_provider is None) != (
+            self.prompt_provider is None
+        ):
+            raise HostedConfigurationRegistrationError(
+                "hosted settings and prompt providers must be configured together"
+            )
 
 
 def _reject_duplicates(label: str, values: tuple[object, ...]) -> None:
@@ -81,6 +96,7 @@ def create_lifespan(
 ) -> LifespanHandler:
     @asynccontextmanager
     async def runtime_lifespan(_: FastAPI) -> AsyncIterator[None]:
+        configuration_registered = False
         if extension is None:
             validate_public_runtime_settings()
         security_validator()
@@ -89,19 +105,42 @@ def create_lifespan(
                 demo_seed(db)
 
         if extension is not None:
+            if (
+                extension.settings_provider is not None
+                and extension.prompt_provider is not None
+            ):
+                register_hosted_configuration(
+                    extension.settings_provider,
+                    extension.prompt_provider,
+                )
+                configuration_registered = True
             try:
                 for hook in extension.startup_hooks:
                     await hook()
             except BaseException:
-                for hook in reversed(extension.shutdown_hooks):
-                    await hook()
+                try:
+                    for hook in reversed(extension.shutdown_hooks):
+                        await hook()
+                finally:
+                    if configuration_registered:
+                        unregister_hosted_configuration(
+                            extension.settings_provider,
+                            extension.prompt_provider,
+                        )
                 raise
         try:
             yield
         finally:
             if extension is not None:
-                for hook in reversed(extension.shutdown_hooks):
-                    await hook()
+                try:
+                    for hook in reversed(extension.shutdown_hooks):
+                        await hook()
+                finally:
+                    if configuration_registered:
+                        unregister_hosted_configuration(
+                            extension.settings_provider,
+                            extension.prompt_provider,
+                        )
 
     return runtime_lifespan
 
