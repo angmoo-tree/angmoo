@@ -136,6 +136,36 @@ def test_public_ci_policy_accepts_current_workflow() -> None:
     assert ci_policy.check(REPO_ROOT / ".github/workflows/ci.yml") == []
 
 
+@pytest.mark.parametrize(
+    ("before", "after", "expected_error"),
+    [
+        (
+            "  push:\n    branches:\n      - main\n",
+            "  push:\n",
+            "push event must be limited to the main branch",
+        ),
+        (
+            "  pull_request:\n",
+            "",
+            "required workflow event is missing: pull_request",
+        ),
+    ],
+)
+def test_public_ci_policy_rejects_invalid_event_routing(
+    tmp_path: Path,
+    before: str,
+    after: str,
+    expected_error: str,
+) -> None:
+    source = (REPO_ROOT / ".github/workflows/ci.yml").read_text(
+        encoding="utf-8"
+    )
+    assert before in source
+    workflow = tmp_path / "ci.yml"
+    workflow.write_text(source.replace(before, after, 1), encoding="utf-8")
+    assert expected_error in ci_policy.check(workflow)
+
+
 def test_public_ci_policy_rejects_duplicate_yaml_keys(tmp_path: Path) -> None:
     workflow = tmp_path / "ci.yml"
     workflow.write_text(
