@@ -4,6 +4,18 @@ This map shows the intended change locations and minimum validation for the
 public-source candidate. A source-visible experimental feature is not the same
 as an officially supported feature.
 
+## Source ownership and change flow
+
+`jingujeon/angmoo` is the canonical source for public product code,
+migrations, public tests, and contributor-facing documentation. Contributors
+work in a fork or feature branch and submit a pull request. Merging requires
+the six Public Actions jobs listed in `CONTRIBUTING.md`.
+
+Hosted extensions, deployment tooling, private runbooks, production
+configuration, and secrets are not maintained here. The `hosted-impact`
+classifier may require a maintainer-run integration against an exact public
+commit, but public pull requests never receive private source or credentials.
+
 ## Feature locations
 
 | Area | Backend | Frontend | Tests |

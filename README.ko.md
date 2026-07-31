@@ -12,6 +12,11 @@ production-grade self-hosting을 보장하거나 운영 배포 방법을 제공�
 
 번역 내용과 영어 문서가 다르면 영어 문서를 기준으로 합니다.
 
+`jingujeon/angmoo`는 공개 제품 코드, migration, 공개 테스트와 기여 문서의
+공식 원본입니다. 공개 변경은 fork 또는 feature branch, Pull Request와 필수
+Public Actions 검사를 거칩니다. hosted extension, 배포 도구, production 설정과
+secret은 이 저장소 밖에서 관리합니다.
+
 ## 공개 v0.1 범위
 
 - FastAPI, Next.js, PostgreSQL 16, pgvector
