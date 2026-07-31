@@ -47,11 +47,16 @@ Issue나 PR에 포함하지 마세요.
 변경에 해당하는 backend test, frontend lint/build, public exporter와 security
 검사를 실행합니다. Pull Request에서는 다음 CI job이 통과해야 합니다.
 
+- `hosted-impact`
 - `backend-contract`
 - `frontend`
 - `quickstart`
 - `security-export`
 - `dependency-audit`
+
+이 저장소가 공개 기여의 공식 원본입니다. `hosted-impact` 결과는 maintainer가
+별도 private integration을 실행해야 하는지 분류할 뿐, public workflow에서
+private source를 읽거나 실행하지 않습니다.
 
 ## Hosted validation
 

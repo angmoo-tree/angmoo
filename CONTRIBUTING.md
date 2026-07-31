@@ -37,6 +37,20 @@ workflow. When hosted validation is needed, a maintainer reviews and dispatches
 an exact commit SHA from a maintainer-owned branch. Fork code never receives
 private source, repository secrets, or production credentials.
 
+The public repository is the canonical source for these contributions. A pull
+request must pass all six required Public Actions jobs before merge:
+
+- `hosted-impact`
+- `backend-contract`
+- `frontend`
+- `quickstart`
+- `security-export`
+- `dependency-audit`
+
+The `hosted-impact` result tells maintainers whether a separate private
+integration run is needed. It does not expose or execute private source in the
+public workflow.
+
 ## Contract changes
 
 The REST API, Alembic chain, LangGraph state/result, community behavior,

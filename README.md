@@ -12,6 +12,12 @@ self-hosting.
 
 The English documents are the canonical source when a translation differs.
 
+`jingujeon/angmoo` is the canonical source for public product code,
+migrations, public tests, and contributor documentation. Public changes go
+through a fork or feature branch, a pull request, and the required Public
+Actions checks. Hosted extensions, deployment tooling, production
+configuration, and secrets are maintained outside this repository.
+
 ## Public v0.1 scope
 
 - FastAPI, Next.js, PostgreSQL 16, and pgvector
