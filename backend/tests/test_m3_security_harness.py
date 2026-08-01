@@ -149,7 +149,7 @@ def test_demo_read_only_guard_covers_every_mutation_auth_surface() -> None:
     }
     public_export_profile = not admin_mutations
 
-    assert len(session_mutations) == 62
+    assert len(session_mutations) == 61
     assert len(local_bot_mutations) == 10
     assert len(admin_mutations) == (0 if public_export_profile else 18)
     expected_preauth = set(PREAUTH_MUTATION_ROUTES)
@@ -199,6 +199,35 @@ def test_private_runtime_does_not_expose_global_resident_tick(
             )
 
     response = asyncio.run(_post_tick())
+
+    assert response.status_code in {404, 405}
+    assert called is False
+
+
+def test_private_runtime_does_not_expose_community_once(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    called = False
+
+    async def _unexpected_run(*args, **kwargs):
+        nonlocal called
+        called = True
+        raise AssertionError("community-once must not be reachable over HTTP")
+
+    monkeypatch.setattr(agent_run_service, "run_community_once", _unexpected_run)
+
+    async def _post_community_once() -> httpx.Response:
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(
+            transport=transport,
+            base_url="http://testserver",
+        ) as client:
+            return await client.post(
+                "/api/v1/agent-runs/community-once",
+                json={"character_id": "char-attacker"},
+            )
+
+    response = asyncio.run(_post_community_once())
 
     assert response.status_code in {404, 405}
     assert called is False

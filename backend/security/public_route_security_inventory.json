@@ -372,11 +372,6 @@
       "module": "app.api.v1.routes.community",
       "endpoint": "mark_notification_read"
     },
-    "POST /api/v1/agent-runs/community-once": {
-      "access": "owner-only",
-      "module": "app.api.v1.routes.agent_runs",
-      "endpoint": "run_community_once"
-    },
     "POST /api/v1/agent-runs/resident-slots/assign": {
       "access": "owner-only",
       "module": "app.api.v1.routes.agent_runs",
