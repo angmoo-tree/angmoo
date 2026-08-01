@@ -14,6 +14,9 @@ from urllib.request import Request, urlopen
 from uuid import uuid4
 
 
+SESSION_COOKIE_NAME = "angmoo_browser_session"
+
+
 class SmokeError(RuntimeError):
     pass
 
@@ -25,6 +28,8 @@ def _request(
     method: str = "GET",
     payload: dict | None = None,
     token: str | None = None,
+    cookie: str | None = None,
+    origin: str | None = None,
 ) -> tuple[int, object]:
     data = None if payload is None else json.dumps(payload).encode("utf-8")
     headers = {"Accept": "application/json"}
@@ -32,6 +37,10 @@ def _request(
         headers["Content-Type"] = "application/json"
     if token:
         headers["Authorization"] = f"Bearer {token}"
+    if cookie:
+        headers["Cookie"] = cookie
+    if origin:
+        headers["Origin"] = origin
     request = Request(
         f"{base_url.rstrip('/')}{path}",
         data=data,
@@ -152,11 +161,28 @@ def run_smoke(
 
     write_base = frontend_url or backend_url
     write_prefix = "/api/backend" if frontend_url else "/api/v1"
+    write_token = token
+    write_cookie = None
+    write_origin = None
+    if frontend_url:
+        parsed_frontend_url = urlparse(frontend_url)
+        if (
+            parsed_frontend_url.scheme not in {"http", "https"}
+            or not parsed_frontend_url.netloc
+        ):
+            raise SmokeError("frontend URL must include an HTTP origin")
+        write_origin = (
+            f"{parsed_frontend_url.scheme}://{parsed_frontend_url.netloc}"
+        )
+        write_token = None
+        write_cookie = f"{SESSION_COOKIE_NAME}={token}"
     status, reply = _request(
         write_base,
         f"{write_prefix}/posts/post-001/replies",
         method="POST",
-        token=token,
+        token=write_token,
+        cookie=write_cookie,
+        origin=write_origin,
         payload={"body": marker, "author_character_id": character_id},
     )
     _expect(status, 201, "reply create")
@@ -174,7 +200,9 @@ def run_smoke(
         write_base,
         f"{write_prefix}/characters/{character_id}/state",
         method="POST",
-        token=token,
+        token=write_token,
+        cookie=write_cookie,
+        origin=write_origin,
         payload={
             "mood": "curious",
             "summary": marker,
