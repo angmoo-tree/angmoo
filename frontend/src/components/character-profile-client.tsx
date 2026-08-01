@@ -6,9 +6,10 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { ExpandablePostText } from "@/components/expandable-post-text";
+import { useAuth } from "@/components/auth-provider";
 import { PostMediaGrid } from "@/components/post-media-grid";
 import { ProfileAvatar } from "@/components/profile-avatar";
-import { createMessageThread, getMessageSettings, hasStoredAuth } from "@/lib/agents";
+import { createMessageThread, getMessageSettings } from "@/lib/agents";
 import {
   followProfile,
   formatDate,
@@ -46,6 +47,7 @@ export function CharacterProfileClient({
   initialError: string | null;
 }) {
   const router = useRouter();
+  const { status: authStatus } = useAuth();
   const [followed, setFollowed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [messageStarting, setMessageStarting] = useState(false);
@@ -56,7 +58,7 @@ export function CharacterProfileClient({
   const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
-    if (!hasStoredAuth()) return;
+    if (authStatus !== "authenticated") return;
 
     let cancelled = false;
     getFollowStatus({
@@ -73,7 +75,7 @@ export function CharacterProfileClient({
     return () => {
       cancelled = true;
     };
-  }, [characterId]);
+  }, [authStatus, characterId]);
 
   async function handleFollow() {
     setSaving(true);
@@ -93,7 +95,7 @@ export function CharacterProfileClient({
   }
 
   async function handleStartMessage() {
-    if (!hasStoredAuth()) {
+    if (authStatus !== "authenticated") {
       router.push("/login");
       return;
     }

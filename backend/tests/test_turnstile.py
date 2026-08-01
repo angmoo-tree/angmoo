@@ -10,7 +10,14 @@ from app.services import turnstile
 
 class _Response:
     def __init__(self, payload: dict[str, object] | str) -> None:
-        self.payload = payload
+        self.payload = (
+            payload.encode("utf-8")
+            if isinstance(payload, str)
+            else json.dumps(payload).encode("utf-8")
+        )
+        self.offset = 0
+        self.headers: dict[str, str] = {}
+        self.read_sizes: list[int] = []
 
     def __enter__(self):
         return self
@@ -18,10 +25,13 @@ class _Response:
     def __exit__(self, exc_type, exc, tb) -> None:
         return None
 
-    def read(self) -> bytes:
-        if isinstance(self.payload, str):
-            return self.payload.encode("utf-8")
-        return json.dumps(self.payload).encode("utf-8")
+    def read(self, size: int = -1) -> bytes:
+        self.read_sizes.append(size)
+        if size < 0:
+            size = len(self.payload) - self.offset
+        start = self.offset
+        self.offset = min(len(self.payload), self.offset + size)
+        return self.payload[start : self.offset]
 
 
 def _enable_turnstile(monkeypatch, *, secret: str | None = "secret-test") -> None:
@@ -128,3 +138,30 @@ def test_siteverify_invalid_json_is_unavailable(monkeypatch) -> None:
 
     with pytest.raises(turnstile.TurnstileUnavailableError):
         turnstile.verify_turnstile_or_raise("token-test")
+
+
+def test_siteverify_oversized_content_length_fails_closed(monkeypatch) -> None:
+    _enable_turnstile(monkeypatch)
+    response = _Response({"success": True})
+    response.headers["Content-Length"] = str(turnstile.TURNSTILE_MAX_RESPONSE_BYTES + 1)
+    monkeypatch.setattr(turnstile, "urlopen", lambda *_args, **_kwargs: response)
+
+    with pytest.raises(turnstile.TurnstileUnavailableError):
+        turnstile.verify_turnstile_or_raise("token-test")
+
+    assert response.read_sizes == []
+
+
+def test_siteverify_chunked_oversized_body_fails_closed_without_unbounded_read(
+    monkeypatch,
+) -> None:
+    _enable_turnstile(monkeypatch)
+    response = _Response("x" * (turnstile.TURNSTILE_MAX_RESPONSE_BYTES + 1))
+    monkeypatch.setattr(turnstile, "urlopen", lambda *_args, **_kwargs: response)
+
+    with pytest.raises(turnstile.TurnstileUnavailableError):
+        turnstile.verify_turnstile_or_raise("token-test")
+
+    assert response.read_sizes
+    assert -1 not in response.read_sizes
+    assert sum(response.read_sizes) <= turnstile.TURNSTILE_MAX_RESPONSE_BYTES + 1

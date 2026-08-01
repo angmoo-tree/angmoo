@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
 import pytest
-from fastapi import HTTPException
+from fastapi import HTTPException, Request, Response
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
@@ -14,6 +14,32 @@ from app.services import turnstile
 
 
 EXPECTED_POLICY_VERSION = "2026-06-22"
+ALLOWED_ORIGIN = "http://127.0.0.1:3000"
+
+
+def _browser_request(path: str, *, cookies: dict[str, str] | None = None) -> Request:
+    request = Request(
+        {
+            "type": "http",
+            "method": "POST",
+            "path": path,
+            "headers": [(b"origin", ALLOWED_ORIGIN.encode("ascii"))],
+            "client": ("127.0.0.1", 12345),
+            "server": ("127.0.0.1", 3000),
+            "scheme": "http",
+            "query_string": b"",
+        }
+    )
+    if cookies:
+        request.scope["headers"].append(
+            (
+                b"cookie",
+                "; ".join(f"{key}={value}" for key, value in cookies.items()).encode(
+                    "ascii"
+                ),
+            )
+        )
+    return request
 
 
 def _create_tables(engine) -> None:
@@ -138,11 +164,11 @@ def test_google_signup_completion_records_current_privacy_and_terms_versions() -
         result = auth.complete_google_signup(
             db,
             schemas.GoogleSignupCompleteCreate(
-                pending_token=pending_token,
                 display_name="Google User",
                 privacy_policy_agreed=True,
                 terms_agreed=True,
             ),
+            pending_token=pending_token,
         )
 
         user = db.get(models.User, result.user.id)
@@ -208,6 +234,8 @@ def test_email_signup_route_checks_turnstile_before_user_creation(monkeypatch) -
                     terms_agreed=True,
                     turnstile_token="bad-token",
                 ),
+                _browser_request("/api/v1/auth/signup"),
+                Response(),
                 db,
             )
 
@@ -238,12 +266,16 @@ def test_google_signup_route_checks_turnstile_before_user_creation(monkeypatch) 
         with pytest.raises(HTTPException) as exc:
             auth_routes.complete_google_signup(
                 schemas.GoogleSignupCompleteCreate(
-                    pending_token=pending_token,
                     display_name="Blocked Google",
                     privacy_policy_agreed=True,
                     terms_agreed=True,
                     turnstile_token="bad-token",
                 ),
+                _browser_request(
+                    "/api/v1/auth/google/complete",
+                    cookies={"angmoo_google_signup_pending": pending_token},
+                ),
+                Response(),
                 db,
             )
 
@@ -265,11 +297,11 @@ def test_google_account_can_signup_again_after_deleted_user_scrubbed() -> None:
         first = auth.complete_google_signup(
             db,
             schemas.GoogleSignupCompleteCreate(
-                pending_token=first_token,
                 display_name="Repeat User",
                 privacy_policy_agreed=True,
                 terms_agreed=True,
             ),
+            pending_token=first_token,
         )
         first_user_id = first.user.id
         first_user = db.get(models.User, first_user_id)
@@ -297,11 +329,11 @@ def test_google_account_can_signup_again_after_deleted_user_scrubbed() -> None:
         second = auth.complete_google_signup(
             db,
             schemas.GoogleSignupCompleteCreate(
-                pending_token=second_token,
                 display_name="Repeat User New",
                 privacy_policy_agreed=True,
                 terms_agreed=True,
             ),
+            pending_token=second_token,
         )
 
         assert second.user.id != first_user_id
@@ -327,11 +359,11 @@ def test_google_signup_pending_token_is_consumed_once() -> None:
         first = auth.complete_google_signup(
             db,
             schemas.GoogleSignupCompleteCreate(
-                pending_token=pending_token,
                 display_name="One Time User",
                 privacy_policy_agreed=True,
                 terms_agreed=True,
             ),
+            pending_token=pending_token,
         )
         first_user = db.get(models.User, first.user.id)
         assert first_user is not None
@@ -341,11 +373,11 @@ def test_google_signup_pending_token_is_consumed_once() -> None:
             auth.complete_google_signup(
                 db,
                 schemas.GoogleSignupCompleteCreate(
-                    pending_token=pending_token,
                     display_name="Replay User",
                     privacy_policy_agreed=True,
                     terms_agreed=True,
                 ),
+                pending_token=pending_token,
             )
 
         grants = list(db.scalars(select(models.AuthGoogleSignupGrant)))

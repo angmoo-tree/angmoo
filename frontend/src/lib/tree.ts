@@ -1,5 +1,3 @@
-import { getStoredToken } from "@/lib/agents";
-
 export type TreeCategory = "notice" | "bug" | "suggestion" | "question" | "free";
 
 export type TreeAuthorRead = {
@@ -47,19 +45,19 @@ export type TreeFeedPage = {
 
 type RequestOptions = Omit<RequestInit, "body"> & {
   body?: unknown;
-  token?: string | null;
+  anonymous?: boolean;
 };
 
 async function apiRequest<T>(path: string, options: RequestOptions = {}) {
-  const { body, headers, token = getStoredToken(), ...rest } = options;
+  const { body, headers, anonymous = false, ...rest } = options;
   const response = await fetch(`/api/backend${path}`, {
     ...rest,
     body: body === undefined ? undefined : JSON.stringify(body),
     cache: "no-store",
+    credentials: anonymous ? "omit" : "same-origin",
     headers: {
       Accept: "application/json",
       ...(body === undefined ? {} : { "Content-Type": "application/json" }),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(headers ?? {}),
     },
   });
@@ -91,7 +89,7 @@ export function listTreePosts({
   if (query?.trim()) params.set("q", query.trim());
   if (cursor) params.set("cursor", cursor);
   return apiRequest<TreeFeedPage>(`/tree/posts?${params.toString()}`, {
-    token: null,
+    anonymous: true,
   });
 }
 
@@ -108,7 +106,7 @@ export function createTreePost(data: {
 }
 
 export function getTreePost(postId: string) {
-  return apiRequest<TreePostDetail>(`/tree/posts/${postId}`, { token: null });
+  return apiRequest<TreePostDetail>(`/tree/posts/${postId}`, { anonymous: true });
 }
 
 export function createTreeComment(postId: string, content: string) {

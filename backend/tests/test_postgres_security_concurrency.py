@@ -1,7 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
 import os
-from threading import Barrier
+from threading import Barrier, Lock
 from time import sleep
 from uuid import uuid4
 
@@ -18,6 +18,7 @@ from app.services import external_auth_verification
 from app.services import local_bot_quota
 from app.services import login_throttle
 from app.services import lore_parser_quota
+from app.services import messages as message_service
 
 
 DATABASE_URL = os.getenv("SECURITY_CONCURRENCY_DATABASE_URL")
@@ -529,3 +530,238 @@ def test_agent_creation_quota_is_atomic_across_postgres_sessions() -> None:
         results = list(executor.map(attempt, range(12)))
     assert results.count("created") == agent_service.MAX_LOCAL_AGENTS_PER_USER
     assert results.count("limited") == 12 - agent_service.MAX_LOCAL_AGENTS_PER_USER
+
+
+def test_first_greeting_claim_is_single_flight_across_postgres_sessions() -> None:
+    engine = _engine()
+    suffix = uuid4().hex
+    user_id = f"user-greeting-{suffix}"
+    character_id = f"char-greeting-{suffix}"
+    credential_id = f"cred-greeting-{suffix}"
+    now = datetime.now(UTC)
+    barrier = Barrier(8)
+    counter_lock = Lock()
+    provider_calls = 0
+
+    with Session(engine) as db:
+        db.add(
+            models.User(
+                id=user_id,
+                email=f"{suffix}@example.invalid",
+                display_name=user_id,
+                display_name_normalized=user_id,
+                profile_setup_completed=True,
+            )
+        )
+        db.add(
+            models.Character(
+                id=character_id,
+                owner_id=user_id,
+                name=character_id,
+                handle=f"greeting_{suffix[:20]}",
+                persona_summary="security greeting fixture",
+                execution_mode="llm",
+            )
+        )
+        db.add(
+            models.LlmCredential(
+                id=credential_id,
+                owner_id=user_id,
+                character_id=character_id,
+                provider="google",
+                purpose="agent",
+                model="gemini-3.1-flash-lite",
+                auth_profile_id=f"google:{character_id}",
+                label=character_id,
+                encrypted_api_key="synthetic-encrypted",
+                key_fingerprint=suffix[:16],
+                enabled=True,
+            )
+        )
+        db.commit()
+
+    def attempt(index: int) -> str:
+        nonlocal provider_calls
+        with Session(engine) as db:
+            user = db.get(models.User, user_id)
+            character = db.get(models.Character, character_id)
+            credential = db.get(models.LlmCredential, credential_id)
+            assert user is not None and character is not None and credential is not None
+            run_id = f"run-greeting-{suffix}-{index}"
+            barrier.wait()
+            try:
+                agent_service._claim_first_greeting_run(
+                    db,
+                    user=user,
+                    character=character,
+                    credential=credential,
+                    run_id=run_id,
+                    session_key=(
+                        "agent:onboarding-first-greeting:first-greeting:"
+                        f"{user_id}:{character_id}:{run_id}"
+                    ),
+                    now=now,
+                )
+            except (
+                agent_service.FirstGreetingCooldownError,
+                agent_service.FirstGreetingUnavailableError,
+            ):
+                return "limited"
+            with counter_lock:
+                provider_calls += 1
+            db.add(
+                models.Post(
+                    id=f"post-greeting-{suffix}",
+                    author_character_id=character_id,
+                    author_name=character_id,
+                    title="synthetic",
+                    body="synthetic",
+                    post_type="text",
+                )
+            )
+            db.commit()
+            return "created"
+
+    try:
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            results = list(executor.map(attempt, range(8)))
+        assert results.count("created") == 1
+        assert results.count("limited") == 7
+        assert provider_calls == 1
+        with Session(engine) as db:
+            assert len(
+                list(
+                    db.scalars(
+                        select(models.AgentRun).where(
+                            models.AgentRun.user_id == user_id,
+                            models.AgentRun.session_key.contains(":first-greeting:"),
+                        )
+                    )
+                )
+            ) == 1
+            assert len(
+                list(
+                    db.scalars(
+                        select(models.Post).where(
+                            models.Post.author_character_id == character_id
+                        )
+                    )
+                )
+            ) == 1
+    finally:
+        with Session(engine) as db:
+            db.execute(delete(models.AgentRun).where(models.AgentRun.user_id == user_id))
+            db.execute(
+                delete(models.Post).where(models.Post.author_character_id == character_id)
+            )
+            db.execute(
+                delete(models.LlmCredential).where(models.LlmCredential.id == credential_id)
+            )
+            db.execute(delete(models.Character).where(models.Character.id == character_id))
+            db.execute(delete(models.User).where(models.User.id == user_id))
+            db.commit()
+
+
+def test_message_thread_quota_is_atomic_across_postgres_sessions() -> None:
+    engine = _engine()
+    suffix = uuid4().hex
+    requester_id = f"user-message-requester-{suffix}"
+    owner_id = f"user-message-owner-{suffix}"
+    character_ids = [f"char-message-{suffix}-{index}" for index in range(6)]
+    barrier = Barrier(len(character_ids))
+
+    with Session(engine) as db:
+        db.add_all(
+            [
+                models.User(
+                    id=requester_id,
+                    email=f"requester-{suffix}@example.invalid",
+                    display_name=requester_id,
+                    display_name_normalized=requester_id,
+                    profile_setup_completed=True,
+                ),
+                models.User(
+                    id=owner_id,
+                    email=f"owner-{suffix}@example.invalid",
+                    display_name=owner_id,
+                    display_name_normalized=owner_id,
+                    profile_setup_completed=True,
+                ),
+            ]
+        )
+        for character_id in character_ids:
+            db.add(
+                models.Character(
+                    id=character_id,
+                    owner_id=owner_id,
+                    name=character_id,
+                    handle=character_id[-40:],
+                    persona_summary="security message fixture",
+                    execution_mode="llm",
+                )
+            )
+            db.add(
+                models.CharacterMessageSetting(
+                    character_id=character_id,
+                    enabled=True,
+                )
+            )
+        db.add(
+            models.UserMessagePreference(
+                user_id=requester_id,
+                credential_source="message_key",
+                default_model=message_service.DEFAULT_MESSAGE_MODEL,
+            )
+        )
+        db.commit()
+
+    def attempt(character_id: str) -> str:
+        with Session(engine) as db:
+            requester = db.get(models.User, requester_id)
+            assert requester is not None
+            barrier.wait()
+            try:
+                message_service.create_or_get_thread(
+                    db,
+                    requester,
+                    schemas.MessageThreadCreate(character_id=character_id),
+                )
+            except message_service.MessageThreadLimitError:
+                return "limited"
+            return "created"
+
+    try:
+        with ThreadPoolExecutor(max_workers=len(character_ids)) as executor:
+            results = list(executor.map(attempt, character_ids))
+        assert results.count("created") == message_service.MAX_ACTIVE_THREADS
+        assert results.count("limited") == 1
+        with Session(engine) as db:
+            active_threads = list(
+                db.scalars(
+                    select(models.MessageThread).where(
+                        models.MessageThread.requester_id == requester_id,
+                        models.MessageThread.deleted_at.is_(None),
+                    )
+                )
+            )
+            assert len(active_threads) == message_service.MAX_ACTIVE_THREADS
+    finally:
+        with Session(engine) as db:
+            db.execute(
+                delete(models.MessageThread).where(
+                    models.MessageThread.requester_id == requester_id
+                )
+            )
+            db.execute(
+                delete(models.UserMessagePreference).where(
+                    models.UserMessagePreference.user_id == requester_id
+                )
+            )
+            db.execute(
+                delete(models.CharacterMessageSetting).where(
+                    models.CharacterMessageSetting.character_id.in_(character_ids)
+                )
+            )
+            db.execute(delete(models.Character).where(models.Character.id.in_(character_ids)))
+            db.execute(delete(models.User).where(models.User.id.in_([requester_id, owner_id])))
+            db.commit()

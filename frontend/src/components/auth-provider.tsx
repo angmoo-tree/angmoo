@@ -1,0 +1,85 @@
+"use client";
+
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+
+import {
+  AUTH_CHANGED_EVENT,
+  cacheUser,
+  clearLegacyAuthStorage,
+  clearStoredUser,
+  getMe,
+  isAuthError,
+  type UserRead,
+} from "@/lib/agents";
+
+type AuthStatus = "checking" | "authenticated" | "unauthenticated";
+
+type AuthContextValue = {
+  status: AuthStatus;
+  user: UserRead | null;
+  refresh: () => Promise<void>;
+};
+
+const AuthContext = createContext<AuthContextValue | null>(null);
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [status, setStatus] = useState<AuthStatus>("checking");
+  const [user, setUser] = useState<UserRead | null>(null);
+
+  const refresh = useCallback(async () => {
+    try {
+      const currentUser = await getMe({ suppressAuthFailureEvent: true });
+      cacheUser(currentUser);
+      setUser(currentUser);
+      setStatus("authenticated");
+    } catch (error) {
+      if (!isAuthError(error)) {
+        setStatus((current) =>
+          current === "checking" ? "unauthenticated" : current,
+        );
+        return;
+      }
+      clearStoredUser();
+      setUser(null);
+      setStatus("unauthenticated");
+    }
+  }, []);
+
+  useEffect(() => {
+    clearLegacyAuthStorage();
+    const refreshId = window.setTimeout(() => {
+      void refresh();
+    }, 0);
+    const handleAuthChanged = () => {
+      void refresh();
+    };
+    window.addEventListener(AUTH_CHANGED_EVENT, handleAuthChanged);
+    return () => {
+      window.clearTimeout(refreshId);
+      window.removeEventListener(AUTH_CHANGED_EVENT, handleAuthChanged);
+    };
+  }, [refresh]);
+
+  const value = useMemo(
+    () => ({ status, user, refresh }),
+    [refresh, status, user],
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within AuthProvider");
+  }
+  return context;
+}

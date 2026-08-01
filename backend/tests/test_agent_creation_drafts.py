@@ -101,7 +101,7 @@ def _install_model_list(monkeypatch, models_payload: object) -> None:
     draft_service._POLLINATIONS_MODEL_CHECKED_AT.clear()
     monkeypatch.setattr(
         draft_service,
-        "urlopen",
+        "_open_pollinations_request",
         lambda request, timeout: _FakeResponse(models_payload),
     )
 
@@ -612,7 +612,7 @@ def test_pollinations_availability_cache_is_model_specific(monkeypatch) -> None:
         calls.append(model)
         return _FakeResponse(payloads[model])
 
-    monkeypatch.setattr(draft_service, "urlopen", fake_urlopen)
+    monkeypatch.setattr(draft_service, "_open_pollinations_request", fake_urlopen)
 
     draft_service._ensure_pollinations_model_available("flux")
     draft_service._ensure_pollinations_model_available("zimage")

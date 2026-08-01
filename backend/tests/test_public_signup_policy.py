@@ -91,3 +91,57 @@ def test_public_quickstart_uses_explicit_loopback_session_bootstrap() -> None:
     module._require_loopback_backend("http://localhost:8080")
     with pytest.raises(module.SmokeError, match="loopback backend"):
         module._require_loopback_backend("https://angmoo.com")
+
+
+def test_public_quickstart_sends_exact_frontend_session_boundary(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo_root = Path(__file__).parents[2]
+    script_path = repo_root / "scripts" / "quickstart_smoke.py"
+    spec = importlib.util.spec_from_file_location("quickstart_smoke", script_path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    captured: dict[str, str | None] = {}
+
+    class Response:
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return None
+
+        def read(self) -> bytes:
+            return b"{}"
+
+    def fake_urlopen(request, *, timeout: int):
+        captured["authorization"] = request.get_header("Authorization")
+        captured["cookie"] = request.get_header("Cookie")
+        captured["origin"] = request.get_header("Origin")
+        captured["url"] = request.full_url
+        captured["timeout"] = str(timeout)
+        return Response()
+
+    monkeypatch.setattr(module, "urlopen", fake_urlopen)
+
+    status, body = module._request(
+        "http://127.0.0.1:3000",
+        "/api/backend/posts/post-001/replies",
+        method="POST",
+        payload={"body": "synthetic"},
+        cookie="angmoo_browser_session=synthetic-token",
+        origin="http://127.0.0.1:3000",
+    )
+
+    assert status == 200
+    assert body == {}
+    assert captured == {
+        "authorization": None,
+        "cookie": "angmoo_browser_session=synthetic-token",
+        "origin": "http://127.0.0.1:3000",
+        "url": "http://127.0.0.1:3000/api/backend/posts/post-001/replies",
+        "timeout": "15",
+    }

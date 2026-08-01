@@ -21,11 +21,12 @@ import type { LucideIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ReactNode } from "react";
 
 import { ActiveAgentCard } from "@/components/active-agent-card";
+import { useAuth } from "@/components/auth-provider";
 import { NestSearchForm } from "@/components/nest-search-form";
 import { ProfileAvatar } from "@/components/profile-avatar";
 import { HOSTED_FRONTEND_EXTENSION } from "@/lib/features";
@@ -36,14 +37,7 @@ import {
   useRightRailInsights,
 } from "@/components/right-rail-insights";
 import {
-  AUTH_CHANGED_EVENT,
-  clearAuth,
-  getMe,
-  getStoredUser,
-  hasStoredAuth,
   hasPendingGoogleSignup,
-  isAuthError,
-  storeUser,
   type UserRead,
 } from "@/lib/agents";
 import { getUserProfile } from "@/lib/community";
@@ -66,38 +60,17 @@ const HOSTED_ADMIN_NAVIGATION =
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const profileHref = useSyncExternalStore(
-    subscribeToProfileHref,
-    getProfileHref,
-    getServerProfileHref,
-  );
-  const user = useSyncExternalStore(
-    subscribeToProfileHref,
-    getStoredUserSnapshot,
-    getServerStoredUser,
-  );
+  const { status, user } = useAuth();
+  const profileHref = user
+    ? user.profile_setup_completed
+      ? `/profiles/users/${user.id}`
+      : "/profile/setup"
+    : "/login";
   const isTree = isActive(pathname, "/tree");
   const isAngmooApi = isActive(pathname, "/angmoo-api");
 
   useEffect(() => {
-    if (!hasStoredAuth()) return;
-    let cancelled = false;
-    getMe()
-      .then((freshUser) => {
-        if (!cancelled) storeUser(freshUser);
-      })
-      .catch((err) => {
-        if (!cancelled && isAuthError(err)) {
-          clearAuth();
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!pathname) return;
+    if (!pathname || status === "checking") return;
     if (
       user &&
       !user.profile_setup_completed &&
@@ -106,10 +79,14 @@ export function AppShell({ children }: { children: ReactNode }) {
     ) {
       router.replace("/profile/setup");
     }
-    if (!user && pathname === "/profile/setup" && !hasPendingGoogleSignup()) {
+    if (
+      status === "unauthenticated" &&
+      pathname === "/profile/setup" &&
+      !hasPendingGoogleSignup()
+    ) {
       router.replace("/login");
     }
-  }, [pathname, router, user]);
+  }, [pathname, router, status, user]);
 
   const primaryItems: DesktopNavItem[] = [
     { name: "둥지", icon: Birdhouse, href: "/", active: pathname === "/" || isActive(pathname, "/posts") },
@@ -533,76 +510,4 @@ function navLinkClass(active: boolean, disabled = false) {
 function isActive(pathname: string | null, href: string) {
   if (!pathname) return false;
   return pathname === href || pathname.startsWith(`${href}/`);
-}
-
-function getProfileHref() {
-  const user = getStoredUser();
-  if (user && !user.profile_setup_completed) return "/profile/setup";
-  return user ? `/profiles/users/${user.id}` : "/login";
-}
-
-function getServerProfileHref() {
-  return "/login";
-}
-
-function getServerStoredUser() {
-  return null;
-}
-
-let cachedUserRaw: string | null = null;
-let cachedUser: UserRead | null = null;
-
-function getStoredUserSnapshot() {
-  if (typeof window === "undefined") return null;
-  const raw = window.sessionStorage.getItem("angmoo.user");
-  if (raw === cachedUserRaw) return cachedUser;
-  cachedUserRaw = raw;
-  if (!raw) {
-    cachedUser = null;
-    return cachedUser;
-  }
-  try {
-    const parsed = JSON.parse(raw) as Partial<UserRead>;
-    cachedUser =
-      typeof parsed.id === "string" && typeof parsed.display_name === "string"
-        ? {
-            id: parsed.id,
-            email: typeof parsed.email === "string" ? parsed.email : null,
-            display_name: parsed.display_name,
-            display_name_updated_at:
-              typeof parsed.display_name_updated_at === "string"
-                ? parsed.display_name_updated_at
-                : null,
-            display_name_change_available_at:
-              typeof parsed.display_name_change_available_at === "string"
-                ? parsed.display_name_change_available_at
-                : null,
-            profile_setup_completed:
-              typeof parsed.profile_setup_completed === "boolean"
-                ? parsed.profile_setup_completed
-                : true,
-            feed_content_filter:
-              parsed.feed_content_filter === "posts" ||
-              parsed.feed_content_filter === "reposts" ||
-              parsed.feed_content_filter === "all"
-                ? parsed.feed_content_filter
-                : "all",
-            is_admin: parsed.is_admin === true,
-          }
-        : null;
-  } catch {
-    cachedUser = null;
-  }
-  return cachedUser;
-}
-
-function subscribeToProfileHref(onStoreChange: () => void) {
-  window.addEventListener("storage", onStoreChange);
-  window.addEventListener("focus", onStoreChange);
-  window.addEventListener(AUTH_CHANGED_EVENT, onStoreChange);
-  return () => {
-    window.removeEventListener("storage", onStoreChange);
-    window.removeEventListener("focus", onStoreChange);
-    window.removeEventListener(AUTH_CHANGED_EVENT, onStoreChange);
-  };
 }

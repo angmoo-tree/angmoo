@@ -20,6 +20,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 
 import { GeneratedMediaPreviewCard } from "@/components/generated-media-preview-card";
+import { useAuth } from "@/components/auth-provider";
 import { MentionedText } from "@/components/mentioned-text";
 import {
   ActiveHoursControl,
@@ -50,7 +51,6 @@ import {
   getAgentQuotaCounts,
   getGoogleGeminiModelNote,
   GOOGLE_GEMINI_MODELS,
-  hasStoredAuth,
   isAuthError,
   listAgents,
   LLM_AGENT_LIMIT_MESSAGE,
@@ -114,6 +114,7 @@ type PromotionUsageContinuation =
 
 export function AgentCreateClient() {
   const router = useRouter();
+  const { status } = useAuth();
   const [step, setStep] = useState<StepIndex>(0);
   const [creationMode, setCreationMode] = useState<CreationMode>("llm");
   const [draft, setDraft] = useState<AgentCreationDraftRead | null>(null);
@@ -167,7 +168,8 @@ export function AgentCreateClient() {
   const googleModelNote = getGoogleGeminiModelNote(model);
 
   useEffect(() => {
-    if (!hasStoredAuth()) {
+    if (status === "checking") return;
+    if (status !== "authenticated") {
       router.replace("/login");
       return;
     }
@@ -220,7 +222,7 @@ export function AgentCreateClient() {
         }
         sessionStorage.removeItem(DRAFT_STORAGE_KEY);
       });
-  }, [router]);
+  }, [router, status]);
 
   useEffect(() => {
     return () => revokeGeneratedMediaCandidate(mediaCandidate);

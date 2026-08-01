@@ -10,10 +10,10 @@ import re
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode
-from urllib.request import Request, urlopen
+from urllib.request import Request
 
 from app.core.config import settings
-from app.services import bounded_http
+from app.services import bounded_http, provider_http
 
 
 logger = logging.getLogger(__name__)
@@ -22,7 +22,6 @@ POLLINATIONS_IMAGE_URL = "https://gen.pollinations.ai/image"
 POLLINATIONS_REFERER = "https://angmoo.com"
 POLLINATIONS_USER_AGENT = "Angmoo/1.0"
 POLLINATIONS_SAFE_FILTER = "privacy,secrets,sexual,violence,shield"
-POLLINATIONS_RESPONSE_BODY_PREVIEW_MAX = 500
 POLLINATIONS_PROMPT_PREVIEW_MAX = 160
 POLLINATIONS_SAFE_HINT_TERMS = (
     "safe",
@@ -44,6 +43,9 @@ POLLINATIONS_INPUT_HINT_TERMS = (
     "invalid",
     "bad_request",
     "bad request",
+)
+POLLINATIONS_SENSITIVE_HEADERS = frozenset(
+    {"Authorization", "X-Pollinations-Api-Key"}
 )
 POLLINATIONS_REFERENCE_FALLBACK_FAILURES = {
     "http_400",
@@ -69,11 +71,12 @@ class PollinationsImageError(Exception):
         safe_filter: str | None = None,
         diagnostic_hint: str | None = None,
         relay_elapsed_ms: int | None = None,
+        provider_request_id: str | None = None,
     ) -> None:
         super().__init__(message)
         self.failure_class = failure_class
         self.status_code = status_code
-        self.response_body_preview = response_body_preview
+        self.response_body_preview = None
         self.response_content_type = response_content_type
         self.request_url_length = request_url_length
         self.prompt_length = prompt_length
@@ -81,6 +84,7 @@ class PollinationsImageError(Exception):
         self.safe_filter = safe_filter
         self.diagnostic_hint = diagnostic_hint
         self.relay_elapsed_ms = relay_elapsed_ms
+        self.provider_request_id = provider_request_id
 
 
 @dataclass(frozen=True)
@@ -259,7 +263,7 @@ async def _request_image_direct(
             method="GET",
         )
         try:
-            with urlopen(request, timeout=max(1, int(timeout_seconds))) as response:
+            with _open_pollinations_request(request, timeout_seconds) as response:
                 content_type = (
                     response.headers.get("Content-Type", "")
                     .split(";", 1)[0]
@@ -276,13 +280,22 @@ async def _request_image_direct(
                 failure_class="invalid_image",
             ) from exc
         except HTTPError as exc:
-            response_body_preview, response_content_type = _read_http_error_preview(exc)
+            failure_class = f"http_{exc.code}"
+            diagnostic = provider_http.read_safe_http_error_diagnostic(
+                exc,
+                classify_body=lambda body, content_type: classify_failure_diagnostic_hint(
+                    failure_class=failure_class,
+                    status_code=exc.code,
+                    response_body_preview=body,
+                    response_content_type=content_type,
+                ),
+            )
             _log_failure(
                 model=model,
-                failure_class=f"http_{exc.code}",
+                failure_class=failure_class,
                 status_code=exc.code,
-                response_body_preview=response_body_preview,
-                response_content_type=response_content_type,
+                response_body_preview=None,
+                response_content_type=diagnostic.content_type,
                 prompt_hash=prompt_hash,
                 prompt_length=prompt_length,
                 request_url_length=request_url_length,
@@ -292,20 +305,16 @@ async def _request_image_direct(
             )
             raise PollinationsImageError(
                 f"Pollinations image request failed with HTTP {exc.code}",
-                failure_class=f"http_{exc.code}",
+                failure_class=failure_class,
                 status_code=exc.code,
-                response_body_preview=response_body_preview,
-                response_content_type=response_content_type,
+                response_body_preview=None,
+                response_content_type=diagnostic.content_type,
                 request_url_length=request_url_length,
                 prompt_length=prompt_length,
                 reference_sent=reference_sent,
                 safe_filter=safe_filter,
-                diagnostic_hint=classify_failure_diagnostic_hint(
-                    failure_class=f"http_{exc.code}",
-                    status_code=exc.code,
-                    response_body_preview=response_body_preview,
-                    response_content_type=response_content_type,
-                ),
+                diagnostic_hint=diagnostic.diagnostic_hint,
+                provider_request_id=diagnostic.request_id,
             ) from exc
         except TimeoutError as exc:
             _log_failure(
@@ -515,7 +524,7 @@ async def _request_image_via_lambda(
             method="POST",
         )
         try:
-            with urlopen(request, timeout=max(1, int(timeout_seconds) + 5)) as response:
+            with _open_relay_request(request, timeout_seconds + 5) as response:
                 response_content_type = (
                     response.headers.get("Content-Type", "")
                     .split(";", 1)[0]
@@ -533,14 +542,22 @@ async def _request_image_via_lambda(
                 failure_class="relay_invalid_response",
             ) from exc
         except HTTPError as exc:
-            response_body_preview, response_content_type = _read_http_error_preview(exc)
             failure_class = "relay_unauthorized" if exc.code in {401, 403} else "relay_invalid_response"
+            diagnostic = provider_http.read_safe_http_error_diagnostic(
+                exc,
+                classify_body=lambda body, content_type: classify_failure_diagnostic_hint(
+                    failure_class=failure_class,
+                    status_code=exc.code,
+                    response_body_preview=body,
+                    response_content_type=content_type,
+                ),
+            )
             _log_failure(
                 model=model,
                 failure_class=failure_class,
                 status_code=exc.code,
-                response_body_preview=response_body_preview,
-                response_content_type=response_content_type,
+                response_body_preview=None,
+                response_content_type=diagnostic.content_type,
                 prompt_hash=prompt_hash,
                 prompt_length=prompt_length,
                 request_url_length=len(relay_url),
@@ -552,18 +569,14 @@ async def _request_image_via_lambda(
                 "Pollinations image relay request failed",
                 failure_class=failure_class,
                 status_code=exc.code,
-                response_body_preview=response_body_preview,
-                response_content_type=response_content_type,
+                response_body_preview=None,
+                response_content_type=diagnostic.content_type,
                 request_url_length=len(relay_url),
                 prompt_length=prompt_length,
                 reference_sent=reference_sent,
                 safe_filter=safe_filter,
-                diagnostic_hint=classify_failure_diagnostic_hint(
-                    failure_class=failure_class,
-                    status_code=exc.code,
-                    response_body_preview=response_body_preview,
-                    response_content_type=response_content_type,
-                ),
+                diagnostic_hint=diagnostic.diagnostic_hint,
+                provider_request_id=diagnostic.request_id,
             ) from exc
         except TimeoutError as exc:
             _log_failure(
@@ -673,6 +686,8 @@ async def _request_image_via_lambda(
                     response_content_type=response_content_type,
                 ),
             ) from exc
+        finally:
+            response_body = b""
         if not isinstance(payload, dict):
             raise PollinationsImageError(
                 "Pollinations image relay response was invalid",
@@ -698,8 +713,10 @@ async def _request_image_via_lambda(
         effective_safe_filter = response_safe_filter if response_safe_filter is not None else safe_filter
         if not payload.get("ok"):
             failure_class = str(payload.get("failure_class") or "relay_invalid_response")
-            preview = payload.get("response_body_preview")
-            response_body_preview = preview if isinstance(preview, str) else None
+            unsafe_preview = payload.pop("response_body_preview", None)
+            response_body_for_classification = (
+                unsafe_preview if isinstance(unsafe_preview, str) else None
+            )
             content_type_value = payload.get("response_content_type") or payload.get("content_type")
             failure_content_type = (
                 str(content_type_value).split(";", 1)[0].strip().lower()
@@ -710,14 +727,15 @@ async def _request_image_via_lambda(
             diagnostic_hint = classify_failure_diagnostic_hint(
                 failure_class=failure_class,
                 status_code=failure_status_code,
-                response_body_preview=response_body_preview,
+                response_body_preview=response_body_for_classification,
                 response_content_type=failure_content_type,
             )
+            del unsafe_preview, response_body_for_classification
             _log_failure(
                 model=model,
                 failure_class=failure_class,
                 status_code=failure_status_code,
-                response_body_preview=response_body_preview,
+                response_body_preview=None,
                 response_content_type=failure_content_type,
                 prompt_hash=prompt_hash,
                 prompt_length=relay_prompt_length,
@@ -730,7 +748,7 @@ async def _request_image_via_lambda(
                 "Pollinations image relay returned a failed result",
                 failure_class=failure_class,
                 status_code=failure_status_code,
-                response_body_preview=response_body_preview,
+                response_body_preview=None,
                 response_content_type=failure_content_type,
                 request_url_length=relay_url_length,
                 prompt_length=relay_prompt_length,
@@ -889,24 +907,36 @@ def classify_failure_diagnostic_hint(
     return None
 
 
-def _read_http_error_preview(exc: HTTPError) -> tuple[str | None, str | None]:
-    content_type = (
-        (exc.headers.get("Content-Type", "") if exc.headers else "")
-        .split(";", 1)[0]
-        .strip()
-        .lower()
-        or None
-    )
+def _open_pollinations_request(request: Request, timeout_seconds: float):
     try:
-        raw = exc.read(2048)
-    except Exception:
-        return None, content_type
-    if not raw:
-        return None, content_type
-    text = raw.decode("utf-8", errors="replace").strip()
-    if not text:
-        return None, content_type
-    return text[:POLLINATIONS_RESPONSE_BODY_PREVIEW_MAX], content_type
+        return provider_http.open_validated_request(
+            request,
+            timeout_seconds=timeout_seconds,
+            initial_validator=lambda url: provider_http.validate_public_https_url(
+                url,
+                allowed_hosts={"gen.pollinations.ai"},
+                allowed_path_prefixes={"/image"},
+            ),
+            redirect_validator=provider_http.validate_public_https_url,
+            sensitive_headers=POLLINATIONS_SENSITIVE_HEADERS,
+            allow_cross_origin_redirects=True,
+        )
+    except provider_http.ProviderUrlError as exc:
+        raise URLError("Pollinations URL was not allowed") from exc
+
+
+def _open_relay_request(request: Request, timeout_seconds: float):
+    try:
+        return provider_http.open_validated_request(
+            request,
+            timeout_seconds=timeout_seconds,
+            initial_validator=provider_http.validate_public_https_url,
+            redirect_validator=provider_http.validate_public_https_url,
+            sensitive_headers=POLLINATIONS_SENSITIVE_HEADERS,
+            allow_cross_origin_redirects=False,
+        )
+    except provider_http.ProviderUrlError as exc:
+        raise URLError("Pollinations relay URL was not allowed") from exc
 
 
 def _redacted_prompt_preview(prompt: str) -> str:
@@ -956,14 +986,14 @@ def _log_failure(
     prompt: str,
     log_context: dict[str, Any] | None,
 ) -> None:
+    del response_body_preview
     logger.warning(
         "pollinations_image_failed model=%s failure_class=%s status_code=%s "
-        "response_body_preview=%r response_content_type=%s prompt_hash=%s "
+        "response_content_type=%s prompt_hash=%s "
         "prompt_length=%s url_length=%s reference_sent=%s prompt_preview=%r%s",
         model,
         failure_class,
         status_code,
-        response_body_preview,
         response_content_type,
         prompt_hash,
         prompt_length,

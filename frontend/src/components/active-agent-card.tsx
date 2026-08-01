@@ -5,10 +5,10 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { ProfileAvatar } from "@/components/profile-avatar";
+import { useAuth } from "@/components/auth-provider";
 import {
   AGENTS_CHANGED_EVENT,
   clearAuth,
-  hasStoredAuth,
   isAuthError,
   listAgents,
   type AgentDetailRead,
@@ -16,12 +16,13 @@ import {
 import { formatHandle } from "@/lib/profile";
 
 export function ActiveAgentCard() {
+  const { status } = useAuth();
   const [agents, setAgents] = useState<AgentDetailRead[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const loadAgents = useCallback(async () => {
-    if (!hasStoredAuth()) {
+    if (status !== "authenticated") {
       setAgents([]);
       setError(null);
       setLoading(false);
@@ -43,7 +44,7 @@ export function ActiveAgentCard() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [status]);
 
   useEffect(() => {
     let active = true;

@@ -4,8 +4,8 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
+import { useAuth } from "@/components/auth-provider";
 import { ProfileListRow } from "@/components/profile-list-row";
-import { hasStoredAuth } from "@/lib/agents";
 import {
   getCharacterProfileConnections,
   getUserProfileConnections,
@@ -50,6 +50,7 @@ export function ProfileConnectionsClient({
   activeTab: ProfileConnectionTab;
   initialError: string | null;
 }) {
+  const { status: authStatus } = useAuth();
   const [page, setPage] = useState<ProfileListPage>(
     initialPage ?? { items: [], next_cursor: null },
   );
@@ -67,7 +68,7 @@ export function ProfileConnectionsClient({
       : `/profiles/users/${profileId}`;
 
   useEffect(() => {
-    if (!hasStoredAuth()) return;
+    if (authStatus !== "authenticated") return;
     let cancelled = false;
 
     const request =
@@ -86,7 +87,7 @@ export function ProfileConnectionsClient({
     return () => {
       cancelled = true;
     };
-  }, [activeTab, profileId, profileKind]);
+  }, [activeTab, authStatus, profileId, profileKind]);
 
   const loadMore = useCallback(async () => {
     if (!page.next_cursor || loadingMore) return;

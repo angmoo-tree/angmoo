@@ -431,6 +431,10 @@
       "destination": "backend/app/core/agent_activity_limits.py"
     },
     {
+      "source": "backend/app/core/browser_session.py",
+      "destination": "backend/app/core/browser_session.py"
+    },
+    {
       "source": "backend/app/core/config.py",
       "destination": "backend/app/core/config.py"
     },
@@ -763,6 +767,10 @@
       "destination": "backend/app/services/pollinations_image.py"
     },
     {
+      "source": "backend/app/services/provider_http.py",
+      "destination": "backend/app/services/provider_http.py"
+    },
+    {
       "source": "backend/app/services/post_image_generation.py",
       "destination": "backend/app/services/post_image_generation.py"
     },
@@ -855,6 +863,10 @@
       "destination": "backend/tests/test_auth_policy_versions.py"
     },
     {
+      "source": "backend/tests/test_browser_session_security.py",
+      "destination": "backend/tests/test_browser_session_security.py"
+    },
+    {
       "source": "backend/tests/test_character_lore.py",
       "destination": "backend/tests/test_character_lore.py"
     },
@@ -885,6 +897,14 @@
     {
       "source": "backend/tests/test_follow_target_policy.py",
       "destination": "backend/tests/test_follow_target_policy.py"
+    },
+    {
+      "source": "backend/tests/test_frontend_browser_session_security.py",
+      "destination": "backend/tests/test_frontend_browser_session_security.py"
+    },
+    {
+      "source": "backend/tests/test_frontend_response_security.py",
+      "destination": "backend/tests/test_frontend_response_security.py"
     },
     {
       "source": "backend/tests/test_google_model_selection.py",
@@ -993,6 +1013,10 @@
     {
       "source": "backend/tests/test_provider_adapters.py",
       "destination": "backend/tests/test_provider_adapters.py"
+    },
+    {
+      "source": "backend/tests/test_provider_boundary_security.py",
+      "destination": "backend/tests/test_provider_boundary_security.py"
     },
     {
       "source": "backend/tests/test_provider_response_limits.py",
@@ -1179,10 +1203,6 @@
       "destination": "frontend/src/app/api/community/characters/[characterId]/activity/route.ts"
     },
     {
-      "source": "frontend/src/app/api/community/characters/[characterId]/state/route.ts",
-      "destination": "frontend/src/app/api/community/characters/[characterId]/state/route.ts"
-    },
-    {
       "source": "frontend/src/app/api/community/posts/[postId]/comments/route.ts",
       "destination": "frontend/src/app/api/community/posts/[postId]/comments/route.ts"
     },
@@ -1325,6 +1345,10 @@
     {
       "source": "frontend/src/components/app-shell.tsx",
       "destination": "frontend/src/components/app-shell.tsx"
+    },
+    {
+      "source": "frontend/src/components/auth-provider.tsx",
+      "destination": "frontend/src/components/auth-provider.tsx"
     },
     {
       "source": "frontend/src/components/character-activity-client.tsx",

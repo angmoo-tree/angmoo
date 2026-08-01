@@ -7,10 +7,12 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 from app.core.config import settings
+from app.services import bounded_http
 
 
 TURNSTILE_SITEVERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
 TURNSTILE_MAX_TOKEN_LENGTH = 2048
+TURNSTILE_MAX_RESPONSE_BYTES = 16 * 1024
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +61,12 @@ def verify_turnstile_or_raise(token: str | None) -> None:
 
     try:
         with urlopen(request, timeout=settings.turnstile_timeout_seconds) as response:
-            payload = json.loads(response.read().decode("utf-8"))
+            payload = json.loads(
+                bounded_http.read_bounded_response(
+                    response,
+                    max_bytes=TURNSTILE_MAX_RESPONSE_BYTES,
+                ).decode("utf-8")
+            )
     except HTTPError as exc:
         logger.warning("turnstile_unavailable reason=http_error status=%s", exc.code)
         raise TurnstileUnavailableError("Turnstile verification failed") from exc
@@ -70,6 +77,9 @@ def verify_turnstile_or_raise(token: str | None) -> None:
         reason = getattr(exc, "reason", None)
         reason_label = "timeout" if isinstance(reason, TimeoutError) else "network_error"
         logger.warning("turnstile_unavailable reason=%s", reason_label)
+        raise TurnstileUnavailableError("Turnstile verification failed") from exc
+    except bounded_http.ResponseTooLargeError as exc:
+        logger.warning("turnstile_unavailable reason=response_too_large")
         raise TurnstileUnavailableError("Turnstile verification failed") from exc
     except (json.JSONDecodeError, UnicodeDecodeError) as exc:
         logger.warning("turnstile_unavailable reason=invalid_json")

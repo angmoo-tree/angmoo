@@ -5,6 +5,10 @@ from collections.abc import Callable
 from urllib.parse import urlsplit
 
 from app.core import security
+from app.core.browser_session import (
+    BrowserSessionConfigurationError,
+    validate_browser_session_settings,
+)
 from app.core.config import DEFAULT_APP_SECRET, Settings, settings
 
 
@@ -42,6 +46,10 @@ def validate_startup_security(
     *,
     kms_round_trip: KmsRoundTrip | None = None,
 ) -> None:
+    try:
+        validate_browser_session_settings(config)
+    except BrowserSessionConfigurationError as exc:
+        raise StartupSecurityError(exc.args[0]) from exc
     if config.app_env != "production":
         return
 

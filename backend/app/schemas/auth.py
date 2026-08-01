@@ -25,7 +25,6 @@ class GoogleLoginCreate(BaseModel):
 
 
 class GoogleSignupCompleteCreate(BaseModel):
-    pending_token: str = Field(min_length=1)
     display_name: str = Field(min_length=1, max_length=80)
     privacy_policy_agreed: bool = False
     terms_agreed: bool = False
@@ -64,16 +63,13 @@ class UserRead(BaseModel):
 
 
 class AuthRead(BaseModel):
-    token: str
     user: UserRead
     profile_setup_required: bool = False
 
 
 class GoogleLoginRead(BaseModel):
-    token: str | None = None
     user: UserRead | None = None
     profile_setup_required: bool = False
     signup_required: bool = False
-    pending_token: str | None = None
     expires_at: datetime | None = None
     email: str | None = None

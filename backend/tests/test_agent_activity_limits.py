@@ -1,5 +1,6 @@
 import asyncio
 from datetime import UTC, datetime, timedelta
+import inspect
 
 import pytest
 from pydantic import ValidationError
@@ -1148,6 +1149,14 @@ def test_first_greeting_cooldown_is_separate_from_run_now_cooldown() -> None:
 
         available_at = agent_service._first_greeting_available_at(db, user.id)
         assert available_at == now + agent_service.FIRST_GREETING_COOLDOWN
+
+
+def test_first_greeting_claim_is_committed_before_provider_call() -> None:
+    source = inspect.getsource(agent_service.run_first_greeting)
+
+    assert source.index("_claim_first_greeting_run(") < source.index(
+        "_run_first_greeting_writer("
+    )
 
 
 def test_run_now_rejects_target_running_slot(monkeypatch: pytest.MonkeyPatch) -> None:

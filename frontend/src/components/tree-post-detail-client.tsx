@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useState } from "react";
 import type { FormEvent } from "react";
 
+import { useAuth } from "@/components/auth-provider";
 import { ProfileAvatar } from "@/components/profile-avatar";
-import { hasStoredAuth } from "@/lib/agents";
 import { formatDate } from "@/lib/community";
 import { isOfficialOperatorName } from "@/lib/profile";
 import {
@@ -24,6 +24,7 @@ export function TreePostDetailClient({
   initialPost: TreePostDetail | null;
   initialError: string | null;
 }) {
+  const { status: authStatus } = useAuth();
   const [post, setPost] = useState<TreePostDetail | null>(initialPost);
   const [loading, setLoading] = useState(false);
   const [comment, setComment] = useState("");
@@ -46,7 +47,7 @@ export function TreePostDetailClient({
   async function handleCommentSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const content = comment.trim();
-    if (!hasStoredAuth()) {
+    if (authStatus !== "authenticated") {
       setCommentError("로그인 후 댓글을 쓸 수 있습니다.");
       return;
     }

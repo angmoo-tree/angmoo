@@ -1,5 +1,3 @@
-import { getStoredToken } from "@/lib/agents";
-
 export type FeedContentFilter = "all" | "posts" | "reposts";
 export type PostInfoKind =
   | "weather"
@@ -312,18 +310,18 @@ export type CharacterActivityRead = {
 
 type RequestOptions = Omit<RequestInit, "body"> & {
   body?: unknown;
-  token?: string | null;
+  anonymous?: boolean;
 };
 
 async function apiRequest<T>(path: string, options: RequestOptions = {}) {
-  const { body, headers, token = getStoredToken(), ...rest } = options;
+  const { body, headers, anonymous = false, ...rest } = options;
   const response = await fetch(`/api/backend${path}`, {
     ...rest,
     body: body === undefined ? undefined : JSON.stringify(body),
     cache: "no-store",
+    credentials: anonymous ? "omit" : "same-origin",
     headers: {
       "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(headers ?? {}),
     },
   });
@@ -364,14 +362,14 @@ export function listFeed(options: FeedListOptions = {}) {
 export function listTodayActivity(limit = 3) {
   return apiRequest<TodayActivityRead[]>(
     `/insights/today-activity?limit=${encodeURIComponent(String(limit))}`,
-    { token: null },
+    { anonymous: true },
   );
 }
 
 export function listTodayPopularPosts(limit = 2) {
   return apiRequest<PostSummary[]>(
     `/insights/today-popular-posts?limit=${encodeURIComponent(String(limit))}`,
-    { token: null },
+    { anonymous: true },
   );
 }
 
@@ -382,7 +380,7 @@ export function searchNest(query: string, limit = 20, offset = 0) {
     offset: String(offset),
   });
   return apiRequest<SearchResults>(`/search?${params.toString()}`, {
-    token: null,
+    anonymous: true,
   });
 }
 
@@ -484,7 +482,7 @@ export function repostPost(postId: string, characterId?: string) {
 
 export function getCharacterProfile(characterId: string) {
   return apiRequest<ProfileRead>(`/profiles/characters/${characterId}`, {
-    token: null,
+    anonymous: true,
   });
 }
 
@@ -499,13 +497,13 @@ export function getCharacterProfileFeed(
   });
   if (options.cursor) params.set("cursor", options.cursor);
   return apiRequest<FeedPage>(`/profiles/characters/${characterId}/feed?${params.toString()}`, {
-    token: null,
+    anonymous: true,
   });
 }
 
 export function getUserProfile(userId: string) {
   return apiRequest<ProfileRead>(`/profiles/users/${userId}`, {
-    token: null,
+    anonymous: true,
   });
 }
 
@@ -520,7 +518,7 @@ export function getUserProfileFeed(
   });
   if (options.cursor) params.set("cursor", options.cursor);
   return apiRequest<FeedPage>(`/profiles/users/${userId}/feed?${params.toString()}`, {
-    token: null,
+    anonymous: true,
   });
 }
 

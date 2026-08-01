@@ -3,6 +3,11 @@ import { proxyBackend } from "@/lib/backend";
 const DEFAULT_PROXY_MAX_BYTES = 1024 * 1024;
 const LORE_UPLOAD_PROXY_MAX_BYTES = 10 * 1024 * 1024 + 256 * 1024;
 const PROFILE_MEDIA_PROXY_MAX_BYTES = 8_000_000 + 256 * 1024;
+const FORWARDED_COOKIE_NAMES = new Set([
+  "angmoo_browser_session",
+  "angmoo_google_signup_pending",
+]);
+const UNSAFE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 type RouteContext = {
   params: Promise<{
@@ -11,6 +16,50 @@ type RouteContext = {
 };
 
 class RequestBodyTooLargeError extends Error {}
+
+function filterForwardedCookies(rawCookie: string | null) {
+  if (!rawCookie) return null;
+  const cookies = rawCookie
+    .split(";")
+    .map((item) => item.trim())
+    .filter((item) => {
+      const separator = item.indexOf("=");
+      return separator > 0 && FORWARDED_COOKIE_NAMES.has(item.slice(0, separator));
+    });
+  return cookies.length > 0 ? cookies.join("; ") : null;
+}
+
+function exactSameOrigin(request: Request) {
+  const origin = request.headers.get("origin");
+  const host = request.headers.get("host");
+  if (
+    !origin ||
+    !host ||
+    request.headers.get("sec-fetch-site") === "cross-site"
+  ) {
+    return null;
+  }
+  try {
+    const parsed = new URL(origin);
+    const forwardedProtocol = request.headers
+      .get("x-forwarded-proto")
+      ?.split(",", 1)[0]
+      ?.trim()
+      .toLowerCase();
+    const requestProtocol =
+      forwardedProtocol || new URL(request.url).protocol.slice(0, -1);
+    if (!["http", "https"].includes(requestProtocol)) {
+      return null;
+    }
+    const requestOrigin = new URL(`${requestProtocol}://${host}`).origin;
+    if (origin !== parsed.origin || parsed.origin !== requestOrigin) {
+      return null;
+    }
+    return parsed.origin;
+  } catch {
+    return null;
+  }
+}
 
 function isLoreUpload(path: string[], method: string) {
   return (
@@ -89,6 +138,11 @@ async function readBoundedRequestBody(request: Request, maxBytes: number) {
 
 async function proxy(request: Request, context: RouteContext) {
   const { path } = await context.params;
+  const unsafe = UNSAFE_METHODS.has(request.method);
+  const origin = unsafe ? exactSameOrigin(request) : null;
+  if (unsafe && !origin) {
+    return Response.json({ detail: "csrf_origin_invalid" }, { status: 403 });
+  }
   let body: ArrayBuffer | undefined;
   try {
     body = ["GET", "HEAD"].includes(request.method)
@@ -107,13 +161,14 @@ async function proxy(request: Request, context: RouteContext) {
     throw error;
   }
   const query = new URL(request.url).search;
-  const authorization = request.headers.get("authorization");
+  const cookie = filterForwardedCookies(request.headers.get("cookie"));
 
   return proxyBackend(`/api/v1/${path.map(encodeURIComponent).join("/")}${query}`, {
     method: request.method,
     body,
     headers: {
-      ...(authorization ? { Authorization: authorization } : {}),
+      ...(cookie ? { Cookie: cookie } : {}),
+      ...(origin ? { Origin: origin } : {}),
       "Content-Type": request.headers.get("content-type") ?? "application/json",
     },
   });

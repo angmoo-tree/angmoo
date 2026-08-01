@@ -5,10 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { useAuth } from "@/components/auth-provider";
 import { ProfileAvatar } from "@/components/profile-avatar";
 import {
   deleteMessageThread,
-  hasStoredAuth,
   listMessageThreads,
   type MessageThreadListRead,
 } from "@/lib/agents";
@@ -16,12 +16,14 @@ import { formatHandle } from "@/lib/profile";
 
 export function MessagesClient() {
   const router = useRouter();
+  const { status: authStatus } = useAuth();
   const [threads, setThreads] = useState<MessageThreadListRead | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!hasStoredAuth()) {
+    if (authStatus === "checking") return;
+    if (authStatus !== "authenticated") {
       router.replace("/login");
       return;
     }
@@ -42,7 +44,7 @@ export function MessagesClient() {
     return () => {
       active = false;
     };
-  }, [router]);
+  }, [authStatus, router]);
 
   async function handleDelete(threadId: string) {
     setDeletingId(threadId);
