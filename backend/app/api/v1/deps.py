@@ -4,6 +4,7 @@ from fastapi import Depends, Header, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app import models
+from app.core import browser_session
 from app.core.db import get_db
 from app.services import auth as auth_service
 from app.services import demo_lock
@@ -45,28 +46,47 @@ def get_current_user_allow_incomplete(
     authorization: AuthorizationHeader = None,
     db: Session = Depends(get_db),
 ) -> models.User:
+    token, cookie_authenticated = _user_token_from_request(
+        request,
+        authorization,
+    )
     result = auth_service.get_user_session_for_token(
         db,
-        _bearer_token(authorization),
+        token,
     )
     if result is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
         )
     user, session = result
+    browser_session.require_cookie_mutation_origin(
+        request,
+        cookie_authenticated=cookie_authenticated,
+    )
     _ensure_demo_request_allowed(user, session, request)
     return user
 
 
 def get_current_session_for_logout(
+    request: Request,
     authorization: AuthorizationHeader = None,
     db: Session = Depends(get_db),
-) -> models.AuthSession:
+) -> models.AuthSession | None:
+    token, cookie_authenticated = _user_token_from_request(
+        request,
+        authorization,
+    )
+    browser_session.require_cookie_mutation_origin(
+        request,
+        cookie_authenticated=cookie_authenticated,
+    )
     session = auth_service.get_session_for_token(
         db,
-        _bearer_token(authorization),
+        token,
     )
     if session is None or session.user.deleted_at is not None:
+        if cookie_authenticated:
+            return None
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
         )
@@ -74,14 +94,21 @@ def get_current_session_for_logout(
 
 
 def get_current_admin_user(
-    authorization: AuthorizationHeader = None, db: Session = Depends(get_db)
+    request: Request,
+    authorization: AuthorizationHeader = None,
+    db: Session = Depends(get_db),
 ) -> models.User:
-    result = auth_service.get_user_session_for_token(db, _bearer_token(authorization))
+    token, cookie_authenticated = _user_token_from_request(request, authorization)
+    result = auth_service.get_user_session_for_token(db, token)
     if result is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
         )
     user, session = result
+    browser_session.require_cookie_mutation_origin(
+        request,
+        cookie_authenticated=cookie_authenticated,
+    )
     try:
         demo_lock.ensure_demo_admin_access_allowed(
             user,
@@ -107,17 +134,48 @@ def get_optional_current_user(
     authorization: AuthorizationHeader = None,
     db: Session = Depends(get_db),
 ) -> models.User | None:
-    if not authorization:
+    cookie_token = browser_session.session_cookie_token(request)
+    if cookie_token and authorization:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="ambiguous_auth",
+        )
+    if cookie_token:
+        token = cookie_token
+        cookie_authenticated = True
+    elif authorization:
+        scheme, _, bearer = authorization.partition(" ")
+        if scheme.lower() != "bearer" or not bearer.strip():
+            return None
+        token = bearer.strip()
+        cookie_authenticated = False
+    else:
         return None
-    scheme, _, token = authorization.partition(" ")
-    if scheme.lower() != "bearer" or not token.strip():
-        return None
-    result = auth_service.get_user_session_for_token(db, token.strip())
+    result = auth_service.get_user_session_for_token(db, token)
     if result is None:
         return None
     user, session = result
+    browser_session.require_cookie_mutation_origin(
+        request,
+        cookie_authenticated=cookie_authenticated,
+    )
     _ensure_demo_request_allowed(user, session, request)
     return user
+
+
+def _user_token_from_request(
+    request: Request,
+    authorization: str | None,
+) -> tuple[str, bool]:
+    cookie_token = browser_session.session_cookie_token(request)
+    if cookie_token and authorization:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="ambiguous_auth",
+        )
+    if cookie_token:
+        return cookie_token, True
+    return _bearer_token(authorization), False
 
 
 def _ensure_demo_request_allowed(

@@ -5,13 +5,13 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { useAuth } from "@/components/auth-provider";
 import { ProfileAvatar } from "@/components/profile-avatar";
 import {
   DEFAULT_MESSAGE_GOOGLE_MODEL,
   MESSAGE_GOOGLE_GEMINI_MODELS,
   deleteMessageThread,
   getMessageThread,
-  hasStoredAuth,
   retryThreadMessage,
   sendThreadMessage,
   updateMessageThread,
@@ -29,6 +29,7 @@ function asMessageGoogleModel(value: string | undefined): MessageGoogleGeminiMod
 
 export function MessageThreadClient({ threadId }: { threadId: string }) {
   const router = useRouter();
+  const { status: authStatus } = useAuth();
   const searchParams = useSearchParams();
   const [thread, setThread] = useState<MessageThreadRead | null>(null);
   const [content, setContent] = useState("");
@@ -42,7 +43,8 @@ export function MessageThreadClient({ threadId }: { threadId: string }) {
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!hasStoredAuth()) {
+    if (authStatus === "checking") return;
+    if (authStatus !== "authenticated") {
       router.replace("/login");
       return;
     }
@@ -63,7 +65,7 @@ export function MessageThreadClient({ threadId }: { threadId: string }) {
     return () => {
       active = false;
     };
-  }, [router, threadId]);
+  }, [authStatus, router, threadId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: "end" });

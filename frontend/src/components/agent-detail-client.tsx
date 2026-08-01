@@ -33,6 +33,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 
 import { AgentActivityList } from "@/components/agent-activity-list";
+import { useAuth } from "@/components/auth-provider";
 import {
   ACTIVE_HOURS_LIMIT_MESSAGE,
   ActiveHoursControl,
@@ -77,7 +78,6 @@ import {
   REPLICATE_API_TOKEN_URL,
   REPLICATE_PRICING_URL,
   generateAgentProfileMedia,
-  hasStoredAuth,
   issueAgentLocalKey,
   isAuthError,
   listAgentLoreSources,
@@ -256,6 +256,7 @@ type MediaGenerationState = {
 
 export function AgentDetailClient({ characterId }: { characterId: string }) {
   const router = useRouter();
+  const { status } = useAuth();
   const [agent, setAgent] = useState<AgentDetailRead | null>(null);
   const [profile, setProfile] = useState<ProfileRead | null>(null);
   const [profileFeed, setProfileFeed] = useState<FeedPage | null>(null);
@@ -392,7 +393,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
   async function loadAgent() {
     setLoading(true);
     setError(null);
-    if (!hasStoredAuth()) {
+    if (status !== "authenticated") {
       router.replace("/login");
       setLoading(false);
       return;
@@ -428,7 +429,8 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
   useEffect(() => {
     let active = true;
     Promise.resolve().then(async () => {
-      if (!hasStoredAuth()) {
+      if (status === "checking") return;
+      if (status !== "authenticated") {
         router.replace("/login");
         if (active) setLoading(false);
         return;
@@ -483,7 +485,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
     return () => {
       active = false;
     };
-  }, [characterId, router, syncAgentProfile]);
+  }, [characterId, router, status, syncAgentProfile]);
 
   useEffect(() => {
     return () => revokeGeneratedMediaCandidate(profileMediaCandidate);
@@ -1032,7 +1034,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
   }
 
   async function handleStartMessage() {
-    if (!hasStoredAuth()) {
+    if (status !== "authenticated") {
       router.push("/login");
       return;
     }

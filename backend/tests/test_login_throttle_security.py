@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 from statistics import median
 from time import perf_counter
 
-from fastapi import HTTPException
+from fastapi import HTTPException, Response
 import pytest
 from sqlalchemy import create_engine, select
 from sqlalchemy.exc import OperationalError
@@ -227,7 +227,7 @@ def test_login_route_returns_generic_429_with_retry_after(
             "type": "http",
             "method": "POST",
             "path": "/api/v1/auth/login",
-            "headers": [],
+            "headers": [(b"origin", b"http://127.0.0.1:3000")],
             "client": ("198.51.100.50", 12345),
             "server": ("testserver", 80),
             "scheme": "http",
@@ -242,6 +242,7 @@ def test_login_route_returns_generic_429_with_retry_after(
                 password="wrong-password",
             ),
             request,
+            Response(),
             object(),
         )
 

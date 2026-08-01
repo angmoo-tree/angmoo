@@ -4,15 +4,15 @@ import { LogIn, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { demoLogin, hasStoredAuth, storeAuth } from "@/lib/agents";
+import { useAuth } from "@/components/auth-provider";
+import { demoLogin, storeAuth } from "@/lib/agents";
 
 type DemoState = "checking" | "confirm" | "loading" | "error";
 
 export function DemoKimarinClient() {
   const router = useRouter();
-  const [state, setState] = useState<DemoState>(() =>
-    hasStoredAuth() ? "confirm" : "checking",
-  );
+  const { status: authStatus } = useAuth();
+  const [state, setState] = useState<DemoState>("checking");
   const [error, setError] = useState<string | null>(null);
 
   const enterDemo = useCallback(async () => {
@@ -34,11 +34,16 @@ export function DemoKimarinClient() {
 
   useEffect(() => {
     if (state !== "checking") return undefined;
+    if (authStatus === "checking") return undefined;
+    if (authStatus === "authenticated") {
+      const confirmId = window.setTimeout(() => setState("confirm"), 0);
+      return () => window.clearTimeout(confirmId);
+    }
     const timeoutId = window.setTimeout(() => {
       void enterDemo();
     }, 0);
     return () => window.clearTimeout(timeoutId);
-  }, [enterDemo, state]);
+  }, [authStatus, enterDemo, state]);
 
   const isLoading = state === "checking" || state === "loading";
 

@@ -5,12 +5,13 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 
+import { useAuth } from "@/components/auth-provider";
 import { TurnstileWidget } from "@/components/turnstile-widget";
 import {
   clearPendingGoogleSignup,
   completeGoogleSignup,
   getPendingGoogleSignup,
-  getStoredUser,
+  isAuthError,
   markFirstAgentWelcomePromptPending,
   storeAuth,
   storeUser,
@@ -23,6 +24,7 @@ const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
 
 export function ProfileSetupClient() {
   const router = useRouter();
+  const { status: authStatus, user } = useAuth();
   const [displayName, setDisplayName] = useState("");
   const [pendingSignup] = useState<PendingGoogleSignup | null>(() =>
     getPendingGoogleSignup(),
@@ -36,7 +38,7 @@ export function ProfileSetupClient() {
   const requiresTurnstile = Boolean(pendingSignup && TURNSTILE_SITE_KEY);
 
   useEffect(() => {
-    const user = getStoredUser();
+    if (authStatus === "checking" && !pendingSignup) return;
     if (!user && !pendingSignup) {
       router.replace("/login");
       return;
@@ -45,7 +47,7 @@ export function ProfileSetupClient() {
       router.replace("/agents");
       return;
     }
-  }, [pendingSignup, router]);
+  }, [authStatus, pendingSignup, router, user]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -68,7 +70,6 @@ export function ProfileSetupClient() {
     try {
       if (pendingSignup) {
         const auth = await completeGoogleSignup({
-          pending_token: pendingSignup.pending_token,
           display_name: nickname,
           privacy_policy_agreed: privacyAgreed,
           terms_agreed: termsAgreed,
@@ -89,6 +90,11 @@ export function ProfileSetupClient() {
       markFirstAgentWelcomePromptPending();
       router.push("/agents");
     } catch (err) {
+      if (pendingSignup && isAuthError(err)) {
+        clearPendingGoogleSignup();
+        router.replace("/login");
+        return;
+      }
       setError(err instanceof Error ? err.message : "닉네임을 저장하지 못했습니다.");
       if (requiresTurnstile) {
         setTurnstileToken(null);

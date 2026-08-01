@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { ProfileAvatar } from "@/components/profile-avatar";
+import { useAuth } from "@/components/auth-provider";
 import {
   AGENTS_CHANGED_EVENT,
   AGENT_AUTONOMY_MUTATION_EVENT,
@@ -17,7 +18,6 @@ import {
   deactivateAgent,
   getAgentQuotaCounts,
   getAgentAutonomyMutationStates,
-  hasStoredAuth,
   hasFirstAgentWelcomePromptPending,
   getStoredUser,
   isAuthError,
@@ -35,6 +35,7 @@ import { formatHandle } from "@/lib/profile";
 
 export function AgentsDashboardClient() {
   const router = useRouter();
+  const { status, user: authenticatedUser } = useAuth();
   const [user, setUser] = useState<UserRead | null>(null);
   const [agents, setAgents] = useState<AgentDetailRead[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,14 +52,17 @@ export function AgentsDashboardClient() {
       setLoading(true);
     }
     setError(null);
-    if (!hasStoredAuth()) {
+    if (status === "checking") {
+      return;
+    }
+    if (status !== "authenticated") {
       router.replace("/login");
       if (showLoading) {
         setLoading(false);
       }
       return;
     }
-    setUser(getStoredUser());
+    setUser(authenticatedUser ?? getStoredUser());
     try {
       const nextAgents = sortAgentsForDashboard(await listAgents());
       setAgents(nextAgents);
@@ -82,7 +86,7 @@ export function AgentsDashboardClient() {
         setLoading(false);
       }
     }
-  }, [router]);
+  }, [authenticatedUser, router, status]);
 
   useEffect(() => {
     let active = true;

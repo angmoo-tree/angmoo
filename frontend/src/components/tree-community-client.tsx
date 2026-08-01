@@ -2,12 +2,12 @@
 
 import { MessageCircle, RefreshCw, Send } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 
+import { useAuth } from "@/components/auth-provider";
 import { ProfileAvatar } from "@/components/profile-avatar";
 import {
-  hasStoredAuth,
   listAgents,
   type AgentDetailRead,
   type UserRead,
@@ -57,6 +57,7 @@ export function TreeCommunityClient({
   initialQuery: string;
   initialError: string | null;
 }) {
+  const { status: authStatus, user } = useAuth();
   const [posts, setPosts] = useState(initialPage.items);
   const [nextCursor, setNextCursor] = useState(initialPage.next_cursor);
   const [loading, setLoading] = useState(false);
@@ -64,11 +65,6 @@ export function TreeCommunityClient({
   const [composerText, setComposerText] = useState("");
   const [composerError, setComposerError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const user = useSyncExternalStore(
-    subscribeToStoredUser,
-    getStoredUserSnapshot,
-    getServerUserSnapshot,
-  );
   const [agents, setAgents] = useState<AgentDetailRead[]>([]);
   const [relatedCharacterId, setRelatedCharacterId] = useState("");
 
@@ -96,11 +92,11 @@ export function TreeCommunityClient({
   });
 
   useEffect(() => {
-    if (!hasStoredAuth()) return;
+    if (authStatus !== "authenticated") return;
     listAgents()
       .then(setAgents)
       .catch(() => setAgents([]));
-  }, []);
+  }, [authStatus]);
 
   async function loadMore() {
     if (!nextCursor || loading) return;
@@ -126,7 +122,7 @@ export function TreeCommunityClient({
     event.preventDefault();
     if (initialCategory === "notice") return;
     const content = composerText.trim();
-    if (!hasStoredAuth()) {
+    if (authStatus !== "authenticated") {
       setComposerError("로그인 후 글을 쓸 수 있습니다.");
       return;
     }
@@ -437,33 +433,4 @@ function emptyText(category: TreeCategory, query: string) {
   if (query.trim()) return "검색 결과가 없습니다.";
   if (category === "notice") return "아직 공지가 없습니다.";
   return "아직 올라온 나무 글이 없습니다.";
-}
-
-let cachedUserRaw: string | null = null;
-let cachedUser: UserRead | null = null;
-
-function getStoredUserSnapshot() {
-  if (typeof window === "undefined") return null;
-  const raw = window.sessionStorage.getItem("angmoo.user");
-  if (raw === cachedUserRaw) return cachedUser;
-  cachedUserRaw = raw;
-  if (!raw) {
-    cachedUser = null;
-    return cachedUser;
-  }
-  try {
-    cachedUser = JSON.parse(raw) as UserRead;
-  } catch {
-    cachedUser = null;
-  }
-  return cachedUser;
-}
-
-function getServerUserSnapshot(): UserRead | null {
-  return null;
-}
-
-function subscribeToStoredUser(onStoreChange: () => void) {
-  window.addEventListener("storage", onStoreChange);
-  return () => window.removeEventListener("storage", onStoreChange);
 }

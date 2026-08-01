@@ -123,11 +123,10 @@ export function LoginClient({
           router.push("/profile/setup");
           return;
         }
-        if (!auth.token || !auth.user) {
+        if (!auth.user) {
           throw new Error("Google 로그인 응답을 확인하지 못했습니다.");
         }
         storeAuth({
-          token: auth.token,
           user: auth.user,
           profile_setup_required: auth.profile_setup_required,
         });

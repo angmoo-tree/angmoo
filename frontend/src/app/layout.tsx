@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AuthProvider } from "@/components/auth-provider";
 import {
   SITE_DESCRIPTION,
   SITE_ICON,
@@ -50,7 +51,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }

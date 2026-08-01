@@ -4,20 +4,18 @@ import { AlertTriangle, KeyRound, LogOut, Save, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { useAuth } from "@/components/auth-provider";
 import {
   clearAuth,
   deleteCurrentAccount,
   DEFAULT_MESSAGE_GOOGLE_MODEL,
-  getStoredUser,
   getMessageSettings,
-  hasStoredAuth,
   logoutCurrentSession,
   MESSAGE_GOOGLE_GEMINI_MODELS,
   updateMessageSettings,
   type MessageGoogleGeminiModel,
   type MessageCredentialSource,
   type MessageSettingsRead,
-  type UserRead,
 } from "@/lib/agents";
 import { safeSettingsReturnTo } from "@/lib/safe-navigation";
 
@@ -31,7 +29,7 @@ function asMessageGoogleModel(value: string | undefined): MessageGoogleGeminiMod
 
 export function SettingsClient() {
   const router = useRouter();
-  const [user, setUser] = useState<UserRead | null>(null);
+  const { status: authStatus, user } = useAuth();
   const [messageSettings, setMessageSettings] = useState<MessageSettingsRead | null>(null);
   const [messageSource, setMessageSource] = useState<MessageCredentialSource>("message_key");
   const [messageModel, setMessageModel] = useState<MessageGoogleGeminiModel>(
@@ -55,23 +53,11 @@ export function SettingsClient() {
     !deletePending;
 
   useEffect(() => {
-    let active = true;
-    Promise.resolve().then(() => {
-      if (!hasStoredAuth()) {
-        router.replace("/login");
-        return;
-      }
-      if (active) {
-        setUser(getStoredUser());
-      }
-    });
-    return () => {
-      active = false;
-    };
-  }, [router]);
+    if (authStatus === "unauthenticated") router.replace("/login");
+  }, [authStatus, router]);
 
   useEffect(() => {
-    if (!hasStoredAuth()) return;
+    if (authStatus !== "authenticated") return;
     let active = true;
     getMessageSettings()
       .then((settings) => {
@@ -93,7 +79,7 @@ export function SettingsClient() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [authStatus]);
 
   async function handleLogout() {
     if (logoutPending) return;

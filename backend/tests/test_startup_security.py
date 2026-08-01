@@ -15,6 +15,7 @@ def _production_settings(**overrides: object) -> Settings:
     values: dict[str, object] = {
         "APP_ENV": "production",
         "APP_SECRET": SecretStr("synthetic-production-secret-for-tests"),
+        "BROWSER_SESSION_ALLOWED_ORIGINS": "https://angmoo.com",
         "CREDENTIAL_ENCRYPTION_PROVIDER": "oci_kms",
         "OCI_KMS_KEY_ID": "synthetic-key-id",
         "OCI_KMS_CRYPTO_ENDPOINT": "https://synthetic.crypto.us-test-1.oraclecloud.com",

@@ -3,7 +3,7 @@ from types import SimpleNamespace
 
 import httpx
 import pytest
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
 
 from app import models, schemas
 from app.api.v1 import deps as api_deps
@@ -41,8 +41,19 @@ def _character() -> models.Character:
     )
 
 
-def _request(method: str) -> SimpleNamespace:
-    return SimpleNamespace(method=method)
+def _request(method: str) -> Request:
+    return Request(
+        {
+            "type": "http",
+            "method": method,
+            "path": "/synthetic",
+            "headers": [(b"origin", b"http://127.0.0.1:3000")],
+            "client": ("127.0.0.1", 12345),
+            "server": ("127.0.0.1", 3000),
+            "scheme": "http",
+            "query_string": b"",
+        }
+    )
 
 
 def _session(auth_method: str = "demo") -> SimpleNamespace:
@@ -251,7 +262,11 @@ def test_locked_demo_admin_is_blocked_even_with_google_admin_session(monkeypatch
     )
 
     with pytest.raises(HTTPException) as exc_info:
-        api_deps.get_current_admin_user("Bearer admin-token", object())
+        api_deps.get_current_admin_user(
+            _request("GET"),
+            "Bearer admin-token",
+            object(),
+        )
 
     assert exc_info.value.status_code == 403
     assert exc_info.value.detail == demo_lock.DEMO_ACCOUNT_LOCKED_MESSAGE
@@ -380,7 +395,7 @@ def test_demo_login_creates_demo_auth_session(monkeypatch):
 
     def fake_auth_response(db, user, *, auth_method="password"):
         captured["auth_method"] = auth_method
-        return schemas.AuthRead(
+        return auth_service.IssuedAuthSession(
             token="demo-token",
             user=schemas.UserRead.model_validate(user),
             profile_setup_required=False,
@@ -402,7 +417,11 @@ def test_demo_login_route_returns_404_when_disabled(monkeypatch):
     monkeypatch.setattr(auth_routes.auth_service, "login_demo", raise_disabled)
 
     with pytest.raises(HTTPException) as exc_info:
-        auth_routes.demo_login(db=object())
+        auth_routes.demo_login(
+            request=_request("POST"),
+            response=Response(),
+            db=object(),
+        )
 
     assert exc_info.value.status_code == 404
 
@@ -414,7 +433,11 @@ def test_demo_login_route_returns_503_when_unavailable(monkeypatch):
     monkeypatch.setattr(auth_routes.auth_service, "login_demo", raise_unavailable)
 
     with pytest.raises(HTTPException) as exc_info:
-        auth_routes.demo_login(db=object())
+        auth_routes.demo_login(
+            request=_request("POST"),
+            response=Response(),
+            db=object(),
+        )
 
     assert exc_info.value.status_code == 503
 
@@ -425,7 +448,12 @@ def test_account_delete_route_returns_403_for_locked_demo_user():
     )
 
     with pytest.raises(HTTPException) as exc_info:
-        auth_routes.delete_me(data=data, db=object(), user=_user())
+        auth_routes.delete_me(
+            data=data,
+            response=Response(),
+            db=object(),
+            user=_user(),
+        )
 
     assert exc_info.value.status_code == 403
     assert exc_info.value.detail == demo_lock.DEMO_ACCOUNT_LOCKED_MESSAGE

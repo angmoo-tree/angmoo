@@ -3,6 +3,7 @@ import binascii
 import hashlib
 import hmac
 import json
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
@@ -148,6 +149,39 @@ class AccountDeletionMediaCleanupError(AuthError):
     pass
 
 
+@dataclass(frozen=True)
+class IssuedAuthSession:
+    token: str
+    user: schemas.UserRead
+    profile_setup_required: bool = False
+
+    def public_response(self) -> schemas.AuthRead:
+        return schemas.AuthRead(
+            user=self.user,
+            profile_setup_required=self.profile_setup_required,
+        )
+
+
+@dataclass(frozen=True)
+class GoogleLoginResult:
+    token: str | None = None
+    user: schemas.UserRead | None = None
+    profile_setup_required: bool = False
+    signup_required: bool = False
+    pending_token: str | None = None
+    expires_at: datetime | None = None
+    email: str | None = None
+
+    def public_response(self) -> schemas.GoogleLoginRead:
+        return schemas.GoogleLoginRead(
+            user=self.user,
+            profile_setup_required=self.profile_setup_required,
+            signup_required=self.signup_required,
+            expires_at=self.expires_at,
+            email=self.email,
+        )
+
+
 def normalize_email(email: str) -> str:
     return email.strip().lower()
 
@@ -160,7 +194,7 @@ def normalize_display_name_key(display_name: str) -> str:
     return normalize_display_name(display_name).casefold()
 
 
-def create_user(db: Session, data: schemas.SignupCreate) -> schemas.AuthRead:
+def create_user(db: Session, data: schemas.SignupCreate) -> IssuedAuthSession:
     _ensure_policy_agreements(data.privacy_policy_agreed, data.terms_agreed)
     email = normalize_email(data.email)
     existing = db.scalar(
@@ -208,7 +242,7 @@ def login(
     data: schemas.LoginCreate,
     *,
     source: str = "unknown",
-) -> schemas.AuthRead:
+) -> IssuedAuthSession:
     email = normalize_email(data.email)
     throttle = login_throttle.lock_login_throttle(
         db,
@@ -236,7 +270,7 @@ def login(
     return _create_auth_response(db, user)
 
 
-def login_demo(db: Session) -> schemas.AuthRead:
+def login_demo(db: Session) -> IssuedAuthSession:
     if not settings.demo_login_enabled:
         raise DemoLoginDisabledError("Demo login is disabled")
 
@@ -262,7 +296,7 @@ def login_with_google(
     data: schemas.GoogleLoginCreate,
     *,
     source: str,
-) -> schemas.GoogleLoginRead:
+) -> GoogleLoginResult:
     try:
         reservation = external_auth_verification.reserve_google_verification(
             db,
@@ -317,7 +351,7 @@ def login_with_google(
         raise GoogleEmailAlreadyExistsError(email)
 
     expires_at = _utcnow() + GOOGLE_SIGNUP_PENDING_TTL
-    return schemas.GoogleLoginRead(
+    return GoogleLoginResult(
         signup_required=True,
         pending_token=_create_pending_google_signup_token(
             db,
@@ -331,10 +365,13 @@ def login_with_google(
 
 
 def complete_google_signup(
-    db: Session, data: schemas.GoogleSignupCompleteCreate
-) -> schemas.AuthRead:
+    db: Session,
+    data: schemas.GoogleSignupCompleteCreate,
+    *,
+    pending_token: str,
+) -> IssuedAuthSession:
     _ensure_policy_agreements(data.privacy_policy_agreed, data.terms_agreed)
-    pending = _read_pending_google_signup_token(data.pending_token)
+    pending = _read_pending_google_signup_token(pending_token)
     grant = _lock_pending_google_signup_grant(
         db,
         jti=pending["jti"],
@@ -397,9 +434,41 @@ def complete_google_signup(
 
 
 def link_google_account(
-    db: Session, user: models.User, data: schemas.GoogleLinkCreate
-) -> schemas.AuthRead:
-    payload = _verify_google_credential(data.credential)
+    db: Session,
+    user: models.User,
+    data: schemas.GoogleLinkCreate,
+    *,
+    source: str,
+) -> IssuedAuthSession:
+    try:
+        reservation = external_auth_verification.reserve_google_verification(
+            db,
+            source=f"google-link:{user.id}:{source}",
+        )
+    except external_auth_verification.ExternalVerificationRateLimitedError as exc:
+        raise GoogleLoginRateLimitedError(exc.retry_after_seconds) from exc
+
+    try:
+        payload = _verify_google_credential(data.credential)
+    except InvalidGoogleCredentialError:
+        external_auth_verification.complete_google_verification(
+            db,
+            reservation.id,
+            outcome_class="invalid",
+        )
+        raise
+    except Exception:
+        external_auth_verification.complete_google_verification(
+            db,
+            reservation.id,
+            outcome_class="error",
+        )
+        raise
+    external_auth_verification.complete_google_verification(
+        db,
+        reservation.id,
+        outcome_class="success",
+    )
     google_sub = _required_payload_string(payload, "sub")
     email = normalize_email(_required_payload_string(payload, "email"))
     email_verified = payload.get("email_verified")
@@ -998,8 +1067,8 @@ def _deleted_character_handle(db: Session, character_id: str) -> str:
     return candidate
 
 
-def _google_login_from_auth(auth: schemas.AuthRead) -> schemas.GoogleLoginRead:
-    return schemas.GoogleLoginRead(
+def _google_login_from_auth(auth: IssuedAuthSession) -> GoogleLoginResult:
+    return GoogleLoginResult(
         token=auth.token,
         user=auth.user,
         profile_setup_required=auth.profile_setup_required,
@@ -1163,7 +1232,7 @@ def _lock_pending_google_signup_grant(
 
 def _create_auth_response(
     db: Session, user: models.User, *, auth_method: str = "password"
-) -> schemas.AuthRead:
+) -> IssuedAuthSession:
     token = security.create_token()
     db.add(
         models.AuthSession(
@@ -1174,7 +1243,7 @@ def _create_auth_response(
     )
     db.commit()
     profile_setup_required = not user.profile_setup_completed
-    return schemas.AuthRead(
+    return IssuedAuthSession(
         token=token,
         user=schemas.UserRead.model_validate(user),
         profile_setup_required=profile_setup_required,

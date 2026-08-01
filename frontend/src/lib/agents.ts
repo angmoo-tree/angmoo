@@ -78,23 +78,19 @@ export type UserRead = {
 };
 
 export type AuthRead = {
-  token: string;
   user: UserRead;
   profile_setup_required: boolean;
 };
 
 export type GoogleLoginRead = {
-  token: string | null;
   user: UserRead | null;
   profile_setup_required: boolean;
   signup_required: boolean;
-  pending_token: string | null;
   expires_at: string | null;
   email: string | null;
 };
 
 export type PendingGoogleSignup = {
-  pending_token: string;
   expires_at: string;
   email: string;
 };
@@ -489,7 +485,7 @@ export type AgentSettingsInput = Partial<
   >
 >;
 
-const TOKEN_KEY = "angmoo.authToken";
+const LEGACY_TOKEN_KEY = ["angmoo", "authToken"].join(".");
 const USER_KEY = "angmoo.user";
 const PENDING_GOOGLE_SIGNUP_KEY = "angmoo.pendingGoogleSignup";
 const FIRST_AGENT_WELCOME_PROMPT_KEY = "angmoo.firstAgentWelcomePromptPending";
@@ -508,7 +504,8 @@ export type AgentAutonomyMutationEventDetail = {
 
 type RequestOptions = Omit<RequestInit, "body"> & {
   body?: unknown | FormData;
-  token?: string | null;
+  anonymous?: boolean;
+  suppressAuthFailureEvent?: boolean;
 };
 
 function getErrorMessage(payload: unknown, fallback: string) {
@@ -560,15 +557,6 @@ function getValidationMessage(detail: unknown[]) {
     return first.msg;
   }
   return null;
-}
-
-export function getStoredToken() {
-  if (typeof window === "undefined") return null;
-  return window.sessionStorage.getItem(TOKEN_KEY);
-}
-
-export function hasStoredAuth() {
-  return Boolean(getStoredToken());
 }
 
 export function getStoredUser() {
@@ -623,14 +611,12 @@ export function getPendingGoogleSignup(): PendingGoogleSignup | null {
   try {
     const parsed = JSON.parse(raw) as Partial<PendingGoogleSignup>;
     if (
-      typeof parsed.pending_token !== "string" ||
       typeof parsed.expires_at !== "string" ||
       typeof parsed.email !== "string"
     ) {
       return null;
     }
     return {
-      pending_token: parsed.pending_token,
       expires_at: parsed.expires_at,
       email: parsed.email,
     };
@@ -643,26 +629,24 @@ export function hasPendingGoogleSignup() {
   return Boolean(getPendingGoogleSignup());
 }
 
-function notifyAuthChanged() {
+export function notifyAuthChanged() {
   if (typeof window === "undefined") return;
   window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
 }
 
 export function storePendingGoogleSignup(auth: GoogleLoginRead) {
-  if (!auth.pending_token || !auth.expires_at || !auth.email) {
+  if (!auth.expires_at || !auth.email) {
     throw new Error("Google signup information is missing.");
   }
   window.sessionStorage.setItem(
     PENDING_GOOGLE_SIGNUP_KEY,
     JSON.stringify({
-      pending_token: auth.pending_token,
       expires_at: auth.expires_at,
       email: auth.email,
     }),
   );
-  window.sessionStorage.removeItem(TOKEN_KEY);
   window.sessionStorage.removeItem(USER_KEY);
-  window.localStorage.removeItem(TOKEN_KEY);
+  removeLegacyAuthTokens();
   window.localStorage.removeItem(USER_KEY);
   notifyAuthChanged();
 }
@@ -674,30 +658,52 @@ export function clearPendingGoogleSignup() {
 }
 
 export function storeAuth(auth: AuthRead) {
-  window.sessionStorage.setItem(TOKEN_KEY, auth.token);
   window.sessionStorage.setItem(USER_KEY, JSON.stringify(auth.user));
   window.sessionStorage.removeItem(PENDING_GOOGLE_SIGNUP_KEY);
-  window.localStorage.removeItem(TOKEN_KEY);
+  removeLegacyAuthTokens();
   window.localStorage.removeItem(USER_KEY);
   notifyAuthChanged();
 }
 
 export function storeUser(user: UserRead) {
+  cacheUser(user);
+  notifyAuthChanged();
+}
+
+export function cacheUser(user: UserRead) {
   window.sessionStorage.setItem(USER_KEY, JSON.stringify(user));
   if (user.profile_setup_completed) {
     window.sessionStorage.removeItem(PENDING_GOOGLE_SIGNUP_KEY);
   }
   window.localStorage.removeItem(USER_KEY);
-  notifyAuthChanged();
 }
 
 export function clearAuth() {
-  window.sessionStorage.removeItem(TOKEN_KEY);
   window.sessionStorage.removeItem(USER_KEY);
   window.sessionStorage.removeItem(PENDING_GOOGLE_SIGNUP_KEY);
-  window.localStorage.removeItem(TOKEN_KEY);
+  removeLegacyAuthTokens();
   window.localStorage.removeItem(USER_KEY);
   notifyAuthChanged();
+}
+
+export function clearStoredUser() {
+  if (typeof window === "undefined") return;
+  window.sessionStorage.removeItem(USER_KEY);
+  window.localStorage.removeItem(USER_KEY);
+}
+
+export function clearLegacyAuthStorage() {
+  if (typeof window === "undefined") return;
+  removeLegacyAuthTokens();
+  const pending = window.sessionStorage.getItem(PENDING_GOOGLE_SIGNUP_KEY);
+  if (pending?.includes(["pending", "token"].join("_"))) {
+    window.sessionStorage.removeItem(PENDING_GOOGLE_SIGNUP_KEY);
+  }
+}
+
+function removeLegacyAuthTokens() {
+  window.sessionStorage.removeItem(LEGACY_TOKEN_KEY);
+  window.localStorage.removeItem(LEGACY_TOKEN_KEY);
 }
 
 export function markFirstAgentWelcomePromptPending() {
@@ -800,6 +806,7 @@ export function isAuthError(err: unknown) {
     message === "Invalid token" ||
     message === "Bearer token required" ||
     message === "Invalid or expired token" ||
+    message === "Invalid or expired signup token" ||
     message === "Not authenticated" ||
     message === "401" ||
     message.includes("401")
@@ -807,7 +814,13 @@ export function isAuthError(err: unknown) {
 }
 
 async function apiRequest<T>(path: string, options: RequestOptions = {}) {
-  const { body, headers, token = getStoredToken(), ...rest } = options;
+  const {
+    body,
+    headers,
+    anonymous = false,
+    suppressAuthFailureEvent = false,
+    ...rest
+  } = options;
   const isFormDataBody = typeof FormData !== "undefined" && body instanceof FormData;
   const response = await fetch(`/api/backend${path}`, {
     ...rest,
@@ -818,9 +831,9 @@ async function apiRequest<T>(path: string, options: RequestOptions = {}) {
           ? body
           : JSON.stringify(body),
     cache: "no-store",
+    credentials: anonymous ? "omit" : "same-origin",
     headers: {
       ...(isFormDataBody ? {} : { "Content-Type": "application/json" }),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(headers ?? {}),
     },
   });
@@ -839,6 +852,10 @@ async function apiRequest<T>(path: string, options: RequestOptions = {}) {
   }
 
   if (!response.ok) {
+    if (response.status === 401 && !anonymous && !suppressAuthFailureEvent) {
+      clearStoredUser();
+      notifyAuthChanged();
+    }
     throw new Error(
       getErrorMessage(payload, `Request failed with ${response.status}`),
     );
@@ -849,16 +866,12 @@ async function apiRequest<T>(path: string, options: RequestOptions = {}) {
 
 
 export async function fetchAuthenticatedMediaObjectUrl(apiPath: string) {
-  const token = getStoredToken();
-  if (!token) {
-    throw new Error("Authorization required");
-  }
   const normalizedPath = apiPath.startsWith("/api/v1")
     ? apiPath.slice("/api/v1".length)
     : apiPath;
   const response = await fetch(`/api/backend${normalizedPath}`, {
     cache: "no-store",
-    headers: { Authorization: `Bearer ${token}` },
+    credentials: "same-origin",
   });
   if (!response.ok) {
     throw new Error(`Private media request failed with ${response.status}`);
@@ -886,7 +899,6 @@ export function signup(data: {
   return apiRequest<AuthRead>("/auth/signup", {
     method: "POST",
     body: data,
-    token: null,
   });
 }
 
@@ -894,14 +906,12 @@ export function login(data: { email: string; password: string }) {
   return apiRequest<AuthRead>("/auth/login", {
     method: "POST",
     body: data,
-    token: null,
   });
 }
 
 export function demoLogin() {
   return apiRequest<AuthRead>("/auth/demo-login", {
     method: "POST",
-    token: null,
   });
 }
 
@@ -915,12 +925,10 @@ export function googleLogin(data: { credential: string }) {
   return apiRequest<GoogleLoginRead>("/auth/google", {
     method: "POST",
     body: data,
-    token: null,
   });
 }
 
 export function completeGoogleSignup(data: {
-  pending_token: string;
   display_name: string;
   privacy_policy_agreed: boolean;
   terms_agreed: boolean;
@@ -929,7 +937,7 @@ export function completeGoogleSignup(data: {
   return apiRequest<AuthRead>("/auth/google/complete", {
     method: "POST",
     body: data,
-    token: null,
+    anonymous: false,
   });
 }
 
@@ -940,13 +948,13 @@ export function linkGoogleAccount(data: { credential: string }) {
   });
 }
 
-export function getMe() {
-  return apiRequest<UserRead>("/auth/me");
+export function getMe(options: { suppressAuthFailureEvent?: boolean } = {}) {
+  return apiRequest<UserRead>("/auth/me", options);
 }
 
 export function getAgentActivityMaintenance() {
   return apiRequest<AgentActivityMaintenanceRead>("/maintenance/agent-activity", {
-    token: null,
+    anonymous: true,
   });
 }
 

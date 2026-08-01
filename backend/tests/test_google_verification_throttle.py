@@ -1,6 +1,7 @@
 from datetime import UTC, datetime, timedelta
+from types import SimpleNamespace
 
-from fastapi import HTTPException
+from fastapi import HTTPException, Response
 import pytest
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
@@ -29,8 +30,23 @@ def _request() -> Request:
             "type": "http",
             "method": "POST",
             "path": "/api/v1/auth/google",
-            "headers": [],
+            "headers": [(b"origin", b"http://127.0.0.1:3000")],
             "client": ("198.51.100.70", 12345),
+            "server": ("testserver", 80),
+            "scheme": "http",
+            "query_string": b"",
+        }
+    )
+
+
+def _link_request() -> Request:
+    return Request(
+        {
+            "type": "http",
+            "method": "POST",
+            "path": "/api/v1/auth/google/link",
+            "headers": [(b"origin", b"http://127.0.0.1:3000")],
+            "client": ("198.51.100.76", 12345),
             "server": ("testserver", 80),
             "scheme": "http",
             "query_string": b"",
@@ -206,9 +222,126 @@ def test_google_route_returns_generic_429_with_retry_after(
         auth_routes.google_login(
             schemas.GoogleLoginCreate(credential="synthetic-google-token"),
             _request(),
+            Response(),
             object(),
         )
 
     assert exc.value.status_code == 429
     assert exc.value.headers == {"Retry-After": "30"}
+    assert exc.value.detail == "Google login temporarily rate limited"
+
+
+def test_google_link_reserves_verification_for_user_and_trusted_source(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    db = _session()
+    models.User.__table__.create(db.bind)
+    user = models.User(
+        id="user-link",
+        email="link@example.invalid",
+        display_name="link",
+        profile_setup_completed=True,
+    )
+    db.add(user)
+    db.commit()
+    captured: dict[str, object] = {}
+
+    def reserve(_db, *, source: str):
+        captured["source"] = source
+        return SimpleNamespace(id="reservation-link")
+
+    def complete(_db, reservation_id: str, *, outcome_class: str):
+        captured["completed"] = (reservation_id, outcome_class)
+
+    monkeypatch.setattr(
+        auth_service.external_auth_verification,
+        "reserve_google_verification",
+        reserve,
+    )
+    monkeypatch.setattr(
+        auth_service.external_auth_verification,
+        "complete_google_verification",
+        complete,
+    )
+    monkeypatch.setattr(
+        auth_service,
+        "_verify_google_credential",
+        lambda _credential: {
+            "sub": "google-link",
+            "email": "link@example.invalid",
+            "email_verified": True,
+        },
+    )
+    monkeypatch.setattr(auth_service, "_create_auth_response", lambda *_args, **_kwargs: "ok")
+
+    result = auth_service.link_google_account(
+        db,
+        user,
+        schemas.GoogleLinkCreate(credential="synthetic-google-link-token"),
+        source="198.51.100.76",
+    )
+
+    assert result == "ok"
+    assert captured == {
+        "source": "google-link:user-link:198.51.100.76",
+        "completed": ("reservation-link", "success"),
+    }
+
+
+def test_google_link_rate_limit_prevents_credential_verification(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    verifier_calls = 0
+
+    def rate_limited(*_args, **_kwargs):
+        raise external_auth_verification.ExternalVerificationRateLimitedError(45)
+
+    def verify(_credential: str):
+        nonlocal verifier_calls
+        verifier_calls += 1
+        return {}
+
+    monkeypatch.setattr(
+        auth_service.external_auth_verification,
+        "reserve_google_verification",
+        rate_limited,
+    )
+    monkeypatch.setattr(auth_service, "_verify_google_credential", verify)
+
+    with pytest.raises(auth_service.GoogleLoginRateLimitedError) as exc:
+        auth_service.link_google_account(
+            object(),
+            SimpleNamespace(id="user-link"),
+            schemas.GoogleLinkCreate(credential="synthetic-google-link-token"),
+            source="198.51.100.76",
+        )
+
+    assert exc.value.retry_after_seconds == 45
+    assert verifier_calls == 0
+
+
+def test_google_link_route_returns_generic_429_with_retry_after(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, str] = {}
+
+    def rate_limited(_db, user, _data, *, source: str):
+        captured.update(user_id=user.id, source=source)
+        raise auth_service.GoogleLoginRateLimitedError(45)
+
+    monkeypatch.setattr(auth_routes.auth_service, "link_google_account", rate_limited)
+    user = SimpleNamespace(id="user-link")
+
+    with pytest.raises(HTTPException) as exc:
+        auth_routes.link_google_account(
+            schemas.GoogleLinkCreate(credential="synthetic-google-link-token"),
+            _link_request(),
+            Response(),
+            object(),
+            user,
+        )
+
+    assert captured == {"user_id": "user-link", "source": "198.51.100.76"}
+    assert exc.value.status_code == 429
+    assert exc.value.headers == {"Retry-After": "45"}
     assert exc.value.detail == "Google login temporarily rate limited"
