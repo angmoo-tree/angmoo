@@ -12,7 +12,7 @@ from urllib.parse import urlparse
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 from app.core.config import settings
-from app.services import bounded_http
+from app.services import bounded_http, provider_http
 
 
 REPLICATE_PREDICTIONS_URL = "https://api.replicate.com/v1/predictions"
@@ -48,7 +48,7 @@ class ReplicateImageError(Exception):
         super().__init__(message)
         self.failure_class = failure_class
         self.status_code = status_code
-        self.response_body_preview = response_body_preview
+        self.response_body_preview = None
         self.prediction_id = prediction_id
 
 
@@ -219,12 +219,11 @@ def _poll_prediction_sync(
                 elapsed_ms=round((time.perf_counter() - started) * 1000),
             )
         if status in {"failed", "canceled", "aborted"}:
-            error = status_payload.get("error")
+            status_payload.pop("error", None)
             raise ReplicateImageError(
                 "Replicate prediction did not succeed",
                 failure_class=f"prediction_{status}",
                 prediction_id=prediction_id,
-                response_body_preview=_preview(error),
             )
         if time.monotonic() >= deadline:
             raise ReplicateImageError(
@@ -268,12 +267,11 @@ def _request_json(
     except ReplicateImageError:
         raise
     except HTTPError as exc:
-        body = exc.read(500).decode("utf-8", errors="replace")
+        diagnostic = provider_http.read_safe_http_error_diagnostic(exc)
         raise ReplicateImageError(
             f"Replicate request failed with HTTP {exc.code}",
             failure_class=f"http_{exc.code}",
-            status_code=exc.code,
-            response_body_preview=body,
+            status_code=diagnostic.status_code,
         ) from exc
     except bounded_http.ResponseTooLargeError as exc:
         raise ReplicateImageError(
@@ -481,9 +479,3 @@ def _output_url(output: object) -> str | None:
             if isinstance(item, str):
                 return item
     return None
-
-
-def _preview(value: object) -> str | None:
-    if value is None:
-        return None
-    return str(value)[:500]

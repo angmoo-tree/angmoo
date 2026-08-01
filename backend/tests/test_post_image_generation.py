@@ -363,7 +363,7 @@ def test_pollinations_image_request_uses_bearer_header(monkeypatch) -> None:
         seen["timeout"] = timeout
         return FakeResponse()
 
-    monkeypatch.setattr(pollinations_image, "urlopen", fake_urlopen)
+    monkeypatch.setattr(pollinations_image, "_open_pollinations_request", fake_urlopen)
 
     generated = asyncio.run(
         pollinations_image.generate_image(
@@ -436,7 +436,7 @@ def test_pollinations_lambda_route_posts_headers_and_restores_image(monkeypatch)
 
     monkeypatch.setattr(settings, "POLLINATIONS_IMAGE_RELAY_URL", "https://relay.example.com/")
     monkeypatch.setattr(settings, "POLLINATIONS_IMAGE_RELAY_TOKEN", SecretStr("relay-token"))
-    monkeypatch.setattr(pollinations_image, "urlopen", fake_urlopen)
+    monkeypatch.setattr(pollinations_image, "_open_relay_request", fake_urlopen)
 
     generated = asyncio.run(
         pollinations_image.generate_image(
@@ -468,6 +468,8 @@ def test_pollinations_lambda_route_posts_headers_and_restores_image(monkeypatch)
 
 
 def test_pollinations_lambda_route_preserves_provider_failure(monkeypatch) -> None:
+    canary = "phase7-relay-body-canary-71ad"
+
     class FakeHeaders:
         def get(self, name: str, default: str = "") -> str:
             return "application/json" if name.lower() == "content-type" else default
@@ -492,7 +494,10 @@ def test_pollinations_lambda_route_preserves_provider_failure(monkeypatch) -> No
                     "ok": False,
                     "failure_class": "http_400",
                     "status_code": 400,
-                    "response_body_preview": '{"error":"Something was wrong with the input data"}',
+                    "response_body_preview": (
+                        '{"error":"Something was wrong with the input data",'
+                        f'"reflected":"{canary}"}}'
+                    ),
                     "response_content_type": "application/json",
                     "prompt_length": 17,
                     "url_length": 555,
@@ -503,7 +508,11 @@ def test_pollinations_lambda_route_preserves_provider_failure(monkeypatch) -> No
 
     monkeypatch.setattr(settings, "POLLINATIONS_IMAGE_RELAY_URL", "https://relay.example.com/")
     monkeypatch.setattr(settings, "POLLINATIONS_IMAGE_RELAY_TOKEN", SecretStr("relay-token"))
-    monkeypatch.setattr(pollinations_image, "urlopen", lambda *_args, **_kwargs: FakeResponse())
+    monkeypatch.setattr(
+        pollinations_image,
+        "_open_relay_request",
+        lambda *_args, **_kwargs: FakeResponse(),
+    )
 
     with pytest.raises(pollinations_image.PollinationsImageError) as raised:
         asyncio.run(
@@ -519,7 +528,7 @@ def test_pollinations_lambda_route_preserves_provider_failure(monkeypatch) -> No
     exc = raised.value
     assert exc.failure_class == "http_400"
     assert exc.status_code == 400
-    assert exc.response_body_preview == '{"error":"Something was wrong with the input data"}'
+    assert exc.response_body_preview is None
     assert exc.response_content_type == "application/json"
     assert exc.request_url_length == 555
     assert exc.prompt_length == 17
@@ -528,6 +537,8 @@ def test_pollinations_lambda_route_preserves_provider_failure(monkeypatch) -> No
     assert exc.diagnostic_hint == "provider_input_or_model_policy"
     assert "sk_user_secret" not in str(exc)
     assert "sk_user_secret" not in str(exc.__dict__)
+    assert canary not in str(exc)
+    assert canary not in repr(exc.__dict__)
 
 
 def test_pollinations_lambda_route_can_omit_safe_filter_for_manual_probe(monkeypatch) -> None:
@@ -567,7 +578,7 @@ def test_pollinations_lambda_route_can_omit_safe_filter_for_manual_probe(monkeyp
 
     monkeypatch.setattr(settings, "POLLINATIONS_IMAGE_RELAY_URL", "https://relay.example.com/")
     monkeypatch.setattr(settings, "POLLINATIONS_IMAGE_RELAY_TOKEN", SecretStr("relay-token"))
-    monkeypatch.setattr(pollinations_image, "urlopen", fake_urlopen)
+    monkeypatch.setattr(pollinations_image, "_open_relay_request", fake_urlopen)
 
     generated = asyncio.run(
         pollinations_image.generate_image(
@@ -614,7 +625,7 @@ def test_pollinations_image_edit_request_includes_reference_image(monkeypatch) -
         seen["authorization"] = request.get_header("Authorization")  # type: ignore[attr-defined]
         return FakeResponse()
 
-    monkeypatch.setattr(pollinations_image, "urlopen", fake_urlopen)
+    monkeypatch.setattr(pollinations_image, "_open_pollinations_request", fake_urlopen)
 
     generated = asyncio.run(
         pollinations_image.generate_image(
@@ -639,16 +650,26 @@ def test_pollinations_image_edit_request_includes_reference_image(monkeypatch) -
     assert "cfg" not in query
 
 
-def test_pollinations_http_error_preserves_diagnostic_metadata(monkeypatch) -> None:
+def test_pollinations_http_error_preserves_diagnostic_metadata(
+    monkeypatch,
+    caplog,
+) -> None:
+    canary = "phase7-provider-body-canary-9f2e"
+
     class FakeHeaders:
         def get(self, name: str, default: str = "") -> str:
             if name.lower() == "content-type":
                 return "application/json; charset=utf-8"
+            if name.lower() == "x-request-id":
+                return "req_safe-456"
             return default
 
     class FakeErrorBody:
         def read(self, _size: int = -1) -> bytes:
-            return b'{"error":"prompt rejected by model policy"}'
+            return (
+                f'{{"error":"prompt rejected by model policy",'
+                f'"reflected":"{canary}"}}'
+            ).encode()
 
         def close(self) -> None:
             return None
@@ -662,7 +683,7 @@ def test_pollinations_http_error_preserves_diagnostic_metadata(monkeypatch) -> N
             FakeErrorBody(),
         )
 
-    monkeypatch.setattr(pollinations_image, "urlopen", fake_urlopen)
+    monkeypatch.setattr(pollinations_image, "_open_pollinations_request", fake_urlopen)
 
     with pytest.raises(pollinations_image.PollinationsImageError) as raised:
         asyncio.run(
@@ -677,15 +698,19 @@ def test_pollinations_http_error_preserves_diagnostic_metadata(monkeypatch) -> N
     exc = raised.value
     assert exc.failure_class == "http_400"
     assert exc.status_code == 400
-    assert exc.response_body_preview == '{"error":"prompt rejected by model policy"}'
+    assert exc.response_body_preview is None
     assert exc.response_content_type == "application/json"
     assert exc.request_url_length is not None and exc.request_url_length > 0
     assert exc.prompt_length == len("warm desk scene")
     assert exc.reference_sent is False
     assert exc.safe_filter == pollinations_image.POLLINATIONS_SAFE_FILTER
     assert exc.diagnostic_hint == "safe_filter_possible"
+    assert exc.provider_request_id == "req_safe-456"
     assert "sk_test_secret" not in str(exc)
     assert "sk_test_secret" not in str(exc.__dict__)
+    assert canary not in str(exc)
+    assert canary not in repr(exc.__dict__)
+    assert canary not in caplog.text
 
 
 def test_pollinations_failure_diagnostic_hint_classification() -> None:
@@ -1322,7 +1347,7 @@ def test_prepare_post_image_flux_failure_keeps_pollinations_diagnostics(
     assert attempt["prompt_hash"] == captured["prompt_hash"]
     assert attempt["prompt_length"] == len("flux refined image prompt")
     assert attempt["pollinations_status_code"] == 400
-    assert attempt["pollinations_response_body_preview"] == '{"error":"bad prompt"}'
+    assert attempt["pollinations_response_body_preview"] is None
     assert attempt["pollinations_content_type"] == "application/json"
     assert attempt["pollinations_url_length"] == 777
     assert captured["reference_image_url"] is None
@@ -1563,7 +1588,7 @@ def test_local_api_prepare_failure_propagates_attempt_metadata(monkeypatch) -> N
     assert attempt["prompt_hash"] == captured["prompt_hash"]
     assert attempt["prompt_length"] == len(str(captured["prompt"]))
     assert attempt["pollinations_status_code"] == 400
-    assert attempt["pollinations_response_body_preview"] == '{"error":"bad prompt"}'
+    assert attempt["pollinations_response_body_preview"] is None
     assert attempt["pollinations_content_type"] == "application/json"
     assert attempt["pollinations_url_length"] == 888
     assert captured["log_context"]["post_id"] == "post-1"  # type: ignore[index]
@@ -1765,7 +1790,7 @@ def test_prepare_post_image_service_failure_keeps_service_mapping_and_diagnostic
     assert attempt["prompt_hash"]
     assert attempt["prompt_length"] == len("service refined image prompt")
     assert attempt["pollinations_status_code"] == 402
-    assert attempt["pollinations_response_body_preview"] == '{"error":"budget exhausted"}'
+    assert attempt["pollinations_response_body_preview"] is None
     assert attempt["pollinations_content_type"] == "application/json"
     assert attempt["pollinations_url_length"] == 999
 

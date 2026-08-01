@@ -225,13 +225,17 @@ def test_draft_pollinations_key_is_authorization_only_not_url(
             self._read = True
             return b"synthetic-image"
 
-    def fake_urlopen(request, **_kwargs):
+    def fake_urlopen(request, _timeout):
         captured["url"] = request.full_url
         captured["authorization"] = request.get_header("Authorization")
         return Response()
 
     monkeypatch.setattr(settings, "POLLINATIONS_API_KEY", SecretStr(canary))
-    monkeypatch.setattr(agent_creation_drafts, "urlopen", fake_urlopen)
+    monkeypatch.setattr(
+        agent_creation_drafts,
+        "_open_pollinations_request",
+        fake_urlopen,
+    )
     monkeypatch.setattr(
         agent_creation_drafts.profile_media,
         "validate_profile_media_content",

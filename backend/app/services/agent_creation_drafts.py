@@ -8,8 +8,8 @@ import re
 from threading import Lock
 from typing import Any
 from urllib.error import HTTPError, URLError
-from urllib.parse import quote, urlencode
-from urllib.request import Request, urlopen
+from urllib.parse import quote, urlencode, urlparse
+from urllib.request import Request
 from uuid import uuid4
 
 from sqlalchemy import func, select
@@ -35,6 +35,7 @@ from app.services import pollinations_image
 from app.services import prompt_safety
 from app.services import profile_media
 from app.services import bounded_http
+from app.services import provider_http
 from app.services import replicate_image
 from app.services import service_image_key
 from app.services.runtime_boundary import (
@@ -54,6 +55,13 @@ POLLINATIONS_MAX_SEED = 2_147_483_647
 POLLINATIONS_MODELS_URL = "https://gen.pollinations.ai/image/models"
 POLLINATIONS_IMAGE_URL = "https://gen.pollinations.ai/image"
 POLLINATIONS_LEGACY_IMAGE_URL = "https://image.pollinations.ai/prompt"
+PROVIDER_SENSITIVE_HEADERS = frozenset(
+    {
+        "Authorization",
+        "Ocp-Apim-Subscription-Key",
+        "Ocp-Apim-Subscription-Region",
+    }
+)
 # OpenClaw validates the global tool allowlist before honoring tool_choice="none".
 DRAFT_LLM_TOOLS_ALLOW = ["angmoo_list_feed"]
 HANGUL_RE = re.compile(r"[\uac00-\ud7a3]")
@@ -1433,6 +1441,46 @@ def _cleanup_expired_profile_image_candidates(db: Session, user_id: str) -> None
     db.commit()
 
 
+def _open_pollinations_request(request: Request, timeout_seconds: float):
+    try:
+        return provider_http.open_validated_request(
+            request,
+            timeout_seconds=timeout_seconds,
+            initial_validator=lambda url: provider_http.validate_public_https_url(
+                url,
+                allowed_hosts={"gen.pollinations.ai", "image.pollinations.ai"},
+                allowed_path_prefixes={"/image", "/prompt"},
+            ),
+            redirect_validator=provider_http.validate_public_https_url,
+            sensitive_headers=PROVIDER_SENSITIVE_HEADERS,
+            allow_cross_origin_redirects=True,
+        )
+    except provider_http.ProviderUrlError as exc:
+        raise URLError("Pollinations URL was not allowed") from exc
+
+
+def _open_translation_request(request: Request, timeout_seconds: float):
+    endpoint = urlparse(settings.azure_translator_endpoint)
+    if not endpoint.hostname:
+        raise URLError("Azure Translator endpoint was not allowed")
+    translate_path = f"{endpoint.path.rstrip('/')}/translate"
+    try:
+        return provider_http.open_validated_request(
+            request,
+            timeout_seconds=timeout_seconds,
+            initial_validator=lambda url: provider_http.validate_public_https_url(
+                url,
+                allowed_hosts={endpoint.hostname},
+                allowed_path_prefixes={translate_path},
+            ),
+            redirect_validator=provider_http.validate_public_https_url,
+            sensitive_headers=PROVIDER_SENSITIVE_HEADERS,
+            allow_cross_origin_redirects=False,
+        )
+    except provider_http.ProviderUrlError as exc:
+        raise URLError("Azure Translator URL was not allowed") from exc
+
+
 def _ensure_pollinations_model_available(model_name: str) -> None:
     now = datetime.now(UTC)
     checked_at = _POLLINATIONS_MODEL_CHECKED_AT.get(model_name)
@@ -1440,7 +1488,7 @@ def _ensure_pollinations_model_available(model_name: str) -> None:
         return
     try:
         request = Request(POLLINATIONS_MODELS_URL, headers={"User-Agent": "Angmoo/1.0"})
-        with urlopen(request, timeout=20) as response:
+        with _open_pollinations_request(request, 20) as response:
             payload = json.loads(
                 bounded_http.read_bounded_response(
                     response,
@@ -1522,7 +1570,10 @@ def _translate_ko_to_en_with_azure(text: str) -> str | None:
             headers["Ocp-Apim-Subscription-Region"] = region
         body = json.dumps([{"Text": text}], ensure_ascii=False).encode("utf-8")
         request = Request(url, data=body, headers=headers, method="POST")
-        with urlopen(request, timeout=settings.translation_timeout_seconds) as response:
+        with _open_translation_request(
+            request,
+            settings.translation_timeout_seconds,
+        ) as response:
             payload = json.loads(
                 bounded_http.read_bounded_response(
                     response,
@@ -1658,7 +1709,10 @@ def _download_pollinations_image(
             if api_key:
                 headers["Authorization"] = f"Bearer {api_key}"
             request = Request(url, headers=headers)
-            with urlopen(request, timeout=settings.pollinations_timeout_seconds) as response:
+            with _open_pollinations_request(
+                request,
+                settings.pollinations_timeout_seconds,
+            ) as response:
                 content_type = (
                     response.headers.get("Content-Type") or ""
                 ).split(";")[0].lower()
