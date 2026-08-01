@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import asyncio
 from datetime import UTC, datetime
+import hashlib
 import logging
 from uuid import uuid4
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session, joinedload
 
 from app import models, schemas
@@ -127,6 +128,7 @@ def create_or_get_thread(
 ) -> schemas.MessageThreadRead:
     character = _get_character(db, data.character_id)
     _ensure_character_available_for_messages(db, user, character)
+    _lock_message_thread_quota(db, user.id)
     existing = db.scalar(
         select(models.MessageThread)
         .where(models.MessageThread.requester_id == user.id)
@@ -162,6 +164,22 @@ def create_or_get_thread(
     db.commit()
     db.refresh(thread)
     return _thread_read(db, thread, include_messages=True)
+
+
+def _lock_message_thread_quota(db: Session, requester_id: str) -> None:
+    if db.bind is None or db.bind.dialect.name != "postgresql":
+        return
+    lock_key = int.from_bytes(
+        hashlib.sha256(
+            f"angmoo:message-thread-quota:{requester_id}:v1".encode("utf-8")
+        ).digest()[:8],
+        byteorder="big",
+        signed=True,
+    )
+    db.execute(
+        text("select pg_advisory_xact_lock(:lock_key)"),
+        {"lock_key": lock_key},
+    )
 
 
 def update_thread(

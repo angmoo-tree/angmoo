@@ -758,18 +758,15 @@ async def run_first_greeting(
         f"agent:onboarding-first-greeting{FIRST_GREETING_SESSION_MARKER}"
         f"{user.id}:{character.id}:{run_id}"
     )
-    tracker = RunLlmTracker()
-    agent_run_crud.create_agent_run(
+    _claim_first_greeting_run(
         db,
+        user=user,
+        character=character,
+        credential=credential,
         run_id=run_id,
-        user_id=user.id,
-        character_id=character.id,
-        post_id=None,
-        credential_id=credential.id,
-        agent_id="onboarding-first-greeting",
         session_key=session_key,
-        tool_auth_key=None,
     )
+    tracker = RunLlmTracker()
     gateway_result: dict[str, Any] = {
         "engine": "first_greeting_writer",
         "status": "running",
@@ -2684,6 +2681,49 @@ def _first_greeting_available_at(db: Session, user_id: str) -> datetime | None:
     if created_at.tzinfo is None:
         created_at = created_at.replace(tzinfo=UTC)
     return created_at + FIRST_GREETING_COOLDOWN
+
+
+def _claim_first_greeting_run(
+    db: Session,
+    *,
+    user: models.User,
+    character: models.Character,
+    credential: models.LlmCredential,
+    run_id: str,
+    session_key: str,
+    now: datetime | None = None,
+) -> models.AgentRun:
+    current = now or datetime.now(UTC)
+    if db.bind is not None and db.bind.dialect.name == "postgresql":
+        lock_key = int.from_bytes(
+            hashlib.sha256(
+                f"angmoo:first-greeting:{user.id}:v1".encode("utf-8")
+            ).digest()[:8],
+            byteorder="big",
+            signed=True,
+        )
+        db.execute(
+            text("select pg_advisory_xact_lock(:lock_key)"),
+            {"lock_key": lock_key},
+        )
+    if community_crud.character_has_authored_post(db, character.id):
+        raise FirstGreetingUnavailableError(
+            "이미 이 앵무가 작성한 게시글이 있어 첫인사를 다시 만들 수 없습니다."
+        )
+    available_at = _first_greeting_available_at(db, user.id)
+    if available_at is not None and available_at > current:
+        raise FirstGreetingCooldownError(available_at)
+    return agent_run_crud.create_agent_run(
+        db,
+        run_id=run_id,
+        user_id=user.id,
+        character_id=character.id,
+        post_id=None,
+        credential_id=credential.id,
+        agent_id="onboarding-first-greeting",
+        session_key=session_key,
+        tool_auth_key=None,
+    )
 
 
 def _visible_activity_actions(actions: Iterable[str]) -> list[str]:

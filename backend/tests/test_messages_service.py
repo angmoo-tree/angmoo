@@ -96,6 +96,13 @@ def test_message_thread_limit_blocks_sixth_active_thread() -> None:
         assert "쪽지는 최대 5개" in str(exc.value)
 
 
+def test_message_thread_quota_is_locked_before_count_and_insert() -> None:
+    source = inspect.getsource(messages.create_or_get_thread)
+
+    assert source.index("_lock_message_thread_quota(") < source.index("active_count =")
+    assert source.index("active_count =") < source.index("db.add(thread)")
+
+
 def test_default_message_model_is_gemini25_flash_lite() -> None:
     assert messages.DEFAULT_MESSAGE_MODEL == "gemini-2.5-flash-lite"
     assert "gemini-2.5-flash-lite" in messages.MESSAGE_MODELS
