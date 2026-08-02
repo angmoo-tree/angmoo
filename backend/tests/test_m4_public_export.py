@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -137,6 +138,70 @@ def test_export_rejects_new_unclassified_root_file(tmp_path: Path) -> None:
             destination=tmp_path / "candidate",
             policy_path=policy,
         )
+
+
+def test_attested_svg_keeps_lf_with_windows_autocrlf(tmp_path: Path) -> None:
+    attributes = (REPO_ROOT / ".gitattributes").read_text(encoding="utf-8")
+    assert attributes.splitlines() == [
+        "frontend/src/app/icon.svg text eol=lf",
+    ]
+
+    source = tmp_path / "source"
+    source.mkdir()
+    _git(source, "init", "-q")
+    _git(source, "config", "user.email", "fixture@example.invalid")
+    _git(source, "config", "user.name", "Fixture")
+    (source / "frontend/src/app").mkdir(parents=True)
+    (source / ".gitattributes").write_text(attributes, encoding="utf-8")
+    (source / "frontend/src/app/icon.svg").write_bytes(
+        (REPO_ROOT / "frontend/src/app/icon.svg").read_bytes()
+    )
+    _git(source, "add", ".")
+    _git(source, "commit", "-q", "-m", "fixture")
+
+    checkout = tmp_path / "checkout"
+    result = subprocess.run(
+        [
+            "git",
+            "-c",
+            "core.autocrlf=true",
+            "clone",
+            "--no-local",
+            str(source),
+            str(checkout),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+
+    manifest = json.loads(
+        (REPO_ROOT / "backend/security/asset_manifest.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    expected = next(
+        item["sha256"]
+        for item in manifest["assets"]
+        if item["path"] == "frontend/src/app/icon.svg"
+    )
+    payload = (checkout / "frontend/src/app/icon.svg").read_bytes()
+    assert b"\r\n" not in payload
+    assert hashlib.sha256(payload).hexdigest() == expected
+
+
+def test_public_policy_exports_checkout_attributes() -> None:
+    policy = json.loads(
+        (REPO_ROOT / "security/public_export_policy.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    mappings = {
+        item["source"]: item["destination"]
+        for item in policy["mappings"]
+    }
+    assert mappings[".gitattributes"] == ".gitattributes"
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Git symlink fixture needs POSIX")
