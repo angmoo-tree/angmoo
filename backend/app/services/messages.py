@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-import asyncio
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 import hashlib
 import logging
 from uuid import uuid4
 
-from sqlalchemy import func, select, text
+from sqlalchemy import func, or_, select, text, update
 from sqlalchemy.orm import Session, joinedload
 
 from app import models, schemas
@@ -33,6 +32,7 @@ CONTEXT_CHAR_LIMIT = 12_000
 USER_MESSAGE_LIMIT = 2_000
 MODEL_OUTPUT_TOKENS = 1024
 DEFAULT_MESSAGE_MODEL = "gemini-2.5-flash-lite"
+MESSAGE_RESPONSE_LEASE_SECONDS = 150
 
 THREAD_LIMIT_MESSAGE = (
     "쪽지는 최대 5개까지 보관할 수 있습니다. 쪽지함에서 기존 쪽지 내역을 삭제한 뒤 다시 시작해주세요."
@@ -55,10 +55,6 @@ MESSAGE_MODELS = {
     "gemma-4-26b-a4b-it",
     "gemma-4-31b-it",
 }
-
-_THREAD_LOCK = asyncio.Lock()
-_IN_FLIGHT_THREADS: set[str] = set()
-
 
 class MessageServiceError(Exception):
     pass
@@ -208,29 +204,74 @@ async def send_message(
     if len(content) > USER_MESSAGE_LIMIT:
         raise MessageValidationError("쪽지는 2,000자 이하로 입력해주세요.")
 
-    async with _THREAD_LOCK:
-        if thread_id in _IN_FLIGHT_THREADS:
-            raise MessageInFlightError("이전 쪽지 응답이 끝난 뒤 다시 보내주세요.")
-        _IN_FLIGHT_THREADS.add(thread_id)
+    lease_token = _acquire_response_lease(db, user, thread_id)
     try:
         return await _send_message_locked(db, user, thread_id, content)
     finally:
-        async with _THREAD_LOCK:
-            _IN_FLIGHT_THREADS.discard(thread_id)
+        _release_response_lease(db, thread_id, lease_token)
 
 
 async def retry_message(
     db: Session, user: models.User, thread_id: str, message_id: int
 ) -> schemas.MessageSendRead:
-    async with _THREAD_LOCK:
-        if thread_id in _IN_FLIGHT_THREADS:
-            raise MessageInFlightError("이전 쪽지 응답이 끝난 뒤 다시 보내주세요.")
-        _IN_FLIGHT_THREADS.add(thread_id)
+    lease_token = _acquire_response_lease(db, user, thread_id)
     try:
         return await _retry_message_locked(db, user, thread_id, message_id)
     finally:
-        async with _THREAD_LOCK:
-            _IN_FLIGHT_THREADS.discard(thread_id)
+        _release_response_lease(db, thread_id, lease_token)
+
+
+def _acquire_response_lease(
+    db: Session,
+    user: models.User,
+    thread_id: str,
+) -> str:
+    _get_owned_thread(db, user, thread_id)
+    now = datetime.now(UTC)
+    token = uuid4().hex
+    acquired_thread_id = db.execute(
+        update(models.MessageThread)
+        .where(
+            models.MessageThread.id == thread_id,
+            models.MessageThread.requester_id == user.id,
+            models.MessageThread.deleted_at.is_(None),
+            or_(
+                models.MessageThread.response_lease_token.is_(None),
+                models.MessageThread.response_lease_expires_at <= now,
+            ),
+        )
+        .values(
+            response_lease_token=token,
+            response_lease_expires_at=now
+            + timedelta(seconds=MESSAGE_RESPONSE_LEASE_SECONDS),
+        )
+        .returning(models.MessageThread.id)
+    ).scalar_one_or_none()
+    if acquired_thread_id is None:
+        db.rollback()
+        raise MessageInFlightError("이전 쪽지 응답이 끝난 뒤 다시 보내주세요.")
+    db.commit()
+    return token
+
+
+def _release_response_lease(db: Session, thread_id: str, token: str) -> None:
+    db.rollback()
+    try:
+        db.execute(
+            update(models.MessageThread)
+            .where(
+                models.MessageThread.id == thread_id,
+                models.MessageThread.response_lease_token == token,
+            )
+            .values(
+                response_lease_token=None,
+                response_lease_expires_at=None,
+            )
+        )
+        db.commit()
+    except Exception:
+        db.rollback()
+        logger.exception("failed to release message response lease")
 
 
 async def _send_message_locked(

@@ -371,6 +371,10 @@
       "destination": "backend/app/alembic/versions/20260802_0067_unique_resident_character_assignment.py"
     },
     {
+      "source": "backend/app/alembic/versions/20260802_0068_message_response_leases.py",
+      "destination": "backend/app/alembic/versions/20260802_0068_message_response_leases.py"
+    },
+    {
       "source": "backend/app/api/v1/__init__.py",
       "destination": "backend/app/api/v1/__init__.py"
     },

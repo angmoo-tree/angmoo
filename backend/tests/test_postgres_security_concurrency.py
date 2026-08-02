@@ -1,3 +1,4 @@
+import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
 import os
@@ -20,6 +21,7 @@ from app.services import local_bot_quota
 from app.services import login_throttle
 from app.services import lore_parser_quota
 from app.services import messages as message_service
+from app.services.direct_llm import DirectLlmResponse
 
 
 DATABASE_URL = os.getenv("SECURITY_CONCURRENCY_DATABASE_URL")
@@ -72,7 +74,7 @@ def test_security_migration_schema_contract() -> None:
     with engine.connect() as connection:
         assert (
             connection.scalar(text("SELECT version_num FROM alembic_version"))
-            == "20260802_0067"
+            == "20260802_0068"
         )
 
 
@@ -167,6 +169,276 @@ def test_resident_character_assignment_is_unique_across_postgres_sessions() -> N
             )
             db.execute(
                 delete(models.Character).where(models.Character.id == character_id)
+            )
+            db.execute(delete(models.User).where(models.User.id == user_id))
+            db.commit()
+
+
+def test_message_response_lease_is_single_flight_across_postgres_sessions(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    engine = _engine()
+    suffix = uuid4().hex
+    user_id = f"user-message-lease-{suffix}"
+    character_ids = [
+        f"char-message-lease-{suffix}-{index}" for index in range(2)
+    ]
+    credential_id = f"cred-message-lease-{suffix}"
+    thread_ids = [f"thread-message-lease-{suffix}-{index}" for index in range(2)]
+    barrier = Barrier(2)
+    provider_lock = Lock()
+    provider_calls = 0
+
+    async def fake_generate_text(**_kwargs):
+        nonlocal provider_calls
+        with provider_lock:
+            provider_calls += 1
+        await asyncio.sleep(0.2)
+        return DirectLlmResponse(
+            text="synthetic response",
+            parsed=None,
+            usage={},
+        )
+
+    monkeypatch.setattr(message_service, "generate_text", fake_generate_text)
+    monkeypatch.setattr(message_service.security, "decrypt_secret", lambda _value: "fake")
+
+    with Session(engine) as db:
+        db.add(
+            models.User(
+                id=user_id,
+                email=f"{suffix}@example.invalid",
+                display_name=user_id,
+                display_name_normalized=user_id,
+                profile_setup_completed=True,
+            )
+        )
+        db.add_all(
+            [
+                models.Character(
+                    id=character_id,
+                    owner_id=user_id,
+                    name=character_id,
+                    handle=f"message_lease_{suffix[:18]}_{index}",
+                    persona_summary="message lease fixture",
+                    execution_mode="llm",
+                )
+                for index, character_id in enumerate(character_ids)
+            ]
+        )
+        db.add(
+            models.LlmCredential(
+                id=credential_id,
+                owner_id=user_id,
+                character_id=None,
+                provider="google",
+                purpose="message",
+                model=message_service.DEFAULT_MESSAGE_MODEL,
+                auth_profile_id=f"google:message:{user_id}",
+                label=credential_id,
+                encrypted_api_key="synthetic-encrypted",
+                key_fingerprint=suffix[:16],
+                enabled=True,
+            )
+        )
+        db.add(
+            models.UserMessagePreference(
+                user_id=user_id,
+                credential_source="message_key",
+                default_model=message_service.DEFAULT_MESSAGE_MODEL,
+            )
+        )
+        db.add_all(
+            [
+                models.MessageThread(
+                    id=thread_id,
+                    requester_id=user_id,
+                    character_id=character_id,
+                    selected_model=message_service.DEFAULT_MESSAGE_MODEL,
+                )
+                for thread_id, character_id in zip(thread_ids, character_ids, strict=True)
+            ]
+        )
+        db.commit()
+
+    def attempt(thread_id: str, start_barrier: Barrier) -> str:
+        with Session(engine) as db:
+            user = db.get(models.User, user_id)
+            assert user is not None
+            start_barrier.wait()
+            try:
+                asyncio.run(
+                    message_service.send_message(
+                        db,
+                        user,
+                        thread_id,
+                        schemas.MessageMessageCreate(content="synthetic"),
+                    )
+                )
+            except message_service.MessageInFlightError:
+                return "in-flight"
+            return "sent"
+
+    try:
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            same_thread = sorted(
+                executor.map(
+                    lambda _index: attempt(thread_ids[0], barrier),
+                    range(2),
+                )
+            )
+        assert same_thread == ["in-flight", "sent"]
+        assert provider_calls == 1
+
+        different_barrier = Barrier(2)
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            different_threads = list(
+                executor.map(
+                    lambda thread_id: attempt(thread_id, different_barrier),
+                    thread_ids,
+                )
+            )
+        assert different_threads == ["sent", "sent"]
+        assert provider_calls == 3
+
+        with Session(engine) as db:
+            rows = list(
+                db.scalars(
+                    select(models.MessageMessage).where(
+                        models.MessageMessage.thread_id.in_(thread_ids)
+                    )
+                )
+            )
+            assert sum(row.role == "user" for row in rows) == 3
+            assert sum(row.role == "assistant" for row in rows) == 3
+            threads = list(
+                db.scalars(
+                    select(models.MessageThread).where(
+                        models.MessageThread.id.in_(thread_ids)
+                    )
+                )
+            )
+            assert all(thread.response_lease_token is None for thread in threads)
+            assert all(thread.response_lease_expires_at is None for thread in threads)
+
+            retry_user_message = models.MessageMessage(
+                thread_id=thread_ids[1],
+                role="user",
+                content="retry fixture",
+                model=message_service.DEFAULT_MESSAGE_MODEL,
+                status="ok",
+            )
+            retry_assistant_message = models.MessageMessage(
+                thread_id=thread_ids[1],
+                role="assistant",
+                content=message_service.MODEL_BUSY_MESSAGE,
+                model=message_service.DEFAULT_MESSAGE_MODEL,
+                status="error",
+                error_code="model_busy",
+            )
+            db.add_all([retry_user_message, retry_assistant_message])
+            db.commit()
+            db.refresh(retry_assistant_message)
+            retry_message_id = retry_assistant_message.id
+
+        cross_barrier = Barrier(2)
+
+        def cross_attempt(kind: str) -> str:
+            with Session(engine) as db:
+                user = db.get(models.User, user_id)
+                assert user is not None
+                cross_barrier.wait()
+                try:
+                    if kind == "send":
+                        asyncio.run(
+                            message_service.send_message(
+                                db,
+                                user,
+                                thread_ids[1],
+                                schemas.MessageMessageCreate(content="cross send"),
+                            )
+                        )
+                    else:
+                        asyncio.run(
+                            message_service.retry_message(
+                                db,
+                                user,
+                                thread_ids[1],
+                                retry_message_id,
+                            )
+                        )
+                except message_service.MessageInFlightError:
+                    return "in-flight"
+                return kind
+
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            cross_results = list(executor.map(cross_attempt, ("send", "retry")))
+        assert cross_results.count("in-flight") == 1
+        assert provider_calls == 4
+
+        with Session(engine) as db:
+            thread = db.get(models.MessageThread, thread_ids[0])
+            user = db.get(models.User, user_id)
+            assert thread is not None and user is not None
+            thread.response_lease_token = "expired-token"
+            thread.response_lease_expires_at = datetime.now(UTC) - timedelta(seconds=1)
+            db.commit()
+            replacement = message_service._acquire_response_lease(
+                db,
+                user,
+                thread.id,
+            )
+            assert replacement != "expired-token"
+            message_service._release_response_lease(db, thread.id, replacement)
+
+        async def fake_provider_error(**_kwargs):
+            raise message_service.DirectLlmError("synthetic provider failure")
+
+        monkeypatch.setattr(
+            message_service,
+            "generate_text",
+            fake_provider_error,
+        )
+        with Session(engine) as db:
+            user = db.get(models.User, user_id)
+            assert user is not None
+            with pytest.raises(message_service.MessageModelBusyError):
+                asyncio.run(
+                    message_service.send_message(
+                        db,
+                        user,
+                        thread_ids[0],
+                        schemas.MessageMessageCreate(content="provider failure"),
+                    )
+                )
+            thread = db.get(models.MessageThread, thread_ids[0])
+            assert thread is not None
+            assert thread.response_lease_token is None
+            assert thread.response_lease_expires_at is None
+    finally:
+        with Session(engine) as db:
+            db.execute(
+                delete(models.MessageMessage).where(
+                    models.MessageMessage.thread_id.in_(thread_ids)
+                )
+            )
+            db.execute(
+                delete(models.MessageThread).where(
+                    models.MessageThread.id.in_(thread_ids)
+                )
+            )
+            db.execute(
+                delete(models.UserMessagePreference).where(
+                    models.UserMessagePreference.user_id == user_id
+                )
+            )
+            db.execute(
+                delete(models.LlmCredential).where(
+                    models.LlmCredential.id == credential_id
+                )
+            )
+            db.execute(
+                delete(models.Character).where(models.Character.id.in_(character_ids))
             )
             db.execute(delete(models.User).where(models.User.id == user_id))
             db.commit()

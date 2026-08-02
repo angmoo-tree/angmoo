@@ -714,18 +714,19 @@ def test_retry_model_busy_failure_keeps_single_error_message(monkeypatch) -> Non
         assert retried.model == "gemma-4-31b-it"
 
 
-def test_retry_message_in_flight_uses_clear_korean_message() -> None:
-    thread_id = "thread-in-flight"
-    messages._IN_FLIGHT_THREADS.add(thread_id)
+def test_retry_message_in_flight_uses_clear_korean_message(monkeypatch) -> None:
+    def reject_lease(*_args, **_kwargs):
+        raise messages.MessageInFlightError(
+            "이전 쪽지 응답이 끝난 뒤 다시 보내주세요."
+        )
 
-    try:
-        with pytest.raises(
-            messages.MessageInFlightError,
-            match="이전 쪽지 응답이 끝난 뒤 다시 보내주세요",
-        ):
-            asyncio.run(messages.retry_message(None, None, thread_id, 1))
-    finally:
-        messages._IN_FLIGHT_THREADS.discard(thread_id)
+    monkeypatch.setattr(messages, "_acquire_response_lease", reject_lease)
+
+    with pytest.raises(
+        messages.MessageInFlightError,
+        match="이전 쪽지 응답이 끝난 뒤 다시 보내주세요",
+    ):
+        asyncio.run(messages.retry_message(None, None, "thread-in-flight", 1))
 
 
 def test_retry_rejects_old_or_non_busy_assistant_message(monkeypatch) -> None:
