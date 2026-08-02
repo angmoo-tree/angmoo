@@ -1,7 +1,16 @@
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.db import Base
@@ -56,12 +65,25 @@ class UserMessagePreference(Base):
 
 class MessageThread(Base):
     __tablename__ = "message_threads"
+    __table_args__ = (
+        CheckConstraint(
+            "(response_lease_token IS NULL) = "
+            "(response_lease_expires_at IS NULL)",
+            name="ck_message_threads_response_lease_pair",
+        ),
+    )
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     requester_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
     character_id: Mapped[str] = mapped_column(ForeignKey("characters.id"), nullable=False)
     selected_model: Mapped[str] = mapped_column(
         String(120), nullable=False, default="gemini-2.5-flash-lite"
+    )
+    response_lease_token: Mapped[Optional[str]] = mapped_column(
+        String(64), nullable=True
+    )
+    response_lease_expires_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
     )
     last_message_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
     deleted_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
