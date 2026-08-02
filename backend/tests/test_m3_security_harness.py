@@ -149,7 +149,7 @@ def test_demo_read_only_guard_covers_every_mutation_auth_surface() -> None:
     }
     public_export_profile = not admin_mutations
 
-    assert len(session_mutations) == 61
+    assert len(session_mutations) == 60
     assert len(local_bot_mutations) == 10
     assert len(admin_mutations) == (0 if public_export_profile else 18)
     expected_preauth = set(PREAUTH_MUTATION_ROUTES)

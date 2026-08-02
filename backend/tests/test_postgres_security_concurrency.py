@@ -10,6 +10,7 @@ from sqlalchemy import create_engine, delete, inspect, select, text
 from sqlalchemy.orm import Session
 
 from app import models, schemas
+from app.cruds import agent_runs as agent_run_crud
 from app.cruds import community as community_crud
 from app.services import agents as agent_service
 from app.services import auth as auth_service
@@ -71,8 +72,104 @@ def test_security_migration_schema_contract() -> None:
     with engine.connect() as connection:
         assert (
             connection.scalar(text("SELECT version_num FROM alembic_version"))
-            == "20260726_0066"
+            == "20260802_0067"
         )
+
+
+def test_resident_character_assignment_is_unique_across_postgres_sessions() -> None:
+    engine = _engine()
+    suffix = uuid4().hex
+    user_id = f"user-resident-{suffix}"
+    character_id = f"char-resident-{suffix}"
+    credential_id = f"cred-resident-{suffix}"
+    agent_ids = [f"resident-slot-{suffix}-1", f"resident-slot-{suffix}-2"]
+    barrier = Barrier(12)
+    next_tick_at = datetime.now(UTC) + timedelta(minutes=5)
+
+    with Session(engine) as db:
+        db.add(
+            models.User(
+                id=user_id,
+                email=f"{suffix}@example.invalid",
+                display_name=user_id,
+                display_name_normalized=user_id,
+                profile_setup_completed=True,
+            )
+        )
+        db.add(
+            models.Character(
+                id=character_id,
+                owner_id=user_id,
+                name=character_id,
+                handle=f"resident_{suffix[:20]}",
+                persona_summary="resident assignment fixture",
+                execution_mode="llm",
+            )
+        )
+        db.add(
+            models.LlmCredential(
+                id=credential_id,
+                owner_id=user_id,
+                character_id=character_id,
+                provider="google",
+                purpose="agent",
+                model="gemini-3.1-flash-lite",
+                auth_profile_id=f"google:{character_id}",
+                label=character_id,
+                encrypted_api_key="synthetic-encrypted",
+                key_fingerprint=suffix[:16],
+                enabled=True,
+            )
+        )
+        db.commit()
+
+    def attempt() -> str:
+        with Session(engine) as db:
+            barrier.wait()
+            slot = agent_run_crud.assign_resident_slot(
+                db,
+                agent_ids=agent_ids,
+                user_id=user_id,
+                character_id=character_id,
+                credential_id=credential_id,
+                heartbeat_interval_seconds=300,
+                next_tick_at=next_tick_at,
+            )
+            assert slot is not None
+            return slot.agent_id
+
+    try:
+        with ThreadPoolExecutor(max_workers=12) as executor:
+            results = list(executor.map(lambda _index: attempt(), range(12)))
+        assert len(set(results)) == 1
+        assert set(results).issubset(set(agent_ids))
+        with Session(engine) as db:
+            assigned = list(
+                db.scalars(
+                    select(models.AgentSlot).where(
+                        models.AgentSlot.assigned_character_id == character_id
+                    )
+                )
+            )
+            assert len(assigned) == 1
+            assert assigned[0].agent_id in agent_ids
+            assert assigned[0].assigned_user_id == user_id
+            assert assigned[0].assigned_credential_id == credential_id
+    finally:
+        with Session(engine) as db:
+            db.execute(
+                delete(models.AgentSlot).where(models.AgentSlot.agent_id.in_(agent_ids))
+            )
+            db.execute(
+                delete(models.LlmCredential).where(
+                    models.LlmCredential.id == credential_id
+                )
+            )
+            db.execute(
+                delete(models.Character).where(models.Character.id == character_id)
+            )
+            db.execute(delete(models.User).where(models.User.id == user_id))
+            db.commit()
 
 
 def test_local_bot_quotas_are_atomic_across_postgres_sessions() -> None:

@@ -45,15 +45,6 @@ class OpenClawAgentRunRead(BaseModel):
     gateway_result: dict[str, Any]
 
 
-class AgentSlotAssignCreate(BaseModel):
-    user_id: str
-    character_id: str
-    credential_id: str
-    agent_id: str | None = None
-    heartbeat_interval_seconds: int = Field(default=1800, ge=60, le=86400)
-    next_tick_at: datetime | None = None
-
-
 class AgentSlotRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

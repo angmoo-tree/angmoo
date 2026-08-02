@@ -5469,32 +5469,37 @@ def list_resident_slots_for_user(
 
 
 def assign_resident_slot(
-    db: Session, data: schemas.AgentSlotAssignCreate, *, commit: bool = True
+    db: Session,
+    *,
+    user_id: str,
+    character_id: str,
+    credential_id: str,
+    heartbeat_interval_seconds: int,
+    next_tick_at: datetime | None = None,
+    commit: bool = True,
 ) -> schemas.AgentSlotRead:
     maintenance_service.ensure_auto_ticks_available(db)
     _validate_character_and_credential(
         db,
-        user_id=data.user_id,
-        character_id=data.character_id,
-        credential_id=data.credential_id,
+        user_id=user_id,
+        character_id=character_id,
+        credential_id=credential_id,
     )
-    candidate_agent_ids = (
-        [data.agent_id] if data.agent_id else settings.openclaw_agent_ids
-    )
-    setting = agent_crud.ensure_setting(db, data.character_id)
-    next_tick_at = data.next_tick_at or agent_activity_policy.initial_tick_schedule(
+    candidate_agent_ids = settings.openclaw_agent_ids
+    setting = agent_crud.ensure_setting(db, character_id)
+    scheduled_tick_at = next_tick_at or agent_activity_policy.initial_tick_schedule(
         setting,
-        character_id=data.character_id,
+        character_id=character_id,
         now=datetime.now(UTC),
     ).next_tick_at
     slot = agent_run_crud.assign_resident_slot(
         db,
         agent_ids=candidate_agent_ids,
-        user_id=data.user_id,
-        character_id=data.character_id,
-        credential_id=data.credential_id,
-        heartbeat_interval_seconds=data.heartbeat_interval_seconds,
-        next_tick_at=next_tick_at,
+        user_id=user_id,
+        character_id=character_id,
+        credential_id=credential_id,
+        heartbeat_interval_seconds=heartbeat_interval_seconds,
+        next_tick_at=scheduled_tick_at,
         commit=commit,
     )
     if slot is None:

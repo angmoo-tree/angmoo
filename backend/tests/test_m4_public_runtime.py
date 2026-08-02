@@ -53,8 +53,8 @@ def test_public_runtime_exposes_only_approved_routes() -> None:
     operations = _operations()
     paths = {path for _, path in operations}
 
-    assert len(paths) == 100
-    assert len(operations) == 126
+    assert len(paths) == 99
+    assert len(operations) == 125
     assert (
         "POST",
         "/api/v1/agent-runs/resident-slots/tick",
@@ -62,6 +62,10 @@ def test_public_runtime_exposes_only_approved_routes() -> None:
     assert (
         "POST",
         "/api/v1/agent-runs/community-once",
+    ) not in operations
+    assert (
+        "POST",
+        "/api/v1/agent-runs/resident-slots/assign",
     ) not in operations
     assert all(
         not path.startswith(prefix)

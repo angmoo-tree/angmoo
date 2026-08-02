@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy import DateTime, ForeignKey, Index, Integer, String, Text, func, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
@@ -9,6 +9,14 @@ from app.core.db import Base
 
 class AgentSlot(Base):
     __tablename__ = "agent_slots"
+    __table_args__ = (
+        Index(
+            "uq_agent_slots_assigned_character_not_null",
+            "assigned_character_id",
+            unique=True,
+            postgresql_where=text("assigned_character_id IS NOT NULL"),
+        ),
+    )
 
     agent_id: Mapped[str] = mapped_column(String(64), primary_key=True)
     status: Mapped[str] = mapped_column(String(40), nullable=False, default="idle")
