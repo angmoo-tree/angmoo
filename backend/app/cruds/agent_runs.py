@@ -670,6 +670,15 @@ def assign_resident_slot(
 
     ensure_agent_slots(db, unique_agent_ids)
 
+    locked_character_id = db.scalar(
+        select(models.Character.id)
+        .where(models.Character.id == character_id)
+        .with_for_update()
+    )
+    if locked_character_id is None:
+        db.rollback()
+        return None
+
     existing_slot = db.scalar(
         select(models.AgentSlot)
         .where(
@@ -682,7 +691,7 @@ def assign_resident_slot(
             models.AgentSlot.updated_at.desc(),
             models.AgentSlot.agent_id.asc(),
         )
-        .with_for_update(skip_locked=True)
+        .with_for_update()
     )
     if existing_slot is not None and existing_slot.status == SLOT_STATUS_RUNNING:
         db.rollback()
@@ -701,35 +710,45 @@ def assign_resident_slot(
         db.rollback()
         return None
 
-    duplicate_slots = list(
-        db.scalars(
-            select(models.AgentSlot)
-            .where(
-                models.AgentSlot.assigned_user_id == user_id,
-                models.AgentSlot.assigned_character_id == character_id,
-                models.AgentSlot.agent_id != slot.agent_id,
-                models.AgentSlot.status != SLOT_STATUS_RUNNING,
+    try:
+        with db.begin_nested():
+            duplicate_slots = list(
+                db.scalars(
+                    select(models.AgentSlot)
+                    .where(
+                        models.AgentSlot.assigned_user_id == user_id,
+                        models.AgentSlot.assigned_character_id == character_id,
+                        models.AgentSlot.agent_id != slot.agent_id,
+                        models.AgentSlot.status != SLOT_STATUS_RUNNING,
+                    )
+                    .with_for_update()
+                )
             )
-            .with_for_update(skip_locked=True)
-        )
-    )
-    for duplicate in duplicate_slots:
-        _clear_resident_slot(duplicate)
+            for duplicate in duplicate_slots:
+                _clear_resident_slot(duplicate)
 
-    slot.status = SLOT_STATUS_ASSIGNED_IDLE
-    slot.assigned_user_id = user_id
-    slot.assigned_character_id = character_id
-    slot.assigned_credential_id = credential_id
-    slot.heartbeat_interval_seconds = heartbeat_interval_seconds
-    slot.next_tick_at = next_tick_at
-    slot.locked_by_run_id = None
-    slot.lease_expires_at = None
-    slot.last_error = None
+            slot.status = SLOT_STATUS_ASSIGNED_IDLE
+            slot.assigned_user_id = user_id
+            slot.assigned_character_id = character_id
+            slot.assigned_credential_id = credential_id
+            slot.heartbeat_interval_seconds = heartbeat_interval_seconds
+            slot.next_tick_at = next_tick_at
+            slot.locked_by_run_id = None
+            slot.lease_expires_at = None
+            slot.last_error = None
+            db.flush()
+    except IntegrityError:
+        slot = db.scalar(
+            select(models.AgentSlot).where(
+                models.AgentSlot.assigned_character_id == character_id
+            )
+        )
+        if slot is None:
+            db.rollback()
+            return None
     if commit:
         db.commit()
         db.refresh(slot)
-    else:
-        db.flush()
     return slot
 
 

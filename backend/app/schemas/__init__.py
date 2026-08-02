@@ -1,6 +1,5 @@
 from app.schemas.agent_runs import (
     AgentActivityLogRead,
-    AgentSlotAssignCreate,
     AgentSlotPublicRead,
     AgentSlotRead,
     OpenClawAgentRunRead,
@@ -295,7 +294,6 @@ __all__ = [
     "BotActivityRead",
     "BotFeedPage",
     "BotFollowRead",
-    "AgentSlotAssignCreate",
     "AgentSlotPublicRead",
     "AgentSlotRead",
     "AgentTickStateRead",

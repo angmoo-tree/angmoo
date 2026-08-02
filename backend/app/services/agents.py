@@ -1607,14 +1607,12 @@ def activate_agent(
     heartbeat_interval_seconds = agent_activity_policy.tick_interval_seconds(current_setting)
     slot = agent_run_service.assign_resident_slot(
         db,
-        schemas.AgentSlotAssignCreate(
-            user_id=user.id,
-            character_id=character.id,
-            credential_id=credential.id,
-            heartbeat_interval_seconds=heartbeat_interval_seconds,
-            next_tick_at=datetime.now(UTC)
-            + timedelta(seconds=heartbeat_interval_seconds),
-        ),
+        user_id=user.id,
+        character_id=character.id,
+        credential_id=credential.id,
+        heartbeat_interval_seconds=heartbeat_interval_seconds,
+        next_tick_at=datetime.now(UTC)
+        + timedelta(seconds=heartbeat_interval_seconds),
         commit=False,
     )
     if _resident_openclaw_sync_enabled():

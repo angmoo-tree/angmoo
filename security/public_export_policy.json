@@ -367,6 +367,10 @@
       "destination": "backend/app/alembic/versions/20260726_0066_lore_parser_leases.py"
     },
     {
+      "source": "backend/app/alembic/versions/20260802_0067_unique_resident_character_assignment.py",
+      "destination": "backend/app/alembic/versions/20260802_0067_unique_resident_character_assignment.py"
+    },
+    {
       "source": "backend/app/api/v1/__init__.py",
       "destination": "backend/app/api/v1/__init__.py"
     },
@@ -1045,6 +1049,10 @@
     {
       "source": "backend/tests/test_request_body_limits.py",
       "destination": "backend/tests/test_request_body_limits.py"
+    },
+    {
+      "source": "backend/tests/test_r7_residual_security.py",
+      "destination": "backend/tests/test_r7_residual_security.py"
     },
     {
       "source": "backend/tests/test_security_secret_scan.py",
