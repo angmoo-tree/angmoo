@@ -27,6 +27,10 @@
       "destination": ".github/workflows/ci.yml"
     },
     {
+      "source": ".gitattributes",
+      "destination": ".gitattributes"
+    },
+    {
       "source": ".gitignore",
       "destination": ".gitignore"
     },

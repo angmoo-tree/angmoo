@@ -44,6 +44,7 @@ def policy() -> dict[str, object]:
         ("backend/app/api/v1/routes/auth.py", "hosted-full"),
         ("backend/app/alembic/versions/20260726_0066.py", "hosted-full"),
         (".github/workflows/ci.yml", "hosted-full"),
+        (".gitattributes", "hosted-full"),
         ("backend/uv.lock", "hosted-full"),
     ],
 )
