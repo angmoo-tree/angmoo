@@ -304,7 +304,11 @@ jobs:
         working-directory: backend
       - name: Audit vulnerabilities
         run: |
-          uv audit --locked
+          # Temporary compatibility exception: OCI SDK 2.182.1 requires
+          # cryptography<50, while GHSA-g6cj-pr64-35w5 is fixed in 50.0.0.
+          # Angmoo does not call the affected PKCS#7 decryption APIs. Remove
+          # this exact ignore when OCI relaxes its cryptography upper bound.
+          uv audit --locked --ignore GHSA-g6cj-pr64-35w5
           corepack pnpm@11.17.0 --dir ../frontend audit --prod --audit-level high
         working-directory: backend
       - name: Verify dependency licenses and notice

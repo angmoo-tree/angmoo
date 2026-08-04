@@ -71,10 +71,14 @@ def test_security_migration_schema_contract() -> None:
         "ck_auth_login_throttle_failure_nonnegative",
         "ck_auth_login_throttle_scope",
     }
+    auth_session_columns = {
+        item["name"]: item for item in inspector.get_columns("auth_sessions")
+    }
+    assert auth_session_columns["expires_at"]["nullable"] is True
     with engine.connect() as connection:
         assert (
             connection.scalar(text("SELECT version_num FROM alembic_version"))
-            == "20260802_0068"
+            == "20260804_0069"
         )
 
 
