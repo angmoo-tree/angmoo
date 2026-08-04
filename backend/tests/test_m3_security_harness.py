@@ -26,11 +26,9 @@ VALID_ACCESS = {
 }
 UNSAFE_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
 PREAUTH_MUTATION_ROUTES = {
-    "POST /api/v1/auth/demo-login",
     "POST /api/v1/auth/google",
     "POST /api/v1/auth/google/complete",
     "POST /api/v1/auth/login",
-    "POST /api/v1/auth/signup",
     "POST /api/v1/posts/{post_id}/comments",
 }
 SESSION_LIFECYCLE_MUTATIONS = {
@@ -99,7 +97,7 @@ def test_security_inventory_access_classes_match_authentication_dependencies() -
         dependencies = _dependency_names(actual[key])
         access = metadata["access"]
         if access == "admin-only":
-            assert "get_current_admin_user" in dependencies, key
+            pytest.fail(f"Public runtime must not expose an admin route: {key}")
         elif access == "local-bot-token":
             assert "get_current_local_bot" in dependencies, key
         elif access in {"authenticated-shared", "owner-only"}:
@@ -147,15 +145,10 @@ def test_demo_read_only_guard_covers_every_mutation_auth_surface() -> None:
         if key.split(" ", 1)[0] in UNSAFE_METHODS
         and metadata["access"] == "public"
     }
-    public_export_profile = not admin_mutations
-
     assert len(session_mutations) == 60
     assert len(local_bot_mutations) == 10
-    assert len(admin_mutations) == (0 if public_export_profile else 18)
-    expected_preauth = set(PREAUTH_MUTATION_ROUTES)
-    if public_export_profile:
-        expected_preauth.remove("POST /api/v1/auth/signup")
-    assert preauth_mutations == expected_preauth
+    assert not admin_mutations
+    assert preauth_mutations == PREAUTH_MUTATION_ROUTES
     assert SESSION_LIFECYCLE_MUTATIONS <= set(inventory)
 
     for key in session_mutations:
@@ -165,8 +158,6 @@ def test_demo_read_only_guard_covers_every_mutation_auth_surface() -> None:
         }, key
     for key in local_bot_mutations:
         assert "get_current_local_bot" in _dependency_names(actual[key]), key
-    for key in admin_mutations:
-        assert "get_current_admin_user" in _dependency_names(actual[key]), key
     for key in SESSION_LIFECYCLE_MUTATIONS:
         assert "get_current_session_for_logout" in _dependency_names(actual[key]), key
 

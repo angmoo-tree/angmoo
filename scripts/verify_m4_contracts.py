@@ -22,7 +22,7 @@ EXPECTED_PRIVATE_OPENAPI_SHA256 = (
     "86A727172D133F4AAC680F8C4ECA514E5FE0CABD15F9FDF47614B5FB308B4BF4"
 )
 EXPECTED_PUBLIC_OPENAPI_SHA256 = (
-    "409B14CD2E168150B89EA819EF1E862E644090223F4D04914A48F0F37D8248BE"
+    "1CBD8149D64025F2BB7FD97389A3183DDE8D4D6F6F10A37EFBBAD03AFC7FF158"
 )
 EXPECTED_CREDENTIAL_SHA256 = (
     "E3CDE9603CA664FC59C285B3401A53A569E6AE4A1C2E778E03E37D71ADBE69C9"
@@ -127,8 +127,8 @@ def verify() -> dict[str, object]:
         "langgraph_state_sha256": _canonical_sha256(langgraph_keys),
     }
     common_expected = {
-        "public_paths": 99,
-        "public_operations": 125,
+        "public_paths": 98,
+        "public_operations": 124,
         "public_schemas": 129,
         "public_openapi_sha256": EXPECTED_PUBLIC_OPENAPI_SHA256,
         "local_bot_paths": 14,
@@ -157,8 +157,8 @@ def verify() -> dict[str, object]:
         expected = {
             **common_expected,
             "source_profile": "public",
-            "private_paths": 99,
-            "private_operations": 125,
+            "private_paths": 98,
+            "private_operations": 124,
             "private_schemas": 129,
             "private_openapi_sha256": EXPECTED_PUBLIC_OPENAPI_SHA256,
             "removed_operations": 0,

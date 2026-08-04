@@ -15,6 +15,7 @@ from app.services import agents as agent_service
 from app.services import auth as auth_service
 from app.services import demo_lock
 from app.services import local_bot as local_bot_service
+from app.public_main import app as public_app
 
 
 DEMO_EMAIL = "demo-kimarin@angmoo.test"
@@ -252,26 +253,6 @@ def test_demo_mutation_is_blocked_before_route_handler(monkeypatch):
     assert called is False
 
 
-def test_locked_demo_admin_is_blocked_even_with_google_admin_session(monkeypatch):
-    user = _user()
-    user.is_admin = True
-    monkeypatch.setattr(
-        auth_service,
-        "get_user_session_for_token",
-        lambda _db, _token: (user, _session("google")),
-    )
-
-    with pytest.raises(HTTPException) as exc_info:
-        api_deps.get_current_admin_user(
-            _request("GET"),
-            "Bearer admin-token",
-            object(),
-        )
-
-    assert exc_info.value.status_code == 403
-    assert exc_info.value.detail == demo_lock.DEMO_ACCOUNT_LOCKED_MESSAGE
-
-
 def test_locked_demo_local_bot_is_blocked_before_last_used_update(monkeypatch):
     user = _user()
     character = SimpleNamespace(
@@ -364,82 +345,21 @@ def test_normal_local_bot_authentication_still_updates_last_used(monkeypatch):
     assert marked_used is True
 
 
-def test_demo_login_is_disabled_by_default(monkeypatch):
-    monkeypatch.setattr(settings, "DEMO_LOGIN_ENABLED", False)
-    monkeypatch.setattr(settings, "DEMO_LOGIN_EMAIL", DEMO_EMAIL)
+def test_public_demo_login_route_is_absent():
+    async def call_removed_route() -> httpx.Response:
+        transport = httpx.ASGITransport(app=public_app)
+        async with httpx.AsyncClient(
+            transport=transport,
+            base_url="http://testserver",
+        ) as client:
+            return await client.post(
+                "/api/v1/auth/demo-login",
+                headers={"Origin": "http://127.0.0.1:3000"},
+            )
 
-    with pytest.raises(auth_service.DemoLoginDisabledError):
-        auth_service.login_demo(object())
+    response = asyncio.run(call_removed_route())
 
-
-def test_demo_login_requires_locked_demo_user(monkeypatch):
-    monkeypatch.setattr(settings, "DEMO_LOGIN_ENABLED", True)
-    monkeypatch.setattr(settings, "DEMO_LOGIN_EMAIL", "normal@example.com")
-
-    class FakeDb:
-        def scalar(self, statement):
-            return _user("normal@example.com")
-
-    with pytest.raises(auth_service.DemoLoginUnavailableError):
-        auth_service.login_demo(FakeDb())
-
-
-def test_demo_login_creates_demo_auth_session(monkeypatch):
-    monkeypatch.setattr(settings, "DEMO_LOGIN_ENABLED", True)
-    monkeypatch.setattr(settings, "DEMO_LOGIN_EMAIL", DEMO_EMAIL)
-    captured: dict[str, str] = {}
-
-    class FakeDb:
-        def scalar(self, statement):
-            return _user()
-
-    def fake_auth_response(db, user, *, auth_method="password"):
-        captured["auth_method"] = auth_method
-        return auth_service.IssuedAuthSession(
-            token="demo-token",
-            user=schemas.UserRead.model_validate(user),
-            profile_setup_required=False,
-        )
-
-    monkeypatch.setattr(auth_service, "issue_auth_session", fake_auth_response)
-
-    auth = auth_service.login_demo(FakeDb())
-
-    assert auth.token == "demo-token"
-    assert auth.user.email == DEMO_EMAIL
-    assert captured["auth_method"] == "demo"
-
-
-def test_demo_login_route_returns_404_when_disabled(monkeypatch):
-    def raise_disabled(db):
-        raise auth_service.DemoLoginDisabledError("disabled")
-
-    monkeypatch.setattr(auth_routes.auth_service, "login_demo", raise_disabled)
-
-    with pytest.raises(HTTPException) as exc_info:
-        auth_routes.demo_login(
-            request=_request("POST"),
-            response=Response(),
-            db=object(),
-        )
-
-    assert exc_info.value.status_code == 404
-
-
-def test_demo_login_route_returns_503_when_unavailable(monkeypatch):
-    def raise_unavailable(db):
-        raise auth_service.DemoLoginUnavailableError("unavailable")
-
-    monkeypatch.setattr(auth_routes.auth_service, "login_demo", raise_unavailable)
-
-    with pytest.raises(HTTPException) as exc_info:
-        auth_routes.demo_login(
-            request=_request("POST"),
-            response=Response(),
-            db=object(),
-        )
-
-    assert exc_info.value.status_code == 503
+    assert response.status_code == 404
 
 
 def test_account_delete_route_returns_403_for_locked_demo_user():

@@ -627,10 +627,6 @@
       "destination": "backend/app/schemas/__init__.py"
     },
     {
-      "source": "backend/app/schemas/admin.py",
-      "destination": "backend/app/schemas/admin.py"
-    },
-    {
       "source": "backend/app/schemas/agent_runs.py",
       "destination": "backend/app/schemas/agent_runs.py"
     },
@@ -1243,10 +1239,6 @@
       "destination": "frontend/src/app/characters/[characterId]/activity/page.tsx"
     },
     {
-      "source": "frontend/src/app/demo/kimarin/page.tsx",
-      "destination": "frontend/src/app/demo/kimarin/page.tsx"
-    },
-    {
       "source": "frontend/src/app/feed-page.tsx",
       "destination": "frontend/src/app/feed-page.tsx"
     },
@@ -1381,10 +1373,6 @@
     {
       "source": "frontend/src/components/character-profile-client.tsx",
       "destination": "frontend/src/components/character-profile-client.tsx"
-    },
-    {
-      "source": "frontend/src/components/demo-kimarin-client.tsx",
-      "destination": "frontend/src/components/demo-kimarin-client.tsx"
     },
     {
       "source": "frontend/src/components/expandable-post-text.tsx",

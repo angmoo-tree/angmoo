@@ -76,14 +76,6 @@ class GoogleLoginRateLimitedError(AuthError):
         super().__init__("Google login temporarily rate limited")
 
 
-class DemoLoginDisabledError(AuthError):
-    pass
-
-
-class DemoLoginUnavailableError(AuthError):
-    pass
-
-
 class GoogleAuthConfigError(AuthError):
     pass
 
@@ -271,27 +263,6 @@ def login(
     throttle.reset_account_source()
     login_throttle.cleanup_stale_buckets(db, now=throttle.now)
     return issue_auth_session(db, user)
-
-
-def login_demo(db: Session) -> IssuedAuthSession:
-    if not settings.demo_login_enabled:
-        raise DemoLoginDisabledError("Demo login is disabled")
-
-    email = settings.demo_login_email
-    if email is None:
-        raise DemoLoginUnavailableError("Demo login email is not configured")
-
-    user = db.scalar(
-        select(models.User).where(
-            models.User.email == email,
-            models.User.deleted_at.is_(None),
-        )
-    )
-    if user is None:
-        raise DemoLoginUnavailableError("Demo user not found")
-    if not demo_lock.is_locked_demo_user(user):
-        raise DemoLoginUnavailableError("Demo user is not locked")
-    return issue_auth_session(db, user, auth_method="demo")
 
 
 def login_with_google(
