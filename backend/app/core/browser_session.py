@@ -109,12 +109,16 @@ def set_session_cookie(
     response: Response,
     token: str,
     *,
+    max_age_seconds: int | None = None,
     config: Settings = settings,
 ) -> None:
+    max_age = SESSION_MAX_AGE_SECONDS if max_age_seconds is None else max_age_seconds
+    if max_age < 0:
+        raise ValueError("session cookie max age must not be negative")
     response.set_cookie(
         key=SESSION_COOKIE_NAME,
         value=token,
-        max_age=SESSION_MAX_AGE_SECONDS,
+        max_age=max_age,
         path=COOKIE_PATH,
         secure=config.app_env == "production",
         httponly=True,

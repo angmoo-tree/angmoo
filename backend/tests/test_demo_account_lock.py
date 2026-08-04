@@ -401,7 +401,7 @@ def test_demo_login_creates_demo_auth_session(monkeypatch):
             profile_setup_required=False,
         )
 
-    monkeypatch.setattr(auth_service, "_create_auth_response", fake_auth_response)
+    monkeypatch.setattr(auth_service, "issue_auth_session", fake_auth_response)
 
     auth = auth_service.login_demo(FakeDb())
 

@@ -272,7 +272,7 @@ def test_google_link_reserves_verification_for_user_and_trusted_source(
             "email_verified": True,
         },
     )
-    monkeypatch.setattr(auth_service, "_create_auth_response", lambda *_args, **_kwargs: "ok")
+    monkeypatch.setattr(auth_service, "issue_auth_session", lambda *_args, **_kwargs: "ok")
 
     result = auth_service.link_google_account(
         db,
