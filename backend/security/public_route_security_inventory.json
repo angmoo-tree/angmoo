@@ -472,11 +472,6 @@
       "module": "app.api.v1.routes.agents",
       "endpoint": "analyze_tendency"
     },
-    "POST /api/v1/auth/demo-login": {
-      "access": "public",
-      "module": "app.api.v1.routes.auth",
-      "endpoint": "demo_login"
-    },
     "POST /api/v1/auth/google": {
       "access": "public",
       "module": "app.api.v1.routes.auth",

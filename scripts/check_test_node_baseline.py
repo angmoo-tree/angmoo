@@ -11,7 +11,7 @@ import sys
 REPO_ROOT = Path(__file__).resolve().parents[1]
 BACKEND_ROOT = REPO_ROOT / "backend"
 BASELINES = {
-    "public": (BACKEND_ROOT / "security" / "m3_public_test_nodes.txt", 608),
+    "public": (BACKEND_ROOT / "security" / "m3_public_test_nodes.txt", 604),
     "private": (BACKEND_ROOT / "security" / "m3_private_test_nodes.txt", 641),
 }
 IGNORED_TESTS = (

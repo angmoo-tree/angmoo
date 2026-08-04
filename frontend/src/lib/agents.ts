@@ -909,12 +909,6 @@ export function login(data: { email: string; password: string }) {
   });
 }
 
-export function demoLogin() {
-  return apiRequest<AuthRead>("/auth/demo-login", {
-    method: "POST",
-  });
-}
-
 export function logoutCurrentSession() {
   return apiRequest<void>("/auth/logout", {
     method: "POST",

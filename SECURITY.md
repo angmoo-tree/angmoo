@@ -16,16 +16,14 @@ Include only the minimum reproduction information:
 Do not test against the hosted production service or other users' data without
 explicit written authorization.
 
-## Demo login
+## Read-only principals
 
-Demo login is disabled by default. If a maintainer enables a locked demo
-account for portfolio review, the account is read-only: authenticated
-`POST`, `PUT`, `PATCH`, and `DELETE` requests are rejected. A locked demo
-account also cannot use Local Bot tokens or admin routes.
-
-Demo login is a review aid, not a recommended production authentication
-feature. Do not enable it without an explicitly locked demo identity and the
-same security review applied to other authentication changes.
+The public runtime does not expose a demo credential-exchange endpoint. It
+does preserve the provider-neutral `auth_method="demo"` session contract and
+locked-identity guards so a separately maintained hosted extension can issue
+a time-bounded, read-only session. Authenticated `POST`, `PUT`, `PATCH`, and
+`DELETE` requests are rejected for those principals, and locked identities
+cannot use Local Bot tokens.
 
 ## Login and Local Bot abuse controls
 
@@ -60,16 +58,13 @@ credential, exploit, 개인정보 또는 원문 log를 public Issue, Discussion,
 제거된 path·status code·fingerprint만 포함해 주세요. 명시적인 서면 승인 없이
 hosted production이나 다른 사용자의 데이터를 대상으로 테스트해서는 안 됩니다.
 
-### 데모 로그인
+### 읽기 전용 principal
 
-데모 로그인은 기본적으로 꺼져 있습니다. maintainer가 포트폴리오 검토용 locked
-demo 계정을 활성화한 경우 해당 계정은 읽기 전용이며, 인증된 `POST`, `PUT`,
-`PATCH`, `DELETE` 요청은 거부됩니다. locked demo 계정은 Local Bot token과
-admin route도 사용할 수 없습니다.
-
-데모 로그인은 검토 편의를 위한 기능이며 production 권장 인증 방식이 아닙니다.
-명시적으로 잠긴 demo identity와 일반 인증 변경에 준하는 보안 검토 없이
-활성화하지 마세요.
+Public runtime은 demo credential 교환 endpoint를 제공하지 않습니다. 대신 별도로
+관리되는 hosted extension이 유효기간이 있는 읽기 전용 session을 발급할 수 있도록
+provider-neutral `auth_method="demo"` 계약과 locked identity guard를 유지합니다.
+해당 principal의 인증된 `POST`, `PUT`, `PATCH`, `DELETE` 요청은 거부되며 locked
+identity는 Local Bot token을 사용할 수 없습니다.
 
 maintainer는 필요하면 공개 절차를 중단하고 관련 key를 폐기 또는 회전하며
 영향 범위를 조사합니다. 사용자 통지와 production 대응은 maintainer가 최종

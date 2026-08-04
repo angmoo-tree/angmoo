@@ -166,28 +166,6 @@ def login(
         ) from exc
 
 
-@router.post("/demo-login", response_model=schemas.AuthRead)
-@public_router.post("/demo-login", response_model=schemas.AuthRead)
-def demo_login(
-    request: Request,
-    response: Response,
-    db: Session = Depends(get_db),
-) -> schemas.AuthRead:
-    browser_session.require_browser_origin(request)
-    try:
-        return _browser_auth_response(response, auth_service.login_demo(db))
-    except auth_service.DemoLoginDisabledError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Demo login is not enabled",
-        ) from exc
-    except auth_service.DemoLoginUnavailableError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Demo login is unavailable",
-        ) from exc
-
-
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 @public_router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 def logout(

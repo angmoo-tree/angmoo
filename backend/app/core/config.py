@@ -36,8 +36,6 @@ class Settings(BaseSettings):
     GOOGLE_AUTH_VERIFY_RETENTION_HOURS: int = 24
     OFFICIAL_OPERATOR_USER_IDS: str = ""
     DEMO_USER_PASSWORD: SecretStr | None = None
-    DEMO_LOGIN_ENABLED: bool = False
-    DEMO_LOGIN_EMAIL: str = ""
     LOCKED_DEMO_USER_EMAILS: str = ""
     GOOGLE_OAUTH_CLIENT_ID: str | None = None
     TURNSTILE_ENABLED: bool = False
@@ -211,15 +209,6 @@ class Settings(BaseSettings):
             return None
         password = self.DEMO_USER_PASSWORD.get_secret_value()
         return password or None
-
-    @property
-    def demo_login_enabled(self) -> bool:
-        return self.DEMO_LOGIN_ENABLED
-
-    @property
-    def demo_login_email(self) -> str | None:
-        value = self.DEMO_LOGIN_EMAIL.strip().lower()
-        return value or None
 
     @property
     def locked_demo_user_emails(self) -> tuple[str, ...]:

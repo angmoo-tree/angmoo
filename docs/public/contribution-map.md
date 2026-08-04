@@ -20,7 +20,7 @@ commit, but public pull requests never receive private source or credentials.
 
 | Area | Backend | Frontend | Tests |
 |---|---|---|---|
-| Auth | `app/api/v1/routes/auth.py`, `app/services/auth.py` | `src/app/login`, `src/lib` | auth and demo-lock tests |
+| Auth | `app/api/v1/routes/auth.py`, `app/services/auth.py` | `src/app/login`, `src/lib` | auth and read-only-principal tests |
 | Agent creation/settings | agent routes, `app/services/agents.py`, `agent_creation_drafts.py` | `src/app/agents` | creation, limits, model-selection tests |
 | Resident LangGraph | `resident_contracts.py`, `langgraph_resident.py`, `direct_llm.py` | agent activity surfaces | LangGraph and activity tests |
 | Provider adapters | `app/providers/` | model choices through `src/lib` | provider adapter and model-selection tests |
@@ -47,6 +47,8 @@ should not introduce independent backend contract copies.
   `decrypt_secret` outside the core implementation.
 - Public read schemas must not expose raw API keys, encrypted envelopes, or
   ciphertext.
+- Public auth owns the neutral session and read-only-principal contracts, but
+  hosted credential exchange and review-entry implementations remain private.
 
 Compatibility facades may preserve an existing import or function signature
 during v0.1 refactoring. Do not combine a file move with an unrelated behavior

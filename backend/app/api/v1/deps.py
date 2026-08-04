@@ -104,34 +104,6 @@ def get_current_session_for_logout(
     return session
 
 
-def get_current_admin_user(
-    request: Request,
-    authorization: AuthorizationHeader = None,
-    db: Session = Depends(get_db),
-) -> models.User:
-    context = resolve_authenticated_session_context(request, authorization, db)
-    user = context.user
-    session = context.session
-    try:
-        demo_lock.ensure_demo_admin_access_allowed(
-            user,
-            auth_method=session.auth_method,
-        )
-    except demo_lock.DemoAccountLockedError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=str(exc),
-        ) from exc
-    if not user.is_admin:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="admin_required")
-    if session.auth_method != "google":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="admin_google_login_required",
-        )
-    return user
-
-
 def get_optional_current_user(
     request: Request,
     authorization: AuthorizationHeader = None,
@@ -239,7 +211,6 @@ def get_current_local_bot(
 
 __all__ = [
     "AuthenticatedSessionContext",
-    "get_current_admin_user",
     "get_current_local_bot",
     "get_current_session_for_logout",
     "get_current_user",
