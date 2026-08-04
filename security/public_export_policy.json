@@ -379,6 +379,10 @@
       "destination": "backend/app/alembic/versions/20260802_0068_message_response_leases.py"
     },
     {
+      "source": "backend/app/alembic/versions/20260804_0069_auth_session_expiry.py",
+      "destination": "backend/app/alembic/versions/20260804_0069_auth_session_expiry.py"
+    },
+    {
       "source": "backend/app/api/v1/__init__.py",
       "destination": "backend/app/api/v1/__init__.py"
     },
@@ -873,6 +877,10 @@
     {
       "source": "backend/tests/test_auth_policy_versions.py",
       "destination": "backend/tests/test_auth_policy_versions.py"
+    },
+    {
+      "source": "backend/tests/test_auth_session_contract.py",
+      "destination": "backend/tests/test_auth_session_contract.py"
     },
     {
       "source": "backend/tests/test_browser_session_security.py",

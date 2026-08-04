@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Annotated
 
 from fastapi import Depends, Header, HTTPException, Request, status
@@ -12,6 +13,13 @@ from app.services import local_bot as local_bot_service
 
 
 AuthorizationHeader = Annotated[str | None, Header(alias="Authorization")]
+
+
+@dataclass(frozen=True)
+class AuthenticatedSessionContext:
+    user: models.User
+    session: models.AuthSession
+    cookie_authenticated: bool
 
 
 def _bearer_token(authorization: str | None) -> str:
@@ -46,25 +54,28 @@ def get_current_user_allow_incomplete(
     authorization: AuthorizationHeader = None,
     db: Session = Depends(get_db),
 ) -> models.User:
-    token, cookie_authenticated = _user_token_from_request(
+    context = resolve_authenticated_session_context(request, authorization, db)
+    _ensure_demo_request_allowed(context.user, context.session, request)
+    return context.user
+
+
+def resolve_authenticated_session_context(
+    request: Request,
+    authorization: AuthorizationHeader = None,
+    db: Session = Depends(get_db),
+) -> AuthenticatedSessionContext:
+    token, cookie_authenticated = _user_token_from_request(request, authorization)
+    context = _resolve_session_context(
         request,
-        authorization,
-    )
-    result = auth_service.get_user_session_for_token(
         db,
-        token,
+        token=token,
+        cookie_authenticated=cookie_authenticated,
     )
-    if result is None:
+    if context is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
         )
-    user, session = result
-    browser_session.require_cookie_mutation_origin(
-        request,
-        cookie_authenticated=cookie_authenticated,
-    )
-    _ensure_demo_request_allowed(user, session, request)
-    return user
+    return context
 
 
 def get_current_session_for_logout(
@@ -98,17 +109,9 @@ def get_current_admin_user(
     authorization: AuthorizationHeader = None,
     db: Session = Depends(get_db),
 ) -> models.User:
-    token, cookie_authenticated = _user_token_from_request(request, authorization)
-    result = auth_service.get_user_session_for_token(db, token)
-    if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
-        )
-    user, session = result
-    browser_session.require_cookie_mutation_origin(
-        request,
-        cookie_authenticated=cookie_authenticated,
-    )
+    context = resolve_authenticated_session_context(request, authorization, db)
+    user = context.user
+    session = context.session
     try:
         demo_lock.ensure_demo_admin_access_allowed(
             user,
@@ -151,16 +154,16 @@ def get_optional_current_user(
         cookie_authenticated = False
     else:
         return None
-    result = auth_service.get_user_session_for_token(db, token)
-    if result is None:
-        return None
-    user, session = result
-    browser_session.require_cookie_mutation_origin(
+    context = _resolve_session_context(
         request,
+        db,
+        token=token,
         cookie_authenticated=cookie_authenticated,
     )
-    _ensure_demo_request_allowed(user, session, request)
-    return user
+    if context is None:
+        return None
+    _ensure_demo_request_allowed(context.user, context.session, request)
+    return context.user
 
 
 def _user_token_from_request(
@@ -176,6 +179,28 @@ def _user_token_from_request(
     if cookie_token:
         return cookie_token, True
     return _bearer_token(authorization), False
+
+
+def _resolve_session_context(
+    request: Request,
+    db: Session,
+    *,
+    token: str,
+    cookie_authenticated: bool,
+) -> AuthenticatedSessionContext | None:
+    result = auth_service.get_user_session_for_token(db, token)
+    if result is None:
+        return None
+    user, session = result
+    browser_session.require_cookie_mutation_origin(
+        request,
+        cookie_authenticated=cookie_authenticated,
+    )
+    return AuthenticatedSessionContext(
+        user=user,
+        session=session,
+        cookie_authenticated=cookie_authenticated,
+    )
 
 
 def _ensure_demo_request_allowed(
@@ -213,11 +238,13 @@ def get_current_local_bot(
 
 
 __all__ = [
+    "AuthenticatedSessionContext",
     "get_current_admin_user",
     "get_current_local_bot",
     "get_current_session_for_logout",
     "get_current_user",
     "get_current_user_allow_incomplete",
     "get_optional_current_user",
+    "resolve_authenticated_session_context",
     "get_db",
 ]

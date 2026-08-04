@@ -3,6 +3,7 @@ import binascii
 import hashlib
 import hmac
 import json
+import math
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
@@ -154,6 +155,7 @@ class IssuedAuthSession:
     token: str
     user: schemas.UserRead
     profile_setup_required: bool = False
+    expires_at: datetime | None = None
 
     def public_response(self) -> schemas.AuthRead:
         return schemas.AuthRead(
@@ -171,6 +173,7 @@ class GoogleLoginResult:
     pending_token: str | None = None
     expires_at: datetime | None = None
     email: str | None = None
+    session_expires_at: datetime | None = None
 
     def public_response(self) -> schemas.GoogleLoginRead:
         return schemas.GoogleLoginRead(
@@ -234,7 +237,7 @@ def create_user(db: Session, data: schemas.SignupCreate) -> IssuedAuthSession:
         _raise_user_integrity_error(exc, email=email)
         raise EmailAlreadyExistsError(email) from exc
     db.refresh(user)
-    return _create_auth_response(db, user)
+    return issue_auth_session(db, user)
 
 
 def login(
@@ -267,7 +270,7 @@ def login(
         raise InvalidCredentialsError("Invalid email or password")
     throttle.reset_account_source()
     login_throttle.cleanup_stale_buckets(db, now=throttle.now)
-    return _create_auth_response(db, user)
+    return issue_auth_session(db, user)
 
 
 def login_demo(db: Session) -> IssuedAuthSession:
@@ -288,7 +291,7 @@ def login_demo(db: Session) -> IssuedAuthSession:
         raise DemoLoginUnavailableError("Demo user not found")
     if not demo_lock.is_locked_demo_user(user):
         raise DemoLoginUnavailableError("Demo user is not locked")
-    return _create_auth_response(db, user, auth_method="demo")
+    return issue_auth_session(db, user, auth_method="demo")
 
 
 def login_with_google(
@@ -339,7 +342,7 @@ def login_with_google(
         )
     )
     if user is not None:
-        return _google_login_from_auth(_create_auth_response(db, user, auth_method="google"))
+        return _google_login_from_auth(issue_auth_session(db, user, auth_method="google"))
 
     existing_email_user = db.scalar(
         select(models.User).where(
@@ -388,7 +391,7 @@ def complete_google_signup(
     if existing_google_user is not None:
         grant.consumed_at = _utcnow()
         db.commit()
-        return _create_auth_response(db, existing_google_user, auth_method="google")
+        return issue_auth_session(db, existing_google_user, auth_method="google")
 
     existing_email_user = db.scalar(
         select(models.User).where(
@@ -430,7 +433,7 @@ def complete_google_signup(
         _raise_user_integrity_error(exc, email=email)
         raise GoogleEmailAlreadyExistsError(email) from exc
     db.refresh(user)
-    return _create_auth_response(db, user, auth_method="google")
+    return issue_auth_session(db, user, auth_method="google")
 
 
 def link_google_account(
@@ -488,7 +491,7 @@ def link_google_account(
     user.google_sub = google_sub
     db.commit()
     db.refresh(user)
-    return _create_auth_response(db, user, auth_method="google")
+    return issue_auth_session(db, user, auth_method="google")
 
 
 def update_user_display_name(
@@ -549,10 +552,12 @@ def get_session_for_token(db: Session, token: str) -> models.AuthSession | None:
     if session is None:
         return None
 
-    created_at = session.created_at
-    if created_at.tzinfo is None:
-        created_at = created_at.replace(tzinfo=timezone.utc)
-    if created_at <= _utcnow() - AUTH_SESSION_TTL:
+    expires_at = session.expires_at
+    if expires_at is None:
+        expires_at = _as_utc(session.created_at) + AUTH_SESSION_TTL
+    else:
+        expires_at = _as_utc(expires_at)
+    if expires_at <= _utcnow():
         return None
     return session
 
@@ -1072,6 +1077,7 @@ def _google_login_from_auth(auth: IssuedAuthSession) -> GoogleLoginResult:
         token=auth.token,
         user=auth.user,
         profile_setup_required=auth.profile_setup_required,
+        session_expires_at=auth.expires_at,
     )
 
 
@@ -1230,15 +1236,23 @@ def _lock_pending_google_signup_grant(
     return grant
 
 
-def _create_auth_response(
-    db: Session, user: models.User, *, auth_method: str = "password"
+def issue_auth_session(
+    db: Session,
+    user: models.User,
+    *,
+    auth_method: str = "password",
+    expires_at: datetime | None = None,
 ) -> IssuedAuthSession:
+    normalized_expires_at = _as_utc(expires_at) if expires_at is not None else None
+    if normalized_expires_at is not None and normalized_expires_at <= _utcnow():
+        raise ValueError("auth session expiry must be in the future")
     token = security.create_token()
     db.add(
         models.AuthSession(
             token_hash=security.hash_token(token),
             user_id=user.id,
             auth_method=auth_method,
+            expires_at=normalized_expires_at,
         )
     )
     db.commit()
@@ -1247,7 +1261,26 @@ def _create_auth_response(
         token=token,
         user=schemas.UserRead.model_validate(user),
         profile_setup_required=profile_setup_required,
+        expires_at=normalized_expires_at,
     )
+
+
+def auth_session_cookie_max_age(
+    expires_at: datetime | None,
+    *,
+    now: datetime | None = None,
+) -> int | None:
+    if expires_at is None:
+        return None
+    remaining = (_as_utc(expires_at) - _as_utc(now or _utcnow())).total_seconds()
+    return max(0, math.ceil(remaining))
+
+
+def _create_auth_response(
+    db: Session, user: models.User, *, auth_method: str = "password"
+) -> IssuedAuthSession:
+    """Compatibility wrapper for callers migrating to issue_auth_session."""
+    return issue_auth_session(db, user, auth_method=auth_method)
 
 
 def _password_hash_for_verification(user: models.User | None) -> str:
@@ -1363,6 +1396,12 @@ def _is_same_display_name(
 
 def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
+
+
+def _as_utc(value: datetime) -> datetime:
+    if value.tzinfo is None:
+        return value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc)
 
 
 def _raise_user_integrity_error(exc: IntegrityError, *, email: str | None) -> None:

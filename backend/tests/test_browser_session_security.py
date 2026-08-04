@@ -140,6 +140,7 @@ def test_password_login_sets_http_only_cookie_without_token_json(
     assert "HttpOnly" in cookie
     assert "SameSite=lax" in cookie
     assert "Path=/api" in cookie
+    assert f"Max-Age={browser_session.SESSION_MAX_AGE_SECONDS}" in cookie
     assert "browser-session-token" not in response.text
 
 

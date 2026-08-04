@@ -25,7 +25,11 @@ def _browser_auth_response(
     response: Response,
     issued: auth_service.IssuedAuthSession,
 ) -> schemas.AuthRead:
-    browser_session.set_session_cookie(response, issued.token)
+    browser_session.set_session_cookie(
+        response,
+        issued.token,
+        max_age_seconds=auth_service.auth_session_cookie_max_age(issued.expires_at),
+    )
     browser_session.delete_google_pending_cookie(response)
     return issued.public_response()
 
@@ -35,7 +39,13 @@ def _browser_google_response(
     result: auth_service.GoogleLoginResult,
 ) -> schemas.GoogleLoginRead:
     if result.token:
-        browser_session.set_session_cookie(response, result.token)
+        browser_session.set_session_cookie(
+            response,
+            result.token,
+            max_age_seconds=auth_service.auth_session_cookie_max_age(
+                result.session_expires_at
+            ),
+        )
         browser_session.delete_google_pending_cookie(response)
     elif result.pending_token:
         browser_session.set_google_pending_cookie(response, result.pending_token)
