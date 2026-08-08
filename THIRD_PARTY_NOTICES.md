@@ -125,7 +125,7 @@ Package authors retain all rights granted by their respective licenses.
 - `lru-cache 5.1.1` — ISC
 - `lucide-react 1.14.0` — ISC
 - `ms 2.1.3` — MIT
-- `nanoid 3.3.12` — MIT
+- `nanoid 3.3.17` — MIT
 - `next 16.2.11` — MIT
 - `node-releases 2.0.38` — MIT
 - `picocolors 1.1.1` — ISC
