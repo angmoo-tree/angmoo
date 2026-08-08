@@ -1,0 +1,32 @@
+{
+  "contract_version": "p0-contract-v1",
+  "schema_path": "fixture.schema.json",
+  "fixtures": [
+    {"fixture_id":"episode_post_success","path":"episode_post_success.json","required_phase":"P4","expected_schema_sha256":"05b54609b0ea55e15240a1c344b43f9ae7ab0e6cdc65db3e6d95958e1038b24f"},
+    {"fixture_id":"fictional_interaction_rejected","path":"fictional_interaction_rejected.json","required_phase":"P6","expected_schema_sha256":"41d64dcedb0d97805374c954013a775756d9f1447f3222c52b606296e9a10c86"},
+    {"fixture_id":"memory_deleted_blocked","path":"memory_deleted_blocked.json","required_phase":"P8","expected_schema_sha256":"f7d57ea8dfd633307bf01413c5cc17cfd0057cc81ce724cf79cb69fc0231fc96"},
+    {"fixture_id":"memory_opt_out_blocked","path":"memory_opt_out_blocked.json","required_phase":"P8","expected_schema_sha256":"66c1efc59029c6e6e1a261d47bdfebe94b4f85024a5cddd1ae2b7007731e813e"},
+    {"fixture_id":"neo4j_down_fallback","path":"neo4j_down_fallback.json","required_phase":"P7","expected_schema_sha256":"414ef9440ef0dde33dd33548eee3e769be01da97c18139bb0a359ee640aa9fb8"},
+    {"fixture_id":"outbox_duplicate_idempotent","path":"outbox_duplicate_idempotent.json","required_phase":"P7","expected_schema_sha256":"dd35cb5a5be6ff68f039322ce3b1632fab0424c0e96cbd5c90f1e86d6c3bdee9"},
+    {"fixture_id":"proactive_duplicate_quiet_blocked","path":"proactive_duplicate_quiet_blocked.json","required_phase":"P9","expected_schema_sha256":"1227c2ffa417a624a809a8ad74643ae76ee04cdda5069c7bebb48c3de2d7ce6a"},
+    {"fixture_id":"proactive_off_blocked","path":"proactive_off_blocked.json","required_phase":"P9","expected_schema_sha256":"34903a02bfd0f761df72795179a5a00c3a8cd753efffe75b982d7b4157ee1102"},
+    {"fixture_id":"provider_timeout_no_fact","path":"provider_timeout_no_fact.json","required_phase":"P4","expected_schema_sha256":"69620d2593d34262678e38c2ca94a1a178c164e567112356f7cae946013485ba"},
+    {"fixture_id":"quota_atomic_race","path":"quota_atomic_race.json","required_phase":"P10","expected_schema_sha256":"45c00432c44276a726792ce84a2cd989468388b3e53e5f1705b012544dea2136"},
+    {"fixture_id":"relationship_direction_preserved","path":"relationship_direction_preserved.json","required_phase":"P6","expected_schema_sha256":"e6012732692c358e5cb9c1debb4285f6a1df8635496f22ecd6b98b75fecf976c"},
+    {"fixture_id":"repertoire_4x10_success","path":"repertoire_4x10_success.json","required_phase":"P2","expected_schema_sha256":"111f0c8517d0982d108fe63982f93f4547108e1220bf33dde27d03446e0633bf"},
+    {"fixture_id":"repertoire_count_failed","path":"repertoire_count_failed.json","required_phase":"P2","expected_schema_sha256":"47afcca7c838098010d1070e29dcc574ddbd439f33ad8f3965c3b3e587800e34"},
+    {"fixture_id":"repertoire_duplicate_failed","path":"repertoire_duplicate_failed.json","required_phase":"P2","expected_schema_sha256":"d0f0573a0df0d88fc25b5efc703b5bd8155cec346e7d734448dfb77e994d8219"},
+    {"fixture_id":"started_episode_revision_rejected","path":"started_episode_revision_rejected.json","required_phase":"P3","expected_schema_sha256":"d3ac09cbbf6f3ce0454fd756e66316d7d33e8aaebc960316568cfb39d39dcdf4"},
+    {"fixture_id":"world_cross_scope_rejected","path":"world_cross_scope_rejected.json","required_phase":"P6","expected_schema_sha256":"f16eafe0df892302d842028b2abf0ecc50181ace40d0de56273d039a44050ca6"},
+    {"fixture_id":"world_banner_only_hash_stable","path":"world_banner_only_hash_stable.json","required_phase":"P1","expected_schema_sha256":"76eb72a84307d04e989f1b1790f2cf495241383cb247146a01449c6951c183ef"},
+    {"fixture_id":"world_definition_prompt_injection_data_only","path":"world_definition_prompt_injection_data_only.json","required_phase":"P1","expected_schema_sha256":"3411eedbeaa7415540b64a6aa1825a723278117baa721cef00f8b82c1cbd6ca3"},
+    {"fixture_id":"world_draft_incomplete","path":"world_draft_incomplete.json","required_phase":"P1","expected_schema_sha256":"56ee2ebc92a2eb64af804777b896d20070ac1dc4baeaf39768469559df70b80f"},
+    {"fixture_id":"world_enriched_publish_ready","path":"world_enriched_publish_ready.json","required_phase":"P1","expected_schema_sha256":"c98c0ccc2b48cbbb3f39d92924bec296e2ecc67ea2c10e6acc3f96a5a483833a"},
+    {"fixture_id":"world_generation_context_sanitized","path":"world_generation_context_sanitized.json","required_phase":"P1","expected_schema_sha256":"08c34244fd74dbdbae263b76092927fe7bd9cd0b2f3ee79acdd4bfe1d1ea8884"},
+    {"fixture_id":"world_minimal_publish_ready","path":"world_minimal_publish_ready.json","required_phase":"P1","expected_schema_sha256":"102005514e923712062c5b89df8c446d435c2cf0abf3e9f76e941e1d2e99fffe"},
+    {"fixture_id":"world_open_join_success","path":"world_open_join_success.json","required_phase":"P1","expected_schema_sha256":"bc3c9b7a73c5d58b4219ab6a44073763312fa19a1579b96c7ffc3020c8d5d195"},
+    {"fixture_id":"world_private_nonmember_hidden","path":"world_private_nonmember_hidden.json","required_phase":"P1","expected_schema_sha256":"c511d9255637b628cffc98cb706ff2bdfba0b6a905f117e8785e201a0b330152"},
+    {"fixture_id":"world_semantic_change_hash_changes","path":"world_semantic_change_hash_changes.json","required_phase":"P1","expected_schema_sha256":"a6f7e0267a583cbe124474674b0e3cb47e650123cb1c667d755e05accc02c403"},
+    {"fixture_id":"world_switch_locked_joint_rejected","path":"world_switch_locked_joint_rejected.json","required_phase":"P3","expected_schema_sha256":"2fa0ab312b861e1b2aee040eda070f9071b8cd6e9d50a419068a5bc1c69e7493"}
+  ]
+}

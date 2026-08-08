@@ -21,6 +21,8 @@ const backendBaseUrl = (process.env.ANGMOO_API_BASE_URL ?? "http://127.0.0.1:808
   /\/$/,
   "",
 );
+const developmentScriptSources =
+  process.env.NODE_ENV === "development" ? ["'unsafe-eval'"] : [];
 
 const contentSecurityPolicy = [
   "default-src 'self'",
@@ -28,7 +30,12 @@ const contentSecurityPolicy = [
   "object-src 'none'",
   "frame-ancestors 'none'",
   "form-action 'self'",
-  "script-src 'self' 'unsafe-inline' https://accounts.google.com https://challenges.cloudflare.com",
+  [
+    "script-src 'self' 'unsafe-inline'",
+    ...developmentScriptSources,
+    "https://accounts.google.com",
+    "https://challenges.cloudflare.com",
+  ].join(" "),
   "style-src 'self' 'unsafe-inline' https://accounts.google.com",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",

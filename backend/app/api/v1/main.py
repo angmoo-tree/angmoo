@@ -10,6 +10,7 @@ from app.api.v1.routes import character_lore
 from app.api.v1.routes import community
 from app.api.v1.routes import messages
 from app.api.v1.routes import tree
+from app.api.v1.routes import worlds
 
 
 class HostedRouterConfigurationError(RuntimeError):
@@ -25,6 +26,7 @@ PUBLIC_ROUTERS = (
     community.router,
     messages.router,
     tree.router,
+    worlds.router,
 )
 
 

@@ -42,6 +42,17 @@ paths = ['''backend/tests/test_security_secret_scan\.py''']
 regexes = ['''(?:AIza1234567890[1]234567890|sk-1234567890[1]2345678901234)''']
 
 [[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Deterministic public World foundation idempotency marker"
+condition = "AND"
+regexTarget = "line"
+paths = [
+  '''backend/app/alembic/versions/20260807_0072_angmoo_global_foundation_backfill\.py''',
+  '''backend/app/services/world_foundation\.py''',
+]
+regexes = ['''^\s*create_idempotency_key="p1-angmoo-global-foundation",\s*$''']
+
+[[allowlists]]
 targetRules = ["angmoo-sensitive-env-value"]
 description = "Documented local-only APP_SECRET placeholder"
 condition = "AND"

@@ -3,8 +3,15 @@ const ALLOWED_RETURN_PATHS = [
   /^\/profiles\/characters\/[^/?#]+$/,
   /^\/messages\/[^/?#]+$/,
 ];
+const ALLOWED_LOGIN_RETURN_PATHS = [
+  /^\/worlds\/new$/,
+  /^\/worlds\/[^/?#]+\/creator$/,
+];
 
-export function safeSettingsReturnTo(value: string | null) {
+function safeAllowlistedReturnTo(
+  value: string | null,
+  allowedPaths: RegExp[],
+) {
   if (!value || !value.startsWith("/") || value.startsWith("//")) {
     return null;
   }
@@ -17,8 +24,16 @@ export function safeSettingsReturnTo(value: string | null) {
   if (parsed.origin !== "https://angmoo.invalid") {
     return null;
   }
-  if (!ALLOWED_RETURN_PATHS.some((pattern) => pattern.test(parsed.pathname))) {
+  if (!allowedPaths.some((pattern) => pattern.test(parsed.pathname))) {
     return null;
   }
   return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+}
+
+export function safeSettingsReturnTo(value: string | null) {
+  return safeAllowlistedReturnTo(value, ALLOWED_RETURN_PATHS);
+}
+
+export function safeLoginReturnTo(value: string | null) {
+  return safeAllowlistedReturnTo(value, ALLOWED_LOGIN_RETURN_PATHS);
 }

@@ -1,0 +1,28 @@
+{
+  "fixture_id": "proactive_off_blocked",
+  "contract_version": "p0-contract-v1",
+  "required_phase": "P9",
+  "input": {
+    "proactive_enabled": false,
+    "evidence_valid": true
+  },
+  "expected": {
+    "outcome": "rejected",
+    "code": "proactive_disabled",
+    "writes": [],
+    "provider_call_count": 0,
+    "notes": [
+      "no message",
+      "no notification"
+    ]
+  },
+  "variants": [
+    "missing_required_field",
+    "length_or_enum_exceeded",
+    "foreign_key_missing",
+    "duplicate_idempotency",
+    "deleted_source",
+    "inactive_membership",
+    "stale_contract_hash"
+  ]
+}

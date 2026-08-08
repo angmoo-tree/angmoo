@@ -1,0 +1,14 @@
+{
+  "fixture_id": "world_private_nonmember_hidden",
+  "contract_version": "p0-contract-v1",
+  "required_phase": "P1",
+  "input": {"visibility": "private", "principal": "nonmember"},
+  "expected": {
+    "outcome": "rejected",
+    "code": "world_not_found",
+    "writes": [],
+    "provider_call_count": 0,
+    "notes": ["existence is hidden with 404", "creator context is not disclosed"]
+  },
+  "variants": ["missing_required_field", "length_or_enum_exceeded", "foreign_key_missing", "duplicate_idempotency", "deleted_source", "inactive_membership", "stale_contract_hash"]
+}

@@ -1,0 +1,27 @@
+{
+  "fixture_id": "started_episode_revision_rejected",
+  "contract_version": "p0-contract-v1",
+  "required_phase": "P3",
+  "input": {
+    "plan_item_status": "in_progress",
+    "action": "revise"
+  },
+  "expected": {
+    "outcome": "rejected",
+    "code": "started_item_immutable",
+    "writes": [],
+    "provider_call_count": 0,
+    "notes": [
+      "existing item retained"
+    ]
+  },
+  "variants": [
+    "missing_required_field",
+    "length_or_enum_exceeded",
+    "foreign_key_missing",
+    "duplicate_idempotency",
+    "deleted_source",
+    "inactive_membership",
+    "stale_contract_hash"
+  ]
+}

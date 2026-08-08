@@ -1,0 +1,14 @@
+{
+  "fixture_id": "world_semantic_change_hash_changes",
+  "contract_version": "p0-contract-v1",
+  "required_phase": "P1",
+  "input": {"change": "daily_life_description"},
+  "expected": {
+    "outcome": "success",
+    "code": "world_contract_hash_changed",
+    "writes": ["world"],
+    "provider_call_count": 0,
+    "notes": ["definition_version increments", "future P2 repertoire becomes stale"]
+  },
+  "variants": ["missing_required_field", "length_or_enum_exceeded", "foreign_key_missing", "duplicate_idempotency", "deleted_source", "inactive_membership", "stale_contract_hash"]
+}

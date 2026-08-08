@@ -36,12 +36,23 @@ def test_frontend_uses_allowlisted_return_and_profile_media_helpers() -> None:
     settings = (root / "components" / "settings-client.tsx").read_text(
         encoding="utf-8"
     )
+    login_page = (root / "app" / "login" / "page.tsx").read_text(
+        encoding="utf-8"
+    )
+    login_client = (root / "components" / "login-client.tsx").read_text(
+        encoding="utf-8"
+    )
     avatar = (root / "components" / "profile-avatar.tsx").read_text(
         encoding="utf-8"
     )
 
     assert 'value.startsWith("//")' in navigation
     assert "ALLOWED_RETURN_PATHS" in navigation
+    assert "ALLOWED_LOGIN_RETURN_PATHS" in navigation
+    assert "safeLoginReturnTo" in navigation
     assert "safeSettingsReturnTo(params.get" in settings
+    assert "safeLoginReturnTo" in login_page
+    assert 'returnTo={returnTo}' in login_page
+    assert 'returnTo ?? "/agents"' in login_client
     assert "parsed.pathname.startsWith(\"/media/\")" in media
     assert "safeSameOriginMediaUrl(avatarUrl, { allowBlob })" in avatar

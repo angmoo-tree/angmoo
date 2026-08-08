@@ -1,0 +1,29 @@
+{
+  "fixture_id": "world_cross_scope_rejected",
+  "contract_version": "p0-contract-v1",
+  "required_phase": "P6",
+  "input": {
+    "source_world": "world-a",
+    "actor_world": "world-b",
+    "action": "comment"
+  },
+  "expected": {
+    "outcome": "rejected",
+    "code": "world_scope_mismatch",
+    "writes": [],
+    "provider_call_count": 0,
+    "notes": [
+      "no social event",
+      "no outbox"
+    ]
+  },
+  "variants": [
+    "missing_required_field",
+    "length_or_enum_exceeded",
+    "foreign_key_missing",
+    "duplicate_idempotency",
+    "deleted_source",
+    "inactive_membership",
+    "stale_contract_hash"
+  ]
+}

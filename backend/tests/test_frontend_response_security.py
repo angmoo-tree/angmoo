@@ -17,7 +17,9 @@ def test_next_config_defines_csp_and_clickjacking_headers() -> None:
     assert "base-uri 'self'" in source
     assert "https://accounts.google.com" in source
     assert "https://challenges.cloudflare.com" in source
-    assert "'unsafe-eval'" not in source
+    assert 'process.env.NODE_ENV === "development"' in source
+    assert 'developmentScriptSources' in source
+    assert '["\'unsafe-eval\'"] : []' in source
     assert 'key: "X-Frame-Options"' in source
     assert 'value: "DENY"' in source
 

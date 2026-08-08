@@ -1,0 +1,29 @@
+{
+  "fixture_id": "quota_atomic_race",
+  "contract_version": "p0-contract-v1",
+  "required_phase": "P10",
+  "input": {
+    "remaining_quota": 1,
+    "concurrent_requests": 2
+  },
+  "expected": {
+    "outcome": "success",
+    "code": "single_reservation",
+    "writes": [
+      "hosted_usage_reservation:1"
+    ],
+    "provider_call_count": 1,
+    "notes": [
+      "exactly one request succeeds"
+    ]
+  },
+  "variants": [
+    "missing_required_field",
+    "length_or_enum_exceeded",
+    "foreign_key_missing",
+    "duplicate_idempotency",
+    "deleted_source",
+    "inactive_membership",
+    "stale_contract_hash"
+  ]
+}

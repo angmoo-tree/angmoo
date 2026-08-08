@@ -1,0 +1,38 @@
+{
+  "fixture_id": "world_open_join_success",
+  "contract_version": "p0-contract-v1",
+  "required_phase": "P1",
+  "input": {
+    "world": {
+      "join_policy": "open",
+      "status": "published"
+    },
+    "actor": {
+      "verified_owner": true,
+      "owned_character": true
+    }
+  },
+  "expected": {
+    "outcome": "success",
+    "code": "world_joined",
+    "writes": [
+      "world_membership",
+      "world_character"
+    ],
+    "provider_call_count": 0,
+    "notes": [
+      "membership active",
+      "world character inactive",
+      "idempotent replay"
+    ]
+  },
+  "variants": [
+    "missing_required_field",
+    "length_or_enum_exceeded",
+    "foreign_key_missing",
+    "duplicate_idempotency",
+    "deleted_source",
+    "inactive_membership",
+    "stale_contract_hash"
+  ]
+}

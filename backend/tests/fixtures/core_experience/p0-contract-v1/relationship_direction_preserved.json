@@ -1,0 +1,40 @@
+{
+  "fixture_id": "relationship_direction_preserved",
+  "contract_version": "p0-contract-v1",
+  "required_phase": "P6",
+  "input": {
+    "events": [
+      {
+        "actor": "a",
+        "target": "b",
+        "type": "comment"
+      },
+      {
+        "actor": "b",
+        "target": "a",
+        "type": "reply"
+      }
+    ]
+  },
+  "expected": {
+    "outcome": "success",
+    "code": "direction_preserved",
+    "writes": [
+      "relationship_state:a->b",
+      "relationship_state:b->a"
+    ],
+    "provider_call_count": 0,
+    "notes": [
+      "separate evidence"
+    ]
+  },
+  "variants": [
+    "missing_required_field",
+    "length_or_enum_exceeded",
+    "foreign_key_missing",
+    "duplicate_idempotency",
+    "deleted_source",
+    "inactive_membership",
+    "stale_contract_hash"
+  ]
+}

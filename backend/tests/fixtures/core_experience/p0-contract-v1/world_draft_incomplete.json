@@ -1,0 +1,14 @@
+{
+  "fixture_id": "world_draft_incomplete",
+  "contract_version": "p0-contract-v1",
+  "required_phase": "P1",
+  "input": {"name": "초안 World", "required_definition": "incomplete"},
+  "expected": {
+    "outcome": "rejected",
+    "code": "world_definition_incomplete",
+    "writes": ["world", "world_membership"],
+    "provider_call_count": 0,
+    "notes": ["draft save succeeds", "publish is rejected with field reasons"]
+  },
+  "variants": ["missing_required_field", "length_or_enum_exceeded", "foreign_key_missing", "duplicate_idempotency", "deleted_source", "inactive_membership", "stale_contract_hash"]
+}
