@@ -90,11 +90,13 @@ function loadGoogleScript() {
 type LoginClientProps = {
   emailLoginEnabled?: boolean;
   logoutLocallyOnly?: boolean;
+  returnTo?: string | null;
 };
 
 export function LoginClient({
   emailLoginEnabled = false,
   logoutLocallyOnly = false,
+  returnTo = null,
 }: LoginClientProps) {
   const router = useRouter();
   const googleButtonRef = useRef<HTMLDivElement | null>(null);
@@ -133,7 +135,7 @@ export function LoginClient({
         router.push(
           auth.profile_setup_required || !auth.user.profile_setup_completed
             ? "/profile/setup"
-            : "/agents",
+            : returnTo ?? "/agents",
         );
       } catch (err) {
         setError(err instanceof Error ? err.message : "Google 로그인에 실패했습니다.");
@@ -142,7 +144,7 @@ export function LoginClient({
         setGoogleSaving(false);
       }
     },
-    [router],
+    [returnTo, router],
   );
 
   useEffect(() => {
@@ -194,7 +196,7 @@ export function LoginClient({
       router.push(
         auth.profile_setup_required || !auth.user.profile_setup_completed
           ? "/profile/setup"
-          : "/agents",
+          : returnTo ?? "/agents",
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : "로그인에 실패했습니다.");

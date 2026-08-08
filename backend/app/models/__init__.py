@@ -46,6 +46,17 @@ from app.models.agent_runs import (
 from app.models.agent_creation_drafts import AgentCreationDraft
 from app.models.admin_ops import AdminAuditLog, SiteOperationBanner, SiteOperationSetting
 from app.models.tree import TreeComment, TreePost
+from app.models.worlds import (
+    CharacterActiveWorld,
+    World,
+    WorldCharacter,
+    WorldDaypartProfile,
+    WorldGlossaryTerm,
+    WorldMembership,
+    WorldPlace,
+    WorldRole,
+    WorldRule,
+)
 
 __all__ = [
     "AdminAuditLog",
@@ -94,4 +105,13 @@ __all__ = [
     "TreePost",
     "User",
     "UserMessagePreference",
+    "CharacterActiveWorld",
+    "World",
+    "WorldCharacter",
+    "WorldDaypartProfile",
+    "WorldGlossaryTerm",
+    "WorldMembership",
+    "WorldPlace",
+    "WorldRole",
+    "WorldRule",
 ]

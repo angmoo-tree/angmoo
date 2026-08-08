@@ -1,0 +1,36 @@
+{
+  "fixture_id": "repertoire_4x10_success",
+  "contract_version": "p0-contract-v1",
+  "required_phase": "P2",
+  "input": {
+    "daypart_counts": {
+      "dawn": 10,
+      "morning": 10,
+      "afternoon": 10,
+      "evening": 10
+    },
+    "template_refs_valid": true,
+    "contract_hash_fresh": true
+  },
+  "expected": {
+    "outcome": "success",
+    "code": "repertoire_ready",
+    "writes": [
+      "world_activity_repertoire",
+      "world_activity_candidates:40"
+    ],
+    "provider_call_count": 1,
+    "notes": [
+      "atomic save"
+    ]
+  },
+  "variants": [
+    "missing_required_field",
+    "length_or_enum_exceeded",
+    "foreign_key_missing",
+    "duplicate_idempotency",
+    "deleted_source",
+    "inactive_membership",
+    "stale_contract_hash"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "fixture_id": "neo4j_down_fallback",
+  "contract_version": "p0-contract-v1",
+  "required_phase": "P7",
+  "input": {
+    "graph_available": false,
+    "direct_relation_exists": true,
+    "requested_hops": 2
+  },
+  "expected": {
+    "outcome": "fallback",
+    "code": "postgres_one_hop",
+    "writes": [],
+    "provider_call_count": 0,
+    "notes": [
+      "no invented multi-hop"
+    ]
+  },
+  "variants": [
+    "missing_required_field",
+    "length_or_enum_exceeded",
+    "foreign_key_missing",
+    "duplicate_idempotency",
+    "deleted_source",
+    "inactive_membership",
+    "stale_contract_hash"
+  ]
+}

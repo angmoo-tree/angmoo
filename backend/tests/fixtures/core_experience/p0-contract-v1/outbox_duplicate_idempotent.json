@@ -1,0 +1,30 @@
+{
+  "fixture_id": "outbox_duplicate_idempotent",
+  "contract_version": "p0-contract-v1",
+  "required_phase": "P7",
+  "input": {
+    "same_source_event_reprocessed": true
+  },
+  "expected": {
+    "outcome": "success",
+    "code": "projection_idempotent",
+    "writes": [
+      "graph_projection:1",
+      "outbox:succeeded"
+    ],
+    "provider_call_count": 0,
+    "notes": [
+      "no duplicate node",
+      "no duplicate edge"
+    ]
+  },
+  "variants": [
+    "missing_required_field",
+    "length_or_enum_exceeded",
+    "foreign_key_missing",
+    "duplicate_idempotency",
+    "deleted_source",
+    "inactive_membership",
+    "stale_contract_hash"
+  ]
+}

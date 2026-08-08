@@ -1,0 +1,30 @@
+{
+  "fixture_id": "repertoire_duplicate_failed",
+  "contract_version": "p0-contract-v1",
+  "required_phase": "P2",
+  "input": {
+    "duplicate_signature_fields": [
+      "place_key",
+      "activity_pattern",
+      "purpose"
+    ]
+  },
+  "expected": {
+    "outcome": "rejected",
+    "code": "repertoire_duplicate",
+    "writes": [],
+    "provider_call_count": 1,
+    "notes": [
+      "no partial activation"
+    ]
+  },
+  "variants": [
+    "missing_required_field",
+    "length_or_enum_exceeded",
+    "foreign_key_missing",
+    "duplicate_idempotency",
+    "deleted_source",
+    "inactive_membership",
+    "stale_contract_hash"
+  ]
+}

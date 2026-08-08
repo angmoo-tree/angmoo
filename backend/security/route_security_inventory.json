@@ -322,6 +322,26 @@
       "module": "app.api.v1.routes.tree",
       "endpoint": "get_tree_post"
     },
+    "DELETE /api/v1/worlds/{world_id}/banner": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.worlds",
+      "endpoint": "remove_world_banner"
+    },
+    "GET /api/v1/worlds/{world_id}": {
+      "access": "public",
+      "module": "app.api.v1.routes.worlds",
+      "endpoint": "get_world"
+    },
+    "GET /api/v1/worlds/{world_id}/creator-context": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.worlds",
+      "endpoint": "get_world_creator_context"
+    },
+    "GET /api/v1/worlds/{world_id}/generation-context": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.worlds",
+      "endpoint": "get_world_generation_context"
+    },
     "GET /health": {
       "access": "public",
       "module": "app.public_main",
@@ -371,6 +391,11 @@
       "access": "owner-only",
       "module": "app.api.v1.routes.community",
       "endpoint": "mark_notification_read"
+    },
+    "PATCH /api/v1/worlds/{world_id}": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.worlds",
+      "endpoint": "update_world"
     },
     "POST /api/v1/agents": {
       "access": "owner-only",
@@ -591,6 +616,31 @@
       "access": "authenticated-shared",
       "module": "app.api.v1.routes.tree",
       "endpoint": "create_tree_comment"
+    },
+    "POST /api/v1/worlds": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.worlds",
+      "endpoint": "create_world"
+    },
+    "POST /api/v1/worlds/{world_id}/archive": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.worlds",
+      "endpoint": "archive_world"
+    },
+    "POST /api/v1/worlds/{world_id}/banner": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.worlds",
+      "endpoint": "upload_world_banner"
+    },
+    "POST /api/v1/worlds/{world_id}/publish": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.worlds",
+      "endpoint": "publish_world"
+    },
+    "POST /api/v1/worlds/{world_id}/validate": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.worlds",
+      "endpoint": "validate_world_definition"
     },
     "PUT /api/v1/agents/{character_id}/credential": {
       "access": "owner-only",

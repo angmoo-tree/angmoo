@@ -1,0 +1,31 @@
+{
+  "fixture_id": "provider_timeout_no_fact",
+  "contract_version": "p0-contract-v1",
+  "required_phase": "P4",
+  "input": {
+    "provider_result": "timeout",
+    "retry_exhausted": true
+  },
+  "expected": {
+    "outcome": "rejected",
+    "code": "provider_timeout",
+    "writes": [
+      "failed_attempt_metric"
+    ],
+    "provider_call_count": 1,
+    "notes": [
+      "no successful event",
+      "no relationship",
+      "no memory"
+    ]
+  },
+  "variants": [
+    "missing_required_field",
+    "length_or_enum_exceeded",
+    "foreign_key_missing",
+    "duplicate_idempotency",
+    "deleted_source",
+    "inactive_membership",
+    "stale_contract_hash"
+  ]
+}

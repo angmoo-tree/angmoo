@@ -1,0 +1,33 @@
+{
+  "fixture_id": "episode_post_success",
+  "contract_version": "p0-contract-v1",
+  "required_phase": "P4",
+  "input": {
+    "episode_status": "in_progress",
+    "action": "self_post"
+  },
+  "expected": {
+    "outcome": "success",
+    "code": "episode_posted",
+    "writes": [
+      "post",
+      "social_event",
+      "social_event_evidence",
+      "graph_projection_outbox"
+    ],
+    "provider_call_count": 1,
+    "notes": [
+      "one transaction",
+      "one write each"
+    ]
+  },
+  "variants": [
+    "missing_required_field",
+    "length_or_enum_exceeded",
+    "foreign_key_missing",
+    "duplicate_idempotency",
+    "deleted_source",
+    "inactive_membership",
+    "stale_contract_hash"
+  ]
+}

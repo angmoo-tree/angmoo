@@ -91,6 +91,10 @@
       "destination": "backend/README.md"
     },
     {
+      "source": "backend/scripts/seed_p1_world_fixture.py",
+      "destination": "backend/scripts/seed_p1_world_fixture.py"
+    },
+    {
       "source": "backend/alembic.ini",
       "destination": "backend/alembic.ini"
     },
@@ -383,6 +387,14 @@
       "destination": "backend/app/alembic/versions/20260804_0069_auth_session_expiry.py"
     },
     {
+      "source": "backend/app/alembic/versions/20260807_0070_world_foundation.py",
+      "destination": "backend/app/alembic/versions/20260807_0070_world_foundation.py"
+    },
+    {
+      "source": "backend/app/alembic/versions/20260807_0072_angmoo_global_foundation_backfill.py",
+      "destination": "backend/app/alembic/versions/20260807_0072_angmoo_global_foundation_backfill.py"
+    },
+    {
       "source": "backend/app/api/v1/__init__.py",
       "destination": "backend/app/api/v1/__init__.py"
     },
@@ -435,6 +447,18 @@
       "destination": "backend/app/api/v1/routes/tree.py"
     },
     {
+      "source": "backend/app/api/v1/routes/worlds.py",
+      "destination": "backend/app/api/v1/routes/worlds.py"
+    },
+    {
+      "source": "backend/app/contracts/__init__.py",
+      "destination": "backend/app/contracts/__init__.py"
+    },
+    {
+      "source": "backend/app/contracts/core_experience.py",
+      "destination": "backend/app/contracts/core_experience.py"
+    },
+    {
       "source": "backend/app/core/__init__.py",
       "destination": "backend/app/core/__init__.py"
     },
@@ -457,6 +481,10 @@
     {
       "source": "backend/app/core/db.py",
       "destination": "backend/app/core/db.py"
+    },
+    {
+      "source": "backend/app/core/ids.py",
+      "destination": "backend/app/core/ids.py"
     },
     {
       "source": "backend/app/core/image_generation.py",
@@ -587,6 +615,10 @@
       "destination": "backend/app/models/tree.py"
     },
     {
+      "source": "backend/app/models/worlds.py",
+      "destination": "backend/app/models/worlds.py"
+    },
+    {
       "source": "backend/app/policies/__init__.py",
       "destination": "backend/app/policies/__init__.py"
     },
@@ -665,6 +697,10 @@
     {
       "source": "backend/app/schemas/tree.py",
       "destination": "backend/app/schemas/tree.py"
+    },
+    {
+      "source": "backend/app/schemas/worlds.py",
+      "destination": "backend/app/schemas/worlds.py"
     },
     {
       "source": "backend/app/services/__init__.py",
@@ -827,6 +863,22 @@
       "destination": "backend/app/services/turnstile.py"
     },
     {
+      "source": "backend/app/services/world_definitions.py",
+      "destination": "backend/app/services/world_definitions.py"
+    },
+    {
+      "source": "backend/app/services/world_foundation.py",
+      "destination": "backend/app/services/world_foundation.py"
+    },
+    {
+      "source": "backend/app/services/world_generation_context.py",
+      "destination": "backend/app/services/world_generation_context.py"
+    },
+    {
+      "source": "backend/app/services/worlds.py",
+      "destination": "backend/app/services/worlds.py"
+    },
+    {
       "source": "backend/pyproject.toml",
       "destination": "backend/pyproject.toml"
     },
@@ -857,6 +909,118 @@
     {
       "source": "backend/tests/conftest.py",
       "destination": "backend/tests/conftest.py"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/episode_post_success.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/episode_post_success.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/fictional_interaction_rejected.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/fictional_interaction_rejected.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/fixture.schema.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/fixture.schema.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/manifest.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/manifest.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/memory_deleted_blocked.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/memory_deleted_blocked.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/memory_opt_out_blocked.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/memory_opt_out_blocked.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/neo4j_down_fallback.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/neo4j_down_fallback.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/outbox_duplicate_idempotent.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/outbox_duplicate_idempotent.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/proactive_duplicate_quiet_blocked.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/proactive_duplicate_quiet_blocked.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/proactive_off_blocked.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/proactive_off_blocked.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/provider_timeout_no_fact.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/provider_timeout_no_fact.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/quota_atomic_race.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/quota_atomic_race.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/relationship_direction_preserved.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/relationship_direction_preserved.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/repertoire_4x10_success.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/repertoire_4x10_success.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/repertoire_count_failed.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/repertoire_count_failed.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/repertoire_duplicate_failed.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/repertoire_duplicate_failed.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/started_episode_revision_rejected.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/started_episode_revision_rejected.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/world_banner_only_hash_stable.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/world_banner_only_hash_stable.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/world_cross_scope_rejected.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/world_cross_scope_rejected.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/world_definition_prompt_injection_data_only.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/world_definition_prompt_injection_data_only.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/world_draft_incomplete.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/world_draft_incomplete.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/world_enriched_publish_ready.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/world_enriched_publish_ready.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/world_generation_context_sanitized.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/world_generation_context_sanitized.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/world_minimal_publish_ready.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/world_minimal_publish_ready.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/world_open_join_success.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/world_open_join_success.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/world_private_nonmember_hidden.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/world_private_nonmember_hidden.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/world_semantic_change_hash_changes.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/world_semantic_change_hash_changes.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/world_switch_locked_joint_rejected.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/world_switch_locked_joint_rejected.json"
     },
     {
       "source": "backend/tests/test_agent_activity_limits.py",
@@ -1089,6 +1253,22 @@
     {
       "source": "backend/tests/test_visible_post_text_sanitizer.py",
       "destination": "backend/tests/test_visible_post_text_sanitizer.py"
+    },
+    {
+      "source": "backend/tests/test_p0_contract_fixtures.py",
+      "destination": "backend/tests/test_p0_contract_fixtures.py"
+    },
+    {
+      "source": "backend/tests/test_world_creator_routes.py",
+      "destination": "backend/tests/test_world_creator_routes.py"
+    },
+    {
+      "source": "backend/tests/test_world_definition_contract.py",
+      "destination": "backend/tests/test_world_definition_contract.py"
+    },
+    {
+      "source": "backend/tests/test_world_foundation.py",
+      "destination": "backend/tests/test_world_foundation.py"
     },
     {
       "source": "backend/uv.lock",
@@ -1335,6 +1515,14 @@
       "destination": "frontend/src/app/tree/page.tsx"
     },
     {
+      "source": "frontend/src/app/worlds/[worldId]/creator/page.tsx",
+      "destination": "frontend/src/app/worlds/[worldId]/creator/page.tsx"
+    },
+    {
+      "source": "frontend/src/app/worlds/new/page.tsx",
+      "destination": "frontend/src/app/worlds/new/page.tsx"
+    },
+    {
       "source": "frontend/src/components/active-agent-card.tsx",
       "destination": "frontend/src/components/active-agent-card.tsx"
     },
@@ -1467,6 +1655,10 @@
       "destination": "frontend/src/components/user-profile-client.tsx"
     },
     {
+      "source": "frontend/src/components/world-creator-client.tsx",
+      "destination": "frontend/src/components/world-creator-client.tsx"
+    },
+    {
       "source": "frontend/src/lib/activity.ts",
       "destination": "frontend/src/lib/activity.ts"
     },
@@ -1533,6 +1725,10 @@
     {
       "source": "frontend/src/lib/use-private-media-url.ts",
       "destination": "frontend/src/lib/use-private-media-url.ts"
+    },
+    {
+      "source": "frontend/src/lib/worlds.ts",
+      "destination": "frontend/src/lib/worlds.ts"
     },
     {
       "source": "frontend/tsconfig.json",

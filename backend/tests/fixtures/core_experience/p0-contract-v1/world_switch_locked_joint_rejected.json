@@ -1,0 +1,27 @@
+{
+  "fixture_id": "world_switch_locked_joint_rejected",
+  "contract_version": "p0-contract-v1",
+  "required_phase": "P3",
+  "input": {
+    "joint_activity_status": "started",
+    "action": "world_switch"
+  },
+  "expected": {
+    "outcome": "rejected",
+    "code": "world_switch_blocked",
+    "writes": [],
+    "provider_call_count": 0,
+    "notes": [
+      "active mapping unchanged"
+    ]
+  },
+  "variants": [
+    "missing_required_field",
+    "length_or_enum_exceeded",
+    "foreign_key_missing",
+    "duplicate_idempotency",
+    "deleted_source",
+    "inactive_membership",
+    "stale_contract_hash"
+  ]
+}

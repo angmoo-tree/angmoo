@@ -1,0 +1,27 @@
+{
+  "fixture_id": "memory_opt_out_blocked",
+  "contract_version": "p0-contract-v1",
+  "required_phase": "P8",
+  "input": {
+    "long_term_memory_enabled": false
+  },
+  "expected": {
+    "outcome": "rejected",
+    "code": "memory_opt_out",
+    "writes": [],
+    "provider_call_count": 0,
+    "notes": [
+      "no candidate",
+      "no retrieval"
+    ]
+  },
+  "variants": [
+    "missing_required_field",
+    "length_or_enum_exceeded",
+    "foreign_key_missing",
+    "duplicate_idempotency",
+    "deleted_source",
+    "inactive_membership",
+    "stale_contract_hash"
+  ]
+}

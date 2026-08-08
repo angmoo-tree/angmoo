@@ -1,0 +1,30 @@
+{
+  "fixture_id": "proactive_duplicate_quiet_blocked",
+  "contract_version": "p0-contract-v1",
+  "required_phase": "P9",
+  "input": {
+    "same_evidence": true,
+    "within_quiet_hours": true
+  },
+  "expected": {
+    "outcome": "deferred",
+    "code": "proactive_duplicate_or_quiet",
+    "writes": [
+      "proactive_candidate:deferred"
+    ],
+    "provider_call_count": 0,
+    "notes": [
+      "defer until 08:00",
+      "no light check-in"
+    ]
+  },
+  "variants": [
+    "missing_required_field",
+    "length_or_enum_exceeded",
+    "foreign_key_missing",
+    "duplicate_idempotency",
+    "deleted_source",
+    "inactive_membership",
+    "stale_contract_hash"
+  ]
+}

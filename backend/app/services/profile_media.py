@@ -160,6 +160,30 @@ def save_profile_media_bytes(
     return f"{settings.media_url_path}/characters/{character_id}/{filename}"
 
 
+def save_world_banner(
+    *,
+    world_id: str,
+    content_type: str,
+    data_base64: str,
+) -> str:
+    content = decode_profile_media(content_type=content_type, data_base64=data_base64)
+    normalized_content_type = content_type.strip().lower()
+    if normalized_content_type not in CONTENT_TYPES:
+        raise InvalidProfileMediaError("Only jpg, png, and webp images are allowed")
+    validate_profile_media_content(normalized_content_type, content)
+    encoded = encode_profile_media_webp(
+        media_type="banner",
+        content=content,
+    )
+
+    world_dir = settings.media_root_path / "worlds" / world_id
+    world_dir.mkdir(parents=True, exist_ok=True)
+    filename = f"banner-{uuid4().hex}.webp"
+    path = world_dir / filename
+    path.write_bytes(encoded)
+    return f"{settings.media_url_path}/worlds/{world_id}/{filename}"
+
+
 def save_seed_image(
     *,
     character_id: str,

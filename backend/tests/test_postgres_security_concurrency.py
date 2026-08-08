@@ -21,6 +21,7 @@ from app.services import local_bot_quota
 from app.services import login_throttle
 from app.services import lore_parser_quota
 from app.services import messages as message_service
+from app.services import worlds as world_service
 from app.services.direct_llm import DirectLlmResponse
 
 
@@ -78,8 +79,80 @@ def test_security_migration_schema_contract() -> None:
     with engine.connect() as connection:
         assert (
             connection.scalar(text("SELECT version_num FROM alembic_version"))
-            == "20260804_0069"
+            == "20260807_0072"
         )
+
+
+def test_world_row_version_serializes_concurrent_writers() -> None:
+    engine = _engine()
+    suffix = uuid4().hex
+    user_id = f"user-world-concurrency-{suffix}"
+    barrier = Barrier(2)
+
+    with Session(engine) as db:
+        owner = models.User(
+            id=user_id,
+            email=f"{suffix}@example.invalid",
+            display_name=user_id,
+            display_name_normalized=user_id,
+            profile_setup_completed=True,
+        )
+        db.add(owner)
+        db.commit()
+        created = world_service.create_world(
+            db,
+            user=owner,
+            data=schemas.WorldDraftCreate(
+                name="동시성 검증 World",
+                tagline="두 작성자의 오래된 수정을 동시에 막는 검증 세계",
+                setting_description="세계" * 100,
+                daily_life_description="일상" * 75,
+                genre_tags=["test"],
+                tone_tags=["safe"],
+                idempotency_key=f"create-{suffix}",
+            ),
+        )
+        world_id = created.world.id
+        row_version = created.world.row_version
+
+    def attempt(label: str) -> str:
+        with Session(engine) as db:
+            owner = db.get(models.User, user_id)
+            assert owner is not None
+            barrier.wait()
+            try:
+                world_service.update_world(
+                    db,
+                    world_id=world_id,
+                    user=owner,
+                    data=schemas.WorldUpdate(
+                        row_version=row_version,
+                        tagline=f"{label} 작성자가 저장한 충분히 긴 World 소개 문장",
+                    ),
+                )
+            except world_service.WorldRowVersionConflictError:
+                db.rollback()
+                return "conflict"
+            return "updated"
+
+    try:
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            results = list(executor.map(attempt, ("첫 번째", "두 번째")))
+        assert sorted(results) == ["conflict", "updated"]
+        with Session(engine) as db:
+            world = db.get(models.World, world_id)
+            assert world is not None
+            assert world.row_version == row_version + 1
+    finally:
+        with Session(engine) as db:
+            db.execute(
+                delete(models.WorldMembership).where(
+                    models.WorldMembership.world_id == world_id
+                )
+            )
+            db.execute(delete(models.World).where(models.World.id == world_id))
+            db.execute(delete(models.User).where(models.User.id == user_id))
+            db.commit()
 
 
 def test_resident_character_assignment_is_unique_across_postgres_sessions() -> None:

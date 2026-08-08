@@ -1,0 +1,14 @@
+{
+  "fixture_id": "world_enriched_publish_ready",
+  "contract_version": "p0-contract-v1",
+  "required_phase": "P1",
+  "input": {"required_definition": "complete", "optional_settings": ["places", "roles", "rules", "glossary"]},
+  "expected": {
+    "outcome": "success",
+    "code": "world_enriched_publish_ready",
+    "writes": ["world", "world_place", "world_role", "world_rule", "world_glossary_term"],
+    "provider_call_count": 0,
+    "notes": ["DETAILED quality tier", "stable keys included in canonical hash"]
+  },
+  "variants": ["missing_required_field", "length_or_enum_exceeded", "foreign_key_missing", "duplicate_idempotency", "deleted_source", "inactive_membership", "stale_contract_hash"]
+}

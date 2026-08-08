@@ -1,0 +1,14 @@
+{
+  "fixture_id": "world_generation_context_sanitized",
+  "contract_version": "p0-contract-v1",
+  "required_phase": "P1",
+  "input": {"world_definition": "complete", "requester_role": "owner"},
+  "expected": {
+    "outcome": "success",
+    "code": "world_generation_context_sanitized",
+    "writes": [],
+    "provider_call_count": 0,
+    "notes": ["owner and credential fields excluded", "only active same-World settings included"]
+  },
+  "variants": ["missing_required_field", "length_or_enum_exceeded", "foreign_key_missing", "duplicate_idempotency", "deleted_source", "inactive_membership", "stale_contract_hash"]
+}

@@ -13,6 +13,7 @@
       "agent_relationship_points",
       "agent_runs",
       "auth_sessions",
+      "character_active_worlds",
       "character_lore_chunks",
       "character_lore_sources",
       "character_message_settings",
@@ -31,7 +32,9 @@
       "profile_follows",
       "profile_image_candidates",
       "profile_image_quota_reservations",
-      "user_message_preferences"
+      "user_message_preferences",
+      "world_characters",
+      "world_memberships"
     ],
     "scrub": [
       "admin_audit_logs",
@@ -48,7 +51,13 @@
       "post_media",
       "posts",
       "tree_comments",
-      "tree_posts"
+      "tree_posts",
+      "world_daypart_profiles",
+      "world_glossary_terms",
+      "world_places",
+      "world_rules",
+      "world_roles",
+      "worlds"
     ],
     "retain_temporary_security_control": [
       "auth_external_verification_reservations",
@@ -69,6 +78,7 @@
       "agent_public_action_executions",
       "agent_relationship_points",
       "agent_runs",
+      "character_active_worlds",
       "character_lore_chunks",
       "character_lore_sources",
       "character_message_settings",
@@ -85,7 +95,8 @@
       "post_reposts",
       "profile_follows",
       "profile_image_candidates",
-      "profile_image_quota_reservations"
+      "profile_image_quota_reservations",
+      "world_characters"
     ],
     "scrub": [
       "characters"
@@ -113,7 +124,14 @@
       "post_reports",
       "site_operation_banners",
       "site_operation_settings",
-      "users"
+      "users",
+      "world_daypart_profiles",
+      "world_glossary_terms",
+      "world_memberships",
+      "world_places",
+      "world_rules",
+      "world_roles",
+      "worlds"
     ]
   }
 }
