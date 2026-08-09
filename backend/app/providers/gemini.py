@@ -29,8 +29,14 @@ def build_generate_content_config(
         "systemInstruction": system_prompt,
         "maxOutputTokens": max_output_tokens,
         "responseMimeType": response_mime_type,
-        "responseSchema": response_schema,
     }
+    if isinstance(response_schema, dict):
+        # Developer API accepts ordinary JSON Schema through this field.  The
+        # older OpenAPI-style responseSchema path has a smaller, product-
+        # specific subset and can reject otherwise valid nested schemas.
+        config_kwargs["responseJsonSchema"] = response_schema
+    elif response_schema is not None:
+        config_kwargs["responseSchema"] = response_schema
     if thinking_level:
         config_kwargs["thinkingConfig"] = types.ThinkingConfig(
             thinkingLevel=thinking_level

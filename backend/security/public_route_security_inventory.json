@@ -327,10 +327,20 @@
       "module": "app.api.v1.routes.tree",
       "endpoint": "get_tree_post"
     },
+    "GET /api/v1/world-characters/{world_character_id}/autonomy-setup": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_character_setup",
+      "endpoint": "get_autonomy_setup"
+    },
     "GET /api/v1/worlds/{world_id}": {
       "access": "public",
       "module": "app.api.v1.routes.worlds",
       "endpoint": "get_world"
+    },
+    "GET /api/v1/worlds/{world_id}/characters/{character_id}": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.worlds",
+      "endpoint": "get_world_character_entry"
     },
     "GET /api/v1/worlds/{world_id}/creator-context": {
       "access": "owner-only",
@@ -617,6 +627,31 @@
       "module": "app.api.v1.routes.tree",
       "endpoint": "create_tree_comment"
     },
+    "POST /api/v1/world-characters/{world_character_id}/autonomy-setup/approve": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_character_setup",
+      "endpoint": "approve_autonomy_setup"
+    },
+    "POST /api/v1/world-characters/{world_character_id}/autonomy-setup/generate": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_character_setup",
+      "endpoint": "generate_autonomy_setup"
+    },
+    "POST /api/v1/world-characters/{world_character_id}/autonomy-setup/preflight": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_character_setup",
+      "endpoint": "preflight_autonomy_setup"
+    },
+    "POST /api/v1/world-characters/{world_character_id}/autonomy-setup/reject": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_character_setup",
+      "endpoint": "reject_autonomy_setup"
+    },
+    "POST /api/v1/world-characters/{world_character_id}/autonomy-setup/retry": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_character_setup",
+      "endpoint": "retry_autonomy_setup"
+    },
     "POST /api/v1/worlds": {
       "access": "owner-only",
       "module": "app.api.v1.routes.worlds",
@@ -631,6 +666,11 @@
       "access": "owner-only",
       "module": "app.api.v1.routes.worlds",
       "endpoint": "upload_world_banner"
+    },
+    "POST /api/v1/worlds/{world_id}/characters": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.worlds",
+      "endpoint": "enter_world_with_character"
     },
     "POST /api/v1/worlds/{world_id}/publish": {
       "access": "owner-only",

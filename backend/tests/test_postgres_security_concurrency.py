@@ -54,6 +54,10 @@ def test_security_migration_schema_contract() -> None:
         "local_bot_action_quota_buckets",
         "local_bot_read_quota_buckets",
         "lore_parser_leases",
+        "world_activity_candidates",
+        "world_activity_repertoires",
+        "world_character_setup_attempts",
+        "world_community_profiles",
     }
     assert expected_tables.issubset(set(inspector.get_table_names()))
     assert {
@@ -79,7 +83,7 @@ def test_security_migration_schema_contract() -> None:
     with engine.connect() as connection:
         assert (
             connection.scalar(text("SELECT version_num FROM alembic_version"))
-            == "20260807_0072"
+            == "20260808_0073"
         )
 
 

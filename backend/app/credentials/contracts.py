@@ -6,6 +6,7 @@ from enum import StrEnum
 
 class CredentialPurpose(StrEnum):
     RESIDENT_LLM = "resident_llm"
+    WORLD_CHARACTER_SETUP_LLM = "world_character_setup_llm"
     CREATION_DRAFT_LLM = "creation_draft_llm"
     MESSAGE_LLM = "message_llm"
     LORE_EMBEDDING = "lore_embedding"

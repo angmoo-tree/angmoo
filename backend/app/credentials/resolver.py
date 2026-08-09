@@ -13,6 +13,7 @@ class CredentialResolutionError(ValueError):
 
 _DEFAULT_STORED_PURPOSES: dict[CredentialPurpose, frozenset[str]] = {
     CredentialPurpose.RESIDENT_LLM: frozenset({"agent"}),
+    CredentialPurpose.WORLD_CHARACTER_SETUP_LLM: frozenset({"agent"}),
     CredentialPurpose.MESSAGE_LLM: frozenset({"agent", "message"}),
     CredentialPurpose.LORE_EMBEDDING: frozenset({"agent"}),
     CredentialPurpose.PRIVATE_OPENCLAW: frozenset({"agent"}),

@@ -212,6 +212,10 @@ export function getWorldCreatorContext(worldId: string) {
   return apiRequest<WorldCreatorContext>(worldPath(worldId, "/creator-context"));
 }
 
+export function getWorld(worldId: string) {
+  return apiRequest<WorldRead>(worldPath(worldId));
+}
+
 export function updateWorld(worldId: string, data: WorldUpdate) {
   return apiRequest<WorldCreatorContext>(worldPath(worldId), {
     method: "PATCH",

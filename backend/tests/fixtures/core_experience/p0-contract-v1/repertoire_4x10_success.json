@@ -9,7 +9,19 @@
       "afternoon": 10,
       "evening": 10
     },
-    "template_refs_valid": true,
+    "world_generation_context_fixture_id": "world_generation_context_sanitized",
+    "world_character_id": "world-character-a",
+    "character_contract_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "world_contract_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "same_world_references": {
+      "place_key": "alchemy-lab",
+      "role_key": "student",
+      "forbid_rule_keys": ["no-dangerous-spells"]
+    },
+    "logical_call_expectation": {
+      "community_profile": 1,
+      "repertoire": 1
+    },
     "contract_hash_fresh": true
   },
   "expected": {
@@ -19,7 +31,7 @@
       "world_activity_repertoire",
       "world_activity_candidates:40"
     ],
-    "provider_call_count": 1,
+    "provider_call_count": 3,
     "notes": [
       "atomic save"
     ]

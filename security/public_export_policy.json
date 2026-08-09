@@ -395,6 +395,10 @@
       "destination": "backend/app/alembic/versions/20260807_0072_angmoo_global_foundation_backfill.py"
     },
     {
+      "source": "backend/app/alembic/versions/20260808_0073_world_character_repertoire.py",
+      "destination": "backend/app/alembic/versions/20260808_0073_world_character_repertoire.py"
+    },
+    {
       "source": "backend/app/api/v1/__init__.py",
       "destination": "backend/app/api/v1/__init__.py"
     },
@@ -449,6 +453,10 @@
     {
       "source": "backend/app/api/v1/routes/worlds.py",
       "destination": "backend/app/api/v1/routes/worlds.py"
+    },
+    {
+      "source": "backend/app/api/v1/routes/world_character_setup.py",
+      "destination": "backend/app/api/v1/routes/world_character_setup.py"
     },
     {
       "source": "backend/app/contracts/__init__.py",
@@ -619,6 +627,10 @@
       "destination": "backend/app/models/worlds.py"
     },
     {
+      "source": "backend/app/models/world_character_setup.py",
+      "destination": "backend/app/models/world_character_setup.py"
+    },
+    {
       "source": "backend/app/policies/__init__.py",
       "destination": "backend/app/policies/__init__.py"
     },
@@ -701,6 +713,10 @@
     {
       "source": "backend/app/schemas/worlds.py",
       "destination": "backend/app/schemas/worlds.py"
+    },
+    {
+      "source": "backend/app/schemas/world_character_setup.py",
+      "destination": "backend/app/schemas/world_character_setup.py"
     },
     {
       "source": "backend/app/services/__init__.py",
@@ -879,6 +895,18 @@
       "destination": "backend/app/services/worlds.py"
     },
     {
+      "source": "backend/app/services/world_character_contracts.py",
+      "destination": "backend/app/services/world_character_contracts.py"
+    },
+    {
+      "source": "backend/app/services/world_character_provider.py",
+      "destination": "backend/app/services/world_character_provider.py"
+    },
+    {
+      "source": "backend/app/services/world_character_setup.py",
+      "destination": "backend/app/services/world_character_setup.py"
+    },
+    {
       "source": "backend/pyproject.toml",
       "destination": "backend/pyproject.toml"
     },
@@ -925,6 +953,14 @@
     {
       "source": "backend/tests/fixtures/core_experience/p0-contract-v1/manifest.json",
       "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/manifest.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/community_profile_keyword_failed.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/community_profile_keyword_failed.json"
+    },
+    {
+      "source": "backend/tests/fixtures/core_experience/p0-contract-v1/community_profile_success.json",
+      "destination": "backend/tests/fixtures/core_experience/p0-contract-v1/community_profile_success.json"
     },
     {
       "source": "backend/tests/fixtures/core_experience/p0-contract-v1/memory_deleted_blocked.json",
@@ -1271,6 +1307,14 @@
       "destination": "backend/tests/test_world_foundation.py"
     },
     {
+      "source": "backend/tests/test_world_character_contracts.py",
+      "destination": "backend/tests/test_world_character_contracts.py"
+    },
+    {
+      "source": "backend/tests/test_world_character_setup_service.py",
+      "destination": "backend/tests/test_world_character_setup_service.py"
+    },
+    {
       "source": "backend/uv.lock",
       "destination": "backend/uv.lock"
     },
@@ -1523,6 +1567,10 @@
       "destination": "frontend/src/app/worlds/new/page.tsx"
     },
     {
+      "source": "frontend/src/app/characters/[characterId]/worlds/[worldId]/autonomy-setup/page.tsx",
+      "destination": "frontend/src/app/characters/[characterId]/worlds/[worldId]/autonomy-setup/page.tsx"
+    },
+    {
       "source": "frontend/src/components/active-agent-card.tsx",
       "destination": "frontend/src/components/active-agent-card.tsx"
     },
@@ -1659,6 +1707,10 @@
       "destination": "frontend/src/components/world-creator-client.tsx"
     },
     {
+      "source": "frontend/src/components/world-character-autonomy-setup-client.tsx",
+      "destination": "frontend/src/components/world-character-autonomy-setup-client.tsx"
+    },
+    {
       "source": "frontend/src/lib/activity.ts",
       "destination": "frontend/src/lib/activity.ts"
     },
@@ -1729,6 +1781,10 @@
     {
       "source": "frontend/src/lib/worlds.ts",
       "destination": "frontend/src/lib/worlds.ts"
+    },
+    {
+      "source": "frontend/src/lib/world-character-setup.ts",
+      "destination": "frontend/src/lib/world-character-setup.ts"
     },
     {
       "source": "frontend/tsconfig.json",

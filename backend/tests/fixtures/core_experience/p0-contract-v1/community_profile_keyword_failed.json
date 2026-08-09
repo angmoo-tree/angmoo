@@ -1,38 +1,20 @@
 {
-  "fixture_id": "repertoire_count_failed",
+  "fixture_id": "community_profile_keyword_failed",
   "contract_version": "p0-contract-v1",
   "required_phase": "P2",
   "input": {
-    "daypart_counts": {
-      "dawn": 10,
-      "morning": 10,
-      "afternoon": 9,
-      "evening": 10
-    },
     "world_generation_context_fixture_id": "world_generation_context_sanitized",
     "world_character_id": "world-character-a",
     "character_contract_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     "world_contract_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-    "same_world_references": {
-      "place_key": "alchemy-lab",
-      "role_key": "student"
-    },
-    "logical_call_expectation": {
-      "community_profile": 1,
-      "repertoire": 1
-    }
+    "search_keywords": ["연금술", "마법약", "도서관", "실습", "기숙사", "친구", "수업", " 연금술 "]
   },
   "expected": {
     "outcome": "rejected",
-    "code": "repertoire_count_invalid",
-    "writes": [
-      "world_activity_repertoire:draft"
-    ],
+    "code": "profile_keyword_count_invalid",
+    "writes": [],
     "provider_call_count": 1,
-    "notes": [
-      "autonomy disabled",
-      "no operator fallback"
-    ]
+    "notes": ["normalized duplicate rejected", "raw provider payload not logged"]
   },
   "variants": [
     "missing_required_field",
