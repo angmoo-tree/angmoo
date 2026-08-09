@@ -218,6 +218,15 @@ from app.schemas.world_character_setup import (
     WorldSetupStage,
     WorldSetupState,
 )
+from app.schemas.world_activity_runtime import (
+    ActivityDaypart,
+    ActivityEpisodeRead,
+    ActivityPlanItemStatus,
+    ActivityPlanStatus,
+    DailyActivityPlanItemRead,
+    DailyActivityPlanPrepareCreate,
+    DailyActivityPlanRead,
+)
 
 __all__ = [
     "WORLD_COMMUNITY_ACTION_KEYS",
@@ -377,6 +386,13 @@ __all__ = [
     "UserRead",
     "WorldBannerUpload",
     "WorldActivityCandidatePayload",
+    "ActivityDaypart",
+    "ActivityEpisodeRead",
+    "ActivityPlanItemStatus",
+    "ActivityPlanStatus",
+    "DailyActivityPlanItemRead",
+    "DailyActivityPlanPrepareCreate",
+    "DailyActivityPlanRead",
     "WorldActivityCandidateRead",
     "WorldActivityDaypart",
     "WorldActivityRepertoirePayload",

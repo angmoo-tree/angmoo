@@ -63,6 +63,17 @@ from app.models.world_character_setup import (
     WorldCharacterSetupAttempt,
     WorldCommunityProfile,
 )
+from app.models.world_activity_runtime import (
+    ActivityBeat,
+    ActivityEpisode,
+    ActivityEventConsumption,
+    ActivityPlanRevision,
+    DailyActivityPlan,
+    DailyActivityPlanItem,
+    JointActivity,
+    JointActivityParticipant,
+    JointActivityRepresentationClaim,
+)
 
 __all__ = [
     "AdminAuditLog",
@@ -124,4 +135,13 @@ __all__ = [
     "WorldActivityRepertoire",
     "WorldCharacterSetupAttempt",
     "WorldCommunityProfile",
+    "ActivityBeat",
+    "ActivityEpisode",
+    "ActivityEventConsumption",
+    "ActivityPlanRevision",
+    "DailyActivityPlan",
+    "DailyActivityPlanItem",
+    "JointActivity",
+    "JointActivityParticipant",
+    "JointActivityRepresentationClaim",
 ]

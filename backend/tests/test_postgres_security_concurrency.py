@@ -1,13 +1,14 @@
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
+from hashlib import sha256
 import os
 from threading import Barrier, Lock
 from time import sleep
 from uuid import uuid4
 
 import pytest
-from sqlalchemy import create_engine, delete, inspect, select, text
+from sqlalchemy import create_engine, delete, func, inspect, select, text
 from sqlalchemy.orm import Session
 
 from app import models, schemas
@@ -21,7 +22,9 @@ from app.services import local_bot_quota
 from app.services import login_throttle
 from app.services import lore_parser_quota
 from app.services import messages as message_service
+from app.services import daily_activity_plans
 from app.services import worlds as world_service
+from app.services import world_character_contracts
 from app.services.direct_llm import DirectLlmResponse
 
 
@@ -58,6 +61,15 @@ def test_security_migration_schema_contract() -> None:
         "world_activity_repertoires",
         "world_character_setup_attempts",
         "world_community_profiles",
+        "daily_activity_plans",
+        "daily_activity_plan_items",
+        "activity_episodes",
+        "activity_beats",
+        "activity_event_consumptions",
+        "activity_plan_revisions",
+        "joint_activities",
+        "joint_activity_participants",
+        "joint_activity_representation_claims",
     }
     assert expected_tables.issubset(set(inspector.get_table_names()))
     assert {
@@ -83,8 +95,242 @@ def test_security_migration_schema_contract() -> None:
     with engine.connect() as connection:
         assert (
             connection.scalar(text("SELECT version_num FROM alembic_version"))
-            == "20260808_0073"
+            == "20260809_0074"
         )
+
+
+def test_daily_activity_plan_is_singleton_across_twenty_postgres_sessions() -> None:
+    engine = _engine()
+    suffix = uuid4().hex
+    user_id = f"user-p3-{suffix}"
+    character_id = f"character-p3-{suffix}"
+    world_id = f"world-p3-{suffix}"
+    membership_id = f"membership-p3-{suffix}"
+    world_character_id = f"wc-p3-{suffix}"
+    profile_id = f"profile-p3-{suffix}"
+    repertoire_id = f"repertoire-p3-{suffix}"
+    now = datetime(2026, 8, 9, 1, 0, tzinfo=UTC)
+    barrier = Barrier(20)
+
+    with Session(engine) as db:
+        user = models.User(
+            id=user_id,
+            email=f"{suffix}@example.invalid",
+            display_name=user_id,
+            display_name_normalized=user_id,
+            profile_setup_completed=True,
+        )
+        character = models.Character(
+            id=character_id,
+            owner_id=user_id,
+            name="P3 concurrency character",
+            handle=f"p3_{suffix[:20]}",
+            persona_summary="A deterministic P3 concurrency fixture.",
+        )
+        world = models.World(
+            id=world_id,
+            slug=f"p3-{suffix}",
+            owner_user_id=user_id,
+            name="P3 concurrency World",
+            tagline="A World for deterministic daily plan concurrency testing.",
+            setting_description="A bounded fixture World with deterministic routines.",
+            daily_life_description="Characters follow four local-time dayparts.",
+            genre_tags=["test"],
+            tone_tags=["safe"],
+            timezone="Asia/Seoul",
+            language="ko",
+            visibility="private",
+            join_policy="open",
+            status="published",
+            contract_version="world-v1",
+            contract_hash="a" * 64,
+            readiness_status="publish_ready",
+            create_idempotency_key=f"create-{suffix}",
+        )
+        db.add_all([user, world])
+        db.flush()
+        db.add(character)
+        db.flush()
+        membership = models.WorldMembership(
+            id=membership_id,
+            world_id=world_id,
+            user_id=user_id,
+            role="member",
+            status="active",
+            joined_at=now,
+        )
+        db.add(membership)
+        db.flush()
+        character_hash = world_character_contracts.character_contract_hash(character)
+        world_character = models.WorldCharacter(
+            id=world_character_id,
+            world_id=world_id,
+            character_id=character_id,
+            membership_id=membership_id,
+            role_key="member",
+            status="active",
+            autonomous_enabled=False,
+            local_profile={"background": "concurrency fixture"},
+            character_contract_hash=character_hash,
+            world_contract_hash=world.contract_hash,
+        )
+        db.add(world_character)
+        db.flush()
+        profile = models.WorldCommunityProfile(
+            id=profile_id,
+            world_character_id=world_character_id,
+            status="ready",
+            visible_summary="P3 concurrency fixture",
+            core_interests=["testing"],
+            adjacent_interests=["routines"],
+            avoid_topics=[],
+            discovery_openness=50,
+            search_keywords=["testing"],
+            action_profile={},
+            schema_version=1,
+            generator_version="test-v1",
+            character_contract_hash=character_hash,
+            world_contract_hash=world.contract_hash,
+            provider="google",
+            model="gemini-test",
+            credential_id=f"credential-{suffix}",
+            generated_at=now,
+            approved_at=now,
+        )
+        db.add(profile)
+        db.flush()
+        repertoire = models.WorldActivityRepertoire(
+            id=repertoire_id,
+            world_character_id=world_character_id,
+            status="ready",
+            schema_version=1,
+            generator_version="test-v1",
+            character_contract_hash=character_hash,
+            world_contract_hash=world.contract_hash,
+            community_profile_id=profile_id,
+            provider="google",
+            model="gemini-test",
+            credential_id=f"credential-{suffix}",
+            validation_summary={"candidate_count": 40},
+            generated_at=now,
+            approved_at=now,
+        )
+        db.add(repertoire)
+        db.flush()
+        for daypart in ("dawn", "morning", "afternoon", "evening"):
+            for ordinal in range(1, 11):
+                signature = sha256(
+                    f"{world_character_id}|{daypart}|{ordinal}".encode()
+                ).hexdigest()
+                db.add(
+                    models.WorldActivityCandidate(
+                        id=f"candidate-{suffix[:8]}-{daypart}-{ordinal}",
+                        repertoire_id=repertoire_id,
+                        daypart=daypart,
+                        ordinal=ordinal,
+                        activity_kind="duty" if ordinal % 2 else "rest",
+                        title=f"{daypart} activity {ordinal}",
+                        activity_seed=f"Complete {daypart} activity {ordinal}.",
+                        social_mode="solo",
+                        canonical_signature=signature,
+                        enabled=True,
+                    )
+                )
+        db.commit()
+
+    def prepare(index: int) -> str:
+        with Session(engine, expire_on_commit=False) as db:
+            user = db.get(models.User, user_id)
+            assert user is not None
+            barrier.wait()
+            result = daily_activity_plans.prepare_activity_plan(
+                db,
+                character_id=character_id,
+                world_id=world_id,
+                user=user,
+                data=schemas.DailyActivityPlanPrepareCreate(
+                    idempotency_key=f"p3-concurrent-{index}"
+                ),
+                now=now,
+            )
+            return result.id
+
+    try:
+        with ThreadPoolExecutor(max_workers=20) as executor:
+            plan_ids = list(executor.map(prepare, range(20)))
+        assert len(set(plan_ids)) == 1
+        with Session(engine) as db:
+            assert db.scalar(
+                select(func.count(models.DailyActivityPlan.id)).where(
+                    models.DailyActivityPlan.world_character_id == world_character_id
+                )
+            ) == 1
+            assert db.scalar(
+                select(func.count(models.DailyActivityPlanItem.id)).where(
+                    models.DailyActivityPlanItem.world_character_id
+                    == world_character_id
+                )
+            ) == 4
+    finally:
+        with Session(engine) as db:
+            item_ids = select(models.DailyActivityPlanItem.id).where(
+                models.DailyActivityPlanItem.world_character_id == world_character_id
+            )
+            episode_ids = select(models.ActivityEpisode.id).where(
+                models.ActivityEpisode.world_character_id == world_character_id
+            )
+            db.execute(
+                delete(models.ActivityBeat).where(
+                    models.ActivityBeat.episode_id.in_(episode_ids)
+                )
+            )
+            db.execute(
+                delete(models.ActivityEpisode).where(
+                    models.ActivityEpisode.world_character_id == world_character_id
+                )
+            )
+            db.execute(
+                delete(models.DailyActivityPlanItem).where(
+                    models.DailyActivityPlanItem.id.in_(item_ids)
+                )
+            )
+            db.execute(
+                delete(models.DailyActivityPlan).where(
+                    models.DailyActivityPlan.world_character_id == world_character_id
+                )
+            )
+            db.execute(
+                delete(models.WorldActivityCandidate).where(
+                    models.WorldActivityCandidate.repertoire_id == repertoire_id
+                )
+            )
+            db.execute(
+                delete(models.WorldActivityRepertoire).where(
+                    models.WorldActivityRepertoire.id == repertoire_id
+                )
+            )
+            db.execute(
+                delete(models.WorldCommunityProfile).where(
+                    models.WorldCommunityProfile.id == profile_id
+                )
+            )
+            db.execute(
+                delete(models.WorldCharacter).where(
+                    models.WorldCharacter.id == world_character_id
+                )
+            )
+            db.execute(
+                delete(models.WorldMembership).where(
+                    models.WorldMembership.id == membership_id
+                )
+            )
+            db.execute(delete(models.World).where(models.World.id == world_id))
+            db.execute(
+                delete(models.Character).where(models.Character.id == character_id)
+            )
+            db.execute(delete(models.User).where(models.User.id == user_id))
+            db.commit()
+        engine.dispose()
 
 
 def test_world_row_version_serializes_concurrent_writers() -> None:

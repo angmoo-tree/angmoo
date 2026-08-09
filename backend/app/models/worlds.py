@@ -325,6 +325,9 @@ class WorldCharacter(Base):
         UniqueConstraint(
             "world_id", "character_id", name="uq_world_characters_world_character"
         ),
+        UniqueConstraint(
+            "id", "world_id", name="uq_world_characters_id_world"
+        ),
         UniqueConstraint("id", "character_id", name="uq_world_characters_id_character"),
         Index("ix_world_characters_world_status", "world_id", "status"),
         Index("ix_world_characters_character_status", "character_id", "status"),

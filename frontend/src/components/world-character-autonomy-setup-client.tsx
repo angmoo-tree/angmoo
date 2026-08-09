@@ -7,6 +7,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { getAgent, type AgentDetailRead } from "@/lib/agents";
 import {
+  DailyActivityPlanApiError,
+  getDailyActivityPlan,
+  prepareDailyActivityPlan,
+  type DailyActivityPlanRead,
+} from "@/lib/world-activity-runtime";
+import {
   approveWorldCharacterSetup,
   enterWorldWithCharacter,
   generateWorldCharacterSetup,
@@ -59,6 +65,13 @@ const REASON_MESSAGES: Record<string, string> = {
   idempotency_replay: "같은 요청이 이미 처리되었습니다. 현재 결과를 다시 확인해 주세요.",
   repertoire_signature_mismatch: "검토 중 일과 결과가 변경되어 승인할 수 없습니다.",
   request_validation_error: "입력 내용을 확인해 주세요.",
+  world_not_ready: "World 공개 준비가 완료되지 않아 오늘 계획을 만들 수 없습니다.",
+  profile_not_ready: "World 전용 프로필을 먼저 준비해 주세요.",
+  repertoire_not_ready: "일과 후보 40개를 먼저 준비해 주세요.",
+  repertoire_stale: "캐릭터 또는 World 설정이 바뀌었습니다. P2 준비를 다시 진행해 주세요.",
+  repertoire_candidate_count_invalid: "승인된 일과 후보 수가 40개가 아닙니다. P2 준비를 다시 확인해 주세요.",
+  daypart_candidate_count_invalid: "시간대별 일과 후보 수가 10개가 아닙니다. P2 준비를 다시 확인해 주세요.",
+  activity_plan_partial: "저장된 오늘 계획이 완전하지 않습니다. 실행하지 말고 다시 확인해 주세요.",
 };
 
 function idempotencyKey(prefix: string) {
@@ -66,6 +79,9 @@ function idempotencyKey(prefix: string) {
 }
 
 function errorMessage(error: unknown) {
+  if (error instanceof DailyActivityPlanApiError) {
+    return REASON_MESSAGES[error.message] ?? `오늘 계획을 처리하지 못했습니다(${error.message}).`;
+  }
   if (error instanceof WorldCharacterSetupApiError) {
     return REASON_MESSAGES[error.message] ?? `요청을 처리하지 못했습니다 (${error.message}).`;
   }
@@ -103,6 +119,7 @@ export function WorldCharacterAutonomySetupClient({
   const [world, setWorld] = useState<WorldRead | null>(null);
   const [entry, setEntry] = useState<WorldCharacterEntryRead | null>(null);
   const [setup, setSetup] = useState<WorldCharacterSetupRead | null>(null);
+  const [activityPlan, setActivityPlan] = useState<DailyActivityPlanRead | null>(null);
   const [preflight, setPreflight] =
     useState<WorldCharacterSetupPreflightRead | null>(null);
   const [roleKey, setRoleKey] = useState("");
@@ -113,6 +130,9 @@ export function WorldCharacterAutonomySetupClient({
   const [pending, setPending] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [planLoading, setPlanLoading] = useState(true);
+  const [planPending, setPlanPending] = useState(false);
+  const [planError, setPlanError] = useState<string | null>(null);
 
   useEffect(() => {
     if (authStatus === "unauthenticated") {
@@ -157,6 +177,24 @@ export function WorldCharacterAutonomySetupClient({
       active = false;
     };
   }, [authStatus, characterId, returnPath, router, worldId]);
+
+  useEffect(() => {
+    if (!setup?.autonomy_ready) return;
+    let active = true;
+    void getDailyActivityPlan(characterId, worldId)
+      .then((nextPlan) => {
+        if (active) setActivityPlan(nextPlan);
+      })
+      .catch((nextError) => {
+        if (active) setPlanError(errorMessage(nextError));
+      })
+      .finally(() => {
+        if (active) setPlanLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [characterId, setup?.autonomy_ready, worldId]);
 
   const allowedRoles = useMemo(
     () => world?.roles.filter((role) => role.autonomous_allowed) ?? [],
@@ -291,6 +329,37 @@ export function WorldCharacterAutonomySetupClient({
     } finally {
       setPending(null);
     }
+  }
+
+  async function handlePrepareActivityPlan() {
+    setPlanPending(true);
+    setPlanError(null);
+    try {
+      const nextPlan = await prepareDailyActivityPlan(
+        characterId,
+        worldId,
+        idempotencyKey("daily-activity-plan"),
+      );
+      setActivityPlan(nextPlan);
+      setNotice(
+        nextPlan.reused
+          ? "이미 준비된 오늘 계획을 그대로 불러왔습니다. 추가 provider 호출은 없었습니다."
+          : "승인된 일과 후보에서 오늘의 중심 일과 4개를 준비했습니다. provider 호출은 없었습니다.",
+      );
+    } catch (nextError) {
+      setPlanError(errorMessage(nextError));
+    } finally {
+      setPlanPending(false);
+    }
+  }
+
+  function localTime(value: string, timezone: string) {
+    return new Intl.DateTimeFormat("ko-KR", {
+      timeZone: timezone,
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(new Date(value));
   }
 
   if (authStatus === "checking" || loading) {
@@ -561,6 +630,97 @@ export function WorldCharacterAutonomySetupClient({
                   <strong>{setup.autonomous_enabled ? " 켜짐" : " 꺼짐"}</strong> 상태이며,
                   P2 승인은 실행을 시작하지 않습니다.
                 </p>
+              </section>
+            ) : null}
+
+            {setup.autonomy_ready ? (
+              <section className="rounded-[28px] border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-bold text-primary">P3 · DAILY ACTIVITY PLAN</p>
+                    <h2 className="mt-1 text-xl font-black">오늘의 활동 계획</h2>
+                    <p className="mt-2 max-w-3xl text-sm text-on-surface-variant">
+                      P2에서 승인한 후보 40개 중 새벽·오전·오후·저녁의 중심 일과를
+                      코드가 하나씩 선택합니다. 이 단계에서는 LLM/provider 비용이 발생하지 않습니다.
+                    </p>
+                  </div>
+                  {activityPlan ? (
+                    <span className="rounded-full bg-primary-fixed px-4 py-2 text-sm font-bold text-on-primary-fixed-variant">
+                      {activityPlan.local_date} · {activityPlan.timezone_name}
+                    </span>
+                  ) : null}
+                </div>
+
+                {planError ? (
+                  <p role="alert" className="mt-4 rounded-2xl bg-error-container p-4 text-on-error-container">
+                    {planError}
+                  </p>
+                ) : null}
+
+                {planLoading ? (
+                  <p className="mt-5 text-sm text-on-surface-variant">저장된 오늘 계획을 확인하는 중입니다.</p>
+                ) : null}
+
+                {!planLoading && !activityPlan ? (
+                  <button
+                    type="button"
+                    onClick={() => void handlePrepareActivityPlan()}
+                    disabled={planPending}
+                    className="mt-5 rounded-full bg-primary px-6 py-3 font-bold text-on-primary disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {planPending ? "오늘 계획 준비 중…" : "오늘 계획 준비하기"}
+                  </button>
+                ) : null}
+
+                {activityPlan ? (
+                  <>
+                    <div className="mt-6 grid gap-3 md:grid-cols-2">
+                      {activityPlan.items.map((item) => {
+                        const daypartInfo = DAYPARTS.find((value) => value.key === item.daypart);
+                        const current = activityPlan.current_daypart === item.daypart;
+                        return (
+                          <article
+                            key={item.id}
+                            className={`rounded-2xl border p-5 ${current ? "border-primary bg-primary-fixed/50" : "border-outline-variant bg-white"}`}
+                          >
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <div>
+                                <p className="text-xs font-bold text-on-surface-variant">
+                                  {daypartInfo?.label ?? item.daypart} · {localTime(item.scheduled_start_at, activityPlan.timezone_name)}–{localTime(item.scheduled_end_at, activityPlan.timezone_name)}
+                                </p>
+                                <h3 className="mt-1 font-black">{item.title}</h3>
+                              </div>
+                              <div className="flex gap-2">
+                                {current ? <span className="rounded-full bg-primary px-2 py-1 text-xs font-bold text-on-primary">현재</span> : null}
+                                <span className="rounded-full bg-surface-container px-2 py-1 text-xs">{item.status}</span>
+                              </div>
+                            </div>
+                            <p className="mt-3 text-sm text-on-surface-variant">{item.activity_seed}</p>
+                            <dl className="mt-4 grid grid-cols-2 gap-2 text-xs">
+                              <div className="rounded-xl bg-surface-container-low p-3">
+                                <dt className="text-on-surface-variant">Episode</dt>
+                                <dd className="mt-1 font-bold">{item.episode?.status ?? "없음"}</dd>
+                              </div>
+                              <div className="rounded-xl bg-surface-container-low p-3">
+                                <dt className="text-on-surface-variant">마지막 성공 활동</dt>
+                                <dd className="mt-1 font-bold">
+                                  {item.episode?.last_successful_beat_at
+                                    ? localTime(item.episode.last_successful_beat_at, activityPlan.timezone_name)
+                                    : "아직 없음"}
+                                </dd>
+                              </div>
+                            </dl>
+                          </article>
+                        );
+                      })}
+                    </div>
+                    <p className="mt-5 rounded-2xl bg-surface-container-low p-4 text-sm text-on-surface-variant">
+                      오늘 계획은 저장되었지만 자율활동은
+                      <strong>{activityPlan.autonomous_enabled ? " 켜짐" : " 꺼짐"}</strong> 상태입니다.
+                      P3 계획 준비는 SNS 게시·댓글·좋아요를 실행하지 않습니다.
+                    </p>
+                  </>
+                ) : null}
               </section>
             ) : null}
           </>
