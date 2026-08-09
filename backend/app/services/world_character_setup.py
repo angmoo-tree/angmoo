@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -72,12 +72,111 @@ def delete_setup_data_for_characters(
     *,
     character_ids: list[str],
 ) -> None:
-    """Delete private P2 setup outputs before a Character is scrubbed."""
+    """Delete private P2/P3 outputs before a Character is scrubbed."""
     if not character_ids:
         return
-    world_character_ids = select(models.WorldCharacter.id).where(
-        models.WorldCharacter.character_id.in_(character_ids)
+    world_character_ids = list(
+        db.scalars(
+            select(models.WorldCharacter.id).where(
+                models.WorldCharacter.character_id.in_(character_ids)
+            )
+        )
     )
+    if not world_character_ids:
+        return
+    plan_ids = select(models.DailyActivityPlan.id).where(
+        models.DailyActivityPlan.world_character_id.in_(world_character_ids)
+    )
+    item_ids = select(models.DailyActivityPlanItem.id).where(
+        models.DailyActivityPlanItem.plan_id.in_(plan_ids)
+    )
+    episode_ids = select(models.ActivityEpisode.id).where(
+        models.ActivityEpisode.plan_item_id.in_(item_ids)
+    )
+    beat_ids = select(models.ActivityBeat.id).where(
+        models.ActivityBeat.episode_id.in_(episode_ids)
+    )
+    # Materialize this set before deleting participants.  A live subquery would
+    # become empty after the participant delete and leave the shared activity
+    # (and its links in another Character's plan) behind.
+    joint_activity_ids = list(
+        db.scalars(
+            select(models.JointActivityParticipant.joint_activity_id)
+            .where(
+                models.JointActivityParticipant.world_character_id.in_(
+                    world_character_ids
+                )
+            )
+            .distinct()
+        )
+    )
+
+    # P3 runtime rows are private execution state.  Remove claims and ledgers
+    # before their scoped plan rows, and detach a shared participant's item
+    # before deleting a joint activity involving the scrubbed Character.
+    db.execute(
+        delete(models.ActivityEventConsumption).where(
+            models.ActivityEventConsumption.consumer_world_character_id.in_(
+                world_character_ids
+            )
+        )
+    )
+    db.execute(
+        delete(models.ActivityEventConsumption).where(
+            models.ActivityEventConsumption.target_activity_beat_id.in_(beat_ids)
+        )
+    )
+    db.execute(
+        delete(models.ActivityBeat).where(models.ActivityBeat.id.in_(beat_ids))
+    )
+    db.execute(
+        delete(models.JointActivityRepresentationClaim).where(
+            models.JointActivityRepresentationClaim.joint_activity_id.in_(
+                joint_activity_ids
+            )
+        )
+    )
+    db.execute(
+        delete(models.ActivityPlanRevision).where(
+            models.ActivityPlanRevision.plan_id.in_(plan_ids)
+        )
+    )
+    db.execute(
+        delete(models.ActivityPlanRevision).where(
+            models.ActivityPlanRevision.joint_activity_id.in_(joint_activity_ids)
+        )
+    )
+    db.execute(
+        delete(models.JointActivityParticipant).where(
+            models.JointActivityParticipant.joint_activity_id.in_(joint_activity_ids)
+        )
+    )
+    db.execute(
+        update(models.DailyActivityPlanItem)
+        .where(models.DailyActivityPlanItem.joint_activity_id.in_(joint_activity_ids))
+        .values(joint_activity_id=None)
+    )
+    db.execute(
+        delete(models.ActivityEpisode).where(
+            models.ActivityEpisode.id.in_(episode_ids)
+        )
+    )
+    db.execute(
+        delete(models.DailyActivityPlanItem).where(
+            models.DailyActivityPlanItem.id.in_(item_ids)
+        )
+    )
+    db.execute(
+        delete(models.DailyActivityPlan).where(
+            models.DailyActivityPlan.id.in_(plan_ids)
+        )
+    )
+    db.execute(
+        delete(models.JointActivity).where(
+            models.JointActivity.id.in_(joint_activity_ids)
+        )
+    )
+
     repertoire_ids = select(models.WorldActivityRepertoire.id).where(
         models.WorldActivityRepertoire.world_character_id.in_(world_character_ids)
     )

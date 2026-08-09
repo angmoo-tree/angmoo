@@ -322,6 +322,11 @@
       "module": "app.api.v1.routes.tree",
       "endpoint": "get_tree_post"
     },
+    "GET /api/v1/characters/{character_id}/worlds/{world_id}/activity-plan": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_activity_runtime",
+      "endpoint": "get_daily_activity_plan"
+    },
     "GET /api/v1/world-characters/{world_character_id}/autonomy-setup": {
       "access": "owner-only",
       "module": "app.api.v1.routes.world_character_setup",
@@ -626,6 +631,11 @@
       "access": "authenticated-shared",
       "module": "app.api.v1.routes.tree",
       "endpoint": "create_tree_comment"
+    },
+    "POST /api/v1/characters/{character_id}/worlds/{world_id}/activity-plan/prepare": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_activity_runtime",
+      "endpoint": "prepare_daily_activity_plan"
     },
     "POST /api/v1/world-characters/{world_character_id}/autonomy-setup/approve": {
       "access": "owner-only",

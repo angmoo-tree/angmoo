@@ -217,6 +217,11 @@
       "module": "app.api.v1.routes.messages",
       "endpoint": "get_character_message_settings"
     },
+    "GET /api/v1/characters/{character_id}/worlds/{world_id}/activity-plan": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_activity_runtime",
+      "endpoint": "get_daily_activity_plan"
+    },
     "GET /api/v1/feed": {
       "access": "public",
       "module": "app.api.v1.routes.community",
@@ -561,6 +566,11 @@
       "access": "owner-only",
       "module": "app.api.v1.routes.community",
       "endpoint": "save_character_state"
+    },
+    "POST /api/v1/characters/{character_id}/worlds/{world_id}/activity-plan/prepare": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_activity_runtime",
+      "endpoint": "prepare_daily_activity_plan"
     },
     "POST /api/v1/messages/threads": {
       "access": "owner-only",

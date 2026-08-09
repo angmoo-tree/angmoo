@@ -1,0 +1,67 @@
+from __future__ import annotations
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from app import models, schemas
+from app.api.v1.deps import get_current_user, get_db
+from app.services import daily_activity_plans
+
+
+router = APIRouter(prefix="/characters", tags=["world-activity-runtime"])
+
+
+def _raise_plan_error(exc: daily_activity_plans.DailyActivityPlanError) -> None:
+    if isinstance(exc, daily_activity_plans.DailyActivityPlanNotFoundError):
+        status_code = status.HTTP_404_NOT_FOUND
+    elif isinstance(exc, daily_activity_plans.DailyActivityPlanForbiddenError):
+        status_code = status.HTTP_403_FORBIDDEN
+    elif isinstance(exc, daily_activity_plans.DailyActivityPlanConflictError):
+        status_code = status.HTTP_409_CONFLICT
+    else:
+        status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+    raise HTTPException(status_code=status_code, detail=exc.reason_code) from exc
+
+
+@router.get(
+    "/{character_id}/worlds/{world_id}/activity-plan",
+    response_model=schemas.DailyActivityPlanRead,
+)
+def get_daily_activity_plan(
+    character_id: str,
+    world_id: str,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user),
+) -> schemas.DailyActivityPlanRead:
+    try:
+        return daily_activity_plans.get_activity_plan(
+            db,
+            character_id=character_id,
+            world_id=world_id,
+            user=user,
+        )
+    except daily_activity_plans.DailyActivityPlanError as exc:
+        _raise_plan_error(exc)
+
+
+@router.post(
+    "/{character_id}/worlds/{world_id}/activity-plan/prepare",
+    response_model=schemas.DailyActivityPlanRead,
+)
+def prepare_daily_activity_plan(
+    character_id: str,
+    world_id: str,
+    data: schemas.DailyActivityPlanPrepareCreate,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user),
+) -> schemas.DailyActivityPlanRead:
+    try:
+        return daily_activity_plans.prepare_activity_plan(
+            db,
+            character_id=character_id,
+            world_id=world_id,
+            user=user,
+            data=data,
+        )
+    except daily_activity_plans.DailyActivityPlanError as exc:
+        _raise_plan_error(exc)

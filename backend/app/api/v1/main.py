@@ -12,6 +12,7 @@ from app.api.v1.routes import messages
 from app.api.v1.routes import tree
 from app.api.v1.routes import worlds
 from app.api.v1.routes import world_character_setup
+from app.api.v1.routes import world_activity_runtime
 
 
 class HostedRouterConfigurationError(RuntimeError):
@@ -29,6 +30,7 @@ PUBLIC_ROUTERS = (
     tree.router,
     worlds.router,
     world_character_setup.router,
+    world_activity_runtime.router,
 )
 
 
