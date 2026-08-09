@@ -57,6 +57,12 @@ from app.models.worlds import (
     WorldRole,
     WorldRule,
 )
+from app.models.world_character_setup import (
+    WorldActivityCandidate,
+    WorldActivityRepertoire,
+    WorldCharacterSetupAttempt,
+    WorldCommunityProfile,
+)
 
 __all__ = [
     "AdminAuditLog",
@@ -114,4 +120,8 @@ __all__ = [
     "WorldPlace",
     "WorldRole",
     "WorldRule",
+    "WorldActivityCandidate",
+    "WorldActivityRepertoire",
+    "WorldCharacterSetupAttempt",
+    "WorldCommunityProfile",
 ]

@@ -14,8 +14,8 @@ def test_p0_contract_fixture_package_is_complete_and_hashed() -> None:
     package = load_fixture_package(FIXTURE_ROOT)
 
     assert package.manifest.contract_version == CONTRACT_VERSION
-    assert len(package.fixtures) == 26
-    assert len({fixture.fixture_id for fixture in package.fixtures}) == 26
+    assert len(package.fixtures) == 28
+    assert len({fixture.fixture_id for fixture in package.fixtures}) == 28
     assert {fixture.required_phase for fixture in package.fixtures} >= {
         "P1",
         "P2",
@@ -32,6 +32,8 @@ def test_p0_contract_fixture_package_is_complete_and_hashed() -> None:
 @pytest.mark.parametrize(
     "fixture_id",
     [
+        "community_profile_success",
+        "community_profile_keyword_failed",
         "world_open_join_success",
         "world_cross_scope_rejected",
         "world_switch_locked_joint_rejected",

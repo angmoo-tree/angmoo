@@ -3,17 +3,29 @@
   "contract_version": "p0-contract-v1",
   "required_phase": "P2",
   "input": {
+    "world_generation_context_fixture_id": "world_generation_context_sanitized",
+    "world_character_id": "world-character-a",
+    "character_contract_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "world_contract_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "same_world_references": {
+      "place_key": "alchemy-lab",
+      "role_key": "student"
+    },
     "duplicate_signature_fields": [
-      "place_key",
-      "activity_pattern",
-      "purpose"
-    ]
+      "activity_kind",
+      "title",
+      "activity_seed"
+    ],
+    "logical_call_expectation": {
+      "community_profile": 1,
+      "repertoire": 1
+    }
   },
   "expected": {
     "outcome": "rejected",
     "code": "repertoire_duplicate",
     "writes": [],
-    "provider_call_count": 1,
+    "provider_call_count": 3,
     "notes": [
       "no partial activation"
     ]

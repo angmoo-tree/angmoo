@@ -33,7 +33,11 @@
       "profile_image_candidates",
       "profile_image_quota_reservations",
       "user_message_preferences",
+      "world_activity_candidates",
+      "world_activity_repertoires",
+      "world_character_setup_attempts",
       "world_characters",
+      "world_community_profiles",
       "world_memberships"
     ],
     "scrub": [
@@ -96,7 +100,11 @@
       "profile_follows",
       "profile_image_candidates",
       "profile_image_quota_reservations",
-      "world_characters"
+      "world_activity_candidates",
+      "world_activity_repertoires",
+      "world_character_setup_attempts",
+      "world_characters",
+      "world_community_profiles"
     ],
     "scrub": [
       "characters"

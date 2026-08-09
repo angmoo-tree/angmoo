@@ -6,6 +6,7 @@ const ALLOWED_RETURN_PATHS = [
 const ALLOWED_LOGIN_RETURN_PATHS = [
   /^\/worlds\/new$/,
   /^\/worlds\/[^/?#]+\/creator$/,
+  /^\/characters\/[^/?#]+\/worlds\/[^/?#]+\/autonomy-setup$/,
 ];
 
 function safeAllowlistedReturnTo(

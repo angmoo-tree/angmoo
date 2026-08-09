@@ -6,9 +6,67 @@ from sqlalchemy.orm import Session
 from app import models, schemas
 from app.api.v1.deps import get_current_user, get_db, get_optional_current_user
 from app.services import worlds as world_service
+from app.services import world_character_setup
 
 
 router = APIRouter(prefix="/worlds", tags=["worlds"])
+
+
+def _raise_world_character_error(exc: world_character_setup.WorldCharacterSetupError) -> None:
+    if isinstance(exc, world_character_setup.WorldCharacterSetupNotFoundError):
+        status_code = status.HTTP_404_NOT_FOUND
+    elif isinstance(exc, world_character_setup.WorldCharacterSetupForbiddenError):
+        status_code = status.HTTP_403_FORBIDDEN
+    elif isinstance(exc, world_character_setup.WorldCharacterSetupConflictError):
+        status_code = status.HTTP_409_CONFLICT
+    else:
+        status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+    raise HTTPException(status_code=status_code, detail=exc.reason_code) from exc
+
+
+@router.get(
+    "/{world_id}/characters/{character_id}",
+    response_model=schemas.WorldCharacterEntryRead,
+)
+def get_world_character_entry(
+    world_id: str,
+    character_id: str,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user),
+) -> schemas.WorldCharacterEntryRead:
+    try:
+        return world_character_setup.get_world_entry(
+            db,
+            world_id=world_id,
+            character_id=character_id,
+            user=user,
+        )
+    except world_character_setup.WorldCharacterSetupError as exc:
+        _raise_world_character_error(exc)
+        raise AssertionError("unreachable")
+
+
+@router.post(
+    "/{world_id}/characters",
+    response_model=schemas.WorldCharacterEntryRead,
+    status_code=status.HTTP_201_CREATED,
+)
+def enter_world_with_character(
+    world_id: str,
+    data: schemas.WorldCharacterEntryCreate,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user),
+) -> schemas.WorldCharacterEntryRead:
+    try:
+        return world_character_setup.enter_world(
+            db,
+            world_id=world_id,
+            user=user,
+            data=data,
+        )
+    except world_character_setup.WorldCharacterSetupError as exc:
+        _raise_world_character_error(exc)
+        raise AssertionError("unreachable")
 
 
 def _raise_world_error(exc: Exception) -> None:

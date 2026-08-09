@@ -1,38 +1,23 @@
 {
-  "fixture_id": "repertoire_count_failed",
+  "fixture_id": "community_profile_success",
   "contract_version": "p0-contract-v1",
   "required_phase": "P2",
   "input": {
-    "daypart_counts": {
-      "dawn": 10,
-      "morning": 10,
-      "afternoon": 9,
-      "evening": 10
-    },
     "world_generation_context_fixture_id": "world_generation_context_sanitized",
     "world_character_id": "world-character-a",
     "character_contract_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     "world_contract_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-    "same_world_references": {
-      "place_key": "alchemy-lab",
-      "role_key": "student"
-    },
-    "logical_call_expectation": {
-      "community_profile": 1,
-      "repertoire": 1
-    }
+    "core_interest_count": 3,
+    "adjacent_interest_count": 2,
+    "search_keyword_count": 8,
+    "action_keys": ["comment", "reply", "like", "repost", "follow", "unfollow", "observe"]
   },
   "expected": {
-    "outcome": "rejected",
-    "code": "repertoire_count_invalid",
-    "writes": [
-      "world_activity_repertoire:draft"
-    ],
+    "outcome": "success",
+    "code": "community_profile_draft_ready",
+    "writes": ["world_community_profile:draft"],
     "provider_call_count": 1,
-    "notes": [
-      "autonomy disabled",
-      "no operator fallback"
-    ]
+    "notes": ["repertoire not ready", "autonomy disabled"]
   },
   "variants": [
     "missing_required_field",

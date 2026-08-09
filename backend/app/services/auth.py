@@ -720,6 +720,12 @@ def _scrub_account_data(
     now = _utcnow()
     character_condition = _character_id_condition
 
+    from app.services import world_character_setup
+
+    world_character_setup.delete_setup_data_for_characters(
+        db, character_ids=character_ids
+    )
+
     db.execute(
         delete(models.ProfileImageCandidate).where(
             or_(

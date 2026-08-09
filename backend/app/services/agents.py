@@ -2469,6 +2469,12 @@ def _scrub_agent_data(db: Session, character: models.Character) -> None:
     now = datetime.now(UTC)
     character_id = character.id
 
+    from app.services import world_character_setup
+
+    world_character_setup.delete_setup_data_for_characters(
+        db, character_ids=[character_id]
+    )
+
     candidate_rows = list(
         db.execute(
             select(
