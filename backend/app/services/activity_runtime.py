@@ -155,6 +155,48 @@ def _episode_scope(
     return episode, item, plan
 
 
+def _lock_beat_with_episode_scope(
+    db: Session,
+    *,
+    beat_id: str,
+) -> tuple[
+    models.ActivityBeat,
+    models.ActivityEpisode,
+    models.DailyActivityPlanItem,
+    models.DailyActivityPlan,
+]:
+    """Lock an episode before its beat to keep one global lock order.
+
+    Claiming a beat already locks ``episode -> beat``. Completion and terminal
+    failure must use the same order or a duplicate scheduler can deadlock with
+    the winning publisher while both are inspecting the same tick.
+    """
+
+    episode_id = db.scalar(
+        select(models.ActivityBeat.episode_id).where(
+            models.ActivityBeat.id == beat_id
+        )
+    )
+    if episode_id is None:
+        raise ActivityRuntimeNotFoundError(beat_id)
+    episode, item, plan = _episode_scope(
+        db,
+        episode_id=episode_id,
+        lock_for_update=True,
+    )
+    beat = db.scalar(
+        select(models.ActivityBeat)
+        .where(
+            models.ActivityBeat.id == beat_id,
+            models.ActivityBeat.episode_id == episode.id,
+        )
+        .with_for_update()
+    )
+    if beat is None:
+        raise ActivityRuntimeNotFoundError(beat_id)
+    return beat, episode, item, plan
+
+
 def claim_activity_beat(
     db: Session,
     *,
@@ -220,6 +262,8 @@ def claim_activity_beat(
             existing.claim_expires_at = None
         if existing.status != "pending":
             raise ActivityRuntimeConflictError("beat_already_terminal")
+        if existing.attempt_count >= 2:
+            raise ActivityRuntimeConflictError("beat_retry_limit_reached")
         existing.status = "claimed"
         existing.claim_run_id = claim_run_id
         existing.claim_expires_at = expiry
@@ -419,24 +463,21 @@ def complete_activity_beat(
     state_after_snapshot: dict[str, object],
     result_snapshot: dict[str, object],
     now: datetime | None = None,
+    commit: bool = True,
 ) -> models.ActivityBeat:
     current = _aware_utc(now or datetime.now(UTC))
-    beat = db.scalar(
-        select(models.ActivityBeat)
-        .where(models.ActivityBeat.id == beat_id)
-        .with_for_update()
+    beat, episode, item, plan = _lock_beat_with_episode_scope(
+        db,
+        beat_id=beat_id,
     )
-    if beat is None:
-        raise ActivityRuntimeNotFoundError(beat_id)
     if beat.status != "claimed" or beat.claim_run_id != claim_run_id:
         raise ActivityRuntimeConflictError("beat_already_claimed")
     if beat.claim_expires_at is None or _aware_utc(beat.claim_expires_at) <= current:
         raise ActivityRuntimeConflictError("beat_claim_expired")
-    episode, item, plan = _episode_scope(
-        db, episode_id=beat.episode_id, lock_for_update=True
-    )
     if beat.world_id != episode.world_id or beat.world_character_id != episode.world_character_id:
         raise ActivityRuntimeValidationError("cross_world_reference")
+    if beat.previous_successful_beat_id != episode.last_successful_beat_id:
+        raise ActivityRuntimeConflictError("previous_successful_beat_stale")
     if activity_state_contracts.validate_state_snapshot(
         episode.current_state_snapshot
     ) != activity_state_contracts.validate_state_snapshot(beat.state_before_snapshot):
@@ -450,6 +491,11 @@ def complete_activity_beat(
         raise ActivityRuntimeValidationError("publish_evidence_missing")
     if post.author_character_id != world_character.character_id:
         raise ActivityRuntimeValidationError("publish_evidence_invalid")
+    if world_character.activity_runtime_mode == "routine_resident_v1" and (
+        post.world_id != beat.world_id
+        or post.author_world_character_id != beat.world_character_id
+    ):
+        raise ActivityRuntimeValidationError("publish_evidence_world_invalid")
 
     consumptions = list(
         db.scalars(
@@ -491,6 +537,53 @@ def complete_activity_beat(
         row.claim_expires_at = None
         row.applied_at = current
         row.version += 1
+    if commit:
+        db.commit()
+    else:
+        db.flush()
+    return beat
+
+
+def release_activity_beat_for_retry(
+    db: Session,
+    *,
+    beat_id: str,
+    claim_run_id: str,
+    reason_code: str,
+) -> models.ActivityBeat:
+    beat = db.scalar(
+        select(models.ActivityBeat)
+        .where(models.ActivityBeat.id == beat_id)
+        .with_for_update()
+    )
+    if beat is None:
+        raise ActivityRuntimeNotFoundError(beat_id)
+    if beat.status != "claimed" or beat.claim_run_id != claim_run_id:
+        raise ActivityRuntimeConflictError("beat_already_claimed")
+    if beat.attempt_count >= 2:
+        raise ActivityRuntimeConflictError("beat_retry_limit_reached")
+    beat.status = "pending"
+    beat.failure_reason_code = reason_code
+    beat.state_after_snapshot = None
+    beat.source_post_id = None
+    beat.result_snapshot = None
+    beat.claim_run_id = None
+    beat.claim_expires_at = None
+    beat.started_at = None
+    for row in db.scalars(
+        select(models.ActivityEventConsumption)
+        .where(
+            models.ActivityEventConsumption.target_activity_beat_id == beat.id,
+            models.ActivityEventConsumption.status == "claimed",
+            models.ActivityEventConsumption.claim_run_id == claim_run_id,
+        )
+        .with_for_update()
+    ):
+        row.status = "released"
+        row.claim_run_id = None
+        row.claim_expires_at = None
+        row.target_activity_beat_id = None
+        row.version += 1
     db.commit()
     return beat
 
@@ -504,18 +597,12 @@ def fail_activity_beat(
     now: datetime | None = None,
 ) -> models.ActivityBeat:
     current = _aware_utc(now or datetime.now(UTC))
-    beat = db.scalar(
-        select(models.ActivityBeat)
-        .where(models.ActivityBeat.id == beat_id)
-        .with_for_update()
+    beat, episode, _item, _plan = _lock_beat_with_episode_scope(
+        db,
+        beat_id=beat_id,
     )
-    if beat is None:
-        raise ActivityRuntimeNotFoundError(beat_id)
     if beat.status != "claimed" or beat.claim_run_id != claim_run_id:
         raise ActivityRuntimeConflictError("beat_already_claimed")
-    episode, _item, _plan = _episode_scope(
-        db, episode_id=beat.episode_id, lock_for_update=True
-    )
     beat.status = "failed"
     beat.failure_reason_code = reason_code
     beat.state_after_snapshot = None

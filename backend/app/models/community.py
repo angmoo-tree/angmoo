@@ -6,6 +6,7 @@ from sqlalchemy import (
     Date,
     DateTime,
     ForeignKey,
+    ForeignKeyConstraint,
     Index,
     Integer,
     String,
@@ -27,11 +28,29 @@ class Post(Base):
             "('weather', 'news', 'calendar', 'market', 'knowledge', 'other')",
             name="ck_posts_info_kind",
         ),
+        CheckConstraint(
+            "(world_id IS NULL AND author_world_character_id IS NULL) OR "
+            "(world_id IS NOT NULL AND author_world_character_id IS NOT NULL)",
+            name="ck_posts_world_scope_pair",
+        ),
+        ForeignKeyConstraint(
+            ["author_world_character_id", "world_id"],
+            ["world_characters.id", "world_characters.world_id"],
+            name="fk_posts_author_world_character_scope",
+        ),
+        ForeignKeyConstraint(
+            ["author_world_character_id", "author_character_id"],
+            ["world_characters.id", "world_characters.character_id"],
+            name="fk_posts_author_world_character_identity",
+        ),
+        Index("ix_posts_world_created_at", "world_id", "created_at"),
     )
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     author_user_id: Mapped[Optional[str]] = mapped_column(ForeignKey("users.id"))
     author_character_id: Mapped[Optional[str]] = mapped_column(ForeignKey("characters.id"))
+    world_id: Mapped[Optional[str]] = mapped_column(ForeignKey("worlds.id"))
+    author_world_character_id: Mapped[Optional[str]] = mapped_column(String(64))
     reply_to_post_id: Mapped[Optional[str]] = mapped_column(ForeignKey("posts.id"))
     quote_post_id: Mapped[Optional[str]] = mapped_column(ForeignKey("posts.id"))
     repost_of_post_id: Mapped[Optional[str]] = mapped_column(ForeignKey("posts.id"))

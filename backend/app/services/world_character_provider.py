@@ -4,107 +4,14 @@ from dataclasses import dataclass
 import json
 from typing import Any, Protocol
 
-from pydantic import BaseModel
-
 from app import schemas
 from app.credentials import CredentialMaterial
+from app.providers.gemini import build_gemini_developer_response_schema
 from app.services import direct_llm, world_character_contracts
 
 
 PROFILE_MAX_OUTPUT_TOKENS = 2048
 REPERTOIRE_MAX_OUTPUT_TOKENS = 12288
-
-
-_GEMINI_DEVELOPER_SCHEMA_KEYS = frozenset(
-    {
-        "type",
-        "properties",
-        "required",
-        "items",
-        "enum",
-        "format",
-        "description",
-        "minimum",
-        "maximum",
-        "minLength",
-        "maxLength",
-        "minItems",
-        "maxItems",
-        "nullable",
-        "pattern",
-    }
-)
-
-
-def build_gemini_developer_response_schema(
-    model: type[BaseModel],
-) -> dict[str, Any]:
-    """Convert a strict Pydantic schema to Gemini Developer API's subset.
-
-    Angmoo still validates the returned payload with the original strict Pydantic
-    model.  This transport schema only removes unsupported JSON Schema keywords
-    and inlines references before the request leaves the process.
-    """
-
-    source = model.model_json_schema()
-    definitions = source.get("$defs", {})
-
-    def convert(value: Any) -> Any:
-        if isinstance(value, list):
-            return [convert(item) for item in value]
-        if not isinstance(value, dict):
-            return value
-
-        if "$ref" in value:
-            reference = value["$ref"]
-            prefix = "#/$defs/"
-            if not isinstance(reference, str) or not reference.startswith(prefix):
-                raise ValueError(f"unsupported response schema reference: {reference}")
-            name = reference[len(prefix) :]
-            target = definitions.get(name)
-            if not isinstance(target, dict):
-                raise ValueError(f"missing response schema definition: {name}")
-            merged = dict(target)
-            merged.update({key: item for key, item in value.items() if key != "$ref"})
-            return convert(merged)
-
-        variants = value.get("anyOf")
-        if isinstance(variants, list):
-            non_null = [
-                item
-                for item in variants
-                if not (isinstance(item, dict) and item.get("type") == "null")
-            ]
-            has_null = len(non_null) != len(variants)
-            if has_null and len(non_null) == 1:
-                converted = convert(non_null[0])
-                if not isinstance(converted, dict):
-                    raise ValueError("nullable response schema must resolve to an object")
-                converted_type = converted.get("type")
-                if isinstance(converted_type, str):
-                    converted["type"] = [converted_type, "null"]
-                else:
-                    raise ValueError(
-                        "nullable response schema must have one concrete type"
-                    )
-                return converted
-            raise ValueError("unsupported response schema union")
-
-        converted: dict[str, Any] = {}
-        for key, item in value.items():
-            if key == "properties" and isinstance(item, dict):
-                converted[key] = {
-                    property_name: convert(property_schema)
-                    for property_name, property_schema in item.items()
-                }
-            elif key in _GEMINI_DEVELOPER_SCHEMA_KEYS:
-                converted[key] = convert(item)
-        return converted
-
-    converted = convert(source)
-    if not isinstance(converted, dict):
-        raise ValueError("response schema root must be an object")
-    return converted
 
 
 GEMINI_PROFILE_RESPONSE_SCHEMA = build_gemini_developer_response_schema(

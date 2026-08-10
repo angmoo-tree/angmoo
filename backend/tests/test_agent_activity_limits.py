@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from app import models, schemas
 from app.core import active_hours
 from app.core.config import settings
+from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.services import (
     agent_creation_drafts as draft_service,
@@ -24,6 +25,7 @@ def _create_autonomy_capacity_tables(engine) -> None:
     for table in (
         models.User.__table__,
         models.Character.__table__,
+        models.CharacterActiveWorld.__table__,
         models.CharacterState.__table__,
         models.Post.__table__,
         models.PostMedia.__table__,
@@ -970,20 +972,46 @@ def test_activate_agent_allows_same_user_replacement_at_capacity(
         assert agent_crud.count_effective_active_server_llm_autonomy_agents(db) == 1
 
 
-def test_run_now_rejects_without_assigned_slot_and_does_not_fallback(
+def test_run_now_uses_temporary_slot_without_enabling_autonomy(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setattr(settings, "AGENT_ACTIVITY_ENGINE", "langgraph")
     engine = create_engine("sqlite:///:memory:")
     _create_autonomy_capacity_tables(engine)
-    called = {"assigned": False, "community": False}
+    called = {"assigned": False, "temporary": False, "community": False}
 
     async def _assigned(*args, **kwargs):
         called["assigned"] = True
+
+    async def _temporary(db, **kwargs):
+        called["temporary"] = True
+        slot = db.get(models.AgentSlot, kwargs["agent_id"])
+        assert slot is not None
+        assert slot.status == "running"
+        assert slot.assigned_character_id == "char-run-now"
+        return schemas.OpenClawAgentRunRead(
+            run_id="run-temporary",
+            status="completed",
+            summary="ok",
+            agent_id=slot.agent_id,
+            session_key=(
+                f"agent:{slot.agent_id}:resident-manual:"
+                "user-1:char-run-now:run-temporary"
+            ),
+            character_id="char-run-now",
+            post_id="post-temporary",
+            gateway_result={"status": "completed"},
+        )
 
     async def _community(*args, **kwargs):
         called["community"] = True
 
     monkeypatch.setattr(agent_service.agent_run_service, "run_assigned_resident_slot_once", _assigned)
+    monkeypatch.setattr(
+        agent_service.agent_run_service,
+        "run_claimed_temporary_resident_slot_once",
+        _temporary,
+    )
     monkeypatch.setattr(agent_service.agent_run_service, "run_community_once", _community)
 
     with Session(engine) as db:
@@ -991,11 +1019,166 @@ def test_run_now_rejects_without_assigned_slot_and_does_not_fallback(
         character = _add_capacity_agent(db, user_id=user.id, character_id="char-run-now")
         db.commit()
 
+        result = asyncio.run(agent_service.run_agent_now(db, user, character.id))
+
+        setting = agent_crud.get_setting(db, character.id)
+        assert result.status == "completed"
+        assert called == {
+            "assigned": False,
+            "temporary": True,
+            "community": False,
+        }
+        assert setting is not None and setting.auto_enabled is False
+        assert agent_crud.get_assigned_slot(db, character.id) is None
+        assert all(
+            slot.assigned_character_id is None
+            for slot in db.scalars(select(models.AgentSlot))
+        )
+        assert list(db.scalars(select(models.AgentRun))) == []
+
+
+def test_run_now_rejects_without_assigned_slot_and_does_not_fallback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(settings, "AGENT_ACTIVITY_ENGINE", "langgraph")
+    engine = create_engine("sqlite:///:memory:")
+    _create_autonomy_capacity_tables(engine)
+    called = {"claim": False, "assigned": False, "community": False}
+
+    def _claim(*args, **kwargs):
+        called["claim"] = True
+        raise agent_run_service.AgentSlotUnavailableError()
+
+    async def _assigned(*args, **kwargs):
+        called["assigned"] = True
+        raise AssertionError("run-now must not use an unassigned resident slot")
+
+    async def _community(*args, **kwargs):
+        called["community"] = True
+        raise AssertionError("run-now must not fall back to the community runner")
+
+    monkeypatch.setattr(
+        agent_service.agent_run_service,
+        "claim_temporary_resident_slot",
+        _claim,
+    )
+    monkeypatch.setattr(
+        agent_service.agent_run_service,
+        "run_assigned_resident_slot_once",
+        _assigned,
+    )
+    monkeypatch.setattr(
+        agent_service.agent_run_service,
+        "run_community_once",
+        _community,
+    )
+
+    with Session(engine) as db:
+        user = _add_capacity_user(db)
+        character = _add_capacity_agent(
+            db,
+            user_id=user.id,
+            character_id="char-run-now-no-capacity",
+        )
+        db.commit()
+
         with pytest.raises(agent_service.RunNowSlotUnavailableError):
             asyncio.run(agent_service.run_agent_now(db, user, character.id))
 
-        assert called == {"assigned": False, "community": False}
-        assert list(db.scalars(select(models.AgentRun))) == []
+        setting = agent_crud.get_setting(db, character.id)
+        assert called == {"claim": True, "assigned": False, "community": False}
+        assert setting is not None and setting.auto_enabled is False
+        assert agent_crud.get_assigned_slot(db, character.id) is None
+
+
+def test_run_now_releases_temporary_slot_after_runner_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(settings, "AGENT_ACTIVITY_ENGINE", "langgraph")
+    engine = create_engine("sqlite:///:memory:")
+    _create_autonomy_capacity_tables(engine)
+
+    async def _temporary(*args, **kwargs):
+        raise RuntimeError("temporary runner failed")
+
+    monkeypatch.setattr(
+        agent_service.agent_run_service,
+        "run_claimed_temporary_resident_slot_once",
+        _temporary,
+    )
+
+    with Session(engine) as db:
+        user = _add_capacity_user(db)
+        character = _add_capacity_agent(
+            db,
+            user_id=user.id,
+            character_id="char-run-now-failure",
+        )
+        db.commit()
+
+        with pytest.raises(RuntimeError, match="temporary runner failed"):
+            asyncio.run(agent_service.run_agent_now(db, user, character.id))
+
+        setting = agent_crud.get_setting(db, character.id)
+        assert setting is not None and setting.auto_enabled is False
+        assert agent_crud.get_assigned_slot(db, character.id) is None
+
+
+def test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy() -> None:
+    engine = create_engine("sqlite:///:memory:")
+    _create_autonomy_capacity_tables(engine)
+    now = datetime.now(UTC)
+
+    with Session(engine) as db:
+        user = _add_capacity_user(db)
+        character = _add_capacity_agent(
+            db,
+            user_id=user.id,
+            character_id="char-expired-manual-run",
+        )
+        run = models.AgentRun(
+            id="run-expired-manual",
+            user_id=user.id,
+            character_id=character.id,
+            credential_id=f"cred-{character.id}",
+            agent_id="angmoo-1",
+            session_key="agent:angmoo-1:resident-manual:test",
+            status="running",
+        )
+        slot = models.AgentSlot(
+            agent_id="angmoo-1",
+            status=agent_run_crud.SLOT_STATUS_RUNNING,
+            assigned_user_id=user.id,
+            assigned_character_id=character.id,
+            assigned_credential_id=f"cred-{character.id}",
+            heartbeat_interval_seconds=300,
+            locked_by_run_id=run.id,
+            lease_expires_at=now - timedelta(seconds=1),
+        )
+        db.add_all([run, slot])
+        db.commit()
+
+        recovered_count = agent_run_crud.recover_expired_resident_slot_runs(
+            db,
+            now=now,
+        )
+
+        db.refresh(run)
+        db.refresh(slot)
+        setting = agent_crud.get_setting(db, character.id)
+        assert recovered_count == 1
+        assert run.status == "failed"
+        assert run.gateway_result is not None
+        assert run.gateway_result["reason"] == (
+            agent_run_crud.ORPHANED_RESIDENT_RUN_ERROR
+        )
+        assert setting is not None and setting.auto_enabled is False
+        assert slot.status == agent_run_crud.SLOT_STATUS_EMPTY
+        assert slot.assigned_user_id is None
+        assert slot.assigned_character_id is None
+        assert slot.assigned_credential_id is None
+        assert slot.locked_by_run_id is None
+        assert slot.lease_expires_at is None
 
 
 def test_run_now_rejects_character_owned_by_another_user() -> None:

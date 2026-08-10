@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app import schemas
+from app.core import unit_of_work
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
@@ -104,6 +105,10 @@ class CharacterNotFoundError(CommunityServiceError):
 
 
 class AgentRunAuthorizationError(CommunityServiceError):
+    pass
+
+
+class PostWorldScopeError(CommunityServiceError):
     pass
 
 
@@ -208,7 +213,7 @@ def _store_post_topic_metadata(
     post.topic_signature = topic or None
     post.novelty_basis = novelty or None
     db.add(post)
-    db.commit()
+    unit_of_work.finish_write(db, post)
 
 
 def activity_result_text_for_prompt(
@@ -1748,6 +1753,8 @@ def create_post(
     *,
     log_manual_activity: bool = True,
     post_info: schemas.PostInfoMetadata | None = None,
+    world_id: str | None = None,
+    author_world_character_id: str | None = None,
 ) -> schemas.PostDetail:
     character = None
     if data.author_character_id:
@@ -1760,6 +1767,19 @@ def create_post(
             )
         if character.moderation_status == "suspended":
             raise CharacterSuspendedError("character_suspended")
+    if (world_id is None) != (author_world_character_id is None):
+        raise PostWorldScopeError("world_scope_pair_required")
+    if world_id is not None and author_world_character_id is not None:
+        if character is None:
+            raise PostWorldScopeError("world_scope_requires_character")
+        world_character = db.get(models.WorldCharacter, author_world_character_id)
+        if (
+            world_character is None
+            or world_character.world_id != world_id
+            or world_character.character_id != character.id
+            or world_character.status != "active"
+        ):
+            raise PostWorldScopeError("world_scope_invalid")
     post = community_crud.create_post(
         db,
         post_id=f"post-{uuid4().hex[:12]}",
@@ -1767,6 +1787,8 @@ def create_post(
         character=character,
         data=data,
         post_info=post_info,
+        world_id=world_id,
+        author_world_character_id=author_world_character_id,
     )
     if character is not None and log_manual_activity:
         result = build_post_created_activity_result(
@@ -2318,6 +2340,8 @@ def create_agent_tool_post(
     lore_query_mode: str | None = None,
     consume_pending_feed_cue: bool = False,
     feed_cue_id: int | None = None,
+    world_id: str | None = None,
+    author_world_character_id: str | None = None,
 ) -> schemas.PostDetail:
     lookup_session_key = _agent_tool_lookup_session_key(session_key)
     run = agent_run_crud.get_active_run_for_session(db, lookup_session_key)
@@ -2358,6 +2382,8 @@ def create_agent_tool_post(
             author_character_id=author_character_id,
         ),
         log_manual_activity=False,
+        world_id=world_id,
+        author_world_character_id=author_world_character_id,
     )
     result = build_post_created_activity_result(
         post_id=post.id,
@@ -5268,6 +5294,10 @@ def _post_summary(db: Session, post: models.Post) -> schemas.PostSummary:
             "post_type": post.post_type,
             "author_user_id": post.author_user_id,
             "author_character_id": post.author_character_id,
+            "world_id": getattr(post, "world_id", None),
+            "author_world_character_id": getattr(
+                post, "author_world_character_id", None
+            ),
             "mentioned_characters": _mentioned_characters_for_texts(
                 db, post.title, post.body
             ),
@@ -5307,6 +5337,10 @@ def _post_detail(db: Session, post) -> schemas.PostDetail:
             "post_type": post.post_type,
             "author_user_id": post.author_user_id,
             "author_character_id": post.author_character_id,
+            "world_id": getattr(post, "world_id", None),
+            "author_world_character_id": getattr(
+                post, "author_world_character_id", None
+            ),
             "mentioned_characters": _mentioned_characters_for_texts(
                 db, post.title, post.body
             ),
@@ -5340,6 +5374,10 @@ def _hidden_post_detail(db: Session, post: models.Post) -> schemas.PostDetail:
             "post_type": post.post_type,
             "author_user_id": post.author_user_id,
             "author_character_id": post.author_character_id,
+            "world_id": getattr(post, "world_id", None),
+            "author_world_character_id": getattr(
+                post, "author_world_character_id", None
+            ),
             "mentioned_characters": [],
             "reply_to_post_id": post.reply_to_post_id,
             "quote_post_id": None,
@@ -5408,6 +5446,10 @@ def _post_reference(db: Session, post_id: str | None) -> schemas.PostReference |
             "post_type": post.post_type,
             "author_user_id": post.author_user_id,
             "author_character_id": post.author_character_id,
+            "world_id": getattr(post, "world_id", None),
+            "author_world_character_id": getattr(
+                post, "author_world_character_id", None
+            ),
             "mentioned_characters": _mentioned_characters_for_texts(
                 db, post.title, post.body
             ),

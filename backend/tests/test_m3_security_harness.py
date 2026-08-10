@@ -145,7 +145,7 @@ def test_demo_read_only_guard_covers_every_mutation_auth_surface() -> None:
         if key.split(" ", 1)[0] in UNSAFE_METHODS
         and metadata["access"] == "public"
     }
-    assert len(session_mutations) == 74
+    assert len(session_mutations) == 75
     assert len(local_bot_mutations) == 10
     assert not admin_mutations
     assert preauth_mutations == PREAUTH_MUTATION_ROUTES

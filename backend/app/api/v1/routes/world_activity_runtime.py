@@ -65,3 +65,26 @@ def prepare_daily_activity_plan(
         )
     except daily_activity_plans.DailyActivityPlanError as exc:
         _raise_plan_error(exc)
+
+
+@router.patch(
+    "/{character_id}/worlds/{world_id}/activity-runtime-mode",
+    response_model=schemas.WorldCharacterRuntimeModeRead,
+)
+def update_world_character_activity_runtime_mode(
+    character_id: str,
+    world_id: str,
+    data: schemas.WorldCharacterRuntimeModeUpdate,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user),
+) -> schemas.WorldCharacterRuntimeModeRead:
+    try:
+        return daily_activity_plans.update_activity_runtime_mode(
+            db,
+            character_id=character_id,
+            world_id=world_id,
+            user=user,
+            data=data,
+        )
+    except daily_activity_plans.DailyActivityPlanError as exc:
+        _raise_plan_error(exc)

@@ -140,6 +140,22 @@ def _add_ready_character(
     db.flush()
     db.add(character)
     db.flush()
+    db.add(
+        models.LlmCredential(
+            id=f"credential-{suffix}",
+            owner_id=user.id,
+            character_id=character.id,
+            provider="google",
+            purpose="agent",
+            model="gemini-test",
+            auth_profile_id=f"profile-{suffix}",
+            label="Activity runtime test key",
+            encrypted_api_key="not-used-by-runtime-contract-tests",
+            key_fingerprint=f"fixture-{suffix}",
+            enabled=True,
+        )
+    )
+    db.flush()
     db.add(membership)
     db.flush()
     db.add(world_character)
@@ -409,8 +425,39 @@ def test_owner_api_prepares_reads_and_forbids_other_user() -> None:
     assert created.json()["autonomous_enabled"] is False
     assert _request(app, "GET", path).json()["id"] == created.json()["id"]
 
+    mode_path = (
+        "/api/v1/characters/character-a/worlds/world-a/activity-runtime-mode"
+    )
+    switched = _request(
+        app,
+        "PATCH",
+        mode_path,
+        json={"activity_runtime_mode": "routine_resident_v1"},
+    )
+    assert switched.status_code == 200, switched.text
+    assert switched.json()["activity_runtime_mode"] == "routine_resident_v1"
+    assert switched.json()["autonomous_enabled"] is False
+    assert (
+        _request(
+            app,
+            "PATCH",
+            "/api/v1/characters/character-a/worlds/world-missing/activity-runtime-mode",
+            json={"activity_runtime_mode": "legacy_resident_v1"},
+        ).status_code
+        == 404
+    )
+
     principal["user"] = outsider
     assert _request(app, "GET", path).status_code == 403
+    assert (
+        _request(
+            app,
+            "PATCH",
+            mode_path,
+            json={"activity_runtime_mode": "legacy_resident_v1"},
+        ).status_code
+        == 403
+    )
 
 
 def test_state_contract_bounds_decay_and_rejects_excess_delta() -> None:

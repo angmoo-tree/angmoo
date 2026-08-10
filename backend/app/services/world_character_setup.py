@@ -402,6 +402,37 @@ def _load_scope(
     return SetupScope(world, membership, world_character, character)
 
 
+def _select_active_world_character(
+    db: Session,
+    *,
+    scope: SetupScope,
+    approval_id: str,
+    selected_at: datetime,
+) -> None:
+    active_world = db.scalar(
+        select(models.CharacterActiveWorld)
+        .where(models.CharacterActiveWorld.character_id == scope.character.id)
+        .with_for_update()
+    )
+    if active_world is None:
+        db.add(
+            models.CharacterActiveWorld(
+                character_id=scope.character.id,
+                world_character_id=scope.world_character.id,
+                selected_at=selected_at,
+                idempotency_key=f"approval:{approval_id}",
+                version=1,
+            )
+        )
+        return
+    if active_world.world_character_id == scope.world_character.id:
+        return
+    active_world.world_character_id = scope.world_character.id
+    active_world.selected_at = selected_at
+    active_world.idempotency_key = f"approval:{approval_id}"
+    active_world.version += 1
+
+
 def _resolve_material(db: Session, scope: SetupScope) -> CredentialMaterial:
     credential = agent_crud.get_character_credential(db, scope.character.id)
     try:
@@ -754,6 +785,14 @@ def approve_setup(
     )
     if existing_approval is not None:
         if existing_approval.status == "succeeded":
+            _select_active_world_character(
+                db,
+                scope=scope,
+                approval_id=existing_approval.id,
+                selected_at=existing_approval.finished_at
+                or existing_approval.created_at,
+            )
+            db.commit()
             return get_setup(db, world_character_id=world_character_id, user=user)
         raise WorldCharacterSetupConflictError("idempotency_replay")
 
@@ -878,6 +917,12 @@ def approve_setup(
     scope.world_character.character_contract_hash = character_hash
     scope.world_character.world_contract_hash = world_hash
     scope.world_character.version += 1
+    _select_active_world_character(
+        db,
+        scope=scope,
+        approval_id=approval.id,
+        selected_at=now,
+    )
     db.add(approval)
     try:
         db.commit()

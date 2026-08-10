@@ -1,4 +1,5 @@
 export type ActivityDaypart = "dawn" | "morning" | "afternoon" | "evening";
+export type ActivityRuntimeMode = "legacy_resident_v1" | "routine_resident_v1";
 
 export type ActivityEpisodeRead = {
   id: string;
@@ -7,7 +8,13 @@ export type ActivityEpisodeRead = {
   current_state_schema_version: number;
   current_state_snapshot: Record<string, unknown>;
   last_successful_beat_id: string | null;
+  last_successful_post_id: string | null;
+  last_successful_sequence_no: number | null;
   last_successful_beat_at: string | null;
+  considered_event_count: number;
+  used_event_count: number;
+  overflow_event_count: number;
+  recent_outcome: string | null;
   next_sequence_no: number;
   started_at: string | null;
   completed_at: string | null;
@@ -51,6 +58,7 @@ export type DailyActivityPlanRead = {
   revision_count: number;
   version: number;
   autonomous_enabled: boolean;
+  activity_runtime_mode: ActivityRuntimeMode;
   current_daypart: ActivityDaypart | null;
   reused: boolean;
   items: DailyActivityPlanItemRead[];
@@ -129,4 +137,24 @@ export function prepareDailyActivityPlan(
     method: "POST",
     body: { idempotency_key: idempotencyKey },
   });
+}
+
+export function updateActivityRuntimeMode(
+  characterId: string,
+  worldId: string,
+  activityRuntimeMode: ActivityRuntimeMode,
+) {
+  return apiRequest<{
+    world_character_id: string;
+    world_id: string;
+    character_id: string;
+    activity_runtime_mode: ActivityRuntimeMode;
+    autonomous_enabled: boolean;
+  }>(
+    `/characters/${encodeURIComponent(characterId)}/worlds/${encodeURIComponent(worldId)}/activity-runtime-mode`,
+    {
+      method: "PATCH",
+      body: { activity_runtime_mode: activityRuntimeMode },
+    },
+  );
 }

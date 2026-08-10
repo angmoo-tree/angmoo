@@ -92,10 +92,23 @@ def test_security_migration_schema_contract() -> None:
         item["name"]: item for item in inspector.get_columns("auth_sessions")
     }
     assert auth_session_columns["expires_at"]["nullable"] is True
+    world_character_columns = {
+        item["name"]: item for item in inspector.get_columns("world_characters")
+    }
+    post_columns = {item["name"]: item for item in inspector.get_columns("posts")}
+    assert world_character_columns["activity_runtime_mode"]["nullable"] is False
+    assert post_columns["world_id"]["nullable"] is True
+    assert post_columns["author_world_character_id"]["nullable"] is True
+    assert {
+        item["name"] for item in inspector.get_check_constraints("posts")
+    }.issuperset({"ck_posts_world_scope_pair"})
+    assert {
+        item["name"] for item in inspector.get_indexes("posts")
+    }.issuperset({"ix_posts_world_created_at"})
     with engine.connect() as connection:
         assert (
             connection.scalar(text("SELECT version_num FROM alembic_version"))
-            == "20260809_0074"
+            == "20260810_0075"
         )
 
 
@@ -484,6 +497,127 @@ def test_resident_character_assignment_is_unique_across_postgres_sessions() -> N
             assert assigned[0].agent_id in agent_ids
             assert assigned[0].assigned_user_id == user_id
             assert assigned[0].assigned_credential_id == credential_id
+    finally:
+        with Session(engine) as db:
+            db.execute(
+                delete(models.AgentSlot).where(models.AgentSlot.agent_id.in_(agent_ids))
+            )
+            db.execute(
+                delete(models.LlmCredential).where(
+                    models.LlmCredential.id == credential_id
+                )
+            )
+            db.execute(
+                delete(models.Character).where(models.Character.id == character_id)
+            )
+            db.execute(delete(models.User).where(models.User.id == user_id))
+            db.commit()
+
+
+def test_temporary_manual_slot_claim_is_single_flight_across_postgres_sessions() -> None:
+    engine = _engine()
+    suffix = uuid4().hex
+    user_id = f"user-temporary-manual-{suffix}"
+    character_id = f"char-temporary-manual-{suffix}"
+    credential_id = f"cred-temporary-manual-{suffix}"
+    agent_ids = [
+        f"temporary-manual-slot-{suffix}-1",
+        f"temporary-manual-slot-{suffix}-2",
+    ]
+    contender_count = 8
+    barrier = Barrier(contender_count)
+
+    with Session(engine) as db:
+        db.add(
+            models.User(
+                id=user_id,
+                email=f"{suffix}@example.invalid",
+                display_name=user_id,
+                display_name_normalized=user_id,
+                profile_setup_completed=True,
+            )
+        )
+        db.add(
+            models.Character(
+                id=character_id,
+                owner_id=user_id,
+                name=character_id,
+                handle=f"temporary_manual_{suffix[:16]}",
+                persona_summary="temporary manual slot fixture",
+                execution_mode="llm",
+            )
+        )
+        db.add(
+            models.LlmCredential(
+                id=credential_id,
+                owner_id=user_id,
+                character_id=character_id,
+                provider="google",
+                purpose="agent",
+                model="gemini-3.1-flash-lite",
+                auth_profile_id=f"google:{character_id}",
+                label=character_id,
+                encrypted_api_key="synthetic-encrypted",
+                key_fingerprint=suffix[:16],
+                enabled=True,
+            )
+        )
+        db.commit()
+        agent_run_crud.ensure_agent_slots(db, agent_ids)
+
+    def attempt() -> str | None:
+        with Session(engine) as db:
+            barrier.wait()
+            slot = agent_run_crud.claim_temporary_resident_slot_assignment(
+                db,
+                agent_ids=agent_ids,
+                user_id=user_id,
+                character_id=character_id,
+                credential_id=credential_id,
+                heartbeat_interval_seconds=300,
+                lease_seconds=390,
+            )
+            return slot.agent_id if slot is not None else None
+
+    try:
+        with ThreadPoolExecutor(max_workers=contender_count) as executor:
+            results = list(executor.map(lambda _index: attempt(), range(contender_count)))
+        claimed_agent_ids = [agent_id for agent_id in results if agent_id is not None]
+        assert len(claimed_agent_ids) == 1
+        assert claimed_agent_ids[0] in agent_ids
+
+        with Session(engine) as db:
+            assigned = list(
+                db.scalars(
+                    select(models.AgentSlot).where(
+                        models.AgentSlot.assigned_character_id == character_id
+                    )
+                )
+            )
+            assert len(assigned) == 1
+            claimed_slot = assigned[0]
+            assert claimed_slot.status == agent_run_crud.SLOT_STATUS_RUNNING
+            assert claimed_slot.assigned_user_id == user_id
+            assert claimed_slot.assigned_credential_id == credential_id
+            assert claimed_slot.next_tick_at is None
+            assert (claimed_slot.locked_by_run_id or "").startswith(
+                "pending:temporary:"
+            )
+
+            released = agent_run_crud.release_temporary_resident_slot_assignment(
+                db,
+                agent_id=claimed_slot.agent_id,
+                user_id=user_id,
+                character_id=character_id,
+                credential_id=credential_id,
+            )
+            assert released is not None
+            assert released.status == agent_run_crud.SLOT_STATUS_EMPTY
+            assert released.assigned_user_id is None
+            assert released.assigned_character_id is None
+            assert released.assigned_credential_id is None
+            assert released.locked_by_run_id is None
+            assert released.lease_expires_at is None
     finally:
         with Session(engine) as db:
             db.execute(

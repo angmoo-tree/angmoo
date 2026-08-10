@@ -13,6 +13,7 @@ def _create_tables(engine) -> None:
     for table in (
         models.User.__table__,
         models.Character.__table__,
+        models.CharacterActiveWorld.__table__,
         models.CharacterState.__table__,
         models.Post.__table__,
         models.PostMedia.__table__,

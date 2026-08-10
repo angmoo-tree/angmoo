@@ -455,6 +455,14 @@ class AgentActivitySummaryRead(BaseModel):
     today_like_count: int
 
 
+class AgentActivityProfileReadinessRead(BaseModel):
+    ready: bool
+    source: Literal["legacy_tendency", "world_community_profile"]
+    reason_code: str | None = None
+    world_id: str | None = None
+    world_character_id: str | None = None
+
+
 class CredentialUpsert(BaseModel):
     provider: str = Field(default="google", max_length=40)
     model: AgentGoogleModel = "gemini-3.1-flash-lite"
@@ -471,5 +479,6 @@ class AgentDetailRead(BaseModel):
     image_settings: AgentImageGenerationSettingRead
     promotion_usage: AgentPromotionUsageRead
     assigned_slot: AgentSlotRead | None = None
+    activity_profile_readiness: AgentActivityProfileReadinessRead
     activity_summary: AgentActivitySummaryRead
     recent_activity: list[AgentActivityLogRead]

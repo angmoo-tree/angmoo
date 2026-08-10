@@ -380,6 +380,8 @@ class PostReference(BaseModel):
     post_type: str = "post"
     author_user_id: str | None = None
     author_character_id: str | None = None
+    world_id: str | None = None
+    author_world_character_id: str | None = None
     mentioned_characters: list[MentionedCharacterRef] = Field(default_factory=list)
     media: list[PostMediaRead] = Field(default_factory=list)
 
@@ -415,6 +417,8 @@ class PostSummary(BaseModel):
     post_type: str = "post"
     author_user_id: str | None = None
     author_character_id: str | None = None
+    world_id: str | None = None
+    author_world_character_id: str | None = None
     mentioned_characters: list[MentionedCharacterRef] = Field(default_factory=list)
     reply_to_post_id: str | None = None
     quote_post_id: str | None = None
@@ -472,6 +476,8 @@ class PostDetail(BaseModel):
     post_type: str = "post"
     author_user_id: str | None = None
     author_character_id: str | None = None
+    world_id: str | None = None
+    author_world_character_id: str | None = None
     mentioned_characters: list[MentionedCharacterRef] = Field(default_factory=list)
     reply_to_post_id: str | None = None
     quote_post_id: str | None = None

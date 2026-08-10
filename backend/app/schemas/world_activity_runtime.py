@@ -16,6 +16,7 @@ ActivityPlanItemStatus = Literal[
 ActivityEpisodeStatus = Literal[
     "planned", "active", "completed", "interrupted", "cancelled"
 ]
+ActivityRuntimeMode = Literal["legacy_resident_v1", "routine_resident_v1"]
 
 
 class WorldActivityRuntimeSchema(BaseModel):
@@ -26,6 +27,18 @@ class DailyActivityPlanPrepareCreate(WorldActivityRuntimeSchema):
     idempotency_key: str = Field(min_length=8, max_length=128)
 
 
+class WorldCharacterRuntimeModeUpdate(WorldActivityRuntimeSchema):
+    activity_runtime_mode: ActivityRuntimeMode
+
+
+class WorldCharacterRuntimeModeRead(WorldActivityRuntimeSchema):
+    world_character_id: str
+    world_id: str
+    character_id: str
+    activity_runtime_mode: ActivityRuntimeMode
+    autonomous_enabled: bool
+
+
 class ActivityEpisodeRead(WorldActivityRuntimeSchema):
     id: str
     plan_item_id: str
@@ -33,7 +46,13 @@ class ActivityEpisodeRead(WorldActivityRuntimeSchema):
     current_state_schema_version: int
     current_state_snapshot: dict[str, object]
     last_successful_beat_id: str | None = None
+    last_successful_post_id: str | None = None
+    last_successful_sequence_no: int | None = None
     last_successful_beat_at: datetime | None = None
+    considered_event_count: int = 0
+    used_event_count: int = 0
+    overflow_event_count: int = 0
+    recent_outcome: str | None = None
     next_sequence_no: int
     started_at: datetime | None = None
     completed_at: datetime | None = None
@@ -77,6 +96,7 @@ class DailyActivityPlanRead(WorldActivityRuntimeSchema):
     revision_count: int
     version: int
     autonomous_enabled: bool
+    activity_runtime_mode: ActivityRuntimeMode
     current_daypart: ActivityDaypart | None = None
     reused: bool = False
     items: list[DailyActivityPlanItemRead] = Field(min_length=4, max_length=4)

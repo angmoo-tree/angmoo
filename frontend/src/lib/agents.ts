@@ -198,6 +198,14 @@ export type AgentActivityLogRead = {
   created_at: string;
 };
 
+export type AgentActivityProfileReadinessRead = {
+  ready: boolean;
+  source: "legacy_tendency" | "world_community_profile";
+  reason_code: string | null;
+  world_id: string | null;
+  world_character_id: string | null;
+};
+
 export type AgentFeedCueRead = {
   id: number;
   user_id: string;
@@ -237,6 +245,17 @@ export type AgentFirstGreetingRead = {
   gateway_result: Record<string, unknown>;
 };
 
+export type AgentRunRead = {
+  run_id: string;
+  status: string;
+  summary: string | null;
+  agent_id: string;
+  session_key: string;
+  character_id: string;
+  post_id: string | null;
+  gateway_result: Record<string, unknown>;
+};
+
 export type AgentActivityMaintenanceRead = {
   enabled: boolean;
   title: string;
@@ -266,6 +285,7 @@ export type AgentDetailRead = {
   image_settings: AgentImageGenerationSettingRead;
   promotion_usage: AgentPromotionUsageRead;
   assigned_slot: AgentSlotRead | null;
+  activity_profile_readiness: AgentActivityProfileReadinessRead;
   activity_summary: AgentActivitySummaryRead;
   recent_activity: AgentActivityLogRead[];
 };
@@ -1400,7 +1420,7 @@ export async function deleteAgent(
 }
 
 export async function runAgentNow(characterId: string) {
-  const result = await apiRequest(`/agents/${characterId}/run-now`, {
+  const result = await apiRequest<AgentRunRead>(`/agents/${characterId}/run-now`, {
     method: "POST",
   });
   notifyAgentsChanged();
