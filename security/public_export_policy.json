@@ -403,6 +403,10 @@
       "destination": "backend/app/alembic/versions/20260809_0074_daily_activity_runtime.py"
     },
     {
+      "source": "backend/app/alembic/versions/20260810_0075_routine_continuous_posts.py",
+      "destination": "backend/app/alembic/versions/20260810_0075_routine_continuous_posts.py"
+    },
+    {
       "source": "backend/app/api/v1/__init__.py",
       "destination": "backend/app/api/v1/__init__.py"
     },
@@ -719,6 +723,10 @@
       "destination": "backend/app/schemas/messages.py"
     },
     {
+      "source": "backend/app/schemas/routine_post.py",
+      "destination": "backend/app/schemas/routine_post.py"
+    },
+    {
       "source": "backend/app/schemas/tree.py",
       "destination": "backend/app/schemas/tree.py"
     },
@@ -937,6 +945,22 @@
     {
       "source": "backend/app/services/joint_activity_scheduling.py",
       "destination": "backend/app/services/joint_activity_scheduling.py"
+    },
+    {
+      "source": "backend/app/services/activity_profile_readiness.py",
+      "destination": "backend/app/services/activity_profile_readiness.py"
+    },
+    {
+      "source": "backend/app/services/routine_post_context.py",
+      "destination": "backend/app/services/routine_post_context.py"
+    },
+    {
+      "source": "backend/app/services/routine_post_planner.py",
+      "destination": "backend/app/services/routine_post_planner.py"
+    },
+    {
+      "source": "backend/app/services/routine_post_runtime.py",
+      "destination": "backend/app/services/routine_post_runtime.py"
     },
     {
       "source": "backend/pyproject.toml",
@@ -1349,6 +1373,10 @@
     {
       "source": "backend/tests/test_daily_activity_runtime.py",
       "destination": "backend/tests/test_daily_activity_runtime.py"
+    },
+    {
+      "source": "backend/tests/test_routine_post_runtime.py",
+      "destination": "backend/tests/test_routine_post_runtime.py"
     },
     {
       "source": "backend/uv.lock",
