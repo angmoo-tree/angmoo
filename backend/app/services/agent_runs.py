@@ -26,6 +26,7 @@ from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
 from app.services import agent_activity_policy
+from app.services import activity_profile_readiness
 from app.services.agent_briefs import (
     PREPARED_CREATE_POST_BRIEF_SENTINEL,
     build_feed_scan_create_post_brief,
@@ -5509,6 +5510,55 @@ def assign_resident_slot(
     return schemas.AgentSlotRead.model_validate(slot)
 
 
+def claim_temporary_resident_slot(
+    db: Session,
+    *,
+    user_id: str,
+    character_id: str,
+    credential_id: str,
+    heartbeat_interval_seconds: int,
+    timeout_seconds: int,
+) -> models.AgentSlot:
+    maintenance_service.ensure_run_now_available(db)
+    _validate_character_and_credential(
+        db,
+        user_id=user_id,
+        character_id=character_id,
+        credential_id=credential_id,
+    )
+    slot = agent_run_crud.claim_temporary_resident_slot_assignment(
+        db,
+        agent_ids=settings.openclaw_agent_ids,
+        user_id=user_id,
+        character_id=character_id,
+        credential_id=credential_id,
+        heartbeat_interval_seconds=heartbeat_interval_seconds,
+        lease_seconds=timeout_seconds + 90,
+    )
+    if slot is None:
+        raise AgentSlotUnavailableError(
+            f"No temporary OpenClaw slot is available for character {character_id}"
+        )
+    return slot
+
+
+def release_temporary_resident_slot(
+    db: Session,
+    *,
+    agent_id: str,
+    user_id: str,
+    character_id: str,
+    credential_id: str,
+) -> None:
+    agent_run_crud.release_temporary_resident_slot_assignment(
+        db,
+        agent_id=agent_id,
+        user_id=user_id,
+        character_id=character_id,
+        credential_id=credential_id,
+    )
+
+
 def _scheduled_retry_next_tick_at(
     db: Session,
     *,
@@ -5778,8 +5828,10 @@ async def run_community_once(
             public_action_count = agent_activity_policy.count_public_actions_since(
                 db, character_id=character.id, since=run_started_at
             )
+            status = str(gateway_result.get("status", "completed"))
             if (
-                public_action_count == 0
+                _is_success_status(status)
+                and public_action_count == 0
                 and _policy_allows_observe(activity_policy)
                 and not _has_activity_since(
                     db,
@@ -5799,7 +5851,6 @@ async def run_community_once(
                         db, character_id=character.id, since=run_started_at
                     ),
                 )
-            status = str(gateway_result.get("status", "completed"))
             agent_run_crud.mark_agent_run_finished(
                 db,
                 run_id,
@@ -6789,8 +6840,25 @@ async def _run_resident_slot_once(
             )
         if cooldown_until is not None and cooldown_until <= now:
             credential.cooldown_until = None
-        if enforce_activity_policy and not _has_tendency_analysis(setting):
-            summary = "커뮤니티 성향 분석을 먼저 실행해주세요."
+        readiness = (
+            activity_profile_readiness.evaluate(
+                db,
+                character=character,
+                setting=setting,
+            )
+            if enforce_activity_policy and setting is not None
+            else None
+        )
+        if enforce_activity_policy and (readiness is None or not readiness.ready):
+            uses_world_profile = (
+                readiness is not None
+                and readiness.source == "world_community_profile"
+            )
+            summary = (
+                "이 World의 활동 준비를 완료해주세요."
+                if uses_world_profile
+                else "커뮤니티 성향 분석을 먼저 실행해주세요."
+            )
             agent_run_crud.create_agent_run(
                 db,
                 run_id=run_id,
@@ -6803,7 +6871,16 @@ async def _run_resident_slot_once(
                 tool_auth_key=tool_auth_key,
             )
             run_created = True
-            gateway_payload = {"status": "skipped", "reason": summary}
+            gateway_payload = {
+                "status": "skipped",
+                "reason": summary,
+                "reason_code": (
+                    readiness.reason_code if readiness is not None else None
+                ),
+                "readiness_source": (
+                    readiness.source if readiness is not None else None
+                ),
+            }
             agent_run_crud.mark_agent_run_finished(
                 db,
                 run_id,
@@ -6816,7 +6893,11 @@ async def _run_resident_slot_once(
                 character_id=character.id,
                 action_type="skipped",
                 target_post_id=selected_post_id,
-                reason="tendency_analysis_required",
+                reason=(
+                    "activity_profile_required"
+                    if uses_world_profile
+                    else "tendency_analysis_required"
+                ),
                 result=summary,
             )
             agent_run_crud.complete_resident_slot_run(
@@ -7047,7 +7128,8 @@ async def _run_resident_slot_once(
                 db, character_id=character.id, since=run_started_at
             )
             if (
-                public_action_count == 0
+                _is_success_status(status)
+                and public_action_count == 0
                 and _policy_allows_observe(activity_policy)
                 and not _has_activity_since(
                     db,
@@ -7812,6 +7894,44 @@ async def run_assigned_resident_slot_once(
     if slot is None:
         raise AgentSlotUnavailableError(
             f"No assigned OpenClaw slot is available for character {character_id}"
+        )
+    return await _run_resident_slot_once(
+        db,
+        slot=slot,
+        post_id=post_id,
+        timeout_seconds=timeout,
+        message=message,
+        require_public_action=require_public_action,
+        enforce_activity_policy=enforce_activity_policy,
+    )
+
+
+async def run_claimed_temporary_resident_slot_once(
+    db: Session,
+    *,
+    agent_id: str,
+    user_id: str,
+    character_id: str,
+    credential_id: str,
+    post_id: str | None = None,
+    timeout_seconds: int | None = None,
+    message: str | None = None,
+    require_public_action: bool = False,
+    enforce_activity_policy: bool = False,
+) -> schemas.OpenClawAgentRunRead:
+    maintenance_service.ensure_run_now_available(db)
+    timeout = timeout_seconds or settings.openclaw_timeout_seconds
+    slot = db.get(models.AgentSlot, agent_id)
+    if (
+        slot is None
+        or slot.status != agent_run_crud.SLOT_STATUS_RUNNING
+        or slot.assigned_user_id != user_id
+        or slot.assigned_character_id != character_id
+        or slot.assigned_credential_id != credential_id
+        or not (slot.locked_by_run_id or "").startswith("pending:temporary:")
+    ):
+        raise AgentSlotUnavailableError(
+            f"Temporary OpenClaw slot {agent_id} is not claimed for character {character_id}"
         )
     return await _run_resident_slot_once(
         db,

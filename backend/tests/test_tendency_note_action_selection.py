@@ -103,7 +103,7 @@ def test_agent_service_tendency_readiness_requires_hidden_feed_seed_criteria():
     )
 
 
-def test_public_activity_entrypoints_require_tendency_readiness():
+def test_public_activity_entrypoints_use_lane_specific_profile_readiness():
     feed_cue_source = inspect.getsource(agent_service.give_feed_cue)
     assert feed_cue_source.index("if not _has_tendency_analysis(setting):") < (
         feed_cue_source.index("if not setting.auto_enabled:")
@@ -111,8 +111,23 @@ def test_public_activity_entrypoints_require_tendency_readiness():
     assert "_ensure_tendency_analysis_ready(setting)" in inspect.getsource(
         agent_service.run_first_greeting
     )
-    assert "_ensure_tendency_analysis_ready(current_setting)" in inspect.getsource(
+    assert "_ensure_activity_profile_ready(" in inspect.getsource(
         agent_service.activate_agent
+    )
+    assert "_ensure_activity_profile_ready(" in inspect.getsource(
+        agent_service.run_agent_now
+    )
+
+
+def test_public_activity_entrypoints_require_tendency_readiness():
+    """Keep the approved legacy readiness boundary while World lanes migrate."""
+
+    feed_cue_source = inspect.getsource(agent_service.give_feed_cue)
+    assert feed_cue_source.index("if not _has_tendency_analysis(setting):") < (
+        feed_cue_source.index("if not setting.auto_enabled:")
+    )
+    assert "_ensure_tendency_analysis_ready(setting)" in inspect.getsource(
+        agent_service.run_first_greeting
     )
 
 

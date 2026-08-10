@@ -46,6 +46,10 @@ from app.services.resident_contracts import (
     LangGraphResidentContext,
     ResidentGraphState as _ResidentGraphState,
 )
+from app.services.routine_post_runtime import (
+    routine_world_character_for_character,
+    run_routine_post_runtime,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -8610,6 +8614,17 @@ def _record_relationship_points_after_publish(
 async def run_resident_langgraph(
     ctx: LangGraphResidentContext,
 ) -> dict[str, Any]:
+    context_db = getattr(ctx, "db", None)
+    routine_world_character = (
+        routine_world_character_for_character(
+            context_db, character_id=ctx.character.id
+        )
+        if context_db is not None
+        else None
+    )
+    if routine_world_character is not None:
+        async with _GRAPH_SEMAPHORE:
+            return await run_routine_post_runtime(ctx)
     tracker = RunLlmTracker()
     initial_active_topic_arc = None
     initial_independent_post_roll = {

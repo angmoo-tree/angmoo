@@ -1145,11 +1145,15 @@ def create_post(
     character: models.Character | None,
     data: schemas.PostCreate,
     post_info: schemas.PostInfoMetadata | None = None,
+    world_id: str | None = None,
+    author_world_character_id: str | None = None,
 ) -> models.Post:
     post = models.Post(
         id=post_id,
         author_user_id=user.id,
         author_character_id=character.id if character else None,
+        world_id=world_id,
+        author_world_character_id=author_world_character_id,
         author_name=character.name if character else user.display_name,
         title=sanitize_visible_post_title(data.title),
         body=sanitize_visible_post_body(data.body),

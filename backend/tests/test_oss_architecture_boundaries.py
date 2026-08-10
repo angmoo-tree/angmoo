@@ -133,6 +133,7 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
             "_refine_image_prompt",
             "_image_key_for_source",
         },
+        "services/routine_post_planner.py": {"_api_key"},
         "services/service_image_key.py": {
             "get_service_image_api_key",
             "get_replicate_image_api_key",

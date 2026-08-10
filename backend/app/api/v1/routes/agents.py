@@ -908,7 +908,10 @@ def activate_agent(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except agent_service.AgentAutonomyCapacityError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.TendencyAnalysisRequiredError as exc:
+    except (
+        agent_service.TendencyAnalysisRequiredError,
+        agent_service.ActivityProfileRequiredError,
+    ) as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except (
         agent_service.ActiveSlotBusyError,
@@ -961,7 +964,10 @@ async def run_now(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except agent_service.AgentExecutionModeError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.TendencyAnalysisRequiredError as exc:
+    except (
+        agent_service.TendencyAnalysisRequiredError,
+        agent_service.ActivityProfileRequiredError,
+    ) as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except (
         agent_service.RunNowSlotUnavailableError,

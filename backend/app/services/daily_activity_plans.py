@@ -504,6 +504,71 @@ def get_activity_plan(
     )
 
 
+def update_activity_runtime_mode(
+    db: Session,
+    *,
+    character_id: str,
+    world_id: str,
+    user: models.User,
+    data: schemas.WorldCharacterRuntimeModeUpdate,
+    now: datetime | None = None,
+) -> schemas.WorldCharacterRuntimeModeRead:
+    current = _aware_utc(now or datetime.now(UTC))
+    scope = _load_scope(
+        db,
+        character_id=character_id,
+        world_id=world_id,
+        user=user,
+        lock_for_update=True,
+    )
+    if data.activity_runtime_mode == "routine_resident_v1":
+        repertoire, _candidates = _ready_repertoire(db, scope=scope)
+        credential = db.get(models.LlmCredential, repertoire.credential_id)
+        if (
+            credential is None
+            or not credential.enabled
+            or credential.owner_id != user.id
+            or credential.character_id not in {None, character_id}
+        ):
+            raise DailyActivityPlanValidationError("credential_required")
+        target_date = local_activity_date(current, scope.world.timezone)
+        plan = db.scalar(
+            select(models.DailyActivityPlan).where(
+                models.DailyActivityPlan.world_character_id
+                == scope.world_character.id,
+                models.DailyActivityPlan.local_date == target_date,
+            )
+        )
+        if plan is None:
+            raise DailyActivityPlanValidationError("activity_plan_not_ready")
+        plan_read = _plan_read(
+            db,
+            plan=plan,
+            world_character=scope.world_character,
+            now=current,
+            reused=True,
+        )
+        if plan_read.current_daypart is None:
+            raise DailyActivityPlanValidationError("activity_plan_not_ready")
+        current_item = next(
+            (item for item in plan_read.items if item.daypart == plan_read.current_daypart),
+            None,
+        )
+        if current_item is None or current_item.episode is None:
+            raise DailyActivityPlanValidationError("activity_plan_not_ready")
+
+    scope.world_character.activity_runtime_mode = data.activity_runtime_mode
+    scope.world_character.version += 1
+    db.commit()
+    return schemas.WorldCharacterRuntimeModeRead(
+        world_character_id=scope.world_character.id,
+        world_id=scope.world_character.world_id,
+        character_id=scope.world_character.character_id,
+        activity_runtime_mode=scope.world_character.activity_runtime_mode,
+        autonomous_enabled=scope.world_character.autonomous_enabled,
+    )
+
+
 def _plan_read(
     db: Session,
     *,
@@ -548,6 +613,16 @@ def _plan_read(
         if successful_beat_ids
         else {}
     )
+    all_beats = list(
+        db.scalars(
+            select(models.ActivityBeat)
+            .where(models.ActivityBeat.episode_id.in_([episode.id for episode in episodes.values()]))
+            .order_by(models.ActivityBeat.created_at.desc(), models.ActivityBeat.id.desc())
+        )
+    )
+    latest_beats: dict[str, models.ActivityBeat] = {}
+    for beat in all_beats:
+        latest_beats.setdefault(beat.episode_id, beat)
     order = {daypart: index for index, daypart in enumerate(DAYPARTS)}
     items.sort(key=lambda item: order[item.daypart])
     current_daypart = next(
@@ -568,6 +643,16 @@ def _plan_read(
             if episode is not None and episode.last_successful_beat_id is not None
             else None
         )
+        latest_beat = latest_beats.get(episode.id) if episode is not None else None
+        result_snapshot = (
+            last_successful_beat.result_snapshot
+            if last_successful_beat is not None
+            and isinstance(last_successful_beat.result_snapshot, dict)
+            else {}
+        )
+        considered_ids = result_snapshot.get("considered_source_event_ids", [])
+        used_ids = result_snapshot.get("used_source_event_ids", [])
+        overflow_count = result_snapshot.get("overflow_count", 0)
         item_reads.append(
             schemas.DailyActivityPlanItemRead(
                 id=item.id,
@@ -594,10 +679,41 @@ def _plan_read(
                         current_state_schema_version=episode.current_state_schema_version,
                         current_state_snapshot=episode.current_state_snapshot,
                         last_successful_beat_id=episode.last_successful_beat_id,
+                        last_successful_post_id=(
+                            last_successful_beat.source_post_id
+                            if last_successful_beat is not None
+                            else None
+                        ),
+                        last_successful_sequence_no=(
+                            last_successful_beat.sequence_no
+                            if last_successful_beat is not None
+                            else None
+                        ),
                         last_successful_beat_at=(
                             _aware_utc(last_successful_beat.completed_at)
                             if last_successful_beat is not None
                             and last_successful_beat.completed_at is not None
+                            else None
+                        ),
+                        considered_event_count=(
+                            len(considered_ids) if isinstance(considered_ids, list) else 0
+                        ),
+                        used_event_count=(
+                            len(used_ids) if isinstance(used_ids, list) else 0
+                        ),
+                        overflow_event_count=(
+                            overflow_count
+                            if isinstance(overflow_count, int)
+                            and not isinstance(overflow_count, bool)
+                            and overflow_count >= 0
+                            else 0
+                        ),
+                        recent_outcome=(
+                            (
+                                latest_beat.failure_reason_code
+                                or latest_beat.status
+                            )
+                            if latest_beat is not None
                             else None
                         ),
                         next_sequence_no=episode.next_sequence_no,
@@ -627,6 +743,7 @@ def _plan_read(
         revision_count=plan.revision_count,
         version=plan.version,
         autonomous_enabled=world_character.autonomous_enabled,
+        activity_runtime_mode=world_character.activity_runtime_mode,
         current_daypart=current_daypart,
         reused=reused,
         items=item_reads,

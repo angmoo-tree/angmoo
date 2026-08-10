@@ -1020,7 +1020,19 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
     setRunningNow(true);
     setError(null);
     try {
-      await runAgentNow(characterId);
+      const result = await runAgentNow(characterId);
+      if (
+        ["failed", "failure", "error", "tool_call_missing"].includes(
+          result.status.toLowerCase(),
+        )
+      ) {
+        const routineOutcome = result.gateway_result.routine_outcome;
+        throw new Error(
+          routineOutcome === "provider_failed"
+            ? "게시글 생성을 위한 AI 호출에 실패했습니다. 잠시 후 다시 시도해주세요."
+            : result.summary || "수동 실행에 실패했습니다.",
+        );
+      }
       await loadAgent();
       setActiveTab("status");
     } catch (err) {
@@ -1076,7 +1088,9 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
     }
   }
 
-  const hasTendencyAnalysis = agent ? hasCompletedTendencyAnalysis(agent) : false;
+  const activityProfileReady = Boolean(agent?.activity_profile_readiness?.ready);
+  const usesWorldActivityProfile =
+    agent?.activity_profile_readiness?.source === "world_community_profile";
   const isLocalAgent = agent?.character.execution_mode === "local";
   const manualRunAvailableAt = agent?.activity_summary.manual_run_available_at ?? null;
   const manualRunAvailableAtMs = manualRunAvailableAt
@@ -1110,20 +1124,22 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
     isLocalAgent ||
     !agent ||
     activationBlockedByMaintenance ||
-    (!agent.settings.auto_enabled && !hasTendencyAnalysis);
+    (!agent.settings.auto_enabled && !activityProfileReady);
   const runNowDisabled =
     saving ||
     isLocalAgent ||
     !agent ||
     runNowBlockedByMaintenance ||
-    !hasTendencyAnalysis ||
+    !activityProfileReady ||
     runNowCooldownActive ||
     runNowBlockedBySoonScheduled;
-  const tendencyRequiredTitle = "커뮤니티 성향 분석을 먼저 실행해주세요.";
+  const activityProfileRequiredTitle = usesWorldActivityProfile
+    ? "이 World의 활동 준비를 완료해주세요."
+    : "커뮤니티 성향 분석을 먼저 실행해주세요.";
   const runNowTitle = runNowBlockedByMaintenance
     ? maintenance?.message
-    : !hasTendencyAnalysis
-    ? tendencyRequiredTitle
+    : !activityProfileReady
+    ? activityProfileRequiredTitle
     : runNowCooldownActive
       ? "지금 한 번 활동은 같은 계정 전체에서 30분에 한 번 사용할 수 있습니다."
     : runNowBlockedBySoonScheduled
@@ -1131,8 +1147,8 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
       : undefined;
   const activationTitle = activationBlockedByMaintenance
     ? maintenance?.message
-    : !hasTendencyAnalysis && !agent?.settings.auto_enabled
-      ? tendencyRequiredTitle
+    : !activityProfileReady && !agent?.settings.auto_enabled
+      ? activityProfileRequiredTitle
       : undefined;
   const autonomyButtonLabel =
     autonomyMutation === "activating"
@@ -1273,9 +1289,23 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
           </div>
         </div>
       ) : null}
-      {agent && !isLocalAgent && !hasTendencyAnalysis ? (
+      {agent && !isLocalAgent && !activityProfileReady ? (
         <div className="mx-5 mt-6 rounded-[24px] border border-[#ffe4bf] bg-[#fff8ed] px-5 py-4 text-[15px] font-bold leading-6 text-[#9a5b13] md:mx-9">
-          커뮤니티 성향 분석을 먼저 실행하면 자율 활동과 지금 한 번 활동을 사용할 수 있습니다.
+          {usesWorldActivityProfile ? (
+            <>
+              이 World의 활동 준비를 완료하면 자율 활동과 지금 한 번 활동을 사용할 수 있습니다.{" "}
+              {agent.activity_profile_readiness.world_id ? (
+                <Link
+                  className="underline"
+                  href={`/characters/${agent.character.id}/worlds/${agent.activity_profile_readiness.world_id}/autonomy-setup`}
+                >
+                  World 활동 준비로 이동
+                </Link>
+              ) : null}
+            </>
+          ) : (
+            "커뮤니티 성향 분석을 먼저 실행하면 자율 활동과 지금 한 번 활동을 사용할 수 있습니다."
+          )}
         </div>
       ) : null}
 
@@ -2712,11 +2742,15 @@ function SettingsTab({
 
   return (
     <div className="space-y-6">
-      <TendencyCard
-        agent={agent}
-        saving={saving}
-        onAnalyzeTendency={onAnalyzeTendency}
-      />
+      {agent.activity_profile_readiness?.source === "world_community_profile" ? (
+        <WorldActivityProfileCard agent={agent} />
+      ) : (
+        <TendencyCard
+          agent={agent}
+          saving={saving}
+          onAnalyzeTendency={onAnalyzeTendency}
+        />
+      )}
 
       <form
         onSubmit={onPersonaSubmit}
@@ -3382,6 +3416,42 @@ function TendencyCard({
   );
 }
 
+function WorldActivityProfileCard({ agent }: { agent: AgentDetailRead }) {
+  const readiness = agent.activity_profile_readiness;
+  const setupHref = readiness.world_id
+    ? `/characters/${agent.character.id}/worlds/${readiness.world_id}/autonomy-setup`
+    : null;
+
+  return (
+    <section className="rounded-[28px] border border-[#eef1f5] bg-white p-6 shadow-[0_14px_34px_rgba(16,24,40,0.05)] md:p-7">
+      <SectionHeader
+        icon={<Sparkles size={20} aria-hidden="true" />}
+        title="World 커뮤니티 프로필"
+        description="현재 World의 설정과 이 캐릭터의 페르소나를 결합한 활동 기준입니다."
+      />
+      <p
+        className={`mt-5 rounded-[22px] px-5 py-4 text-[15px] font-bold leading-6 ${
+          readiness.ready
+            ? "bg-[#f2f8df] text-[#52610f]"
+            : "bg-[#fff8ec] text-[#b45309]"
+        }`}
+      >
+        {readiness.ready
+          ? "승인된 World 커뮤니티 프로필을 사용합니다. 레거시 성향 분석을 다시 실행할 필요가 없습니다."
+          : "현재 World의 활동 준비가 완료되지 않았습니다."}
+      </p>
+      {setupHref ? (
+        <Link
+          className="mt-4 inline-flex h-11 items-center rounded-full border border-[#e1e5eb] px-5 text-[15px] font-extrabold text-[#667085] hover:bg-[#f9fafb]"
+          href={setupHref}
+        >
+          World 활동 준비 확인
+        </Link>
+      ) : null}
+    </section>
+  );
+}
+
 function ProfileBanner({ bannerUrl }: { bannerUrl?: string | null }) {
   const safeBannerUrl = safeSameOriginMediaUrl(bannerUrl);
   if (!safeBannerUrl) {
@@ -3953,10 +4023,6 @@ function fileToBase64Payload(file: File): Promise<string> {
     reader.onerror = () => reject(reader.error ?? new Error("파일을 읽지 못했습니다."));
     reader.readAsDataURL(file);
   });
-}
-
-function hasCompletedTendencyAnalysis(agent: AgentDetailRead) {
-  return agent.settings.tendency_analysis_ready;
 }
 
 function formatTendencyActionLabel(action: string, fallback: string) {

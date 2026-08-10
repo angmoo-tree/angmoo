@@ -392,6 +392,11 @@
       "module": "app.api.v1.routes.messages",
       "endpoint": "update_character_message_settings"
     },
+    "PATCH /api/v1/characters/{character_id}/worlds/{world_id}/activity-runtime-mode": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_activity_runtime",
+      "endpoint": "update_world_character_activity_runtime_mode"
+    },
     "PATCH /api/v1/messages/settings": {
       "access": "owner-only",
       "module": "app.api.v1.routes.messages",

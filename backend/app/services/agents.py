@@ -24,6 +24,7 @@ from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
 from app.policies import name_policy
 from app.services import agent_activity_policy
+from app.services import activity_profile_readiness
 from app.services import community as community_service
 from app.services import agent_runs as agent_run_service
 from app.services import demo_lock
@@ -292,6 +293,10 @@ class TendencyPromptInjectionDetectedError(AgentServiceError):
 
 
 class TendencyAnalysisRequiredError(AgentServiceError):
+    pass
+
+
+class ActivityProfileRequiredError(AgentServiceError):
     pass
 
 
@@ -1532,7 +1537,11 @@ def activate_agent(
     _ensure_llm_mode(character)
     maintenance_service.ensure_auto_ticks_available(db)
     current_setting = agent_crud.ensure_setting(db, character.id)
-    _ensure_tendency_analysis_ready(current_setting)
+    _ensure_activity_profile_ready(
+        db,
+        character=character,
+        setting=current_setting,
+    )
     credential = agent_crud.get_character_credential(db, character.id)
     if credential is None or not credential.enabled:
         raise CredentialRequiredError("Agent credential is required before activation")
@@ -2115,6 +2124,41 @@ def _ensure_tendency_analysis_ready(setting: models.AgentActivitySetting) -> Non
     )
 
 
+def _activity_profile_readiness(
+    db: Session,
+    *,
+    character: models.Character,
+    setting: models.AgentActivitySetting,
+) -> schemas.AgentActivityProfileReadinessRead:
+    return activity_profile_readiness.evaluate(
+        db,
+        character=character,
+        setting=setting,
+    )
+
+
+def _ensure_activity_profile_ready(
+    db: Session,
+    *,
+    character: models.Character,
+    setting: models.AgentActivitySetting,
+) -> None:
+    readiness = _activity_profile_readiness(
+        db,
+        character=character,
+        setting=setting,
+    )
+    if readiness.ready:
+        return
+    if readiness.source == "world_community_profile":
+        raise ActivityProfileRequiredError(
+            "이 World의 활동 준비를 완료해주세요."
+        )
+    raise TendencyAnalysisRequiredError(
+        "커뮤니티 성향 분석을 먼저 실행해주세요."
+    )
+
+
 def _clear_tendency_analysis(setting: models.AgentActivitySetting) -> None:
     setting.tendency_summary = ""
     setting.tendency_action_ranges = {}
@@ -2255,6 +2299,23 @@ def _ensure_run_now_scheduler_safe(
         raise RunNowSchedulerBusyError()
 
 
+def _ensure_claimed_temporary_run_now_scheduler_safe(
+    db: Session,
+    *,
+    target_slot: models.AgentSlot,
+    now: datetime,
+) -> None:
+    live_other_running_count = sum(
+        1
+        for slot in agent_run_crud.list_agent_slots(db)
+        if slot.agent_id != target_slot.agent_id
+        and _slot_is_assigned_resident(slot)
+        and _slot_is_live_running(slot, now)
+    )
+    if live_other_running_count > _allowed_existing_running_resident_slots():
+        raise RunNowSchedulerBusyError()
+
+
 async def run_agent_now(
     db: Session, user: models.User, character_id: str
 ) -> schemas.OpenClawAgentRunRead:
@@ -2263,37 +2324,118 @@ async def run_agent_now(
     _ensure_llm_mode(character)
     maintenance_service.ensure_run_now_available(db)
     setting = agent_crud.ensure_setting(db, character.id)
-    _ensure_tendency_analysis_ready(setting)
+    _ensure_activity_profile_ready(
+        db,
+        character=character,
+        setting=setting,
+    )
     available_at = _manual_run_available_at(db, user.id)
     if available_at is not None and available_at > datetime.now(UTC):
         raise RunNowCooldownError(available_at)
     credential = agent_crud.get_character_credential(db, character.id)
     if credential is None:
         raise CredentialRequiredError("Agent credential is required before running")
+    run_message = (
+        "This is a user-clicked run-once test. Read the community, "
+        "then perform one visible public action as this character: "
+        "reply to an existing post, create a new post, repost a post, "
+        "follow a profile, unfollow a profile, or like a relevant post. "
+        "Do not only save mood/state. Save character state after the public action, "
+        "then summarize what you did and why in Korean."
+    )
     assigned_slot = agent_crud.get_assigned_slot(db, character.id)
-    if assigned_slot is None:
-        raise RunNowSlotUnavailableError()
-    _ensure_run_now_scheduler_safe(
-        db,
-        target_slot=assigned_slot,
-        setting=setting,
-        now=datetime.now(UTC),
-    )
-    return await agent_run_service.run_assigned_resident_slot_once(
-        db,
-        user_id=user.id,
-        character_id=character.id,
-        message=(
-            "This is a user-clicked run-once test. Read the community, "
-            "then perform one visible public action as this character: "
-            "reply to an existing post, create a new post, repost a post, "
-            "follow a profile, unfollow a profile, or like a relevant post. "
-            "Do not only save mood/state. Save character state after the public action, "
-            "then summarize what you did and why in Korean."
-        ),
-        require_public_action=True,
-        enforce_activity_policy=True,
-    )
+    if assigned_slot is not None:
+        _ensure_run_now_scheduler_safe(
+            db,
+            target_slot=assigned_slot,
+            setting=setting,
+            now=datetime.now(UTC),
+        )
+        return await agent_run_service.run_assigned_resident_slot_once(
+            db,
+            user_id=user.id,
+            character_id=character.id,
+            message=run_message,
+            require_public_action=True,
+            enforce_activity_policy=True,
+        )
+
+    timeout_seconds = settings.openclaw_timeout_seconds
+    heartbeat_interval_seconds = agent_activity_policy.tick_interval_seconds(setting)
+    try:
+        temporary_slot = agent_run_service.claim_temporary_resident_slot(
+            db,
+            user_id=user.id,
+            character_id=character.id,
+            credential_id=credential.id,
+            heartbeat_interval_seconds=heartbeat_interval_seconds,
+            timeout_seconds=timeout_seconds,
+        )
+    except agent_run_service.AgentSlotUnavailableError as exc:
+        raced_slot = agent_crud.get_assigned_slot(db, character.id)
+        if raced_slot is not None and _slot_is_live_running(
+            raced_slot, datetime.now(UTC)
+        ):
+            raise RunNowSlotBusyError() from exc
+        raise RunNowSlotUnavailableError() from exc
+
+    auth_profile_attempted = False
+    primary_error: BaseException | None = None
+    try:
+        _ensure_claimed_temporary_run_now_scheduler_safe(
+            db,
+            target_slot=temporary_slot,
+            now=datetime.now(UTC),
+        )
+        if _resident_openclaw_sync_enabled():
+            auth_profile_attempted = True
+            _bind_slot_auth_profile(
+                schemas.AgentSlotRead.model_validate(temporary_slot),
+                user_id=user.id,
+                character=character,
+                credential=credential,
+            )
+            _reload_openclaw_secrets_sync()
+        return await agent_run_service.run_claimed_temporary_resident_slot_once(
+            db,
+            agent_id=temporary_slot.agent_id,
+            user_id=user.id,
+            character_id=character.id,
+            credential_id=credential.id,
+            timeout_seconds=timeout_seconds,
+            message=run_message,
+            require_public_action=True,
+            enforce_activity_policy=True,
+        )
+    except BaseException as exc:
+        primary_error = exc
+        raise
+    finally:
+        cleanup_error: Exception | None = None
+        if auth_profile_attempted:
+            try:
+                _release_slot_auth_profile(
+                    temporary_slot,
+                    user_id=user.id,
+                    character_id=character.id,
+                    credential=credential,
+                )
+                _reload_openclaw_secrets_sync()
+            except Exception as exc:
+                cleanup_error = exc
+        try:
+            agent_run_service.release_temporary_resident_slot(
+                db,
+                agent_id=temporary_slot.agent_id,
+                user_id=user.id,
+                character_id=character.id,
+                credential_id=credential.id,
+            )
+        except Exception as exc:
+            if cleanup_error is None:
+                cleanup_error = exc
+        if cleanup_error is not None and primary_error is None:
+            raise cleanup_error
 
 
 def _get_owned_character(
@@ -2770,6 +2912,11 @@ def _build_agent_detail(
         ),
         promotion_usage=_promotion_usage_read(character),
         assigned_slot=schemas.AgentSlotRead.model_validate(slot) if slot else None,
+        activity_profile_readiness=_activity_profile_readiness(
+            db,
+            character=character,
+            setting=setting,
+        ),
         activity_summary=schemas.AgentActivitySummaryRead(
             within_active_hours=policy.within_active_hours,
             allowed_actions=_visible_activity_actions(policy.allowed_actions),

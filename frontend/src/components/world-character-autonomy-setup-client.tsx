@@ -10,6 +10,7 @@ import {
   DailyActivityPlanApiError,
   getDailyActivityPlan,
   prepareDailyActivityPlan,
+  updateActivityRuntimeMode,
   type DailyActivityPlanRead,
 } from "@/lib/world-activity-runtime";
 import {
@@ -72,6 +73,7 @@ const REASON_MESSAGES: Record<string, string> = {
   repertoire_candidate_count_invalid: "승인된 일과 후보 수가 40개가 아닙니다. P2 준비를 다시 확인해 주세요.",
   daypart_candidate_count_invalid: "시간대별 일과 후보 수가 10개가 아닙니다. P2 준비를 다시 확인해 주세요.",
   activity_plan_partial: "저장된 오늘 계획이 완전하지 않습니다. 실행하지 말고 다시 확인해 주세요.",
+  activity_plan_not_ready: "오늘 계획과 현재 시간대 Episode를 먼저 준비해 주세요.",
 };
 
 function idempotencyKey(prefix: string) {
@@ -133,6 +135,7 @@ export function WorldCharacterAutonomySetupClient({
   const [planLoading, setPlanLoading] = useState(true);
   const [planPending, setPlanPending] = useState(false);
   const [planError, setPlanError] = useState<string | null>(null);
+  const [modePending, setModePending] = useState(false);
 
   useEffect(() => {
     if (authStatus === "unauthenticated") {
@@ -212,6 +215,26 @@ export function WorldCharacterAutonomySetupClient({
     ]);
     setSetup(nextSetup);
     setPreflight(nextPreflight);
+  }
+
+  async function handleRuntimeMode(mode: "legacy_resident_v1" | "routine_resident_v1") {
+    setModePending(true);
+    setPlanError(null);
+    try {
+      const result = await updateActivityRuntimeMode(characterId, worldId, mode);
+      setActivityPlan((current) =>
+        current ? { ...current, activity_runtime_mode: result.activity_runtime_mode } : current,
+      );
+      setNotice(
+        mode === "routine_resident_v1"
+          ? "P4 일과 연속 전개 모드를 선택했습니다. 자율활동은 별도로 켜야 합니다."
+          : "기존 resident 호환 모드로 되돌렸습니다.",
+      );
+    } catch (nextError) {
+      setPlanError(errorMessage(nextError));
+    } finally {
+      setModePending(false);
+    }
   }
 
   async function handleEnterWorld() {
@@ -719,6 +742,56 @@ export function WorldCharacterAutonomySetupClient({
                       <strong>{activityPlan.autonomous_enabled ? " 켜짐" : " 꺼짐"}</strong> 상태입니다.
                       P3 계획 준비는 SNS 게시·댓글·좋아요를 실행하지 않습니다.
                     </p>
+                    <div className="mt-5 rounded-2xl border border-outline-variant bg-white p-5">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-bold text-primary">P4 · ROUTINE CONTINUATION</p>
+                          <h3 className="mt-1 font-black">일과 연속 전개 엔진</h3>
+                          <p className="mt-2 max-w-2xl text-sm text-on-surface-variant">
+                            같은 시간대의 중심 일과, 직전 성공 게시글, 현재 상태를 이어 다음 장면을 씁니다.
+                            모드 선택만으로 자율활동이 켜지거나 Production 실행이 시작되지는 않습니다.
+                          </p>
+                        </div>
+                        <span className="rounded-full bg-surface-container px-3 py-2 text-xs font-bold">
+                          {activityPlan.activity_runtime_mode}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          void handleRuntimeMode(
+                            activityPlan.activity_runtime_mode === "routine_resident_v1"
+                              ? "legacy_resident_v1"
+                              : "routine_resident_v1",
+                          )
+                        }
+                        disabled={modePending}
+                        className="mt-4 rounded-full border border-primary px-5 py-2 text-sm font-bold text-primary disabled:opacity-50"
+                      >
+                        {modePending
+                          ? "변경 중…"
+                          : activityPlan.activity_runtime_mode === "routine_resident_v1"
+                            ? "호환 모드로 되돌리기"
+                            : "P4 연속 전개 모드 선택"}
+                      </button>
+                      <div className="mt-4 grid gap-2 md:grid-cols-2">
+                        {activityPlan.items
+                          .filter((item) => item.episode?.last_successful_beat_id)
+                          .map((item) => (
+                            <div key={`${item.id}-p4-evidence`} className="rounded-xl bg-surface-container-low p-3 text-xs">
+                              <p className="font-bold">{DAYPARTS.find((value) => value.key === item.daypart)?.label ?? item.daypart}</p>
+                              <p className="mt-1 text-on-surface-variant">
+                                성공 beat #{item.episode?.last_successful_sequence_no ?? "-"} · 댓글 근거 {item.episode?.used_event_count ?? 0}/{item.episode?.considered_event_count ?? 0} · 입력 상한 초과 {item.episode?.overflow_event_count ?? 0}
+                              </p>
+                              {item.episode?.last_successful_post_id ? (
+                                <Link className="mt-2 inline-block font-bold text-primary underline" href={`/posts/${item.episode.last_successful_post_id}`}>
+                                  마지막 성공 게시글 보기
+                                </Link>
+                              ) : null}
+                            </div>
+                          ))}
+                      </div>
+                    </div>
                   </>
                 ) : null}
               </section>

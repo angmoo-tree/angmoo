@@ -368,6 +368,10 @@ def test_approval_activates_contract_but_not_autonomous_execution() -> None:
         assert approved.repertoire.status == "ready"
         assert world_character.status == "active"
         assert world_character.autonomous_enabled is False
+        active_world = db.get(models.CharacterActiveWorld, world_character.character_id)
+        assert active_world is not None
+        assert active_world.world_character_id == world_character.id
+        assert active_world.version == 1
 
 
 def test_ready_same_hash_pair_is_reused_without_provider_calls() -> None:

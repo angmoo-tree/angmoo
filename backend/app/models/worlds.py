@@ -316,6 +316,10 @@ class WorldCharacter(Base):
             "status IN ('pending','inactive','active','left','rejected','banned')",
             name="ck_world_characters_status",
         ),
+        CheckConstraint(
+            "activity_runtime_mode IN ('legacy_resident_v1','routine_resident_v1')",
+            name="ck_world_characters_activity_runtime_mode",
+        ),
         CheckConstraint("version >= 1", name="ck_world_characters_version"),
         ForeignKeyConstraint(
             ["world_id", "membership_id"],
@@ -341,6 +345,12 @@ class WorldCharacter(Base):
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="pending")
     autonomous_enabled: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, server_default=false()
+    )
+    activity_runtime_mode: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+        default="legacy_resident_v1",
+        server_default="legacy_resident_v1",
     )
     local_profile: Mapped[dict[str, Any] | None] = mapped_column(JSON_DOCUMENT)
     character_contract_hash: Mapped[str | None] = mapped_column(String(64))
