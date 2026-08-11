@@ -70,6 +70,9 @@ def test_security_migration_schema_contract() -> None:
         "joint_activities",
         "joint_activity_participants",
         "joint_activity_representation_claims",
+        "world_character_feed_cursors",
+        "world_character_blocks",
+        "world_character_feed_observations",
     }
     assert expected_tables.issubset(set(inspector.get_table_names()))
     assert {
@@ -96,19 +99,68 @@ def test_security_migration_schema_contract() -> None:
         item["name"]: item for item in inspector.get_columns("world_characters")
     }
     post_columns = {item["name"]: item for item in inspector.get_columns("posts")}
+    public_action_columns = {
+        item["name"]: item
+        for item in inspector.get_columns("agent_public_action_executions")
+    }
     assert world_character_columns["activity_runtime_mode"]["nullable"] is False
+    assert world_character_columns["feed_runtime_mode"]["nullable"] is False
     assert post_columns["world_id"]["nullable"] is True
     assert post_columns["author_world_character_id"]["nullable"] is True
+    assert post_columns["search_document"]["nullable"] is False
+    assert {
+        "world_id",
+        "actor_world_character_id",
+        "feed_observation_id",
+        "interaction_intent",
+        "comment_purpose",
+    }.issubset(public_action_columns)
     assert {
         item["name"] for item in inspector.get_check_constraints("posts")
     }.issuperset({"ck_posts_world_scope_pair"})
     assert {
         item["name"] for item in inspector.get_indexes("posts")
-    }.issuperset({"ix_posts_world_created_at"})
+    }.issuperset(
+        {
+            "ix_posts_world_created_at",
+            "ix_posts_world_feed_search_document_trgm",
+        }
+    )
+    assert {
+        item["name"]
+        for item in inspector.get_check_constraints("world_character_feed_cursors")
+    }.issuperset(
+        {
+            "ck_world_character_feed_cursors_offset",
+            "ck_world_character_feed_cursors_version",
+        }
+    )
+    assert {
+        item["name"]
+        for item in inspector.get_check_constraints("world_character_feed_observations")
+    }.issuperset(
+        {
+            "ck_world_character_feed_observations_status",
+            "ck_world_character_feed_observations_outcome",
+            "ck_world_character_feed_observations_action",
+            "ck_world_character_feed_observations_intent",
+            "ck_world_character_feed_observations_purpose",
+            "ck_world_character_feed_observations_reason",
+        }
+    )
+    assert {
+        item["name"]
+        for item in inspector.get_indexes("world_character_feed_observations")
+    }.issuperset(
+        {
+            "ix_world_character_feed_observations_claim_expiry",
+            "ix_world_character_feed_observations_character_created",
+        }
+    )
     with engine.connect() as connection:
         assert (
             connection.scalar(text("SELECT version_num FROM alembic_version"))
-            == "20260810_0075"
+            == "20260811_0076"
         )
 
 
