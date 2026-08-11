@@ -66,6 +66,20 @@ import { useMobilePullToRefresh } from "@/lib/use-mobile-pull-to-refresh";
 
 type FeedMode = "public" | "character-following" | "user-following";
 
+function mergeUniquePosts(
+  existing: PostSummary[],
+  incoming: PostSummary[],
+): PostSummary[] {
+  const seen = new Set(existing.map((post) => post.id));
+  const merged = [...existing];
+  for (const post of incoming) {
+    if (seen.has(post.id)) continue;
+    seen.add(post.id);
+    merged.push(post);
+  }
+  return merged;
+}
+
 export function PostListClient({
   initialFeed,
   initialError,
@@ -76,7 +90,7 @@ export function PostListClient({
   suppressFeedSnippet?: boolean;
 }) {
   const router = useRouter();
-  const [posts, setPosts] = useState(initialFeed.items);
+  const [posts, setPosts] = useState(() => mergeUniquePosts([], initialFeed.items));
   const [nextCursor, setNextCursor] = useState(initialFeed.next_cursor);
   const [selectedAgentId, setSelectedAgentId] = useState("");
   const [selectedAgentName, setSelectedAgentName] = useState("");
@@ -104,6 +118,8 @@ export function PostListClient({
     useState<FeedContentFilter>("all");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(initialError);
+  const feedGenerationRef = useRef(0);
+  const loadMoreCursorRef = useRef<string | null>(null);
 
   const refreshFeedCue = useCallback(async (characterId: string) => {
     try {
@@ -204,19 +220,26 @@ export function PostListClient({
       mode: FeedMode = feedMode,
       content: FeedContentFilter = feedContentFilter,
     ) => {
+      const generation = feedGenerationRef.current + 1;
+      feedGenerationRef.current = generation;
+      loadMoreCursorRef.current = null;
       setLoading(true);
       setError(null);
 
       try {
         const feed = await fetchFeedPage(mode, null, content);
-        setPosts(feed.items);
+        if (generation !== feedGenerationRef.current) return;
+        setPosts(mergeUniquePosts([], feed.items));
         setNextCursor(feed.next_cursor);
         setFeedMode(mode);
         setFeedContentFilter(content);
       } catch (err) {
+        if (generation !== feedGenerationRef.current) return;
         setError(err instanceof Error ? err.message : "피드를 불러오지 못했습니다.");
       } finally {
-        setLoading(false);
+        if (generation === feedGenerationRef.current) {
+          setLoading(false);
+        }
       }
     },
     [feedContentFilter, feedMode, fetchFeedPage],
@@ -253,18 +276,28 @@ export function PostListClient({
   });
 
   const loadMore = useCallback(async () => {
-    if (!nextCursor || loading) return;
+    const cursor = nextCursor;
+    if (!cursor || loading || loadMoreCursorRef.current === cursor) return;
+    const generation = feedGenerationRef.current;
+    loadMoreCursorRef.current = cursor;
     setLoading(true);
     setError(null);
 
     try {
-      const feed = await fetchFeedPage(feedMode, nextCursor, feedContentFilter);
-      setPosts((previous) => [...previous, ...feed.items]);
+      const feed = await fetchFeedPage(feedMode, cursor, feedContentFilter);
+      if (generation !== feedGenerationRef.current) return;
+      setPosts((previous) => mergeUniquePosts(previous, feed.items));
       setNextCursor(feed.next_cursor);
     } catch (err) {
+      if (generation !== feedGenerationRef.current) return;
+      if (loadMoreCursorRef.current === cursor) {
+        loadMoreCursorRef.current = null;
+      }
       setError(err instanceof Error ? err.message : "피드를 더 불러오지 못했습니다.");
     } finally {
-      setLoading(false);
+      if (generation === feedGenerationRef.current) {
+        setLoading(false);
+      }
     }
   }, [feedContentFilter, feedMode, fetchFeedPage, loading, nextCursor]);
 

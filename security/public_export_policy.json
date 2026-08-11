@@ -407,6 +407,10 @@
       "destination": "backend/app/alembic/versions/20260810_0075_routine_continuous_posts.py"
     },
     {
+      "source": "backend/app/alembic/versions/20260811_0076_world_keyword_feed.py",
+      "destination": "backend/app/alembic/versions/20260811_0076_world_keyword_feed.py"
+    },
+    {
       "source": "backend/app/api/v1/__init__.py",
       "destination": "backend/app/api/v1/__init__.py"
     },
@@ -525,6 +529,10 @@
     {
       "source": "backend/app/core/security.py",
       "destination": "backend/app/core/security.py"
+    },
+    {
+      "source": "backend/app/core/search_text.py",
+      "destination": "backend/app/core/search_text.py"
     },
     {
       "source": "backend/app/core/startup_security.py",
@@ -647,6 +655,10 @@
       "destination": "backend/app/models/world_activity_runtime.py"
     },
     {
+      "source": "backend/app/models/world_feed.py",
+      "destination": "backend/app/models/world_feed.py"
+    },
+    {
       "source": "backend/app/policies/__init__.py",
       "destination": "backend/app/policies/__init__.py"
     },
@@ -741,6 +753,10 @@
     {
       "source": "backend/app/schemas/world_activity_runtime.py",
       "destination": "backend/app/schemas/world_activity_runtime.py"
+    },
+    {
+      "source": "backend/app/schemas/world_feed.py",
+      "destination": "backend/app/schemas/world_feed.py"
     },
     {
       "source": "backend/app/services/__init__.py",
@@ -961,6 +977,18 @@
     {
       "source": "backend/app/services/routine_post_runtime.py",
       "destination": "backend/app/services/routine_post_runtime.py"
+    },
+    {
+      "source": "backend/app/services/feed_reaction_planner.py",
+      "destination": "backend/app/services/feed_reaction_planner.py"
+    },
+    {
+      "source": "backend/app/services/world_feed_runtime.py",
+      "destination": "backend/app/services/world_feed_runtime.py"
+    },
+    {
+      "source": "backend/app/services/world_feed_search.py",
+      "destination": "backend/app/services/world_feed_search.py"
     },
     {
       "source": "backend/pyproject.toml",
@@ -1377,6 +1405,14 @@
     {
       "source": "backend/tests/test_routine_post_runtime.py",
       "destination": "backend/tests/test_routine_post_runtime.py"
+    },
+    {
+      "source": "backend/tests/test_feed_reaction_intent.py",
+      "destination": "backend/tests/test_feed_reaction_intent.py"
+    },
+    {
+      "source": "backend/tests/test_world_feed_search.py",
+      "destination": "backend/tests/test_world_feed_search.py"
     },
     {
       "source": "backend/uv.lock",

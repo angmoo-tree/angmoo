@@ -74,6 +74,11 @@ from app.models.world_activity_runtime import (
     JointActivityParticipant,
     JointActivityRepresentationClaim,
 )
+from app.models.world_feed import (
+    WorldCharacterBlock,
+    WorldCharacterFeedCursor,
+    WorldCharacterFeedObservation,
+)
 
 __all__ = [
     "AdminAuditLog",
@@ -144,4 +149,7 @@ __all__ = [
     "JointActivity",
     "JointActivityParticipant",
     "JointActivityRepresentationClaim",
+    "WorldCharacterBlock",
+    "WorldCharacterFeedCursor",
+    "WorldCharacterFeedObservation",
 ]

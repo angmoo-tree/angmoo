@@ -231,6 +231,18 @@ from app.schemas.world_activity_runtime import (
     WorldCharacterRuntimeModeRead,
     WorldCharacterRuntimeModeUpdate,
 )
+from app.schemas.world_feed import (
+    FeedAction,
+    FeedCommentDraft,
+    FeedCommentPurpose,
+    FeedInteractionIntent,
+    FeedNoActionReason,
+    FeedReactionDecision,
+    JointActivityProposalPreview,
+    WorldFeedCandidateRead,
+    WorldFeedCycleStatusRead,
+    WorldFeedObservationRead,
+)
 from app.schemas.routine_post import (
     RoutineBeatPlan,
     RoutinePostDraft,
@@ -454,4 +466,14 @@ __all__ = [
     "WorldValidationReason",
     "WorldVisibility",
     "validate_managed_world_banner",
+    "FeedAction",
+    "FeedCommentDraft",
+    "FeedCommentPurpose",
+    "FeedInteractionIntent",
+    "FeedNoActionReason",
+    "FeedReactionDecision",
+    "JointActivityProposalPreview",
+    "WorldFeedCandidateRead",
+    "WorldFeedCycleStatusRead",
+    "WorldFeedObservationRead",
 ]

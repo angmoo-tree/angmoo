@@ -108,7 +108,7 @@ def mark_agent_run_finished(
     db.commit()
 
 
-def set_agent_run_post_id(db: Session, run_id: str, post_id: str) -> None:
+def set_agent_run_post_id(db: Session, run_id: str, post_id: str | None) -> None:
     run = db.get(models.AgentRun, run_id)
     if run is None:
         return
@@ -138,6 +138,11 @@ def create_public_action_execution(
     target_profile_type: str | None = None,
     target_profile_id: str | None = None,
     brief_hash: str | None = None,
+    world_id: str | None = None,
+    actor_world_character_id: str | None = None,
+    feed_observation_id: str | None = None,
+    interaction_intent: str | None = None,
+    comment_purpose: str | None = None,
 ) -> models.AgentPublicActionExecution:
     execution = models.AgentPublicActionExecution(
         run_id=run_id,
@@ -149,6 +154,11 @@ def create_public_action_execution(
         target_profile_type=target_profile_type,
         target_profile_id=target_profile_id,
         brief_hash=brief_hash,
+        world_id=world_id,
+        actor_world_character_id=actor_world_character_id,
+        feed_observation_id=feed_observation_id,
+        interaction_intent=interaction_intent,
+        comment_purpose=comment_purpose,
         status="pending",
     )
     db.add(execution)

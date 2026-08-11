@@ -557,6 +557,11 @@ def test_routes_expose_preflight_generate_and_approve_without_enabling_autonomy(
         "GET",
         "/api/v1/world-characters/world-character-a/autonomy-setup",
     )
+    feed_status = _request(
+        app,
+        "GET",
+        "/api/v1/world-characters/world-character-a/feed-status",
+    )
 
     assert reentered.status_code == 200
     assert reentered.json()["id"] == "world-character-a"
@@ -565,6 +570,11 @@ def test_routes_expose_preflight_generate_and_approve_without_enabling_autonomy(
     assert restored.status_code == 200
     assert restored.json()["autonomy_ready"] is True
     assert restored.json()["autonomous_enabled"] is False
+    assert feed_status.status_code == 200
+    assert feed_status.json()["world_character_id"] == "world-character-a"
+    assert feed_status.json()["profile_keyword_count"] == 8
+    assert feed_status.json()["profile_keywords_ready"] is True
+    assert feed_status.json()["recent_observations"] == []
 
 
 def test_routes_hide_missing_and_foreign_world_characters() -> None:
@@ -595,11 +605,25 @@ def test_routes_hide_missing_and_foreign_world_characters() -> None:
         "GET",
         "/api/v1/world-characters/missing/autonomy-setup",
     )
+    feed_forbidden = _request(
+        app,
+        "GET",
+        "/api/v1/world-characters/world-character-a/feed-status",
+    )
+    feed_missing = _request(
+        app,
+        "GET",
+        "/api/v1/world-characters/missing/feed-status",
+    )
 
     assert forbidden.status_code == 403
     assert forbidden.json() == {"detail": "character_not_owned"}
     assert missing.status_code == 404
     assert missing.json() == {"detail": "world_character_not_found"}
+    assert feed_forbidden.status_code == 403
+    assert feed_forbidden.json() == {"detail": "world_character_forbidden"}
+    assert feed_missing.status_code == 404
+    assert feed_missing.json() == {"detail": "world_character_not_found"}
 
 
 def test_world_entry_creates_pending_world_character_without_provider_or_autonomy() -> None:

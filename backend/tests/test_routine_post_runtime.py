@@ -944,6 +944,50 @@ def test_langgraph_routes_routine_mode_without_building_legacy_graph(monkeypatch
     assert result == {"engine": "routine_resident_v1", "status": "completed"}
 
 
+def test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode(monkeypatch) -> None:
+    context = SimpleNamespace(
+        db=object(),
+        character=SimpleNamespace(id="character-keyword-feed"),
+    )
+    monkeypatch.setattr(
+        langgraph_resident,
+        "routine_world_character_for_character",
+        lambda *_args, **_kwargs: SimpleNamespace(
+            id="world-character-keyword-feed",
+            feed_runtime_mode="keyword_search_v1",
+        ),
+    )
+
+    async def fake_routine(_context):
+        return {
+            "engine": "routine_resident_v1",
+            "status": "completed",
+            "publish_result": {"public_action_count": 1},
+            "llm_usage_summary": {"provider_call_count": 1},
+        }
+
+    async def fake_feed(_context):
+        return {
+            "engine": "keyword_search_v1",
+            "status": "observed",
+            "publish_result": {"public_action_count": 0},
+            "llm_usage_summary": {"provider_call_count": 0},
+        }
+
+    monkeypatch.setattr(
+        langgraph_resident, "run_routine_post_runtime", fake_routine
+    )
+    monkeypatch.setattr(langgraph_resident, "run_world_keyword_feed", fake_feed)
+
+    result = asyncio.run(langgraph_resident.run_resident_langgraph(context))
+
+    assert result["engine"] == "routine_resident_v1+keyword_search_v1"
+    assert result["status"] == "completed"
+    assert result["publish_result"]["public_action_count"] == 1
+    assert result["llm_usage_summary"]["routine"]["provider_call_count"] == 1
+    assert result["llm_usage_summary"]["feed"]["provider_call_count"] == 0
+
+
 def test_scoped_post_pair_and_identity_are_validated_by_service() -> None:
     engine = _engine()
     with Session(engine, expire_on_commit=False) as db:

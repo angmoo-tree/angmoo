@@ -1697,3 +1697,97 @@ def test_run_now_manual_slot_does_not_preserve_previous_next_tick() -> None:
 
     assert "manual_next_tick_at = None" in source
     assert "manual_next_tick_at = slot.next_tick_at if require_public_action else None" not in source
+
+
+def test_routine_runtime_does_not_invent_global_selected_post(monkeypatch) -> None:
+    monkeypatch.setattr(
+        agent_run_service,
+        "routine_world_character_for_character",
+        lambda *_args, **_kwargs: object(),
+    )
+
+    def global_fallback_must_not_run(*_args, **_kwargs):
+        raise AssertionError("routine runtime must not select a global fallback post")
+
+    monkeypatch.setattr(
+        agent_run_service,
+        "_select_tick_post_id",
+        global_fallback_must_not_run,
+    )
+
+    assert (
+        agent_run_service._select_resident_run_post_id(
+            object(),
+            preferred_post_id=None,
+            character_id="char-routine",
+            scoped_runtime=True,
+        )
+        is None
+    )
+
+
+def test_combined_runtime_audit_post_prefers_actual_feed_target() -> None:
+    result = {
+        "publish_result": {
+            "routine": {
+                "public_action_count": 1,
+                "post_id": "post-routine-root",
+            },
+            "feed": {
+                "public_action_count": 1,
+                "target_post_id": "post-feed-target",
+            },
+        }
+    }
+
+    assert (
+        agent_run_service._combined_runtime_evidence_post_id(result)
+        == "post-feed-target"
+    )
+
+
+def test_combined_runtime_audit_post_uses_root_or_none() -> None:
+    root_only = {
+        "publish_result": {
+            "routine": {
+                "public_action_count": 1,
+                "post_id": "post-routine-root",
+            },
+            "feed": {"public_action_count": 0},
+        }
+    }
+    no_action = {
+        "publish_result": {
+            "routine": {"public_action_count": 0},
+            "feed": {"public_action_count": 0},
+        }
+    }
+
+    assert (
+        agent_run_service._combined_runtime_evidence_post_id(root_only)
+        == "post-routine-root"
+    )
+    assert agent_run_service._combined_runtime_evidence_post_id(no_action) is None
+
+
+def test_non_scoped_runtime_keeps_legacy_post_fallback(monkeypatch) -> None:
+    monkeypatch.setattr(
+        agent_run_service,
+        "routine_world_character_for_character",
+        lambda *_args, **_kwargs: object(),
+    )
+    monkeypatch.setattr(
+        agent_run_service,
+        "_select_tick_post_id",
+        lambda *_args, **_kwargs: "post-legacy-fallback",
+    )
+
+    assert (
+        agent_run_service._select_resident_run_post_id(
+            object(),
+            preferred_post_id=None,
+            character_id="char-legacy",
+            scoped_runtime=False,
+        )
+        == "post-legacy-fallback"
+    )
