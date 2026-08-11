@@ -50,6 +50,7 @@ from app.services.routine_post_runtime import (
     routine_world_character_for_character,
     run_routine_post_runtime,
 )
+from app.services.world_feed_runtime import run_world_keyword_feed
 
 
 logger = logging.getLogger(__name__)
@@ -8624,7 +8625,55 @@ async def run_resident_langgraph(
     )
     if routine_world_character is not None:
         async with _GRAPH_SEMAPHORE:
-            return await run_routine_post_runtime(ctx)
+            routine_result = await run_routine_post_runtime(ctx)
+            if (
+                getattr(
+                    routine_world_character,
+                    "feed_runtime_mode",
+                    "legacy_latest_v1",
+                )
+                != "keyword_search_v1"
+            ):
+                return routine_result
+            feed_result = await run_world_keyword_feed(ctx)
+            routine_publish = routine_result.get("publish_result")
+            feed_publish = feed_result.get("publish_result")
+            routine_action_count = (
+                int(routine_publish.get("public_action_count") or 0)
+                if isinstance(routine_publish, dict)
+                else 0
+            )
+            feed_action_count = (
+                int(feed_publish.get("public_action_count") or 0)
+                if isinstance(feed_publish, dict)
+                else 0
+            )
+            statuses = {routine_result.get("status"), feed_result.get("status")}
+            status = (
+                "failed"
+                if "failed" in statuses
+                else "completed"
+                if routine_action_count + feed_action_count > 0
+                else "observed"
+            )
+            return {
+                "engine": "routine_resident_v1+keyword_search_v1",
+                "status": status,
+                "summary": (
+                    "Routine continuous post and World keyword feed cycle completed."
+                ),
+                "routine_result": routine_result,
+                "feed_result": feed_result,
+                "publish_result": {
+                    "public_action_count": routine_action_count + feed_action_count,
+                    "routine": routine_publish or {},
+                    "feed": feed_publish or {},
+                },
+                "llm_usage_summary": {
+                    "routine": routine_result.get("llm_usage_summary", {}),
+                    "feed": feed_result.get("llm_usage_summary", {}),
+                },
+            }
     tracker = RunLlmTracker()
     initial_active_topic_arc = None
     initial_independent_post_roll = {

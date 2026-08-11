@@ -18,6 +18,7 @@ import {
   enterWorldWithCharacter,
   generateWorldCharacterSetup,
   getExistingWorldCharacterEntry,
+  getWorldFeedStatus,
   getWorldCharacterSetup,
   preflightWorldCharacterSetup,
   rejectWorldCharacterSetup,
@@ -25,6 +26,7 @@ import {
   WorldCharacterSetupApiError,
   type WorldActivityDaypart,
   type WorldCharacterEntryRead,
+  type WorldFeedCycleStatusRead,
   type WorldCharacterSetupPreflightRead,
   type WorldCharacterSetupRead,
 } from "@/lib/world-character-setup";
@@ -106,6 +108,31 @@ function statusLabel(state: WorldCharacterSetupRead["state"]) {
   }[state];
 }
 
+function summaryNumber(summary: Record<string, unknown> | null, key: string) {
+  const value = summary?.[key];
+  return typeof value === "number" ? value : null;
+}
+
+function summaryText(summary: Record<string, unknown> | null, key: string) {
+  const value = summary?.[key];
+  return typeof value === "string" ? value : null;
+}
+
+function summaryKeywords(summary: Record<string, unknown> | null) {
+  const value = summary?.keywords;
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string").slice(0, 2)
+    : [];
+}
+
+function feedOutcomeLabel(status: WorldFeedCycleStatusRead) {
+  const action = summaryText(status.last_cycle_summary, "selected_action");
+  if (action) return ACTION_LABELS[action] ?? action;
+  const outcome = summaryText(status.last_cycle_summary, "outcome");
+  if (outcome === "NO_ACTION") return "이번에는 자연스러운 반응 없음";
+  return outcome ?? "아직 검색 실행 기록 없음";
+}
+
 export function WorldCharacterAutonomySetupClient({
   characterId,
   worldId,
@@ -122,6 +149,7 @@ export function WorldCharacterAutonomySetupClient({
   const [entry, setEntry] = useState<WorldCharacterEntryRead | null>(null);
   const [setup, setSetup] = useState<WorldCharacterSetupRead | null>(null);
   const [activityPlan, setActivityPlan] = useState<DailyActivityPlanRead | null>(null);
+  const [feedStatus, setFeedStatus] = useState<WorldFeedCycleStatusRead | null>(null);
   const [preflight, setPreflight] =
     useState<WorldCharacterSetupPreflightRead | null>(null);
   const [roleKey, setRoleKey] = useState("");
@@ -136,6 +164,7 @@ export function WorldCharacterAutonomySetupClient({
   const [planPending, setPlanPending] = useState(false);
   const [planError, setPlanError] = useState<string | null>(null);
   const [modePending, setModePending] = useState(false);
+  const [feedStatusError, setFeedStatusError] = useState<string | null>(null);
 
   useEffect(() => {
     if (authStatus === "unauthenticated") {
@@ -198,6 +227,24 @@ export function WorldCharacterAutonomySetupClient({
       active = false;
     };
   }, [characterId, setup?.autonomy_ready, worldId]);
+
+  useEffect(() => {
+    if (!entry?.id || !setup?.autonomy_ready) return;
+    let active = true;
+    void getWorldFeedStatus(entry.id)
+      .then((nextStatus) => {
+        if (active) {
+          setFeedStatus(nextStatus);
+          setFeedStatusError(null);
+        }
+      })
+      .catch((nextError) => {
+        if (active) setFeedStatusError(errorMessage(nextError));
+      });
+    return () => {
+      active = false;
+    };
+  }, [entry?.id, setup?.autonomy_ready]);
 
   const allowedRoles = useMemo(
     () => world?.roles.filter((role) => role.autonomous_allowed) ?? [],
@@ -792,6 +839,121 @@ export function WorldCharacterAutonomySetupClient({
                           ))}
                       </div>
                     </div>
+                  </>
+                ) : null}
+              </section>
+            ) : null}
+
+            {setup.autonomy_ready ? (
+              <section className="rounded-[28px] border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-bold text-primary">P5 · WORLD KEYWORD FEED</p>
+                    <h2 className="mt-1 text-xl font-black">관심 키워드 피드</h2>
+                    <p className="mt-2 max-w-3xl text-sm text-on-surface-variant">
+                      승인된 World 전용 키워드를 두 개씩 순환해 같은 World의 관련 게시글을 찾습니다.
+                      이 영역은 최근 검색·반응 상태만 보여주며 자율활동이나 P5 모드를 켜지 않습니다.
+                    </p>
+                  </div>
+                  {feedStatus ? (
+                    <span className="rounded-full bg-surface-container px-3 py-2 text-xs font-bold">
+                      {feedStatus.feed_runtime_mode}
+                    </span>
+                  ) : null}
+                </div>
+
+                {!feedStatus && !feedStatusError ? (
+                  <p className="mt-5 text-sm text-on-surface-variant">최근 관심 피드 상태를 확인하는 중입니다.</p>
+                ) : null}
+                {feedStatusError ? (
+                  <p role="alert" className="mt-5 rounded-2xl bg-error-container p-4 text-on-error-container">
+                    {feedStatusError}
+                  </p>
+                ) : null}
+
+                {feedStatus ? (
+                  <>
+                    <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                      <div className="rounded-2xl bg-surface-container-low p-4">
+                        <p className="text-xs text-on-surface-variant">검색 키워드</p>
+                        <p className="mt-1 font-black">
+                          {feedStatus.profile_keyword_count}/8
+                          {!feedStatus.profile_keywords_ready ? " · 확인 필요" : ""}
+                        </p>
+                      </div>
+                      <div className="rounded-2xl bg-surface-container-low p-4 sm:col-span-1 lg:col-span-2">
+                        <p className="text-xs text-on-surface-variant">다음 검색 묶음</p>
+                        <p className="mt-1 font-bold">
+                          {feedStatus.next_keywords.length > 0
+                            ? feedStatus.next_keywords.map((keyword) => `#${keyword}`).join(" · ")
+                            : "준비되지 않음"}
+                        </p>
+                      </div>
+                      <div className="rounded-2xl bg-surface-container-low p-4">
+                        <p className="text-xs text-on-surface-variant">마지막 검색</p>
+                        <p className="mt-1 font-bold">
+                          {feedStatus.last_cycle_at
+                            ? new Intl.DateTimeFormat("ko-KR", {
+                                timeZone: world.timezone,
+                                dateStyle: "medium",
+                                timeStyle: "short",
+                              }).format(new Date(feedStatus.last_cycle_at))
+                            : "아직 없음"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {feedStatus.feed_runtime_mode === "legacy_latest_v1" ? (
+                      <p className="mt-5 rounded-2xl bg-surface-container-low p-4 text-sm text-on-surface-variant">
+                        현재는 기존 최신 피드 호환 모드입니다. P5 keyword mode 전환은 local fixture와
+                        후속 배포 Gate에서만 명시적으로 수행합니다.
+                      </p>
+                    ) : (
+                      <div className="mt-5 rounded-2xl border border-secondary/40 bg-secondary-container p-5 text-on-secondary-container">
+                        <p className="font-black">관심 키워드 피드 준비됨</p>
+                        <p className="mt-2 text-sm">
+                          마지막 검색 키워드: {summaryKeywords(feedStatus.last_cycle_summary).map((keyword) => `#${keyword}`).join(" · ") || "아직 없음"}
+                        </p>
+                        <p className="mt-1 text-sm">
+                          관련 글 {summaryNumber(feedStatus.last_cycle_summary, "filtered_candidate_count") ?? 0}개 · {feedOutcomeLabel(feedStatus)}
+                        </p>
+                        {process.env.NODE_ENV === "development" && summaryText(feedStatus.last_cycle_summary, "reason_code") ? (
+                          <p className="mt-2 font-mono text-xs">
+                            reason={summaryText(feedStatus.last_cycle_summary, "reason_code")}
+                          </p>
+                        ) : null}
+                      </div>
+                    )}
+
+                    {feedStatus.recent_observations.length > 0 ? (
+                      <div className="mt-5 space-y-3">
+                        <h3 className="font-black">최근 확인한 관련 게시글</h3>
+                        {feedStatus.recent_observations.slice(0, 4).map((observation) => (
+                          <article key={observation.observation_id} className="rounded-2xl border border-outline-variant bg-white p-4">
+                            <div className="flex flex-wrap items-start justify-between gap-3">
+                              <div>
+                                <p className="font-bold">{observation.post_title}</p>
+                                <p className="mt-1 text-xs text-on-surface-variant">
+                                  {observation.author_name} · {new Intl.DateTimeFormat("ko-KR", {
+                                    timeZone: world.timezone,
+                                    dateStyle: "medium",
+                                    timeStyle: "short",
+                                  }).format(new Date(observation.post_created_at))}
+                                </p>
+                              </div>
+                              <span className="rounded-full bg-surface-container px-3 py-1 text-xs font-bold">
+                                {observation.selected_action
+                                  ? ACTION_LABELS[observation.selected_action] ?? observation.selected_action
+                                  : "관찰"}
+                              </span>
+                            </div>
+                            <p className="mt-3 text-xs text-on-surface-variant">
+                              {observation.matched_keywords.map((keyword) => `#${keyword}`).join(" · ")}
+                            </p>
+                          </article>
+                        ))}
+                      </div>
+                    ) : null}
                   </>
                 ) : null}
               </section>

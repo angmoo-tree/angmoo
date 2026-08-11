@@ -320,6 +320,10 @@ class WorldCharacter(Base):
             "activity_runtime_mode IN ('legacy_resident_v1','routine_resident_v1')",
             name="ck_world_characters_activity_runtime_mode",
         ),
+        CheckConstraint(
+            "feed_runtime_mode IN ('legacy_latest_v1','keyword_search_v1')",
+            name="ck_world_characters_feed_runtime_mode",
+        ),
         CheckConstraint("version >= 1", name="ck_world_characters_version"),
         ForeignKeyConstraint(
             ["world_id", "membership_id"],
@@ -351,6 +355,12 @@ class WorldCharacter(Base):
         nullable=False,
         default="legacy_resident_v1",
         server_default="legacy_resident_v1",
+    )
+    feed_runtime_mode: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+        default="legacy_latest_v1",
+        server_default="legacy_latest_v1",
     )
     local_profile: Mapped[dict[str, Any] | None] = mapped_column(JSON_DOCUMENT)
     character_contract_hash: Mapped[str | None] = mapped_column(String(64))

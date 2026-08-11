@@ -41,6 +41,7 @@ from app.services.langgraph_resident import (
     LangGraphResidentContext,
     run_resident_langgraph,
 )
+from app.services.routine_post_runtime import routine_world_character_for_character
 from app.services.runtime_boundary import (
     OpenClawGatewayClient,
     OpenClawGatewayError,
@@ -6768,8 +6769,11 @@ async def _run_resident_slot_once(
             character_id=slot.assigned_character_id,
             credential_id=slot.assigned_credential_id,
         )
-        selected_post_id = _select_tick_post_id(
-            db, preferred_post_id=post_id, character_id=character.id
+        selected_post_id = _select_resident_run_post_id(
+            db,
+            preferred_post_id=post_id,
+            character_id=character.id,
+            scoped_runtime=use_langgraph_resident,
         )
         post = community_service.get_post(db, selected_post_id) if selected_post_id else None
         session_key = (
@@ -7120,6 +7124,17 @@ async def _run_resident_slot_once(
                     character_id=character.id,
                     post_id=selected_post_id,
                     gateway_result=gateway_payload,
+                )
+
+            if (
+                gateway_result.get("engine")
+                == "routine_resident_v1+keyword_search_v1"
+            ):
+                selected_post_id = _combined_runtime_evidence_post_id(
+                    gateway_result
+                )
+                agent_run_crud.set_agent_run_post_id(
+                    db, run_id, selected_post_id
                 )
 
             status = str(gateway_result.get("status", "completed"))
@@ -8096,6 +8111,56 @@ def _select_tick_post_id(
     )
     if post_id:
         return post_id
+    return None
+
+
+def _select_resident_run_post_id(
+    db: Session,
+    *,
+    preferred_post_id: str | None,
+    character_id: str,
+    scoped_runtime: bool,
+) -> str | None:
+    """Avoid inventing a global feed target for the scoped routine runtime."""
+    if scoped_runtime and (
+        routine_world_character_for_character(db, character_id=character_id)
+        is not None
+    ):
+        return preferred_post_id
+    return _select_tick_post_id(
+        db,
+        preferred_post_id=preferred_post_id,
+        character_id=character_id,
+    )
+
+
+def _combined_runtime_evidence_post_id(
+    gateway_result: dict[str, Any],
+) -> str | None:
+    """Choose one truthful representative post for the combined P4/P5 run."""
+    publish_result = gateway_result.get("publish_result")
+    if not isinstance(publish_result, dict):
+        return None
+
+    feed_result = publish_result.get("feed")
+    if isinstance(feed_result, dict):
+        target_post_id = feed_result.get("target_post_id")
+        if (
+            int(feed_result.get("public_action_count") or 0) > 0
+            and isinstance(target_post_id, str)
+            and target_post_id
+        ):
+            return target_post_id
+
+    routine_result = publish_result.get("routine")
+    if isinstance(routine_result, dict):
+        post_id = routine_result.get("post_id")
+        if (
+            int(routine_result.get("public_action_count") or 0) > 0
+            and isinstance(post_id, str)
+            and post_id
+        ):
+            return post_id
     return None
 
 

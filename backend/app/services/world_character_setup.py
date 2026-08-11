@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from sqlalchemy import delete, func, select, update
+from sqlalchemy import delete, func, or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -84,6 +84,54 @@ def delete_setup_data_for_characters(
     )
     if not world_character_ids:
         return
+
+    # P5 feed cursors, claims, and blocks are private WorldCharacter runtime
+    # state. Break the execution -> observation edge before deleting the
+    # observation rows; account/Character deletion later removes the owned
+    # executions through the existing scrub path.
+    feed_observation_ids = list(
+        db.scalars(
+            select(models.WorldCharacterFeedObservation.id).where(
+                models.WorldCharacterFeedObservation.observer_world_character_id.in_(
+                    world_character_ids
+                )
+            )
+        )
+    )
+    if feed_observation_ids:
+        db.execute(
+            update(models.AgentPublicActionExecution)
+            .where(
+                models.AgentPublicActionExecution.feed_observation_id.in_(
+                    feed_observation_ids
+                )
+            )
+            .values(feed_observation_id=None)
+        )
+        db.execute(
+            delete(models.WorldCharacterFeedObservation).where(
+                models.WorldCharacterFeedObservation.id.in_(feed_observation_ids)
+            )
+        )
+    db.execute(
+        delete(models.WorldCharacterFeedCursor).where(
+            models.WorldCharacterFeedCursor.world_character_id.in_(
+                world_character_ids
+            )
+        )
+    )
+    db.execute(
+        delete(models.WorldCharacterBlock).where(
+            or_(
+                models.WorldCharacterBlock.blocker_world_character_id.in_(
+                    world_character_ids
+                ),
+                models.WorldCharacterBlock.blocked_world_character_id.in_(
+                    world_character_ids
+                ),
+            )
+        )
+    )
     plan_ids = select(models.DailyActivityPlan.id).where(
         models.DailyActivityPlan.world_character_id.in_(world_character_ids)
     )

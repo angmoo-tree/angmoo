@@ -43,6 +43,7 @@ class Post(Base):
             ["world_characters.id", "world_characters.character_id"],
             name="fk_posts_author_world_character_identity",
         ),
+        UniqueConstraint("id", "world_id", name="uq_posts_id_world"),
         Index("ix_posts_world_created_at", "world_id", "created_at"),
     )
 
@@ -60,6 +61,7 @@ class Post(Base):
     title: Mapped[str] = mapped_column(String(160), nullable=False)
     body: Mapped[str] = mapped_column(Text, nullable=False)
     topic_signature: Mapped[Optional[str]] = mapped_column(Text)
+    search_document: Mapped[str] = mapped_column(Text, nullable=False, default="")
     novelty_basis: Mapped[Optional[str]] = mapped_column(Text)
     info_kind: Mapped[Optional[str]] = mapped_column(String(40))
     source_name: Mapped[Optional[str]] = mapped_column(String(120))

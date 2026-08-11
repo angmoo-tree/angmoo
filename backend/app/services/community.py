@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from app import models
 from app import schemas
 from app.core import unit_of_work
+from app.core.search_text import build_post_search_document
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
@@ -212,6 +213,11 @@ def _store_post_topic_metadata(
         return
     post.topic_signature = topic or None
     post.novelty_basis = novelty or None
+    post.search_document = build_post_search_document(
+        title=post.title,
+        body=post.body,
+        topic_signature=post.topic_signature,
+    )
     db.add(post)
     unit_of_work.finish_write(db, post)
 
@@ -1815,6 +1821,46 @@ def create_post(
     return _post_detail(db, post)
 
 
+def _timeline_world_scope(
+    db: Session,
+    *,
+    target: models.Post,
+    character: models.Character | None,
+) -> tuple[str | None, str | None]:
+    """Derive a timeline mutation's World from its canonical target.
+
+    A scoped target must never trust a client supplied World id. The acting
+    character must currently be active in the target World and its membership
+    must still be active. Legacy unscoped targets remain unscoped until the
+    canonical backfill is applied.
+    """
+
+    if target.world_id is None:
+        return None, None
+    if character is None:
+        raise PostWorldScopeError("world_scope_requires_character")
+    active_world = db.get(models.CharacterActiveWorld, character.id)
+    if active_world is None:
+        raise PostWorldScopeError("active_world_required")
+    world_character = db.get(models.WorldCharacter, active_world.world_character_id)
+    if (
+        world_character is None
+        or world_character.character_id != character.id
+        or world_character.world_id != target.world_id
+        or world_character.status != "active"
+    ):
+        raise PostWorldScopeError("target_world_not_active")
+    membership = db.get(models.WorldMembership, world_character.membership_id)
+    if (
+        membership is None
+        or membership.world_id != target.world_id
+        or membership.user_id != character.owner_id
+        or membership.status != "active"
+    ):
+        raise PostWorldScopeError("world_membership_not_active")
+    return target.world_id, world_character.id
+
+
 def create_reply(
     db: Session,
     user: models.User,
@@ -1837,6 +1883,11 @@ def create_reply(
         except community_abuse_quota.CommunityQuotaExceeded as exc:
             raise CommunityRateLimitedError(exc.retry_after_seconds) from exc
     character = _resolve_author_character(db, user, data.author_character_id)
+    world_id, author_world_character_id = _timeline_world_scope(
+        db,
+        target=parent,
+        character=character,
+    )
     reply = community_crud.create_timeline_post(
         db,
         post_id=f"post-{uuid4().hex[:12]}",
@@ -1846,6 +1897,8 @@ def create_reply(
         body=data.body,
         post_type="reply",
         reply_to_post_id=parent.id,
+        world_id=world_id,
+        author_world_character_id=author_world_character_id,
     )
     if character is not None:
         agent_crud.log_activity(
@@ -1887,6 +1940,11 @@ def create_quote(
     if quoted is None or not _is_post_public_context_visible(db, quoted):
         raise PostNotFoundError(post_id)
     character = _resolve_author_character(db, user, data.author_character_id)
+    world_id, author_world_character_id = _timeline_world_scope(
+        db,
+        target=quoted,
+        character=character,
+    )
     quote = community_crud.create_timeline_post(
         db,
         post_id=f"post-{uuid4().hex[:12]}",
@@ -1896,6 +1954,8 @@ def create_quote(
         body=data.body,
         post_type="quote",
         quote_post_id=quoted.id,
+        world_id=world_id,
+        author_world_character_id=author_world_character_id,
     )
     if character is not None:
         agent_crud.log_activity(
@@ -1993,6 +2053,11 @@ def repost_post(
     if post is None or not _is_post_public_context_visible(db, post):
         raise PostNotFoundError(post_id)
     character = _resolve_author_character(db, user, data.character_id)
+    world_id, author_world_character_id = _timeline_world_scope(
+        db,
+        target=post,
+        character=character,
+    )
     existing_timeline_repost = community_crud.get_timeline_repost(
         db, post=post, user=user, character=character
     )
@@ -2010,6 +2075,8 @@ def repost_post(
         body="",
         post_type="repost",
         repost_of_post_id=post.id,
+        world_id=world_id,
+        author_world_character_id=author_world_character_id,
     )
     if character is not None and created:
         agent_crud.log_activity(

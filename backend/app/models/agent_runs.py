@@ -172,6 +172,15 @@ class AgentPublicActionExecution(Base):
     target_post_id: Mapped[Optional[str]] = mapped_column(ForeignKey("posts.id"), index=True)
     target_profile_type: Mapped[Optional[str]] = mapped_column(String(40))
     target_profile_id: Mapped[Optional[str]] = mapped_column(String(64))
+    world_id: Mapped[Optional[str]] = mapped_column(ForeignKey("worlds.id"), index=True)
+    actor_world_character_id: Mapped[Optional[str]] = mapped_column(
+        ForeignKey("world_characters.id"), index=True
+    )
+    feed_observation_id: Mapped[Optional[str]] = mapped_column(
+        ForeignKey("world_character_feed_observations.id"), index=True
+    )
+    interaction_intent: Mapped[Optional[str]] = mapped_column(String(40))
+    comment_purpose: Mapped[Optional[str]] = mapped_column(String(40))
     brief_hash: Mapped[Optional[str]] = mapped_column(String(64))
     status: Mapped[str] = mapped_column(String(40), nullable=False, default="pending")
     result: Mapped[Optional[dict[str, Any]]] = mapped_column(JSON, nullable=True)

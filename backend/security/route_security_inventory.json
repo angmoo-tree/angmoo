@@ -332,6 +332,11 @@
       "module": "app.api.v1.routes.world_character_setup",
       "endpoint": "get_autonomy_setup"
     },
+    "GET /api/v1/world-characters/{world_character_id}/feed-status": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_character_setup",
+      "endpoint": "get_world_feed_status"
+    },
     "DELETE /api/v1/worlds/{world_id}/banner": {
       "access": "owner-only",
       "module": "app.api.v1.routes.worlds",
