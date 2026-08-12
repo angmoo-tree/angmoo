@@ -181,6 +181,9 @@ class AgentPublicActionExecution(Base):
     )
     interaction_intent: Mapped[Optional[str]] = mapped_column(String(40))
     comment_purpose: Mapped[Optional[str]] = mapped_column(String(40))
+    social_event_id: Mapped[Optional[str]] = mapped_column(
+        ForeignKey("social_events.id"), index=True
+    )
     brief_hash: Mapped[Optional[str]] = mapped_column(String(64))
     status: Mapped[str] = mapped_column(String(40), nullable=False, default="pending")
     result: Mapped[Optional[dict[str, Any]]] = mapped_column(JSON, nullable=True)

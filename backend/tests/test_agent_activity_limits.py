@@ -1726,9 +1726,13 @@ def test_routine_runtime_does_not_invent_global_selected_post(monkeypatch) -> No
     )
 
 
-def test_combined_runtime_audit_post_prefers_actual_feed_target() -> None:
+def test_combined_runtime_audit_post_prefers_actual_inbox_target() -> None:
     result = {
         "publish_result": {
+            "inbox": {
+                "public_action_count": 1,
+                "target_post_id": "post-inbox-target",
+            },
             "routine": {
                 "public_action_count": 1,
                 "post_id": "post-routine-root",
@@ -1742,7 +1746,7 @@ def test_combined_runtime_audit_post_prefers_actual_feed_target() -> None:
 
     assert (
         agent_run_service._combined_runtime_evidence_post_id(result)
-        == "post-feed-target"
+        == "post-inbox-target"
     )
 
 

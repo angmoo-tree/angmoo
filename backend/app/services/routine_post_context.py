@@ -322,7 +322,14 @@ def assemble_routine_post_context(
         if previous_beat is not None and previous_beat.completed_at is not None
         else _aware_utc(item.scheduled_start_at)
     )
-    source = interaction_source or EmptyRoutineInteractionSource()
+    if interaction_source is None:
+        from app.services.social_routine_interactions import (
+            CanonicalRoutineInteractionSource,
+        )
+
+        source: RoutineInteractionSource = CanonicalRoutineInteractionSource()
+    else:
+        source = interaction_source
     raw_events = source.candidates(
         db,
         world_id=world.id,

@@ -12,6 +12,7 @@ from app.services import agent_activity_policy
 
 
 class ResidentGraphState(TypedDict, total=False):
+    inbox_lane_only: bool
     next_node: str
     steps: int
     completed_nodes: list[str]

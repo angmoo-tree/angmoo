@@ -79,6 +79,14 @@ from app.models.world_feed import (
     WorldCharacterFeedCursor,
     WorldCharacterFeedObservation,
 )
+from app.models.social_memory import (
+    ActivityProposal,
+    GraphProjectionOutbox,
+    RelationshipState,
+    RelationshipStateChange,
+    SocialEvent,
+    SocialEventEvidence,
+)
 
 __all__ = [
     "AdminAuditLog",
@@ -152,4 +160,10 @@ __all__ = [
     "WorldCharacterBlock",
     "WorldCharacterFeedCursor",
     "WorldCharacterFeedObservation",
+    "ActivityProposal",
+    "GraphProjectionOutbox",
+    "RelationshipState",
+    "RelationshipStateChange",
+    "SocialEvent",
+    "SocialEventEvidence",
 ]

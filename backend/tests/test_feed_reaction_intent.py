@@ -5,7 +5,7 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 from pydantic import ValidationError
-from sqlalchemy import create_engine, event, select
+from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
@@ -415,6 +415,39 @@ def test_ordinary_comment_is_world_scoped_and_execution_keeps_intent_evidence() 
         assert execution.world_id == target.world_id
         assert execution.feed_observation_id == observation.id
         assert execution.action_type == "comment"
+        assert execution.social_event_id is not None
+        social_event = db.get(models.SocialEvent, execution.social_event_id)
+        assert social_event is not None
+        assert social_event.event_type == "comment_created"
+        assert social_event.world_id == target.world_id
+        assert social_event.actor_world_character_id == "world-character-actor"
+        assert social_event.target_world_character_id == "world-character-author"
+        evidence = db.scalar(
+            select(models.SocialEventEvidence).where(
+                models.SocialEventEvidence.social_event_id == social_event.id
+            )
+        )
+        assert evidence is not None
+        assert evidence.source_object_id == reply.id
+        assert evidence.source_post_id == reply.id
+        assert evidence.target_post_id == target.id
+        assert evidence.comment_purpose == "question"
+        state = db.scalar(
+            select(models.RelationshipState).where(
+                models.RelationshipState.actor_world_character_id
+                == "world-character-actor",
+                models.RelationshipState.target_world_character_id
+                == "world-character-author",
+            )
+        )
+        assert state is not None
+        assert (state.familiarity, state.affinity, state.trust, state.tension) == (
+            2,
+            0,
+            0,
+            0,
+        )
+        assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 1
 
 
 def test_same_minute_cycle_is_reused_without_second_provider_call() -> None:

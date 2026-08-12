@@ -3927,6 +3927,9 @@ def _patch_reply_execution(monkeypatch, *, created: list[dict[str, str]]) -> Non
         created.append({"post_id": post_id, "body": data.body})
         return SimpleNamespace(id=f"reply-{post_id}")
 
+    def fake_social_apply(*_args, **_kwargs):
+        return SimpleNamespace(event=SimpleNamespace(id="social-event-reply"))
+
     monkeypatch.setattr(langgraph_resident, "_reserve_public_action", fake_reserve)
     monkeypatch.setattr(langgraph_resident, "_finish_execution", fake_finish)
     monkeypatch.setattr(
@@ -3939,13 +3942,21 @@ def _patch_reply_execution(monkeypatch, *, created: list[dict[str, str]]) -> Non
         "reply_agent_tool_post",
         fake_reply,
     )
+    monkeypatch.setattr(
+        langgraph_resident.langgraph_social_apply,
+        "apply_successful_public_action",
+        fake_social_apply,
+    )
 
 
 def test_reply_action_uses_body_matching_scope_index_and_post_id(monkeypatch) -> None:
     created: list[dict[str, str]] = []
     _patch_reply_execution(monkeypatch, created=created)
     ctx = SimpleNamespace(
-        db=object(),
+        db=SimpleNamespace(
+            commit=lambda: None,
+            rollback=lambda: None,
+        ),
         session_key="session-1",
         run_id="run-1",
         character=SimpleNamespace(id="char-1"),
@@ -4069,7 +4080,10 @@ def test_duplicate_reply_body_to_different_posts_skips_second(monkeypatch) -> No
     created: list[dict[str, str]] = []
     _patch_reply_execution(monkeypatch, created=created)
     ctx = SimpleNamespace(
-        db=object(),
+        db=SimpleNamespace(
+            commit=lambda: None,
+            rollback=lambda: None,
+        ),
         session_key="session-1",
         run_id="run-1",
         character=SimpleNamespace(id="char-1"),
@@ -4354,10 +4368,10 @@ def test_inbox_and_independent_planner_wire_schemas_stay_lane_specific() -> None
         langgraph_resident._FeedActionPlan.model_validate(
             {"feed_actions": [{"item_index": 0, "action_type": "follow"}]}
         )
-    with pytest.raises(langgraph_resident.ValidationError):
-        langgraph_resident._InboxActionPlan.model_validate(
-            {"inbox_actions": [{"item_index": 0, "action_type": "follow"}]}
-        )
+    inbox_follow = langgraph_resident._InboxActionPlan.model_validate(
+        {"inbox_actions": [{"item_index": 0, "action_type": "follow"}]}
+    )
+    assert inbox_follow.inbox_actions[0].action_type == "follow"
 
     relationship = langgraph_resident._RelationshipActionPlan.model_validate(
         {

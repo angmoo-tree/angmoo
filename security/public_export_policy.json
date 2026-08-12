@@ -411,6 +411,10 @@
       "destination": "backend/app/alembic/versions/20260811_0076_world_keyword_feed.py"
     },
     {
+      "source": "backend/app/alembic/versions/20260811_0077_social_events_relationships.py",
+      "destination": "backend/app/alembic/versions/20260811_0077_social_events_relationships.py"
+    },
+    {
       "source": "backend/app/api/v1/__init__.py",
       "destination": "backend/app/api/v1/__init__.py"
     },
@@ -571,6 +575,10 @@
       "destination": "backend/app/cruds/community.py"
     },
     {
+      "source": "backend/app/cruds/social_memory.py",
+      "destination": "backend/app/cruds/social_memory.py"
+    },
+    {
       "source": "backend/app/cruds/tree.py",
       "destination": "backend/app/cruds/tree.py"
     },
@@ -637,6 +645,10 @@
     {
       "source": "backend/app/models/profile_images.py",
       "destination": "backend/app/models/profile_images.py"
+    },
+    {
+      "source": "backend/app/models/social_memory.py",
+      "destination": "backend/app/models/social_memory.py"
     },
     {
       "source": "backend/app/models/tree.py",
@@ -739,6 +751,10 @@
       "destination": "backend/app/schemas/routine_post.py"
     },
     {
+      "source": "backend/app/schemas/social_memory.py",
+      "destination": "backend/app/schemas/social_memory.py"
+    },
+    {
       "source": "backend/app/schemas/tree.py",
       "destination": "backend/app/schemas/tree.py"
     },
@@ -835,6 +851,10 @@
       "destination": "backend/app/services/langgraph_resident.py"
     },
     {
+      "source": "backend/app/services/langgraph_social_apply.py",
+      "destination": "backend/app/services/langgraph_social_apply.py"
+    },
+    {
       "source": "backend/app/services/llm_context.py",
       "destination": "backend/app/services/llm_context.py"
     },
@@ -911,6 +931,18 @@
       "destination": "backend/app/services/service_image_key.py"
     },
     {
+      "source": "backend/app/services/social_event_runtime.py",
+      "destination": "backend/app/services/social_event_runtime.py"
+    },
+    {
+      "source": "backend/app/services/social_memory_read.py",
+      "destination": "backend/app/services/social_memory_read.py"
+    },
+    {
+      "source": "backend/app/services/social_routine_interactions.py",
+      "destination": "backend/app/services/social_routine_interactions.py"
+    },
+    {
       "source": "backend/app/services/tree.py",
       "destination": "backend/app/services/tree.py"
     },
@@ -963,8 +995,16 @@
       "destination": "backend/app/services/joint_activity_scheduling.py"
     },
     {
+      "source": "backend/app/services/joint_activity_runtime.py",
+      "destination": "backend/app/services/joint_activity_runtime.py"
+    },
+    {
       "source": "backend/app/services/activity_profile_readiness.py",
       "destination": "backend/app/services/activity_profile_readiness.py"
+    },
+    {
+      "source": "backend/app/services/activity_proposal_runtime.py",
+      "destination": "backend/app/services/activity_proposal_runtime.py"
     },
     {
       "source": "backend/app/services/routine_post_context.py",
@@ -985,6 +1025,10 @@
     {
       "source": "backend/app/services/world_feed_runtime.py",
       "destination": "backend/app/services/world_feed_runtime.py"
+    },
+    {
+      "source": "backend/app/services/world_feed_social_apply.py",
+      "destination": "backend/app/services/world_feed_social_apply.py"
     },
     {
       "source": "backend/app/services/world_feed_search.py",
@@ -1403,12 +1447,20 @@
       "destination": "backend/tests/test_daily_activity_runtime.py"
     },
     {
+      "source": "backend/tests/test_activity_proposal_runtime.py",
+      "destination": "backend/tests/test_activity_proposal_runtime.py"
+    },
+    {
       "source": "backend/tests/test_routine_post_runtime.py",
       "destination": "backend/tests/test_routine_post_runtime.py"
     },
     {
       "source": "backend/tests/test_feed_reaction_intent.py",
       "destination": "backend/tests/test_feed_reaction_intent.py"
+    },
+    {
+      "source": "backend/tests/test_social_event_runtime.py",
+      "destination": "backend/tests/test_social_event_runtime.py"
     },
     {
       "source": "backend/tests/test_world_feed_search.py",

@@ -1751,6 +1751,16 @@ def delete_post(db: Session, user: models.User, post_id: str) -> None:
             )
         index += 1
 
+    from app.services import social_event_runtime
+
+    social_event_runtime.exclude_events_for_posts(
+        db,
+        post_ids=[deleted_post.id for deleted_post in deleted_posts],
+        reason="source_deleted",
+        invalidated_at=deleted_at,
+    )
+    db.commit()
+
 
 def create_post(
     db: Session,
@@ -2955,7 +2965,7 @@ def list_resident_actionable_inbox_notifications(
     candidates: list[models.Notification] = []
     per_type_limit = min(5, max(1, limit))
     scan_limit = max(10, min(per_type_limit * 5, 50))
-    for notification_type in ("reply", "mention"):
+    for notification_type in ("reply", "mention", "joint_activity_started"):
         notifications = community_crud.list_unread_notifications_for_character(
             db,
             character_id=character_id,

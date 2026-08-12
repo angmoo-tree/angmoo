@@ -327,6 +327,11 @@
       "module": "app.api.v1.routes.world_activity_runtime",
       "endpoint": "get_daily_activity_plan"
     },
+    "GET /api/v1/characters/{character_id}/worlds/{world_id}/social-memory": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_activity_runtime",
+      "endpoint": "get_world_character_social_memory"
+    },
     "GET /api/v1/world-characters/{world_character_id}/autonomy-setup": {
       "access": "owner-only",
       "module": "app.api.v1.routes.world_character_setup",

@@ -219,6 +219,15 @@ from app.schemas.world_character_setup import (
     WorldSetupStage,
     WorldSetupState,
 )
+from app.schemas.social_memory import (
+    ActivityProposalRead,
+    JointActivityParticipantRead,
+    JointActivityRead,
+    RelationshipStateRead,
+    SocialEventEvidenceRead,
+    SocialEventRead,
+    SocialMemoryDiagnosticsRead,
+)
 from app.schemas.world_activity_runtime import (
     ActivityDaypart,
     ActivityEpisodeRead,
@@ -414,6 +423,13 @@ __all__ = [
     "ActivityPlanItemStatus",
     "ActivityPlanStatus",
     "ActivityRuntimeMode",
+    "ActivityProposalRead",
+    "JointActivityParticipantRead",
+    "JointActivityRead",
+    "RelationshipStateRead",
+    "SocialEventEvidenceRead",
+    "SocialEventRead",
+    "SocialMemoryDiagnosticsRead",
     "DailyActivityPlanItemRead",
     "DailyActivityPlanPrepareCreate",
     "DailyActivityPlanRead",

@@ -262,6 +262,32 @@ def _seed(db: Session, *, two_characters: bool = False):
     return world, first, second
 
 
+def _add_social_event(
+    db: Session,
+    *,
+    event_id: str,
+    world_id: str,
+    actor_world_character_id: str,
+    target_world_character_id: str,
+    event_type: str = "comment_created",
+    occurred_at: datetime,
+) -> models.SocialEvent:
+    row = models.SocialEvent(
+        id=event_id,
+        world_id=world_id,
+        actor_world_character_id=actor_world_character_id,
+        target_world_character_id=target_world_character_id,
+        event_type=event_type,
+        result="succeeded",
+        occurred_at=occurred_at,
+        idempotency_key=f"fixture:{event_id}",
+        schema_version="social-event-v1",
+    )
+    db.add(row)
+    db.flush()
+    return row
+
+
 def _prepare(
     db: Session,
     fixture: ReadyCharacter,
@@ -536,7 +562,25 @@ def test_beat_success_applies_event_once_and_failure_releases_claim() -> None:
     engine = _engine()
     now = _utc(datetime(2026, 8, 9, 0, 30))
     with Session(engine, expire_on_commit=False) as db:
-        _world_row, fixture, _other = _seed(db)
+        world, fixture, other = _seed(db, two_characters=True)
+        assert other is not None
+        _add_social_event(
+            db,
+            event_id="event-1",
+            world_id=world.id,
+            actor_world_character_id=other.world_character.id,
+            target_world_character_id=fixture.world_character.id,
+            occurred_at=now - timedelta(minutes=5),
+        )
+        _add_social_event(
+            db,
+            event_id="event-2",
+            world_id=world.id,
+            actor_world_character_id=other.world_character.id,
+            target_world_character_id=fixture.world_character.id,
+            occurred_at=now + timedelta(minutes=55),
+        )
+        db.commit()
         plan = _prepare(db, fixture, now=now)
         episode_id = plan.items[0].episode.id  # type: ignore[union-attr]
         beat_claim = activity_runtime.claim_activity_beat(
@@ -879,7 +923,17 @@ def test_expired_runtime_claims_are_recoverable_after_restart() -> None:
     engine = _engine()
     now = _utc(datetime(2026, 8, 9, 1, 0))
     with Session(engine, expire_on_commit=False) as db:
-        _world_row, fixture, _other = _seed(db)
+        world, fixture, other = _seed(db, two_characters=True)
+        assert other is not None
+        _add_social_event(
+            db,
+            event_id="expired-event",
+            world_id=world.id,
+            actor_world_character_id=other.world_character.id,
+            target_world_character_id=fixture.world_character.id,
+            occurred_at=now - timedelta(minutes=1),
+        )
+        db.commit()
         plan = _prepare(db, fixture, now=now)
         episode_id = plan.items[0].episode.id  # type: ignore[union-attr]
         beat = activity_runtime.claim_activity_beat(
@@ -924,6 +978,24 @@ def test_joint_schedule_links_both_participants_and_claim_has_no_consumption() -
     with Session(engine, expire_on_commit=False) as db:
         world, first, second = _seed(db, two_characters=True)
         assert second is not None
+        _add_social_event(
+            db,
+            event_id="proposal-a",
+            world_id=world.id,
+            actor_world_character_id=first.world_character.id,
+            target_world_character_id=second.world_character.id,
+            event_type="joint_proposed",
+            occurred_at=now - timedelta(minutes=2),
+        )
+        _add_social_event(
+            db,
+            event_id="acceptance-a",
+            world_id=world.id,
+            actor_world_character_id=second.world_character.id,
+            target_world_character_id=first.world_character.id,
+            event_type="joint_accepted",
+            occurred_at=now - timedelta(minutes=1),
+        )
         _prepare(db, first, now=now, key="plan-first")
         _prepare(db, second, now=now, key="plan-second")
         joint = models.JointActivity(

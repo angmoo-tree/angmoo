@@ -9,9 +9,11 @@ import { getAgent, type AgentDetailRead } from "@/lib/agents";
 import {
   DailyActivityPlanApiError,
   getDailyActivityPlan,
+  getSocialMemoryDiagnostics,
   prepareDailyActivityPlan,
   updateActivityRuntimeMode,
   type DailyActivityPlanRead,
+  type SocialMemoryDiagnosticsRead,
 } from "@/lib/world-activity-runtime";
 import {
   approveWorldCharacterSetup,
@@ -165,6 +167,8 @@ export function WorldCharacterAutonomySetupClient({
   const [planError, setPlanError] = useState<string | null>(null);
   const [modePending, setModePending] = useState(false);
   const [feedStatusError, setFeedStatusError] = useState<string | null>(null);
+  const [socialMemory, setSocialMemory] = useState<SocialMemoryDiagnosticsRead | null>(null);
+  const [socialMemoryError, setSocialMemoryError] = useState<string | null>(null);
 
   useEffect(() => {
     if (authStatus === "unauthenticated") {
@@ -246,6 +250,24 @@ export function WorldCharacterAutonomySetupClient({
     };
   }, [entry?.id, setup?.autonomy_ready]);
 
+
+  useEffect(() => {
+    if (!setup?.autonomy_ready) return;
+    let active = true;
+    void getSocialMemoryDiagnostics(characterId, worldId)
+      .then((diagnostics) => {
+        if (active) {
+          setSocialMemory(diagnostics);
+          setSocialMemoryError(null);
+        }
+      })
+      .catch((nextError) => {
+        if (active) setSocialMemoryError(errorMessage(nextError));
+      });
+    return () => {
+      active = false;
+    };
+  }, [characterId, setup?.autonomy_ready, worldId]);
   const allowedRoles = useMemo(
     () => world?.roles.filter((role) => role.autonomous_allowed) ?? [],
     [world],
@@ -961,6 +983,106 @@ export function WorldCharacterAutonomySetupClient({
           </>
         ) : null}
       </div>
+
+            {setup?.autonomy_ready ? (
+              <section className="rounded-[28px] border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-bold text-primary">P6 · SOCIAL MEMORY</p>
+                    <h2 className="mt-1 text-xl font-black">실제 SNS 사건과 방향성 관계</h2>
+                    <p className="mt-2 max-w-3xl text-sm text-on-surface-variant">
+                      실제 DB 쓰기에 성공한 사건만 근거와 함께 보존합니다. 내가 상대를 보는 관계와
+                      상대가 나를 보는 관계는 서로 다른 상태이며, 이 화면은 캐릭터 소유자에게만 보입니다.
+                    </p>
+                  </div>
+                  {socialMemory ? (
+                    <span className="rounded-full bg-surface-container px-3 py-2 text-xs font-bold">
+                      graph 대기 {socialMemory.graph_outbox_pending_count}
+                    </span>
+                  ) : null}
+                </div>
+
+                {!socialMemory && !socialMemoryError ? (
+                  <p className="mt-5 text-sm text-on-surface-variant">사건과 관계 근거를 확인하는 중입니다.</p>
+                ) : null}
+                {socialMemoryError ? (
+                  <p role="alert" className="mt-5 rounded-2xl bg-error-container p-4 text-on-error-container">
+                    {socialMemoryError}
+                  </p>
+                ) : null}
+
+                {socialMemory ? (
+                  <>
+                    <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                      <div className="rounded-2xl bg-surface-container-low p-4">
+                        <p className="text-xs text-on-surface-variant">최근 실제 사건</p>
+                        <p className="mt-1 text-2xl font-black">{socialMemory.recent_events.length}</p>
+                      </div>
+                      <div className="rounded-2xl bg-surface-container-low p-4">
+                        <p className="text-xs text-on-surface-variant">내가 보는 관계</p>
+                        <p className="mt-1 text-2xl font-black">{socialMemory.outgoing_relationships.length}</p>
+                      </div>
+                      <div className="rounded-2xl bg-surface-container-low p-4">
+                        <p className="text-xs text-on-surface-variant">상대가 보는 관계</p>
+                        <p className="mt-1 text-2xl font-black">{socialMemory.incoming_relationships.length}</p>
+                      </div>
+                      <div className="rounded-2xl bg-surface-container-low p-4">
+                        <p className="text-xs text-on-surface-variant">열린 제안 · 공동 일과</p>
+                        <p className="mt-1 text-2xl font-black">
+                          {socialMemory.open_proposals.length} · {socialMemory.active_joint_activities.length}
+                        </p>
+                      </div>
+                    </div>
+
+                    {socialMemory.outgoing_relationships.length > 0 ? (
+                      <div className="mt-5 grid gap-3 md:grid-cols-2">
+                        {socialMemory.outgoing_relationships.slice(0, 6).map((relationship) => (
+                          <article key={relationship.id} className="rounded-2xl border border-outline-variant bg-white p-4">
+                            <p className="font-bold">상대 {relationship.target_world_character_id}</p>
+                            <p className="mt-2 text-xs text-on-surface-variant">
+                              친숙 {relationship.familiarity} · 호감 {relationship.affinity} · 신뢰 {relationship.trust} · 긴장 {relationship.tension}
+                            </p>
+                            <p className="mt-1 text-xs text-on-surface-variant">실제 상호작용 {relationship.interaction_count}회</p>
+                          </article>
+                        ))}
+                      </div>
+                    ) : null}
+
+                    {socialMemory.recent_events.length > 0 ? (
+                      <div className="mt-5 space-y-3">
+                        <h3 className="font-black">최근 사건 근거</h3>
+                        {socialMemory.recent_events.slice(0, 8).map((event) => {
+                          const sourcePostId = event.evidence.find((item) => item.source_post_id)?.source_post_id;
+                          const excluded = event.evidence.some((item) => item.source_status === "excluded");
+                          return (
+                            <article key={event.id} className="rounded-2xl border border-outline-variant bg-white p-4">
+                              <div className="flex flex-wrap items-center justify-between gap-3">
+                                <p className="font-bold">{event.event_type}</p>
+                                <span className="rounded-full bg-surface-container px-3 py-1 text-xs">
+                                  {excluded ? "근거 제외됨" : "근거 확인 가능"}
+                                </span>
+                              </div>
+                              <p className="mt-2 text-xs text-on-surface-variant">
+                                {new Intl.DateTimeFormat("ko-KR", {
+                                  timeZone: world.timezone,
+                                  dateStyle: "medium",
+                                  timeStyle: "short",
+                                }).format(new Date(event.occurred_at))}
+                              </p>
+                              {sourcePostId && !excluded ? (
+                                <Link className="mt-2 inline-block text-sm font-bold text-primary underline" href={`/posts/${sourcePostId}`}>
+                                  근거 게시글 보기
+                                </Link>
+                              ) : null}
+                            </article>
+                          );
+                        })}
+                      </div>
+                    ) : null}
+                  </>
+                ) : null}
+              </section>
+            ) : null}
     </main>
   );
 }

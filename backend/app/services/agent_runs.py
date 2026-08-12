@@ -5034,6 +5034,22 @@ def _compact_stored_lane_result(value: Any) -> dict[str, Any]:
         item = value.get(key)
         if item is not None:
             compact[key] = item
+    for key in ("outcome", "decision_source"):
+        item = value.get(key)
+        if isinstance(item, str) and item:
+            compact[key] = item
+    for key in (
+        "candidate_count",
+        "provider_call_count",
+        "public_action_count",
+        "handled_notification_count",
+    ):
+        item = value.get(key)
+        if isinstance(item, int) and item >= 0:
+            compact[key] = item
+    planner_invoked = value.get("planner_invoked")
+    if isinstance(planner_invoked, bool):
+        compact["planner_invoked"] = planner_invoked
     for key in (
         "backend_request_started_at",
         "backend_request_finished_at",
@@ -8137,10 +8153,20 @@ def _select_resident_run_post_id(
 def _combined_runtime_evidence_post_id(
     gateway_result: dict[str, Any],
 ) -> str | None:
-    """Choose one truthful representative post for the combined P4/P5 run."""
+    """Choose one truthful representative post for the combined P4/P5/P6 run."""
     publish_result = gateway_result.get("publish_result")
     if not isinstance(publish_result, dict):
         return None
+
+    inbox_result = publish_result.get("inbox")
+    if isinstance(inbox_result, dict):
+        target_post_id = inbox_result.get("target_post_id")
+        if (
+            int(inbox_result.get("public_action_count") or 0) > 0
+            and isinstance(target_post_id, str)
+            and target_post_id
+        ):
+            return target_post_id
 
     feed_result = publish_result.get("feed")
     if isinstance(feed_result, dict):

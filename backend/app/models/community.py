@@ -43,6 +43,11 @@ class Post(Base):
             ["world_characters.id", "world_characters.character_id"],
             name="fk_posts_author_world_character_identity",
         ),
+        ForeignKeyConstraint(
+            ["joint_activity_id", "world_id"],
+            ["joint_activities.id", "joint_activities.world_id"],
+            name="fk_posts_joint_activity_scope",
+        ),
         UniqueConstraint("id", "world_id", name="uq_posts_id_world"),
         Index("ix_posts_world_created_at", "world_id", "created_at"),
     )
@@ -68,6 +73,14 @@ class Post(Base):
     source_url: Mapped[Optional[str]] = mapped_column(String(500))
     observed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
     location_label: Mapped[Optional[str]] = mapped_column(String(120))
+    joint_activity_id: Mapped[Optional[str]] = mapped_column(String(64))
+    opening_post_id: Mapped[Optional[str]] = mapped_column(ForeignKey("posts.id"))
+    activity_episode_id: Mapped[Optional[str]] = mapped_column(
+        ForeignKey("activity_episodes.id")
+    )
+    activity_beat_id: Mapped[Optional[str]] = mapped_column(
+        ForeignKey("activity_beats.id")
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -198,12 +211,40 @@ class PostLike(Base):
             postgresql_where=text("character_id IS NULL"),
             sqlite_where=text("character_id IS NULL"),
         ),
+        CheckConstraint(
+            "(world_id IS NULL AND actor_world_character_id IS NULL AND "
+            "target_world_character_id IS NULL) OR "
+            "(world_id IS NOT NULL AND actor_world_character_id IS NOT NULL AND "
+            "target_world_character_id IS NOT NULL)",
+            name="ck_post_likes_world_scope",
+        ),
+        ForeignKeyConstraint(
+            ["actor_world_character_id", "world_id"],
+            ["world_characters.id", "world_characters.world_id"],
+            name="fk_post_likes_actor_scope",
+        ),
+        ForeignKeyConstraint(
+            ["target_world_character_id", "world_id"],
+            ["world_characters.id", "world_characters.world_id"],
+            name="fk_post_likes_target_scope",
+        ),
+        Index(
+            "uq_post_likes_post_actor_world_character",
+            "post_id",
+            "actor_world_character_id",
+            unique=True,
+            postgresql_where=text("actor_world_character_id IS NOT NULL"),
+            sqlite_where=text("actor_world_character_id IS NOT NULL"),
+        ),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     post_id: Mapped[str] = mapped_column(ForeignKey("posts.id"), nullable=False)
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
     character_id: Mapped[Optional[str]] = mapped_column(ForeignKey("characters.id"))
+    world_id: Mapped[Optional[str]] = mapped_column(ForeignKey("worlds.id"))
+    actor_world_character_id: Mapped[Optional[str]] = mapped_column(String(64))
+    target_world_character_id: Mapped[Optional[str]] = mapped_column(String(64))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -221,12 +262,40 @@ class PostRepost(Base):
             "(user_id is null) <> (character_id is null)",
             name="ck_post_reposts_actor_exactly_one",
         ),
+        CheckConstraint(
+            "(world_id IS NULL AND actor_world_character_id IS NULL AND "
+            "target_world_character_id IS NULL) OR "
+            "(world_id IS NOT NULL AND actor_world_character_id IS NOT NULL AND "
+            "target_world_character_id IS NOT NULL)",
+            name="ck_post_reposts_world_scope",
+        ),
+        ForeignKeyConstraint(
+            ["actor_world_character_id", "world_id"],
+            ["world_characters.id", "world_characters.world_id"],
+            name="fk_post_reposts_actor_scope",
+        ),
+        ForeignKeyConstraint(
+            ["target_world_character_id", "world_id"],
+            ["world_characters.id", "world_characters.world_id"],
+            name="fk_post_reposts_target_scope",
+        ),
+        Index(
+            "uq_post_reposts_post_actor_world_character",
+            "post_id",
+            "actor_world_character_id",
+            unique=True,
+            postgresql_where=text("actor_world_character_id IS NOT NULL"),
+            sqlite_where=text("actor_world_character_id IS NOT NULL"),
+        ),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     post_id: Mapped[str] = mapped_column(ForeignKey("posts.id"), nullable=False)
     user_id: Mapped[Optional[str]] = mapped_column(ForeignKey("users.id"))
     character_id: Mapped[Optional[str]] = mapped_column(ForeignKey("characters.id"))
+    world_id: Mapped[Optional[str]] = mapped_column(ForeignKey("worlds.id"))
+    actor_world_character_id: Mapped[Optional[str]] = mapped_column(String(64))
+    target_world_character_id: Mapped[Optional[str]] = mapped_column(String(64))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -297,6 +366,29 @@ class ProfileFollow(Base):
             "(target_user_id is null) <> (target_character_id is null)",
             name="ck_profile_follows_target_exactly_one",
         ),
+        CheckConstraint(
+            "(world_id IS NULL AND follower_world_character_id IS NULL AND "
+            "target_world_character_id IS NULL) OR "
+            "(world_id IS NOT NULL AND follower_world_character_id IS NOT NULL AND "
+            "target_world_character_id IS NOT NULL)",
+            name="ck_profile_follows_world_scope",
+        ),
+        ForeignKeyConstraint(
+            ["follower_world_character_id", "world_id"],
+            ["world_characters.id", "world_characters.world_id"],
+            name="fk_profile_follows_follower_scope",
+        ),
+        ForeignKeyConstraint(
+            ["target_world_character_id", "world_id"],
+            ["world_characters.id", "world_characters.world_id"],
+            name="fk_profile_follows_target_scope",
+        ),
+        UniqueConstraint(
+            "world_id",
+            "follower_world_character_id",
+            "target_world_character_id",
+            name="uq_profile_follows_world_direction",
+        ),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -304,6 +396,9 @@ class ProfileFollow(Base):
     follower_character_id: Mapped[Optional[str]] = mapped_column(ForeignKey("characters.id"))
     target_user_id: Mapped[Optional[str]] = mapped_column(ForeignKey("users.id"))
     target_character_id: Mapped[Optional[str]] = mapped_column(ForeignKey("characters.id"))
+    world_id: Mapped[Optional[str]] = mapped_column(ForeignKey("worlds.id"))
+    follower_world_character_id: Mapped[Optional[str]] = mapped_column(String(64))
+    target_world_character_id: Mapped[Optional[str]] = mapped_column(String(64))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -316,6 +411,16 @@ class Notification(Base):
             "(recipient_user_id is null) <> (recipient_character_id is null)",
             name="ck_notifications_recipient_exactly_one",
         ),
+        ForeignKeyConstraint(
+            ["recipient_world_character_id", "world_id"],
+            ["world_characters.id", "world_characters.world_id"],
+            name="fk_notifications_recipient_scope",
+        ),
+        ForeignKeyConstraint(
+            ["actor_world_character_id", "world_id"],
+            ["world_characters.id", "world_characters.world_id"],
+            name="fk_notifications_actor_scope",
+        ),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -323,11 +428,22 @@ class Notification(Base):
     recipient_character_id: Mapped[Optional[str]] = mapped_column(ForeignKey("characters.id"))
     actor_user_id: Mapped[Optional[str]] = mapped_column(ForeignKey("users.id"))
     actor_character_id: Mapped[Optional[str]] = mapped_column(ForeignKey("characters.id"))
+    world_id: Mapped[Optional[str]] = mapped_column(ForeignKey("worlds.id"))
+    recipient_world_character_id: Mapped[Optional[str]] = mapped_column(String(64))
+    actor_world_character_id: Mapped[Optional[str]] = mapped_column(String(64))
+    source_social_event_id: Mapped[Optional[str]] = mapped_column(
+        ForeignKey("social_events.id")
+    )
+    source_joint_activity_id: Mapped[Optional[str]] = mapped_column(
+        ForeignKey("joint_activities.id")
+    )
     notification_type: Mapped[str] = mapped_column(String(40), nullable=False)
     post_id: Mapped[Optional[str]] = mapped_column(ForeignKey("posts.id"))
     source_post_id: Mapped[Optional[str]] = mapped_column(ForeignKey("posts.id"))
     data: Mapped[Optional[str]] = mapped_column(Text)
     read_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    handled_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    handling_outcome: Mapped[Optional[str]] = mapped_column(String(40))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
