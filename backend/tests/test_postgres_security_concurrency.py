@@ -73,6 +73,12 @@ def test_security_migration_schema_contract() -> None:
         "world_character_feed_cursors",
         "world_character_blocks",
         "world_character_feed_observations",
+        "social_events",
+        "social_event_evidence",
+        "relationship_states",
+        "relationship_state_changes",
+        "activity_proposals",
+        "graph_projection_outbox",
     }
     assert expected_tables.issubset(set(inspector.get_table_names()))
     assert {
@@ -157,10 +163,47 @@ def test_security_migration_schema_contract() -> None:
             "ix_world_character_feed_observations_character_created",
         }
     )
+    assert {
+        item["name"] for item in inspector.get_check_constraints("social_events")
+    }.issuperset(
+        {
+            "ck_social_events_type",
+            "ck_social_events_result",
+            "ck_social_events_retrieval_status",
+            "ck_social_events_not_self",
+            "ck_social_events_target_required",
+        }
+    )
+    assert {
+        item["name"] for item in inspector.get_indexes("social_events")
+    }.issuperset(
+        {
+            "ix_social_events_world_occurred",
+            "ix_social_events_actor_occurred",
+            "ix_social_events_target_occurred",
+        }
+    )
+    assert {
+        item["name"]
+        for item in inspector.get_unique_constraints("relationship_states")
+    }.issuperset(
+        {
+            "uq_relationship_states_scope",
+            "uq_relationship_states_direction",
+        }
+    )
+    assert {
+        item["name"] for item in inspector.get_indexes("graph_projection_outbox")
+    }.issuperset(
+        {
+            "ix_graph_projection_outbox_pending",
+            "ix_graph_projection_outbox_world_created",
+        }
+    )
     with engine.connect() as connection:
         assert (
             connection.scalar(text("SELECT version_num FROM alembic_version"))
-            == "20260811_0076"
+            == "20260811_0077"
         )
 
 

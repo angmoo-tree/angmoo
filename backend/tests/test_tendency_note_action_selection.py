@@ -924,6 +924,33 @@ def test_compact_stored_lane_result_keeps_read_only_attempt_diagnostics():
     }
 
 
+def test_compact_stored_lane_result_keeps_inbox_decision_evidence():
+    compact = agent_runs._compact_stored_lane_result(
+        {
+            "status": "observed",
+            "outcome": "LLM_DECIDED_NO_ACTION",
+            "decision_source": "llm",
+            "candidate_count": 1,
+            "planner_invoked": True,
+            "provider_call_count": 1,
+            "public_action_count": 0,
+            "handled_notification_count": 1,
+            "prompt": "must not be kept",
+        }
+    )
+
+    assert compact == {
+        "status": "observed",
+        "outcome": "LLM_DECIDED_NO_ACTION",
+        "decision_source": "llm",
+        "candidate_count": 1,
+        "planner_invoked": True,
+        "provider_call_count": 1,
+        "public_action_count": 0,
+        "handled_notification_count": 1,
+    }
+
+
 def test_stored_gateway_result_keeps_sanitize_fallback_reason():
     stored = agent_runs._stored_gateway_result(
         {

@@ -24,9 +24,12 @@ export type ActivityEpisodeRead = {
 export type DailyActivityPlanItemRead = {
   id: string;
   daypart: ActivityDaypart;
-  selected_candidate_id: string;
-  candidate_signature: string;
-  candidate_ordinal: number;
+  selected_candidate_id: string | null;
+  candidate_signature: string | null;
+  candidate_ordinal: number | null;
+  origin_type: "repertoire" | "joint_activity";
+  supersedes_plan_item_id: string | null;
+  is_user_pinned: boolean;
   activity_kind: string;
   title: string;
   activity_seed: string;
@@ -62,6 +65,92 @@ export type DailyActivityPlanRead = {
   current_daypart: ActivityDaypart | null;
   reused: boolean;
   items: DailyActivityPlanItemRead[];
+};
+
+export type SocialEventEvidenceRead = {
+  evidence_kind: string;
+  source_object_type: string;
+  source_object_id: string;
+  root_post_id: string | null;
+  source_post_id: string | null;
+  target_post_id: string | null;
+  source_status: "available" | "excluded";
+  exclusion_reason: string | null;
+};
+
+export type SocialEventRead = {
+  id: string;
+  world_id: string;
+  actor_world_character_id: string;
+  target_world_character_id: string | null;
+  event_type: string;
+  occurred_at: string;
+  retrieval_status: string;
+  evidence: SocialEventEvidenceRead[];
+};
+
+export type RelationshipStateRead = {
+  id: string;
+  actor_world_character_id: string;
+  target_world_character_id: string;
+  familiarity: number;
+  affinity: number;
+  trust: number;
+  tension: number;
+  interaction_count: number;
+  last_event_id: string | null;
+  last_event_at: string | null;
+  version: number;
+};
+
+export type ActivityProposalRead = {
+  id: string;
+  proposer_world_character_id: string;
+  target_world_character_id: string;
+  activity_seed: string;
+  place_key: string | null;
+  target_daypart: ActivityDaypart;
+  date_policy: "exact" | "earliest_available";
+  target_date: string | null;
+  status: string;
+  expires_at: string;
+};
+
+export type JointActivityParticipantRead = {
+  world_character_id: string;
+  role: "proposer" | "acceptor";
+  participation_status: string;
+  linked_daily_activity_plan_item_id: string | null;
+  linked_activity_episode_id: string | null;
+  represented_at: string | null;
+  last_joint_post_id: string | null;
+};
+
+export type JointActivityRead = {
+  id: string;
+  proposal_id: string | null;
+  activity_seed: string;
+  place_key: string | null;
+  scheduled_local_date: string | null;
+  target_daypart: ActivityDaypart | null;
+  timezone_snapshot: string | null;
+  status: string;
+  opening_post_id: string | null;
+  opened_by_world_character_id: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+  participants: JointActivityParticipantRead[];
+};
+
+export type SocialMemoryDiagnosticsRead = {
+  world_id: string;
+  world_character_id: string;
+  recent_events: SocialEventRead[];
+  outgoing_relationships: RelationshipStateRead[];
+  incoming_relationships: RelationshipStateRead[];
+  open_proposals: ActivityProposalRead[];
+  active_joint_activities: JointActivityRead[];
+  graph_outbox_pending_count: number;
 };
 
 type RequestOptions = Omit<RequestInit, "body"> & { body?: unknown };
@@ -138,6 +227,13 @@ export function prepareDailyActivityPlan(
     body: { idempotency_key: idempotencyKey },
   });
 }
+
+export function getSocialMemoryDiagnostics(characterId: string, worldId: string) {
+  return apiRequest<SocialMemoryDiagnosticsRead>(
+    `/characters/${encodeURIComponent(characterId)}/worlds/${encodeURIComponent(worldId)}/social-memory`,
+  );
+}
+
 
 export function updateActivityRuntimeMode(
   characterId: string,

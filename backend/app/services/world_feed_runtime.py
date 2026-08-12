@@ -11,7 +11,11 @@ from pydantic import ValidationError
 from app import models, schemas
 from app.core import unit_of_work
 from app.cruds import agent_runs as agent_run_crud
-from app.services import community as community_service
+from app.services import (
+    activity_proposal_runtime,
+    community as community_service,
+    world_feed_social_apply,
+)
 from app.services.direct_llm import (
     DirectLlmDeferred,
     DirectLlmError,
@@ -162,7 +166,7 @@ def _publish_action(
     *,
     candidate: schemas.WorldFeedCandidateRead,
     decision: schemas.FeedReactionDecision,
-    draft: schemas.FeedCommentDraft | None,
+    draft: schemas.FeedCommentDraft | schemas.JointActivityProposalPreview | None,
 ) -> dict[str, object]:
     action = decision.selected_action
     if action == "like":
@@ -340,6 +344,16 @@ async def run_world_keyword_feed(
             summary=cycle_summary,
         )
 
+    proposal_eligible_indices = frozenset(
+        candidate.candidate_index
+        for candidate in claims.candidates
+        if activity_proposal_runtime.proposal_eligibility(
+            ctx.db,
+            actor_world_character_id=profile.world_character.id,
+            target_post_id=candidate.post_id,
+            now=ctx.run_started_at,
+        ).eligible
+    )
     reaction_provider = provider or DirectFeedReactionProvider()
     planner_started = perf_counter()
     try:
@@ -349,9 +363,10 @@ async def run_world_keyword_feed(
                 profile=profile,
                 candidates=claims.candidates,
                 tracker=tracker,
+                proposal_eligible_indices=proposal_eligible_indices,
             ),
             candidates=claims.candidates,
-            proposal_eligible=True,
+            proposal_eligible_indices=proposal_eligible_indices,
         )
     except DirectLlmDeferred:
         mark_claims_retryable(
@@ -424,61 +439,7 @@ async def run_world_keyword_feed(
 
     selected_index = int(decision.selected_candidate_index or 0)
     candidate = claims.candidates[selected_index]
-    if decision.interaction_intent == "joint_activity_proposal":
-        writer_started = perf_counter()
-        try:
-            await reaction_provider.write_comment(
-                resident_context=ctx,
-                profile=profile,
-                candidate=candidate,
-                decision=decision,
-                tracker=tracker,
-            )
-            reason: schemas.FeedNoActionReason = "proposal_apply_not_ready"
-        except (DirectLlmError, ValidationError, ValueError):
-            reason = "writer_invalid"
-        writer_latency_ms = int((perf_counter() - writer_started) * 1000)
-        cycle_summary = _summary(
-            ctx=ctx,
-            profile=profile,
-            claim=claim,
-            raw_candidate_count=search.raw_candidate_count,
-            filtered_candidate_count=search.filtered_candidate_count,
-            claimed_candidate_count=len(claims.observations),
-            selected_action=None,
-            interaction_intent="joint_activity_proposal",
-            outcome="NO_ACTION",
-            reason_code=reason,
-            query_latency_ms=search.query_latency_ms,
-            planner_latency_ms=planner_latency_ms,
-            writer_latency_ms=writer_latency_ms,
-            tracker=tracker,
-            claim_conflict_count=claims.claim_conflict_count,
-        )
-        finalize_feed_cycle(
-            ctx.db,
-            profile=profile,
-            claim=claim,
-            observations=claims.observations,
-            selected_index=None,
-            selected_action=None,
-            interaction_intent=None,
-            comment_purpose=None,
-            reason_code=reason,
-            public_action_execution_id=None,
-            summary=cycle_summary,
-            now=ctx.run_started_at,
-        )
-        ctx.db.commit()
-        return _safe_result(
-            outcome=reason,
-            tracker=tracker,
-            world_id=profile.world.id,
-            world_character_id=profile.world_character.id,
-            summary=cycle_summary,
-        )
-
-    draft: schemas.FeedCommentDraft | None = None
+    draft: schemas.FeedCommentDraft | schemas.JointActivityProposalPreview | None = None
     writer_latency_ms: int | None = None
     if decision.selected_action == "comment":
         writer_started = perf_counter()
@@ -490,9 +451,21 @@ async def run_world_keyword_feed(
                 decision=decision,
                 tracker=tracker,
             )
-            if not isinstance(writer_result, schemas.FeedCommentDraft):
-                raise FeedReactionValidationError("comment writer returned preview")
+            if decision.interaction_intent == "ordinary_comment":
+                if not isinstance(writer_result, schemas.FeedCommentDraft):
+                    raise FeedReactionValidationError("ordinary writer returned proposal")
+            elif not isinstance(writer_result, schemas.JointActivityProposalPreview):
+                raise FeedReactionValidationError("proposal writer returned comment")
             draft = writer_result
+            if isinstance(draft, schemas.JointActivityProposalPreview):
+                activity_proposal_runtime.validate_preview(
+                    ctx.db,
+                    preview=draft,
+                    world_id=profile.world.id,
+                    proposer_world_character_id=profile.world_character.id,
+                    target_post_id=candidate.post_id,
+                    now=ctx.run_started_at,
+                )
         except DirectLlmDeferred:
             mark_claims_retryable(
                 ctx.db, observations=claims.observations, now=ctx.run_started_at
@@ -682,6 +655,18 @@ async def run_world_keyword_feed(
                     decision=decision,
                     draft=draft,
                 )
+                social_apply = (
+                    world_feed_social_apply.apply_successful_world_feed_action(
+                        ctx.db,
+                        profile=profile,
+                        candidate=candidate,
+                        decision=decision,
+                        draft=draft,
+                        action_result=action_result,
+                        execution=execution,
+                        occurred_at=ctx.run_started_at,
+                    )
+                )
                 action_result.update(
                     {
                         "world_id": profile.world.id,
@@ -690,6 +675,12 @@ async def run_world_keyword_feed(
                         "feed_observation_id": observation.id,
                         "interaction_intent": decision.interaction_intent,
                         "comment_purpose": decision.comment_purpose,
+                        "social_event_id": social_apply.event.id,
+                        "proposal_id": (
+                            social_apply.proposal.id
+                            if social_apply.proposal is not None
+                            else None
+                        ),
                     }
                 )
                 agent_run_crud.mark_public_action_execution_finished(

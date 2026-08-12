@@ -62,9 +62,12 @@ class ActivityEpisodeRead(WorldActivityRuntimeSchema):
 class DailyActivityPlanItemRead(WorldActivityRuntimeSchema):
     id: str
     daypart: ActivityDaypart
-    selected_candidate_id: str
-    candidate_signature: str
-    candidate_ordinal: int
+    selected_candidate_id: str | None = None
+    candidate_signature: str | None = None
+    candidate_ordinal: int | None = None
+    origin_type: Literal["repertoire", "joint_activity"] = "repertoire"
+    supersedes_plan_item_id: str | None = None
+    is_user_pinned: bool = False
     activity_kind: str
     title: str
     activity_seed: str

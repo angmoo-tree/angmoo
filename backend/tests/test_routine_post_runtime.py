@@ -716,6 +716,35 @@ def test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_on
     second_now = _utc(datetime(2026, 8, 10, 11, 5))
     with Session(engine, expire_on_commit=False) as db:
         fixture = _seed(db)
+        friend_character = models.Character(
+            id="character-routine-friend",
+            owner_id=fixture.user.id,
+            name="Sage",
+            handle="sage-routine",
+            one_liner="A practical academy classmate",
+            personality="Supportive and direct.",
+            speech_style="Friendly and concise.",
+            worldview="Friends improve by sharing observations.",
+            topic_preferences="Alchemy and study groups",
+            safety_rules="Avoid unsafe experiments.",
+            persona_summary="Mira's academy classmate.",
+            moderation_status="active",
+        )
+        db.add(friend_character)
+        db.flush()
+        friend_world_character = models.WorldCharacter(
+            id="world-character-friend",
+            world_id=fixture.world.id,
+            character_id=friend_character.id,
+            membership_id=fixture.world_character.membership_id,
+            status="active",
+            character_contract_hash=world_character_contracts.character_contract_hash(
+                friend_character
+            ),
+            world_contract_hash=fixture.world.contract_hash,
+        )
+        db.add(friend_world_character)
+        db.flush()
         provider = FakeRoutineProvider()
         first = asyncio.run(
             routine_post_runtime.run_routine_post_runtime(
@@ -723,6 +752,20 @@ def test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_on
                 provider=provider,
             )
         )
+        db.add(
+            models.SocialEvent(
+                id="event-reply-1",
+                world_id=fixture.world.id,
+                actor_world_character_id=friend_world_character.id,
+                target_world_character_id=fixture.world_character.id,
+                event_type="comment_created",
+                result="succeeded",
+                occurred_at=_utc(datetime(2026, 8, 10, 10, 30)),
+                idempotency_key="fixture:event-reply-1",
+                schema_version="social-event-v1",
+            )
+        )
+        db.commit()
         event_source = StaticInteractionSource(
             [
                 RoutineInteractionInput(
@@ -755,6 +798,13 @@ def test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_on
             )
         )
         consumption = db.scalar(select(models.ActivityEventConsumption))
+        post_events = list(
+            db.scalars(
+                select(models.SocialEvent)
+                .where(models.SocialEvent.event_type == "post_published")
+                .order_by(models.SocialEvent.occurred_at)
+            )
+        )
 
         assert first["routine_outcome"] == "POST_SUCCEEDED"
         assert second["routine_outcome"] == "POST_SUCCEEDED"
@@ -771,6 +821,19 @@ def test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_on
         )
         assert beats[0].source_post_id == posts[0].id
         assert beats[1].previous_successful_beat_id == beats[0].id
+        assert len(post_events) == 2
+        assert all(event.world_id == fixture.world.id for event in post_events)
+        assert all(
+            event.actor_world_character_id == fixture.world_character.id
+            and event.target_world_character_id is None
+            for event in post_events
+        )
+        assert (
+            db.scalar(select(func.count(models.SocialEventEvidence.id))) == 2
+        )
+        assert (
+            db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 2
+        )
         assert beats[1].source_post_id == posts[1].id
         assert beats[1].result_snapshot["used_source_event_ids"] == ["event-reply-1"]
         assert consumption is not None
@@ -795,6 +858,73 @@ def test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_on
         assert no_due["routine_outcome"] == "BEAT_NOT_DUE"
         assert no_due_provider.calls == 0
         assert db.scalar(select(func.count(models.Post.id))) == 2
+
+
+def test_runtime_closes_elapsed_episode_before_activating_current_daypart() -> None:
+    engine = _engine()
+    morning_now = _utc(datetime(2026, 8, 10, 10, 5))
+    afternoon_now = _utc(datetime(2026, 8, 10, 16, 5))
+    with Session(engine, expire_on_commit=False) as db:
+        fixture = _seed(db)
+        provider = FakeRoutineProvider()
+
+        first = asyncio.run(
+            routine_post_runtime.run_routine_post_runtime(
+                _resident_context(
+                    db,
+                    fixture,
+                    run_id='run-morning-before-pause',
+                    now=morning_now,
+                ),
+                provider=provider,
+            )
+        )
+        morning_post_id = first['publish_result']['post_id']
+        morning_item = db.get(models.DailyActivityPlanItem, 'item-morning')
+        assert first['routine_outcome'] == 'POST_SUCCEEDED'
+        assert morning_item is not None and morning_item.status == 'active'
+        assert fixture.morning_episode.status == 'active'
+
+        second = asyncio.run(
+            routine_post_runtime.run_routine_post_runtime(
+                _resident_context(
+                    db,
+                    fixture,
+                    run_id='run-afternoon-after-resume',
+                    now=afternoon_now,
+                ),
+                provider=provider,
+            )
+        )
+
+        db.refresh(fixture.morning_episode)
+        db.refresh(morning_item)
+        dawn_item = db.get(models.DailyActivityPlanItem, 'item-dawn')
+        dawn_episode = db.get(models.ActivityEpisode, 'episode-dawn')
+        afternoon_item = db.get(models.DailyActivityPlanItem, 'item-afternoon')
+        afternoon_episode = db.get(models.ActivityEpisode, 'episode-afternoon')
+
+        assert second['routine_outcome'] == 'POST_SUCCEEDED'
+        assert morning_item.status == 'completed'
+        assert morning_item.terminal_reason_code == 'daypart_completed'
+        assert fixture.morning_episode.status == 'completed'
+        assert fixture.morning_episode.terminal_reason_code == 'daypart_completed'
+        assert fixture.morning_episode.completion_summary == {
+            'successful_beat_count': 1,
+            'successful_post_ids': [morning_post_id],
+        }
+        assert dawn_item is not None and dawn_item.status == 'skipped'
+        assert dawn_item.terminal_reason_code == 'daypart_window_elapsed'
+        assert dawn_episode is not None and dawn_episode.status == 'cancelled'
+        assert afternoon_item is not None and afternoon_item.status == 'active'
+        assert afternoon_episode is not None and afternoon_episode.status == 'active'
+        assert provider.calls == 2
+        assert db.scalar(select(func.count(models.Post.id))) == 2
+        assert db.scalar(
+            select(func.count(models.ActivityBeat.id)).where(
+                models.ActivityBeat.episode_id == 'episode-dawn'
+            )
+        ) == 0
 
 
 def test_transient_provider_failure_retries_same_beat_without_duplicate_post() -> None:
@@ -958,15 +1088,32 @@ def test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode(monkeypatch
         ),
     )
 
+    call_order: list[str] = []
+
+    async def fake_inbox(_context):
+        call_order.append("inbox")
+        return {
+            "engine": "inbox_lane_v1",
+            "status": "completed",
+            "outcome": "INBOX_ACTION_SUCCEEDED",
+            "publish_result": {
+                "public_action_count": 1,
+                "target_post_id": "post-unread-reply",
+            },
+            "llm_usage_summary": {"provider_call_count": 2},
+        }
+
     async def fake_routine(_context):
+        call_order.append("routine")
         return {
             "engine": "routine_resident_v1",
-            "status": "completed",
-            "publish_result": {"public_action_count": 1},
-            "llm_usage_summary": {"provider_call_count": 1},
+            "status": "observed",
+            "publish_result": {"public_action_count": 0},
+            "llm_usage_summary": {"provider_call_count": 0},
         }
 
     async def fake_feed(_context):
+        call_order.append("feed")
         return {
             "engine": "keyword_search_v1",
             "status": "observed",
@@ -977,6 +1124,9 @@ def test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode(monkeypatch
     monkeypatch.setattr(
         langgraph_resident, "run_routine_post_runtime", fake_routine
     )
+    monkeypatch.setattr(
+        langgraph_resident, "_run_combined_inbox_lane", fake_inbox
+    )
     monkeypatch.setattr(langgraph_resident, "run_world_keyword_feed", fake_feed)
 
     result = asyncio.run(langgraph_resident.run_resident_langgraph(context))
@@ -984,8 +1134,122 @@ def test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode(monkeypatch
     assert result["engine"] == "routine_resident_v1+keyword_search_v1"
     assert result["status"] == "completed"
     assert result["publish_result"]["public_action_count"] == 1
-    assert result["llm_usage_summary"]["routine"]["provider_call_count"] == 1
+    assert result["inbox_lane"]["outcome"] == "INBOX_ACTION_SUCCEEDED"
+    assert result["llm_usage_summary"]["inbox"]["provider_call_count"] == 2
+    assert result["llm_usage_summary"]["routine"]["provider_call_count"] == 0
     assert result["llm_usage_summary"]["feed"]["provider_call_count"] == 0
+    assert call_order == ["inbox", "routine", "feed"]
+
+
+def test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run(
+    monkeypatch,
+) -> None:
+    handled: list[tuple[int, str]] = []
+
+    class FakeDb:
+        def commit(self) -> None:
+            return None
+
+        def rollback(self) -> None:
+            return None
+
+    context = SimpleNamespace(
+        db=FakeDb(),
+        character=SimpleNamespace(id="character-inbox-no-action"),
+        run_id="run-inbox-no-action",
+    )
+    monkeypatch.setattr(
+        langgraph_resident, "_current_daypart_context", lambda _ctx: {}
+    )
+    monkeypatch.setattr(
+        langgraph_resident, "_inbox_lane_relationship_memory", lambda _ctx: {}
+    )
+
+    class NoActionGraph:
+        def __init__(self, tracker) -> None:
+            self.tracker = tracker
+
+        async def ainvoke(self, _state, config=None):
+            assert config is not None
+            self.tracker.calls.append(
+                {
+                    "lane": "inbox_action_planner",
+                    "call_type": "generate_content",
+                    "usage": {},
+                }
+            )
+            return {
+                "completed_nodes": [
+                    *langgraph_resident._INBOX_LANE_PRECOMPLETED_NODES,
+                    "InboxObserver",
+                    "InboxActionPlanner",
+                    "BundleComposer",
+                    "ActionBudgetTrimmer",
+                    "WriteTaskComposer",
+                    "CommunityExecutor",
+                ],
+                "inbox_observation": {
+                    "observed_count": 1,
+                    "items": [
+                        {
+                            "notification_id": 71,
+                            "source_post_id": "post-inbox-no-action",
+                        }
+                    ],
+                },
+                "inbox_action_plan": {"raw_selected_action_count": 0},
+                "action_plan": {"inbox_actions": []},
+                "publish_result": {"actions": [], "public_action_count": 0},
+            }
+
+    monkeypatch.setattr(
+        langgraph_resident,
+        "_build_graph",
+        lambda _ctx, tracker: NoActionGraph(tracker),
+    )
+    monkeypatch.setattr(
+        langgraph_resident.langgraph_social_apply,
+        "mark_notification_handled_without_public_action",
+        lambda _db, *, notification_id, handling_outcome, **_kwargs: handled.append(
+            (notification_id, handling_outcome)
+        ),
+    )
+
+    no_action = asyncio.run(
+        langgraph_resident._run_combined_inbox_lane(context)
+    )
+
+    assert no_action["outcome"] == "LLM_DECIDED_NO_ACTION"
+    assert no_action["planner_invoked"] is True
+    assert no_action["decision_source"] == "llm"
+    assert no_action["provider_call_count"] == 1
+    assert no_action["public_action_count"] == 0
+    assert no_action["handled_notification_count"] == 1
+    assert handled == [(71, "LLM_DECIDED_NO_ACTION")]
+
+    class NotRunGraph:
+        async def ainvoke(self, _state, config=None):
+            assert config is not None
+            return {
+                "completed_nodes": list(
+                    langgraph_resident._INBOX_LANE_PRECOMPLETED_NODES
+                ),
+                "publish_result": {"actions": [], "public_action_count": 0},
+            }
+
+    monkeypatch.setattr(
+        langgraph_resident,
+        "_build_graph",
+        lambda _ctx, _tracker: NotRunGraph(),
+    )
+    not_run = asyncio.run(
+        langgraph_resident._run_combined_inbox_lane(context)
+    )
+
+    assert not_run["outcome"] == "INBOX_NOT_RUN"
+    assert not_run["planner_invoked"] is False
+    assert not_run["decision_source"] == "code"
+    assert not_run["handled_notification_count"] == 0
 
 
 def test_scoped_post_pair_and_identity_are_validated_by_service() -> None:

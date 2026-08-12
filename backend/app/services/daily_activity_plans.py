@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.core.ids import uuid7_string
-from app.services import world_character_contracts
+from app.services import joint_activity_runtime, world_character_contracts
 
 
 DAYPARTS = ("dawn", "morning", "afternoon", "evening")
@@ -358,6 +358,15 @@ def prepare_activity_plan(
         world_character_id=scope.world_character.id,
         local_date=target_date,
     )
+    reservations = {
+        daypart: joint_activity_runtime.reservation_for(
+            db,
+            world_character_id=scope.world_character.id,
+            local_date=target_date,
+            daypart=daypart,
+        )
+        for daypart in DAYPARTS
+    }
     selected = {
         daypart: _select_candidate(
             world_character_id=scope.world_character.id,
@@ -368,6 +377,7 @@ def prepare_activity_plan(
             history=history,
         )
         for daypart in DAYPARTS
+        if reservations[daypart] is None
     }
     seed_hash = sha256(
         "|".join(
@@ -400,9 +410,29 @@ def prepare_activity_plan(
     db.add(plan)
     pending_episodes: list[models.ActivityEpisode] = []
     for daypart in DAYPARTS:
-        candidate = selected[daypart]
         start_at, end_at = windows[daypart]
         already_ended = end_at <= current
+        reservation = reservations[daypart]
+        if reservation is not None:
+            if already_ended:
+                db.rollback()
+                raise DailyActivityPlanConflictError(
+                    "joint_activity_reservation_expired"
+                )
+            try:
+                joint_activity_runtime.materialize_reservation_for_new_plan(
+                    db,
+                    plan=plan,
+                    joint=reservation,
+                    scheduled_start_at=start_at,
+                    scheduled_end_at=end_at,
+                    now=current,
+                )
+            except joint_activity_runtime.JointActivityRuntimeError as exc:
+                db.rollback()
+                raise DailyActivityPlanConflictError(exc.reason_code) from exc
+            continue
+        candidate = selected[daypart]
         item = models.DailyActivityPlanItem(
             id=uuid7_string(),
             plan_id=plan.id,
@@ -580,7 +610,8 @@ def _plan_read(
     items = list(
         db.scalars(
             select(models.DailyActivityPlanItem).where(
-                models.DailyActivityPlanItem.plan_id == plan.id
+                models.DailyActivityPlanItem.plan_id == plan.id,
+                models.DailyActivityPlanItem.status != "superseded",
             )
         )
     )
@@ -658,6 +689,9 @@ def _plan_read(
                 id=item.id,
                 daypart=item.daypart,
                 selected_candidate_id=item.selected_candidate_id,
+                origin_type=item.origin_type,
+                supersedes_plan_item_id=item.supersedes_plan_item_id,
+                is_user_pinned=item.is_user_pinned,
                 candidate_signature=item.candidate_signature,
                 candidate_ordinal=item.candidate_ordinal,
                 activity_kind=item.activity_kind,

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.api.v1.deps import get_current_user, get_db
-from app.services import daily_activity_plans
+from app.services import daily_activity_plans, social_memory_read
 
 
 router = APIRouter(prefix="/characters", tags=["world-activity-runtime"])
@@ -21,6 +21,16 @@ def _raise_plan_error(exc: daily_activity_plans.DailyActivityPlanError) -> None:
     else:
         status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
     raise HTTPException(status_code=status_code, detail=exc.reason_code) from exc
+
+def _raise_social_memory_error(exc: social_memory_read.SocialMemoryReadError) -> None:
+    if isinstance(exc, social_memory_read.SocialMemoryNotFoundError):
+        status_code = status.HTTP_404_NOT_FOUND
+    elif isinstance(exc, social_memory_read.SocialMemoryForbiddenError):
+        status_code = status.HTTP_403_FORBIDDEN
+    else:
+        status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+    raise HTTPException(status_code=status_code, detail=exc.reason_code) from exc
+
 
 
 @router.get(
@@ -88,3 +98,26 @@ def update_world_character_activity_runtime_mode(
         )
     except daily_activity_plans.DailyActivityPlanError as exc:
         _raise_plan_error(exc)
+
+
+@router.get(
+    "/{character_id}/worlds/{world_id}/social-memory",
+    response_model=schemas.SocialMemoryDiagnosticsRead,
+)
+def get_world_character_social_memory(
+    character_id: str,
+    world_id: str,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user),
+) -> schemas.SocialMemoryDiagnosticsRead:
+    """Return owner-only P6 evidence, directional relationships, and joint state."""
+
+    try:
+        return social_memory_read.get_owner_diagnostics(
+            db,
+            character_id=character_id,
+            world_id=world_id,
+            user=user,
+        )
+    except social_memory_read.SocialMemoryReadError as exc:
+        _raise_social_memory_error(exc)

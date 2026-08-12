@@ -11,7 +11,12 @@ from sqlalchemy.orm import Session
 from app import models, schemas
 from app.core import unit_of_work
 from app.cruds import agent_runs as agent_run_crud
-from app.services import activity_runtime, agent_activity_policy
+from app.services import (
+    activity_runtime,
+    agent_activity_policy,
+    joint_activity_runtime,
+    social_event_runtime,
+)
 from app.services import community as community_service
 from app.services.direct_llm import (
     DirectLlmDeferred,
@@ -184,6 +189,46 @@ async def run_routine_post_runtime(
         return _safe_result(outcome="AUTONOMY_DISABLED", tracker=tracker)
     if "post" not in set(resident_context.activity_policy.allowed_actions):
         return _safe_result(outcome="POST_NOT_ALLOWED", tracker=tracker)
+    try:
+        joint_activity_runtime.complete_due_joint_activities(
+            db,
+            world_id=world_character.world_id,
+            now=resident_context.run_started_at,
+        )
+    except joint_activity_runtime.JointActivityRuntimeError as exc:
+        db.rollback()
+        logger.exception(
+            "joint_activity_completion_failed run_id=%s reason_code=%s",
+            resident_context.run_id,
+            exc.reason_code,
+        )
+        return _safe_result(
+            outcome=exc.reason_code,
+            tracker=tracker,
+            status="failed",
+            failure_class=type(exc).__name__,
+        )
+
+    try:
+        activity_runtime.close_elapsed_dayparts(
+            db,
+            world_character_id=world_character.id,
+            now=resident_context.run_started_at,
+        )
+    except activity_runtime.ActivityRuntimeError as exc:
+        db.rollback()
+        logger.exception(
+            'routine_elapsed_daypart_transition_failed run_id=%s '
+            'reason_code=%s',
+            resident_context.run_id,
+            str(exc),
+        )
+        return _safe_result(
+            outcome=_runtime_error_code(exc),
+            tracker=tracker,
+            status='failed',
+            failure_class=type(exc).__name__,
+        )
 
     try:
         context = assemble_routine_post_context(
@@ -195,6 +240,21 @@ async def run_routine_post_runtime(
         )
     except RoutineContextUnavailable as exc:
         return _safe_result(outcome=exc.reason_code, tracker=tracker)
+    joint_activity = (
+        db.get(models.JointActivity, context.item.joint_activity_id)
+        if context.item.joint_activity_id is not None
+        else None
+    )
+    if context.item.joint_activity_id is not None and (
+        joint_activity is None or joint_activity.world_id != context.world.id
+    ):
+        return _safe_result(outcome="JOINT_ACTIVITY_INVALID", tracker=tracker)
+    if (
+        joint_activity is not None
+        and joint_activity.opening_post_id is None
+        and joint_activity.status != "ready"
+    ):
+        return _safe_result(outcome="JOINT_ACTIVITY_NOT_READY", tracker=tracker)
 
     idempotency_key = _beat_idempotency_key(
         world_character_id=world_character.id,
@@ -271,6 +331,37 @@ async def run_routine_post_runtime(
             "llm_usage_summary": tracker.summary(),
         }
 
+    opening_claim: joint_activity_runtime.OpeningClaim | None = None
+    if joint_activity is not None and joint_activity.opening_post_id is None:
+        try:
+            opening_claim = joint_activity_runtime.claim_opening(
+                db,
+                joint_activity_id=joint_activity.id,
+                claimant_world_character_id=world_character.id,
+                now=resident_context.run_started_at,
+            )
+        except joint_activity_runtime.JointActivityRuntimeError as exc:
+            db.rollback()
+            refreshed_joint = db.get(models.JointActivity, joint_activity.id)
+            if (
+                exc.reason_code == "joint_activity_already_opened"
+                and refreshed_joint is not None
+                and refreshed_joint.opening_post_id is not None
+            ):
+                joint_activity = refreshed_joint
+            else:
+                _finish_failed_beat(
+                    db,
+                    beat=beat,
+                    claim_run_id=resident_context.run_id,
+                    reason_code=exc.reason_code,
+                    retryable=exc.reason_code == "joint_activity_opening_claimed",
+                )
+                return _safe_result(
+                    outcome=exc.reason_code.upper(),
+                    tracker=tracker,
+                )
+
     try:
         generation = validate_routine_generation(
             await (provider or DirectRoutinePostProvider()).generate(
@@ -283,6 +374,8 @@ async def run_routine_post_runtime(
             beat=beat,
         )
     except DirectLlmDeferred:
+        if opening_claim is not None:
+            joint_activity_runtime.release_opening(db, claim=opening_claim)
         _finish_failed_beat(
             db,
             beat=beat,
@@ -292,6 +385,8 @@ async def run_routine_post_runtime(
         )
         raise
     except Exception as exc:
+        if opening_claim is not None:
+            joint_activity_runtime.release_opening(db, claim=opening_claim)
         reason_code = _failure_code(exc)
         _finish_failed_beat(
             db,
@@ -340,6 +435,8 @@ async def run_routine_post_runtime(
                 scope="routine_activity_beat",
                 action_type="post",
                 brief_hash=result_snapshot["planner_output_hash"],
+                world_id=context.world.id,
+                actor_world_character_id=world_character.id,
             )
             post_read = community_service.create_agent_tool_post(
                 db,
@@ -364,6 +461,50 @@ async def run_routine_post_runtime(
                 "world_id": post.world_id,
                 "author_world_character_id": post.author_world_character_id,
             }
+            post.joint_activity_id = context.item.joint_activity_id
+            post.activity_episode_id = context.episode.id
+            post.activity_beat_id = beat.id
+            event_result = social_event_runtime.record_successful_social_event(
+                db,
+                world_id=context.world.id,
+                actor_world_character_id=world_character.id,
+                target_world_character_id=None,
+                event_type="post_published",
+                occurred_at=resident_context.run_started_at,
+                idempotency_key=sha256(
+                    f"p4|{execution.signature}|post_published".encode("utf-8")
+                ).hexdigest(),
+                evidence=social_event_runtime.EvidenceInput(
+                    evidence_kind="post",
+                    source_object_type="post",
+                    source_object_id=post.id,
+                    root_post_id=post.id,
+                    source_post_id=post.id,
+                    agent_run_id=resident_context.run_id,
+                    public_action_execution_id=execution.id,
+                    source_text=f"{post.title}\n{post.body}",
+                    source_visibility_at_event=post.visibility,
+                    source_author_id_at_event=world_character.id,
+                ),
+            )
+            result_snapshot["social_event_id"] = event_result.event.id
+            if joint_activity is not None:
+                started_event = joint_activity_runtime.apply_joint_post(
+                    db,
+                    joint_activity_id=joint_activity.id,
+                    author_world_character_id=world_character.id,
+                    post=post,
+                    post_event=event_result.event,
+                    opening_claim=opening_claim,
+                    now=resident_context.run_started_at,
+                )
+                result_snapshot["joint_activity_id"] = joint_activity.id
+                result_snapshot["joint_opening_post_id"] = (
+                    post.id if started_event is not None else joint_activity.opening_post_id
+                )
+                result_snapshot["joint_started_event_id"] = (
+                    started_event.id if started_event is not None else None
+                )
             activity_runtime.complete_activity_beat(
                 db,
                 beat_id=beat.id,
@@ -384,11 +525,18 @@ async def run_routine_post_runtime(
                     "beat_id": beat.id,
                     "world_id": context.world.id,
                     "world_character_id": world_character.id,
+                    "social_event_id": event_result.event.id,
+                    "joint_activity_id": (
+                        joint_activity.id if joint_activity is not None else None
+                    ),
+                    "opening_post_id": post.opening_post_id,
                 },
             )
         db.commit()
     except Exception as exc:
         db.rollback()
+        if opening_claim is not None:
+            joint_activity_runtime.release_opening(db, claim=opening_claim)
         _finish_failed_beat(
             db,
             beat=beat,
@@ -396,7 +544,7 @@ async def run_routine_post_runtime(
             reason_code="publish_transaction_failed",
             retryable=isinstance(exc, IntegrityError),
         )
-        logger.warning(
+        logger.exception(
             "routine_publish_failed run_id=%s beat_id=%s failure_class=%s",
             resident_context.run_id,
             beat.id,

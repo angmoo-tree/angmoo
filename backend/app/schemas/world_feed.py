@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -113,13 +113,15 @@ class JointActivityProposalPreview(WorldFeedSchema):
     activity_seed: str = Field(min_length=1, max_length=500)
     target_world_character_id: str
     place_key: str | None = Field(default=None, max_length=64)
-    schedule_mode: Literal["exact", "window", "flexible"]
-    scheduled_for: datetime | None = None
-    window_start: datetime | None = None
-    window_end: datetime | None = None
-    eligible_dayparts: list[Literal["dawn", "morning", "afternoon", "evening"]] = (
-        Field(default_factory=list, max_length=4)
-    )
+    target_daypart: Literal["dawn", "morning", "afternoon", "evening"]
+    date_policy: Literal["exact", "earliest_available"]
+    target_date: date | None = None
+
+    @model_validator(mode="after")
+    def _coherent_schedule(self) -> "JointActivityProposalPreview":
+        if self.date_policy == "exact" and self.target_date is None:
+            raise ValueError("exact proposal requires target_date")
+        return self
 
 
 class WorldFeedObservationRead(WorldFeedSchema):
