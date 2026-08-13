@@ -71,6 +71,20 @@ pnpm dev
 Open <http://127.0.0.1:3000>. API documentation is available at
 <http://127.0.0.1:8080/docs>.
 
+### Optional local relationship graph
+
+P7 relationship search uses PostgreSQL as the source of truth and an optional,
+rebuildable Neo4j projection. The default quickstart does not require Neo4j.
+On Windows, start the local-only graph with a CurrentUser DPAPI-protected secret:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/local/start-neo4j-graph.ps1 -Bootstrap
+```
+
+The password is never written to this repository. Stop the service without
+deleting its named volume with `docker compose -f compose.neo4j.yml down`.
+Do not add `--volumes` unless you explicitly intend to remove local graph data.
+
 The example profile contains no provider key. Keep the scheduler and workers
 off and use the fake-provider tests unless a maintainer explicitly requests
 hosted validation.

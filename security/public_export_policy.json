@@ -1997,6 +1997,130 @@
     {
       "source": "security/public_export_policy.json",
       "destination": "security/public_export_policy.json"
+    },
+    {
+      "source": "backend/app/alembic/versions/20260812_0078_graph_projection_replay_runs.py",
+      "destination": "backend/app/alembic/versions/20260812_0078_graph_projection_replay_runs.py"
+    },
+    {
+      "source": "backend/app/cruds/graph_projection.py",
+      "destination": "backend/app/cruds/graph_projection.py"
+    },
+    {
+      "source": "backend/app/integrations/__init__.py",
+      "destination": "backend/app/integrations/__init__.py"
+    },
+    {
+      "source": "backend/app/integrations/neo4j.py",
+      "destination": "backend/app/integrations/neo4j.py"
+    },
+    {
+      "source": "backend/app/models/graph_projection.py",
+      "destination": "backend/app/models/graph_projection.py"
+    },
+    {
+      "source": "backend/app/repositories/__init__.py",
+      "destination": "backend/app/repositories/__init__.py"
+    },
+    {
+      "source": "backend/app/repositories/relationship_graph.py",
+      "destination": "backend/app/repositories/relationship_graph.py"
+    },
+    {
+      "source": "backend/app/schemas/relationship_graph.py",
+      "destination": "backend/app/schemas/relationship_graph.py"
+    },
+    {
+      "source": "backend/app/services/graph_projection_commands.py",
+      "destination": "backend/app/services/graph_projection_commands.py"
+    },
+    {
+      "source": "backend/app/services/graph_projection_metrics.py",
+      "destination": "backend/app/services/graph_projection_metrics.py"
+    },
+    {
+      "source": "backend/app/services/graph_projection_replay.py",
+      "destination": "backend/app/services/graph_projection_replay.py"
+    },
+    {
+      "source": "backend/app/services/graph_projection_runtime.py",
+      "destination": "backend/app/services/graph_projection_runtime.py"
+    },
+    {
+      "source": "backend/app/services/graph_projection_worker.py",
+      "destination": "backend/app/services/graph_projection_worker.py"
+    },
+    {
+      "source": "backend/app/services/relationship_graph_read.py",
+      "destination": "backend/app/services/relationship_graph_read.py"
+    },
+    {
+      "source": "backend/scripts/replay_relationship_graph.py",
+      "destination": "backend/scripts/replay_relationship_graph.py"
+    },
+    {
+      "source": "backend/scripts/run_graph_projection_worker.py",
+      "destination": "backend/scripts/run_graph_projection_worker.py"
+    },
+    {
+      "source": "backend/tests/p7_graph_support.py",
+      "destination": "backend/tests/p7_graph_support.py"
+    },
+    {
+      "source": "backend/tests/test_graph_projection_commands.py",
+      "destination": "backend/tests/test_graph_projection_commands.py"
+    },
+    {
+      "source": "backend/tests/test_graph_projection_metrics.py",
+      "destination": "backend/tests/test_graph_projection_metrics.py"
+    },
+    {
+      "source": "backend/tests/test_graph_projection_postgres_concurrency.py",
+      "destination": "backend/tests/test_graph_projection_postgres_concurrency.py"
+    },
+    {
+      "source": "backend/tests/test_graph_projection_replay.py",
+      "destination": "backend/tests/test_graph_projection_replay.py"
+    },
+    {
+      "source": "backend/tests/test_graph_projection_worker.py",
+      "destination": "backend/tests/test_graph_projection_worker.py"
+    },
+    {
+      "source": "backend/tests/test_neo4j_relationship_projection_integration.py",
+      "destination": "backend/tests/test_neo4j_relationship_projection_integration.py"
+    },
+    {
+      "source": "backend/tests/test_relationship_graph_api.py",
+      "destination": "backend/tests/test_relationship_graph_api.py"
+    },
+    {
+      "source": "backend/tests/test_relationship_graph_repository.py",
+      "destination": "backend/tests/test_relationship_graph_repository.py"
+    },
+    {
+      "source": "compose.neo4j.yml",
+      "destination": "compose.neo4j.yml"
+    },
+    {
+      "source": "frontend/src/app/characters/[characterId]/worlds/[worldId]/relationship-graph/page.tsx",
+      "destination": "frontend/src/app/characters/[characterId]/worlds/[worldId]/relationship-graph/page.tsx"
+    },
+    {
+      "source": "frontend/src/components/relationship-graph-client.tsx",
+      "destination": "frontend/src/components/relationship-graph-client.tsx"
+    },
+    {
+      "source": "frontend/src/lib/relationship-graph.ts",
+      "destination": "frontend/src/lib/relationship-graph.ts"
+    },
+    {
+      "source": "scripts/local/neo4j-local-secret.ps1",
+      "destination": "scripts/local/neo4j-local-secret.ps1"
+    },
+    {
+      "source": "scripts/local/start-neo4j-graph.ps1",
+      "destination": "scripts/local/start-neo4j-graph.ps1"
     }
   ],
   "ignored_sources": [],

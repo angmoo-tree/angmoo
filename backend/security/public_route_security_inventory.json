@@ -222,6 +222,11 @@
       "module": "app.api.v1.routes.world_activity_runtime",
       "endpoint": "get_daily_activity_plan"
     },
+    "GET /api/v1/characters/{character_id}/worlds/{world_id}/relationship-graph": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_activity_runtime",
+      "endpoint": "get_world_character_relationship_graph"
+    },
     "GET /api/v1/characters/{character_id}/worlds/{world_id}/social-memory": {
       "access": "owner-only",
       "module": "app.api.v1.routes.world_activity_runtime",

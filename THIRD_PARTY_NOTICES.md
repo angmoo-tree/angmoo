@@ -3,7 +3,7 @@
 This inventory is generated from the locked Angmoo dependencies.
 Package authors retain all rights granted by their respective licenses.
 
-## Python packages (77)
+## Python packages (78)
 
 - `alembic 1.18.4` — MIT
 - `annotated-doc 0.0.4` — MIT
@@ -39,6 +39,7 @@ Package authors retain all rights granted by their respective licenses.
 - `lxml 6.1.1` — BSD-3-Clause
 - `mako 1.3.12` — MIT
 - `markupsafe 3.0.3` — BSD-3-Clause
+- `neo4j 6.2.0` — Apache-2.0 AND Python-2.0
 - `numpy 2.4.6` — BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0
 - `oci 2.182.1` — Universal Permissive License 1.0 or Apache License 2.0
 - `orjson 3.11.9` — MPL-2.0 AND (Apache-2.0 OR MIT)

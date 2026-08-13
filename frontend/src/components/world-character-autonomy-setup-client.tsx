@@ -995,11 +995,25 @@ export function WorldCharacterAutonomySetupClient({
                       상대가 나를 보는 관계는 서로 다른 상태이며, 이 화면은 캐릭터 소유자에게만 보입니다.
                     </p>
                   </div>
-                  {socialMemory ? (
-                    <span className="rounded-full bg-surface-container px-3 py-2 text-xs font-bold">
-                      graph 대기 {socialMemory.graph_outbox_pending_count}
-                    </span>
-                  ) : null}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {socialMemory ? (
+                      <span className="rounded-full bg-surface-container px-3 py-2 text-xs font-bold">
+                        graph {socialMemory.relationship_graph_status} {"\u00B7 \uB300\uAE30"} {socialMemory.graph_outbox_pending_count}
+                        {socialMemory.graph_outbox_processing_count > 0
+                          ? ` \u00B7 \uCC98\uB9AC ${socialMemory.graph_outbox_processing_count}`
+                          : ""}
+                        {socialMemory.graph_outbox_dead_count > 0
+                          ? ` \u00B7 dead ${socialMemory.graph_outbox_dead_count}`
+                          : ""}
+                      </span>
+                    ) : null}
+                    <Link
+                      href={`/characters/${characterId}/worlds/${worldId}/relationship-graph`}
+                      className="rounded-full border border-outline-variant px-4 py-2 text-xs font-bold"
+                    >
+                      {"\uAD00\uACC4\uB9DD \uBCF4\uAE30"}
+                    </Link>
+                  </div>
                 </div>
 
                 {!socialMemory && !socialMemoryError ? (

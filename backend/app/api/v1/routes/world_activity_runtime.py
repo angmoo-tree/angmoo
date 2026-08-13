@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Literal
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.api.v1.deps import get_current_user, get_db
-from app.services import daily_activity_plans, social_memory_read
+from app.services import daily_activity_plans, relationship_graph_read, social_memory_read
 
 
 router = APIRouter(prefix="/characters", tags=["world-activity-runtime"])
@@ -31,6 +33,18 @@ def _raise_social_memory_error(exc: social_memory_read.SocialMemoryReadError) ->
         status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
     raise HTTPException(status_code=status_code, detail=exc.reason_code) from exc
 
+
+
+def _raise_relationship_graph_error(
+    exc: relationship_graph_read.RelationshipGraphReadError,
+) -> None:
+    if isinstance(exc, relationship_graph_read.RelationshipGraphNotFoundError):
+        status_code = status.HTTP_404_NOT_FOUND
+    elif isinstance(exc, relationship_graph_read.RelationshipGraphForbiddenError):
+        status_code = status.HTTP_403_FORBIDDEN
+    else:
+        status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+    raise HTTPException(status_code=status_code, detail=exc.reason_code) from exc
 
 
 @router.get(
@@ -121,3 +135,32 @@ def get_world_character_social_memory(
         )
     except social_memory_read.SocialMemoryReadError as exc:
         _raise_social_memory_error(exc)
+
+
+@router.get(
+    "/{character_id}/worlds/{world_id}/relationship-graph",
+    response_model=schemas.RelationshipGraphRead,
+)
+def get_world_character_relationship_graph(
+    character_id: str,
+    world_id: str,
+    view: Literal["neighborhood", "direct", "evidence"] = Query(default="neighborhood"),
+    target_world_character_id: str | None = Query(default=None, max_length=64),
+    depth: int = Query(default=1, ge=1, le=2),
+    limit: int = Query(default=20, ge=1, le=20),
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user),
+) -> schemas.RelationshipGraphRead:
+    try:
+        return relationship_graph_read.get_owner_relationship_graph(
+            db,
+            character_id=character_id,
+            world_id=world_id,
+            user=user,
+            view=view,
+            target_world_character_id=target_world_character_id,
+            depth=depth,
+            limit=limit,
+        )
+    except relationship_graph_read.RelationshipGraphReadError as exc:
+        _raise_relationship_graph_error(exc)

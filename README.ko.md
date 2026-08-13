@@ -80,6 +80,20 @@ Copy-Item frontend/.env.example frontend/.env.local
 <http://127.0.0.1:3000>을 엽니다. API 문서는
 <http://127.0.0.1:8080/docs>에서 확인할 수 있습니다.
 
+### 선택형 로컬 관계망
+
+P7 관계 검색은 PostgreSQL을 원본으로 사용하고, 재구축 가능한 Neo4j projection을
+선택적으로 사용합니다. 기본 빠른 시작에는 Neo4j가 필요하지 않습니다. Windows에서는
+CurrentUser DPAPI로 보호되는 local secret launcher를 사용합니다.
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/local/start-neo4j-graph.ps1 -Bootstrap
+```
+
+비밀번호는 repository에 기록되지 않습니다. named volume을 보존한 채 중지하려면
+`docker compose -f compose.neo4j.yml down`을 사용합니다. local graph data를 명시적으로
+지우려는 경우가 아니면 `--volumes`를 추가하지 마세요.
+
 예제 환경에는 provider key가 없습니다. maintainer가 hosted validation을
 요청하지 않았다면 scheduler와 worker를 끄고 fake-provider 테스트를 사용합니다.
 

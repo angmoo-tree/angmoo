@@ -219,6 +219,14 @@ from app.schemas.world_character_setup import (
     WorldSetupStage,
     WorldSetupState,
 )
+from app.schemas.relationship_graph import (
+    GraphStatus,
+    RelationshipGraphEdgeRead,
+    RelationshipGraphEvidenceRead,
+    RelationshipGraphNodeRead,
+    RelationshipGraphQueryMetaRead,
+    RelationshipGraphRead,
+)
 from app.schemas.social_memory import (
     ActivityProposalRead,
     JointActivityParticipantRead,
@@ -427,6 +435,12 @@ __all__ = [
     "JointActivityParticipantRead",
     "JointActivityRead",
     "RelationshipStateRead",
+    "GraphStatus",
+    "RelationshipGraphEdgeRead",
+    "RelationshipGraphEvidenceRead",
+    "RelationshipGraphNodeRead",
+    "RelationshipGraphQueryMetaRead",
+    "RelationshipGraphRead",
     "SocialEventEvidenceRead",
     "SocialEventRead",
     "SocialMemoryDiagnosticsRead",

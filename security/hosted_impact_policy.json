@@ -53,7 +53,22 @@
         "frontend/src/components/portfolio-review-client.tsx",
         "frontend/src/lib/admin.ts",
         "frontend/src/lib/agents.ts",
-        "frontend/src/lib/portfolio-review.ts"
+        "frontend/src/lib/portfolio-review.ts",
+        "backend/app/api/v1/routes/world_activity_runtime.py",
+        "backend/app/cruds/graph_projection.py",
+        "backend/app/integrations/neo4j.py",
+        "backend/app/repositories/relationship_graph.py",
+        "backend/app/schemas/relationship_graph.py",
+        "backend/app/services/graph_projection_commands.py",
+        "backend/app/services/graph_projection_metrics.py",
+        "backend/app/services/graph_projection_replay.py",
+        "backend/app/services/graph_projection_runtime.py",
+        "backend/app/services/graph_projection_worker.py",
+        "backend/app/services/relationship_graph_read.py",
+        "backend/app/services/social_memory_read.py",
+        "backend/scripts/replay_relationship_graph.py",
+        "backend/scripts/run_graph_projection_worker.py",
+        "compose.neo4j.yml"
       ],
       "prefixes": [
         ".github/workflows/",
