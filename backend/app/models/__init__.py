@@ -79,6 +79,7 @@ from app.models.world_feed import (
     WorldCharacterFeedCursor,
     WorldCharacterFeedObservation,
 )
+from app.models.graph_projection import GraphProjectionReplayRun
 from app.models.social_memory import (
     ActivityProposal,
     GraphProjectionOutbox,
@@ -162,6 +163,7 @@ __all__ = [
     "WorldCharacterFeedObservation",
     "ActivityProposal",
     "GraphProjectionOutbox",
+    "GraphProjectionReplayRun",
     "RelationshipState",
     "RelationshipStateChange",
     "SocialEvent",

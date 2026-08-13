@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app import models, schemas
+from app.cruds import graph_projection as graph_projection_crud
 from app.cruds import social_memory as social_memory_crud
+from app.services import relationship_graph_read
 
 
 class SocialMemoryReadError(Exception):
@@ -199,28 +203,57 @@ def get_owner_diagnostics(
             )
         )
 
+    outgoing_rows = social_memory_crud.list_relationships(
+        db,
+        world_id=world_id,
+        world_character_id=world_character.id,
+        outgoing=True,
+    )
+    incoming_rows = social_memory_crud.list_relationships(
+        db,
+        world_id=world_id,
+        world_character_id=world_character.id,
+        outgoing=False,
+    )
+    counts = graph_projection_crud.world_counts(db, world_id=world_id)
+    oldest_pending = counts.oldest_pending_at
+    if oldest_pending is not None:
+        if oldest_pending.tzinfo is None:
+            oldest_pending = oldest_pending.replace(tzinfo=UTC)
+        oldest_pending_age = max(
+            0.0,
+            (datetime.now(UTC) - oldest_pending).total_seconds(),
+        )
+    else:
+        oldest_pending_age = None
+
+    graph = relationship_graph_read.get_owner_relationship_graph(
+        db,
+        character_id=character_id,
+        world_id=world_id,
+        user=user,
+        view="neighborhood",
+        depth=1,
+        limit=20,
+    )
+    latest_relationship_version_parity: bool | None = None
+    if graph.meta.source == "neo4j" and not graph.meta.truncated:
+        graph_versions = {
+            edge.relationship_state_id: edge.relationship_version
+            for edge in graph.edges
+        }
+        canonical_rows = [*outgoing_rows, *incoming_rows]
+        latest_relationship_version_parity = all(
+            graph_versions.get(row.id) == row.version
+            for row in canonical_rows
+        )
+
     return schemas.SocialMemoryDiagnosticsRead(
         world_id=world_id,
         world_character_id=world_character.id,
         recent_events=event_reads,
-        outgoing_relationships=[
-            relationship_read(row)
-            for row in social_memory_crud.list_relationships(
-                db,
-                world_id=world_id,
-                world_character_id=world_character.id,
-                outgoing=True,
-            )
-        ],
-        incoming_relationships=[
-            relationship_read(row)
-            for row in social_memory_crud.list_relationships(
-                db,
-                world_id=world_id,
-                world_character_id=world_character.id,
-                outgoing=False,
-            )
-        ],
+        outgoing_relationships=[relationship_read(row) for row in outgoing_rows],
+        incoming_relationships=[relationship_read(row) for row in incoming_rows],
         open_proposals=[
             schemas.ActivityProposalRead.model_validate(row)
             for row in social_memory_crud.list_open_proposals(
@@ -230,7 +263,12 @@ def get_owner_diagnostics(
             )
         ],
         active_joint_activities=joint_reads,
-        graph_outbox_pending_count=social_memory_crud.pending_outbox_count(
-            db, world_id=world_id
-        ),
+        graph_outbox_pending_count=counts.pending,
+        graph_outbox_processing_count=counts.processing,
+        graph_outbox_dead_count=counts.dead,
+        graph_oldest_pending_age_seconds=oldest_pending_age,
+        graph_last_succeeded_at=counts.last_succeeded_at,
+        relationship_graph_status=graph.meta.graph_status,
+        latest_relationship_version_parity=latest_relationship_version_parity,
+        graph_replay_active=counts.active_replay,
     )

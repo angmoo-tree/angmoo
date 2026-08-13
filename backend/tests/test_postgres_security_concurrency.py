@@ -203,7 +203,7 @@ def test_security_migration_schema_contract() -> None:
     with engine.connect() as connection:
         assert (
             connection.scalar(text("SELECT version_num FROM alembic_version"))
-            == "20260811_0077"
+            == "20260812_0078"
         )
 
 

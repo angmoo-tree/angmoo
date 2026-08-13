@@ -151,8 +151,21 @@ export type SocialMemoryDiagnosticsRead = {
   open_proposals: ActivityProposalRead[];
   active_joint_activities: JointActivityRead[];
   graph_outbox_pending_count: number;
+  graph_outbox_processing_count: number;
+  graph_outbox_dead_count: number;
+  graph_oldest_pending_age_seconds: number | null;
+  graph_last_succeeded_at: string | null;
+  relationship_graph_status:
+    | "disabled"
+    | "healthy"
+    | "lagging"
+    | "rebuilding"
+    | "unavailable"
+    | "timeout"
+    | "misconfigured";
+  latest_relationship_version_parity: boolean | null;
+  graph_replay_active: boolean;
 };
-
 type RequestOptions = Omit<RequestInit, "body"> & { body?: unknown };
 
 export class DailyActivityPlanApiError extends Error {

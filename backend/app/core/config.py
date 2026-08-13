@@ -126,6 +126,17 @@ class Settings(BaseSettings):
     PUBLIC_BASE_URL: str | None = None
     MEDIA_UPLOAD_MAX_BYTES: int = 5 * 1024 * 1024
     CREDENTIAL_ENCRYPTION_PROVIDER: str = "local"
+    GRAPH_PROJECTION_ENABLED: bool = False
+    NEO4J_URI: str = "bolt://127.0.0.1:7687"
+    NEO4J_DATABASE: str = "neo4j"
+    NEO4J_USERNAME: str = "neo4j"
+    NEO4J_PASSWORD: SecretStr | None = None
+    GRAPH_PROJECTOR_BATCH_SIZE: int = 50
+    GRAPH_PROJECTOR_POLL_INTERVAL_SECONDS: float = 2.0
+    GRAPH_PROJECTOR_WORKER_ID: str = ""
+    GRAPH_PROJECTOR_CONCURRENCY: int = 2
+    GRAPH_PROJECTOR_COMMAND_TIMEOUT_SECONDS: float = 5.0
+    GRAPH_PROJECTOR_SHUTDOWN_DRAIN_SECONDS: float = 20.0
     OCI_KMS_KEY_ID: str | None = None
     OCI_KMS_CRYPTO_ENDPOINT: str | None = None
     OCI_REGION: str | None = None
@@ -648,6 +659,57 @@ class Settings(BaseSettings):
     @property
     def credential_encryption_provider(self) -> str:
         return self.CREDENTIAL_ENCRYPTION_PROVIDER.strip().lower() or "local"
+
+    @property
+    def graph_projection_enabled(self) -> bool:
+        return self.GRAPH_PROJECTION_ENABLED
+
+    @property
+    def neo4j_uri(self) -> str:
+        value = self.NEO4J_URI.strip()
+        if not value.startswith(("bolt://", "bolt+s://", "neo4j://", "neo4j+s://")):
+            raise ValueError("NEO4J_URI must use a Neo4j driver scheme")
+        return value
+
+    @property
+    def neo4j_database(self) -> str:
+        return self.NEO4J_DATABASE.strip() or "neo4j"
+
+    @property
+    def neo4j_username(self) -> str:
+        return self.NEO4J_USERNAME.strip() or "neo4j"
+
+    @property
+    def neo4j_password(self) -> str | None:
+        if self.NEO4J_PASSWORD is None:
+            return None
+        value = self.NEO4J_PASSWORD.get_secret_value()
+        return value if value else None
+
+    @property
+    def graph_projector_batch_size(self) -> int:
+        return max(1, min(self.GRAPH_PROJECTOR_BATCH_SIZE, 100))
+
+    @property
+    def graph_projector_poll_interval_seconds(self) -> float:
+        return max(1.0, self.GRAPH_PROJECTOR_POLL_INTERVAL_SECONDS)
+
+    @property
+    def graph_projector_worker_id(self) -> str | None:
+        value = self.GRAPH_PROJECTOR_WORKER_ID.strip()
+        return value[:128] if value else None
+
+    @property
+    def graph_projector_concurrency(self) -> int:
+        return max(1, min(self.GRAPH_PROJECTOR_CONCURRENCY, 4))
+
+    @property
+    def graph_projector_command_timeout_seconds(self) -> float:
+        return max(0.1, min(self.GRAPH_PROJECTOR_COMMAND_TIMEOUT_SECONDS, 10.0))
+
+    @property
+    def graph_projector_shutdown_drain_seconds(self) -> float:
+        return max(0.1, min(self.GRAPH_PROJECTOR_SHUTDOWN_DRAIN_SECONDS, 30.0))
 
     @property
     def oci_kms_key_id(self) -> str | None:

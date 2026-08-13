@@ -94,3 +94,18 @@ class SocialMemoryDiagnosticsRead(SocialMemorySchema):
     open_proposals: list[ActivityProposalRead] = Field(default_factory=list)
     active_joint_activities: list[JointActivityRead] = Field(default_factory=list)
     graph_outbox_pending_count: int = 0
+    graph_outbox_processing_count: int = 0
+    graph_outbox_dead_count: int = 0
+    graph_oldest_pending_age_seconds: float | None = None
+    graph_last_succeeded_at: datetime | None = None
+    relationship_graph_status: Literal[
+        "disabled",
+        "healthy",
+        "lagging",
+        "rebuilding",
+        "unavailable",
+        "timeout",
+        "misconfigured",
+    ] = "disabled"
+    latest_relationship_version_parity: bool | None = None
+    graph_replay_active: bool = False
