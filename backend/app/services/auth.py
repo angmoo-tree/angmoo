@@ -1075,7 +1075,11 @@ def _set_policy_agreements(user: models.User, agreed_at: datetime) -> None:
 
 
 def _pending_signup_key() -> bytes:
-    return hashlib.sha256(settings.app_secret.encode("utf-8")).digest()
+    return hmac.new(
+        settings.app_secret.encode("utf-8"),
+        b"angmoo-google-signup-pending-key-v1",
+        hashlib.sha256,
+    ).digest()
 
 
 def _b64url_encode(value: bytes) -> str:

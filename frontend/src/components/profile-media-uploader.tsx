@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, ImageIcon, Loader2, Upload, X } from "lucide-react";
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 
 import { ProfileAvatar } from "@/components/profile-avatar";
@@ -41,10 +41,10 @@ export function ProfileMediaUploader({
 }) {
   const avatarInputId = useId();
   const bannerInputId = useId();
+  const draftBitmapRef = useRef<ImageBitmap | null>(null);
   const [draft, setDraft] = useState<{
     kind: MediaKind;
-    file: File;
-    url: string;
+    bitmap: ImageBitmap;
     naturalSize: { width: number; height: number };
   } | null>(null);
   const [crop, setCrop] = useState<CropState>({ scale: 1, offsetX: 0, offsetY: 0 });
@@ -55,25 +55,12 @@ export function ProfileMediaUploader({
 
   useEffect(() => {
     return () => {
-      if (draft?.url) URL.revokeObjectURL(draft.url);
+      draftBitmapRef.current?.close();
+      draftBitmapRef.current = null;
     };
-  }, [draft?.url]);
+  }, []);
 
   const spec = draft ? SPECS[draft.kind] : SPECS.avatar;
-  const previewStyle = useMemo(() => {
-    if (!draft) return null;
-    const baseScale = Math.max(
-      spec.width / draft.naturalSize.width,
-      spec.height / draft.naturalSize.height,
-    );
-    return {
-      width: `${((draft.naturalSize.width * baseScale * crop.scale) / spec.width) * 100}%`,
-      height: `${((draft.naturalSize.height * baseScale * crop.scale) / spec.height) * 100}%`,
-      left: `${50 + crop.offsetX}%`,
-      top: `${50 + crop.offsetY}%`,
-      transform: "translate(-50%, -50%)",
-    };
-  }, [crop.offsetX, crop.offsetY, crop.scale, draft, spec.height, spec.width]);
 
   async function handleFileChange(kind: MediaKind, event: ChangeEvent<HTMLInputElement>) {
     const nextFile = event.target.files?.[0] ?? null;
@@ -89,25 +76,26 @@ export function ProfileMediaUploader({
       return;
     }
 
-    const objectUrl = URL.createObjectURL(nextFile);
+    let bitmap: ImageBitmap | null = null;
     try {
-      const image = await loadImage(objectUrl);
+      bitmap = await createImageBitmap(nextFile);
       closeCropper();
+      draftBitmapRef.current = bitmap;
       setDraft({
         kind,
-        file: nextFile,
-        url: objectUrl,
-        naturalSize: { width: image.naturalWidth, height: image.naturalHeight },
+        bitmap,
+        naturalSize: { width: bitmap.width, height: bitmap.height },
       });
       setCrop({ scale: 1, offsetX: 0, offsetY: 0 });
     } catch {
-      URL.revokeObjectURL(objectUrl);
+      bitmap?.close();
       setError("이미지를 열 수 없습니다.");
     }
   }
 
   function closeCropper() {
-    if (draft?.url) URL.revokeObjectURL(draft.url);
+    draftBitmapRef.current?.close();
+    draftBitmapRef.current = null;
     setDraft(null);
     setCrop({ scale: 1, offsetX: 0, offsetY: 0 });
   }
@@ -117,7 +105,7 @@ export function ProfileMediaUploader({
     setUploading(true);
     setError(null);
     try {
-      const blob = await cropToBlob(draft.url, draft.naturalSize, spec, crop);
+      const blob = await cropToBlob(draft.bitmap, draft.naturalSize, spec, crop);
       const dataBase64 = await blobToBase64(blob);
       await onUpload({
         media_type: draft.kind,
@@ -204,16 +192,12 @@ export function ProfileMediaUploader({
                 draft.kind === "avatar" ? "aspect-square w-full max-w-[360px]" : "aspect-[3/1] w-full"
               }`}
             >
-              {previewStyle ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={draft.url}
-                  alt=""
-                  className="absolute max-w-none select-none"
-                  style={previewStyle}
-                  draggable={false}
-                />
-              ) : null}
+              <CropPreview
+                bitmap={draft.bitmap}
+                naturalSize={draft.naturalSize}
+                spec={spec}
+                crop={crop}
+              />
             </div>
 
             <div className="mt-5 grid gap-4">
@@ -358,39 +342,45 @@ function Slider({
   );
 }
 
-async function loadImage(src: string) {
-  const image = new Image();
-  image.src = src;
-  await image.decode();
-  return image;
+function CropPreview({
+  bitmap,
+  naturalSize,
+  spec,
+  crop,
+}: {
+  bitmap: ImageBitmap;
+  naturalSize: { width: number; height: number };
+  spec: { width: number; height: number };
+  crop: CropState;
+}) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    canvas.width = spec.width;
+    canvas.height = spec.height;
+    const context = canvas.getContext("2d");
+    if (!context) return;
+    drawCroppedImage(context, bitmap, naturalSize, spec, crop);
+  }, [bitmap, crop, naturalSize, spec]);
+
+  return <canvas ref={canvasRef} aria-hidden="true" className="h-full w-full" />;
 }
 
 async function cropToBlob(
-  src: string,
+  bitmap: ImageBitmap,
   naturalSize: { width: number; height: number },
   spec: { width: number; height: number },
   crop: CropState,
 ) {
-  const image = await loadImage(src);
   const canvas = document.createElement("canvas");
   canvas.width = spec.width;
   canvas.height = spec.height;
   const context = canvas.getContext("2d");
   if (!context) throw new Error("이미지를 처리하지 못했습니다.");
 
-  const baseScale = Math.max(spec.width / naturalSize.width, spec.height / naturalSize.height);
-  const drawWidth = naturalSize.width * baseScale * crop.scale;
-  const drawHeight = naturalSize.height * baseScale * crop.scale;
-  const centerX = spec.width * (0.5 + crop.offsetX / 100);
-  const centerY = spec.height * (0.5 + crop.offsetY / 100);
-
-  context.drawImage(
-    image,
-    centerX - drawWidth / 2,
-    centerY - drawHeight / 2,
-    drawWidth,
-    drawHeight,
-  );
+  drawCroppedImage(context, bitmap, naturalSize, spec, crop);
 
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
@@ -402,6 +392,29 @@ async function cropToBlob(
       0.8,
     );
   });
+}
+
+function drawCroppedImage(
+  context: CanvasRenderingContext2D,
+  bitmap: ImageBitmap,
+  naturalSize: { width: number; height: number },
+  spec: { width: number; height: number },
+  crop: CropState,
+) {
+  context.clearRect(0, 0, spec.width, spec.height);
+  const baseScale = Math.max(spec.width / naturalSize.width, spec.height / naturalSize.height);
+  const drawWidth = naturalSize.width * baseScale * crop.scale;
+  const drawHeight = naturalSize.height * baseScale * crop.scale;
+  const centerX = spec.width * (0.5 + crop.offsetX / 100);
+  const centerY = spec.height * (0.5 + crop.offsetY / 100);
+
+  context.drawImage(
+    bitmap,
+    centerX - drawWidth / 2,
+    centerY - drawHeight / 2,
+    drawWidth,
+    drawHeight,
+  );
 }
 
 function blobToBase64(blob: Blob) {
