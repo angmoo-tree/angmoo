@@ -12,6 +12,9 @@ Describe the smallest user-visible or contract-visible change.
 - [ ] Frontend lint/build when applicable
 - [ ] No production credential or user data used
 - [ ] Public exporter/security checks when the candidate tree changes
+- [ ] Every commit includes a DCO 1.1 `Signed-off-by` trailer (`git commit -s`)
+- [ ] I understand that accepted contributions are provided under
+      `GPL-3.0-only` unless explicitly stated otherwise
 
 ## Hosted validation
 

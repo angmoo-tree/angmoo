@@ -59,4 +59,9 @@ Intentional breaking changes require prior maintainer approval, an explicit
 migration when applicable, and release notes.
 
 By intentionally submitting a contribution for inclusion, you agree that it
-is provided under Apache License 2.0 unless you explicitly state otherwise.
+is provided under GPL-3.0-only unless you explicitly state otherwise.
+
+Every contribution must certify the Developer Certificate of Origin 1.1 with
+a `Signed-off-by` trailer. The usual command is `git commit -s`. The DCO
+confirms that you have the right to submit the contribution; it does not
+replace the project license.

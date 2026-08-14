@@ -318,6 +318,10 @@ jobs:
           if [[ ! -f "$notice" ]]; then
             notice=../THIRD_PARTY_NOTICES.md
           fi
+          uv run python ../scripts/check_project_license.py \
+            --repo-root .. --policy ../security/license_policy.json
           uv run python ../scripts/check_dependency_licenses.py \
-            --repo-root .. --check-notice "$notice"
+            --repo-root .. \
+            --policy ../security/license_policy.json \
+            --check-notice "$notice"
         working-directory: backend

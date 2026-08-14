@@ -14,7 +14,6 @@ REQUIRED = {
     "README.md",
     "README.ko.md",
     "LICENSE",
-    "NOTICE",
     "BRANDING.md",
     "THIRD_PARTY_NOTICES.md",
     "CONTRIBUTING.md",
@@ -33,6 +32,11 @@ REQUIRED_MARKERS = {
         "## Quickstart",
         "## Known limitations",
         "It is not yet a long-term memory system",
+        "GPL-3.0-only",
+        "[LICENSE](LICENSE)",
+        "[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)",
+        "user-created or imported World Package",
+        "local runtime data",
     ),
     "README.ko.md": (
         "[English](README.md) | 한국어",
@@ -42,12 +46,21 @@ REQUIRED_MARKERS = {
         "## 알려진 한계",
         "장기 메모리 시스템은 아직 아닙니다",
         "[한국어 기여 가이드](CONTRIBUTING.ko.md)",
+        "GPL-3.0-only",
+        "[LICENSE](LICENSE)",
+        "[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)",
+        "World Package",
+        "Runtime 데이터",
     ),
     "CONTRIBUTING.md": (
         "Issues and pull requests may be written in English or Korean",
         "`requires-hosted-validation`",
         "`hosted-fast`",
         "This classification does not start",
+        "GPL-3.0-only",
+        "Developer Certificate of Origin 1.1",
+        "git commit -s",
+        "Signed-off-by",
     ),
     "CONTRIBUTING.ko.md": (
         "한국어와 영어 모두 사용할 수 있습니다",
@@ -58,10 +71,27 @@ REQUIRED_MARKERS = {
         "`requires-hosted-validation`",
         "`hosted-fast`",
         "private workflow",
+        "GPL-3.0-only",
+        "Developer Certificate of Origin 1.1",
+        "git commit -s",
+        "Signed-off-by",
     ),
     ".github/PULL_REQUEST_TEMPLATE.md": (
         "Hosted impact classification",
         "Public pull requests never receive private source or credentials",
+        "GPL-3.0-only",
+        "DCO 1.1",
+        "Signed-off-by",
+    ),
+    "BRANDING.md": (
+        "GPL-3.0-only",
+        "not the Angmoo name, logo",
+    ),
+    "THIRD_PARTY_NOTICES.md": (
+        "## Reviewed conditional dependencies",
+        "## Infrastructure and build tooling",
+        "## Bundled assets and content",
+        "## License scope boundary",
     ),
     "SECURITY.md": (
         "GitHub Private Vulnerability Reporting",
@@ -70,6 +100,16 @@ REQUIRED_MARKERS = {
     ),
 }
 LINK = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
+EXCLUDED_DIRECTORIES = {
+    ".git",
+    ".mypy_cache",
+    ".next",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".venv",
+    "__pycache__",
+    "node_modules",
+}
 
 
 def check(root: Path) -> list[str]:
@@ -91,6 +131,11 @@ def check(root: Path) -> list[str]:
         )
     for document in sorted(root.rglob("*.md")):
         if not document.is_file():
+            continue
+        if any(
+            part in EXCLUDED_DIRECTORIES
+            for part in document.relative_to(root).parts
+        ):
             continue
         text = document.read_text(encoding="utf-8")
         for raw_target in LINK.findall(text):
