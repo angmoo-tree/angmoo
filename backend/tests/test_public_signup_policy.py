@@ -75,9 +75,9 @@ def test_public_environment_defaults_to_google_only_signup() -> None:
 
 def test_public_quickstart_uses_explicit_loopback_session_bootstrap() -> None:
     repo_root = Path(__file__).parents[2]
-    workflow = (repo_root / ".github" / "workflows" / "ci.yml").read_text(
-        encoding="utf-8"
-    )
+    workflow = (
+        repo_root / ".github" / "workflows" / "local-smoke.yml"
+    ).read_text(encoding="utf-8")
 
     assert "--bootstrap-local-session" in workflow
 

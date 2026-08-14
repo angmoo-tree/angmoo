@@ -1,0 +1,185 @@
+{
+  "entries": [
+    {
+      "markers": [
+        "hosted-extension-type"
+      ],
+      "owner_phases": [
+        "L0-L4 hosted extension compatibility audit"
+      ],
+      "path": "backend/app/main.py"
+    },
+    {
+      "markers": [
+        "hosted-extension-type"
+      ],
+      "owner_phases": [
+        "L0-L4 hosted extension compatibility audit"
+      ],
+      "path": "backend/app/public_main.py"
+    },
+    {
+      "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "backend/app/services/pollinations_image.py"
+    },
+    {
+      "markers": [
+        "privacy-contact",
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 local privacy contact UX",
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "backend/security/secret_scan_allowlist.json"
+    },
+    {
+      "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "backend/tests/test_browser_session_security.py"
+    },
+    {
+      "markers": [
+        "hosted-extension-type"
+      ],
+      "owner_phases": [
+        "L0-L4 hosted extension compatibility audit"
+      ],
+      "path": "backend/tests/test_m4_public_runtime.py"
+    },
+    {
+      "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "backend/tests/test_post_image_generation.py"
+    },
+    {
+      "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "backend/tests/test_public_signup_policy.py"
+    },
+    {
+      "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "backend/tests/test_replicate_image.py"
+    },
+    {
+      "markers": [
+        "privacy-contact",
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 local privacy contact UX",
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "backend/tests/test_security_secret_scan.py"
+    },
+    {
+      "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "backend/tests/test_startup_security.py"
+    },
+    {
+      "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "docs/agent_guide.md"
+    },
+    {
+      "markers": [
+        "private-admin-flag"
+      ],
+      "owner_phases": [
+        "L0-L2 runtime feature-flag reference audit"
+      ],
+      "path": "frontend/.env.example"
+    },
+    {
+      "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "frontend/public/openapi.json"
+    },
+    {
+      "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "frontend/src/app/angmoo-api/page.tsx"
+    },
+    {
+      "markers": [
+        "privacy-contact",
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 local privacy contact UX",
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "frontend/src/components/agent-detail-client.tsx"
+    },
+    {
+      "markers": [
+        "privacy-contact",
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 local privacy contact UX",
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "frontend/src/components/settings-client.tsx"
+    },
+    {
+      "markers": [
+        "private-admin-flag"
+      ],
+      "owner_phases": [
+        "L0-L2 runtime feature-flag reference audit"
+      ],
+      "path": "frontend/src/lib/features.ts"
+    },
+    {
+      "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "frontend/src/lib/seo.ts"
+    }
+  ],
+  "purpose": "Strings intentionally deferred from T2 without bulk replacement",
+  "schema_version": 1
+}

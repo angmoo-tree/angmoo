@@ -1,29 +1,35 @@
 name: Feature proposal
-description: Propose a focused public v0.1 improvement
+description: Propose a focused Angmoo Local OSS improvement
 title: "[Proposal] "
 labels:
   - enhancement
 body:
   - type: markdown
     attributes:
-      value: Proposals may be written in English or Korean. 한국어와 영어 모두 사용할 수 있습니다.
+      value: Proposals may be written in English or Korean. Features and structural changes should agree scope before implementation.
   - type: textarea
     id: problem
     attributes:
       label: Problem
-      description: What contributor or user problem should be solved?
+      description: What local user or contributor problem should be solved?
     validations:
       required: true
   - type: textarea
     id: scope
     attributes:
-      label: Proposed public scope
-      description: Include affected contracts and what remains out of scope.
+      label: Proposed Local OSS scope
+      description: Include Device, Studio, World, Package, and affected contracts. State what remains out of scope.
     validations:
       required: true
-  - type: checkboxes
-    id: hosted
+  - type: textarea
+    id: data
     attributes:
-      label: Hosted validation
-      options:
-        - label: This may affect a hosted-validation boundary described in CONTRIBUTING.md.
+      label: Schema, provider, secret, and data impact
+      description: Describe migrations, provider calls, BYOK, backups, rollback, and synthetic validation.
+    validations:
+      required: true
+  - type: textarea
+    id: legacy
+    attributes:
+      label: Legacy path and removal condition
+      description: List compatibility paths that remain and their removal condition.

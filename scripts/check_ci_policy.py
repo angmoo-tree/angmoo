@@ -1,8 +1,9 @@
-"""Reject unsafe or unpinned GitHub Actions workflow configuration."""
+"""Validate Angmoo's single-repository Local OSS workflow policy."""
 
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 from pathlib import Path
 import re
 import sys
@@ -10,9 +11,30 @@ import sys
 import yaml
 
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+WORKFLOW_DIR = Path(".github/workflows")
+EXPECTED_WORKFLOWS = {
+    "ci.yml",
+    "local-smoke.yml",
+    "security.yml",
+    "windows-smoke.yml",
+}
+REQUIRED_JOBS = {
+    "backend",
+    "frontend",
+    "migration-postgres",
+    "local-core-smoke",
+    "local-autonomy-smoke",
+    "local-full-graph",
+    "oss-boundary",
+    "dependency-license",
+    "dco",
+}
+ADVISORY_JOBS = {"windows-local-smoke", "architecture-boundary"}
+REQUIRED_EVENTS = {"push", "pull_request", "workflow_dispatch"}
 ACTION = re.compile(r"(?m)^\s*-\s+uses:\s+([^\s#]+)")
 FULL_SHA = re.compile(r"^[^@]+@[0-9a-f]{40}$")
-FORBIDDEN = {
+FORBIDDEN_TEXT = {
     "pull_request_target": "pull_request_target event",
     "repository_dispatch": "repository_dispatch event",
     "self-hosted": "self-hosted runner",
@@ -22,15 +44,6 @@ FORBIDDEN = {
     "actions/upload-artifact@": "raw artifact upload",
     "permissions: write": "write permission",
 }
-REQUIRED_JOBS = {
-    "backend-contract",
-    "hosted-impact",
-    "frontend",
-    "quickstart",
-    "security-export",
-    "dependency-audit",
-}
-REQUIRED_EVENTS = {"push", "pull_request", "workflow_dispatch"}
 
 
 class _UniqueKeyLoader(yaml.SafeLoader):
@@ -62,27 +75,26 @@ _UniqueKeyLoader.add_constructor(
 )
 
 
+def _events(document: dict[object, object]) -> object:
+    if "on" in document:
+        return document["on"]
+    return document.get(True)
+
+
 def _check_triggers(document: object) -> list[str]:
     if not isinstance(document, dict):
         return ["workflow root must be a mapping"]
-    trigger_key: object | None = None
-    if "on" in document:
-        trigger_key = "on"
-    elif True in document:
-        # PyYAML's YAML 1.1 resolver treats the plain key `on` as boolean true.
-        trigger_key = True
-    if trigger_key is None or not isinstance(document[trigger_key], dict):
+    events = _events(document)
+    if not isinstance(events, dict):
         return ["workflow events must be a mapping"]
-
-    events = document[trigger_key]
-    event_names = set(events)
+    names = set(events)
     errors = [
         f"required workflow event is missing: {event}"
-        for event in sorted(REQUIRED_EVENTS - event_names)
+        for event in sorted(REQUIRED_EVENTS - names)
     ]
     errors.extend(
         f"unexpected workflow event: {event}"
-        for event in sorted(event_names - REQUIRED_EVENTS)
+        for event in sorted(names - REQUIRED_EVENTS)
     )
     push = events.get("push")
     if not isinstance(push, dict) or push.get("branches") != ["main"]:
@@ -90,46 +102,82 @@ def _check_triggers(document: object) -> list[str]:
     return errors
 
 
-def check(workflow: Path) -> list[str]:
-    text = workflow.read_text(encoding="utf-8")
+def _service_images(jobs: dict[object, object]) -> list[tuple[str, str]]:
+    images: list[tuple[str, str]] = []
+    for job_name, value in jobs.items():
+        if not isinstance(value, dict):
+            continue
+        services = value.get("services", {})
+        if not isinstance(services, dict):
+            continue
+        for service_name, service in services.items():
+            if isinstance(service, dict) and isinstance(service.get("image"), str):
+                images.append((f"{job_name}.{service_name}", service["image"]))
+    return images
+
+
+def check_workflow(path: Path) -> tuple[list[str], list[str]]:
+    text = path.read_text(encoding="utf-8")
     errors: list[str] = []
-    document: object | None = None
     try:
         document = yaml.load(text, Loader=_UniqueKeyLoader)
     except yaml.YAMLError as exc:
-        errors.append(f"workflow YAML is invalid: {exc}")
-    if document is not None:
-        errors.extend(_check_triggers(document))
+        return [f"workflow YAML is invalid: {exc}"], []
+    errors.extend(_check_triggers(document))
     errors.extend(
-        [
         f"forbidden workflow feature: {label}"
-        for marker, label in FORBIDDEN.items()
+        for marker, label in FORBIDDEN_TEXT.items()
         if marker in text
-        ]
     )
-    actions = ACTION.findall(text)
-    errors.extend(
-        f"action is not pinned to a full commit SHA: {action}"
-        for action in actions
-        if not action.startswith("./") and not FULL_SHA.fullmatch(action)
-    )
-    if "permissions:\n  contents: read\n" not in text:
-        errors.append("top-level permissions must be contents: read")
-    missing_jobs = sorted(
-        job for job in REQUIRED_JOBS if not re.search(rf"(?m)^  {re.escape(job)}:\s*$", text)
-    )
-    errors.extend(f"required job is missing: {job}" for job in missing_jobs)
+    for action in ACTION.findall(text):
+        if not action.startswith("./") and not FULL_SHA.fullmatch(action):
+            errors.append(f"action is not pinned to a full commit SHA: {action}")
+    if not isinstance(document, dict):
+        return errors, []
+    if document.get("permissions") != {"contents": "read"}:
+        errors.append("top-level permissions must be exactly contents: read")
+    jobs = document.get("jobs")
+    if not isinstance(jobs, dict):
+        errors.append("workflow jobs must be a mapping")
+        return errors, []
+    for job_name, value in jobs.items():
+        if not isinstance(value, dict):
+            errors.append(f"job must be a mapping: {job_name}")
+            continue
+        if "timeout-minutes" not in value:
+            errors.append(f"job timeout is missing: {job_name}")
+        if job_name in REQUIRED_JOBS and "if" in value:
+            errors.append(f"required job must not be conditionally skipped: {job_name}")
+    for label, image in _service_images(jobs):
+        if "@sha256:" not in image:
+            errors.append(f"service image is not pinned by digest: {label}={image}")
+    return errors, [str(name) for name in jobs]
+
+
+def check_repo(root: Path = REPO_ROOT) -> list[str]:
+    workflow_root = root / WORKFLOW_DIR
+    actual = {path.name for path in workflow_root.glob("*.yml")}
+    errors = [
+        f"workflow set mismatch: expected={sorted(EXPECTED_WORKFLOWS)} actual={sorted(actual)}"
+    ] if actual != EXPECTED_WORKFLOWS else []
+    all_jobs: list[str] = []
+    for name in sorted(actual):
+        workflow_errors, jobs = check_workflow(workflow_root / name)
+        errors.extend(f"{name}: {error}" for error in workflow_errors)
+        all_jobs.extend(jobs)
+    counts = Counter(all_jobs)
+    for job in sorted(REQUIRED_JOBS | ADVISORY_JOBS):
+        if counts[job] != 1:
+            errors.append(f"job must appear exactly once: {job} count={counts[job]}")
     return errors
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--workflow", type=Path, default=Path(".github/workflows/ci.yml")
-    )
+    parser.add_argument("--repo-root", type=Path, default=REPO_ROOT)
     args = parser.parse_args()
     try:
-        errors = check(args.workflow)
+        errors = check_repo(args.repo_root.resolve())
     except OSError as exc:
         print(f"CI policy check failed: {exc}", file=sys.stderr)
         return 1
@@ -137,7 +185,7 @@ def main() -> int:
         print(error, file=sys.stderr)
     if errors:
         return 1
-    print("CI policy check passed")
+    print("Local OSS CI policy check passed: required=9 advisory=2 workflows=4")
     return 0
 
 

@@ -260,7 +260,7 @@
     {
       "name": "Neo4j Community Edition",
       "source_path": "compose.neo4j.yml",
-      "reference": "neo4j:2026.06.0",
+      "reference": "neo4j@sha256:42fd5b9ead4dd4211f6f91bd831c358e4e2117367d04633fbf88682ca4792b30",
       "license_expression": "GPL-3.0-only",
       "distribution_boundary": "Optional independent graph database service, not embedded application code.",
       "source": "https://neo4j.com/licensing/"
@@ -270,30 +270,37 @@
     {
       "name": "actions/checkout",
       "source_path": ".github/workflows/ci.yml",
-      "reference": "actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd",
+      "reference": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
       "license_expression": "MIT",
-      "source": "https://github.com/actions/checkout/blob/de0fac2e4500dabe0009e67214ff5f5447ce83dd/LICENSE"
+      "source": "https://github.com/actions/checkout/blob/3d3c42e5aac5ba805825da76410c181273ba90b1/LICENSE"
     },
     {
       "name": "astral-sh/setup-uv",
       "source_path": ".github/workflows/ci.yml",
-      "reference": "astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b",
+      "reference": "astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9",
       "license_expression": "MIT",
-      "source": "https://github.com/astral-sh/setup-uv/blob/08807647e7069bb48b6ef5acd8ec9567f424441b/LICENSE"
+      "source": "https://github.com/astral-sh/setup-uv/blob/c771a70e6277c0a99b617c7a806ffedaca235ff9/LICENSE"
     },
     {
       "name": "actions/setup-node",
       "source_path": ".github/workflows/ci.yml",
-      "reference": "actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e",
+      "reference": "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
       "license_expression": "MIT",
-      "source": "https://github.com/actions/setup-node/blob/48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e/LICENSE"
+      "source": "https://github.com/actions/setup-node/blob/820762786026740c76f36085b0efc47a31fe5020/LICENSE"
     },
     {
       "name": "pnpm/action-setup",
       "source_path": ".github/workflows/ci.yml",
-      "reference": "pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093",
+      "reference": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
       "license_expression": "MIT",
-      "source": "https://github.com/pnpm/action-setup/blob/0e279bb959325dab635dd2c09392533439d90093/LICENSE"
+      "source": "https://github.com/pnpm/action-setup/blob/0977fd99725f1db4007ccb2928dbb4e90d06cc86/LICENSE"
+    },
+    {
+      "name": "actions/dependency-review-action",
+      "source_path": ".github/workflows/security.yml",
+      "reference": "actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294",
+      "license_expression": "MIT",
+      "source": "https://github.com/actions/dependency-review-action/blob/a1d282b36b6f3519aa1f3fc636f609c47dddb294/LICENSE"
     }
   ],
   "assets": [

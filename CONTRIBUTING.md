@@ -1,67 +1,94 @@
 # Contributing to Angmoo
 
-Thank you for helping improve the Angmoo public experiment.
-
-Issues and pull requests may be written in English or Korean. A Korean guide is
-available in `CONTRIBUTING.ko.md`. The English documents are canonical when a
-translation differs.
+Thank you for helping improve Angmoo. The canonical repository is
+`angmoo-tree/angmoo`. Issues and pull requests may be written in English or
+Korean; the English guide is canonical if translations differ.
 
 ## Before opening a change
 
-1. Read `docs/public/architecture.md` and `docs/public/contribution-map.md`.
-2. Keep the change inside the public boundary.
-3. Use synthetic data and fake providers.
-4. Add or update the smallest relevant test.
-5. Run the frozen-install, backend, frontend, and export checks that apply.
+- Read `docs/public/architecture.md` and `docs/public/contribution-map.md`.
+- Start from the latest `main` in a branch or fork.
+- Use synthetic data and fake providers. Never submit credentials, personal
+  data, raw logs, backups, or a local user's World Package.
+- Add or update the smallest relevant deterministic test.
+- Keep unrelated refactoring out of a behavior change.
 
-Do not submit production credentials, private user data, OpenClaw runtime
-material, admin or maintenance controls, backups, logs, traces, uploads, or
-hosted-infrastructure configuration.
+An Issue before implementation is recommended for features, bugs, and
+structural changes so scope can be agreed first. Small documentation and typo
+fixes may open a pull request without an Issue. Issue linkage is not enforced
+mechanically. When an Issue exists, use `Closes #number` or an explicit
+reference in the pull request.
 
-## Pull requests
+## Local setup and checks
 
-Explain the behavior being changed, tests run, and any remaining gap. Check
-`requires-hosted-validation` when the change affects provider requests,
-resident orchestration, prompts/traces, scheduler/worker/media behavior,
-migrations, credentials, authentication, authorization, ownership, or
-privacy.
+Install only from the committed lockfiles:
 
-Hosted validation is performed by a maintainer with synthetic data and limited
-test credentials. Contributors are never given production DB, KMS, Oracle,
-SSH, or hosted-service credentials. Staging success is not production
-approval.
+```powershell
+uv sync --frozen --directory backend
+pnpm --dir frontend install --frozen-lockfile
+```
 
-The public workflow classifies each pull request as `public-only`,
-`hosted-fast`, or `hosted-full`. This classification does not start a private
-workflow. When hosted validation is needed, a maintainer reviews and dispatches
-an exact commit SHA from a maintainer-owned branch. Fork code never receives
-private source, repository secrets, or production credentials.
+Run the checks that cover your change. The complete Local OSS gate is:
 
-The public repository is the canonical source for these contributions. A pull
-request must pass all six required Public Actions jobs before merge:
+```powershell
+uv run --project backend python scripts/check_ci_policy.py
+uv run --directory backend python -m pytest -q
+pnpm --dir frontend lint
+pnpm --dir frontend typecheck
+pnpm --dir frontend build
+```
 
-- `hosted-impact`
-- `backend-contract`
+PostgreSQL and Neo4j checks use disposable local services. Provider-dependent
+tests use fake providers and must not make external model calls.
+
+## Pull requests and merge ownership
+
+Every change reaches `main` through a pull request. The nine required checks
+are:
+
+- `backend`
 - `frontend`
-- `quickstart`
-- `security-export`
-- `dependency-audit`
+- `migration-postgres`
+- `local-core-smoke`
+- `local-autonomy-smoke`
+- `local-full-graph`
+- `oss-boundary`
+- `dependency-license`
+- `dco`
 
-The `hosted-impact` result tells maintainers whether a separate private
-integration run is needed. It does not expose or execute private source in the
-public workflow.
+`windows-local-smoke`, `architecture-boundary`, and `codeql` begin as advisory
+checks. Advisory does not mean ignored: failures and promotion conditions must
+be documented and security findings must be resolved or explicitly triaged.
 
-## Contract changes
+External contributors submit pull requests and cannot push to or merge
+`main`. The repository owner performs the final review and merge after required
+checks pass and conversations are resolved. During the single-maintainer
+period, `required approvals: 0` avoids requiring an impossible self-approval;
+it does not remove owner review or give contributors merge authority.
 
-The REST API, Alembic chain, LangGraph state/result, community behavior,
-credential security, and lease/retry behavior are preserved contracts.
-Intentional breaking changes require prior maintainer approval, an explicit
-migration when applicable, and release notes.
+## License and DCO
 
-By intentionally submitting a contribution for inclusion, you agree that it
-is provided under GPL-3.0-only unless you explicitly state otherwise.
+Accepted contributions are provided under `GPL-3.0-only` unless explicitly
+stated otherwise. Every human commit must certify the Developer Certificate of Origin 1.1 with a `Signed-off-by: Name <email>` trailer. Use:
 
-Every contribution must certify the Developer Certificate of Origin 1.1 with
-a `Signed-off-by` trailer. The usual command is `git commit -s`. The DCO
-confirms that you have the right to submit the contribution; it does not
-replace the project license.
+```powershell
+git commit -s
+```
+
+The DCO 1.1 confirms that you have the right to submit the contribution; it
+does not replace the project license. Dependabot receives only the narrow bot
+exception enforced by the repository checker.
+
+## Contract and architecture changes
+
+REST/OpenAPI, Alembic, routine/social/graph contracts, authorization,
+credentials, lease/retry, and user-data boundaries are compatibility surfaces.
+Intentional breaking changes require an Issue, migration or compatibility plan
+when applicable, focused tests, and a clear rollback path.
+
+T2 records the current import inventory. Domain-oriented restructuring is a
+later refactoring gate; do not increase legacy boundary exceptions without an
+owner, reason, and removal condition.
+
+Report vulnerabilities through the private process in `SECURITY.md`, never a
+public Issue.
