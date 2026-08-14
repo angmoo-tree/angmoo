@@ -83,7 +83,7 @@ dev = [
 requires-dist = [
     { name = "alembic", specifier = ">=1.19.0" },
     { name = "fastapi", specifier = ">=0.141.1" },
-    { name = "google-auth", extras = ["requests"], specifier = ">=2.40.0" },
+    { name = "google-auth", extras = ["requests"], specifier = ">=2.56.3" },
     { name = "google-genai", specifier = ">=2.17.0" },
     { name = "langgraph", specifier = ">=1.0.4" },
     { name = "neo4j", specifier = ">=6.2.0,<7.0.0" },
