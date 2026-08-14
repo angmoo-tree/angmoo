@@ -43,7 +43,7 @@ tests use fake providers and must not make external model calls.
 
 ## Pull requests and merge ownership
 
-Every change reaches `main` through a pull request. The nine required checks
+Every change reaches `main` through a pull request. The ten required checks
 are:
 
 - `backend`
@@ -55,10 +55,11 @@ are:
 - `oss-boundary`
 - `dependency-license`
 - `dco`
+- `architecture-boundary`
 
-`windows-local-smoke`, `architecture-boundary`, and `codeql` begin as advisory
-checks. Advisory does not mean ignored: failures and promotion conditions must
-be documented and security findings must be resolved or explicitly triaged.
+`windows-local-smoke` and `codeql` remain advisory checks. Advisory does not
+mean ignored: failures and promotion conditions must be documented and
+security findings must be resolved or explicitly triaged.
 
 External contributors submit pull requests and cannot push to or merge
 `main`. The repository owner performs the final review and merge after required

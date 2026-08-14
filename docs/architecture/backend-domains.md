@@ -8,7 +8,9 @@ The T2.5 umbrella proposal is
 [`#32`](https://github.com/angmoo-tree/angmoo/issues/32). The architecture
 PR A recorded its baseline from `main` commit
 `16fe1b58c34bfac7e0f94cf449d8078bba98d1b2` and merged as
-`9141a266e922981fff9ee90abf3aeb0cfa3e42a4`. PR B is based on that exact merge.
+`9141a266e922981fff9ee90abf3aeb0cfa3e42a4`. PR B used that exact base and
+merged as `85a8eb7753130fcb2be9d75a2bc64ba3079c14c3`. PR C is based on that
+PR B merge.
 
 ## Facts, policy, and enforcement
 
@@ -22,19 +24,22 @@ These files have deliberately separate responsibilities:
 | `scripts/ci/check_architecture_boundaries.py` | Enforce policy, cycles, and no-growth rules |
 
 At the PR A baseline the precise inventory contained 246 modules, 595 internal
-edges, and 1,030 unique per-module external import records. PR B adds the
+edges, and 1,030 unique per-module external import records. PR B added the
 relationship read domain and adapter modules, producing 256 modules, 613
-internal edges, and 1,036 unique per-module external import records. The
+internal edges, and 1,036 unique per-module external import records. PR C
+removes two usage-zero compatibility modules and their three edges, producing
+254 modules, 610 internal edges, and 1,036 external import records. The
 previous T2 inventory reported 426 internal edges because
 `from package import module` was recorded only as the package; inventory schema
 v2 resolves the real module when it exists.
 
-The policy now freezes 390 exact imports into the horizontal legacy prefixes
+The policy freezes 390 exact imports into the horizontal legacy prefixes
 `app.cruds`, `app.models`, `app.schemas`, and `app.services`: 388 general
-horizontal edges plus the 2-edge Neo4j write-runtime bridge. PR B adds zero
-legacy exceptions and removes two stale exceptions. Existing edges may only
-disappear. Updating the inventory cannot silently authorize another legacy
-edge.
+horizontal edges plus the 2-edge Neo4j write-runtime bridge. PR B added zero
+legacy exceptions and removed two stale exceptions. PR C also adds zero legacy
+exceptions; deleting the two non-legacy compatibility modules leaves the exact
+legacy count at 390. Existing edges may only disappear. Updating the inventory
+cannot silently authorize another legacy edge.
 
 ## Target tree
 
@@ -76,14 +81,15 @@ backend/app/
 | `worlds`, `characters`, `activities`, root posts | each domain's `public.py` | L3 | target only |
 | `world_packages` | `app.domains.world_packages.public` | L3.5 | new Local feature later |
 | feed and `social` | `app.domains.social.public` | L4 | target only |
-| `relationships` graph read | `app.domains.relationships.public` | T2.5 pilot | canonical read slice active in PR B; write path unchanged |
+| `relationships` graph read | `app.domains.relationships.public` | T2.5 pilot | canonical read slice active; PR C removes usage-zero aliases; write path unchanged |
 | relationships write and graph projection | domain/runtime public ports | L4 | unchanged by the read pilot |
 | `chat` and chat memory | `app.domains.chat.public` | P8-L | blocked by Local transition gates |
 | remaining active legacy or ownerless shim | none | L6 | final removal gate |
 
-PR A adds the contract and checker but moves **zero product source files**.
-PR B is limited to the P7 relationship graph read path. PR C removes only
-imports or shims proven unused and closes the evidence loop.
+PR A added the contract and checker but moved **zero product source files**.
+PR B moved only the P7 relationship graph read path. PR C removes only shims
+proven unused, promotes the stable boundary contract in repository policy, and
+closes the evidence loop.
 
 ## T2.5 relationship graph read pilot
 
@@ -100,14 +106,17 @@ world_activity_runtime route
 The L4-owned `app.services.relationship_graph_read` module composes the
 existing SQLAlchemy models, PostgreSQL fallback queries, projection metrics,
 and graph client factory into the domain gateway. It is not a second use-case
-implementation. Current consumers are the API route, social-memory diagnostics,
-and downstream legacy imports. L4 removes this adapter after relationship
-persistence and graph runtime have canonical ports.
+implementation. Current runtime consumers are the API route and social-memory
+diagnostics; compatibility tests also cover its legacy facade. L4 removes this
+adapter only after relationship persistence and graph runtime have canonical
+ports.
 
-`app.schemas.relationship_graph` and
-`app.repositories.relationship_graph` are narrow compatibility aliases only.
-They preserve downstream imports without duplicating schema or query logic.
-Their deletion gate is old import usage zero during L4.
+PR C's `rg` and AST inventory found zero importers for
+`app.schemas.relationship_graph` and `app.repositories.relationship_graph`.
+Those aliases were therefore deleted instead of being retained until L4.
+Schema consumers import the canonical domain schema, and Neo4j adapter tests
+import `app.integrations.relationship_graph_read`. The active L4 service adapter
+is intentionally retained because its runtime consumer count is not zero.
 
 The pilot does not modify `SocialEvent`, `RelationshipState` writes,
 `GraphProjectionOutbox`, projector leases or retries, replay commands, Neo4j

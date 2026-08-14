@@ -13,7 +13,7 @@ final merge after required checks pass.
 | World and Studio | World routes/services/models | World and creator routes | schema, migration, package boundary |
 | Routine runtime | routine planners/runtime | agent activity surfaces | deterministic tick, duplicate write |
 | SNS and Inbox | community/social services | posts, notifications | event ordering, relationship direction |
-| Relationship graph | `app.domains.relationships.public` + Neo4j adapter; writes remain in outbox/projector | relationship graph | read parity, replay, outage, World isolation |
+| Relationship graph | `app.domains.relationships.public` + `app.integrations.relationship_graph_read`; the SQLAlchemy gateway remains an L4 adapter | relationship graph | read parity, replay, outage, World isolation |
 | Providers and credentials | `backend/app/providers`, `backend/app/credentials` | settings/model forms | BYOK redaction, fake provider |
 | Local Bot | bot route/schema | `frontend/src/app/angmoo-api` | quota and response contracts |
 
@@ -37,19 +37,21 @@ independent backend contract copies.
 Compatibility facades may preserve stable imports during refactoring only when
 they name an owner, current consumer, removal stage, and usage-zero deletion
 gate. They re-export canonical types or compose adapters; they do not duplicate
-use-case logic. Do not combine a move with unrelated behavior changes. T2
-checks the current import inventory; T2.5 enforces domain-oriented migration
-incrementally.
+use-case logic. T2.5 PR C removed the unused relationship schema and repository
+aliases after both `rg` and the AST inventory reported zero importers. The
+SQLAlchemy relationship gateway remains an L4-owned adapter because it still
+has runtime consumers. Do not combine a move with unrelated behavior changes.
 
 ## Validation map
 
 All PRs run these required checks: `backend`, `frontend`,
 `migration-postgres`, `local-core-smoke`, `local-autonomy-smoke`,
-`local-full-graph`, `oss-boundary`, `dependency-license`, and `dco`.
+`local-full-graph`, `oss-boundary`, `dependency-license`, `dco`, and
+`architecture-boundary`.
 
-The first advisory checks are `windows-local-smoke`,
-`architecture-boundary`, and `codeql`. They are triaged rather than silently
-ignored and are promoted only after their deterministic contract is stable.
+`windows-local-smoke` and `codeql` remain advisory checks. They are triaged
+rather than silently ignored and are promoted only after their deterministic
+contract is stable.
 
 Use synthetic users and fake providers. Disposable PostgreSQL and Neo4j
 services are allowed; production credentials, user data, and external LLM

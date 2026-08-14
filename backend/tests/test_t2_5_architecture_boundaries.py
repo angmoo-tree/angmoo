@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 import sys
 from typing import Any
@@ -109,6 +110,20 @@ def test_valid_domain_public_dependency_passes() -> None:
     )
 
     assert checker.check_inventory(inventory, _policy()) == []
+
+
+def test_relationship_graph_cleanup_removes_usage_zero_compatibility_modules() -> None:
+    inventory = json.loads(
+        (REPO_ROOT / "security/architecture_import_baseline.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    modules = {item["module"] for item in inventory["modules"]}
+
+    assert "app.schemas.relationship_graph" not in modules
+    assert "app.repositories.relationship_graph" not in modules
+    assert "app.services.relationship_graph_read" in modules
+    assert "app.domains.relationships.public" in modules
 
 
 def test_cross_domain_deep_import_fails_with_actionable_message() -> None:

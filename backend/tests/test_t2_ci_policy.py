@@ -18,6 +18,12 @@ def test_current_local_oss_workflow_policy_passes() -> None:
     assert checker.check_repo(REPO_ROOT) == []
 
 
+def test_architecture_boundary_is_the_tenth_required_check() -> None:
+    assert "architecture-boundary" in checker.REQUIRED_JOBS
+    assert len(checker.REQUIRED_JOBS) == 10
+    assert checker.ADVISORY_JOBS == {"windows-local-smoke"}
+
+
 def test_unpinned_action_and_conditional_required_job_are_rejected(tmp_path: Path) -> None:
     workflow = tmp_path / "workflow.yml"
     workflow.write_text(
