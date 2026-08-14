@@ -397,10 +397,6 @@
           "importer": "app.schemas"
         },
         {
-          "imported": "app.schemas.relationship_graph",
-          "importer": "app.schemas"
-        },
-        {
           "imported": "app.schemas.routine_post",
           "importer": "app.schemas"
         },
@@ -1206,10 +1202,6 @@
         },
         {
           "imported": "app.models",
-          "importer": "app.services.relationship_graph_read"
-        },
-        {
-          "imported": "app.schemas",
           "importer": "app.services.relationship_graph_read"
         },
         {

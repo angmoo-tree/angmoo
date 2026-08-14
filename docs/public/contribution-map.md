@@ -13,7 +13,7 @@ final merge after required checks pass.
 | World and Studio | World routes/services/models | World and creator routes | schema, migration, package boundary |
 | Routine runtime | routine planners/runtime | agent activity surfaces | deterministic tick, duplicate write |
 | SNS and Inbox | community/social services | posts, notifications | event ordering, relationship direction |
-| Relationship graph | outbox/projector/Neo4j integration | relationship graph | replay, outage, World isolation |
+| Relationship graph | `app.domains.relationships.public` + Neo4j adapter; writes remain in outbox/projector | relationship graph | read parity, replay, outage, World isolation |
 | Providers and credentials | `backend/app/providers`, `backend/app/credentials` | settings/model forms | BYOK redaction, fake provider |
 | Local Bot | bot route/schema | `frontend/src/app/angmoo-api` | quota and response contracts |
 
@@ -22,18 +22,24 @@ independent backend contract copies.
 
 ## Responsibility boundaries
 
-- Routes own authentication dependencies, HTTP input/output, use-case calls,
-  and error mapping.
-- Services own policy, orchestration, and transaction decisions.
-- CRUD modules own queries and persistence and must not import services.
+- Routes own authentication dependencies, HTTP input/output, public use-case
+  calls, and error mapping.
+- Domain public APIs and use cases own new business policy and orchestration.
+- Legacy services may remain as explicitly owned composition adapters during
+  staged migration, but new features do not add another horizontal service.
+- Repository ports sit below use cases; CRUD and persistence adapters do not
+  import policy from above or commit behind a caller.
 - Provider SDK imports stay inside their adapters.
 - Raw secret decryption stays inside the credential resolver boundary.
 - Public read schemas never expose API keys, encrypted envelopes, or
   ciphertext.
 
-Compatibility facades may preserve imports during refactoring. Do not combine
-a move with unrelated behavior changes. T2 checks the current import inventory;
-T2.5 introduces domain-oriented enforcement incrementally.
+Compatibility facades may preserve stable imports during refactoring only when
+they name an owner, current consumer, removal stage, and usage-zero deletion
+gate. They re-export canonical types or compose adapters; they do not duplicate
+use-case logic. Do not combine a move with unrelated behavior changes. T2
+checks the current import inventory; T2.5 enforces domain-oriented migration
+incrementally.
 
 ## Validation map
 

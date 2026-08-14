@@ -7,7 +7,12 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.api.v1.deps import get_current_user, get_db
-from app.services import daily_activity_plans, relationship_graph_read, social_memory_read
+from app.core.config import settings
+from app.domains.relationships import public as relationships
+from app.services import daily_activity_plans, social_memory_read
+from app.services.relationship_graph_read import (
+    SqlAlchemyRelationshipGraphReadGateway,
+)
 
 
 router = APIRouter(prefix="/characters", tags=["world-activity-runtime"])
@@ -36,11 +41,11 @@ def _raise_social_memory_error(exc: social_memory_read.SocialMemoryReadError) ->
 
 
 def _raise_relationship_graph_error(
-    exc: relationship_graph_read.RelationshipGraphReadError,
+    exc: relationships.RelationshipGraphReadError,
 ) -> None:
-    if isinstance(exc, relationship_graph_read.RelationshipGraphNotFoundError):
+    if isinstance(exc, relationships.RelationshipGraphNotFoundError):
         status_code = status.HTTP_404_NOT_FOUND
-    elif isinstance(exc, relationship_graph_read.RelationshipGraphForbiddenError):
+    elif isinstance(exc, relationships.RelationshipGraphForbiddenError):
         status_code = status.HTTP_403_FORBIDDEN
     else:
         status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -139,7 +144,7 @@ def get_world_character_social_memory(
 
 @router.get(
     "/{character_id}/worlds/{world_id}/relationship-graph",
-    response_model=schemas.RelationshipGraphRead,
+    response_model=relationships.RelationshipGraphRead,
 )
 def get_world_character_relationship_graph(
     character_id: str,
@@ -150,17 +155,19 @@ def get_world_character_relationship_graph(
     limit: int = Query(default=20, ge=1, le=20),
     db: Session = Depends(get_db),
     user: models.User = Depends(get_current_user),
-) -> schemas.RelationshipGraphRead:
+) -> relationships.RelationshipGraphRead:
     try:
-        return relationship_graph_read.get_owner_relationship_graph(
-            db,
+        gateway = SqlAlchemyRelationshipGraphReadGateway(db, config=settings)
+        return relationships.get_owner_relationship_graph(
+            gateway,
             character_id=character_id,
             world_id=world_id,
-            user=user,
+            owner_id=user.id,
             view=view,
             target_world_character_id=target_world_character_id,
             depth=depth,
             limit=limit,
+            graph_projection_enabled=settings.graph_projection_enabled,
         )
-    except relationship_graph_read.RelationshipGraphReadError as exc:
+    except relationships.RelationshipGraphReadError as exc:
         _raise_relationship_graph_error(exc)

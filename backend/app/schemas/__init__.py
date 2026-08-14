@@ -219,7 +219,7 @@ from app.schemas.world_character_setup import (
     WorldSetupStage,
     WorldSetupState,
 )
-from app.schemas.relationship_graph import (
+from app.domains.relationships.graph_read.schemas import (
     GraphStatus,
     RelationshipGraphEdgeRead,
     RelationshipGraphEvidenceRead,

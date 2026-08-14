@@ -1,356 +1,462 @@
-from __future__ import annotations
+"""L4-owned legacy adapter from SQLAlchemy/runtime to graph-read domain.
 
-from datetime import UTC, datetime
-from typing import Literal
+Current consumers: the relationship-graph API route, social-memory diagnostics,
+and the legacy ``app.services.relationship_graph_read`` import facade.
+Removal condition: move relationship PostgreSQL repositories and graph runtime
+composition behind L4 integration ports, then delete this bridge.
+"""
+
+from __future__ import annotations
 
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
-from app import models, schemas
+from app import models
 from app.core.config import Settings, settings
 from app.cruds import graph_projection as graph_projection_crud
-from app.integrations.neo4j import GraphClientError
-from app.repositories.relationship_graph import (
+from app.domains.relationships import public as relationships
+from app.domains.relationships.graph_read import schemas
+from app.domains.relationships.graph_read.errors import GraphReadBackendError
+from app.domains.relationships.graph_read.repository import (
+    EvidencePostFacts,
+    GraphEvidenceCandidate,
     GraphEvidenceHit,
+    GraphNeighborhoodHit,
+    GraphNodeCandidate,
+    GraphPathHit,
     GraphRelationshipHit,
-    RelationshipGraphRepository,
+    OwnerWorldCharacterAccess,
+    RelationshipGraphQueryPort,
+    RelationshipRevalidationFacts,
 )
+from app.domains.relationships.graph_read.use_case import GraphProjectionCounts
+from app.integrations.neo4j import GraphClientError
+from app.integrations.relationship_graph_read import RelationshipGraphRepository
 from app.services.graph_projection_metrics import graph_metrics
 from app.services.graph_projection_runtime import graph_client_from_settings
 
 
-GraphView = Literal["neighborhood", "direct", "evidence"]
+class _BackendErrorMappingRepository:
+    """Normalize Neo4j transport errors before they enter the domain."""
+
+    def __init__(self, delegate: RelationshipGraphQueryPort) -> None:
+        self._delegate = delegate
+
+    def _call(self, method_name: str, **kwargs):
+        try:
+            return getattr(self._delegate, method_name)(**kwargs)
+        except GraphClientError as exc:
+            raise GraphReadBackendError(exc.error_class) from exc
+
+    def get_direct_relationship(self, **kwargs) -> list[GraphRelationshipHit]:
+        return self._call("get_direct_relationship", **kwargs)
+
+    def list_shared_neighbors(self, **kwargs) -> list[str]:
+        return self._call("list_shared_neighbors", **kwargs)
+
+    def find_shortest_path(self, **kwargs) -> GraphPathHit | None:
+        return self._call("find_shortest_path", **kwargs)
+
+    def rank_related_characters(self, **kwargs) -> list[GraphRelationshipHit]:
+        return self._call("rank_related_characters", **kwargs)
+
+    def list_relationship_evidence(self, **kwargs) -> list[GraphEvidenceHit]:
+        return self._call("list_relationship_evidence", **kwargs)
+
+    def get_visualization_neighborhood(self, **kwargs) -> GraphNeighborhoodHit:
+        return self._call("get_visualization_neighborhood", **kwargs)
 
 
-class RelationshipGraphReadError(RuntimeError):
-    reason_code = "relationship_graph_read_error"
+class SqlAlchemyRelationshipGraphReadGateway:
+    """Legacy persistence/runtime adapter for the canonical read use case."""
 
+    def __init__(self, db: Session, *, config: Settings = settings) -> None:
+        self._db = db
+        self._config = config
+        self._client = None
 
-class RelationshipGraphNotFoundError(RelationshipGraphReadError):
-    reason_code = "world_character_not_found"
-
-
-class RelationshipGraphForbiddenError(RelationshipGraphReadError):
-    reason_code = "character_not_owned"
-
-
-class RelationshipGraphRequestError(RelationshipGraphReadError):
-    def __init__(self, reason_code: str) -> None:
-        super().__init__(reason_code)
-        self.reason_code = reason_code
-
-
-def _owner_world_character(
-    db: Session,
-    *,
-    character_id: str,
-    world_id: str,
-    user: models.User,
-) -> models.WorldCharacter:
-    character = db.get(models.Character, character_id)
-    if character is None or character.deleted_at is not None:
-        raise RelationshipGraphNotFoundError(character_id)
-    if character.owner_id != user.id:
-        raise RelationshipGraphForbiddenError(character_id)
-    world_character = db.scalar(
-        select(models.WorldCharacter).where(
-            models.WorldCharacter.world_id == world_id,
-            models.WorldCharacter.character_id == character_id,
-        )
-    )
-    if world_character is None:
-        raise RelationshipGraphNotFoundError(character_id)
-    membership = db.get(models.WorldMembership, world_character.membership_id)
-    if (
-        world_character.status != "active"
-        or membership is None
-        or membership.status != "active"
-        or membership.world_id != world_id
-    ):
-        raise RelationshipGraphRequestError("membership_inactive")
-    return world_character
-
-
-def _blocked_pairs(db: Session, *, world_id: str) -> set[frozenset[str]]:
-    return {
-        frozenset(
-            (
-                row.blocker_world_character_id,
-                row.blocked_world_character_id,
+    def owner_access(
+        self,
+        *,
+        character_id: str,
+        world_id: str,
+    ) -> OwnerWorldCharacterAccess:
+        character = self._db.get(models.Character, character_id)
+        if character is None:
+            return OwnerWorldCharacterAccess(
+                character_exists=False,
+                character_deleted=False,
+                character_owner_id=None,
+                world_character_id=None,
+                world_character_status=None,
+                membership_status=None,
+                membership_world_id=None,
             )
-        )
-        for row in db.scalars(
-            select(models.WorldCharacterBlock).where(
-                models.WorldCharacterBlock.world_id == world_id
-            )
-        )
-    }
-
-
-def _relationship_hit(row: models.RelationshipState) -> GraphRelationshipHit:
-    return GraphRelationshipHit(
-        world_id=row.world_id,
-        actor_world_character_id=row.actor_world_character_id,
-        target_world_character_id=row.target_world_character_id,
-        relationship_state_id=row.id,
-        familiarity=row.familiarity,
-        affinity=row.affinity,
-        trust=row.trust,
-        tension=row.tension,
-        interaction_count=row.interaction_count,
-        relationship_version=row.version,
-        last_event_id=row.last_event_id,
-        last_event_at=row.last_event_at,
-        updated_at=row.updated_at,
-    )
-
-
-def _postgres_direct_hits(
-    db: Session,
-    *,
-    world_id: str,
-    center_id: str,
-    target_id: str | None,
-    limit: int,
-) -> list[GraphRelationshipHit]:
-    statement = select(models.RelationshipState).where(
-        models.RelationshipState.world_id == world_id
-    )
-    if target_id is None:
-        statement = statement.where(
-            or_(
-                models.RelationshipState.actor_world_character_id == center_id,
-                models.RelationshipState.target_world_character_id == center_id,
-            )
-        )
-    else:
-        statement = statement.where(
-            or_(
-                (
-                    (models.RelationshipState.actor_world_character_id == center_id)
-                    & (
-                        models.RelationshipState.target_world_character_id
-                        == target_id
-                    )
-                ),
-                (
-                    (models.RelationshipState.actor_world_character_id == target_id)
-                    & (
-                        models.RelationshipState.target_world_character_id
-                        == center_id
-                    )
-                ),
-            )
-        )
-    rows = list(
-        db.scalars(
-            statement.order_by(
-                models.RelationshipState.updated_at.desc(),
-                models.RelationshipState.id.asc(),
-            ).limit(limit)
-        )
-    )
-    return [_relationship_hit(row) for row in rows]
-
-
-def _revalidate_relationships(
-    db: Session,
-    *,
-    world_id: str,
-    hits: list[GraphRelationshipHit],
-    allow_stale_replace: bool,
-) -> list[GraphRelationshipHit]:
-    if not hits:
-        return []
-    rows = {
-        row.id: row
-        for row in db.scalars(
-            select(models.RelationshipState).where(
-                models.RelationshipState.id.in_(
-                    [hit.relationship_state_id for hit in hits]
-                ),
-                models.RelationshipState.world_id == world_id,
-            )
-        )
-    }
-    world_character_ids = {
-        value
-        for hit in hits
-        for value in (
-            hit.actor_world_character_id,
-            hit.target_world_character_id,
-        )
-    }
-    world_characters = {
-        row.id: row
-        for row in db.scalars(
+        world_character = self._db.scalar(
             select(models.WorldCharacter).where(
-                models.WorldCharacter.id.in_(world_character_ids),
                 models.WorldCharacter.world_id == world_id,
-                models.WorldCharacter.status == "active",
+                models.WorldCharacter.character_id == character_id,
             )
         )
-    }
-    membership_ids = {row.membership_id for row in world_characters.values()}
-    active_memberships = {
-        row.id
-        for row in db.scalars(
-            select(models.WorldMembership).where(
-                models.WorldMembership.id.in_(membership_ids),
-                models.WorldMembership.world_id == world_id,
-                models.WorldMembership.status == "active",
-            )
+        membership = (
+            self._db.get(models.WorldMembership, world_character.membership_id)
+            if world_character is not None
+            else None
         )
-    }
-    blocked = _blocked_pairs(db, world_id=world_id)
-    result = []
-    for hit in hits:
-        row = rows.get(hit.relationship_state_id)
-        actor = world_characters.get(hit.actor_world_character_id)
-        target = world_characters.get(hit.target_world_character_id)
-        if (
-            row is None
-            or actor is None
-            or target is None
-            or actor.membership_id not in active_memberships
-            or target.membership_id not in active_memberships
-            or frozenset((actor.id, target.id)) in blocked
-            or row.actor_world_character_id != hit.actor_world_character_id
-            or row.target_world_character_id != hit.target_world_character_id
-        ):
-            continue
-        if row.version != hit.relationship_version:
-            graph_metrics.increment("graph_query_stale_edge_total")
-            if allow_stale_replace:
-                result.append(_relationship_hit(row))
-            continue
-        result.append(hit)
-    return result
+        return OwnerWorldCharacterAccess(
+            character_exists=True,
+            character_deleted=character.deleted_at is not None,
+            character_owner_id=character.owner_id,
+            world_character_id=(
+                world_character.id if world_character is not None else None
+            ),
+            world_character_status=(
+                world_character.status if world_character is not None else None
+            ),
+            membership_status=(
+                membership.status if membership is not None else None
+            ),
+            membership_world_id=(
+                membership.world_id if membership is not None else None
+            ),
+        )
 
+    def target_world_id(self, *, world_character_id: str) -> str | None:
+        target = self._db.get(models.WorldCharacter, world_character_id)
+        return target.world_id if target is not None else None
+    def projection_counts(self, *, world_id: str) -> GraphProjectionCounts:
+        counts = graph_projection_crud.world_counts(self._db, world_id=world_id)
+        return GraphProjectionCounts(
+            pending=counts.pending,
+            processing=counts.processing,
+            oldest_pending_at=counts.oldest_pending_at,
+            active_replay=counts.active_replay,
+            failed_rebuild=counts.failed_rebuild,
+        )
 
-def _evidence_reads(
-    db: Session,
-    *,
-    world_id: str,
-    event_ids: list[str],
-    limit: int,
-) -> list[schemas.RelationshipGraphEvidenceRead]:
-    if not event_ids:
-        return []
-    events = {
-        row.id: row
-        for row in db.scalars(
-            select(models.SocialEvent).where(
-                models.SocialEvent.id.in_(event_ids),
-                models.SocialEvent.world_id == world_id,
-                models.SocialEvent.result == "succeeded",
-                models.SocialEvent.retrieval_status == "eligible",
-            )
+    def record_projection_metrics(
+        self, *, pending_count: int, oldest_pending_age_seconds: float
+    ) -> None:
+        graph_metrics.set_gauge("graph_projection_pending_count", pending_count)
+        graph_metrics.set_gauge(
+            "graph_projection_oldest_pending_age_seconds",
+            oldest_pending_age_seconds,
         )
-    }
-    evidence_rows = list(
-        db.scalars(
-            select(models.SocialEventEvidence).where(
-                models.SocialEventEvidence.social_event_id.in_(events)
-            )
-        )
-    )
-    evidence_by_event: dict[str, list[models.SocialEventEvidence]] = {}
-    for evidence in evidence_rows:
-        evidence_by_event.setdefault(evidence.social_event_id, []).append(evidence)
-    result = []
-    for event_id in event_ids:
-        event = events.get(event_id)
-        if event is None:
-            continue
-        source_post_id = None
-        valid = True
-        for evidence in evidence_by_event.get(event_id, []):
-            post_id = (
-                evidence.source_post_id
-                or evidence.target_post_id
-                or evidence.root_post_id
-                or (
-                    evidence.source_object_id
-                    if evidence.source_object_type == "post"
-                    else None
+
+    def open_graph_repository(self) -> RelationshipGraphQueryPort:
+        client = None
+        try:
+            client = graph_client_from_settings(self._config)
+            self._client = client
+            client.verify_connectivity()
+        except GraphClientError as exc:
+            if client is not None:
+                client.close()
+            self._client = None
+            raise GraphReadBackendError(exc.error_class) from exc
+        return _BackendErrorMappingRepository(RelationshipGraphRepository(client))
+
+    def close_graph_repository(self) -> None:
+        if self._client is not None:
+            self._client.close()
+            self._client = None
+
+    def record_fallback(self, *, reason: str) -> None:
+        graph_metrics.increment("graph_query_fallback_total", reason=reason)
+
+    def record_stale_edge(self) -> None:
+        graph_metrics.increment("graph_query_stale_edge_total")
+
+    def _blocked_pairs(self, *, world_id: str) -> set[frozenset[str]]:
+        return {
+            frozenset(
+                (
+                    row.blocker_world_character_id,
+                    row.blocked_world_character_id,
                 )
             )
-            if post_id is None:
+            for row in self._db.scalars(
+                select(models.WorldCharacterBlock).where(
+                    models.WorldCharacterBlock.world_id == world_id
+                )
+            )
+        }
+
+    @staticmethod
+    def _relationship_hit(
+        row: models.RelationshipState,
+    ) -> GraphRelationshipHit:
+        return GraphRelationshipHit(
+            world_id=row.world_id,
+            actor_world_character_id=row.actor_world_character_id,
+            target_world_character_id=row.target_world_character_id,
+            relationship_state_id=row.id,
+            familiarity=row.familiarity,
+            affinity=row.affinity,
+            trust=row.trust,
+            tension=row.tension,
+            interaction_count=row.interaction_count,
+            relationship_version=row.version,
+            last_event_id=row.last_event_id,
+            last_event_at=row.last_event_at,
+            updated_at=row.updated_at,
+        )
+
+    def postgres_direct_hits(
+        self,
+        *,
+        world_id: str,
+        center_id: str,
+        target_id: str | None,
+        limit: int,
+    ) -> list[GraphRelationshipHit]:
+        statement = select(models.RelationshipState).where(
+            models.RelationshipState.world_id == world_id
+        )
+        if target_id is None:
+            statement = statement.where(
+                or_(
+                    models.RelationshipState.actor_world_character_id == center_id,
+                    models.RelationshipState.target_world_character_id == center_id,
+                )
+            )
+        else:
+            statement = statement.where(
+                or_(
+                    (
+                        (
+                            models.RelationshipState.actor_world_character_id
+                            == center_id
+                        )
+                        & (
+                            models.RelationshipState.target_world_character_id
+                            == target_id
+                        )
+                    ),
+                    (
+                        (
+                            models.RelationshipState.actor_world_character_id
+                            == target_id
+                        )
+                        & (
+                            models.RelationshipState.target_world_character_id
+                            == center_id
+                        )
+                    ),
+                )
+            )
+        rows = list(
+            self._db.scalars(
+                statement.order_by(
+                    models.RelationshipState.updated_at.desc(),
+                    models.RelationshipState.id.asc(),
+                ).limit(limit)
+            )
+        )
+        return [self._relationship_hit(row) for row in rows]
+
+    def relationship_revalidation_facts(
+        self,
+        *,
+        world_id: str,
+        hits: list[GraphRelationshipHit],
+    ) -> dict[str, RelationshipRevalidationFacts]:
+        if not hits:
+            return {}
+        rows = {
+            row.id: row
+            for row in self._db.scalars(
+                select(models.RelationshipState).where(
+                    models.RelationshipState.id.in_(
+                        [hit.relationship_state_id for hit in hits]
+                    ),
+                    models.RelationshipState.world_id == world_id,
+                )
+            )
+        }
+        world_character_ids = {
+            value
+            for hit in hits
+            for value in (
+                hit.actor_world_character_id,
+                hit.target_world_character_id,
+            )
+        }
+        world_characters = {
+            row.id: row
+            for row in self._db.scalars(
+                select(models.WorldCharacter).where(
+                    models.WorldCharacter.id.in_(world_character_ids),
+                    models.WorldCharacter.world_id == world_id,
+                )
+            )
+        }
+        membership_ids = {
+            row.membership_id for row in world_characters.values()
+        }
+        active_memberships = {
+            row.id
+            for row in self._db.scalars(
+                select(models.WorldMembership).where(
+                    models.WorldMembership.id.in_(membership_ids),
+                    models.WorldMembership.world_id == world_id,
+                    models.WorldMembership.status == "active",
+                )
+            )
+        }
+        blocked = self._blocked_pairs(world_id=world_id)
+        facts: dict[str, RelationshipRevalidationFacts] = {}
+        for hit in hits:
+            row = rows.get(hit.relationship_state_id)
+            actor = world_characters.get(hit.actor_world_character_id)
+            target = world_characters.get(hit.target_world_character_id)
+            facts[hit.relationship_state_id] = RelationshipRevalidationFacts(
+                canonical_hit=(
+                    self._relationship_hit(row) if row is not None else None
+                ),
+                actor_active=(
+                    actor is not None
+                    and actor.status == "active"
+                    and actor.membership_id in active_memberships
+                ),
+                target_active=(
+                    target is not None
+                    and target.status == "active"
+                    and target.membership_id in active_memberships
+                ),
+                blocked=(
+                    actor is not None
+                    and target is not None
+                    and frozenset((actor.id, target.id)) in blocked
+                ),
+            )
+        return facts
+    def evidence_candidates(
+        self,
+        *,
+        world_id: str,
+        event_ids: list[str],
+    ) -> list[GraphEvidenceCandidate]:
+        if not event_ids:
+            return []
+        events = {
+            row.id: row
+            for row in self._db.scalars(
+                select(models.SocialEvent).where(
+                    models.SocialEvent.id.in_(event_ids)
+                )
+            )
+        }
+        evidence_rows = list(
+            self._db.scalars(
+                select(models.SocialEventEvidence).where(
+                    models.SocialEventEvidence.social_event_id.in_(events)
+                )
+            )
+        )
+        evidence_by_event: dict[str, list[models.SocialEventEvidence]] = {}
+        for evidence in evidence_rows:
+            evidence_by_event.setdefault(
+                evidence.social_event_id, []
+            ).append(evidence)
+
+        result = []
+        for event_id in event_ids:
+            event = events.get(event_id)
+            if event is None:
                 continue
-            post = db.get(models.Post, post_id)
-            if (
-                post is None
-                or post.world_id != world_id
-                or post.deleted_at is not None
-                or post.report_hidden_at is not None
-                or post.visibility != "public"
-            ):
-                valid = False
-                break
-            source_post_id = evidence.source_post_id or post_id
-        if valid:
+            posts = []
+            for evidence_row in evidence_by_event.get(event_id, []):
+                post_id = (
+                    evidence_row.source_post_id
+                    or evidence_row.target_post_id
+                    or evidence_row.root_post_id
+                    or (
+                        evidence_row.source_object_id
+                        if evidence_row.source_object_type == "post"
+                        else None
+                    )
+                )
+                if post_id is None:
+                    continue
+                post = self._db.get(models.Post, post_id)
+                posts.append(
+                    EvidencePostFacts(
+                        post_id=post_id,
+                        source_post_id=evidence_row.source_post_id,
+                        exists=post is not None,
+                        world_id=post.world_id if post is not None else None,
+                        deleted=(
+                            post.deleted_at is not None
+                            if post is not None
+                            else False
+                        ),
+                        report_hidden=(
+                            post.report_hidden_at is not None
+                            if post is not None
+                            else False
+                        ),
+                        visibility=(
+                            post.visibility if post is not None else None
+                        ),
+                    )
+                )
             result.append(
-                schemas.RelationshipGraphEvidenceRead(
+                GraphEvidenceCandidate(
                     event_id=event.id,
                     event_type=event.event_type,
                     occurred_at=event.occurred_at,
                     actor_world_character_id=event.actor_world_character_id,
-                    target_world_character_id=event.target_world_character_id,
-                    source_post_id=source_post_id,
+                    target_world_character_id=(
+                        event.target_world_character_id
+                    ),
+                    world_id=event.world_id,
+                    result=event.result,
+                    retrieval_status=event.retrieval_status,
+                    posts=tuple(posts),
                 )
             )
-        if len(result) >= limit:
-            break
-    return result
-
-
-def _node_reads(
-    db: Session,
-    *,
-    world_id: str,
-    center_id: str,
-    edges: list[GraphRelationshipHit],
-) -> list[schemas.RelationshipGraphNodeRead]:
-    ids = {center_id}
-    for edge in edges:
-        ids.add(edge.actor_world_character_id)
-        ids.add(edge.target_world_character_id)
-    world_characters = {
-        row.id: row
-        for row in db.scalars(
-            select(models.WorldCharacter).where(
-                models.WorldCharacter.id.in_(ids),
-                models.WorldCharacter.world_id == world_id,
-            )
-        )
-    }
-    characters = {
-        row.id: row
-        for row in db.scalars(
-            select(models.Character).where(
-                models.Character.id.in_(
-                    [row.character_id for row in world_characters.values()]
+        return result
+    def node_candidates(
+        self,
+        *,
+        world_id: str,
+        world_character_ids: set[str],
+    ) -> list[GraphNodeCandidate]:
+        world_characters = {
+            row.id: row
+            for row in self._db.scalars(
+                select(models.WorldCharacter).where(
+                    models.WorldCharacter.id.in_(world_character_ids)
                 )
             )
-        )
-    }
-    result = []
-    for world_character_id in sorted(world_characters):
-        world_character = world_characters[world_character_id]
-        character = characters.get(world_character.character_id)
-        if character is None or character.deleted_at is not None:
-            continue
-        result.append(
-            schemas.RelationshipGraphNodeRead(
-                world_character_id=world_character.id,
-                character_id=character.id,
-                display_name=character.name,
-                is_center=world_character.id == center_id,
+        }
+        characters = {
+            row.id: row
+            for row in self._db.scalars(
+                select(models.Character).where(
+                    models.Character.id.in_(
+                        [row.character_id for row in world_characters.values()]
+                    )
+                )
             )
-        )
-    return result
-
+        }
+        result = []
+        for world_character_id in sorted(world_characters):
+            world_character = world_characters[world_character_id]
+            character = characters.get(world_character.character_id)
+            if character is None:
+                continue
+            result.append(
+                GraphNodeCandidate(
+                    world_character_id=world_character.id,
+                    world_id=world_character.world_id,
+                    character_id=character.id,
+                    display_name=character.name,
+                    character_deleted=character.deleted_at is not None,
+                )
+            )
+        return result
 
 def get_owner_relationship_graph(
     db: Session,
@@ -358,192 +464,40 @@ def get_owner_relationship_graph(
     character_id: str,
     world_id: str,
     user: models.User,
-    view: GraphView = "neighborhood",
+    view: relationships.GraphView = "neighborhood",
     target_world_character_id: str | None = None,
     depth: int = 1,
     limit: int = 20,
     config: Settings = settings,
-    repository: RelationshipGraphRepository | None = None,
-) -> schemas.RelationshipGraphRead:
-    if view not in {"neighborhood", "direct", "evidence"}:
-        raise RelationshipGraphRequestError("graph_view_invalid")
-    if view in {"direct", "evidence"} and not target_world_character_id:
-        raise RelationshipGraphRequestError("target_world_character_required")
-    depth = max(1, min(depth, 2))
-    limit = max(1, min(limit, 20))
-    center = _owner_world_character(
-        db,
+    repository: RelationshipGraphQueryPort | None = None,
+) -> relationships.RelationshipGraphRead:
+    """Preserve the legacy call signature while delegating to the domain."""
+
+    gateway = SqlAlchemyRelationshipGraphReadGateway(db, config=config)
+    mapped_repository = (
+        _BackendErrorMappingRepository(repository)
+        if repository is not None
+        else None
+    )
+    return relationships.get_owner_relationship_graph(
+        gateway,
         character_id=character_id,
         world_id=world_id,
-        user=user,
+        owner_id=user.id,
+        view=view,
+        target_world_character_id=target_world_character_id,
+        depth=depth,
+        limit=limit,
+        graph_projection_enabled=config.graph_projection_enabled,
+        repository=mapped_repository,
     )
-    if target_world_character_id is not None:
-        target = db.get(models.WorldCharacter, target_world_character_id)
-        if target is None or target.world_id != world_id:
-            raise RelationshipGraphRequestError("world_mismatch")
 
-    counts = graph_projection_crud.world_counts(db, world_id=world_id)
-    now = datetime.now(UTC)
-    oldest = counts.oldest_pending_at
-    if oldest is not None:
-        oldest = oldest.replace(tzinfo=UTC) if oldest.tzinfo is None else oldest
-    lag = max(0.0, (now - oldest).total_seconds()) if oldest else 0.0
-    graph_metrics.set_gauge(
-        "graph_projection_pending_count",
-        counts.pending + counts.processing,
-    )
-    graph_metrics.set_gauge(
-        "graph_projection_oldest_pending_age_seconds", lag
-    )
-    source: Literal["neo4j", "postgres_fallback"] = "neo4j"
-    fallback_reason: str | None = None
-    template = {
-        "neighborhood": f"visualization_neighborhood_{depth}",
-        "direct": "direct_relationship",
-        "evidence": "relationship_evidence",
-    }[view]
-    truncated = False
-    client = None
-    graph_status: schemas.GraphStatus
 
-    try:
-        if repository is None and not config.graph_projection_enabled:
-            raise GraphClientError("graph_disabled")
-        if counts.active_replay:
-            raise GraphClientError("graph_rebuilding")
-        if counts.failed_rebuild:
-            raise GraphClientError("graph_rebuild_failed")
-        if repository is None:
-            client = graph_client_from_settings(config)
-            client.verify_connectivity()
-            repository = RelationshipGraphRepository(client)
-        if view == "neighborhood":
-            neighborhood = repository.get_visualization_neighborhood(
-                world_id=world_id,
-                source_world_character_id=center.id,
-                depth=depth,
-                node_limit=limit,
-                edge_limit=min(limit * 2, 40),
-            )
-            graph_hits = list(neighborhood.edges)
-            truncated = neighborhood.truncated
-        else:
-            graph_hits = repository.get_direct_relationship(
-                world_id=world_id,
-                source_world_character_id=center.id,
-                target_world_character_id=target_world_character_id or "",
-                include_reverse=True,
-            )
-        graph_hits = _revalidate_relationships(
-            db,
-            world_id=world_id,
-            hits=graph_hits,
-            allow_stale_replace=view in {"direct", "evidence"},
-        )
-        graph_status = (
-            "lagging" if counts.pending or counts.processing else "healthy"
-        )
-    except GraphClientError as exc:
-        graph_metrics.increment(
-            "graph_query_fallback_total", reason=exc.error_class
-        )
-        source = "postgres_fallback"
-        fallback_reason = exc.error_class
-        if exc.error_class == "graph_disabled":
-            graph_status = "disabled"
-        elif exc.error_class == "graph_rebuilding":
-            graph_status = "rebuilding"
-        elif exc.error_class == "neo4j_query_timeout":
-            graph_status = "timeout"
-        elif exc.error_class in {"neo4j_auth_invalid", "schema_not_ready"}:
-            graph_status = "misconfigured"
-        else:
-            graph_status = "unavailable"
-        graph_hits = _postgres_direct_hits(
-            db,
-            world_id=world_id,
-            center_id=center.id,
-            target_id=target_world_character_id,
-            limit=min(limit * 2, 40),
-        )
-        graph_hits = _revalidate_relationships(
-            db,
-            world_id=world_id,
-            hits=graph_hits,
-            allow_stale_replace=True,
-        )
-
-    event_ids: list[str] = []
-    if view == "evidence" and repository is not None and source == "neo4j":
-        try:
-            event_hits: list[GraphEvidenceHit] = repository.list_relationship_evidence(
-                world_id=world_id,
-                source_world_character_id=center.id,
-                target_world_character_id=target_world_character_id or "",
-                limit=5,
-            )
-            event_ids = [hit.event_id for hit in event_hits]
-        except GraphClientError:
-            event_ids = []
-    if client is not None:
-        client.close()
-    if not event_ids:
-        event_ids = [
-            hit.last_event_id
-            for hit in graph_hits
-            if hit.last_event_id is not None
-        ][:5]
-    evidence = _evidence_reads(
-        db,
-        world_id=world_id,
-        event_ids=event_ids,
-        limit=5,
-    )
-    edges = [
-        schemas.RelationshipGraphEdgeRead(
-            relationship_state_id=hit.relationship_state_id,
-            actor_world_character_id=hit.actor_world_character_id,
-            target_world_character_id=hit.target_world_character_id,
-            familiarity=hit.familiarity,
-            affinity=hit.affinity,
-            trust=hit.trust,
-            tension=hit.tension,
-            interaction_count=hit.interaction_count,
-            relationship_version=hit.relationship_version,
-            last_event_id=hit.last_event_id,
-            last_event_at=hit.last_event_at,
-        )
-        for hit in graph_hits[:40]
-    ]
-    return schemas.RelationshipGraphRead(
-        world_id=world_id,
-        center_world_character_id=center.id,
-        nodes=_node_reads(
-            db,
-            world_id=world_id,
-            center_id=center.id,
-            edges=graph_hits,
-        )[:limit],
-        edges=edges,
-        evidence=evidence,
-        meta=schemas.RelationshipGraphQueryMetaRead(
-            template=template,
-            source=source,
-            graph_status=graph_status,
-            truncated=truncated,
-            projection_lag_seconds=lag,
-            revalidated_node_count=len(
-                {center.id}
-                | {
-                    value
-                    for hit in graph_hits
-                    for value in (
-                        hit.actor_world_character_id,
-                        hit.target_world_character_id,
-                    )
-                }
-            ),
-            revalidated_edge_count=len(graph_hits),
-            fallback_reason=fallback_reason,
-        ),
-    )
+# Legacy public names intentionally remain narrow aliases until L4.
+GraphStatus = relationships.GraphStatus
+GraphView = relationships.GraphView
+RelationshipGraphForbiddenError = relationships.RelationshipGraphForbiddenError
+RelationshipGraphNotFoundError = relationships.RelationshipGraphNotFoundError
+RelationshipGraphRead = relationships.RelationshipGraphRead
+RelationshipGraphReadError = relationships.RelationshipGraphReadError
+RelationshipGraphRequestError = relationships.RelationshipGraphRequestError

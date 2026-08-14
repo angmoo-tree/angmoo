@@ -7,8 +7,12 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.cruds import graph_projection as graph_projection_crud
+from app.services.relationship_graph_read import (
+    SqlAlchemyRelationshipGraphReadGateway,
+)
+from app.core.config import settings
 from app.cruds import social_memory as social_memory_crud
-from app.services import relationship_graph_read
+from app.domains.relationships import public as relationships
 
 
 class SocialMemoryReadError(Exception):
@@ -227,14 +231,16 @@ def get_owner_diagnostics(
     else:
         oldest_pending_age = None
 
-    graph = relationship_graph_read.get_owner_relationship_graph(
-        db,
+    graph_gateway = SqlAlchemyRelationshipGraphReadGateway(db, config=settings)
+    graph = relationships.get_owner_relationship_graph(
+        graph_gateway,
         character_id=character_id,
         world_id=world_id,
-        user=user,
+        owner_id=user.id,
         view="neighborhood",
         depth=1,
         limit=20,
+        graph_projection_enabled=settings.graph_projection_enabled,
     )
     latest_relationship_version_parity: bool | None = None
     if graph.meta.source == "neo4j" and not graph.meta.truncated:
