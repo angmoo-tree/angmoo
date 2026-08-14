@@ -86,9 +86,26 @@ credentials, lease/retry, and user-data boundaries are compatibility surfaces.
 Intentional breaking changes require an Issue, migration or compatibility plan
 when applicable, focused tests, and a clear rollback path.
 
-T2 records the current import inventory. Domain-oriented restructuring is a
-later refactoring gate; do not increase legacy boundary exceptions without an
-owner, reason, and removal condition.
+T2.5 adds the incremental domain-first contract in
+`docs/architecture/backend-domains.md`. Before adding backend behavior, choose
+the owning domain or runtime area there. Cross-domain imports must use
+`app.domains.<name>.public`; do not reach into another domain's internal module
+or add a dependency on the horizontal `services`, `models`, `schemas`, or
+`cruds` paths.
+
+The import inventory records facts, while `security/architecture_import_policy.json`
+records target rules and exact reviewed legacy exceptions. Existing exceptions
+may shrink but must not grow merely to make CI pass. Run:
+
+```powershell
+uv run --project backend python scripts/ci/generate_architecture_inventory.py --write
+uv run --project backend python scripts/ci/check_architecture_boundaries.py
+uv run --directory backend python -m pytest -q tests/test_t2_5_architecture_boundaries.py
+```
+
+Keep structure-only PRs focused. Do not mix behavior changes, migrations,
+provider configuration, dependency majors, transaction semantics, bulk
+formatting, or Hosted/Private/Production settings into a package-move PR.
 
 Report vulnerabilities through the private process in `SECURITY.md`, never a
 public Issue.

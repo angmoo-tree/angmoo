@@ -87,9 +87,26 @@ REST/OpenAPI, Alembic, 일과·SNS·관계 그래프, 권한, credential, lease/
 사용자 데이터 경계는 호환성 계약입니다. 의도적인 breaking change에는 Issue,
 필요한 migration 또는 호환 계획, focused test와 rollback 경로가 필요합니다.
 
-T2는 현재 import inventory를 기록합니다. domain 중심 구조 전환은 후속
-refactoring gate에서 진행하며 owner·이유·제거 조건 없이 legacy 예외를 늘리지
-않습니다.
+T2.5의 점진적 domain-first 계약은
+`docs/architecture/backend-domains.md`에 있습니다. backend 동작을 추가하기
+전에 그 문서에서 소유 domain 또는 runtime 영역을 정합니다. domain 간 import는
+`app.domains.<name>.public`을 사용하며, 다른 domain의 내부 module이나 수평
+`services`, `models`, `schemas`, `cruds` 경로에 새로 의존하지 않습니다.
+
+import inventory는 현재 사실을 기록하고
+`security/architecture_import_policy.json`은 목표 규칙과 검토된 exact legacy
+예외를 기록합니다. 기존 예외는 줄일 수 있지만 CI를 통과시키기 위해 늘려서는
+안 됩니다. 다음을 실행합니다.
+
+```powershell
+uv run --project backend python scripts/ci/generate_architecture_inventory.py --write
+uv run --project backend python scripts/ci/check_architecture_boundaries.py
+uv run --directory backend python -m pytest -q tests/test_t2_5_architecture_boundaries.py
+```
+
+구조 전용 PR은 범위를 좁게 유지합니다. package 이동 PR에 동작 변경, migration,
+provider 설정, dependency major, transaction 의미, 일괄 formatting,
+Hosted·Private·Production 설정을 섞지 않습니다.
 
 보안 문제는 public Issue에 작성하지 말고 `SECURITY.md`의 비공개 신고 절차를
 사용해 주세요.
