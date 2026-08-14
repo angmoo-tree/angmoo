@@ -93,11 +93,7 @@ jobs:
       - name: Audit vulnerabilities
         shell: bash
         run: |
-          # GHSA-g6cj-pr64-35w5 affects cryptography PKCS#7 decryption APIs,
-          # which Angmoo does not call. OCI SDK 2.182.1 currently requires
-          # cryptography<50. Owner: angmoo-tree maintainers.
-          # Review due: 2026-11-14. Remove when OCI relaxes its upper bound.
-          uv audit --project backend --locked --ignore GHSA-g6cj-pr64-35w5
+          uv audit --project backend --locked
           corepack pnpm@11.17.0 --dir frontend audit --prod --audit-level high
       - name: Verify GPL, dependency licenses, and notice
         shell: bash
