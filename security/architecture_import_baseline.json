@@ -1,7 +1,7 @@
 {
-  "edge_count": 595,
-  "external_import_count": 1030,
-  "module_count": 246,
+  "edge_count": 613,
+  "external_import_count": 1036,
+  "module_count": 256,
   "modules": [
     {
       "external_imports": [],
@@ -1103,6 +1103,8 @@
       ],
       "imports": [
         "app.api.v1.deps",
+        "app.core.config",
+        "app.domains.relationships.public",
         "app.models",
         "app.schemas",
         "app.services.daily_activity_plans",
@@ -1490,6 +1492,87 @@
     {
       "external_imports": [],
       "imports": [],
+      "module": "app.domains",
+      "path": "backend/app/domains/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.relationships",
+      "path": "backend/app/domains/relationships/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.relationships.graph_read",
+      "path": "backend/app/domains/relationships/graph_read/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__"
+      ],
+      "imports": [],
+      "module": "app.domains.relationships.graph_read.errors",
+      "path": "backend/app/domains/relationships/graph_read/errors.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.relationships.graph_read.repository",
+      "path": "backend/app/domains/relationships/graph_read/repository.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.relationships.graph_read.schemas",
+      "path": "backend/app/domains/relationships/graph_read/schemas.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.relationships.graph_read.errors",
+        "app.domains.relationships.graph_read.repository",
+        "app.domains.relationships.graph_read.schemas"
+      ],
+      "module": "app.domains.relationships.graph_read.use_case",
+      "path": "backend/app/domains/relationships/graph_read/use_case.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.relationships.graph_read.errors",
+        "app.domains.relationships.graph_read.schemas",
+        "app.domains.relationships.graph_read.use_case"
+      ],
+      "module": "app.domains.relationships.public",
+      "path": "backend/app/domains/relationships/public.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
       "module": "app.integrations",
       "path": "backend/app/integrations/__init__.py",
       "wildcard_imports": []
@@ -1511,6 +1594,20 @@
       ],
       "module": "app.integrations.neo4j",
       "path": "backend/app/integrations/neo4j.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.relationships.graph_read.repository",
+        "app.integrations.neo4j"
+      ],
+      "module": "app.integrations.relationship_graph_read",
+      "path": "backend/app/integrations/relationship_graph_read.py",
       "wildcard_imports": []
     },
     {
@@ -1990,14 +2087,10 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "__future__",
-        "dataclasses",
-        "datetime",
-        "typing"
-      ],
+      "external_imports": [],
       "imports": [
-        "app.integrations.neo4j"
+        "app.domains.relationships.graph_read.repository",
+        "app.integrations.relationship_graph_read"
       ],
       "module": "app.repositories.relationship_graph",
       "path": "backend/app/repositories/relationship_graph.py",
@@ -2005,7 +2098,15 @@
     },
     {
       "external_imports": [],
+      "imports": [],
+      "module": "app.runtime",
+      "path": "backend/app/runtime/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
       "imports": [
+        "app.domains.relationships.graph_read.schemas",
         "app.schemas.agent_runs",
         "app.schemas.agents",
         "app.schemas.auth",
@@ -2014,7 +2115,6 @@
         "app.schemas.community",
         "app.schemas.maintenance",
         "app.schemas.messages",
-        "app.schemas.relationship_graph",
         "app.schemas.routine_post",
         "app.schemas.social_memory",
         "app.schemas.tree",
@@ -2135,13 +2235,10 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "__future__",
-        "datetime",
-        "pydantic",
-        "typing"
+      "external_imports": [],
+      "imports": [
+        "app.domains.relationships.graph_read.schemas"
       ],
-      "imports": [],
       "module": "app.schemas.relationship_graph",
       "path": "backend/app/schemas/relationship_graph.py",
       "wildcard_imports": []
@@ -3234,18 +3331,20 @@
     {
       "external_imports": [
         "__future__",
-        "datetime",
         "sqlalchemy",
-        "sqlalchemy.orm",
-        "typing"
+        "sqlalchemy.orm"
       ],
       "imports": [
         "app.core.config",
         "app.cruds.graph_projection",
+        "app.domains.relationships.graph_read.errors",
+        "app.domains.relationships.graph_read.repository",
+        "app.domains.relationships.graph_read.schemas",
+        "app.domains.relationships.graph_read.use_case",
+        "app.domains.relationships.public",
         "app.integrations.neo4j",
+        "app.integrations.relationship_graph_read",
         "app.models",
-        "app.repositories.relationship_graph",
-        "app.schemas",
         "app.services.graph_projection_metrics",
         "app.services.graph_projection_runtime"
       ],
@@ -3435,8 +3534,10 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.core.config",
         "app.cruds.graph_projection",
         "app.cruds.social_memory",
+        "app.domains.relationships.public",
         "app.models",
         "app.schemas",
         "app.services.relationship_graph_read"

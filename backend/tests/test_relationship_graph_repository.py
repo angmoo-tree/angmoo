@@ -12,7 +12,7 @@ from app.integrations.neo4j import (
     GraphQueryTemplate,
     Neo4jGraphClient,
 )
-from app.repositories.relationship_graph import RelationshipGraphRepository
+from app.integrations.relationship_graph_read import RelationshipGraphRepository
 
 
 def _relationship(actor: str, target: str, *, version: int = 2):

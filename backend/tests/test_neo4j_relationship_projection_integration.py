@@ -8,7 +8,7 @@ import pytest
 
 from app.core.config import settings
 from app.integrations.neo4j import Neo4jGraphClient
-from app.repositories.relationship_graph import RelationshipGraphRepository
+from app.integrations.relationship_graph_read import RelationshipGraphRepository
 from app.services.graph_projection_replay import projection_digest
 from app.services.graph_projection_commands import (
     RelationshipStateProjectionCommand,
