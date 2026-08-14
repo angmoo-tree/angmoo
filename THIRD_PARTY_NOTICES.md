@@ -107,31 +107,31 @@ Package authors retain all rights granted by their respective licenses.
 - `@jridgewell/resolve-uri 3.1.2` — MIT
 - `@jridgewell/sourcemap-codec 1.5.5` — MIT
 - `@jridgewell/trace-mapping 0.3.31` — MIT
-- `@next/env 16.2.11` — MIT
+- `@next/env 16.3.0` — MIT
 - `@swc/helpers 0.5.15` — Apache-2.0
-- `baseline-browser-mapping 2.10.29` — Apache-2.0
-- `browserslist 4.28.2` — MIT
-- `caniuse-lite 1.0.30001792` — CC-BY-4.0
+- `baseline-browser-mapping 2.11.14` — Apache-2.0
+- `browserslist 4.28.8` — MIT
+- `caniuse-lite 1.0.30001809` — CC-BY-4.0
 - `client-only 0.0.1` — MIT
 - `convert-source-map 2.0.0` — MIT
 - `debug 4.4.3` — MIT
 - `detect-libc 2.1.2` — Apache-2.0
-- `electron-to-chromium 1.5.353` — ISC
+- `electron-to-chromium 1.5.406` — ISC
 - `escalade 3.2.0` — MIT
 - `gensync 1.0.0-beta.2` — MIT
 - `js-tokens 4.0.0` — MIT
 - `jsesc 3.1.0` — MIT
 - `json5 2.2.3` — MIT
 - `lru-cache 5.1.1` — ISC
-- `lucide-react 1.14.0` — ISC
+- `lucide-react 1.29.0` — ISC
 - `ms 2.1.3` — MIT
 - `nanoid 3.3.18` — MIT
-- `next 16.2.11` — MIT
-- `node-releases 2.0.38` — MIT
+- `next 16.3.0` — MIT
+- `node-releases 2.0.53` — MIT
 - `picocolors 1.1.1` — ISC
 - `postcss 8.5.23` — MIT
-- `react 19.2.4` — MIT
-- `react-dom 19.2.4` — MIT
+- `react 19.2.8` — MIT
+- `react-dom 19.2.8` — MIT
 - `scheduler 0.27.0` — MIT
 - `semver 6.3.1` — ISC
 - `semver 7.8.5` — ISC
@@ -139,12 +139,12 @@ Package authors retain all rights granted by their respective licenses.
 - `source-map-js 1.2.1` — BSD-3-Clause
 - `styled-jsx 5.1.6` — MIT
 - `tslib 2.8.1` — 0BSD
-- `update-browserslist-db 1.2.3` — MIT
+- `update-browserslist-db 1.3.1` — MIT
 - `yallist 3.1.1` — ISC
 
 ## Reviewed conditional dependencies
 
-### `node/caniuse-lite 1.0.30001792`
+### `node/caniuse-lite 1.0.30001809`
 
 - Reported license: `CC-BY-4.0`
 - Normalized license: `CC-BY-4.0`

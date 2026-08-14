@@ -225,7 +225,7 @@
     {
       "ecosystem": "node",
       "name": "caniuse-lite",
-      "version": "1.0.30001792",
+      "version": "1.0.30001809",
       "reported_expression": "CC-BY-4.0",
       "normalized_expression": "CC-BY-4.0",
       "distribution_boundary": "Production browser-support data bundled through the frontend dependency graph.",
