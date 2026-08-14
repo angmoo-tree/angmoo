@@ -3,9 +3,9 @@
 This inventory is generated from the locked Angmoo dependencies.
 Package authors retain all rights granted by their respective licenses.
 
-## Python packages (78)
+## Python packages (77)
 
-- `alembic 1.18.4` — MIT
+- `alembic 1.19.0` — MIT
 - `annotated-doc 0.0.4` — MIT
 - `annotated-types 0.7.0` — OSI Approved :: MIT License
 - `anyio 4.13.0` — MIT
@@ -18,9 +18,9 @@ Package authors retain all rights granted by their respective licenses.
 - `crc32c 2.8` — LGPL-2.1-or-later
 - `cryptography 50.0.0` — Apache-2.0 OR BSD-3-Clause
 - `distro 1.9.0` — Apache License, Version 2.0
-- `fastapi 0.139.2` — MIT
-- `google-auth 2.53.0` — Apache 2.0
-- `google-genai 2.8.0` — Apache-2.0
+- `fastapi 0.141.1` — MIT
+- `google-auth 2.56.3` — Apache 2.0
+- `google-genai 2.17.0` — Apache-2.0
 - `greenlet 3.5.0` — MIT AND PSF-2.0
 - `h11 0.16.0` — MIT
 - `httpcore 1.0.9` — BSD-3-Clause
@@ -40,12 +40,11 @@ Package authors retain all rights granted by their respective licenses.
 - `mako 1.3.12` — MIT
 - `markupsafe 3.0.3` — BSD-3-Clause
 - `neo4j 6.2.0` — Apache-2.0 AND Python-2.0
-- `numpy 2.4.6` — BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0
 - `oci 2.184.1` — Universal Permissive License 1.0 or Apache License 2.0
 - `orjson 3.11.9` — MPL-2.0 AND (Apache-2.0 OR MIT)
 - `ormsgpack 1.12.2` — Apache-2.0 OR MIT
 - `packaging 26.2` — Apache-2.0 OR BSD-2-Clause
-- `pgvector 0.4.2` — MIT
+- `pgvector 0.5.0` — MIT
 - `pillow 12.3.0` — MIT-CMU
 - `pluggy 1.6.0` — MIT
 - `psycopg 3.3.4` — LGPL-3.0-only
@@ -60,7 +59,7 @@ Package authors retain all rights granted by their respective licenses.
 - `pyjwt 2.13.0` — MIT
 - `pyopenssl 26.4.0` — Apache License, Version 2.0
 - `pypdf 6.15.0` — BSD-3-Clause
-- `pytest 9.0.3` — MIT
+- `pytest 9.1.1` — MIT
 - `python-dateutil 2.9.0.post0` — Dual License
 - `python-docx 1.2.0` — MIT
 - `python-dotenv 1.2.2` — BSD-3-Clause
@@ -71,7 +70,7 @@ Package authors retain all rights granted by their respective licenses.
 - `requests-toolbelt 1.0.0` — Apache 2.0
 - `six 1.17.0` — MIT
 - `sniffio 1.3.1` — MIT OR Apache-2.0
-- `sqlalchemy 2.0.49` — MIT
+- `sqlalchemy 2.0.51` — MIT
 - `starlette 1.3.1` — BSD-3-Clause
 - `tenacity 9.1.4` — Apache 2.0
 - `typing-extensions 4.15.0` — PSF-2.0
@@ -79,7 +78,7 @@ Package authors retain all rights granted by their respective licenses.
 - `tzdata 2026.2` — Apache-2.0
 - `urllib3 2.7.0` — MIT
 - `uuid-utils 0.16.0` — BSD-3-Clause
-- `uvicorn 0.46.0` — BSD-3-Clause
+- `uvicorn 0.52.1` — BSD-3-Clause
 - `websockets 16.0` — BSD-3-Clause
 - `xxhash 3.7.0` — BSD
 - `zstandard 0.25.0` — BSD-3-Clause
