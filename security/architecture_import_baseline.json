@@ -1,609 +1,1528 @@
 {
-  "edge_count": 426,
+  "edge_count": 595,
+  "external_import_count": 1030,
   "module_count": 246,
   "modules": [
     {
+      "external_imports": [],
       "imports": [],
-      "module": "app"
+      "module": "app",
+      "path": "backend/app/__init__.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "alembic",
+        "logging.config",
+        "sqlalchemy"
+      ],
       "imports": [
-        "app",
         "app.core.config",
-        "app.core.db"
-      ],
-      "module": "app.alembic.env"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260510_0001_initial_community_schema"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260511_0002_agent_run_credentials"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260511_0003_agent_slots"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260511_0004_resident_agent_slots"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260513_0005_product_slice"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260513_0006_social_timeline_schema"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260514_0007_migrate_comments_to_reply_posts"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260514_0008_character_profile_identity"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260514_0009_character_banner_url"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260516_0010_agent_action_settings_and_slots"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260516_0011_agent_tendency_analysis"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260516_0012_llm_credential_model"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260516_0013_agent_feed_cues"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260516_0014_agent_activity_interval"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260517_0015_nullable_agent_run_post"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260519_0016_gemini_flash_lite_only"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260519_0017_min_activity_interval_30"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260519_0018_llm_credential_cooldown"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260520_0019_tree_community"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260520_0020_google_auth"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260520_0021_user_profile_setup"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260520_0022_user_display_name_cooldown"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260520_0023_user_admin_avatar"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260520_0024_drop_user_avatar_url"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260522_0025_user_deleted_at"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260522_0026_character_deleted_at"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260522_0027_user_policy_agreements"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260522_0028_agent_creation_drafts"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260526_0029_agent_run_gateway_result"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260528_0030_post_reports"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260529_0031_user_feed_content_filter"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260529_0032_agent_writing_sampling_settings"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260529_0033_agent_writing_repetition_level"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260530_0034_local_agent_mode"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260530_0035_post_info_metadata"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260601_0036_character_follow_targets_only"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260604_0037_character_lore_pgvector"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260605_0038_posts_topic_metadata"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260609_0039_daypart_persistent_session"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260610_0040_agent_public_action_executions"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260610_0041_agent_planner_tendency_profile"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260614_0042_admin_operations"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260615_0043_agent_activity_default_limits"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260615_0044_post_image_generation"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260615_0045_pollinations_post_images"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260616_0046_messages_v1"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260616_0047_message_default_gemma4_26b"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260616_0048_active_hours_presets"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260616_0049_observe_internal"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260617_0050_message_default_gemini25_flash_lite"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260617_0051_backfill_unconfigured_message_default"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260618_0052_local_api_post_image_jobs"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260620_0053_service_image_quota"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260624_0054_agent_relationship_points"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260625_0055_character_promotion_usage_consent"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260625_0056_agent_activity_reply_limit_30"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260627_0057_site_operation_settings"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260705_0058_profile_image_candidates"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260721_0059_replicate_image_token"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260726_0060_local_bot_quota_buckets"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260726_0061_auth_login_throttle"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260726_0062_external_auth_verification"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260726_0063_direct_user_like_uniqueness"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260726_0064_google_signup_grants"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260726_0065_community_mutation_quotas"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260726_0066_lore_parser_leases"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260802_0067_unique_resident_character_assignment"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260802_0068_message_response_leases"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260804_0069_auth_session_expiry"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260807_0070_world_foundation"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260807_0072_angmoo_global_foundation_backfill"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260808_0073_world_character_repertoire"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260809_0074_daily_activity_runtime"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260810_0075_routine_continuous_posts"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260811_0076_world_keyword_feed"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260811_0077_social_events_relationships"
-    },
-    {
-      "imports": [],
-      "module": "app.alembic.versions.20260812_0078_graph_projection_replay_runs"
-    },
-    {
-      "imports": [],
-      "module": "app.api.v1"
-    },
-    {
-      "imports": [
-        "app",
-        "app.core",
         "app.core.db",
-        "app.services"
+        "app.models"
       ],
-      "module": "app.api.v1.deps"
+      "module": "app.alembic.env",
+      "path": "backend/app/alembic/env.py",
+      "wildcard_imports": []
     },
     {
-      "imports": [
-        "app.api.v1.routes"
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
       ],
-      "module": "app.api.v1.main"
-    },
-    {
-      "imports": [
-        "app.api.v1.routes"
-      ],
-      "module": "app.api.v1.public"
-    },
-    {
       "imports": [],
-      "module": "app.api.v1.routes"
+      "module": "app.alembic.versions.20260510_0001_initial_community_schema",
+      "path": "backend/app/alembic/versions/20260510_0001_initial_community_schema.py",
+      "wildcard_imports": []
     },
     {
-      "imports": [
-        "app",
-        "app.api.v1.deps",
-        "app.services"
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
       ],
-      "module": "app.api.v1.routes.agent_runs"
+      "imports": [],
+      "module": "app.alembic.versions.20260511_0002_agent_run_credentials",
+      "path": "backend/app/alembic/versions/20260511_0002_agent_run_credentials.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260511_0003_agent_slots",
+      "path": "backend/app/alembic/versions/20260511_0003_agent_slots.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260511_0004_resident_agent_slots",
+      "path": "backend/app/alembic/versions/20260511_0004_resident_agent_slots.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260513_0005_product_slice",
+      "path": "backend/app/alembic/versions/20260513_0005_product_slice.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260513_0006_social_timeline_schema",
+      "path": "backend/app/alembic/versions/20260513_0006_social_timeline_schema.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260514_0007_migrate_comments_to_reply_posts",
+      "path": "backend/app/alembic/versions/20260514_0007_migrate_comments_to_reply_posts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "re",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260514_0008_character_profile_identity",
+      "path": "backend/app/alembic/versions/20260514_0008_character_profile_identity.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260514_0009_character_banner_url",
+      "path": "backend/app/alembic/versions/20260514_0009_character_banner_url.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260516_0010_agent_action_settings_and_slots",
+      "path": "backend/app/alembic/versions/20260516_0010_agent_action_settings_and_slots.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260516_0011_agent_tendency_analysis",
+      "path": "backend/app/alembic/versions/20260516_0011_agent_tendency_analysis.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260516_0012_llm_credential_model",
+      "path": "backend/app/alembic/versions/20260516_0012_llm_credential_model.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260516_0013_agent_feed_cues",
+      "path": "backend/app/alembic/versions/20260516_0013_agent_feed_cues.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260516_0014_agent_activity_interval",
+      "path": "backend/app/alembic/versions/20260516_0014_agent_activity_interval.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260517_0015_nullable_agent_run_post",
+      "path": "backend/app/alembic/versions/20260517_0015_nullable_agent_run_post.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260519_0016_gemini_flash_lite_only",
+      "path": "backend/app/alembic/versions/20260519_0016_gemini_flash_lite_only.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260519_0017_min_activity_interval_30",
+      "path": "backend/app/alembic/versions/20260519_0017_min_activity_interval_30.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260519_0018_llm_credential_cooldown",
+      "path": "backend/app/alembic/versions/20260519_0018_llm_credential_cooldown.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260520_0019_tree_community",
+      "path": "backend/app/alembic/versions/20260520_0019_tree_community.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260520_0020_google_auth",
+      "path": "backend/app/alembic/versions/20260520_0020_google_auth.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260520_0021_user_profile_setup",
+      "path": "backend/app/alembic/versions/20260520_0021_user_profile_setup.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260520_0022_user_display_name_cooldown",
+      "path": "backend/app/alembic/versions/20260520_0022_user_display_name_cooldown.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260520_0023_user_admin_avatar",
+      "path": "backend/app/alembic/versions/20260520_0023_user_admin_avatar.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260520_0024_drop_user_avatar_url",
+      "path": "backend/app/alembic/versions/20260520_0024_drop_user_avatar_url.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260522_0025_user_deleted_at",
+      "path": "backend/app/alembic/versions/20260522_0025_user_deleted_at.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260522_0026_character_deleted_at",
+      "path": "backend/app/alembic/versions/20260522_0026_character_deleted_at.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260522_0027_user_policy_agreements",
+      "path": "backend/app/alembic/versions/20260522_0027_user_policy_agreements.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "sqlalchemy",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260522_0028_agent_creation_drafts",
+      "path": "backend/app/alembic/versions/20260522_0028_agent_creation_drafts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "sqlalchemy",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260526_0029_agent_run_gateway_result",
+      "path": "backend/app/alembic/versions/20260526_0029_agent_run_gateway_result.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "sqlalchemy",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260528_0030_post_reports",
+      "path": "backend/app/alembic/versions/20260528_0030_post_reports.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "sqlalchemy",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260529_0031_user_feed_content_filter",
+      "path": "backend/app/alembic/versions/20260529_0031_user_feed_content_filter.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "sqlalchemy",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260529_0032_agent_writing_sampling_settings",
+      "path": "backend/app/alembic/versions/20260529_0032_agent_writing_sampling_settings.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "sqlalchemy",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260529_0033_agent_writing_repetition_level",
+      "path": "backend/app/alembic/versions/20260529_0033_agent_writing_repetition_level.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "sqlalchemy",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260530_0034_local_agent_mode",
+      "path": "backend/app/alembic/versions/20260530_0034_local_agent_mode.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "sqlalchemy",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260530_0035_post_info_metadata",
+      "path": "backend/app/alembic/versions/20260530_0035_post_info_metadata.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260601_0036_character_follow_targets_only",
+      "path": "backend/app/alembic/versions/20260601_0036_character_follow_targets_only.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "pgvector.sqlalchemy",
+        "sqlalchemy",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260604_0037_character_lore_pgvector",
+      "path": "backend/app/alembic/versions/20260604_0037_character_lore_pgvector.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "sqlalchemy",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260605_0038_posts_topic_metadata",
+      "path": "backend/app/alembic/versions/20260605_0038_posts_topic_metadata.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260609_0039_daypart_persistent_session",
+      "path": "backend/app/alembic/versions/20260609_0039_daypart_persistent_session.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260610_0040_agent_public_action_executions",
+      "path": "backend/app/alembic/versions/20260610_0040_agent_public_action_executions.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260610_0041_agent_planner_tendency_profile",
+      "path": "backend/app/alembic/versions/20260610_0041_agent_planner_tendency_profile.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260614_0042_admin_operations",
+      "path": "backend/app/alembic/versions/20260614_0042_admin_operations.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260615_0043_agent_activity_default_limits",
+      "path": "backend/app/alembic/versions/20260615_0043_agent_activity_default_limits.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260615_0044_post_image_generation",
+      "path": "backend/app/alembic/versions/20260615_0044_post_image_generation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260615_0045_pollinations_post_images",
+      "path": "backend/app/alembic/versions/20260615_0045_pollinations_post_images.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260616_0046_messages_v1",
+      "path": "backend/app/alembic/versions/20260616_0046_messages_v1.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260616_0047_message_default_gemma4_26b",
+      "path": "backend/app/alembic/versions/20260616_0047_message_default_gemma4_26b.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260616_0048_active_hours_presets",
+      "path": "backend/app/alembic/versions/20260616_0048_active_hours_presets.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260616_0049_observe_internal",
+      "path": "backend/app/alembic/versions/20260616_0049_observe_internal.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260617_0050_message_default_gemini25_flash_lite",
+      "path": "backend/app/alembic/versions/20260617_0050_message_default_gemini25_flash_lite.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260617_0051_backfill_unconfigured_message_default",
+      "path": "backend/app/alembic/versions/20260617_0051_backfill_unconfigured_message_default.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260618_0052_local_api_post_image_jobs",
+      "path": "backend/app/alembic/versions/20260618_0052_local_api_post_image_jobs.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "sqlalchemy",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260620_0053_service_image_quota",
+      "path": "backend/app/alembic/versions/20260620_0053_service_image_quota.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260624_0054_agent_relationship_points",
+      "path": "backend/app/alembic/versions/20260624_0054_agent_relationship_points.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260625_0055_character_promotion_usage_consent",
+      "path": "backend/app/alembic/versions/20260625_0055_character_promotion_usage_consent.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260625_0056_agent_activity_reply_limit_30",
+      "path": "backend/app/alembic/versions/20260625_0056_agent_activity_reply_limit_30.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260627_0057_site_operation_settings",
+      "path": "backend/app/alembic/versions/20260627_0057_site_operation_settings.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260705_0058_profile_image_candidates",
+      "path": "backend/app/alembic/versions/20260705_0058_profile_image_candidates.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260721_0059_replicate_image_token",
+      "path": "backend/app/alembic/versions/20260721_0059_replicate_image_token.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260726_0060_local_bot_quota_buckets",
+      "path": "backend/app/alembic/versions/20260726_0060_local_bot_quota_buckets.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260726_0061_auth_login_throttle",
+      "path": "backend/app/alembic/versions/20260726_0061_auth_login_throttle.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260726_0062_external_auth_verification",
+      "path": "backend/app/alembic/versions/20260726_0062_external_auth_verification.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260726_0063_direct_user_like_uniqueness",
+      "path": "backend/app/alembic/versions/20260726_0063_direct_user_like_uniqueness.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260726_0064_google_signup_grants",
+      "path": "backend/app/alembic/versions/20260726_0064_google_signup_grants.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260726_0065_community_mutation_quotas",
+      "path": "backend/app/alembic/versions/20260726_0065_community_mutation_quotas.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260726_0066_lore_parser_leases",
+      "path": "backend/app/alembic/versions/20260726_0066_lore_parser_leases.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260802_0067_unique_resident_character_assignment",
+      "path": "backend/app/alembic/versions/20260802_0067_unique_resident_character_assignment.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260802_0068_message_response_leases",
+      "path": "backend/app/alembic/versions/20260802_0068_message_response_leases.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260804_0069_auth_session_expiry",
+      "path": "backend/app/alembic/versions/20260804_0069_auth_session_expiry.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy",
+        "sqlalchemy.dialects"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260807_0070_world_foundation",
+      "path": "backend/app/alembic/versions/20260807_0070_world_foundation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "alembic",
+        "collections.abc",
+        "datetime",
+        "hashlib",
+        "json",
+        "sqlalchemy",
+        "unicodedata",
+        "uuid"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260807_0072_angmoo_global_foundation_backfill",
+      "path": "backend/app/alembic/versions/20260807_0072_angmoo_global_foundation_backfill.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy",
+        "sqlalchemy.dialects"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260808_0073_world_character_repertoire",
+      "path": "backend/app/alembic/versions/20260808_0073_world_character_repertoire.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy",
+        "sqlalchemy.dialects"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260809_0074_daily_activity_runtime",
+      "path": "backend/app/alembic/versions/20260809_0074_daily_activity_runtime.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260810_0075_routine_continuous_posts",
+      "path": "backend/app/alembic/versions/20260810_0075_routine_continuous_posts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "re",
+        "sqlalchemy",
+        "sqlalchemy.dialects",
+        "unicodedata"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260811_0076_world_keyword_feed",
+      "path": "backend/app/alembic/versions/20260811_0076_world_keyword_feed.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy",
+        "sqlalchemy.dialects"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260811_0077_social_events_relationships",
+      "path": "backend/app/alembic/versions/20260811_0077_social_events_relationships.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260812_0078_graph_projection_replay_runs",
+      "path": "backend/app/alembic/versions/20260812_0078_graph_projection_replay_runs.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.api.v1",
+      "path": "backend/app/api/v1/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "dataclasses",
+        "fastapi",
+        "sqlalchemy.orm",
+        "typing"
+      ],
       "imports": [
-        "app",
+        "app.core.browser_session",
+        "app.core.db",
+        "app.models",
+        "app.services.auth",
+        "app.services.demo_lock",
+        "app.services.local_bot"
+      ],
+      "module": "app.api.v1.deps",
+      "path": "backend/app/api/v1/deps.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "collections.abc",
+        "fastapi"
+      ],
+      "imports": [
+        "app.api.v1.routes.agent_runs",
+        "app.api.v1.routes.agents",
+        "app.api.v1.routes.auth",
+        "app.api.v1.routes.bot",
+        "app.api.v1.routes.character_lore",
+        "app.api.v1.routes.community",
+        "app.api.v1.routes.messages",
+        "app.api.v1.routes.tree",
+        "app.api.v1.routes.world_activity_runtime",
+        "app.api.v1.routes.world_character_setup",
+        "app.api.v1.routes.worlds"
+      ],
+      "module": "app.api.v1.main",
+      "path": "backend/app/api/v1/main.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "collections.abc",
+        "fastapi"
+      ],
+      "imports": [
+        "app.api.v1.routes.agent_runs",
+        "app.api.v1.routes.agents",
+        "app.api.v1.routes.auth",
+        "app.api.v1.routes.bot",
+        "app.api.v1.routes.character_lore",
+        "app.api.v1.routes.community",
+        "app.api.v1.routes.messages",
+        "app.api.v1.routes.tree",
+        "app.api.v1.routes.world_activity_runtime",
+        "app.api.v1.routes.world_character_setup",
+        "app.api.v1.routes.worlds"
+      ],
+      "module": "app.api.v1.public",
+      "path": "backend/app/api/v1/public.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.api.v1.routes",
+      "path": "backend/app/api/v1/routes/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "fastapi",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
         "app.api.v1.deps",
-        "app.services",
+        "app.models",
+        "app.schemas",
+        "app.services.agent_runs"
+      ],
+      "module": "app.api.v1.routes.agent_runs",
+      "path": "backend/app/api/v1/routes/agent_runs.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "fastapi",
+        "fastapi.responses",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.api.v1.deps",
+        "app.models",
+        "app.schemas",
+        "app.services.agent_creation_drafts",
+        "app.services.agent_runs",
+        "app.services.agents",
+        "app.services.community",
         "app.services.direct_llm",
+        "app.services.maintenance",
+        "app.services.profile_media",
         "app.services.runtime_boundary"
       ],
-      "module": "app.api.v1.routes.agents"
+      "module": "app.api.v1.routes.agents",
+      "path": "backend/app/api/v1/routes/agents.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "fastapi",
+        "fastapi.responses",
+        "sqlalchemy.orm"
+      ],
       "imports": [
-        "app",
         "app.api.v1.deps",
-        "app.core",
+        "app.core.browser_session",
         "app.core.config",
-        "app.services"
+        "app.models",
+        "app.schemas",
+        "app.services.auth",
+        "app.services.demo_lock",
+        "app.services.login_throttle",
+        "app.services.turnstile"
       ],
-      "module": "app.api.v1.routes.auth"
+      "module": "app.api.v1.routes.auth",
+      "path": "backend/app/api/v1/routes/auth.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "fastapi",
+        "sqlalchemy.orm"
+      ],
       "imports": [
-        "app",
         "app.api.v1.deps",
-        "app.services"
+        "app.schemas",
+        "app.services.community",
+        "app.services.local_bot"
       ],
-      "module": "app.api.v1.routes.bot"
+      "module": "app.api.v1.routes.bot",
+      "path": "backend/app/api/v1/routes/bot.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "fastapi",
+        "sqlalchemy.orm"
+      ],
       "imports": [
-        "app",
         "app.api.v1.deps",
-        "app.services"
+        "app.models",
+        "app.schemas",
+        "app.services.character_lore"
       ],
-      "module": "app.api.v1.routes.character_lore"
+      "module": "app.api.v1.routes.character_lore",
+      "path": "backend/app/api/v1/routes/character_lore.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "fastapi",
+        "sqlalchemy.orm",
+        "typing"
+      ],
       "imports": [
-        "app",
         "app.api.v1.deps",
-        "app.services"
+        "app.models",
+        "app.schemas",
+        "app.services.community"
       ],
-      "module": "app.api.v1.routes.community"
+      "module": "app.api.v1.routes.community",
+      "path": "backend/app/api/v1/routes/community.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "fastapi",
+        "sqlalchemy.orm"
+      ],
       "imports": [
-        "app",
         "app.api.v1.deps",
-        "app.services"
+        "app.models",
+        "app.schemas",
+        "app.services.messages"
       ],
-      "module": "app.api.v1.routes.messages"
+      "module": "app.api.v1.routes.messages",
+      "path": "backend/app/api/v1/routes/messages.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "fastapi",
+        "sqlalchemy.orm"
+      ],
       "imports": [
-        "app",
         "app.api.v1.deps",
-        "app.services"
+        "app.models",
+        "app.schemas",
+        "app.services.tree"
       ],
-      "module": "app.api.v1.routes.tree"
+      "module": "app.api.v1.routes.tree",
+      "path": "backend/app/api/v1/routes/tree.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "fastapi",
+        "sqlalchemy.orm",
+        "typing"
+      ],
       "imports": [
-        "app",
         "app.api.v1.deps",
-        "app.services"
+        "app.models",
+        "app.schemas",
+        "app.services.daily_activity_plans",
+        "app.services.relationship_graph_read",
+        "app.services.social_memory_read"
       ],
-      "module": "app.api.v1.routes.world_activity_runtime"
+      "module": "app.api.v1.routes.world_activity_runtime",
+      "path": "backend/app/api/v1/routes/world_activity_runtime.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "fastapi",
+        "sqlalchemy.orm"
+      ],
       "imports": [
-        "app",
         "app.api.v1.deps",
-        "app.services"
+        "app.models",
+        "app.schemas",
+        "app.services.world_character_setup",
+        "app.services.world_feed_search"
       ],
-      "module": "app.api.v1.routes.world_character_setup"
+      "module": "app.api.v1.routes.world_character_setup",
+      "path": "backend/app/api/v1/routes/world_character_setup.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "fastapi",
+        "sqlalchemy.orm"
+      ],
       "imports": [
-        "app",
         "app.api.v1.deps",
-        "app.services"
+        "app.models",
+        "app.schemas",
+        "app.services.world_character_setup",
+        "app.services.worlds"
       ],
-      "module": "app.api.v1.routes.worlds"
+      "module": "app.api.v1.routes.worlds",
+      "path": "backend/app/api/v1/routes/worlds.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [],
       "imports": [
         "app.contracts.core_experience"
       ],
-      "module": "app.contracts"
+      "module": "app.contracts",
+      "path": "backend/app/contracts/__init__.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "hashlib",
+        "json",
+        "pathlib",
+        "pydantic",
+        "typing"
+      ],
       "imports": [],
-      "module": "app.contracts.core_experience"
+      "module": "app.contracts.core_experience",
+      "path": "backend/app/contracts/core_experience.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [],
       "imports": [],
-      "module": "app.core"
+      "module": "app.core",
+      "path": "backend/app/core/__init__.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [],
       "imports": [],
-      "module": "app.core.active_hours"
+      "module": "app.core.active_hours",
+      "path": "backend/app/core/active_hours.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [],
       "imports": [],
-      "module": "app.core.agent_activity_limits"
+      "module": "app.core.agent_activity_limits",
+      "path": "backend/app/core/agent_activity_limits.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "fastapi",
+        "urllib.parse"
+      ],
       "imports": [
         "app.core.config"
       ],
-      "module": "app.core.browser_session"
+      "module": "app.core.browser_session",
+      "path": "backend/app/core/browser_session.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "pathlib",
+        "pydantic",
+        "pydantic_settings",
+        "typing"
+      ],
       "imports": [],
-      "module": "app.core.config"
+      "module": "app.core.config",
+      "path": "backend/app/core/config.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "collections.abc",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
       "imports": [
         "app.core.config"
       ],
-      "module": "app.core.db"
+      "module": "app.core.db",
+      "path": "backend/app/core/db.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "secrets",
+        "time",
+        "uuid"
+      ],
       "imports": [],
-      "module": "app.core.ids"
+      "module": "app.core.ids",
+      "path": "backend/app/core/ids.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [],
       "imports": [],
-      "module": "app.core.image_generation"
+      "module": "app.core.image_generation",
+      "path": "backend/app/core/image_generation.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "fastapi",
+        "fastapi.staticfiles"
+      ],
       "imports": [
         "app.core.config"
       ],
-      "module": "app.core.public_media"
+      "module": "app.core.public_media",
+      "path": "backend/app/core/public_media.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "collections.abc",
+        "re",
+        "typing"
+      ],
       "imports": [],
-      "module": "app.core.redaction"
+      "module": "app.core.redaction",
+      "path": "backend/app/core/redaction.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "collections.abc",
+        "re",
+        "starlette.responses",
+        "starlette.types",
+        "typing"
+      ],
       "imports": [],
-      "module": "app.core.request_limits"
+      "module": "app.core.request_limits",
+      "path": "backend/app/core/request_limits.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "re",
+        "unicodedata"
+      ],
       "imports": [],
-      "module": "app.core.search_text"
+      "module": "app.core.search_text",
+      "path": "backend/app/core/search_text.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "base64",
+        "binascii",
+        "hashlib",
+        "hmac",
+        "oci",
+        "oci.auth.signers",
+        "oci.key_management",
+        "oci.key_management.models",
+        "secrets",
+        "typing"
+      ],
       "imports": [
         "app.core.config"
       ],
-      "module": "app.core.security"
+      "module": "app.core.security",
+      "path": "backend/app/core/security.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "secrets",
+        "urllib.parse"
+      ],
       "imports": [
-        "app.core",
         "app.core.browser_session",
-        "app.core.config"
+        "app.core.config",
+        "app.core.security"
       ],
-      "module": "app.core.startup_security"
+      "module": "app.core.startup_security",
+      "path": "backend/app/core/startup_security.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "collections.abc",
+        "contextlib",
+        "contextvars",
+        "sqlalchemy.orm"
+      ],
       "imports": [],
-      "module": "app.core.unit_of_work"
+      "module": "app.core.unit_of_work",
+      "path": "backend/app/core/unit_of_work.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [],
       "imports": [
         "app.credentials.contracts",
         "app.credentials.resolver"
       ],
-      "module": "app.credentials"
+      "module": "app.credentials",
+      "path": "backend/app/credentials/__init__.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "enum"
+      ],
       "imports": [],
-      "module": "app.credentials.contracts"
+      "module": "app.credentials.contracts",
+      "path": "backend/app/credentials/contracts.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "typing"
+      ],
       "imports": [
-        "app.core",
+        "app.core.security",
         "app.credentials.contracts"
       ],
-      "module": "app.credentials.resolver"
+      "module": "app.credentials.resolver",
+      "path": "backend/app/credentials/resolver.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [],
       "imports": [],
-      "module": "app.cruds"
+      "module": "app.cruds",
+      "path": "backend/app/cruds/__init__.py",
+      "wildcard_imports": []
     },
     {
-      "imports": [
-        "app",
-        "app.core"
+      "external_imports": [
+        "datetime",
+        "hashlib",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm",
+        "typing"
       ],
-      "module": "app.cruds.agent_runs"
+      "imports": [
+        "app.core.unit_of_work",
+        "app.models"
+      ],
+      "module": "app.cruds.agent_runs",
+      "path": "backend/app/cruds/agent_runs.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "uuid"
+      ],
       "imports": [
-        "app",
-        "app.core",
+        "app.core.active_hours",
         "app.core.agent_activity_limits",
-        "app.core.image_generation"
+        "app.core.image_generation",
+        "app.core.security",
+        "app.core.unit_of_work",
+        "app.models",
+        "app.schemas"
       ],
-      "module": "app.cruds.agents"
+      "module": "app.cruds.agents",
+      "path": "backend/app/cruds/agents.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "hashlib",
+        "re",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm"
+      ],
       "imports": [
-        "app",
-        "app.core",
+        "app.core.active_hours",
         "app.core.agent_activity_limits",
         "app.core.config",
         "app.core.search_text",
-        "app.cruds"
+        "app.core.security",
+        "app.core.unit_of_work",
+        "app.cruds.agents",
+        "app.models",
+        "app.schemas"
       ],
-      "module": "app.cruds.community"
+      "module": "app.cruds.community",
+      "path": "backend/app/cruds/community.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
       "imports": [
-        "app"
+        "app.models"
       ],
-      "module": "app.cruds.graph_projection"
+      "module": "app.cruds.graph_projection",
+      "path": "backend/app/cruds/graph_projection.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
       "imports": [
-        "app"
+        "app.models"
       ],
-      "module": "app.cruds.social_memory"
+      "module": "app.cruds.social_memory",
+      "path": "backend/app/cruds/social_memory.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
       "imports": [
-        "app"
+        "app.models"
       ],
-      "module": "app.cruds.tree"
+      "module": "app.cruds.tree",
+      "path": "backend/app/cruds/tree.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [],
       "imports": [],
-      "module": "app.integrations"
+      "module": "app.integrations",
+      "path": "backend/app/integrations/__init__.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "concurrent.futures",
+        "enum",
+        "json",
+        "neo4j",
+        "neo4j.exceptions",
+        "time",
+        "typing"
+      ],
       "imports": [
         "app.services.graph_projection_commands",
         "app.services.graph_projection_metrics"
       ],
-      "module": "app.integrations.neo4j"
+      "module": "app.integrations.neo4j",
+      "path": "backend/app/integrations/neo4j.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "contextlib",
+        "dataclasses",
+        "fastapi",
+        "typing",
+        "uvicorn"
+      ],
       "imports": [
         "app.api.v1.public",
         "app.core.config",
@@ -614,9 +1533,12 @@
         "app.cruds.community",
         "app.services.hosted_configuration"
       ],
-      "module": "app.main"
+      "module": "app.main",
+      "path": "backend/app/main.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [],
       "imports": [
         "app.models.admin_ops",
         "app.models.agent_creation_drafts",
@@ -640,182 +1562,412 @@
         "app.models.world_feed",
         "app.models.worlds"
       ],
-      "module": "app.models"
+      "module": "app.models",
+      "path": "backend/app/models/__init__.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
       "imports": [
         "app.core.db"
       ],
-      "module": "app.models.admin_ops"
+      "module": "app.models.admin_ops",
+      "path": "backend/app/models/admin_ops.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
       "imports": [
         "app.core.db"
       ],
-      "module": "app.models.agent_creation_drafts"
+      "module": "app.models.agent_creation_drafts",
+      "path": "backend/app/models/agent_creation_drafts.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
       "imports": [
         "app.core.db"
       ],
-      "module": "app.models.agent_local_keys"
+      "module": "app.models.agent_local_keys",
+      "path": "backend/app/models/agent_local_keys.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
       "imports": [
         "app.core.db"
       ],
-      "module": "app.models.agent_runs"
+      "module": "app.models.agent_runs",
+      "path": "backend/app/models/agent_runs.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
       "imports": [
-        "app.core",
+        "app.core.active_hours",
         "app.core.agent_activity_limits",
         "app.core.db",
         "app.core.image_generation"
       ],
-      "module": "app.models.agent_settings"
+      "module": "app.models.agent_settings",
+      "path": "backend/app/models/agent_settings.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
       "imports": [
         "app.core.db"
       ],
-      "module": "app.models.agent_slots"
+      "module": "app.models.agent_slots",
+      "path": "backend/app/models/agent_slots.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
       "imports": [
         "app.core.db"
       ],
-      "module": "app.models.auth"
+      "module": "app.models.auth",
+      "path": "backend/app/models/auth.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "pgvector.sqlalchemy",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
       "imports": [
         "app.core.db"
       ],
-      "module": "app.models.character_lore"
+      "module": "app.models.character_lore",
+      "path": "backend/app/models/character_lore.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
       "imports": [
         "app.core.db"
       ],
-      "module": "app.models.characters"
+      "module": "app.models.characters",
+      "path": "backend/app/models/characters.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
       "imports": [
         "app.core.db"
       ],
-      "module": "app.models.community"
+      "module": "app.models.community",
+      "path": "backend/app/models/community.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
       "imports": [
         "app.core.db"
       ],
-      "module": "app.models.credentials"
+      "module": "app.models.credentials",
+      "path": "backend/app/models/credentials.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
       "imports": [
         "app.core.db"
       ],
-      "module": "app.models.graph_projection"
+      "module": "app.models.graph_projection",
+      "path": "backend/app/models/graph_projection.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
       "imports": [
         "app.core.db"
       ],
-      "module": "app.models.local_bot_quotas"
+      "module": "app.models.local_bot_quotas",
+      "path": "backend/app/models/local_bot_quotas.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
       "imports": [
         "app.core.db"
       ],
-      "module": "app.models.messages"
+      "module": "app.models.messages",
+      "path": "backend/app/models/messages.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
       "imports": [
         "app.core.db"
       ],
-      "module": "app.models.profile_images"
+      "module": "app.models.profile_images",
+      "path": "backend/app/models/profile_images.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
       "imports": [
         "app.core.db",
         "app.models.worlds"
       ],
-      "module": "app.models.social_memory"
+      "module": "app.models.social_memory",
+      "path": "backend/app/models/social_memory.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
       "imports": [
         "app.core.db"
       ],
-      "module": "app.models.tree"
+      "module": "app.models.tree",
+      "path": "backend/app/models/tree.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
       "imports": [
         "app.core.db",
         "app.models.worlds"
       ],
-      "module": "app.models.world_activity_runtime"
+      "module": "app.models.world_activity_runtime",
+      "path": "backend/app/models/world_activity_runtime.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
       "imports": [
         "app.core.db",
         "app.models.worlds"
       ],
-      "module": "app.models.world_character_setup"
+      "module": "app.models.world_character_setup",
+      "path": "backend/app/models/world_character_setup.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
       "imports": [
         "app.core.db",
         "app.models.worlds"
       ],
-      "module": "app.models.world_feed"
+      "module": "app.models.world_feed",
+      "path": "backend/app/models/world_feed.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.dialects.postgresql",
+        "sqlalchemy.orm",
+        "typing"
+      ],
       "imports": [
         "app.core.db"
       ],
-      "module": "app.models.worlds"
+      "module": "app.models.worlds",
+      "path": "backend/app/models/worlds.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [],
       "imports": [],
-      "module": "app.policies"
+      "module": "app.policies",
+      "path": "backend/app/policies/__init__.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "csv",
+        "functools",
+        "pathlib",
+        "re",
+        "unicodedata"
+      ],
       "imports": [],
-      "module": "app.policies.name_policy"
+      "module": "app.policies.name_policy",
+      "path": "backend/app/policies/name_policy.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [],
       "imports": [
         "app.providers.contracts",
         "app.providers.registry"
       ],
-      "module": "app.providers"
+      "module": "app.providers",
+      "path": "backend/app/providers/__init__.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "typing"
+      ],
       "imports": [],
-      "module": "app.providers.contracts"
+      "module": "app.providers.contracts",
+      "path": "backend/app/providers/contracts.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "json"
+      ],
       "imports": [
         "app.core.redaction",
         "app.providers.contracts"
       ],
-      "module": "app.providers.fake"
+      "module": "app.providers.fake",
+      "path": "backend/app/providers/fake.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "asyncio",
+        "google",
+        "google.genai",
+        "pydantic",
+        "typing"
+      ],
       "imports": [
         "app.core.redaction",
         "app.providers.contracts"
       ],
-      "module": "app.providers.gemini"
+      "module": "app.providers.gemini",
+      "path": "backend/app/providers/gemini.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "typing"
+      ],
       "imports": [
         "app.providers.contracts",
         "app.providers.gemini"
       ],
-      "module": "app.providers.registry"
+      "module": "app.providers.registry",
+      "path": "backend/app/providers/registry.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "contextlib",
+        "dataclasses",
+        "fastapi",
+        "typing",
+        "uvicorn"
+      ],
       "imports": [
         "app.api.v1.public",
         "app.core.config",
@@ -826,19 +1978,33 @@
         "app.cruds.community",
         "app.services.hosted_configuration"
       ],
-      "module": "app.public_main"
+      "module": "app.public_main",
+      "path": "backend/app/public_main.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [],
       "imports": [],
-      "module": "app.repositories"
+      "module": "app.repositories",
+      "path": "backend/app/repositories/__init__.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "typing"
+      ],
       "imports": [
         "app.integrations.neo4j"
       ],
-      "module": "app.repositories.relationship_graph"
+      "module": "app.repositories.relationship_graph",
+      "path": "backend/app/repositories/relationship_graph.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [],
       "imports": [
         "app.schemas.agent_runs",
         "app.schemas.agents",
@@ -857,13 +2023,27 @@
         "app.schemas.world_feed",
         "app.schemas.worlds"
       ],
-      "module": "app.schemas"
+      "module": "app.schemas",
+      "path": "backend/app/schemas/__init__.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
       "imports": [],
-      "module": "app.schemas.agent_runs"
+      "module": "app.schemas.agent_runs",
+      "path": "backend/app/schemas/agent_runs.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
       "imports": [
         "app.core.agent_activity_limits",
         "app.core.image_generation",
@@ -873,245 +2053,637 @@
         "app.schemas.community",
         "app.schemas.media_security"
       ],
-      "module": "app.schemas.agents"
+      "module": "app.schemas.agents",
+      "path": "backend/app/schemas/agents.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
       "imports": [],
-      "module": "app.schemas.auth"
+      "module": "app.schemas.auth",
+      "path": "backend/app/schemas/auth.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "pydantic"
+      ],
       "imports": [],
-      "module": "app.schemas.character_lore"
+      "module": "app.schemas.character_lore",
+      "path": "backend/app/schemas/character_lore.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
       "imports": [
         "app.schemas.community"
       ],
-      "module": "app.schemas.characters"
+      "module": "app.schemas.characters",
+      "path": "backend/app/schemas/characters.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
       "imports": [],
-      "module": "app.schemas.community"
+      "module": "app.schemas.community",
+      "path": "backend/app/schemas/community.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "pydantic"
+      ],
       "imports": [],
-      "module": "app.schemas.maintenance"
+      "module": "app.schemas.maintenance",
+      "path": "backend/app/schemas/maintenance.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "urllib.parse"
+      ],
       "imports": [],
-      "module": "app.schemas.media_security"
+      "module": "app.schemas.media_security",
+      "path": "backend/app/schemas/media_security.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
       "imports": [
         "app.providers.registry",
         "app.schemas.community"
       ],
-      "module": "app.schemas.messages"
+      "module": "app.schemas.messages",
+      "path": "backend/app/schemas/messages.py",
+      "wildcard_imports": []
     },
     {
-      "imports": [],
-      "module": "app.schemas.relationship_graph"
-    },
-    {
-      "imports": [],
-      "module": "app.schemas.routine_post"
-    },
-    {
-      "imports": [],
-      "module": "app.schemas.social_memory"
-    },
-    {
-      "imports": [],
-      "module": "app.schemas.tree"
-    },
-    {
-      "imports": [],
-      "module": "app.schemas.world_activity_runtime"
-    },
-    {
-      "imports": [],
-      "module": "app.schemas.world_character_setup"
-    },
-    {
-      "imports": [],
-      "module": "app.schemas.world_feed"
-    },
-    {
-      "imports": [],
-      "module": "app.schemas.worlds"
-    },
-    {
-      "imports": [],
-      "module": "app.services"
-    },
-    {
-      "imports": [
-        "app",
-        "app.services"
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "pydantic",
+        "typing"
       ],
-      "module": "app.services.activity_profile_readiness"
+      "imports": [],
+      "module": "app.schemas.relationship_graph",
+      "path": "backend/app/schemas/relationship_graph.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.schemas.routine_post",
+      "path": "backend/app/schemas/routine_post.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.schemas.social_memory",
+      "path": "backend/app/schemas/social_memory.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.schemas.tree",
+      "path": "backend/app/schemas/tree.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.schemas.world_activity_runtime",
+      "path": "backend/app/schemas/world_activity_runtime.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "pydantic",
+        "typing",
+        "unicodedata"
+      ],
+      "imports": [],
+      "module": "app.schemas.world_character_setup",
+      "path": "backend/app/schemas/world_character_setup.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.schemas.world_feed",
+      "path": "backend/app/schemas/world_feed.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "pydantic",
+        "re",
+        "typing",
+        "unicodedata",
+        "zoneinfo"
+      ],
+      "imports": [],
+      "module": "app.schemas.worlds",
+      "path": "backend/app/schemas/worlds.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.services",
+      "path": "backend/app/services/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
       "imports": [
-        "app",
+        "app.models",
+        "app.schemas",
+        "app.services.world_character_contracts"
+      ],
+      "module": "app.services.activity_profile_readiness",
+      "path": "backend/app/services/activity_profile_readiness.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
         "app.core.ids",
-        "app.services"
+        "app.models",
+        "app.schemas",
+        "app.services.daily_activity_plans",
+        "app.services.joint_activity_runtime"
       ],
-      "module": "app.services.activity_proposal_runtime"
+      "module": "app.services.activity_proposal_runtime",
+      "path": "backend/app/services/activity_proposal_runtime.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm"
+      ],
       "imports": [
-        "app",
         "app.core.ids",
-        "app.services"
+        "app.models",
+        "app.services.activity_state_contracts"
       ],
-      "module": "app.services.activity_runtime"
+      "module": "app.services.activity_runtime",
+      "path": "backend/app/services/activity_runtime.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "typing"
+      ],
       "imports": [],
-      "module": "app.services.activity_state_contracts"
+      "module": "app.services.activity_state_contracts",
+      "path": "backend/app/services/activity_state_contracts.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "zoneinfo"
+      ],
       "imports": [
-        "app",
-        "app.core",
+        "app.core.active_hours",
         "app.core.config",
-        "app.cruds"
+        "app.cruds.agents",
+        "app.models"
       ],
-      "module": "app.services.agent_activity_policy"
+      "module": "app.services.agent_activity_policy",
+      "path": "backend/app/services/agent_activity_policy.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "typing"
+      ],
       "imports": [
         "app.services.llm_context"
       ],
-      "module": "app.services.agent_briefs"
+      "module": "app.services.agent_briefs",
+      "path": "backend/app/services/agent_briefs.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "json",
+        "logging",
+        "re",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "threading",
+        "typing",
+        "urllib.error",
+        "urllib.parse",
+        "urllib.request",
+        "uuid"
+      ],
       "imports": [
-        "app",
-        "app.core",
         "app.core.config",
         "app.core.redaction",
+        "app.core.security",
         "app.credentials",
-        "app.cruds",
-        "app.policies",
-        "app.services",
+        "app.cruds.agent_runs",
+        "app.cruds.agents",
+        "app.cruds.community",
+        "app.models",
+        "app.policies.name_policy",
+        "app.schemas",
+        "app.services.agent_activity_policy",
+        "app.services.agent_runs",
+        "app.services.agents",
+        "app.services.bounded_http",
+        "app.services.demo_lock",
         "app.services.direct_llm",
-        "app.services.runtime_boundary"
+        "app.services.image_provider",
+        "app.services.operation_settings",
+        "app.services.pollinations_image",
+        "app.services.profile_media",
+        "app.services.prompt_safety",
+        "app.services.provider_http",
+        "app.services.replicate_image",
+        "app.services.runtime_boundary",
+        "app.services.service_image_key"
       ],
-      "module": "app.services.agent_creation_drafts"
+      "module": "app.services.agent_creation_drafts",
+      "path": "backend/app/services/agent_creation_drafts.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "asyncio",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "json",
+        "logging",
+        "random",
+        "re",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing",
+        "uuid",
+        "zoneinfo"
+      ],
       "imports": [
-        "app",
         "app.core.config",
         "app.core.db",
         "app.core.redaction",
         "app.credentials",
-        "app.cruds",
-        "app.services",
+        "app.cruds.agent_runs",
+        "app.cruds.agents",
+        "app.cruds.community",
+        "app.models",
+        "app.schemas",
+        "app.services.activity_profile_readiness",
+        "app.services.agent_activity_policy",
         "app.services.agent_briefs",
+        "app.services.community",
         "app.services.direct_llm",
         "app.services.langgraph_resident",
         "app.services.llm_context",
+        "app.services.maintenance",
         "app.services.routine_post_runtime",
         "app.services.runtime_boundary"
       ],
-      "module": "app.services.agent_runs"
+      "module": "app.services.agent_runs",
+      "path": "backend/app/services/agent_runs.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "asyncio",
+        "datetime",
+        "hashlib",
+        "json",
+        "logging",
+        "pydantic",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing",
+        "zoneinfo"
+      ],
       "imports": [
-        "app",
         "app.core.config",
-        "app.cruds",
-        "app.services",
+        "app.cruds.agent_runs",
+        "app.cruds.agents",
+        "app.cruds.community",
+        "app.models",
+        "app.schemas",
         "app.services.agent_briefs",
+        "app.services.character_lore",
+        "app.services.community",
         "app.services.llm_context",
         "app.services.runtime_boundary"
       ],
-      "module": "app.services.agent_writing"
+      "module": "app.services.agent_writing",
+      "path": "backend/app/services/agent_writing.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "hashlib",
+        "json",
+        "pydantic",
+        "re",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing",
+        "uuid"
+      ],
       "imports": [
-        "app",
-        "app.core",
+        "app.core.active_hours",
         "app.core.config",
         "app.core.image_generation",
         "app.core.redaction",
+        "app.core.security",
         "app.credentials",
-        "app.cruds",
-        "app.policies",
-        "app.services",
+        "app.cruds.agent_runs",
+        "app.cruds.agents",
+        "app.cruds.community",
+        "app.models",
+        "app.policies.name_policy",
+        "app.schemas",
+        "app.services.activity_profile_readiness",
+        "app.services.agent_activity_policy",
+        "app.services.agent_runs",
+        "app.services.community",
+        "app.services.demo_lock",
         "app.services.direct_llm",
-        "app.services.runtime_boundary"
+        "app.services.image_prompt_safety",
+        "app.services.maintenance",
+        "app.services.operation_settings",
+        "app.services.post_image_generation",
+        "app.services.profile_media",
+        "app.services.prompt_safety",
+        "app.services.runtime_boundary",
+        "app.services.service_image_key",
+        "app.services.world_character_setup"
       ],
-      "module": "app.services.agents"
+      "module": "app.services.agents",
+      "path": "backend/app/services/agents.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "base64",
+        "binascii",
+        "dataclasses",
+        "datetime",
+        "google.auth.exceptions",
+        "google.auth.transport",
+        "google.oauth2",
+        "hashlib",
+        "hmac",
+        "json",
+        "math",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm",
+        "uuid"
+      ],
       "imports": [
-        "app",
-        "app.core",
         "app.core.config",
         "app.core.redaction",
-        "app.cruds",
-        "app.policies",
-        "app.services",
-        "app.services.runtime_boundary"
+        "app.core.security",
+        "app.cruds.agent_runs",
+        "app.models",
+        "app.policies.name_policy",
+        "app.schemas",
+        "app.services.demo_lock",
+        "app.services.external_auth_verification",
+        "app.services.login_throttle",
+        "app.services.profile_media",
+        "app.services.runtime_boundary",
+        "app.services.world_character_setup"
       ],
-      "module": "app.services.auth"
+      "module": "app.services.auth",
+      "path": "backend/app/services/auth.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "typing"
+      ],
       "imports": [],
-      "module": "app.services.bounded_http"
+      "module": "app.services.bounded_http",
+      "path": "backend/app/services/bounded_http.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "asyncio",
+        "ctypes",
+        "dataclasses",
+        "datetime",
+        "docx",
+        "hashlib",
+        "io",
+        "multiprocessing",
+        "os",
+        "pathlib",
+        "pypdf",
+        "re",
+        "resource",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "stat",
+        "sys",
+        "time",
+        "typing",
+        "uuid",
+        "zipfile",
+        "zoneinfo"
+      ],
       "imports": [
-        "app",
         "app.credentials",
-        "app.cruds",
+        "app.cruds.agents",
+        "app.cruds.community",
+        "app.models",
         "app.providers.contracts",
         "app.providers.registry",
-        "app.services",
+        "app.schemas",
+        "app.services.community",
         "app.services.direct_llm",
-        "app.services.llm_context"
+        "app.services.llm_context",
+        "app.services.lore_parser_quota"
       ],
-      "module": "app.services.character_lore"
+      "module": "app.services.character_lore",
+      "path": "backend/app/services/character_lore.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "hashlib",
+        "json",
+        "logging",
+        "re",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "time",
+        "typing",
+        "uuid"
+      ],
       "imports": [
-        "app",
-        "app.core",
         "app.core.search_text",
-        "app.cruds",
-        "app.services",
+        "app.core.unit_of_work",
+        "app.cruds.agent_runs",
+        "app.cruds.agents",
+        "app.cruds.community",
+        "app.models",
+        "app.schemas",
+        "app.services.agent_activity_policy",
         "app.services.agent_briefs",
-        "app.services.llm_context"
+        "app.services.community_abuse_quota",
+        "app.services.llm_context",
+        "app.services.social_event_runtime"
       ],
-      "module": "app.services.community"
+      "module": "app.services.community",
+      "path": "backend/app/services/community.py",
+      "wildcard_imports": []
     },
     {
-      "imports": [
-        "app",
-        "app.core.config"
+      "external_imports": [
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "hmac",
+        "math",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm"
       ],
-      "module": "app.services.community_abuse_quota"
+      "imports": [
+        "app.core.config",
+        "app.models"
+      ],
+      "module": "app.services.community_abuse_quota",
+      "path": "backend/app/services/community_abuse_quota.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm",
+        "zoneinfo"
+      ],
       "imports": [
-        "app",
         "app.core.ids",
-        "app.services"
+        "app.models",
+        "app.schemas",
+        "app.services.joint_activity_runtime",
+        "app.services.world_character_contracts"
       ],
-      "module": "app.services.daily_activity_plans"
+      "module": "app.services.daily_activity_plans",
+      "path": "backend/app/services/daily_activity_plans.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [],
       "imports": [
-        "app",
-        "app.core.config"
+        "app.core.config",
+        "app.models"
       ],
-      "module": "app.services.demo_lock"
+      "module": "app.services.demo_lock",
+      "path": "backend/app/services/demo_lock.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "asyncio",
+        "collections",
+        "collections.abc",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "json",
+        "logging",
+        "re",
+        "time",
+        "typing"
+      ],
       "imports": [
         "app.core.config",
         "app.core.redaction",
@@ -1119,425 +2691,1019 @@
         "app.providers.gemini",
         "app.providers.registry"
       ],
-      "module": "app.services.direct_llm"
+      "module": "app.services.direct_llm",
+      "path": "backend/app/services/direct_llm.py",
+      "wildcard_imports": []
     },
     {
-      "imports": [
-        "app",
-        "app.core.config"
+      "external_imports": [
+        "contextlib",
+        "datetime",
+        "hashlib",
+        "hmac",
+        "logging",
+        "math",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm",
+        "threading",
+        "uuid"
       ],
-      "module": "app.services.external_auth_verification"
+      "imports": [
+        "app.core.config",
+        "app.models"
+      ],
+      "module": "app.services.external_auth_verification",
+      "path": "backend/app/services/external_auth_verification.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "json",
+        "pydantic",
+        "typing"
+      ],
       "imports": [
-        "app",
         "app.credentials",
         "app.providers.gemini",
+        "app.schemas",
         "app.services.direct_llm",
         "app.services.llm_context",
         "app.services.resident_contracts",
         "app.services.world_feed_search"
       ],
-      "module": "app.services.feed_reaction_planner"
+      "module": "app.services.feed_reaction_planner",
+      "path": "backend/app/services/feed_reaction_planner.py",
+      "wildcard_imports": []
     },
     {
-      "imports": [
-        "app"
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "json",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
       ],
-      "module": "app.services.graph_projection_commands"
-    },
-    {
-      "imports": [],
-      "module": "app.services.graph_projection_metrics"
-    },
-    {
       "imports": [
-        "app",
+        "app.models"
+      ],
+      "module": "app.services.graph_projection_commands",
+      "path": "backend/app/services/graph_projection_commands.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "threading",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.services.graph_projection_metrics",
+      "path": "backend/app/services/graph_projection_metrics.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "json",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "time",
+        "typing"
+      ],
+      "imports": [
         "app.core.ids",
+        "app.models",
         "app.services.graph_projection_commands",
         "app.services.graph_projection_metrics",
         "app.services.graph_projection_worker"
       ],
-      "module": "app.services.graph_projection_replay"
+      "module": "app.services.graph_projection_replay",
+      "path": "backend/app/services/graph_projection_replay.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__"
+      ],
       "imports": [
         "app.core.config",
         "app.integrations.neo4j"
       ],
-      "module": "app.services.graph_projection_runtime"
+      "module": "app.services.graph_projection_runtime",
+      "path": "backend/app/services/graph_projection_runtime.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "concurrent.futures",
+        "dataclasses",
+        "datetime",
+        "logging",
+        "sqlalchemy.orm",
+        "threading",
+        "time",
+        "typing"
+      ],
       "imports": [
-        "app",
-        "app.cruds",
+        "app.cruds.graph_projection",
         "app.integrations.neo4j",
+        "app.models",
         "app.services.graph_projection_commands",
         "app.services.graph_projection_metrics"
       ],
-      "module": "app.services.graph_projection_worker"
+      "module": "app.services.graph_projection_worker",
+      "path": "backend/app/services/graph_projection_worker.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
       "imports": [],
-      "module": "app.services.hosted_configuration"
+      "module": "app.services.hosted_configuration",
+      "path": "backend/app/services/hosted_configuration.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "re",
+        "unicodedata"
+      ],
       "imports": [],
-      "module": "app.services.image_prompt_safety"
+      "module": "app.services.image_prompt_safety",
+      "path": "backend/app/services/image_prompt_safety.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
       "imports": [
         "app.core.image_generation",
-        "app.services"
+        "app.services.pollinations_image",
+        "app.services.replicate_image"
       ],
-      "module": "app.services.image_provider"
+      "module": "app.services.image_provider",
+      "path": "backend/app/services/image_provider.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "json",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
       "imports": [
-        "app",
         "app.core.ids",
-        "app.services"
+        "app.models",
+        "app.services.social_event_runtime"
       ],
-      "module": "app.services.joint_activity_runtime"
+      "module": "app.services.joint_activity_runtime",
+      "path": "backend/app/services/joint_activity_runtime.py",
+      "wildcard_imports": []
     },
     {
-      "imports": [
-        "app",
-        "app.core.ids"
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm"
       ],
-      "module": "app.services.joint_activity_scheduling"
+      "imports": [
+        "app.core.ids",
+        "app.models"
+      ],
+      "module": "app.services.joint_activity_scheduling",
+      "path": "backend/app/services/joint_activity_scheduling.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "asyncio",
+        "collections.abc",
+        "datetime",
+        "hashlib",
+        "json",
+        "langgraph.errors",
+        "langgraph.graph",
+        "logging",
+        "pydantic",
+        "re",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm",
+        "typing",
+        "unicodedata"
+      ],
       "imports": [
-        "app",
-        "app.core",
         "app.core.config",
         "app.core.redaction",
+        "app.core.unit_of_work",
         "app.credentials",
-        "app.cruds",
-        "app.services",
+        "app.cruds.agent_runs",
+        "app.cruds.agents",
+        "app.cruds.community",
+        "app.models",
+        "app.schemas",
+        "app.services.agent_activity_policy",
+        "app.services.character_lore",
+        "app.services.community",
         "app.services.direct_llm",
+        "app.services.langgraph_social_apply",
         "app.services.llm_context",
+        "app.services.post_image_generation",
+        "app.services.prompt_safety",
         "app.services.resident_contracts",
         "app.services.routine_post_runtime",
         "app.services.world_feed_runtime"
       ],
-      "module": "app.services.langgraph_resident"
+      "module": "app.services.langgraph_resident",
+      "path": "backend/app/services/langgraph_resident.py",
+      "wildcard_imports": []
     },
     {
-      "imports": [
-        "app",
-        "app.services"
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "sqlalchemy",
+        "sqlalchemy.orm"
       ],
-      "module": "app.services.langgraph_social_apply"
+      "imports": [
+        "app.models",
+        "app.services.activity_proposal_runtime",
+        "app.services.social_event_runtime"
+      ],
+      "module": "app.services.langgraph_social_apply",
+      "path": "backend/app/services/langgraph_social_apply.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "re"
+      ],
       "imports": [],
-      "module": "app.services.llm_context"
+      "module": "app.services.llm_context",
+      "path": "backend/app/services/llm_context.py",
+      "wildcard_imports": []
     },
     {
-      "imports": [
-        "app",
-        "app.core",
-        "app.cruds",
-        "app.services"
+      "external_imports": [
+        "dataclasses",
+        "datetime",
+        "logging",
+        "math",
+        "sqlalchemy",
+        "sqlalchemy.orm"
       ],
-      "module": "app.services.local_bot"
-    },
-    {
       "imports": [
-        "app",
-        "app.services"
+        "app.core.security",
+        "app.core.unit_of_work",
+        "app.cruds.agents",
+        "app.models",
+        "app.schemas",
+        "app.services.agent_activity_policy",
+        "app.services.agents",
+        "app.services.community",
+        "app.services.demo_lock",
+        "app.services.local_bot_quota",
+        "app.services.post_image_generation"
       ],
-      "module": "app.services.local_bot_quota"
+      "module": "app.services.local_bot",
+      "path": "backend/app/services/local_bot.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "dataclasses",
+        "datetime",
+        "math",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm"
+      ],
       "imports": [
-        "app",
-        "app.core.config"
+        "app.models",
+        "app.services.agent_activity_policy"
       ],
-      "module": "app.services.login_throttle"
+      "module": "app.services.local_bot_quota",
+      "path": "backend/app/services/local_bot_quota.py",
+      "wildcard_imports": []
     },
     {
-      "imports": [
-        "app",
-        "app.core.config"
+      "external_imports": [
+        "dataclasses",
+        "datetime",
+        "fastapi",
+        "hashlib",
+        "hmac",
+        "ipaddress",
+        "logging",
+        "math",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm"
       ],
-      "module": "app.services.lore_parser_quota"
-    },
-    {
-      "imports": [
-        "app",
-        "app.core.config"
-      ],
-      "module": "app.services.maintenance"
-    },
-    {
-      "imports": [
-        "app",
-        "app.core",
-        "app.credentials",
-        "app.services",
-        "app.services.direct_llm"
-      ],
-      "module": "app.services.messages"
-    },
-    {
-      "imports": [
-        "app",
-        "app.core.config"
-      ],
-      "module": "app.services.operation_settings"
-    },
-    {
       "imports": [
         "app.core.config",
-        "app.services"
+        "app.models"
       ],
-      "module": "app.services.pollinations_image"
+      "module": "app.services.login_throttle",
+      "path": "backend/app/services/login_throttle.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "contextlib",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "hmac",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm",
+        "threading",
+        "typing",
+        "uuid"
+      ],
       "imports": [
-        "app",
-        "app.core",
+        "app.core.config",
+        "app.models"
+      ],
+      "module": "app.services.lore_parser_quota",
+      "path": "backend/app/services/lore_parser_quota.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.config",
+        "app.models",
+        "app.schemas"
+      ],
+      "module": "app.services.maintenance",
+      "path": "backend/app/services/maintenance.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "hashlib",
+        "logging",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "uuid"
+      ],
+      "imports": [
+        "app.core.security",
+        "app.credentials",
+        "app.models",
+        "app.schemas",
+        "app.services.direct_llm",
+        "app.services.prompt_safety"
+      ],
+      "module": "app.services.messages",
+      "path": "backend/app/services/messages.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.core.config",
+        "app.models"
+      ],
+      "module": "app.services.operation_settings",
+      "path": "backend/app/services/operation_settings.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "asyncio",
+        "base64",
+        "dataclasses",
+        "hashlib",
+        "json",
+        "logging",
+        "re",
+        "typing",
+        "urllib.error",
+        "urllib.parse",
+        "urllib.request"
+      ],
+      "imports": [
+        "app.core.config",
+        "app.services.bounded_http",
+        "app.services.provider_http"
+      ],
+      "module": "app.services.pollinations_image",
+      "path": "backend/app/services/pollinations_image.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "json",
+        "pydantic",
+        "sqlalchemy.orm",
+        "typing",
+        "urllib.parse"
+      ],
+      "imports": [
         "app.core.config",
         "app.core.image_generation",
+        "app.core.security",
         "app.credentials",
-        "app.cruds",
-        "app.services",
-        "app.services.direct_llm"
+        "app.cruds.agents",
+        "app.cruds.community",
+        "app.models",
+        "app.schemas",
+        "app.services.agent_activity_policy",
+        "app.services.direct_llm",
+        "app.services.image_prompt_safety",
+        "app.services.image_provider",
+        "app.services.operation_settings",
+        "app.services.pollinations_image",
+        "app.services.profile_media",
+        "app.services.replicate_image",
+        "app.services.service_image_key"
       ],
-      "module": "app.services.post_image_generation"
+      "module": "app.services.post_image_generation",
+      "path": "backend/app/services/post_image_generation.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "asyncio",
+        "datetime",
+        "logging"
+      ],
       "imports": [
-        "app",
         "app.core.config",
         "app.core.db",
-        "app.cruds",
-        "app.services"
+        "app.cruds.community",
+        "app.models",
+        "app.services.post_image_generation"
       ],
-      "module": "app.services.post_image_job_worker"
+      "module": "app.services.post_image_job_worker",
+      "path": "backend/app/services/post_image_job_worker.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "PIL",
+        "base64",
+        "dataclasses",
+        "io",
+        "pathlib",
+        "shutil",
+        "typing",
+        "uuid",
+        "warnings"
+      ],
       "imports": [
         "app.core.config"
       ],
-      "module": "app.services.profile_media"
+      "module": "app.services.profile_media",
+      "path": "backend/app/services/profile_media.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "re",
+        "unicodedata"
+      ],
       "imports": [],
-      "module": "app.services.prompt_safety"
+      "module": "app.services.prompt_safety",
+      "path": "backend/app/services/prompt_safety.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "dataclasses",
+        "ipaddress",
+        "re",
+        "socket",
+        "urllib.error",
+        "urllib.parse",
+        "urllib.request"
+      ],
       "imports": [],
-      "module": "app.services.provider_http"
+      "module": "app.services.provider_http",
+      "path": "backend/app/services/provider_http.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
       "imports": [
-        "app",
         "app.core.config",
-        "app.cruds",
+        "app.cruds.graph_projection",
         "app.integrations.neo4j",
+        "app.models",
         "app.repositories.relationship_graph",
+        "app.schemas",
         "app.services.graph_projection_metrics",
         "app.services.graph_projection_runtime"
       ],
-      "module": "app.services.relationship_graph_read"
+      "module": "app.services.relationship_graph_read",
+      "path": "backend/app/services/relationship_graph_read.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "asyncio",
+        "dataclasses",
+        "ipaddress",
+        "json",
+        "re",
+        "socket",
+        "time",
+        "urllib.error",
+        "urllib.parse",
+        "urllib.request"
+      ],
       "imports": [
         "app.core.config",
-        "app.services"
+        "app.services.bounded_http",
+        "app.services.provider_http"
       ],
-      "module": "app.services.replicate_image"
+      "module": "app.services.replicate_image",
+      "path": "backend/app/services/replicate_image.py",
+      "wildcard_imports": []
     },
     {
-      "imports": [
-        "app",
-        "app.services"
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "dataclasses",
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
       ],
-      "module": "app.services.resident_contracts"
+      "imports": [
+        "app.models",
+        "app.services.agent_activity_policy"
+      ],
+      "module": "app.services.resident_contracts",
+      "path": "backend/app/services/resident_contracts.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "asyncio",
+        "logging"
+      ],
       "imports": [
-        "app",
         "app.core.config",
         "app.core.db",
-        "app.services"
+        "app.schemas",
+        "app.services.agent_runs"
       ],
-      "module": "app.services.resident_tick_scheduler"
+      "module": "app.services.resident_tick_scheduler",
+      "path": "backend/app/services/resident_tick_scheduler.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "json",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
       "imports": [
-        "app",
-        "app.services",
+        "app.models",
+        "app.services.activity_runtime",
+        "app.services.activity_state_contracts",
         "app.services.llm_context",
         "app.services.social_routine_interactions"
       ],
-      "module": "app.services.routine_post_context"
+      "module": "app.services.routine_post_context",
+      "path": "backend/app/services/routine_post_context.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "copy",
+        "dataclasses",
+        "json",
+        "pydantic",
+        "typing"
+      ],
       "imports": [
-        "app",
         "app.credentials",
+        "app.models",
         "app.providers.gemini",
-        "app.services",
+        "app.schemas",
+        "app.services.activity_state_contracts",
         "app.services.direct_llm",
         "app.services.llm_context",
         "app.services.resident_contracts",
         "app.services.routine_post_context"
       ],
-      "module": "app.services.routine_post_planner"
+      "module": "app.services.routine_post_planner",
+      "path": "backend/app/services/routine_post_planner.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "hashlib",
+        "json",
+        "logging",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm"
+      ],
       "imports": [
-        "app",
-        "app.core",
-        "app.cruds",
-        "app.services",
+        "app.core.unit_of_work",
+        "app.cruds.agent_runs",
+        "app.models",
+        "app.schemas",
+        "app.services.activity_runtime",
+        "app.services.agent_activity_policy",
+        "app.services.community",
         "app.services.direct_llm",
+        "app.services.joint_activity_runtime",
         "app.services.resident_contracts",
         "app.services.routine_post_context",
-        "app.services.routine_post_planner"
+        "app.services.routine_post_planner",
+        "app.services.social_event_runtime"
       ],
-      "module": "app.services.routine_post_runtime"
+      "module": "app.services.routine_post_runtime",
+      "path": "backend/app/services/routine_post_runtime.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
       "imports": [],
-      "module": "app.services.runtime_boundary"
+      "module": "app.services.runtime_boundary",
+      "path": "backend/app/services/runtime_boundary.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__"
+      ],
       "imports": [
-        "app.core",
         "app.core.config",
         "app.core.image_generation",
+        "app.core.security",
         "app.credentials"
       ],
-      "module": "app.services.service_image_key"
+      "module": "app.services.service_image_key",
+      "path": "backend/app/services/service_image_key.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "json",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing",
+        "zoneinfo"
+      ],
       "imports": [
-        "app",
         "app.core.ids",
+        "app.models",
         "app.models.social_memory"
       ],
-      "module": "app.services.social_event_runtime"
+      "module": "app.services.social_event_runtime",
+      "path": "backend/app/services/social_event_runtime.py",
+      "wildcard_imports": []
     },
     {
-      "imports": [
-        "app",
-        "app.cruds",
-        "app.services"
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
       ],
-      "module": "app.services.social_memory_read"
+      "imports": [
+        "app.cruds.graph_projection",
+        "app.cruds.social_memory",
+        "app.models",
+        "app.schemas",
+        "app.services.relationship_graph_read"
+      ],
+      "module": "app.services.social_memory_read",
+      "path": "backend/app/services/social_memory_read.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
       "imports": [
-        "app",
+        "app.models",
         "app.services.routine_post_context"
       ],
-      "module": "app.services.social_routine_interactions"
+      "module": "app.services.social_routine_interactions",
+      "path": "backend/app/services/social_routine_interactions.py",
+      "wildcard_imports": []
     },
     {
-      "imports": [
-        "app",
-        "app.cruds"
+      "external_imports": [
+        "sqlalchemy.orm",
+        "uuid"
       ],
-      "module": "app.services.tree"
+      "imports": [
+        "app.cruds.community",
+        "app.cruds.tree",
+        "app.models",
+        "app.schemas"
+      ],
+      "module": "app.services.tree",
+      "path": "backend/app/services/tree.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "json",
+        "logging",
+        "urllib.error",
+        "urllib.parse",
+        "urllib.request"
+      ],
       "imports": [
         "app.core.config",
-        "app.services"
+        "app.services.bounded_http"
       ],
-      "module": "app.services.turnstile"
+      "module": "app.services.turnstile",
+      "path": "backend/app/services/turnstile.py",
+      "wildcard_imports": []
     },
     {
-      "imports": [
-        "app"
+      "external_imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hashlib",
+        "json",
+        "pydantic",
+        "re",
+        "typing",
+        "unicodedata"
       ],
-      "module": "app.services.world_character_contracts"
+      "imports": [
+        "app.models",
+        "app.schemas"
+      ],
+      "module": "app.services.world_character_contracts",
+      "path": "backend/app/services/world_character_contracts.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "json",
+        "typing"
+      ],
       "imports": [
-        "app",
         "app.credentials",
         "app.providers.gemini",
-        "app.services"
+        "app.schemas",
+        "app.services.direct_llm",
+        "app.services.world_character_contracts"
       ],
-      "module": "app.services.world_character_provider"
+      "module": "app.services.world_character_provider",
+      "path": "backend/app/services/world_character_provider.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm",
+        "typing"
+      ],
       "imports": [
-        "app",
         "app.core.ids",
         "app.credentials",
-        "app.cruds",
+        "app.cruds.agents",
+        "app.models",
         "app.providers.registry",
-        "app.services"
+        "app.schemas",
+        "app.services.direct_llm",
+        "app.services.world_character_contracts",
+        "app.services.world_character_provider",
+        "app.services.world_generation_context"
       ],
-      "module": "app.services.world_character_setup"
+      "module": "app.services.world_character_setup",
+      "path": "backend/app/services/world_character_setup.py",
+      "wildcard_imports": []
     },
     {
-      "imports": [
-        "app"
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "hashlib",
+        "json",
+        "re",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "unicodedata",
+        "zoneinfo"
       ],
-      "module": "app.services.world_definitions"
+      "imports": [
+        "app.models",
+        "app.schemas"
+      ],
+      "module": "app.services.world_definitions",
+      "path": "backend/app/services/world_definitions.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "hashlib",
+        "logging",
+        "pydantic",
+        "time",
+        "typing"
+      ],
       "imports": [
-        "app",
-        "app.core",
-        "app.cruds",
-        "app.services",
+        "app.core.unit_of_work",
+        "app.cruds.agent_runs",
+        "app.models",
+        "app.schemas",
+        "app.services.activity_proposal_runtime",
+        "app.services.community",
         "app.services.direct_llm",
         "app.services.feed_reaction_planner",
         "app.services.resident_contracts",
-        "app.services.world_feed_search"
+        "app.services.world_feed_search",
+        "app.services.world_feed_social_apply"
       ],
-      "module": "app.services.world_feed_runtime"
+      "module": "app.services.world_feed_runtime",
+      "path": "backend/app/services/world_feed_runtime.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "pydantic",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm",
+        "time",
+        "typing",
+        "uuid",
+        "zoneinfo"
+      ],
       "imports": [
-        "app",
         "app.core.search_text",
-        "app.services"
+        "app.models",
+        "app.schemas",
+        "app.services.world_character_contracts"
       ],
-      "module": "app.services.world_feed_search"
+      "module": "app.services.world_feed_search",
+      "path": "backend/app/services/world_feed_search.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
       "imports": [
-        "app",
-        "app.services",
+        "app.models",
+        "app.schemas",
+        "app.services.activity_proposal_runtime",
+        "app.services.social_event_runtime",
         "app.services.world_feed_search"
       ],
-      "module": "app.services.world_feed_social_apply"
+      "module": "app.services.world_feed_social_apply",
+      "path": "backend/app/services/world_feed_social_apply.py",
+      "wildcard_imports": []
     },
     {
-      "imports": [
-        "app",
-        "app.services"
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "uuid"
       ],
-      "module": "app.services.world_foundation"
-    },
-    {
       "imports": [
-        "app",
-        "app.services"
+        "app.models",
+        "app.services.world_definitions"
       ],
-      "module": "app.services.world_generation_context"
+      "module": "app.services.world_foundation",
+      "path": "backend/app/services/world_foundation.py",
+      "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy.orm"
+      ],
       "imports": [
-        "app",
+        "app.models",
+        "app.schemas",
+        "app.services.world_definitions"
+      ],
+      "module": "app.services.world_generation_context",
+      "path": "backend/app/services/world_generation_context.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "re",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm",
+        "typing",
+        "unicodedata"
+      ],
+      "imports": [
         "app.core.ids",
-        "app.services"
+        "app.models",
+        "app.schemas",
+        "app.services.profile_media",
+        "app.services.world_definitions",
+        "app.services.world_generation_context"
       ],
-      "module": "app.services.worlds"
+      "module": "app.services.worlds",
+      "path": "backend/app/services/worlds.py",
+      "wildcard_imports": []
     }
   ],
-  "purpose": "T2.5 pre-refactor internal app import baseline",
+  "purpose": "T2.5 deterministic internal app import inventory",
   "root": "backend/app",
-  "schema_version": 1
+  "schema_version": 2
 }

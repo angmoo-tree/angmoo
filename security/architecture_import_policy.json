@@ -1,0 +1,1634 @@
+{
+  "documentation": "docs/architecture/backend-domains.md",
+  "effective_main_sha": "16fe1b58c34bfac7e0f94cf449d8078bba98d1b2",
+  "legacy_exception_groups": [
+    {
+      "edges": [
+        {
+          "imported": "app.models",
+          "importer": "app.alembic.env"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.api.v1.deps"
+        },
+        {
+          "imported": "app.services.auth",
+          "importer": "app.api.v1.deps"
+        },
+        {
+          "imported": "app.services.demo_lock",
+          "importer": "app.api.v1.deps"
+        },
+        {
+          "imported": "app.services.local_bot",
+          "importer": "app.api.v1.deps"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.api.v1.routes.agent_runs"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.api.v1.routes.agent_runs"
+        },
+        {
+          "imported": "app.services.agent_runs",
+          "importer": "app.api.v1.routes.agent_runs"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.api.v1.routes.agents"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.api.v1.routes.agents"
+        },
+        {
+          "imported": "app.services.agent_creation_drafts",
+          "importer": "app.api.v1.routes.agents"
+        },
+        {
+          "imported": "app.services.agent_runs",
+          "importer": "app.api.v1.routes.agents"
+        },
+        {
+          "imported": "app.services.agents",
+          "importer": "app.api.v1.routes.agents"
+        },
+        {
+          "imported": "app.services.community",
+          "importer": "app.api.v1.routes.agents"
+        },
+        {
+          "imported": "app.services.direct_llm",
+          "importer": "app.api.v1.routes.agents"
+        },
+        {
+          "imported": "app.services.maintenance",
+          "importer": "app.api.v1.routes.agents"
+        },
+        {
+          "imported": "app.services.profile_media",
+          "importer": "app.api.v1.routes.agents"
+        },
+        {
+          "imported": "app.services.runtime_boundary",
+          "importer": "app.api.v1.routes.agents"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.api.v1.routes.auth"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.api.v1.routes.auth"
+        },
+        {
+          "imported": "app.services.auth",
+          "importer": "app.api.v1.routes.auth"
+        },
+        {
+          "imported": "app.services.demo_lock",
+          "importer": "app.api.v1.routes.auth"
+        },
+        {
+          "imported": "app.services.login_throttle",
+          "importer": "app.api.v1.routes.auth"
+        },
+        {
+          "imported": "app.services.turnstile",
+          "importer": "app.api.v1.routes.auth"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.api.v1.routes.bot"
+        },
+        {
+          "imported": "app.services.community",
+          "importer": "app.api.v1.routes.bot"
+        },
+        {
+          "imported": "app.services.local_bot",
+          "importer": "app.api.v1.routes.bot"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.api.v1.routes.character_lore"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.api.v1.routes.character_lore"
+        },
+        {
+          "imported": "app.services.character_lore",
+          "importer": "app.api.v1.routes.character_lore"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.api.v1.routes.community"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.api.v1.routes.community"
+        },
+        {
+          "imported": "app.services.community",
+          "importer": "app.api.v1.routes.community"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.api.v1.routes.messages"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.api.v1.routes.messages"
+        },
+        {
+          "imported": "app.services.messages",
+          "importer": "app.api.v1.routes.messages"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.api.v1.routes.tree"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.api.v1.routes.tree"
+        },
+        {
+          "imported": "app.services.tree",
+          "importer": "app.api.v1.routes.tree"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.api.v1.routes.world_activity_runtime"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.api.v1.routes.world_activity_runtime"
+        },
+        {
+          "imported": "app.services.daily_activity_plans",
+          "importer": "app.api.v1.routes.world_activity_runtime"
+        },
+        {
+          "imported": "app.services.relationship_graph_read",
+          "importer": "app.api.v1.routes.world_activity_runtime"
+        },
+        {
+          "imported": "app.services.social_memory_read",
+          "importer": "app.api.v1.routes.world_activity_runtime"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.api.v1.routes.world_character_setup"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.api.v1.routes.world_character_setup"
+        },
+        {
+          "imported": "app.services.world_character_setup",
+          "importer": "app.api.v1.routes.world_character_setup"
+        },
+        {
+          "imported": "app.services.world_feed_search",
+          "importer": "app.api.v1.routes.world_character_setup"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.api.v1.routes.worlds"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.api.v1.routes.worlds"
+        },
+        {
+          "imported": "app.services.world_character_setup",
+          "importer": "app.api.v1.routes.worlds"
+        },
+        {
+          "imported": "app.services.worlds",
+          "importer": "app.api.v1.routes.worlds"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.cruds.agent_runs"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.cruds.agents"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.cruds.agents"
+        },
+        {
+          "imported": "app.cruds.agents",
+          "importer": "app.cruds.community"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.cruds.community"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.cruds.community"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.cruds.graph_projection"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.cruds.social_memory"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.cruds.tree"
+        },
+        {
+          "imported": "app.cruds.community",
+          "importer": "app.main"
+        },
+        {
+          "imported": "app.services.hosted_configuration",
+          "importer": "app.main"
+        },
+        {
+          "imported": "app.models.admin_ops",
+          "importer": "app.models"
+        },
+        {
+          "imported": "app.models.agent_creation_drafts",
+          "importer": "app.models"
+        },
+        {
+          "imported": "app.models.agent_local_keys",
+          "importer": "app.models"
+        },
+        {
+          "imported": "app.models.agent_runs",
+          "importer": "app.models"
+        },
+        {
+          "imported": "app.models.agent_settings",
+          "importer": "app.models"
+        },
+        {
+          "imported": "app.models.agent_slots",
+          "importer": "app.models"
+        },
+        {
+          "imported": "app.models.auth",
+          "importer": "app.models"
+        },
+        {
+          "imported": "app.models.character_lore",
+          "importer": "app.models"
+        },
+        {
+          "imported": "app.models.characters",
+          "importer": "app.models"
+        },
+        {
+          "imported": "app.models.community",
+          "importer": "app.models"
+        },
+        {
+          "imported": "app.models.credentials",
+          "importer": "app.models"
+        },
+        {
+          "imported": "app.models.graph_projection",
+          "importer": "app.models"
+        },
+        {
+          "imported": "app.models.local_bot_quotas",
+          "importer": "app.models"
+        },
+        {
+          "imported": "app.models.messages",
+          "importer": "app.models"
+        },
+        {
+          "imported": "app.models.profile_images",
+          "importer": "app.models"
+        },
+        {
+          "imported": "app.models.social_memory",
+          "importer": "app.models"
+        },
+        {
+          "imported": "app.models.tree",
+          "importer": "app.models"
+        },
+        {
+          "imported": "app.models.world_activity_runtime",
+          "importer": "app.models"
+        },
+        {
+          "imported": "app.models.world_character_setup",
+          "importer": "app.models"
+        },
+        {
+          "imported": "app.models.world_feed",
+          "importer": "app.models"
+        },
+        {
+          "imported": "app.models.worlds",
+          "importer": "app.models"
+        },
+        {
+          "imported": "app.models.worlds",
+          "importer": "app.models.social_memory"
+        },
+        {
+          "imported": "app.models.worlds",
+          "importer": "app.models.world_activity_runtime"
+        },
+        {
+          "imported": "app.models.worlds",
+          "importer": "app.models.world_character_setup"
+        },
+        {
+          "imported": "app.models.worlds",
+          "importer": "app.models.world_feed"
+        },
+        {
+          "imported": "app.cruds.community",
+          "importer": "app.public_main"
+        },
+        {
+          "imported": "app.services.hosted_configuration",
+          "importer": "app.public_main"
+        },
+        {
+          "imported": "app.schemas.agent_runs",
+          "importer": "app.schemas"
+        },
+        {
+          "imported": "app.schemas.agents",
+          "importer": "app.schemas"
+        },
+        {
+          "imported": "app.schemas.auth",
+          "importer": "app.schemas"
+        },
+        {
+          "imported": "app.schemas.character_lore",
+          "importer": "app.schemas"
+        },
+        {
+          "imported": "app.schemas.characters",
+          "importer": "app.schemas"
+        },
+        {
+          "imported": "app.schemas.community",
+          "importer": "app.schemas"
+        },
+        {
+          "imported": "app.schemas.maintenance",
+          "importer": "app.schemas"
+        },
+        {
+          "imported": "app.schemas.messages",
+          "importer": "app.schemas"
+        },
+        {
+          "imported": "app.schemas.relationship_graph",
+          "importer": "app.schemas"
+        },
+        {
+          "imported": "app.schemas.routine_post",
+          "importer": "app.schemas"
+        },
+        {
+          "imported": "app.schemas.social_memory",
+          "importer": "app.schemas"
+        },
+        {
+          "imported": "app.schemas.tree",
+          "importer": "app.schemas"
+        },
+        {
+          "imported": "app.schemas.world_activity_runtime",
+          "importer": "app.schemas"
+        },
+        {
+          "imported": "app.schemas.world_character_setup",
+          "importer": "app.schemas"
+        },
+        {
+          "imported": "app.schemas.world_feed",
+          "importer": "app.schemas"
+        },
+        {
+          "imported": "app.schemas.worlds",
+          "importer": "app.schemas"
+        },
+        {
+          "imported": "app.schemas.agent_runs",
+          "importer": "app.schemas.agents"
+        },
+        {
+          "imported": "app.schemas.characters",
+          "importer": "app.schemas.agents"
+        },
+        {
+          "imported": "app.schemas.community",
+          "importer": "app.schemas.agents"
+        },
+        {
+          "imported": "app.schemas.media_security",
+          "importer": "app.schemas.agents"
+        },
+        {
+          "imported": "app.schemas.community",
+          "importer": "app.schemas.characters"
+        },
+        {
+          "imported": "app.schemas.community",
+          "importer": "app.schemas.messages"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.activity_profile_readiness"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.activity_profile_readiness"
+        },
+        {
+          "imported": "app.services.world_character_contracts",
+          "importer": "app.services.activity_profile_readiness"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.activity_proposal_runtime"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.activity_proposal_runtime"
+        },
+        {
+          "imported": "app.services.daily_activity_plans",
+          "importer": "app.services.activity_proposal_runtime"
+        },
+        {
+          "imported": "app.services.joint_activity_runtime",
+          "importer": "app.services.activity_proposal_runtime"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.activity_runtime"
+        },
+        {
+          "imported": "app.services.activity_state_contracts",
+          "importer": "app.services.activity_runtime"
+        },
+        {
+          "imported": "app.cruds.agents",
+          "importer": "app.services.agent_activity_policy"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.agent_activity_policy"
+        },
+        {
+          "imported": "app.services.llm_context",
+          "importer": "app.services.agent_briefs"
+        },
+        {
+          "imported": "app.cruds.agent_runs",
+          "importer": "app.services.agent_creation_drafts"
+        },
+        {
+          "imported": "app.cruds.agents",
+          "importer": "app.services.agent_creation_drafts"
+        },
+        {
+          "imported": "app.cruds.community",
+          "importer": "app.services.agent_creation_drafts"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.agent_creation_drafts"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.agent_creation_drafts"
+        },
+        {
+          "imported": "app.services.agent_activity_policy",
+          "importer": "app.services.agent_creation_drafts"
+        },
+        {
+          "imported": "app.services.agent_runs",
+          "importer": "app.services.agent_creation_drafts"
+        },
+        {
+          "imported": "app.services.agents",
+          "importer": "app.services.agent_creation_drafts"
+        },
+        {
+          "imported": "app.services.bounded_http",
+          "importer": "app.services.agent_creation_drafts"
+        },
+        {
+          "imported": "app.services.demo_lock",
+          "importer": "app.services.agent_creation_drafts"
+        },
+        {
+          "imported": "app.services.direct_llm",
+          "importer": "app.services.agent_creation_drafts"
+        },
+        {
+          "imported": "app.services.image_provider",
+          "importer": "app.services.agent_creation_drafts"
+        },
+        {
+          "imported": "app.services.operation_settings",
+          "importer": "app.services.agent_creation_drafts"
+        },
+        {
+          "imported": "app.services.pollinations_image",
+          "importer": "app.services.agent_creation_drafts"
+        },
+        {
+          "imported": "app.services.profile_media",
+          "importer": "app.services.agent_creation_drafts"
+        },
+        {
+          "imported": "app.services.prompt_safety",
+          "importer": "app.services.agent_creation_drafts"
+        },
+        {
+          "imported": "app.services.provider_http",
+          "importer": "app.services.agent_creation_drafts"
+        },
+        {
+          "imported": "app.services.replicate_image",
+          "importer": "app.services.agent_creation_drafts"
+        },
+        {
+          "imported": "app.services.runtime_boundary",
+          "importer": "app.services.agent_creation_drafts"
+        },
+        {
+          "imported": "app.services.service_image_key",
+          "importer": "app.services.agent_creation_drafts"
+        },
+        {
+          "imported": "app.cruds.agent_runs",
+          "importer": "app.services.agent_runs"
+        },
+        {
+          "imported": "app.cruds.agents",
+          "importer": "app.services.agent_runs"
+        },
+        {
+          "imported": "app.cruds.community",
+          "importer": "app.services.agent_runs"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.agent_runs"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.agent_runs"
+        },
+        {
+          "imported": "app.services.activity_profile_readiness",
+          "importer": "app.services.agent_runs"
+        },
+        {
+          "imported": "app.services.agent_activity_policy",
+          "importer": "app.services.agent_runs"
+        },
+        {
+          "imported": "app.services.agent_briefs",
+          "importer": "app.services.agent_runs"
+        },
+        {
+          "imported": "app.services.community",
+          "importer": "app.services.agent_runs"
+        },
+        {
+          "imported": "app.services.direct_llm",
+          "importer": "app.services.agent_runs"
+        },
+        {
+          "imported": "app.services.langgraph_resident",
+          "importer": "app.services.agent_runs"
+        },
+        {
+          "imported": "app.services.llm_context",
+          "importer": "app.services.agent_runs"
+        },
+        {
+          "imported": "app.services.maintenance",
+          "importer": "app.services.agent_runs"
+        },
+        {
+          "imported": "app.services.routine_post_runtime",
+          "importer": "app.services.agent_runs"
+        },
+        {
+          "imported": "app.services.runtime_boundary",
+          "importer": "app.services.agent_runs"
+        },
+        {
+          "imported": "app.cruds.agent_runs",
+          "importer": "app.services.agent_writing"
+        },
+        {
+          "imported": "app.cruds.agents",
+          "importer": "app.services.agent_writing"
+        },
+        {
+          "imported": "app.cruds.community",
+          "importer": "app.services.agent_writing"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.agent_writing"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.agent_writing"
+        },
+        {
+          "imported": "app.services.agent_briefs",
+          "importer": "app.services.agent_writing"
+        },
+        {
+          "imported": "app.services.character_lore",
+          "importer": "app.services.agent_writing"
+        },
+        {
+          "imported": "app.services.community",
+          "importer": "app.services.agent_writing"
+        },
+        {
+          "imported": "app.services.llm_context",
+          "importer": "app.services.agent_writing"
+        },
+        {
+          "imported": "app.services.runtime_boundary",
+          "importer": "app.services.agent_writing"
+        },
+        {
+          "imported": "app.cruds.agent_runs",
+          "importer": "app.services.agents"
+        },
+        {
+          "imported": "app.cruds.agents",
+          "importer": "app.services.agents"
+        },
+        {
+          "imported": "app.cruds.community",
+          "importer": "app.services.agents"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.agents"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.agents"
+        },
+        {
+          "imported": "app.services.activity_profile_readiness",
+          "importer": "app.services.agents"
+        },
+        {
+          "imported": "app.services.agent_activity_policy",
+          "importer": "app.services.agents"
+        },
+        {
+          "imported": "app.services.agent_runs",
+          "importer": "app.services.agents"
+        },
+        {
+          "imported": "app.services.community",
+          "importer": "app.services.agents"
+        },
+        {
+          "imported": "app.services.demo_lock",
+          "importer": "app.services.agents"
+        },
+        {
+          "imported": "app.services.direct_llm",
+          "importer": "app.services.agents"
+        },
+        {
+          "imported": "app.services.image_prompt_safety",
+          "importer": "app.services.agents"
+        },
+        {
+          "imported": "app.services.maintenance",
+          "importer": "app.services.agents"
+        },
+        {
+          "imported": "app.services.operation_settings",
+          "importer": "app.services.agents"
+        },
+        {
+          "imported": "app.services.post_image_generation",
+          "importer": "app.services.agents"
+        },
+        {
+          "imported": "app.services.profile_media",
+          "importer": "app.services.agents"
+        },
+        {
+          "imported": "app.services.prompt_safety",
+          "importer": "app.services.agents"
+        },
+        {
+          "imported": "app.services.runtime_boundary",
+          "importer": "app.services.agents"
+        },
+        {
+          "imported": "app.services.service_image_key",
+          "importer": "app.services.agents"
+        },
+        {
+          "imported": "app.services.world_character_setup",
+          "importer": "app.services.agents"
+        },
+        {
+          "imported": "app.cruds.agent_runs",
+          "importer": "app.services.auth"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.auth"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.auth"
+        },
+        {
+          "imported": "app.services.demo_lock",
+          "importer": "app.services.auth"
+        },
+        {
+          "imported": "app.services.external_auth_verification",
+          "importer": "app.services.auth"
+        },
+        {
+          "imported": "app.services.login_throttle",
+          "importer": "app.services.auth"
+        },
+        {
+          "imported": "app.services.profile_media",
+          "importer": "app.services.auth"
+        },
+        {
+          "imported": "app.services.runtime_boundary",
+          "importer": "app.services.auth"
+        },
+        {
+          "imported": "app.services.world_character_setup",
+          "importer": "app.services.auth"
+        },
+        {
+          "imported": "app.cruds.agents",
+          "importer": "app.services.character_lore"
+        },
+        {
+          "imported": "app.cruds.community",
+          "importer": "app.services.character_lore"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.character_lore"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.character_lore"
+        },
+        {
+          "imported": "app.services.community",
+          "importer": "app.services.character_lore"
+        },
+        {
+          "imported": "app.services.direct_llm",
+          "importer": "app.services.character_lore"
+        },
+        {
+          "imported": "app.services.llm_context",
+          "importer": "app.services.character_lore"
+        },
+        {
+          "imported": "app.services.lore_parser_quota",
+          "importer": "app.services.character_lore"
+        },
+        {
+          "imported": "app.cruds.agent_runs",
+          "importer": "app.services.community"
+        },
+        {
+          "imported": "app.cruds.agents",
+          "importer": "app.services.community"
+        },
+        {
+          "imported": "app.cruds.community",
+          "importer": "app.services.community"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.community"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.community"
+        },
+        {
+          "imported": "app.services.agent_activity_policy",
+          "importer": "app.services.community"
+        },
+        {
+          "imported": "app.services.agent_briefs",
+          "importer": "app.services.community"
+        },
+        {
+          "imported": "app.services.community_abuse_quota",
+          "importer": "app.services.community"
+        },
+        {
+          "imported": "app.services.llm_context",
+          "importer": "app.services.community"
+        },
+        {
+          "imported": "app.services.social_event_runtime",
+          "importer": "app.services.community"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.community_abuse_quota"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.daily_activity_plans"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.daily_activity_plans"
+        },
+        {
+          "imported": "app.services.joint_activity_runtime",
+          "importer": "app.services.daily_activity_plans"
+        },
+        {
+          "imported": "app.services.world_character_contracts",
+          "importer": "app.services.daily_activity_plans"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.demo_lock"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.external_auth_verification"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.feed_reaction_planner"
+        },
+        {
+          "imported": "app.services.direct_llm",
+          "importer": "app.services.feed_reaction_planner"
+        },
+        {
+          "imported": "app.services.llm_context",
+          "importer": "app.services.feed_reaction_planner"
+        },
+        {
+          "imported": "app.services.resident_contracts",
+          "importer": "app.services.feed_reaction_planner"
+        },
+        {
+          "imported": "app.services.world_feed_search",
+          "importer": "app.services.feed_reaction_planner"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.graph_projection_commands"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.graph_projection_replay"
+        },
+        {
+          "imported": "app.services.graph_projection_commands",
+          "importer": "app.services.graph_projection_replay"
+        },
+        {
+          "imported": "app.services.graph_projection_metrics",
+          "importer": "app.services.graph_projection_replay"
+        },
+        {
+          "imported": "app.services.graph_projection_worker",
+          "importer": "app.services.graph_projection_replay"
+        },
+        {
+          "imported": "app.cruds.graph_projection",
+          "importer": "app.services.graph_projection_worker"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.graph_projection_worker"
+        },
+        {
+          "imported": "app.services.graph_projection_commands",
+          "importer": "app.services.graph_projection_worker"
+        },
+        {
+          "imported": "app.services.graph_projection_metrics",
+          "importer": "app.services.graph_projection_worker"
+        },
+        {
+          "imported": "app.services.pollinations_image",
+          "importer": "app.services.image_provider"
+        },
+        {
+          "imported": "app.services.replicate_image",
+          "importer": "app.services.image_provider"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.joint_activity_runtime"
+        },
+        {
+          "imported": "app.services.social_event_runtime",
+          "importer": "app.services.joint_activity_runtime"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.joint_activity_scheduling"
+        },
+        {
+          "imported": "app.cruds.agent_runs",
+          "importer": "app.services.langgraph_resident"
+        },
+        {
+          "imported": "app.cruds.agents",
+          "importer": "app.services.langgraph_resident"
+        },
+        {
+          "imported": "app.cruds.community",
+          "importer": "app.services.langgraph_resident"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.langgraph_resident"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.langgraph_resident"
+        },
+        {
+          "imported": "app.services.agent_activity_policy",
+          "importer": "app.services.langgraph_resident"
+        },
+        {
+          "imported": "app.services.character_lore",
+          "importer": "app.services.langgraph_resident"
+        },
+        {
+          "imported": "app.services.community",
+          "importer": "app.services.langgraph_resident"
+        },
+        {
+          "imported": "app.services.direct_llm",
+          "importer": "app.services.langgraph_resident"
+        },
+        {
+          "imported": "app.services.langgraph_social_apply",
+          "importer": "app.services.langgraph_resident"
+        },
+        {
+          "imported": "app.services.llm_context",
+          "importer": "app.services.langgraph_resident"
+        },
+        {
+          "imported": "app.services.post_image_generation",
+          "importer": "app.services.langgraph_resident"
+        },
+        {
+          "imported": "app.services.prompt_safety",
+          "importer": "app.services.langgraph_resident"
+        },
+        {
+          "imported": "app.services.resident_contracts",
+          "importer": "app.services.langgraph_resident"
+        },
+        {
+          "imported": "app.services.routine_post_runtime",
+          "importer": "app.services.langgraph_resident"
+        },
+        {
+          "imported": "app.services.world_feed_runtime",
+          "importer": "app.services.langgraph_resident"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.langgraph_social_apply"
+        },
+        {
+          "imported": "app.services.activity_proposal_runtime",
+          "importer": "app.services.langgraph_social_apply"
+        },
+        {
+          "imported": "app.services.social_event_runtime",
+          "importer": "app.services.langgraph_social_apply"
+        },
+        {
+          "imported": "app.cruds.agents",
+          "importer": "app.services.local_bot"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.local_bot"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.local_bot"
+        },
+        {
+          "imported": "app.services.agent_activity_policy",
+          "importer": "app.services.local_bot"
+        },
+        {
+          "imported": "app.services.agents",
+          "importer": "app.services.local_bot"
+        },
+        {
+          "imported": "app.services.community",
+          "importer": "app.services.local_bot"
+        },
+        {
+          "imported": "app.services.demo_lock",
+          "importer": "app.services.local_bot"
+        },
+        {
+          "imported": "app.services.local_bot_quota",
+          "importer": "app.services.local_bot"
+        },
+        {
+          "imported": "app.services.post_image_generation",
+          "importer": "app.services.local_bot"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.local_bot_quota"
+        },
+        {
+          "imported": "app.services.agent_activity_policy",
+          "importer": "app.services.local_bot_quota"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.login_throttle"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.lore_parser_quota"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.maintenance"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.maintenance"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.messages"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.messages"
+        },
+        {
+          "imported": "app.services.direct_llm",
+          "importer": "app.services.messages"
+        },
+        {
+          "imported": "app.services.prompt_safety",
+          "importer": "app.services.messages"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.operation_settings"
+        },
+        {
+          "imported": "app.services.bounded_http",
+          "importer": "app.services.pollinations_image"
+        },
+        {
+          "imported": "app.services.provider_http",
+          "importer": "app.services.pollinations_image"
+        },
+        {
+          "imported": "app.cruds.agents",
+          "importer": "app.services.post_image_generation"
+        },
+        {
+          "imported": "app.cruds.community",
+          "importer": "app.services.post_image_generation"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.post_image_generation"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.post_image_generation"
+        },
+        {
+          "imported": "app.services.agent_activity_policy",
+          "importer": "app.services.post_image_generation"
+        },
+        {
+          "imported": "app.services.direct_llm",
+          "importer": "app.services.post_image_generation"
+        },
+        {
+          "imported": "app.services.image_prompt_safety",
+          "importer": "app.services.post_image_generation"
+        },
+        {
+          "imported": "app.services.image_provider",
+          "importer": "app.services.post_image_generation"
+        },
+        {
+          "imported": "app.services.operation_settings",
+          "importer": "app.services.post_image_generation"
+        },
+        {
+          "imported": "app.services.pollinations_image",
+          "importer": "app.services.post_image_generation"
+        },
+        {
+          "imported": "app.services.profile_media",
+          "importer": "app.services.post_image_generation"
+        },
+        {
+          "imported": "app.services.replicate_image",
+          "importer": "app.services.post_image_generation"
+        },
+        {
+          "imported": "app.services.service_image_key",
+          "importer": "app.services.post_image_generation"
+        },
+        {
+          "imported": "app.cruds.community",
+          "importer": "app.services.post_image_job_worker"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.post_image_job_worker"
+        },
+        {
+          "imported": "app.services.post_image_generation",
+          "importer": "app.services.post_image_job_worker"
+        },
+        {
+          "imported": "app.cruds.graph_projection",
+          "importer": "app.services.relationship_graph_read"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.relationship_graph_read"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.relationship_graph_read"
+        },
+        {
+          "imported": "app.services.graph_projection_metrics",
+          "importer": "app.services.relationship_graph_read"
+        },
+        {
+          "imported": "app.services.graph_projection_runtime",
+          "importer": "app.services.relationship_graph_read"
+        },
+        {
+          "imported": "app.services.bounded_http",
+          "importer": "app.services.replicate_image"
+        },
+        {
+          "imported": "app.services.provider_http",
+          "importer": "app.services.replicate_image"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.resident_contracts"
+        },
+        {
+          "imported": "app.services.agent_activity_policy",
+          "importer": "app.services.resident_contracts"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.resident_tick_scheduler"
+        },
+        {
+          "imported": "app.services.agent_runs",
+          "importer": "app.services.resident_tick_scheduler"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.routine_post_context"
+        },
+        {
+          "imported": "app.services.activity_runtime",
+          "importer": "app.services.routine_post_context"
+        },
+        {
+          "imported": "app.services.activity_state_contracts",
+          "importer": "app.services.routine_post_context"
+        },
+        {
+          "imported": "app.services.llm_context",
+          "importer": "app.services.routine_post_context"
+        },
+        {
+          "imported": "app.services.social_routine_interactions",
+          "importer": "app.services.routine_post_context"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.routine_post_planner"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.routine_post_planner"
+        },
+        {
+          "imported": "app.services.activity_state_contracts",
+          "importer": "app.services.routine_post_planner"
+        },
+        {
+          "imported": "app.services.direct_llm",
+          "importer": "app.services.routine_post_planner"
+        },
+        {
+          "imported": "app.services.llm_context",
+          "importer": "app.services.routine_post_planner"
+        },
+        {
+          "imported": "app.services.resident_contracts",
+          "importer": "app.services.routine_post_planner"
+        },
+        {
+          "imported": "app.services.routine_post_context",
+          "importer": "app.services.routine_post_planner"
+        },
+        {
+          "imported": "app.cruds.agent_runs",
+          "importer": "app.services.routine_post_runtime"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.routine_post_runtime"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.routine_post_runtime"
+        },
+        {
+          "imported": "app.services.activity_runtime",
+          "importer": "app.services.routine_post_runtime"
+        },
+        {
+          "imported": "app.services.agent_activity_policy",
+          "importer": "app.services.routine_post_runtime"
+        },
+        {
+          "imported": "app.services.community",
+          "importer": "app.services.routine_post_runtime"
+        },
+        {
+          "imported": "app.services.direct_llm",
+          "importer": "app.services.routine_post_runtime"
+        },
+        {
+          "imported": "app.services.joint_activity_runtime",
+          "importer": "app.services.routine_post_runtime"
+        },
+        {
+          "imported": "app.services.resident_contracts",
+          "importer": "app.services.routine_post_runtime"
+        },
+        {
+          "imported": "app.services.routine_post_context",
+          "importer": "app.services.routine_post_runtime"
+        },
+        {
+          "imported": "app.services.routine_post_planner",
+          "importer": "app.services.routine_post_runtime"
+        },
+        {
+          "imported": "app.services.social_event_runtime",
+          "importer": "app.services.routine_post_runtime"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.social_event_runtime"
+        },
+        {
+          "imported": "app.models.social_memory",
+          "importer": "app.services.social_event_runtime"
+        },
+        {
+          "imported": "app.cruds.graph_projection",
+          "importer": "app.services.social_memory_read"
+        },
+        {
+          "imported": "app.cruds.social_memory",
+          "importer": "app.services.social_memory_read"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.social_memory_read"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.social_memory_read"
+        },
+        {
+          "imported": "app.services.relationship_graph_read",
+          "importer": "app.services.social_memory_read"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.social_routine_interactions"
+        },
+        {
+          "imported": "app.services.routine_post_context",
+          "importer": "app.services.social_routine_interactions"
+        },
+        {
+          "imported": "app.cruds.community",
+          "importer": "app.services.tree"
+        },
+        {
+          "imported": "app.cruds.tree",
+          "importer": "app.services.tree"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.tree"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.tree"
+        },
+        {
+          "imported": "app.services.bounded_http",
+          "importer": "app.services.turnstile"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.world_character_contracts"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.world_character_contracts"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.world_character_provider"
+        },
+        {
+          "imported": "app.services.direct_llm",
+          "importer": "app.services.world_character_provider"
+        },
+        {
+          "imported": "app.services.world_character_contracts",
+          "importer": "app.services.world_character_provider"
+        },
+        {
+          "imported": "app.cruds.agents",
+          "importer": "app.services.world_character_setup"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.world_character_setup"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.world_character_setup"
+        },
+        {
+          "imported": "app.services.direct_llm",
+          "importer": "app.services.world_character_setup"
+        },
+        {
+          "imported": "app.services.world_character_contracts",
+          "importer": "app.services.world_character_setup"
+        },
+        {
+          "imported": "app.services.world_character_provider",
+          "importer": "app.services.world_character_setup"
+        },
+        {
+          "imported": "app.services.world_generation_context",
+          "importer": "app.services.world_character_setup"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.world_definitions"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.world_definitions"
+        },
+        {
+          "imported": "app.cruds.agent_runs",
+          "importer": "app.services.world_feed_runtime"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.world_feed_runtime"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.world_feed_runtime"
+        },
+        {
+          "imported": "app.services.activity_proposal_runtime",
+          "importer": "app.services.world_feed_runtime"
+        },
+        {
+          "imported": "app.services.community",
+          "importer": "app.services.world_feed_runtime"
+        },
+        {
+          "imported": "app.services.direct_llm",
+          "importer": "app.services.world_feed_runtime"
+        },
+        {
+          "imported": "app.services.feed_reaction_planner",
+          "importer": "app.services.world_feed_runtime"
+        },
+        {
+          "imported": "app.services.resident_contracts",
+          "importer": "app.services.world_feed_runtime"
+        },
+        {
+          "imported": "app.services.world_feed_search",
+          "importer": "app.services.world_feed_runtime"
+        },
+        {
+          "imported": "app.services.world_feed_social_apply",
+          "importer": "app.services.world_feed_runtime"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.world_feed_search"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.world_feed_search"
+        },
+        {
+          "imported": "app.services.world_character_contracts",
+          "importer": "app.services.world_feed_search"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.world_feed_social_apply"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.world_feed_social_apply"
+        },
+        {
+          "imported": "app.services.activity_proposal_runtime",
+          "importer": "app.services.world_feed_social_apply"
+        },
+        {
+          "imported": "app.services.social_event_runtime",
+          "importer": "app.services.world_feed_social_apply"
+        },
+        {
+          "imported": "app.services.world_feed_search",
+          "importer": "app.services.world_feed_social_apply"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.world_foundation"
+        },
+        {
+          "imported": "app.services.world_definitions",
+          "importer": "app.services.world_foundation"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.world_generation_context"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.world_generation_context"
+        },
+        {
+          "imported": "app.services.world_definitions",
+          "importer": "app.services.world_generation_context"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.services.worlds"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.services.worlds"
+        },
+        {
+          "imported": "app.services.profile_media",
+          "importer": "app.services.worlds"
+        },
+        {
+          "imported": "app.services.world_definitions",
+          "importer": "app.services.worlds"
+        },
+        {
+          "imported": "app.services.world_generation_context",
+          "importer": "app.services.worlds"
+        }
+      ],
+      "id": "pre-t2-5-horizontal-layer-imports",
+      "owner_stage": "L6",
+      "reason": "Exact edges present before the domain-first contract; no wider prefix or new edge is allowed.",
+      "removal_condition": "Remove each edge when its owning domain/runtime stage adopts a canonical public API; remove all remaining edges at L6.",
+      "review_date": "2026-11-14"
+    },
+    {
+      "edges": [
+        {
+          "imported": "app.services.graph_projection_commands",
+          "importer": "app.integrations.neo4j"
+        },
+        {
+          "imported": "app.services.graph_projection_metrics",
+          "importer": "app.integrations.neo4j"
+        }
+      ],
+      "id": "neo4j-write-runtime-command-bridge",
+      "owner_stage": "L4",
+      "reason": "The existing P7 Neo4j adapter consumes graph projection command and metric contracts from the legacy service layer.",
+      "removal_condition": "Move graph projection commands and metrics behind runtime/integration public ports during the L4 write-runtime split.",
+      "review_date": "2026-11-14"
+    }
+  ],
+  "legacy_module_cycles": [
+    {
+      "id": "routine-social-interaction-cycle",
+      "modules": [
+        "app.services.routine_post_context",
+        "app.services.social_routine_interactions"
+      ],
+      "owner_stage": "L4",
+      "reason": "Exact pre-T2.5 service cycle retained only until feed/social runtime extraction.",
+      "removal_condition": "Break the cycle when routine post context and social interaction input move behind L4 public contracts.",
+      "review_date": "2026-11-14"
+    }
+  ],
+  "legacy_prefixes": [
+    "app.cruds",
+    "app.models",
+    "app.schemas",
+    "app.services"
+  ],
+  "new_area_prefixes": [
+    "app.domains",
+    "app.integrations",
+    "app.runtime"
+  ],
+  "owner_stages": [
+    "L0",
+    "L1",
+    "L2",
+    "L3",
+    "L4",
+    "L6",
+    "P8-L",
+    "T2.5"
+  ],
+  "policy_id": "angmoo-t2-5-domain-first-v1",
+  "provider_sdk_prefixes": [
+    "google",
+    "oci",
+    "replicate"
+  ],
+  "purpose": "Freeze pre-T2.5 horizontal imports while enforcing domain-first boundaries for new code.",
+  "schema_version": 1
+}
