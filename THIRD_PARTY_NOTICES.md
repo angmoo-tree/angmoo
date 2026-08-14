@@ -16,7 +16,7 @@ Package authors retain all rights granted by their respective licenses.
 - `click 8.3.3` — BSD-3-Clause
 - `colorama 0.4.6` — OSI Approved :: BSD License
 - `crc32c 2.8` — LGPL-2.1-or-later
-- `cryptography 49.0.0` — Apache-2.0 OR BSD-3-Clause
+- `cryptography 50.0.0` — Apache-2.0 OR BSD-3-Clause
 - `distro 1.9.0` — Apache License, Version 2.0
 - `fastapi 0.139.2` — MIT
 - `google-auth 2.53.0` — Apache 2.0
@@ -41,7 +41,7 @@ Package authors retain all rights granted by their respective licenses.
 - `markupsafe 3.0.3` — BSD-3-Clause
 - `neo4j 6.2.0` — Apache-2.0 AND Python-2.0
 - `numpy 2.4.6` — BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0
-- `oci 2.182.1` — Universal Permissive License 1.0 or Apache License 2.0
+- `oci 2.184.1` — Universal Permissive License 1.0 or Apache License 2.0
 - `orjson 3.11.9` — MPL-2.0 AND (Apache-2.0 OR MIT)
 - `ormsgpack 1.12.2` — Apache-2.0 OR MIT
 - `packaging 26.2` — Apache-2.0 OR BSD-2-Clause
@@ -58,7 +58,7 @@ Package authors retain all rights granted by their respective licenses.
 - `pydantic-settings 2.14.2` — MIT
 - `pygments 2.20.0` — BSD-2-Clause
 - `pyjwt 2.13.0` — MIT
-- `pyopenssl 26.3.0` — Apache License, Version 2.0
+- `pyopenssl 26.4.0` — Apache License, Version 2.0
 - `pypdf 6.15.0` — BSD-3-Clause
 - `pytest 9.0.3` — MIT
 - `python-dateutil 2.9.0.post0` — Dual License
@@ -86,22 +86,22 @@ Package authors retain all rights granted by their respective licenses.
 
 ## JavaScript production packages (56)
 
-- `@babel/code-frame 7.29.0` — MIT
-- `@babel/compat-data 7.29.3` — MIT
-- `@babel/core 7.29.0` — MIT
-- `@babel/generator 7.29.1` — MIT
-- `@babel/helper-compilation-targets 7.28.6` — MIT
-- `@babel/helper-globals 7.28.0` — MIT
-- `@babel/helper-module-imports 7.28.6` — MIT
-- `@babel/helper-module-transforms 7.28.6` — MIT
-- `@babel/helper-string-parser 7.27.1` — MIT
-- `@babel/helper-validator-identifier 7.28.5` — MIT
-- `@babel/helper-validator-option 7.27.1` — MIT
-- `@babel/helpers 7.29.2` — MIT
-- `@babel/parser 7.29.3` — MIT
-- `@babel/template 7.28.6` — MIT
-- `@babel/traverse 7.29.0` — MIT
-- `@babel/types 7.29.0` — MIT
+- `@babel/code-frame 7.29.7` — MIT
+- `@babel/compat-data 7.29.7` — MIT
+- `@babel/core 7.29.7` — MIT
+- `@babel/generator 7.29.8` — MIT
+- `@babel/helper-compilation-targets 7.29.7` — MIT
+- `@babel/helper-globals 7.29.7` — MIT
+- `@babel/helper-module-imports 7.29.7` — MIT
+- `@babel/helper-module-transforms 7.29.7` — MIT
+- `@babel/helper-string-parser 7.29.7` — MIT
+- `@babel/helper-validator-identifier 7.29.7` — MIT
+- `@babel/helper-validator-option 7.29.7` — MIT
+- `@babel/helpers 7.29.7` — MIT
+- `@babel/parser 7.29.8` — MIT
+- `@babel/template 7.29.7` — MIT
+- `@babel/traverse 7.29.8` — MIT
+- `@babel/types 7.29.8` — MIT
 - `@img/colour 1.1.0` — MIT
 - `@jridgewell/gen-mapping 0.3.13` — MIT
 - `@jridgewell/remapping 2.3.5` — MIT
@@ -130,7 +130,7 @@ Package authors retain all rights granted by their respective licenses.
 - `next 16.2.11` — MIT
 - `node-releases 2.0.38` — MIT
 - `picocolors 1.1.1` — ISC
-- `postcss 8.5.18` — MIT
+- `postcss 8.5.23` — MIT
 - `react 19.2.4` — MIT
 - `react-dom 19.2.4` — MIT
 - `scheduler 0.27.0` — MIT
