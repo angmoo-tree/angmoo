@@ -1,0 +1,210 @@
+name: Local Smoke
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-smoke-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONUTF8: "1"
+
+jobs:
+  local-core-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    services:
+      postgres:
+        image: pgvector/pgvector@sha256:1d533553fefe4f12e5d80c7b80622ba0c382abb5758856f52983d8789179f0fb
+        env:
+          POSTGRES_DB: angmoo
+          POSTGRES_USER: angmoo
+          POSTGRES_PASSWORD: angmoo-dev-only
+        ports:
+          - 55432:5432
+        options: >-
+          --health-cmd "pg_isready -U angmoo -d angmoo"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 30
+    env:
+      APP_ENV: test
+      APP_SECRET: synthetic-ci-${{ github.repository_id }}-${{ github.run_id }}
+      DATABASE_URL: postgresql+psycopg://angmoo@127.0.0.1:55432/angmoo
+      PGPASSWORD: angmoo-dev-only
+      SEED_DEMO_DATA: "true"
+      RESIDENT_TICK_SCHEDULER_ENABLED: "false"
+      POST_IMAGE_JOB_WORKER_ENABLED: "false"
+      POLLINATIONS_SERVICE_IMAGE_ENABLED: "false"
+      CREDENTIAL_ENCRYPTION_PROVIDER: local
+      NEXT_PUBLIC_EXPERIMENTAL_IMAGE_ENABLED: "false"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.11.9"
+          python-version: "3.13"
+          enable-cache: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: "10.33.2"
+          run_install: false
+      - name: Install locked dependencies
+        shell: bash
+        run: |
+          uv sync --frozen --directory backend
+          pnpm --dir frontend install --frozen-lockfile
+      - name: Run Local OSS vertical smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          cleanup() {
+            [[ -n "${backend_pid:-}" ]] && kill "$backend_pid" >/dev/null 2>&1 || true
+            [[ -n "${frontend_pid:-}" ]] && kill "$frontend_pid" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          uv run --directory backend alembic upgrade head
+          uv run --directory backend uvicorn app.public_main:app --host 127.0.0.1 --port 8080 >"$RUNNER_TEMP/backend.log" 2>&1 &
+          backend_pid=$!
+          pnpm --dir frontend build
+          pnpm --dir frontend exec next start -H 127.0.0.1 -p 3000 >"$RUNNER_TEMP/frontend.log" 2>&1 &
+          frontend_pid=$!
+          for attempt in {1..60}; do
+            curl --fail --silent http://127.0.0.1:8080/health >/dev/null && break
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8080/health >/dev/null
+          for attempt in {1..60}; do
+            curl --fail --silent http://127.0.0.1:3000/ >/dev/null && break
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:3000/ >/dev/null
+          uv run --directory backend python ../scripts/quickstart_smoke.py \
+            --backend-url http://127.0.0.1:8080 \
+            --frontend-url http://127.0.0.1:3000 \
+            --bootstrap-local-session
+          if grep -E 'https?://(generativelanguage|api\.pollinations|api\.replicate)' "$RUNNER_TEMP/backend.log"; then
+            echo "Provider request found in Local OSS smoke"
+            exit 1
+          fi
+
+  local-autonomy-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      APP_ENV: test
+      APP_SECRET: synthetic-ci-${{ github.repository_id }}-${{ github.run_id }}
+      RESIDENT_TICK_SCHEDULER_ENABLED: "false"
+      POST_IMAGE_JOB_WORKER_ENABLED: "false"
+      POLLINATIONS_SERVICE_IMAGE_ENABLED: "false"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.11.9"
+          python-version: "3.13"
+          enable-cache: false
+      - name: Install locked backend dependencies
+        run: uv sync --frozen
+        working-directory: backend
+      - name: Run provider-free P1-P6 autonomy scenarios
+        working-directory: backend
+        run: |
+          uv run python -m pytest -q \
+            tests/test_world_foundation.py \
+            tests/test_world_definition_contract.py \
+            tests/test_world_creator_routes.py \
+            tests/test_world_character_setup_service.py \
+            tests/test_daily_activity_runtime.py \
+            tests/test_routine_post_runtime.py \
+            tests/test_feed_reaction_intent.py \
+            tests/test_world_feed_search.py \
+            tests/test_social_event_runtime.py \
+            tests/test_activity_proposal_runtime.py
+
+  local-full-graph:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: pgvector/pgvector@sha256:1d533553fefe4f12e5d80c7b80622ba0c382abb5758856f52983d8789179f0fb
+        env:
+          POSTGRES_DB: angmoo
+          POSTGRES_USER: angmoo
+          POSTGRES_PASSWORD: angmoo-dev-only
+        ports:
+          - 55432:5432
+        options: >-
+          --health-cmd "pg_isready -U angmoo -d angmoo"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 30
+      neo4j:
+        image: neo4j@sha256:42fd5b9ead4dd4211f6f91bd831c358e4e2117367d04633fbf88682ca4792b30
+        env:
+          NEO4J_AUTH: neo4j/t2-graph-ci-password
+          NEO4J_server_memory_heap_initial__size: 256m
+          NEO4J_server_memory_heap_max__size: 512m
+          NEO4J_server_memory_pagecache_size: 256m
+        ports:
+          - 7474:7474
+          - 7687:7687
+        options: >-
+          --health-cmd "wget -q --spider http://127.0.0.1:7474/ || exit 1"
+          --health-interval 5s
+          --health-timeout 10s
+          --health-retries 24
+          --health-start-period 20s
+    env:
+      APP_ENV: test
+      APP_SECRET: synthetic-ci-${{ github.repository_id }}-${{ github.run_id }}
+      DATABASE_URL: postgresql+psycopg://angmoo@127.0.0.1:55432/angmoo
+      P7_GRAPH_POSTGRES_DATABASE_URL: postgresql+psycopg://angmoo@127.0.0.1:55432/angmoo
+      PGPASSWORD: angmoo-dev-only
+      NEO4J_URI: bolt://127.0.0.1:7687
+      NEO4J_USERNAME: neo4j
+      NEO4J_PASSWORD: t2-graph-ci-password
+      NEO4J_DATABASE: neo4j
+      GRAPH_PROJECTION_ENABLED: "true"
+      P7_NEO4J_INTEGRATION: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.11.9"
+          python-version: "3.13"
+          enable-cache: false
+      - name: Install and migrate
+        working-directory: backend
+        run: |
+          uv sync --frozen
+          uv run alembic upgrade head
+      - name: Run P7 graph, outage, replay, and isolation scenarios
+        working-directory: backend
+        run: |
+          uv run python -m pytest -q \
+            tests/test_graph_projection_commands.py \
+            tests/test_graph_projection_metrics.py \
+            tests/test_graph_projection_postgres_concurrency.py \
+            tests/test_graph_projection_replay.py \
+            tests/test_graph_projection_worker.py \
+            tests/test_relationship_graph_api.py \
+            tests/test_relationship_graph_repository.py \
+            tests/test_neo4j_relationship_projection_integration.py

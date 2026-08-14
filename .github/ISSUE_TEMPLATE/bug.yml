@@ -1,17 +1,24 @@
 name: Bug report
-description: Report a reproducible Angmoo public-source defect
+description: Report a reproducible Angmoo Local OSS defect
 title: "[Bug] "
 labels:
   - bug
 body:
   - type: markdown
     attributes:
-      value: Reports may be written in English or Korean. 한국어와 영어 모두 사용할 수 있습니다. Do not include credentials, private user data, or unredacted logs.
+      value: Reports may be written in English or Korean. Do not include credentials, personal data, backups, World Packages, or unredacted logs.
   - type: input
     id: revision
     attributes:
       label: Revision
       description: Commit SHA or release version
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: OS and Local profile
+      description: Operating system, Docker or native services, and enabled Local profile
     validations:
       required: true
   - type: textarea
@@ -33,10 +40,15 @@ body:
       label: Expected behavior
     validations:
       required: true
+  - type: textarea
+    id: contract
+    attributes:
+      label: Affected contract and rollback
+      description: Note schema, migration, provider, data, backup, or rollback impact when relevant
   - type: checkboxes
     id: safety
     attributes:
       label: Safety
       options:
-        - label: I removed credentials, personal data, and production logs.
+        - label: I removed credentials, personal data, backups, World Packages, and raw logs.
           required: true

@@ -2,7 +2,7 @@ name: angmoo-p7-graph
 
 services:
   neo4j:
-    image: neo4j:2026.06.0
+    image: neo4j@sha256:42fd5b9ead4dd4211f6f91bd831c358e4e2117367d04633fbf88682ca4792b30
     container_name: angmoo-p7-neo4j
     restart: "no"
     ports:

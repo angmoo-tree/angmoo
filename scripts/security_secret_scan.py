@@ -97,7 +97,7 @@ RULES = (
         "credentialed-database-url",
         re.compile(
             r"\b(?:postgres(?:ql)?(?:\+[^:]+)?|mysql(?:\+[^:]+)?|redis)://"
-            r"[^\s/:@]+:[^\s/@]+@[^\s]+",
+            r"[^\s/:@]+:[^\s/@]+@[^\s\"'<>),\]}]+",
             re.IGNORECASE,
         ),
     ),

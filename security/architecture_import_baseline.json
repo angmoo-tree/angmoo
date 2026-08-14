@@ -1,0 +1,1543 @@
+{
+  "edge_count": 426,
+  "module_count": 246,
+  "modules": [
+    {
+      "imports": [],
+      "module": "app"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core.config",
+        "app.core.db"
+      ],
+      "module": "app.alembic.env"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260510_0001_initial_community_schema"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260511_0002_agent_run_credentials"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260511_0003_agent_slots"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260511_0004_resident_agent_slots"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260513_0005_product_slice"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260513_0006_social_timeline_schema"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260514_0007_migrate_comments_to_reply_posts"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260514_0008_character_profile_identity"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260514_0009_character_banner_url"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260516_0010_agent_action_settings_and_slots"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260516_0011_agent_tendency_analysis"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260516_0012_llm_credential_model"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260516_0013_agent_feed_cues"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260516_0014_agent_activity_interval"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260517_0015_nullable_agent_run_post"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260519_0016_gemini_flash_lite_only"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260519_0017_min_activity_interval_30"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260519_0018_llm_credential_cooldown"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260520_0019_tree_community"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260520_0020_google_auth"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260520_0021_user_profile_setup"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260520_0022_user_display_name_cooldown"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260520_0023_user_admin_avatar"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260520_0024_drop_user_avatar_url"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260522_0025_user_deleted_at"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260522_0026_character_deleted_at"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260522_0027_user_policy_agreements"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260522_0028_agent_creation_drafts"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260526_0029_agent_run_gateway_result"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260528_0030_post_reports"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260529_0031_user_feed_content_filter"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260529_0032_agent_writing_sampling_settings"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260529_0033_agent_writing_repetition_level"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260530_0034_local_agent_mode"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260530_0035_post_info_metadata"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260601_0036_character_follow_targets_only"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260604_0037_character_lore_pgvector"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260605_0038_posts_topic_metadata"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260609_0039_daypart_persistent_session"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260610_0040_agent_public_action_executions"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260610_0041_agent_planner_tendency_profile"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260614_0042_admin_operations"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260615_0043_agent_activity_default_limits"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260615_0044_post_image_generation"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260615_0045_pollinations_post_images"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260616_0046_messages_v1"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260616_0047_message_default_gemma4_26b"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260616_0048_active_hours_presets"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260616_0049_observe_internal"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260617_0050_message_default_gemini25_flash_lite"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260617_0051_backfill_unconfigured_message_default"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260618_0052_local_api_post_image_jobs"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260620_0053_service_image_quota"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260624_0054_agent_relationship_points"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260625_0055_character_promotion_usage_consent"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260625_0056_agent_activity_reply_limit_30"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260627_0057_site_operation_settings"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260705_0058_profile_image_candidates"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260721_0059_replicate_image_token"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260726_0060_local_bot_quota_buckets"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260726_0061_auth_login_throttle"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260726_0062_external_auth_verification"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260726_0063_direct_user_like_uniqueness"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260726_0064_google_signup_grants"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260726_0065_community_mutation_quotas"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260726_0066_lore_parser_leases"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260802_0067_unique_resident_character_assignment"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260802_0068_message_response_leases"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260804_0069_auth_session_expiry"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260807_0070_world_foundation"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260807_0072_angmoo_global_foundation_backfill"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260808_0073_world_character_repertoire"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260809_0074_daily_activity_runtime"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260810_0075_routine_continuous_posts"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260811_0076_world_keyword_feed"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260811_0077_social_events_relationships"
+    },
+    {
+      "imports": [],
+      "module": "app.alembic.versions.20260812_0078_graph_projection_replay_runs"
+    },
+    {
+      "imports": [],
+      "module": "app.api.v1"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core",
+        "app.core.db",
+        "app.services"
+      ],
+      "module": "app.api.v1.deps"
+    },
+    {
+      "imports": [
+        "app.api.v1.routes"
+      ],
+      "module": "app.api.v1.main"
+    },
+    {
+      "imports": [
+        "app.api.v1.routes"
+      ],
+      "module": "app.api.v1.public"
+    },
+    {
+      "imports": [],
+      "module": "app.api.v1.routes"
+    },
+    {
+      "imports": [
+        "app",
+        "app.api.v1.deps",
+        "app.services"
+      ],
+      "module": "app.api.v1.routes.agent_runs"
+    },
+    {
+      "imports": [
+        "app",
+        "app.api.v1.deps",
+        "app.services",
+        "app.services.direct_llm",
+        "app.services.runtime_boundary"
+      ],
+      "module": "app.api.v1.routes.agents"
+    },
+    {
+      "imports": [
+        "app",
+        "app.api.v1.deps",
+        "app.core",
+        "app.core.config",
+        "app.services"
+      ],
+      "module": "app.api.v1.routes.auth"
+    },
+    {
+      "imports": [
+        "app",
+        "app.api.v1.deps",
+        "app.services"
+      ],
+      "module": "app.api.v1.routes.bot"
+    },
+    {
+      "imports": [
+        "app",
+        "app.api.v1.deps",
+        "app.services"
+      ],
+      "module": "app.api.v1.routes.character_lore"
+    },
+    {
+      "imports": [
+        "app",
+        "app.api.v1.deps",
+        "app.services"
+      ],
+      "module": "app.api.v1.routes.community"
+    },
+    {
+      "imports": [
+        "app",
+        "app.api.v1.deps",
+        "app.services"
+      ],
+      "module": "app.api.v1.routes.messages"
+    },
+    {
+      "imports": [
+        "app",
+        "app.api.v1.deps",
+        "app.services"
+      ],
+      "module": "app.api.v1.routes.tree"
+    },
+    {
+      "imports": [
+        "app",
+        "app.api.v1.deps",
+        "app.services"
+      ],
+      "module": "app.api.v1.routes.world_activity_runtime"
+    },
+    {
+      "imports": [
+        "app",
+        "app.api.v1.deps",
+        "app.services"
+      ],
+      "module": "app.api.v1.routes.world_character_setup"
+    },
+    {
+      "imports": [
+        "app",
+        "app.api.v1.deps",
+        "app.services"
+      ],
+      "module": "app.api.v1.routes.worlds"
+    },
+    {
+      "imports": [
+        "app.contracts.core_experience"
+      ],
+      "module": "app.contracts"
+    },
+    {
+      "imports": [],
+      "module": "app.contracts.core_experience"
+    },
+    {
+      "imports": [],
+      "module": "app.core"
+    },
+    {
+      "imports": [],
+      "module": "app.core.active_hours"
+    },
+    {
+      "imports": [],
+      "module": "app.core.agent_activity_limits"
+    },
+    {
+      "imports": [
+        "app.core.config"
+      ],
+      "module": "app.core.browser_session"
+    },
+    {
+      "imports": [],
+      "module": "app.core.config"
+    },
+    {
+      "imports": [
+        "app.core.config"
+      ],
+      "module": "app.core.db"
+    },
+    {
+      "imports": [],
+      "module": "app.core.ids"
+    },
+    {
+      "imports": [],
+      "module": "app.core.image_generation"
+    },
+    {
+      "imports": [
+        "app.core.config"
+      ],
+      "module": "app.core.public_media"
+    },
+    {
+      "imports": [],
+      "module": "app.core.redaction"
+    },
+    {
+      "imports": [],
+      "module": "app.core.request_limits"
+    },
+    {
+      "imports": [],
+      "module": "app.core.search_text"
+    },
+    {
+      "imports": [
+        "app.core.config"
+      ],
+      "module": "app.core.security"
+    },
+    {
+      "imports": [
+        "app.core",
+        "app.core.browser_session",
+        "app.core.config"
+      ],
+      "module": "app.core.startup_security"
+    },
+    {
+      "imports": [],
+      "module": "app.core.unit_of_work"
+    },
+    {
+      "imports": [
+        "app.credentials.contracts",
+        "app.credentials.resolver"
+      ],
+      "module": "app.credentials"
+    },
+    {
+      "imports": [],
+      "module": "app.credentials.contracts"
+    },
+    {
+      "imports": [
+        "app.core",
+        "app.credentials.contracts"
+      ],
+      "module": "app.credentials.resolver"
+    },
+    {
+      "imports": [],
+      "module": "app.cruds"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core"
+      ],
+      "module": "app.cruds.agent_runs"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core",
+        "app.core.agent_activity_limits",
+        "app.core.image_generation"
+      ],
+      "module": "app.cruds.agents"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core",
+        "app.core.agent_activity_limits",
+        "app.core.config",
+        "app.core.search_text",
+        "app.cruds"
+      ],
+      "module": "app.cruds.community"
+    },
+    {
+      "imports": [
+        "app"
+      ],
+      "module": "app.cruds.graph_projection"
+    },
+    {
+      "imports": [
+        "app"
+      ],
+      "module": "app.cruds.social_memory"
+    },
+    {
+      "imports": [
+        "app"
+      ],
+      "module": "app.cruds.tree"
+    },
+    {
+      "imports": [],
+      "module": "app.integrations"
+    },
+    {
+      "imports": [
+        "app.services.graph_projection_commands",
+        "app.services.graph_projection_metrics"
+      ],
+      "module": "app.integrations.neo4j"
+    },
+    {
+      "imports": [
+        "app.api.v1.public",
+        "app.core.config",
+        "app.core.db",
+        "app.core.public_media",
+        "app.core.request_limits",
+        "app.core.startup_security",
+        "app.cruds.community",
+        "app.services.hosted_configuration"
+      ],
+      "module": "app.main"
+    },
+    {
+      "imports": [
+        "app.models.admin_ops",
+        "app.models.agent_creation_drafts",
+        "app.models.agent_local_keys",
+        "app.models.agent_runs",
+        "app.models.agent_settings",
+        "app.models.agent_slots",
+        "app.models.auth",
+        "app.models.character_lore",
+        "app.models.characters",
+        "app.models.community",
+        "app.models.credentials",
+        "app.models.graph_projection",
+        "app.models.local_bot_quotas",
+        "app.models.messages",
+        "app.models.profile_images",
+        "app.models.social_memory",
+        "app.models.tree",
+        "app.models.world_activity_runtime",
+        "app.models.world_character_setup",
+        "app.models.world_feed",
+        "app.models.worlds"
+      ],
+      "module": "app.models"
+    },
+    {
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.models.admin_ops"
+    },
+    {
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.models.agent_creation_drafts"
+    },
+    {
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.models.agent_local_keys"
+    },
+    {
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.models.agent_runs"
+    },
+    {
+      "imports": [
+        "app.core",
+        "app.core.agent_activity_limits",
+        "app.core.db",
+        "app.core.image_generation"
+      ],
+      "module": "app.models.agent_settings"
+    },
+    {
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.models.agent_slots"
+    },
+    {
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.models.auth"
+    },
+    {
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.models.character_lore"
+    },
+    {
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.models.characters"
+    },
+    {
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.models.community"
+    },
+    {
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.models.credentials"
+    },
+    {
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.models.graph_projection"
+    },
+    {
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.models.local_bot_quotas"
+    },
+    {
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.models.messages"
+    },
+    {
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.models.profile_images"
+    },
+    {
+      "imports": [
+        "app.core.db",
+        "app.models.worlds"
+      ],
+      "module": "app.models.social_memory"
+    },
+    {
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.models.tree"
+    },
+    {
+      "imports": [
+        "app.core.db",
+        "app.models.worlds"
+      ],
+      "module": "app.models.world_activity_runtime"
+    },
+    {
+      "imports": [
+        "app.core.db",
+        "app.models.worlds"
+      ],
+      "module": "app.models.world_character_setup"
+    },
+    {
+      "imports": [
+        "app.core.db",
+        "app.models.worlds"
+      ],
+      "module": "app.models.world_feed"
+    },
+    {
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.models.worlds"
+    },
+    {
+      "imports": [],
+      "module": "app.policies"
+    },
+    {
+      "imports": [],
+      "module": "app.policies.name_policy"
+    },
+    {
+      "imports": [
+        "app.providers.contracts",
+        "app.providers.registry"
+      ],
+      "module": "app.providers"
+    },
+    {
+      "imports": [],
+      "module": "app.providers.contracts"
+    },
+    {
+      "imports": [
+        "app.core.redaction",
+        "app.providers.contracts"
+      ],
+      "module": "app.providers.fake"
+    },
+    {
+      "imports": [
+        "app.core.redaction",
+        "app.providers.contracts"
+      ],
+      "module": "app.providers.gemini"
+    },
+    {
+      "imports": [
+        "app.providers.contracts",
+        "app.providers.gemini"
+      ],
+      "module": "app.providers.registry"
+    },
+    {
+      "imports": [
+        "app.api.v1.public",
+        "app.core.config",
+        "app.core.db",
+        "app.core.public_media",
+        "app.core.request_limits",
+        "app.core.startup_security",
+        "app.cruds.community",
+        "app.services.hosted_configuration"
+      ],
+      "module": "app.public_main"
+    },
+    {
+      "imports": [],
+      "module": "app.repositories"
+    },
+    {
+      "imports": [
+        "app.integrations.neo4j"
+      ],
+      "module": "app.repositories.relationship_graph"
+    },
+    {
+      "imports": [
+        "app.schemas.agent_runs",
+        "app.schemas.agents",
+        "app.schemas.auth",
+        "app.schemas.character_lore",
+        "app.schemas.characters",
+        "app.schemas.community",
+        "app.schemas.maintenance",
+        "app.schemas.messages",
+        "app.schemas.relationship_graph",
+        "app.schemas.routine_post",
+        "app.schemas.social_memory",
+        "app.schemas.tree",
+        "app.schemas.world_activity_runtime",
+        "app.schemas.world_character_setup",
+        "app.schemas.world_feed",
+        "app.schemas.worlds"
+      ],
+      "module": "app.schemas"
+    },
+    {
+      "imports": [],
+      "module": "app.schemas.agent_runs"
+    },
+    {
+      "imports": [
+        "app.core.agent_activity_limits",
+        "app.core.image_generation",
+        "app.providers.registry",
+        "app.schemas.agent_runs",
+        "app.schemas.characters",
+        "app.schemas.community",
+        "app.schemas.media_security"
+      ],
+      "module": "app.schemas.agents"
+    },
+    {
+      "imports": [],
+      "module": "app.schemas.auth"
+    },
+    {
+      "imports": [],
+      "module": "app.schemas.character_lore"
+    },
+    {
+      "imports": [
+        "app.schemas.community"
+      ],
+      "module": "app.schemas.characters"
+    },
+    {
+      "imports": [],
+      "module": "app.schemas.community"
+    },
+    {
+      "imports": [],
+      "module": "app.schemas.maintenance"
+    },
+    {
+      "imports": [],
+      "module": "app.schemas.media_security"
+    },
+    {
+      "imports": [
+        "app.providers.registry",
+        "app.schemas.community"
+      ],
+      "module": "app.schemas.messages"
+    },
+    {
+      "imports": [],
+      "module": "app.schemas.relationship_graph"
+    },
+    {
+      "imports": [],
+      "module": "app.schemas.routine_post"
+    },
+    {
+      "imports": [],
+      "module": "app.schemas.social_memory"
+    },
+    {
+      "imports": [],
+      "module": "app.schemas.tree"
+    },
+    {
+      "imports": [],
+      "module": "app.schemas.world_activity_runtime"
+    },
+    {
+      "imports": [],
+      "module": "app.schemas.world_character_setup"
+    },
+    {
+      "imports": [],
+      "module": "app.schemas.world_feed"
+    },
+    {
+      "imports": [],
+      "module": "app.schemas.worlds"
+    },
+    {
+      "imports": [],
+      "module": "app.services"
+    },
+    {
+      "imports": [
+        "app",
+        "app.services"
+      ],
+      "module": "app.services.activity_profile_readiness"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core.ids",
+        "app.services"
+      ],
+      "module": "app.services.activity_proposal_runtime"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core.ids",
+        "app.services"
+      ],
+      "module": "app.services.activity_runtime"
+    },
+    {
+      "imports": [],
+      "module": "app.services.activity_state_contracts"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core",
+        "app.core.config",
+        "app.cruds"
+      ],
+      "module": "app.services.agent_activity_policy"
+    },
+    {
+      "imports": [
+        "app.services.llm_context"
+      ],
+      "module": "app.services.agent_briefs"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core",
+        "app.core.config",
+        "app.core.redaction",
+        "app.credentials",
+        "app.cruds",
+        "app.policies",
+        "app.services",
+        "app.services.direct_llm",
+        "app.services.runtime_boundary"
+      ],
+      "module": "app.services.agent_creation_drafts"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core.config",
+        "app.core.db",
+        "app.core.redaction",
+        "app.credentials",
+        "app.cruds",
+        "app.services",
+        "app.services.agent_briefs",
+        "app.services.direct_llm",
+        "app.services.langgraph_resident",
+        "app.services.llm_context",
+        "app.services.routine_post_runtime",
+        "app.services.runtime_boundary"
+      ],
+      "module": "app.services.agent_runs"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core.config",
+        "app.cruds",
+        "app.services",
+        "app.services.agent_briefs",
+        "app.services.llm_context",
+        "app.services.runtime_boundary"
+      ],
+      "module": "app.services.agent_writing"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core",
+        "app.core.config",
+        "app.core.image_generation",
+        "app.core.redaction",
+        "app.credentials",
+        "app.cruds",
+        "app.policies",
+        "app.services",
+        "app.services.direct_llm",
+        "app.services.runtime_boundary"
+      ],
+      "module": "app.services.agents"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core",
+        "app.core.config",
+        "app.core.redaction",
+        "app.cruds",
+        "app.policies",
+        "app.services",
+        "app.services.runtime_boundary"
+      ],
+      "module": "app.services.auth"
+    },
+    {
+      "imports": [],
+      "module": "app.services.bounded_http"
+    },
+    {
+      "imports": [
+        "app",
+        "app.credentials",
+        "app.cruds",
+        "app.providers.contracts",
+        "app.providers.registry",
+        "app.services",
+        "app.services.direct_llm",
+        "app.services.llm_context"
+      ],
+      "module": "app.services.character_lore"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core",
+        "app.core.search_text",
+        "app.cruds",
+        "app.services",
+        "app.services.agent_briefs",
+        "app.services.llm_context"
+      ],
+      "module": "app.services.community"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core.config"
+      ],
+      "module": "app.services.community_abuse_quota"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core.ids",
+        "app.services"
+      ],
+      "module": "app.services.daily_activity_plans"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core.config"
+      ],
+      "module": "app.services.demo_lock"
+    },
+    {
+      "imports": [
+        "app.core.config",
+        "app.core.redaction",
+        "app.providers.contracts",
+        "app.providers.gemini",
+        "app.providers.registry"
+      ],
+      "module": "app.services.direct_llm"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core.config"
+      ],
+      "module": "app.services.external_auth_verification"
+    },
+    {
+      "imports": [
+        "app",
+        "app.credentials",
+        "app.providers.gemini",
+        "app.services.direct_llm",
+        "app.services.llm_context",
+        "app.services.resident_contracts",
+        "app.services.world_feed_search"
+      ],
+      "module": "app.services.feed_reaction_planner"
+    },
+    {
+      "imports": [
+        "app"
+      ],
+      "module": "app.services.graph_projection_commands"
+    },
+    {
+      "imports": [],
+      "module": "app.services.graph_projection_metrics"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core.ids",
+        "app.services.graph_projection_commands",
+        "app.services.graph_projection_metrics",
+        "app.services.graph_projection_worker"
+      ],
+      "module": "app.services.graph_projection_replay"
+    },
+    {
+      "imports": [
+        "app.core.config",
+        "app.integrations.neo4j"
+      ],
+      "module": "app.services.graph_projection_runtime"
+    },
+    {
+      "imports": [
+        "app",
+        "app.cruds",
+        "app.integrations.neo4j",
+        "app.services.graph_projection_commands",
+        "app.services.graph_projection_metrics"
+      ],
+      "module": "app.services.graph_projection_worker"
+    },
+    {
+      "imports": [],
+      "module": "app.services.hosted_configuration"
+    },
+    {
+      "imports": [],
+      "module": "app.services.image_prompt_safety"
+    },
+    {
+      "imports": [
+        "app.core.image_generation",
+        "app.services"
+      ],
+      "module": "app.services.image_provider"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core.ids",
+        "app.services"
+      ],
+      "module": "app.services.joint_activity_runtime"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core.ids"
+      ],
+      "module": "app.services.joint_activity_scheduling"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core",
+        "app.core.config",
+        "app.core.redaction",
+        "app.credentials",
+        "app.cruds",
+        "app.services",
+        "app.services.direct_llm",
+        "app.services.llm_context",
+        "app.services.resident_contracts",
+        "app.services.routine_post_runtime",
+        "app.services.world_feed_runtime"
+      ],
+      "module": "app.services.langgraph_resident"
+    },
+    {
+      "imports": [
+        "app",
+        "app.services"
+      ],
+      "module": "app.services.langgraph_social_apply"
+    },
+    {
+      "imports": [],
+      "module": "app.services.llm_context"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core",
+        "app.cruds",
+        "app.services"
+      ],
+      "module": "app.services.local_bot"
+    },
+    {
+      "imports": [
+        "app",
+        "app.services"
+      ],
+      "module": "app.services.local_bot_quota"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core.config"
+      ],
+      "module": "app.services.login_throttle"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core.config"
+      ],
+      "module": "app.services.lore_parser_quota"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core.config"
+      ],
+      "module": "app.services.maintenance"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core",
+        "app.credentials",
+        "app.services",
+        "app.services.direct_llm"
+      ],
+      "module": "app.services.messages"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core.config"
+      ],
+      "module": "app.services.operation_settings"
+    },
+    {
+      "imports": [
+        "app.core.config",
+        "app.services"
+      ],
+      "module": "app.services.pollinations_image"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core",
+        "app.core.config",
+        "app.core.image_generation",
+        "app.credentials",
+        "app.cruds",
+        "app.services",
+        "app.services.direct_llm"
+      ],
+      "module": "app.services.post_image_generation"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core.config",
+        "app.core.db",
+        "app.cruds",
+        "app.services"
+      ],
+      "module": "app.services.post_image_job_worker"
+    },
+    {
+      "imports": [
+        "app.core.config"
+      ],
+      "module": "app.services.profile_media"
+    },
+    {
+      "imports": [],
+      "module": "app.services.prompt_safety"
+    },
+    {
+      "imports": [],
+      "module": "app.services.provider_http"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core.config",
+        "app.cruds",
+        "app.integrations.neo4j",
+        "app.repositories.relationship_graph",
+        "app.services.graph_projection_metrics",
+        "app.services.graph_projection_runtime"
+      ],
+      "module": "app.services.relationship_graph_read"
+    },
+    {
+      "imports": [
+        "app.core.config",
+        "app.services"
+      ],
+      "module": "app.services.replicate_image"
+    },
+    {
+      "imports": [
+        "app",
+        "app.services"
+      ],
+      "module": "app.services.resident_contracts"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core.config",
+        "app.core.db",
+        "app.services"
+      ],
+      "module": "app.services.resident_tick_scheduler"
+    },
+    {
+      "imports": [
+        "app",
+        "app.services",
+        "app.services.llm_context",
+        "app.services.social_routine_interactions"
+      ],
+      "module": "app.services.routine_post_context"
+    },
+    {
+      "imports": [
+        "app",
+        "app.credentials",
+        "app.providers.gemini",
+        "app.services",
+        "app.services.direct_llm",
+        "app.services.llm_context",
+        "app.services.resident_contracts",
+        "app.services.routine_post_context"
+      ],
+      "module": "app.services.routine_post_planner"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core",
+        "app.cruds",
+        "app.services",
+        "app.services.direct_llm",
+        "app.services.resident_contracts",
+        "app.services.routine_post_context",
+        "app.services.routine_post_planner"
+      ],
+      "module": "app.services.routine_post_runtime"
+    },
+    {
+      "imports": [],
+      "module": "app.services.runtime_boundary"
+    },
+    {
+      "imports": [
+        "app.core",
+        "app.core.config",
+        "app.core.image_generation",
+        "app.credentials"
+      ],
+      "module": "app.services.service_image_key"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core.ids",
+        "app.models.social_memory"
+      ],
+      "module": "app.services.social_event_runtime"
+    },
+    {
+      "imports": [
+        "app",
+        "app.cruds",
+        "app.services"
+      ],
+      "module": "app.services.social_memory_read"
+    },
+    {
+      "imports": [
+        "app",
+        "app.services.routine_post_context"
+      ],
+      "module": "app.services.social_routine_interactions"
+    },
+    {
+      "imports": [
+        "app",
+        "app.cruds"
+      ],
+      "module": "app.services.tree"
+    },
+    {
+      "imports": [
+        "app.core.config",
+        "app.services"
+      ],
+      "module": "app.services.turnstile"
+    },
+    {
+      "imports": [
+        "app"
+      ],
+      "module": "app.services.world_character_contracts"
+    },
+    {
+      "imports": [
+        "app",
+        "app.credentials",
+        "app.providers.gemini",
+        "app.services"
+      ],
+      "module": "app.services.world_character_provider"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core.ids",
+        "app.credentials",
+        "app.cruds",
+        "app.providers.registry",
+        "app.services"
+      ],
+      "module": "app.services.world_character_setup"
+    },
+    {
+      "imports": [
+        "app"
+      ],
+      "module": "app.services.world_definitions"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core",
+        "app.cruds",
+        "app.services",
+        "app.services.direct_llm",
+        "app.services.feed_reaction_planner",
+        "app.services.resident_contracts",
+        "app.services.world_feed_search"
+      ],
+      "module": "app.services.world_feed_runtime"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core.search_text",
+        "app.services"
+      ],
+      "module": "app.services.world_feed_search"
+    },
+    {
+      "imports": [
+        "app",
+        "app.services",
+        "app.services.world_feed_search"
+      ],
+      "module": "app.services.world_feed_social_apply"
+    },
+    {
+      "imports": [
+        "app",
+        "app.services"
+      ],
+      "module": "app.services.world_foundation"
+    },
+    {
+      "imports": [
+        "app",
+        "app.services"
+      ],
+      "module": "app.services.world_generation_context"
+    },
+    {
+      "imports": [
+        "app",
+        "app.core.ids",
+        "app.services"
+      ],
+      "module": "app.services.worlds"
+    }
+  ],
+  "purpose": "T2.5 pre-refactor internal app import baseline",
+  "root": "backend/app",
+  "schema_version": 1
+}

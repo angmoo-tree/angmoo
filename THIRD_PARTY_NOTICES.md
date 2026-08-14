@@ -210,11 +210,12 @@ Package authors retain all rights granted by their respective licenses.
 These services and CI tools are separate components and retain their own licenses.
 
 - **pgvector PostgreSQL image** — `PostgreSQL`; reference `pgvector/pgvector@sha256:1d533553fefe4f12e5d80c7b80622ba0c382abb5758856f52983d8789179f0fb`; source <https://github.com/pgvector/pgvector/blob/master/LICENSE>
-- **Neo4j Community Edition** — `GPL-3.0-only`; reference `neo4j:2026.06.0`; source <https://neo4j.com/licensing/>
-- **actions/checkout** — `MIT`; reference `actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd`; source <https://github.com/actions/checkout/blob/de0fac2e4500dabe0009e67214ff5f5447ce83dd/LICENSE>
-- **astral-sh/setup-uv** — `MIT`; reference `astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b`; source <https://github.com/astral-sh/setup-uv/blob/08807647e7069bb48b6ef5acd8ec9567f424441b/LICENSE>
-- **actions/setup-node** — `MIT`; reference `actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e`; source <https://github.com/actions/setup-node/blob/48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e/LICENSE>
-- **pnpm/action-setup** — `MIT`; reference `pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093`; source <https://github.com/pnpm/action-setup/blob/0e279bb959325dab635dd2c09392533439d90093/LICENSE>
+- **Neo4j Community Edition** — `GPL-3.0-only`; reference `neo4j@sha256:42fd5b9ead4dd4211f6f91bd831c358e4e2117367d04633fbf88682ca4792b30`; source <https://neo4j.com/licensing/>
+- **actions/checkout** — `MIT`; reference `actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1`; source <https://github.com/actions/checkout/blob/3d3c42e5aac5ba805825da76410c181273ba90b1/LICENSE>
+- **astral-sh/setup-uv** — `MIT`; reference `astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9`; source <https://github.com/astral-sh/setup-uv/blob/c771a70e6277c0a99b617c7a806ffedaca235ff9/LICENSE>
+- **actions/setup-node** — `MIT`; reference `actions/setup-node@820762786026740c76f36085b0efc47a31fe5020`; source <https://github.com/actions/setup-node/blob/820762786026740c76f36085b0efc47a31fe5020/LICENSE>
+- **pnpm/action-setup** — `MIT`; reference `pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86`; source <https://github.com/pnpm/action-setup/blob/0977fd99725f1db4007ccb2928dbb4e90d06cc86/LICENSE>
+- **actions/dependency-review-action** — `MIT`; reference `actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294`; source <https://github.com/actions/dependency-review-action/blob/a1d282b36b6f3519aa1f3fc636f609c47dddb294/LICENSE>
 
 ## Bundled assets and content
 

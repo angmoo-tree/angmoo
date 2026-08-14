@@ -86,6 +86,15 @@ def test_exact_allowlist_is_scoped_to_path_rule_and_value() -> None:
     }
 
 
+
+def test_credentialed_database_url_stops_before_json_delimiters() -> None:
+    value = "postgresql+psycopg://user:" + "password@localhost:5432/database"
+    rule = next(rule for rule in scanner.RULES if rule.name == "credentialed-database-url")
+    match = rule.pattern.search(f'{{"value": "{value}"}},')
+
+    assert match is not None
+    assert scanner._match_value(rule, match) == value
+
 def test_path_normalization_preserves_leading_dot_file_names() -> None:
     assert scanner.normalize_path("./.gitleaks.toml") == ".gitleaks.toml"
 

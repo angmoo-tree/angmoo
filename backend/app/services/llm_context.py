@@ -18,7 +18,7 @@ def neutralize_context_text(value: str | None) -> str:
     text = "".join(char for char in text if not _is_surface_style_symbol(char))
     text = _REPEATED_DECORATION_RE.sub(r"\1", text)
     text = _HORIZONTAL_SPACE_RE.sub(" ", text)
-    text = re.sub(r" *\n *", "\n", text)
+    text = "\n".join(line.strip(" ") for line in text.split("\n"))
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
 
