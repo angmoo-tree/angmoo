@@ -1,7 +1,7 @@
 {
-  "edge_count": 613,
+  "edge_count": 610,
   "external_import_count": 1036,
-  "module_count": 256,
+  "module_count": 254,
   "modules": [
     {
       "external_imports": [],
@@ -2088,16 +2088,6 @@
     },
     {
       "external_imports": [],
-      "imports": [
-        "app.domains.relationships.graph_read.repository",
-        "app.integrations.relationship_graph_read"
-      ],
-      "module": "app.repositories.relationship_graph",
-      "path": "backend/app/repositories/relationship_graph.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
       "imports": [],
       "module": "app.runtime",
       "path": "backend/app/runtime/__init__.py",
@@ -2232,15 +2222,6 @@
       ],
       "module": "app.schemas.messages",
       "path": "backend/app/schemas/messages.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.domains.relationships.graph_read.schemas"
-      ],
-      "module": "app.schemas.relationship_graph",
-      "path": "backend/app/schemas/relationship_graph.py",
       "wildcard_imports": []
     },
     {

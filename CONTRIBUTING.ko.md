@@ -44,7 +44,7 @@ PostgreSQL과 Neo4j 검사는 폐기 가능한 로컬 서비스를 사용합니�
 
 ## Pull Request와 merge 권한
 
-모든 변경은 PR을 통해 `main`에 들어갑니다. required checks 9개는 다음과
+모든 변경은 PR을 통해 `main`에 들어갑니다. required checks 10개는 다음과
 같습니다.
 
 - `backend`
@@ -56,10 +56,11 @@ PostgreSQL과 Neo4j 검사는 폐기 가능한 로컬 서비스를 사용합니�
 - `oss-boundary`
 - `dependency-license`
 - `dco`
+- `architecture-boundary`
 
-`windows-local-smoke`, `architecture-boundary`, `codeql`은 처음에는 advisory
-check입니다. Advisory는 실패를 무시한다는 뜻이 아니며 실패 원인과 required
-승격 조건을 기록하고 보안 finding은 해결하거나 명시적으로 판정해야 합니다.
+`windows-local-smoke`, `codeql`은 advisory check로 유지합니다. Advisory는
+실패를 무시한다는 뜻이 아니며 실패 원인과 required 승격 조건을 기록하고
+보안 finding은 해결하거나 명시적으로 판정해야 합니다.
 
 외부 기여자는 PR을 제출하며 `main`에 직접 push하거나 PR을 merge할 수
 없습니다. required checks 통과와 conversation 해결 뒤 저장소 오너가 최종

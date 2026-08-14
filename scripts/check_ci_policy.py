@@ -29,8 +29,9 @@ REQUIRED_JOBS = {
     "oss-boundary",
     "dependency-license",
     "dco",
+    "architecture-boundary",
 }
-ADVISORY_JOBS = {"windows-local-smoke", "architecture-boundary"}
+ADVISORY_JOBS = {"windows-local-smoke"}
 REQUIRED_EVENTS = {"push", "pull_request", "workflow_dispatch"}
 ACTION = re.compile(r"(?m)^\s*-\s+uses:\s+([^\s#]+)")
 FULL_SHA = re.compile(r"^[^@]+@[0-9a-f]{40}$")
@@ -185,7 +186,7 @@ def main() -> int:
         print(error, file=sys.stderr)
     if errors:
         return 1
-    print("Local OSS CI policy check passed: required=9 advisory=2 workflows=4")
+    print("Local OSS CI policy check passed: required=10 advisory=1 workflows=4")
     return 0
 
 
