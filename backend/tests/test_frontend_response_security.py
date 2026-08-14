@@ -19,8 +19,11 @@ def test_next_config_defines_csp_and_clickjacking_headers() -> None:
     assert "frame-ancestors 'none'" in source
     assert "object-src 'none'" in source
     assert "base-uri 'self'" in source
-    assert "https://accounts.google.com" in double_quoted_literals
-    assert "https://challenges.cloudflare.com" in double_quoted_literals
+    required_external_origins = {
+        "https://accounts.google.com",
+        "https://challenges.cloudflare.com",
+    }
+    assert not required_external_origins.difference(double_quoted_literals)
     assert 'process.env.NODE_ENV === "development"' in source
     assert 'developmentScriptSources' in source
     assert '["\'unsafe-eval\'"] : []' in source
