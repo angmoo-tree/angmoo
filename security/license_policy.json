@@ -1,0 +1,329 @@
+{
+  "schema_version": 1,
+  "project": {
+    "spdx": "GPL-3.0-only",
+    "license_path": "LICENSE",
+    "license_sha256_lf": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+    "required_current_legal_files": [
+      "LICENSE",
+      "THIRD_PARTY_NOTICES.md"
+    ],
+    "forbidden_current_legal_files": [
+      "NOTICE",
+      "LICENSE_HISTORY.md",
+      "LICENSES/Apache-2.0.txt",
+      "docs/legal/NOTICE-P1-P7-APACHE-2.0.txt"
+    ],
+    "declarations": [
+      {
+        "path": "README.md",
+        "required": [
+          "GPL-3.0-only",
+          "[LICENSE](LICENSE)",
+          "user-created or imported World Package",
+          "local runtime data"
+        ],
+        "forbidden": [
+          "The code is licensed under Apache License 2.0"
+        ]
+      },
+      {
+        "path": "README.ko.md",
+        "required": [
+          "GPL-3.0-only",
+          "[LICENSE](LICENSE)",
+          "World Package",
+          "Runtime 데이터"
+        ],
+        "forbidden": [
+          "코드는 Apache License 2.0으로 배포됩니다"
+        ]
+      },
+      {
+        "path": "CONTRIBUTING.md",
+        "required": [
+          "GPL-3.0-only",
+          "Developer Certificate of Origin 1.1",
+          "git commit -s",
+          "Signed-off-by"
+        ],
+        "forbidden": [
+          "provided under Apache License 2.0"
+        ]
+      },
+      {
+        "path": "CONTRIBUTING.ko.md",
+        "required": [
+          "GPL-3.0-only",
+          "Developer Certificate of Origin 1.1",
+          "git commit -s",
+          "Signed-off-by"
+        ],
+        "forbidden": [
+          "Apache License 2.0으로 제공"
+        ]
+      },
+      {
+        "path": "BRANDING.md",
+        "required": [
+          "GPL-3.0-only",
+          "not the Angmoo name, logo"
+        ],
+        "forbidden": [
+          "Apache License 2.0 covers the code"
+        ]
+      },
+      {
+        "path": ".github/PULL_REQUEST_TEMPLATE.md",
+        "required": [
+          "GPL-3.0-only",
+          "DCO 1.1",
+          "Signed-off-by"
+        ],
+        "forbidden": []
+      },
+      {
+        "path": "frontend/src/app/licenses/page.tsx",
+        "required": [
+          "GPL-3.0-only",
+          "World Package",
+          "Runtime",
+          "Lucide Icons - ISC License",
+          "Feather Icons - MIT License"
+        ],
+        "forbidden": []
+      }
+    ]
+  },
+  "scope": {
+    "application": "Angmoo application source and first-party bundled application assets use GPL-3.0-only unless a component states another license.",
+    "world_packages": "User-created and imported World Packages retain creator-selected license and attribution metadata; using Angmoo does not automatically apply the application GPL.",
+    "runtime_data": "Posts, comments, relationships, chat, memories, routines, logs, credentials, and backups are local user data rather than project source distributions.",
+    "third_party": "Bundled or installed third-party components retain their own licenses and attribution requirements."
+  },
+  "license_aliases": {
+    "Apache 2.0": "Apache-2.0",
+    "Apache License, Version 2.0": "Apache-2.0",
+    "BSD": "BSD-3-Clause",
+    "Modified BSD License": "BSD-3-Clause",
+    "OSI Approved :: BSD License": "BSD-3-Clause",
+    "OSI Approved :: MIT License": "MIT",
+    "Universal Permissive License 1.0 or Apache License 2.0": "UPL-1.0 OR Apache-2.0"
+  },
+  "metadata_overrides": [
+    {
+      "ecosystem": "python",
+      "name": "python-dateutil",
+      "reported_expression": "Dual License",
+      "normalized_expression": "Apache-2.0 OR BSD-3-Clause",
+      "reason": "Upstream offers Apache-2.0 or BSD-3-Clause; both branches are compatible with this distribution."
+    }
+  ],
+  "allowed_license_ids": [
+    "0BSD",
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "CC-BY-4.0",
+    "CC0-1.0",
+    "GPL-3.0-only",
+    "GPL-3.0-or-later",
+    "ISC",
+    "LGPL-2.1-or-later",
+    "LGPL-3.0-only",
+    "MIT",
+    "MIT-CMU",
+    "MPL-2.0",
+    "PSF-2.0",
+    "Python-2.0",
+    "UPL-1.0",
+    "Zlib"
+  ],
+  "review_required_license_ids": [
+    "CC-BY-4.0",
+    "GPL-3.0-only",
+    "GPL-3.0-or-later",
+    "LGPL-2.1-or-later",
+    "LGPL-3.0-only",
+    "MPL-2.0"
+  ],
+  "forbidden_license_ids": [
+    "AGPL-3.0-only",
+    "AGPL-3.0-or-later",
+    "GPL-2.0-only",
+    "GPL-2.0-or-later",
+    "LicenseRef-Proprietary",
+    "SSPL-1.0"
+  ],
+  "allowed_exceptions": [],
+  "dependency_reviews": [
+    {
+      "ecosystem": "python",
+      "name": "certifi",
+      "version": "2026.4.22",
+      "reported_expression": "MPL-2.0",
+      "normalized_expression": "MPL-2.0",
+      "distribution_boundary": "Unmodified separately installed Python package.",
+      "obligations": [
+        "Preserve certifi copyright and MPL-2.0 notice with redistributed package files.",
+        "Publish modifications to certifi-covered files under MPL-2.0 if such files are changed."
+      ],
+      "source": "https://github.com/certifi/python-certifi/blob/master/LICENSE"
+    },
+    {
+      "ecosystem": "python",
+      "name": "crc32c",
+      "version": "2.8",
+      "reported_expression": "LGPL-2.1-or-later",
+      "normalized_expression": "LGPL-2.1-or-later",
+      "distribution_boundary": "Separately imported Python library.",
+      "obligations": [
+        "Preserve the LGPL notice and license when redistributing the library.",
+        "Keep replacement and relinking rights available for redistributed library binaries."
+      ],
+      "source": "https://github.com/ICRAR/crc32c"
+    },
+    {
+      "ecosystem": "python",
+      "name": "orjson",
+      "version": "3.11.9",
+      "reported_expression": "MPL-2.0 AND (Apache-2.0 OR MIT)",
+      "normalized_expression": "MPL-2.0 AND (Apache-2.0 OR MIT)",
+      "distribution_boundary": "Unmodified separately installed Python extension package.",
+      "obligations": [
+        "Preserve upstream license and copyright notices.",
+        "Keep MPL-covered file modifications available under MPL-2.0 if modified."
+      ],
+      "source": "https://github.com/ijl/orjson#license"
+    },
+    {
+      "ecosystem": "python",
+      "name": "psycopg",
+      "version": "3.3.4",
+      "reported_expression": "LGPL-3.0-only",
+      "normalized_expression": "LGPL-3.0-only",
+      "distribution_boundary": "Separately imported PostgreSQL client library.",
+      "obligations": [
+        "Preserve the LGPL-3.0-only notice and source availability for redistributed library code.",
+        "Do not prevent users from replacing or relinking the separately distributed library."
+      ],
+      "source": "https://github.com/psycopg/psycopg/blob/master/LICENSE.txt"
+    },
+    {
+      "ecosystem": "python",
+      "name": "psycopg-binary",
+      "version": "3.3.4",
+      "reported_expression": "LGPL-3.0-only",
+      "normalized_expression": "LGPL-3.0-only",
+      "distribution_boundary": "Bundled binary wheel installed as a replaceable Python dependency.",
+      "obligations": [
+        "Preserve the LGPL-3.0-only notice and corresponding source offer when redistributing the binary package.",
+        "Keep the dependency replaceable rather than merging it into a proprietary binary."
+      ],
+      "source": "https://github.com/psycopg/psycopg/blob/master/LICENSE.txt"
+    },
+    {
+      "ecosystem": "node",
+      "name": "caniuse-lite",
+      "version": "1.0.30001792",
+      "reported_expression": "CC-BY-4.0",
+      "normalized_expression": "CC-BY-4.0",
+      "distribution_boundary": "Production browser-support data bundled through the frontend dependency graph.",
+      "obligations": [
+        "Preserve attribution to the caniuse-lite and Can I Use data sources.",
+        "Provide the CC-BY-4.0 license link with redistributed data."
+      ],
+      "source": "https://github.com/browserslist/caniuse-lite/blob/main/LICENSE"
+    }
+  ],
+  "bundled_content": [
+    {
+      "path": "backend/scripts/seed_p1_world_fixture.py",
+      "classification": "first-party synthetic seed source",
+      "license_expression": "GPL-3.0-only"
+    },
+    {
+      "path": "backend/tests/fixtures/core_experience/p0-contract-v1",
+      "classification": "first-party synthetic contract fixtures",
+      "license_expression": "GPL-3.0-only"
+    }
+  ],
+  "infrastructure": [
+    {
+      "name": "pgvector PostgreSQL image",
+      "source_path": "compose.yml",
+      "reference": "pgvector/pgvector@sha256:1d533553fefe4f12e5d80c7b80622ba0c382abb5758856f52983d8789179f0fb",
+      "license_expression": "PostgreSQL",
+      "distribution_boundary": "Independent local database container; image components retain their respective licenses.",
+      "source": "https://github.com/pgvector/pgvector/blob/master/LICENSE"
+    },
+    {
+      "name": "Neo4j Community Edition",
+      "source_path": "compose.neo4j.yml",
+      "reference": "neo4j:2026.06.0",
+      "license_expression": "GPL-3.0-only",
+      "distribution_boundary": "Optional independent graph database service, not embedded application code.",
+      "source": "https://neo4j.com/licensing/"
+    }
+  ],
+  "actions": [
+    {
+      "name": "actions/checkout",
+      "source_path": ".github/workflows/ci.yml",
+      "reference": "actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd",
+      "license_expression": "MIT",
+      "source": "https://github.com/actions/checkout/blob/de0fac2e4500dabe0009e67214ff5f5447ce83dd/LICENSE"
+    },
+    {
+      "name": "astral-sh/setup-uv",
+      "source_path": ".github/workflows/ci.yml",
+      "reference": "astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b",
+      "license_expression": "MIT",
+      "source": "https://github.com/astral-sh/setup-uv/blob/08807647e7069bb48b6ef5acd8ec9567f424441b/LICENSE"
+    },
+    {
+      "name": "actions/setup-node",
+      "source_path": ".github/workflows/ci.yml",
+      "reference": "actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e",
+      "license_expression": "MIT",
+      "source": "https://github.com/actions/setup-node/blob/48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e/LICENSE"
+    },
+    {
+      "name": "pnpm/action-setup",
+      "source_path": ".github/workflows/ci.yml",
+      "reference": "pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093",
+      "license_expression": "MIT",
+      "source": "https://github.com/pnpm/action-setup/blob/0e279bb959325dab635dd2c09392533439d90093/LICENSE"
+    }
+  ],
+  "assets": [
+    {
+      "name": "Angmoo favicon",
+      "path": "frontend/public/favicon.ico",
+      "sha256": "776197e8be3aec0a5e04fdc1f10f6df6e2f9967a003f8a8405d32562f7ea7940",
+      "license_expression": "GPL-3.0-only",
+      "note": "First-party project asset; trademark and official-status use remains subject to BRANDING.md."
+    },
+    {
+      "name": "Angmoo application icon",
+      "path": "frontend/src/app/icon.svg",
+      "sha256": "ec8143b994f25f023422c55e3898ef46ed686db919625ba7e4ba28a133a57593",
+      "license_expression": "GPL-3.0-only",
+      "note": "First-party project asset; trademark and official-status use remains subject to BRANDING.md."
+    },
+    {
+      "name": "Lucide Icons",
+      "path": "frontend/src/app/licenses/page.tsx",
+      "notice_marker": "Lucide Icons - ISC License",
+      "license_expression": "ISC",
+      "source": "https://lucide.dev/license"
+    },
+    {
+      "name": "Feather Icons",
+      "path": "frontend/src/app/licenses/page.tsx",
+      "notice_marker": "Feather Icons - MIT License",
+      "license_expression": "MIT",
+      "source": "https://github.com/feathericons/feather/blob/main/LICENSE"
+    }
+  ]
+}

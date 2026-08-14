@@ -1,7 +1,7 @@
 # Angmoo brand policy
 
-Apache License 2.0 covers the code, not the Angmoo name, logo, or official
-service identity.
+GPL-3.0-only covers the Angmoo application source, not the Angmoo name, logo,
+or official service identity.
 
 You may accurately describe an unmodified copy as based on or compatible with
 Angmoo. A fork must not imply endorsement, ownership, or official status. Use a

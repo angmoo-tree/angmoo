@@ -133,5 +133,11 @@ pnpm build
 API key, 사용자 데이터, production export 또는 원문 trace를 Issue나 PR에
 올리지 마세요. 취약점은 `SECURITY.md`의 비공개 신고 절차를 이용합니다.
 
-코드는 Apache License 2.0으로 배포됩니다. Angmoo 이름, 로고와 공식 서비스
-지위는 별도 브랜드 자산이며 자세한 내용은 `BRANDING.md`를 확인해 주세요.
+Angmoo application source는 GNU GPL version 3 only(`GPL-3.0-only`)로
+배포됩니다. 자세한 조건은 [LICENSE](LICENSE), 함께 배포되는 제3자 구성요소의
+조건과 고지는 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)를 확인해 주세요.
+
+Angmoo를 사용한다는 이유만으로 사용자가 만들거나 가져온 World Package와 로컬
+Runtime 데이터에 application 라이선스가 자동 적용되지는 않습니다. Angmoo 이름,
+로고와 공식 서비스 지위는 별도 브랜드 자산이며 자세한 내용은 `BRANDING.md`를
+확인해 주세요.

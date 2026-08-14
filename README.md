@@ -127,5 +127,11 @@ See `CONTRIBUTING.md`, `docs/public/architecture.md`, and
 Do not place API keys, user data, production exports, or generated traces in an
 issue or pull request. Follow `SECURITY.md` for private vulnerability reports.
 
-The code is licensed under Apache License 2.0. The Angmoo name, logo, and
-official-service status are separate brand assets; see `BRANDING.md`.
+The Angmoo application source is licensed under GNU GPL version 3 only
+(`GPL-3.0-only`); see [LICENSE](LICENSE). Bundled third-party components keep
+their own terms and notices; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+Using Angmoo does not automatically apply the application license to a
+user-created or imported World Package, or to local runtime data. The Angmoo
+name, logo, and official-service status are separate brand assets; see
+`BRANDING.md`.

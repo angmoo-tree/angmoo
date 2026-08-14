@@ -143,4 +143,93 @@ Package authors retain all rights granted by their respective licenses.
 - `update-browserslist-db 1.2.3` — MIT
 - `yallist 3.1.1` — ISC
 
+## Reviewed conditional dependencies
+
+### `node/caniuse-lite 1.0.30001792`
+
+- Reported license: `CC-BY-4.0`
+- Normalized license: `CC-BY-4.0`
+- Distribution boundary: Production browser-support data bundled through the frontend dependency graph.
+- Upstream license source: <https://github.com/browserslist/caniuse-lite/blob/main/LICENSE>
+- Recorded obligations:
+  - Preserve attribution to the caniuse-lite and Can I Use data sources.
+  - Provide the CC-BY-4.0 license link with redistributed data.
+
+### `python/certifi 2026.4.22`
+
+- Reported license: `MPL-2.0`
+- Normalized license: `MPL-2.0`
+- Distribution boundary: Unmodified separately installed Python package.
+- Upstream license source: <https://github.com/certifi/python-certifi/blob/master/LICENSE>
+- Recorded obligations:
+  - Preserve certifi copyright and MPL-2.0 notice with redistributed package files.
+  - Publish modifications to certifi-covered files under MPL-2.0 if such files are changed.
+
+### `python/crc32c 2.8`
+
+- Reported license: `LGPL-2.1-or-later`
+- Normalized license: `LGPL-2.1-or-later`
+- Distribution boundary: Separately imported Python library.
+- Upstream license source: <https://github.com/ICRAR/crc32c>
+- Recorded obligations:
+  - Preserve the LGPL notice and license when redistributing the library.
+  - Keep replacement and relinking rights available for redistributed library binaries.
+
+### `python/orjson 3.11.9`
+
+- Reported license: `MPL-2.0 AND (Apache-2.0 OR MIT)`
+- Normalized license: `MPL-2.0 AND (Apache-2.0 OR MIT)`
+- Distribution boundary: Unmodified separately installed Python extension package.
+- Upstream license source: <https://github.com/ijl/orjson#license>
+- Recorded obligations:
+  - Preserve upstream license and copyright notices.
+  - Keep MPL-covered file modifications available under MPL-2.0 if modified.
+
+### `python/psycopg 3.3.4`
+
+- Reported license: `LGPL-3.0-only`
+- Normalized license: `LGPL-3.0-only`
+- Distribution boundary: Separately imported PostgreSQL client library.
+- Upstream license source: <https://github.com/psycopg/psycopg/blob/master/LICENSE.txt>
+- Recorded obligations:
+  - Preserve the LGPL-3.0-only notice and source availability for redistributed library code.
+  - Do not prevent users from replacing or relinking the separately distributed library.
+
+### `python/psycopg-binary 3.3.4`
+
+- Reported license: `LGPL-3.0-only`
+- Normalized license: `LGPL-3.0-only`
+- Distribution boundary: Bundled binary wheel installed as a replaceable Python dependency.
+- Upstream license source: <https://github.com/psycopg/psycopg/blob/master/LICENSE.txt>
+- Recorded obligations:
+  - Preserve the LGPL-3.0-only notice and corresponding source offer when redistributing the binary package.
+  - Keep the dependency replaceable rather than merging it into a proprietary binary.
+
+## Infrastructure and build tooling
+
+These services and CI tools are separate components and retain their own licenses.
+
+- **pgvector PostgreSQL image** — `PostgreSQL`; reference `pgvector/pgvector@sha256:1d533553fefe4f12e5d80c7b80622ba0c382abb5758856f52983d8789179f0fb`; source <https://github.com/pgvector/pgvector/blob/master/LICENSE>
+- **Neo4j Community Edition** — `GPL-3.0-only`; reference `neo4j:2026.06.0`; source <https://neo4j.com/licensing/>
+- **actions/checkout** — `MIT`; reference `actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd`; source <https://github.com/actions/checkout/blob/de0fac2e4500dabe0009e67214ff5f5447ce83dd/LICENSE>
+- **astral-sh/setup-uv** — `MIT`; reference `astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b`; source <https://github.com/astral-sh/setup-uv/blob/08807647e7069bb48b6ef5acd8ec9567f424441b/LICENSE>
+- **actions/setup-node** — `MIT`; reference `actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e`; source <https://github.com/actions/setup-node/blob/48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e/LICENSE>
+- **pnpm/action-setup** — `MIT`; reference `pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093`; source <https://github.com/pnpm/action-setup/blob/0e279bb959325dab635dd2c09392533439d90093/LICENSE>
+
+## Bundled assets and content
+
+- **Angmoo favicon** — `GPL-3.0-only`; First-party project asset; trademark and official-status use remains subject to BRANDING.md.
+- **Angmoo application icon** — `GPL-3.0-only`; First-party project asset; trademark and official-status use remains subject to BRANDING.md.
+- **Lucide Icons** — `ISC`; source <https://lucide.dev/license>
+- **Feather Icons** — `MIT`; source <https://github.com/feathericons/feather/blob/main/LICENSE>
+- `backend/scripts/seed_p1_world_fixture.py` — first-party synthetic seed source; `GPL-3.0-only`
+- `backend/tests/fixtures/core_experience/p0-contract-v1` — first-party synthetic contract fixtures; `GPL-3.0-only`
+
+## License scope boundary
+
+- **Application**: Angmoo application source and first-party bundled application assets use GPL-3.0-only unless a component states another license.
+- **World Packages**: User-created and imported World Packages retain creator-selected license and attribution metadata; using Angmoo does not automatically apply the application GPL.
+- **Runtime Data**: Posts, comments, relationships, chat, memories, routines, logs, credentials, and backups are local user data rather than project source distributions.
+- **Third Party**: Bundled or installed third-party components retain their own licenses and attribution requirements.
+
 This notice does not replace license text distributed by an individual dependency.

@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "라이선스 | Angmoo",
-  description: "Angmoo에서 사용하는 Lucide Icons 라이선스 고지",
+  description: "Angmoo application과 제3자 구성요소의 라이선스 고지",
   alternates: {
     canonical: "/licenses",
   },
@@ -62,11 +62,44 @@ export default function LicensesPage() {
             라이선스
           </h1>
           <p className="mt-4 max-w-[660px] break-keep text-[16px] font-bold leading-7 text-[#667085]">
-            Angmoo UI에서 사용하는 외부 아이콘 라이브러리의 라이선스 고지입니다.
+            Angmoo application과 함께 배포되는 제3자 구성요소의 라이선스
+            경계를 안내합니다.
           </p>
         </header>
 
         <section className="px-5 py-8 md:px-9">
+          <div className="mb-6 rounded-[24px] border border-[#eef1f5] bg-white p-5 shadow-[0_14px_34px_rgba(16,24,40,0.04)] md:p-6">
+            <p className="text-[14px] font-extrabold text-[#ff6b6b]">
+              Angmoo application
+            </p>
+            <h2 className="mt-1 text-[24px] font-extrabold text-[#101828]">
+              GPL-3.0-only
+            </h2>
+            <div className="mt-4 space-y-3 break-keep text-[15px] font-medium leading-7 text-[#475467]">
+              <p>
+                Angmoo application source는 GNU General Public License version
+                3 only 조건으로 제공됩니다.
+              </p>
+              <p>
+                이 조건은 Angmoo를 사용해 만든 World Package나 로컬 Runtime
+                데이터에 자동으로 부여되지 않습니다. 함께 배포되는 제3자
+                구성요소에는 각 구성요소의 라이선스가 적용됩니다.
+              </p>
+              <p>
+                전체 원문은 저장소의{" "}
+                <a
+                  href="https://github.com/angmoo-tree/angmoo/blob/main/LICENSE"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-extrabold text-[#ff6b6b] hover:underline"
+                >
+                  LICENSE
+                </a>
+                에서 확인할 수 있습니다.
+              </p>
+            </div>
+          </div>
+
           <div className="rounded-[24px] border border-[#eef1f5] bg-white p-5 shadow-[0_14px_34px_rgba(16,24,40,0.04)] md:p-6">
             <p className="text-[14px] font-extrabold text-[#ff6b6b]">Icons</p>
             <h2 className="mt-1 text-[24px] font-extrabold text-[#101828]">

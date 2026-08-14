@@ -49,3 +49,19 @@ def test_document_checker_rejects_missing_bilingual_required_marker(
         error.startswith("README.ko.md: missing required marker")
         for error in checker.check(tmp_path)
     )
+
+def test_document_checker_ignores_dependency_directories(tmp_path: Path) -> None:
+    for relative in checker.REQUIRED:
+        target = tmp_path / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        markers = checker.REQUIRED_MARKERS.get(relative, ())
+        target.write_text(
+            "# test\n" + "\n".join(markers) + "\n",
+            encoding="utf-8",
+        )
+
+    dependency_readme = tmp_path / "frontend" / "node_modules" / "example" / "README.md"
+    dependency_readme.parent.mkdir(parents=True)
+    dependency_readme.write_text("[missing](not-present.md)\n", encoding="utf-8")
+
+    assert checker.check(tmp_path) == []

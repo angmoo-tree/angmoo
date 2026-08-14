@@ -58,10 +58,7 @@
       "source": "LICENSE",
       "destination": "LICENSE"
     },
-    {
-      "source": "NOTICE",
-      "destination": "NOTICE"
-    },
+
     {
       "source": "README.ko.md",
       "destination": "README.ko.md"
@@ -1321,6 +1318,13 @@
     {
       "source": "backend/tests/test_m4_tree_public_contract.py",
       "destination": "backend/tests/test_m4_tree_public_contract.py"
+    },    {
+      "source": "backend/tests/test_t1_5_dependency_license_policy.py",
+      "destination": "backend/tests/test_t1_5_dependency_license_policy.py"
+    },
+    {
+      "source": "backend/tests/test_t1_5_project_license.py",
+      "destination": "backend/tests/test_t1_5_project_license.py"
     },
     {
       "source": "backend/tests/test_messages_service.py",
@@ -1967,6 +1971,9 @@
       "destination": "scripts/check_dependency_licenses.py"
     },
     {
+      "source": "scripts/check_project_license.py",
+      "destination": "scripts/check_project_license.py"
+    },    {
       "source": "scripts/check_public_docs.py",
       "destination": "scripts/check_public_docs.py"
     },
@@ -1993,6 +2000,9 @@
     {
       "source": "security/hosted_impact_policy.json",
       "destination": "security/hosted_impact_policy.json"
+    },    {
+      "source": "security/license_policy.json",
+      "destination": "security/license_policy.json"
     },
     {
       "source": "security/public_export_policy.json",
@@ -2141,7 +2151,6 @@
     "CONTRIBUTING.ko.md",
     "CONTRIBUTING.md",
     "LICENSE",
-    "NOTICE",
     "README.ko.md",
     "README.md",
     "SECURITY.md",
@@ -2161,6 +2170,8 @@
     "frontend/public/openapi.json",
     "frontend/src/app/icon.svg",
     "scripts/build_public_candidate.py",
+    "scripts/check_project_license.py",
+    "security/license_policy.json",
     "security/public_export_policy.json"
   ]
 }

@@ -39,8 +39,12 @@ Issue나 PR에 포함하지 마세요.
 - 변경 이유, 사용자 또는 contract 영향, 실행한 테스트와 남은 gap을 기록합니다.
 - intentional breaking change는 maintainer 사전 승인, 필요한 migration과
   release note가 있어야 합니다.
-- 제출한 기여는 별도 표시가 없는 한 Apache License 2.0으로 제공하는 데
-  동의한 것으로 처리됩니다.
+- 제출한 기여는 별도 표시가 없는 한 `GPL-3.0-only`로 제공하는 데 동의한
+  것으로 처리됩니다.
+- 모든 기여 commit에는 Developer Certificate of Origin 1.1을 확인하는
+  `Signed-off-by` trailer가 있어야 합니다. 보통 `git commit -s`를 사용합니다.
+  DCO는 기여물을 제출할 권리가 있음을 확인하는 절차이며 프로젝트 라이선스를
+  대신하지 않습니다.
 
 ## GitHub Actions Gate
 
