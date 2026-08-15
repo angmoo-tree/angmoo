@@ -48,11 +48,46 @@ def test_repository_docker_runtime_assets_pass() -> None:
     assert CHECKER.validate_resolved_compose(release, development, root=ROOT) == []
 
 
-def test_backend_entrypoint_exposes_migration_mode() -> None:
+def test_backend_entrypoint_runs_schema_and_credential_migrations() -> None:
     content = (ROOT / "scripts/docker/backend-entrypoint.sh").read_text(
         encoding="utf-8"
     )
-    assert "  migrate)\n    exec alembic upgrade head\n    ;;" in content
+    assert "prepare_database()" in content
+    assert "alembic upgrade head" in content
+    assert "python scripts/migrate_local_credentials.py" in content
+    assert 'APP_SECRET_FILE="$secret_dir/app_secret"' in content
+    assert "export APP_SECRET " not in content
+    assert 'APP_SECRET="$(cat' not in content
+    assert content.index("alembic upgrade head") < content.index(
+        "python scripts/migrate_local_credentials.py"
+    )
+
+
+def test_existing_database_requires_its_persistent_secrets() -> None:
+    content = (ROOT / "scripts/docker/postgresql-entrypoint.sh").read_text(
+        encoding="utf-8"
+    )
+    assert 'if [ -s "$data_dir/PG_VERSION" ]; then' in content
+    assert "credential_recovery_required secret=app_secret" in content
+    assert "validate_secret app_secret" in content
+    assert 'chown 10001:10001 "$target"' in content
+    assert "secret_acl_unsafe secret=app_secret" in content
+    assert "secret_volume_unavailable" in content
+    assert content.index('if [ -s "$data_dir/PG_VERSION" ]; then') < content.index(
+        "create_secret app_secret"
+    )
+
+
+def test_frontend_never_receives_the_runtime_secret_volume() -> None:
+    release, _ = _configs()
+    assert release["services"]["frontend"].get("volumes", []) == []
+    for service_name in ("backend", "scheduler", "projector"):
+        mounts = release["services"][service_name]["volumes"]
+        assert any(
+            mount.get("target") == "/run/angmoo-secrets"
+            and mount.get("read_only") is True
+            for mount in mounts
+        )
 
 
 def test_runtime_assets_reject_an_extra_host_port() -> None:

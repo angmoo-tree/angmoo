@@ -3,6 +3,7 @@ name: angmoo
 x-backend-image: &backend-image ghcr.io/angmoo-tree/angmoo-backend:${ANGMOO_VERSION:-v0.1.0}
 x-backend-environment: &backend-environment
   APP_ENV: development
+  APP_SECRET_FILE: /run/angmoo-secrets/app_secret
   API_DOCS_ENABLED: "false"
   SEED_DEMO_DATA: "true"
   SIGNUP_ENABLED: "false"

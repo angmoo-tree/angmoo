@@ -727,7 +727,15 @@ def _upsert_message_credential(
     db: Session, user: models.User, api_key: str, model: str
 ) -> models.LlmCredential:
     credential = _get_message_credential(db, user.id)
-    encrypted_api_key = security.encrypt_secret(api_key)
+    encrypted_api_key = security.encrypt_secret(
+        api_key,
+        scope=security.SecretScope(
+            owner_id=user.id,
+            character_id="",
+            provider="google",
+            purpose="message",
+        ),
+    )
     fingerprint = security.fingerprint_secret(api_key)
     if credential is None:
         credential = models.LlmCredential(

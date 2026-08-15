@@ -1253,7 +1253,7 @@ def test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident
 
     monkeypatch.setattr(agent_service.agent_run_service, "run_assigned_resident_slot_once", _assigned)
     monkeypatch.setattr(agent_service.agent_run_service, "run_community_once", _community)
-    monkeypatch.setattr(agent_service.security, "decrypt_secret", lambda value: "api-key")
+    monkeypatch.setattr(agent_service.security, "decrypt_secret", lambda value, **_kwargs: "api-key")
     monkeypatch.setattr(agent_service, "_run_first_greeting_writer", _writer)
     monkeypatch.setattr(agent_service, "_attach_first_greeting_image", _image)
     monkeypatch.setattr(agent_service.community_service, "create_post", _create_post)

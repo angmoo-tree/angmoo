@@ -101,12 +101,29 @@ def test_first_greeting_image_mode_uses_first_greeting_identity_model() -> None:
     )
 
 
+def _add_image_setting_owner(db: Session) -> None:
+    owner = models.User(id="owner-image-setting", display_name="Image Owner")
+    character = models.Character(
+        id="char-1",
+        owner_id=owner.id,
+        name="Image Bird",
+        handle="image-bird-test",
+        persona_summary="",
+    )
+    db.add(owner)
+    db.flush()
+    db.add(character)
+    db.commit()
+
+
 def test_image_generation_setting_encrypts_key() -> None:
     engine = create_engine("sqlite:///:memory:")
+    models.User.__table__.create(engine)
     models.Character.__table__.create(engine)
     models.AgentImageGenerationSetting.__table__.create(engine)
 
     with Session(engine) as db:
+        _add_image_setting_owner(db)
         setting = agent_crud.ensure_image_generation_setting(db, "char-1")
         updated = agent_crud.update_image_generation_setting(
             db,
@@ -129,10 +146,12 @@ def test_image_generation_setting_encrypts_key() -> None:
 
 def test_image_generation_setting_mode_sync_and_preserve_key() -> None:
     engine = create_engine("sqlite:///:memory:")
+    models.User.__table__.create(engine)
     models.Character.__table__.create(engine)
     models.AgentImageGenerationSetting.__table__.create(engine)
 
     with Session(engine) as db:
+        _add_image_setting_owner(db)
         setting = agent_crud.ensure_image_generation_setting(db, "char-1")
         assert setting.image_key_mode == "disabled"
         assert setting.image_generation_enabled is False
@@ -195,7 +214,7 @@ def test_service_image_key_helper_decrypts_envelope(monkeypatch) -> None:
     monkeypatch.setattr(
         service_image_key.security,
         "decrypt_secret",
-        lambda value: "decrypted-service-key",
+        lambda value, **_kwargs: "decrypted-service-key",
     )
 
     assert service_image_key.get_service_image_api_key() == "decrypted-service-key"
@@ -211,7 +230,7 @@ def test_service_image_key_helper_hides_invalid_envelope(monkeypatch) -> None:
         SecretStr("oci-kms-v1:invalid"),
     )
 
-    def fail_decrypt(_value: str) -> str:
+    def fail_decrypt(_value: str, **_kwargs: object) -> str:
         raise ValueError("bad envelope")
 
     monkeypatch.setattr(service_image_key.security, "decrypt_secret", fail_decrypt)
@@ -1085,7 +1104,7 @@ def test_prepare_post_image_does_not_skip_new_root_post_modes(
         lambda _db, _character_id: setting,
     )
     monkeypatch.setattr(post_image_generation, "_daily_image_usage", lambda *_args, **_kwargs: 0)
-    monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value: value)
+    monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
     monkeypatch.setattr(
         post_image_generation,
         "_refine_image_prompt",
@@ -1163,7 +1182,7 @@ def test_prepare_post_image_flux_uses_visual_identity_without_reference(monkeypa
         lambda _db, _character_id: setting,
     )
     monkeypatch.setattr(post_image_generation, "_daily_image_usage", lambda *_args, **_kwargs: 0)
-    monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value: value)
+    monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
     monkeypatch.setattr(post_image_generation, "_refine_image_prompt", fake_refine_image_prompt)
     monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
 
@@ -1243,7 +1262,7 @@ def test_prepare_post_image_reads_route_mode_at_processing_time(monkeypatch) -> 
         lambda _db, _character_id: setting,
     )
     monkeypatch.setattr(post_image_generation, "_daily_image_usage", lambda *_args, **_kwargs: 0)
-    monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value: value)
+    monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
     monkeypatch.setattr(post_image_generation, "_refine_image_prompt", fake_refine_image_prompt)
     monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
 
@@ -1317,7 +1336,7 @@ def test_prepare_post_image_flux_failure_keeps_pollinations_diagnostics(
         lambda _db, _character_id: setting,
     )
     monkeypatch.setattr(post_image_generation, "_daily_image_usage", lambda *_args, **_kwargs: 0)
-    monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value: value)
+    monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
     monkeypatch.setattr(post_image_generation, "_refine_image_prompt", fake_refine_image_prompt)
     monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
 
@@ -1365,6 +1384,7 @@ def test_local_api_prepare_uses_deterministic_prompt_without_llm(monkeypatch) ->
     )
     character = SimpleNamespace(
         id="char-1",
+        owner_id="user-1",
         name="Local Bird",
         avatar_url=None,
         banner_url=None,
@@ -1391,7 +1411,7 @@ def test_local_api_prepare_uses_deterministic_prompt_without_llm(monkeypatch) ->
         lambda _db, _character_id: setting,
     )
     monkeypatch.setattr(post_image_generation, "_daily_image_usage", lambda *_args, **_kwargs: 0)
-    monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value: value)
+    monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
     monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
     monkeypatch.setattr(post_image_generation, "_refine_image_prompt", fail_refiner)
     monkeypatch.setattr(post_image_generation, "_ensure_visual_identity", fail_identity)
@@ -1427,6 +1447,7 @@ def test_local_api_prepare_reads_route_mode_at_worker_processing_time(monkeypatc
     )
     character = SimpleNamespace(
         id="char-1",
+        owner_id="user-1",
         name="Local Bird",
         avatar_url=None,
         banner_url=None,
@@ -1455,7 +1476,7 @@ def test_local_api_prepare_reads_route_mode_at_worker_processing_time(monkeypatc
         lambda _db, _character_id: setting,
     )
     monkeypatch.setattr(post_image_generation, "_daily_image_usage", lambda *_args, **_kwargs: 0)
-    monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value: value)
+    monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
     monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
 
     result = asyncio.run(
@@ -1486,6 +1507,7 @@ def test_local_api_prepare_flux_uses_visual_identity_without_reference(monkeypat
     )
     character = SimpleNamespace(
         id="char-1",
+        owner_id="user-1",
         name="Local Bird",
         avatar_url=None,
         banner_url=None,
@@ -1506,7 +1528,7 @@ def test_local_api_prepare_flux_uses_visual_identity_without_reference(monkeypat
         lambda _db, _character_id: setting,
     )
     monkeypatch.setattr(post_image_generation, "_daily_image_usage", lambda *_args, **_kwargs: 0)
-    monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value: value)
+    monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
     monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
 
     result = asyncio.run(
@@ -1539,6 +1561,7 @@ def test_local_api_prepare_failure_propagates_attempt_metadata(monkeypatch) -> N
     )
     character = SimpleNamespace(
         id="char-1",
+        owner_id="user-1",
         name="Local Bird",
         avatar_url=None,
         banner_url=None,
@@ -1564,7 +1587,7 @@ def test_local_api_prepare_failure_propagates_attempt_metadata(monkeypatch) -> N
         lambda _db, _character_id: setting,
     )
     monkeypatch.setattr(post_image_generation, "_daily_image_usage", lambda *_args, **_kwargs: 0)
-    monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value: value)
+    monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
     monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
 
     result = asyncio.run(

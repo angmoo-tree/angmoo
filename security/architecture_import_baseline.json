@@ -1,7 +1,7 @@
 {
-  "edge_count": 645,
-  "external_import_count": 1065,
-  "module_count": 273,
+  "edge_count": 647,
+  "external_import_count": 1073,
+  "module_count": 274,
   "modules": [
     {
       "external_imports": [],
@@ -1316,8 +1316,14 @@
       "external_imports": [
         "base64",
         "binascii",
+        "cryptography.exceptions",
+        "cryptography.hazmat.primitives",
+        "cryptography.hazmat.primitives.ciphers.aead",
+        "cryptography.hazmat.primitives.kdf.hkdf",
+        "dataclasses",
         "hashlib",
         "hmac",
+        "json",
         "oci",
         "oci.auth.signers",
         "oci.key_management",
@@ -1587,6 +1593,19 @@
       ],
       "module": "app.domains.identity.application.local_owner",
       "path": "backend/app/domains/identity/application/local_owner.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses"
+      ],
+      "imports": [
+        "app.core.security",
+        "app.domains.identity.application.resolve_credential"
+      ],
+      "module": "app.domains.identity.application.migrate_local_credentials",
+      "path": "backend/app/domains/identity/application/migrate_local_credentials.py",
       "wildcard_imports": []
     },
     {

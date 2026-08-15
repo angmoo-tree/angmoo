@@ -20,11 +20,20 @@ def _credential(**overrides: object) -> SimpleNamespace:
         "provider": "google",
         "purpose": "agent",
         "model": "gemini-3.1-flash-lite",
-        "encrypted_api_key": security.encrypt_secret("synthetic-api-key"),
         "key_fingerprint": "fingerprint-1",
         "enabled": True,
     }
     values.update(overrides)
+    if "encrypted_api_key" not in overrides:
+        values["encrypted_api_key"] = security.encrypt_secret(
+            "synthetic-api-key",
+            scope=security.SecretScope(
+                owner_id=str(values["owner_id"]),
+                character_id=str(values["character_id"] or ""),
+                provider=str(values["provider"]),
+                purpose=str(values["purpose"]),
+            ),
+        )
     return SimpleNamespace(**values)
 
 

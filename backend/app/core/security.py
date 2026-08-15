@@ -2,16 +2,43 @@ import base64
 import binascii
 import hashlib
 import hmac
+import json
 import secrets
+from dataclasses import dataclass
 from typing import Any
+
+from cryptography.exceptions import InvalidTag
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
 from app.core.config import settings
 
 
 PASSWORD_ITERATIONS = 120_000
-LOCAL_SECRET_PREFIX = "dev-v1"
+LEGACY_LOCAL_SECRET_PREFIX = "dev-v1"
+LOCAL_SECRET_PREFIX = "local-v2"
 OCI_KMS_SECRET_PREFIX = "oci-kms-v1"
+LOCAL_SECRET_NONCE_BYTES = 12
+LOCAL_SECRET_KEY_BYTES = 32
+LOCAL_SECRET_HKDF_INFO = b"angmoo:credential:local-v2"
 _KMS_CLIENT: Any | None = None
+
+
+@dataclass(frozen=True)
+class SecretScope:
+    owner_id: str = ""
+    character_id: str = ""
+    provider: str = ""
+    purpose: str = "generic"
+
+    def as_dict(self) -> dict[str, str]:
+        return {
+            "character_id": self.character_id,
+            "owner_id": self.owner_id,
+            "provider": self.provider,
+            "purpose": self.purpose,
+        }
 
 
 def _b64encode(value: bytes) -> str:
@@ -63,6 +90,49 @@ def _credential_key() -> bytes:
     return hashlib.sha256(settings.app_secret.encode("utf-8")).digest()
 
 
+def _local_v2_key() -> bytes:
+    return HKDF(
+        algorithm=hashes.SHA256(),
+        length=LOCAL_SECRET_KEY_BYTES,
+        salt=None,
+        info=LOCAL_SECRET_HKDF_INFO,
+    ).derive(settings.app_secret.encode("utf-8"))
+
+
+def _scope_aad(scope: SecretScope | None) -> bytes:
+    normalized = scope or SecretScope()
+    return json.dumps(
+        normalized.as_dict(),
+        ensure_ascii=False,
+        separators=(",", ":"),
+        sort_keys=True,
+    ).encode("utf-8")
+
+
+def _validate_scope_aad(aad: bytes) -> None:
+    try:
+        decoded = json.loads(aad.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ValueError("Invalid local-v2 credential scope") from exc
+    if not isinstance(decoded, dict) or set(decoded) != {
+        "character_id",
+        "owner_id",
+        "provider",
+        "purpose",
+    }:
+        raise ValueError("Invalid local-v2 credential scope")
+    if not all(isinstance(value, str) for value in decoded.values()):
+        raise ValueError("Invalid local-v2 credential scope")
+    canonical = json.dumps(
+        decoded,
+        ensure_ascii=False,
+        separators=(",", ":"),
+        sort_keys=True,
+    ).encode("utf-8")
+    if not hmac.compare_digest(aad, canonical):
+        raise ValueError("Invalid local-v2 credential scope")
+
+
 def _xor_stream(length: int, nonce: bytes) -> bytes:
     key = _credential_key()
     chunks: list[bytes] = []
@@ -75,21 +145,24 @@ def _xor_stream(length: int, nonce: bytes) -> bytes:
     return b"".join(chunks)[:length]
 
 
-def _encrypt_secret_local(secret: str) -> str:
+def _encrypt_secret_legacy_local(secret: str) -> str:
     nonce = secrets.token_bytes(16)
     plain = secret.encode("utf-8")
     stream = _xor_stream(len(plain), nonce)
     cipher = bytes(left ^ right for left, right in zip(plain, stream, strict=True))
     mac = hmac.new(_credential_key(), nonce + cipher, hashlib.sha256).digest()
-    return f"{LOCAL_SECRET_PREFIX}:{_b64encode(nonce)}:{_b64encode(cipher)}:{_b64encode(mac)}"
+    return (
+        f"{LEGACY_LOCAL_SECRET_PREFIX}:"
+        f"{_b64encode(nonce)}:{_b64encode(cipher)}:{_b64encode(mac)}"
+    )
 
 
-def _decrypt_secret_local(payload: str) -> str:
+def _decrypt_secret_legacy_local(payload: str) -> str:
     try:
         version, nonce_raw, cipher_raw, mac_raw = payload.split(":", 3)
     except ValueError as exc:
         raise ValueError("Invalid credential envelope") from exc
-    if version != LOCAL_SECRET_PREFIX:
+    if version != LEGACY_LOCAL_SECRET_PREFIX:
         raise ValueError("Unsupported credential envelope")
     nonce = _b64decode(nonce_raw)
     cipher = _b64decode(cipher_raw)
@@ -100,6 +173,52 @@ def _decrypt_secret_local(payload: str) -> str:
     stream = _xor_stream(len(cipher), nonce)
     plain = bytes(left ^ right for left, right in zip(cipher, stream, strict=True))
     return plain.decode("utf-8")
+
+
+def _encrypt_secret_local_v2(secret: str, *, scope: SecretScope | None) -> str:
+    nonce = secrets.token_bytes(LOCAL_SECRET_NONCE_BYTES)
+    aad = _scope_aad(scope)
+    ciphertext = AESGCM(_local_v2_key()).encrypt(
+        nonce,
+        secret.encode("utf-8"),
+        aad,
+    )
+    return (
+        f"{LOCAL_SECRET_PREFIX}:"
+        f"{_b64encode(nonce)}:{_b64encode(aad)}:{_b64encode(ciphertext)}"
+    )
+
+
+def _decrypt_secret_local_v2(
+    payload: str,
+    *,
+    scope: SecretScope | None,
+) -> str:
+    try:
+        version, nonce_raw, aad_raw, ciphertext_raw = payload.split(":", 3)
+    except ValueError as exc:
+        raise ValueError("Invalid local-v2 credential envelope") from exc
+    if version != LOCAL_SECRET_PREFIX:
+        raise ValueError("Unsupported credential envelope")
+    try:
+        nonce = _b64decode(nonce_raw)
+        aad = _b64decode(aad_raw)
+        ciphertext = _b64decode(ciphertext_raw)
+    except (ValueError, binascii.Error) as exc:
+        raise ValueError("Invalid local-v2 credential envelope") from exc
+    if len(nonce) != LOCAL_SECRET_NONCE_BYTES:
+        raise ValueError("Invalid local-v2 credential nonce")
+    _validate_scope_aad(aad)
+    if scope is not None and not hmac.compare_digest(aad, _scope_aad(scope)):
+        raise ValueError("Credential scope does not match")
+    try:
+        plaintext = AESGCM(_local_v2_key()).decrypt(nonce, ciphertext, aad)
+    except InvalidTag as exc:
+        raise ValueError("Credential envelope failed authentication") from exc
+    try:
+        return plaintext.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise ValueError("Credential plaintext is not valid UTF-8") from exc
 
 
 def _kms_client() -> Any:
@@ -178,18 +297,26 @@ def _decrypt_secret_oci_kms(payload: str) -> str:
     return base64.b64decode(plain_b64).decode("utf-8")
 
 
-def encrypt_secret(secret: str) -> str:
+def encrypt_local_secret(secret: str, *, scope: SecretScope) -> str:
+    """Write the current local envelope; legacy dev-v1 is read-only."""
+
+    return _encrypt_secret_local_v2(secret, scope=scope)
+
+
+def encrypt_secret(secret: str, *, scope: SecretScope | None = None) -> str:
     provider = settings.credential_encryption_provider
     if provider in {"local", "dev", LOCAL_SECRET_PREFIX}:
-        return _encrypt_secret_local(secret)
+        return _encrypt_secret_local_v2(secret, scope=scope)
     if provider in {"oci_kms", "oci-kms"}:
         return _encrypt_secret_oci_kms(secret)
     raise ValueError(f"Unsupported credential encryption provider: {provider}")
 
 
-def decrypt_secret(payload: str) -> str:
+def decrypt_secret(payload: str, *, scope: SecretScope | None = None) -> str:
     if payload.startswith(f"{LOCAL_SECRET_PREFIX}:"):
-        return _decrypt_secret_local(payload)
+        return _decrypt_secret_local_v2(payload, scope=scope)
+    if payload.startswith(f"{LEGACY_LOCAL_SECRET_PREFIX}:"):
+        return _decrypt_secret_legacy_local(payload)
     if payload.startswith(f"{OCI_KMS_SECRET_PREFIX}:"):
         return _decrypt_secret_oci_kms(payload)
     raise ValueError("Unsupported credential envelope")

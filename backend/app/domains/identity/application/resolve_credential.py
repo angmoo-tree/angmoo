@@ -63,6 +63,9 @@ class CredentialResolver:
             model=str(getattr(credential, "model", "") or ""),
             fingerprint=getattr(credential, "key_fingerprint", None),
             purpose=purpose,
+            owner_id=str(getattr(credential, "owner_id", "") or ""),
+            character_id=str(getattr(credential, "character_id", "") or ""),
+            stored_purpose=stored_purpose,
         )
 
     @classmethod
@@ -77,6 +80,9 @@ class CredentialResolver:
             model=str(getattr(draft, "model", "") or ""),
             fingerprint=getattr(draft, "key_fingerprint", None),
             purpose=CredentialPurpose.CREATION_DRAFT_LLM,
+            owner_id=str(getattr(draft, "user_id", "") or ""),
+            character_id="",
+            stored_purpose="creation_draft",
         )
 
     @staticmethod
@@ -88,11 +94,24 @@ class CredentialResolver:
         model: str,
         fingerprint: str | None,
         purpose: CredentialPurpose,
+        owner_id: str | None = None,
+        character_id: str | None = None,
+        stored_purpose: str | None = None,
     ) -> CredentialMaterial:
         if not encrypted_secret:
             raise CredentialResolutionError("credential key is missing")
+        scope = (
+            security.SecretScope(
+                owner_id=owner_id or "",
+                character_id=character_id or "",
+                provider=provider,
+                purpose=stored_purpose or purpose.value,
+            )
+            if owner_id is not None or stored_purpose is not None
+            else None
+        )
         try:
-            secret = security.decrypt_secret(encrypted_secret).strip()
+            secret = security.decrypt_secret(encrypted_secret, scope=scope).strip()
         except ValueError as exc:
             raise CredentialResolutionError(
                 "credential key cannot be decrypted"
@@ -108,6 +127,38 @@ class CredentialResolver:
             _secret=secret,
         )
 
+    @staticmethod
+    def migrate_local_envelope(
+        encrypted_secret: str,
+        *,
+        scope: security.SecretScope,
+    ) -> str:
+        """Validate a local envelope and return its current local-v2 form."""
+
+        try:
+            plaintext = security.decrypt_secret(encrypted_secret, scope=scope).strip()
+        except ValueError as exc:
+            raise CredentialResolutionError(
+                "credential key cannot be decrypted"
+            ) from exc
+        if not plaintext:
+            raise CredentialResolutionError("credential key is empty")
+        if encrypted_secret.startswith(f"{security.LOCAL_SECRET_PREFIX}:"):
+            return encrypted_secret
+        if not encrypted_secret.startswith(
+            f"{security.LEGACY_LOCAL_SECRET_PREFIX}:"
+        ):
+            raise CredentialResolutionError("credential envelope is not local")
+        migrated = security.encrypt_local_secret(plaintext, scope=scope)
+        try:
+            if security.decrypt_secret(migrated, scope=scope) != plaintext:
+                raise CredentialResolutionError("credential migration canary failed")
+        except ValueError as exc:
+            raise CredentialResolutionError(
+                "credential migration canary failed"
+            ) from exc
+        return migrated
+
     @classmethod
     def resolve_configured_secret(
         cls,
@@ -122,7 +173,11 @@ class CredentialResolver:
         if not raw_value:
             return None
         if raw_value.startswith(
-            (f"{security.OCI_KMS_SECRET_PREFIX}:", f"{security.LOCAL_SECRET_PREFIX}:")
+            (
+                f"{security.OCI_KMS_SECRET_PREFIX}:",
+                f"{security.LOCAL_SECRET_PREFIX}:",
+                f"{security.LEGACY_LOCAL_SECRET_PREFIX}:",
+            )
         ):
             return cls.resolve_encrypted_material(
                 encrypted_secret=raw_value,

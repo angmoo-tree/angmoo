@@ -168,7 +168,15 @@ async def create_draft(
         user_id=user.id,
         provider=data.provider,
         model=data.model,
-        encrypted_api_key=security.encrypt_secret(data.api_key),
+        encrypted_api_key=security.encrypt_secret(
+            data.api_key,
+            scope=security.SecretScope(
+                owner_id=user.id,
+                character_id="",
+                provider=data.provider,
+                purpose="creation_draft",
+            ),
+        ),
         key_fingerprint=security.fingerprint_secret(data.api_key),
         name="",
         handle=None,

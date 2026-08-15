@@ -257,7 +257,7 @@ async def prepare_post_image(
         )
         prompt = _compose_pollinations_prompt(refined, model=model)
         prompt_hash = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
-        image_key = _image_key_for_source(setting, key_source, model)
+        image_key = _image_key_for_source(setting, key_source, model, character=character)
         if image_key is None:
             _finalize_service_image_quota(db, reservation, status="released")
             return _skipped(
@@ -527,7 +527,7 @@ async def prepare_local_api_post_image(
     reference_sent = bool(reference_image_url)
     route_mode = "replicate" if provider == "replicate" else operation_settings.get_pollinations_image_route_mode(db)
     try:
-        image_key = _image_key_for_source(setting, key_source, model)
+        image_key = _image_key_for_source(setting, key_source, model, character=character)
         if image_key is None:
             return _skipped(
                 "service_key_missing"
@@ -1319,7 +1319,11 @@ def _image_model_for_key_source(
 
 
 def _image_key_for_source(
-    setting: models.AgentImageGenerationSetting, key_source: str, model: str
+    setting: models.AgentImageGenerationSetting,
+    key_source: str,
+    model: str,
+    *,
+    character: models.Character,
 ) -> str | None:
     if key_source == "service":
         if image_provider.is_replicate_model(model):
@@ -1342,6 +1346,9 @@ def _image_key_for_source(
             model=model,
             fingerprint=None,
             purpose=CredentialPurpose.USER_IMAGE,
+            owner_id=character.owner_id,
+            character_id=character.id,
+            stored_purpose="user_image",
         ).reveal()
     except CredentialResolutionError:
         return None
