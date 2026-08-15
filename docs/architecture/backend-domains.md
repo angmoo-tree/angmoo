@@ -122,6 +122,20 @@ The pilot does not modify `SocialEvent`, `RelationshipState` writes,
 `GraphProjectionOutbox`, projector leases or retries, replay commands, Neo4j
 bootstrap, migrations, provider behavior, or transaction ownership.
 
+## L0 core audit
+
+The L0 Docker runtime proposal records the exact current `app.core` inventory
+in `security/local_runtime_contract.json`. Shared configuration, database,
+identifier, transaction, redaction, request-limit, browser-session, and
+security primitives remain in core. Activity scheduling policy moves at L2/L3,
+search normalization at L4, and media-specific policy at L6. Every deferred
+module has an owner and removal condition.
+
+`scripts/ci/check_local_runtime_contract.py` fails if a core module is added or
+removed without updating that inventory, or if core imports `app.domains`,
+`app.runtime`, or `app.integrations`. The audit changes no product behavior,
+schema, transaction boundary, or provider call.
+
 ## Dependency direction
 
 ```text

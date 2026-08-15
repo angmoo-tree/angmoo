@@ -1,5 +1,8 @@
 # Contributor development
 
+The Docker-first runtime target, support tiers, port boundary, and staged
+transition status are documented in [local-runtime.md](local-runtime.md).
+
 The supported contributor path is:
 
 1. start PostgreSQL+pgvector with root `compose.yml`;
