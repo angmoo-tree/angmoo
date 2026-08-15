@@ -12,7 +12,7 @@ production-grade self-hosting을 보장하거나 운영 배포 방법을 제공�
 
 번역 내용과 영어 문서가 다르면 영어 문서를 기준으로 합니다.
 
-`jingujeon/angmoo`는 공개 제품 코드, migration, 공개 테스트와 기여 문서의
+`angmoo-tree/angmoo`는 공개 제품 코드, migration, 공개 테스트와 기여 문서의
 공식 원본입니다. 공개 변경은 fork 또는 feature branch, Pull Request와 필수
 Public Actions 검사를 거칩니다. hosted extension, 배포 도구, production 설정과
 secret은 이 저장소 밖에서 관리합니다.
@@ -33,70 +33,64 @@ infrastructure와 private runbook은 public source에 포함하지 않습니다.
 ## 준비물
 
 - Git
-- Docker와 Compose
-- Python 3.13과 [uv](https://docs.astral.sh/uv/)
-- Node.js 22와 pnpm 10
+- Docker Compose 2.22.0 이상을 포함한 Docker Desktop 또는 Docker Engine
+
+사용자 빠른 시작에는 host Python, Node.js, PostgreSQL, Neo4j 설치가 필요하지
+않습니다.
 
 ## 빠른 시작
 
-PostgreSQL과 pgvector를 실행합니다.
-
 ```bash
-docker compose up -d db
+git clone https://github.com/angmoo-tree/angmoo.git
+cd angmoo
+docker compose up -d
 docker compose ps
 ```
 
-backend 환경을 준비하고 실행합니다.
+기본 명령은 frontend, backend, PostgreSQL, scheduler, Neo4j, projector의 전체
+6-service Angmoo stack을 시작합니다. 첫 실행에서는 GHCR의 공식 `v0.1.0`
+backend·frontend image를 내려받습니다. 모든 service가 healthy가 되면
+<http://127.0.0.1:3000>을 엽니다.
+
+provider credential은 image에 포함되지 않습니다. 후속 local user 설정에서
+BYOK를 추가하기 전에는 scheduler와 SNS runtime이 실제 모델 요청을 하지
+않습니다.
+
+### 종료와 재시작
 
 ```bash
-cp backend/.env.example backend/.env
-cd backend
-uv sync --frozen
-uv run alembic upgrade head
-uv run uvicorn app.public_main:app --host 127.0.0.1 --port 8080
+docker compose down
+docker compose up -d
 ```
 
-PowerShell에서는 첫 번째 명령 대신 다음을 사용할 수 있습니다.
+일반 `down`은 PostgreSQL, Neo4j, media, runtime-secret named volume을
+보존합니다. local state를 의도적으로 지우는 경우가 아니면 `--volumes`를
+추가하지 마세요. 명시적으로 image를 갱신하려면 재시작 전에 선택적으로
+`docker compose pull`을 실행합니다.
+
+### port 충돌
+
+host에는 frontend만 공개합니다. `127.0.0.1:3000`이 이미 사용 중이면 다른
+process를 종료하거나 임의 port로 이동하지 않고 시작을 중단합니다. 충돌
+process를 직접 정리하거나 시작 전에 다른 frontend port를 명시합니다.
 
 ```powershell
-Copy-Item backend/.env.example backend/.env
+$env:ANGMOO_PORT = '3010'
+docker compose up -d
 ```
 
-다른 terminal에서 frontend를 준비하고 실행합니다.
+### 기여자 개발
+
+기여자는 checkout한 source로 같은 Dockerfile을 build하고 Compose Watch를
+사용합니다.
 
 ```bash
-cp frontend/.env.example frontend/.env.local
-cd frontend
-pnpm install --frozen-lockfile
-pnpm dev
+docker compose -f compose.yml -f compose.dev.yml up --watch
 ```
 
-PowerShell에서는 첫 번째 명령 대신 다음을 사용할 수 있습니다.
-
-```powershell
-Copy-Item frontend/.env.example frontend/.env.local
-```
-
-<http://127.0.0.1:3000>을 엽니다. API 문서는
-<http://127.0.0.1:8080/docs>에서 확인할 수 있습니다.
-
-### 선택형 로컬 관계망
-
-P7 관계 검색은 PostgreSQL을 원본으로 사용하고, 재구축 가능한 Neo4j projection을
-선택적으로 사용합니다. 기본 빠른 시작에는 Neo4j가 필요하지 않습니다. Windows에서는
-CurrentUser DPAPI로 보호되는 local secret launcher를 사용합니다.
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/local/start-neo4j-graph.ps1 -Bootstrap
-```
-
-비밀번호는 repository에 기록되지 않습니다. named volume을 보존한 채 중지하려면
-`docker compose -f compose.neo4j.yml down`을 사용합니다. local graph data를 명시적으로
-지우려는 경우가 아니면 `--volumes`를 추가하지 마세요.
-
-예제 환경에는 provider key가 없습니다. maintainer가 hosted validation을
-요청하지 않았다면 scheduler와 worker를 끄고 fake-provider 테스트를 사용합니다.
-
+container 내부 test·lint·migration과 release 검사는 `CONTRIBUTING.ko.md`를
+확인하세요. lifecycle 계약은 `docs/public/local-runtime.md`, tag에서만 실행되는
+GHCR release Gate는 `docs/public/container-release.md`에 있습니다.
 ## 로컬 검사
 
 ```bash

@@ -1,0 +1,18 @@
+x-backend-ci-image: &backend-ci-image angmoo-backend-ci:${ANGMOO_CI_IMAGE_TAG:-ci}
+
+services:
+  backend:
+    image: *backend-ci-image
+    pull_policy: never
+
+  scheduler:
+    image: *backend-ci-image
+    pull_policy: never
+
+  projector:
+    image: *backend-ci-image
+    pull_policy: never
+
+  frontend:
+    image: angmoo-frontend-ci:${ANGMOO_CI_IMAGE_TAG:-ci}
+    pull_policy: never

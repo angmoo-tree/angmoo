@@ -39,6 +39,9 @@ def _compose(*files: str) -> dict[str, object]:
 def _configs() -> tuple[dict[str, object], dict[str, object]]:
     return _compose("compose.yml"), _compose("compose.yml", "compose.dev.yml")
 
+def _ci_config() -> dict[str, object]:
+    return _compose("compose.yml", "compose.ci.yml")
+
 
 def test_repository_docker_runtime_assets_pass() -> None:
     release, development = _configs()
@@ -81,4 +84,16 @@ def test_runtime_assets_require_compose_watch() -> None:
     assert (
         "Compose Watch is missing: frontend"
         in CHECKER.validate_resolved_compose(release, mutated, root=ROOT)
+    )
+
+def test_ci_compose_reuses_only_locally_built_application_images() -> None:
+    assert CHECKER.validate_ci_compose(_ci_config()) == []
+
+
+def test_ci_compose_rejects_registry_pull_for_frontend() -> None:
+    mutated = deepcopy(_ci_config())
+    mutated["services"]["frontend"]["pull_policy"] = "missing"
+    assert (
+        "CI frontend must not pull an unverified registry image"
+        in CHECKER.validate_ci_compose(mutated)
     )

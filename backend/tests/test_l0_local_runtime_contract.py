@@ -51,3 +51,20 @@ def test_contract_rejects_incomplete_default_stack() -> None:
         "default_services must contain the complete Angmoo stack"
         in CHECKER.validate_contract(payload, root=ROOT)
     )
+
+def test_contract_rejects_mutable_release_image_identity() -> None:
+    payload = deepcopy(CONTRACT)
+    payload["release_images"]["backend"]["default_tag"] = "latest"
+
+    assert "release image contract mismatch" in CHECKER.validate_contract(
+        payload, root=ROOT
+    )
+
+
+def test_contract_rejects_mutable_supply_chain_tools() -> None:
+    payload = deepcopy(CONTRACT)
+    payload["supply_chain"]["trivy_image"] = "ghcr.io/aquasecurity/trivy:latest"
+
+    assert "container supply-chain contract mismatch" in CHECKER.validate_contract(
+        payload, root=ROOT
+    )

@@ -20,28 +20,40 @@ Angmoo 개선에 참여해 주셔서 감사합니다. 공식 저장소는
 있습니다. Issue 연결은 기계적으로 강제하지 않습니다. 관련 Issue가 있으면
 PR 본문에 `Closes #번호` 또는 명시적 reference를 남깁니다.
 
-## 로컬 설치와 검사
+## 로컬 개발과 검사
 
-commit된 lockfile만 사용합니다.
-
-```powershell
-uv sync --frozen --directory backend
-pnpm --dir frontend install --frozen-lockfile
-```
-
-변경 범위에 맞는 검사를 실행합니다. 전체 Local OSS gate는 다음과 같습니다.
+기여자 기준선에는 Git과 Docker Compose 2.22.0 이상이 필요합니다. repository
+root에서 전체 개발 stack을 시작합니다.
 
 ```powershell
-uv run --project backend python scripts/check_ci_policy.py
-uv run --directory backend python -m pytest -q
-pnpm --dir frontend lint
-pnpm --dir frontend typecheck
-pnpm --dir frontend build
+docker compose -f compose.yml -f compose.dev.yml up --watch
 ```
 
-PostgreSQL과 Neo4j 검사는 폐기 가능한 로컬 서비스를 사용합니다. provider
-관련 검사는 fake provider를 사용하며 외부 모델을 호출하지 않아야 합니다.
+checkout한 공개 Dockerfile을 build하고 frontend, backend, PostgreSQL,
+scheduler, Neo4j, projector를 모두 시작합니다. source 변경은 Compose Watch가
+sync하거나 rebuild합니다. 개발 데이터를 지우지 않고 종료하려면 다음을
+실행합니다.
 
+```powershell
+docker compose -f compose.yml -f compose.dev.yml down
+```
+
+host Python, uv, Node.js, pnpm version 차이를 막기 위해 같은 개발 container
+안에서 검사를 실행합니다.
+
+```powershell
+docker compose -f compose.yml -f compose.dev.yml exec -T backend uv run python -m pytest -q
+docker compose -f compose.yml -f compose.dev.yml exec -T backend uv run alembic upgrade head
+docker compose -f compose.yml -f compose.dev.yml exec -T backend uv run python ../scripts/check_ci_policy.py
+docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm lint
+docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm typecheck
+docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm build
+```
+
+required `local-core-smoke`는 release target build, image 취약점·secret scan,
+SPDX SBOM 검증과 격리된 Linux clean-clone lifecycle fixture도 실행합니다.
+PostgreSQL·Neo4j test state는 폐기 가능하며 provider 관련 검사는 fake
+provider만 사용하고 외부 모델을 호출하지 않습니다.
 ## Pull Request와 merge 권한
 
 모든 변경은 PR을 통해 `main`에 들어갑니다. required checks 10개는 다음과

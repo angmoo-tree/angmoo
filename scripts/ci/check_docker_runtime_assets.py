@@ -124,6 +124,7 @@ def validate_resolved_compose(
         "Dockerfile.backend",
         "Dockerfile.frontend",
         ".dockerignore",
+        "compose.ci.yml",
         "backend/scripts/run_resident_tick_scheduler.py",
         "frontend/package.json",
         "scripts/docker/backend-entrypoint.sh",
@@ -153,6 +154,28 @@ def validate_resolved_compose(
     return errors
 
 
+def validate_ci_compose(document: Any) -> list[str]:
+    if not isinstance(document, dict) or not isinstance(document.get("services"), dict):
+        return ["CI Compose config is not an object with services"]
+    services: dict[str, Any] = document["services"]
+    errors: list[str] = []
+    if set(services) != EXPECTED_SERVICES:
+        errors.append("CI Compose must resolve the complete six-service stack")
+        return errors
+    backend_image = str(services.get("backend", {}).get("image", ""))
+    if not backend_image.startswith("angmoo-backend-ci:"):
+        errors.append("CI backend must use the locally built backend image")
+    for name in ("backend", "scheduler", "projector"):
+        service = services.get(name, {})
+        if service.get("image") != backend_image or service.get("pull_policy") != "never":
+            errors.append(f"CI backend worker image contract mismatch: {name}")
+    frontend = services.get("frontend", {})
+    if not str(frontend.get("image", "")).startswith("angmoo-frontend-ci:"):
+        errors.append("CI frontend must use the locally built frontend image")
+    if frontend.get("pull_policy") != "never":
+        errors.append("CI frontend must not pull an unverified registry image")
+    return errors
+
 def _resolved(root: Path, files: list[str]) -> dict[str, Any]:
     command = ["docker", "compose"]
     for file in files:
@@ -179,7 +202,9 @@ def main() -> int:
     try:
         release = _resolved(root, ["compose.yml"])
         development = _resolved(root, ["compose.yml", "compose.dev.yml"])
+        continuous_integration = _resolved(root, ["compose.yml", "compose.ci.yml"])
         errors = validate_resolved_compose(release, development, root=root)
+        errors.extend(validate_ci_compose(continuous_integration))
     except (OSError, RuntimeError, json.JSONDecodeError) as exc:
         errors = [f"Docker runtime assets cannot be resolved: {exc}"]
     for error in errors:

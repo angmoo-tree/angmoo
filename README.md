@@ -12,7 +12,7 @@ self-hosting.
 
 The English documents are the canonical source when a translation differs.
 
-`jingujeon/angmoo` is the canonical source for public product code,
+`angmoo-tree/angmoo` is the canonical source for public product code,
 migrations, public tests, and contributor documentation. Public changes go
 through a fork or feature branch, a pull request, and the required Public
 Actions checks. Hosted extensions, deployment tooling, production
@@ -36,59 +36,65 @@ public source tree.
 ## Prerequisites
 
 - Git
-- Docker with Compose
-- Python 3.13 and [uv](https://docs.astral.sh/uv/)
-- Node.js 22 and pnpm 10
+- Docker Desktop or Docker Engine with Docker Compose 2.22.0 or newer
+
+Python, Node.js, PostgreSQL, and Neo4j do not need to be installed on the host
+for the user Quickstart.
 
 ## Quickstart
 
-Start PostgreSQL with pgvector:
-
 ```bash
-docker compose up -d db
+git clone https://github.com/angmoo-tree/angmoo.git
+cd angmoo
+docker compose up -d
 docker compose ps
 ```
 
-Prepare and run the backend:
+The default command starts the complete six-service Angmoo stack: frontend,
+backend, PostgreSQL, scheduler, Neo4j, and projector. The first run pulls the
+official `v0.1.0` backend and frontend images from GHCR. Open
+<http://127.0.0.1:3000> after all services report healthy.
+
+No provider credential is bundled. Until the local user adds BYOK in a later
+setup stage, scheduler and social runtime processes stay provider-free and do
+not make a real model request.
+
+### Stop and restart
 
 ```bash
-cp backend/.env.example backend/.env
-cd backend
-uv sync --frozen
-uv run alembic upgrade head
-uv run uvicorn app.public_main:app --host 127.0.0.1 --port 8080
+docker compose down
+docker compose up -d
 ```
 
-In another terminal, prepare and run the frontend:
+Normal `down` preserves the PostgreSQL, Neo4j, media, and runtime-secret named
+volumes. Do not add `--volumes` unless you intentionally want to erase local
+state. `docker compose pull` is an optional explicit image update before a
+restart.
 
-```bash
-cp frontend/.env.example frontend/.env.local
-cd frontend
-pnpm install --frozen-lockfile
-pnpm dev
-```
+### Port conflict
 
-Open <http://127.0.0.1:3000>. API documentation is available at
-<http://127.0.0.1:8080/docs>.
-
-### Optional local relationship graph
-
-P7 relationship search uses PostgreSQL as the source of truth and an optional,
-rebuildable Neo4j projection. The default quickstart does not require Neo4j.
-On Windows, start the local-only graph with a CurrentUser DPAPI-protected secret:
+Only the frontend is published to the host. If `127.0.0.1:3000` is already in
+use, Angmoo fails closed instead of killing that process or silently choosing a
+new port. Stop the conflicting process, or explicitly select another frontend
+port before starting:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/local/start-neo4j-graph.ps1 -Bootstrap
+$env:ANGMOO_PORT = '3010'
+docker compose up -d
 ```
 
-The password is never written to this repository. Stop the service without
-deleting its named volume with `docker compose -f compose.neo4j.yml down`.
-Do not add `--volumes` unless you explicitly intend to remove local graph data.
+### Contributor development
 
-The example profile contains no provider key. Keep the scheduler and workers
-off and use the fake-provider tests unless a maintainer explicitly requests
-hosted validation.
+Contributors build the same Dockerfiles from the checked-out source and enable
+Compose Watch:
 
+```bash
+docker compose -f compose.yml -f compose.dev.yml up --watch
+```
+
+See `CONTRIBUTING.md` for container-internal tests, lint, migration, and release
+checks. See `docs/public/local-runtime.md` for the lifecycle contract and
+`docs/public/container-release.md` for the tag-only GHCR release Gate.
 ## Local checks
 
 ```bash

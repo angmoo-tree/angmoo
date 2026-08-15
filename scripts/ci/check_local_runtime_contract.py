@@ -36,6 +36,31 @@ EXPECTED_COMMANDS = {
     ],
     "stop": ["docker", "compose", "down"],
 }
+EXPECTED_RELEASE_IMAGES = {
+    "backend": {
+        "default_tag": "v0.1.0",
+        "repository": "ghcr.io/angmoo-tree/angmoo-backend",
+    },
+    "frontend": {
+        "default_tag": "v0.1.0",
+        "repository": "ghcr.io/angmoo-tree/angmoo-frontend",
+    },
+}
+EXPECTED_SUPPLY_CHAIN = {
+    "platform": "linux/amd64",
+    "provenance": "github-artifact-attestation",
+    "release_trigger": "v*.*.*",
+    "sbom_format": "spdx-json",
+    "secret_allowlist": "security/trivy-secret.yaml",
+    "syft_image": (
+        "anchore/syft:v1.51.0@sha256:"
+        "678bfa565b60f747aac0f8e964fe5588a24445b8d0a480e91f6efd70020dfbb0"
+    ),
+    "trivy_image": (
+        "ghcr.io/aquasecurity/trivy:0.74.0@sha256:"
+        "62b1e65e8869bc4b4c6aa4fa2b21595256c7c2f6018a9d9ad61caf87187c1969"
+    ),
+}
 IMMUTABLE_IMAGE = re.compile(r"^[^@\s]+@sha256:[0-9a-f]{64}$")
 
 
@@ -75,6 +100,10 @@ def validate_contract(payload: Any, *, root: Path = ROOT) -> list[str]:
         errors.append("runtime states mismatch")
     if set(payload.get("error_codes", [])) != EXPECTED_ERROR_CODES:
         errors.append("runtime error codes mismatch")
+    if payload.get("release_images") != EXPECTED_RELEASE_IMAGES:
+        errors.append("release image contract mismatch")
+    if payload.get("supply_chain") != EXPECTED_SUPPLY_CHAIN:
+        errors.append("container supply-chain contract mismatch")
 
     publications = payload.get("host_publications")
     if not isinstance(publications, dict) or set(publications) != {"frontend"}:
@@ -147,12 +176,16 @@ def check_repo(
         "docker compose up -d",
         "docker compose -f compose.yml -f compose.dev.yml up --watch",
         "https://github.com/angmoo-tree/angmoo/issues/36",
+        "ghcr.io/angmoo-tree/angmoo-backend:v0.1.0",
+        "ghcr.io/angmoo-tree/angmoo-frontend:v0.1.0",
     ):
         if required not in document:
             errors.append(f"local runtime document is missing: {required}")
     for required_path in (
         "Dockerfile.backend", "Dockerfile.frontend", ".dockerignore",
-        "compose.yml", "compose.dev.yml",
+        "compose.yml", "compose.dev.yml", "compose.ci.yml",
+        ".github/workflows/release-images.yml",
+        "docs/public/container-release.md",
     ):
         if not (root / required_path).is_file():
             errors.append(f"local runtime asset is missing: {required_path}")
