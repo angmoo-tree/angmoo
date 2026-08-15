@@ -1,0 +1,50 @@
+# syntax=docker/dockerfile:1.7
+
+ARG NODE_IMAGE=node:22-bookworm-slim@sha256:d649c27dae7ba0137b3cef5dd75baa422c08dc3d9e3fc0c23dfb172dc3cc6436
+FROM ${NODE_IMAGE} AS base
+
+ARG PNPM_VERSION=10.33.2
+WORKDIR /app
+RUN corepack enable && corepack prepare "pnpm@${PNPM_VERSION}" --activate
+
+FROM base AS dependencies
+COPY frontend/package.json frontend/pnpm-lock.yaml frontend/pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile
+
+FROM dependencies AS development
+COPY --chown=node:node frontend ./
+RUN chown node:node /app && mkdir -p /app/.next && chown node:node /app/.next
+USER node
+EXPOSE 3000
+CMD ["pnpm", "dev", "--hostname", "0.0.0.0"]
+
+FROM dependencies AS build
+ARG ANGMOO_API_BASE_URL=http://backend:8080
+ENV ANGMOO_API_BASE_URL=${ANGMOO_API_BASE_URL}
+COPY frontend ./
+RUN pnpm build
+
+FROM ${NODE_IMAGE} AS runtime
+ARG VCS_REF=unknown
+ARG VERSION=0.1.0
+
+LABEL org.opencontainers.image.source="https://github.com/angmoo-tree/angmoo" \
+      org.opencontainers.image.revision="${VCS_REF}" \
+      org.opencontainers.image.version="${VERSION}" \
+      org.opencontainers.image.licenses="GPL-3.0-only"
+
+ENV NODE_ENV=production \
+    HOSTNAME=0.0.0.0 \
+    PORT=3000 \
+    ANGMOO_API_BASE_URL=http://backend:8080
+
+WORKDIR /app
+COPY --from=build --chown=node:node /app/public ./public
+COPY --from=build --chown=node:node /app/.next/standalone ./
+COPY --from=build --chown=node:node /app/.next/static ./.next/static
+
+USER node
+EXPOSE 3000
+HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=6 \
+  CMD node -e "fetch('http://127.0.0.1:3000/').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+CMD ["node", "server.js"]

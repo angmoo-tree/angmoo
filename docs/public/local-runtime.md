@@ -1,9 +1,9 @@
 # Local Docker runtime contract
 
 Angmoo is transitioning from a host-native contributor setup to one canonical
-Docker Compose topology. This document records the L0 contract before the
-Dockerfiles and Compose implementation land. The proposal and acceptance
-matrix are tracked in
+Docker Compose topology. This document records the L0 contract and its
+Dockerfiles and Compose implementation. The proposal and acceptance matrix are
+tracked in
 [`#36`](https://github.com/angmoo-tree/angmoo/issues/36).
 
 ## Canonical topology
@@ -23,21 +23,32 @@ The backend, PostgreSQL, and Neo4j use service names on the internal Compose
 network. Changing `ANGMOO_PORT` may move the frontend port; Angmoo never kills
 another listener or silently chooses a different port.
 
-The future user command is:
+The user command is:
 
 ```powershell
 docker compose up -d
 ```
 
-The future contributor command is:
+The contributor command is:
 
 ```powershell
 docker compose -f compose.yml -f compose.dev.yml up --watch
 ```
 
-Until PR B of L0 lands, the existing host-native Quickstart remains the
-working path. This contract document does not claim that the Docker commands
-already work on `main`.
+The contributor overlay builds the same Dockerfiles locally and enables
+Compose Watch. Release Compose uses the official GHCR image names; publishing
+those images and the final clean-clone gate are owned by PR C.
+
+Reduced diagnostic starts are explicit service selections and are not the
+general Quickstart:
+
+```powershell
+# core
+docker compose up -d postgresql backend frontend
+
+# autonomy
+docker compose up -d postgresql backend scheduler frontend
+```
 
 ## Support tiers
 
