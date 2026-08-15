@@ -133,15 +133,6 @@ def validate_resolved_compose(
     for relative in required_files:
         if not (root / relative).is_file():
             errors.append(f"Docker runtime asset is missing: {relative}")
-    frontend_package = root / "frontend/package.json"
-    if frontend_package.is_file():
-        try:
-            metadata = json.loads(frontend_package.read_text(encoding="utf-8"))
-        except json.JSONDecodeError:
-            errors.append("frontend package.json is not valid JSON")
-        else:
-            if metadata.get("packageManager") != "pnpm@10.33.2":
-                errors.append("frontend packageManager must match Docker pnpm 10.33.2")
 
     for dockerfile in ("Dockerfile.backend", "Dockerfile.frontend"):
         path = root / dockerfile
@@ -154,6 +145,11 @@ def validate_resolved_compose(
                 errors.append(
                     f"runtime image metadata or non-root user is missing: {dockerfile}"
                 )
+            if (
+                dockerfile == "Dockerfile.frontend"
+                and "ARG PNPM_VERSION=10.33.2" not in content
+            ):
+                errors.append("frontend Dockerfile must pin pnpm 10.33.2")
     return errors
 
 
