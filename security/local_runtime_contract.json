@@ -1,0 +1,81 @@
+{
+  "canonical_commands": {
+    "contributor_start": ["docker", "compose", "-f", "compose.yml", "-f", "compose.dev.yml", "up", "--watch"],
+    "stop": ["docker", "compose", "down"],
+    "user_start": ["docker", "compose", "up", "-d"]
+  },
+  "contract_id": "angmoo-l0-docker-runtime-v1",
+  "core_modules": [
+    {"disposition": "migrate", "module": "app.core.active_hours", "owner_stage": "L3", "removal_condition": "Move active-hour policy behind the activities domain public API."},
+    {"disposition": "migrate", "module": "app.core.agent_activity_limits", "owner_stage": "L2", "removal_condition": "Move scheduler and resident quota policy behind runtime public ports."},
+    {"disposition": "keep", "module": "app.core.browser_session", "owner_stage": "L1", "removal_condition": null},
+    {"disposition": "keep", "module": "app.core.config", "owner_stage": "L0", "removal_condition": null},
+    {"disposition": "keep", "module": "app.core.db", "owner_stage": "L0", "removal_condition": null},
+    {"disposition": "keep", "module": "app.core.ids", "owner_stage": "L0", "removal_condition": null},
+    {"disposition": "migrate", "module": "app.core.image_generation", "owner_stage": "L6", "removal_condition": "Move media generation policy behind the media domain public API."},
+    {"disposition": "migrate", "module": "app.core.public_media", "owner_stage": "L6", "removal_condition": "Move public media mounting behind the media domain composition API."},
+    {"disposition": "keep", "module": "app.core.redaction", "owner_stage": "L0", "removal_condition": null},
+    {"disposition": "keep", "module": "app.core.request_limits", "owner_stage": "L0", "removal_condition": null},
+    {"disposition": "migrate", "module": "app.core.search_text", "owner_stage": "L4", "removal_condition": "Move search normalization behind the social feed domain public API."},
+    {"disposition": "keep", "module": "app.core.security", "owner_stage": "L1", "removal_condition": null},
+    {"disposition": "keep", "module": "app.core.startup_security", "owner_stage": "L1", "removal_condition": null},
+    {"disposition": "keep", "module": "app.core.unit_of_work", "owner_stage": "L0", "removal_condition": null}
+  ],
+  "databases": {
+    "neo4j": {
+      "image": "neo4j:2026.06.0@sha256:42fd5b9ead4dd4211f6f91bd831c358e4e2117367d04633fbf88682ca4792b30",
+      "role": "rebuildable_projection",
+      "version": "2026.06.0"
+    },
+    "postgresql": {
+      "image": "pgvector/pgvector:pg16@sha256:1d533553fefe4f12e5d80c7b80622ba0c382abb5758856f52983d8789179f0fb",
+      "role": "source_of_truth",
+      "version": "16.14"
+    }
+  },
+  "default_services": ["backend", "frontend", "neo4j", "postgresql", "projector", "scheduler"],
+  "error_codes": [
+    "container_engine_unavailable", "data_path_unwritable", "database_unavailable",
+    "image_build_failed", "image_pull_failed", "migration_mismatch", "neo4j_unavailable",
+    "not_implemented_until_L5", "port_conflict", "projector_backlog",
+    "provider_not_configured", "runtime_state_stale", "secret_mismatch",
+    "secret_missing", "unsupported_tool_version"
+  ],
+  "followup_owners": {
+    "device_home": "L2.5",
+    "local_owner_and_secret_bootstrap": "L1",
+    "world_package": "L3.5"
+  },
+  "host_publications": {
+    "frontend": {"address": "127.0.0.1", "default_port": 3000, "port_environment": "ANGMOO_PORT"}
+  },
+  "issue": "https://github.com/angmoo-tree/angmoo/issues/36",
+  "network": {
+    "backend": "http://backend:8080",
+    "neo4j": "bolt://neo4j:7687",
+    "postgresql": "postgresql:5432"
+  },
+  "reduced_modes": {
+    "autonomy": ["backend", "frontend", "postgresql", "scheduler"],
+    "core": ["backend", "frontend", "postgresql"]
+  },
+  "runtime_images": {
+    "backend": {"python": "3.13", "uv": "0.11.9"},
+    "frontend": {"node": "22", "pnpm": "10.33.2"}
+  },
+  "schema_version": 1,
+  "states": ["blocked", "degraded", "healthy", "stale_state", "starting", "stopped", "stopping"],
+  "support": {
+    "best_effort": ["macOS"],
+    "compose_minimum": "2.22.0",
+    "engine_contract": "capability_based",
+    "tier_1": ["Windows 11", "PowerShell 5.1", "PowerShell 7"],
+    "tier_2": ["latest Ubuntu LTS"],
+    "validated_baseline": {
+      "compose": "5.3.0",
+      "docker_engine": "29.6.1",
+      "host": "Windows 11 10.0.26200",
+      "platform": "linux/amd64"
+    }
+  }
+}
