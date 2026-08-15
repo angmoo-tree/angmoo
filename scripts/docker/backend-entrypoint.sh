@@ -36,7 +36,7 @@ export DATABASE_URL="${database_scheme}://${database_authority}/${ANGMOO_POSTGRE
 
 prepare_database() {
   alembic upgrade head
-  python scripts/migrate_local_credentials.py
+  python -m scripts.migrate_local_credentials
 }
 
 mode="${1:-api}"
@@ -51,7 +51,7 @@ case "$mode" in
     ;;
   migrate)
     alembic upgrade head
-    exec python scripts/migrate_local_credentials.py
+    exec python -m scripts.migrate_local_credentials
     ;;
   scheduler)
     : > /tmp/angmoo-worker-ready

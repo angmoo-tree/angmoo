@@ -54,12 +54,12 @@ def test_backend_entrypoint_runs_schema_and_credential_migrations() -> None:
     )
     assert "prepare_database()" in content
     assert "alembic upgrade head" in content
-    assert "python scripts/migrate_local_credentials.py" in content
+    assert "python -m scripts.migrate_local_credentials" in content
     assert 'APP_SECRET_FILE="$secret_dir/app_secret"' in content
     assert "export APP_SECRET " not in content
     assert 'APP_SECRET="$(cat' not in content
     assert content.index("alembic upgrade head") < content.index(
-        "python scripts/migrate_local_credentials.py"
+        "python -m scripts.migrate_local_credentials"
     )
 
 
