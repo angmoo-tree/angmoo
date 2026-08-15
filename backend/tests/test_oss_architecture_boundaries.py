@@ -100,7 +100,7 @@ def test_secret_decryption_is_confined_to_credential_resolver():
     allowed = {
         "core/security.py",
         "core/startup_security.py",
-        "credentials/resolver.py",
+        "domains/identity/application/resolve_credential.py",
     }
     violations: list[str] = []
     for path in sorted(APP_ROOT.rglob("*.py")):

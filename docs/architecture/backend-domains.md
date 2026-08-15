@@ -28,17 +28,21 @@ edges, and 1,030 unique per-module external import records. PR B added the
 relationship read domain and adapter modules, producing 256 modules, 613
 internal edges, and 1,036 unique per-module external import records. PR C
 removes two usage-zero compatibility modules and their three edges, producing
-254 modules, 610 internal edges, and 1,036 external import records. The
+254 modules, 610 internal edges, and 1,036 external import records. L1 PR A
+moves the identity model, schema, and credential definitions behind a canonical
+domain surface, producing 265 modules, 624 internal edges, and 1,036 external
+import records without changing product behavior. The
 previous T2 inventory reported 426 internal edges because
 `from package import module` was recorded only as the package; inventory schema
 v2 resolves the real module when it exists.
 
-The policy freezes 390 exact imports into the horizontal legacy prefixes
-`app.cruds`, `app.models`, `app.schemas`, and `app.services`: 388 general
-horizontal edges plus the 2-edge Neo4j write-runtime bridge. PR B added zero
-legacy exceptions and removed two stale exceptions. PR C also adds zero legacy
-exceptions; deleting the two non-legacy compatibility modules leaves the exact
-legacy count at 390. Existing edges may only disappear. Updating the inventory
+The policy now freezes 387 exact imports into the horizontal legacy prefixes
+`app.cruds`, `app.models`, `app.schemas`, and `app.services`: 385 general
+horizontal edges plus the 2-edge Neo4j write-runtime bridge. L1 PR A removes
+three identity aggregate edges rather than replacing them with exceptions. PR B
+added zero legacy exceptions and removed two stale exceptions. PR C also added
+zero legacy exceptions and left the previous exact count at 390. L1 PR A lowers
+that count to 387. Existing edges may only disappear. Updating the inventory
 cannot silently authorize another legacy edge.
 
 ## Target tree
@@ -76,7 +80,7 @@ backend/app/
 | Area | Stable cross-area surface | Owner stage | T2.5 state |
 |---|---|---:|---|
 | `core` | small primitives only | L0 | existing core is audited, not moved in PR A |
-| `identity` | `app.domains.identity.public` | L1 | target only |
+| `identity` | `app.domains.identity.public` | L1 | PR A foundation active; runtime behavior unchanged |
 | resident and scheduler runtime | runtime public ports | L2 | target only |
 | `worlds`, `characters`, `activities`, root posts | each domain's `public.py` | L3 | target only |
 | `world_packages` | `app.domains.world_packages.public` | L3.5 | new Local feature later |
@@ -135,6 +139,20 @@ module has an owner and removal condition.
 removed without updating that inventory, or if core imports `app.domains`,
 `app.runtime`, or `app.integrations`. The audit changes no product behavior,
 schema, transaction boundary, or provider call.
+
+## L1 identity foundation
+
+L1 starts with [`#40`](https://github.com/angmoo-tree/angmoo/issues/40). Its
+first PR is structural only: `User`, `AuthSession`, identity support tables,
+`LlmCredential`, auth schemas, and credential resolution now have canonical
+definitions under `app.domains.identity`. Existing `app.models.auth`,
+`app.models.credentials`, `app.schemas.auth`, and `app.credentials` imports are
+compatibility facades that re-export the same Python objects.
+
+This foundation changes no table, migration, OpenAPI field, provider call,
+transaction boundary, authentication behavior, or secret format. Local owner,
+persistent `APP_SECRET`, standard authenticated encryption, legacy credential
+migration, and BYOK lifecycle remain later L1 PRs with their own gates.
 
 ## Dependency direction
 

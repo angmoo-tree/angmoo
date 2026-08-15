@@ -47,7 +47,7 @@ from app.schemas.agents import (
     CredentialRead,
     CredentialUpsert,
 )
-from app.schemas.auth import (
+from app.domains.identity.api import (
     AccountDeletionCreate,
     AuthRead,
     GoogleLoginRead,

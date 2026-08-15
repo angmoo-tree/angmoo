@@ -281,10 +281,6 @@
           "importer": "app.models"
         },
         {
-          "imported": "app.models.auth",
-          "importer": "app.models"
-        },
-        {
           "imported": "app.models.character_lore",
           "importer": "app.models"
         },
@@ -294,10 +290,6 @@
         },
         {
           "imported": "app.models.community",
-          "importer": "app.models"
-        },
-        {
-          "imported": "app.models.credentials",
           "importer": "app.models"
         },
         {
@@ -370,10 +362,6 @@
         },
         {
           "imported": "app.schemas.agents",
-          "importer": "app.schemas"
-        },
-        {
-          "imported": "app.schemas.auth",
           "importer": "app.schemas"
         },
         {
