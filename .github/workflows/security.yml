@@ -28,7 +28,7 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
-          version: "0.11.9"
+          version: "0.12.5"
           python-version: "3.13"
           enable-cache: false
       - name: Install checker dependencies
@@ -39,6 +39,7 @@ jobs:
           uv run --project backend python scripts/check_ci_policy.py
           uv run --project backend python scripts/ci/check_oss_boundary.py
           uv run --project backend python scripts/ci/check_secret_allowlist_metadata.py
+          uv run --project backend python scripts/ci/check_container_release_contract.py
           uv run --project backend python scripts/ci/generate_architecture_inventory.py --check
           uv run --project backend python scripts/ci/generate_deferred_runtime_inventory.py --check
       - name: Scan current repository and full history
@@ -75,7 +76,7 @@ jobs:
           deny-licenses: AGPL-1.0-only, AGPL-1.0-or-later, AGPL-3.0-only, AGPL-3.0-or-later, GPL-2.0-only, GPL-2.0-or-later, SSPL-1.0
       - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
-          version: "0.11.9"
+          version: "0.12.5"
           python-version: "3.13"
           enable-cache: false
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -129,7 +130,7 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
-          version: "0.11.9"
+          version: "0.12.5"
           python-version: "3.13"
           enable-cache: false
       - name: Install locked backend dependencies

@@ -18,6 +18,7 @@ EXPECTED_WORKFLOWS = {
     "local-smoke.yml",
     "security.yml",
     "windows-smoke.yml",
+    "release-images.yml",
 }
 REQUIRED_JOBS = {
     "backend",
@@ -82,13 +83,22 @@ def _events(document: dict[object, object]) -> object:
     return document.get(True)
 
 
-def _check_triggers(document: object) -> list[str]:
+def _check_triggers(document: object, *, release: bool) -> list[str]:
     if not isinstance(document, dict):
         return ["workflow root must be a mapping"]
     events = _events(document)
     if not isinstance(events, dict):
         return ["workflow events must be a mapping"]
     names = set(events)
+    if release:
+        if names != {"push"}:
+            return ["release workflow must be triggered only by push"]
+        push = events.get("push")
+        if not isinstance(push, dict) or push.get("tags") != ["v*.*.*"]:
+            return ["release workflow must be limited to semantic v*.*.* tags"]
+        if "branches" in push:
+            return ["release workflow must not publish from a branch push"]
+        return []
     errors = [
         f"required workflow event is missing: {event}"
         for event in sorted(REQUIRED_EVENTS - names)
@@ -124,7 +134,7 @@ def check_workflow(path: Path) -> tuple[list[str], list[str]]:
         document = yaml.load(text, Loader=_UniqueKeyLoader)
     except yaml.YAMLError as exc:
         return [f"workflow YAML is invalid: {exc}"], []
-    errors.extend(_check_triggers(document))
+    errors.extend(_check_triggers(document, release=path.name == "release-images.yml"))
     errors.extend(
         f"forbidden workflow feature: {label}"
         for marker, label in FORBIDDEN_TEXT.items()
@@ -186,7 +196,7 @@ def main() -> int:
         print(error, file=sys.stderr)
     if errors:
         return 1
-    print("Local OSS CI policy check passed: required=10 advisory=1 workflows=4")
+    print("Local OSS CI policy check passed: required=10 advisory=1 workflows=5")
     return 0
 
 

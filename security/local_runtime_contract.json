@@ -60,8 +60,18 @@
     "core": ["backend", "frontend", "postgresql"]
   },
   "runtime_images": {
-    "backend": {"python": "3.13", "uv": "0.11.9"},
+    "backend": {"python": "3.13", "uv": "0.12.5"},
     "frontend": {"node": "22", "pnpm": "10.33.2"}
+  },
+  "release_images": {
+    "backend": {
+      "default_tag": "v0.1.0",
+      "repository": "ghcr.io/angmoo-tree/angmoo-backend"
+    },
+    "frontend": {
+      "default_tag": "v0.1.0",
+      "repository": "ghcr.io/angmoo-tree/angmoo-frontend"
+    }
   },
   "schema_version": 1,
   "states": ["blocked", "degraded", "healthy", "stale_state", "starting", "stopped", "stopping"],
@@ -77,5 +87,14 @@
       "host": "Windows 11 10.0.26200",
       "platform": "linux/amd64"
     }
+  },
+  "supply_chain": {
+    "platform": "linux/amd64",
+    "provenance": "github-artifact-attestation",
+    "release_trigger": "v*.*.*",
+    "sbom_format": "spdx-json",
+    "secret_allowlist": "security/trivy-secret.yaml",
+    "syft_image": "anchore/syft:v1.51.0@sha256:678bfa565b60f747aac0f8e964fe5588a24445b8d0a480e91f6efd70020dfbb0",
+    "trivy_image": "ghcr.io/aquasecurity/trivy:0.74.0@sha256:62b1e65e8869bc4b4c6aa4fa2b21595256c7c2f6018a9d9ad61caf87187c1969"
   }
 }

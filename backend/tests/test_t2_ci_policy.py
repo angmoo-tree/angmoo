@@ -22,6 +22,7 @@ def test_architecture_boundary_is_the_tenth_required_check() -> None:
     assert "architecture-boundary" in checker.REQUIRED_JOBS
     assert len(checker.REQUIRED_JOBS) == 10
     assert checker.ADVISORY_JOBS == {"windows-local-smoke"}
+    assert "release-images.yml" in checker.EXPECTED_WORKFLOWS
 
 
 def test_unpinned_action_and_conditional_required_job_are_rejected(tmp_path: Path) -> None:
@@ -51,3 +52,27 @@ jobs:
 
     assert any("full commit SHA" in error for error in errors)
     assert any("conditionally skipped" in error for error in errors)
+
+def test_release_workflow_rejects_pull_request_and_branch_triggers(tmp_path: Path) -> None:
+    workflow = tmp_path / "release-images.yml"
+    workflow.write_text(
+        """
+name: release
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  publish-ghcr:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps: []
+""".lstrip(),
+        encoding="utf-8",
+    )
+
+    errors, _ = checker.check_workflow(workflow)
+
+    assert any("triggered only by push" in error for error in errors)

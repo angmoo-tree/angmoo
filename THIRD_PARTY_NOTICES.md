@@ -210,11 +210,17 @@ These services and CI tools are separate components and retain their own license
 
 - **pgvector PostgreSQL image** — `PostgreSQL`; reference `pgvector/pgvector:pg16@sha256:1d533553fefe4f12e5d80c7b80622ba0c382abb5758856f52983d8789179f0fb`; source <https://github.com/pgvector/pgvector/blob/master/LICENSE>
 - **Neo4j Community Edition** — `GPL-3.0-only`; reference `neo4j:2026.06.0@sha256:42fd5b9ead4dd4211f6f91bd831c358e4e2117367d04633fbf88682ca4792b30`; source <https://neo4j.com/licensing/>
+- **Trivy container scanner** — `Apache-2.0`; reference `ghcr.io/aquasecurity/trivy:0.74.0@sha256:62b1e65e8869bc4b4c6aa4fa2b21595256c7c2f6018a9d9ad61caf87187c1969`; source <https://github.com/aquasecurity/trivy/blob/v0.74.0/LICENSE>
+- **Syft SBOM generator** — `Apache-2.0`; reference `anchore/syft:v1.51.0@sha256:678bfa565b60f747aac0f8e964fe5588a24445b8d0a480e91f6efd70020dfbb0`; source <https://github.com/anchore/syft/blob/v1.51.0/LICENSE>
 - **actions/checkout** — `MIT`; reference `actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1`; source <https://github.com/actions/checkout/blob/3d3c42e5aac5ba805825da76410c181273ba90b1/LICENSE>
 - **astral-sh/setup-uv** — `MIT`; reference `astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9`; source <https://github.com/astral-sh/setup-uv/blob/c771a70e6277c0a99b617c7a806ffedaca235ff9/LICENSE>
 - **actions/setup-node** — `MIT`; reference `actions/setup-node@820762786026740c76f36085b0efc47a31fe5020`; source <https://github.com/actions/setup-node/blob/820762786026740c76f36085b0efc47a31fe5020/LICENSE>
 - **pnpm/action-setup** — `MIT`; reference `pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86`; source <https://github.com/pnpm/action-setup/blob/0977fd99725f1db4007ccb2928dbb4e90d06cc86/LICENSE>
 - **actions/dependency-review-action** — `MIT`; reference `actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294`; source <https://github.com/actions/dependency-review-action/blob/a1d282b36b6f3519aa1f3fc636f609c47dddb294/LICENSE>
+- **docker/setup-buildx-action** — `Apache-2.0`; reference `docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c`; source <https://github.com/docker/setup-buildx-action/blob/bb05f3f5519dd87d3ba754cc423b652a5edd6d2c/LICENSE>
+- **docker/login-action** — `Apache-2.0`; reference `docker/login-action@dbcb813823bdd20940b903addbd779551569679f`; source <https://github.com/docker/login-action/blob/dbcb813823bdd20940b903addbd779551569679f/LICENSE>
+- **docker/build-push-action** — `Apache-2.0`; reference `docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a`; source <https://github.com/docker/build-push-action/blob/53b7df96c91f9c12dcc8a07bcb9ccacbed38856a/LICENSE>
+- **actions/attest-build-provenance** — `MIT`; reference `actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8`; source <https://github.com/actions/attest-build-provenance/blob/4d101475d8b20a2381f78447822ac1eab6504dd8/LICENSE>
 
 ## Bundled assets and content
 

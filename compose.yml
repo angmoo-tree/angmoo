@@ -1,6 +1,6 @@
 name: angmoo
 
-x-backend-image: &backend-image ghcr.io/angmoo-tree/angmoo-backend:${ANGMOO_VERSION:-0.1.0}
+x-backend-image: &backend-image ghcr.io/angmoo-tree/angmoo-backend:${ANGMOO_VERSION:-v0.1.0}
 x-backend-environment: &backend-environment
   APP_ENV: development
   API_DOCS_ENABLED: "false"
@@ -150,7 +150,7 @@ services:
     stop_grace_period: 30s
 
   frontend:
-    image: ghcr.io/angmoo-tree/angmoo-frontend:${ANGMOO_VERSION:-0.1.0}
+    image: ghcr.io/angmoo-tree/angmoo-frontend:${ANGMOO_VERSION:-v0.1.0}
     pull_policy: missing
     restart: unless-stopped
     init: true

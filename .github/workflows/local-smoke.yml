@@ -20,7 +20,7 @@ env:
 jobs:
   local-core-smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 75
     services:
       postgres:
         image: pgvector/pgvector@sha256:1d533553fefe4f12e5d80c7b80622ba0c382abb5758856f52983d8789179f0fb
@@ -52,7 +52,7 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
-          version: "0.11.9"
+          version: "0.12.5"
           python-version: "3.13"
           enable-cache: false
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -101,6 +101,12 @@ jobs:
             exit 1
           fi
 
+      - name: Run required container supply-chain and clean-clone Gate
+        shell: bash
+        env:
+          ANGMOO_CI_PROJECT: angmoo-pr-${{ github.run_id }}
+        run: bash scripts/ci/run_container_gate.sh
+
   local-autonomy-smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -116,7 +122,7 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
-          version: "0.11.9"
+          version: "0.12.5"
           python-version: "3.13"
           enable-cache: false
       - name: Install locked backend dependencies
@@ -188,7 +194,7 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
-          version: "0.11.9"
+          version: "0.12.5"
           python-version: "3.13"
           enable-cache: false
       - name: Install and migrate

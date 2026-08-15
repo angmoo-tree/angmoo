@@ -19,28 +19,40 @@ fixes may open a pull request without an Issue. Issue linkage is not enforced
 mechanically. When an Issue exists, use `Closes #number` or an explicit
 reference in the pull request.
 
-## Local setup and checks
+## Local development and checks
 
-Install only from the committed lockfiles:
-
-```powershell
-uv sync --frozen --directory backend
-pnpm --dir frontend install --frozen-lockfile
-```
-
-Run the checks that cover your change. The complete Local OSS gate is:
+The contributor baseline requires Git and Docker Compose 2.22.0 or newer. Start
+the complete development stack from the repository root:
 
 ```powershell
-uv run --project backend python scripts/check_ci_policy.py
-uv run --directory backend python -m pytest -q
-pnpm --dir frontend lint
-pnpm --dir frontend typecheck
-pnpm --dir frontend build
+docker compose -f compose.yml -f compose.dev.yml up --watch
 ```
 
-PostgreSQL and Neo4j checks use disposable local services. Provider-dependent
-tests use fake providers and must not make external model calls.
+This builds the public Dockerfiles from the checkout and starts frontend,
+backend, PostgreSQL, scheduler, Neo4j, and projector. Source changes are synced
+or rebuilt through Compose Watch. Stop it without deleting development data:
 
+```powershell
+docker compose -f compose.yml -f compose.dev.yml down
+```
+
+Run checks inside the same development containers so host Python, uv, Node.js,
+and pnpm versions cannot drift:
+
+```powershell
+docker compose -f compose.yml -f compose.dev.yml exec -T backend uv run python -m pytest -q
+docker compose -f compose.yml -f compose.dev.yml exec -T backend uv run alembic upgrade head
+docker compose -f compose.yml -f compose.dev.yml exec -T backend uv run python ../scripts/check_ci_policy.py
+docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm lint
+docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm typecheck
+docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm build
+```
+
+The required `local-core-smoke` check additionally builds the release targets,
+scans image vulnerabilities and secrets, validates SPDX SBOM output, and runs
+the isolated Linux clean-clone lifecycle fixtures. PostgreSQL and Neo4j test
+state is disposable. Provider-dependent tests use fake providers and must not
+make external model calls.
 ## Pull requests and merge ownership
 
 Every change reaches `main` through a pull request. The ten required checks

@@ -49,6 +49,12 @@ All PRs run these required checks: `backend`, `frontend`,
 `local-full-graph`, `oss-boundary`, `dependency-license`, `dco`, and
 `architecture-boundary`.
 
+The required `local-core-smoke` check also builds the release Docker targets,
+checks non-root and secret-layer boundaries, scans fixable high/critical
+vulnerabilities, emits an SPDX JSON SBOM, and runs the clean-clone full-stack
+lifecycle. The tag-only release workflow publishes to GHCR after the same Gate;
+it is not an additional pull-request check.
+
 `windows-local-smoke` and `codeql` remain advisory checks. They are triaged
 rather than silently ignored and are promoted only after their deterministic
 contract is stable.

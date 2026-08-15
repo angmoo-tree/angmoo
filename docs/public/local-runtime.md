@@ -36,8 +36,11 @@ docker compose -f compose.yml -f compose.dev.yml up --watch
 ```
 
 The contributor overlay builds the same Dockerfiles locally and enables
-Compose Watch. Release Compose uses the official GHCR image names; publishing
-those images and the final clean-clone gate are owned by PR C.
+Compose Watch. Release Compose uses the versioned official images
+`ghcr.io/angmoo-tree/angmoo-backend:v0.1.0` and
+`ghcr.io/angmoo-tree/angmoo-frontend:v0.1.0`. An approved `v*.*.*` release tag
+publishes both images after the complete container Gate; ordinary pull requests
+never publish a stable image. See [Container release](container-release.md).
 
 Reduced diagnostic starts are explicit service selections and are not the
 general Quickstart:
@@ -63,7 +66,7 @@ healthchecks, named volumes, loopback publication, project isolation, and
 dependency readiness must work. The first Windows baseline was recorded with
 Docker 29.6.1 and Compose 5.3.0 on `linux/amd64` containers.
 
-Application images use Python 3.13 with uv 0.11.9 and Node.js 22 with pnpm
+Application images use Python 3.13 with uv 0.12.5 and Node.js 22 with pnpm
 10.33.2. PostgreSQL 16.14 with pgvector is the source of truth. Neo4j
 2026.06.0 is a disposable, replayable relationship projection. Database
 images are pinned by digest in `security/local_runtime_contract.json`.
