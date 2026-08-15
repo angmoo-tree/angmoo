@@ -6,6 +6,8 @@ from app.domains.identity.infrastructure.sqlalchemy_auth_models import (
     AuthLoginThrottleBucket,
     AuthSession,
     CommunityMutationQuotaBucket,
+    InstallationIdentity,
+    LocalOwnerBootstrapChallenge,
     User,
 )
 from app.domains.identity.infrastructure.sqlalchemy_credential_models import (
@@ -18,6 +20,8 @@ __all__ = [
     "AuthLoginThrottleBucket",
     "AuthSession",
     "CommunityMutationQuotaBucket",
+    "InstallationIdentity",
+    "LocalOwnerBootstrapChallenge",
     "LlmCredential",
     "User",
 ]

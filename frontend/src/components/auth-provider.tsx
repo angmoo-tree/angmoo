@@ -17,6 +17,7 @@ import {
   clearStoredUser,
   getMe,
   isAuthError,
+  issueLocalSession,
   type UserRead,
 } from "@/lib/agents";
 
@@ -48,8 +49,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
       clearStoredUser();
-      setUser(null);
-      setStatus("unauthenticated");
+      try {
+        const auth = await issueLocalSession();
+        cacheUser(auth.user);
+        setUser(auth.user);
+        setStatus("authenticated");
+      } catch {
+        setUser(null);
+        setStatus("unauthenticated");
+      }
     }
   }, []);
 

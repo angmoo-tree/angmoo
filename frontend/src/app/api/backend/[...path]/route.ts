@@ -6,6 +6,7 @@ const PROFILE_MEDIA_PROXY_MAX_BYTES = 8_000_000 + 256 * 1024;
 const FORWARDED_COOKIE_NAMES = new Set([
   "angmoo_browser_session",
   "angmoo_google_signup_pending",
+  "angmoo_local_owner_challenge",
 ]);
 const UNSAFE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
@@ -29,6 +30,24 @@ function filterForwardedCookies(rawCookie: string | null) {
   return cookies.length > 0 ? cookies.join("; ") : null;
 }
 
+function requestFrontendOrigin(request: Request) {
+  const host = request.headers.get("host");
+  if (!host) return null;
+  try {
+    const forwardedProtocol = request.headers
+      .get("x-forwarded-proto")
+      ?.split(",", 1)[0]
+      ?.trim()
+      .toLowerCase();
+    const requestProtocol =
+      forwardedProtocol || new URL(request.url).protocol.slice(0, -1);
+    if (!["http", "https"].includes(requestProtocol)) return null;
+    return new URL(`${requestProtocol}://${host}`).origin;
+  } catch {
+    return null;
+  }
+}
+
 function exactSameOrigin(request: Request) {
   const origin = request.headers.get("origin");
   const host = request.headers.get("host");
@@ -41,17 +60,8 @@ function exactSameOrigin(request: Request) {
   }
   try {
     const parsed = new URL(origin);
-    const forwardedProtocol = request.headers
-      .get("x-forwarded-proto")
-      ?.split(",", 1)[0]
-      ?.trim()
-      .toLowerCase();
-    const requestProtocol =
-      forwardedProtocol || new URL(request.url).protocol.slice(0, -1);
-    if (!["http", "https"].includes(requestProtocol)) {
-      return null;
-    }
-    const requestOrigin = new URL(`${requestProtocol}://${host}`).origin;
+    const requestOrigin = requestFrontendOrigin(request);
+    if (!requestOrigin) return null;
     if (origin !== parsed.origin || parsed.origin !== requestOrigin) {
       return null;
     }
@@ -139,6 +149,7 @@ async function readBoundedRequestBody(request: Request, maxBytes: number) {
 async function proxy(request: Request, context: RouteContext) {
   const { path } = await context.params;
   const unsafe = UNSAFE_METHODS.has(request.method);
+  const frontendOrigin = requestFrontendOrigin(request);
   const origin = unsafe ? exactSameOrigin(request) : null;
   if (unsafe && !origin) {
     return Response.json({ detail: "csrf_origin_invalid" }, { status: 403 });
@@ -169,6 +180,9 @@ async function proxy(request: Request, context: RouteContext) {
     headers: {
       ...(cookie ? { Cookie: cookie } : {}),
       ...(origin ? { Origin: origin } : {}),
+      ...(frontendOrigin
+        ? { "X-Angmoo-Frontend-Origin": frontendOrigin }
+        : {}),
       "Content-Type": request.headers.get("content-type") ?? "application/json",
     },
   });

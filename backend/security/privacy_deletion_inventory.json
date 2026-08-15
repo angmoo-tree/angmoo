@@ -88,6 +88,10 @@
       "auth_login_throttle_buckets",
       "community_mutation_quota_buckets",
       "lore_parser_leases"
+    ],
+    "retain_local_installation": [
+      "installation_identities",
+      "local_owner_bootstrap_challenges"
     ]
   },
   "character_deletion": {
@@ -163,9 +167,11 @@
       "agent_creation_drafts",
       "auth_external_verification_reservations",
       "auth_google_signup_grants",
-      "auth_sessions",
       "auth_login_throttle_buckets",
+      "auth_sessions",
       "community_mutation_quota_buckets",
+      "installation_identities",
+      "local_owner_bootstrap_challenges",
       "lore_parser_leases",
       "post_reports",
       "site_operation_banners",
@@ -175,8 +181,8 @@
       "world_glossary_terms",
       "world_memberships",
       "world_places",
-      "world_rules",
       "world_roles",
+      "world_rules",
       "worlds"
     ]
   }

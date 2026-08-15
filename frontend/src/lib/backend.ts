@@ -5,6 +5,7 @@ const MAX_SERVER_JSON_BYTES = 1024 * 1024;
 const FORWARDED_SET_COOKIE_NAMES = [
   "angmoo_browser_session",
   "angmoo_google_signup_pending",
+  "angmoo_local_owner_challenge",
 ];
 
 class UpstreamResponseTooLargeError extends Error {}

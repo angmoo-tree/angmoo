@@ -11,6 +11,7 @@ from sqlalchemy import (
     String,
     Text,
     func,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -86,6 +87,78 @@ class AuthSession(Base):
     )
 
     user: Mapped[User] = relationship()
+
+
+class InstallationIdentity(Base):
+    __tablename__ = "installation_identities"
+    __table_args__ = (
+        CheckConstraint(
+            "singleton_key = 'local-installation'",
+            name="ck_installation_identities_singleton",
+        ),
+        CheckConstraint(
+            "bootstrap_state IN ('unclaimed','claimed','recovery_required')",
+            name="ck_installation_identities_bootstrap_state",
+        ),
+        CheckConstraint(
+            "(bootstrap_state = 'claimed' AND owner_user_id IS NOT NULL "
+            "AND claimed_at IS NOT NULL) OR (bootstrap_state <> 'claimed')",
+            name="ck_installation_identities_claimed_owner",
+        ),
+    )
+
+    singleton_key: Mapped[str] = mapped_column(String(40), primary_key=True)
+    installation_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    owner_user_id: Mapped[str | None] = mapped_column(
+        ForeignKey("users.id"), unique=True, nullable=True
+    )
+    bootstrap_state: Mapped[str] = mapped_column(
+        String(24), nullable=False, default="unclaimed", server_default="unclaimed"
+    )
+    local_label: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    claimed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
+
+    owner: Mapped[User | None] = relationship(foreign_keys=[owner_user_id])
+
+
+class LocalOwnerBootstrapChallenge(Base):
+    __tablename__ = "local_owner_bootstrap_challenges"
+    __table_args__ = (
+        CheckConstraint(
+            "attempt_count >= 0 AND attempt_count <= 5",
+            name="ck_local_owner_bootstrap_attempt_count",
+        ),
+        Index(
+            "ix_local_owner_bootstrap_challenges_active",
+            "installation_key",
+            "expires_at",
+            postgresql_where=text("consumed_at IS NULL"),
+        ),
+    )
+
+    challenge_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    installation_key: Mapped[str] = mapped_column(
+        ForeignKey("installation_identities.singleton_key", ondelete="CASCADE"),
+        nullable=False,
+    )
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    consumed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    attempt_count: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
 
 
 class AuthLoginThrottleBucket(Base):

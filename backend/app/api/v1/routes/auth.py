@@ -137,7 +137,7 @@ def signup(
 
 
 @router.post("/login", response_model=schemas.AuthRead)
-@public_router.post("/login", response_model=schemas.AuthRead)
+@hosted_router.post("/login", response_model=schemas.AuthRead)
 def login(
     data: schemas.LoginCreate,
     request: Request,
@@ -181,7 +181,7 @@ def logout(
 
 
 @router.post("/google", response_model=schemas.GoogleLoginRead)
-@public_router.post("/google", response_model=schemas.GoogleLoginRead)
+@hosted_router.post("/google", response_model=schemas.GoogleLoginRead)
 def google_login(
     data: schemas.GoogleLoginCreate,
     request: Request,
@@ -225,7 +225,7 @@ def google_login(
 
 
 @router.post("/google/complete", response_model=schemas.AuthRead)
-@public_router.post("/google/complete", response_model=schemas.AuthRead)
+@hosted_router.post("/google/complete", response_model=schemas.AuthRead)
 def complete_google_signup(
     data: schemas.GoogleSignupCompleteCreate,
     request: Request,
@@ -284,7 +284,7 @@ def complete_google_signup(
 
 
 @router.post("/google/link", response_model=schemas.AuthRead)
-@public_router.post("/google/link", response_model=schemas.AuthRead)
+@hosted_router.post("/google/link", response_model=schemas.AuthRead)
 def link_google_account(
     data: schemas.GoogleLinkCreate,
     request: Request,
@@ -385,7 +385,7 @@ def update_me_preferences(
 
 
 @router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
-@public_router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+@hosted_router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
 def delete_me(
     data: schemas.AccountDeletionCreate,
     response: Response,

@@ -49,7 +49,7 @@ def _create_test_app() -> tuple[FastAPI, object]:
     models.AuthSession.__table__.create(engine)
 
     app = FastAPI()
-    app.include_router(auth_routes.public_router, prefix="/api/v1")
+    app.include_router(auth_routes.router, prefix="/api/v1")
 
     def get_test_db():
         with Session(engine) as db:
