@@ -1,0 +1,74 @@
+x-backend-dev-build: &backend-dev-build
+  context: .
+  dockerfile: Dockerfile.backend
+  target: development
+  args:
+    VCS_REF: ${ANGMOO_VCS_REF:-dev}
+    VERSION: ${ANGMOO_VERSION:-0.1.0-dev}
+
+services:
+  backend:
+    image: angmoo-backend-dev
+    pull_policy: build
+    build: *backend-dev-build
+    command: ["api-dev"]
+    environment:
+      API_DOCS_ENABLED: "true"
+    develop:
+      watch:
+        - action: sync
+          path: ./backend/app
+          target: /workspace/backend/app
+        - action: sync
+          path: ./backend/scripts
+          target: /workspace/backend/scripts
+        - action: sync
+          path: ./backend/tests
+          target: /workspace/backend/tests
+        - action: rebuild
+          path: ./backend/pyproject.toml
+        - action: rebuild
+          path: ./backend/uv.lock
+        - action: rebuild
+          path: ./Dockerfile.backend
+        - action: rebuild
+          path: ./scripts/docker/backend-entrypoint.sh
+
+  scheduler:
+    image: angmoo-backend-dev
+    pull_policy: never
+
+  projector:
+    image: angmoo-backend-dev
+    pull_policy: never
+
+  frontend:
+    image: angmoo-frontend-dev
+    pull_policy: build
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      target: development
+      args:
+        VCS_REF: ${ANGMOO_VCS_REF:-dev}
+        VERSION: ${ANGMOO_VERSION:-0.1.0-dev}
+    command: ["pnpm", "dev", "--hostname", "0.0.0.0"]
+    environment:
+      NODE_ENV: development
+      ANGMOO_API_BASE_URL: http://backend:8080
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend/src
+          target: /app/src
+        - action: sync
+          path: ./frontend/public
+          target: /app/public
+        - action: rebuild
+          path: ./frontend/package.json
+        - action: rebuild
+          path: ./frontend/pnpm-lock.yaml
+        - action: rebuild
+          path: ./frontend/next.config.ts
+        - action: rebuild
+          path: ./Dockerfile.frontend

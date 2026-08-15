@@ -150,6 +150,12 @@ def check_repo(
     ):
         if required not in document:
             errors.append(f"local runtime document is missing: {required}")
+    for required_path in (
+        "Dockerfile.backend", "Dockerfile.frontend", ".dockerignore",
+        "compose.yml", "compose.dev.yml",
+    ):
+        if not (root / required_path).is_file():
+            errors.append(f"local runtime asset is missing: {required_path}")
     return errors
 
 

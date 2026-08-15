@@ -252,15 +252,15 @@
     {
       "name": "pgvector PostgreSQL image",
       "source_path": "compose.yml",
-      "reference": "pgvector/pgvector@sha256:1d533553fefe4f12e5d80c7b80622ba0c382abb5758856f52983d8789179f0fb",
+      "reference": "pgvector/pgvector:pg16@sha256:1d533553fefe4f12e5d80c7b80622ba0c382abb5758856f52983d8789179f0fb",
       "license_expression": "PostgreSQL",
       "distribution_boundary": "Independent local database container; image components retain their respective licenses.",
       "source": "https://github.com/pgvector/pgvector/blob/master/LICENSE"
     },
     {
       "name": "Neo4j Community Edition",
-      "source_path": "compose.neo4j.yml",
-      "reference": "neo4j@sha256:42fd5b9ead4dd4211f6f91bd831c358e4e2117367d04633fbf88682ca4792b30",
+      "source_path": "compose.yml",
+      "reference": "neo4j:2026.06.0@sha256:42fd5b9ead4dd4211f6f91bd831c358e4e2117367d04633fbf88682ca4792b30",
       "license_expression": "GPL-3.0-only",
       "distribution_boundary": "Optional independent graph database service, not embedded application code.",
       "source": "https://neo4j.com/licensing/"
