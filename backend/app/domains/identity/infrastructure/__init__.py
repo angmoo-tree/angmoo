@@ -1,4 +1,4 @@
-"""Compatibility facade for canonical identity domain models."""
+"""Identity infrastructure adapters."""
 
 from app.domains.identity.infrastructure.sqlalchemy_auth_models import (
     AuthExternalVerificationReservation,
@@ -6,8 +6,10 @@ from app.domains.identity.infrastructure.sqlalchemy_auth_models import (
     AuthLoginThrottleBucket,
     AuthSession,
     CommunityMutationQuotaBucket,
-    DISPLAY_NAME_CHANGE_COOLDOWN,
     User,
+)
+from app.domains.identity.infrastructure.sqlalchemy_credential_models import (
+    LlmCredential,
 )
 
 __all__ = [
@@ -16,6 +18,6 @@ __all__ = [
     "AuthLoginThrottleBucket",
     "AuthSession",
     "CommunityMutationQuotaBucket",
-    "DISPLAY_NAME_CHANGE_COOLDOWN",
+    "LlmCredential",
     "User",
 ]

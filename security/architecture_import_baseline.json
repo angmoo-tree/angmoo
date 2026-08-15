@@ -1,7 +1,7 @@
 {
-  "edge_count": 610,
+  "edge_count": 624,
   "external_import_count": 1036,
-  "module_count": 254,
+  "module_count": 265,
   "modules": [
     {
       "external_imports": [],
@@ -1349,33 +1349,26 @@
     {
       "external_imports": [],
       "imports": [
-        "app.credentials.contracts",
-        "app.credentials.resolver"
+        "app.domains.identity.application",
+        "app.domains.identity.domain"
       ],
       "module": "app.credentials",
       "path": "backend/app/credentials/__init__.py",
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "__future__",
-        "dataclasses",
-        "enum"
+      "external_imports": [],
+      "imports": [
+        "app.domains.identity.domain.credential"
       ],
-      "imports": [],
       "module": "app.credentials.contracts",
       "path": "backend/app/credentials/contracts.py",
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "__future__",
-        "collections.abc",
-        "typing"
-      ],
+      "external_imports": [],
       "imports": [
-        "app.core.security",
-        "app.credentials.contracts"
+        "app.domains.identity.application.resolve_credential"
       ],
       "module": "app.credentials.resolver",
       "path": "backend/app/credentials/resolver.py",
@@ -1494,6 +1487,127 @@
       "imports": [],
       "module": "app.domains",
       "path": "backend/app/domains/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.identity",
+      "path": "backend/app/domains/identity/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.identity.api.schemas"
+      ],
+      "module": "app.domains.identity.api",
+      "path": "backend/app/domains/identity/api/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.identity.api.schemas",
+      "path": "backend/app/domains/identity/api/schemas.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.identity.application.resolve_credential"
+      ],
+      "module": "app.domains.identity.application",
+      "path": "backend/app/domains/identity/application/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "typing"
+      ],
+      "imports": [
+        "app.core.security",
+        "app.domains.identity.domain.credential"
+      ],
+      "module": "app.domains.identity.application.resolve_credential",
+      "path": "backend/app/domains/identity/application/resolve_credential.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.identity.domain.credential"
+      ],
+      "module": "app.domains.identity.domain",
+      "path": "backend/app/domains/identity/domain/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "enum"
+      ],
+      "imports": [],
+      "module": "app.domains.identity.domain.credential",
+      "path": "backend/app/domains/identity/domain/credential.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.identity.infrastructure.sqlalchemy_auth_models",
+        "app.domains.identity.infrastructure.sqlalchemy_credential_models"
+      ],
+      "module": "app.domains.identity.infrastructure",
+      "path": "backend/app/domains/identity/infrastructure/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.domains.identity.infrastructure.sqlalchemy_auth_models",
+      "path": "backend/app/domains/identity/infrastructure/sqlalchemy_auth_models.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.domains.identity.infrastructure.sqlalchemy_credential_models",
+      "path": "backend/app/domains/identity/infrastructure/sqlalchemy_credential_models.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.identity.api.schemas",
+        "app.domains.identity.application.resolve_credential",
+        "app.domains.identity.domain.credential",
+        "app.domains.identity.infrastructure.sqlalchemy_auth_models",
+        "app.domains.identity.infrastructure.sqlalchemy_credential_models"
+      ],
+      "module": "app.domains.identity.public",
+      "path": "backend/app/domains/identity/public.py",
       "wildcard_imports": []
     },
     {
@@ -1637,17 +1751,16 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.identity.infrastructure",
         "app.models.admin_ops",
         "app.models.agent_creation_drafts",
         "app.models.agent_local_keys",
         "app.models.agent_runs",
         "app.models.agent_settings",
         "app.models.agent_slots",
-        "app.models.auth",
         "app.models.character_lore",
         "app.models.characters",
         "app.models.community",
-        "app.models.credentials",
         "app.models.graph_projection",
         "app.models.local_bot_quotas",
         "app.models.messages",
@@ -1749,14 +1862,9 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "datetime",
-        "sqlalchemy",
-        "sqlalchemy.orm",
-        "typing"
-      ],
+      "external_imports": [],
       "imports": [
-        "app.core.db"
+        "app.domains.identity.infrastructure.sqlalchemy_auth_models"
       ],
       "module": "app.models.auth",
       "path": "backend/app/models/auth.py",
@@ -1806,14 +1914,9 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "datetime",
-        "sqlalchemy",
-        "sqlalchemy.orm",
-        "typing"
-      ],
+      "external_imports": [],
       "imports": [
-        "app.core.db"
+        "app.domains.identity.infrastructure.sqlalchemy_credential_models"
       ],
       "module": "app.models.credentials",
       "path": "backend/app/models/credentials.py",
@@ -2096,10 +2199,10 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.identity.api",
         "app.domains.relationships.graph_read.schemas",
         "app.schemas.agent_runs",
         "app.schemas.agents",
-        "app.schemas.auth",
         "app.schemas.character_lore",
         "app.schemas.characters",
         "app.schemas.community",
@@ -2148,12 +2251,10 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "datetime",
-        "pydantic",
-        "typing"
+      "external_imports": [],
+      "imports": [
+        "app.domains.identity.api.schemas"
       ],
-      "imports": [],
       "module": "app.schemas.auth",
       "path": "backend/app/schemas/auth.py",
       "wildcard_imports": []

@@ -1,14 +1,14 @@
-from app.models.auth import (
+from app.domains.identity.infrastructure import (
     AuthExternalVerificationReservation,
     AuthGoogleSignupGrant,
     AuthLoginThrottleBucket,
     AuthSession,
     CommunityMutationQuotaBucket,
     User,
+    LlmCredential,
 )
 from app.models.characters import Character, CharacterState
 from app.models.character_lore import CharacterLoreChunk, CharacterLoreSource, LoreParserLease
-from app.models.credentials import LlmCredential
 from app.models.agent_settings import AgentActivitySetting, AgentImageGenerationSetting
 from app.models.agent_local_keys import AgentLocalKey
 from app.models.local_bot_quotas import (

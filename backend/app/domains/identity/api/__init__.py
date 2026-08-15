@@ -1,4 +1,4 @@
-"""Compatibility facade for canonical identity API schemas."""
+"""Identity API contracts."""
 
 from app.domains.identity.api.schemas import (
     AccountDeletionCreate,

@@ -1,4 +1,4 @@
-"""Compatibility facade for identity credential value objects."""
+"""Pure identity-domain value objects."""
 
 from app.domains.identity.domain.credential import CredentialMaterial, CredentialPurpose
 
