@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import argparse
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 import json
 from pathlib import Path
 import sys
@@ -78,6 +78,7 @@ def _bootstrap_local_session(marker: str, backend_url: str) -> str:
     from app.core import security
     from app.core.config import settings
     from app.core.db import SessionLocal
+    from app.domains.identity.domain.local_owner import LOCAL_INSTALLATION_KEY
 
     if make_url(settings.database_url).host not in {"127.0.0.1", "::1", "localhost"}:
         raise SmokeError("local session bootstrap requires a loopback database")
@@ -102,10 +103,23 @@ def _bootstrap_local_session(marker: str, backend_url: str) -> str:
             )
         )
         db.add(
+            models.InstallationIdentity(
+                singleton_key=LOCAL_INSTALLATION_KEY,
+                installation_id=f"installation-{uuid4().hex}",
+                owner_user_id=user_id,
+                bootstrap_state="claimed",
+                claimed_at=now,
+                created_at=now,
+                updated_at=now,
+            )
+        )
+        db.add(
             models.AuthSession(
                 token_hash=security.hash_token(token),
                 user_id=user_id,
-                auth_method="google",
+                auth_method="local_owner",
+                created_at=now,
+                expires_at=now + timedelta(days=7),
             )
         )
         db.commit()
@@ -264,7 +278,7 @@ def main() -> int:
     parser.add_argument(
         "--bootstrap-local-session",
         action="store_true",
-        help="seed a synthetic Google-auth session in a loopback disposable database",
+        help="seed a synthetic local-owner session in a loopback disposable database",
     )
     args = parser.parse_args()
     try:

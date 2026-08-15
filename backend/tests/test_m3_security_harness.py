@@ -26,9 +26,9 @@ VALID_ACCESS = {
 }
 UNSAFE_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
 PREAUTH_MUTATION_ROUTES = {
-    "POST /api/v1/auth/google",
-    "POST /api/v1/auth/google/complete",
-    "POST /api/v1/auth/login",
+    "POST /api/v1/auth/local/bootstrap/challenge",
+    "POST /api/v1/auth/local/bootstrap/claim",
+    "POST /api/v1/auth/local/session",
     "POST /api/v1/posts/{post_id}/comments",
 }
 SESSION_LIFECYCLE_MUTATIONS = {
@@ -81,10 +81,21 @@ def test_security_inventory_explicitly_covers_every_openapi_operation() -> None:
     actual = _actual_routes()
     inventory = _inventory()
 
-    assert set(inventory) == set(actual)
+    covered = {
+        key for key, metadata in inventory.items()
+        if metadata["access"] != "private-excluded"
+    }
+    excluded = {
+        key for key, metadata in inventory.items()
+        if metadata["access"] == "private-excluded"
+    }
+    assert covered == set(actual)
+    assert excluded.isdisjoint(actual)
     for key, metadata in inventory.items():
-        route = actual[key]
         assert metadata["access"] in VALID_ACCESS
+        if metadata["access"] == "private-excluded":
+            continue
+        route = actual[key]
         assert metadata["module"] == _canonical_inventory_module(
             route.endpoint.__module__
         )
@@ -94,6 +105,9 @@ def test_security_inventory_explicitly_covers_every_openapi_operation() -> None:
 def test_security_inventory_access_classes_match_authentication_dependencies() -> None:
     actual = _actual_routes()
     for key, metadata in _inventory().items():
+        if metadata["access"] == "private-excluded":
+            assert key not in actual
+            continue
         dependencies = _dependency_names(actual[key])
         access = metadata["access"]
         if access == "admin-only":
@@ -145,7 +159,7 @@ def test_demo_read_only_guard_covers_every_mutation_auth_surface() -> None:
         if key.split(" ", 1)[0] in UNSAFE_METHODS
         and metadata["access"] == "public"
     }
-    assert len(session_mutations) == 75
+    assert len(session_mutations) == 73
     assert len(local_bot_mutations) == 10
     assert not admin_mutations
     assert preauth_mutations == PREAUTH_MUTATION_ROUTES

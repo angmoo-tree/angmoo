@@ -82,6 +82,23 @@ export type AuthRead = {
   profile_setup_required: boolean;
 };
 
+export type LocalOwnerCandidateRead = {
+  user_id: string;
+  display_name: string;
+  character_count: number;
+  world_count: number;
+  credential_count: number;
+  suggested: boolean;
+};
+
+export type LocalBootstrapRead = {
+  state: "unclaimed" | "claimed" | "recovery_required";
+  installation_id: string | null;
+  local_label: string | null;
+  owner: UserRead | null;
+  candidates: LocalOwnerCandidateRead[];
+};
+
 export type GoogleLoginRead = {
   user: UserRead | null;
   profile_setup_required: boolean;
@@ -919,6 +936,36 @@ export function signup(data: {
   return apiRequest<AuthRead>("/auth/signup", {
     method: "POST",
     body: data,
+  });
+}
+
+export function getLocalBootstrapStatus() {
+  return apiRequest<LocalBootstrapRead>("/auth/local/bootstrap", {
+    anonymous: true,
+  });
+}
+
+export function createLocalBootstrapChallenge() {
+  return apiRequest<{ expires_at: string }>("/auth/local/bootstrap/challenge", {
+    method: "POST",
+  });
+}
+
+export function claimLocalOwner(data: {
+  owner_user_id: string | null;
+  display_name: string | null;
+  local_label: string | null;
+  privacy_acknowledged: boolean;
+}) {
+  return apiRequest<AuthRead>("/auth/local/bootstrap/claim", {
+    method: "POST",
+    body: data,
+  });
+}
+
+export function issueLocalSession() {
+  return apiRequest<AuthRead>("/auth/local/session", {
+    method: "POST",
   });
 }
 

@@ -38,7 +38,7 @@
       "endpoint": "discard_profile_media_candidate"
     },
     "DELETE /api/v1/auth/me": {
-      "access": "authenticated-shared",
+      "access": "private-excluded",
       "module": "app.api.v1.routes.auth",
       "endpoint": "delete_me"
     },
@@ -81,6 +81,11 @@
       "access": "authenticated-shared",
       "module": "app.api.v1.routes.community",
       "endpoint": "unfollow_profile"
+    },
+    "DELETE /api/v1/worlds/{world_id}/banner": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.worlds",
+      "endpoint": "remove_world_banner"
     },
     "GET /api/v1/agent-runs/resident-slots": {
       "access": "owner-only",
@@ -157,6 +162,11 @@
       "module": "app.api.v1.routes.agents",
       "endpoint": "get_settings"
     },
+    "GET /api/v1/auth/local/bootstrap": {
+      "access": "public",
+      "module": "app.domains.identity.api.local_routes",
+      "endpoint": "get_local_bootstrap_status"
+    },
     "GET /api/v1/auth/me": {
       "access": "authenticated-shared",
       "module": "app.api.v1.routes.auth",
@@ -211,6 +221,21 @@
       "access": "owner-only",
       "module": "app.api.v1.routes.messages",
       "endpoint": "get_character_message_settings"
+    },
+    "GET /api/v1/characters/{character_id}/worlds/{world_id}/activity-plan": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_activity_runtime",
+      "endpoint": "get_daily_activity_plan"
+    },
+    "GET /api/v1/characters/{character_id}/worlds/{world_id}/relationship-graph": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_activity_runtime",
+      "endpoint": "get_world_character_relationship_graph"
+    },
+    "GET /api/v1/characters/{character_id}/worlds/{world_id}/social-memory": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_activity_runtime",
+      "endpoint": "get_world_character_social_memory"
     },
     "GET /api/v1/feed": {
       "access": "public",
@@ -322,21 +347,6 @@
       "module": "app.api.v1.routes.tree",
       "endpoint": "get_tree_post"
     },
-    "GET /api/v1/characters/{character_id}/worlds/{world_id}/activity-plan": {
-      "access": "owner-only",
-      "module": "app.api.v1.routes.world_activity_runtime",
-      "endpoint": "get_daily_activity_plan"
-    },
-    "GET /api/v1/characters/{character_id}/worlds/{world_id}/relationship-graph": {
-      "access": "owner-only",
-      "module": "app.api.v1.routes.world_activity_runtime",
-      "endpoint": "get_world_character_relationship_graph"
-    },
-    "GET /api/v1/characters/{character_id}/worlds/{world_id}/social-memory": {
-      "access": "owner-only",
-      "module": "app.api.v1.routes.world_activity_runtime",
-      "endpoint": "get_world_character_social_memory"
-    },
     "GET /api/v1/world-characters/{world_character_id}/autonomy-setup": {
       "access": "owner-only",
       "module": "app.api.v1.routes.world_character_setup",
@@ -346,11 +356,6 @@
       "access": "owner-only",
       "module": "app.api.v1.routes.world_character_setup",
       "endpoint": "get_world_feed_status"
-    },
-    "DELETE /api/v1/worlds/{world_id}/banner": {
-      "access": "owner-only",
-      "module": "app.api.v1.routes.worlds",
-      "endpoint": "remove_world_banner"
     },
     "GET /api/v1/worlds/{world_id}": {
       "access": "public",
@@ -533,22 +538,37 @@
       "endpoint": "analyze_tendency"
     },
     "POST /api/v1/auth/google": {
-      "access": "public",
+      "access": "private-excluded",
       "module": "app.api.v1.routes.auth",
       "endpoint": "google_login"
     },
     "POST /api/v1/auth/google/complete": {
-      "access": "public",
+      "access": "private-excluded",
       "module": "app.api.v1.routes.auth",
       "endpoint": "complete_google_signup"
     },
     "POST /api/v1/auth/google/link": {
-      "access": "authenticated-shared",
+      "access": "private-excluded",
       "module": "app.api.v1.routes.auth",
       "endpoint": "link_google_account"
     },
-    "POST /api/v1/auth/login": {
+    "POST /api/v1/auth/local/bootstrap/challenge": {
       "access": "public",
+      "module": "app.domains.identity.api.local_routes",
+      "endpoint": "create_local_bootstrap_challenge"
+    },
+    "POST /api/v1/auth/local/bootstrap/claim": {
+      "access": "public",
+      "module": "app.domains.identity.api.local_routes",
+      "endpoint": "claim_local_owner"
+    },
+    "POST /api/v1/auth/local/session": {
+      "access": "public",
+      "module": "app.domains.identity.api.local_routes",
+      "endpoint": "issue_local_session"
+    },
+    "POST /api/v1/auth/login": {
+      "access": "private-excluded",
       "module": "app.api.v1.routes.auth",
       "endpoint": "login"
     },
@@ -586,6 +606,11 @@
       "access": "owner-only",
       "module": "app.api.v1.routes.community",
       "endpoint": "save_character_state"
+    },
+    "POST /api/v1/characters/{character_id}/worlds/{world_id}/activity-plan/prepare": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_activity_runtime",
+      "endpoint": "prepare_daily_activity_plan"
     },
     "POST /api/v1/messages/threads": {
       "access": "owner-only",
@@ -651,11 +676,6 @@
       "access": "authenticated-shared",
       "module": "app.api.v1.routes.tree",
       "endpoint": "create_tree_comment"
-    },
-    "POST /api/v1/characters/{character_id}/worlds/{world_id}/activity-plan/prepare": {
-      "access": "owner-only",
-      "module": "app.api.v1.routes.world_activity_runtime",
-      "endpoint": "prepare_daily_activity_plan"
     },
     "POST /api/v1/world-characters/{world_character_id}/autonomy-setup/approve": {
       "access": "owner-only",

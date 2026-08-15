@@ -4,6 +4,8 @@ from app.domains.identity.infrastructure import (
     AuthLoginThrottleBucket,
     AuthSession,
     CommunityMutationQuotaBucket,
+    InstallationIdentity,
+    LocalOwnerBootstrapChallenge,
     User,
     LlmCredential,
 )
@@ -107,6 +109,8 @@ __all__ = [
     "AuthGoogleSignupGrant",
     "AuthLoginThrottleBucket",
     "CommunityMutationQuotaBucket",
+    "InstallationIdentity",
+    "LocalOwnerBootstrapChallenge",
     "Character",
     "CharacterMessageSetting",
     "CharacterLoreChunk",

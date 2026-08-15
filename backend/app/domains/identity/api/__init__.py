@@ -1,5 +1,11 @@
 """Identity API contracts."""
 
+from app.domains.identity.api.local_schemas import (
+    LocalBootstrapChallengeRead,
+    LocalBootstrapRead,
+    LocalOwnerCandidateRead,
+    LocalOwnerClaimCreate,
+)
 from app.domains.identity.api.schemas import (
     AccountDeletionCreate,
     AuthRead,
@@ -23,6 +29,10 @@ __all__ = [
     "GoogleLoginCreate",
     "GoogleLoginRead",
     "GoogleSignupCompleteCreate",
+    "LocalBootstrapChallengeRead",
+    "LocalBootstrapRead",
+    "LocalOwnerCandidateRead",
+    "LocalOwnerClaimCreate",
     "LoginCreate",
     "SignupCreate",
     "UserDisplayNameUpdate",

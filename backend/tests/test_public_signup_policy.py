@@ -2,8 +2,9 @@ import importlib.util
 from pathlib import Path
 
 import pytest
+from fastapi import FastAPI
 
-from app.main import app as private_app
+from app.api.v1.routes import auth as auth_routes
 from app.public_main import (
     PublicRuntimeConfigurationError,
     app as public_app,
@@ -23,21 +24,30 @@ def _operations(app) -> set[tuple[str, str]]:
     }
 
 
-def test_public_runtime_excludes_password_signup_but_keeps_google_signup() -> None:
+def test_public_runtime_exposes_local_owner_bootstrap_not_hosted_login() -> None:
     operations = _operations(public_app)
 
     assert ("POST", "/api/v1/auth/signup") not in operations
-    assert ("POST", "/api/v1/auth/google") in operations
-    assert ("POST", "/api/v1/auth/google/complete") in operations
+    assert ("POST", "/api/v1/auth/login") not in operations
+    assert ("POST", "/api/v1/auth/google") not in operations
+    assert ("POST", "/api/v1/auth/google/complete") not in operations
+    assert ("GET", "/api/v1/auth/local/bootstrap") in operations
+    assert ("POST", "/api/v1/auth/local/bootstrap/challenge") in operations
+    assert ("POST", "/api/v1/auth/local/bootstrap/claim") in operations
+    assert ("POST", "/api/v1/auth/local/session") in operations
 
 
-def test_private_runtime_keeps_flag_gated_password_signup_for_compatibility() -> None:
-    private_operations = _operations(private_app)
-    public_operations = _operations(public_app)
-    if private_operations == public_operations:
-        assert ("POST", "/api/v1/auth/signup") not in private_operations
-        return
-    assert ("POST", "/api/v1/auth/signup") in private_operations
+def test_hosted_auth_facade_keeps_legacy_routes_outside_local_default() -> None:
+    hosted_app = FastAPI()
+    hosted_app.include_router(auth_routes.hosted_router, prefix="/api/v1")
+    hosted_operations = _operations(hosted_app)
+
+    assert ("POST", "/api/v1/auth/signup") in hosted_operations
+    assert ("POST", "/api/v1/auth/login") in hosted_operations
+    assert ("POST", "/api/v1/auth/google") in hosted_operations
+    assert ("POST", "/api/v1/auth/google/complete") in hosted_operations
+    assert ("POST", "/api/v1/auth/google/link") in hosted_operations
+    assert ("DELETE", "/api/v1/auth/me") in hosted_operations
 
 
 def test_hosted_production_rejects_password_signup_even_if_flag_is_enabled(
@@ -61,7 +71,7 @@ def test_public_runtime_rejects_enabled_password_signup(
         validate_public_runtime_settings()
 
 
-def test_public_environment_defaults_to_google_only_signup() -> None:
+def test_public_environment_disables_hosted_signup() -> None:
     repo_root = Path(__file__).parents[2]
     source_env = repo_root / "public" / "backend.env.example"
     exported_env = repo_root / "backend" / ".env.example"

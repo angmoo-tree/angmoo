@@ -1,7 +1,7 @@
 {
-  "edge_count": 624,
-  "external_import_count": 1036,
-  "module_count": 265,
+  "edge_count": 645,
+  "external_import_count": 1065,
+  "module_count": 273,
   "modules": [
     {
       "external_imports": [],
@@ -883,6 +883,17 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260815_0079_local_owner_identity",
+      "path": "backend/app/alembic/versions/20260815_0079_local_owner_identity.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.api.v1",
@@ -946,7 +957,8 @@
         "app.api.v1.routes.tree",
         "app.api.v1.routes.world_activity_runtime",
         "app.api.v1.routes.world_character_setup",
-        "app.api.v1.routes.worlds"
+        "app.api.v1.routes.worlds",
+        "app.domains.identity.api.local_routes"
       ],
       "module": "app.api.v1.public",
       "path": "backend/app/api/v1/public.py",
@@ -1196,7 +1208,9 @@
     {
       "external_imports": [
         "__future__",
+        "datetime",
         "fastapi",
+        "math",
         "urllib.parse"
       ],
       "imports": [
@@ -1499,10 +1513,46 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.identity.api.local_schemas",
         "app.domains.identity.api.schemas"
       ],
       "module": "app.domains.identity.api",
       "path": "backend/app/domains/identity/api/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "fastapi",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.browser_session",
+        "app.core.config",
+        "app.core.db",
+        "app.domains.identity.api.local_schemas",
+        "app.domains.identity.api.schemas",
+        "app.domains.identity.application.local_owner",
+        "app.domains.identity.domain.local_owner",
+        "app.domains.identity.infrastructure.sqlalchemy_identity_repository"
+      ],
+      "module": "app.domains.identity.api.local_routes",
+      "path": "backend/app/domains/identity/api/local_routes.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.identity.api.schemas",
+        "app.domains.identity.domain.local_owner"
+      ],
+      "module": "app.domains.identity.api.local_schemas",
+      "path": "backend/app/domains/identity/api/local_schemas.py",
       "wildcard_imports": []
     },
     {
@@ -1519,10 +1569,24 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.identity.application.local_owner",
         "app.domains.identity.application.resolve_credential"
       ],
       "module": "app.domains.identity.application",
       "path": "backend/app/domains/identity/application/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime"
+      ],
+      "imports": [
+        "app.domains.identity.domain.local_owner",
+        "app.domains.identity.ports.identity_repository"
+      ],
+      "module": "app.domains.identity.application.local_owner",
+      "path": "backend/app/domains/identity/application/local_owner.py",
       "wildcard_imports": []
     },
     {
@@ -1542,7 +1606,8 @@
     {
       "external_imports": [],
       "imports": [
-        "app.domains.identity.domain.credential"
+        "app.domains.identity.domain.credential",
+        "app.domains.identity.domain.local_owner"
       ],
       "module": "app.domains.identity.domain",
       "path": "backend/app/domains/identity/domain/__init__.py",
@@ -1557,6 +1622,18 @@
       "imports": [],
       "module": "app.domains.identity.domain.credential",
       "path": "backend/app/domains/identity/domain/credential.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.identity.domain.local_owner",
+      "path": "backend/app/domains/identity/domain/local_owner.py",
       "wildcard_imports": []
     },
     {
@@ -1595,6 +1672,48 @@
       ],
       "module": "app.domains.identity.infrastructure.sqlalchemy_credential_models",
       "path": "backend/app/domains/identity/infrastructure/sqlalchemy_credential_models.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "hashlib",
+        "secrets",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm",
+        "uuid"
+      ],
+      "imports": [
+        "app.core.security",
+        "app.domains.identity.domain.local_owner",
+        "app.domains.identity.infrastructure.sqlalchemy_auth_models"
+      ],
+      "module": "app.domains.identity.infrastructure.sqlalchemy_identity_repository",
+      "path": "backend/app/domains/identity/infrastructure/sqlalchemy_identity_repository.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.identity.ports.identity_repository"
+      ],
+      "module": "app.domains.identity.ports",
+      "path": "backend/app/domains/identity/ports/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.identity.domain.local_owner"
+      ],
+      "module": "app.domains.identity.ports.identity_repository",
+      "path": "backend/app/domains/identity/ports/identity_repository.py",
       "wildcard_imports": []
     },
     {

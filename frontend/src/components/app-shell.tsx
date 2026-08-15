@@ -36,10 +36,7 @@ import {
   TodayActivityCard,
   useRightRailInsights,
 } from "@/components/right-rail-insights";
-import {
-  hasPendingGoogleSignup,
-  type UserRead,
-} from "@/lib/agents";
+import { type UserRead } from "@/lib/agents";
 import { getUserProfile } from "@/lib/community";
 import { LICENSES_URL, PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from "@/lib/policy-links";
 
@@ -81,10 +78,10 @@ export function AppShell({ children }: { children: ReactNode }) {
     }
     if (
       status === "unauthenticated" &&
-      pathname === "/profile/setup" &&
-      !hasPendingGoogleSignup()
+      pathname !== "/login"
     ) {
-      router.replace("/login");
+      const returnTo = pathname && pathname !== "/" ? `?returnTo=${encodeURIComponent(pathname)}` : "";
+      router.replace(`/login${returnTo}`);
     }
   }, [pathname, router, status, user]);
 
