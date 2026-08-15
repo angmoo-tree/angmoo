@@ -258,7 +258,15 @@ def _seed(db: Session) -> tuple[models.User, models.WorldCharacter]:
         model="gemini-3.1-flash-lite",
         auth_profile_id="test-profile",
         label="test key",
-        encrypted_api_key=security.encrypt_secret("synthetic-api-key"),
+        encrypted_api_key=security.encrypt_secret(
+            "synthetic-api-key",
+            scope=security.SecretScope(
+                owner_id=owner.id,
+                character_id=character.id,
+                provider="google",
+                purpose="agent",
+            ),
+        ),
         enabled=True,
     )
     db.add(owner)

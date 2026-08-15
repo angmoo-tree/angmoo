@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     API_DOCS_ENABLED: bool = True
     APP_ENV: Literal["development", "test", "production"] = "development"
     APP_SECRET: SecretStr = SecretStr(DEFAULT_APP_SECRET)
+    APP_SECRET_FILE: str | None = None
     DATABASE_URL: str = "postgresql+psycopg://postgres:postgres@localhost:5432/angmoo"
     SEED_DEMO_DATA: bool = True
     SIGNUP_ENABLED: bool = False
@@ -178,6 +179,14 @@ class Settings(BaseSettings):
 
     @property
     def app_secret(self) -> str:
+        if self.APP_SECRET_FILE:
+            path = Path(self.APP_SECRET_FILE)
+            if path.is_symlink() or not path.is_file():
+                raise ValueError("app_secret_file_invalid")
+            value = path.read_text(encoding="utf-8").strip()
+            if not value:
+                raise ValueError("app_secret_file_empty")
+            return value
         return self.APP_SECRET.get_secret_value()
 
     @property

@@ -757,7 +757,7 @@ def test_message_response_lease_is_single_flight_across_postgres_sessions(
         )
 
     monkeypatch.setattr(message_service, "generate_text", fake_generate_text)
-    monkeypatch.setattr(message_service.security, "decrypt_secret", lambda _value: "fake")
+    monkeypatch.setattr(message_service.security, "decrypt_secret", lambda _value, **_kwargs: "fake")
 
     with Session(engine) as db:
         db.add(

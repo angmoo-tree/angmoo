@@ -260,7 +260,7 @@ def test_message_credential_label_uses_message_wording(monkeypatch) -> None:
     engine = create_engine("sqlite:///:memory:")
     _create_tables(engine)
 
-    monkeypatch.setattr(messages.security, "encrypt_secret", lambda _: "encrypted-key")
+    monkeypatch.setattr(messages.security, "encrypt_secret", lambda _, **_kwargs: "encrypted-key")
     monkeypatch.setattr(messages.security, "fingerprint_secret", lambda _: "fingerprint")
 
     with Session(engine) as db:
@@ -406,7 +406,7 @@ def test_send_message_stores_fallback_when_output_leaks_internal_prompt(
         )
 
     monkeypatch.setattr(messages, "generate_text", fake_generate_text)
-    monkeypatch.setattr(messages.security, "decrypt_secret", lambda _: "raw-key")
+    monkeypatch.setattr(messages.security, "decrypt_secret", lambda _, **_kwargs: "raw-key")
 
     with Session(engine) as db:
         owner = _user("owner")
@@ -474,7 +474,7 @@ def test_send_message_stores_normal_answer_without_prompt_guard_change(
         )
 
     monkeypatch.setattr(messages, "generate_text", fake_generate_text)
-    monkeypatch.setattr(messages.security, "decrypt_secret", lambda _: "raw-key")
+    monkeypatch.setattr(messages.security, "decrypt_secret", lambda _, **_kwargs: "raw-key")
 
     with Session(engine) as db:
         owner = _user("owner")
@@ -529,7 +529,7 @@ def test_retry_model_busy_message_updates_existing_assistant_with_current_model(
         )
 
     monkeypatch.setattr(messages, "generate_text", fake_generate_text)
-    monkeypatch.setattr(messages.security, "decrypt_secret", lambda _: "raw-key")
+    monkeypatch.setattr(messages.security, "decrypt_secret", lambda _, **_kwargs: "raw-key")
 
     with Session(engine) as db:
         owner = _user("owner")
@@ -600,7 +600,7 @@ def test_retry_message_stores_fallback_when_output_leaks_internal_secret(
         )
 
     monkeypatch.setattr(messages, "generate_text", fake_generate_text)
-    monkeypatch.setattr(messages.security, "decrypt_secret", lambda _: "raw-key")
+    monkeypatch.setattr(messages.security, "decrypt_secret", lambda _, **_kwargs: "raw-key")
 
     with Session(engine) as db:
         owner = _user("owner")
@@ -660,7 +660,7 @@ def test_retry_model_busy_failure_keeps_single_error_message(monkeypatch) -> Non
         raise messages.DirectLlmError("503 UNAVAILABLE high demand")
 
     monkeypatch.setattr(messages, "generate_text", fake_generate_text)
-    monkeypatch.setattr(messages.security, "decrypt_secret", lambda _: "raw-key")
+    monkeypatch.setattr(messages.security, "decrypt_secret", lambda _, **_kwargs: "raw-key")
 
     with Session(engine) as db:
         owner = _user("owner")
@@ -732,7 +732,7 @@ def test_retry_message_in_flight_uses_clear_korean_message(monkeypatch) -> None:
 def test_retry_rejects_old_or_non_busy_assistant_message(monkeypatch) -> None:
     engine = create_engine("sqlite:///:memory:")
     _create_tables(engine)
-    monkeypatch.setattr(messages.security, "decrypt_secret", lambda _: "raw-key")
+    monkeypatch.setattr(messages.security, "decrypt_secret", lambda _, **_kwargs: "raw-key")
 
     with Session(engine) as db:
         owner = _user("owner")

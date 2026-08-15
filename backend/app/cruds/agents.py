@@ -137,6 +137,23 @@ def ensure_image_generation_setting(
     return setting
 
 
+def _image_secret_scope(
+    db: Session,
+    setting: models.AgentImageGenerationSetting,
+    *,
+    provider: str,
+) -> security.SecretScope:
+    character = db.get(models.Character, setting.character_id)
+    if character is None:
+        raise ValueError("image credential character is missing")
+    return security.SecretScope(
+        owner_id=character.owner_id,
+        character_id=character.id,
+        provider=provider,
+        purpose="user_image",
+    )
+
+
 def update_image_generation_setting(
     db: Session,
     setting: models.AgentImageGenerationSetting,
@@ -153,7 +170,10 @@ def update_image_generation_setting(
         if value is not None:
             setattr(setting, field, value)
     if api_key is not None:
-        setting.encrypted_pollinations_api_key = security.encrypt_secret(api_key)
+        setting.encrypted_pollinations_api_key = security.encrypt_secret(
+            api_key,
+            scope=_image_secret_scope(db, setting, provider="pollinations"),
+        )
         setting.key_fingerprint = security.fingerprint_secret(api_key)
     elif clear_key:
         setting.encrypted_pollinations_api_key = None
@@ -161,7 +181,10 @@ def update_image_generation_setting(
         if setting.image_key_mode == "user":
             setting.image_key_mode = "disabled"
     if replicate_api_key is not None:
-        setting.encrypted_replicate_api_token = security.encrypt_secret(replicate_api_key)
+        setting.encrypted_replicate_api_token = security.encrypt_secret(
+            replicate_api_key,
+            scope=_image_secret_scope(db, setting, provider="replicate"),
+        )
         setting.replicate_key_fingerprint = security.fingerprint_secret(replicate_api_key)
     elif clear_replicate_key:
         setting.encrypted_replicate_api_token = None
@@ -313,7 +336,15 @@ def upsert_credential(
     credential = get_character_credential(db, character.id)
     profile_id = auth_profile_id or default_auth_profile_id(provider, character.id)
     credential_model = model or default_credential_model()
-    encrypted_api_key = security.encrypt_secret(api_key)
+    encrypted_api_key = security.encrypt_secret(
+        api_key,
+        scope=security.SecretScope(
+            owner_id=user.id,
+            character_id=character.id,
+            provider=provider,
+            purpose="agent",
+        ),
+    )
     key_fingerprint = security.fingerprint_secret(api_key)
     if credential is None:
         credential = models.LlmCredential(
