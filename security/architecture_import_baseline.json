@@ -1,7 +1,7 @@
 {
-  "edge_count": 658,
-  "external_import_count": 1086,
-  "module_count": 285,
+  "edge_count": 671,
+  "external_import_count": 1115,
+  "module_count": 291,
   "modules": [
     {
       "external_imports": [],
@@ -894,6 +894,18 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy",
+        "uuid"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260816_0080_scheduler_singleton",
+      "path": "backend/app/alembic/versions/20260816_0080_scheduler_singleton.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.api.v1",
@@ -1741,6 +1753,7 @@
         "app.domains.identity.api.schemas",
         "app.domains.identity.application.resolve_credential",
         "app.domains.identity.domain.credential",
+        "app.domains.identity.domain.local_owner",
         "app.domains.identity.infrastructure.sqlalchemy_auth_models",
         "app.domains.identity.infrastructure.sqlalchemy_credential_models"
       ],
@@ -1863,6 +1876,18 @@
         "__future__"
       ],
       "imports": [
+        "app.domains.runtime.domain.scheduler_lease",
+        "app.domains.runtime.ports.scheduler_lease_repository"
+      ],
+      "module": "app.domains.runtime.application.manage_scheduler_lease",
+      "path": "backend/app/domains/runtime/application/manage_scheduler_lease.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__"
+      ],
+      "imports": [
         "app.domains.runtime.domain.installation_state",
         "app.domains.runtime.ports.application_runtime_probe"
       ],
@@ -1902,6 +1927,47 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "enum"
+      ],
+      "imports": [],
+      "module": "app.domains.runtime.domain.scheduler_lease",
+      "path": "backend/app/domains/runtime/domain/scheduler_lease.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.runtime.infrastructure.sqlalchemy_scheduler_lease"
+      ],
+      "module": "app.domains.runtime.infrastructure",
+      "path": "backend/app/domains/runtime/infrastructure/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "contextlib",
+        "contextvars",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.core.db",
+        "app.domains.identity.public",
+        "app.domains.runtime.domain.scheduler_lease"
+      ],
+      "module": "app.domains.runtime.infrastructure.sqlalchemy_scheduler_lease",
+      "path": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.domains.runtime.ports",
@@ -1921,12 +1987,27 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.runtime.domain.scheduler_lease"
+      ],
+      "module": "app.domains.runtime.ports.scheduler_lease_repository",
+      "path": "backend/app/domains/runtime/ports/scheduler_lease_repository.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.domains.runtime.api.runtime_schemas",
+        "app.domains.runtime.application.manage_scheduler_lease",
         "app.domains.runtime.application.read_runtime_status",
         "app.domains.runtime.domain.diagnostic_codes",
         "app.domains.runtime.domain.installation_state",
+        "app.domains.runtime.domain.scheduler_lease",
+        "app.domains.runtime.infrastructure",
         "app.domains.runtime.ports.application_runtime_probe"
       ],
       "module": "app.domains.runtime.public",
@@ -2001,6 +2082,7 @@
       "external_imports": [],
       "imports": [
         "app.domains.identity.infrastructure",
+        "app.domains.runtime.infrastructure",
         "app.models.admin_ops",
         "app.models.agent_creation_drafts",
         "app.models.agent_local_keys",
@@ -3725,12 +3807,22 @@
     },
     {
       "external_imports": [
+        "__future__",
         "asyncio",
-        "logging"
+        "fcntl",
+        "logging",
+        "msvcrt",
+        "os",
+        "pathlib",
+        "time",
+        "types",
+        "typing",
+        "uuid"
       ],
       "imports": [
         "app.core.config",
         "app.core.db",
+        "app.domains.runtime.public",
         "app.schemas",
         "app.services.agent_runs"
       ],
@@ -3790,6 +3882,7 @@
         "hashlib",
         "json",
         "logging",
+        "sqlalchemy",
         "sqlalchemy.exc",
         "sqlalchemy.orm"
       ],

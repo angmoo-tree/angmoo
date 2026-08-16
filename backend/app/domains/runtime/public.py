@@ -7,6 +7,9 @@ from app.domains.runtime.api.runtime_schemas import (
 from app.domains.runtime.application.read_runtime_status import (
     ReadApplicationRuntimeStatus,
 )
+from app.domains.runtime.application.manage_scheduler_lease import (
+    SchedulerLeaseCoordinator,
+)
 from app.domains.runtime.domain.diagnostic_codes import RuntimeDiagnosticCode
 from app.domains.runtime.domain.installation_state import (
     RUNTIME_STATUS_SCHEMA_VERSION,
@@ -21,6 +24,22 @@ from app.domains.runtime.domain.installation_state import (
     RuntimeComponentStatus,
     RuntimeDependencyStatus,
     SchedulerRuntimeStatus,
+)
+from app.domains.runtime.domain.scheduler_lease import (
+    SchedulerFenceRejectedError,
+    SchedulerLeaseHeldError,
+    SchedulerLeaseLostError,
+    SchedulerLeaseSnapshot,
+    SchedulerLeaseState,
+    SchedulerTickPermit,
+    SchedulerTickResult,
+    decide_tick_window,
+    logical_tick_window,
+)
+from app.domains.runtime.infrastructure import (
+    RuntimeSchedulerLease,
+    SqlAlchemySchedulerLeaseRepository,
+    scheduler_fence,
 )
 from app.domains.runtime.ports.application_runtime_probe import (
     ApplicationRuntimeProbe,
@@ -42,6 +61,19 @@ __all__ = [
     "RuntimeComponentStatus",
     "RuntimeDependencyStatus",
     "RuntimeDiagnosticCode",
+    "RuntimeSchedulerLease",
+    "SchedulerFenceRejectedError",
+    "SchedulerLeaseCoordinator",
+    "SchedulerLeaseHeldError",
+    "SchedulerLeaseLostError",
+    "SchedulerLeaseSnapshot",
+    "SchedulerLeaseState",
     "SchedulerRuntimeStatus",
+    "SchedulerTickPermit",
+    "SchedulerTickResult",
+    "SqlAlchemySchedulerLeaseRepository",
+    "decide_tick_window",
+    "logical_tick_window",
     "runtime_status_read",
+    "scheduler_fence",
 ]

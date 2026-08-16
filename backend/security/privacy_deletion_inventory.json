@@ -91,7 +91,8 @@
     ],
     "retain_local_installation": [
       "installation_identities",
-      "local_owner_bootstrap_challenges"
+      "local_owner_bootstrap_challenges",
+      "runtime_scheduler_leases"
     ]
   },
   "character_deletion": {
@@ -174,6 +175,7 @@
       "local_owner_bootstrap_challenges",
       "lore_parser_leases",
       "post_reports",
+      "runtime_scheduler_leases",
       "site_operation_banners",
       "site_operation_settings",
       "users",

@@ -1,6 +1,7 @@
 import asyncio
 from datetime import UTC, datetime, timedelta
 import inspect
+from types import SimpleNamespace
 
 import pytest
 from pydantic import ValidationError
@@ -680,7 +681,7 @@ def test_tick_resident_slots_staggers_claimed_runs(
     assert leases == [100 + 90 + 40]
 
 
-def test_resident_scheduler_calls_global_tick_service_directly(
+def test_resident_scheduler_tick_runner_uses_configured_global_tick(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     db = object()
@@ -696,27 +697,30 @@ def test_resident_scheduler_calls_global_tick_service_directly(
     async def _tick(
         received_db: object,
         data: schemas.ResidentSlotTickCreate,
-    ) -> None:
+    ) -> schemas.ResidentSlotTickRead:
         calls.append((received_db, data))
-
-    async def _stop_after_first_tick(_seconds: float) -> None:
-        raise asyncio.CancelledError
+        return schemas.ResidentSlotTickRead(
+            due_count=0,
+            started_count=0,
+            results=[],
+            slots=[],
+        )
 
     monkeypatch.setattr(resident_tick_scheduler, "SessionLocal", _SessionContext)
     monkeypatch.setattr(
         resident_tick_scheduler.agent_runs,
-        "tick_resident_slots",
-        _tick,
+        "reconcile_all_elapsed_routines",
+        lambda _db: SimpleNamespace(completed=0, skipped=0),
     )
-    monkeypatch.setattr(resident_tick_scheduler.asyncio, "sleep", _stop_after_first_tick)
+    monkeypatch.setattr(resident_tick_scheduler.agent_runs, "tick_resident_slots", _tick)
     monkeypatch.setattr(settings, "RESIDENT_TICK_POST_ID", "post-scheduler")
     monkeypatch.setattr(settings, "RESIDENT_TICK_MAX_RUNS", 4)
     monkeypatch.setattr(settings, "OPENCLAW_TIMEOUT_SECONDS", 120)
 
-    with pytest.raises(asyncio.CancelledError):
-        asyncio.run(resident_tick_scheduler.run_resident_tick_scheduler())
+    result = asyncio.run(resident_tick_scheduler._tick_once())
 
     assert len(calls) == 1
+    assert result.started_count == 0
     received_db, data = calls[0]
     assert received_db is db
     assert data.post_id == "post-scheduler"
