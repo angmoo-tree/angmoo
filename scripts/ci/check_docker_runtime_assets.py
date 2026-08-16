@@ -146,11 +146,23 @@ def validate_resolved_compose(
                 errors.append(
                     f"runtime image metadata or non-root user is missing: {dockerfile}"
                 )
-            if (
-                dockerfile == "Dockerfile.frontend"
-                and "ARG PNPM_VERSION=10.33.2" not in content
-            ):
-                errors.append("frontend Dockerfile must pin pnpm 10.33.2")
+            if dockerfile == "Dockerfile.frontend":
+                if "ARG PNPM_VERSION=11.22.0" not in content:
+                    errors.append("frontend Dockerfile must pin pnpm 11.22.0")
+                if "ENV COREPACK_HOME=/opt/corepack" not in content:
+                    errors.append("frontend Dockerfile must share the Corepack cache")
+
+    frontend_package_path = root / "frontend/package.json"
+    if frontend_package_path.is_file():
+        try:
+            frontend_package = json.loads(
+                frontend_package_path.read_text(encoding="utf-8")
+            )
+        except json.JSONDecodeError:
+            errors.append("frontend package.json is not valid JSON")
+        else:
+            if frontend_package.get("packageManager") != "pnpm@11.22.0":
+                errors.append("frontend packageManager must pin pnpm 11.22.0")
     return errors
 
 

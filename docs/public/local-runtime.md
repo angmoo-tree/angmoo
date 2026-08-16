@@ -67,7 +67,7 @@ dependency readiness must work. The first Windows baseline was recorded with
 Docker 29.6.1 and Compose 5.3.0 on `linux/amd64` containers.
 
 Application images use Python 3.13 with uv 0.12.5 and Node.js 22 with pnpm
-10.33.2. PostgreSQL 16.14 with pgvector is the source of truth. Neo4j
+11.22.0. PostgreSQL 16.14 with pgvector is the source of truth. Neo4j
 2026.06.0 is a disposable, replayable relationship projection. Database
 images are pinned by digest in `security/local_runtime_contract.json`.
 
