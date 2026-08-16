@@ -47,6 +47,19 @@ docker compose up -d
 docker compose ps
 ```
 
+Windows에서는 선택적 thin launcher로 host preflight를 실행한 뒤 동일한
+canonical Compose stack을 시작할 수 있습니다. 별도 runtime은 추가되지 않습니다.
+
+```powershell
+.\angmoo.ps1 start
+.\angmoo.ps1 status
+.\angmoo.ps1 doctor
+```
+
+기존 `docker compose up -d` Quickstart도 계속 공식 지원합니다. JSON 출력,
+기여자 mode, 디스크 안내, volume 보존 lifecycle은
+[local launcher 계약](docs/public/local-launcher.md)을 참고하십시오.
+
 기본 명령은 frontend, backend, PostgreSQL, scheduler, Neo4j, projector의 전체
 6-service Angmoo stack을 시작합니다. 첫 실행에서는 GHCR의 공식 `v0.2.0`
 backend·frontend image를 내려받습니다. 모든 service가 healthy가 되면

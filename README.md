@@ -50,6 +50,19 @@ docker compose up -d
 docker compose ps
 ```
 
+On Windows, the optional thin launcher runs host preflight and the same canonical
+Compose stack without adding another runtime:
+
+```powershell
+.\angmoo.ps1 start
+.\angmoo.ps1 status
+.\angmoo.ps1 doctor
+```
+
+The direct `docker compose up -d` Quickstart remains fully supported. See the
+[local launcher contract](docs/public/local-launcher.md) for JSON output,
+contributor mode, disk guidance, and volume-preserving lifecycle commands.
+
 The default command starts the complete six-service Angmoo stack: frontend,
 backend, PostgreSQL, scheduler, Neo4j, and projector. The first run pulls the
 official `v0.2.0` backend and frontend images from GHCR. Open
