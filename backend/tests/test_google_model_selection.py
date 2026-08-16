@@ -116,12 +116,15 @@ def test_model_only_credential_update_preserves_existing_key(monkeypatch):
         owner_id=user.id,
         character_id=character.id,
         provider="google",
+        purpose="agent",
         model="gemini-3.1-flash-lite",
         label="Gemma Bird google",
         encrypted_api_key="encrypted-key",
         key_fingerprint="fingerprint",
         enabled=True,
         cooldown_until=None,
+        created_at=datetime(2026, 6, 20, tzinfo=UTC),
+        updated_at=datetime(2026, 6, 20, tzinfo=UTC),
     )
 
     monkeypatch.setattr(agent_service, "_get_owned_character", lambda *_: character)
@@ -167,11 +170,14 @@ def test_api_key_credential_update_without_slot_commits_in_upsert(monkeypatch):
         owner_id=user.id,
         character_id=character.id,
         provider="google",
+        purpose="agent",
         model="gemini-3.1-flash-lite",
         label="Gemma Bird google",
         key_fingerprint="fingerprint",
         enabled=True,
         cooldown_until=None,
+        created_at=datetime(2026, 6, 20, tzinfo=UTC),
+        updated_at=datetime(2026, 6, 20, tzinfo=UTC),
     )
     upsert_calls: list[dict[str, object]] = []
 
@@ -235,11 +241,14 @@ def test_api_key_credential_update_with_idle_slot_syncs_profile(monkeypatch):
         owner_id=user.id,
         character_id=character.id,
         provider="google",
+        purpose="agent",
         model="gemini-3.1-flash-lite",
         label="Gemma Bird google",
         key_fingerprint="fingerprint",
         enabled=True,
         cooldown_until=None,
+        created_at=datetime(2026, 6, 20, tzinfo=UTC),
+        updated_at=datetime(2026, 6, 20, tzinfo=UTC),
     )
     upsert_calls: list[dict[str, object]] = []
     bind_calls: list[dict[str, object]] = []

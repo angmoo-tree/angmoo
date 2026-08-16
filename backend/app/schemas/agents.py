@@ -224,10 +224,13 @@ class CredentialRead(BaseModel):
     owner_id: str
     character_id: str | None = None
     provider: str
+    purpose: str
     model: str
     label: str
     key_fingerprint: str | None = None
     enabled: bool
+    created_at: datetime
+    updated_at: datetime
     cooldown_until: datetime | None = None
 
 
@@ -469,6 +472,7 @@ class CredentialUpsert(BaseModel):
     api_key: str | None = Field(default=None, min_length=1, max_length=4000)
     auth_profile_id: str | None = Field(default=None, max_length=120)
     label: str | None = Field(default=None, max_length=80)
+    world_id: str | None = Field(default=None, min_length=1, max_length=64)
 
 
 class AgentDetailRead(BaseModel):

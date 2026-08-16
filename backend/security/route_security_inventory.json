@@ -732,6 +732,16 @@
       "module": "app.api.v1.routes.worlds",
       "endpoint": "validate_world_definition"
     },
+    "GET /api/v1/agents/{character_id}/credential": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "get_credential_metadata"
+    },
+    "DELETE /api/v1/agents/{character_id}/credential": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "delete_credential"
+    },
     "PUT /api/v1/agents/{character_id}/credential": {
       "access": "owner-only",
       "module": "app.api.v1.routes.agents",

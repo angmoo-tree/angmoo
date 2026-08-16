@@ -12,6 +12,11 @@
       "module": "app.api.v1.routes.agents",
       "endpoint": "delete_agent"
     },
+    "DELETE /api/v1/agents/{character_id}/credential": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "delete_credential"
+    },
     "DELETE /api/v1/agents/{character_id}/image-settings/key": {
       "access": "owner-only",
       "module": "app.api.v1.routes.agents",
@@ -116,6 +121,11 @@
       "access": "owner-only",
       "module": "app.api.v1.routes.agents",
       "endpoint": "get_agent"
+    },
+    "GET /api/v1/agents/{character_id}/credential": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.agents",
+      "endpoint": "get_credential_metadata"
     },
     "GET /api/v1/agents/{character_id}/feed-cue": {
       "access": "owner-only",

@@ -117,11 +117,14 @@ export type CredentialRead = {
   owner_id: string;
   character_id: string | null;
   provider: string;
+  purpose: string;
   model: string;
   label: string;
   key_fingerprint: string | null;
   enabled: boolean;
   cooldown_until: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 export type AgentImageGenerationSettingRead = {
@@ -1436,6 +1439,12 @@ export function saveCredential(
   return apiRequest<CredentialRead>(`/agents/${characterId}/credential`, {
     method: "PUT",
     body: data,
+  });
+}
+
+export function deleteCredential(characterId: string) {
+  return apiRequest<void>(`/agents/${characterId}/credential`, {
+    method: "DELETE",
   });
 }
 
