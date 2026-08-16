@@ -98,6 +98,7 @@ class Settings(BaseSettings):
     RESIDENT_TICK_INTERVAL_SECONDS: int = 60
     RESIDENT_TICK_LEASE_TTL_SECONDS: int = 45
     RESIDENT_TICK_HEARTBEAT_INTERVAL_SECONDS: int = 10
+    RESIDENT_TICK_SHUTDOWN_DRAIN_SECONDS: float = 20.0
     RESIDENT_TICK_PROCESS_LOCK_PATH: str = "/tmp/angmoo-resident-scheduler.lock"
     RESIDENT_TICK_READY_PATH: str = "/tmp/angmoo-worker-ready"
     RESIDENT_TICK_MAX_RUNS: int = 5
@@ -142,6 +143,7 @@ class Settings(BaseSettings):
     GRAPH_PROJECTOR_CONCURRENCY: int = 2
     GRAPH_PROJECTOR_COMMAND_TIMEOUT_SECONDS: float = 5.0
     GRAPH_PROJECTOR_SHUTDOWN_DRAIN_SECONDS: float = 20.0
+    GRAPH_PROJECTOR_READY_PATH: str = "/tmp/angmoo-worker-ready"
     OCI_KMS_KEY_ID: str | None = None
     OCI_KMS_CRYPTO_ENDPOINT: str | None = None
     OCI_REGION: str | None = None
@@ -563,6 +565,10 @@ class Settings(BaseSettings):
     @property
     def resident_tick_interval_seconds(self) -> int:
         return max(10, self.RESIDENT_TICK_INTERVAL_SECONDS)
+
+    @property
+    def resident_tick_shutdown_drain_seconds(self) -> float:
+        return max(0.1, min(self.RESIDENT_TICK_SHUTDOWN_DRAIN_SECONDS, 30.0))
 
     @property
     def resident_tick_max_runs(self) -> int:

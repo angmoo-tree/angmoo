@@ -1,7 +1,7 @@
 {
   "edge_count": 671,
-  "external_import_count": 1115,
-  "module_count": 291,
+  "external_import_count": 1120,
+  "module_count": 292,
   "modules": [
     {
       "external_imports": [],
@@ -2525,6 +2525,19 @@
       "imports": [],
       "module": "app.runtime",
       "path": "backend/app/runtime/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "contextlib",
+        "signal",
+        "types"
+      ],
+      "imports": [],
+      "module": "app.runtime.shutdown",
+      "path": "backend/app/runtime/shutdown.py",
       "wildcard_imports": []
     },
     {
