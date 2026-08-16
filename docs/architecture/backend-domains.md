@@ -12,6 +12,13 @@ PR A recorded its baseline from `main` commit
 merged as `85a8eb7753130fcb2be9d75a2bc64ba3079c14c3`. PR C is based on that
 PR B merge.
 
+L2 starts with
+[`#51`](https://github.com/angmoo-tree/angmoo/issues/51) from `main` commit
+`45edb3fee5f229c0d44867d9461eaea5b3135551`. Its PR A adds only the
+application-runtime state contract, probe port, versioned read schema, and
+normalized diagnostic codes. Launcher, `/health`, scheduler, migration,
+Compose, and provider behavior remain unchanged in this structural PR.
+
 ## Facts, policy, and enforcement
 
 These files have deliberately separate responsibilities:
@@ -35,6 +42,10 @@ import records without changing product behavior. The
 previous T2 inventory reported 426 internal edges because
 `from package import module` was recorded only as the package; inventory schema
 v2 resolves the real module when it exists.
+
+L2 PR A adds 11 runtime-domain modules and reaches 285 modules, 658 internal
+edges, and 1,086 unique per-module external import records. It adds zero legacy
+exceptions and leaves the exact legacy allowlist at 387 edges.
 
 The policy now freezes 387 exact imports into the horizontal legacy prefixes
 `app.cruds`, `app.models`, `app.schemas`, and `app.services`: 385 general
@@ -60,6 +71,7 @@ backend/app/
 │   ├── activities/
 │   ├── social/
 │   ├── relationships/
+│   ├── runtime/                  # application runtime state and public ports
 │   ├── chat/
 │   ├── world_packages/
 │   └── media/
@@ -81,7 +93,7 @@ backend/app/
 |---|---|---:|---|
 | `core` | small primitives only | L0 | existing core is audited, not moved in PR A |
 | `identity` | `app.domains.identity.public` | L1 | PR A foundation active; runtime behavior unchanged |
-| resident and scheduler runtime | runtime public ports | L2 | target only |
+| resident and scheduler runtime | `app.domains.runtime.public` | L2 | PR A state/schema foundation active; behavior unchanged |
 | `worlds`, `characters`, `activities`, root posts | each domain's `public.py` | L3 | target only |
 | `world_packages` | `app.domains.world_packages.public` | L3.5 | new Local feature later |
 | feed and `social` | `app.domains.social.public` | L4 | target only |
@@ -154,6 +166,23 @@ transaction boundary, authentication behavior, or secret format. Local owner,
 persistent `APP_SECRET`, standard authenticated encryption, legacy credential
 migration, and BYOK lifecycle remain later L1 PRs with their own gates.
 
+## L2 runtime foundation
+
+The canonical application-runtime read surface is
+`app.domains.runtime.public`. Pure domain types own installation state,
+component state, dependency state, and stable diagnostic codes. The
+`ApplicationRuntimeProbe` port returns only application facts; it cannot expose
+Docker socket data, container IDs, image digests, restart counts, or host
+absolute paths. A read use case consumes that port and the API layer maps the
+result to the strict `local-runtime-status-v1` Pydantic contract.
+
+PR A provides only the boundary and a fake probe. The existing `/health`
+response remains the minimal `{"status": "ok"}` liveness contract, and the
+legacy scheduler keeps its current behavior. Host and Compose diagnostics are
+owned by the later L2 launcher adapter, while PostgreSQL lease, fencing,
+sleep/wake reconciliation, graceful drain, and projector degradation are
+separate behavior PRs.
+
 ## Dependency direction
 
 ```text
@@ -179,6 +208,9 @@ Rules for new code:
 - Cross-domain use goes through `app.domains.<name>.public` only.
 - A domain does not import runtime, a provider SDK, or a legacy horizontal
   layer.
+- Domain `domain`, `application`, and `ports` modules do not import Docker,
+  FastAPI, or SQLAlchemy; framework code stays in API, infrastructure, or
+  integration adapters.
 - Runtime composes domain public APIs and integration public ports; domains do
   not call upward into runtime.
 - Integrations own transport and SDK details, not World or relationship policy.
@@ -241,7 +273,7 @@ The policy contains two reviewed edge groups and one exact module cycle:
 
 | Entry | Count | Owner | Removal condition |
 |---|---:|---:|---|
-| pre-T2.5 horizontal imports | 388 edges | L6 fallback owner | remove each edge at its owning domain/runtime stage; none remain after L6 |
+| pre-T2.5 horizontal imports | 385 edges | L6 fallback owner | remove each edge at its owning domain/runtime stage; none remain after L6 |
 | Neo4j write-runtime command bridge | 2 edges | L4 | move projection commands and metrics behind runtime/integration public ports |
 | routine/social interaction module cycle | 2 modules | L4 | split routine context and social interaction input behind public contracts |
 

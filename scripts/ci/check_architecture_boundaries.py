@@ -124,6 +124,7 @@ def _validate_policy(
     for field in (
         "legacy_prefixes",
         "new_area_prefixes",
+        "pure_layer_forbidden_external_prefixes",
         "provider_sdk_prefixes",
     ):
         values = policy.get(field)
@@ -297,6 +298,9 @@ def check_inventory(
         return sorted(errors)
 
     legacy_prefixes = tuple(policy["legacy_prefixes"])
+    pure_layer_forbidden_prefixes = tuple(
+        policy["pure_layer_forbidden_external_prefixes"]
+    )
     provider_prefixes = tuple(policy["provider_sdk_prefixes"])
     current_edges = {
         (module, imported)
@@ -445,6 +449,27 @@ def check_inventory(
 
         if importer.startswith(("app.domains.", "app.runtime.")):
             for imported in item["external_imports"]:
+                parts = importer.split(".")
+                is_pure_domain_layer = len(parts) >= 4 and parts[3] in {
+                    "application",
+                    "domain",
+                    "ports",
+                }
+                if is_pure_domain_layer and any(
+                    _matches_prefix(imported, prefix)
+                    for prefix in pure_layer_forbidden_prefixes
+                ):
+                    errors.append(
+                        _violation(
+                            rule="domain_pure_layer_imports_framework",
+                            importer=importer,
+                            imported=imported,
+                            suggestion=(
+                                "inject a port and keep framework code in api, "
+                                "infrastructure, or integrations"
+                            ),
+                        )
+                    )
                 if any(
                     _matches_prefix(imported, prefix)
                     for prefix in provider_prefixes
