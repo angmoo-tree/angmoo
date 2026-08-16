@@ -10,6 +10,7 @@ from uuid import uuid4
 import pytest
 from sqlalchemy import create_engine, delete, func, inspect, select, text
 from sqlalchemy.orm import Session
+from sqlalchemy.pool import NullPool
 
 from app import models, schemas
 from app.cruds import agent_runs as agent_run_crud
@@ -41,8 +42,7 @@ def _engine():
     return create_engine(
         DATABASE_URL,
         pool_pre_ping=True,
-        pool_size=60,
-        max_overflow=0,
+        poolclass=NullPool,
     )
 
 

@@ -20,7 +20,30 @@ SENSITIVE_FIELD_NAMES = {
     "refresh_token",
     "secret",
     "password",
+    "app_secret",
+    "session_token",
+    "encrypted_api_key",
+    "encrypted_pollinations_api_key",
+    "encrypted_replicate_api_key",
+    "credential_payload",
+    "full_prompt",
+    "provider_response",
 }
+
+SUPPORT_BUNDLE_DEFAULT_EXCLUDED_FIELDS = frozenset(
+    {
+        *SENSITIVE_FIELD_NAMES,
+        "authorization_header",
+        "cookie_header",
+        "private_chat",
+        "private_chat_messages",
+        "sns_content",
+        "media_original",
+        "postgresql_dump",
+        "raw_prompt",
+        "raw_provider_response",
+    }
+)
 
 
 def redact_secret_text(value: str) -> str:
@@ -59,6 +82,27 @@ def redact_secrets(value: Any) -> Any:
     if isinstance(value, Sequence) and not isinstance(value, (bytes, bytearray, str)):
         return [redact_secrets(item) for item in value]
     return value
+
+
+def sanitize_support_bundle_metadata(value: Any) -> Any:
+    """Return support-safe metadata while excluding private payload fields.
+
+    Support bundles are intentionally metadata-first. Exact secrets are redacted
+    recursively and fields that can contain private content are omitted instead
+    of being copied into a diagnostic archive.
+    """
+
+    if isinstance(value, Mapping):
+        sanitized: dict[Any, Any] = {}
+        for key, item in value.items():
+            normalized = str(key).replace("-", "_").lower()
+            if normalized in SUPPORT_BUNDLE_DEFAULT_EXCLUDED_FIELDS:
+                continue
+            sanitized[key] = sanitize_support_bundle_metadata(item)
+        return sanitized
+    if isinstance(value, Sequence) and not isinstance(value, (bytes, bytearray, str)):
+        return [sanitize_support_bundle_metadata(item) for item in value]
+    return redact_secrets(value)
 
 
 def _redact_mapping_value(key: str, value: Any) -> Any:

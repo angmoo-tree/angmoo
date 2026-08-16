@@ -84,6 +84,7 @@ import {
   runAgentNow,
   rebuildAgentLoreSource,
   saveCredential,
+  deleteCredential,
   setAgentAutonomyMutationState,
   revokeAgentLocalKey,
   updateAgentPersona,
@@ -711,6 +712,28 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
       setApiKey("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "API key를 저장하지 못했습니다.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleCredentialDelete() {
+    if (!agent?.credential?.enabled || saving) return;
+    if (
+      !window.confirm(
+        "저장된 API key를 삭제할까요? 자율 활동은 꺼지며, 새 key를 등록하기 전까지 LLM 기능만 건너뜁니다.",
+      )
+    ) {
+      return;
+    }
+    setSaving(true);
+    setError(null);
+    try {
+      await deleteCredential(characterId);
+      setAgent({ ...agent, credential: null });
+      setApiKey("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "API key를 삭제하지 못했습니다.");
     } finally {
       setSaving(false);
     }
@@ -1378,6 +1401,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
                 onPersonaSubmit={handlePersonaSubmit}
                 onSettingsSubmit={handleSettingsSubmit}
                 onCredentialSubmit={handleCredentialSubmit}
+                onCredentialDelete={handleCredentialDelete}
                 onImageSettingsSubmit={handleImageSettingsSubmit}
                 onDeleteImageKey={handleDeleteImageKey}
                 onUploadImageSeed={handleUploadImageSeed}
@@ -2636,6 +2660,7 @@ function SettingsTab({
   onPersonaSubmit,
   onSettingsSubmit,
   onCredentialSubmit,
+  onCredentialDelete,
   onImageSettingsSubmit,
   onDeleteImageKey,
   onUploadImageSeed,
@@ -2661,6 +2686,7 @@ function SettingsTab({
   onPersonaSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onSettingsSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onCredentialSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onCredentialDelete: () => void;
   onImageSettingsSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onDeleteImageKey: () => void;
   onUploadImageSeed: (file: File) => Promise<void>;
@@ -2913,7 +2939,15 @@ function SettingsTab({
           title="앵무 활동 API key"
           description="자율 활동과 성향 분석에 사용할 Google API key와 모델을 관리합니다."
         />
-        <Metric label="앵무 활동 key" value={getCredentialKeyStatus(agent.credential)} />
+        <div className="mb-4 grid gap-3 sm:grid-cols-2">
+          <Metric label="상태" value={getCredentialKeyStatus(agent.credential)} />
+          <Metric label="제공사" value={agent.credential?.provider ?? "google"} />
+          <Metric label="저장된 모델" value={agent.credential?.model ?? "-"} />
+          <Metric
+            label="key fingerprint"
+            value={agent.credential?.key_fingerprint ?? "-"}
+          />
+        </div>
         <label className="mb-4 block">
           <span className="mb-2 block text-[15px] font-bold text-[#344054]">
             Google AI 모델
@@ -2968,17 +3002,33 @@ function SettingsTab({
             className={inputClassName}
           />
           <span className="mt-2 block text-[13px] font-bold leading-5 text-[#98a2b3]">
-            API 키 원문은 다시 표시하지 않으며, 암호화해 저장합니다. 암호화에는 OCI Vault/KMS를 사용합니다.
+            API key 원문은 다시 표시하지 않습니다. 이 기기의 Docker secret volume에 있는 APP_SECRET으로 암호화하며, DB만 복사해서는 복호화할 수 없습니다.
           </span>
         </label>
-        <button
-          type="submit"
-          disabled={credentialSubmitDisabled}
-          className="inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#101828] px-6 text-[17px] font-extrabold text-white transition-colors hover:bg-[#344054] disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          <Save size={20} aria-hidden="true" />
-          {credentialButtonLabel}
-        </button>
+        <p className="mb-4 rounded-[18px] bg-[#f6f7f9] px-4 py-3 text-[13px] font-bold leading-6 text-[#667085]">
+          사용료는 선택한 LLM 제공사 계정에 청구됩니다. key가 없거나 삭제되어도 World 탐색과 편집은 유지되며, LLM이 필요한 기능만 건너뜁니다.
+        </p>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <button
+            type="submit"
+            disabled={credentialSubmitDisabled}
+            className="inline-flex h-14 flex-1 items-center justify-center gap-3 rounded-full bg-[#101828] px-6 text-[17px] font-extrabold text-white transition-colors hover:bg-[#344054] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <Save size={20} aria-hidden="true" />
+            {credentialButtonLabel}
+          </button>
+          {agent.credential?.enabled ? (
+            <button
+              type="button"
+              onClick={() => void onCredentialDelete()}
+              disabled={saving}
+              className="inline-flex h-14 items-center justify-center gap-2 rounded-full border border-[#ffd7d7] bg-white px-6 text-[16px] font-extrabold text-[#d92d20] transition-colors hover:bg-[#fff5f5] disabled:cursor-not-allowed disabled:text-[#d0d5dd]"
+            >
+              <Trash2 size={19} aria-hidden="true" />
+              저장된 key 삭제
+            </button>
+          ) : null}
+        </div>
       </form>
 
       {EXPERIMENTAL_IMAGE_ENABLED ? (

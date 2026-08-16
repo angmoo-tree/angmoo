@@ -151,6 +151,20 @@ def validate_resolved_compose(
                     errors.append("frontend Dockerfile must pin pnpm 11.22.0")
                 if "ENV COREPACK_HOME=/opt/corepack" not in content:
                     errors.append("frontend Dockerfile must share the Corepack cache")
+                if "PNPM_HOME=/opt/pnpm" not in content:
+                    errors.append("frontend Dockerfile must share the pnpm store")
+                if (
+                    "COPY --chown=node:node frontend/package.json "
+                    "frontend/pnpm-lock.yaml frontend/pnpm-workspace.yaml ./"
+                    not in content
+                ):
+                    errors.append(
+                        "frontend dependency manifests must be owned by the node user"
+                    )
+                if "USER node\nRUN pnpm install --frozen-lockfile" not in content:
+                    errors.append(
+                        "frontend dependencies must be installed by the runtime node user"
+                    )
 
     frontend_package_path = root / "frontend/package.json"
     if frontend_package_path.is_file():
@@ -163,6 +177,14 @@ def validate_resolved_compose(
         else:
             if frontend_package.get("packageManager") != "pnpm@11.22.0":
                 errors.append("frontend packageManager must pin pnpm 11.22.0")
+
+    frontend_next_config_path = root / "frontend/next.config.ts"
+    if frontend_next_config_path.is_file():
+        frontend_next_config = frontend_next_config_path.read_text(encoding="utf-8")
+        if 'allowedDevOrigins: ["127.0.0.1", "localhost"]' not in frontend_next_config:
+            errors.append(
+                "frontend development server must allow the documented loopback origins"
+            )
     return errors
 
 

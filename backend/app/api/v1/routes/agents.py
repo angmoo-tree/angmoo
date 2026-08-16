@@ -795,6 +795,57 @@ def update_credential(
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
 
 
+@router.get(
+    "/{character_id}/credential",
+    response_model=schemas.CredentialRead | None,
+)
+def get_credential_metadata(
+    character_id: str,
+    world_id: str | None = None,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user),
+) -> schemas.CredentialRead | None:
+    try:
+        return agent_service.get_credential_metadata(
+            db,
+            user,
+            character_id,
+            world_id=world_id,
+        )
+    except agent_service.AgentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
+    except agent_service.AgentExecutionModeError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+
+
+@router.delete(
+    "/{character_id}/credential",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_credential(
+    character_id: str,
+    world_id: str | None = None,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user),
+) -> Response:
+    try:
+        agent_service.delete_credential(
+            db,
+            user,
+            character_id,
+            world_id=world_id,
+        )
+    except agent_service.AgentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
+    except agent_service.DemoAccountLockedError as exc:
+        _raise_demo_account_locked(exc)
+    except (agent_service.ActiveSlotBusyError, agent_service.AgentExecutionModeError) as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except agent_service.CredentialSyncError as exc:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
 @router.get("/{character_id}/settings", response_model=schemas.AgentActivitySettingRead)
 def get_settings(
     character_id: str,
