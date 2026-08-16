@@ -73,7 +73,7 @@ echo %* | findstr /C:" ps --all --format json" >nul && (
   exit /b 0
 )
 echo %* | findstr /C:" exec -T backend /usr/local/bin/angmoo-backend-entrypoint diagnostics" >nul && (
-  echo {"schema_version":"local-runtime-status-v1","installation_state":"ready","version":"0.2.0","components":[],"migration":{"state":"ready","current_revision":"20260816_0080","head_revision":"20260816_0080"},"scheduler":{"state":"running","fencing_epoch":7},"projector":{"state":"ready","pending_count":0,"retry_count":0,"failed_count":0,"dead_letter_count":0},"provider_usage":{"recent_call_count":0,"kill_switch_enabled":false},"owner":{"bootstrap_state":"claimed","registered_world_count":1,"active_world_count":1,"active_world_character_count":1},"activity":{},"capabilities":{}}
+  echo {"schema_version":"local-runtime-status-v1","installation_state":"ready","version":"0.3.0","components":[],"migration":{"state":"ready","current_revision":"20260816_0080","head_revision":"20260816_0080"},"scheduler":{"state":"running","fencing_epoch":7},"projector":{"state":"ready","pending_count":0,"retry_count":0,"failed_count":0,"dead_letter_count":0},"provider_usage":{"recent_call_count":0,"kill_switch_enabled":false},"owner":{"bootstrap_state":"claimed","registered_world_count":1,"active_world_count":1,"active_world_character_count":1},"activity":{},"capabilities":{}}
   exit /b 0
 )
 echo %* | findstr /C:" stop --timeout 60" >nul && exit /b 0

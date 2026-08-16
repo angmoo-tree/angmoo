@@ -37,8 +37,8 @@ docker compose -f compose.yml -f compose.dev.yml up --watch
 
 The contributor overlay builds the same Dockerfiles locally and enables
 Compose Watch. Release Compose uses the versioned official images
-`ghcr.io/angmoo-tree/angmoo-backend:v0.2.0` and
-`ghcr.io/angmoo-tree/angmoo-frontend:v0.2.0`. An approved `v*.*.*` release tag
+`ghcr.io/angmoo-tree/angmoo-backend:v0.3.0` and
+`ghcr.io/angmoo-tree/angmoo-frontend:v0.3.0`. An approved `v*.*.*` release tag
 publishes both images after the complete container Gate; ordinary pull requests
 never publish a stable image. See [Container release](container-release.md).
 

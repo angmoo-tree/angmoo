@@ -138,11 +138,22 @@ def validate_contract(root: Path = ROOT) -> list[str]:
 
     compose = (root / "compose.yml").read_text(encoding="utf-8")
     for marker in (
-        "ghcr.io/angmoo-tree/angmoo-backend:${ANGMOO_VERSION:-v0.2.0}",
-        "ghcr.io/angmoo-tree/angmoo-frontend:${ANGMOO_VERSION:-v0.2.0}",
+        "ghcr.io/angmoo-tree/angmoo-backend:${ANGMOO_VERSION:-v0.3.0}",
+        "ghcr.io/angmoo-tree/angmoo-frontend:${ANGMOO_VERSION:-v0.3.0}",
     ):
         if marker not in compose:
             errors.append(f"release Compose image marker is missing: {marker}")
+    versioned_sources = {
+        "Dockerfile.backend": "ARG VERSION=0.3.0",
+        "Dockerfile.frontend": "ARG VERSION=0.3.0",
+        "launcher/windows/Angmoo.Launcher.psm1": "'v0.3.0'",
+    }
+    for relative, marker in versioned_sources.items():
+        if marker not in (root / relative).read_text(encoding="utf-8"):
+            errors.append(f"release version marker is missing: {relative}")
+    compose_dev = (root / "compose.dev.yml").read_text(encoding="utf-8")
+    if compose_dev.count("${ANGMOO_VERSION:-0.3.0-dev}") != 2:
+        errors.append("contributor Compose version markers must match release 0.3.0")
     compose_ci = (root / "compose.ci.yml").read_text(encoding="utf-8")
     for marker in ("angmoo-backend-ci:", "angmoo-frontend-ci:", "pull_policy: never"):
         if marker not in compose_ci:
