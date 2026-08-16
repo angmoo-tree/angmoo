@@ -102,17 +102,25 @@ def _bootstrap_local_session(marker: str, backend_url: str) -> str:
                 profile_setup_completed=True,
             )
         )
-        db.add(
-            models.InstallationIdentity(
+        installation = db.get(models.InstallationIdentity, LOCAL_INSTALLATION_KEY)
+        if installation is None:
+            installation = models.InstallationIdentity(
                 singleton_key=LOCAL_INSTALLATION_KEY,
                 installation_id=f"installation-{uuid4().hex}",
-                owner_user_id=user_id,
-                bootstrap_state="claimed",
-                claimed_at=now,
+                bootstrap_state="unclaimed",
                 created_at=now,
                 updated_at=now,
             )
-        )
+            db.add(installation)
+        elif (
+            installation.owner_user_id is not None
+            or installation.bootstrap_state != "unclaimed"
+        ):
+            raise SmokeError("local installation is already claimed")
+        installation.owner_user_id = user_id
+        installation.bootstrap_state = "claimed"
+        installation.claimed_at = now
+        installation.updated_at = now
         db.add(
             models.AuthSession(
                 token_hash=security.hash_token(token),
