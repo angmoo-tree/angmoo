@@ -80,6 +80,17 @@ def validate_resolved_compose(
         if exposed:
             errors.append(f"plaintext runtime secret environment is forbidden: {name}")
 
+    for name in {"backend", "scheduler", "projector"}:
+        service = services.get(name, {})
+        environment = (
+            service.get("environment", {}) if isinstance(service, dict) else {}
+        )
+        if (
+            not isinstance(environment, dict)
+            or environment.get("ANGMOO_VERSION") != "v0.3.0"
+        ):
+            errors.append(f"release runtime version environment mismatch: {name}")
+
     postgresql = services.get("postgresql")
     if isinstance(postgresql, dict) and "@sha256:" not in str(
         postgresql.get("image", "")
@@ -107,18 +118,29 @@ def validate_resolved_compose(
         backend_image = backend.get("image") if isinstance(backend, dict) else None
         for name in {"scheduler", "projector"}:
             service = dev_services.get(name)
-            if (
-                not isinstance(service, dict)
-                or service.get("image") != backend_image
-            ):
+            if not isinstance(service, dict) or service.get("image") != backend_image:
                 errors.append(f"development worker must reuse backend image: {name}")
             elif service.get("build"):
-                errors.append(f"development worker must not duplicate backend build: {name}")
+                errors.append(
+                    f"development worker must not duplicate backend build: {name}"
+                )
         for name in {"backend", "frontend"}:
             service = dev_services.get(name, {})
             develop = service.get("develop", {}) if isinstance(service, dict) else {}
             if not isinstance(develop, dict) or not develop.get("watch"):
                 errors.append(f"Compose Watch is missing: {name}")
+        for name in {"backend", "scheduler", "projector"}:
+            service = dev_services.get(name, {})
+            environment = (
+                service.get("environment", {}) if isinstance(service, dict) else {}
+            )
+            if (
+                not isinstance(environment, dict)
+                or environment.get("ANGMOO_VERSION") != "0.3.0-dev"
+            ):
+                errors.append(
+                    f"development runtime version environment mismatch: {name}"
+                )
 
     required_files = (
         "Dockerfile.backend",
@@ -201,7 +223,10 @@ def validate_ci_compose(document: Any) -> list[str]:
         errors.append("CI backend must use the locally built backend image")
     for name in ("backend", "scheduler", "projector"):
         service = services.get(name, {})
-        if service.get("image") != backend_image or service.get("pull_policy") != "never":
+        if (
+            service.get("image") != backend_image
+            or service.get("pull_policy") != "never"
+        ):
             errors.append(f"CI backend worker image contract mismatch: {name}")
     frontend = services.get("frontend", {})
     if not str(frontend.get("image", "")).startswith("angmoo-frontend-ci:"):
@@ -209,6 +234,7 @@ def validate_ci_compose(document: Any) -> list[str]:
     if frontend.get("pull_policy") != "never":
         errors.append("CI frontend must not pull an unverified registry image")
     return errors
+
 
 def _resolved(root: Path, files: list[str]) -> dict[str, Any]:
     command = ["docker", "compose"]

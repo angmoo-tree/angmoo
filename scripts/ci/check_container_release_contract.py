@@ -52,7 +52,9 @@ def validate_contract(root: Path = ROOT) -> list[str]:
     )
     for path in required_files:
         if not path.is_file():
-            errors.append(f"container release asset is missing: {path.relative_to(root)}")
+            errors.append(
+                f"container release asset is missing: {path.relative_to(root)}"
+            )
     if errors:
         return errors
 
@@ -87,7 +89,9 @@ def validate_contract(root: Path = ROOT) -> list[str]:
             "packages": "write",
         }
         if publish.get("permissions") != expected_permissions:
-            errors.append("publish-ghcr permissions do not match the minimum release set")
+            errors.append(
+                "publish-ghcr permissions do not match the minimum release set"
+            )
         if publish.get("if") != "github.repository == 'angmoo-tree/angmoo'":
             errors.append("fork tag publication must be disabled")
 
@@ -112,7 +116,9 @@ def validate_contract(root: Path = ROOT) -> list[str]:
         if marker not in text:
             errors.append(f"release workflow marker is missing: {marker}")
     if "pull_request" in text or "secrets." in text:
-        errors.append("release workflow must not run on PRs or require repository secrets")
+        errors.append(
+            "release workflow must not run on PRs or require repository secrets"
+        )
 
     gate = (root / "scripts/ci/run_container_gate.sh").read_text(encoding="utf-8")
     for image in (TRIVY_IMAGE, SYFT_IMAGE):
@@ -152,7 +158,7 @@ def validate_contract(root: Path = ROOT) -> list[str]:
         if marker not in (root / relative).read_text(encoding="utf-8"):
             errors.append(f"release version marker is missing: {relative}")
     compose_dev = (root / "compose.dev.yml").read_text(encoding="utf-8")
-    if compose_dev.count("${ANGMOO_VERSION:-0.3.0-dev}") != 2:
+    if compose_dev.count("${ANGMOO_VERSION:-0.3.0-dev}") != 3:
         errors.append("contributor Compose version markers must match release 0.3.0")
     compose_ci = (root / "compose.ci.yml").read_text(encoding="utf-8")
     for marker in ("angmoo-backend-ci:", "angmoo-frontend-ci:", "pull_policy: never"):

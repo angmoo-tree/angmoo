@@ -6,6 +6,9 @@ x-backend-dev-build: &backend-dev-build
     VCS_REF: ${ANGMOO_VCS_REF:-dev}
     VERSION: ${ANGMOO_VERSION:-0.3.0-dev}
 
+x-backend-dev-environment: &backend-dev-environment
+  ANGMOO_VERSION: ${ANGMOO_VERSION:-0.3.0-dev}
+
 services:
   backend:
     image: angmoo-backend-dev
@@ -13,6 +16,7 @@ services:
     build: *backend-dev-build
     command: ["api-dev"]
     environment:
+      <<: *backend-dev-environment
       API_DOCS_ENABLED: "true"
     develop:
       watch:
@@ -37,10 +41,12 @@ services:
   scheduler:
     image: angmoo-backend-dev
     pull_policy: never
+    environment: *backend-dev-environment
 
   projector:
     image: angmoo-backend-dev
     pull_policy: never
+    environment: *backend-dev-environment
 
   frontend:
     image: angmoo-frontend-dev
