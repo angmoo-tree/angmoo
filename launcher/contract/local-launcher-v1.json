@@ -1,0 +1,60 @@
+{
+  "contract_id": "angmoo-local-launcher-v1",
+  "result_schema": "angmoo-launcher-result-v1",
+  "schema_version": 1,
+  "default_project": "angmoo",
+  "default_port": 3000,
+  "compose": {
+    "release_files": ["compose.yml"],
+    "contributor_files": ["compose.yml", "compose.dev.yml"],
+    "required_services": ["backend", "frontend", "neo4j", "postgresql", "projector", "scheduler"]
+  },
+  "commands": ["start", "stop", "restart", "status", "logs", "doctor"],
+  "exit_codes": {
+    "success": 0,
+    "invalid_argument": 2,
+    "container_engine_unavailable": 10,
+    "preflight_failed": 11,
+    "startup_failed": 20,
+    "recovery_required": 21,
+    "scheduler_singleton_mismatch": 22,
+    "doctor_degraded": 30,
+    "destructive_command_blocked": 40
+  },
+  "error_codes": [
+    "compose_config_invalid",
+    "compose_unavailable",
+    "credential_recovery_required",
+    "destructive_command_blocked",
+    "docker_engine_unavailable",
+    "doctor_degraded",
+    "host_port_conflict",
+    "launcher_invalid_argument",
+    "lifecycle_lock_held",
+    "lifecycle_stop_failed",
+    "runtime_disk_space_low",
+    "runtime_start_timeout",
+    "unsupported_architecture"
+  ],
+  "disk_policy_gib": {
+    "filesystem_critical": 2,
+    "release_existing_critical": 2,
+    "release_fresh_fail": 10,
+    "release_fresh_warn": 15,
+    "release_recommended": 20,
+    "contributor_fail": 10,
+    "contributor_warn": 30,
+    "contributor_recommended": 40
+  },
+  "timeouts_seconds": {
+    "lock": 0,
+    "start_release": 240,
+    "start_contributor": 420,
+    "stop": 60
+  },
+  "safety": {
+    "forbidden_options": ["--purge", "--volumes", "--volume", "-v"],
+    "host_publication": "127.0.0.1",
+    "volume_delete_allowed": false
+  }
+}
