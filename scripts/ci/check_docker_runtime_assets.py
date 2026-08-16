@@ -177,6 +177,14 @@ def validate_resolved_compose(
         else:
             if frontend_package.get("packageManager") != "pnpm@11.22.0":
                 errors.append("frontend packageManager must pin pnpm 11.22.0")
+
+    frontend_next_config_path = root / "frontend/next.config.ts"
+    if frontend_next_config_path.is_file():
+        frontend_next_config = frontend_next_config_path.read_text(encoding="utf-8")
+        if 'allowedDevOrigins: ["127.0.0.1", "localhost"]' not in frontend_next_config:
+            errors.append(
+                "frontend development server must allow the documented loopback origins"
+            )
     return errors
 
 
