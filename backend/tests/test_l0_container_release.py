@@ -47,7 +47,7 @@ def _image_document(*, user: str = "10001:10001", environment: list[str] | None 
             "Labels": {
                 "org.opencontainers.image.source": IMAGES.EXPECTED_SOURCE,
                 "org.opencontainers.image.revision": "revision-1",
-                "org.opencontainers.image.version": "v0.1.0",
+                "org.opencontainers.image.version": "v0.2.0",
                 "org.opencontainers.image.licenses": "GPL-3.0-only",
             },
         },
@@ -59,10 +59,10 @@ def test_repository_container_release_contract_passes() -> None:
 
 
 def test_release_tag_matches_both_application_versions() -> None:
-    assert RELEASE_TAG.expected_release_tag(ROOT) == "v0.1.0"
-    assert RELEASE_TAG.validate_release_tag("v0.1.0", ROOT) == []
+    assert RELEASE_TAG.expected_release_tag(ROOT) == "v0.2.0"
+    assert RELEASE_TAG.validate_release_tag("v0.2.0", ROOT) == []
     assert "release tag mismatch" in RELEASE_TAG.validate_release_tag(
-        "v0.1.1", ROOT
+        "v0.2.1", ROOT
     )[0]
 
 
@@ -72,7 +72,7 @@ def test_image_contract_accepts_non_root_metadata() -> None:
             _image_document(),
             image="angmoo-backend-ci:test",
             expected_revision="revision-1",
-            expected_version="v0.1.0",
+            expected_version="v0.2.0",
         )
         == []
     )
@@ -83,7 +83,7 @@ def test_image_contract_rejects_root_and_baked_secret() -> None:
         _image_document(user="root", environment=["APP_SECRET=unsafe"]),
         image="angmoo-backend-ci:test",
         expected_revision="revision-1",
-        expected_version="v0.1.0",
+        expected_version="v0.2.0",
     )
     assert "runtime image must use a non-root user" in errors[0]
     assert any("runtime secret environment is baked into image" in error for error in errors)

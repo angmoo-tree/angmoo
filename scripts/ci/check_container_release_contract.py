@@ -138,8 +138,8 @@ def validate_contract(root: Path = ROOT) -> list[str]:
 
     compose = (root / "compose.yml").read_text(encoding="utf-8")
     for marker in (
-        "ghcr.io/angmoo-tree/angmoo-backend:${ANGMOO_VERSION:-v0.1.0}",
-        "ghcr.io/angmoo-tree/angmoo-frontend:${ANGMOO_VERSION:-v0.1.0}",
+        "ghcr.io/angmoo-tree/angmoo-backend:${ANGMOO_VERSION:-v0.2.0}",
+        "ghcr.io/angmoo-tree/angmoo-frontend:${ANGMOO_VERSION:-v0.2.0}",
     ):
         if marker not in compose:
             errors.append(f"release Compose image marker is missing: {marker}")

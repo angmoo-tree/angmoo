@@ -27,12 +27,12 @@ CMD ["pnpm", "dev", "--hostname", "0.0.0.0"]
 FROM dependencies AS build
 ARG ANGMOO_API_BASE_URL=http://backend:8080
 ENV ANGMOO_API_BASE_URL=${ANGMOO_API_BASE_URL}
-COPY frontend ./
+COPY --chown=node:node frontend ./
 RUN pnpm build
 
 FROM ${NODE_IMAGE} AS runtime
 ARG VCS_REF=unknown
-ARG VERSION=0.1.0
+ARG VERSION=0.2.0
 
 LABEL org.opencontainers.image.source="https://github.com/angmoo-tree/angmoo" \
       org.opencontainers.image.revision="${VCS_REF}" \

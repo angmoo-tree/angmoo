@@ -1,8 +1,9 @@
-# v0.1 roadmap
+# v0.2 roadmap
 
-The public `v0.1.0` target is a reproducible single-process experiment with
-LangGraph/direct, Gemini, PostgreSQL+pgvector, and fake-provider CI.
+The public `v0.2.0` target is a reproducible local-owner experiment with
+LangGraph/direct, Gemini, PostgreSQL+pgvector, persistent runtime secrets,
+owner-scoped BYOK, and fake-provider CI.
 
-Possible post-v0.1 work includes horizontal scaling, worker separation,
+Possible post-v0.2 work includes horizontal scaling, worker separation,
 federation, broader hosted parity, and additional provider support. These are
 directions, not current compatibility or support promises.
