@@ -68,6 +68,11 @@ def _policy(
             "app.runtime",
         ],
         "owner_stages": ["L0", "L1", "L2", "L3", "L4", "L6", "P8-L", "T2.5"],
+        "pure_layer_forbidden_external_prefixes": [
+            "docker",
+            "fastapi",
+            "sqlalchemy",
+        ],
         "policy_id": "angmoo-t2-5-domain-first-v1",
         "provider_sdk_prefixes": ["google", "oci", "replicate"],
         "schema_version": 1,
@@ -155,6 +160,21 @@ def test_domain_provider_sdk_import_fails() -> None:
     errors = checker.check_inventory(inventory, _policy())
 
     assert any("[domain_runtime_imports_provider_sdk]" in error for error in errors)
+
+
+def test_domain_pure_layer_framework_import_fails() -> None:
+    inventory = _inventory(
+        _module(
+            "app.domains.runtime.application.status",
+            external=("docker", "fastapi", "sqlalchemy"),
+        ),
+    )
+
+    errors = checker.check_inventory(inventory, _policy())
+
+    assert sum(
+        "[domain_pure_layer_imports_framework]" in error for error in errors
+    ) == 3
 
 
 def test_new_legacy_edge_fails_but_exact_reviewed_edge_passes() -> None:

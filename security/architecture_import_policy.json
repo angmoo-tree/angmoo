@@ -1604,6 +1604,11 @@
     "T2.5"
   ],
   "policy_id": "angmoo-t2-5-domain-first-v1",
+  "pure_layer_forbidden_external_prefixes": [
+    "docker",
+    "fastapi",
+    "sqlalchemy"
+  ],
   "provider_sdk_prefixes": [
     "google",
     "oci",

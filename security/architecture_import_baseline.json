@@ -1,7 +1,7 @@
 {
-  "edge_count": 647,
-  "external_import_count": 1073,
-  "module_count": 274,
+  "edge_count": 658,
+  "external_import_count": 1086,
+  "module_count": 285,
   "modules": [
     {
       "external_imports": [],
@@ -1820,6 +1820,117 @@
       ],
       "module": "app.domains.relationships.public",
       "path": "backend/app/domains/relationships/public.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.runtime",
+      "path": "backend/app/domains/runtime/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.runtime.api",
+      "path": "backend/app/domains/runtime/api/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.runtime.domain.diagnostic_codes",
+        "app.domains.runtime.domain.installation_state"
+      ],
+      "module": "app.domains.runtime.api.runtime_schemas",
+      "path": "backend/app/domains/runtime/api/runtime_schemas.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.runtime.application",
+      "path": "backend/app/domains/runtime/application/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__"
+      ],
+      "imports": [
+        "app.domains.runtime.domain.installation_state",
+        "app.domains.runtime.ports.application_runtime_probe"
+      ],
+      "module": "app.domains.runtime.application.read_runtime_status",
+      "path": "backend/app/domains/runtime/application/read_runtime_status.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.runtime.domain",
+      "path": "backend/app/domains/runtime/domain/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "enum"
+      ],
+      "imports": [],
+      "module": "app.domains.runtime.domain.diagnostic_codes",
+      "path": "backend/app/domains/runtime/domain/diagnostic_codes.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "enum"
+      ],
+      "imports": [
+        "app.domains.runtime.domain.diagnostic_codes"
+      ],
+      "module": "app.domains.runtime.domain.installation_state",
+      "path": "backend/app/domains/runtime/domain/installation_state.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.runtime.ports",
+      "path": "backend/app/domains/runtime/ports/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.runtime.domain.installation_state"
+      ],
+      "module": "app.domains.runtime.ports.application_runtime_probe",
+      "path": "backend/app/domains/runtime/ports/application_runtime_probe.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.runtime.api.runtime_schemas",
+        "app.domains.runtime.application.read_runtime_status",
+        "app.domains.runtime.domain.diagnostic_codes",
+        "app.domains.runtime.domain.installation_state",
+        "app.domains.runtime.ports.application_runtime_probe"
+      ],
+      "module": "app.domains.runtime.public",
+      "path": "backend/app/domains/runtime/public.py",
       "wildcard_imports": []
     },
     {
