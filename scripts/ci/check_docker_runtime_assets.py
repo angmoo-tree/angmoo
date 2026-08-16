@@ -151,6 +151,20 @@ def validate_resolved_compose(
                     errors.append("frontend Dockerfile must pin pnpm 11.22.0")
                 if "ENV COREPACK_HOME=/opt/corepack" not in content:
                     errors.append("frontend Dockerfile must share the Corepack cache")
+                if "PNPM_HOME=/opt/pnpm" not in content:
+                    errors.append("frontend Dockerfile must share the pnpm store")
+                if (
+                    "COPY --chown=node:node frontend/package.json "
+                    "frontend/pnpm-lock.yaml frontend/pnpm-workspace.yaml ./"
+                    not in content
+                ):
+                    errors.append(
+                        "frontend dependency manifests must be owned by the node user"
+                    )
+                if "USER node\nRUN pnpm install --frozen-lockfile" not in content:
+                    errors.append(
+                        "frontend dependencies must be installed by the runtime node user"
+                    )
 
     frontend_package_path = root / "frontend/package.json"
     if frontend_package_path.is_file():
