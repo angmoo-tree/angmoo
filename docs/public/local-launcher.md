@@ -45,6 +45,41 @@ The launcher starts the development stack in the background and prints the
 canonical Watch command. Compose Watch remains attached to the contributor's
 terminal rather than becoming a hidden launcher daemon.
 
+## Aggregate status and doctor
+
+`status` combines two deliberately separate sources into the versioned
+`angmoo-launcher-result-v1` result:
+
+- the owner-protected backend application snapshot reports migration, local
+  owner, World and WorldCharacter counts, scheduler lease, recent provider-use
+  metadata, last successful activity identifiers, Outbox, projector, and Neo4j
+  state;
+- the host launcher reports Compose service health, restart counts, short image
+  digests, loopback ports, disk pressure, Docker storage categories, named
+  volumes, and a point-in-time container CPU and memory sample.
+
+The backend never receives the Docker socket or host filesystem paths. If the
+backend is unavailable, application checks become `unknown` while `doctor`
+continues to report Docker, Compose, port, disk, image, cache, container, and
+volume diagnostics from the host.
+
+`doctor` evaluates the same snapshot used by `status`. A disk-space warning can
+therefore produce a degraded exit code even when all Angmoo services and the
+application runtime are ready; the human output identifies the warning rather
+than reporting a false service failure.
+
+## Diagnostic privacy
+
+Launcher human output, JSON, and test diagnostics pass through the same
+recursive sanitizer. They may contain opaque IDs, aggregate counts, normalized
+reason codes, timestamps, restart counts, resource measurements, and shortened
+image digests. They do not contain APP_SECRET, database passwords, provider API
+keys, credential envelopes, cookies, authorization headers, prompts, private
+messages, post or comment content, container IDs, or host absolute paths.
+
+Status and doctor are read-only. They never decrypt credentials, prune Docker
+objects, mutate scheduler leases, replay Outbox rows, or call an LLM provider.
+
 ## Preflight and disk policy
 
 Preflight verifies Docker Engine, Docker Compose, the supported CPU architecture,

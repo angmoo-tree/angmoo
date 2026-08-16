@@ -1,3 +1,6 @@
+from app.domains.runtime.infrastructure.sqlalchemy_application_runtime_probe import (
+    SqlAlchemyApplicationRuntimeProbe,
+)
 from app.domains.runtime.infrastructure.sqlalchemy_scheduler_lease import (
     RuntimeSchedulerLease,
     SqlAlchemySchedulerLeaseRepository,
@@ -5,6 +8,7 @@ from app.domains.runtime.infrastructure.sqlalchemy_scheduler_lease import (
 )
 
 __all__ = [
+    "SqlAlchemyApplicationRuntimeProbe",
     "RuntimeSchedulerLease",
     "SqlAlchemySchedulerLeaseRepository",
     "scheduler_fence",

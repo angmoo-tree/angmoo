@@ -70,6 +70,24 @@ class ProviderUsageRuntimeRead(RuntimeStatusSchema):
     kill_switch_enabled: bool = False
 
 
+class OwnerRuntimeRead(RuntimeStatusSchema):
+    bootstrap_state: str
+    owner_user_id: str | None = None
+    registered_world_count: int = Field(default=0, ge=0)
+    active_world_count: int = Field(default=0, ge=0)
+    active_world_character_count: int = Field(default=0, ge=0)
+
+
+class ActivityRuntimeRead(RuntimeStatusSchema):
+    last_successful_run_id: str | None = None
+    last_successful_post_id: str | None = None
+    last_successful_beat_id: str | None = None
+    last_successful_episode_id: str | None = None
+    last_successful_at: datetime | None = None
+    inbox_result_code: str | None = None
+    feed_result_code: str | None = None
+
+
 class RuntimeCapabilityRead(RuntimeStatusSchema):
     state: RuntimeComponentState
     reason_code: RuntimeDiagnosticCode | None = None
@@ -86,6 +104,8 @@ class LocalRuntimeStatusRead(RuntimeStatusSchema):
     scheduler: SchedulerRuntimeRead
     projector: ProjectorRuntimeRead
     provider_usage: ProviderUsageRuntimeRead
+    owner: OwnerRuntimeRead
+    activity: ActivityRuntimeRead
     capabilities: dict[str, RuntimeCapabilityRead] = Field(default_factory=dict)
 
 
@@ -142,6 +162,22 @@ def runtime_status_read(status: ApplicationRuntimeStatus) -> LocalRuntimeStatusR
             recent_call_count=status.provider_usage.recent_call_count,
             recent_failure_class=status.provider_usage.recent_failure_class,
             kill_switch_enabled=status.provider_usage.kill_switch_enabled,
+        ),
+        owner=OwnerRuntimeRead(
+            bootstrap_state=status.owner.bootstrap_state,
+            owner_user_id=status.owner.owner_user_id,
+            registered_world_count=status.owner.registered_world_count,
+            active_world_count=status.owner.active_world_count,
+            active_world_character_count=status.owner.active_world_character_count,
+        ),
+        activity=ActivityRuntimeRead(
+            last_successful_run_id=status.activity.last_successful_run_id,
+            last_successful_post_id=status.activity.last_successful_post_id,
+            last_successful_beat_id=status.activity.last_successful_beat_id,
+            last_successful_episode_id=status.activity.last_successful_episode_id,
+            last_successful_at=status.activity.last_successful_at,
+            inbox_result_code=status.activity.inbox_result_code,
+            feed_result_code=status.activity.feed_result_code,
         ),
         capabilities={
             capability.name: RuntimeCapabilityRead(

@@ -22,11 +22,13 @@
     "destructive_command_blocked": 40
   },
   "error_codes": [
+    "application_status_unavailable",
     "compose_config_invalid",
     "compose_unavailable",
     "credential_recovery_required",
     "destructive_command_blocked",
     "docker_engine_unavailable",
+    "docker_usage_unavailable",
     "doctor_degraded",
     "host_port_conflict",
     "launcher_invalid_argument",

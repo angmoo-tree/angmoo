@@ -5,6 +5,64 @@ $script:LauncherRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $script:ContractPath = Join-Path $script:LauncherRoot 'launcher\contract\local-launcher-v1.json'
 $script:Contract = Get-Content -LiteralPath $script:ContractPath -Raw -Encoding utf8 | ConvertFrom-Json
 
+function Protect-AngmooDiagnosticText {
+    param([AllowNull()][string]$Value)
+    if ($null -eq $Value) { return $null }
+    $redacted = $Value
+    $redacted = $redacted -replace '\bAIza[0-9A-Za-z_-]{20,}\b', '[REDACTED_API_KEY]'
+    $redacted = $redacted -replace '\bsk-[A-Za-z0-9_-]{20,}\b', '[REDACTED_API_KEY]'
+    $redacted = $redacted -replace '(?i)\b(APP_SECRET|POSTGRES(?:QL)?_PASSWORD|NEO4J_PASSWORD|API_KEY|AUTHORIZATION|SESSION_TOKEN)\s*[:=]\s*[^\s,;]+', '$1=[REDACTED]'
+    foreach ($secretName in @('APP_SECRET', 'POSTGRES_PASSWORD', 'NEO4J_PASSWORD')) {
+        $secret = [Environment]::GetEnvironmentVariable($secretName)
+        if ($secret) { $redacted = $redacted.Replace($secret, '[REDACTED]') }
+    }
+    return $redacted
+}
+
+function Protect-AngmooDiagnosticValue {
+    param(
+        [AllowNull()][object]$Value,
+        [string]$FieldName = ''
+    )
+    $normalizedField = $FieldName.Replace('-', '_').ToLowerInvariant()
+    if ($normalizedField -in @(
+        'api_key', 'apikey', 'authorization', 'token', 'access_token',
+        'refresh_token', 'secret', 'password', 'app_secret', 'session_token',
+        'encrypted_api_key', 'credential_payload', 'full_prompt',
+        'provider_response', 'private_chat', 'sns_content', 'media_original'
+    )) { return '[REDACTED]' }
+    if ($null -eq $Value) { return $null }
+    if ($Value -is [string]) { return Protect-AngmooDiagnosticText -Value $Value }
+    if ($Value -is [Collections.IDictionary]) {
+        $safe = [ordered]@{}
+        foreach ($key in $Value.Keys) {
+            $safe[[string]$key] = Protect-AngmooDiagnosticValue -Value $Value[$key] -FieldName ([string]$key)
+        }
+        return [pscustomobject]$safe
+    }
+    if ($Value -is [Management.Automation.PSCustomObject]) {
+        $safe = [ordered]@{}
+        foreach ($property in $Value.PSObject.Properties) {
+            $safe[$property.Name] = Protect-AngmooDiagnosticValue -Value $property.Value -FieldName $property.Name
+        }
+        return [pscustomobject]$safe
+    }
+    if ($Value -is [Collections.IEnumerable] -and $Value -isnot [string]) {
+        return @($Value | ForEach-Object { Protect-AngmooDiagnosticValue -Value $_ })
+    }
+    return $Value
+}
+
+function Test-AngmooDiagnosticSanitizer {
+    $canary = 'AIza' + ('Z' * 24)
+    $result = Protect-AngmooDiagnosticValue -Value ([ordered]@{
+        api_key = $canary
+        message = (('APP' + '_SECRET=') + $canary)
+    })
+    $serialized = $result | ConvertTo-Json -Depth 5 -Compress
+    return -not $serialized.Contains($canary)
+}
+
 function New-AngmooLauncherResult {
     param(
         [string]$Command,
@@ -25,10 +83,10 @@ function New-AngmooLauncherResult {
         state = $State
         exit_code = $ExitCode
         error_code = $ErrorCode
-        message = $Message
+        message = Protect-AngmooDiagnosticText -Value $Message
         project = $Project
         mode = $Mode
-        details = [pscustomobject]$Details
+        details = Protect-AngmooDiagnosticValue -Value $Details
     }
 }
 
@@ -316,6 +374,215 @@ function Get-AngmooComposeStatus {
     return [pscustomobject]@{ state = $state; services = $records; output = @() }
 }
 
+function Get-AngmooApplicationStatus {
+    param([string]$Project, [bool]$Contributor)
+    $result = Invoke-AngmooCompose -Project $Project -Contributor $Contributor -Arguments @(
+        'exec', '-T', 'backend', '/usr/local/bin/angmoo-backend-entrypoint', 'diagnostics'
+    )
+    if ($result.exit_code -ne 0) {
+        return [pscustomobject]@{
+            state = 'unknown'
+            error_code = 'application_status_unavailable'
+            payload = $null
+        }
+    }
+    foreach ($line in @($result.output | Select-Object -Last 5)) {
+        if (-not $line.Trim().StartsWith('{')) { continue }
+        try {
+            $payload = $line | ConvertFrom-Json
+            if ($payload.schema_version -eq 'local-runtime-status-v1') {
+                return [pscustomobject]@{
+                    state = [string]$payload.installation_state
+                    error_code = $null
+                    payload = Protect-AngmooDiagnosticValue -Value $payload
+                }
+            }
+        } catch { }
+    }
+    return [pscustomobject]@{
+        state = 'unknown'
+        error_code = 'application_status_unavailable'
+        payload = $null
+    }
+}
+
+function Get-AngmooDockerStorageStatus {
+    $result = Invoke-AngmooDocker -Arguments @('system', 'df', '--format', '{{json .}}')
+    if ($result.exit_code -ne 0) {
+        return [pscustomobject]@{
+            state = 'unknown'
+            error_code = 'docker_usage_unavailable'
+            records = @()
+        }
+    }
+    $records = [System.Collections.Generic.List[object]]::new()
+    foreach ($line in $result.output) {
+        if (-not $line.Trim()) { continue }
+        try {
+            $item = $line | ConvertFrom-Json
+            $records.Add([pscustomobject][ordered]@{
+                type = [string]$item.Type
+                total_count = [string]$item.TotalCount
+                active_count = [string]$item.Active
+                size = [string]$item.Size
+                reclaimable = [string]$item.Reclaimable
+            })
+        } catch { }
+    }
+    return [pscustomobject]@{
+        state = if ($records.Count -gt 0) { 'ready' } else { 'unknown' }
+        error_code = if ($records.Count -gt 0) { $null } else { 'docker_usage_unavailable' }
+        records = @($records)
+    }
+}
+
+function Get-AngmooContainerResourceStatus {
+    param([string]$Project, [bool]$Contributor)
+    $measuredAt = [DateTime]::UtcNow.ToString('o')
+    $compose = Invoke-AngmooCompose -Project $Project -Contributor $Contributor -Arguments @('ps', '--all', '--format', 'json')
+    $containers = @()
+    if ($compose.exit_code -eq 0) {
+        $raw = ($compose.output -join "`n").Trim()
+        if ($raw) {
+            try { $containers = @($raw | ConvertFrom-Json) } catch {
+                foreach ($line in $compose.output) {
+                    if ($line.Trim()) {
+                        try { $containers += ($line | ConvertFrom-Json) } catch { }
+                    }
+                }
+            }
+        }
+    }
+    $references = @($containers | ForEach-Object {
+        if ($_.Name) { [string]$_.Name } elseif ($_.ID) { [string]$_.ID }
+    } | Where-Object { $_ })
+    $statsByName = @{}
+    if ($references.Count -gt 0) {
+        $statsArguments = @('stats', '--no-stream', '--format', '{{json .}}') + $references
+        $stats = Invoke-AngmooDocker -Arguments $statsArguments
+        if ($stats.exit_code -eq 0) {
+            foreach ($line in $stats.output) {
+                try {
+                    $item = $line | ConvertFrom-Json
+                    if ($item.Name) { $statsByName[[string]$item.Name] = $item }
+                } catch { }
+            }
+        }
+    }
+    $inspectByName = @{}
+    if ($references.Count -gt 0) {
+        $inspectArguments = @(
+            'inspect', '--format',
+            '{{json dict "Name" .Name "RestartCount" .RestartCount "Image" .Image}}'
+        ) + $references
+        $inspect = Invoke-AngmooDocker -Arguments $inspectArguments
+        if ($inspect.exit_code -eq 0) {
+            foreach ($line in $inspect.output) {
+                try {
+                    $item = $line | ConvertFrom-Json
+                    if ($item.Name) { $inspectByName[[string]$item.Name.TrimStart('/')] = $item }
+                } catch { }
+            }
+        }
+    }
+    $records = [System.Collections.Generic.List[object]]::new()
+    foreach ($service in @($script:Contract.compose.required_services)) {
+        $container = $containers | Where-Object { [string]$_.Service -eq [string]$service } | Select-Object -First 1
+        $containerReference = if ($null -ne $container -and $container.Name) { [string]$container.Name } elseif ($null -ne $container -and $container.ID) { [string]$container.ID } else { '' }
+        if (-not $containerReference.Trim()) {
+            $records.Add([pscustomobject]@{
+                service = [string]$service
+                state = 'unknown'
+                cpu_percent = 'unknown'
+                memory_usage = 'unknown'
+                restart_count = 'unknown'
+                image_digest = 'unknown'
+                measured_at = $measuredAt
+            })
+            continue
+        }
+        $cpu = 'unknown'; $memory = 'unknown'
+        $statsPayload = $statsByName[$containerReference]
+        if ($null -ne $statsPayload) {
+            if ($statsPayload.CPUPerc) { $cpu = [string]$statsPayload.CPUPerc }
+            if ($statsPayload.MemUsage) { $memory = [string]$statsPayload.MemUsage }
+        }
+        $restartCount = 'unknown'; $imageDigest = 'unknown'
+        $inspectPayload = $inspectByName[$containerReference]
+        if ($null -ne $inspectPayload) {
+            if ($null -ne $inspectPayload.RestartCount) { $restartCount = [string]$inspectPayload.RestartCount }
+            if ($inspectPayload.Image) {
+                $image = [string]$inspectPayload.Image
+                $imageDigest = $image.Substring(0, [Math]::Min(19, $image.Length))
+            }
+        }
+        $records.Add([pscustomobject]@{
+            service = [string]$service
+            state = 'measured'
+            cpu_percent = $cpu
+            memory_usage = $memory
+            restart_count = $restartCount
+            image_digest = $imageDigest
+            measured_at = $measuredAt
+        })
+    }
+    return @($records)
+}
+
+function Get-AngmooHostDiagnostics {
+    param([string]$Project, [bool]$Contributor, [bool]$IncludeResources)
+    $storage = Get-AngmooDockerStorageStatus
+    return [pscustomobject][ordered]@{
+        free_disk_gib = Get-AngmooFreeDiskGiB
+        named_volumes = @(Get-AngmooVolumeInventory -Project $Project)
+        docker_storage = $storage
+        container_resources = if ($IncludeResources) {
+            @(Get-AngmooContainerResourceStatus -Project $Project -Contributor $Contributor)
+        } else { @() }
+    }
+}
+
+function Add-AngmooApplicationChecks {
+    param(
+        [System.Collections.Generic.List[object]]$Checks,
+        [AllowNull()][object]$Application
+    )
+    if ($null -eq $Application -or $Application.state -eq 'unknown' -or $null -eq $Application.payload) {
+        $Checks.Add([pscustomobject]@{
+            name = 'application_status'
+            state = 'unknown'
+            detail = 'application_status_unavailable'
+        })
+        return
+    }
+    $payload = $Application.payload
+    $Checks.Add([pscustomobject]@{
+        name = 'application_status'
+        state = [string]$payload.installation_state
+        detail = [string]$payload.schema_version
+    })
+    $Checks.Add([pscustomobject]@{
+        name = 'migration'
+        state = [string]$payload.migration.state
+        detail = "$($payload.migration.current_revision)/$($payload.migration.head_revision)"
+    })
+    $Checks.Add([pscustomobject]@{
+        name = 'owner'
+        state = if ($payload.owner.bootstrap_state -eq 'claimed') { 'ready' } else { [string]$payload.owner.bootstrap_state }
+        detail = "worlds=$($payload.owner.registered_world_count) active_characters=$($payload.owner.active_world_character_count)"
+    })
+    $Checks.Add([pscustomobject]@{
+        name = 'scheduler'
+        state = [string]$payload.scheduler.state
+        detail = "epoch=$($payload.scheduler.fencing_epoch)"
+    })
+    $Checks.Add([pscustomobject]@{
+        name = 'projector'
+        state = [string]$payload.projector.state
+        detail = "pending=$($payload.projector.pending_count) retry=$($payload.projector.retry_count) dead=$($payload.projector.dead_letter_count)"
+    })
+}
+
 function Get-AngmooLockName {
     param([string]$Project)
     $identity = "$($script:LauncherRoot.ToLowerInvariant())|$($Project.ToLowerInvariant())"
@@ -413,7 +680,15 @@ function Invoke-AngmooLauncher {
             $result = New-AngmooLauncherResult -Command $normalizedCommand -Project $options.project_name -Mode $mode -Ok $false -State 'failed' -ExitCode (Get-AngmooExitCode 'container_engine_unavailable') -ErrorCode 'docker_engine_unavailable' -Message 'Docker Engine is unavailable.'
         } else {
             $status = Get-AngmooComposeStatus -Project $options.project_name -Contributor $options.contributor
-            $result = New-AngmooLauncherResult -Command $normalizedCommand -Project $options.project_name -Mode $mode -Ok ($status.state -ne 'failed') -State $status.state -ExitCode $(if ($status.state -eq 'failed') { Get-AngmooExitCode 'preflight_failed' } else { 0 }) -ErrorCode $(if ($status.state -eq 'failed') { 'compose_config_invalid' } else { $null }) -Message "Angmoo state: $($status.state)." -Details @{ services = $status.services }
+            $application = if ($status.state -in @('ready', 'degraded')) {
+                Get-AngmooApplicationStatus -Project $options.project_name -Contributor $options.contributor
+            } else {
+                [pscustomobject]@{ state = 'unknown'; error_code = 'application_status_unavailable'; payload = $null }
+            }
+            $hostDiagnostics = Get-AngmooHostDiagnostics -Project $options.project_name -Contributor $options.contributor -IncludeResources ($status.state -in @('ready', 'degraded'))
+            $aggregateState = $status.state
+            if ($status.state -eq 'ready' -and $application.state -notin @('ready', 'unknown')) { $aggregateState = 'degraded' }
+            $result = New-AngmooLauncherResult -Command $normalizedCommand -Project $options.project_name -Mode $mode -Ok ($status.state -ne 'failed') -State $aggregateState -ExitCode $(if ($status.state -eq 'failed') { Get-AngmooExitCode 'preflight_failed' } else { 0 }) -ErrorCode $(if ($status.state -eq 'failed') { 'compose_config_invalid' } else { $null }) -Message "Angmoo state: $aggregateState." -Details @{ services = $status.services; application = $application; host = $hostDiagnostics }
         }
         return [pscustomobject]@{ result = $result; json_requested = $options.json }
     }
@@ -423,8 +698,33 @@ function Invoke-AngmooLauncher {
             $result = New-AngmooLauncherResult -Command $normalizedCommand -Project $options.project_name -Mode $mode -Ok $false -State 'failed' -ExitCode $preflight.exit_code -ErrorCode $preflight.error_code -Message $preflight.message -Details @{ checks = @($preflight.checks) }
         } else {
             $status = Get-AngmooComposeStatus -Project $options.project_name -Contributor $options.contributor
-            $isDegraded = $preflight.degraded -or $status.state -notin @('ready', 'stopped')
+            $application = if ($status.state -in @('ready', 'degraded')) {
+                Get-AngmooApplicationStatus -Project $options.project_name -Contributor $options.contributor
+            } else {
+                [pscustomobject]@{ state = 'unknown'; error_code = 'application_status_unavailable'; payload = $null }
+            }
+            $checks = [System.Collections.Generic.List[object]]::new()
+            foreach ($check in @($preflight.checks)) { $checks.Add($check) }
+            Add-AngmooApplicationChecks -Checks $checks -Application $application
+            $privacyReady = Test-AngmooDiagnosticSanitizer
+            $checks.Add([pscustomobject]@{
+                name = 'privacy'
+                state = if ($privacyReady) { 'ready' } else { 'failed' }
+                detail = if ($privacyReady) { 'sanitizer_canary_absent' } else { 'diagnostic_redaction_failed' }
+            })
+            $hostDiagnostics = Get-AngmooHostDiagnostics -Project $options.project_name -Contributor $options.contributor -IncludeResources ($status.state -in @('ready', 'degraded'))
+            $applicationDegraded = $status.state -eq 'ready' -and $application.state -notin @('ready')
+            $isDegraded = $preflight.degraded -or $status.state -notin @('ready', 'stopped') -or $applicationDegraded -or (-not $privacyReady)
             $result = New-AngmooLauncherResult -Command $normalizedCommand -Project $options.project_name -Mode $mode -Ok (-not $isDegraded) -State $(if ($isDegraded) { 'degraded' } else { $status.state }) -ExitCode $(if ($isDegraded) { Get-AngmooExitCode 'doctor_degraded' } else { 0 }) -ErrorCode $(if ($isDegraded) { 'doctor_degraded' } else { $null }) -Message $(if ($isDegraded) { 'Doctor found a degraded host or Compose condition.' } else { 'Doctor checks passed.' }) -Details @{ checks = @($preflight.checks); services = $status.services; free_disk_gib = $preflight.free_disk_gib; secret_state = $preflight.secret_state; volume_count = @($preflight.volumes).Count }
+            $result.details = Protect-AngmooDiagnosticValue -Value ([ordered]@{
+                checks = @($checks)
+                services = $status.services
+                application = $application
+                host = $hostDiagnostics
+                free_disk_gib = $preflight.free_disk_gib
+                secret_state = $preflight.secret_state
+                volume_count = @($preflight.volumes).Count
+            })
         }
         return [pscustomobject]@{ result = $result; json_requested = $options.json }
     }
@@ -454,6 +754,16 @@ function Write-AngmooLauncherHumanResult {
     $servicesProperty = $Result.details.PSObject.Properties['services']
     if ($null -ne $servicesProperty -and $servicesProperty.Value) {
         foreach ($service in @($servicesProperty.Value)) { Write-Output "service=$($service.service) state=$($service.state) health=$($service.health)" }
+    }
+    $applicationProperty = $Result.details.PSObject.Properties['application']
+    if ($null -ne $applicationProperty -and $applicationProperty.Value) {
+        $application = $applicationProperty.Value
+        Write-Output "application=$($application.state)"
+    }
+    $hostProperty = $Result.details.PSObject.Properties['host']
+    if ($null -ne $hostProperty -and $hostProperty.Value) {
+        $hostStatus = $hostProperty.Value
+        Write-Output "host_free_disk_gib=$($hostStatus.free_disk_gib) docker_storage=$($hostStatus.docker_storage.state)"
     }
     $logsProperty = $Result.details.PSObject.Properties['log_lines']
     if ($null -ne $logsProperty -and $logsProperty.Value) {

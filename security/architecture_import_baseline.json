@@ -1,7 +1,7 @@
 {
-  "edge_count": 671,
-  "external_import_count": 1120,
-  "module_count": 292,
+  "edge_count": 681,
+  "external_import_count": 1132,
+  "module_count": 294,
   "modules": [
     {
       "external_imports": [],
@@ -966,6 +966,7 @@
         "app.api.v1.routes.character_lore",
         "app.api.v1.routes.community",
         "app.api.v1.routes.messages",
+        "app.api.v1.routes.runtime_status",
         "app.api.v1.routes.tree",
         "app.api.v1.routes.world_activity_runtime",
         "app.api.v1.routes.world_character_setup",
@@ -1101,6 +1102,23 @@
       ],
       "module": "app.api.v1.routes.messages",
       "path": "backend/app/api/v1/routes/messages.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "fastapi",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.api.v1.deps",
+        "app.core.browser_session",
+        "app.core.db",
+        "app.domains.identity.public",
+        "app.domains.runtime.public"
+      ],
+      "module": "app.api.v1.routes.runtime_status",
+      "path": "backend/app/api/v1/routes/runtime_status.py",
       "wildcard_imports": []
     },
     {
@@ -1941,10 +1959,32 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.runtime.infrastructure.sqlalchemy_application_runtime_probe",
         "app.domains.runtime.infrastructure.sqlalchemy_scheduler_lease"
       ],
       "module": "app.domains.runtime.infrastructure",
       "path": "backend/app/domains/runtime/infrastructure/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "json",
+        "os",
+        "socket",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing",
+        "urllib.parse"
+      ],
+      "imports": [
+        "app.core.config",
+        "app.domains.runtime.domain.diagnostic_codes",
+        "app.domains.runtime.domain.installation_state"
+      ],
+      "module": "app.domains.runtime.infrastructure.sqlalchemy_application_runtime_probe",
+      "path": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py",
       "wildcard_imports": []
     },
     {

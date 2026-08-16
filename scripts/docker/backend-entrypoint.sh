@@ -59,6 +59,9 @@ case "$mode" in
   projector)
     exec python scripts/run_graph_projection_worker.py --loop --bootstrap
     ;;
+  diagnostics)
+    exec python scripts/read_runtime_status.py
+    ;;
   *)
     echo "unsupported_runtime_process" >&2
     exit 64

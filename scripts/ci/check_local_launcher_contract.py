@@ -31,9 +31,11 @@ EXPECTED_EXIT_CODES = {
     "destructive_command_blocked": 40,
 }
 SHARED_RUNTIME_CODES = {
+    "application_status_unavailable",
     "compose_config_invalid",
     "credential_recovery_required",
     "docker_engine_unavailable",
+    "docker_usage_unavailable",
     "host_port_conflict",
     "runtime_disk_space_low",
     "runtime_start_timeout",

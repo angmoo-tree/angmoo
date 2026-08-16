@@ -7,6 +7,8 @@ class RuntimeDiagnosticCode(StrEnum):
     """Stable, content-free reason codes shared by status and doctor."""
 
     DOCKER_ENGINE_UNAVAILABLE = "docker_engine_unavailable"
+    APPLICATION_STATUS_UNAVAILABLE = "application_status_unavailable"
+    DOCKER_USAGE_UNAVAILABLE = "docker_usage_unavailable"
     COMPOSE_CONFIG_INVALID = "compose_config_invalid"
     HOST_PORT_CONFLICT = "host_port_conflict"
     RUNTIME_DISK_SPACE_LOW = "runtime_disk_space_low"

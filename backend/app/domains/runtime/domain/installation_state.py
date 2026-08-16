@@ -97,6 +97,26 @@ class ProviderUsageRuntimeStatus:
 
 
 @dataclass(frozen=True)
+class OwnerRuntimeStatus:
+    bootstrap_state: str
+    owner_user_id: str | None = None
+    registered_world_count: int = 0
+    active_world_count: int = 0
+    active_world_character_count: int = 0
+
+
+@dataclass(frozen=True)
+class ActivityRuntimeStatus:
+    last_successful_run_id: str | None = None
+    last_successful_post_id: str | None = None
+    last_successful_beat_id: str | None = None
+    last_successful_episode_id: str | None = None
+    last_successful_at: datetime | None = None
+    inbox_result_code: str | None = None
+    feed_result_code: str | None = None
+
+
+@dataclass(frozen=True)
 class RuntimeCapabilityStatus:
     name: str
     state: RuntimeComponentState
@@ -112,4 +132,6 @@ class ApplicationRuntimeStatus:
     scheduler: SchedulerRuntimeStatus
     projector: ProjectorRuntimeStatus
     provider_usage: ProviderUsageRuntimeStatus
+    owner: OwnerRuntimeStatus
+    activity: ActivityRuntimeStatus
     capabilities: tuple[RuntimeCapabilityStatus, ...] = ()
