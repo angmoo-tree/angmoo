@@ -39,6 +39,7 @@ def _compose(*files: str) -> dict[str, object]:
 def _configs() -> tuple[dict[str, object], dict[str, object]]:
     return _compose("compose.yml"), _compose("compose.yml", "compose.dev.yml")
 
+
 def _ci_config() -> dict[str, object]:
     return _compose("compose.yml", "compose.ci.yml")
 
@@ -90,6 +91,19 @@ def test_frontend_never_receives_the_runtime_secret_volume() -> None:
         )
 
 
+def test_runtime_version_matches_release_and_contributor_images() -> None:
+    release, development = _configs()
+    for service_name in ("backend", "scheduler", "projector"):
+        assert (
+            release["services"][service_name]["environment"]["ANGMOO_VERSION"]
+            == "v0.3.0"
+        )
+        assert (
+            development["services"][service_name]["environment"]["ANGMOO_VERSION"]
+            == "0.3.0-dev"
+        )
+
+
 def test_frontend_build_source_is_writable_by_the_non_root_builder() -> None:
     content = (ROOT / "Dockerfile.frontend").read_text(encoding="utf-8")
     assert content.count("COPY --chown=node:node frontend ./") == 2
@@ -121,10 +135,10 @@ def test_runtime_assets_require_compose_watch() -> None:
     release, development = _configs()
     mutated = deepcopy(development)
     del mutated["services"]["frontend"]["develop"]
-    assert (
-        "Compose Watch is missing: frontend"
-        in CHECKER.validate_resolved_compose(release, mutated, root=ROOT)
+    assert "Compose Watch is missing: frontend" in CHECKER.validate_resolved_compose(
+        release, mutated, root=ROOT
     )
+
 
 def test_ci_compose_reuses_only_locally_built_application_images() -> None:
     assert CHECKER.validate_ci_compose(_ci_config()) == []
