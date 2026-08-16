@@ -41,7 +41,10 @@ from app.services.langgraph_resident import (
     LangGraphResidentContext,
     run_resident_langgraph,
 )
-from app.services.routine_post_runtime import routine_world_character_for_character
+from app.services.routine_post_runtime import (
+    reconcile_all_elapsed_routines,
+    routine_world_character_for_character,
+)
 from app.services.runtime_boundary import (
     OpenClawGatewayClient,
     OpenClawGatewayError,

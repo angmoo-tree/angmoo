@@ -5,6 +5,7 @@ from hashlib import sha256
 import json
 import logging
 
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -57,6 +58,40 @@ def routine_world_character_for_character(
     ):
         return None
     return world_character
+
+
+def reconcile_all_elapsed_routines(
+    db: Session,
+    *,
+    now: datetime | None = None,
+) -> activity_runtime.DaypartTransitionCounts:
+    """Close every elapsed routine without creating catch-up provider work."""
+
+    current = now or datetime.now(UTC)
+    world_character_ids = list(
+        db.scalars(
+            select(models.DailyActivityPlanItem.world_character_id)
+            .where(
+                models.DailyActivityPlanItem.scheduled_end_at <= current,
+                models.DailyActivityPlanItem.status.in_({"planned", "active"}),
+            )
+            .distinct()
+        )
+    )
+    completed = 0
+    skipped = 0
+    for world_character_id in world_character_ids:
+        transition = activity_runtime.close_elapsed_dayparts(
+            db,
+            world_character_id=world_character_id,
+            now=current,
+        )
+        completed += transition.completed
+        skipped += transition.skipped
+    return activity_runtime.DaypartTransitionCounts(
+        completed=completed,
+        skipped=skipped,
+    )
 
 
 def _safe_result(

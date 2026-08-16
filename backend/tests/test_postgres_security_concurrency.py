@@ -79,6 +79,7 @@ def test_security_migration_schema_contract() -> None:
         "relationship_state_changes",
         "activity_proposals",
         "graph_projection_outbox",
+        "runtime_scheduler_leases",
     }
     assert expected_tables.issubset(set(inspector.get_table_names()))
     assert {
@@ -200,10 +201,21 @@ def test_security_migration_schema_contract() -> None:
             "ix_graph_projection_outbox_world_created",
         }
     )
+    assert {
+        item["name"]
+        for item in inspector.get_check_constraints("runtime_scheduler_leases")
+    }.issuperset(
+        {
+            "ck_runtime_scheduler_leases_singleton",
+            "ck_runtime_scheduler_leases_state",
+            "ck_runtime_scheduler_leases_fencing_epoch",
+            "ck_runtime_scheduler_leases_tick_result",
+        }
+    )
     with engine.connect() as connection:
         assert (
             connection.scalar(text("SELECT version_num FROM alembic_version"))
-            == "20260815_0079"
+            == "20260816_0080"
         )
 
 

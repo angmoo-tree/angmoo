@@ -54,7 +54,6 @@ case "$mode" in
     exec python -m scripts.migrate_local_credentials
     ;;
   scheduler)
-    : > /tmp/angmoo-worker-ready
     exec python scripts/run_resident_tick_scheduler.py
     ;;
   projector)

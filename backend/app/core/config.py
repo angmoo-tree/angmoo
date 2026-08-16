@@ -96,6 +96,10 @@ class Settings(BaseSettings):
     TRANSLATION_MONTHLY_CHAR_LIMIT: int = 1_800_000
     RESIDENT_TICK_SCHEDULER_ENABLED: bool = False
     RESIDENT_TICK_INTERVAL_SECONDS: int = 60
+    RESIDENT_TICK_LEASE_TTL_SECONDS: int = 45
+    RESIDENT_TICK_HEARTBEAT_INTERVAL_SECONDS: int = 10
+    RESIDENT_TICK_PROCESS_LOCK_PATH: str = "/tmp/angmoo-resident-scheduler.lock"
+    RESIDENT_TICK_READY_PATH: str = "/tmp/angmoo-worker-ready"
     RESIDENT_TICK_MAX_RUNS: int = 5
     RESIDENT_TICK_POST_ID: str | None = None
     RESIDENT_TICK_INDIVIDUAL_TOOLS_ENABLED: bool = False

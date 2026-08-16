@@ -22,6 +22,7 @@ from app.domains.identity.application.resolve_credential import (
     CredentialResolver,
 )
 from app.domains.identity.domain.credential import CredentialMaterial, CredentialPurpose
+from app.domains.identity.domain.local_owner import LOCAL_INSTALLATION_KEY
 from app.domains.identity.infrastructure.sqlalchemy_auth_models import (
     AuthExternalVerificationReservation,
     AuthGoogleSignupGrant,
@@ -29,6 +30,7 @@ from app.domains.identity.infrastructure.sqlalchemy_auth_models import (
     AuthSession,
     CommunityMutationQuotaBucket,
     DISPLAY_NAME_CHANGE_COOLDOWN,
+    InstallationIdentity,
     User,
 )
 from app.domains.identity.infrastructure.sqlalchemy_credential_models import (
@@ -53,6 +55,8 @@ __all__ = [
     "GoogleLoginCreate",
     "GoogleLoginRead",
     "GoogleSignupCompleteCreate",
+    "InstallationIdentity",
+    "LOCAL_INSTALLATION_KEY",
     "LoginCreate",
     "LlmCredential",
     "SignupCreate",

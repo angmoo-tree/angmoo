@@ -9,6 +9,7 @@ from app.domains.identity.infrastructure import (
     User,
     LlmCredential,
 )
+from app.domains.runtime.infrastructure import RuntimeSchedulerLease
 from app.models.characters import Character, CharacterState
 from app.models.character_lore import CharacterLoreChunk, CharacterLoreSource, LoreParserLease
 from app.models.agent_settings import AgentActivitySetting, AgentImageGenerationSetting
@@ -111,6 +112,7 @@ __all__ = [
     "CommunityMutationQuotaBucket",
     "InstallationIdentity",
     "LocalOwnerBootstrapChallenge",
+    "RuntimeSchedulerLease",
     "Character",
     "CharacterMessageSetting",
     "CharacterLoreChunk",

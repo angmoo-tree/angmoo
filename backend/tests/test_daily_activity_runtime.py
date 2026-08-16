@@ -21,6 +21,7 @@ from app.services import activity_runtime
 from app.services import activity_state_contracts
 from app.services import daily_activity_plans
 from app.services import joint_activity_scheduling
+from app.services import routine_post_runtime
 from app.services import world_character_setup
 from app.services import world_character_contracts
 
@@ -743,6 +744,64 @@ def test_daypart_transition_closes_successful_episode_without_provider_work() ->
             "successful_beat_count": 1,
             "successful_post_ids": [post.id],
         }
+
+
+def test_scheduler_reconciles_all_elapsed_routines_without_catch_up_work() -> None:
+    engine = _engine()
+    plan_started_at = _utc(datetime(2026, 8, 9, 0, 30))
+    reconcile_at = _utc(datetime(2026, 8, 9, 12, 1))
+    with Session(engine, expire_on_commit=False) as db:
+        _world_row, first, second = _seed(db, two_characters=True)
+        assert second is not None
+        first_plan = _prepare(db, first, now=plan_started_at, key="reconcile-first")
+        second_plan = _prepare(db, second, now=plan_started_at, key="reconcile-second")
+
+        transition = routine_post_runtime.reconcile_all_elapsed_routines(
+            db,
+            now=reconcile_at,
+        )
+
+        assert transition == activity_runtime.DaypartTransitionCounts(
+            completed=0,
+            skipped=4,
+        )
+        for plan in (first_plan, second_plan):
+            rows = list(
+                db.scalars(
+                    select(models.DailyActivityPlanItem)
+                    .where(models.DailyActivityPlanItem.plan_id == plan.id)
+                    .order_by(models.DailyActivityPlanItem.scheduled_start_at)
+                )
+            )
+            assert [row.status for row in rows] == [
+                "skipped",
+                "skipped",
+                "planned",
+                "planned",
+            ]
+            episodes = list(
+                db.scalars(
+                    select(models.ActivityEpisode)
+                    .where(
+                        models.ActivityEpisode.plan_item_id.in_(
+                            {rows[0].id, rows[1].id}
+                        )
+                    )
+                    .order_by(models.ActivityEpisode.plan_item_id)
+                )
+            )
+            assert len(episodes) == 2
+            assert all(episode.status == "cancelled" for episode in episodes)
+            assert all(
+                episode.terminal_reason_code == "daypart_window_elapsed"
+                for episode in episodes
+            )
+
+        replay = routine_post_runtime.reconcile_all_elapsed_routines(
+            db,
+            now=reconcile_at,
+        )
+        assert replay == activity_runtime.DaypartTransitionCounts(0, 0)
 
 
 def test_inactive_membership_interrupts_current_and_cancels_future_items() -> None:
