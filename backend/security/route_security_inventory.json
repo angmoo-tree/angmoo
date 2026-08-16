@@ -332,6 +332,11 @@
       "module": "app.api.v1.routes.community",
       "endpoint": "get_user_profile_feed"
     },
+    "GET /api/v1/runtime/status": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.runtime_status",
+      "endpoint": "get_runtime_status"
+    },
     "GET /api/v1/search": {
       "access": "public",
       "module": "app.api.v1.routes.community",

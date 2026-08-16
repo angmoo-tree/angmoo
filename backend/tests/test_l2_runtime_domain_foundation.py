@@ -69,6 +69,22 @@ def _status() -> runtime.ApplicationRuntimeStatus:
             recent_failure_class=runtime.ProviderFailureClass.TIMEOUT,
             kill_switch_enabled=False,
         ),
+        owner=runtime.OwnerRuntimeStatus(
+            bootstrap_state="claimed",
+            owner_user_id="opaque-owner",
+            registered_world_count=2,
+            active_world_count=1,
+            active_world_character_count=3,
+        ),
+        activity=runtime.ActivityRuntimeStatus(
+            last_successful_run_id="opaque-run",
+            last_successful_post_id="opaque-post",
+            last_successful_beat_id="opaque-beat",
+            last_successful_episode_id="opaque-episode",
+            last_successful_at=now,
+            inbox_result_code="no_action",
+            feed_result_code="comment_created",
+        ),
         capabilities=(
             runtime.RuntimeCapabilityStatus(
                 name="world_package_import",
@@ -92,6 +108,8 @@ def test_read_status_uses_one_probe_read_and_versioned_schema() -> None:
     assert result.scheduler.fencing_epoch == 4
     assert result.provider_usage.recent_call_count == 0
     assert result.provider_usage.recent_failure_class == "timeout"
+    assert result.owner.registered_world_count == 2
+    assert result.activity.inbox_result_code == "no_action"
     assert result.capabilities["world_package_import"].state == "not_available"
 
 

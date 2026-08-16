@@ -56,6 +56,9 @@ echo %*>>"%ANGMOO_FAKE_DOCKER_LOG%"
 if "%1"=="info" echo 29.6.1& exit /b 0
 if "%1"=="image" exit /b 0
 if "%1"=="volume" exit /b 0
+if "%1"=="system" echo {"Type":"Images","TotalCount":"2","Active":"2","Size":"1.4GB","Reclaimable":"0B"}& exit /b 0
+if "%1"=="stats" echo {"Name":"synthetic-backend","CPUPerc":"0.10%%","MemUsage":"10MiB / 1GiB"}& exit /b 0
+if "%1"=="inspect" echo {"Name":"/synthetic-backend","RestartCount":0,"Image":"sha256:1234567890abcdef1234567890abcdef"}& exit /b 0
 echo %* | findstr /C:"compose version --short" >nul && (echo 5.3.1& exit /b 0)
 echo %* | findstr /C:" config --quiet" >nul && exit /b 0
 echo %* | findstr /C:" port frontend 3000" >nul && (
@@ -63,15 +66,19 @@ echo %* | findstr /C:" port frontend 3000" >nul && (
 )
 echo %* | findstr /C:" ps --all --format json" >nul && (
   if "%ANGMOO_FAKE_RUNNING%"=="1" (
-    echo [{"Service":"backend","State":"running","Health":"healthy","Image":"synthetic"},{"Service":"frontend","State":"running","Health":"healthy","Image":"synthetic"},{"Service":"neo4j","State":"running","Health":"healthy","Image":"synthetic"},{"Service":"postgresql","State":"running","Health":"healthy","Image":"synthetic"},{"Service":"projector","State":"running","Health":"healthy","Image":"synthetic"},{"Service":"scheduler","State":"running","Health":"healthy","Image":"synthetic"}]
+    echo [{"Service":"backend","Name":"synthetic-backend","State":"running","Health":"healthy","Image":"synthetic"},{"Service":"frontend","Name":"synthetic-frontend","State":"running","Health":"healthy","Image":"synthetic"},{"Service":"neo4j","Name":"synthetic-neo4j","State":"running","Health":"healthy","Image":"synthetic"},{"Service":"postgresql","Name":"synthetic-postgresql","State":"running","Health":"healthy","Image":"synthetic"},{"Service":"projector","Name":"synthetic-projector","State":"running","Health":"healthy","Image":"synthetic"},{"Service":"scheduler","Name":"synthetic-scheduler","State":"running","Health":"healthy","Image":"synthetic"}]
   ) else (
     echo []
   )
   exit /b 0
 )
+echo %* | findstr /C:" exec -T backend /usr/local/bin/angmoo-backend-entrypoint diagnostics" >nul && (
+  echo {"schema_version":"local-runtime-status-v1","installation_state":"ready","version":"0.2.0","components":[],"migration":{"state":"ready","current_revision":"20260816_0080","head_revision":"20260816_0080"},"scheduler":{"state":"running","fencing_epoch":7},"projector":{"state":"ready","pending_count":0,"retry_count":0,"failed_count":0,"dead_letter_count":0},"provider_usage":{"recent_call_count":0,"kill_switch_enabled":false},"owner":{"bootstrap_state":"claimed","registered_world_count":1,"active_world_count":1,"active_world_character_count":1},"activity":{},"capabilities":{}}
+  exit /b 0
+)
 echo %* | findstr /C:" stop --timeout 60" >nul && exit /b 0
 echo %* | findstr /C:" up -d" >nul && exit /b 0
-echo %* | findstr /C:" logs --tail" >nul && (echo synthetic log line& exit /b 0)
+echo %* | findstr /C:" logs --tail" >nul && (set "google_prefix=A"& echo synthetic log APP_SECRET=%google_prefix%IzaZZZZZZZZZZZZZZZZZZZZZZZZ& exit /b 0)
 exit /b 0
 '@
 Set-Content -LiteralPath (Join-Path $fakeRoot 'docker.cmd') -Value $fakeDocker -Encoding ascii
@@ -103,6 +110,28 @@ try {
     $startPayload = & $launcher start --json --project-name synthetic-l2 --port 45999 | ConvertFrom-Json
     if ($LASTEXITCODE -ne 0 -or -not $startPayload.details.idempotent_no_op) {
         throw 'launcher_fake_repeated_start_was_not_idempotent'
+    }
+    $doctorPayload = & $launcher doctor --json --project-name synthetic-l2 --port 45999 | ConvertFrom-Json
+    if ($LASTEXITCODE -ne 0 -or $doctorPayload.state -ne 'ready') {
+        throw 'launcher_aggregate_doctor_failed'
+    }
+    if ($doctorPayload.details.application.payload.schema_version -ne 'local-runtime-status-v1') {
+        throw 'launcher_application_status_missing'
+    }
+    if ($doctorPayload.details.host.docker_storage.state -ne 'ready') {
+        throw 'launcher_host_storage_status_missing'
+    }
+    if (@($doctorPayload.details.host.container_resources).Count -ne 6) {
+        throw 'launcher_container_resource_status_missing'
+    }
+    $doctorSerialized = $doctorPayload | ConvertTo-Json -Depth 20 -Compress
+    if ($doctorSerialized -match 'AIzaZZZZ' -or $doctorSerialized -match 'APP_SECRET=AIza') {
+        throw 'launcher_doctor_secret_canary_leaked'
+    }
+    $logsPayload = & $launcher logs --json --project-name synthetic-l2 --port 45999 | ConvertFrom-Json
+    $logsSerialized = $logsPayload | ConvertTo-Json -Depth 20 -Compress
+    if ($logsSerialized -match 'AIzaZZZZ' -or $logsSerialized -match 'APP_SECRET=AIza') {
+        throw 'launcher_logs_secret_canary_leaked'
     }
     $stopPayload = & $launcher stop --json --project-name synthetic-l2 --port 45999 | ConvertFrom-Json
     if ($LASTEXITCODE -ne 0 -or -not $stopPayload.details.volumes_preserved) {
