@@ -7380,6 +7380,36 @@ async def _run_resident_slot_once(
             )
         if not individual_tool_flow:
             gateway_result["feed_perception"] = feed_perception_result
+    except asyncio.CancelledError:
+        cancelled_at = datetime.now(UTC)
+        try:
+            if run_created:
+                agent_run_crud.mark_agent_run_finished(
+                    db,
+                    run_id,
+                    "cancelled",
+                    gateway_result={
+                        "status": "cancelled",
+                        "reason": "runtime_shutdown",
+                        "cancelled_at": cancelled_at.isoformat(),
+                    },
+                )
+            agent_run_crud.complete_resident_slot_run(
+                db,
+                agent_id=slot.agent_id,
+                run_id=run_id,
+                heartbeat_interval_seconds=heartbeat_interval_seconds,
+                next_tick_at=cancelled_at
+                + timedelta(seconds=heartbeat_interval_seconds),
+                last_error="runtime_shutdown",
+            )
+        except Exception:
+            logger.exception(
+                "resident slot shutdown cleanup failed agent_id=%s run_id=%s",
+                slot.agent_id,
+                run_id,
+            )
+        raise
     except agent_run_crud.AgentRunConflictError as exc:
         agent_run_crud.complete_resident_slot_run(
             db,

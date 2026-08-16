@@ -120,7 +120,7 @@ services:
         condition: service_healthy
         restart: true
     healthcheck:
-      test: ["CMD-SHELL", "test -f /tmp/angmoo-worker-ready && kill -0 1"]
+      test: ["CMD-SHELL", "grep -qx 'state=ready' /tmp/angmoo-worker-ready && kill -0 1"]
       interval: 10s
       timeout: 5s
       retries: 6
@@ -143,7 +143,7 @@ services:
         condition: service_healthy
         restart: true
     healthcheck:
-      test: ["CMD-SHELL", "test -f /tmp/angmoo-worker-ready && kill -0 1"]
+      test: ["CMD-SHELL", "grep -qx 'state=ready' /tmp/angmoo-worker-ready && kill -0 1"]
       interval: 10s
       timeout: 5s
       retries: 6

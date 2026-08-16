@@ -26,6 +26,10 @@ from app.services import agent_runs
 logger = logging.getLogger(__name__)
 
 
+class SchedulerShutdownDrainTimeout(RuntimeError):
+    pass
+
+
 class SchedulerProcessLockHeld(RuntimeError):
     pass
 
@@ -129,6 +133,8 @@ async def _run_fenced_tick_with_heartbeat(
     fencing_epoch: int,
     tick_runner: Callable[[], Awaitable[schemas.ResidentSlotTickRead]],
     sleep: Callable[[float], Awaitable[None]],
+    stop_event: asyncio.Event | None = None,
+    drain_timeout_seconds: float | None = None,
 ) -> schemas.ResidentSlotTickRead:
     async def run_tick() -> schemas.ResidentSlotTickRead:
         with scheduler_fence(owner_id=owner_id, fencing_epoch=fencing_epoch):
@@ -141,8 +147,14 @@ async def _run_fenced_tick_with_heartbeat(
 
     tick_task = asyncio.create_task(run_tick())
     heartbeat_task = asyncio.create_task(heartbeat())
+    stop_task = (
+        asyncio.create_task(stop_event.wait()) if stop_event is not None else None
+    )
+    watched = {tick_task, heartbeat_task}
+    if stop_task is not None:
+        watched.add(stop_task)
     done, _ = await asyncio.wait(
-        {tick_task, heartbeat_task},
+        watched,
         return_when=asyncio.FIRST_COMPLETED,
     )
     if heartbeat_task in done:
@@ -152,8 +164,38 @@ async def _run_fenced_tick_with_heartbeat(
         if error is not None:
             raise error
         raise SchedulerLeaseLostError("scheduler heartbeat stopped unexpectedly")
+    if stop_task is not None and stop_task in done and tick_task not in done:
+        timeout = (
+            settings.resident_tick_shutdown_drain_seconds
+            if drain_timeout_seconds is None
+            else max(0.1, drain_timeout_seconds)
+        )
+        done, _ = await asyncio.wait(
+            {tick_task, heartbeat_task},
+            timeout=timeout,
+            return_when=asyncio.FIRST_COMPLETED,
+        )
+        if heartbeat_task in done:
+            error = heartbeat_task.exception()
+            tick_task.cancel()
+            await asyncio.gather(tick_task, return_exceptions=True)
+            if error is not None:
+                raise error
+            raise SchedulerLeaseLostError("scheduler heartbeat stopped unexpectedly")
+        if tick_task not in done:
+            tick_task.cancel()
+            await asyncio.gather(tick_task, return_exceptions=True)
+            raise SchedulerShutdownDrainTimeout(
+                "resident scheduler tick exceeded shutdown drain timeout"
+            )
     heartbeat_task.cancel()
-    await asyncio.gather(heartbeat_task, return_exceptions=True)
+    if stop_task is not None:
+        stop_task.cancel()
+    await asyncio.gather(
+        heartbeat_task,
+        *([stop_task] if stop_task is not None else []),
+        return_exceptions=True,
+    )
     return tick_task.result()
 
 
@@ -165,16 +207,35 @@ async def _sleep_until_next_tick_with_heartbeat(
     duration_seconds: float,
     sleep: Callable[[float], Awaitable[None]],
     monotonic_clock: Callable[[], float] = monotonic,
-) -> None:
+    stop_event: asyncio.Event | None = None,
+) -> bool:
     deadline = monotonic_clock() + max(0.0, duration_seconds)
     heartbeat_interval = max(
         1.0,
         float(settings.RESIDENT_TICK_HEARTBEAT_INTERVAL_SECONDS),
     )
     while (remaining := deadline - monotonic_clock()) > 0:
+        if stop_event is not None and stop_event.is_set():
+            return False
         wait_seconds = min(remaining, heartbeat_interval)
-        await sleep(wait_seconds)
+        if stop_event is None:
+            await sleep(wait_seconds)
+        else:
+            sleep_task = asyncio.create_task(sleep(wait_seconds))
+            stop_task = asyncio.create_task(stop_event.wait())
+            done, _ = await asyncio.wait(
+                {sleep_task, stop_task},
+                return_when=asyncio.FIRST_COMPLETED,
+            )
+            if stop_task in done:
+                sleep_task.cancel()
+                await asyncio.gather(sleep_task, return_exceptions=True)
+                return False
+            stop_task.cancel()
+            await asyncio.gather(stop_task, return_exceptions=True)
+            await sleep_task
         coordinator.heartbeat(owner_id=owner_id, fencing_epoch=fencing_epoch)
+    return True
 
 
 async def run_resident_tick_scheduler(
@@ -186,6 +247,8 @@ async def run_resident_tick_scheduler(
     monotonic_clock: Callable[[], float] = monotonic,
     process_lock: SchedulerProcessLock | None = None,
     ready_path: str | None = None,
+    stop_event: asyncio.Event | None = None,
+    drain_timeout_seconds: float | None = None,
 ) -> None:
     lease_coordinator = coordinator or _coordinator()
     lease_owner_id = owner_id or f"scheduler-{uuid4()}"
@@ -193,6 +256,7 @@ async def run_resident_tick_scheduler(
         settings.RESIDENT_TICK_PROCESS_LOCK_PATH
     )
     readiness = Path(ready_path or settings.RESIDENT_TICK_READY_PATH)
+    stop = stop_event or asyncio.Event()
     lease = None
 
     with lock:
@@ -200,6 +264,7 @@ async def run_resident_tick_scheduler(
             lease = lease_coordinator.acquire(owner_id=lease_owner_id)
             readiness.parent.mkdir(parents=True, exist_ok=True)
             readiness.write_text(
+                "state=ready\n"
                 f"owner={lease_owner_id}\nepoch={lease.fencing_epoch}\n",
                 encoding="utf-8",
             )
@@ -208,7 +273,7 @@ async def run_resident_tick_scheduler(
                 lease_owner_id,
                 lease.fencing_epoch,
             )
-            while True:
+            while not stop.is_set():
                 permit = lease_coordinator.begin_tick(
                     owner_id=lease_owner_id,
                     fencing_epoch=lease.fencing_epoch,
@@ -221,11 +286,22 @@ async def run_resident_tick_scheduler(
                             fencing_epoch=lease.fencing_epoch,
                             tick_runner=tick_runner,
                             sleep=sleep,
+                            stop_event=stop,
+                            drain_timeout_seconds=drain_timeout_seconds,
                         )
                     except asyncio.CancelledError:
                         raise
                     except SchedulerLeaseLostError:
                         raise
+                    except SchedulerShutdownDrainTimeout as exc:
+                        logger.warning("resident scheduler bounded drain timed out")
+                        lease_coordinator.finish_tick(
+                            owner_id=lease_owner_id,
+                            fencing_epoch=lease.fencing_epoch,
+                            result=SchedulerTickResult.FAILED,
+                            error_code=type(exc).__name__,
+                        )
+                        break
                     except Exception as exc:
                         logger.exception("resident scheduler tick failed")
                         lease_coordinator.finish_tick(
@@ -249,14 +325,19 @@ async def run_resident_tick_scheduler(
                         owner_id=lease_owner_id,
                         fencing_epoch=lease.fencing_epoch,
                     )
-                await _sleep_until_next_tick_with_heartbeat(
+                if stop.is_set():
+                    break
+                completed_wait = await _sleep_until_next_tick_with_heartbeat(
                     coordinator=lease_coordinator,
                     owner_id=lease_owner_id,
                     fencing_epoch=lease.fencing_epoch,
                     duration_seconds=settings.resident_tick_interval_seconds,
                     sleep=sleep,
                     monotonic_clock=monotonic_clock,
+                    stop_event=stop,
                 )
+                if not completed_wait:
+                    break
         except SchedulerLeaseHeldError:
             logger.error("resident scheduler duplicate rejected")
             raise
@@ -264,6 +345,12 @@ async def run_resident_tick_scheduler(
             logger.exception("resident scheduler lease lost")
             raise
         finally:
+            if lease is not None and stop.is_set() and readiness.exists():
+                readiness.write_text(
+                    "state=draining\n"
+                    f"owner={lease_owner_id}\nepoch={lease.fencing_epoch}\n",
+                    encoding="utf-8",
+                )
             readiness.unlink(missing_ok=True)
             if lease is not None:
                 try:

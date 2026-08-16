@@ -242,3 +242,105 @@ def test_sleep_wake_gap_does_not_replay_missed_intervals() -> None:
 
     assert sleeps == [10.0]
     assert coordinator.calls == ["heartbeat:owner-test:7"]
+
+
+def test_shutdown_before_first_tick_releases_lease_without_claiming_work(
+    tmp_path: Path,
+) -> None:
+    coordinator = _FakeCoordinator()
+    stop = asyncio.Event()
+    stop.set()
+
+    asyncio.run(
+        resident_tick_scheduler.run_resident_tick_scheduler(
+            coordinator=coordinator,  # type: ignore[arg-type]
+            owner_id="owner-stop-before-tick",
+            stop_event=stop,
+            process_lock=_NullProcessLock(),  # type: ignore[arg-type]
+            ready_path=str(tmp_path / "scheduler-ready"),
+        )
+    )
+
+    assert coordinator.calls == [
+        "acquire:owner-stop-before-tick",
+        "release:owner-stop-before-tick:7",
+    ]
+
+
+def test_shutdown_during_tick_drains_then_releases_without_second_tick(
+    tmp_path: Path,
+) -> None:
+    coordinator = _FakeCoordinator()
+
+    async def scenario() -> None:
+        stop = asyncio.Event()
+        tick_started = asyncio.Event()
+        finish_tick = asyncio.Event()
+
+        async def tick_runner():
+            tick_started.set()
+            await finish_tick.wait()
+            return SimpleNamespace(started_count=1)
+
+        task = asyncio.create_task(
+            resident_tick_scheduler.run_resident_tick_scheduler(
+                coordinator=coordinator,  # type: ignore[arg-type]
+                owner_id="owner-drain",
+                tick_runner=tick_runner,  # type: ignore[arg-type]
+                stop_event=stop,
+                drain_timeout_seconds=1.0,
+                process_lock=_NullProcessLock(),  # type: ignore[arg-type]
+                ready_path=str(tmp_path / "scheduler-ready"),
+            )
+        )
+        await tick_started.wait()
+        stop.set()
+        finish_tick.set()
+        await task
+
+    asyncio.run(scenario())
+
+    assert coordinator.calls == [
+        "acquire:owner-drain",
+        "begin:owner-drain:7",
+        "finish:success:None",
+        "release:owner-drain:7",
+    ]
+
+
+def test_shutdown_drain_timeout_cancels_tick_and_releases_lease(
+    tmp_path: Path,
+) -> None:
+    coordinator = _FakeCoordinator()
+
+    async def scenario() -> None:
+        stop = asyncio.Event()
+        tick_started = asyncio.Event()
+
+        async def tick_runner():
+            tick_started.set()
+            await asyncio.Event().wait()
+
+        task = asyncio.create_task(
+            resident_tick_scheduler.run_resident_tick_scheduler(
+                coordinator=coordinator,  # type: ignore[arg-type]
+                owner_id="owner-timeout",
+                tick_runner=tick_runner,  # type: ignore[arg-type]
+                stop_event=stop,
+                drain_timeout_seconds=0.01,
+                process_lock=_NullProcessLock(),  # type: ignore[arg-type]
+                ready_path=str(tmp_path / "scheduler-ready"),
+            )
+        )
+        await tick_started.wait()
+        stop.set()
+        await task
+
+    asyncio.run(scenario())
+
+    assert coordinator.calls == [
+        "acquire:owner-timeout",
+        "begin:owner-timeout:7",
+        "finish:failed:SchedulerShutdownDrainTimeout",
+        "release:owner-timeout:7",
+    ]

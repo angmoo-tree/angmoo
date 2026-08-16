@@ -57,7 +57,6 @@ case "$mode" in
     exec python scripts/run_resident_tick_scheduler.py
     ;;
   projector)
-    : > /tmp/angmoo-worker-ready
     exec python scripts/run_graph_projection_worker.py --loop --bootstrap
     ;;
   *)

@@ -4,7 +4,7 @@ import inspect
 from types import SimpleNamespace
 
 import pytest
-from pydantic import ValidationError
+from pydantic import SecretStr, ValidationError
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
@@ -1701,6 +1701,110 @@ def test_run_now_manual_slot_does_not_preserve_previous_next_tick() -> None:
 
     assert "manual_next_tick_at = None" in source
     assert "manual_next_tick_at = slot.next_tick_at if require_public_action else None" not in source
+
+
+def test_resident_shutdown_cancellation_marks_run_and_releases_slot(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    engine = create_engine("sqlite:///:memory:")
+    _create_autonomy_capacity_tables(engine)
+    cancellation_calls: list[str] = []
+
+    async def cancel_during_provider_setup(**_kwargs):
+        cancellation_calls.append("provider_setup")
+        raise asyncio.CancelledError
+
+    monkeypatch.setattr(
+        settings,
+        "OPENCLAW_GATEWAY_TOKEN",
+        SecretStr("local-test-token"),
+    )
+    monkeypatch.setattr(
+        agent_run_service,
+        "_ensure_slot_auth_profile",
+        cancel_during_provider_setup,
+    )
+    monkeypatch.setattr(
+        agent_run_service,
+        "OpenClawGatewayClient",
+        lambda **_kwargs: object(),
+    )
+    monkeypatch.setattr(
+        agent_run_service,
+        "_format_inbox_threads",
+        lambda *_args, **_kwargs: ("", False),
+    )
+    monkeypatch.setattr(
+        agent_run_service,
+        "_format_recent_feed_sections",
+        lambda *_args, **_kwargs: ("", []),
+    )
+    monkeypatch.setattr(
+        agent_run_service,
+        "_format_recent_own_posts_to_avoid",
+        lambda *_args, **_kwargs: "",
+    )
+    monkeypatch.setattr(
+        agent_run_service,
+        "_format_recent_activity_summary",
+        lambda *_args, **_kwargs: "",
+    )
+    monkeypatch.setattr(
+        agent_run_service,
+        "_format_relationship_review_candidate",
+        lambda *_args, **_kwargs: "",
+    )
+    monkeypatch.setattr(
+        agent_run_service,
+        "_format_social_connection_candidate",
+        lambda *_args, **_kwargs: "",
+    )
+    monkeypatch.setattr(
+        agent_run_service,
+        "_format_strong_social_connection_candidate",
+        lambda *_args, **_kwargs: "",
+    )
+
+    with Session(engine) as db:
+        _add_capacity_user(db)
+        _add_capacity_agent(
+            db,
+            user_id="user-1",
+            character_id="char-cancel",
+            auto_enabled=True,
+            slot_id="angmoo-1",
+        )
+        db.commit()
+        slot = db.get(models.AgentSlot, "angmoo-1")
+        assert slot is not None
+        slot.status = agent_run_crud.SLOT_STATUS_RUNNING
+        slot.locked_by_run_id = "pending:angmoo-1:test"
+        slot.lease_expires_at = datetime.now(UTC) + timedelta(minutes=5)
+        db.commit()
+
+        with pytest.raises(asyncio.CancelledError):
+            asyncio.run(
+                agent_run_service._run_resident_slot_once(
+                    db,
+                    slot=slot,
+                    post_id=None,
+                    timeout_seconds=30,
+                    message="shutdown cancellation fixture",
+                )
+            )
+        assert cancellation_calls == ["provider_setup"]
+
+        db.expire_all()
+        released = db.get(models.AgentSlot, "angmoo-1")
+        assert released is not None
+        assert released.status == agent_run_crud.SLOT_STATUS_ASSIGNED_IDLE
+        assert released.locked_by_run_id is None
+        assert released.lease_expires_at is None
+        assert released.last_error == "runtime_shutdown"
+        run = db.scalar(select(models.AgentRun))
+        assert run is not None
+        assert run.status == "cancelled"
+        assert run.gateway_result["reason"] == "runtime_shutdown"
 
 
 def test_routine_runtime_does_not_invent_global_selected_post(monkeypatch) -> None:
