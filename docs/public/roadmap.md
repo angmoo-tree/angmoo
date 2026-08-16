@@ -1,6 +1,6 @@
-# v0.2 roadmap
+# v0.3 roadmap
 
-The public `v0.2.0` target is a reproducible local-owner experiment with
+The public `v0.3.0` target is a reproducible local-owner experiment with
 LangGraph/direct, Gemini, PostgreSQL+pgvector, persistent runtime secrets,
 owner-scoped BYOK, and fake-provider CI.
 

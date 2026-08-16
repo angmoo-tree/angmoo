@@ -26,9 +26,19 @@ Before creating a tag, the owner verifies that:
 1. the release commit is on `main` and all required checks pass;
 2. `backend/pyproject.toml` and `frontend/package.json` contain the same
    version;
-3. the tag is exactly `v<version>`;
-4. no open code, dependency, or secret alert blocks the release; and
-5. the Windows clean-clone user scenario is ready to run after publication.
+3. the default image tag in `compose.yml`, the Dockerfile image metadata,
+   contributor overlay version, and Windows launcher default all match that
+   version;
+4. the tagged images satisfy every worker readiness and lifecycle contract in
+   the same source revision, including scheduler and projector health markers;
+5. the tag is exactly `v<version>`;
+6. no open code, dependency, or secret alert blocks the release; and
+7. the Windows clean-clone user scenario is ready to run after publication.
+
+When a source change strengthens a runtime health or lifecycle contract, do
+not point the default Quickstart at an older image that predates that contract.
+Merge the coordinated version change first, publish the matching semantic tag,
+and perform the anonymous Windows clean-clone check against those new images.
 
 The tag-only `Release Images` workflow then:
 
@@ -60,8 +70,8 @@ environment:
 
 ```powershell
 docker logout ghcr.io
-docker pull ghcr.io/angmoo-tree/angmoo-backend:v0.2.0
-docker pull ghcr.io/angmoo-tree/angmoo-frontend:v0.2.0
+docker pull ghcr.io/angmoo-tree/angmoo-backend:v0.3.0
+docker pull ghcr.io/angmoo-tree/angmoo-frontend:v0.3.0
 ```
 
 Record the tag, source commit, workflow URL, both image digests, anonymous-pull

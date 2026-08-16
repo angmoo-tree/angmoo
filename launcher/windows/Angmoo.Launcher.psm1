@@ -251,7 +251,7 @@ function Get-AngmooVolumeInventory {
 }
 
 function Test-AngmooReleaseImagesPresent {
-    $backend = if ($env:ANGMOO_VERSION) { $env:ANGMOO_VERSION } else { 'v0.2.0' }
+    $backend = if ($env:ANGMOO_VERSION) { $env:ANGMOO_VERSION } else { 'v0.3.0' }
     $images = @(
         "ghcr.io/angmoo-tree/angmoo-backend:$backend",
         "ghcr.io/angmoo-tree/angmoo-frontend:$backend"

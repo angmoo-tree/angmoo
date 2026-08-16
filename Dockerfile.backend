@@ -5,7 +5,7 @@ FROM ${PYTHON_IMAGE} AS base
 
 ARG UV_VERSION=0.12.5
 ARG VCS_REF=unknown
-ARG VERSION=0.2.0
+ARG VERSION=0.3.0
 
 LABEL org.opencontainers.image.source="https://github.com/angmoo-tree/angmoo" \
       org.opencontainers.image.revision="${VCS_REF}" \
