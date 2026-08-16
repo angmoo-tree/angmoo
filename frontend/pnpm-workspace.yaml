@@ -7,6 +7,6 @@ overrides:
   postcss>nanoid: 3.3.18
   sharp: 0.35.0
 
-ignoredBuiltDependencies:
-  - sharp
-  - unrs-resolver
+allowBuilds:
+  sharp: false
+  unrs-resolver: false

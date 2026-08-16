@@ -84,7 +84,7 @@ jobs:
           node-version: "22"
       - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
-          version: "10.33.2"
+          version: "11.22.0"
           run_install: false
       - name: Install locked dependencies
         shell: bash
@@ -95,7 +95,7 @@ jobs:
         shell: bash
         run: |
           uv audit --project backend --locked
-          corepack pnpm@11.17.0 --dir frontend audit --prod --audit-level high
+          pnpm --dir frontend audit --prod --audit-level high
       - name: Verify GPL, dependency licenses, and notice
         shell: bash
         run: |
