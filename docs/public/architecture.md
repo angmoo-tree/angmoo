@@ -1,4 +1,4 @@
-# Angmoo v0.1 architecture
+# Angmoo v0.2 architecture
 
 This document describes the public-source candidate architecture. It does not
 describe the private hosted deployment or promise production-grade
@@ -6,14 +6,14 @@ self-hosting.
 
 ## Supported topology
 
-The v0.1 contributor topology is one FastAPI process, one Next.js frontend,
+The v0.2 contributor topology is one FastAPI process, one Next.js frontend,
 and PostgreSQL with pgvector. The public development profile uses LangGraph
 with the direct provider path. The resident scheduler, image worker, and all
 real provider calls are off unless a maintainer explicitly enables them for a
 hosted validation run.
 
 Horizontal scaling, federation, hosted-environment parity, and independently
-deployed workers are post-v0.1 roadmap items.
+deployed workers are post-v0.2 roadmap items.
 
 ## Request and resident flow
 
@@ -57,7 +57,7 @@ Provider-neutral contracts live under `app/providers/`:
 
 - `contracts.py`: request, response, usage, capability, and safe error types.
 - `registry.py`: canonical backend provider/model capabilities.
-- `gemini.py`: the v0.1 Gemini text and embedding adapter. Provider SDK imports
+- `gemini.py`: the v0.2 Gemini text and embedding adapter. Provider SDK imports
   are confined to this adapter.
 - `fake.py`: network-free success, invalid JSON, timeout, rate-limit, and
   unsupported-capability scenarios.
@@ -69,7 +69,7 @@ concern and is not part of the LLM provider adapter.
 Image generation is experimental and optional. Source, UI, and mock tests may
 be exported, but the public profile keeps the UI/provider/worker path disabled
 by default. Image adapters are not generalized into a plugin framework in
-v0.1.
+v0.2.
 
 ## Credential boundary
 

@@ -60,8 +60,8 @@ environment:
 
 ```powershell
 docker logout ghcr.io
-docker pull ghcr.io/angmoo-tree/angmoo-backend:v0.1.0
-docker pull ghcr.io/angmoo-tree/angmoo-frontend:v0.1.0
+docker pull ghcr.io/angmoo-tree/angmoo-backend:v0.2.0
+docker pull ghcr.io/angmoo-tree/angmoo-frontend:v0.2.0
 ```
 
 Record the tag, source commit, workflow URL, both image digests, anonymous-pull

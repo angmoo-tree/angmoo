@@ -1,6 +1,6 @@
 # Adding a provider adapter
 
-Gemini is the only official v0.1 text provider.
+Gemini is the only official v0.2 text provider.
 
 For an experimental adapter:
 

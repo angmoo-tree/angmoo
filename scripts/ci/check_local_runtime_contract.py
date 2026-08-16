@@ -38,11 +38,11 @@ EXPECTED_COMMANDS = {
 }
 EXPECTED_RELEASE_IMAGES = {
     "backend": {
-        "default_tag": "v0.1.0",
+        "default_tag": "v0.2.0",
         "repository": "ghcr.io/angmoo-tree/angmoo-backend",
     },
     "frontend": {
-        "default_tag": "v0.1.0",
+        "default_tag": "v0.2.0",
         "repository": "ghcr.io/angmoo-tree/angmoo-frontend",
     },
 }
@@ -176,8 +176,8 @@ def check_repo(
         "docker compose up -d",
         "docker compose -f compose.yml -f compose.dev.yml up --watch",
         "https://github.com/angmoo-tree/angmoo/issues/36",
-        "ghcr.io/angmoo-tree/angmoo-backend:v0.1.0",
-        "ghcr.io/angmoo-tree/angmoo-frontend:v0.1.0",
+        "ghcr.io/angmoo-tree/angmoo-backend:v0.2.0",
+        "ghcr.io/angmoo-tree/angmoo-frontend:v0.2.0",
     ):
         if required not in document:
             errors.append(f"local runtime document is missing: {required}")

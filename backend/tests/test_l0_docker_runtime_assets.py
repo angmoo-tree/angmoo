@@ -90,6 +90,11 @@ def test_frontend_never_receives_the_runtime_secret_volume() -> None:
         )
 
 
+def test_frontend_build_source_is_writable_by_the_non_root_builder() -> None:
+    content = (ROOT / "Dockerfile.frontend").read_text(encoding="utf-8")
+    assert content.count("COPY --chown=node:node frontend ./") == 2
+
+
 def test_runtime_assets_reject_an_extra_host_port() -> None:
     release, development = _configs()
     mutated = deepcopy(release)

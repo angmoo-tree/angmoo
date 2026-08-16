@@ -28,7 +28,7 @@ REQUIRED_MARKERS = {
     "README.md": (
         "English | [한국어](README.ko.md)",
         "The English documents are the canonical source",
-        "## Public v0.1 scope",
+        "## Public v0.2 scope",
         "## Quickstart",
         "## Known limitations",
         "It is not yet a long-term memory system",
@@ -41,7 +41,7 @@ REQUIRED_MARKERS = {
     "README.ko.md": (
         "[English](README.md) | 한국어",
         "영어 문서를 기준으로 합니다",
-        "## 공개 v0.1 범위",
+        "## 공개 v0.2 범위",
         "## 빠른 시작",
         "## 알려진 한계",
         "장기 메모리 시스템은 아직 아닙니다",
