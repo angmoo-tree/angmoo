@@ -218,3 +218,4 @@ try {
 }
 
 Write-Host "windows_local_smoke=pass scripts=$($localScripts.Count) launcher=pass dpapi=pass"
+exit 0
