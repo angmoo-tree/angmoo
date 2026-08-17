@@ -45,7 +45,7 @@ uv run --project backend python scripts/ci/check_frontend_architecture_boundarie
 - PR B made Device Home the canonical `/` route and added the owner-scoped,
   read-only World surface. The legacy global Feed remains available at
   `/posts`.
-- PR C adds `/worlds/{world_id}` and the explicit
+- PR C added `/worlds/{world_id}` and the explicit
   `feed|chat|characters|relationships` World routes. Every entry performs an
   owner-session and active-membership read through
   `GET /api/v1/worlds/mine/{world_id}` before rendering World data. Missing,
@@ -58,7 +58,17 @@ Relationship entry is already implemented. Those tabs retain the selected
 continues to mean the existing global community Feed and must never be labeled
 or embedded as a World Feed.
 
-Creator Studio wiring and optional PWA behavior remain later L2.5 PRs.
+PR D makes `/studio` the canonical, local-owner Creator Studio surface. Its
+dashboard reads `surface=creator_studio`, groups owner-managed Worlds without
+provider calls or public writes, and connects existing deterministic World
+create, edit, validate, and publish operations behind the wide shell.
+`/studio/worlds/new` and `/studio/worlds/{world_id}` are canonical; the legacy
+`/worlds/new` and `/worlds/{world_id}/creator` routes only redirect to them.
+Draft, private, and archived Worlds remain Studio-only while a published,
+publish-ready public or unlisted World becomes eligible for Device Home and the
+World App. Import remains a truthful unavailable capability until L3.5.
+
+Optional PWA behavior remains a later L2.5 PR.
 
 ## Visual contract
 

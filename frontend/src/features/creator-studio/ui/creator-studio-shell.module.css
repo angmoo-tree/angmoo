@@ -12,8 +12,24 @@
   background: #ffffff;
 }
 
+.brandRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  color: #ff6b6b;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+
 .brand {
-  margin: 0 0 24px;
+  margin: 0;
   font-size: 1.15rem;
   font-weight: 900;
 }
@@ -35,6 +51,6 @@
   }
 
   .brand {
-    margin-bottom: 12px;
+    margin-bottom: 0;
   }
 }
