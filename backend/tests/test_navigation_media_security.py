@@ -32,7 +32,12 @@ def test_profile_media_inputs_allow_managed_media_paths() -> None:
 def test_frontend_uses_allowlisted_return_and_profile_media_helpers() -> None:
     root = Path(__file__).parents[2] / "frontend" / "src"
     navigation = (root / "lib" / "safe-navigation.ts").read_text(encoding="utf-8")
-    media = (root / "lib" / "safe-media-url.ts").read_text(encoding="utf-8")
+    media = (root / "shared" / "media" / "safe-media-url.ts").read_text(
+        encoding="utf-8"
+    )
+    legacy_media = (root / "lib" / "safe-media-url.ts").read_text(
+        encoding="utf-8"
+    )
     settings = (root / "components" / "settings-client.tsx").read_text(
         encoding="utf-8"
     )
@@ -55,4 +60,5 @@ def test_frontend_uses_allowlisted_return_and_profile_media_helpers() -> None:
     assert 'returnTo={returnTo}' in login_page
     assert 'returnTo ?? "/agents"' in login_client
     assert "parsed.pathname.startsWith(\"/media/\")" in media
+    assert 'from "@/shared/media/public"' in legacy_media
     assert "safeSameOriginMediaUrl(avatarUrl, { allowBlob })" in avatar
