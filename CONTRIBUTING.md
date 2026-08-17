@@ -106,6 +106,12 @@ the owning domain or runtime area there. Cross-domain imports must use
 or add a dependency on the horizontal `services`, `models`, `schemas`, or
 `cruds` paths.
 
+The L2.5 frontend product-shell contract is documented in
+`docs/architecture/frontend-product-shell.md`. Route files import migrated
+features only through `@/features/<feature>/public`; features do not deep-import
+one another, and product-neutral `shared` primitives do not import features or
+legacy data clients.
+
 The import inventory records facts, while `security/architecture_import_policy.json`
 records target rules and exact reviewed legacy exceptions. Existing exceptions
 may shrink but must not grow merely to make CI pass. Run:
@@ -113,7 +119,8 @@ may shrink but must not grow merely to make CI pass. Run:
 ```powershell
 uv run --project backend python scripts/ci/generate_architecture_inventory.py --write
 uv run --project backend python scripts/ci/check_architecture_boundaries.py
-uv run --directory backend python -m pytest -q tests/test_t2_5_architecture_boundaries.py
+uv run --project backend python scripts/ci/check_frontend_architecture_boundaries.py
+uv run --directory backend python -m pytest -q tests/test_t2_5_architecture_boundaries.py tests/test_l2_5_frontend_architecture_boundaries.py
 ```
 
 Keep structure-only PRs focused. Do not mix behavior changes, migrations,

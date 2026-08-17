@@ -106,6 +106,12 @@ T2.5의 점진적 domain-first 계약은
 `app.domains.<name>.public`을 사용하며, 다른 domain의 내부 module이나 수평
 `services`, `models`, `schemas`, `cruds` 경로에 새로 의존하지 않습니다.
 
+L2.5 frontend 제품 shell 계약은
+`docs/architecture/frontend-product-shell.md`에 있습니다. 이동을 완료한 route는
+`@/features/<feature>/public`을 통해서만 feature를 import합니다. feature끼리 서로의
+내부 module을 deep import하지 않으며, 제품 중립적인 `shared` primitive는 feature나
+legacy data client를 import하지 않습니다.
+
 import inventory는 현재 사실을 기록하고
 `security/architecture_import_policy.json`은 목표 규칙과 검토된 exact legacy
 예외를 기록합니다. 기존 예외는 줄일 수 있지만 CI를 통과시키기 위해 늘려서는
@@ -114,7 +120,8 @@ import inventory는 현재 사실을 기록하고
 ```powershell
 uv run --project backend python scripts/ci/generate_architecture_inventory.py --write
 uv run --project backend python scripts/ci/check_architecture_boundaries.py
-uv run --directory backend python -m pytest -q tests/test_t2_5_architecture_boundaries.py
+uv run --project backend python scripts/ci/check_frontend_architecture_boundaries.py
+uv run --directory backend python -m pytest -q tests/test_t2_5_architecture_boundaries.py tests/test_l2_5_frontend_architecture_boundaries.py
 ```
 
 구조 전용 PR은 범위를 좁게 유지합니다. package 이동 PR에 동작 변경, migration,

@@ -1,0 +1,51 @@
+.root {
+  display: flex;
+  min-height: 100dvh;
+  justify-content: center;
+  padding: 20px;
+  background: #f4f5f7;
+}
+
+.header {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 14px;
+}
+
+.identity {
+  min-width: 0;
+}
+
+.eyebrow {
+  color: #8c706f;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.title {
+  overflow: hidden;
+  margin: 2px 0 0;
+  font-size: 1.2rem;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.content {
+  min-height: 100%;
+}
+
+.footer {
+  padding-top: 10px;
+}
+
+@media (max-width: 479px) {
+  .root {
+    padding: 0;
+  }
+}
