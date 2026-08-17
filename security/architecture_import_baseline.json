@@ -1,7 +1,7 @@
 {
-  "edge_count": 701,
-  "external_import_count": 1155,
-  "module_count": 307,
+  "edge_count": 705,
+  "external_import_count": 1157,
+  "module_count": 308,
   "modules": [
     {
       "external_imports": [],
@@ -1575,6 +1575,7 @@
       "external_imports": [
         "__future__",
         "fastapi",
+        "logging",
         "sqlalchemy.orm",
         "typing"
       ],
@@ -1583,6 +1584,7 @@
         "app.core.browser_session",
         "app.core.db",
         "app.domains.device_home.api.device_home_schemas",
+        "app.domains.device_home.application.get_local_world_app",
         "app.domains.device_home.application.list_local_world_apps",
         "app.domains.device_home.domain.world_surface_policy",
         "app.domains.device_home.infrastructure.sqlalchemy_world_surface_repository"
@@ -1598,6 +1600,19 @@
       ],
       "module": "app.domains.device_home.application",
       "path": "backend/app/domains/device_home/application/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__"
+      ],
+      "imports": [
+        "app.domains.device_home.application.list_local_world_apps",
+        "app.domains.device_home.domain.world_surface_policy",
+        "app.domains.device_home.ports.world_surface_repository"
+      ],
+      "module": "app.domains.device_home.application.get_local_world_app",
+      "path": "backend/app/domains/device_home/application/get_local_world_app.py",
       "wildcard_imports": []
     },
     {

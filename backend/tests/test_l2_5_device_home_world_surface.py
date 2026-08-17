@@ -12,6 +12,7 @@ from app import models
 from app.api.v1.deps import get_current_user
 from app.core.db import Base, get_db
 from app.domains.device_home.api.routes import router
+from app.providers import registry as provider_registry
 
 
 def _user(user_id: str) -> models.User:
@@ -281,3 +282,81 @@ def test_surface_read_is_bounded_cursor_safe_and_write_free() -> None:
     )
     assert invalid.status_code == 422
     assert invalid.json() == {"detail": "invalid_world_surface_cursor"}
+
+
+def test_world_app_read_is_exact_owner_scoped_and_launchable() -> None:
+    client, engine, principal = _fixture()
+    _seed(engine, principal)
+
+    response = client.get("/api/v1/worlds/mine/home-new")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["schema_version"] == "local-world-app-v1"
+    assert payload["surface"] == "world_app"
+    assert payload["world"]["world_id"] == "home-new"
+    assert payload["world"]["launchable"] is True
+    assert "home-old" not in response.text
+    assert "foreign" not in response.text
+
+
+def test_world_app_read_fails_closed_for_foreign_and_blocked_worlds() -> None:
+    client, engine, principal = _fixture()
+    _seed(engine, principal)
+
+    for world_id in ("foreign", "private", "draft", "archived", "missing"):
+        response = client.get(f"/api/v1/worlds/mine/{world_id}")
+        assert response.status_code == 404
+        assert response.json() == {"detail": "world_app_unavailable"}
+        assert world_id not in response.text
+
+
+def test_world_app_read_requires_owner_and_active_membership() -> None:
+    client, engine, principal = _fixture()
+    owner, outsider = _seed(engine, principal)
+
+    principal["user"] = None
+    assert client.get("/api/v1/worlds/mine/home-new").status_code == 401
+
+    principal["user"] = outsider
+    forbidden = client.get("/api/v1/worlds/mine/home-new")
+    assert forbidden.status_code == 403
+    assert forbidden.json() == {"detail": "local_owner_required"}
+
+    principal["user"] = owner
+    with Session(engine) as db:
+        membership = db.get(models.WorldMembership, "membership-home-new")
+        assert membership is not None
+        membership.status = "left"
+        db.commit()
+    unavailable = client.get("/api/v1/worlds/mine/home-new")
+    assert unavailable.status_code == 404
+    assert unavailable.json() == {"detail": "world_app_unavailable"}
+
+
+def test_world_app_read_has_zero_writes_and_zero_provider_calls(
+    monkeypatch,
+) -> None:
+    client, engine, principal = _fixture()
+    _seed(engine, principal)
+    writes: list[str] = []
+    provider_calls: list[str] = []
+
+    @event.listens_for(engine, "before_cursor_execute")
+    def _capture_writes(_conn, _cursor, statement, _parameters, _context, _many):
+        operation = statement.lstrip().split(None, 1)[0].upper()
+        if operation in {"INSERT", "UPDATE", "DELETE"}:
+            writes.append(operation)
+
+    def _provider_forbidden(*_args, **_kwargs):
+        provider_calls.append("provider")
+        raise AssertionError("World App read must not call a provider")
+
+    monkeypatch.setattr(provider_registry, "get_provider_adapter", _provider_forbidden)
+    monkeypatch.setattr(provider_registry, "get_embedding_adapter", _provider_forbidden)
+
+    response = client.get("/api/v1/worlds/mine/home-new")
+
+    assert response.status_code == 200
+    assert writes == []
+    assert provider_calls == []

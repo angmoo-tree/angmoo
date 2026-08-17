@@ -1,0 +1,176 @@
+.navigation {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.navItem {
+  display: flex;
+  min-width: 0;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  color: #787f8b;
+  flex-direction: column;
+  font-size: 0.58rem;
+  font-weight: 800;
+  gap: 3px;
+  text-decoration: none;
+}
+
+.navItem:hover,
+.navItem:focus-visible {
+  background: #f6e9e7;
+  color: #8f4f4c;
+  outline: none;
+}
+
+.navItemActive {
+  background: #f8dfdc;
+  color: #9f413d;
+}
+
+.homeReturn {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  border: 1px solid #e3d6d3;
+  border-radius: 999px;
+  color: #615655;
+  font-size: 0.72rem;
+  font-weight: 850;
+  gap: 5px;
+  padding: 7px 10px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.homeReturn:hover,
+.homeReturn:focus-visible {
+  border-color: #b8837f;
+  outline: 3px solid rgb(184 131 127 / 22%);
+}
+
+.worldOverview,
+.capability {
+  padding: 22px 20px 28px;
+}
+
+.overviewHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.role {
+  color: #8a6f6d;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.worldOverview h2,
+.capability h2 {
+  margin: 22px 0 8px;
+  color: #252124;
+  font-size: 1.65rem;
+  line-height: 1.2;
+}
+
+.tagline,
+.capability > p {
+  margin: 0;
+  color: #6d6465;
+  font-size: 0.94rem;
+  line-height: 1.65;
+}
+
+.scopeNotice,
+.legacyNotice {
+  margin-top: 26px;
+  border: 1px solid #efd7d2;
+  border-radius: 20px;
+  background: #fff4f0;
+  padding: 18px;
+}
+
+.scopeNotice strong,
+.legacyNotice strong {
+  color: #7e4744;
+  font-size: 0.88rem;
+}
+
+.scopeNotice p,
+.legacyNotice p {
+  margin: 7px 0 0;
+  color: #716464;
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.capability {
+  text-align: center;
+}
+
+.capabilityIcon {
+  display: inline-flex;
+  width: 58px;
+  height: 58px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  background: #f8dfdc;
+  color: #9f413d;
+}
+
+.capabilityKicker {
+  margin: 14px 0 0 !important;
+  color: #9f413d !important;
+  font-size: 0.7rem !important;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.legacyNotice {
+  text-align: left;
+}
+
+.legacyNotice a,
+.gate a {
+  display: inline-block;
+  margin-top: 12px;
+  color: #8f3f3b;
+  font-weight: 850;
+}
+
+.gate {
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  background: #f4f5f7;
+  padding: 24px;
+}
+
+.gate section {
+  width: min(100%, 430px);
+  border: 1px solid #e6dbd8;
+  border-radius: 28px;
+  background: #fff8f7;
+  box-shadow: 0 18px 50px rgb(16 24 40 / 12%);
+  padding: 28px;
+}
+
+.gate h1 {
+  margin: 0;
+  color: #292326;
+  font-size: 1.35rem;
+}
+
+.gate p {
+  margin: 10px 0 0;
+  color: #6d6465;
+  line-height: 1.6;
+}

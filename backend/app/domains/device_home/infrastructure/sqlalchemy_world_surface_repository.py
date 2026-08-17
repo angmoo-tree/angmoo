@@ -46,6 +46,42 @@ class SqlAlchemyWorldSurfaceRepository:
             and row["owner_user_id"] == user_id
         )
 
+    def get_world(
+        self,
+        *,
+        owner_user_id: str,
+        world_id: str,
+    ) -> WorldSurfaceItem | None:
+        row = self._db.execute(
+            text(
+                """
+                SELECT
+                    w.id AS world_id,
+                    w.name,
+                    w.tagline,
+                    w.banner_media_id,
+                    w.banner_alt_text,
+                    w.status,
+                    w.visibility,
+                    w.readiness_status,
+                    w.updated_at,
+                    wm.role AS membership_role
+                FROM worlds AS w
+                JOIN world_memberships AS wm
+                    ON wm.world_id = w.id
+                    AND wm.user_id = :owner_user_id
+                    AND wm.status = 'active'
+                WHERE w.id = :world_id
+                LIMIT 1
+                """
+            ),
+            {
+                "owner_user_id": owner_user_id,
+                "world_id": world_id,
+            },
+        ).mappings().one_or_none()
+        return _surface_item(row) if row is not None else None
+
     def list_worlds(
         self,
         *,

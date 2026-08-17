@@ -24,6 +24,12 @@
       "DEVICE_HOME_FIXED_APPS",
       "DeviceHomeShell"
     ],
+    "frontend/src/features/world-app/model/world-app-contract.ts": [
+      "availability: \"unavailable\"",
+      "id: \"relationships\"",
+      "segment: \"feed\"",
+      "worldAppSectionRoute"
+    ],
     "frontend/src/shared/ui/device-frame.module.css": [
       "--device-bezel-width: 3px",
       "--device-corner-radius: 34px"
@@ -33,7 +39,10 @@
     "frontend/src/features/creator-studio/public.ts",
     "frontend/src/features/device-home/public.ts",
     "frontend/src/features/runtime-status/public.ts",
+    "frontend/src/features/world-app/api/world-app-client.ts",
+    "frontend/src/features/world-app/model/world-app-contract.ts",
     "frontend/src/features/world-app/public.ts",
+    "frontend/src/features/world-app/ui/world-app.tsx",
     "frontend/src/shared/navigation/public.ts",
     "frontend/src/shared/ui/app-icon.tsx",
     "frontend/src/shared/ui/device-frame.tsx",

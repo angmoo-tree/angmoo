@@ -39,9 +39,21 @@ class LocalWorldSurfaceRead(DeviceHomeSchema):
     next_cursor: str | None = None
 
 
+class LocalWorldAppRead(DeviceHomeSchema):
+    schema_version: Literal["local-world-app-v1"] = "local-world-app-v1"
+    surface: Literal["world_app"] = "world_app"
+    world: WorldSurfaceItemRead
+
+
 def world_surface_read(page: WorldSurfacePage) -> LocalWorldSurfaceRead:
     return LocalWorldSurfaceRead(
         surface=page.surface,
         items=[WorldSurfaceItemRead.model_validate(item.__dict__) for item in page.items],
         next_cursor=page.next_cursor,
+    )
+
+
+def world_app_read(world: WorldSurfaceItem) -> LocalWorldAppRead:
+    return LocalWorldAppRead(
+        world=WorldSurfaceItemRead.model_validate(world.__dict__),
     )

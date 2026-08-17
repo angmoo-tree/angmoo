@@ -38,13 +38,27 @@ Run the boundary locally with:
 uv run --project backend python scripts/ci/check_frontend_architecture_boundaries.py
 ```
 
-## PR A behavior boundary
+## Incremental behavior boundary
 
-The foundation PR adds components and contracts but does not switch a live
-route. `/` remains the existing feed, backend schemas and database writes do not
-change, and the legacy `AppShell` remains active. Device Home wiring, the
-owner-scoped World list, World-app navigation, Studio wiring, and PWA behavior
-belong to subsequent L2.5 PRs.
+- PR A established the public feature, shared UI, route-builder, and import
+  boundaries without switching a live route.
+- PR B made Device Home the canonical `/` route and added the owner-scoped,
+  read-only World surface. The legacy global Feed remains available at
+  `/posts`.
+- PR C adds `/worlds/{world_id}` and the explicit
+  `feed|chat|characters|relationships` World routes. Every entry performs an
+  owner-session and active-membership read through
+  `GET /api/v1/worlds/mine/{world_id}` before rendering World data. Missing,
+  archived, private, draft, foreign, or permission-lost Worlds fail closed and
+  never fall back to another World.
+
+PR C does not claim that a World-scoped Feed, Chat, Character list, or
+Relationship entry is already implemented. Those tabs retain the selected
+`world_id` but render a truthful unavailable state. In particular, `/posts`
+continues to mean the existing global community Feed and must never be labeled
+or embedded as a World Feed.
+
+Creator Studio wiring and optional PWA behavior remain later L2.5 PRs.
 
 ## Visual contract
 

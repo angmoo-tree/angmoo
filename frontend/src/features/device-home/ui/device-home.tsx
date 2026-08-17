@@ -128,7 +128,7 @@ export function DeviceHome({ authStatus }: DeviceHomeProps) {
 }
 
 function WorldAppIcon({ world }: { world: WorldSurfaceItem }) {
-  const routeReady = false;
+  const routeReady = world.launchable;
   return (
     <AppIcon
       disabled={!routeReady}
