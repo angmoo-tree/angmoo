@@ -50,6 +50,21 @@ docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm typecheck
 docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm build
 ```
 
+제품 shell 변경은 Core CI의 필수 Chromium smoke도 실행합니다. repository가
+고정한 Node·pnpm 도구를 host에서 사용할 수 있는 기여자는 provider 호출이나
+DB write가 없는 동일한 fake-backend suite를 다음처럼 실행할 수 있습니다.
+
+```powershell
+cd browser-tests
+pnpm install --frozen-lockfile
+pnpm exec playwright install chromium
+pnpm test
+```
+
+기본 port는 `3100`이며 이미 실행 중인 frontend를 사용할 때는
+`ANGMOO_E2E_BASE_URL`을 지정할 수 있습니다. 실제 사용자 데이터가 담긴
+profile을 이 검사 대상으로 사용하면 안 됩니다.
+
 required `local-core-smoke`는 release target build, image 취약점·secret scan,
 SPDX SBOM 검증과 격리된 Linux clean-clone lifecycle fixture도 실행합니다.
 PostgreSQL·Neo4j test state는 폐기 가능하며 provider 관련 검사는 fake

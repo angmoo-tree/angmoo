@@ -93,12 +93,21 @@ jobs:
       - name: Install locked frontend dependencies
         run: pnpm install --frozen-lockfile
         working-directory: frontend
+      - name: Install locked browser-test dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: browser-tests
       - name: Lint
         run: pnpm lint
         working-directory: frontend
       - name: Typecheck
         run: pnpm typecheck
         working-directory: frontend
+      - name: Install Chromium for product-shell smoke
+        run: pnpm exec playwright install --with-deps chromium
+        working-directory: browser-tests
+      - name: Run product-shell browser smoke
+        run: pnpm test
+        working-directory: browser-tests
       - name: Build Local OSS profile offline
         env:
           NEXT_PUBLIC_EXPERIMENTAL_IMAGE_ENABLED: "false"

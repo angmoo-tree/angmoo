@@ -93,3 +93,14 @@ are a 436 px maximum device width, 3 px bezel, and 34 px outer corner radius.
 The values are a product contract snapshot, not a Samsung asset or runtime
 dependency. App entries use a consistent squircle grid; Creator Studio leaves
 the device frame and uses a wide workspace.
+
+## Browser regression Gate
+
+Core CI runs the isolated Playwright Chromium suite in `browser-tests`. It protects the
+canonical Home route, 390 px and wide-browser device layouts, keyboard-visible
+app links, zero and multiple World states, Creator Studio grouping, explicit
+World routing with no fallback, degraded runtime presentation, and the
+standalone cache-free PWA contract. Backend requests are fulfilled with
+synthetic owner-scoped fixtures; any browser write or provider-shaped request
+fails the audit. These tests complement the backend authorization contract and
+do not replace the Windows clean-clone or final user visual Gate.
