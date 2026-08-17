@@ -1,0 +1,77 @@
+.homeLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  border: 1px solid #e4e7ec;
+  border-radius: 13px;
+  color: #475467;
+  background: #fff;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.homeLink:hover {
+  color: #101828;
+  background: #f7f8fa;
+}
+
+.navigationList {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.navigationLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 46px;
+  padding: 0 14px;
+  border-radius: 15px;
+  color: #667085;
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.navigationLink:hover,
+.active {
+  color: #101828;
+  background: #f2f4f7;
+}
+
+.planned {
+  color: #98a2b3;
+}
+
+.plannedMark {
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: #eef1f5;
+  color: #667085;
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 799px) {
+  .navigationList {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .navigationLink {
+    justify-content: center;
+    min-height: 42px;
+    padding: 0 8px;
+    font-size: 0.78rem;
+    text-align: center;
+  }
+
+  .plannedMark {
+    display: none;
+  }
+}

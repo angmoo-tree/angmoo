@@ -16,6 +16,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
+import { PRODUCT_ROUTES, studioWorldRoute } from "@/shared/navigation/public";
+
 import { useAuth } from "@/components/auth-provider";
 import {
   createWorld,
@@ -186,7 +188,9 @@ export function WorldCreatorClient({ worldId }: { worldId?: string }) {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const returnPath = worldId ? `/worlds/${worldId}/creator` : "/worlds/new";
+  const returnPath = worldId
+    ? studioWorldRoute(worldId)
+    : PRODUCT_ROUTES.studioNewWorld;
 
   useEffect(() => {
     if (authStatus === "unauthenticated") {
@@ -236,7 +240,7 @@ export function WorldCreatorClient({ worldId }: { worldId?: string }) {
     setContext(saved);
     setDefinition(worldToDefinition(saved));
     if (!worldId) {
-      router.replace(`/worlds/${saved.world.id}/creator`);
+      router.replace(studioWorldRoute(saved.world.id));
     }
     return saved;
   }

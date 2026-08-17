@@ -57,7 +57,7 @@ export const DEVICE_HOME_FIXED_APPS: readonly DeviceHomeFixedApp[] = [
     id: "studio",
     label: "Creator Studio",
     href: PRODUCT_ROUTES.studio,
-    availability: "planned",
+    availability: "available",
   },
   {
     id: "world-import",

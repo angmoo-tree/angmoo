@@ -13,6 +13,11 @@
   ],
   "policy_id": "angmoo-l2-5-frontend-product-shell-v1",
   "required_markers": {
+    "frontend/src/features/creator-studio/ui/creator-studio-dashboard.tsx": [
+      "getLocalWorldSurface(\"creator_studio\"",
+      "studioWorldRoute(world.world_id)",
+      "worldAppRoute(world.world_id)"
+    ],
     "frontend/src/features/device-home/model/device-home-contract.ts": [
       "bezelWidthPx: 3",
       "cornerRadiusPx: 34",
@@ -37,6 +42,8 @@
   },
   "required_paths": [
     "frontend/src/features/creator-studio/public.ts",
+    "frontend/src/features/creator-studio/ui/creator-studio-dashboard.tsx",
+    "frontend/src/features/creator-studio/ui/creator-studio-frame.tsx",
     "frontend/src/features/device-home/public.ts",
     "frontend/src/features/runtime-status/public.ts",
     "frontend/src/features/world-app/api/world-app-client.ts",

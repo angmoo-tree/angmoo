@@ -1,0 +1,67 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+FRONTEND_ROOT = REPO_ROOT / "frontend" / "src"
+
+
+def _read(relative: str) -> str:
+    return (FRONTEND_ROOT / relative).read_text(encoding="utf-8")
+
+
+def test_creator_studio_canonical_routes_use_public_feature_shell() -> None:
+    dashboard_page = _read("app/studio/page.tsx")
+    new_page = _read("app/studio/worlds/new/page.tsx")
+    edit_page = _read("app/studio/worlds/[worldId]/page.tsx")
+    import_page = _read("app/studio/import/page.tsx")
+
+    for source in (dashboard_page, new_page, edit_page, import_page):
+        assert 'from "@/features/creator-studio/public"' in source
+    assert 'activeSection="worlds"' in dashboard_page
+    assert 'activeSection="new-world"' in new_page
+    assert "WorldCreatorClient" in new_page
+    assert "WorldCreatorClient" in edit_page
+    assert "서명된 World Package" in import_page
+
+
+def test_creator_studio_reads_owner_surface_and_groups_blocked_worlds() -> None:
+    dashboard = _read(
+        "features/creator-studio/ui/creator-studio-dashboard.tsx"
+    )
+    device_contract = _read("features/device-home/model/device-home-contract.ts")
+
+    assert 'getLocalWorldSurface("creator_studio"' in dashboard
+    assert '"live" | "draft" | "private" | "archived"' in dashboard
+    assert "studioWorldRoute(world.world_id)" in dashboard
+    assert "worldAppRoute(world.world_id)" in dashboard
+    assert 'label: "Creator Studio"' in device_contract
+    studio_entry = device_contract.split('id: "studio"', 1)[1].split("},", 1)[0]
+    assert 'availability: "available"' in studio_entry
+
+
+def test_legacy_creator_routes_redirect_to_canonical_studio_routes() -> None:
+    legacy_new = _read("app/worlds/new/page.tsx")
+    legacy_edit = _read("app/worlds/[worldId]/creator/page.tsx")
+    creator = _read("components/world-creator-client.tsx")
+
+    assert "redirect(PRODUCT_ROUTES.studioNewWorld)" in legacy_new
+    assert "redirect(studioWorldRoute(worldId))" in legacy_edit
+    assert "router.replace(studioWorldRoute(saved.world.id))" in creator
+    assert '"/worlds/new"' not in creator
+    assert "`/worlds/${worldId}/creator`" not in creator
+
+
+def test_studio_shell_is_wide_and_preserves_small_viewport_accessibility() -> None:
+    shell_css = _read("features/creator-studio/ui/creator-studio-shell.module.css")
+    dashboard_css = _read(
+        "features/creator-studio/ui/creator-studio-dashboard.module.css"
+    )
+    frame = _read("features/creator-studio/ui/creator-studio-frame.tsx")
+
+    assert "grid-template-columns: minmax(210px, 260px) minmax(0, 1fr)" in shell_css
+    assert "@media (max-width: 799px)" in shell_css
+    assert "grid-template-columns: 1fr" in shell_css
+    assert "width: min(100%, 1180px)" in dashboard_css
+    assert 'href={PRODUCT_ROUTES.deviceHome}' in frame
