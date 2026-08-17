@@ -12,6 +12,7 @@
 .venv/
 __pycache__/
 node_modules/
+.pnpm-store/
 uploads/
 coverage/
 out/
@@ -19,3 +20,5 @@ build/
 *.py[cod]
 *.tsbuildinfo
 *.log
+playwright-report/
+test-results/

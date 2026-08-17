@@ -65,6 +65,13 @@ canonical Compose stack을 시작할 수 있습니다. 별도 runtime은 추가�
 backend·frontend image를 내려받습니다. 모든 service가 healthy가 되면
 <http://127.0.0.1:3000>을 엽니다.
 
+root 화면은 기존 커뮤니티 Feed가 아니라 핸드폰형 **Device Home**입니다.
+이 설치의 owner가 관리하는 `published + publish_ready + public|unlisted`
+World가 앱으로 표시됩니다. **Creator Studio**는 초안·비공개·실행 중·보관
+World를 관리하는 넓은 작업 화면이며, 기존 전체 Feed는 `/posts`에 유지됩니다.
+지원 브라우저의 앱 설치는 선택 사항이고 같은 owner·route·로컬 데이터를
+standalone PWA 창에서 사용합니다.
+
 provider credential은 image에 포함되지 않습니다. 후속 local user 설정에서
 BYOK를 추가하기 전에는 scheduler와 SNS runtime이 실제 모델 요청을 하지
 않습니다.

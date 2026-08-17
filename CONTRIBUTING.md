@@ -48,6 +48,22 @@ docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm typecheck
 docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm build
 ```
 
+Product-shell changes also run a required Chromium smoke in Core CI. A
+contributor with the repository-pinned Node/pnpm toolchain on the host can run
+the same deterministic, fake-backend suite without a provider or database
+write:
+
+```powershell
+cd browser-tests
+pnpm install --frozen-lockfile
+pnpm exec playwright install chromium
+pnpm test
+```
+
+The suite uses port `3100` by default and can use an already running frontend
+through `ANGMOO_E2E_BASE_URL`. It must not point at a profile containing real
+user data.
+
 The required `local-core-smoke` check additionally builds the release targets,
 scans image vulnerabilities and secrets, validates SPDX SBOM output, and runs
 the isolated Linux clean-clone lifecycle fixtures. PostgreSQL and Neo4j test

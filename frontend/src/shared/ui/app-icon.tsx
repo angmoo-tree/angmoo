@@ -44,14 +44,15 @@ export function AppIcon({
 
   if (href && !disabled) {
     return (
-      <Link
-        className={className}
-        href={href}
-        aria-label={description ?? label}
-        role="listitem"
-      >
-        {contents}
-      </Link>
+      <div className={styles.listItem} role="listitem">
+        <Link
+          className={className}
+          href={href}
+          aria-label={description ?? label}
+        >
+          {contents}
+        </Link>
+      </div>
     );
   }
 

@@ -68,6 +68,13 @@ backend, PostgreSQL, scheduler, Neo4j, and projector. The first run pulls the
 official `v0.3.0` backend and frontend images from GHCR. Open
 <http://127.0.0.1:3000> after all services report healthy.
 
+The root page is the phone-like **Device Home**, not the legacy community Feed.
+Published, publish-ready public or unlisted Worlds owned by this installation
+appear as apps. **Creator Studio** opens as a wide workspace for draft,
+private, live, and archived Worlds; the legacy global Feed remains at
+`/posts`. Installing Angmoo from a supported browser is optional and uses the
+same owner, routes, and local data in a standalone PWA window.
+
 No provider credential is bundled. Until the local user adds BYOK in a later
 setup stage, scheduler and social runtime processes stay provider-free and do
 not make a real model request.
