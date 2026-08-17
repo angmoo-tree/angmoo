@@ -1,0 +1,56 @@
+.frame {
+  --device-bezel-width: 3px;
+  --device-corner-radius: 34px;
+  width: min(100%, 436px);
+  min-height: min(880px, 100dvh);
+  overflow: hidden;
+  border: var(--device-bezel-width) solid #30343b;
+  border-radius: var(--device-corner-radius);
+  background: #30343b;
+  box-shadow:
+    0 24px 64px rgb(16 24 40 / 18%),
+    0 4px 14px rgb(16 24 40 / 12%);
+}
+
+.screen {
+  display: flex;
+  min-height: calc(min(880px, 100dvh) - (var(--device-bezel-width) * 2));
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: calc(var(--device-corner-radius) - 4px);
+  background: var(--color-surface, #fff8f7);
+}
+
+.header,
+.footer {
+  flex: 0 0 auto;
+  padding-inline:
+    max(18px, env(safe-area-inset-left))
+    max(18px, env(safe-area-inset-right));
+}
+
+.header {
+  padding-top: max(18px, env(safe-area-inset-top));
+}
+
+.footer {
+  padding-bottom: max(14px, env(safe-area-inset-bottom));
+}
+
+.content {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+@media (max-width: 479px) {
+  .frame,
+  .screen {
+    width: 100%;
+    min-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}

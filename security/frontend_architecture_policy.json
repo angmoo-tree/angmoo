@@ -1,0 +1,44 @@
+{
+  "documentation": "docs/architecture/frontend-product-shell.md",
+  "feature_names": [
+    "creator-studio",
+    "device-home",
+    "runtime-status",
+    "world-app"
+  ],
+  "legacy_import_exceptions": [],
+  "legacy_import_prefixes": [
+    "@/components",
+    "@/lib"
+  ],
+  "policy_id": "angmoo-l2-5-frontend-product-shell-v1",
+  "required_markers": {
+    "frontend/src/features/device-home/model/device-home-contract.ts": [
+      "bezelWidthPx: 3",
+      "cornerRadiusPx: 34",
+      "frameStyle: \"thin-uniform-flat\"",
+      "iconStyle: \"squircle-grid\"",
+      "maxWidthPx: 436"
+    ],
+    "frontend/src/features/device-home/public.ts": [
+      "DEVICE_HOME_FIXED_APPS",
+      "DeviceHomeShell"
+    ],
+    "frontend/src/shared/ui/device-frame.module.css": [
+      "--device-bezel-width: 3px",
+      "--device-corner-radius: 34px"
+    ]
+  },
+  "required_paths": [
+    "frontend/src/features/creator-studio/public.ts",
+    "frontend/src/features/device-home/public.ts",
+    "frontend/src/features/runtime-status/public.ts",
+    "frontend/src/features/world-app/public.ts",
+    "frontend/src/shared/navigation/public.ts",
+    "frontend/src/shared/ui/app-icon.tsx",
+    "frontend/src/shared/ui/device-frame.tsx",
+    "frontend/src/shared/ui/public.ts",
+    "frontend/src/shared/ui/status-badge.tsx"
+  ],
+  "schema_version": 1
+}
