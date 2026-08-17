@@ -1,7 +1,7 @@
 {
-  "edge_count": 681,
-  "external_import_count": 1132,
-  "module_count": 294,
+  "edge_count": 701,
+  "external_import_count": 1155,
+  "module_count": 307,
   "modules": [
     {
       "external_imports": [],
@@ -947,7 +947,8 @@
         "app.api.v1.routes.tree",
         "app.api.v1.routes.world_activity_runtime",
         "app.api.v1.routes.world_character_setup",
-        "app.api.v1.routes.worlds"
+        "app.api.v1.routes.worlds",
+        "app.domains.device_home.public"
       ],
       "module": "app.api.v1.main",
       "path": "backend/app/api/v1/main.py",
@@ -971,6 +972,7 @@
         "app.api.v1.routes.world_activity_runtime",
         "app.api.v1.routes.world_character_setup",
         "app.api.v1.routes.worlds",
+        "app.domains.device_home.public",
         "app.domains.identity.api.local_routes"
       ],
       "module": "app.api.v1.public",
@@ -1537,6 +1539,155 @@
       "imports": [],
       "module": "app.domains",
       "path": "backend/app/domains/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.device_home",
+      "path": "backend/app/domains/device_home/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.device_home.api.routes"
+      ],
+      "module": "app.domains.device_home.api",
+      "path": "backend/app/domains/device_home/api/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.device_home.domain.world_surface_policy"
+      ],
+      "module": "app.domains.device_home.api.device_home_schemas",
+      "path": "backend/app/domains/device_home/api/device_home_schemas.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "fastapi",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.api.v1.deps",
+        "app.core.browser_session",
+        "app.core.db",
+        "app.domains.device_home.api.device_home_schemas",
+        "app.domains.device_home.application.list_local_world_apps",
+        "app.domains.device_home.domain.world_surface_policy",
+        "app.domains.device_home.infrastructure.sqlalchemy_world_surface_repository"
+      ],
+      "module": "app.domains.device_home.api.routes",
+      "path": "backend/app/domains/device_home/api/routes.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.device_home.application.list_local_world_apps"
+      ],
+      "module": "app.domains.device_home.application",
+      "path": "backend/app/domains/device_home/application/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__"
+      ],
+      "imports": [
+        "app.domains.device_home.domain.world_surface_policy",
+        "app.domains.device_home.ports.world_surface_repository"
+      ],
+      "module": "app.domains.device_home.application.list_local_world_apps",
+      "path": "backend/app/domains/device_home/application/list_local_world_apps.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.device_home.domain.world_surface_policy"
+      ],
+      "module": "app.domains.device_home.domain",
+      "path": "backend/app/domains/device_home/domain/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.device_home.domain.world_surface_policy",
+      "path": "backend/app/domains/device_home/domain/world_surface_policy.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.device_home.infrastructure.sqlalchemy_world_surface_repository"
+      ],
+      "module": "app.domains.device_home.infrastructure",
+      "path": "backend/app/domains/device_home/infrastructure/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "base64",
+        "binascii",
+        "datetime",
+        "json",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.device_home.domain.world_surface_policy"
+      ],
+      "module": "app.domains.device_home.infrastructure.sqlalchemy_world_surface_repository",
+      "path": "backend/app/domains/device_home/infrastructure/sqlalchemy_world_surface_repository.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.device_home.ports.world_surface_repository"
+      ],
+      "module": "app.domains.device_home.ports",
+      "path": "backend/app/domains/device_home/ports/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.device_home.domain.world_surface_policy"
+      ],
+      "module": "app.domains.device_home.ports.world_surface_repository",
+      "path": "backend/app/domains/device_home/ports/world_surface_repository.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.device_home.api.routes"
+      ],
+      "module": "app.domains.device_home.public",
+      "path": "backend/app/domains/device_home/public.py",
       "wildcard_imports": []
     },
     {

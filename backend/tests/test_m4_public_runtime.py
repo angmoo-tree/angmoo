@@ -53,8 +53,8 @@ def test_public_runtime_exposes_only_approved_routes() -> None:
     operations = _operations()
     paths = {path for _, path in operations}
 
-    assert len(paths) == 121
-    assert len(operations) == 150
+    assert len(paths) == 122
+    assert len(operations) == 151
     assert (
         "POST",
         "/api/v1/agent-runs/resident-slots/tick",
