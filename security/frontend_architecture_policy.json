@@ -3,6 +3,7 @@
   "feature_names": [
     "creator-studio",
     "device-home",
+    "pwa-shell",
     "runtime-status",
     "world-app"
   ],
@@ -13,6 +14,16 @@
   ],
   "policy_id": "angmoo-l2-5-frontend-product-shell-v1",
   "required_markers": {
+    "frontend/public/sw.js": [
+      "ANGMOO_WORKER_VERSION",
+      "addEventListener(\"activate\"",
+      "addEventListener(\"install\""
+    ],
+    "frontend/src/app/manifest.ts": [
+      "display: \"standalone\"",
+      "scope: \"/\"",
+      "start_url: \"/\""
+    ],
     "frontend/src/features/creator-studio/ui/creator-studio-dashboard.tsx": [
       "getLocalWorldSurface(\"creator_studio\"",
       "studioWorldRoute(world.world_id)",
@@ -29,6 +40,11 @@
       "DEVICE_HOME_FIXED_APPS",
       "DeviceHomeShell"
     ],
+    "frontend/src/features/pwa-shell/ui/pwa-service-worker-lifecycle.tsx": [
+      "registration.unregister()",
+      "registration.update()",
+      "updateViaCache: \"none\""
+    ],
     "frontend/src/features/world-app/model/world-app-contract.ts": [
       "availability: \"unavailable\"",
       "id: \"relationships\"",
@@ -41,10 +57,14 @@
     ]
   },
   "required_paths": [
+    "frontend/public/sw.js",
+    "frontend/src/app/manifest.ts",
     "frontend/src/features/creator-studio/public.ts",
     "frontend/src/features/creator-studio/ui/creator-studio-dashboard.tsx",
     "frontend/src/features/creator-studio/ui/creator-studio-frame.tsx",
     "frontend/src/features/device-home/public.ts",
+    "frontend/src/features/pwa-shell/public.ts",
+    "frontend/src/features/pwa-shell/ui/pwa-service-worker-lifecycle.tsx",
     "frontend/src/features/runtime-status/public.ts",
     "frontend/src/features/world-app/api/world-app-client.ts",
     "frontend/src/features/world-app/model/world-app-contract.ts",

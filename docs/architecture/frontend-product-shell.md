@@ -68,7 +68,23 @@ Draft, private, and archived Worlds remain Studio-only while a published,
 publish-ready public or unlisted World becomes eligible for Device Home and the
 World App. Import remains a truthful unavailable capability until L3.5.
 
-Optional PWA behavior remains a later L2.5 PR.
+The optional PWA shell is implemented as a standards-based manifest plus a
+cache-free service worker lifecycle. It only changes the browser chrome:
+
+- ordinary browser use remains the complete default experience;
+- standalone launch starts at the canonical Device Home and keeps the same
+  local owner session, PostgreSQL data, and routes;
+- Creator Studio still leaves the phone frame for its wide workspace;
+- the service worker has no fetch handler, Cache API use, offline response
+  store, background write queue, or API/auth/credential persistence;
+- service-worker script responses are not cached, and registration explicitly
+  checks for updates while unregister remains available for recovery.
+
+PWA installation never creates a second owner, database, or runtime.
+The three bundled PWA PNG files are deterministic raster derivatives of the
+project-owned `frontend/src/app/icon.svg`: 192px and 512px general icons plus a
+512px maskable icon with an expanded Angmoo color safe area. No third-party
+icon or remote build asset is introduced.
 
 ## Visual contract
 
