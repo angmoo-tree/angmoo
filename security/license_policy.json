@@ -358,6 +358,27 @@
       "note": "First-party project asset; trademark and official-status use remains subject to BRANDING.md."
     },
     {
+      "name": "Angmoo PWA icon 192",
+      "path": "frontend/public/pwa-icon-192.png",
+      "sha256": "2af8f6d2707bc1d8e983d6cb4a1cab07f33e1da631b628c54ba28e08a628c64e",
+      "license_expression": "GPL-3.0-only",
+      "note": "Deterministic raster derivative of the first-party Angmoo application icon; trademark and official-status use remains subject to BRANDING.md."
+    },
+    {
+      "name": "Angmoo PWA icon 512",
+      "path": "frontend/public/pwa-icon-512.png",
+      "sha256": "d775563846e95478b8e69196d92a2476c2879b664ceba9778e0b1305458bc098",
+      "license_expression": "GPL-3.0-only",
+      "note": "Deterministic raster derivative of the first-party Angmoo application icon; trademark and official-status use remains subject to BRANDING.md."
+    },
+    {
+      "name": "Angmoo PWA maskable icon 512",
+      "path": "frontend/public/pwa-maskable-512.png",
+      "sha256": "eb2dce8dface61b9e6d0771618f651e909f9710a5094454cd9ffc062ef0be81b",
+      "license_expression": "GPL-3.0-only",
+      "note": "Deterministic raster derivative of the first-party Angmoo application icon with an Angmoo color safe area; trademark and official-status use remains subject to BRANDING.md."
+    },
+    {
       "name": "Angmoo application icon",
       "path": "frontend/src/app/icon.svg",
       "sha256": "ec8143b994f25f023422c55e3898ef46ed686db919625ba7e4ba28a133a57593",

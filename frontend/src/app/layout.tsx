@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AuthProvider } from "@/components/auth-provider";
+import { PwaServiceWorkerLifecycle } from "@/features/pwa-shell/public";
 import {
   SITE_DESCRIPTION,
   SITE_ICON,
@@ -52,7 +53,10 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className="antialiased">
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <PwaServiceWorkerLifecycle />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

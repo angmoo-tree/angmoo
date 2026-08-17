@@ -225,6 +225,9 @@ These services and CI tools are separate components and retain their own license
 ## Bundled assets and content
 
 - **Angmoo favicon** — `GPL-3.0-only`; First-party project asset; trademark and official-status use remains subject to BRANDING.md.
+- **Angmoo PWA icon 192** — `GPL-3.0-only`; Deterministic raster derivative of the first-party Angmoo application icon; trademark and official-status use remains subject to BRANDING.md.
+- **Angmoo PWA icon 512** — `GPL-3.0-only`; Deterministic raster derivative of the first-party Angmoo application icon; trademark and official-status use remains subject to BRANDING.md.
+- **Angmoo PWA maskable icon 512** — `GPL-3.0-only`; Deterministic raster derivative of the first-party Angmoo application icon with an Angmoo color safe area; trademark and official-status use remains subject to BRANDING.md.
 - **Angmoo application icon** — `GPL-3.0-only`; First-party project asset; trademark and official-status use remains subject to BRANDING.md.
 - **Lucide Icons** — `ISC`; source <https://lucide.dev/license>
 - **Feather Icons** — `MIT`; source <https://github.com/feathericons/feather/blob/main/LICENSE>
