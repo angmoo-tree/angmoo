@@ -1,0 +1,210 @@
+"use client";
+
+import Link from "next/link";
+import {
+  ArrowLeft,
+  House,
+  MessageCircle,
+  Network,
+  Newspaper,
+  Users,
+} from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
+
+import type { WorldSurfaceItem } from "@/features/device-home/public";
+import { PRODUCT_ROUTES } from "@/shared/navigation/public";
+import { StatusBadge } from "@/shared/ui/public";
+
+import { getLocalWorldApp, WorldAppApiError } from "../api/world-app-client";
+import {
+  WORLD_APP_SECTIONS,
+  worldAppSectionRoute,
+  type WorldAppSection,
+  type WorldAppSectionId,
+} from "../model/world-app-contract";
+import { WorldAppShell } from "./world-app-shell";
+import styles from "./world-app.module.css";
+
+
+export type WorldAppAuthStatus =
+  | "checking"
+  | "authenticated"
+  | "unauthenticated";
+
+type WorldAppProps = {
+  authStatus: WorldAppAuthStatus;
+  sectionId: WorldAppSectionId;
+  worldId: string;
+};
+
+const SECTION_ICONS: Record<WorldAppSectionId, ReactNode> = {
+  home: <House size={19} strokeWidth={2.2} />,
+  feed: <Newspaper size={19} strokeWidth={2.2} />,
+  chat: <MessageCircle size={19} strokeWidth={2.2} />,
+  characters: <Users size={19} strokeWidth={2.2} />,
+  relationships: <Network size={19} strokeWidth={2.2} />,
+};
+
+export function WorldApp({ authStatus, sectionId, worldId }: WorldAppProps) {
+  const [world, setWorld] = useState<WorldSurfaceItem | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<WorldAppApiError | Error | null>(null);
+
+  useEffect(() => {
+    if (authStatus !== "authenticated") return;
+    const controller = new AbortController();
+    void getLocalWorldApp(worldId, { signal: controller.signal })
+      .then((read) => setWorld(read.world))
+      .catch((reason: unknown) => {
+        if (reason instanceof DOMException && reason.name === "AbortError") return;
+        setWorld(null);
+        setError(reason instanceof Error ? reason : new Error("world_app_unavailable"));
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, [authStatus, worldId]);
+
+  if (authStatus === "checking" || (authStatus === "authenticated" && loading)) {
+    return <WorldGate title="World 앱을 확인하는 중" description="owner 권한과 World 상태를 안전하게 확인하고 있어요." />;
+  }
+  if (authStatus === "unauthenticated") {
+    const returnTo = worldAppSectionRoute(
+      worldId,
+      WORLD_APP_SECTIONS.find((section) => section.id === sectionId) ?? WORLD_APP_SECTIONS[0],
+    );
+    return (
+      <WorldGate
+        title="로컬 owner 연결이 필요해요"
+        description="owner session을 확인한 뒤 이 World 앱을 다시 엽니다."
+        href={`/login?returnTo=${encodeURIComponent(returnTo)}`}
+        linkLabel="owner 연결"
+      />
+    );
+  }
+  if (error || !world) {
+    const unavailable = error instanceof WorldAppApiError && [403, 404].includes(error.status);
+    return (
+      <WorldGate
+        title={unavailable ? "이 World 앱을 열 수 없어요" : "World 앱을 불러오지 못했어요"}
+        description={
+          unavailable
+            ? "권한이 없거나 World가 보관·비공개 상태로 바뀌었습니다. 다른 World로 자동 이동하지 않습니다."
+            : "runtime 상태를 확인한 뒤 다시 시도해주세요."
+        }
+        href={unavailable ? PRODUCT_ROUTES.deviceHome : PRODUCT_ROUTES.settings}
+        linkLabel={unavailable ? "Device Home으로 돌아가기" : "설정 열기"}
+      />
+    );
+  }
+
+  const activeSection =
+    WORLD_APP_SECTIONS.find((section) => section.id === sectionId) ?? WORLD_APP_SECTIONS[0];
+
+  return (
+    <WorldAppShell
+      navigation={<WorldNavigation activeSection={activeSection} worldId={worldId} />}
+      status={
+        <Link className={styles.homeReturn} href={PRODUCT_ROUTES.deviceHome}>
+          <ArrowLeft size={16} aria-hidden="true" />
+          Device Home
+        </Link>
+      }
+      worldId={world.world_id}
+      worldName={world.name}
+    >
+      <WorldSection activeSection={activeSection} world={world} />
+    </WorldAppShell>
+  );
+}
+
+function WorldNavigation({
+  activeSection,
+  worldId,
+}: {
+  activeSection: WorldAppSection;
+  worldId: string;
+}) {
+  return (
+    <nav className={styles.navigation} aria-label="World 앱 기능">
+      {WORLD_APP_SECTIONS.map((section) => (
+        <Link
+          aria-current={section.id === activeSection.id ? "page" : undefined}
+          className={`${styles.navItem} ${
+            section.id === activeSection.id ? styles.navItemActive : ""
+          }`}
+          href={worldAppSectionRoute(worldId, section)}
+          key={section.id}
+          title={section.description}
+        >
+          {SECTION_ICONS[section.id]}
+          <span>{section.label}</span>
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
+function WorldSection({
+  activeSection,
+  world,
+}: {
+  activeSection: WorldAppSection;
+  world: WorldSurfaceItem;
+}) {
+  if (activeSection.id === "home") {
+    return (
+      <section className={styles.worldOverview}>
+        <div className={styles.overviewHeading}>
+          <StatusBadge label="실행 가능" tone="healthy" />
+          <span className={styles.role}>{world.membership_role}</span>
+        </div>
+        <h2>{world.name}</h2>
+        <p className={styles.tagline}>{world.tagline || "이 World의 일상을 만나보세요."}</p>
+        <div className={styles.scopeNotice}>
+          <strong>World 경계가 적용됐어요</strong>
+          <p>아래 기능은 항상 이 World의 식별자를 유지하며, 다른 World로 자동 fallback하지 않습니다.</p>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className={styles.capability} role="status">
+      <div className={styles.capabilityIcon}>{SECTION_ICONS[activeSection.id]}</div>
+      <p className={styles.capabilityKicker}>{activeSection.label}</p>
+      <h2>이 World 전용 기능은 준비 중이에요</h2>
+      <p>{activeSection.description}</p>
+      {activeSection.id === "feed" ? (
+        <div className={styles.legacyNotice}>
+          <strong>전체 커뮤니티 Feed와 구분됩니다</strong>
+          <p>`/posts`는 기존 전체 Feed이며 이 World의 Feed로 표시하지 않습니다.</p>
+          <Link href="/posts">전체 커뮤니티 Feed 별도로 열기</Link>
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function WorldGate({
+  description,
+  href,
+  linkLabel,
+  title,
+}: {
+  description: string;
+  href?: string;
+  linkLabel?: string;
+  title: string;
+}) {
+  return (
+    <main className={styles.gate}>
+      <section role="status">
+        <h1>{title}</h1>
+        <p>{description}</p>
+        {href && linkLabel ? <Link href={href}>{linkLabel}</Link> : null}
+      </section>
+    </main>
+  );
+}

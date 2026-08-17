@@ -372,6 +372,11 @@
       "module": "app.domains.device_home.api.routes",
       "endpoint": "list_local_world_apps"
     },
+    "GET /api/v1/worlds/mine/{world_id}": {
+      "access": "owner-only",
+      "module": "app.domains.device_home.api.routes",
+      "endpoint": "get_local_world_app"
+    },
     "GET /api/v1/worlds/{world_id}": {
       "access": "public",
       "module": "app.api.v1.routes.worlds",
