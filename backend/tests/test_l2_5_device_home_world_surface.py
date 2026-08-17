@@ -1,0 +1,283 @@
+from __future__ import annotations
+
+from datetime import UTC, datetime, timedelta
+
+from fastapi import FastAPI, HTTPException, status
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine, event
+from sqlalchemy.orm import Session
+from sqlalchemy.pool import StaticPool
+
+from app import models
+from app.api.v1.deps import get_current_user
+from app.core.db import Base, get_db
+from app.domains.device_home.api.routes import router
+
+
+def _user(user_id: str) -> models.User:
+    return models.User(
+        id=user_id,
+        email=f"{user_id}@example.test",
+        display_name=user_id,
+        display_name_normalized=user_id,
+        privacy_policy_version="test",
+        terms_version="test",
+        profile_setup_completed=True,
+    )
+
+
+def _world(
+    world_id: str,
+    *,
+    owner_user_id: str,
+    status_value: str = "published",
+    visibility: str = "public",
+    readiness_status: str = "publish_ready",
+    updated_at: datetime,
+) -> models.World:
+    return models.World(
+        id=world_id,
+        slug=world_id,
+        owner_user_id=owner_user_id,
+        name=f"World {world_id}",
+        tagline=f"tagline {world_id}",
+        setting_description="fixture setting",
+        daily_life_description="fixture daily life",
+        genre_tags=["fixture"],
+        tone_tags=["warm"],
+        banner_alt_text="",
+        timezone="Asia/Seoul",
+        language="ko",
+        visibility=visibility,
+        join_policy="open",
+        status=status_value,
+        definition_version=1,
+        row_version=1,
+        contract_version="world-contract-v1",
+        contract_hash=(world_id * 64)[:64],
+        readiness_status=readiness_status,
+        additional_generation_guidance="",
+        create_idempotency_key=f"create-{world_id}",
+        created_at=updated_at,
+        updated_at=updated_at,
+        archived_at=updated_at if status_value == "archived" else None,
+    )
+
+
+def _membership(
+    membership_id: str,
+    *,
+    world_id: str,
+    user_id: str,
+    role: str = "owner",
+) -> models.WorldMembership:
+    return models.WorldMembership(
+        id=membership_id,
+        world_id=world_id,
+        user_id=user_id,
+        role=role,
+        status="active",
+        joined_at=datetime.now(UTC),
+    )
+
+
+def _fixture():
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+
+    @event.listens_for(engine, "connect")
+    def _foreign_keys(dbapi_connection, _connection_record) -> None:
+        dbapi_connection.execute("PRAGMA foreign_keys=ON")
+
+    Base.metadata.create_all(engine)
+    principal: dict[str, models.User | None] = {"user": None}
+    app = FastAPI()
+    app.include_router(router, prefix="/api/v1")
+
+    def db_dependency():
+        with Session(engine) as db:
+            yield db
+
+    def user_dependency() -> models.User:
+        if principal["user"] is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token",
+            )
+        return principal["user"]
+
+    app.dependency_overrides[get_db] = db_dependency
+    app.dependency_overrides[get_current_user] = user_dependency
+    client = TestClient(app, base_url="http://127.0.0.1:3000")
+    return client, engine, principal
+
+
+def _seed(engine, principal) -> tuple[models.User, models.User]:
+    owner = _user("owner-a")
+    outsider = _user("owner-b")
+    now = datetime(2026, 8, 17, 12, 0, tzinfo=UTC)
+    worlds = (
+        _world("home-new", owner_user_id=owner.id, updated_at=now),
+        _world(
+            "home-old",
+            owner_user_id=owner.id,
+            visibility="unlisted",
+            updated_at=now - timedelta(hours=1),
+        ),
+        _world(
+            "private",
+            owner_user_id=owner.id,
+            visibility="private",
+            updated_at=now - timedelta(hours=2),
+        ),
+        _world(
+            "draft",
+            owner_user_id=owner.id,
+            status_value="draft",
+            readiness_status="not_ready",
+            updated_at=now - timedelta(hours=3),
+        ),
+        _world(
+            "archived",
+            owner_user_id=owner.id,
+            status_value="archived",
+            updated_at=now - timedelta(hours=4),
+        ),
+        _world("foreign", owner_user_id=outsider.id, updated_at=now + timedelta(hours=1)),
+    )
+    with Session(engine, expire_on_commit=False) as db:
+        db.add_all([owner, outsider])
+        db.flush()
+        db.add(
+            models.InstallationIdentity(
+                singleton_key="local-installation",
+                installation_id="fixture-installation",
+                owner_user_id=owner.id,
+                bootstrap_state="claimed",
+                local_label="fixture",
+                claimed_at=now,
+            )
+        )
+        db.add_all(worlds)
+        db.flush()
+        db.add_all(
+            [
+                _membership(
+                    f"membership-{world.id}",
+                    world_id=world.id,
+                    user_id=world.owner_user_id,
+                )
+                for world in worlds
+            ]
+        )
+        db.commit()
+    principal["user"] = owner
+    return owner, outsider
+
+
+def test_device_home_surface_is_owner_scoped_filtered_and_deterministic() -> None:
+    client, engine, principal = _fixture()
+    _seed(engine, principal)
+
+    response = client.get("/api/v1/worlds/mine?surface=device_home")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["schema_version"] == "local-world-surface-v1"
+    assert payload["surface"] == "device_home"
+    assert [item["world_id"] for item in payload["items"]] == [
+        "home-new",
+        "home-old",
+    ]
+    assert all(item["launchable"] is True for item in payload["items"])
+    assert all(item["launch_block_reason"] is None for item in payload["items"])
+    serialized = response.text.lower()
+    for forbidden in (
+        "foreign",
+        "private",
+        "draft",
+        "archived",
+        "owner-a@example.test",
+        "api_key",
+        "app_secret",
+    ):
+        assert forbidden not in serialized
+
+
+def test_creator_studio_surface_includes_only_owner_managed_worlds() -> None:
+    client, engine, principal = _fixture()
+    _seed(engine, principal)
+
+    response = client.get("/api/v1/worlds/mine?surface=creator_studio")
+
+    assert response.status_code == 200
+    items = response.json()["items"]
+    assert [item["world_id"] for item in items] == [
+        "home-new",
+        "home-old",
+        "private",
+        "draft",
+        "archived",
+    ]
+    blocked = {item["world_id"]: item["launch_block_reason"] for item in items}
+    assert blocked == {
+        "home-new": None,
+        "home-old": None,
+        "private": "world_private",
+        "draft": "world_not_published",
+        "archived": "world_archived",
+    }
+
+
+def test_surface_requires_session_and_claimed_installation_owner() -> None:
+    client, engine, principal = _fixture()
+    owner, outsider = _seed(engine, principal)
+
+    principal["user"] = None
+    unauthenticated = client.get("/api/v1/worlds/mine?surface=device_home")
+    assert unauthenticated.status_code == 401
+
+    principal["user"] = outsider
+    forbidden = client.get("/api/v1/worlds/mine?surface=device_home")
+    assert forbidden.status_code == 403
+    assert forbidden.json() == {"detail": "local_owner_required"}
+
+    principal["user"] = owner
+    invalid_surface = client.get("/api/v1/worlds/mine?surface=public_discovery")
+    assert invalid_surface.status_code == 422
+
+
+def test_surface_read_is_bounded_cursor_safe_and_write_free() -> None:
+    client, engine, principal = _fixture()
+    _seed(engine, principal)
+    writes: list[str] = []
+
+    @event.listens_for(engine, "before_cursor_execute")
+    def _capture_writes(_conn, _cursor, statement, _parameters, _context, _many):
+        operation = statement.lstrip().split(None, 1)[0].upper()
+        if operation in {"INSERT", "UPDATE", "DELETE"}:
+            writes.append(operation)
+
+    first = client.get("/api/v1/worlds/mine?surface=device_home&limit=1")
+    assert first.status_code == 200
+    assert [item["world_id"] for item in first.json()["items"]] == ["home-new"]
+    cursor = first.json()["next_cursor"]
+    assert cursor
+
+    second = client.get(
+        "/api/v1/worlds/mine",
+        params={"surface": "device_home", "limit": 1, "cursor": cursor},
+    )
+    assert second.status_code == 200
+    assert [item["world_id"] for item in second.json()["items"]] == ["home-old"]
+    assert second.json()["next_cursor"] is None
+    assert writes == []
+
+    invalid = client.get(
+        "/api/v1/worlds/mine?surface=device_home&cursor=not-a-valid-cursor"
+    )
+    assert invalid.status_code == 422
+    assert invalid.json() == {"detail": "invalid_world_surface_cursor"}

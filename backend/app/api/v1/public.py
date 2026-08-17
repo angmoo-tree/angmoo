@@ -14,6 +14,7 @@ from app.api.v1.routes import tree
 from app.api.v1.routes import worlds
 from app.api.v1.routes import world_character_setup
 from app.api.v1.routes import world_activity_runtime
+from app.domains.device_home.public import router as device_home_router
 from app.domains.identity.api.local_routes import router as local_identity_router
 
 
@@ -23,6 +24,7 @@ class HostedRouterConfigurationError(RuntimeError):
 
 PUBLIC_ROUTERS = (
     local_identity_router,
+    device_home_router,
     auth.public_router,
     agents.router,
     character_lore.router,
