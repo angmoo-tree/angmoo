@@ -209,10 +209,6 @@
           "importer": "app.api.v1.routes.worlds"
         },
         {
-          "imported": "app.services.worlds",
-          "importer": "app.api.v1.routes.worlds"
-        },
-        {
           "imported": "app.models",
           "importer": "app.cruds.agent_runs"
         },
@@ -1425,14 +1421,6 @@
           "importer": "app.services.world_character_setup"
         },
         {
-          "imported": "app.models",
-          "importer": "app.services.world_definitions"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.services.world_definitions"
-        },
-        {
           "imported": "app.cruds.agent_runs",
           "importer": "app.services.world_feed_runtime"
         },
@@ -1514,34 +1502,6 @@
         },
         {
           "imported": "app.models",
-          "importer": "app.services.world_generation_context"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.services.world_generation_context"
-        },
-        {
-          "imported": "app.services.world_definitions",
-          "importer": "app.services.world_generation_context"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.worlds"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.services.worlds"
-        },
-        {
-          "imported": "app.services.profile_media",
-          "importer": "app.services.worlds"
-        },
-        {
-          "imported": "app.services.world_definitions",
-          "importer": "app.services.worlds"
-        },
-        {
-          "imported": "app.services.world_generation_context",
           "importer": "app.services.worlds"
         }
       ],

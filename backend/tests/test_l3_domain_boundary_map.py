@@ -44,9 +44,9 @@ def test_l3_execution_map_records_exact_baseline_and_status() -> None:
         assert f"app.domains.{boundary}.public" in text
 
 
-def test_l3_current_entrypoints_exist_before_behavior_migration() -> None:
+def test_l3_current_entrypoints_track_completed_and_pending_migrations() -> None:
     expected = {
-        APP_ROOT / "services" / "worlds.py": {
+        APP_ROOT / "domains" / "worlds" / "infrastructure" / "sqlalchemy_world_creator.py": {
             "create_world",
             "update_world",
             "validate_world_definition",
@@ -77,6 +77,14 @@ def test_l3_current_entrypoints_exist_before_behavior_migration() -> None:
     for path, functions in expected.items():
         assert path.is_file(), path
         assert functions <= _function_names(path)
+
+
+def test_world_creator_route_uses_worlds_public_boundary() -> None:
+    route = APP_ROOT / "api" / "v1" / "routes" / "worlds.py"
+    imports = _imports(route)
+
+    assert "app.domains.worlds" in imports
+    assert "app.services.worlds" not in imports
 
 
 def test_l3_public_package_anchors_have_no_reverse_dependencies() -> None:

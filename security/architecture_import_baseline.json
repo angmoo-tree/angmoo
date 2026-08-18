@@ -1,7 +1,7 @@
 {
-  "edge_count": 705,
-  "external_import_count": 1157,
-  "module_count": 316,
+  "edge_count": 714,
+  "external_import_count": 1170,
+  "module_count": 324,
   "modules": [
     {
       "external_imports": [],
@@ -1184,10 +1184,10 @@
       ],
       "imports": [
         "app.api.v1.deps",
+        "app.domains.worlds.public",
         "app.models",
         "app.schemas",
-        "app.services.world_character_setup",
-        "app.services.worlds"
+        "app.services.world_character_setup"
       ],
       "module": "app.api.v1.routes.worlds",
       "path": "backend/app/api/v1/routes/worlds.py",
@@ -2272,6 +2272,126 @@
     {
       "external_imports": [],
       "imports": [],
+      "module": "app.domains.worlds.api",
+      "path": "backend/app/domains/worlds/api/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "pydantic",
+        "re",
+        "typing",
+        "unicodedata",
+        "zoneinfo"
+      ],
+      "imports": [],
+      "module": "app.domains.worlds.api.schemas",
+      "path": "backend/app/domains/worlds/api/schemas.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.worlds.infrastructure",
+      "path": "backend/app/domains/worlds/infrastructure/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "hashlib",
+        "json",
+        "re",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "unicodedata",
+        "zoneinfo"
+      ],
+      "imports": [
+        "app.domains.worlds.api.schemas",
+        "app.domains.worlds.infrastructure.sqlalchemy_models"
+      ],
+      "module": "app.domains.worlds.infrastructure.definition_repository",
+      "path": "backend/app/domains/worlds/infrastructure/definition_repository.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.worlds.api.schemas",
+        "app.domains.worlds.infrastructure.definition_repository",
+        "app.domains.worlds.infrastructure.sqlalchemy_models"
+      ],
+      "module": "app.domains.worlds.infrastructure.generation_context",
+      "path": "backend/app/domains/worlds/infrastructure/generation_context.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.dialects.postgresql",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.domains.worlds.infrastructure.sqlalchemy_models",
+      "path": "backend/app/domains/worlds/infrastructure/sqlalchemy_models.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "re",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm",
+        "typing",
+        "unicodedata"
+      ],
+      "imports": [
+        "app.core.ids",
+        "app.domains.worlds.api.schemas",
+        "app.domains.worlds.infrastructure.definition_repository",
+        "app.domains.worlds.infrastructure.generation_context",
+        "app.domains.worlds.infrastructure.sqlalchemy_models",
+        "app.domains.worlds.infrastructure.world_banner_storage"
+      ],
+      "module": "app.domains.worlds.infrastructure.sqlalchemy_world_creator",
+      "path": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "PIL",
+        "__future__",
+        "base64",
+        "io",
+        "pathlib",
+        "uuid",
+        "warnings"
+      ],
+      "imports": [
+        "app.core.config"
+      ],
+      "module": "app.domains.worlds.infrastructure.world_banner_storage",
+      "path": "backend/app/domains/worlds/infrastructure/world_banner_storage.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.worlds.infrastructure.sqlalchemy_world_creator"
+      ],
       "module": "app.domains.worlds.public",
       "path": "backend/app/domains/worlds/public.py",
       "wildcard_imports": []
@@ -2653,12 +2773,12 @@
         "__future__",
         "datetime",
         "sqlalchemy",
-        "sqlalchemy.dialects.postgresql",
         "sqlalchemy.orm",
         "typing"
       ],
       "imports": [
-        "app.core.db"
+        "app.core.db",
+        "app.domains.worlds.infrastructure.sqlalchemy_models"
       ],
       "module": "app.models.worlds",
       "path": "backend/app/models/worlds.py",
@@ -3003,16 +3123,10 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "__future__",
-        "datetime",
-        "pydantic",
-        "re",
-        "typing",
-        "unicodedata",
-        "zoneinfo"
+      "external_imports": [],
+      "imports": [
+        "app.domains.worlds.api.schemas"
       ],
-      "imports": [],
       "module": "app.schemas.worlds",
       "path": "backend/app/schemas/worlds.py",
       "wildcard_imports": []
@@ -4357,20 +4471,9 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "__future__",
-        "datetime",
-        "hashlib",
-        "json",
-        "re",
-        "sqlalchemy",
-        "sqlalchemy.orm",
-        "unicodedata",
-        "zoneinfo"
-      ],
+      "external_imports": [],
       "imports": [
-        "app.models",
-        "app.schemas"
+        "app.domains.worlds.infrastructure.definition_repository"
       ],
       "module": "app.services.world_definitions",
       "path": "backend/app/services/world_definitions.py",
@@ -4466,14 +4569,9 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "__future__",
-        "sqlalchemy.orm"
-      ],
+      "external_imports": [],
       "imports": [
-        "app.models",
-        "app.schemas",
-        "app.services.world_definitions"
+        "app.domains.worlds.infrastructure.generation_context"
       ],
       "module": "app.services.world_generation_context",
       "path": "backend/app/services/world_generation_context.py",
@@ -4482,21 +4580,11 @@
     {
       "external_imports": [
         "__future__",
-        "datetime",
-        "re",
-        "sqlalchemy",
-        "sqlalchemy.exc",
-        "sqlalchemy.orm",
-        "typing",
-        "unicodedata"
+        "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.ids",
-        "app.models",
-        "app.schemas",
-        "app.services.profile_media",
-        "app.services.world_definitions",
-        "app.services.world_generation_context"
+        "app.domains.worlds.public",
+        "app.models"
       ],
       "module": "app.services.worlds",
       "path": "backend/app/services/worlds.py",
