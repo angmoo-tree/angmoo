@@ -75,6 +75,11 @@ private, live, and archived Worlds; the legacy global Feed remains at
 `/posts`. Installing Angmoo from a supported browser is optional and uses the
 same owner, routes, and local data in a standalone PWA window.
 
+Creator Studio can create and edit one Local Owner-controlled parrot identity
+per World. This identity always has autonomous activity disabled, and its
+create/update path makes no provider request. Manual Post and Comment controls
+are connected in a later, separately reviewed L3 change.
+
 No provider credential is bundled. Until the local user adds BYOK in a later
 setup stage, scheduler and social runtime processes stay provider-free and do
 not make a real model request.

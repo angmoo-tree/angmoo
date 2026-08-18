@@ -7,7 +7,7 @@ vertical loop has shipped or passed user validation.
 - Baseline repository: `angmoo-tree/angmoo`
 - Baseline branch: `main`
 - Baseline commit: `b809bc2d748f8bcac82860447bcff3c816f93452`
-- L3 status at this map: `P1 IMPLEMENTED; P2-P4 IMPLEMENTATION NOT STARTED`
+- L3 status at this map: `P1 IMPLEMENTED; owner-controlled identity foundation IMPLEMENTED; autonomous P2-P4 IMPLEMENTATION NOT STARTED`
 - Canonical store: PostgreSQL
 - Projection store: Neo4j, replayable from PostgreSQL outbox events
 
@@ -49,6 +49,32 @@ generation-context reads preserve their request schemas, commits, row versions,
 hashes, and error codes. They have no provider dependency; route parity tests
 also assert zero Post and AgentRun rows during the P1 lifecycle.
 
+### Owner-controlled WorldCharacter identity foundation
+
+```text
+HTTP /api/v1/worlds/{world_id}/owner-character
+-> app.domains.world_characters.api
+-> app.domains.world_characters.application.owner_controlled_identity
+-> OwnerControlledIdentityRepository port
+-> SQLAlchemy WorldCharacter adapter
+-> Character + WorldCharacter + CharacterActiveWorld in PostgreSQL
+```
+
+PR C adds `control_mode=autonomous|owner_controlled` and a Local Owner binding
+without adding an AI generation path. Existing rows are backfilled as
+`autonomous`; an active owner-controlled identity is unique per World and Local
+Owner, has autonomy disabled, and exposes only its minimum World profile. The
+Creator Studio creates or edits it, while the World App reads it as the current
+manual actor. The owner identity path creates no Post, Comment, AgentRun, or
+provider attempt; manual social writes remain PR G scope.
+
+The scheduler claim query excludes owner-controlled identities, and resident
+execution and Run now repeat the same decision before any provider adapter can
+start. This double check is deliberate: a stale or forged slot cannot turn a
+manual identity into an autonomous executor. Because owner-controlled rows
+cannot be represented by revision 0080 without losing provenance, downgrade
+refuses with a stable recovery reason while such rows exist.
+
 ### P2 autonomous WorldCharacter setup
 
 ```text
@@ -86,10 +112,12 @@ scheduler process
 -> resident execution
 ```
 
-Plan preparation has zero provider calls. PR E moves selection and lifecycle
-behind `app.domains.routines.public`, makes the scheduler and Run now share the
-same use case, and excludes owner-controlled WorldCharacters at both candidate
-selection and execution preflight.
+Plan preparation has zero provider calls. PR C installs the owner-controlled
+candidate-query and execution-preflight exclusion before those identities can
+be created. PR E moves selection and lifecycle behind
+`app.domains.routines.public`, makes the scheduler and Run now share the same
+use case, and retains those exclusions as part of the canonical routine
+lifecycle.
 
 ### P4 routine post continuation
 
@@ -154,7 +182,7 @@ by their owning behavior PR:
 
 | Current edge group | Owner PR | Removal condition |
 |---|---|---|
-| World entry/setup routes -> `app.services.world_character_setup` | PR C / PR D | identity and autonomous setup calls use the public WorldCharacter boundary |
+| autonomous World entry/setup routes -> `app.services.world_character_setup` | PR D | autonomous setup calls use the public WorldCharacter boundary; PR C owner identity already uses its domain application/port/adapter path |
 | activity-plan routes -> `app.services.daily_activity_plans` | PR E | plan and runtime-mode calls use the public routine boundary |
 | resident runtime -> routine post legacy services | PR F | resident calls the public routine-post execution use case |
 | community manual writes -> unrestricted Character author logic | PR G | owner-controlled guard and Inbox handoff are canonical and tested |

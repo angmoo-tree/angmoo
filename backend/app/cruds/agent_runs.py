@@ -953,6 +953,11 @@ def claim_resident_slot_assignment(
     lease_seconds: int,
 ) -> models.AgentSlot | None:
     now = datetime.now(UTC)
+    owner_controlled = select(models.WorldCharacter.id).where(
+        models.WorldCharacter.character_id == models.AgentSlot.assigned_character_id,
+        models.WorldCharacter.control_mode == "owner_controlled",
+        models.WorldCharacter.status == "active",
+    ).exists()
     slot = db.scalar(
         select(models.AgentSlot)
         .where(
@@ -962,6 +967,7 @@ def claim_resident_slot_assignment(
                 models.AgentSlot.status.in_(DUE_SLOT_STATUSES),
                 models.AgentSlot.lease_expires_at <= now,
             ),
+            ~owner_controlled,
         )
         .order_by(models.AgentSlot.updated_at.asc(), models.AgentSlot.agent_id.asc())
         .with_for_update(skip_locked=True)
@@ -1000,6 +1006,12 @@ def claim_due_resident_slots(
         models.AgentSlot.assigned_credential_id.is_not(None),
         models.AgentSlot.next_tick_at <= now,
     ]
+    owner_controlled = select(models.WorldCharacter.id).where(
+        models.WorldCharacter.character_id == models.AgentSlot.assigned_character_id,
+        models.WorldCharacter.control_mode == "owner_controlled",
+        models.WorldCharacter.status == "active",
+    ).exists()
+    conditions.append(~owner_controlled)
     if allowed_character_ids is not None:
         conditions.append(
             models.AgentSlot.assigned_character_id.in_(allowed_character_ids)

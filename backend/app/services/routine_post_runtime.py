@@ -54,6 +54,7 @@ def routine_world_character_for_character(
     if (
         world_character is None
         or world_character.character_id != character_id
+        or world_character.control_mode == "owner_controlled"
         or world_character.activity_runtime_mode != "routine_resident_v1"
     ):
         return None

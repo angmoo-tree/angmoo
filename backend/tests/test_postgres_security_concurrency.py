@@ -112,6 +112,26 @@ def test_security_migration_schema_contract() -> None:
     }
     assert world_character_columns["activity_runtime_mode"]["nullable"] is False
     assert world_character_columns["feed_runtime_mode"]["nullable"] is False
+    assert world_character_columns["control_mode"]["nullable"] is False
+    assert world_character_columns["owner_user_id"]["nullable"] is True
+    assert {
+        item["name"]
+        for item in inspector.get_check_constraints("world_characters")
+    }.issuperset(
+        {
+            "ck_world_characters_control_mode",
+            "ck_world_characters_owner_binding",
+            "ck_world_characters_owner_autonomy_disabled",
+        }
+    )
+    assert {
+        item["name"] for item in inspector.get_indexes("world_characters")
+    }.issuperset(
+        {
+            "ix_world_characters_owner_status",
+            "uq_world_characters_active_owner_controlled",
+        }
+    )
     assert post_columns["world_id"]["nullable"] is True
     assert post_columns["author_world_character_id"]["nullable"] is True
     assert post_columns["search_document"]["nullable"] is False
@@ -215,7 +235,7 @@ def test_security_migration_schema_contract() -> None:
     with engine.connect() as connection:
         assert (
             connection.scalar(text("SELECT version_num FROM alembic_version"))
-            == "20260816_0080"
+            == "20260818_0081"
         )
 
 

@@ -14,8 +14,12 @@ import { useEffect, useState, type ReactNode } from "react";
 import type { WorldSurfaceItem } from "@/features/device-home/public";
 import { PRODUCT_ROUTES } from "@/shared/navigation/public";
 import { StatusBadge } from "@/shared/ui/public";
-
-import { getLocalWorldApp, WorldAppApiError } from "../api/world-app-client";
+import {
+  getLocalWorldApp,
+  getOwnerControlledActor,
+  type OwnerControlledActorRead,
+  WorldAppApiError,
+} from "../api/world-app-client";
 import {
   WORLD_APP_SECTIONS,
   worldAppSectionRoute,
@@ -47,14 +51,21 @@ const SECTION_ICONS: Record<WorldAppSectionId, ReactNode> = {
 
 export function WorldApp({ authStatus, sectionId, worldId }: WorldAppProps) {
   const [world, setWorld] = useState<WorldSurfaceItem | null>(null);
+  const [ownerActor, setOwnerActor] = useState<OwnerControlledActorRead | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<WorldAppApiError | Error | null>(null);
 
   useEffect(() => {
     if (authStatus !== "authenticated") return;
     const controller = new AbortController();
-    void getLocalWorldApp(worldId, { signal: controller.signal })
-      .then((read) => setWorld(read.world))
+    void Promise.all([
+      getLocalWorldApp(worldId, { signal: controller.signal }),
+      getOwnerControlledActor(worldId, { signal: controller.signal }),
+    ])
+      .then(([read, identity]) => {
+        setWorld(read.world);
+        setOwnerActor(identity);
+      })
       .catch((reason: unknown) => {
         if (reason instanceof DOMException && reason.name === "AbortError") return;
         setWorld(null);
@@ -114,7 +125,7 @@ export function WorldApp({ authStatus, sectionId, worldId }: WorldAppProps) {
       worldId={world.world_id}
       worldName={world.name}
     >
-      <WorldSection activeSection={activeSection} world={world} />
+      <WorldSection activeSection={activeSection} ownerActor={ownerActor} world={world} />
     </WorldAppShell>
   );
 }
@@ -148,9 +159,11 @@ function WorldNavigation({
 
 function WorldSection({
   activeSection,
+  ownerActor,
   world,
 }: {
   activeSection: WorldAppSection;
+  ownerActor: OwnerControlledActorRead | null;
   world: WorldSurfaceItem;
 }) {
   if (activeSection.id === "home") {
@@ -165,6 +178,16 @@ function WorldSection({
         <div className={styles.scopeNotice}>
           <strong>World 경계가 적용됐어요</strong>
           <p>아래 기능은 항상 이 World의 식별자를 유지하며, 다른 World로 자동 fallback하지 않습니다.</p>
+        </div>
+        <div className={styles.scopeNotice}>
+          <strong>이 World에서 내가 조종하는 앵무</strong>
+          {ownerActor ? (
+            <p>
+              {ownerActor.profile.display_name} · 자동 활동 OFF · {ownerActor.profile.role_key || "역할 없음"}
+            </p>
+          ) : (
+            <p>Creator Studio에서 사용자 조종 앵무를 만들 수 있습니다.</p>
+          )}
         </div>
       </section>
     );

@@ -45,6 +45,10 @@ from app.services.routine_post_runtime import (
     reconcile_all_elapsed_routines,
     routine_world_character_for_character,
 )
+from app.domains.world_characters.public import (
+    is_owner_controlled_character,
+    owner_controlled_character_ids,
+)
 from app.services.runtime_boundary import (
     OpenClawGatewayClient,
     OpenClawGatewayError,
@@ -6748,15 +6752,45 @@ async def _run_resident_slot_once(
 ) -> schemas.OpenClawAgentRunRead:
     engine = settings.agent_activity_engine
     use_langgraph_resident = engine == "langgraph" and enforce_activity_policy
-    token = settings.openclaw_gateway_token
-    if not use_langgraph_resident and token is None:
-        raise OpenClawNotConfiguredError("OPENCLAW_GATEWAY_TOKEN is missing")
     if (
         slot.assigned_user_id is None
         or slot.assigned_character_id is None
         or slot.assigned_credential_id is None
     ):
         raise AgentSlotUnavailableError(f"slot {slot.agent_id} has no assignment")
+
+    if is_owner_controlled_character(db, slot.assigned_character_id):
+        session_key = (
+            f"agent:{slot.agent_id}:owner-controlled-block:"
+            f"{slot.assigned_user_id}:{slot.assigned_character_id}"
+        )
+        agent_run_crud.complete_resident_slot_run(
+            db,
+            agent_id=slot.agent_id,
+            run_id=slot.locked_by_run_id or "",
+            heartbeat_interval_seconds=slot.heartbeat_interval_seconds or 1800,
+            next_tick_at=None,
+            last_error="owner_controlled_automation_disabled",
+        )
+        return schemas.OpenClawAgentRunRead(
+            run_id="owner-controlled-no-run",
+            status="no_action",
+            summary="사용자 조종 identity는 자동 실행하지 않습니다.",
+            agent_id=slot.agent_id,
+            session_key=session_key,
+            character_id=slot.assigned_character_id,
+            post_id=None,
+            gateway_result={
+                "status": "no_action",
+                "reason_code": "owner_controlled_automation_disabled",
+                "provider_call_count": 0,
+                "public_write_count": 0,
+            },
+        )
+
+    token = settings.openclaw_gateway_token
+    if not use_langgraph_resident and token is None:
+        raise OpenClawNotConfiguredError("OPENCLAW_GATEWAY_TOKEN is missing")
 
     run_id = str(uuid4())
     individual_tool_flow = (
@@ -8054,12 +8088,21 @@ async def tick_resident_slots(
                 results=[],
                 slots=list_resident_slots(db),
             )
+    candidate_character_ids = {
+        slot.assigned_character_id
+        for slot in agent_run_crud.list_agent_slots(db)
+        if slot.assigned_character_id is not None
+    }
+    owner_controlled_ids = owner_controlled_character_ids(
+        db, candidate_character_ids
+    )
     due_before = [
         slot
         for slot in agent_run_crud.list_agent_slots(db)
         if slot.next_tick_at is not None
         and slot.next_tick_at <= now
         and slot.status in agent_run_crud.DUE_SLOT_STATUSES
+        and slot.assigned_character_id not in owner_controlled_ids
         and (
             allowed_character_ids is None
             or slot.assigned_character_id in allowed_character_ids
