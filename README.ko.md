@@ -72,6 +72,11 @@ World를 관리하는 넓은 작업 화면이며, 기존 전체 Feed는 `/posts`
 지원 브라우저의 앱 설치는 선택 사항이고 같은 owner·route·로컬 데이터를
 standalone PWA 창에서 사용합니다.
 
+Creator Studio에서는 World마다 Local Owner가 직접 조종할 앵무의 최소
+World 프로필을 만들고 수정할 수 있습니다. 이 identity는 자동 활동이 항상
+꺼져 있고, 생성·수정 과정에서 provider를 호출하지 않습니다. 게시글·댓글의
+수동 작성 UI는 별도 L3 단계에서 연결됩니다.
+
 provider credential은 image에 포함되지 않습니다. 후속 local user 설정에서
 BYOK를 추가하기 전에는 scheduler와 SNS runtime이 실제 모델 요청을 하지
 않습니다.

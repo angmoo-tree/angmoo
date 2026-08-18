@@ -57,6 +57,15 @@ per-module external import records, and 377 exact legacy exceptions. The ten
 removed exceptions were existing World Creator compatibility edges; PR B adds
 no exception.
 
+L3 PR C adds the `characters` identity persistence facade and the
+`world_characters` domain/application/port/API/SQLAlchemy slices for the
+owner-controlled identity foundation. The regenerated inventory contains 341
+modules, 741 internal edges, and 1,191 per-module external import records while
+the exact legacy exception count remains 377. The new route reaches concrete
+SQLAlchemy only inside the domain infrastructure adapter; cross-domain World
+and Local Owner checks use their stable public surfaces. No new legacy import
+exception is introduced.
+
 The policy now freezes 377 exact imports into the horizontal legacy prefixes
 `app.cruds`, `app.models`, `app.schemas`, and `app.services`: 375 general
 horizontal edges plus the 2-edge Neo4j write-runtime bridge. L1 PR A removes
@@ -105,7 +114,7 @@ backend/app/
 | `core` | small primitives only | L0 | existing core is audited, not moved in PR A |
 | `identity` | `app.domains.identity.public` | L1 | PR A foundation active; runtime behavior unchanged |
 | resident and scheduler runtime | `app.domains.runtime.public` | L2 | PR A state/schema foundation active; behavior unchanged |
-| `worlds`, `world_characters`, `routines`, `routine_posts` | each domain's `public.py` | L3 | P1 World Creator uses `app.domains.worlds.public`; remaining behavior migration is PR C-G |
+| `worlds`, `world_characters`, `routines`, `routine_posts` | each domain's `public.py` | L3 | P1 World Creator and owner-controlled WorldCharacter identity are active; autonomous setup and P3-P4 remain PR D-G |
 | `world_packages` | `app.domains.world_packages.public` | L3.5 | new Local feature later |
 | feed and `social` | `app.domains.social.public` | L4 | target only |
 | `relationships` graph read | `app.domains.relationships.public` | T2.5 pilot | canonical read slice active; PR C removes usage-zero aliases; write path unchanged |
@@ -124,8 +133,12 @@ four public package anchors and parity guards. It adds no migration, provider
 call, transaction change, HTTP response change, scheduler behavior, or product
 write. L3 PR B moves only the P1 World Creator boundary and preserves its HTTP,
 transaction, row-version, definition-hash, provider-free, and zero-post
-contracts. PR C-G move the remaining behavior boundaries one at a time and
-remove the matching exact legacy exceptions as their callers migrate.
+contracts. L3 PR C adds an additive owner-controlled identity rather than
+reusing the autonomous setup service. It validates Local Owner, World
+ownership, membership and World role before persistence, and scheduler/run
+preflight consumes only the stable WorldCharacter public policy. PR D-G move
+the remaining behavior boundaries one at a time and remove the matching exact
+legacy exceptions as their callers migrate.
 
 ## T2.5 relationship graph read pilot
 

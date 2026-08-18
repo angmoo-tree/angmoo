@@ -20,16 +20,21 @@ import { PRODUCT_ROUTES, studioWorldRoute } from "@/shared/navigation/public";
 
 import { useAuth } from "@/components/auth-provider";
 import {
+  createOwnerControlledIdentity,
   createWorld,
+  getOwnerControlledIdentity,
   getWorldCreatorContext,
   publishWorld,
   removeWorldBanner,
   requestValidationFields,
   updateWorld,
+  updateOwnerControlledIdentity,
   uploadWorldBanner,
   validateWorld,
   WorldApiError,
   type WorldCreatorContext,
+  type OwnerControlledIdentityRead,
+  type OwnerControlledProfileWrite,
   type WorldDaypart,
   type WorldDefinition,
   type WorldGlossaryTermInput,
@@ -83,6 +88,10 @@ const REASON_LABELS: Record<string, string> = {
   unsafe_banner_reference: "배너 이미지 형식이나 크기를 확인해 주세요.",
   row_version_conflict: "다른 변경이 먼저 저장됐습니다. 새로고침 후 다시 시도해 주세요.",
   request_validation_error: "입력값과 형식을 확인해 주세요.",
+  local_owner_required: "이 설치의 Local Owner 연결이 필요합니다.",
+  owner_world_required: "Local Owner가 소유한 World에서만 만들 수 있습니다.",
+  owner_controlled_identity_exists: "이 World에는 이미 사용자 조종 앵무가 있습니다.",
+  owner_controlled_role_invalid: "이 World에서 사용할 수 있는 역할을 선택해 주세요.",
 };
 
 function splitList(value: string) {
@@ -454,6 +463,13 @@ export function WorldCreatorClient({ worldId }: { worldId?: string }) {
 
             <OptionalSettings definition={definition} change={change} />
 
+            {context ? (
+              <OwnerControlledIdentityPanel
+                roles={definition.roles}
+                worldId={context.world.id}
+              />
+            ) : null}
+
             <Panel title="배너 이미지 (선택)" description="초안을 저장한 뒤 업로드할 수 있습니다. 이미지 변경은 캐릭터 일과 생성 계약 hash를 바꾸지 않습니다.">
               <div className="flex flex-wrap items-center gap-3">
                 <label className={secondaryButtonClass}>
@@ -496,6 +512,145 @@ export function WorldCreatorClient({ worldId }: { worldId?: string }) {
         </div>
       </div>
     </main>
+  );
+}
+
+const EMPTY_OWNER_PROFILE: OwnerControlledProfileWrite = {
+  display_name: "",
+  avatar_url: "",
+  intro: "",
+  role_key: null,
+  preferred_address: "",
+  interests: [],
+  background: "",
+};
+
+function OwnerControlledIdentityPanel({
+  roles,
+  worldId,
+}: {
+  roles: WorldRoleInput[];
+  worldId: string;
+}) {
+  const [identity, setIdentity] = useState<OwnerControlledIdentityRead | null>(null);
+  const [profile, setProfile] = useState<OwnerControlledProfileWrite>(
+    EMPTY_OWNER_PROFILE,
+  );
+  const [interestsText, setInterestsText] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    void getOwnerControlledIdentity(worldId)
+      .then((next) => {
+        if (!active) return;
+        setIdentity(next);
+        setProfile(next.profile);
+        setInterestsText(next.profile.interests.join(", "));
+      })
+      .catch((reason: unknown) => {
+        if (
+          active &&
+          reason instanceof WorldApiError &&
+          reason.status !== 404
+        ) {
+          setMessage(errorMessage(reason));
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [worldId]);
+
+  function patchProfile<K extends keyof OwnerControlledProfileWrite>(
+    key: K,
+    value: OwnerControlledProfileWrite[K],
+  ) {
+    setProfile((current) => ({ ...current, [key]: value }));
+    setMessage(null);
+  }
+
+  async function saveIdentity() {
+    setSaving(true);
+    setMessage(null);
+    const payload = {
+      ...profile,
+      interests: parseCommaList(interestsText, 12),
+    };
+    try {
+      const next = identity
+        ? await updateOwnerControlledIdentity(worldId, payload)
+        : await createOwnerControlledIdentity(worldId, payload);
+      setIdentity(next);
+      setProfile(next.profile);
+      setInterestsText(next.profile.interests.join(", "));
+      setMessage(identity ? "사용자 조종 앵무를 수정했습니다." : "사용자 조종 앵무를 만들었습니다.");
+    } catch (reason) {
+      setMessage(errorMessage(reason));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Panel
+      title="내가 조종하는 앵무"
+      description="이 World에서 Local Owner가 직접 말하고 행동할 identity입니다. 자동 활동·BYOK·AI 호출은 연결되지 않습니다."
+    >
+      {loading ? (
+        <p className="text-sm font-bold text-[#667085]">identity를 확인하는 중입니다.</p>
+      ) : (
+        <>
+          {identity ? (
+            <div className="flex flex-wrap gap-2 text-xs font-extrabold">
+              <Badge>owner controlled</Badge>
+              <Badge>자동 활동 OFF</Badge>
+              <Badge>v{identity.version}</Badge>
+            </div>
+          ) : (
+            <p className="rounded-[18px] bg-[#f2f4f7] px-4 py-3 text-sm font-bold text-[#475467]">
+              아직 이 World에서 사용자가 조종할 앵무가 없습니다.
+            </p>
+          )}
+          <div className="grid gap-5 md:grid-cols-2">
+            <Field label="표시 이름" counter={`${profile.display_name.length}/80`}>
+              <input className={inputClass} maxLength={80} value={profile.display_name} onChange={(event) => patchProfile("display_name", event.target.value)} placeholder="예: 진구의 앵무" />
+            </Field>
+            <Field label="World 역할">
+              <select className={inputClass} value={profile.role_key ?? ""} onChange={(event) => patchProfile("role_key", event.target.value || null)}>
+                <option value="">역할 없음</option>
+                {roles.map((role) => <option key={role.key} value={role.key}>{role.name || role.key}</option>)}
+              </select>
+            </Field>
+            <Field label="불리고 싶은 이름" counter={`${profile.preferred_address.length}/80`}>
+              <input className={inputClass} maxLength={80} value={profile.preferred_address} onChange={(event) => patchProfile("preferred_address", event.target.value)} />
+            </Field>
+            <Field label="관심사" hint="쉼표로 구분 · 최대 12개">
+              <input className={inputClass} value={interestsText} onChange={(event) => setInterestsText(event.target.value)} placeholder="마법약, 친구, 산책" />
+            </Field>
+          </div>
+          <Field label="한 줄 소개" counter={`${profile.intro.length}/280`}>
+            <textarea className={textareaClass} maxLength={280} value={profile.intro} onChange={(event) => patchProfile("intro", event.target.value)} />
+          </Field>
+          <Field label="World 안의 배경" counter={`${profile.background.length}/500`}>
+            <textarea className={textareaClass} maxLength={500} value={profile.background} onChange={(event) => patchProfile("background", event.target.value)} />
+          </Field>
+          <Field label="아바타 URL" hint="필수 · http 또는 https 이미지 주소">
+            <input className={inputClass} maxLength={500} value={profile.avatar_url} onChange={(event) => patchProfile("avatar_url", event.target.value)} />
+          </Field>
+          {message ? <p className="text-sm font-bold text-[#475467]">{message}</p> : null}
+          <button type="button" className={secondaryButtonClass} disabled={saving || !profile.display_name.trim() || !profile.avatar_url.trim() || !profile.intro.trim()} onClick={() => void saveIdentity()}>
+            {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+            {identity ? "조종 앵무 수정" : "조종 앵무 만들기"}
+          </button>
+        </>
+      )}
+    </Panel>
   );
 }
 

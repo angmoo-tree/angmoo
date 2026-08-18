@@ -86,6 +86,20 @@ project-owned `frontend/src/app/icon.svg`: 192px and 512px general icons plus a
 512px maskable icon with an expanded Angmoo color safe area. No third-party
 icon or remote build asset is introduced.
 
+## L3 owner-controlled World actor
+
+Creator Studio now contains the Local Owner's minimum World identity editor.
+It requires a display name, an HTTP(S) avatar URL, and a one-line introduction;
+World role, preferred address, interests, and World-local background remain
+optional. The feature calls the owner-scoped WorldCharacter API only and does
+not start BYOK setup, enable autonomy, or create a social write.
+
+The World App reads the same identity and presents it as the current manual
+actor with `automatic activity OFF`. A missing identity is an explicit Studio
+setup state, not a fallback to another World or autonomous Character. Manual
+Post and Comment controls remain unavailable until the separately reviewed L3
+PR G author-guard contract is implemented.
+
 ## Visual contract
 
 Device Home and World App share a thin, uniform, flat frame. The initial tokens

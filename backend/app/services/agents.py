@@ -47,6 +47,9 @@ from app.services.runtime_boundary import (
     OpenClawGatewayError,
     openclaw_auth_profiles,
 )
+from app.domains.world_characters.public import (
+    is_owner_controlled_character,
+)
 
 
 MAX_LLM_AGENTS_PER_USER = 3
@@ -2442,6 +2445,8 @@ async def run_agent_now(
 ) -> schemas.OpenClawAgentRunRead:
     character = _get_owned_character(db, user, character_id)
     _ensure_not_suspended(character)
+    if is_owner_controlled_character(db, character.id):
+        raise AgentExecutionModeError("owner_controlled_manual_write_not_available")
     _ensure_llm_mode(character)
     maintenance_service.ensure_run_now_available(db)
     setting = agent_crud.ensure_setting(db, character.id)

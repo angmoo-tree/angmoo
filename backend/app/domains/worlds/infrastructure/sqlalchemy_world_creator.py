@@ -100,6 +100,23 @@ def get_active_membership(
     )
 
 
+def is_enabled_world_role(
+    db: Session,
+    *,
+    world_id: str,
+    role_key: str,
+) -> bool:
+    return bool(
+        db.scalar(
+            select(models.WorldRole.id).where(
+                models.WorldRole.world_id == world_id,
+                models.WorldRole.role_key == role_key,
+                models.WorldRole.status == "enabled",
+            )
+        )
+    )
+
+
 def require_world_read_access(
     db: Session,
     *,

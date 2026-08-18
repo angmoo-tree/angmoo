@@ -103,6 +103,28 @@ export type WorldCreatorContext = {
   readiness: WorldReadiness;
 };
 
+export type OwnerControlledProfileWrite = {
+  display_name: string;
+  avatar_url: string;
+  intro: string;
+  role_key: string | null;
+  preferred_address: string;
+  interests: string[];
+  background: string;
+};
+
+export type OwnerControlledIdentityRead = {
+  schema_version: "owner-controlled-world-character-v1";
+  world_character_id: string;
+  world_id: string;
+  character_id: string;
+  control_mode: "owner_controlled";
+  status: string;
+  autonomous_enabled: false;
+  version: number;
+  profile: OwnerControlledProfileWrite;
+};
+
 export type WorldGenerationContext = Omit<
   WorldDefinition,
   "visibility" | "join_policy"
@@ -268,5 +290,31 @@ export function removeWorldBanner(worldId: string, rowVersion: number) {
 export function getWorldGenerationContext(worldId: string) {
   return apiRequest<WorldGenerationContext>(
     worldPath(worldId, "/generation-context"),
+  );
+}
+
+export function getOwnerControlledIdentity(worldId: string) {
+  return apiRequest<OwnerControlledIdentityRead>(
+    worldPath(worldId, "/owner-character"),
+  );
+}
+
+export function createOwnerControlledIdentity(
+  worldId: string,
+  data: OwnerControlledProfileWrite,
+) {
+  return apiRequest<OwnerControlledIdentityRead>(
+    worldPath(worldId, "/owner-character"),
+    { method: "POST", body: data },
+  );
+}
+
+export function updateOwnerControlledIdentity(
+  worldId: string,
+  data: OwnerControlledProfileWrite,
+) {
+  return apiRequest<OwnerControlledIdentityRead>(
+    worldPath(worldId, "/owner-character"),
+    { method: "PATCH", body: data },
   );
 }

@@ -26,6 +26,7 @@ def _create_autonomy_capacity_tables(engine) -> None:
     for table in (
         models.User.__table__,
         models.Character.__table__,
+        models.WorldCharacter.__table__,
         models.CharacterActiveWorld.__table__,
         models.CharacterState.__table__,
         models.Post.__table__,
