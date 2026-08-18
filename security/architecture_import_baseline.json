@@ -1,7 +1,7 @@
 {
   "edge_count": 705,
   "external_import_count": 1157,
-  "module_count": 308,
+  "module_count": 316,
   "modules": [
     {
       "external_imports": [],
@@ -2022,6 +2022,34 @@
     {
       "external_imports": [],
       "imports": [],
+      "module": "app.domains.routine_posts",
+      "path": "backend/app/domains/routine_posts/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.routine_posts.public",
+      "path": "backend/app/domains/routine_posts/public.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.routines",
+      "path": "backend/app/domains/routines/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.routines.public",
+      "path": "backend/app/domains/routines/public.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
       "module": "app.domains.runtime",
       "path": "backend/app/domains/runtime/__init__.py",
       "wildcard_imports": []
@@ -2218,6 +2246,34 @@
       ],
       "module": "app.domains.runtime.public",
       "path": "backend/app/domains/runtime/public.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.world_characters",
+      "path": "backend/app/domains/world_characters/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.world_characters.public",
+      "path": "backend/app/domains/world_characters/public.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.worlds",
+      "path": "backend/app/domains/worlds/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.worlds.public",
+      "path": "backend/app/domains/worlds/public.py",
       "wildcard_imports": []
     },
     {

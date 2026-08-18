@@ -94,7 +94,7 @@ backend/app/
 | `core` | small primitives only | L0 | existing core is audited, not moved in PR A |
 | `identity` | `app.domains.identity.public` | L1 | PR A foundation active; runtime behavior unchanged |
 | resident and scheduler runtime | `app.domains.runtime.public` | L2 | PR A state/schema foundation active; behavior unchanged |
-| `worlds`, `characters`, `activities`, root posts | each domain's `public.py` | L3 | target only |
+| `worlds`, `world_characters`, `routines`, `routine_posts` | each domain's `public.py` | L3 | PR A package anchors and execution map active; behavior migration remains PR B-G |
 | `world_packages` | `app.domains.world_packages.public` | L3.5 | new Local feature later |
 | feed and `social` | `app.domains.social.public` | L4 | target only |
 | `relationships` graph read | `app.domains.relationships.public` | T2.5 pilot | canonical read slice active; PR C removes usage-zero aliases; write path unchanged |
@@ -106,6 +106,13 @@ PR A added the contract and checker but moved **zero product source files**.
 PR B moved only the P7 relationship graph read path. PR C removes only shims
 proven unused, promotes the stable boundary contract in repository policy, and
 closes the evidence loop.
+
+The L3 execution baseline and exact migration ownership are recorded in
+[`l3-p1-p4-execution-map.md`](l3-p1-p4-execution-map.md). L3 PR A adds only the
+four public package anchors and parity guards. It adds no migration, provider
+call, transaction change, HTTP response change, scheduler behavior, or product
+write. PR B-G move one behavior boundary at a time and remove the matching
+exact legacy exceptions as their callers migrate.
 
 ## T2.5 relationship graph read pilot
 
