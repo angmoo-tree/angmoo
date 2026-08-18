@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.api.v1.deps import get_current_user, get_db, get_optional_current_user
-from app.services import worlds as world_service
+from app.domains.worlds import public as world_service
 from app.services import world_character_setup
 
 

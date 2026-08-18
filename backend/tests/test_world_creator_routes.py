@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import asyncio
+import base64
 from datetime import datetime, timezone
+from io import BytesIO
 from pathlib import Path
 
 import httpx
 from fastapi import FastAPI
+from PIL import Image
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
@@ -13,6 +16,7 @@ from sqlalchemy.pool import StaticPool
 from app import models
 from app.api.v1 import deps as api_deps
 from app.api.v1.routes import worlds as world_routes
+from app.core.config import settings
 from app.core.db import Base
 
 
@@ -128,6 +132,58 @@ def test_creator_route_lifecycle_and_stable_conflict() -> None:
     )
     assert stale.status_code == 409
     assert stale.json() == {"detail": "row_version_conflict"}
+
+    with Session(engine) as db:
+        assert db.query(models.Post).count() == 0
+        assert db.query(models.AgentRun).count() == 0
+
+
+def test_world_banner_round_trip_stays_inside_worlds_domain_storage(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(settings, "MEDIA_ROOT", str(tmp_path))
+    app, engine, principal = _app()
+    owner = _user("owner")
+    with Session(engine, expire_on_commit=False) as db:
+        db.add(owner)
+        db.commit()
+    principal["user"] = owner
+
+    created = _request(app, "POST", "/api/v1/worlds", json=_payload())
+    world = created.json()["world"]
+    image = Image.new("RGB", (320, 120), (120, 80, 200))
+    output = BytesIO()
+    image.save(output, format="PNG")
+
+    uploaded = _request(
+        app,
+        "POST",
+        f"/api/v1/worlds/{world['id']}/banner",
+        json={
+            "row_version": world["row_version"],
+            "content_type": "image/png",
+            "data_base64": base64.b64encode(output.getvalue()).decode("ascii"),
+            "alt_text": "비늘항구의 야경",
+        },
+    )
+    assert uploaded.status_code == 200
+    uploaded_world = uploaded.json()["world"]
+    media_url = uploaded_world["banner_media_id"]
+    assert media_url.startswith(f"/media/worlds/{world['id']}/banner-")
+    media_path = tmp_path / media_url.removeprefix("/media/")
+    assert media_path.is_file()
+    assert media_path.read_bytes().startswith(b"RIFF")
+
+    removed = _request(
+        app,
+        "DELETE",
+        f"/api/v1/worlds/{world['id']}/banner",
+        json={"row_version": uploaded_world["row_version"]},
+    )
+    assert removed.status_code == 200
+    assert removed.json()["world"]["banner_media_id"] is None
+    assert not media_path.exists()
 
 
 def test_private_world_is_hidden_and_member_cannot_mutate() -> None:

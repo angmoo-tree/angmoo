@@ -47,14 +47,25 @@ L2 PR A adds 11 runtime-domain modules and reaches 285 modules, 658 internal
 edges, and 1,086 unique per-module external import records. It adds zero legacy
 exceptions and leaves the exact legacy allowlist at 387 edges.
 
-The policy now freezes 387 exact imports into the horizontal legacy prefixes
-`app.cruds`, `app.models`, `app.schemas`, and `app.services`: 385 general
+L3 PR A records its execution map at merge commit
+`e989dca1bb103ad61fac3518fc39c9055ad424aa` with 316 modules, 705 internal
+edges, and 387 exact legacy exceptions. L3 PR B makes the P1 World Creator
+schemas, definition/hash logic, persistence models, generation context, banner
+storage, and SQLAlchemy use-case adapter canonical under `app.domains.worlds`.
+The resulting inventory contains 324 modules, 714 internal edges, 1,170
+per-module external import records, and 377 exact legacy exceptions. The ten
+removed exceptions were existing World Creator compatibility edges; PR B adds
+no exception.
+
+The policy now freezes 377 exact imports into the horizontal legacy prefixes
+`app.cruds`, `app.models`, `app.schemas`, and `app.services`: 375 general
 horizontal edges plus the 2-edge Neo4j write-runtime bridge. L1 PR A removes
 three identity aggregate edges rather than replacing them with exceptions. PR B
 added zero legacy exceptions and removed two stale exceptions. PR C also added
 zero legacy exceptions and left the previous exact count at 390. L1 PR A lowers
-that count to 387. Existing edges may only disappear. Updating the inventory
-cannot silently authorize another legacy edge.
+that count to 387. L3 PR B removes ten World Creator exceptions and lowers it
+to 377. Existing edges may only disappear. Updating the inventory cannot
+silently authorize another legacy edge.
 
 ## Target tree
 
@@ -94,7 +105,7 @@ backend/app/
 | `core` | small primitives only | L0 | existing core is audited, not moved in PR A |
 | `identity` | `app.domains.identity.public` | L1 | PR A foundation active; runtime behavior unchanged |
 | resident and scheduler runtime | `app.domains.runtime.public` | L2 | PR A state/schema foundation active; behavior unchanged |
-| `worlds`, `world_characters`, `routines`, `routine_posts` | each domain's `public.py` | L3 | PR A package anchors and execution map active; behavior migration remains PR B-G |
+| `worlds`, `world_characters`, `routines`, `routine_posts` | each domain's `public.py` | L3 | P1 World Creator uses `app.domains.worlds.public`; remaining behavior migration is PR C-G |
 | `world_packages` | `app.domains.world_packages.public` | L3.5 | new Local feature later |
 | feed and `social` | `app.domains.social.public` | L4 | target only |
 | `relationships` graph read | `app.domains.relationships.public` | T2.5 pilot | canonical read slice active; PR C removes usage-zero aliases; write path unchanged |
@@ -111,8 +122,10 @@ The L3 execution baseline and exact migration ownership are recorded in
 [`l3-p1-p4-execution-map.md`](l3-p1-p4-execution-map.md). L3 PR A adds only the
 four public package anchors and parity guards. It adds no migration, provider
 call, transaction change, HTTP response change, scheduler behavior, or product
-write. PR B-G move one behavior boundary at a time and remove the matching
-exact legacy exceptions as their callers migrate.
+write. L3 PR B moves only the P1 World Creator boundary and preserves its HTTP,
+transaction, row-version, definition-hash, provider-free, and zero-post
+contracts. PR C-G move the remaining behavior boundaries one at a time and
+remove the matching exact legacy exceptions as their callers migrate.
 
 ## T2.5 relationship graph read pilot
 

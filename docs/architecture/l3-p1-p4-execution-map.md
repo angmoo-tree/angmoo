@@ -1,12 +1,13 @@
 # L3 P1-P4 execution path and migration map
 
-This document records the executable L3 baseline before behavior changes. It is
-an architecture map, not evidence that the L3 Local vertical loop has shipped.
+This document records the executable L3 baseline and the boundaries migrated
+from it. It is an architecture map, not evidence that the complete L3 Local
+vertical loop has shipped or passed user validation.
 
 - Baseline repository: `angmoo-tree/angmoo`
 - Baseline branch: `main`
 - Baseline commit: `b809bc2d748f8bcac82860447bcff3c816f93452`
-- L3 status at this map: `IMPLEMENTATION NOT STARTED`
+- L3 status at this map: `P1 IMPLEMENTED; P2-P4 IMPLEMENTATION NOT STARTED`
 - Canonical store: PostgreSQL
 - Projection store: Neo4j, replayable from PostgreSQL outbox events
 
@@ -33,15 +34,20 @@ owner-controlled author guard and one-time Inbox handoff around that path.
 ```text
 HTTP /api/v1/worlds/*
 -> app.api.v1.routes.worlds
--> app.services.worlds
--> app.models.worlds + app.schemas.worlds
+-> app.domains.worlds.public
+-> app.domains.worlds.infrastructure.sqlalchemy_world_creator
+-> app.domains.worlds.infrastructure.sqlalchemy_models
 -> SQLAlchemy Session / PostgreSQL
 ```
 
-Provider calls are not part of the create, edit, readiness, publish, archive,
-banner, or generation-context read path. PR B moves this path behind
-`app.domains.worlds.public` while preserving request schemas, commits, row
-versions, hashes, and error codes.
+PR B moved all World Creator routes behind `app.domains.worlds.public` and made
+the domain the canonical owner of its Pydantic schemas, World definition/hash
+logic, SQLAlchemy persistence models, generation context, and banner storage.
+Compatibility modules re-export the same Python objects for callers owned by
+later L3 PRs. Create, edit, readiness, publish, archive, banner, and
+generation-context reads preserve their request schemas, commits, row versions,
+hashes, and error codes. They have no provider dependency; route parity tests
+also assert zero Post and AgentRun rows during the P1 lifecycle.
 
 ### P2 autonomous WorldCharacter setup
 
@@ -141,12 +147,13 @@ transport / scheduler / launcher
 
 ## Legacy allowlist disposition
 
-No new legacy exception is added by PR A. The following current edges are
-removed by their owning behavior PR, after parity tests protect their behavior:
+No new legacy exception is added by L3. PR B removed the exact
+`app.api.v1.routes.worlds -> app.services.worlds` exception after parity tests
+protected the World Creator behavior. The remaining current edges are removed
+by their owning behavior PR:
 
 | Current edge group | Owner PR | Removal condition |
 |---|---|---|
-| `app.api.v1.routes.worlds -> app.services.worlds` | PR B | all World Creator routes call `app.domains.worlds.public` |
 | World entry/setup routes -> `app.services.world_character_setup` | PR C / PR D | identity and autonomous setup calls use the public WorldCharacter boundary |
 | activity-plan routes -> `app.services.daily_activity_plans` | PR E | plan and runtime-mode calls use the public routine boundary |
 | resident runtime -> routine post legacy services | PR F | resident calls the public routine-post execution use case |
@@ -168,5 +175,6 @@ removing its exact policy exception in the same PR; stale exceptions fail CI.
 7. PR G: owner-controlled manual write and one-time Inbox observation.
 8. PR H: migration, Docker, Windows clean-clone, evidence, and user closeout.
 
+P1 implementation alone does not prove P2-P4 or the complete user scenario.
 Until all required runtime, DB, log, migration, and user-screen evidence passes,
-the milestone remains `PLANNED / IMPLEMENTATION NOT STARTED`.
+the overall L3 milestone remains `PLANNED`.
