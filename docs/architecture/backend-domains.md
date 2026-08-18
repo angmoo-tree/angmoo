@@ -114,7 +114,7 @@ backend/app/
 | `core` | small primitives only | L0 | existing core is audited, not moved in PR A |
 | `identity` | `app.domains.identity.public` | L1 | PR A foundation active; runtime behavior unchanged |
 | resident and scheduler runtime | `app.domains.runtime.public` | L2 | PR A state/schema foundation active; behavior unchanged |
-| `worlds`, `world_characters`, `routines`, `routine_posts` | each domain's `public.py` | L3 | P1 World Creator and owner-controlled WorldCharacter identity are active; autonomous setup and P3-P4 remain PR D-G |
+| `worlds`, `world_characters`, `routines`, `routine_posts` | each domain's `public.py` | L3 | P1 World Creator and owner-controlled identity are active; PR D moves autonomous setup behind the WorldCharacter public boundary; P3-P4 remain PR E-G |
 | `world_packages` | `app.domains.world_packages.public` | L3.5 | new Local feature later |
 | feed and `social` | `app.domains.social.public` | L4 | target only |
 | `relationships` graph read | `app.domains.relationships.public` | T2.5 pilot | canonical read slice active; PR C removes usage-zero aliases; write path unchanged |
@@ -139,6 +139,14 @@ ownership, membership and World role before persistence, and scheduler/run
 preflight consumes only the stable WorldCharacter public policy. PR D-G move
 the remaining behavior boundaries one at a time and remove the matching exact
 legacy exceptions as their callers migrate.
+
+L3 PR D makes `app.domains.world_characters.public` the only HTTP-facing entry
+for autonomous World entry and setup. The domain-owned SQLAlchemy adapter uses
+the identity `local-v2` resolver, a direct-LLM integration adapter, explicit
+consent/attempt records, and the existing exact 40-candidate validator. The
+legacy setup, schema, model, provider, contract, and direct-LLM modules are
+compatibility aliases only; privacy cleanup remains in the legacy service
+until its P3-P6 rows have migrated to their owning domains.
 
 ## T2.5 relationship graph read pilot
 

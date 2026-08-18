@@ -7,7 +7,7 @@ vertical loop has shipped or passed user validation.
 - Baseline repository: `angmoo-tree/angmoo`
 - Baseline branch: `main`
 - Baseline commit: `b809bc2d748f8bcac82860447bcff3c816f93452`
-- L3 status at this map: `P1 IMPLEMENTED; owner-controlled identity foundation IMPLEMENTED; autonomous P2-P4 IMPLEMENTATION NOT STARTED`
+- L3 status at this map: `P1 IMPLEMENTED; owner-controlled identity foundation IMPLEMENTED; autonomous P2 PR D IN PROGRESS; P3-P4 IMPLEMENTATION NOT STARTED`
 - Canonical store: PostgreSQL
 - Projection store: Neo4j, replayable from PostgreSQL outbox events
 
@@ -80,22 +80,33 @@ refuses with a stable recovery reason while such rows exist.
 ```text
 HTTP /api/v1/worlds/{world_id}/characters
 -> app.api.v1.routes.worlds
--> app.services.world_character_setup.enter_world
+-> app.domains.world_characters.public
+-> app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup
 
 HTTP /api/v1/world-characters/{id}/autonomy-setup/*
 -> app.api.v1.routes.world_character_setup
--> app.services.world_character_setup
--> app.credentials.CredentialResolver
--> app.services.world_character_provider
--> app.services.direct_llm
+-> app.domains.world_characters.public
+-> app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup
+-> app.domains.identity.public CredentialResolver (`local-v2`)
+-> app.domains.world_characters.infrastructure.direct_llm_setup_provider
+-> app.integrations.direct_llm
 -> provider adapter
 -> setup/profile/repertoire/candidate tables in PostgreSQL
 ```
 
 The initial successful provider contract is profile request 1 plus repertoire
-requests 2, with exactly 40 validated candidates and 10 per daypart. PR D owns
-that migration. PR C first adds owner-controlled identity without calling this
-provider path.
+requests 2, with exactly 40 validated candidates and 10 per daypart. Preflight
+shows logical calls 2 and physical requests 3 before consent. Reusing an
+approved same-hash pair makes both counts zero. The adapter persists physical
+request counts per attempt, allows stage-local retry, and never enables
+autonomy as a side effect of generation or approval.
+
+PR D makes this path autonomous-only: an `owner_controlled` identity fails with
+`owner_controlled_automation_disabled` before credential resolution, provider
+construction, setup writes, AgentRun creation, or public writes. Removing the
+credential after approval does not delete the PostgreSQL profile, repertoire,
+or forty candidates. Compatibility modules retain the old Python imports while
+HTTP entrypoints use the canonical public boundary.
 
 ### P3 deterministic daily plan and lifecycle
 
@@ -175,14 +186,13 @@ transport / scheduler / launcher
 
 ## Legacy allowlist disposition
 
-No new legacy exception is added by L3. PR B removed the exact
-`app.api.v1.routes.worlds -> app.services.worlds` exception after parity tests
-protected the World Creator behavior. The remaining current edges are removed
-by their owning behavior PR:
+No new legacy exception is added by L3. PR B removed the exact World Creator
+route exception, and PR D removes the two autonomous setup route exceptions
+plus the migrated setup model/schema/provider implementation edges. The
+remaining current edges are removed by their owning behavior PR:
 
 | Current edge group | Owner PR | Removal condition |
 |---|---|---|
-| autonomous World entry/setup routes -> `app.services.world_character_setup` | PR D | autonomous setup calls use the public WorldCharacter boundary; PR C owner identity already uses its domain application/port/adapter path |
 | activity-plan routes -> `app.services.daily_activity_plans` | PR E | plan and runtime-mode calls use the public routine boundary |
 | resident runtime -> routine post legacy services | PR F | resident calls the public routine-post execution use case |
 | community manual writes -> unrestricted Character author logic | PR G | owner-controlled guard and Inbox handoff are canonical and tested |

@@ -95,6 +95,7 @@ export type WorldCharacterSetupPreflightRead = {
   model: string | null;
   credential_ready: boolean;
   logical_call_count: number;
+  physical_request_count: number;
   profile_max_output_tokens: number;
   repertoire_max_output_tokens: number;
   regeneration_limit_character_24h: number;

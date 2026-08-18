@@ -1,7 +1,7 @@
 {
-  "edge_count": 742,
-  "external_import_count": 1191,
-  "module_count": 341,
+  "edge_count": 758,
+  "external_import_count": 1198,
+  "module_count": 348,
   "modules": [
     {
       "external_imports": [],
@@ -1180,9 +1180,9 @@
       ],
       "imports": [
         "app.api.v1.deps",
+        "app.domains.world_characters.public",
         "app.models",
         "app.schemas",
-        "app.services.world_character_setup",
         "app.services.world_feed_search"
       ],
       "module": "app.api.v1.routes.world_character_setup",
@@ -1197,10 +1197,10 @@
       ],
       "imports": [
         "app.api.v1.deps",
+        "app.domains.world_characters.public",
         "app.domains.worlds.public",
         "app.models",
-        "app.schemas",
-        "app.services.world_character_setup"
+        "app.schemas"
       ],
       "module": "app.api.v1.routes.worlds",
       "path": "backend/app/api/v1/routes/worlds.py",
@@ -2309,9 +2309,7 @@
     },
     {
       "external_imports": [],
-      "imports": [
-        "app.domains.world_characters.api.routes"
-      ],
+      "imports": [],
       "module": "app.domains.world_characters.api",
       "path": "backend/app/domains/world_characters/api/__init__.py",
       "wildcard_imports": []
@@ -2347,6 +2345,21 @@
       ],
       "module": "app.domains.world_characters.api.schemas",
       "path": "backend/app/domains/world_characters/api/schemas.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "pydantic",
+        "typing",
+        "unicodedata"
+      ],
+      "imports": [
+        "app.domains.worlds.public"
+      ],
+      "module": "app.domains.world_characters.api.setup_schemas",
+      "path": "backend/app/domains/world_characters/api/setup_schemas.py",
       "wildcard_imports": []
     },
     {
@@ -2397,6 +2410,83 @@
     {
       "external_imports": [
         "__future__",
+        "collections",
+        "dataclasses",
+        "hashlib",
+        "json",
+        "pydantic",
+        "re",
+        "typing",
+        "unicodedata"
+      ],
+      "imports": [
+        "app.domains.characters.public",
+        "app.domains.world_characters.api.setup_schemas",
+        "app.domains.world_characters.infrastructure.sqlalchemy_models"
+      ],
+      "module": "app.domains.world_characters.infrastructure.autonomous_setup_contracts",
+      "path": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.characters.public",
+        "app.domains.identity.public",
+        "app.domains.world_characters.infrastructure.sqlalchemy_models",
+        "app.domains.world_characters.infrastructure.sqlalchemy_setup_models",
+        "app.domains.worlds.public"
+      ],
+      "module": "app.domains.world_characters.infrastructure.autonomous_setup_models",
+      "path": "backend/app/domains/world_characters/infrastructure/autonomous_setup_models.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "json",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.identity.public",
+        "app.domains.world_characters.api.setup_schemas",
+        "app.domains.world_characters.infrastructure.autonomous_setup_contracts",
+        "app.integrations.direct_llm",
+        "app.providers.gemini"
+      ],
+      "module": "app.domains.world_characters.infrastructure.direct_llm_setup_provider",
+      "path": "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.core.ids",
+        "app.domains.identity.public",
+        "app.domains.world_characters.api.setup_schemas",
+        "app.domains.world_characters.infrastructure.autonomous_setup_contracts",
+        "app.domains.world_characters.infrastructure.autonomous_setup_models",
+        "app.domains.world_characters.infrastructure.direct_llm_setup_provider",
+        "app.domains.worlds.public",
+        "app.integrations.direct_llm",
+        "app.providers.registry"
+      ],
+      "module": "app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup",
+      "path": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "datetime",
         "sqlalchemy",
         "sqlalchemy.dialects.postgresql",
@@ -2431,6 +2521,22 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.core.db",
+        "app.domains.world_characters.infrastructure.sqlalchemy_models"
+      ],
+      "module": "app.domains.world_characters.infrastructure.sqlalchemy_setup_models",
+      "path": "backend/app/domains/world_characters/infrastructure/sqlalchemy_setup_models.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.domains.world_characters.ports",
@@ -2452,6 +2558,7 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup",
         "app.domains.world_characters.infrastructure.sqlalchemy_owner_controlled_identity"
       ],
       "module": "app.domains.world_characters.public",
@@ -2586,6 +2693,9 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.worlds.api.schemas",
+        "app.domains.worlds.infrastructure.generation_context",
+        "app.domains.worlds.infrastructure.sqlalchemy_models",
         "app.domains.worlds.infrastructure.sqlalchemy_world_creator"
       ],
       "module": "app.domains.worlds.public",
@@ -2597,6 +2707,32 @@
       "imports": [],
       "module": "app.integrations",
       "path": "backend/app/integrations/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "asyncio",
+        "collections",
+        "collections.abc",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "json",
+        "logging",
+        "re",
+        "time",
+        "typing"
+      ],
+      "imports": [
+        "app.core.config",
+        "app.core.redaction",
+        "app.providers.contracts",
+        "app.providers.gemini",
+        "app.providers.registry"
+      ],
+      "module": "app.integrations.direct_llm",
+      "path": "backend/app/integrations/direct_llm.py",
       "wildcard_imports": []
     },
     {
@@ -2929,15 +3065,10 @@
     },
     {
       "external_imports": [
-        "__future__",
-        "datetime",
-        "sqlalchemy",
-        "sqlalchemy.orm",
-        "typing"
+        "sys"
       ],
       "imports": [
-        "app.core.db",
-        "app.models.worlds"
+        "app.domains.world_characters.infrastructure.sqlalchemy_setup_models"
       ],
       "module": "app.models.world_character_setup",
       "path": "backend/app/models/world_character_setup.py",
@@ -3284,13 +3415,11 @@
     },
     {
       "external_imports": [
-        "__future__",
-        "datetime",
-        "pydantic",
-        "typing",
-        "unicodedata"
+        "sys"
       ],
-      "imports": [],
+      "imports": [
+        "app.domains.world_characters.api.setup_schemas"
+      ],
       "module": "app.schemas.world_character_setup",
       "path": "backend/app/schemas/world_character_setup.py",
       "wildcard_imports": []
@@ -3757,25 +3886,10 @@
     },
     {
       "external_imports": [
-        "__future__",
-        "asyncio",
-        "collections",
-        "collections.abc",
-        "dataclasses",
-        "datetime",
-        "hashlib",
-        "json",
-        "logging",
-        "re",
-        "time",
-        "typing"
+        "sys"
       ],
       "imports": [
-        "app.core.config",
-        "app.core.redaction",
-        "app.providers.contracts",
-        "app.providers.gemini",
-        "app.providers.registry"
+        "app.integrations.direct_llm"
       ],
       "module": "app.services.direct_llm",
       "path": "backend/app/services/direct_llm.py",
@@ -4595,19 +4709,10 @@
     },
     {
       "external_imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hashlib",
-        "json",
-        "pydantic",
-        "re",
-        "typing",
-        "unicodedata"
+        "sys"
       ],
       "imports": [
-        "app.models",
-        "app.schemas"
+        "app.domains.world_characters.infrastructure.autonomous_setup_contracts"
       ],
       "module": "app.services.world_character_contracts",
       "path": "backend/app/services/world_character_contracts.py",
@@ -4615,17 +4720,10 @@
     },
     {
       "external_imports": [
-        "__future__",
-        "dataclasses",
-        "json",
-        "typing"
+        "sys"
       ],
       "imports": [
-        "app.credentials",
-        "app.providers.gemini",
-        "app.schemas",
-        "app.services.direct_llm",
-        "app.services.world_character_contracts"
+        "app.domains.world_characters.infrastructure.direct_llm_setup_provider"
       ],
       "module": "app.services.world_character_provider",
       "path": "backend/app/services/world_character_provider.py",
@@ -4633,25 +4731,12 @@
     },
     {
       "external_imports": [
-        "__future__",
-        "dataclasses",
-        "datetime",
         "sqlalchemy",
-        "sqlalchemy.exc",
-        "sqlalchemy.orm",
-        "typing"
+        "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.ids",
-        "app.credentials",
-        "app.cruds.agents",
-        "app.models",
-        "app.providers.registry",
-        "app.schemas",
-        "app.services.direct_llm",
-        "app.services.world_character_contracts",
-        "app.services.world_character_provider",
-        "app.services.world_generation_context"
+        "app.domains.world_characters.public",
+        "app.models"
       ],
       "module": "app.services.world_character_setup",
       "path": "backend/app/services/world_character_setup.py",

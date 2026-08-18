@@ -189,10 +189,6 @@
           "importer": "app.api.v1.routes.world_character_setup"
         },
         {
-          "imported": "app.services.world_character_setup",
-          "importer": "app.api.v1.routes.world_character_setup"
-        },
-        {
           "imported": "app.services.world_feed_search",
           "importer": "app.api.v1.routes.world_character_setup"
         },
@@ -202,10 +198,6 @@
         },
         {
           "imported": "app.schemas",
-          "importer": "app.api.v1.routes.worlds"
-        },
-        {
-          "imported": "app.services.world_character_setup",
           "importer": "app.api.v1.routes.worlds"
         },
         {
@@ -335,10 +327,6 @@
         {
           "imported": "app.models.worlds",
           "importer": "app.models.world_activity_runtime"
-        },
-        {
-          "imported": "app.models.worlds",
-          "importer": "app.models.world_character_setup"
         },
         {
           "imported": "app.models.worlds",
@@ -1374,50 +1362,6 @@
         },
         {
           "imported": "app.models",
-          "importer": "app.services.world_character_contracts"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.services.world_character_contracts"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.services.world_character_provider"
-        },
-        {
-          "imported": "app.services.direct_llm",
-          "importer": "app.services.world_character_provider"
-        },
-        {
-          "imported": "app.services.world_character_contracts",
-          "importer": "app.services.world_character_provider"
-        },
-        {
-          "imported": "app.cruds.agents",
-          "importer": "app.services.world_character_setup"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.world_character_setup"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.services.world_character_setup"
-        },
-        {
-          "imported": "app.services.direct_llm",
-          "importer": "app.services.world_character_setup"
-        },
-        {
-          "imported": "app.services.world_character_contracts",
-          "importer": "app.services.world_character_setup"
-        },
-        {
-          "imported": "app.services.world_character_provider",
-          "importer": "app.services.world_character_setup"
-        },
-        {
-          "imported": "app.services.world_generation_context",
           "importer": "app.services.world_character_setup"
         },
         {
