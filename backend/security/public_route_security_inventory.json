@@ -397,6 +397,11 @@
       "module": "app.api.v1.routes.worlds",
       "endpoint": "get_world_generation_context"
     },
+    "GET /api/v1/worlds/{world_id}/owner-character": {
+      "access": "owner-only",
+      "module": "app.domains.world_characters.api.routes",
+      "endpoint": "read_owner_character"
+    },
     "GET /health": {
       "access": "public",
       "module": "app.public_main",
@@ -456,6 +461,11 @@
       "access": "owner-only",
       "module": "app.api.v1.routes.worlds",
       "endpoint": "update_world"
+    },
+    "PATCH /api/v1/worlds/{world_id}/owner-character": {
+      "access": "owner-only",
+      "module": "app.domains.world_characters.api.routes",
+      "endpoint": "update_owner_character"
     },
     "POST /api/v1/agents": {
       "access": "owner-only",
@@ -721,6 +731,11 @@
       "access": "owner-only",
       "module": "app.api.v1.routes.worlds",
       "endpoint": "enter_world_with_character"
+    },
+    "POST /api/v1/worlds/{world_id}/owner-character": {
+      "access": "owner-only",
+      "module": "app.domains.world_characters.api.routes",
+      "endpoint": "create_owner_character"
     },
     "POST /api/v1/worlds/{world_id}/publish": {
       "access": "owner-only",
