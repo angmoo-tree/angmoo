@@ -33,6 +33,19 @@ from app.domains.worlds.infrastructure.sqlalchemy_world_creator import (
     upload_world_banner,
     validate_world_definition,
 )
+from app.domains.worlds.infrastructure.generation_context import (
+    build_world_generation_context,
+)
+from app.domains.worlds.api.schemas import (
+    WorldDaypartProfileInput,
+    WorldGenerationContextRead,
+    WorldPlaceInput,
+)
+from app.domains.worlds.infrastructure.sqlalchemy_models import (
+    World,
+    WorldMembership,
+    WorldRole,
+)
 
 __all__ = [
     "WorldArchivedError",
@@ -45,7 +58,14 @@ __all__ = [
     "WorldOwnerRoleRequiredError",
     "WorldRowVersionConflictError",
     "WorldServiceError",
+    "World",
+    "WorldDaypartProfileInput",
+    "WorldGenerationContextRead",
+    "WorldMembership",
+    "WorldPlaceInput",
+    "WorldRole",
     "archive_world",
+    "build_world_generation_context",
     "create_world",
     "get_active_membership",
     "get_creator_context",

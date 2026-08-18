@@ -3,6 +3,23 @@
 from app.domains.world_characters.infrastructure.sqlalchemy_owner_controlled_identity import (
     SqlAlchemyOwnerControlledIdentityRepository,
 )
+from app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup import (
+    OWNER_REGENERATION_LIMIT_24H,
+    PROFILE_REGENERATION_LIMIT_24H,
+    WorldCharacterSetupConflictError,
+    WorldCharacterSetupError,
+    WorldCharacterSetupForbiddenError,
+    WorldCharacterSetupNotFoundError,
+    WorldCharacterSetupValidationError,
+    approve_setup,
+    enter_world,
+    generate_setup,
+    get_setup,
+    get_world_entry,
+    preflight_setup,
+    reject_setup,
+    retry_setup,
+)
 
 
 def is_owner_controlled_character(db, character_id: str) -> bool:
@@ -19,6 +36,21 @@ def owner_controlled_character_ids(
     ).owner_controlled_character_ids(character_ids)
 
 __all__ = [
+    "OWNER_REGENERATION_LIMIT_24H",
+    "PROFILE_REGENERATION_LIMIT_24H",
+    "WorldCharacterSetupConflictError",
+    "WorldCharacterSetupError",
+    "WorldCharacterSetupForbiddenError",
+    "WorldCharacterSetupNotFoundError",
+    "WorldCharacterSetupValidationError",
+    "approve_setup",
+    "enter_world",
+    "generate_setup",
+    "get_setup",
+    "get_world_entry",
     "is_owner_controlled_character",
     "owner_controlled_character_ids",
+    "preflight_setup",
+    "reject_setup",
+    "retry_setup",
 ]

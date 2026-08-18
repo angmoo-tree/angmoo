@@ -555,7 +555,9 @@ export function WorldCharacterAutonomySetupClient({
                 <div>
                   <h2 className="text-xl font-black">2. 생성 전 확인</h2>
                   <p className="mt-2 text-sm text-on-surface-variant">
-                    사용자의 캐릭터 전용 키로 논리적 호출 {preflight.logical_call_count}회를 수행합니다.
+                    사용자의 캐릭터 전용 키로 논리적 호출 {preflight.logical_call_count}회,
+                    실제 provider 요청 {preflight.physical_request_count}회
+                    (프로필 1 + 일과 후보 묶음 2)를 수행합니다.
                   </p>
                 </div>
                 <span className="rounded-full bg-surface-container px-4 py-2 text-sm font-bold">

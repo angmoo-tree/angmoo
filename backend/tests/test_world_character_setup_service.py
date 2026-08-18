@@ -178,7 +178,7 @@ class FakeProvider:
         validated = validator(_repertoire_payload())
         return world_character_provider.WorldCharacterProviderResult(
             payload=validated,
-            physical_request_count=1,
+            physical_request_count=2,
             prompt_token_count=200,
             output_token_count=500,
             total_token_count=700,
@@ -334,6 +334,11 @@ def test_two_logical_calls_create_profile_and_exact_forty_candidates() -> None:
 
         assert provider.profile_calls == 1
         assert provider.repertoire_calls == 1
+        assert sum(
+            db.scalars(
+                select(models.WorldCharacterSetupAttempt.physical_request_count)
+            )
+        ) == 3
         assert result.state == "ready"
         assert result.can_approve is True
         assert result.autonomy_ready is False
@@ -411,6 +416,77 @@ def test_ready_same_hash_pair_is_reused_without_provider_calls() -> None:
         assert reused.autonomy_ready is True
         assert provider.profile_calls == 0
         assert provider.repertoire_calls == 0
+
+
+def test_owner_controlled_identity_is_rejected_before_provider_or_writes() -> None:
+    engine = _engine()
+    with Session(engine, expire_on_commit=False) as db:
+        owner, world_character = _seed(db)
+        world_character.control_mode = "owner_controlled"
+        world_character.owner_user_id = owner.id
+        db.commit()
+        provider = FakeProvider()
+
+        with pytest.raises(
+            world_character_setup.WorldCharacterSetupValidationError
+        ) as exc:
+            _generate(db, owner=owner, provider=provider)
+
+        assert exc.value.reason_code == "owner_controlled_automation_disabled"
+        assert provider.profile_calls == 0
+        assert provider.repertoire_calls == 0
+        assert db.scalar(select(func.count(models.WorldCharacterSetupAttempt.id))) == 0
+        assert db.scalar(select(func.count(models.WorldCommunityProfile.id))) == 0
+        assert db.scalar(select(func.count(models.WorldActivityRepertoire.id))) == 0
+        assert db.scalar(select(func.count(models.WorldActivityCandidate.id))) == 0
+        assert db.scalar(select(func.count(models.Post.id))) == 0
+        assert db.scalar(select(func.count(models.AgentRun.id))) == 0
+
+
+def test_credential_deletion_preserves_approved_setup_and_zero_call_reentry() -> None:
+    engine = _engine()
+    with Session(engine, expire_on_commit=False) as db:
+        owner, world_character = _seed(db)
+        generated = _generate(db, owner=owner, provider=FakeProvider())
+        assert generated.profile is not None and generated.repertoire is not None
+        world_character_setup.approve_setup(
+            db,
+            world_character_id=world_character.id,
+            user=owner,
+            data=schemas.WorldCharacterSetupApproveCreate(
+                idempotency_key="approve-before-credential-delete",
+                profile_id=generated.profile.id,
+                repertoire_id=generated.repertoire.id,
+            ),
+        )
+        credential = db.get(models.LlmCredential, "credential-a")
+        assert credential is not None
+        db.delete(credential)
+        db.commit()
+
+        restored = world_character_setup.get_setup(
+            db,
+            world_character_id=world_character.id,
+            user=owner,
+        )
+        preflight = world_character_setup.preflight_setup(
+            db,
+            world_character_id=world_character.id,
+            user=owner,
+        )
+
+        assert restored.autonomy_ready is True
+        assert restored.profile is not None
+        assert restored.repertoire is not None
+        assert len(restored.repertoire.candidates) == 40
+        assert preflight.credential_ready is False
+        assert preflight.safe_reason_code == "credential_required"
+        assert preflight.reused is True
+        assert preflight.logical_call_count == 0
+        assert preflight.physical_request_count == 0
+        assert db.scalar(select(func.count(models.WorldCommunityProfile.id))) == 1
+        assert db.scalar(select(func.count(models.WorldActivityRepertoire.id))) == 1
+        assert db.scalar(select(func.count(models.WorldActivityCandidate.id))) == 40
 
 
 def test_character_privacy_cleanup_removes_setup_outputs_only() -> None:
@@ -526,6 +602,7 @@ def test_routes_expose_preflight_generate_and_approve_without_enabling_autonomy(
     assert preflight.status_code == 200
     assert preflight.json()["credential_ready"] is True
     assert preflight.json()["logical_call_count"] == 2
+    assert preflight.json()["physical_request_count"] == 3
 
     generated = _request(
         app,
