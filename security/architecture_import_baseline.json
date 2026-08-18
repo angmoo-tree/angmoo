@@ -1,5 +1,5 @@
 {
-  "edge_count": 741,
+  "edge_count": 742,
   "external_import_count": 1191,
   "module_count": 341,
   "modules": [
@@ -985,7 +985,8 @@
         "app.api.v1.routes.world_character_setup",
         "app.api.v1.routes.worlds",
         "app.domains.device_home.public",
-        "app.domains.identity.api.local_routes"
+        "app.domains.identity.api.local_routes",
+        "app.domains.world_characters.api.routes"
       ],
       "module": "app.api.v1.public",
       "path": "backend/app/api/v1/public.py",
