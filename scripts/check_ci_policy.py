@@ -16,6 +16,7 @@ WORKFLOW_DIR = Path(".github/workflows")
 EXPECTED_WORKFLOWS = {
     "ci.yml",
     "local-smoke.yml",
+    "native-runtime-spike.yml",
     "security.yml",
     "windows-smoke.yml",
     "release-images.yml",
@@ -196,7 +197,7 @@ def main() -> int:
         print(error, file=sys.stderr)
     if errors:
         return 1
-    print("Local OSS CI policy check passed: required=10 advisory=1 workflows=5")
+    print("Local OSS CI policy check passed: required=10 advisory=1 workflows=6")
     return 0
 
 

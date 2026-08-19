@@ -1,0 +1,12 @@
+{
+  "name": "angmoo-l3-er1-native-runtime-spike",
+  "version": "0.0.0",
+  "private": true,
+  "license": "GPL-3.0-only",
+  "scripts": {
+    "tauri": "tauri"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.11.4"
+  }
+}

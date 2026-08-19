@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Minimal capability set for the ER1 native runtime spike.",
+  "windows": ["main"],
+  "permissions": ["core:default", "shell:allow-execute"]
+}
