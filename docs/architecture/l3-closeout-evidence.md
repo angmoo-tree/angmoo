@@ -1,6 +1,6 @@
 # L3 integrated clean-clone closeout evidence
 
-Status: **PR H LOCAL TECH PASS / HOSTED ACTIONS AND USER MERGE GATES NOT REACHED**
+Status: **PR H LOCAL AND HOSTED TECH PASS / USER SCREEN AND MERGE GATES NOT REACHED**
 
 Baseline:
 
@@ -35,9 +35,22 @@ Executed on Windows from an isolated Compose project named
 - canonical development stack: all six services remain healthy and all five
   `angmoo_angmoo_*` canonical volumes remain present
 
-These results prove the local technical Gate only. Hosted Actions, the final
-Local Owner screen check, Ready conversion, merge, branch deletion, and exact
-merge SHA remain open Gates.
+The local results above prove the local technical Gate. Hosted evidence is
+recorded separately below; user-owned and merge Gates remain open.
+
+Hosted evidence:
+
+- Draft PR: [#94](https://github.com/angmoo-tree/angmoo/pull/94)
+- required and advisory Actions: `14/14` PASS
+- `local-core-smoke` completed the container supply-chain and clean-clone Gate
+  in `6m58s`; this was normal execution, not a stalled job
+- an initial documentation-state assertion failed after this evidence document
+  advanced from `IN PROGRESS` to `LOCAL TECH PASS`; the assertion was corrected
+  without changing product behavior and the rerun passed
+
+The remaining Gates are the Local Owner final screen check, Ready conversion,
+maintainer merge, remote branch deletion, exact merge SHA recording, and the
+L3-ER rollback-oracle freeze. Release tagging remains separately approved.
 
 ## Required automated evidence
 
