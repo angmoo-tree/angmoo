@@ -638,6 +638,35 @@
     },
     {
       "markers": {
+        "pgvector": [
+          80
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/runtime/persistence/sqlite_codecs.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "d1ad4a897ce41fc80e988fcdf1db8314d378fa21ef431541a700c9575e634c52",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          45,
+          46,
+          48
+        ],
+        "pgvector": [
+          9
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/runtime/persistence/sqlite_schema.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "355ce45ed95f72cf40768b16309dd02cc1c3f701b4e6565698b2595f312e4197",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
         "row_lock": [
           418
         ]
@@ -1082,12 +1111,12 @@
       "transition_pr": "ER7 PR P"
     }
   ],
-  "entry_count": 68,
+  "entry_count": 70,
   "marker_counts": {
     "advisory_lock": 8,
-    "driver_or_url": 45,
+    "driver_or_url": 46,
     "jsonb": 8,
-    "pgvector": 5,
+    "pgvector": 7,
     "row_lock": 22,
     "skip_locked": 7
   },

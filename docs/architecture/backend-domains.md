@@ -430,3 +430,17 @@ Architecture changes use a focused Issue and PR. Do not mix product behavior,
 migrations, dependency majors, provider configuration, bulk formatting,
 Hosted/Private/Production settings, or unrelated frontend moves into a
 structure-only PR.
+
+## Embedded canonical persistence
+
+ER2 introduces SQLite only as a runtime-owned infrastructure adapter. Domain
+and application packages continue to depend on repository and UnitOfWork
+ports; they do not import SQLite, filesystem paths, PRAGMAs, or connection
+lifecycle code. Existing SQLAlchemy repositories can receive either the
+current PostgreSQL session or the future SQLite session when their documented
+contract is portable.
+
+The initial schema and connection contract is documented in
+`docs/architecture/l3-er2-sqlite-canonical-adapter.md`. Production remains on
+PostgreSQL until the later ER2 concurrency, FTS, migration, and explicit
+cutover gates pass.
