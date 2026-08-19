@@ -1,7 +1,7 @@
 # L3 P1-P4 execution path and migration map
 
 This document records the executable L3 baseline and the boundaries migrated
-from it. PR A-G are merged; PR H is the integrated clean-clone closeout. This
+from it. PR A-H are merged and the integrated clean-clone closeout is complete. This
 map is an architecture contract, while runtime, migration, DB, log, and final
 user-screen evidence is recorded separately.
 
@@ -9,7 +9,7 @@ user-screen evidence is recorded separately.
 - Baseline branch: `main`
 - Baseline commit: `b809bc2d748f8bcac82860447bcff3c816f93452`
 - L3 baseline status: `P1-P4 + OWNER PARTICIPATION IMPLEMENTED`
-- Current migration status: `PR A-G MERGED; PR H CLEAN-CLONE CLOSEOUT IN PROGRESS`
+- Current migration status: `L3 PASS_P1_P4_LOCAL_VERTICAL_LOOP; PR A-H MERGED; L3-ER0 NEXT`
 - Canonical store: PostgreSQL
 - Projection store: Neo4j, replayable from PostgreSQL outbox events
 
@@ -233,6 +233,11 @@ removing its exact policy exception in the same PR; stale exceptions fail CI.
 7. PR G: owner-controlled manual write and one-time Inbox observation.
 8. PR H: migration, Docker, Windows clean-clone, evidence, and user closeout.
 
-PR A-G implementation does not by itself prove a clean-clone installation.
-Until PR H's runtime, DB, log, migration, Windows, and final user-screen evidence
-passes, the overall L3 milestone remains `IN PROGRESS / PR H CLOSEOUT`.
+PR A-G implementation did not by itself prove a clean-clone installation.
+PR H supplied runtime, DB, log, migration, Windows, Hosted Actions, and final
+user-screen evidence and was merged as
+`6119129334193b35b8eb737bd79a3c47ce911afe`. The exact-main rerun and frozen
+PostgreSQL/Neo4j parity oracle are recorded in
+[`l3-closeout-evidence.md`](l3-closeout-evidence.md). L3 is
+`PASS_P1_P4_LOCAL_VERTICAL_LOOP`; embedded-runtime work starts separately at
+L3-ER0.

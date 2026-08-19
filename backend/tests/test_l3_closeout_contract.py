@@ -8,6 +8,12 @@ WORKFLOW = REPO_ROOT / ".github" / "workflows" / "local-smoke.yml"
 CONTAINER_SMOKE = REPO_ROOT / "scripts" / "ci" / "run_l0_container_smoke.py"
 EXECUTION_MAP = REPO_ROOT / "docs" / "architecture" / "l3-p1-p4-execution-map.md"
 EVIDENCE = REPO_ROOT / "docs" / "architecture" / "l3-closeout-evidence.md"
+PARITY_ORACLE = (
+    REPO_ROOT
+    / "docs"
+    / "architecture"
+    / "l3-er-postgres-neo4j-parity-oracle.json"
+)
 USER_GUIDE = REPO_ROOT / "docs" / "public" / "l3-local-vertical-loop.md"
 
 
@@ -35,16 +41,22 @@ def test_container_gate_owns_l3_migration_round_trip_and_cleanup() -> None:
     assert "L3 migration round trip passed" in smoke
 
 
-def test_l3_docs_separate_implementation_from_final_user_gate() -> None:
+def test_l3_docs_record_completed_closeout_and_separate_release_gate() -> None:
     execution_map = EXECUTION_MAP.read_text(encoding="utf-8")
     evidence = EVIDENCE.read_text(encoding="utf-8")
+    oracle = PARITY_ORACLE.read_text(encoding="utf-8")
     guide = USER_GUIDE.read_text(encoding="utf-8")
 
-    assert "IN PROGRESS / PR H CLOSEOUT" in execution_map
-    assert "PR H LOCAL AND HOSTED TECH PASS" in evidence
-    assert "USER SCREEN AND MERGE GATES NOT REACHED" in evidence
+    assert "L3 PASS_P1_P4_LOCAL_VERTICAL_LOOP" in execution_map
+    assert "PR A-H MERGED" in execution_map
+    assert "L3 PASS_P1_P4_LOCAL_VERTICAL_LOOP" in evidence
+    assert "6119129334193b35b8eb737bd79a3c47ce911afe" in evidence
     assert "0082 -> 0080 -> 0082" in evidence
     assert "Release tagging remains a separate approval" in evidence
+    assert '"oracle_version": "l3-er-postgres-neo4j-v1"' in oracle
+    assert '"public_anonymous_clone": true' in oracle
+    assert '"provider_calls": 0' in oracle
+    assert '"credentials_included": false' in oracle
     assert "docker compose up -d" in guide
     assert "docker compose -f compose.yml -f compose.dev.yml up --watch" in guide
     assert "does not guarantee a public reply" in guide
