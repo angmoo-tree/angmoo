@@ -67,6 +67,38 @@ class SetupScope:
     character: models.Character
 
 
+def set_active_world_character_autonomy(
+    db: Session,
+    *,
+    character_id: str,
+    enabled: bool,
+) -> bool:
+    """Align the selected autonomous WorldCharacter with scheduler lifecycle.
+
+    Agent activation is character-scoped, while P4 execution is scoped to the
+    selected WorldCharacter. Only that selected autonomous identity may inherit
+    the lifecycle switch; owner-controlled identities remain fail-closed.
+    """
+
+    active_world = db.get(models.CharacterActiveWorld, character_id)
+    if active_world is None:
+        return False
+    world_character = db.get(models.WorldCharacter, active_world.world_character_id)
+    if (
+        world_character is None
+        or world_character.character_id != character_id
+        or world_character.control_mode != "autonomous"
+        or world_character.status != "active"
+    ):
+        return False
+    if world_character.autonomous_enabled == enabled:
+        return False
+    world_character.autonomous_enabled = enabled
+    world_character.version += 1
+    db.flush()
+    return True
+
+
 def enter_world(
     db: Session,
     *,

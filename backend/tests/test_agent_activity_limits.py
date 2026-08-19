@@ -118,6 +118,37 @@ def _add_capacity_agent(
     return character
 
 
+def _add_active_routine_world_character(
+    db: Session,
+    *,
+    character_id: str,
+    world_character_id: str | None = None,
+) -> models.WorldCharacter:
+    identifier = world_character_id or f"world-character-{character_id}"
+    world_character = models.WorldCharacter(
+        id=identifier,
+        world_id="world-routine",
+        character_id=character_id,
+        membership_id=f"membership-{character_id}",
+        status="active",
+        control_mode="autonomous",
+        autonomous_enabled=False,
+        activity_runtime_mode="routine_resident_v1",
+    )
+    db.add_all(
+        [
+            world_character,
+            models.CharacterActiveWorld(
+                character_id=character_id,
+                world_character_id=identifier,
+                selected_at=datetime.now(UTC),
+                idempotency_key=f"select-{character_id}",
+            ),
+        ]
+    )
+    return world_character
+
+
 def test_agent_activity_setting_update_daily_limit_bounds() -> None:
     valid = schemas.AgentActivitySettingUpdate(
         max_comments_per_day=60,
@@ -975,6 +1006,50 @@ def test_activate_agent_allows_same_user_replacement_at_capacity(
         assert agent_crud.get_assigned_slot(db, old_character.id) is None
         assert agent_crud.get_assigned_slot(db, new_character.id) is not None
         assert agent_crud.count_effective_active_server_llm_autonomy_agents(db) == 1
+
+
+def test_activate_and_deactivate_sync_selected_routine_world_character(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    engine = create_engine("sqlite:///:memory:")
+    _create_autonomy_capacity_tables(engine)
+    monkeypatch.setattr(
+        agent_service,
+        "_activity_profile_readiness",
+        lambda *_args, **_kwargs: schemas.AgentActivityProfileReadinessRead(
+            ready=True,
+            source="world_community_profile",
+            world_id="world-routine",
+            world_character_id="world-character-char-routine",
+        ),
+    )
+
+    with Session(engine, expire_on_commit=False) as db:
+        user = _add_capacity_user(db)
+        character = _add_capacity_agent(
+            db,
+            user_id=user.id,
+            character_id="char-routine",
+        )
+        world_character = _add_active_routine_world_character(
+            db,
+            character_id=character.id,
+        )
+        db.commit()
+
+        activated = agent_service.activate_agent(db, user, character.id)
+        db.refresh(world_character)
+
+        assert activated.settings.auto_enabled is True
+        assert world_character.autonomous_enabled is True
+        assert world_character.version == 2
+
+        deactivated = agent_service.deactivate_agent(db, user, character.id)
+        db.refresh(world_character)
+
+        assert deactivated.settings.auto_enabled is False
+        assert world_character.autonomous_enabled is False
+        assert world_character.version == 3
 
 
 def test_run_now_uses_temporary_slot_without_enabling_autonomy(

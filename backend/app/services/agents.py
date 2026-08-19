@@ -49,6 +49,7 @@ from app.services.runtime_boundary import (
 )
 from app.domains.world_characters.public import (
     is_owner_controlled_character,
+    set_active_world_character_autonomy,
 )
 
 
@@ -1361,6 +1362,11 @@ def delete_credential(
         setting = db.get(models.AgentActivitySetting, character.id)
         if setting is not None:
             setting.auto_enabled = False
+        set_active_world_character_autonomy(
+            db,
+            character_id=character.id,
+            enabled=False,
+        )
         character.status = "inactive"
         credential.enabled = False
         credential.encrypted_api_key = None
@@ -1733,6 +1739,11 @@ def activate_agent(
         db, user_id=user.id, keep_character_id=character.id, commit=False
     )
     for disabled_setting in disabled_settings:
+        set_active_world_character_autonomy(
+            db,
+            character_id=disabled_setting.character_id,
+            enabled=False,
+        )
         other = community_crud.get_character(db, disabled_setting.character_id)
         if other is not None:
             other.status = "inactive"
@@ -1776,6 +1787,11 @@ def activate_agent(
             db.commit()
             raise
     current_setting.auto_enabled = True
+    set_active_world_character_autonomy(
+        db,
+        character_id=character.id,
+        enabled=True,
+    )
     character.status = "active"
     active_count = _effective_server_llm_autonomy_count(db)
     db.commit()
@@ -1802,6 +1818,13 @@ def deactivate_agent(
     current_setting = agent_crud.ensure_setting(db, character.id)
     assigned_slot = agent_crud.get_assigned_slot(db, character.id)
     if assigned_slot is None and not current_setting.auto_enabled:
+        changed = set_active_world_character_autonomy(
+            db,
+            character_id=character.id,
+            enabled=False,
+        )
+        if changed:
+            db.commit()
         return _build_agent_detail(db, character)
     if (
         assigned_slot is not None
@@ -1824,9 +1847,17 @@ def deactivate_agent(
         )
         _reload_openclaw_secrets_sync()
     agent_run_crud.release_resident_slot_assignment(
-        db, user_id=user.id, character_id=character.id
+        db,
+        user_id=user.id,
+        character_id=character.id,
+        commit=False,
     )
     current_setting.auto_enabled = False
+    set_active_world_character_autonomy(
+        db,
+        character_id=character.id,
+        enabled=False,
+    )
     character.status = "inactive"
     db.commit()
     agent_crud.log_activity(

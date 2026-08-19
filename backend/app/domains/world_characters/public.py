@@ -28,6 +28,7 @@ from app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup imp
     preflight_setup,
     reject_setup,
     retry_setup,
+    set_active_world_character_autonomy,
 )
 
 
@@ -67,4 +68,5 @@ __all__ = [
     "preflight_setup",
     "reject_setup",
     "retry_setup",
+    "set_active_world_character_autonomy",
 ]

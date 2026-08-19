@@ -29,6 +29,10 @@ from app.credentials import (
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
+from app.domains.routine_posts.public import (
+    routine_world_character_for_character,
+    run_routine_post_runtime,
+)
 from app.services import agent_activity_policy
 from app.services import character_lore as character_lore_service
 from app.services import community as community_service
@@ -47,10 +51,6 @@ from app.services.llm_context import neutralize_context_text
 from app.services.resident_contracts import (
     LangGraphResidentContext,
     ResidentGraphState as _ResidentGraphState,
-)
-from app.services.routine_post_runtime import (
-    routine_world_character_for_character,
-    run_routine_post_runtime,
 )
 from app.services.world_feed_runtime import run_world_keyword_feed
 

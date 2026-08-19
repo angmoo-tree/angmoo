@@ -1,0 +1,48 @@
+"""Narrow bridge from the L3 P4 domain to later-stage legacy persistence.
+
+PR F owns routine continuation and atomic publication. The underlying social
+write, joint-activity, and agent-run persistence modules are still owned by PR
+G/L4, so they remain behind this explicitly temporary adapter instead of being
+imported by the domain itself.
+"""
+
+from __future__ import annotations
+
+from app import models
+from app.compatibility.routine_posts.canonical_interactions import (
+    CanonicalRoutineInteractionSource,
+)
+from app.cruds import agent_runs as agent_run_crud
+from app.schemas.community import PostCreate
+from app.services import (
+    activity_runtime,
+    activity_state_contracts,
+    agent_activity_policy,
+    joint_activity_runtime,
+    social_event_runtime,
+)
+from app.services import community as community_service
+from app.services.llm_context import neutralize_context_text
+from app.services.resident_contracts import LangGraphResidentContext
+
+
+def canonical_interaction_source() -> object:
+    """Build the canonical successful-social-event adapter."""
+
+    return CanonicalRoutineInteractionSource()
+
+
+__all__ = [
+    "LangGraphResidentContext",
+    "PostCreate",
+    "activity_runtime",
+    "activity_state_contracts",
+    "agent_activity_policy",
+    "agent_run_crud",
+    "canonical_interaction_source",
+    "community_service",
+    "joint_activity_runtime",
+    "models",
+    "neutralize_context_text",
+    "social_event_runtime",
+]

@@ -114,7 +114,7 @@ backend/app/
 | `core` | small primitives only | L0 | existing core is audited, not moved in PR A |
 | `identity` | `app.domains.identity.public` | L1 | PR A foundation active; runtime behavior unchanged |
 | resident and scheduler runtime | `app.domains.runtime.public` | L2 | PR A state/schema foundation active; behavior unchanged |
-| `worlds`, `world_characters`, `routines`, `routine_posts` | each domain's `public.py` | L3 | P1-P2 are active; PR E moves deterministic P3 planning and lifecycle behind the routines public boundary; P4 remains PR F-G |
+| `worlds`, `world_characters`, `routines`, `routine_posts` | each domain's `public.py` | L3 | P1-P3 are active; PR F moves P4 continuation and atomic publication behind the routine-post public boundary; PR G retains owner manual writes and Inbox observation |
 | `world_packages` | `app.domains.world_packages.public` | L3.5 | new Local feature later |
 | feed and `social` | `app.domains.social.public` | L4 | target only |
 | `relationships` graph read | `app.domains.relationships.public` | T2.5 pilot | canonical read slice active; PR C removes usage-zero aliases; write path unchanged |
@@ -156,6 +156,21 @@ Legacy `app.models`, `app.schemas`, `app.services.daily_activity_plans` and
 activity-state paths remain thin compatibility facades. API and scheduler
 consumers no longer import the legacy daily-plan service, and restart recovery
 closes elapsed state without creating catch-up public actions.
+
+L3 PR F makes `app.domains.routine_posts.public` the production entry for
+autonomous routine selection, evidence-bounded continuation, two-call writing,
+and atomic publication. Resident and scheduler consumers no longer import the
+legacy runtime. The context, validated schemas, direct-LLM provider and
+SQLAlchemy orchestration live under the domain; the old routine-post modules
+are compatibility aliases. An exact L4-owned compatibility bridge isolates
+agent-run, social-write, joint-activity and successful-event persistence that
+has not yet moved to canonical social/runtime ports. The move preserves the
+normal two-call and repair-inclusive three-call cap, successful-beat reuse with
+zero provider calls, same-episode continuation, once-only event consumption,
+and all-or-nothing post/beat/episode/state/outbox commit. The character
+scheduler lifecycle and selected autonomous WorldCharacter are kept in sync:
+activation, deactivation, character replacement and credential removal update
+the WorldCharacter autonomy flag without enabling owner-controlled identities.
 
 ## T2.5 relationship graph read pilot
 

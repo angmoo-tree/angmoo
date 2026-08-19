@@ -1,7 +1,7 @@
 {
-  "edge_count": 795,
-  "external_import_count": 1234,
-  "module_count": 368,
+  "edge_count": 801,
+  "external_import_count": 1248,
+  "module_count": 380,
   "modules": [
     {
       "external_imports": [],
@@ -1208,6 +1208,57 @@
     },
     {
       "external_imports": [],
+      "imports": [],
+      "module": "app.compatibility",
+      "path": "backend/app/compatibility/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.compatibility.routine_posts",
+      "path": "backend/app/compatibility/routine_posts/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routine_posts.domain.interaction",
+        "app.models"
+      ],
+      "module": "app.compatibility.routine_posts.canonical_interactions",
+      "path": "backend/app/compatibility/routine_posts/canonical_interactions.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__"
+      ],
+      "imports": [
+        "app.compatibility.routine_posts.canonical_interactions",
+        "app.cruds.agent_runs",
+        "app.models",
+        "app.schemas.community",
+        "app.services.activity_runtime",
+        "app.services.activity_state_contracts",
+        "app.services.agent_activity_policy",
+        "app.services.community",
+        "app.services.joint_activity_runtime",
+        "app.services.llm_context",
+        "app.services.resident_contracts",
+        "app.services.social_event_runtime"
+      ],
+      "module": "app.compatibility.routine_posts.legacy",
+      "path": "backend/app/compatibility/routine_posts/legacy.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
       "imports": [
         "app.contracts.core_experience"
       ],
@@ -2081,6 +2132,115 @@
     {
       "external_imports": [],
       "imports": [],
+      "module": "app.domains.routine_posts.api",
+      "path": "backend/app/domains/routine_posts/api/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.routine_posts.api.schemas",
+      "path": "backend/app/domains/routine_posts/api/schemas.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.routine_posts.domain",
+      "path": "backend/app/domains/routine_posts/domain/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime"
+      ],
+      "imports": [],
+      "module": "app.domains.routine_posts.domain.interaction",
+      "path": "backend/app/domains/routine_posts/domain/interaction.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.routine_posts.infrastructure",
+      "path": "backend/app/domains/routine_posts/infrastructure/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "copy",
+        "dataclasses",
+        "json",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.compatibility.routine_posts.legacy",
+        "app.credentials",
+        "app.domains.routine_posts.api.schemas",
+        "app.domains.routine_posts.infrastructure.sqlalchemy_context",
+        "app.integrations.direct_llm",
+        "app.providers.gemini"
+      ],
+      "module": "app.domains.routine_posts.infrastructure.direct_llm_provider",
+      "path": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "json",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.compatibility.routine_posts.legacy",
+        "app.domains.routine_posts.domain.interaction"
+      ],
+      "module": "app.domains.routine_posts.infrastructure.sqlalchemy_context",
+      "path": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "hashlib",
+        "json",
+        "logging",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.compatibility.routine_posts.legacy",
+        "app.core.unit_of_work",
+        "app.domains.routine_posts.infrastructure.direct_llm_provider",
+        "app.domains.routine_posts.infrastructure.sqlalchemy_context",
+        "app.domains.routines.public",
+        "app.integrations.direct_llm"
+      ],
+      "module": "app.domains.routine_posts.infrastructure.sqlalchemy_runtime",
+      "path": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_runtime.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.routine_posts.infrastructure.direct_llm_provider",
+        "app.domains.routine_posts.infrastructure.sqlalchemy_context",
+        "app.domains.routine_posts.infrastructure.sqlalchemy_runtime"
+      ],
       "module": "app.domains.routine_posts.public",
       "path": "backend/app/domains/routine_posts/public.py",
       "wildcard_imports": []
@@ -3622,10 +3782,11 @@
     {
       "external_imports": [
         "__future__",
-        "pydantic",
-        "typing"
+        "sys"
       ],
-      "imports": [],
+      "imports": [
+        "app.domains.routine_posts.api.schemas"
+      ],
       "module": "app.schemas.routine_post",
       "path": "backend/app/schemas/routine_post.py",
       "wildcard_imports": []
@@ -3866,6 +4027,7 @@
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.routine_posts.public",
         "app.domains.routines.public",
         "app.domains.world_characters.public",
         "app.models",
@@ -3878,7 +4040,6 @@
         "app.services.langgraph_resident",
         "app.services.llm_context",
         "app.services.maintenance",
-        "app.services.routine_post_runtime",
         "app.services.runtime_boundary"
       ],
       "module": "app.services.agent_runs",
@@ -4357,6 +4518,7 @@
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.routine_posts.public",
         "app.models",
         "app.schemas",
         "app.services.agent_activity_policy",
@@ -4368,7 +4530,6 @@
         "app.services.post_image_generation",
         "app.services.prompt_safety",
         "app.services.resident_contracts",
-        "app.services.routine_post_runtime",
         "app.services.world_feed_runtime"
       ],
       "module": "app.services.langgraph_resident",
@@ -4758,19 +4919,10 @@
     {
       "external_imports": [
         "__future__",
-        "dataclasses",
-        "datetime",
-        "json",
-        "sqlalchemy",
-        "sqlalchemy.orm",
-        "typing"
+        "sys"
       ],
       "imports": [
-        "app.models",
-        "app.services.activity_runtime",
-        "app.services.activity_state_contracts",
-        "app.services.llm_context",
-        "app.services.social_routine_interactions"
+        "app.domains.routine_posts.infrastructure.sqlalchemy_context"
       ],
       "module": "app.services.routine_post_context",
       "path": "backend/app/services/routine_post_context.py",
@@ -4779,22 +4931,10 @@
     {
       "external_imports": [
         "__future__",
-        "copy",
-        "dataclasses",
-        "json",
-        "pydantic",
-        "typing"
+        "sys"
       ],
       "imports": [
-        "app.credentials",
-        "app.models",
-        "app.providers.gemini",
-        "app.schemas",
-        "app.services.activity_state_contracts",
-        "app.services.direct_llm",
-        "app.services.llm_context",
-        "app.services.resident_contracts",
-        "app.services.routine_post_context"
+        "app.domains.routine_posts.infrastructure.direct_llm_provider"
       ],
       "module": "app.services.routine_post_planner",
       "path": "backend/app/services/routine_post_planner.py",
@@ -4803,29 +4943,10 @@
     {
       "external_imports": [
         "__future__",
-        "datetime",
-        "hashlib",
-        "json",
-        "logging",
-        "sqlalchemy",
-        "sqlalchemy.exc",
-        "sqlalchemy.orm"
+        "sys"
       ],
       "imports": [
-        "app.core.unit_of_work",
-        "app.cruds.agent_runs",
-        "app.domains.routines.public",
-        "app.models",
-        "app.schemas",
-        "app.services.activity_runtime",
-        "app.services.agent_activity_policy",
-        "app.services.community",
-        "app.services.direct_llm",
-        "app.services.joint_activity_runtime",
-        "app.services.resident_contracts",
-        "app.services.routine_post_context",
-        "app.services.routine_post_planner",
-        "app.services.social_event_runtime"
+        "app.domains.routine_posts.infrastructure.sqlalchemy_runtime"
       ],
       "module": "app.services.routine_post_runtime",
       "path": "backend/app/services/routine_post_runtime.py",
@@ -4899,13 +5020,10 @@
     {
       "external_imports": [
         "__future__",
-        "datetime",
-        "sqlalchemy",
-        "sqlalchemy.orm"
+        "sys"
       ],
       "imports": [
-        "app.models",
-        "app.services.routine_post_context"
+        "app.compatibility.routine_posts.canonical_interactions"
       ],
       "module": "app.services.social_routine_interactions",
       "path": "backend/app/services/social_routine_interactions.py",

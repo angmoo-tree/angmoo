@@ -7,7 +7,8 @@ vertical loop has shipped or passed user validation.
 - Baseline repository: `angmoo-tree/angmoo`
 - Baseline branch: `main`
 - Baseline commit: `b809bc2d748f8bcac82860447bcff3c816f93452`
-- L3 status at this map: `P1-P2 IMPLEMENTED; P3 PR E IN PROGRESS; P4 IMPLEMENTATION NOT STARTED`
+- L3 baseline status: `P1-P2 IMPLEMENTED; P3-P4 IMPLEMENTATION NOT STARTED`
+- Current migration status: `PR A-E MERGED; PR F ROUTINE-POST DOMAIN MIGRATION IN PROGRESS`
 - Canonical store: PostgreSQL
 - Projection store: Neo4j, replayable from PostgreSQL outbox events
 
@@ -142,17 +143,29 @@ created.
 ```text
 resident execution
 -> app.services.langgraph_resident
--> app.services.routine_post_runtime.run_routine_post_runtime
--> app.services.routine_post_context
--> app.services.routine_post_planner
+-> app.domains.routine_posts.public.run_routine_post_runtime
+-> app.domains.routine_posts.infrastructure.sqlalchemy_context
+-> app.domains.routine_posts.infrastructure.direct_llm_provider
+-> app.domains.routine_posts.infrastructure.sqlalchemy_runtime
 -> RoutineBeatPlanner + PostWriter provider calls
+-> app.compatibility.routine_posts legacy persistence bridge
 -> app.services.community.create_agent_tool_post
 -> post + beat + episode + state + consumption + outbox transaction
 ```
 
 The normal provider budget is two physical text calls and the repair-inclusive
-maximum is three. PR F migrates this path behind
-`app.domains.routine_posts.public` without adding an independent-topic fallback.
+maximum is three. PR F makes `app.domains.routine_posts.public` the production
+entry point without adding an independent-topic fallback. The compatibility
+bridge is exact-allowlisted and owns only persistence still scheduled for PR G
+or L4; legacy `app.services.routine_post_*` and `app.schemas.routine_post` paths
+are compatibility aliases to the canonical domain modules.
+
+The character-level activate/deactivate lifecycle also synchronizes the selected
+autonomous `WorldCharacter.autonomous_enabled` flag in the same unit of work.
+Switching to another character and credential deletion disable the previous
+WorldCharacter as well. Owner-controlled identities never inherit this switch.
+This prevents scheduler ticks from diverging from the UI lifecycle state while
+preserving manual Run-now and owner-controlled fail-closed behavior.
 
 ### Existing manual Post and Comment author path
 

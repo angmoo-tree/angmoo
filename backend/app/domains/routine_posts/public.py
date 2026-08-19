@@ -1,7 +1,38 @@
-"""Stable public surface for the L3 routine-post migration.
+"""Stable public boundary for P4 routine continuation and atomic publication."""
 
-PR A intentionally exports no product behavior. PR F and PR G add autonomous
-continuation and owner-controlled Inbox observation as separate changes.
-"""
+from app.domains.routine_posts.infrastructure.direct_llm_provider import (
+    ROUTINE_CONTRACT_VERSION,
+    DirectRoutinePostProvider,
+    RoutineGeneration,
+    RoutinePostProvider,
+    validate_routine_generation,
+)
+from app.domains.routine_posts.infrastructure.sqlalchemy_context import (
+    EmptyRoutineInteractionSource,
+    RoutineContextUnavailable,
+    RoutineInteractionInput,
+    RoutineInteractionSource,
+    RoutinePostContext,
+    assemble_routine_post_context,
+)
+from app.domains.routine_posts.infrastructure.sqlalchemy_runtime import (
+    routine_world_character_for_character,
+    run_routine_post_runtime,
+)
 
-__all__: tuple[str, ...] = ()
+
+__all__ = [
+    "ROUTINE_CONTRACT_VERSION",
+    "DirectRoutinePostProvider",
+    "EmptyRoutineInteractionSource",
+    "RoutineContextUnavailable",
+    "RoutineGeneration",
+    "RoutineInteractionInput",
+    "RoutineInteractionSource",
+    "RoutinePostContext",
+    "RoutinePostProvider",
+    "assemble_routine_post_context",
+    "routine_world_character_for_character",
+    "run_routine_post_runtime",
+    "validate_routine_generation",
+]
