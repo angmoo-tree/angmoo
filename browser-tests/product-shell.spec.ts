@@ -223,7 +223,10 @@ test("World App keeps the requested World boundary and never falls back", async 
   await page.getByRole("link", { name: "Feed" }).click();
   await expect(page).toHaveURL(new RegExp(`/worlds/${WORLD_ALPHA.world_id}/feed$`));
   await expect(worldApp).toHaveAttribute("data-world-id", WORLD_ALPHA.world_id);
-  await expect(page.getByText("전체 커뮤니티 Feed와 구분됩니다")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "이 World에서 내가 조종하는 앵무가 필요해요" }),
+  ).toBeVisible();
+  await expect(page.getByText("Creator Studio에서 owner-controlled 앵무를 만든 뒤")).toBeVisible();
 
   await page.goto("/worlds/world-foreign");
   await expect(page.getByRole("heading", { name: "이 World 앱을 열 수 없어요" })).toBeVisible();
