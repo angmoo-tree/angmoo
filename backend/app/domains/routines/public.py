@@ -52,7 +52,7 @@ from app.domains.routines.infrastructure.sqlalchemy_lifecycle import (
     interrupt_inactive_world_character as _interrupt_inactive_world_character,
 )
 from app.domains.routines.infrastructure.system_clock import FrozenClock, SystemClock
-from app.domains.routines.ports.clock import Clock
+from app.domains.routines.ports.clock import Clock, ClockPort
 
 
 def _clock(*, now: datetime | None, clock: Clock | None) -> Clock:
@@ -163,6 +163,7 @@ __all__ = [
     "ActivityRuntimeNotFoundError",
     "ActivityRuntimeValidationError",
     "Clock",
+    "ClockPort",
     "DAYPARTS",
     "DAYPART_START_HOURS",
     "DaypartTransitionCounts",

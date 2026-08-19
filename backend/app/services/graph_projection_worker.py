@@ -6,31 +6,23 @@ from datetime import UTC, datetime
 import logging
 import threading
 import time
-from typing import Callable, Protocol
+from typing import Callable
 
-from sqlalchemy.orm import Session
-
-from app import models
-from app.cruds import graph_projection as graph_projection_crud
+from app.domains.relationships.ports.outbox import OutboxPort, ProjectionWorkItem
+from app.domains.relationships.ports.projection import RelationshipProjectionPort
+from app.domains.relationships.projection.commands import ProjectionCommandError
 from app.integrations.neo4j import GraphClientError
-from app.services.graph_projection_metrics import graph_metrics
-from app.services.graph_projection_commands import (
-    ProjectionCommand,
-    ProjectionCommandError,
-    build_projection_command,
+from app.runtime.graph_projection.sqlalchemy_outbox import (
+    SessionFactory,
+    SqlAlchemyProjectionOutbox,
 )
+from app.services.graph_projection_metrics import graph_metrics
 
 
 logger = logging.getLogger(__name__)
 
 
-class ProjectionStore(Protocol):
-    def apply(
-        self, command: ProjectionCommand, *, timeout_seconds: float = 5.0
-    ) -> str: ...
-
-
-SessionFactory = Callable[[], Session]
+ProjectionStore = RelationshipProjectionPort
 
 
 @dataclass(frozen=True)
@@ -58,7 +50,8 @@ class GraphProjectionWorker:
     def __init__(
         self,
         *,
-        session_factory: SessionFactory,
+        session_factory: SessionFactory | None = None,
+        outbox: OutboxPort | None = None,
         store: ProjectionStore,
         worker_id: str,
         batch_size: int = 50,
@@ -66,7 +59,9 @@ class GraphProjectionWorker:
         command_timeout_seconds: float = 5.0,
         shutdown_drain_seconds: float = 20.0,
     ) -> None:
-        self._session_factory = session_factory
+        if outbox is None and session_factory is None:
+            raise ValueError("session_factory or outbox is required")
+        self._outbox = outbox or SqlAlchemyProjectionOutbox(session_factory)
         self._store = store
         self.worker_id = worker_id[:128]
         self.batch_size = max(1, min(batch_size, 100))
@@ -77,27 +72,19 @@ class GraphProjectionWorker:
             self.shutdown_drain_seconds,
         )
 
-    def _claim(self) -> list[str]:
-        with self._session_factory() as db:
-            ids = graph_projection_crud.claim_batch(
-                db,
-                worker_id=self.worker_id,
-                now=_utc_now(),
-                batch_size=self.batch_size,
-            )
-            db.commit()
-            return ids
+    def _claim(self) -> tuple[ProjectionWorkItem, ...]:
+        return self._outbox.claim(
+            worker_id=self.worker_id,
+            now=_utc_now(),
+            batch_size=self.batch_size,
+        )
 
     def _finalize_success(self, outbox_id: str) -> str:
-        with self._session_factory() as db:
-            ok = graph_projection_crud.finalize_success(
-                db,
-                outbox_id=outbox_id,
-                worker_id=self.worker_id,
-                now=_utc_now(),
-            )
-            db.commit()
-            return "succeeded" if ok else "lease_lost"
+        return self._outbox.finalize_success(
+            outbox_id=outbox_id,
+            worker_id=self.worker_id,
+            now=_utc_now(),
+        )
 
     def _finalize_failure(
         self,
@@ -107,34 +94,27 @@ class GraphProjectionWorker:
         terminal: bool,
         cancelled: bool = False,
     ) -> str:
-        with self._session_factory() as db:
-            status = graph_projection_crud.finalize_failure(
-                db,
-                outbox_id=outbox_id,
-                worker_id=self.worker_id,
-                now=_utc_now(),
-                error_class=error_class,
-                terminal=terminal,
-                cancelled=cancelled,
-            )
-            db.commit()
-            return status
+        return self._outbox.finalize_failure(
+            outbox_id=outbox_id,
+            worker_id=self.worker_id,
+            now=_utc_now(),
+            error_class=error_class,
+            terminal=terminal,
+            cancelled=cancelled,
+        )
 
-    def _process_one(self, outbox_id: str) -> _ProjectionItemResult:
+    def _process_one(self, item: ProjectionWorkItem) -> _ProjectionItemResult:
+        outbox_id = item.id
         started = time.monotonic()
-        projection_type = "unknown"
+        projection_type = item.projection_type
         error_class = "none"
         graph_degraded = False
         try:
-            with self._session_factory() as db:
-                row = db.get(models.GraphProjectionOutbox, outbox_id)
-                if row is not None:
-                    projection_type = row.projection_type
-                graph_metrics.increment(
-                    "graph_projection_claimed_total",
-                    projection_type=projection_type,
-                )
-                command = build_projection_command(db, outbox_id=outbox_id)
+            graph_metrics.increment(
+                "graph_projection_claimed_total",
+                projection_type=projection_type,
+            )
+            command = self._outbox.load_command(outbox_id=outbox_id)
             result_class = self._store.apply(
                 command, timeout_seconds=self.command_timeout_seconds
             )
@@ -214,16 +194,18 @@ class GraphProjectionWorker:
             graph_degraded=graph_degraded,
         )
 
-    def _release_unstarted(self, outbox_ids: list[str]) -> list[_ProjectionItemResult]:
+    def _release_unstarted(
+        self, items: list[ProjectionWorkItem]
+    ) -> list[_ProjectionItemResult]:
         return [
             _ProjectionItemResult(
                 status=self._finalize_failure(
-                    outbox_id,
+                    item.id,
                     error_class="shutdown_interrupted",
                     terminal=False,
                 )
             )
-            for outbox_id in outbox_ids
+            for item in items
         ]
 
     def process_batch(
@@ -234,31 +216,31 @@ class GraphProjectionWorker:
         stop = stop_event or threading.Event()
         if stop.is_set():
             return ProjectionBatchResult(0, 0, 0, 0, 0, 0)
-        outbox_ids = self._claim()
-        if not outbox_ids:
+        items = self._claim()
+        if not items:
             return ProjectionBatchResult(0, 0, 0, 0, 0, 0)
         item_results: list[_ProjectionItemResult] = []
         if stop.is_set():
-            item_results.extend(self._release_unstarted(outbox_ids))
-        elif self.concurrency == 1 or len(outbox_ids) == 1:
-            for index, outbox_id in enumerate(outbox_ids):
+            item_results.extend(self._release_unstarted(list(items)))
+        elif self.concurrency == 1 or len(items) == 1:
+            for index, item in enumerate(items):
                 if stop.is_set():
-                    item_results.extend(self._release_unstarted(outbox_ids[index:]))
+                    item_results.extend(self._release_unstarted(list(items[index:])))
                     break
-                item_results.append(self._process_one(outbox_id))
+                item_results.append(self._process_one(item))
         else:
             with ThreadPoolExecutor(
                 max_workers=self.concurrency,
                 thread_name_prefix="graph-projector",
             ) as executor:
-                remaining = iter(outbox_ids)
-                active: dict[Future[_ProjectionItemResult], str] = {}
-                unstarted: list[str] = []
-                for _ in range(min(self.concurrency, len(outbox_ids))):
-                    outbox_id = next(remaining, None)
-                    if outbox_id is None:
+                remaining = iter(items)
+                active: dict[Future[_ProjectionItemResult], ProjectionWorkItem] = {}
+                unstarted: list[ProjectionWorkItem] = []
+                for _ in range(min(self.concurrency, len(items))):
+                    item = next(remaining, None)
+                    if item is None:
                         break
-                    active[executor.submit(self._process_one, outbox_id)] = outbox_id
+                    active[executor.submit(self._process_one, item)] = item
                 while active:
                     completed, _ = wait(active, return_when=FIRST_COMPLETED)
                     for future in completed:
@@ -269,14 +251,14 @@ class GraphProjectionWorker:
                             unstarted.extend(remaining)
                         continue
                     while len(active) < self.concurrency:
-                        outbox_id = next(remaining, None)
-                        if outbox_id is None:
+                        item = next(remaining, None)
+                        if item is None:
                             break
-                        active[executor.submit(self._process_one, outbox_id)] = outbox_id
+                        active[executor.submit(self._process_one, item)] = item
                 item_results.extend(self._release_unstarted(unstarted))
         statuses = [item.status for item in item_results]
         return ProjectionBatchResult(
-            claimed=len(outbox_ids),
+            claimed=len(items),
             succeeded=statuses.count("succeeded"),
             retried=statuses.count("pending"),
             dead=statuses.count("dead"),

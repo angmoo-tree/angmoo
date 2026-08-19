@@ -47,7 +47,9 @@ def test_storage_frontend_runtime_and_parity_corpora_are_complete() -> None:
     frontend = _load("next-static-compatibility.json")
     runtime = _load("embedded-runtime-inventory.json")
 
-    assert postgres["entry_count"] == 67
+    # ER1 adds the current SQLAlchemy projection-outbox adapter to the frozen
+    # PostgreSQL inventory without changing its behavior.
+    assert postgres["entry_count"] == 68
     assert graph["query_count"] == 24
     assert frontend["route_count"] == 38
     assert {item["phase"] for item in runtime["parity"]["workloads"]} == {

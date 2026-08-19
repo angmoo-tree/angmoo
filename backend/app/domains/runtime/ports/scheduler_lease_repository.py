@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Protocol
+from typing import Protocol, runtime_checkable
 
 from app.domains.runtime.domain.scheduler_lease import (
     SchedulerLeaseSnapshot,
@@ -9,7 +9,8 @@ from app.domains.runtime.domain.scheduler_lease import (
 )
 
 
-class SchedulerLeaseRepository(Protocol):
+@runtime_checkable
+class ClaimLeasePort(Protocol):
     def acquire(self, *, owner_id: str, ttl_seconds: int) -> SchedulerLeaseSnapshot: ...
 
     def heartbeat(
@@ -39,3 +40,8 @@ class SchedulerLeaseRepository(Protocol):
     ) -> SchedulerLeaseSnapshot: ...
 
     def read(self) -> SchedulerLeaseSnapshot | None: ...
+
+
+SchedulerLeaseRepository = ClaimLeasePort
+
+__all__ = ["ClaimLeasePort", "SchedulerLeaseRepository"]

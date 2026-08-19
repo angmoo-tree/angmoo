@@ -337,6 +337,7 @@ def check_inventory(
             if importer.startswith("app.domains.")
             else None
         )
+        is_port_module = "ports" in importer.split(".")
         for imported in item["imports"]:
             edge = (importer, imported)
             exception = exceptions.get(edge)
@@ -446,6 +447,24 @@ def check_inventory(
                                 exception=exception,
                             )
                         )
+
+            if is_port_module and (
+                imported.startswith(("app.runtime.", "app.integrations."))
+                or ".infrastructure" in imported
+                or is_legacy
+            ):
+                errors.append(
+                    _violation(
+                        rule="port_imports_implementation",
+                        importer=importer,
+                        imported=imported,
+                        suggestion=(
+                            "move the implementation behind the port and compose it "
+                            "above the domain"
+                        ),
+                        exception=exception,
+                    )
+                )
 
         if importer.startswith(("app.domains.", "app.runtime.")):
             for imported in item["external_imports"]:

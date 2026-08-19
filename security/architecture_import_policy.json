@@ -873,18 +873,6 @@
           "importer": "app.services.graph_projection_replay"
         },
         {
-          "imported": "app.cruds.graph_projection",
-          "importer": "app.services.graph_projection_worker"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.graph_projection_worker"
-        },
-        {
-          "imported": "app.services.graph_projection_commands",
-          "importer": "app.services.graph_projection_worker"
-        },
-        {
           "imported": "app.services.graph_projection_metrics",
           "importer": "app.services.graph_projection_worker"
         },
@@ -1400,19 +1388,36 @@
     {
       "edges": [
         {
-          "imported": "app.services.graph_projection_commands",
-          "importer": "app.integrations.neo4j"
-        },
-        {
           "imported": "app.services.graph_projection_metrics",
           "importer": "app.integrations.neo4j"
         }
       ],
       "id": "neo4j-write-runtime-command-bridge",
       "owner_stage": "L4",
-      "reason": "The existing P7 Neo4j adapter consumes graph projection command and metric contracts from the legacy service layer.",
-      "removal_condition": "Move graph projection commands and metrics behind runtime/integration public ports during the L4 write-runtime split.",
+      "reason": "The existing P7 Neo4j adapter still reports through the legacy projection metrics module; ER1 has already moved command values to the relationships domain.",
+      "removal_condition": "Move graph projection metrics behind a runtime or integration public port during the L4 write-runtime split.",
       "review_date": "2026-11-14"
+    },
+    {
+      "edges": [
+        {
+          "imported": "app.cruds.graph_projection",
+          "importer": "app.runtime.graph_projection.sqlalchemy_outbox"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.runtime.graph_projection.sqlalchemy_outbox"
+        },
+        {
+          "imported": "app.services.graph_projection_commands",
+          "importer": "app.runtime.graph_projection.sqlalchemy_outbox"
+        }
+      ],
+      "id": "er1-current-graph-outbox-adapter",
+      "owner_stage": "L4",
+      "reason": "ER1 keeps the current PostgreSQL outbox and command builder behind storage-neutral runtime ports while SQLite canonical persistence remains OFF.",
+      "removal_condition": "Remove these exact edges when ER2 and L4 move the outbox model, claim semantics, and command builder behind canonical domain repositories.",
+      "review_date": "2026-11-19"
     }
   ],
   "legacy_module_cycles": [],
