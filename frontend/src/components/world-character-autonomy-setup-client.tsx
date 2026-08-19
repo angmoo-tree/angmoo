@@ -808,6 +808,25 @@ export function WorldCharacterAutonomySetupClient({
                         );
                       })}
                     </div>
+                    <details className="mt-5 rounded-2xl border border-outline-variant bg-white p-4 text-sm">
+                      <summary className="cursor-pointer font-bold text-on-surface">
+                        재진입 검증 정보
+                      </summary>
+                      <dl className="mt-4 grid gap-3 text-xs text-on-surface-variant">
+                        <div>
+                          <dt className="font-bold text-on-surface">Plan ID</dt>
+                          <dd className="mt-1 break-all font-mono">{activityPlan.id}</dd>
+                        </div>
+                        {activityPlan.items.map((item) => (
+                          <div key={`verification-${item.id}`}>
+                            <dt className="font-bold text-on-surface">
+                              {DAYPARTS.find((value) => value.key === item.daypart)?.label ?? item.daypart} item ID
+                            </dt>
+                            <dd className="mt-1 break-all font-mono">{item.id}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </details>
                     <p className="mt-5 rounded-2xl bg-surface-container-low p-4 text-sm text-on-surface-variant">
                       오늘 계획은 저장되었지만 자율활동은
                       <strong>{activityPlan.autonomous_enabled ? " 켜짐" : " 꺼짐"}</strong> 상태입니다.

@@ -63,14 +63,20 @@ def test_l3_current_entrypoints_track_completed_and_pending_migrations() -> None
             "retry_setup",
             "approve_setup",
         },
-        APP_ROOT / "services" / "daily_activity_plans.py": {
+        APP_ROOT
+        / "domains"
+        / "routines"
+        / "infrastructure"
+        / "sqlalchemy_daily_activity_plans.py": {
             "prepare_activity_plan",
             "get_activity_plan",
             "update_activity_runtime_mode",
         },
+        APP_ROOT / "domains" / "routines" / "public.py": {
+            "reconcile_all_elapsed_routines",
+        },
         APP_ROOT / "services" / "routine_post_runtime.py": {
             "run_routine_post_runtime",
-            "reconcile_all_elapsed_routines",
         },
         APP_ROOT / "services" / "community.py": {
             "create_post",
@@ -98,6 +104,24 @@ def test_autonomous_setup_routes_use_world_characters_public_boundary() -> None:
 
         assert "app.domains.world_characters" in imports
         assert "app.services.world_character_setup" not in imports
+
+
+def test_activity_plan_route_and_scheduler_use_routines_public_boundary() -> None:
+    route = APP_ROOT / "api" / "v1" / "routes" / "world_activity_runtime.py"
+    agent_runs = APP_ROOT / "services" / "agent_runs.py"
+
+    assert "app.domains.routines" in _imports(route)
+    assert "app.services.daily_activity_plans" not in _imports(route)
+    assert "app.domains.routines.public" in _imports(agent_runs)
+    assert "app.services.routine_post_runtime" in _imports(agent_runs)
+
+
+def test_daily_plan_legacy_path_is_a_thin_domain_facade() -> None:
+    facade = APP_ROOT / "services" / "daily_activity_plans.py"
+    imports = _imports(facade)
+
+    assert imports == {"app.domains.routines.public"}
+    assert not _function_names(facade)
 
 
 def test_l3_public_package_anchors_have_no_reverse_dependencies() -> None:

@@ -114,7 +114,7 @@ backend/app/
 | `core` | small primitives only | L0 | existing core is audited, not moved in PR A |
 | `identity` | `app.domains.identity.public` | L1 | PR A foundation active; runtime behavior unchanged |
 | resident and scheduler runtime | `app.domains.runtime.public` | L2 | PR A state/schema foundation active; behavior unchanged |
-| `worlds`, `world_characters`, `routines`, `routine_posts` | each domain's `public.py` | L3 | P1 World Creator and owner-controlled identity are active; PR D moves autonomous setup behind the WorldCharacter public boundary; P3-P4 remain PR E-G |
+| `worlds`, `world_characters`, `routines`, `routine_posts` | each domain's `public.py` | L3 | P1-P2 are active; PR E moves deterministic P3 planning and lifecycle behind the routines public boundary; P4 remains PR F-G |
 | `world_packages` | `app.domains.world_packages.public` | L3.5 | new Local feature later |
 | feed and `social` | `app.domains.social.public` | L4 | target only |
 | `relationships` graph read | `app.domains.relationships.public` | T2.5 pilot | canonical read slice active; PR C removes usage-zero aliases; write path unchanged |
@@ -147,6 +147,15 @@ consent/attempt records, and the existing exact 40-candidate validator. The
 legacy setup, schema, model, provider, contract, and direct-LLM modules are
 compatibility aliases only; privacy cleanup remains in the legacy service
 until its P3-P6 rows have migrated to their owning domains.
+
+L3 PR E makes `app.domains.routines.public` the canonical P3 entry for daily
+plan preparation, read, runtime-mode updates and elapsed lifecycle recovery.
+Application use cases depend on explicit Clock, daily-plan repository and
+lifecycle repository ports; SQLAlchemy is confined to infrastructure adapters.
+Legacy `app.models`, `app.schemas`, `app.services.daily_activity_plans` and
+activity-state paths remain thin compatibility facades. API and scheduler
+consumers no longer import the legacy daily-plan service, and restart recovery
+closes elapsed state without creating catch-up public actions.
 
 ## T2.5 relationship graph read pilot
 

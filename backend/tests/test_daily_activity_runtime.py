@@ -17,6 +17,7 @@ from app import models, schemas
 from app.api.v1 import deps as api_deps
 from app.api.v1.routes import world_activity_runtime as runtime_routes
 from app.core.db import Base
+from app.domains.routines import public as routines
 from app.services import activity_runtime
 from app.services import activity_state_contracts
 from app.services import daily_activity_plans
@@ -338,6 +339,76 @@ def test_prepare_creates_four_items_without_enabling_autonomy_and_reuses() -> No
         assert fixture.world_character.autonomous_enabled is False
         assert db.scalar(select(func.count(models.DailyActivityPlan.id))) == 1
         assert db.scalar(select(func.count(models.DailyActivityPlanItem.id))) == 4
+
+
+def test_routines_public_uses_frozen_clock_and_writes_no_public_action() -> None:
+    engine = _engine()
+    now = _utc(datetime(2026, 8, 9, 0, 30))
+    with Session(engine, expire_on_commit=False) as db:
+        _world_row, fixture, _other = _seed(db)
+
+        created = routines.prepare_activity_plan(
+            db,
+            character_id=fixture.character.id,
+            world_id=fixture.world_character.world_id,
+            user=fixture.user,
+            data=schemas.DailyActivityPlanPrepareCreate(
+                idempotency_key="domain-clock-plan"
+            ),
+            clock=routines.FrozenClock(now),
+        )
+        replay = routines.get_activity_plan(
+            db,
+            character_id=fixture.character.id,
+            world_id=fixture.world_character.world_id,
+            user=fixture.user,
+            clock=routines.FrozenClock(now),
+        )
+
+        assert created.id == replay.id
+        assert replay.reused is True
+        assert db.scalar(select(func.count(models.AgentRun.id))) == 0
+        assert db.scalar(select(func.count(models.Post.id))) == 0
+        assert db.scalar(select(func.count(models.Comment.id))) == 0
+        assert db.scalar(select(func.count(models.SocialEvent.id))) == 0
+        assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 0
+
+
+def test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan() -> None:
+    engine = _engine()
+    now = _utc(datetime(2026, 8, 9, 0, 30))
+    with Session(engine, expire_on_commit=False) as db:
+        _world_row, fixture, _other = _seed(db)
+        fixture.world_character.control_mode = "owner_controlled"
+        fixture.world_character.owner_user_id = fixture.user.id
+        fixture.world_character.autonomous_enabled = False
+        db.commit()
+
+        with pytest.raises(
+            routines.DailyActivityPlanValidationError,
+            match="owner_controlled_automation_disabled",
+        ):
+            routines.prepare_activity_plan(
+                db,
+                character_id=fixture.character.id,
+                world_id=fixture.world_character.world_id,
+                user=fixture.user,
+                data=schemas.DailyActivityPlanPrepareCreate(
+                    idempotency_key="forged-owner-plan"
+                ),
+                clock=routines.FrozenClock(now),
+            )
+
+        transition = routines.reconcile_all_elapsed_routines(
+            db, clock=routines.FrozenClock(now + timedelta(days=1))
+        )
+        assert transition == routines.DaypartTransitionCounts(0, 0)
+        assert db.scalar(select(func.count(models.DailyActivityPlan.id))) == 0
+        assert db.scalar(select(func.count(models.DailyActivityPlanItem.id))) == 0
+        assert db.scalar(select(func.count(models.ActivityEpisode.id))) == 0
+        assert db.scalar(select(func.count(models.ActivityBeat.id))) == 0
+        assert db.scalar(select(func.count(models.AgentRun.id))) == 0
+        assert db.scalar(select(func.count(models.Post.id))) == 0
 
 
 def test_selection_avoids_exact_repeat_for_three_recent_local_dates() -> None:

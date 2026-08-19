@@ -9,7 +9,8 @@ from app import models, schemas
 from app.api.v1.deps import get_current_user, get_db
 from app.core.config import settings
 from app.domains.relationships import public as relationships
-from app.services import daily_activity_plans, social_memory_read
+from app.domains.routines import public as routines
+from app.services import social_memory_read
 from app.services.relationship_graph_read import (
     SqlAlchemyRelationshipGraphReadGateway,
 )
@@ -18,12 +19,12 @@ from app.services.relationship_graph_read import (
 router = APIRouter(prefix="/characters", tags=["world-activity-runtime"])
 
 
-def _raise_plan_error(exc: daily_activity_plans.DailyActivityPlanError) -> None:
-    if isinstance(exc, daily_activity_plans.DailyActivityPlanNotFoundError):
+def _raise_plan_error(exc: routines.DailyActivityPlanError) -> None:
+    if isinstance(exc, routines.DailyActivityPlanNotFoundError):
         status_code = status.HTTP_404_NOT_FOUND
-    elif isinstance(exc, daily_activity_plans.DailyActivityPlanForbiddenError):
+    elif isinstance(exc, routines.DailyActivityPlanForbiddenError):
         status_code = status.HTTP_403_FORBIDDEN
-    elif isinstance(exc, daily_activity_plans.DailyActivityPlanConflictError):
+    elif isinstance(exc, routines.DailyActivityPlanConflictError):
         status_code = status.HTTP_409_CONFLICT
     else:
         status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -63,13 +64,13 @@ def get_daily_activity_plan(
     user: models.User = Depends(get_current_user),
 ) -> schemas.DailyActivityPlanRead:
     try:
-        return daily_activity_plans.get_activity_plan(
+        return routines.get_activity_plan(
             db,
             character_id=character_id,
             world_id=world_id,
             user=user,
         )
-    except daily_activity_plans.DailyActivityPlanError as exc:
+    except routines.DailyActivityPlanError as exc:
         _raise_plan_error(exc)
 
 
@@ -85,14 +86,14 @@ def prepare_daily_activity_plan(
     user: models.User = Depends(get_current_user),
 ) -> schemas.DailyActivityPlanRead:
     try:
-        return daily_activity_plans.prepare_activity_plan(
+        return routines.prepare_activity_plan(
             db,
             character_id=character_id,
             world_id=world_id,
             user=user,
             data=data,
         )
-    except daily_activity_plans.DailyActivityPlanError as exc:
+    except routines.DailyActivityPlanError as exc:
         _raise_plan_error(exc)
 
 
@@ -108,14 +109,14 @@ def update_world_character_activity_runtime_mode(
     user: models.User = Depends(get_current_user),
 ) -> schemas.WorldCharacterRuntimeModeRead:
     try:
-        return daily_activity_plans.update_activity_runtime_mode(
+        return routines.update_activity_runtime_mode(
             db,
             character_id=character_id,
             world_id=world_id,
             user=user,
             data=data,
         )
-    except daily_activity_plans.DailyActivityPlanError as exc:
+    except routines.DailyActivityPlanError as exc:
         _raise_plan_error(exc)
 
 
