@@ -173,6 +173,7 @@ async function proxy(request: Request, context: RouteContext) {
   }
   const query = new URL(request.url).search;
   const cookie = filterForwardedCookies(request.headers.get("cookie"));
+  const idempotencyKey = request.headers.get("idempotency-key");
 
   return proxyBackend(`/api/v1/${path.map(encodeURIComponent).join("/")}${query}`, {
     method: request.method,
@@ -183,6 +184,7 @@ async function proxy(request: Request, context: RouteContext) {
       ...(frontendOrigin
         ? { "X-Angmoo-Frontend-Origin": frontendOrigin }
         : {}),
+      ...(idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {}),
       "Content-Type": request.headers.get("content-type") ?? "application/json",
     },
   });

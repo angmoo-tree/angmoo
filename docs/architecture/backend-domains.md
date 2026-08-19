@@ -114,7 +114,7 @@ backend/app/
 | `core` | small primitives only | L0 | existing core is audited, not moved in PR A |
 | `identity` | `app.domains.identity.public` | L1 | PR A foundation active; runtime behavior unchanged |
 | resident and scheduler runtime | `app.domains.runtime.public` | L2 | PR A state/schema foundation active; behavior unchanged |
-| `worlds`, `world_characters`, `routines`, `routine_posts` | each domain's `public.py` | L3 | P1-P3 are active; PR F moves P4 continuation and atomic publication behind the routine-post public boundary; PR G retains owner manual writes and Inbox observation |
+| `worlds`, `world_characters`, `routines`, `routine_posts`, owner manual social | each domain's `public.py` | L3 | P1-P3 are active; PR F moves P4 continuation and atomic publication behind the routine-post public boundary; PR G moves owner manual writes and Inbox observation behind a stable public boundary |
 | `world_packages` | `app.domains.world_packages.public` | L3.5 | new Local feature later |
 | feed and `social` | `app.domains.social.public` | L4 | target only |
 | `relationships` graph read | `app.domains.relationships.public` | T2.5 pilot | canonical read slice active; PR C removes usage-zero aliases; write path unchanged |
@@ -171,6 +171,19 @@ and all-or-nothing post/beat/episode/state/outbox commit. The character
 scheduler lifecycle and selected autonomous WorldCharacter are kept in sync:
 activation, deactivation, character replacement and credential removal update
 the WorldCharacter autonomy flag without enabling owner-controlled identities.
+
+L3 PR G makes `app.domains.manual_social.public` the stable entry for Local
+Owner-authored World posts, replies and once-only autonomous Inbox observation.
+The HTTP body never selects an author: the Local Owner session, active
+owner-controlled WorldCharacter and same-World target are revalidated on every
+write. A committed reply and its Inbox candidate share one transaction; the
+candidate is claimed at the target's next allowed P4 beat and consumed only in
+the beat's atomic publication transaction. The manual request itself performs
+zero provider calls and L3 writes no relationship delta, graph edge or
+long-term memory. Four exact L4-owned compatibility edges isolate the existing
+Post, reply, block and visibility persistence until the social domain moves in
+L4. The resulting inventory contains 391 modules, 827 internal edges, 1,277
+per-module external import records and 344 exact legacy exceptions.
 
 ## T2.5 relationship graph read pilot
 

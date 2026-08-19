@@ -18,6 +18,10 @@ from sqlalchemy.pool import StaticPool
 from app import models, schemas
 from app.core.db import Base
 from app.cruds import agents as agent_crud
+from app.domains.manual_social.api.schemas import OwnerManualReplyWrite
+from app.domains.manual_social.public import (
+    create_owner_reply,
+)
 from app.providers.gemini import build_generate_content_config
 from app.services import activity_state_contracts, daily_activity_plans
 from app.services import agents as agent_service
@@ -858,6 +862,162 @@ def test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_on
         assert no_due["routine_outcome"] == "BEAT_NOT_DUE"
         assert no_due_provider.calls == 0
         assert db.scalar(select(func.count(models.Post.id))) == 2
+
+
+def test_owner_manual_reply_is_observed_once_on_next_allowed_beat() -> None:
+    engine = _engine()
+    first_now = _utc(datetime(2026, 8, 10, 10, 5))
+    reply_now = _utc(datetime(2026, 8, 10, 10, 30))
+    second_now = _utc(datetime(2026, 8, 10, 11, 5))
+    with Session(engine, expire_on_commit=False) as db:
+        fixture = _seed(db)
+        provider = FakeRoutineProvider()
+        first = asyncio.run(
+            routine_post_runtime.run_routine_post_runtime(
+                _resident_context(db, fixture, run_id="manual-inbox-first", now=first_now),
+                provider=provider,
+            )
+        )
+        assert first["routine_outcome"] == "POST_SUCCEEDED"
+        target_post_id = first["publish_result"]["post_id"]
+
+        db.add(
+            models.InstallationIdentity(
+                singleton_key="local-installation",
+                installation_id="manual-inbox-installation",
+                owner_user_id=fixture.user.id,
+                bootstrap_state="claimed",
+                local_label="fixture",
+                claimed_at=first_now,
+            )
+        )
+        membership = db.get(models.WorldMembership, fixture.world_character.membership_id)
+        assert membership is not None
+        membership.role = "owner"
+
+        owner_character = models.Character(
+            id="character-owner-manual-inbox",
+            owner_id=fixture.user.id,
+            name="Owner Bird",
+            handle="owner-manual-inbox",
+            one_liner="The user's direct voice in this World.",
+            personality="Direct and kind.",
+            speech_style="Brief.",
+            worldview="Friends listen to one another.",
+            topic_preferences="Academy life",
+            safety_rules="Stay safe.",
+            persona_summary="Owner controlled fixture.",
+            moderation_status="active",
+            execution_mode="local",
+        )
+        db.add(owner_character)
+        db.flush()
+        owner_world_character = models.WorldCharacter(
+            id="world-character-owner-manual-inbox",
+            world_id=fixture.world.id,
+            character_id=owner_character.id,
+            membership_id=fixture.world_character.membership_id,
+            role_key="student",
+            status="active",
+            control_mode="owner_controlled",
+            owner_user_id=fixture.user.id,
+            autonomous_enabled=False,
+            activity_runtime_mode="legacy_resident_v1",
+            feed_runtime_mode="legacy_latest_v1",
+            local_profile={"display_name": "Owner Bird"},
+            character_contract_hash=world_character_contracts.character_contract_hash(
+                owner_character
+            ),
+            world_contract_hash=fixture.world.contract_hash,
+        )
+        db.add(owner_world_character)
+        db.flush()
+        db.add(
+            models.CharacterActiveWorld(
+                character_id=owner_character.id,
+                world_character_id=owner_world_character.id,
+                selected_at=reply_now,
+                idempotency_key="owner-manual-inbox-active-world",
+                version=1,
+            )
+        )
+        db.commit()
+
+        manual_reply = create_owner_reply(
+            db,
+            world_id=fixture.world.id,
+            target_post_id=target_post_id,
+            current_user=fixture.user,
+            idempotency_key="owner-manual-inbox-reply",
+            data=OwnerManualReplyWrite(
+                body="다음 실험에서는 온도를 조금 낮춰 보는 건 어때?"
+            ),
+        )
+        assert manual_reply.delivery.provider_call_count == 0
+        assert manual_reply.delivery.inbox_status == "pending"
+        candidate = db.get(
+            models.OwnerManualInboxCandidate,
+            manual_reply.delivery.inbox_candidate_id,
+        )
+        assert candidate is not None
+        candidate.created_at = reply_now
+        db.commit()
+
+        second = asyncio.run(
+            routine_post_runtime.run_routine_post_runtime(
+                _resident_context(db, fixture, run_id="manual-inbox-second", now=second_now),
+                provider=provider,
+            )
+        )
+
+        db.refresh(candidate)
+        beats = list(
+            db.scalars(
+                select(models.ActivityBeat)
+                .where(models.ActivityBeat.episode_id == fixture.morning_episode.id)
+                .order_by(models.ActivityBeat.sequence_no)
+            )
+        )
+        posts = list(db.scalars(select(models.Post).order_by(models.Post.created_at)))
+        manual_source_id = f"manual-inbox:{candidate.id}"
+
+        assert second["routine_outcome"] == "POST_SUCCEEDED"
+        assert second["llm_usage_summary"]["provider_call_count"] == 2
+        assert provider.calls == 2
+        assert len(beats) == 2
+        assert manual_source_id in beats[1].result_snapshot["used_source_event_ids"]
+        assert beats[1].result_snapshot["considered_source_event_ids"] == [
+            manual_source_id
+        ]
+        assert candidate.status == "consumed"
+        assert candidate.target_activity_beat_id == beats[1].id
+        assert candidate.consumed_at is not None
+        assert db.scalar(select(func.count(models.ActivityEventConsumption.id))) == 0
+        assert db.scalar(select(func.count(models.RelationshipState.id))) == 0
+        assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 2
+        assert len(posts) == 3
+        assert sum(post.reply_to_post_id is not None for post in posts) == 1
+        assert all(
+            post.reply_to_post_id is None
+            for post in posts
+            if post.author_world_character_id == fixture.world_character.id
+        )
+
+        no_due_provider = FakeRoutineProvider()
+        no_due = asyncio.run(
+            routine_post_runtime.run_routine_post_runtime(
+                _resident_context(
+                    db,
+                    fixture,
+                    run_id="manual-inbox-no-due",
+                    now=_utc(datetime(2026, 8, 10, 11, 20)),
+                ),
+                provider=no_due_provider,
+            )
+        )
+        assert no_due["routine_outcome"] == "BEAT_NOT_DUE"
+        assert no_due_provider.calls == 0
+        assert db.scalar(select(func.count(models.Post.id))) == 3
 
 
 def test_runtime_closes_elapsed_episode_before_activating_current_daypart() -> None:

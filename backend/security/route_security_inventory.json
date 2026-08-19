@@ -392,6 +392,11 @@
       "module": "app.api.v1.routes.worlds",
       "endpoint": "get_world_generation_context"
     },
+    "GET /api/v1/worlds/{world_id}/manual-social/feed": {
+      "access": "owner-only",
+      "module": "app.domains.manual_social.api.routes",
+      "endpoint": "read_manual_social_feed"
+    },
     "GET /api/v1/worlds/{world_id}/owner-character": {
       "access": "owner-only",
       "module": "app.domains.world_characters.api.routes",
@@ -746,6 +751,16 @@
       "access": "owner-only",
       "module": "app.api.v1.routes.worlds",
       "endpoint": "enter_world_with_character"
+    },
+    "POST /api/v1/worlds/{world_id}/manual-social/posts": {
+      "access": "owner-only",
+      "module": "app.domains.manual_social.api.routes",
+      "endpoint": "write_owner_post"
+    },
+    "POST /api/v1/worlds/{world_id}/manual-social/posts/{post_id}/replies": {
+      "access": "owner-only",
+      "module": "app.domains.manual_social.api.routes",
+      "endpoint": "write_owner_reply"
     },
     "POST /api/v1/worlds/{world_id}/owner-character": {
       "access": "owner-only",

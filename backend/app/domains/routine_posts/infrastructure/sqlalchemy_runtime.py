@@ -24,6 +24,13 @@ from app.domains.routine_posts.infrastructure.sqlalchemy_context import (
     assemble_routine_post_context,
 )
 from app.domains.routines.public import reconcile_all_elapsed_routines
+from app.domains.manual_social.public import (
+    ManualInboxRuntimeError,
+    claim_manual_inbox,
+    consume_manual_inbox_claims,
+    is_manual_inbox_source,
+    release_manual_inbox_claims,
+)
 from app.integrations.direct_llm import (
     DirectLlmDeferred,
     DirectLlmError,
@@ -148,7 +155,13 @@ def _finish_failed_beat(
     claim_run_id: str,
     reason_code: str,
     retryable: bool,
+    manual_source_event_ids: list[str] | None = None,
 ) -> None:
+    release_manual_inbox_claims(
+        db,
+        source_event_ids=manual_source_event_ids or [],
+        claim_run_id=claim_run_id,
+    )
     try:
         if retryable and beat.attempt_count < 2:
             activity_runtime.release_activity_beat_for_retry(
@@ -285,29 +298,48 @@ async def run_routine_post_runtime(
     beat = claim.row
     if not isinstance(beat, models.ActivityBeat):
         raise TypeError("activity beat claim returned an invalid row")
+    claimed_manual_source_ids: list[str] = []
     try:
         for event in context.source_events:
-            activity_runtime.claim_event_consumption(
-                db,
-                world_id=context.world.id,
-                consumer_world_character_id=world_character.id,
-                source_social_event_id=event.source_event_id,
-                target_activity_beat_id=beat.id,
-                idempotency_key=f"{beat.id}:{event.source_event_id}",
-                claim_run_id=resident_context.run_id,
-                claim_expires_at=resident_context.run_started_at + CLAIM_LEASE,
-                now=resident_context.run_started_at,
-            )
-    except activity_runtime.ActivityRuntimeError as exc:
+            if is_manual_inbox_source(event.source_event_id):
+                claim_manual_inbox(
+                    db,
+                    source_event_id=event.source_event_id,
+                    world_id=context.world.id,
+                    consumer_world_character_id=world_character.id,
+                    target_activity_beat_id=beat.id,
+                    claim_run_id=resident_context.run_id,
+                    claim_expires_at=resident_context.run_started_at + CLAIM_LEASE,
+                    now=resident_context.run_started_at,
+                )
+                claimed_manual_source_ids.append(event.source_event_id)
+            else:
+                activity_runtime.claim_event_consumption(
+                    db,
+                    world_id=context.world.id,
+                    consumer_world_character_id=world_character.id,
+                    source_social_event_id=event.source_event_id,
+                    target_activity_beat_id=beat.id,
+                    idempotency_key=f"{beat.id}:{event.source_event_id}",
+                    claim_run_id=resident_context.run_id,
+                    claim_expires_at=resident_context.run_started_at + CLAIM_LEASE,
+                    now=resident_context.run_started_at,
+                )
+    except (activity_runtime.ActivityRuntimeError, ManualInboxRuntimeError) as exc:
         _finish_failed_beat(
             db,
             beat=beat,
             claim_run_id=resident_context.run_id,
             reason_code="source_event_claim_conflict",
             retryable=False,
+            manual_source_event_ids=claimed_manual_source_ids,
         )
         return _safe_result(
-            outcome=_runtime_error_code(exc),
+            outcome=(
+                _runtime_error_code(exc)
+                if isinstance(exc, activity_runtime.ActivityRuntimeError)
+                else "MANUAL_INBOX_CLAIM_CONFLICT"
+            ),
             tracker=tracker,
             status="failed",
             failure_class=type(exc).__name__,
@@ -360,6 +392,7 @@ async def run_routine_post_runtime(
                     claim_run_id=resident_context.run_id,
                     reason_code=exc.reason_code,
                     retryable=exc.reason_code == "joint_activity_opening_claimed",
+                    manual_source_event_ids=claimed_manual_source_ids,
                 )
                 return _safe_result(
                     outcome=exc.reason_code.upper(),
@@ -386,6 +419,7 @@ async def run_routine_post_runtime(
             claim_run_id=resident_context.run_id,
             reason_code="provider_deferred",
             retryable=True,
+            manual_source_event_ids=claimed_manual_source_ids,
         )
         raise
     except Exception as exc:
@@ -398,6 +432,7 @@ async def run_routine_post_runtime(
             claim_run_id=resident_context.run_id,
             reason_code=reason_code,
             retryable=_retryable_provider_error(exc),
+            manual_source_event_ids=claimed_manual_source_ids,
         )
         logger.warning(
             "routine_generation_failed run_id=%s beat_id=%s failure_class=%s",
@@ -509,6 +544,13 @@ async def run_routine_post_runtime(
                 result_snapshot["joint_started_event_id"] = (
                     started_event.id if started_event is not None else None
                 )
+            consume_manual_inbox_claims(
+                db,
+                source_event_ids=claimed_manual_source_ids,
+                target_activity_beat_id=beat.id,
+                claim_run_id=resident_context.run_id,
+                now=resident_context.run_started_at,
+            )
             activity_runtime.complete_activity_beat(
                 db,
                 beat_id=beat.id,
@@ -516,6 +558,7 @@ async def run_routine_post_runtime(
                 source_post_id=post.id,
                 state_after_snapshot=generation.state_after,
                 result_snapshot=result_snapshot,
+                external_claimed_source_event_ids=set(claimed_manual_source_ids),
                 now=resident_context.run_started_at,
                 commit=False,
             )
@@ -547,6 +590,7 @@ async def run_routine_post_runtime(
             claim_run_id=resident_context.run_id,
             reason_code="publish_transaction_failed",
             retryable=isinstance(exc, IntegrityError),
+            manual_source_event_ids=claimed_manual_source_ids,
         )
         logger.exception(
             "routine_publish_failed run_id=%s beat_id=%s failure_class=%s",

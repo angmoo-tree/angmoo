@@ -1,7 +1,7 @@
 {
-  "edge_count": 801,
-  "external_import_count": 1248,
-  "module_count": 380,
+  "edge_count": 827,
+  "external_import_count": 1277,
+  "module_count": 391,
   "modules": [
     {
       "external_imports": [],
@@ -917,6 +917,17 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.alembic.versions.20260819_0082_owner_manual_social_inbox",
+      "path": "backend/app/alembic/versions/20260819_0082_owner_manual_social_inbox.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.api.v1",
@@ -986,6 +997,7 @@
         "app.api.v1.routes.worlds",
         "app.domains.device_home.public",
         "app.domains.identity.api.local_routes",
+        "app.domains.manual_social.api.routes",
         "app.domains.world_characters.api.routes"
       ],
       "module": "app.api.v1.public",
@@ -1216,6 +1228,53 @@
     {
       "external_imports": [],
       "imports": [],
+      "module": "app.compatibility.manual_social",
+      "path": "backend/app/compatibility/manual_social/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.manual_social.domain.inbox",
+        "app.domains.manual_social.infrastructure.sqlalchemy_models",
+        "app.models"
+      ],
+      "module": "app.compatibility.manual_social.inbox",
+      "path": "backend/app/compatibility/manual_social/inbox.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "hashlib",
+        "json",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.ids",
+        "app.core.unit_of_work",
+        "app.domains.manual_social.api.schemas",
+        "app.domains.manual_social.infrastructure.sqlalchemy_models",
+        "app.domains.world_characters.public",
+        "app.models",
+        "app.schemas.community",
+        "app.services.community"
+      ],
+      "module": "app.compatibility.manual_social.legacy",
+      "path": "backend/app/compatibility/manual_social/legacy.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
       "module": "app.compatibility.routine_posts",
       "path": "backend/app/compatibility/routine_posts/__init__.py",
       "wildcard_imports": []
@@ -1228,6 +1287,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.domains.manual_social.public",
         "app.domains.routine_posts.domain.interaction",
         "app.models"
       ],
@@ -2051,6 +2111,87 @@
     {
       "external_imports": [],
       "imports": [],
+      "module": "app.domains.manual_social",
+      "path": "backend/app/domains/manual_social/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "fastapi",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.api.v1.deps",
+        "app.core.browser_session",
+        "app.core.db",
+        "app.domains.manual_social.api.schemas",
+        "app.domains.manual_social.public",
+        "app.domains.world_characters.public"
+      ],
+      "module": "app.domains.manual_social.api.routes",
+      "path": "backend/app/domains/manual_social/api/routes.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.manual_social.api.schemas",
+      "path": "backend/app/domains/manual_social/api/schemas.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.manual_social.domain",
+      "path": "backend/app/domains/manual_social/domain/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime"
+      ],
+      "imports": [],
+      "module": "app.domains.manual_social.domain.inbox",
+      "path": "backend/app/domains/manual_social/domain/inbox.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.domains.manual_social.infrastructure.sqlalchemy_models",
+      "path": "backend/app/domains/manual_social/infrastructure/sqlalchemy_models.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.compatibility.manual_social.inbox",
+        "app.compatibility.manual_social.legacy",
+        "app.domains.manual_social.domain.inbox"
+      ],
+      "module": "app.domains.manual_social.public",
+      "path": "backend/app/domains/manual_social/public.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
       "module": "app.domains.relationships",
       "path": "backend/app/domains/relationships/__init__.py",
       "wildcard_imports": []
@@ -2225,6 +2366,7 @@
       "imports": [
         "app.compatibility.routine_posts.legacy",
         "app.core.unit_of_work",
+        "app.domains.manual_social.public",
         "app.domains.routine_posts.infrastructure.direct_llm_provider",
         "app.domains.routine_posts.infrastructure.sqlalchemy_context",
         "app.domains.routines.public",
@@ -2974,6 +3116,7 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.world_characters.domain.owner_controlled_identity",
         "app.domains.world_characters.infrastructure.autonomous_setup_contracts",
         "app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup",
         "app.domains.world_characters.infrastructure.sqlalchemy_models",
@@ -3215,6 +3358,7 @@
       "external_imports": [],
       "imports": [
         "app.domains.identity.infrastructure",
+        "app.domains.manual_social.infrastructure.sqlalchemy_models",
         "app.domains.runtime.infrastructure",
         "app.models.admin_ops",
         "app.models.agent_creation_drafts",
