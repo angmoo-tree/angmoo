@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Literal, Protocol
+from typing import Literal, Protocol, runtime_checkable
 
 
 DirectionMode = Literal["outgoing", "incoming", "either"]
@@ -105,6 +105,7 @@ class GraphNodeCandidate:
     character_deleted: bool
 
 
+@runtime_checkable
 class RelationshipGraphQueryPort(Protocol):
     def get_direct_relationship(
         self,

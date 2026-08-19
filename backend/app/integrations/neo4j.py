@@ -16,7 +16,7 @@ from neo4j.exceptions import (
 )
 
 from app.services.graph_projection_metrics import graph_metrics
-from app.services.graph_projection_commands import (
+from app.domains.relationships.projection.commands import (
     NoGraphMutationCommand,
     ProjectionCommand,
     RelationshipStateProjectionCommand,

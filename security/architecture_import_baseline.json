@@ -1,7 +1,7 @@
 {
-  "edge_count": 827,
-  "external_import_count": 1277,
-  "module_count": 391,
+  "edge_count": 858,
+  "external_import_count": 1311,
+  "module_count": 410,
   "modules": [
     {
       "external_imports": [],
@@ -2255,9 +2255,78 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.relationships.ports.outbox",
+        "app.domains.relationships.ports.projection",
+        "app.domains.relationships.ports.query"
+      ],
+      "module": "app.domains.relationships.ports",
+      "path": "backend/app/domains/relationships/ports/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.relationships.projection.commands"
+      ],
+      "module": "app.domains.relationships.ports.outbox",
+      "path": "backend/app/domains/relationships/ports/outbox.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.relationships.projection.commands"
+      ],
+      "module": "app.domains.relationships.ports.projection",
+      "path": "backend/app/domains/relationships/ports/projection.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.relationships.graph_read.repository"
+      ],
+      "module": "app.domains.relationships.ports.query",
+      "path": "backend/app/domains/relationships/ports/query.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.relationships.projection.commands"
+      ],
+      "module": "app.domains.relationships.projection",
+      "path": "backend/app/domains/relationships/projection/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.relationships.projection.commands",
+      "path": "backend/app/domains/relationships/projection/commands.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
         "app.domains.relationships.graph_read.errors",
         "app.domains.relationships.graph_read.schemas",
-        "app.domains.relationships.graph_read.use_case"
+        "app.domains.relationships.graph_read.use_case",
+        "app.domains.relationships.ports",
+        "app.domains.relationships.projection"
       ],
       "module": "app.domains.relationships.public",
       "path": "backend/app/domains/relationships/public.py",
@@ -2813,7 +2882,14 @@
     },
     {
       "external_imports": [],
-      "imports": [],
+      "imports": [
+        "app.domains.runtime.ports.application_runtime_probe",
+        "app.domains.runtime.ports.migration_source",
+        "app.domains.runtime.ports.runtime_data_path",
+        "app.domains.runtime.ports.scheduler_lease_repository",
+        "app.domains.runtime.ports.search_index",
+        "app.domains.runtime.ports.unit_of_work"
+      ],
       "module": "app.domains.runtime.ports",
       "path": "backend/app/domains/runtime/ports/__init__.py",
       "wildcard_imports": []
@@ -2833,6 +2909,29 @@
     {
       "external_imports": [
         "__future__",
+        "dataclasses",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.runtime.ports.migration_source",
+      "path": "backend/app/domains/runtime/ports/migration_source.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "pathlib",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.runtime.ports.runtime_data_path",
+      "path": "backend/app/domains/runtime/ports/runtime_data_path.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "typing"
       ],
       "imports": [
@@ -2840,6 +2939,27 @@
       ],
       "module": "app.domains.runtime.ports.scheduler_lease_repository",
       "path": "backend/app/domains/runtime/ports/scheduler_lease_repository.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.runtime.ports.search_index",
+      "path": "backend/app/domains/runtime/ports/search_index.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.runtime.ports.unit_of_work",
+      "path": "backend/app/domains/runtime/ports/unit_of_work.py",
       "wildcard_imports": []
     },
     {
@@ -2852,6 +2972,7 @@
         "app.domains.runtime.domain.installation_state",
         "app.domains.runtime.domain.scheduler_lease",
         "app.domains.runtime.infrastructure",
+        "app.domains.runtime.ports",
         "app.domains.runtime.ports.application_runtime_probe"
       ],
       "module": "app.domains.runtime.public",
@@ -3309,7 +3430,7 @@
         "typing"
       ],
       "imports": [
-        "app.services.graph_projection_commands",
+        "app.domains.relationships.projection.commands",
         "app.services.graph_projection_metrics"
       ],
       "module": "app.integrations.neo4j",
@@ -3779,6 +3900,109 @@
       "imports": [],
       "module": "app.runtime",
       "path": "backend/app/runtime/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.runtime.graph_projection.sqlalchemy_outbox"
+      ],
+      "module": "app.runtime.graph_projection",
+      "path": "backend/app/runtime/graph_projection/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "datetime",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.cruds.graph_projection",
+        "app.domains.relationships.ports.outbox",
+        "app.domains.relationships.projection.commands",
+        "app.models",
+        "app.services.graph_projection_commands"
+      ],
+      "module": "app.runtime.graph_projection.sqlalchemy_outbox",
+      "path": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.runtime.migrations.alembic_source"
+      ],
+      "module": "app.runtime.migrations",
+      "path": "backend/app/runtime/migrations/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "ast",
+        "hashlib",
+        "pathlib"
+      ],
+      "imports": [
+        "app.domains.runtime.ports.migration_source"
+      ],
+      "module": "app.runtime.migrations.alembic_source",
+      "path": "backend/app/runtime/migrations/alembic_source.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.runtime.persistence.runtime_data_path",
+        "app.runtime.persistence.sqlalchemy_unit_of_work"
+      ],
+      "module": "app.runtime.persistence",
+      "path": "backend/app/runtime/persistence/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "pathlib"
+      ],
+      "imports": [
+        "app.domains.runtime.ports.runtime_data_path"
+      ],
+      "module": "app.runtime.persistence.runtime_data_path",
+      "path": "backend/app/runtime/persistence/runtime_data_path.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy.orm"
+      ],
+      "imports": [],
+      "module": "app.runtime.persistence.sqlalchemy_unit_of_work",
+      "path": "backend/app/runtime/persistence/sqlalchemy_unit_of_work.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.runtime.search.callback_index"
+      ],
+      "module": "app.runtime.search",
+      "path": "backend/app/runtime/search/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc"
+      ],
+      "imports": [
+        "app.domains.runtime.ports.search_index"
+      ],
+      "module": "app.runtime.search.callback_index",
+      "path": "backend/app/runtime/search/callback_index.py",
       "wildcard_imports": []
     },
     {
@@ -4480,7 +4704,6 @@
     {
       "external_imports": [
         "__future__",
-        "dataclasses",
         "datetime",
         "hashlib",
         "json",
@@ -4489,6 +4712,7 @@
         "typing"
       ],
       "imports": [
+        "app.domains.relationships.projection.commands",
         "app.models"
       ],
       "module": "app.services.graph_projection_commands",
@@ -4547,16 +4771,16 @@
         "dataclasses",
         "datetime",
         "logging",
-        "sqlalchemy.orm",
         "threading",
         "time",
         "typing"
       ],
       "imports": [
-        "app.cruds.graph_projection",
+        "app.domains.relationships.ports.outbox",
+        "app.domains.relationships.ports.projection",
+        "app.domains.relationships.projection.commands",
         "app.integrations.neo4j",
-        "app.models",
-        "app.services.graph_projection_commands",
+        "app.runtime.graph_projection.sqlalchemy_outbox",
         "app.services.graph_projection_metrics"
       ],
       "module": "app.services.graph_projection_worker",

@@ -177,6 +177,24 @@ def test_domain_pure_layer_framework_import_fails() -> None:
     ) == 3
 
 
+def test_port_cannot_import_runtime_or_integration_implementation() -> None:
+    inventory = _inventory(
+        _module(
+            "app.domains.alpha.ports.repository",
+            imports=("app.integrations.alpha",),
+        ),
+        _module("app.integrations.alpha"),
+    )
+
+    errors = checker.check_inventory(inventory, _policy())
+
+    assert any("[port_imports_implementation]" in error for error in errors)
+    assert any(
+        "app.domains.alpha.ports.repository -> app.integrations.alpha" in error
+        for error in errors
+    )
+
+
 def test_new_legacy_edge_fails_but_exact_reviewed_edge_passes() -> None:
     inventory = _inventory(
         _module("app.api.route", imports=("app.services.legacy",)),

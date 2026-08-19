@@ -626,6 +626,18 @@
     },
     {
       "markers": {
+        "driver_or_url": [
+          1
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "0c4077552f9399b53b052029bbe18dfc1d739dd3153dfeeafe3358b18069c15d",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
         "row_lock": [
           418
         ]
@@ -1070,10 +1082,10 @@
       "transition_pr": "ER7 PR P"
     }
   ],
-  "entry_count": 67,
+  "entry_count": 68,
   "marker_counts": {
     "advisory_lock": 8,
-    "driver_or_url": 44,
+    "driver_or_url": 45,
     "jsonb": 8,
     "pgvector": 5,
     "row_lock": 22,

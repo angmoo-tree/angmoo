@@ -185,6 +185,47 @@ Post, reply, block and visibility persistence until the social domain moves in
 L4. The resulting inventory contains 391 modules, 827 internal edges, 1,277
 per-module external import records and 344 exact legacy exceptions.
 
+## L3-ER1 storage and graph port extraction
+
+ER1 PR B begins from Issue
+[`#99`](https://github.com/angmoo-tree/angmoo/issues/99). It is a structural
+compatibility step: PostgreSQL remains the canonical store, Neo4j remains the
+graph projection, and the existing HTTP schemas, scheduler/projector process
+model, transaction results, provider calls and user-visible behavior remain
+unchanged.
+
+The storage-neutral contracts are now explicit:
+
+```text
+domain application
+├─ UnitOfWorkPort / domain repository protocols
+├─ ClockPort / ClaimLeasePort
+├─ OutboxPort
+├─ RelationshipProjectionPort / RelationshipQueryPort
+├─ SearchIndexPort
+├─ MigrationSourcePort
+└─ RuntimeDataPathPort
+        ↓
+current runtime adapters
+├─ SQLAlchemy unit of work and projection outbox
+├─ Alembic migration source
+├─ Neo4j projection and relationship-query adapters
+├─ callback-compatible current search adapter
+└─ deterministic local data-path resolver
+```
+
+`GraphProjectionWorker` now claims, loads and finalizes work through
+`OutboxPort`; it no longer imports SQLAlchemy, `app.models`, or graph CRUD.
+The existing SQLAlchemy adapter temporarily owns three exact L4-reviewed
+legacy edges until ER2/L4 move the outbox model and command builder. Projection
+command value types live in the relationships domain and the legacy service is
+only a compatibility facade. CI rejects a port importing runtime,
+infrastructure, integrations, or any legacy horizontal layer.
+
+No SQLite schema, LadybugDB database file, Tauri shell, data migration, runtime
+switch or feature flag is introduced by this PR. Those remain independently
+reviewed ER1 PR C and ER2+ gates.
+
 ## T2.5 relationship graph read pilot
 
 The owner-only HTTP flow now has one canonical decision path:
