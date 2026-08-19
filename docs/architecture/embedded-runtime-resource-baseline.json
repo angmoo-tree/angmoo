@@ -1,0 +1,67 @@
+{
+  "baseline_commit": "db1c32510f66cee20a3e64a01e85c5ea8753d77e",
+  "build_cache": {
+    "note": "Contributor-only BuildKit cache; not required by GHCR image users",
+    "reported_gb": 14.53
+  },
+  "capture": {
+    "captured_at": "2026-08-19T19:31:00+09:00",
+    "method": "docker compose ps; docker stats --no-stream; docker system df -v; HTTP warm samples; volume-preserving stop/start",
+    "privacy": "No credentials, raw user content, container IDs, or absolute user paths"
+  },
+  "host": {
+    "docker_memory_limit_gib": 7.669,
+    "logical_processors": 12,
+    "total_memory_gib": 15.83
+  },
+  "images": {
+    "display_size_gb": 5.491,
+    "entries": [
+      {"display_size_gb": 2.52, "name": "angmoo-backend-dev", "unique_size_gb": 2.405},
+      {"display_size_gb": 1.28, "name": "angmoo-frontend-dev", "unique_size_gb": 1.278},
+      {"display_size_gb": 1.07, "name": "neo4j:2026.06.0", "unique_size_gb": 0.9563},
+      {"display_size_gb": 0.621, "name": "pgvector/pgvector:pg16", "unique_size_gb": 0.6208}
+    ],
+    "unique_size_gb": 5.2601
+  },
+  "observed_start": {
+    "all_six_services_healthy_within_seconds": 55,
+    "first_ui_request_ms": 288.73,
+    "first_ui_status": 200,
+    "volume_deleted": false
+  },
+  "one_shot_container_sample": {
+    "aggregate_cpu_percent_of_one_core_units": 97.43,
+    "aggregate_memory_mib": 2133.19,
+    "services": [
+      {"cpu_percent": 75.60, "memory_mib": 327.8, "name": "backend"},
+      {"cpu_percent": 14.59, "memory_mib": 677.1, "name": "frontend"},
+      {"cpu_percent": 6.08, "memory_mib": 72.49, "name": "postgresql"},
+      {"cpu_percent": 0.89, "memory_mib": 795.9, "name": "neo4j"},
+      {"cpu_percent": 0.27, "memory_mib": 100.3, "name": "projector"},
+      {"cpu_percent": 0.0, "memory_mib": 159.6, "name": "scheduler"}
+    ]
+  },
+  "schema_version": 1,
+  "services": {
+    "healthy": 6,
+    "names": ["postgresql", "backend", "neo4j", "projector", "scheduler", "frontend"]
+  },
+  "volumes": {
+    "canonical_count": 5,
+    "entries": [
+      {"name": "postgresql_data", "size_mb": 72.0},
+      {"name": "neo4j_data", "size_mb": 541.5},
+      {"name": "neo4j_logs", "size_mb": 2.849},
+      {"name": "media", "size_mb": 0.0},
+      {"name": "runtime_secrets", "size_mb": 0.000192}
+    ],
+    "total_mb": 616.349192
+  },
+  "warm_ui": {
+    "average_ms_including_first_sample": 117.47,
+    "samples_ms": [372.91, 52.66, 60.61, 48.1, 53.09],
+    "status": 200,
+    "uri": "/"
+  }
+}

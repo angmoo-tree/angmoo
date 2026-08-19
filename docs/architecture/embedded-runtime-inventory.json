@@ -1,0 +1,317 @@
+{
+  "baseline_commit": "db1c32510f66cee20a3e64a01e85c5ea8753d77e",
+  "behavior_critical_file_hashes": [
+    {
+      "path": "compose.yml",
+      "sha256": "e3c45a55f59e29fb9d48310746b5fb948068b095dedf45dc9956ba17d10ed275"
+    },
+    {
+      "path": "compose.dev.yml",
+      "sha256": "f95857ed850b1829367d698738043fbdaba50d0b4d7315758cc39aa485a4cd5b"
+    },
+    {
+      "path": "compose.ci.yml",
+      "sha256": "8da5a9fbdf7bd8347fd7201fd80ba4414e31d20017c0473fc6dcddd184da0186"
+    },
+    {
+      "path": "Dockerfile.backend",
+      "sha256": "fce5966efd674c661147e4edcef90f57de02f0f9aa0b4df6cddee91d1165f48b"
+    },
+    {
+      "path": "Dockerfile.frontend",
+      "sha256": "ff970a866522d46c5a60b1977dbf25a489b02843afa01663a4194a30a24935bc"
+    },
+    {
+      "path": "frontend/next.config.ts",
+      "sha256": "db811251ce9582c75da8067d51e7f4455b51ae118e86bf852454acaf4884f3e7"
+    },
+    {
+      "path": "backend/app/main.py",
+      "sha256": "d74f829285517fbee48783fd2a8efac46b990ccbfe45f44754e8360f38cd6d0d"
+    },
+    {
+      "path": "backend/app/services/resident_tick_scheduler.py",
+      "sha256": "c2fc221577e0fbec679a3590cca63a0e0a4eea4bfe46fb9dd83aa4bf35ed103c"
+    },
+    {
+      "path": "backend/app/services/graph_projection_worker.py",
+      "sha256": "61f182d1782240dab01362f0607d535fa5bb4a2db542112e0510d2b629361bd5"
+    }
+  ],
+  "dependencies": {
+    "backend": {
+      "dependencies": [
+        "alembic>=1.19.0",
+        "cryptography>=50.0.0",
+        "fastapi>=0.141.1",
+        "google-auth[requests]>=2.40.0",
+        "google-genai>=2.17.0",
+        "langgraph>=1.0.4",
+        "neo4j>=6.2.0,<7.0.0",
+        "oci>=2.175.0",
+        "pgvector>=0.5.0",
+        "pillow>=12.0.0",
+        "psycopg[binary]>=3.3.2",
+        "pydantic-settings>=2.12.0",
+        "pypdf>=6.15.0",
+        "python-docx>=1.2.0",
+        "python-multipart>=0.0.30",
+        "sqlalchemy>=2.0.51",
+        "uvicorn>=0.52.1",
+        "websockets>=16.0"
+      ],
+      "python": ">=3.13",
+      "source": "backend/pyproject.toml"
+    },
+    "docker": [
+      {
+        "base_images": [
+          "${PYTHON_IMAGE} AS base",
+          "base AS source",
+          "base AS development",
+          "source AS runtime"
+        ],
+        "path": "Dockerfile.backend"
+      },
+      {
+        "base_images": [
+          "${NODE_IMAGE} AS base",
+          "base AS dependencies",
+          "dependencies AS development",
+          "dependencies AS build",
+          "${NODE_IMAGE} AS runtime"
+        ],
+        "path": "Dockerfile.frontend"
+      }
+    ],
+    "frontend": {
+      "dependencies": {
+        "lucide-react": "^1.29.0",
+        "next": "16.3.0",
+        "react": "19.2.8",
+        "react-dom": "19.2.8"
+      },
+      "dev_dependencies": {
+        "@tailwindcss/postcss": "^4",
+        "@types/node": "^20",
+        "@types/react": "^19",
+        "@types/react-dom": "^19",
+        "eslint": "^9",
+        "eslint-config-next": "16.3.0",
+        "tailwindcss": "^4",
+        "typescript": "^5"
+      },
+      "package_manager": "pnpm@11.22.0",
+      "source": "frontend/package.json"
+    },
+    "future_native_owners": {
+      "LadybugDB": "ER1 PR C compatibility spike; ER3 PR H/I",
+      "Rust_Tauri": "ER1 PR C compatibility spike; ER5 PR L/M"
+    },
+    "license_evidence": [
+      "THIRD_PARTY_NOTICES.md",
+      "LICENSE"
+    ]
+  },
+  "parity": {
+    "oracle_path": "docs/architecture/l3-er-postgres-neo4j-parity-oracle.json",
+    "oracle_sha256": "00c605044bedfa0d6394b064557a06a1469dc12f6c6a68f3559bb7aa125ecf59",
+    "workloads": [
+      {
+        "contract": "World create/update/readiness/publish/archive with provider calls and public writes both zero",
+        "missing_tests": [],
+        "phase": "P1",
+        "tests": [
+          "backend/tests/test_world_creator_routes.py",
+          "backend/tests/test_world_definition_contract.py",
+          "backend/tests/test_world_foundation.py"
+        ]
+      },
+      {
+        "contract": "WorldCharacter setup uses three physical provider requests and persists 40 candidates, ten per daypart",
+        "missing_tests": [],
+        "phase": "P2",
+        "tests": [
+          "backend/tests/test_world_character_contracts.py",
+          "backend/tests/test_world_character_setup_service.py",
+          "backend/tests/test_l3_owner_controlled_world_character.py"
+        ]
+      },
+      {
+        "contract": "Daily plan selects four deterministic items with zero provider calls and no missed-slot catch-up",
+        "missing_tests": [],
+        "phase": "P3",
+        "tests": [
+          "backend/tests/test_daily_activity_runtime.py",
+          "backend/tests/test_agent_activity_limits.py"
+        ]
+      },
+      {
+        "contract": "Routine continuation publishes atomically with normal two-call and repair-bounded three-call behavior",
+        "missing_tests": [],
+        "phase": "P4",
+        "tests": [
+          "backend/tests/test_routine_post_runtime.py",
+          "backend/tests/test_l3_owner_manual_social_inbox.py"
+        ]
+      },
+      {
+        "contract": "World-scoped keyword feed and reaction intent preserve provider and public-write boundaries",
+        "missing_tests": [],
+        "phase": "P5",
+        "tests": [
+          "backend/tests/test_world_feed_search.py",
+          "backend/tests/test_feed_reaction_intent.py"
+        ]
+      },
+      {
+        "contract": "Successful social events create directional relationship state and evidence once; failed writes create none",
+        "missing_tests": [],
+        "phase": "P6",
+        "tests": [
+          "backend/tests/test_social_event_runtime.py",
+          "backend/tests/test_activity_proposal_runtime.py"
+        ]
+      },
+      {
+        "contract": "Graph projection is replayable, World-isolated, idempotent, outage-tolerant, and query-template compatible",
+        "missing_tests": [],
+        "phase": "P7",
+        "tests": [
+          "backend/tests/test_graph_projection_commands.py",
+          "backend/tests/test_graph_projection_replay.py",
+          "backend/tests/test_graph_projection_worker.py",
+          "backend/tests/test_relationship_graph_repository.py",
+          "backend/tests/test_relationship_graph_api.py"
+        ]
+      }
+    ]
+  },
+  "purpose": "L3-ER0 runtime coupling, dependency, behavior, and parity inventory",
+  "runtime_coupling": [
+    {
+      "component": "shared",
+      "markers": [
+        "six-service topology",
+        "scheduler/projector commands",
+        "health dependencies"
+      ],
+      "owner": "ER4",
+      "path": "compose.yml",
+      "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
+      "source_sha256": "e3c45a55f59e29fb9d48310746b5fb948068b095dedf45dc9956ba17d10ed275",
+      "transition_pr": "ER4 PR J"
+    },
+    {
+      "component": "shared",
+      "markers": [
+        "contributor watch overrides"
+      ],
+      "owner": "ER4",
+      "path": "compose.dev.yml",
+      "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
+      "source_sha256": "f95857ed850b1829367d698738043fbdaba50d0b4d7315758cc39aa485a4cd5b",
+      "transition_pr": "ER4 PR J"
+    },
+    {
+      "component": "scheduler",
+      "markers": [
+        "process entrypoint",
+        "signal bridge"
+      ],
+      "owner": "ER4",
+      "path": "backend/scripts/run_resident_tick_scheduler.py",
+      "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
+      "source_sha256": "320b77ba57c030bd19a19890ce269b9a6d8a2326e1e5e3354797fbda02b883bc",
+      "transition_pr": "ER4 PR J"
+    },
+    {
+      "component": "scheduler",
+      "markers": [
+        "singleton process lock",
+        "database lease",
+        "heartbeat",
+        "bounded drain"
+      ],
+      "owner": "ER4",
+      "path": "backend/app/services/resident_tick_scheduler.py",
+      "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
+      "source_sha256": "c2fc221577e0fbec679a3590cca63a0e0a4eea4bfe46fb9dd83aa4bf35ed103c",
+      "transition_pr": "ER4 PR J"
+    },
+    {
+      "component": "scheduler",
+      "markers": [
+        "lease repository",
+        "fencing epoch"
+      ],
+      "owner": "ER4",
+      "path": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py",
+      "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
+      "source_sha256": "ee8654be091cca6f20a11d2f412c5ba214a6557f041c60254c9cce3e2da2a139",
+      "transition_pr": "ER4 PR J"
+    },
+    {
+      "component": "projector",
+      "markers": [
+        "process entrypoint",
+        "signal bridge",
+        "readiness marker"
+      ],
+      "owner": "ER4",
+      "path": "backend/scripts/run_graph_projection_worker.py",
+      "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
+      "source_sha256": "609f2298d4bba43364f625ecb718ce5c8b9847121c468700e761ec4e95f20d70",
+      "transition_pr": "ER4 PR J"
+    },
+    {
+      "component": "projector",
+      "markers": [
+        "outbox claim",
+        "thread pool",
+        "bounded drain",
+        "degraded state"
+      ],
+      "owner": "ER4",
+      "path": "backend/app/services/graph_projection_worker.py",
+      "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
+      "source_sha256": "61f182d1782240dab01362f0607d535fa5bb4a2db542112e0510d2b629361bd5",
+      "transition_pr": "ER4 PR J"
+    },
+    {
+      "component": "projector",
+      "markers": [
+        "graph client construction"
+      ],
+      "owner": "ER4",
+      "path": "backend/app/services/graph_projection_runtime.py",
+      "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
+      "source_sha256": "4d7cfe5f26a2a5127cd6d225fea8a51ed8e7a30e2de36c97366437d9a995b8d7",
+      "transition_pr": "ER4 PR J"
+    },
+    {
+      "component": "api",
+      "markers": [
+        "FastAPI lifespan",
+        "public profile worker rejection"
+      ],
+      "owner": "ER4",
+      "path": "backend/app/main.py",
+      "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
+      "source_sha256": "d74f829285517fbee48783fd2a8efac46b990ccbfe45f44754e8360f38cd6d0d",
+      "transition_pr": "ER4 PR J"
+    },
+    {
+      "component": "shared",
+      "markers": [
+        "cooperative signal bridge"
+      ],
+      "owner": "ER4",
+      "path": "backend/app/runtime/shutdown.py",
+      "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
+      "source_sha256": "8a3e018d0f45d3e262c11c2263e8f21784be73fdf2f1a7d6b3eac968adac3b22",
+      "transition_pr": "ER4 PR J"
+    }
+  ],
+  "schema_version": 1
+}

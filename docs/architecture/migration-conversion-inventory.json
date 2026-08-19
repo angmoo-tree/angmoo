@@ -1,0 +1,936 @@
+{
+  "baseline_commit": "db1c32510f66cee20a3e64a01e85c5ea8753d77e",
+  "entries": [
+    {
+      "down_revision": null,
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260510_0001_initial_community_schema.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260510_0001",
+      "source_sha256": "d40970c22080215631909c61de84aa49bd1bc2e06ac1f37ee01d36cc8cf2db08",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260510_0001",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260511_0002_agent_run_credentials.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260511_0002",
+      "source_sha256": "63d58865bc049ce37aefd88f95a5818d001fe989e8fe8711039f914398b34785",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260511_0002",
+      "manual_review_markers": [
+        "driver_or_url"
+      ],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260511_0003_agent_slots.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260511_0003",
+      "source_sha256": "9236f0dfd049373f4edbbaa52605d5abd34cb8060e61a06667b8de2b187be5fd",
+      "strategy": "translate-and-validate",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260511_0003",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260511_0004_resident_agent_slots.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260511_0004",
+      "source_sha256": "8ad7c0c4f597da3a3520c23ac867433540d020709292f245594ddd62e6d00700",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260511_0004",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260513_0005_product_slice.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260513_0005",
+      "source_sha256": "a9c3403818c0fe7f1b7f3127b03be03a688409801b39fb74d68ae946be3ec06c",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260513_0005",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260513_0006_social_timeline_schema.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260513_0006",
+      "source_sha256": "d10b671e7224e94b197a4a1be8390312d0e36ebbf9c37965aa71c157b000cdfe",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260513_0006",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260514_0007_migrate_comments_to_reply_posts.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260514_0007",
+      "source_sha256": "62d03f87f456a5754bd36ed3dbb151ad7ffa3bd43c43da3c4ef363b5d7621c66",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260514_0007",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260514_0008_character_profile_identity.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260514_0008",
+      "source_sha256": "6730898a3b1ea879db3d203ef6f30f95e47afd5c4c2bee6fe2251d8e66554705",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260514_0008",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260514_0009_character_banner_url.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260514_0009",
+      "source_sha256": "468297aab8f1dc2b31af46c1cf15944d5b8fd80536cf3465da34334f4d3f6e0e",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260514_0009",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260516_0010_agent_action_settings_and_slots.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260516_0010",
+      "source_sha256": "ab4a9d5b531520cb2c934e0e5826c56d5d96a7d8acf1bc3485834fd02feea034",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260516_0010",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260516_0011_agent_tendency_analysis.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260516_0011",
+      "source_sha256": "4b8773f18bb2452b64f573b0d8475eb67ca43b777e45db7facf791fba17889e1",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260516_0011",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260516_0012_llm_credential_model.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260516_0012",
+      "source_sha256": "5a944d494e6aba8ce189c6d345dfd3276ec11f01e3b2f1bf23ef63787d0af848",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260516_0012",
+      "manual_review_markers": [
+        "driver_or_url"
+      ],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260516_0013_agent_feed_cues.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260516_0013",
+      "source_sha256": "456cbf7d67798366774cae7b0ab038904885d8a1c7fd4ebf1761e42b318df8bf",
+      "strategy": "translate-and-validate",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260516_0013",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260516_0014_agent_activity_interval.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260516_0014",
+      "source_sha256": "f42d589e0cd55a3534e5f2eeddf33145ead2da5dd1c32426285f7b070f14074d",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260516_0014",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260517_0015_nullable_agent_run_post.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260517_0015",
+      "source_sha256": "3e3e1a40dbba760070dd4198082e30eacf6206a364a860f46e21f5a450c3ae44",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260517_0015",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260519_0016_gemini_flash_lite_only.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260519_0016",
+      "source_sha256": "0c97eccb8bc8aca870f43d3ac27acc6fce226bf1301a8bc001271dccee10cbdb",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260519_0016",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260519_0017_min_activity_interval_30.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260519_0017",
+      "source_sha256": "ef6a32e55f80a6cf024beeb660e1e2ab6b6934550629706815c58488e0c8930c",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260519_0017",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260519_0018_llm_credential_cooldown.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260519_0018",
+      "source_sha256": "cabd7f392c59ebd6bbf7da35fa4839392a44d36565ab5873257df2373521d346",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260519_0018",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260520_0019_tree_community.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260520_0019",
+      "source_sha256": "dc58eca221d44bb2469f42a0e5e9571b8393d7a85eac120b7edabf1d2d4e7a73",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260520_0019",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260520_0020_google_auth.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260520_0020",
+      "source_sha256": "20d73271f72a50c39aa8da9b0f9ac83dc2875fd8d5766e4cb36c917afb9682c5",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260520_0020",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260520_0021_user_profile_setup.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260520_0021",
+      "source_sha256": "9751018b33540f33d953f79f3a5004f941dd917a98a55af03392a43d06ee957d",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260520_0021",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260520_0022_user_display_name_cooldown.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260520_0022",
+      "source_sha256": "d3c09fc565a17783b12f75064a91d702098e855ba9c63fe72319b15b7c81c31d",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260520_0022",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260520_0023_user_admin_avatar.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260520_0023",
+      "source_sha256": "146fc6d6c7cf53ab7b00a358e31652a4941ddbfe37a5fe32491d7eb300a72a60",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260520_0023",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260520_0024_drop_user_avatar_url.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260520_0024",
+      "source_sha256": "56f41f7a37a6c84e37e315d6c52b34968ee71dc3c605887331c3ed7697d73965",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260520_0024",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260522_0025_user_deleted_at.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260522_0025",
+      "source_sha256": "232c40d0e0923083b228cae4612dfa8a41cf13ca879e6540fbd7a8a794218577",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260522_0025",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260522_0026_character_deleted_at.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260522_0026",
+      "source_sha256": "fddb5044b86088e6f7478ad57270e30a7e27ca736477a9ec8c0a19ed2752a46b",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260522_0026",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260522_0027_user_policy_agreements.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260522_0027",
+      "source_sha256": "b5a04814f3f58bd94f85ff8a9be90eb025d2cd33c1f85c6198ea7991bef105f0",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260522_0027",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260522_0028_agent_creation_drafts.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260522_0028",
+      "source_sha256": "8ce8d4b40b425209c809893d3c4f1de7255490c4ff9f47758ffdb2efd2988be8",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260522_0028",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260526_0029_agent_run_gateway_result.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260526_0029",
+      "source_sha256": "bf9e7336f3742d3f54d4b4f1635fbd046fc79ba25051e59f3b9a7cbbcc446d8b",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260526_0029",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260528_0030_post_reports.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260528_0030",
+      "source_sha256": "81d2e86ca4ffbea5f090efd3198a3c204d65636fff7620b0a3fe5a8f512cb3e5",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260528_0030",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260529_0031_user_feed_content_filter.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260529_0031",
+      "source_sha256": "096040e612fabf0c6caf77167f555a955a7bd9ee743bfab291c9a2bebc34e0c5",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260529_0031",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260529_0032_agent_writing_sampling_settings.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260529_0032",
+      "source_sha256": "f1421774cc05b55b98e7e1f670a24dbd6f29e1e3ece5da512853f55bbc2ea392",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260529_0032",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260529_0033_agent_writing_repetition_level.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260529_0033",
+      "source_sha256": "796b583374fb994aa013ee810d84727f6c2574715f40b3293ffa56f032467c91",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260529_0033",
+      "manual_review_markers": [
+        "driver_or_url"
+      ],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260530_0034_local_agent_mode.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260530_0034",
+      "source_sha256": "15402fa93632bb734c73ffe697b8e0442fb67ca6b8216b42a73034adc885b7bd",
+      "strategy": "translate-and-validate",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260530_0034",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260530_0035_post_info_metadata.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260530_0035",
+      "source_sha256": "679de4c27efb7596c6c19ea3fc12641880f8fafb83b66404e6c5b5a85e2511be",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260530_0035",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260601_0036_character_follow_targets_only.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260601_0036",
+      "source_sha256": "691ee6ee3b9b976dc8dc06c2fecacff7220053dfccd542b83091b03fa2ce75bb",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260601_0036",
+      "manual_review_markers": [
+        "pgvector"
+      ],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260604_0037_character_lore_pgvector.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260604_0037",
+      "source_sha256": "6bcc316ce80ce03b2d90cfab46cf6a96b47dbe1d5984696a387da544e2cf9973",
+      "strategy": "translate-and-validate",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260604_0037",
+      "manual_review_markers": [
+        "jsonb"
+      ],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260605_0038_posts_topic_metadata.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260605_0038",
+      "source_sha256": "21dda7f6116cf5fe17ac54befdabcb6938df4da70772b7f17d4acdb4a510cc95",
+      "strategy": "translate-and-validate",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260605_0038",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260609_0039_daypart_persistent_session.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260609_0039",
+      "source_sha256": "15f3c0d1676fc040c63a35b1f5bf71c1f2f4bf17b74fe30bd29708ab759863f2",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260609_0039",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260610_0040_agent_public_action_executions.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260610_0040",
+      "source_sha256": "9239e08d3ac85e17f1dbfaaba2087de8872474316ecdbe14a28cc0d4cb21341f",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260610_0040",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260610_0041_agent_planner_tendency_profile.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260610_0041",
+      "source_sha256": "5b526e1edacd9b3acb64d3282aebd092bbe45938cad0222a1af2803ccdca8a90",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260610_0041",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260614_0042_admin_operations.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260614_0042",
+      "source_sha256": "0800c8299c0ec016eb9c5ec9596800c804b124955f58d9166998ef4336f4e139",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260614_0042",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260615_0043_agent_activity_default_limits.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260615_0043",
+      "source_sha256": "0d4c4840ddbaa7e16244b34d5de0b9ccff7e70c40189f5686d8443552e9ae5a9",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260615_0043",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260615_0044_post_image_generation.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260615_0044",
+      "source_sha256": "27b7fefc8e58bd9a11604f4c2bd50f6ef2648189b986fc0b74a64691e9355e11",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260615_0044",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260615_0045_pollinations_post_images.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260615_0045",
+      "source_sha256": "b8062c2b28c4240085df15e9688e9f16275763185db2e61d838074f34f0feb01",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260615_0045",
+      "manual_review_markers": [
+        "driver_or_url"
+      ],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260616_0046_messages_v1.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260616_0046",
+      "source_sha256": "1b19a1682e62d868471aebe2dc4728689b2e06dfc6616f737c765e37ba1cb00b",
+      "strategy": "translate-and-validate",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260616_0046",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260616_0047_message_default_gemma4_26b.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260616_0047",
+      "source_sha256": "c4018d140d0da476b68b1c29428624ed3b64b058907058d0b66dc5f5f2087582",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260616_0047",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260616_0048_active_hours_presets.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260616_0048",
+      "source_sha256": "a4ae93d976db704e03ac83081fd7e6c89365d277fa38957bc4cb1818f26c396e",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260616_0048",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260616_0049_observe_internal.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260616_0049",
+      "source_sha256": "85e7bfc722ba97a2b7eece2252753532d09d4edd456379b2f992ccb3ea33128a",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260616_0049",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260617_0050_message_default_gemini25_flash_lite.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260617_0050",
+      "source_sha256": "db53bc814bcb0a71348a281ff4c59907821b37f6c37ece358c054feb602cd98b",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260617_0050",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260617_0051_backfill_unconfigured_message_default.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260617_0051",
+      "source_sha256": "92553a2e700440e9a917bd5256ac4a8322ca093e3ea7f9c244dff16ff7b47070",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260617_0051",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260618_0052_local_api_post_image_jobs.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260618_0052",
+      "source_sha256": "6b9c52624f1b14e4adbcfd74331308c35a30ece4933547d4422acee7abcf854c",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260618_0052",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260620_0053_service_image_quota.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260620_0053",
+      "source_sha256": "8f5af8b3feaa3c8e758b85cc59fd5ffcf3a29a8e4a7c3408b1ecd6fd58e254b6",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260620_0053",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260624_0054_agent_relationship_points.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260624_0054",
+      "source_sha256": "4b8606a361c5840884298153c632d32a1cac11e45f40272a41f17a153941ffbf",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260624_0054",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260625_0055_character_promotion_usage_consent.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260625_0055",
+      "source_sha256": "9ee2af7dff606ebefe17ed14843c27d4351e85724716e0fe61acdb2b726a7cce",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260625_0055",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260625_0056_agent_activity_reply_limit_30.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260625_0056",
+      "source_sha256": "7836f9673899a78f13988e2fd7ee586ab531b83e22c5021190abafc096c6a335",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260625_0056",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260627_0057_site_operation_settings.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260627_0057",
+      "source_sha256": "3fc87d221b28ae9209f805f27134b97549189fcb6e72d5ac1bddfabba238dfd8",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260627_0057",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260705_0058_profile_image_candidates.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260705_0058",
+      "source_sha256": "38320f2068d4723acd1618fd09f9e1000831fc0fe226cd8a7957153c925a4f8d",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260705_0058",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260721_0059_replicate_image_token.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260721_0059",
+      "source_sha256": "1ab409288a30e38353db1b860a8879dfa02e425377b009f93a59ea6ef448f90b",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260721_0059",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260726_0060_local_bot_quota_buckets.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260726_0060",
+      "source_sha256": "60d56a5250bcc99375a4aef3c9d7c253ca416af755858e2c5717f1bab6d6fabe",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260726_0060",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260726_0061_auth_login_throttle.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260726_0061",
+      "source_sha256": "e60c36555a0ff80586d4f1104552336c0c672740320e3236773879486efa4350",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260726_0061",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260726_0062_external_auth_verification.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260726_0062",
+      "source_sha256": "3e3bf549e4e3728dedb9c5af50fec1e8583db875496fd00407646062409d3a56",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260726_0062",
+      "manual_review_markers": [
+        "driver_or_url"
+      ],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260726_0063_direct_user_like_uniqueness.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260726_0063",
+      "source_sha256": "2837752dbdcf5bd6858192b3d45504829424ff5ea5192dbf0875a750e81f7744",
+      "strategy": "translate-and-validate",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260726_0063",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260726_0064_google_signup_grants.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260726_0064",
+      "source_sha256": "be0a8042e5eadec5a0c77c9b940758339909824e77af562fbc745c4d57cf4cc1",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260726_0064",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260726_0065_community_mutation_quotas.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260726_0065",
+      "source_sha256": "7ec38fe9087009c56e8d5b565f1b2b1c21a3d0d7509e4581218252fc8572954b",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260726_0065",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260726_0066_lore_parser_leases.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260726_0066",
+      "source_sha256": "d33ffb553a982890b43a21eb5dc3ac5a7062ca8a8f3e6fbde4c0f33bd4e8da0a",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260726_0066",
+      "manual_review_markers": [
+        "driver_or_url"
+      ],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260802_0067_unique_resident_character_assignment.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260802_0067",
+      "source_sha256": "afec58481f951f6c3b8385d6d1214393d3f6c3af6a491f097c2c6d0818c3516f",
+      "strategy": "translate-and-validate",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260802_0067",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260802_0068_message_response_leases.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260802_0068",
+      "source_sha256": "caaca18cff6dad9202a1e14c22c5cf266fbaa984c4652d9d5603cb830f720c14",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260802_0068",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260804_0069_auth_session_expiry.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260804_0069",
+      "source_sha256": "6faaab4c056fa542f92fdd08f9404ac53fe93b17c3874bd88abd213c01555a66",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260804_0069",
+      "manual_review_markers": [
+        "driver_or_url",
+        "jsonb"
+      ],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260807_0070_world_foundation.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260807_0070",
+      "source_sha256": "27214c6aeb64db39f2b0534e279ac6e6c1a31fed83c591fb7471473fa24d3347",
+      "strategy": "translate-and-validate",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260807_0070",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260807_0072_angmoo_global_foundation_backfill.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260807_0072",
+      "source_sha256": "e2e175564e9bff920ccb69c887e32b8e0ca3c9e73b4c12aea996179f30813a71",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260807_0072",
+      "manual_review_markers": [
+        "driver_or_url",
+        "jsonb"
+      ],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260808_0073_world_character_repertoire.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260808_0073",
+      "source_sha256": "13414bd7cb7035ab81a534fbd693911f9237a89976e100471e3cb20f4d289e91",
+      "strategy": "translate-and-validate",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260808_0073",
+      "manual_review_markers": [
+        "driver_or_url",
+        "jsonb"
+      ],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260809_0074_daily_activity_runtime.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260809_0074",
+      "source_sha256": "e0564c6fd2ee60148d159058938a9b164b463f75f7027638f97fbf7ade891991",
+      "strategy": "translate-and-validate",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260809_0074",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260810_0075_routine_continuous_posts.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260810_0075",
+      "source_sha256": "12d5bd5fb35d2ecfa98e0e4698ffcff05fd9fea478cd4d5f6b1aea3b08e46801",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260810_0075",
+      "manual_review_markers": [
+        "driver_or_url",
+        "jsonb"
+      ],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260811_0076_world_keyword_feed.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260811_0076",
+      "source_sha256": "11f96d630ceb434e2adebb9293ee15d1452e629413aedbab34f455bd69f3316b",
+      "strategy": "translate-and-validate",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260811_0076",
+      "manual_review_markers": [
+        "driver_or_url",
+        "jsonb"
+      ],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260811_0077_social_events_relationships.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260811_0077",
+      "source_sha256": "fa2f22a2bf115981868d090b73cb3946835222ace35da0df1ffc2213f48b6aa6",
+      "strategy": "translate-and-validate",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260811_0077",
+      "manual_review_markers": [
+        "driver_or_url"
+      ],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260812_0078_graph_projection_replay_runs.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260812_0078",
+      "source_sha256": "bf35c6f0a641f512f5f35a4628734684c19a728f91813a52c97e9897ef958616",
+      "strategy": "translate-and-validate",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260812_0078",
+      "manual_review_markers": [
+        "driver_or_url"
+      ],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260815_0079_local_owner_identity.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260815_0079",
+      "source_sha256": "6a67f5047034f0552492fa4e9da6323a65f64454efd73edaaf0a4d972e809cd3",
+      "strategy": "translate-and-validate",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260815_0079",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260816_0080_scheduler_singleton.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260816_0080",
+      "source_sha256": "2f35934cd7f3d9ee04e5de13db586326b3d383cb95fb0a1950fcca4796180e28",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260816_0080",
+      "manual_review_markers": [
+        "driver_or_url"
+      ],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260818_0081_owner_controlled_world_character.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260818_0081",
+      "source_sha256": "49f7357d51f31e856ad4e194a50e08648f177139aeb5b4147408043764013e22",
+      "strategy": "translate-and-validate",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260818_0081",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260819_0082_owner_manual_social_inbox.py",
+      "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+      "revision": "20260819_0082",
+      "source_sha256": "89d3ba0433c282df830daba5e07691f595a0856981413fba6ba9d9b35f0beba7",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
+    }
+  ],
+  "migration_count": 81,
+  "purpose": "L3-ER0 Alembic-to-SQLite conversion inventory",
+  "schema_version": 1
+}

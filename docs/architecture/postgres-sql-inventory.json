@@ -1,0 +1,1084 @@
+{
+  "baseline_commit": "db1c32510f66cee20a3e64a01e85c5ea8753d77e",
+  "entries": [
+    {
+      "markers": {
+        "driver_or_url": [
+          48
+        ]
+      },
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260511_0003_agent_slots.py",
+      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "source_sha256": "9236f0dfd049373f4edbbaa52605d5abd34cb8060e61a06667b8de2b187be5fd",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          48
+        ]
+      },
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260516_0013_agent_feed_cues.py",
+      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "source_sha256": "456cbf7d67798366774cae7b0ab038904885d8a1c7fd4ebf1761e42b318df8bf",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          78
+        ]
+      },
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260530_0034_local_agent_mode.py",
+      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "source_sha256": "15402fa93632bb734c73ffe697b8e0442fb67ca6b8216b42a73034adc885b7bd",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "markers": {
+        "pgvector": [
+          1,
+          12,
+          83
+        ]
+      },
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260604_0037_character_lore_pgvector.py",
+      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "source_sha256": "6bcc316ce80ce03b2d90cfab46cf6a96b47dbe1d5984696a387da544e2cf9973",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "markers": {
+        "jsonb": [
+          28
+        ]
+      },
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260605_0038_posts_topic_metadata.py",
+      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "source_sha256": "21dda7f6116cf5fe17ac54befdabcb6938df4da70772b7f17d4acdb4a510cc95",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          43,
+          50,
+          142
+        ]
+      },
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260616_0046_messages_v1.py",
+      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "source_sha256": "1b19a1682e62d868471aebe2dc4728689b2e06dfc6616f737c765e37ba1cb00b",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          36
+        ]
+      },
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260726_0063_direct_user_like_uniqueness.py",
+      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "source_sha256": "2837752dbdcf5bd6858192b3d45504829424ff5ea5192dbf0875a750e81f7744",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          42
+        ]
+      },
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260802_0067_unique_resident_character_assignment.py",
+      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "source_sha256": "afec58481f951f6c3b8385d6d1214393d3f6c3af6a491f097c2c6d0818c3516f",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          12,
+          49,
+          52,
+          150,
+          155,
+          185,
+          190,
+          220,
+          225,
+          317
+        ],
+        "jsonb": [
+          49,
+          52,
+          150,
+          155,
+          185,
+          190,
+          220,
+          225,
+          317
+        ]
+      },
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260807_0070_world_foundation.py",
+      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "source_sha256": "27214c6aeb64db39f2b0534e279ac6e6c1a31fed83c591fb7471473fa24d3347",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          12,
+          21,
+          89,
+          133,
+          273
+        ],
+        "jsonb": [
+          21
+        ]
+      },
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260808_0073_world_character_repertoire.py",
+      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "source_sha256": "13414bd7cb7035ab81a534fbd693911f9237a89976e100471e3cb20f4d289e91",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          12,
+          21,
+          284
+        ],
+        "jsonb": [
+          21
+        ]
+      },
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260809_0074_daily_activity_runtime.py",
+      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "source_sha256": "e0564c6fd2ee60148d159058938a9b164b463f75f7027638f97fbf7ade891991",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          14,
+          23,
+          92,
+          98,
+          99,
+          100,
+          379
+        ],
+        "jsonb": [
+          23
+        ]
+      },
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260811_0076_world_keyword_feed.py",
+      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "source_sha256": "11f96d630ceb434e2adebb9293ee15d1452e629413aedbab34f455bd69f3316b",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          12,
+          21,
+          125,
+          264,
+          272
+        ],
+        "jsonb": [
+          21
+        ]
+      },
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260811_0077_social_events_relationships.py",
+      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "source_sha256": "fa2f22a2bf115981868d090b73cb3946835222ace35da0df1ffc2213f48b6aa6",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          79
+        ]
+      },
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260812_0078_graph_projection_replay_runs.py",
+      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "source_sha256": "bf35c6f0a641f512f5f35a4628734684c19a728f91813a52c97e9897ef958616",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          88
+        ]
+      },
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260815_0079_local_owner_identity.py",
+      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "source_sha256": "6a67f5047034f0552492fa4e9da6323a65f64454efd73edaaf0a4d972e809cd3",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          79
+        ]
+      },
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260818_0081_owner_controlled_world_character.py",
+      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "source_sha256": "49f7357d51f31e856ad4e194a50e08648f177139aeb5b4147408043764013e22",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          212,
+          259,
+          284
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/compatibility/manual_social/inbox.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "1d50b91ffcc304b2e65d0cf8cae3d514eb3353f1be7ae8411ab61810a3c5aa4e",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          26,
+          156,
+          157
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/core/config.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "4119e0ac42b132d9757b593cf89af8f7d1a21ffea091380f89e8f265ef4bfb80",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          42
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/core/redaction.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "1fbf4c185fb4c7389d0097926fd900a2a0b2fc7c77793265b681d6c467c388fa",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          553,
+          614,
+          700,
+          718,
+          731,
+          748,
+          802,
+          811,
+          827,
+          873,
+          927,
+          973,
+          1026
+        ],
+        "skip_locked": [
+          553,
+          614,
+          731,
+          827,
+          927,
+          973,
+          1026
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/cruds/agent_runs.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "2e75cde84969584a7ef3c27311fbf1d6160bcad594cb91fbe539c17927145bfa",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "advisory_lock": [
+          376,
+          1278
+        ],
+        "driver_or_url": [
+          373,
+          493,
+          1268
+        ],
+        "row_lock": [
+          494
+        ],
+        "skip_locked": [
+          494
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/cruds/community.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "f894c473f34a79b32ecf52e0eb75133df3ef210bcf17e10117a0cb55ec736ba9",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          65
+        ],
+        "skip_locked": [
+          65
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/cruds/graph_projection.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "e40006dede661cb20a5554178622e4ede76d9f95890ddd2a0f9e7a66ed60a83a",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          143
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/domains/identity/infrastructure/sqlalchemy_auth_models.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "bbc94100a8ff3a8d77161eef8a3bb202a88e52b213c6ec8ad91c785bd7fcc1a3",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          133,
+          148,
+          213
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/domains/identity/infrastructure/sqlalchemy_identity_repository.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "fd8659f134dc872b832e6482587030bb9e2504ea1b5a052430bf451cdc80fe7a",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          1
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/domains/routines/infrastructure/__init__.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "fc2acb1969162f94698315aa63be6b9b80ff9a8d540b5f6892d0782a9c2d8eff",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          99
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "daa75dd8d94468d559b6801df1bb74db8986d04017b5324f5fb724a5a1b5640d",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          41,
+          129,
+          140,
+          147,
+          267
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/domains/routines/infrastructure/sqlalchemy_joint_reservations.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "bb1b7ef1d319ccfe1d13072e4a259e2e9a32b93fb0968c5f457a998135557acd",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          48,
+          65,
+          89,
+          100,
+          131,
+          141,
+          197,
+          272,
+          282,
+          310
+        ],
+        "skip_locked": [
+          48,
+          65,
+          131
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/domains/routines/infrastructure/sqlalchemy_lifecycle.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "1a4b6fd935c0991dd1ee5d6fd69cd5c444768fdebe0f65cd313146ceb77b5198",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          239,
+          247,
+          339
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/domains/routines/infrastructure/sqlalchemy_models.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "0a53b43b4f7a84c7f2d68de40ec07999e4e7d55f4ce061566e1220669667d08b",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          63,
+          69
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "519aa7e7c33a4dea7a28bf5db2f282ea2d0ffa976b07588448cc7dbf5b040414",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "advisory_lock": [
+          335
+        ],
+        "driver_or_url": [
+          333
+        ],
+        "row_lock": [
+          138,
+          146,
+          266,
+          298
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "ee8654be091cca6f20a11d2f412c5ba214a6557f041c60254c9cce3e2da2a139",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          271,
+          314,
+          797,
+          809
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "a2b41b73f4eff630ab1629763807834847fb4c66af1e17254f2faf799bb4ca84",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          23,
+          29,
+          79
+        ],
+        "jsonb": [
+          23,
+          29
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/domains/world_characters/infrastructure/sqlalchemy_models.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "98abd7afc8f4533c4fa5b6edd3a38bf373cd82b08309955c3e01b4c01217a59f",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          44,
+          108,
+          242
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/domains/world_characters/infrastructure/sqlalchemy_setup_models.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "413574f55db1c14a241971deee8cc13b4ba2feca4b65ff15e0a422967dc4d134",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          19,
+          25
+        ],
+        "jsonb": [
+          19,
+          25
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/domains/worlds/infrastructure/sqlalchemy_models.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "61ae97bf60790940e34e24d3d3fbba07c94a63caea53d0871e48695c62e8b11c",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          81
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "2dc64dd021f4cf0c858e3695a515df885848e4ebdc5788b2fc6e56b4c4c821c6",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          17
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/models/agent_slots.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "314ed706f48990519f14275404c4e5a3d4ff32a197a045c933c4ee24f67e797e",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "pgvector": [
+          4,
+          81
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/models/character_lore.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "7c437ef5fb0a4e6ece7845200a33e9fccab8e806fb1458d3cfac6f277fbbeeba",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          211,
+          236,
+          287
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/models/community.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "be60159ca0fa97fa68a070571edfabbaafa0cb8fcf01504f1580a9b2ebff577a",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          45
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/models/graph_projection.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "2678bb026b654c7df3d2bf4c32f0fac56830a2913613c7680f951958b3fb57ce",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          418
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/services/activity_proposal_runtime.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "01c27985fcfe2e9875169024aa851877f77034f61ecaa602965239554f94fe1e",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          100,
+          155,
+          207,
+          310,
+          378,
+          403,
+          469,
+          521,
+          544,
+          590,
+          614,
+          629,
+          656,
+          667,
+          701,
+          711,
+          769,
+          801,
+          821,
+          831,
+          859
+        ],
+        "skip_locked": [
+          614,
+          629,
+          701
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/services/activity_runtime.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "3c870ca5e3757cd8322edd8ecd53711d36748939ec98092958d636d82b29c067",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "advisory_lock": [
+          1431
+        ],
+        "driver_or_url": [
+          1428
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/services/agent_creation_drafts.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "16a2ee135676f12c9c9aff37b92032f2acef36910062b00605dc854030b41a73",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "advisory_lock": [
+          586,
+          595,
+          3009
+        ],
+        "driver_or_url": [
+          576,
+          592,
+          3000
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/services/agents.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "bb53f8126ac985632038182b00d914ec1e192c2b615b6c25ebfacde5257290de",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          1202
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/services/auth.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "847aad35393f9f19e8344d02e023038cf3e8e1f6b6fe1d6d31ec59e5f5be734a",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "pgvector": [
+          478
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/services/character_lore.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "551c5d9ae13d07a2ec8acf95bbdfe45afd9e24dbe926a927d89f590954e38a4c",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          63
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/services/community_abuse_quota.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "b123b21352076b4950b7cd369c76ff04dedb6dd56dc8369bc4a689ceba258b7a",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "advisory_lock": [
+          211,
+          215
+        ],
+        "driver_or_url": [
+          202
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/services/external_auth_verification.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "f8445dcb4411da0fb345e8ebc444cd67e63801dc25f01538d43648051bd9e01d",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          195,
+          275
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/services/graph_projection_replay.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "62e6bee80079b659ba3b744bba427667ecd86391bc12b617722b19bf89559859",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          61,
+          325,
+          336,
+          343,
+          581,
+          694,
+          729,
+          784,
+          815,
+          844,
+          968
+        ],
+        "skip_locked": [
+          968
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/services/joint_activity_runtime.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "008553f78189fc95dd89d33242eae2ca73c8b840b1bcbcb401efd117656e8062",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          79,
+          169,
+          210,
+          220,
+          321,
+          348,
+          400,
+          431
+        ],
+        "skip_locked": [
+          431
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/services/joint_activity_scheduling.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "ccc7d917bb14d1d844beaf80a4f93857185ef53339fab06b54ae1a9ab24b0f64",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          91,
+          118
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/services/local_bot_quota.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "6eeafb3dcd3fb60bb260cab5917c6e8a8e7e29fb859c6b5c159842f155c403dd",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          98
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/services/login_throttle.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "6289c4a8e4d43d4d2d1262583cca9f096eb72e045832a69c4bb4a32e7e737e4d",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "advisory_lock": [
+          53
+        ],
+        "driver_or_url": [
+          46,
+          51
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/services/lore_parser_quota.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "b7f62ddd66f43c23d8d9bcfa8fad3b8eb8170eef499e73ed0c1a1a1f9da793ec",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "advisory_lock": [
+          176
+        ],
+        "driver_or_url": [
+          166
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/services/messages.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "b2182b43f5f52daa7d7b5a88da9d1f3a8b213f66dbe885c0bec3446d83403e5c",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          5
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/services/relationship_graph_read.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "35791afba6af594970bdbf6d1c2bec5cba7bf2759b62fc8a81be010a32eab1db",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          38
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/services/resident_tick_scheduler.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "c2fc221577e0fbec679a3590cca63a0e0a4eea4bfe46fb9dd83aa4bf35ed103c",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          198,
+          316,
+          531
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/services/social_event_runtime.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "d5148c0de8dd0d2debeb9201d13f3eb0913955efc326135873fc6f6a9eb17dc7",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          163
+        ],
+        "row_lock": [
+          199,
+          219,
+          583,
+          776
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/services/world_feed_search.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "8e43429e94623caea264a8806020018bc194e774752f17f8bbaa8085b0180a99",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          19
+        ],
+        "pgvector": [
+          17
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/pyproject.toml",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "7f6ff98f1c390e7ca5144debf75e2f2f2e61b7844d97c81f53870485abd98181",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "advisory_lock": [
+          19,
+          35,
+          36
+        ],
+        "driver_or_url": [
+          33
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/scripts/migrate_local_credentials.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "e23038c8c173e913f165c37f3a8221b4449e00ec49415a96383aad795d2fa8ae",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          21,
+          31,
+          34,
+          41,
+          43,
+          61,
+          96,
+          182
+        ],
+        "pgvector": [
+          32
+        ]
+      },
+      "owner": "ER7",
+      "path": "compose.yml",
+      "removal_condition": "embedded canonical rollback window PASS and user-approved legacy-default removal",
+      "source_sha256": "e3c45a55f59e29fb9d48310746b5fb948068b095dedf45dc9956ba17d10ed275",
+      "transition_pr": "ER7 PR P"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          18,
+          33,
+          94,
+          95,
+          96,
+          98,
+          154
+        ]
+      },
+      "owner": "ER7",
+      "path": "scripts/ci/check_docker_runtime_assets.py",
+      "removal_condition": "embedded canonical rollback window PASS and user-approved legacy-default removal",
+      "source_sha256": "9748c7979aa2d163ae9f22756853ba961bface3153794a036e27aa8340bcfd4e",
+      "transition_pr": "ER7 PR P"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          20
+        ]
+      },
+      "owner": "ER7",
+      "path": "scripts/ci/check_local_launcher_contract.py",
+      "removal_condition": "embedded canonical rollback window PASS and user-approved legacy-default removal",
+      "source_sha256": "4badb0af8b32d9388dda1a4af86f628fea0741ba3926dd887e28fba0cd709ac4",
+      "transition_pr": "ER7 PR P"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          19,
+          119,
+          120
+        ]
+      },
+      "owner": "ER7",
+      "path": "scripts/ci/check_local_runtime_contract.py",
+      "removal_condition": "embedded canonical rollback window PASS and user-approved legacy-default removal",
+      "source_sha256": "405e81b03beb5ec4372aa0de61de8ef1d4e9e99908ec087541f218a4653e8983",
+      "transition_pr": "ER7 PR P"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          23,
+          27,
+          28,
+          186,
+          208,
+          209,
+          210,
+          231,
+          254,
+          271,
+          289,
+          326,
+          353,
+          365,
+          377,
+          385,
+          395
+        ]
+      },
+      "owner": "ER7",
+      "path": "scripts/ci/run_l0_container_smoke.py",
+      "removal_condition": "embedded canonical rollback window PASS and user-approved legacy-default removal",
+      "source_sha256": "2fbd04badff9ddad28c37edfcd22360471162ea65166fdd5df5727cdb6c129a5",
+      "transition_pr": "ER7 PR P"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          69
+        ]
+      },
+      "owner": "ER7",
+      "path": "scripts/ci/windows_local_smoke.ps1",
+      "removal_condition": "embedded canonical rollback window PASS and user-approved legacy-default removal",
+      "source_sha256": "0f9a1ef8cbb5716fc8213bc5852e34c108bb8a2560f5089c908aa9e758d2269d",
+      "transition_pr": "ER7 PR P"
+    }
+  ],
+  "entry_count": 67,
+  "marker_counts": {
+    "advisory_lock": 8,
+    "driver_or_url": 44,
+    "jsonb": 8,
+    "pgvector": 5,
+    "row_lock": 22,
+    "skip_locked": 7
+  },
+  "purpose": "L3-ER0 PostgreSQL-specific source binding inventory",
+  "schema_version": 1
+}
