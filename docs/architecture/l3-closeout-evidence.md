@@ -1,6 +1,6 @@
 # L3 integrated clean-clone closeout evidence
 
-Status: **PR H LOCAL AND HOSTED TECH PASS / USER SCREEN AND MERGE GATES NOT REACHED**
+Status: **L3 PASS_P1_P4_LOCAL_VERTICAL_LOOP / PR H PASS AND MERGED / L3-ER0 NEXT**
 
 Baseline:
 
@@ -11,6 +11,9 @@ Baseline:
 - migration head: `20260819_0082`
 - previous L3-safe revision: `20260816_0080`
 - local evidence commit: `438b96c2c16e4e46bd4e6c66510c655261a97cd0`
+- final PR head: `3d9ecc5157aa0fe0b39a901c8f3f59f222eb492d`
+- exact merge commit: `6119129334193b35b8eb737bd79a3c47ce911afe`
+- PR state: merged; Issue `#93` closed; remote branch deleted
 
 ## Local execution evidence
 
@@ -36,11 +39,13 @@ Executed on Windows from an isolated Compose project named
   `angmoo_angmoo_*` canonical volumes remain present
 
 The local results above prove the local technical Gate. Hosted evidence is
-recorded separately below; user-owned and merge Gates remain open.
+recorded separately below. The Local Owner final screen and merge Gates were
+subsequently completed.
 
 Hosted evidence:
 
-- Draft PR: [#94](https://github.com/angmoo-tree/angmoo/pull/94)
+- PR: [#94](https://github.com/angmoo-tree/angmoo/pull/94), merged as
+  `6119129334193b35b8eb737bd79a3c47ce911afe`
 - required and advisory Actions: `14/14` PASS
 - `local-core-smoke` completed the container supply-chain and clean-clone Gate
   in `6m58s`; this was normal execution, not a stalled job
@@ -48,9 +53,27 @@ Hosted evidence:
   advanced from `IN PROGRESS` to `LOCAL TECH PASS`; the assertion was corrected
   without changing product behavior and the rerun passed
 
-The remaining Gates are the Local Owner final screen check, Ready conversion,
-maintainer merge, remote branch deletion, exact merge SHA recording, and the
-L3-ER rollback-oracle freeze. Release tagging remains separately approved.
+After merge, exact `main` images were rebuilt with revision
+`6119129334193b35b8eb737bd79a3c47ce911afe` and version
+`sha-611912933419`. A second isolated Windows clean-clone named
+`angmoo-l3-final-main-6119129` passed the same `0082 -> 0080 -> 0082`
+migration round trip, full/core/autonomy modes, repeat-start and persistence
+checks, port-conflict classification, and provider-call `0` contract. Its
+containers and volumes were removed, while the canonical six-service stack and
+five `angmoo_angmoo_*` volumes remained healthy and present.
+
+The same commit was then cloned from the public GitHub HTTPS URL with terminal
+prompts and credential helpers disabled. That clean checkout was empty of local
+changes and its source images passed the same six/three/four-service,
+`0082 -> 0080 -> 0082`, provider-call `0`, and fixture-cleanup contract under
+the isolated project `angmoo-l3-final-anon-6119129`.
+
+The PostgreSQL row/count digest, Neo4j World projection digest, and production
+typed-query digest are frozen in
+[`l3-er-postgres-neo4j-parity-oracle.json`](l3-er-postgres-neo4j-parity-oracle.json).
+This is the rollback and parity oracle for L3-ER0 onward; it contains no raw
+user content, credential, secret envelope, or absolute user-home path. Release
+tagging remains a separate approval.
 
 ## Required automated evidence
 
@@ -71,9 +94,9 @@ fixture volumes, verifies the migration round trip and lifecycle, and removes th
 fixture volumes in `finally`. Canonical `angmoo_*` volumes are outside that
 project and must remain untouched.
 
-## Human evidence still required
+## Human evidence completed
 
-Before L3 PASS, the Local Owner must confirm in one clean-clone stack:
+The Local Owner confirmed PASS in the final user stack for:
 
 1. Device Home -> Creator Studio -> World App -> Feed -> Home navigation.
 2. An autonomous P1-P4 sequence and the owner-controlled minimum-participation
@@ -83,7 +106,8 @@ Before L3 PASS, the Local Owner must confirm in one clean-clone stack:
 4. The manual reply can be observed once on a later allowed beat; a public reply
    is optional and duplicate observation is absent.
 
-Only after the Draft PR passes all required Actions, the user confirms the final
-screen, and the PR is merged may the plan record
-`L3 PASS_P1_P4_LOCAL_VERTICAL_LOOP`. Release tagging remains a separate approval
-gate.
+The final screen was confirmed after all required Actions passed. PR #94 was
+then merged, its remote branch was deleted, exact-main clean-clone evidence was
+repeated, and the parity oracle was frozen. L3 is therefore
+`PASS_P1_P4_LOCAL_VERTICAL_LOOP`; L3-ER0 is next.
+Release tagging remains a separate approval gate.

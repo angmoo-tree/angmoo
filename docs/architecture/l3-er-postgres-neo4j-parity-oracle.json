@@ -1,0 +1,98 @@
+{
+  "oracle_version": "l3-er-postgres-neo4j-v1",
+  "captured_at": "2026-08-19T09:41:31Z",
+  "repository": "angmoo-tree/angmoo",
+  "app_merge_sha": "6119129334193b35b8eb737bd79a3c47ce911afe",
+  "migration_revision": "20260819_0082",
+  "previous_safe_revision": "20260816_0080",
+  "privacy": {
+    "raw_user_content_included": false,
+    "credentials_included": false,
+    "absolute_user_paths_included": false,
+    "identifiers_are_fixture_or_canonical_row_keys": true
+  },
+  "digest_contract": {
+    "postgresql_row_digest": "MD5 of newline-joined, table-specific structural rows sorted by primary id; nullable fields are normalized to an empty string",
+    "postgresql_aggregate_sha256": "SHA-256 of newline-joined surface|row_count|row_digest entries sorted by surface",
+    "neo4j_projection_digest": "Canonical JSON emitted by Neo4jGraphClient.world_digest for WorldCharacter, SocialEvent, RELATES_TO, and RELATIONSHIP_GROUNDED_IN entries",
+    "neo4j_typed_query_digest": "SHA-256 of canonical sorted JSON returned through the production RelationshipGraphRepository query templates",
+    "migration_use": "A SQLite or LadybugDB candidate must reproduce the same structural row counts and semantic query results, or document an approved deterministic translation before cutover"
+  },
+  "postgresql": {
+    "aggregate_sha256": "08fc3149140fba31406b222271e0588ca62fe8ccba5db592043e6e725e9f86e0",
+    "surfaces": {
+      "activity_beats": {"row_count": 3, "row_digest_md5": "4d3f7b62e15b599eb8d48df6f93ae1ef"},
+      "activity_episodes": {"row_count": 2, "row_digest_md5": "986d3959e20f5027cf290a076c13dd30"},
+      "characters": {"row_count": 4, "row_digest_md5": "353a4b93009f3d9469ee2c523e686036"},
+      "comments": {"row_count": 0, "row_digest_md5": ""},
+      "daily_activity_plan_items": {"row_count": 4, "row_digest_md5": "dcb91679104b1aa004c57000fc171ead"},
+      "daily_activity_plans": {"row_count": 1, "row_digest_md5": "28887e806065250465e0aae8ed5e7ed3"},
+      "graph_projection_outbox": {"row_count": 4, "row_digest_md5": "6fd80953efbaeb92511a648b695a9568"},
+      "owner_manual_inbox_candidates": {"row_count": 1, "row_digest_md5": "3e0e8b38f14cbf3db35fc5c02718f206"},
+      "owner_manual_social_writes": {"row_count": 2, "row_digest_md5": "807d788b3c5300d26d8466dbbb09729f"},
+      "posts": {"row_count": 9, "row_digest_md5": "6327fdcfe12b2ea6d1c960b6b30ef814"},
+      "relationship_state_changes": {"row_count": 1, "row_digest_md5": "2f2eb32b23a994957e24d60ff54952ae"},
+      "relationship_states": {"row_count": 1, "row_digest_md5": "2bb1a0dacc146732784c4fa36f62638a"},
+      "social_event_evidence": {"row_count": 4, "row_digest_md5": "2e8c702bcfebbb4bef811cafc4e3ee74"},
+      "social_events": {"row_count": 4, "row_digest_md5": "01448153f966edd16820d7bc2420dd16"},
+      "world_activity_candidates": {"row_count": 40, "row_digest_md5": "c3148d330f26efa91dd0e6ad79969211"},
+      "world_activity_repertoires": {"row_count": 1, "row_digest_md5": "3b8dc3f1014ec132bacb8bb1e5625169"},
+      "world_characters": {"row_count": 4, "row_digest_md5": "84dec9f9e3efdb4c244e5e3d021fa725"},
+      "world_community_profiles": {"row_count": 1, "row_digest_md5": "5841d7283df79e57dabcca1b9e5023c7"},
+      "worlds": {"row_count": 2, "row_digest_md5": "f8aaa9ed3dd81f1e13f286b8d742cb24"}
+    }
+  },
+  "neo4j": {
+    "aggregate_sha256": "3ff85c261be42faf0be2e1dce925d8f713e339f1837bb334752f9b232a4e0b0e",
+    "worlds": {
+      "01a00953-2a6a-77e6-b823-c30ad3925cbb": {
+        "world_character_count": 1,
+        "event_count": 3,
+        "relationship_count": 0,
+        "evidence_count": 0,
+        "projection_sha256": "57101dd76507890da090dcc77adab2ba32e23c18e5a31d3e3b6df05c8aa38a49"
+      },
+      "p7-world-l2outage0816": {
+        "world_character_count": 2,
+        "event_count": 1,
+        "relationship_count": 1,
+        "evidence_count": 1,
+        "projection_sha256": "a064461978ec7d87a2649502535d50c6b0c45b3cfbca3619b9b29b830991c04d",
+        "typed_query_subject": {
+          "source_world_character_id": "p7-wc-actor-l2outage0816",
+          "target_world_character_id": "p7-wc-target-l2outage0816"
+        },
+        "typed_query_counts": {
+          "direct": 1,
+          "direct_with_reverse": 1,
+          "shared_neighbors_either": 0,
+          "shortest_path_either_3": 1,
+          "shortest_path_hops": 1,
+          "rank_positive": 1,
+          "rank_tense": 1,
+          "rank_recent": 1,
+          "evidence": 1
+        },
+        "typed_queries_sha256": "9c452340a0208cccbe9946b3b3045168dcd4844f5bc7511a7488777220aff634"
+      }
+    }
+  },
+  "closeout": {
+    "exact_main_clean_clone": {
+      "public_anonymous_clone": true,
+      "public_clone_head": "6119129334193b35b8eb737bd79a3c47ce911afe",
+      "image_version": "sha-611912933419",
+      "compose_version": "5.3.1",
+      "migration_round_trip": "20260819_0082->20260816_0080->20260819_0082",
+      "migration_digest": "0||1|1348052885f848a74d61942f01461bf2|0||2|19f63f8294863b6fae9831970626dbb4",
+      "full_service_count": 6,
+      "core_service_count": 3,
+      "autonomy_service_count": 4,
+      "provider_calls": 0,
+      "fixture_volumes_remaining": 0
+    },
+    "canonical_services_healthy": 6,
+    "canonical_volumes_preserved": 5,
+    "user_final_screen": "PASS"
+  }
+}
