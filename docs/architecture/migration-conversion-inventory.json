@@ -8,7 +8,7 @@
       "path": "backend/app/alembic/versions/20260510_0001_initial_community_schema.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260510_0001",
-      "source_sha256": "d40970c22080215631909c61de84aa49bd1bc2e06ac1f37ee01d36cc8cf2db08",
+      "source_sha256": "eadec691eeea7ccfea4d32551f5ec1fe8fc003144d7bce934740d41e8dce176c",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -19,7 +19,7 @@
       "path": "backend/app/alembic/versions/20260511_0002_agent_run_credentials.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260511_0002",
-      "source_sha256": "63d58865bc049ce37aefd88f95a5818d001fe989e8fe8711039f914398b34785",
+      "source_sha256": "ad0c3507b9508e650d5045644b65bc112e5759d90ae93562e422566acd2d5591",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -32,7 +32,7 @@
       "path": "backend/app/alembic/versions/20260511_0003_agent_slots.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260511_0003",
-      "source_sha256": "9236f0dfd049373f4edbbaa52605d5abd34cb8060e61a06667b8de2b187be5fd",
+      "source_sha256": "6d49b780efc3c3c8e326a13b4afedad2ec538804a41364583286235927f94f20",
       "strategy": "translate-and-validate",
       "transition_pr": "ER2 PR G"
     },
@@ -43,7 +43,7 @@
       "path": "backend/app/alembic/versions/20260511_0004_resident_agent_slots.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260511_0004",
-      "source_sha256": "8ad7c0c4f597da3a3520c23ac867433540d020709292f245594ddd62e6d00700",
+      "source_sha256": "812c4a00ff5136a52309a7d92cbab7373194341be41ff2e42e77f5d7900cd0b2",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -54,7 +54,7 @@
       "path": "backend/app/alembic/versions/20260513_0005_product_slice.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260513_0005",
-      "source_sha256": "a9c3403818c0fe7f1b7f3127b03be03a688409801b39fb74d68ae946be3ec06c",
+      "source_sha256": "3538e08925aa78dbe29d3fa4b8f8613540bf6f399415f236103877a40ad9743b",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -65,7 +65,7 @@
       "path": "backend/app/alembic/versions/20260513_0006_social_timeline_schema.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260513_0006",
-      "source_sha256": "d10b671e7224e94b197a4a1be8390312d0e36ebbf9c37965aa71c157b000cdfe",
+      "source_sha256": "daa82f2436c45f1afc42a40f1e875007341532ffa3c7b36701af08e3bf7af362",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -76,7 +76,7 @@
       "path": "backend/app/alembic/versions/20260514_0007_migrate_comments_to_reply_posts.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260514_0007",
-      "source_sha256": "62d03f87f456a5754bd36ed3dbb151ad7ffa3bd43c43da3c4ef363b5d7621c66",
+      "source_sha256": "9c69b71d67272460ea6c441190cd410f0a3c007d71715aaced2b397ccdb2925d",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -87,7 +87,7 @@
       "path": "backend/app/alembic/versions/20260514_0008_character_profile_identity.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260514_0008",
-      "source_sha256": "6730898a3b1ea879db3d203ef6f30f95e47afd5c4c2bee6fe2251d8e66554705",
+      "source_sha256": "e249ee52a08d992785b927e50095ea6abee4f52e8a6254820250271cd62e53be",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -98,7 +98,7 @@
       "path": "backend/app/alembic/versions/20260514_0009_character_banner_url.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260514_0009",
-      "source_sha256": "468297aab8f1dc2b31af46c1cf15944d5b8fd80536cf3465da34334f4d3f6e0e",
+      "source_sha256": "2ed22b0bf29cbaf1e2ca8af38181f7ab8c03fad2af563d22c2686b9a84b43f0b",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -109,7 +109,7 @@
       "path": "backend/app/alembic/versions/20260516_0010_agent_action_settings_and_slots.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260516_0010",
-      "source_sha256": "ab4a9d5b531520cb2c934e0e5826c56d5d96a7d8acf1bc3485834fd02feea034",
+      "source_sha256": "099141a3bd6d3e34fbb340f5fe9990c7559bf52cfdd13e30cf9a9c3bc4d6052e",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -120,7 +120,7 @@
       "path": "backend/app/alembic/versions/20260516_0011_agent_tendency_analysis.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260516_0011",
-      "source_sha256": "4b8773f18bb2452b64f573b0d8475eb67ca43b777e45db7facf791fba17889e1",
+      "source_sha256": "7a756827e146a4d533d2b0106c7495bb831deb67901b119b69593c4a812b3cc1",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -131,7 +131,7 @@
       "path": "backend/app/alembic/versions/20260516_0012_llm_credential_model.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260516_0012",
-      "source_sha256": "5a944d494e6aba8ce189c6d345dfd3276ec11f01e3b2f1bf23ef63787d0af848",
+      "source_sha256": "bc51146cf3f02b89ccd6f2acfc39dbba5568c8ad15ffcad04a8bb1b6e5d8e063",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -144,7 +144,7 @@
       "path": "backend/app/alembic/versions/20260516_0013_agent_feed_cues.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260516_0013",
-      "source_sha256": "456cbf7d67798366774cae7b0ab038904885d8a1c7fd4ebf1761e42b318df8bf",
+      "source_sha256": "e21cbc208d6380f35ded1198129136c4d0c1b18341f3e59e868f0c8f83eb889a",
       "strategy": "translate-and-validate",
       "transition_pr": "ER2 PR G"
     },
@@ -155,7 +155,7 @@
       "path": "backend/app/alembic/versions/20260516_0014_agent_activity_interval.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260516_0014",
-      "source_sha256": "f42d589e0cd55a3534e5f2eeddf33145ead2da5dd1c32426285f7b070f14074d",
+      "source_sha256": "2ede1d4be08e80582d7c0a3e8eb1e58bfdc2fc3c7caea836ef9af464bd124395",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -166,7 +166,7 @@
       "path": "backend/app/alembic/versions/20260517_0015_nullable_agent_run_post.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260517_0015",
-      "source_sha256": "3e3e1a40dbba760070dd4198082e30eacf6206a364a860f46e21f5a450c3ae44",
+      "source_sha256": "bc863e20e66480132a84678015f0397f4af8e0f6edd9adbb515f550142240795",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -177,7 +177,7 @@
       "path": "backend/app/alembic/versions/20260519_0016_gemini_flash_lite_only.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260519_0016",
-      "source_sha256": "0c97eccb8bc8aca870f43d3ac27acc6fce226bf1301a8bc001271dccee10cbdb",
+      "source_sha256": "4f39e5f7412a78cc4f083695284374e24b0d056bca67062034d9cbf9b08983e0",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -188,7 +188,7 @@
       "path": "backend/app/alembic/versions/20260519_0017_min_activity_interval_30.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260519_0017",
-      "source_sha256": "ef6a32e55f80a6cf024beeb660e1e2ab6b6934550629706815c58488e0c8930c",
+      "source_sha256": "db43db73d75c3067f12aa878ea71091e8ba1c89e687c881b995267f3c1bd1aea",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -199,7 +199,7 @@
       "path": "backend/app/alembic/versions/20260519_0018_llm_credential_cooldown.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260519_0018",
-      "source_sha256": "cabd7f392c59ebd6bbf7da35fa4839392a44d36565ab5873257df2373521d346",
+      "source_sha256": "b28257d05f97873d3123f798e2da66caed379391bf1c0c0df973352a8afb4f5a",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -210,7 +210,7 @@
       "path": "backend/app/alembic/versions/20260520_0019_tree_community.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260520_0019",
-      "source_sha256": "dc58eca221d44bb2469f42a0e5e9571b8393d7a85eac120b7edabf1d2d4e7a73",
+      "source_sha256": "d84636dcd5ade5ae41ac0f22368e2b465670d24fa70471e84c02698c42533b45",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -221,7 +221,7 @@
       "path": "backend/app/alembic/versions/20260520_0020_google_auth.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260520_0020",
-      "source_sha256": "20d73271f72a50c39aa8da9b0f9ac83dc2875fd8d5766e4cb36c917afb9682c5",
+      "source_sha256": "1004f8edca70106d904c38d36c4b572479ada2940bf59039440f360d512eaa35",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -232,7 +232,7 @@
       "path": "backend/app/alembic/versions/20260520_0021_user_profile_setup.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260520_0021",
-      "source_sha256": "9751018b33540f33d953f79f3a5004f941dd917a98a55af03392a43d06ee957d",
+      "source_sha256": "e24364c649d0d37a6f83df156f54028e502e06b4b0c27f5a8bfbf6ebe2bfc60d",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -243,7 +243,7 @@
       "path": "backend/app/alembic/versions/20260520_0022_user_display_name_cooldown.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260520_0022",
-      "source_sha256": "d3c09fc565a17783b12f75064a91d702098e855ba9c63fe72319b15b7c81c31d",
+      "source_sha256": "cd2f535cfe394b61835cbc003bdf99468a5091327c8a20bd83ac5c6519286003",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -254,7 +254,7 @@
       "path": "backend/app/alembic/versions/20260520_0023_user_admin_avatar.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260520_0023",
-      "source_sha256": "146fc6d6c7cf53ab7b00a358e31652a4941ddbfe37a5fe32491d7eb300a72a60",
+      "source_sha256": "d908306ce66915bd977b435a040371df8a866904a542c47e8e76786d5987e18e",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -265,7 +265,7 @@
       "path": "backend/app/alembic/versions/20260520_0024_drop_user_avatar_url.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260520_0024",
-      "source_sha256": "56f41f7a37a6c84e37e315d6c52b34968ee71dc3c605887331c3ed7697d73965",
+      "source_sha256": "25b92962d2ce6a21ba405b5d2e56fe36312d9dea3c6547743792dbe3045317c1",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -276,7 +276,7 @@
       "path": "backend/app/alembic/versions/20260522_0025_user_deleted_at.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260522_0025",
-      "source_sha256": "232c40d0e0923083b228cae4612dfa8a41cf13ca879e6540fbd7a8a794218577",
+      "source_sha256": "6e3da7514cd8f88ffc565fef586456f258c8fb7520f1f4304c26965b9d597bae",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -287,7 +287,7 @@
       "path": "backend/app/alembic/versions/20260522_0026_character_deleted_at.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260522_0026",
-      "source_sha256": "fddb5044b86088e6f7478ad57270e30a7e27ca736477a9ec8c0a19ed2752a46b",
+      "source_sha256": "4494f1817171557d77a1094676f0c2ae2fab097b448e3130b723c777d39624eb",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -298,7 +298,7 @@
       "path": "backend/app/alembic/versions/20260522_0027_user_policy_agreements.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260522_0027",
-      "source_sha256": "b5a04814f3f58bd94f85ff8a9be90eb025d2cd33c1f85c6198ea7991bef105f0",
+      "source_sha256": "d936b6a3280dc2dc853c6d7cd582eaf1496df738f664e739d2c9e878429775fb",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -309,7 +309,7 @@
       "path": "backend/app/alembic/versions/20260522_0028_agent_creation_drafts.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260522_0028",
-      "source_sha256": "8ce8d4b40b425209c809893d3c4f1de7255490c4ff9f47758ffdb2efd2988be8",
+      "source_sha256": "dab819619187a3a29419fb5c6b451f1ee8e2e46e3ef2eb8f3c2730ccba5c7af2",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -320,7 +320,7 @@
       "path": "backend/app/alembic/versions/20260526_0029_agent_run_gateway_result.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260526_0029",
-      "source_sha256": "bf9e7336f3742d3f54d4b4f1635fbd046fc79ba25051e59f3b9a7cbbcc446d8b",
+      "source_sha256": "f49786be5d4df39cb96135f4a5701c60fe85b44f072213b95679e9096c9724c5",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -331,7 +331,7 @@
       "path": "backend/app/alembic/versions/20260528_0030_post_reports.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260528_0030",
-      "source_sha256": "81d2e86ca4ffbea5f090efd3198a3c204d65636fff7620b0a3fe5a8f512cb3e5",
+      "source_sha256": "9df13d016a72d0f2c29ef2b987d4715eb1b986c7b74dec37356b864bd35fbc96",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -342,7 +342,7 @@
       "path": "backend/app/alembic/versions/20260529_0031_user_feed_content_filter.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260529_0031",
-      "source_sha256": "096040e612fabf0c6caf77167f555a955a7bd9ee743bfab291c9a2bebc34e0c5",
+      "source_sha256": "37c48139e0532d530ab6c41b955639b33285a62e6df2f02d2dd949731974d6f3",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -353,7 +353,7 @@
       "path": "backend/app/alembic/versions/20260529_0032_agent_writing_sampling_settings.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260529_0032",
-      "source_sha256": "f1421774cc05b55b98e7e1f670a24dbd6f29e1e3ece5da512853f55bbc2ea392",
+      "source_sha256": "6e1e108bcc96fcc9bc2957fc84c7d63b44c4e82bcc560043997782a3239e683e",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -364,7 +364,7 @@
       "path": "backend/app/alembic/versions/20260529_0033_agent_writing_repetition_level.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260529_0033",
-      "source_sha256": "796b583374fb994aa013ee810d84727f6c2574715f40b3293ffa56f032467c91",
+      "source_sha256": "8a0f11ff6538321fbbe4790daa1a2d45b6dcf5c0d5a90e63ad33d14eb38645b0",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -377,7 +377,7 @@
       "path": "backend/app/alembic/versions/20260530_0034_local_agent_mode.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260530_0034",
-      "source_sha256": "15402fa93632bb734c73ffe697b8e0442fb67ca6b8216b42a73034adc885b7bd",
+      "source_sha256": "15ca97a843f21890b883e5992602b1bc6ec219245a720b04368f40e0bbbb5a4d",
       "strategy": "translate-and-validate",
       "transition_pr": "ER2 PR G"
     },
@@ -388,7 +388,7 @@
       "path": "backend/app/alembic/versions/20260530_0035_post_info_metadata.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260530_0035",
-      "source_sha256": "679de4c27efb7596c6c19ea3fc12641880f8fafb83b66404e6c5b5a85e2511be",
+      "source_sha256": "763566af0898d53371cfc370dc35830b0fd471e647521a7479ff61a8f0a7c58d",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -399,7 +399,7 @@
       "path": "backend/app/alembic/versions/20260601_0036_character_follow_targets_only.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260601_0036",
-      "source_sha256": "691ee6ee3b9b976dc8dc06c2fecacff7220053dfccd542b83091b03fa2ce75bb",
+      "source_sha256": "84884710957f29ed0904abc45bceda85a52326878ed56697937668a2e6b11442",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -412,7 +412,7 @@
       "path": "backend/app/alembic/versions/20260604_0037_character_lore_pgvector.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260604_0037",
-      "source_sha256": "6bcc316ce80ce03b2d90cfab46cf6a96b47dbe1d5984696a387da544e2cf9973",
+      "source_sha256": "1dafe3f55ae6bb40dc4ecdd7b642f83b31fb8b22968b589bda2f33c8efdb2782",
       "strategy": "translate-and-validate",
       "transition_pr": "ER2 PR G"
     },
@@ -425,7 +425,7 @@
       "path": "backend/app/alembic/versions/20260605_0038_posts_topic_metadata.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260605_0038",
-      "source_sha256": "21dda7f6116cf5fe17ac54befdabcb6938df4da70772b7f17d4acdb4a510cc95",
+      "source_sha256": "7bcc37b2286711d7f5565789fcc327e22cdd7552866644ac15d9819f22c3ede4",
       "strategy": "translate-and-validate",
       "transition_pr": "ER2 PR G"
     },
@@ -436,7 +436,7 @@
       "path": "backend/app/alembic/versions/20260609_0039_daypart_persistent_session.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260609_0039",
-      "source_sha256": "15f3c0d1676fc040c63a35b1f5bf71c1f2f4bf17b74fe30bd29708ab759863f2",
+      "source_sha256": "1bd14fd9d53c899bbf991c432531215264b8863985d9a84f911cd0761fa6c7a9",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -447,7 +447,7 @@
       "path": "backend/app/alembic/versions/20260610_0040_agent_public_action_executions.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260610_0040",
-      "source_sha256": "9239e08d3ac85e17f1dbfaaba2087de8872474316ecdbe14a28cc0d4cb21341f",
+      "source_sha256": "8ad38e3dc458d7d24664cf52a176c94970b426f939f3330e412231d159e7d024",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -458,7 +458,7 @@
       "path": "backend/app/alembic/versions/20260610_0041_agent_planner_tendency_profile.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260610_0041",
-      "source_sha256": "5b526e1edacd9b3acb64d3282aebd092bbe45938cad0222a1af2803ccdca8a90",
+      "source_sha256": "2a3f70c90c767f786657290512a34635c78b435c575e1ffab801a722591cbfaf",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -469,7 +469,7 @@
       "path": "backend/app/alembic/versions/20260614_0042_admin_operations.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260614_0042",
-      "source_sha256": "0800c8299c0ec016eb9c5ec9596800c804b124955f58d9166998ef4336f4e139",
+      "source_sha256": "2f2ec08606923ab31803127223aedd54226aedba7eeb6878739fef676d446341",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -480,7 +480,7 @@
       "path": "backend/app/alembic/versions/20260615_0043_agent_activity_default_limits.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260615_0043",
-      "source_sha256": "0d4c4840ddbaa7e16244b34d5de0b9ccff7e70c40189f5686d8443552e9ae5a9",
+      "source_sha256": "9e00ea8f5c45c89fbe64ca2f47952cacc83ed18af768c5a46251774f5df5beb3",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -491,7 +491,7 @@
       "path": "backend/app/alembic/versions/20260615_0044_post_image_generation.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260615_0044",
-      "source_sha256": "27b7fefc8e58bd9a11604f4c2bd50f6ef2648189b986fc0b74a64691e9355e11",
+      "source_sha256": "dc381f51804ad8b42113824b63addd9247e1b0a4f498eba36349f27a71616972",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -502,7 +502,7 @@
       "path": "backend/app/alembic/versions/20260615_0045_pollinations_post_images.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260615_0045",
-      "source_sha256": "b8062c2b28c4240085df15e9688e9f16275763185db2e61d838074f34f0feb01",
+      "source_sha256": "37aa4157b250b43ef4abef5645015bffad041a0f457dac19405248bb52359b83",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -515,7 +515,7 @@
       "path": "backend/app/alembic/versions/20260616_0046_messages_v1.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260616_0046",
-      "source_sha256": "1b19a1682e62d868471aebe2dc4728689b2e06dfc6616f737c765e37ba1cb00b",
+      "source_sha256": "7ae15de22fe71fd6a403c07256e74ef92e4cc79359030e16c2704a5cd21108ae",
       "strategy": "translate-and-validate",
       "transition_pr": "ER2 PR G"
     },
@@ -526,7 +526,7 @@
       "path": "backend/app/alembic/versions/20260616_0047_message_default_gemma4_26b.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260616_0047",
-      "source_sha256": "c4018d140d0da476b68b1c29428624ed3b64b058907058d0b66dc5f5f2087582",
+      "source_sha256": "12b1a96c275a2c3429147b9a281f5f6115e017b0078a78dc08d32d3bd382edbf",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -537,7 +537,7 @@
       "path": "backend/app/alembic/versions/20260616_0048_active_hours_presets.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260616_0048",
-      "source_sha256": "a4ae93d976db704e03ac83081fd7e6c89365d277fa38957bc4cb1818f26c396e",
+      "source_sha256": "1a05facade95af6c5740cf5d11dff770baabe7054744163e732e626e4619fe26",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -548,7 +548,7 @@
       "path": "backend/app/alembic/versions/20260616_0049_observe_internal.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260616_0049",
-      "source_sha256": "85e7bfc722ba97a2b7eece2252753532d09d4edd456379b2f992ccb3ea33128a",
+      "source_sha256": "fc6c1dd42ffe67e4acceb2becdb276b60afba9949351dbdc18ed7516abdb65fe",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -559,7 +559,7 @@
       "path": "backend/app/alembic/versions/20260617_0050_message_default_gemini25_flash_lite.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260617_0050",
-      "source_sha256": "db53bc814bcb0a71348a281ff4c59907821b37f6c37ece358c054feb602cd98b",
+      "source_sha256": "e9579f667a8284a23ca25955ca435af5760959b153812751463d13b11c3df76e",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -570,7 +570,7 @@
       "path": "backend/app/alembic/versions/20260617_0051_backfill_unconfigured_message_default.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260617_0051",
-      "source_sha256": "92553a2e700440e9a917bd5256ac4a8322ca093e3ea7f9c244dff16ff7b47070",
+      "source_sha256": "74e50c4ab584fa45cb1d01314d9850ff5508ab8424c50459fe0461b3f707970c",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -581,7 +581,7 @@
       "path": "backend/app/alembic/versions/20260618_0052_local_api_post_image_jobs.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260618_0052",
-      "source_sha256": "6b9c52624f1b14e4adbcfd74331308c35a30ece4933547d4422acee7abcf854c",
+      "source_sha256": "7e1ab54b17b7c8e92d6cf0518786a2a156c6c93bf90db51f49ed7ec0ef6eb845",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -592,7 +592,7 @@
       "path": "backend/app/alembic/versions/20260620_0053_service_image_quota.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260620_0053",
-      "source_sha256": "8f5af8b3feaa3c8e758b85cc59fd5ffcf3a29a8e4a7c3408b1ecd6fd58e254b6",
+      "source_sha256": "516e73e148cee4b9864d98515e6d15e5ec348b7763c3f4f30a98b9191824d1d1",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -603,7 +603,7 @@
       "path": "backend/app/alembic/versions/20260624_0054_agent_relationship_points.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260624_0054",
-      "source_sha256": "4b8606a361c5840884298153c632d32a1cac11e45f40272a41f17a153941ffbf",
+      "source_sha256": "df26d68eeeff0bef609cbdabb0bf730cb6e74cc5678e770fa95734c915302409",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -614,7 +614,7 @@
       "path": "backend/app/alembic/versions/20260625_0055_character_promotion_usage_consent.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260625_0055",
-      "source_sha256": "9ee2af7dff606ebefe17ed14843c27d4351e85724716e0fe61acdb2b726a7cce",
+      "source_sha256": "076ecf9827ba728e315bda095ba9d101dfd84ba1a659a4085f8436426c62ed4a",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -625,7 +625,7 @@
       "path": "backend/app/alembic/versions/20260625_0056_agent_activity_reply_limit_30.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260625_0056",
-      "source_sha256": "7836f9673899a78f13988e2fd7ee586ab531b83e22c5021190abafc096c6a335",
+      "source_sha256": "5cd3f127f2bebc760022589590c5811c4a5cc415d71f76af40a7389e81a2caad",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -636,7 +636,7 @@
       "path": "backend/app/alembic/versions/20260627_0057_site_operation_settings.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260627_0057",
-      "source_sha256": "3fc87d221b28ae9209f805f27134b97549189fcb6e72d5ac1bddfabba238dfd8",
+      "source_sha256": "7037d08b318385af627d7ed2c2ba75c01c6c08a8277f8d2c811299e814109229",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -647,7 +647,7 @@
       "path": "backend/app/alembic/versions/20260705_0058_profile_image_candidates.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260705_0058",
-      "source_sha256": "38320f2068d4723acd1618fd09f9e1000831fc0fe226cd8a7957153c925a4f8d",
+      "source_sha256": "2dd5768b483d5a6f6f67b2939503031fe8d79325076854160ceba63f608a4e2f",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -658,7 +658,7 @@
       "path": "backend/app/alembic/versions/20260721_0059_replicate_image_token.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260721_0059",
-      "source_sha256": "1ab409288a30e38353db1b860a8879dfa02e425377b009f93a59ea6ef448f90b",
+      "source_sha256": "8632222af0bfa9a04475812bac67f5cdef676308d64eced8613559aa6ab8ec65",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -669,7 +669,7 @@
       "path": "backend/app/alembic/versions/20260726_0060_local_bot_quota_buckets.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260726_0060",
-      "source_sha256": "60d56a5250bcc99375a4aef3c9d7c253ca416af755858e2c5717f1bab6d6fabe",
+      "source_sha256": "7ead524be1d54a48fe9a23c12f75369aa506813cf4ca73a636241f6aa32d470e",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -680,7 +680,7 @@
       "path": "backend/app/alembic/versions/20260726_0061_auth_login_throttle.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260726_0061",
-      "source_sha256": "e60c36555a0ff80586d4f1104552336c0c672740320e3236773879486efa4350",
+      "source_sha256": "3749a40da3e2120d162193b49e4584396734fd6265621515a9eb4b2ff41bcb0e",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -691,7 +691,7 @@
       "path": "backend/app/alembic/versions/20260726_0062_external_auth_verification.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260726_0062",
-      "source_sha256": "3e3bf549e4e3728dedb9c5af50fec1e8583db875496fd00407646062409d3a56",
+      "source_sha256": "6fff394e80280db8203ff2a654be68703ec8aea724e98979fd2704642ffce2c8",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -704,7 +704,7 @@
       "path": "backend/app/alembic/versions/20260726_0063_direct_user_like_uniqueness.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260726_0063",
-      "source_sha256": "2837752dbdcf5bd6858192b3d45504829424ff5ea5192dbf0875a750e81f7744",
+      "source_sha256": "0287d299d24b1f311bc42dd52f1db1a8ee12637bd2bdd225011ffb51f139ceb5",
       "strategy": "translate-and-validate",
       "transition_pr": "ER2 PR G"
     },
@@ -715,7 +715,7 @@
       "path": "backend/app/alembic/versions/20260726_0064_google_signup_grants.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260726_0064",
-      "source_sha256": "be0a8042e5eadec5a0c77c9b940758339909824e77af562fbc745c4d57cf4cc1",
+      "source_sha256": "9c497e30bafa7ba9d0531eb89425fbeb9b1e156495715860ae59b371ead04f63",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -726,7 +726,7 @@
       "path": "backend/app/alembic/versions/20260726_0065_community_mutation_quotas.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260726_0065",
-      "source_sha256": "7ec38fe9087009c56e8d5b565f1b2b1c21a3d0d7509e4581218252fc8572954b",
+      "source_sha256": "e875e850d0030b52c7fb86630355179c9948233df70112c026c9b8fc3dc16c69",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -737,7 +737,7 @@
       "path": "backend/app/alembic/versions/20260726_0066_lore_parser_leases.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260726_0066",
-      "source_sha256": "d33ffb553a982890b43a21eb5dc3ac5a7062ca8a8f3e6fbde4c0f33bd4e8da0a",
+      "source_sha256": "83510acef357383b77a8ed41759789c48486815f4cd8c1f920c1ea743576d99a",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -750,7 +750,7 @@
       "path": "backend/app/alembic/versions/20260802_0067_unique_resident_character_assignment.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260802_0067",
-      "source_sha256": "afec58481f951f6c3b8385d6d1214393d3f6c3af6a491f097c2c6d0818c3516f",
+      "source_sha256": "20f3089e70651f35d72734c78dc3ca962ccc3ecdc995d54b3e45c91aac213598",
       "strategy": "translate-and-validate",
       "transition_pr": "ER2 PR G"
     },
@@ -761,7 +761,7 @@
       "path": "backend/app/alembic/versions/20260802_0068_message_response_leases.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260802_0068",
-      "source_sha256": "caaca18cff6dad9202a1e14c22c5cf266fbaa984c4652d9d5603cb830f720c14",
+      "source_sha256": "4d29c8de1feedad477bc6416b747b69cd815398d196d0791cd3a2671f7d96e3d",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -772,7 +772,7 @@
       "path": "backend/app/alembic/versions/20260804_0069_auth_session_expiry.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260804_0069",
-      "source_sha256": "6faaab4c056fa542f92fdd08f9404ac53fe93b17c3874bd88abd213c01555a66",
+      "source_sha256": "85f4f26b47b371a7ef0e8b9e0c9e81bfb48104b429959630aac60d30216c95fa",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -786,7 +786,7 @@
       "path": "backend/app/alembic/versions/20260807_0070_world_foundation.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260807_0070",
-      "source_sha256": "27214c6aeb64db39f2b0534e279ac6e6c1a31fed83c591fb7471473fa24d3347",
+      "source_sha256": "044ecb158b83815076ab520906c66c42bea662989cd8afc262bba91425abbe9f",
       "strategy": "translate-and-validate",
       "transition_pr": "ER2 PR G"
     },
@@ -797,7 +797,7 @@
       "path": "backend/app/alembic/versions/20260807_0072_angmoo_global_foundation_backfill.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260807_0072",
-      "source_sha256": "e2e175564e9bff920ccb69c887e32b8e0ca3c9e73b4c12aea996179f30813a71",
+      "source_sha256": "fe373473d4b3658b5c0c06818ed806cbd3acf0d0bc9b934047f986b3aa997825",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -811,7 +811,7 @@
       "path": "backend/app/alembic/versions/20260808_0073_world_character_repertoire.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260808_0073",
-      "source_sha256": "13414bd7cb7035ab81a534fbd693911f9237a89976e100471e3cb20f4d289e91",
+      "source_sha256": "ff3aa135b269c56b75c6a826875b93fb94fca809ff84eff299393a139e5e6948",
       "strategy": "translate-and-validate",
       "transition_pr": "ER2 PR G"
     },
@@ -825,7 +825,7 @@
       "path": "backend/app/alembic/versions/20260809_0074_daily_activity_runtime.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260809_0074",
-      "source_sha256": "e0564c6fd2ee60148d159058938a9b164b463f75f7027638f97fbf7ade891991",
+      "source_sha256": "7b7d7862d2a8adfeaa1a0c6da947168ed59302a086f596f31a33749f42e5d59b",
       "strategy": "translate-and-validate",
       "transition_pr": "ER2 PR G"
     },
@@ -836,7 +836,7 @@
       "path": "backend/app/alembic/versions/20260810_0075_routine_continuous_posts.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260810_0075",
-      "source_sha256": "12d5bd5fb35d2ecfa98e0e4698ffcff05fd9fea478cd4d5f6b1aea3b08e46801",
+      "source_sha256": "38500e0bfe3ce109f6e1fec408262caa87201eb5d0d5e7c3d393705a83af1a29",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -850,7 +850,7 @@
       "path": "backend/app/alembic/versions/20260811_0076_world_keyword_feed.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260811_0076",
-      "source_sha256": "11f96d630ceb434e2adebb9293ee15d1452e629413aedbab34f455bd69f3316b",
+      "source_sha256": "0baed5ebdb428c158e464efea53c4131013a0b136a7cc6eb2595817330455080",
       "strategy": "translate-and-validate",
       "transition_pr": "ER2 PR G"
     },
@@ -864,7 +864,7 @@
       "path": "backend/app/alembic/versions/20260811_0077_social_events_relationships.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260811_0077",
-      "source_sha256": "fa2f22a2bf115981868d090b73cb3946835222ace35da0df1ffc2213f48b6aa6",
+      "source_sha256": "00ff5f8966d202c7de14aa5407de8e543bd7562a53be18a9bb73fbdff50c82c0",
       "strategy": "translate-and-validate",
       "transition_pr": "ER2 PR G"
     },
@@ -877,7 +877,7 @@
       "path": "backend/app/alembic/versions/20260812_0078_graph_projection_replay_runs.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260812_0078",
-      "source_sha256": "bf35c6f0a641f512f5f35a4628734684c19a728f91813a52c97e9897ef958616",
+      "source_sha256": "2fc65c41f5d9ab2bdeebc33a8a5a3369ca495dc536fad8606904f3d73abefaa3",
       "strategy": "translate-and-validate",
       "transition_pr": "ER2 PR G"
     },
@@ -890,7 +890,7 @@
       "path": "backend/app/alembic/versions/20260815_0079_local_owner_identity.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260815_0079",
-      "source_sha256": "6a67f5047034f0552492fa4e9da6323a65f64454efd73edaaf0a4d972e809cd3",
+      "source_sha256": "eefebd462d25944a973f643539aa715f1e299709782d450800d8220d5f14b259",
       "strategy": "translate-and-validate",
       "transition_pr": "ER2 PR G"
     },
@@ -901,7 +901,7 @@
       "path": "backend/app/alembic/versions/20260816_0080_scheduler_singleton.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260816_0080",
-      "source_sha256": "2f35934cd7f3d9ee04e5de13db586326b3d383cb95fb0a1950fcca4796180e28",
+      "source_sha256": "b8d8aa1a6e346c3628198be59e6a5eb19ca6537524e1429b2bcdc857b4c9e067",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     },
@@ -914,7 +914,7 @@
       "path": "backend/app/alembic/versions/20260818_0081_owner_controlled_world_character.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260818_0081",
-      "source_sha256": "49f7357d51f31e856ad4e194a50e08648f177139aeb5b4147408043764013e22",
+      "source_sha256": "51aefaba031795ceae52baad1ecab9722c2d6c46a7da9d3dde4850d43862c1ed",
       "strategy": "translate-and-validate",
       "transition_pr": "ER2 PR G"
     },
@@ -925,7 +925,7 @@
       "path": "backend/app/alembic/versions/20260819_0082_owner_manual_social_inbox.py",
       "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
       "revision": "20260819_0082",
-      "source_sha256": "89d3ba0433c282df830daba5e07691f595a0856981413fba6ba9d9b35f0beba7",
+      "source_sha256": "f1db17bad8383c3430d2cb80cabde75ea672c2ece1433ec60834b81b5f20660e",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     }

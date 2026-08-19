@@ -114,7 +114,10 @@ def _sha256_bytes(value: bytes) -> str:
 
 
 def _sha256_file(path: Path) -> str:
-    return _sha256_bytes(path.read_bytes())
+    # Git may materialize text as CRLF on Windows and LF on Linux. Inventory
+    # hashes describe source content, not the checkout's line-ending policy.
+    canonical = path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    return _sha256_bytes(canonical)
 
 
 def _json(payload: object) -> str:
