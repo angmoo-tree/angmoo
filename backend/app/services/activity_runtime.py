@@ -424,6 +424,7 @@ def complete_activity_beat(
     source_post_id: str,
     state_after_snapshot: dict[str, object],
     result_snapshot: dict[str, object],
+    external_claimed_source_event_ids: set[str] | None = None,
     now: datetime | None = None,
     commit: bool = True,
 ) -> models.ActivityBeat:
@@ -473,6 +474,7 @@ def complete_activity_beat(
         for row in consumptions
         if row.status == "claimed" and row.claim_run_id == claim_run_id
     }
+    claimed_event_ids.update(external_claimed_source_event_ids or set())
     if set(beat.source_event_ids) != claimed_event_ids:
         raise ActivityRuntimeValidationError("source_event_claim_mismatch")
 

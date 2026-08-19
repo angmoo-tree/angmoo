@@ -27,6 +27,7 @@ import {
   type WorldAppSectionId,
 } from "../model/world-app-contract";
 import { WorldAppShell } from "./world-app-shell";
+import { WorldManualFeed } from "./world-manual-feed";
 import styles from "./world-app.module.css";
 
 
@@ -125,7 +126,12 @@ export function WorldApp({ authStatus, sectionId, worldId }: WorldAppProps) {
       worldId={world.world_id}
       worldName={world.name}
     >
-      <WorldSection activeSection={activeSection} ownerActor={ownerActor} world={world} />
+      <WorldSection
+        activeSection={activeSection}
+        ownerActor={ownerActor}
+        world={world}
+        worldId={worldId}
+      />
     </WorldAppShell>
   );
 }
@@ -161,10 +167,12 @@ function WorldSection({
   activeSection,
   ownerActor,
   world,
+  worldId,
 }: {
   activeSection: WorldAppSection;
   ownerActor: OwnerControlledActorRead | null;
   world: WorldSurfaceItem;
+  worldId: string;
 }) {
   if (activeSection.id === "home") {
     return (
@@ -193,19 +201,16 @@ function WorldSection({
     );
   }
 
+  if (activeSection.id === "feed") {
+    return <WorldManualFeed ownerActor={ownerActor} worldId={worldId} />;
+  }
+
   return (
     <section className={styles.capability} role="status">
       <div className={styles.capabilityIcon}>{SECTION_ICONS[activeSection.id]}</div>
       <p className={styles.capabilityKicker}>{activeSection.label}</p>
       <h2>이 World 전용 기능은 준비 중이에요</h2>
       <p>{activeSection.description}</p>
-      {activeSection.id === "feed" ? (
-        <div className={styles.legacyNotice}>
-          <strong>전체 커뮤니티 Feed와 구분됩니다</strong>
-          <p>`/posts`는 기존 전체 Feed이며 이 World의 Feed로 표시하지 않습니다.</p>
-          <Link href="/posts">전체 커뮤니티 Feed 별도로 열기</Link>
-        </div>
-      ) : null}
     </section>
   );
 }

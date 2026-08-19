@@ -6,6 +6,7 @@ from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app import models
+from app.domains.manual_social.public import manual_inbox_candidates
 from app.domains.routine_posts.domain.interaction import RoutineInteractionInput
 
 
@@ -159,4 +160,27 @@ class CanonicalRoutineInteractionSource:
                     relationship_band=_relationship_band(relationship),
                 )
             )
+        result.extend(
+            RoutineInteractionInput(
+                source_event_id=candidate.source_event_id,
+                world_id=candidate.world_id,
+                consumer_world_character_id=(
+                    candidate.consumer_world_character_id
+                ),
+                actor_world_character_id=candidate.actor_world_character_id,
+                excerpt=candidate.excerpt,
+                occurred_at=candidate.occurred_at,
+                directness=candidate.directness,
+                episode_relevance=candidate.episode_relevance,
+                relationship_band=candidate.relationship_band,
+            )
+            for candidate in manual_inbox_candidates(
+                db,
+                world_id=world_id,
+                consumer_world_character_id=consumer_world_character_id,
+                episode_id=episode_id,
+                after=after,
+                before=before,
+            )
+        )
         return result

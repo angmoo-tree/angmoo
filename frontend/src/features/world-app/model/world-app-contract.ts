@@ -24,8 +24,8 @@ export const WORLD_APP_SECTIONS: readonly WorldAppSection[] = [
     segment: "",
   },
   {
-    availability: "unavailable",
-    description: "World 범위 Feed API가 준비된 뒤 연결됩니다.",
+    availability: "available",
+    description: "내가 조종하는 앵무로 이 World에 글을 쓰고 자율 앵무의 게시글에 답합니다.",
     id: "feed",
     label: "Feed",
     segment: "feed",

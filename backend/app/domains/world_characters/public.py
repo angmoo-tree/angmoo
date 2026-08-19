@@ -3,6 +3,9 @@
 from app.domains.world_characters.infrastructure.sqlalchemy_owner_controlled_identity import (
     SqlAlchemyOwnerControlledIdentityRepository,
 )
+from app.domains.world_characters.domain.owner_controlled_identity import (
+    OwnerControlledIdentityError,
+)
 from app.domains.world_characters.infrastructure.autonomous_setup_contracts import (
     character_contract_hash,
 )
@@ -47,6 +50,7 @@ def owner_controlled_character_ids(
 
 __all__ = [
     "OWNER_REGENERATION_LIMIT_24H",
+    "OwnerControlledIdentityError",
     "PROFILE_REGENERATION_LIMIT_24H",
     "WorldCharacterSetupConflictError",
     "WorldCharacterSetupError",
@@ -57,6 +61,7 @@ __all__ = [
     "WorldActivityRepertoire",
     "WorldCharacter",
     "WorldCommunityProfile",
+    "SqlAlchemyOwnerControlledIdentityRepository",
     "approve_setup",
     "character_contract_hash",
     "enter_world",

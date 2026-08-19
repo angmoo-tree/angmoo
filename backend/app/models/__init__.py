@@ -91,6 +91,10 @@ from app.models.social_memory import (
     SocialEvent,
     SocialEventEvidence,
 )
+from app.domains.manual_social.infrastructure.sqlalchemy_models import (
+    OwnerManualInboxCandidate,
+    OwnerManualSocialWrite,
+)
 
 __all__ = [
     "AdminAuditLog",
@@ -174,4 +178,6 @@ __all__ = [
     "RelationshipStateChange",
     "SocialEvent",
     "SocialEventEvidence",
+    "OwnerManualInboxCandidate",
+    "OwnerManualSocialWrite",
 ]

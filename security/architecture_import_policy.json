@@ -1375,6 +1375,31 @@
     {
       "edges": [
         {
+          "imported": "app.models",
+          "importer": "app.compatibility.manual_social.inbox"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.compatibility.manual_social.legacy"
+        },
+        {
+          "imported": "app.schemas.community",
+          "importer": "app.compatibility.manual_social.legacy"
+        },
+        {
+          "imported": "app.services.community",
+          "importer": "app.compatibility.manual_social.legacy"
+        }
+      ],
+      "id": "l3-owner-manual-social-persistence-bridge",
+      "owner_stage": "L4",
+      "reason": "PR G adds owner-controlled manual social writes and once-only Inbox observation while canonical Post and Comment persistence remain owned by the later L4 social migration.",
+      "removal_condition": "Remove these exact edges when L4 exposes canonical social Post, Comment, block, and visibility persistence ports.",
+      "review_date": "2026-11-19"
+    },
+    {
+      "edges": [
+        {
           "imported": "app.services.graph_projection_commands",
           "importer": "app.integrations.neo4j"
         },
