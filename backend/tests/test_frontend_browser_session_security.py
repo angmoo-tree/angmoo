@@ -20,6 +20,13 @@ def test_next_proxy_forwards_only_browser_session_cookies() -> None:
     assert 'request.headers.get("origin")' in route
 
 
+def test_next_proxy_forwards_idempotency_key_for_safe_mutation_replay() -> None:
+    route = _read("app/api/backend/[...path]/route.ts")
+
+    assert 'request.headers.get("idempotency-key")' in route
+    assert '{ "Idempotency-Key": idempotencyKey }' in route
+
+
 def test_backend_proxy_preserves_allowlisted_set_cookie_on_all_statuses() -> None:
     proxy = _read("lib/backend.ts")
 
