@@ -103,7 +103,50 @@ jobs:
         run: pnpm typecheck
         working-directory: frontend
       - name: Install Chromium for product-shell smoke
-        run: pnpm exec playwright install --with-deps chromium
+        shell: bash
+        env:
+          PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT: "120000"
+        run: |
+          set -euo pipefail
+
+          # GitHub's Azure Ubuntu mirror can accept the connection and then
+          # stop serving package indexes. Use the canonical archive mirror
+          # and bound every network attempt so this required check fails
+          # clearly instead of occupying the runner until the job timeout.
+          while IFS= read -r source_file; do
+            sudo sed -i \
+              's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' \
+              "$source_file"
+          done < <(
+            sudo grep -rl \
+              'http://azure.archive.ubuntu.com/ubuntu' \
+              /etc/apt/sources.list \
+              /etc/apt/sources.list.d \
+              /etc/apt/apt-mirrors.txt \
+              2>/dev/null || true
+          )
+
+          sudo tee /etc/apt/apt.conf.d/99angmoo-ci-network >/dev/null <<'EOF'
+          Acquire::Retries "3";
+          Acquire::http::Timeout "30";
+          Acquire::https::Timeout "30";
+          EOF
+
+          for attempt in 1 2; do
+            echo "Playwright Chromium install attempt ${attempt}/2"
+            if timeout --signal=TERM --kill-after=15s 4m \
+              pnpm exec playwright install --with-deps chromium; then
+              exit 0
+            fi
+
+            if [[ "$attempt" -lt 2 ]]; then
+              echo "Chromium install attempt ${attempt} failed or timed out; retrying."
+              sleep 10
+            fi
+          done
+
+          echo "Chromium installation failed after two bounded attempts."
+          exit 1
         working-directory: browser-tests
       - name: Run product-shell browser smoke
         run: pnpm test
