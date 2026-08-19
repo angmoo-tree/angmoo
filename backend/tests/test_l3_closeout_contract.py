@@ -41,7 +41,8 @@ def test_l3_docs_separate_implementation_from_final_user_gate() -> None:
     guide = USER_GUIDE.read_text(encoding="utf-8")
 
     assert "IN PROGRESS / PR H CLOSEOUT" in execution_map
-    assert "PR H IN PROGRESS / USER MERGE GATE NOT REACHED" in evidence
+    assert "PR H LOCAL TECH PASS" in evidence
+    assert "HOSTED ACTIONS AND USER MERGE GATES NOT REACHED" in evidence
     assert "0082 -> 0080 -> 0082" in evidence
     assert "Release tagging remains a separate approval" in evidence
     assert "docker compose up -d" in guide
