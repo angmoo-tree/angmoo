@@ -1,6 +1,6 @@
 # L3 integrated clean-clone closeout evidence
 
-Status: **PR H IN PROGRESS / USER MERGE GATE NOT REACHED**
+Status: **PR H LOCAL TECH PASS / HOSTED ACTIONS AND USER MERGE GATES NOT REACHED**
 
 Baseline:
 
@@ -10,6 +10,34 @@ Baseline:
 - branch: `test/l3-p1-p4-vertical-loop-closeout`
 - migration head: `20260819_0082`
 - previous L3-safe revision: `20260816_0080`
+- local evidence commit: `438b96c2c16e4e46bd4e6c66510c655261a97cd0`
+
+## Local execution evidence
+
+Executed on Windows from an isolated Compose project named
+`angmoo-l3-pr-h-438b96c`:
+
+- representative L3 suites: `67 passed, 1 skipped`
+- backend full suite: `1125 passed, 21 skipped`
+- frontend: typecheck PASS, lint PASS with one pre-existing warning, production
+  build PASS
+- Windows launcher smoke: `windows_local_smoke=pass`, launcher PASS, DPAPI PASS
+- public secret scan: `807` text files and `4` binary files inspected,
+  `findings=0`, `fatal=0`
+- source-image clean-clone: six-service full mode PASS, three-service core mode
+  PASS, four-service autonomy mode PASS, provider calls `0`
+- migration round trip:
+  `20260819_0082 -> 20260816_0080 -> 20260819_0082`
+- canonical row/ID digest before and after the round trip:
+  `0||1|1348052885f848a74d61942f01461bf2|0||2|19f63f8294863b6fae9831970626dbb4`
+- port-conflict fixture: automatic port move `0`, unrelated process kill `0`
+- fixture cleanup: no `angmoo-l3-pr-h-438b96c_*` volume remains
+- canonical development stack: all six services remain healthy and all five
+  `angmoo_angmoo_*` canonical volumes remain present
+
+These results prove the local technical Gate only. Hosted Actions, the final
+Local Owner screen check, Ready conversion, merge, branch deletion, and exact
+merge SHA remain open Gates.
 
 ## Required automated evidence
 
