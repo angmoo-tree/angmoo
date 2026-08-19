@@ -1,0 +1,422 @@
+{
+  "baseline_commit": "db1c32510f66cee20a3e64a01e85c5ea8753d77e",
+  "config_hooks": [
+    {
+      "compatibility": "requires-static-or-sidecar-adapter",
+      "hook": "headers",
+      "line": 50,
+      "owner": "ER5",
+      "path": "frontend/next.config.ts",
+      "removal_condition": "static export and Tauri API/media routing parity PASS",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "compatibility": "requires-static-or-sidecar-adapter",
+      "hook": "redirects",
+      "line": 80,
+      "owner": "ER5",
+      "path": "frontend/next.config.ts",
+      "removal_condition": "static export and Tauri API/media routing parity PASS",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "compatibility": "requires-static-or-sidecar-adapter",
+      "hook": "rewrites",
+      "line": 89,
+      "owner": "ER5",
+      "path": "frontend/next.config.ts",
+      "removal_condition": "static export and Tauri API/media routing parity PASS",
+      "transition_pr": "ER5 PR K"
+    }
+  ],
+  "current_output_mode": "standalone",
+  "purpose": "L3-ER0 Next.js static-export compatibility inventory",
+  "route_count": 38,
+  "routes": [
+    {
+      "blockers": [],
+      "kind": "route-handler",
+      "owner": "ER5",
+      "path": "frontend/src/app/agent_guide.md/route.ts",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/agent_guide.md",
+      "source_sha256": "d66f47a761351a5bc0dc802b1fb97a3b835c8c43b7222301ba83afa869332568",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/agents/[characterId]/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/agents/[characterId]",
+      "source_sha256": "bf6d42682dfb63306fa602fe8fc5c779970caa8dce306a0e2b1b78822a7ed706",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/agents/new/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/agents/new",
+      "source_sha256": "a8dfb61d1f2ad3e49980df07bcf739f9de3a00dd9a4f1c839b29528c2b96d3af",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/agents/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/agents",
+      "source_sha256": "345d3bb3d1f9df4f6d79ed21f425ffdd59b6606c94e86948cf30aa7691b1c94a",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/angmoo-api/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/angmoo-api",
+      "source_sha256": "eff54d5a15a9923327bded3dc8b7edbe62a1e60a395df3ee32fe4a496b90facd",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "route-handler",
+      "owner": "ER5",
+      "path": "frontend/src/app/api/backend/[...path]/route.ts",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/api/backend/[...path]",
+      "source_sha256": "81a590b4c74656728c8e899bdfb0a41136c494ebc6cb633b30b16ffffe4a1249",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "route-handler",
+      "owner": "ER5",
+      "path": "frontend/src/app/api/community/characters/[characterId]/activity/route.ts",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/api/community/characters/[characterId]/activity",
+      "source_sha256": "cb306cd45817876668dc7f6ff063b31d4a91ad7e9c71bc0eded847f2c1a6df27",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "route-handler",
+      "owner": "ER5",
+      "path": "frontend/src/app/api/community/posts/[postId]/comments/route.ts",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/api/community/posts/[postId]/comments",
+      "source_sha256": "e18fb3140d060bd582198c5e9203884e4c9cfc1c35fb471e60d3e0a1c7033940",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "route-handler",
+      "owner": "ER5",
+      "path": "frontend/src/app/api/community/posts/[postId]/route.ts",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/api/community/posts/[postId]",
+      "source_sha256": "4276bdb772aafb9b9508d0013bc52467307b1140784e3d1b47e50671ce92e19f",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "route-handler",
+      "owner": "ER5",
+      "path": "frontend/src/app/api/community/posts/route.ts",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/api/community/posts",
+      "source_sha256": "d28dec941f0e2fd78e165f8603802c0f10011815c3f2152c90cea2fb0a29181a",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/characters/[characterId]/activity/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/characters/[characterId]/activity",
+      "source_sha256": "6f4e38a872caf91eef242ca4d95e0261c2c2d09a63f8e82be2477af939383ef2",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/characters/[characterId]/worlds/[worldId]/autonomy-setup/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/characters/[characterId]/worlds/[worldId]/autonomy-setup",
+      "source_sha256": "4359d0739f7d69fad799c845f98400a02b7ea9864dcee856b107b9667fb52543",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/characters/[characterId]/worlds/[worldId]/relationship-graph/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/characters/[characterId]/worlds/[worldId]/relationship-graph",
+      "source_sha256": "b34d8539b666ab1e7dd17ea116ce2302c76cfc7f4e9d6da9fc9ae45cfdbdb317",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/licenses/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/licenses",
+      "source_sha256": "7da0ef2e94d5150d0816c79adbd6fe81929ed73e2165f64348676e67ac020ca8",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/login/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/login",
+      "source_sha256": "74d5aa6245730a8a4ef97aec9064a6066161a65528c9c4b113ad91749ad4596f",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/messages/[threadId]/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/messages/[threadId]",
+      "source_sha256": "39072bbe92a05e877dc49419515f235cc4f32e072eaa54dfe2f0cb781862fd62",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/messages/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/messages",
+      "source_sha256": "9c13a446d299da141f468790eb43f5cfe96f38b5164ec93c464454c4bd66974f",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/notifications/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/notifications",
+      "source_sha256": "66c39440f766bea922558e36f8ec368a23c8a00394f18705b5dc78ef1609ee01",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/",
+      "source_sha256": "856286bd705578aa4644d11afa2d7a3f5d0411419712abe83c2f7ae6a21f500b",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/posts/[postId]/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/posts/[postId]",
+      "source_sha256": "eff8b7c111a97a724dc22f41d52634e7d9b104d3abd86a494268eb60c863077b",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/posts/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/posts",
+      "source_sha256": "537d9ed3ce73c62673f7140290362d0ef0d87ccd64f2fbee2f25aebdf8b87f7c",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/profile/setup/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/profile/setup",
+      "source_sha256": "4977882c454f784056fcdbe00135487add01de129102c330eb3d13cff86184cc",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/profiles/characters/[characterId]/follows/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/profiles/characters/[characterId]/follows",
+      "source_sha256": "b6c0c938bb346cd95f92eae288632d681b705c513d0048b8ed6e404235d0ed5b",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/profiles/characters/[characterId]/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/profiles/characters/[characterId]",
+      "source_sha256": "b8f84735ea84f4288bd14b2419c221f0617eddc2f854cf36a57442f1d9ce8a59",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/profiles/users/[userId]/follows/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/profiles/users/[userId]/follows",
+      "source_sha256": "b4cd9a8556d589b313455dbe08af559d626392240301d07e71e25ce07a263383",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/profiles/users/[userId]/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/profiles/users/[userId]",
+      "source_sha256": "cf71941fa71bed14c8b44bd2ae3cea5e96d48b0c0955a82f596ea19a17c47dee",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/search/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/search",
+      "source_sha256": "0e4a3a0fa603d501a0e7f030302152d9d2acdfcacd4f1c736fe0e7207d9b11aa",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/settings/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/settings",
+      "source_sha256": "c605dce179d42f7a9486b92ad730b367c237870e97ae917a30aade3a4fb21f67",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/studio/import/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/studio/import",
+      "source_sha256": "6a49ea6d7af2cb8907ddf098555aa5bebfd4308fcd7992107cb32bcb0a49e46e",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/studio/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/studio",
+      "source_sha256": "0713ce25abdc0c25ce5fcd928414168fa62d7f7b742799f81bed2e511c6b4883",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/studio/worlds/[worldId]/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/studio/worlds/[worldId]",
+      "source_sha256": "8cda5c5104907a605c637a087f5a1dfec762107c98a2af4d7feb024de998cb34",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/studio/worlds/new/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/studio/worlds/new",
+      "source_sha256": "9517a014961000abf856e4d91e8c84e40d3faf017213d0bdc3e3c025205272ba",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/tree/[postId]/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/tree/[postId]",
+      "source_sha256": "92c86b7860fc2061b436a06ea4cfba22ddd68da4172a35370347354a3a2f8284",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/tree/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/tree",
+      "source_sha256": "083eefd9c4a57b46489a19c9129ba6b10ec1821fbdb28d0e9d484ca52fa0272c",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/worlds/[worldId]/[section]/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/worlds/[worldId]/[section]",
+      "source_sha256": "df56765945cbb2e23402c4dcc4354040d396833fbcd98ad60b3572a7e9343076",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [
+        "redirect"
+      ],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/worlds/[worldId]/creator/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/worlds/[worldId]/creator",
+      "source_sha256": "49849a9f5a0308d012acea2a114d17b12a2b5f986979fbdd8d0ec64190f7493c",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/worlds/[worldId]/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/worlds/[worldId]",
+      "source_sha256": "101260aa30871e8aa907cd3819d13b21e70d05556e070d6d000cb61076cded2b",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [
+        "redirect"
+      ],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/worlds/new/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/worlds/new",
+      "source_sha256": "a564de75b434ec8918cf04a363a0a9e7fcd616dc037e1dcda013bd9bfc7de5e9",
+      "transition_pr": "ER5 PR K"
+    }
+  ],
+  "schema_version": 1
+}
