@@ -32,6 +32,7 @@ PROVIDER_MARKERS = (
     "gen.pollinations.ai",
     "api.replicate.com",
 )
+L3_PREVIOUS_REVISION = "20260816_0080"
 
 
 def classify_runtime_failure(message: str) -> str:
@@ -180,6 +181,136 @@ def _check_provider_calls(logs: str) -> None:
         raise RuntimeError(f"provider real call marker found in container logs: {matches}")
 
 
+def _l3_canonical_digest(harness: ComposeHarness) -> str:
+    return harness.exec(
+        "postgresql",
+        "psql",
+        "-U",
+        "angmoo",
+        "-d",
+        "angmoo",
+        "-Atc",
+        "SELECT concat_ws('|',"
+        "(SELECT count(*) FROM worlds),"
+        "coalesce((SELECT md5(string_agg(id, ',' ORDER BY id)) FROM worlds), ''),"
+        "(SELECT count(*) FROM characters),"
+        "coalesce((SELECT md5(string_agg(id, ',' ORDER BY id)) FROM characters), ''),"
+        "(SELECT count(*) FROM world_characters),"
+        "coalesce((SELECT md5(string_agg(id, ',' ORDER BY id)) FROM world_characters), ''),"
+        "(SELECT count(*) FROM posts),"
+        "coalesce((SELECT md5(string_agg(id, ',' ORDER BY id)) FROM posts), '')"
+        ");",
+    )
+
+
+def _run_backend_alembic(harness: ComposeHarness, *arguments: str) -> None:
+    command = (
+        'postgresql_password="$(cat /run/angmoo-secrets/postgresql_password)"; '
+        'export DATABASE_URL="postgresql+psycopg://angmoo:'
+        '${postgresql_password}@postgresql:5432/angmoo"; '
+        f"exec alembic {' '.join(arguments)}"
+    )
+    harness.run(
+        "run",
+        "--rm",
+        "--no-deps",
+        "--entrypoint",
+        "sh",
+        "backend",
+        "-c",
+        command,
+    )
+
+
+def _l3_migration_round_trip(
+    harness: ComposeHarness,
+    *,
+    migration_head: str,
+) -> None:
+    unsupported_rows = harness.exec(
+        "postgresql",
+        "psql",
+        "-U",
+        "angmoo",
+        "-d",
+        "angmoo",
+        "-Atc",
+        "SELECT "
+        "(SELECT count(*) FROM world_characters "
+        " WHERE control_mode = 'owner_controlled') + "
+        "(SELECT count(*) FROM owner_manual_social_writes) + "
+        "(SELECT count(*) FROM owner_manual_inbox_candidates);",
+    )
+    if unsupported_rows != "0":
+        raise RuntimeError(
+            "runtime_state_stale: clean-clone migration fixture contains "
+            f"non-downgradable L3 rows={unsupported_rows}"
+        )
+
+    digest_before = _l3_canonical_digest(harness)
+    harness.run("stop", "frontend", "projector", "scheduler", "backend")
+    _run_backend_alembic(harness, "downgrade", L3_PREVIOUS_REVISION)
+    downgraded_revision = harness.exec(
+        "postgresql",
+        "psql",
+        "-U",
+        "angmoo",
+        "-d",
+        "angmoo",
+        "-Atc",
+        "SELECT version_num FROM alembic_version;",
+    )
+    if downgraded_revision != L3_PREVIOUS_REVISION:
+        raise RuntimeError(
+            "runtime_state_stale: L3 downgrade revision mismatch "
+            f"database={downgraded_revision} expected={L3_PREVIOUS_REVISION}"
+        )
+
+    _run_backend_alembic(harness, "upgrade", "head")
+    upgraded_revision = harness.exec(
+        "postgresql",
+        "psql",
+        "-U",
+        "angmoo",
+        "-d",
+        "angmoo",
+        "-Atc",
+        "SELECT version_num FROM alembic_version;",
+    )
+    digest_after = _l3_canonical_digest(harness)
+    if upgraded_revision != migration_head or digest_after != digest_before:
+        raise RuntimeError(
+            "runtime_state_stale: L3 migration round trip changed canonical data "
+            f"revision={upgraded_revision} expected={migration_head} "
+            f"digest_before={digest_before} digest_after={digest_after}"
+        )
+
+    unknown_modes = harness.exec(
+        "postgresql",
+        "psql",
+        "-U",
+        "angmoo",
+        "-d",
+        "angmoo",
+        "-Atc",
+        "SELECT count(*) FROM world_characters "
+        "WHERE control_mode IS NULL OR control_mode <> 'autonomous' "
+        "OR owner_user_id IS NOT NULL;",
+    )
+    if unknown_modes != "0":
+        raise RuntimeError(
+            "runtime_state_stale: autonomous backfill parity failed "
+            f"unexpected_world_characters={unknown_modes}"
+        )
+    print(
+        "L3 migration round trip passed: "
+        f"{migration_head}->{L3_PREVIOUS_REVISION}->{migration_head} "
+        f"canonical_digest={digest_after}"
+    )
+    harness.run("up", "-d")
+    harness.wait_healthy(FULL_SERVICES)
+
+
 def _full_stack_lifecycle(harness: ComposeHarness) -> None:
     harness.run("up", "-d")
     harness.wait_healthy(FULL_SERVICES)
@@ -207,6 +338,8 @@ def _full_stack_lifecycle(harness: ComposeHarness) -> None:
             f"database={database_revision} source={migration_head}"
         )
     print(f"migration head passed: revision={database_revision}")
+
+    _l3_migration_round_trip(harness, migration_head=migration_head)
 
     first_ids = harness.container_ids(FULL_SERVICES)
     harness.run("up", "-d")

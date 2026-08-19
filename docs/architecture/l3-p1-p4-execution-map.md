@@ -1,14 +1,15 @@
 # L3 P1-P4 execution path and migration map
 
 This document records the executable L3 baseline and the boundaries migrated
-from it. It is an architecture map, not evidence that the complete L3 Local
-vertical loop has shipped or passed user validation.
+from it. PR A-G are merged; PR H is the integrated clean-clone closeout. This
+map is an architecture contract, while runtime, migration, DB, log, and final
+user-screen evidence is recorded separately.
 
 - Baseline repository: `angmoo-tree/angmoo`
 - Baseline branch: `main`
 - Baseline commit: `b809bc2d748f8bcac82860447bcff3c816f93452`
-- L3 baseline status: `P1-P2 IMPLEMENTED; P3-P4 IMPLEMENTATION NOT STARTED`
-- Current migration status: `PR A-E MERGED; PR F ROUTINE-POST DOMAIN MIGRATION IN PROGRESS`
+- L3 baseline status: `P1-P4 + OWNER PARTICIPATION IMPLEMENTED`
+- Current migration status: `PR A-G MERGED; PR H CLEAN-CLONE CLOSEOUT IN PROGRESS`
 - Canonical store: PostgreSQL
 - Projection store: Neo4j, replayable from PostgreSQL outbox events
 
@@ -232,6 +233,6 @@ removing its exact policy exception in the same PR; stale exceptions fail CI.
 7. PR G: owner-controlled manual write and one-time Inbox observation.
 8. PR H: migration, Docker, Windows clean-clone, evidence, and user closeout.
 
-P1 implementation alone does not prove P2-P4 or the complete user scenario.
-Until all required runtime, DB, log, migration, and user-screen evidence passes,
-the overall L3 milestone remains `PLANNED`.
+PR A-G implementation does not by itself prove a clean-clone installation.
+Until PR H's runtime, DB, log, migration, Windows, and final user-screen evidence
+passes, the overall L3 milestone remains `IN PROGRESS / PR H CLOSEOUT`.
