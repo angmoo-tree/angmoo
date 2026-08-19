@@ -9,7 +9,17 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.core.ids import uuid7_string
-from app.services import activity_state_contracts
+from app.domains.routines.domain import activity_state as activity_state_contracts
+from app.domains.routines.domain.lifecycle import (
+    ActivityRuntimeConflictError,
+    ActivityRuntimeError,
+    ActivityRuntimeNotFoundError,
+    ActivityRuntimeValidationError,
+    DaypartTransitionCounts,
+    DueTick,
+    RecoveryCounts,
+    WorldInterruptionCounts,
+)
 
 
 EVENT_CONSUMPTION_NAMESPACE = "next_activity_beat"
@@ -19,58 +29,10 @@ TERMINAL_ITEM_STATUSES = frozenset(
 )
 
 
-class ActivityRuntimeError(Exception):
-    reason_code = "activity_runtime_error"
-
-
-class ActivityRuntimeNotFoundError(ActivityRuntimeError):
-    reason_code = "activity_runtime_not_found"
-
-
-class ActivityRuntimeConflictError(ActivityRuntimeError):
-    reason_code = "activity_runtime_conflict"
-
-    def __init__(self, reason_code: str) -> None:
-        self.reason_code = reason_code
-        super().__init__(reason_code)
-
-
-class ActivityRuntimeValidationError(ActivityRuntimeError):
-    reason_code = "activity_runtime_invalid"
-
-    def __init__(self, reason_code: str) -> None:
-        self.reason_code = reason_code
-        super().__init__(reason_code)
-
-
 @dataclass(frozen=True)
 class RuntimeClaimResult:
     row: models.ActivityBeat | models.ActivityEventConsumption
     reused: bool
-
-
-@dataclass(frozen=True)
-class RecoveryCounts:
-    beats: int
-    consumptions: int
-
-
-@dataclass(frozen=True)
-class DueTick:
-    scheduled_for: datetime
-    skipped_tick_count: int
-
-
-@dataclass(frozen=True)
-class DaypartTransitionCounts:
-    completed: int
-    skipped: int
-
-
-@dataclass(frozen=True)
-class WorldInterruptionCounts:
-    interrupted: int
-    cancelled: int
 
 
 def _aware_utc(value: datetime) -> datetime:

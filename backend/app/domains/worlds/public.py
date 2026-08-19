@@ -42,12 +42,14 @@ from app.domains.worlds.api.schemas import (
     WorldPlaceInput,
 )
 from app.domains.worlds.infrastructure.sqlalchemy_models import (
+    JSON_DOCUMENT,
     World,
     WorldMembership,
     WorldRole,
 )
 
 __all__ = [
+    "JSON_DOCUMENT",
     "WorldArchivedError",
     "WorldBannerValidationError",
     "WorldCreatorRoleRequiredError",

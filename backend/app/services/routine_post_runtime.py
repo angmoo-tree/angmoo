@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from app import models, schemas
 from app.core import unit_of_work
 from app.cruds import agent_runs as agent_run_crud
+from app.domains.routines.public import reconcile_all_elapsed_routines
 from app.services import (
     activity_runtime,
     agent_activity_policy,
@@ -59,40 +60,6 @@ def routine_world_character_for_character(
     ):
         return None
     return world_character
-
-
-def reconcile_all_elapsed_routines(
-    db: Session,
-    *,
-    now: datetime | None = None,
-) -> activity_runtime.DaypartTransitionCounts:
-    """Close every elapsed routine without creating catch-up provider work."""
-
-    current = now or datetime.now(UTC)
-    world_character_ids = list(
-        db.scalars(
-            select(models.DailyActivityPlanItem.world_character_id)
-            .where(
-                models.DailyActivityPlanItem.scheduled_end_at <= current,
-                models.DailyActivityPlanItem.status.in_({"planned", "active"}),
-            )
-            .distinct()
-        )
-    )
-    completed = 0
-    skipped = 0
-    for world_character_id in world_character_ids:
-        transition = activity_runtime.close_elapsed_dayparts(
-            db,
-            world_character_id=world_character_id,
-            now=current,
-        )
-        completed += transition.completed
-        skipped += transition.skipped
-    return activity_runtime.DaypartTransitionCounts(
-        completed=completed,
-        skipped=skipped,
-    )
 
 
 def _safe_result(

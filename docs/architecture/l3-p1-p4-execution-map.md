@@ -7,7 +7,7 @@ vertical loop has shipped or passed user validation.
 - Baseline repository: `angmoo-tree/angmoo`
 - Baseline branch: `main`
 - Baseline commit: `b809bc2d748f8bcac82860447bcff3c816f93452`
-- L3 status at this map: `P1 IMPLEMENTED; owner-controlled identity foundation IMPLEMENTED; autonomous P2 PR D IN PROGRESS; P3-P4 IMPLEMENTATION NOT STARTED`
+- L3 status at this map: `P1-P2 IMPLEMENTED; P3 PR E IN PROGRESS; P4 IMPLEMENTATION NOT STARTED`
 - Canonical store: PostgreSQL
 - Projection store: Neo4j, replayable from PostgreSQL outbox events
 
@@ -113,22 +113,29 @@ HTTP entrypoints use the canonical public boundary.
 ```text
 HTTP /api/v1/characters/{character_id}/worlds/{world_id}/activity-plan*
 -> app.api.v1.routes.world_activity_runtime
--> app.services.daily_activity_plans
+-> app.domains.routines.public
+-> application daily-plan use case
+-> Clock + DailyPlanRepository ports
+-> SQLAlchemy adapters
 -> World timezone + ready repertoire + deterministic selector
 -> daily plan/item/episode/beat tables in PostgreSQL
 
 scheduler process
 -> app.services.resident_tick_scheduler
 -> app.services.agent_runs.tick_all_due_slots
+-> app.domains.routines.public lifecycle reconciliation
+-> Clock + LifecycleRepository ports
 -> resident execution
 ```
 
 Plan preparation has zero provider calls. PR C installs the owner-controlled
 candidate-query and execution-preflight exclusion before those identities can
-be created. PR E moves selection and lifecycle behind
-`app.domains.routines.public`, makes the scheduler and Run now share the same
-use case, and retains those exclusions as part of the canonical routine
-lifecycle.
+be created. PR E owns selection and elapsed-lifecycle reconciliation behind
+`app.domains.routines.public`, injects time through a Clock port, and makes API,
+scheduler and Run-now consumers share the same repository-backed use cases.
+Restart recovery closes elapsed state without catch-up posting, while
+owner-controlled identities fail closed before plan or execution rows are
+created.
 
 ### P4 routine post continuation
 
@@ -187,13 +194,12 @@ transport / scheduler / launcher
 ## Legacy allowlist disposition
 
 No new legacy exception is added by L3. PR B removed the exact World Creator
-route exception, and PR D removes the two autonomous setup route exceptions
-plus the migrated setup model/schema/provider implementation edges. The
+route exception, PR D removed the autonomous setup exceptions, and PR E removes
+the activity-plan route plus migrated model/schema/service exceptions. The
 remaining current edges are removed by their owning behavior PR:
 
 | Current edge group | Owner PR | Removal condition |
 |---|---|---|
-| activity-plan routes -> `app.services.daily_activity_plans` | PR E | plan and runtime-mode calls use the public routine boundary |
 | resident runtime -> routine post legacy services | PR F | resident calls the public routine-post execution use case |
 | community manual writes -> unrestricted Character author logic | PR G | owner-controlled guard and Inbox handoff are canonical and tested |
 

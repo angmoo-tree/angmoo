@@ -169,10 +169,6 @@
           "importer": "app.api.v1.routes.world_activity_runtime"
         },
         {
-          "imported": "app.services.daily_activity_plans",
-          "importer": "app.api.v1.routes.world_activity_runtime"
-        },
-        {
           "imported": "app.services.relationship_graph_read",
           "importer": "app.api.v1.routes.world_activity_runtime"
         },
@@ -326,10 +322,6 @@
         },
         {
           "imported": "app.models.worlds",
-          "importer": "app.models.world_activity_runtime"
-        },
-        {
-          "imported": "app.models.worlds",
           "importer": "app.models.world_feed"
         },
         {
@@ -450,10 +442,6 @@
         },
         {
           "imported": "app.models",
-          "importer": "app.services.activity_runtime"
-        },
-        {
-          "imported": "app.services.activity_state_contracts",
           "importer": "app.services.activity_runtime"
         },
         {
@@ -839,22 +827,6 @@
         {
           "imported": "app.models",
           "importer": "app.services.community_abuse_quota"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.daily_activity_plans"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.services.daily_activity_plans"
-        },
-        {
-          "imported": "app.services.joint_activity_runtime",
-          "importer": "app.services.daily_activity_plans"
-        },
-        {
-          "imported": "app.services.world_character_contracts",
-          "importer": "app.services.daily_activity_plans"
         },
         {
           "imported": "app.models",
