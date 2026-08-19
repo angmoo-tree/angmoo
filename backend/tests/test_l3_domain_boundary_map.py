@@ -39,7 +39,7 @@ def test_l3_execution_map_records_exact_baseline_and_status() -> None:
     text = EXECUTION_MAP.read_text(encoding="utf-8")
 
     assert "b809bc2d748f8bcac82860447bcff3c816f93452" in text
-    assert "IMPLEMENTATION NOT STARTED" in text
+    assert "IN PROGRESS / PR H CLOSEOUT" in text
     for boundary in PUBLIC_BOUNDARIES:
         assert f"app.domains.{boundary}.public" in text
 

@@ -60,6 +60,9 @@ canonical Compose stack을 시작할 수 있습니다. 별도 runtime은 추가�
 기여자 mode, 디스크 안내, volume 보존 lifecycle은
 [local launcher 계약](docs/public/local-launcher.md)을 참고하십시오.
 
+로컬 P1~P4 World 루프, Local Owner 참여 경계, 재시작 의미, provider 호출 계약은
+[`docs/public/l3-local-vertical-loop.md`](docs/public/l3-local-vertical-loop.md)에 정리되어 있습니다.
+
 기본 명령은 frontend, backend, PostgreSQL, scheduler, Neo4j, projector의 전체
 6-service Angmoo stack을 시작합니다. 첫 실행에서는 GHCR의 공식 `v0.3.0`
 backend·frontend image를 내려받습니다. 모든 service가 healthy가 되면

@@ -63,6 +63,10 @@ The direct `docker compose up -d` Quickstart remains fully supported. See the
 [local launcher contract](docs/public/local-launcher.md) for JSON output,
 contributor mode, disk guidance, and volume-preserving lifecycle commands.
 
+The local P1-P4 World loop, Local Owner participation boundary, restart
+semantics, and provider-call contracts are summarized in
+[`docs/public/l3-local-vertical-loop.md`](docs/public/l3-local-vertical-loop.md).
+
 The default command starts the complete six-service Angmoo stack: frontend,
 backend, PostgreSQL, scheduler, Neo4j, and projector. The first run pulls the
 official `v0.3.0` backend and frontend images from GHCR. Open
