@@ -23,6 +23,7 @@ def test_architecture_boundary_is_the_tenth_required_check() -> None:
     assert len(checker.REQUIRED_JOBS) == 10
     assert checker.ADVISORY_JOBS == {"windows-local-smoke"}
     assert "release-images.yml" in checker.EXPECTED_WORKFLOWS
+    assert "native-runtime-spike.yml" in checker.EXPECTED_WORKFLOWS
 
 
 def test_unpinned_action_and_conditional_required_job_are_rejected(tmp_path: Path) -> None:

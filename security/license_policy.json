@@ -250,6 +250,38 @@
   ],
   "infrastructure": [
     {
+      "name": "LadybugDB ER1 native runtime spike",
+      "source_path": "spikes/l3-er1-native-runtime/python/requirements.lock",
+      "reference": "ladybug==0.19.1",
+      "license_expression": "MIT",
+      "distribution_boundary": "Pinned embedded graph candidate bundled only by the ER1 compatibility artifact; production remains unchanged until a later approved cutover.",
+      "source": "https://github.com/LadybugDB/ladybug/blob/v0.19.1/LICENSE"
+    },
+    {
+      "name": "Tauri ER1 native runtime spike",
+      "source_path": "spikes/l3-er1-native-runtime/tauri/src-tauri/Cargo.toml",
+      "reference": "tauri = { version = \"=2.11.5\"",
+      "license_expression": "Apache-2.0 OR MIT",
+      "distribution_boundary": "Pinned Windows shell candidate used only by the ER1 compatibility artifact; transitive packages are recorded in the generated SPDX SBOM.",
+      "source": "https://github.com/tauri-apps/tauri/blob/tauri-v2.11.5/LICENSE_APACHE-2.0"
+    },
+    {
+      "name": "Tauri CLI ER1 native runtime spike",
+      "source_path": "spikes/l3-er1-native-runtime/tauri/package.json",
+      "reference": "\"@tauri-apps/cli\": \"2.11.4\"",
+      "license_expression": "Apache-2.0 OR MIT",
+      "distribution_boundary": "Pinned build CLI used only to create the ER1 Windows compatibility artifact; it is not an Angmoo production service.",
+      "source": "https://github.com/tauri-apps/tauri/blob/tauri-cli-v2.11.4/LICENSE_APACHE-2.0"
+    },
+    {
+      "name": "PyInstaller ER1 sidecar packager",
+      "source_path": "spikes/l3-er1-native-runtime/python/requirements.lock",
+      "reference": "pyinstaller==6.16.0",
+      "license_expression": "GPL-2.0-or-later WITH Bootloader-exception",
+      "distribution_boundary": "Build tool for the ER1 sidecar; the bootloader exception permits distribution of the generated executable under the Angmoo project license.",
+      "source": "https://github.com/pyinstaller/pyinstaller/blob/v6.16.0/COPYING.txt"
+    },
+    {
       "name": "pgvector PostgreSQL image",
       "source_path": "compose.yml",
       "reference": "pgvector/pgvector:pg16@sha256:1d533553fefe4f12e5d80c7b80622ba0c382abb5758856f52983d8789179f0fb",

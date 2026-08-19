@@ -208,6 +208,10 @@ Package authors retain all rights granted by their respective licenses.
 
 These services and CI tools are separate components and retain their own licenses.
 
+- **LadybugDB ER1 native runtime spike** — `MIT`; reference `ladybug==0.19.1`; source <https://github.com/LadybugDB/ladybug/blob/v0.19.1/LICENSE>
+- **Tauri ER1 native runtime spike** — `Apache-2.0 OR MIT`; reference `tauri = { version = "=2.11.5"`; source <https://github.com/tauri-apps/tauri/blob/tauri-v2.11.5/LICENSE_APACHE-2.0>
+- **Tauri CLI ER1 native runtime spike** — `Apache-2.0 OR MIT`; reference `"@tauri-apps/cli": "2.11.4"`; source <https://github.com/tauri-apps/tauri/blob/tauri-cli-v2.11.4/LICENSE_APACHE-2.0>
+- **PyInstaller ER1 sidecar packager** — `GPL-2.0-or-later WITH Bootloader-exception`; reference `pyinstaller==6.16.0`; source <https://github.com/pyinstaller/pyinstaller/blob/v6.16.0/COPYING.txt>
 - **pgvector PostgreSQL image** — `PostgreSQL`; reference `pgvector/pgvector:pg16@sha256:1d533553fefe4f12e5d80c7b80622ba0c382abb5758856f52983d8789179f0fb`; source <https://github.com/pgvector/pgvector/blob/master/LICENSE>
 - **Neo4j Community Edition** — `GPL-3.0-only`; reference `neo4j:2026.06.0@sha256:42fd5b9ead4dd4211f6f91bd831c358e4e2117367d04633fbf88682ca4792b30`; source <https://neo4j.com/licensing/>
 - **Trivy container scanner** — `Apache-2.0`; reference `ghcr.io/aquasecurity/trivy:0.74.0@sha256:62b1e65e8869bc4b4c6aa4fa2b21595256c7c2f6018a9d9ad61caf87187c1969`; source <https://github.com/aquasecurity/trivy/blob/v0.74.0/LICENSE>
