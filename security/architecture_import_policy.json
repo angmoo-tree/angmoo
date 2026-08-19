@@ -589,10 +589,6 @@
           "importer": "app.services.agent_runs"
         },
         {
-          "imported": "app.services.routine_post_runtime",
-          "importer": "app.services.agent_runs"
-        },
-        {
           "imported": "app.services.runtime_boundary",
           "importer": "app.services.agent_runs"
         },
@@ -969,10 +965,6 @@
           "importer": "app.services.langgraph_resident"
         },
         {
-          "imported": "app.services.routine_post_runtime",
-          "importer": "app.services.langgraph_resident"
-        },
-        {
           "imported": "app.services.world_feed_runtime",
           "importer": "app.services.langgraph_resident"
         },
@@ -1182,102 +1174,6 @@
         },
         {
           "imported": "app.models",
-          "importer": "app.services.routine_post_context"
-        },
-        {
-          "imported": "app.services.activity_runtime",
-          "importer": "app.services.routine_post_context"
-        },
-        {
-          "imported": "app.services.activity_state_contracts",
-          "importer": "app.services.routine_post_context"
-        },
-        {
-          "imported": "app.services.llm_context",
-          "importer": "app.services.routine_post_context"
-        },
-        {
-          "imported": "app.services.social_routine_interactions",
-          "importer": "app.services.routine_post_context"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.routine_post_planner"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.services.routine_post_planner"
-        },
-        {
-          "imported": "app.services.activity_state_contracts",
-          "importer": "app.services.routine_post_planner"
-        },
-        {
-          "imported": "app.services.direct_llm",
-          "importer": "app.services.routine_post_planner"
-        },
-        {
-          "imported": "app.services.llm_context",
-          "importer": "app.services.routine_post_planner"
-        },
-        {
-          "imported": "app.services.resident_contracts",
-          "importer": "app.services.routine_post_planner"
-        },
-        {
-          "imported": "app.services.routine_post_context",
-          "importer": "app.services.routine_post_planner"
-        },
-        {
-          "imported": "app.cruds.agent_runs",
-          "importer": "app.services.routine_post_runtime"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.routine_post_runtime"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.services.routine_post_runtime"
-        },
-        {
-          "imported": "app.services.activity_runtime",
-          "importer": "app.services.routine_post_runtime"
-        },
-        {
-          "imported": "app.services.agent_activity_policy",
-          "importer": "app.services.routine_post_runtime"
-        },
-        {
-          "imported": "app.services.community",
-          "importer": "app.services.routine_post_runtime"
-        },
-        {
-          "imported": "app.services.direct_llm",
-          "importer": "app.services.routine_post_runtime"
-        },
-        {
-          "imported": "app.services.joint_activity_runtime",
-          "importer": "app.services.routine_post_runtime"
-        },
-        {
-          "imported": "app.services.resident_contracts",
-          "importer": "app.services.routine_post_runtime"
-        },
-        {
-          "imported": "app.services.routine_post_context",
-          "importer": "app.services.routine_post_runtime"
-        },
-        {
-          "imported": "app.services.routine_post_planner",
-          "importer": "app.services.routine_post_runtime"
-        },
-        {
-          "imported": "app.services.social_event_runtime",
-          "importer": "app.services.routine_post_runtime"
-        },
-        {
-          "imported": "app.models",
           "importer": "app.services.social_event_runtime"
         },
         {
@@ -1303,14 +1199,6 @@
         {
           "imported": "app.services.relationship_graph_read",
           "importer": "app.services.social_memory_read"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.social_routine_interactions"
-        },
-        {
-          "imported": "app.services.routine_post_context",
-          "importer": "app.services.social_routine_interactions"
         },
         {
           "imported": "app.cruds.community",
@@ -1430,6 +1318,63 @@
     {
       "edges": [
         {
+          "imported": "app.models",
+          "importer": "app.compatibility.routine_posts.canonical_interactions"
+        },
+        {
+          "imported": "app.cruds.agent_runs",
+          "importer": "app.compatibility.routine_posts.legacy"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.compatibility.routine_posts.legacy"
+        },
+        {
+          "imported": "app.schemas.community",
+          "importer": "app.compatibility.routine_posts.legacy"
+        },
+        {
+          "imported": "app.services.activity_runtime",
+          "importer": "app.compatibility.routine_posts.legacy"
+        },
+        {
+          "imported": "app.services.activity_state_contracts",
+          "importer": "app.compatibility.routine_posts.legacy"
+        },
+        {
+          "imported": "app.services.agent_activity_policy",
+          "importer": "app.compatibility.routine_posts.legacy"
+        },
+        {
+          "imported": "app.services.community",
+          "importer": "app.compatibility.routine_posts.legacy"
+        },
+        {
+          "imported": "app.services.joint_activity_runtime",
+          "importer": "app.compatibility.routine_posts.legacy"
+        },
+        {
+          "imported": "app.services.llm_context",
+          "importer": "app.compatibility.routine_posts.legacy"
+        },
+        {
+          "imported": "app.services.resident_contracts",
+          "importer": "app.compatibility.routine_posts.legacy"
+        },
+        {
+          "imported": "app.services.social_event_runtime",
+          "importer": "app.compatibility.routine_posts.legacy"
+        }
+      ],
+      "id": "l3-routine-post-legacy-persistence-bridge",
+      "owner_stage": "L4",
+      "reason": "PR F owns routine continuation while social writes, joint activity, agent-run persistence, and canonical event storage remain later-stage legacy modules.",
+      "removal_condition": "Remove each edge as PR G and L4 move its social or runtime dependency behind a canonical public port.",
+      "review_date": "2026-11-19"
+    },
+    {
+      "edges": [
+        {
           "imported": "app.services.graph_projection_commands",
           "importer": "app.integrations.neo4j"
         },
@@ -1445,19 +1390,7 @@
       "review_date": "2026-11-14"
     }
   ],
-  "legacy_module_cycles": [
-    {
-      "id": "routine-social-interaction-cycle",
-      "modules": [
-        "app.services.routine_post_context",
-        "app.services.social_routine_interactions"
-      ],
-      "owner_stage": "L4",
-      "reason": "Exact pre-T2.5 service cycle retained only until feed/social runtime extraction.",
-      "removal_condition": "Break the cycle when routine post context and social interaction input move behind L4 public contracts.",
-      "review_date": "2026-11-14"
-    }
-  ],
+  "legacy_module_cycles": [],
   "legacy_prefixes": [
     "app.cruds",
     "app.models",
