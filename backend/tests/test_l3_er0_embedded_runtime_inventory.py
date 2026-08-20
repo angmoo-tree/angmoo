@@ -50,7 +50,7 @@ def test_storage_frontend_runtime_and_parity_corpora_are_complete() -> None:
     # ER1 adds the current SQLAlchemy projection-outbox adapter, ER2 PR D adds
     # the OFF-by-default SQLite schema/codec adapters, and PR E adds the SQLite
     # writer/lease adapters. They remain inventoried until canonical cutover.
-    assert postgres["entry_count"] == 72
+    assert postgres["entry_count"] == 74
     assert graph["query_count"] == 24
     assert frontend["route_count"] == 38
     assert {item["phase"] for item in runtime["parity"]["workloads"]} == {

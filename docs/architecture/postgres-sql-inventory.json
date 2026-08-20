@@ -638,6 +638,20 @@
     },
     {
       "markers": {
+        "driver_or_url": [
+          1,
+          318,
+          333
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/runtime/migrations/postgres_to_sqlite.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "2a8f57ca24f6909256662153948c3dd5c91cbbfdaad8564a2bf5245a2ba69609",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
         "pgvector": [
           80
         ]
@@ -1013,6 +1027,19 @@
     },
     {
       "markers": {
+        "driver_or_url": [
+          1,
+          27
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/scripts/dry_run_postgres_to_sqlite.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "ea0d2063430e69dd1940aadea12495d2d5ea315e2a6fc4356f0578c5c03f9356",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
         "advisory_lock": [
           19,
           35,
@@ -1135,10 +1162,10 @@
       "transition_pr": "ER7 PR P"
     }
   ],
-  "entry_count": 72,
+  "entry_count": 74,
   "marker_counts": {
     "advisory_lock": 8,
-    "driver_or_url": 48,
+    "driver_or_url": 50,
     "jsonb": 8,
     "pgvector": 7,
     "row_lock": 22,
