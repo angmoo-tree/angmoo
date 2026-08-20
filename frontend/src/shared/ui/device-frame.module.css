@@ -2,7 +2,7 @@
   --device-bezel-width: 3px;
   --device-corner-radius: 34px;
   width: min(100%, 436px);
-  min-height: min(880px, 100dvh);
+  height: min(880px, calc(100dvh - 40px));
   overflow: hidden;
   border: var(--device-bezel-width) solid #30343b;
   border-radius: var(--device-corner-radius);
@@ -14,7 +14,8 @@
 
 .screen {
   display: flex;
-  min-height: calc(min(880px, 100dvh) - (var(--device-bezel-width) * 2));
+  height: 100%;
+  min-height: 0;
   flex-direction: column;
   overflow: hidden;
   border-radius: calc(var(--device-corner-radius) - 4px);
@@ -39,6 +40,7 @@
 
 .content {
   min-width: 0;
+  min-height: 0;
   flex: 1 1 auto;
   overflow: auto;
   overscroll-behavior: contain;
@@ -48,7 +50,8 @@
   .frame,
   .screen {
     width: 100%;
-    min-height: 100dvh;
+    height: 100dvh;
+    min-height: 0;
     border: 0;
     border-radius: 0;
     box-shadow: none;
