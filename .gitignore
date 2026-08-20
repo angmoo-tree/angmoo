@@ -22,3 +22,4 @@ build/
 *.log
 playwright-report/
 test-results/
+frontend/next-env.d.ts
