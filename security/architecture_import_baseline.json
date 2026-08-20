@@ -1,7 +1,7 @@
 {
-  "edge_count": 864,
-  "external_import_count": 1339,
-  "module_count": 414,
+  "edge_count": 871,
+  "external_import_count": 1356,
+  "module_count": 416,
   "modules": [
     {
       "external_imports": [],
@@ -3916,13 +3916,16 @@
         "__future__",
         "collections.abc",
         "datetime",
-        "sqlalchemy.orm"
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
       ],
       "imports": [
         "app.cruds.graph_projection",
         "app.domains.relationships.ports.outbox",
         "app.domains.relationships.projection.commands",
         "app.models",
+        "app.runtime.persistence.sqlite_concurrency",
         "app.services.graph_projection_commands"
       ],
       "module": "app.runtime.graph_projection.sqlalchemy_outbox",
@@ -3957,7 +3960,9 @@
       "imports": [
         "app.runtime.persistence.runtime_data_path",
         "app.runtime.persistence.sqlalchemy_unit_of_work",
+        "app.runtime.persistence.sqlite_concurrency",
         "app.runtime.persistence.sqlite_database",
+        "app.runtime.persistence.sqlite_scheduler_lease",
         "app.runtime.persistence.sqlite_unit_of_work"
       ],
       "module": "app.runtime.persistence",
@@ -4006,6 +4011,24 @@
       "external_imports": [
         "__future__",
         "collections.abc",
+        "concurrent.futures",
+        "dataclasses",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlite3",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.runtime.persistence.sqlite_concurrency",
+      "path": "backend/app/runtime/persistence/sqlite_concurrency.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
         "contextlib",
         "dataclasses",
         "datetime",
@@ -4023,6 +4046,24 @@
       ],
       "module": "app.runtime.persistence.sqlite_database",
       "path": "backend/app/runtime/persistence/sqlite_database.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "datetime",
+        "sqlalchemy",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.identity.public",
+        "app.domains.runtime.domain.scheduler_lease",
+        "app.domains.runtime.infrastructure.sqlalchemy_scheduler_lease",
+        "app.runtime.persistence.sqlite_concurrency"
+      ],
+      "module": "app.runtime.persistence.sqlite_scheduler_lease",
+      "path": "backend/app/runtime/persistence/sqlite_scheduler_lease.py",
       "wildcard_imports": []
     },
     {
