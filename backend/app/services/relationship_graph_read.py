@@ -31,13 +31,17 @@ from app.domains.relationships.graph_read.repository import (
 )
 from app.domains.relationships.graph_read.use_case import GraphProjectionCounts
 from app.integrations.neo4j import GraphClientError
+from app.integrations.ladybug_projection import LadybugRelationshipProjection
+from app.domains.relationships.ports.projection import (
+    RelationshipProjectionBackendError,
+)
 from app.integrations.relationship_graph_read import RelationshipGraphRepository
 from app.services.graph_projection_metrics import graph_metrics
 from app.services.graph_projection_runtime import graph_client_from_settings
 
 
 class _BackendErrorMappingRepository:
-    """Normalize Neo4j transport errors before they enter the domain."""
+    """Normalize graph-provider transport errors before they enter the domain."""
 
     def __init__(self, delegate: RelationshipGraphQueryPort) -> None:
         self._delegate = delegate
@@ -45,7 +49,7 @@ class _BackendErrorMappingRepository:
     def _call(self, method_name: str, **kwargs):
         try:
             return getattr(self._delegate, method_name)(**kwargs)
-        except GraphClientError as exc:
+        except RelationshipProjectionBackendError as exc:
             raise GraphReadBackendError(exc.error_class) from exc
 
     def get_direct_relationship(self, **kwargs) -> list[GraphRelationshipHit]:
@@ -70,9 +74,16 @@ class _BackendErrorMappingRepository:
 class SqlAlchemyRelationshipGraphReadGateway:
     """Legacy persistence/runtime adapter for the canonical read use case."""
 
-    def __init__(self, db: Session, *, config: Settings = settings) -> None:
+    def __init__(
+        self,
+        db: Session,
+        *,
+        config: Settings = settings,
+        graph_provider: relationships.GraphProvider = "neo4j",
+    ) -> None:
         self._db = db
         self._config = config
+        self._graph_provider = graph_provider
         self._client = None
 
     def owner_access(
@@ -144,6 +155,25 @@ class SqlAlchemyRelationshipGraphReadGateway:
         )
 
     def open_graph_repository(self) -> RelationshipGraphQueryPort:
+        if self._graph_provider == "ladybug":
+            if not self._config.ladybug_graph_preview_enabled:
+                raise GraphReadBackendError("ladybug_preview_disabled")
+            projection = None
+            try:
+                projection = LadybugRelationshipProjection(
+                    database_root=self._config.ladybug_database_root
+                )
+                self._client = projection
+                projection.verify_connectivity()
+            except RelationshipProjectionBackendError as exc:
+                if projection is not None:
+                    projection.close()
+                self._client = None
+                raise GraphReadBackendError(exc.error_class) from exc
+            return _BackendErrorMappingRepository(
+                RelationshipGraphRepository(projection)
+            )
+
         client = None
         try:
             client = graph_client_from_settings(self._config)
@@ -470,10 +500,15 @@ def get_owner_relationship_graph(
     limit: int = 20,
     config: Settings = settings,
     repository: RelationshipGraphQueryPort | None = None,
+    graph_provider: relationships.GraphProvider = "neo4j",
 ) -> relationships.RelationshipGraphRead:
     """Preserve the legacy call signature while delegating to the domain."""
 
-    gateway = SqlAlchemyRelationshipGraphReadGateway(db, config=config)
+    gateway = SqlAlchemyRelationshipGraphReadGateway(
+        db,
+        config=config,
+        graph_provider=graph_provider,
+    )
     mapped_repository = (
         _BackendErrorMappingRepository(repository)
         if repository is not None
@@ -490,6 +525,7 @@ def get_owner_relationship_graph(
         limit=limit,
         graph_projection_enabled=config.graph_projection_enabled,
         repository=mapped_repository,
+        graph_provider=graph_provider,
     )
 
 

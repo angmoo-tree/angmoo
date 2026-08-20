@@ -30,9 +30,11 @@ function position(index: number, count: number) {
 export function RelationshipGraphClient({
   characterId,
   worldId,
+  provider = "neo4j",
 }: {
   characterId: string;
   worldId: string;
+  provider?: "neo4j" | "ladybug";
 }) {
   const router = useRouter();
   const { status } = useAuth();
@@ -49,7 +51,7 @@ export function RelationshipGraphClient({
     }
     if (status !== "authenticated") return;
     let active = true;
-    void getRelationshipGraph(characterId, worldId, depth)
+    void getRelationshipGraph(characterId, worldId, depth, provider)
       .then((result) => {
         if (active) setGraph(result);
       })
@@ -64,7 +66,7 @@ export function RelationshipGraphClient({
     return () => {
       active = false;
     };
-  }, [characterId, depth, router, status, worldId]);
+  }, [characterId, depth, provider, router, status, worldId]);
 
   const orderedNodes = useMemo(() => {
     if (!graph) return [];
@@ -88,6 +90,11 @@ export function RelationshipGraphClient({
           실제 SNS 쓰기에 성공한 사건만 관계 근거로 사용합니다. 화살표는 보는 방향을 뜻하며,
           반대 방향은 별도의 관계입니다.
         </p>
+        {provider === "ladybug" ? (
+          <p className="mt-3 rounded-2xl bg-tertiary-container px-4 py-3 text-sm font-bold text-on-tertiary-container">
+            LadybugDB 개발자 검증 모드 · production 기본 provider는 아직 Neo4j입니다.
+          </p>
+        ) : null}
         <div className="mt-5 flex flex-wrap items-center gap-3">
           <Link
             href={`/characters/${characterId}/worlds/${worldId}/autonomy-setup`}
@@ -123,7 +130,11 @@ export function RelationshipGraphClient({
                 </p>
               </div>
               <span className="rounded-full bg-surface-container px-3 py-2 text-xs font-bold">
-                {graph.meta.source === "neo4j" ? "Neo4j 검증 결과" : "PostgreSQL 안전 대체"}
+                {graph.meta.source === "neo4j"
+                  ? "Neo4j 검증 결과"
+                  : graph.meta.source === "ladybug"
+                    ? "LadybugDB 검증 결과"
+                    : "PostgreSQL 안전 대체"}
               </span>
             </div>
 

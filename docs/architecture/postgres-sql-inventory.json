@@ -263,14 +263,14 @@
       "markers": {
         "driver_or_url": [
           26,
-          156,
-          157
+          158,
+          159
         ]
       },
       "owner": "ER1-ER2",
       "path": "backend/app/core/config.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "670bde1db09d81cf50766523335fe60df1b9b960575b4d4542627f91412ac4a1",
+      "source_sha256": "d8c0dc23a460afcaaa0b04e92b5b4e0a2d1d4fdbc245ddc7166b152a668ea561",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
@@ -621,7 +621,7 @@
       "owner": "ER1-ER2",
       "path": "backend/app/models/graph_projection.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "c108f496306119b268b444e2e521fccf1718946cc18feb28d85c520c12336845",
+      "source_sha256": "83f8f08bba74541932e5c607bad477433e6048eefd84fea8c5ce4a83410a11be",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
@@ -963,7 +963,7 @@
       "owner": "ER1-ER2",
       "path": "backend/app/services/relationship_graph_read.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "a5f3a2b4ead27112c0e099c22599b58a668d0c07fff616d06e5c815b1eca5057",
+      "source_sha256": "13a8fe2aae4de1ea9c17411dd00002c8db2b5f57e4dc4e0b2ddf34ebc096b980",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
@@ -1036,6 +1036,20 @@
       "path": "backend/scripts/dry_run_postgres_to_sqlite.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
       "source_sha256": "ea0d2063430e69dd1940aadea12495d2d5ea315e2a6fc4356f0578c5c03f9356",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          27,
+          32,
+          35
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/scripts/manage_ladybug_preview.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "9d36fd067fd5f32f81199b1d5d2624a98f71f78fe79c54022aad2846d6219d60",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
@@ -1162,10 +1176,10 @@
       "transition_pr": "ER7 PR P"
     }
   ],
-  "entry_count": 74,
+  "entry_count": 75,
   "marker_counts": {
     "advisory_lock": 8,
-    "driver_or_url": 50,
+    "driver_or_url": 51,
     "jsonb": 8,
     "pgvector": 7,
     "row_lock": 22,

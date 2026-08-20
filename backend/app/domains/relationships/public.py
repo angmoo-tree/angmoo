@@ -15,6 +15,7 @@ from app.domains.relationships.graph_read.schemas import (
     RelationshipGraphRead,
 )
 from app.domains.relationships.graph_read.use_case import (
+    GraphProvider,
     GraphView,
     RelationshipGraphReadGateway,
     get_owner_relationship_graph,
@@ -38,6 +39,7 @@ from app.domains.relationships.projection import (
 
 __all__ = [
     "GraphStatus",
+    "GraphProvider",
     "GraphView",
     "NoGraphMutationCommand",
     "OutboxFinalizeStatus",

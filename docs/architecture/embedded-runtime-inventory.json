@@ -7,7 +7,7 @@
     },
     {
       "path": "compose.dev.yml",
-      "sha256": "0938d23b691e5bac5b836a179449c20ef470a0c2d6f8bb02222dec3330337bb8"
+      "sha256": "f49e4755b736dbfa7998f6ebf670b766eee191cd6be55c53fb07035a8dc037f3"
     },
     {
       "path": "compose.ci.yml",
@@ -211,7 +211,7 @@
       "owner": "ER4",
       "path": "compose.dev.yml",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "0938d23b691e5bac5b836a179449c20ef470a0c2d6f8bb02222dec3330337bb8",
+      "source_sha256": "f49e4755b736dbfa7998f6ebf670b766eee191cd6be55c53fb07035a8dc037f3",
       "transition_pr": "ER4 PR J"
     },
     {

@@ -10,6 +10,17 @@ x-backend-dev-environment: &backend-dev-environment
   ANGMOO_VERSION: ${ANGMOO_VERSION:-0.3.0-dev}
 
 services:
+  ladybug-preview-init:
+    image: angmoo-backend-dev
+    pull_policy: never
+    user: "0:0"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - install -d -o 10001 -g 10001 /var/lib/angmoo/ladybug-preview
+    volumes:
+      - angmoo_ladybug_preview:/var/lib/angmoo/ladybug-preview
+    restart: "no"
+
   backend:
     image: angmoo-backend-dev
     pull_policy: build
@@ -18,6 +29,13 @@ services:
     environment:
       <<: *backend-dev-environment
       API_DOCS_ENABLED: "true"
+      LADYBUG_GRAPH_PREVIEW_ENABLED: "true"
+      LADYBUG_DATABASE_ROOT: /var/lib/angmoo/ladybug-preview
+    volumes:
+      - angmoo_ladybug_preview:/var/lib/angmoo/ladybug-preview
+    depends_on:
+      ladybug-preview-init:
+        condition: service_completed_successfully
     develop:
       watch:
         - action: sync
@@ -78,3 +96,6 @@ services:
           path: ./frontend/next.config.ts
         - action: rebuild
           path: ./Dockerfile.frontend
+
+volumes:
+  angmoo_ladybug_preview:

@@ -219,4 +219,5 @@ jobs:
             tests/test_graph_projection_worker.py \
             tests/test_relationship_graph_api.py \
             tests/test_relationship_graph_repository.py \
+            tests/test_l3_er3_graph_query_parity.py \
             tests/test_neo4j_relationship_projection_integration.py

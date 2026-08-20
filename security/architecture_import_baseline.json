@@ -1,6 +1,6 @@
 {
-  "edge_count": 884,
-  "external_import_count": 1401,
+  "edge_count": 887,
+  "external_import_count": 1402,
   "module_count": 421,
   "modules": [
     {
@@ -2217,6 +2217,7 @@
         "__future__",
         "dataclasses",
         "datetime",
+        "enum",
         "typing"
       ],
       "imports": [],
@@ -3444,6 +3445,7 @@
     {
       "external_imports": [
         "__future__",
+        "collections",
         "ctypes",
         "datetime",
         "fcntl",
@@ -3458,6 +3460,7 @@
         "typing"
       ],
       "imports": [
+        "app.domains.relationships.graph_read.repository",
         "app.domains.relationships.ports.projection",
         "app.domains.relationships.projection.commands"
       ],
@@ -3469,7 +3472,6 @@
       "external_imports": [
         "__future__",
         "concurrent.futures",
-        "enum",
         "json",
         "neo4j",
         "neo4j.exceptions",
@@ -3477,6 +3479,7 @@
         "typing"
       ],
       "imports": [
+        "app.domains.relationships.graph_read.repository",
         "app.domains.relationships.ports.projection",
         "app.domains.relationships.projection.commands",
         "app.services.graph_projection_metrics"
@@ -3492,8 +3495,7 @@
         "typing"
       ],
       "imports": [
-        "app.domains.relationships.graph_read.repository",
-        "app.integrations.neo4j"
+        "app.domains.relationships.graph_read.repository"
       ],
       "module": "app.integrations.relationship_graph_read",
       "path": "backend/app/integrations/relationship_graph_read.py",
@@ -5418,7 +5420,9 @@
         "app.domains.relationships.graph_read.repository",
         "app.domains.relationships.graph_read.schemas",
         "app.domains.relationships.graph_read.use_case",
+        "app.domains.relationships.ports.projection",
         "app.domains.relationships.public",
+        "app.integrations.ladybug_projection",
         "app.integrations.neo4j",
         "app.integrations.relationship_graph_read",
         "app.models",

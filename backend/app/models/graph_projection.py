@@ -45,6 +45,9 @@ class GraphProjectionReplayRun(Base):
             postgresql_where=text(
                 "mode = 'world_rebuild' AND status IN ('pending','running')"
             ),
+            sqlite_where=text(
+                "mode = 'world_rebuild' AND status IN ('pending','running')"
+            ),
         ),
         Index(
             "ix_graph_projection_replay_runs_world_created",

@@ -160,7 +160,7 @@
       "path": "frontend/src/app/characters/[characterId]/worlds/[worldId]/relationship-graph/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/characters/[characterId]/worlds/[worldId]/relationship-graph",
-      "source_sha256": "b34d8539b666ab1e7dd17ea116ce2302c76cfc7f4e9d6da9fc9ae45cfdbdb317",
+      "source_sha256": "409ec7c3a153d65f78ff5eb0c23ebbf9f4a110077b0c6fc93b49f0ee0493735e",
       "transition_pr": "ER5 PR K"
     },
     {

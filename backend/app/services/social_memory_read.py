@@ -243,7 +243,7 @@ def get_owner_diagnostics(
         graph_projection_enabled=settings.graph_projection_enabled,
     )
     latest_relationship_version_parity: bool | None = None
-    if graph.meta.source == "neo4j" and not graph.meta.truncated:
+    if graph.meta.source in {"neo4j", "ladybug"} and not graph.meta.truncated:
         graph_versions = {
             edge.relationship_state_id: edge.relationship_version
             for edge in graph.edges

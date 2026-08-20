@@ -48,9 +48,11 @@ def test_storage_frontend_runtime_and_parity_corpora_are_complete() -> None:
     runtime = _load("embedded-runtime-inventory.json")
 
     # ER1 adds the current SQLAlchemy projection-outbox adapter, ER2 PR D adds
-    # the OFF-by-default SQLite schema/codec adapters, and PR E adds the SQLite
-    # writer/lease adapters. They remain inventoried until canonical cutover.
-    assert postgres["entry_count"] == 74
+    # the OFF-by-default SQLite schema/codec adapters, PR E adds the SQLite
+    # writer/lease adapters, and ER3 PR I adds the development-only LadybugDB
+    # replay helper that reads the current PostgreSQL canonical source. They
+    # remain inventoried until canonical cutover.
+    assert postgres["entry_count"] == 75
     assert graph["query_count"] == 24
     assert frontend["route_count"] == 38
     assert {item["phase"] for item in runtime["parity"]["workloads"]} == {
