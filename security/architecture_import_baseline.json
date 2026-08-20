@@ -1,7 +1,7 @@
 {
-  "edge_count": 871,
-  "external_import_count": 1356,
-  "module_count": 416,
+  "edge_count": 875,
+  "external_import_count": 1371,
+  "module_count": 418,
   "modules": [
     {
       "external_imports": [],
@@ -2963,6 +2963,17 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.runtime.ports.vector_recall",
+      "path": "backend/app/domains/runtime/ports/vector_recall.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.domains.runtime.api.runtime_schemas",
@@ -4096,7 +4107,8 @@
     {
       "external_imports": [],
       "imports": [
-        "app.runtime.search.callback_index"
+        "app.runtime.search.callback_index",
+        "app.runtime.search.sqlite_fts5"
       ],
       "module": "app.runtime.search",
       "path": "backend/app/runtime/search/__init__.py",
@@ -4112,6 +4124,30 @@
       ],
       "module": "app.runtime.search.callback_index",
       "path": "backend/app/runtime/search/callback_index.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "contextlib",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "json",
+        "pathlib",
+        "re",
+        "sqlite3",
+        "threading",
+        "unicodedata"
+      ],
+      "imports": [
+        "app.core.search_text",
+        "app.domains.runtime.ports.runtime_data_path",
+        "app.domains.runtime.ports.search_index"
+      ],
+      "module": "app.runtime.search.sqlite_fts5",
+      "path": "backend/app/runtime/search/sqlite_fts5.py",
       "wildcard_imports": []
     },
     {
