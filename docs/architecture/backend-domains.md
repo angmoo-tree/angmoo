@@ -140,6 +140,14 @@ preflight consumes only the stable WorldCharacter public policy. PR D-G move
 the remaining behavior boundaries one at a time and remove the matching exact
 legacy exceptions as their callers migrate.
 
+ER4 adds `app.runtime.single_backend_components` as the lifecycle composition
+root and keeps runtime status observations behind `app.domains.runtime.public`.
+Because ER4 changes ownership rather than scheduler/projector behavior, one
+explicit compatibility module retains three exact imports to the reviewed L2
+workers. The exception is owned by L6 and must disappear when those worker
+implementations move behind canonical runtime ports; no API route or FastAPI
+entrypoint imports a legacy worker directly.
+
 L3 PR D makes `app.domains.world_characters.public` the only HTTP-facing entry
 for autonomous World entry and setup. The domain-owned SQLAlchemy adapter uses
 the identity `local-v2` resolver, a direct-LLM integration adapter, explicit

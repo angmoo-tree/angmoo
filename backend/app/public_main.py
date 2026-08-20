@@ -22,6 +22,10 @@ from app.services.hosted_configuration import (
     register_hosted_configuration,
     unregister_hosted_configuration,
 )
+from app.runtime.single_backend_components import (
+    SingleBackendRuntimeComponents,
+    create_single_backend_runtime_components,
+)
 
 
 class PublicRuntimeConfigurationError(RuntimeError):
@@ -93,10 +97,14 @@ def create_lifespan(
     security_validator: Callable[[], None] = validate_startup_security,
     session_factory: Callable[[], Any] = SessionLocal,
     demo_seed: Callable[[Any], None] = seed_demo_data,
+    component_manager_factory: Callable[
+        [], SingleBackendRuntimeComponents | None
+    ] = create_single_backend_runtime_components,
 ) -> LifespanHandler:
     @asynccontextmanager
     async def runtime_lifespan(_: FastAPI) -> AsyncIterator[None]:
         configuration_registered = False
+        component_manager = component_manager_factory()
         if extension is None:
             validate_public_runtime_settings()
         security_validator()
@@ -129,18 +137,39 @@ def create_lifespan(
                         )
                 raise
         try:
-            yield
-        finally:
-            if extension is not None:
-                try:
+            if component_manager is not None:
+                await component_manager.start()
+        except BaseException:
+            try:
+                if component_manager is not None:
+                    await component_manager.stop()
+            finally:
+                if extension is not None:
                     for hook in reversed(extension.shutdown_hooks):
                         await hook()
-                finally:
-                    if configuration_registered:
-                        unregister_hosted_configuration(
-                            extension.settings_provider,
-                            extension.prompt_provider,
-                        )
+                if configuration_registered:
+                    unregister_hosted_configuration(
+                        extension.settings_provider,
+                        extension.prompt_provider,
+                    )
+            raise
+        try:
+            yield
+        finally:
+            try:
+                if component_manager is not None:
+                    await component_manager.stop()
+            finally:
+                if extension is not None:
+                    try:
+                        for hook in reversed(extension.shutdown_hooks):
+                            await hook()
+                    finally:
+                        if configuration_registered:
+                            unregister_hosted_configuration(
+                                extension.settings_provider,
+                                extension.prompt_provider,
+                            )
 
     return runtime_lifespan
 

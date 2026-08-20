@@ -1,7 +1,7 @@
 {
-  "edge_count": 887,
-  "external_import_count": 1402,
-  "module_count": 421,
+  "edge_count": 902,
+  "external_import_count": 1418,
+  "module_count": 425,
   "modules": [
     {
       "external_imports": [],
@@ -1140,6 +1140,7 @@
       "imports": [
         "app.api.v1.deps",
         "app.core.browser_session",
+        "app.core.config",
         "app.core.db",
         "app.domains.identity.public",
         "app.domains.runtime.public"
@@ -1315,6 +1316,34 @@
       ],
       "module": "app.compatibility.routine_posts.legacy",
       "path": "backend/app/compatibility/routine_posts/legacy.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.compatibility.runtime",
+      "path": "backend/app/compatibility/runtime/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "asyncio",
+        "collections.abc",
+        "socket",
+        "threading",
+        "typing"
+      ],
+      "imports": [
+        "app.core.config",
+        "app.core.db",
+        "app.domains.relationships.ports.projection",
+        "app.services.graph_projection_runtime",
+        "app.services.graph_projection_worker",
+        "app.services.resident_tick_scheduler"
+      ],
+      "module": "app.compatibility.runtime.single_backend_workers",
+      "path": "backend/app/compatibility/runtime/single_backend_workers.py",
       "wildcard_imports": []
     },
     {
@@ -2788,6 +2817,22 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "threading",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.runtime.domain.diagnostic_codes",
+        "app.domains.runtime.domain.installation_state"
+      ],
+      "module": "app.domains.runtime.application.single_backend_components",
+      "path": "backend/app/domains/runtime/application/single_backend_components.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.domains.runtime.domain",
@@ -2992,6 +3037,7 @@
         "app.domains.runtime.api.runtime_schemas",
         "app.domains.runtime.application.manage_scheduler_lease",
         "app.domains.runtime.application.read_runtime_status",
+        "app.domains.runtime.application.single_backend_components",
         "app.domains.runtime.domain.diagnostic_codes",
         "app.domains.runtime.domain.installation_state",
         "app.domains.runtime.domain.scheduler_lease",
@@ -3519,6 +3565,7 @@
         "app.core.request_limits",
         "app.core.startup_security",
         "app.cruds.community",
+        "app.runtime.single_backend_components",
         "app.services.hosted_configuration"
       ],
       "module": "app.main",
@@ -3932,6 +3979,7 @@
         "app.core.request_limits",
         "app.core.startup_security",
         "app.cruds.community",
+        "app.runtime.single_backend_components",
         "app.services.hosted_configuration"
       ],
       "module": "app.public_main",
@@ -4229,6 +4277,23 @@
       "imports": [],
       "module": "app.runtime.shutdown",
       "path": "backend/app/runtime/shutdown.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "asyncio",
+        "collections.abc",
+        "logging",
+        "threading"
+      ],
+      "imports": [
+        "app.compatibility.runtime.single_backend_workers",
+        "app.core.config",
+        "app.domains.runtime.public"
+      ],
+      "module": "app.runtime.single_backend_components",
+      "path": "backend/app/runtime/single_backend_components.py",
       "wildcard_imports": []
     },
     {

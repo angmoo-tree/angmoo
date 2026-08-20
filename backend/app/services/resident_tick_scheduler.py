@@ -24,6 +24,7 @@ from app.services import agent_runs
 
 
 logger = logging.getLogger(__name__)
+SchedulerStateListener = Callable[[str], None]
 
 
 class SchedulerShutdownDrainTimeout(RuntimeError):
@@ -249,6 +250,7 @@ async def run_resident_tick_scheduler(
     ready_path: str | None = None,
     stop_event: asyncio.Event | None = None,
     drain_timeout_seconds: float | None = None,
+    state_listener: SchedulerStateListener | None = None,
 ) -> None:
     lease_coordinator = coordinator or _coordinator()
     lease_owner_id = owner_id or f"scheduler-{uuid4()}"
@@ -273,6 +275,8 @@ async def run_resident_tick_scheduler(
                 lease_owner_id,
                 lease.fencing_epoch,
             )
+            if state_listener is not None:
+                state_listener("ready")
             while not stop.is_set():
                 permit = lease_coordinator.begin_tick(
                     owner_id=lease_owner_id,
@@ -339,13 +343,19 @@ async def run_resident_tick_scheduler(
                 if not completed_wait:
                     break
         except SchedulerLeaseHeldError:
+            if state_listener is not None:
+                state_listener("duplicate")
             logger.error("resident scheduler duplicate rejected")
             raise
         except SchedulerLeaseLostError:
+            if state_listener is not None:
+                state_listener("failed")
             logger.exception("resident scheduler lease lost")
             raise
         finally:
             if lease is not None and stop.is_set() and readiness.exists():
+                if state_listener is not None:
+                    state_listener("draining")
                 readiness.write_text(
                     "state=draining\n"
                     f"owner={lease_owner_id}\nepoch={lease.fencing_epoch}\n",
@@ -364,3 +374,5 @@ async def run_resident_tick_scheduler(
                         lease_owner_id,
                         lease.fencing_epoch,
                     )
+            if state_listener is not None:
+                state_listener("stopped")

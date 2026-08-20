@@ -1,0 +1,13 @@
+services:
+  backend:
+    environment:
+      LOCAL_RUNTIME_COMPONENT_MODE: in_process
+
+  # The default Compose contract still starts these services. This explicit
+  # override moves both loops into the backend and parks the legacy workers
+  # behind an opt-in regression profile.
+  scheduler:
+    profiles: ["external-workers"]
+
+  projector:
+    profiles: ["external-workers"]

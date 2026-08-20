@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.api.v1.deps import get_current_user
 from app.core import browser_session
+from app.core.config import settings
 from app.core.db import get_db
 from app.domains.identity.public import (
     InstallationIdentity,
@@ -15,6 +16,7 @@ from app.domains.runtime.public import (
     LocalRuntimeStatusRead,
     ReadApplicationRuntimeStatus,
     SqlAlchemyApplicationRuntimeProbe,
+    overlay_in_process_component_status,
     runtime_status_read,
 )
 
@@ -42,4 +44,8 @@ def get_runtime_status(
     runtime_status = ReadApplicationRuntimeStatus(
         SqlAlchemyApplicationRuntimeProbe(db)
     ).execute()
+    runtime_status = overlay_in_process_component_status(
+        runtime_status,
+        config=settings,
+    )
     return runtime_status_read(runtime_status)
