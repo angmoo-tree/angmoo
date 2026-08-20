@@ -1,7 +1,7 @@
 {
-  "edge_count": 858,
-  "external_import_count": 1311,
-  "module_count": 410,
+  "edge_count": 864,
+  "external_import_count": 1339,
+  "module_count": 414,
   "modules": [
     {
       "external_imports": [],
@@ -3956,7 +3956,9 @@
       "external_imports": [],
       "imports": [
         "app.runtime.persistence.runtime_data_path",
-        "app.runtime.persistence.sqlalchemy_unit_of_work"
+        "app.runtime.persistence.sqlalchemy_unit_of_work",
+        "app.runtime.persistence.sqlite_database",
+        "app.runtime.persistence.sqlite_unit_of_work"
       ],
       "module": "app.runtime.persistence",
       "path": "backend/app/runtime/persistence/__init__.py",
@@ -3982,6 +3984,72 @@
       "imports": [],
       "module": "app.runtime.persistence.sqlalchemy_unit_of_work",
       "path": "backend/app/runtime/persistence/sqlalchemy_unit_of_work.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "enum",
+        "json",
+        "math",
+        "re",
+        "typing",
+        "uuid"
+      ],
+      "imports": [],
+      "module": "app.runtime.persistence.sqlite_codecs",
+      "path": "backend/app/runtime/persistence/sqlite_codecs.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "contextlib",
+        "dataclasses",
+        "datetime",
+        "os",
+        "pathlib",
+        "re",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.runtime.ports.runtime_data_path",
+        "app.runtime.persistence.sqlite_codecs",
+        "app.runtime.persistence.sqlite_schema"
+      ],
+      "module": "app.runtime.persistence.sqlite_database",
+      "path": "backend/app/runtime/persistence/sqlite_database.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "hashlib",
+        "json",
+        "pgvector.sqlalchemy",
+        "re",
+        "sqlalchemy",
+        "sqlalchemy.ext.compiler"
+      ],
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.runtime.persistence.sqlite_schema",
+      "path": "backend/app/runtime/persistence/sqlite_schema.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy.orm"
+      ],
+      "imports": [],
+      "module": "app.runtime.persistence.sqlite_unit_of_work",
+      "path": "backend/app/runtime/persistence/sqlite_unit_of_work.py",
       "wildcard_imports": []
     },
     {

@@ -47,9 +47,10 @@ def test_storage_frontend_runtime_and_parity_corpora_are_complete() -> None:
     frontend = _load("next-static-compatibility.json")
     runtime = _load("embedded-runtime-inventory.json")
 
-    # ER1 adds the current SQLAlchemy projection-outbox adapter to the frozen
-    # PostgreSQL inventory without changing its behavior.
-    assert postgres["entry_count"] == 68
+    # ER1 adds the current SQLAlchemy projection-outbox adapter and ER2 PR D
+    # adds the OFF-by-default SQLite schema/codec adapters. Both remain in the
+    # frozen inventory until canonical cutover removes PostgreSQL coupling.
+    assert postgres["entry_count"] == 70
     assert graph["query_count"] == 24
     assert frontend["route_count"] == 38
     assert {item["phase"] for item in runtime["parity"]["workloads"]} == {
