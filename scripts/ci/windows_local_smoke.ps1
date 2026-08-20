@@ -124,6 +124,20 @@ try {
     if (@($doctorPayload.details.host.container_resources).Count -ne 6) {
         throw 'launcher_container_resource_status_missing'
     }
+    $inProcessDoctorPayload = & $launcher doctor --json --in-process --project-name synthetic-l2 --port 45999 | ConvertFrom-Json
+    if ($LASTEXITCODE -ne 0 -or $inProcessDoctorPayload.state -ne 'ready') {
+        throw 'launcher_in_process_doctor_failed'
+    }
+    if (@($inProcessDoctorPayload.details.host.container_resources).Count -ne 4) {
+        throw 'launcher_in_process_resource_status_mismatch'
+    }
+    $inProcessStartPayload = & $launcher start --json --contributor --in-process --project-name synthetic-l2 --port 45999 | ConvertFrom-Json
+    if ($LASTEXITCODE -ne 0 -or -not $inProcessStartPayload.details.watch_command.Contains('compose.in-process.yml')) {
+        throw 'launcher_in_process_watch_command_mismatch'
+    }
+    if (-not ((Get-Content -LiteralPath $fakeLog -Raw).Contains('compose.in-process.yml'))) {
+        throw 'launcher_in_process_compose_override_missing'
+    }
     $doctorSerialized = $doctorPayload | ConvertTo-Json -Depth 20 -Compress
     if ($doctorSerialized -match 'AIzaZZZZ' -or $doctorSerialized -match 'APP_SECRET=AIza') {
         throw 'launcher_doctor_secret_canary_leaked'

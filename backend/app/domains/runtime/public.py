@@ -10,6 +10,12 @@ from app.domains.runtime.application.read_runtime_status import (
 from app.domains.runtime.application.manage_scheduler_lease import (
     SchedulerLeaseCoordinator,
 )
+from app.domains.runtime.application.single_backend_components import (
+    ComponentObservation,
+    ComponentObservationRegistry,
+    component_observations,
+    overlay_in_process_component_status,
+)
 from app.domains.runtime.domain.diagnostic_codes import RuntimeDiagnosticCode
 from app.domains.runtime.domain.installation_state import (
     RUNTIME_STATUS_SCHEMA_VERSION,
@@ -69,6 +75,8 @@ __all__ = [
     "ApplicationRuntimeProbe",
     "ApplicationRuntimeStatus",
     "ClaimLeasePort",
+    "ComponentObservation",
+    "ComponentObservationRegistry",
     "InstallationState",
     "LocalRuntimeStatusRead",
     "MigrationRuntimeStatus",
@@ -107,7 +115,9 @@ __all__ = [
     "SqlAlchemyApplicationRuntimeProbe",
     "UnitOfWorkPort",
     "decide_tick_window",
+    "component_observations",
     "logical_tick_window",
+    "overlay_in_process_component_status",
     "runtime_status_read",
     "scheduler_fence",
 ]

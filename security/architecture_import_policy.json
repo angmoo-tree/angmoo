@@ -1388,6 +1388,27 @@
     {
       "edges": [
         {
+          "imported": "app.services.graph_projection_runtime",
+          "importer": "app.compatibility.runtime.single_backend_workers"
+        },
+        {
+          "imported": "app.services.graph_projection_worker",
+          "importer": "app.compatibility.runtime.single_backend_workers"
+        },
+        {
+          "imported": "app.services.resident_tick_scheduler",
+          "importer": "app.compatibility.runtime.single_backend_workers"
+        }
+      ],
+      "id": "er4-single-backend-existing-worker-bridge",
+      "owner_stage": "L6",
+      "reason": "ER4 changes lifecycle ownership only; the exact reviewed L2 scheduler and graph projector workers remain behind one compatibility bridge until their behavior migrates to canonical runtime modules.",
+      "removal_condition": "Move the scheduler tick runner and graph projector implementation behind canonical runtime ports, then remove this bridge and all three exact edges.",
+      "review_date": "2026-11-20"
+    },
+    {
+      "edges": [
+        {
           "imported": "app.services.graph_projection_metrics",
           "importer": "app.integrations.neo4j"
         }

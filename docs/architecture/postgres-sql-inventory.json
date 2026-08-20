@@ -263,14 +263,14 @@
       "markers": {
         "driver_or_url": [
           26,
-          158,
-          159
+          161,
+          162
         ]
       },
       "owner": "ER1-ER2",
       "path": "backend/app/core/config.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "d8c0dc23a460afcaaa0b04e92b5b4e0a2d1d4fdbc245ddc7166b152a668ea561",
+      "source_sha256": "56ffaa0ba3b3aeead1d37b9063cfb395ea4e0553d767292910c9ad0cd6922249",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
@@ -969,13 +969,13 @@
     {
       "markers": {
         "driver_or_url": [
-          38
+          39
         ]
       },
       "owner": "ER1-ER2",
       "path": "backend/app/services/resident_tick_scheduler.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "61a4cfe2ad9a60cca1511cd3f4c850ec64dee84ba57de410c3ad2a78e7c14cfd",
+      "source_sha256": "723178ed681db0ae40e3a14c1e8b9e620ba6f67eea437a898fe81effd79e7c20",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
@@ -1172,7 +1172,7 @@
       "owner": "ER7",
       "path": "scripts/ci/windows_local_smoke.ps1",
       "removal_condition": "embedded canonical rollback window PASS and user-approved legacy-default removal",
-      "source_sha256": "0f9a1ef8cbb5716fc8213bc5852e34c108bb8a2560f5089c908aa9e758d2269d",
+      "source_sha256": "47c1e2580c1d0fa94b649cf7f76c92f963d95c3620b96d1b456ffae2028b1e8a",
       "transition_pr": "ER7 PR P"
     }
   ],

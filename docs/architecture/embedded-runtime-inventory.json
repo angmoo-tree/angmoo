@@ -7,7 +7,7 @@
     },
     {
       "path": "compose.dev.yml",
-      "sha256": "f49e4755b736dbfa7998f6ebf670b766eee191cd6be55c53fb07035a8dc037f3"
+      "sha256": "3b228b4a128ced275fda1edd7d9828bde391e11b709cba594d04c4a07adb790d"
     },
     {
       "path": "compose.ci.yml",
@@ -27,11 +27,11 @@
     },
     {
       "path": "backend/app/main.py",
-      "sha256": "0e99ae2fb886ce6ae26d24e5d13c4d58378db887a09740f95045e342c329fc2c"
+      "sha256": "36fbd1f3b77a557ea49d419709b2ba1397553ec2f4e70d65490d69b5edd4f9ae"
     },
     {
       "path": "backend/app/services/resident_tick_scheduler.py",
-      "sha256": "61a4cfe2ad9a60cca1511cd3f4c850ec64dee84ba57de410c3ad2a78e7c14cfd"
+      "sha256": "723178ed681db0ae40e3a14c1e8b9e620ba6f67eea437a898fe81effd79e7c20"
     },
     {
       "path": "backend/app/services/graph_projection_worker.py",
@@ -211,7 +211,7 @@
       "owner": "ER4",
       "path": "compose.dev.yml",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "f49e4755b736dbfa7998f6ebf670b766eee191cd6be55c53fb07035a8dc037f3",
+      "source_sha256": "3b228b4a128ced275fda1edd7d9828bde391e11b709cba594d04c4a07adb790d",
       "transition_pr": "ER4 PR J"
     },
     {
@@ -237,7 +237,7 @@
       "owner": "ER4",
       "path": "backend/app/services/resident_tick_scheduler.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "61a4cfe2ad9a60cca1511cd3f4c850ec64dee84ba57de410c3ad2a78e7c14cfd",
+      "source_sha256": "723178ed681db0ae40e3a14c1e8b9e620ba6f67eea437a898fe81effd79e7c20",
       "transition_pr": "ER4 PR J"
     },
     {
@@ -299,7 +299,7 @@
       "owner": "ER4",
       "path": "backend/app/main.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "0e99ae2fb886ce6ae26d24e5d13c4d58378db887a09740f95045e342c329fc2c",
+      "source_sha256": "36fbd1f3b77a557ea49d419709b2ba1397553ec2f4e70d65490d69b5edd4f9ae",
       "transition_pr": "ER4 PR J"
     },
     {
