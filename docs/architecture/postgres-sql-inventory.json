@@ -633,7 +633,7 @@
       "owner": "ER1-ER2",
       "path": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "0c4077552f9399b53b052029bbe18dfc1d739dd3153dfeeafe3358b18069c15d",
+      "source_sha256": "ccbcd6daa55633cf57413f988bf69be05cd10614d1dc4a045dd05f671b15c20f",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
@@ -646,6 +646,30 @@
       "path": "backend/app/runtime/persistence/sqlite_codecs.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
       "source_sha256": "d1ad4a897ce41fc80e988fcdf1db8314d378fa21ef431541a700c9575e634c52",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          3
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/runtime/persistence/sqlite_concurrency.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "496b18373bdbda1e356037f2692dad75f86ceb20ca2d9edba849281dae0cb160",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          36
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/runtime/persistence/sqlite_scheduler_lease.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "f6cc859e64d671779b9ba2ddd38e45b0dcca67b2e2b0a7725e40142b1908b1fb",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
@@ -1111,10 +1135,10 @@
       "transition_pr": "ER7 PR P"
     }
   ],
-  "entry_count": 70,
+  "entry_count": 72,
   "marker_counts": {
     "advisory_lock": 8,
-    "driver_or_url": 46,
+    "driver_or_url": 48,
     "jsonb": 8,
     "pgvector": 7,
     "row_lock": 22,

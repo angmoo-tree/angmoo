@@ -444,3 +444,17 @@ The initial schema and connection contract is documented in
 `docs/architecture/l3-er2-sqlite-canonical-adapter.md`. Production remains on
 PostgreSQL until the later ER2 concurrency, FTS, migration, and explicit
 cutover gates pass.
+
+## Embedded canonical concurrency
+
+ER2 PR E keeps claim and lease mechanics below domain ports. Runtime-owned
+SQLite infrastructure may use `BEGIN IMMEDIATE`, bounded busy retry, and
+state-conditioned CAS, while scheduler and relationship domain code continues
+to depend on the existing lease and outbox contracts. SQLite adapters do not
+import API routes or product use cases, and domain packages do not import
+SQLite connection details.
+
+The executable translation and failure boundaries are documented in
+`docs/architecture/l3-er2-sqlite-concurrency.md`. Production composition still
+uses PostgreSQL; selection of the SQLite adapters remains OFF until later ER2
+migration and cutover gates pass.
