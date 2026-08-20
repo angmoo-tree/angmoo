@@ -154,11 +154,16 @@ def get_world_character_relationship_graph(
     target_world_character_id: str | None = Query(default=None, max_length=64),
     depth: int = Query(default=1, ge=1, le=2),
     limit: int = Query(default=20, ge=1, le=20),
+    provider: Literal["neo4j", "ladybug"] = Query(default="neo4j"),
     db: Session = Depends(get_db),
     user: models.User = Depends(get_current_user),
 ) -> relationships.RelationshipGraphRead:
     try:
-        gateway = SqlAlchemyRelationshipGraphReadGateway(db, config=settings)
+        gateway = SqlAlchemyRelationshipGraphReadGateway(
+            db,
+            config=settings,
+            graph_provider=provider,
+        )
         return relationships.get_owner_relationship_graph(
             gateway,
             character_id=character_id,
@@ -169,6 +174,7 @@ def get_world_character_relationship_graph(
             depth=depth,
             limit=limit,
             graph_projection_enabled=settings.graph_projection_enabled,
+            graph_provider=provider,
         )
     except relationships.RelationshipGraphReadError as exc:
         _raise_relationship_graph_error(exc)

@@ -133,6 +133,8 @@ class Settings(BaseSettings):
     MEDIA_UPLOAD_MAX_BYTES: int = 5 * 1024 * 1024
     CREDENTIAL_ENCRYPTION_PROVIDER: str = "local"
     GRAPH_PROJECTION_ENABLED: bool = False
+    LADYBUG_GRAPH_PREVIEW_ENABLED: bool = False
+    LADYBUG_DATABASE_ROOT: str = str(BACKEND_DIR / ".ladybug-preview")
     NEO4J_URI: str = "bolt://127.0.0.1:7687"
     NEO4J_DATABASE: str = "neo4j"
     NEO4J_USERNAME: str = "neo4j"
@@ -682,6 +684,14 @@ class Settings(BaseSettings):
     @property
     def graph_projection_enabled(self) -> bool:
         return self.GRAPH_PROJECTION_ENABLED
+
+    @property
+    def ladybug_graph_preview_enabled(self) -> bool:
+        return self.LADYBUG_GRAPH_PREVIEW_ENABLED
+
+    @property
+    def ladybug_database_root(self) -> Path:
+        return Path(self.LADYBUG_DATABASE_ROOT).resolve()
 
     @property
     def neo4j_uri(self) -> str:

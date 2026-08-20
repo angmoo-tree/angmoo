@@ -69,8 +69,9 @@ export async function getRelationshipGraph(
   characterId: string,
   worldId: string,
   depth: 1 | 2,
+  provider: "neo4j" | "ladybug" = "neo4j",
 ) {
-  const path = `/characters/${encodeURIComponent(characterId)}/worlds/${encodeURIComponent(worldId)}/relationship-graph?view=neighborhood&depth=${depth}&limit=20`;
+  const path = `/characters/${encodeURIComponent(characterId)}/worlds/${encodeURIComponent(worldId)}/relationship-graph?view=neighborhood&depth=${depth}&limit=20&provider=${provider}`;
   const response = await fetch(`/api/backend${path}`, {
     cache: "no-store",
     credentials: "same-origin",

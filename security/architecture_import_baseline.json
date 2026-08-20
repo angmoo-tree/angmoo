@@ -1,5 +1,5 @@
 {
-  "edge_count": 886,
+  "edge_count": 887,
   "external_import_count": 1402,
   "module_count": 421,
   "modules": [
@@ -5422,6 +5422,7 @@
         "app.domains.relationships.graph_read.use_case",
         "app.domains.relationships.ports.projection",
         "app.domains.relationships.public",
+        "app.integrations.ladybug_projection",
         "app.integrations.neo4j",
         "app.integrations.relationship_graph_read",
         "app.models",
