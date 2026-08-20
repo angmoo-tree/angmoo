@@ -458,3 +458,28 @@ The executable translation and failure boundaries are documented in
 `docs/architecture/l3-er2-sqlite-concurrency.md`. Production composition still
 uses PostgreSQL; selection of the SQLite adapters remains OFF until later ER2
 migration and cutover gates pass.
+
+## Embedded relationship projection
+
+ER3 PR H adds `app.integrations.ladybug_projection` as a second implementation
+of the relationships domain `RelationshipProjectionPort`. It consumes the same
+validated, database-neutral projection commands as the Neo4j adapter. The
+projector worker now handles the domain-owned
+`RelationshipProjectionBackendError`; it does not import either graph
+provider's exception type.
+
+The LadybugDB adapter owns exactly one database and connection behind an
+in-process serialized access lock plus a cross-process writer lock. API routes
+cannot construct the adapter or open LadybugDB connections. Its schema contains
+World, WorldCharacter and SocialEvent nodes and directional RELATES_TO and
+RELATIONSHIP_GROUNDED_IN evidence edges, with World scope and source-event
+metadata on every relevant projection record. Event/state upsert,
+stale-version rejection, source delete/hide, clear-and-replay, and close/reopen
+are deterministic and idempotent.
+
+LadybugDB is derived data only. SQLite outbox state remains canonical when the
+graph is unavailable, so a graph failure leaves a retryable row instead of
+rolling back an already committed social write. PR H does not select this
+adapter in production; PostgreSQL and Neo4j remain the composed defaults.
+Typed read-query parity and the provider switch remain separate ER3 and ER7
+gates.

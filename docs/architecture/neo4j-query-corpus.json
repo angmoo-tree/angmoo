@@ -16,7 +16,7 @@
       "owner": "ER3",
       "removal_condition": "LadybugDB bounded 1-3 hop query parity PASS",
       "source": "backend/app/integrations/neo4j.py",
-      "source_line": 249,
+      "source_line": 250,
       "source_sha256": "6d1e864e82cba9b3bbabbec1934a6eaf988fc0f93e7e94cace4f2b4929daf8f0",
       "transition_pr": "ER3 PR I"
     }
@@ -31,7 +31,7 @@
       "query_sha256": "1d284b52a6e465fd2c72805dcf69946922d051d2ec032569dcaf5c017228527a",
       "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
       "source": "backend/app/integrations/neo4j.py",
-      "source_line": 56,
+      "source_line": 57,
       "transition_pr": "ER3 PR H/I"
     },
     {
@@ -42,7 +42,7 @@
       "query_sha256": "0a81c5c8d3ca0abe3f44e9750d7578a0c21d15d2706d5d7f55254f733a063138",
       "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
       "source": "backend/app/integrations/neo4j.py",
-      "source_line": 56,
+      "source_line": 57,
       "transition_pr": "ER3 PR H/I"
     },
     {
@@ -53,7 +53,7 @@
       "query_sha256": "a18fd9b4643f966f2ea51df0ad68ff1af7a1ed8e83afb5bf8e4d87cd603675ff",
       "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
       "source": "backend/app/integrations/neo4j.py",
-      "source_line": 56,
+      "source_line": 57,
       "transition_pr": "ER3 PR H/I"
     },
     {
@@ -64,7 +64,7 @@
       "query_sha256": "1309dd6547d6e15a633b3bdb660d26102d3a1e2c0d1b8600ec94706cdc4392db",
       "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
       "source": "backend/app/integrations/neo4j.py",
-      "source_line": 56,
+      "source_line": 57,
       "transition_pr": "ER3 PR H/I"
     },
     {
@@ -75,7 +75,7 @@
       "query_sha256": "d7cf5acb9a654b0d404f099c3c37944ae468d4a4630e19a88cf48be1c944aa26",
       "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
       "source": "backend/app/integrations/neo4j.py",
-      "source_line": 56,
+      "source_line": 57,
       "transition_pr": "ER3 PR H/I"
     },
     {
@@ -86,7 +86,7 @@
       "query_sha256": "0569b0663a92333587d434499f2d2d4896fe584d13adadeacc9b4c52194302b6",
       "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
       "source": "backend/app/integrations/neo4j.py",
-      "source_line": 56,
+      "source_line": 57,
       "transition_pr": "ER3 PR H/I"
     },
     {
@@ -97,7 +97,7 @@
       "query_sha256": "ad986af14e6ad8d5c3fbf6a810ef927a697e67ad13ed95197020141219e6c3cd",
       "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
       "source": "backend/app/integrations/neo4j.py",
-      "source_line": 56,
+      "source_line": 57,
       "transition_pr": "ER3 PR H/I"
     },
     {
@@ -108,7 +108,7 @@
       "query_sha256": "4ad06323b7dd3b91d9b659bfb20cfb24c7228c77e895a3e48d66392390bf2609",
       "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
       "source": "backend/app/integrations/neo4j.py",
-      "source_line": 85,
+      "source_line": 86,
       "transition_pr": "ER3 PR H/I"
     },
     {
@@ -119,7 +119,7 @@
       "query_sha256": "15432df8a39c0a351322e3b67ba26a8c0a8f99b8aec1e23b995d4b6e81d33f76",
       "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
       "source": "backend/app/integrations/neo4j.py",
-      "source_line": 102,
+      "source_line": 103,
       "transition_pr": "ER3 PR H/I"
     },
     {
@@ -130,7 +130,7 @@
       "query_sha256": "8d68e6a72409a2041551a42ebf0625e4228ae0920cb2b2fc389b6b88ecb8c9e4",
       "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
       "source": "backend/app/integrations/neo4j.py",
-      "source_line": 115,
+      "source_line": 116,
       "transition_pr": "ER3 PR H/I"
     },
     {
@@ -141,7 +141,7 @@
       "query_sha256": "99e14934da03de6e720d0471ee899ffa3be95fde821b37a93dd3bf19ef036c75",
       "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
       "source": "backend/app/integrations/neo4j.py",
-      "source_line": 154,
+      "source_line": 155,
       "transition_pr": "ER3 PR H/I"
     },
     {
@@ -152,7 +152,7 @@
       "query_sha256": "7a8298a69263866e9da2fc4600bd9cfdd090b123a1968cc02e696037d20ee3cb",
       "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
       "source": "backend/app/integrations/neo4j.py",
-      "source_line": 160,
+      "source_line": 161,
       "transition_pr": "ER3 PR H/I"
     },
     {
@@ -163,7 +163,7 @@
       "query_sha256": "80d80c5c4271631bf749d8b9e4e9343bdb0a2a5585cd7fd0f7f76aef352b932c",
       "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
       "source": "backend/app/integrations/neo4j.py",
-      "source_line": 170,
+      "source_line": 171,
       "transition_pr": "ER3 PR H/I"
     },
     {
@@ -174,7 +174,7 @@
       "query_sha256": "0bf80bcbf377d5796ed146c0f58c56359efe5bc14837b0d56a8592cd6f95eca5",
       "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
       "source": "backend/app/integrations/neo4j.py",
-      "source_line": 180,
+      "source_line": 181,
       "transition_pr": "ER3 PR H/I"
     },
     {
@@ -185,7 +185,7 @@
       "query_sha256": "0d0470fc8f35e6b5fb454a9c38a46f1456f5ba8c8d4eaaca9092bd3064e9baa3",
       "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
       "source": "backend/app/integrations/neo4j.py",
-      "source_line": 190,
+      "source_line": 191,
       "transition_pr": "ER3 PR H/I"
     },
     {
@@ -196,7 +196,7 @@
       "query_sha256": "87565ffeb65bf1878624f9fa7b75ff6c15d9616e2a359f3a588bb964d83c65e5",
       "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
       "source": "backend/app/integrations/neo4j.py",
-      "source_line": 199,
+      "source_line": 200,
       "transition_pr": "ER3 PR H/I"
     },
     {
@@ -207,7 +207,7 @@
       "query_sha256": "bbb17b48955d00000d120de077d3d238b190f10d59defde4b05d73d376a2e608",
       "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
       "source": "backend/app/integrations/neo4j.py",
-      "source_line": 210,
+      "source_line": 211,
       "transition_pr": "ER3 PR H/I"
     },
     {
@@ -218,7 +218,7 @@
       "query_sha256": "09a7f5160301156ca5e72b58e1b981fbd11cbb2a8755281b8e67d7dc480b0d8b",
       "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
       "source": "backend/app/integrations/neo4j.py",
-      "source_line": 224,
+      "source_line": 225,
       "transition_pr": "ER3 PR H/I"
     },
     {
@@ -229,62 +229,62 @@
       "query_sha256": "a37c8ea9c2a26370ee164bdc11ba0e5fe893a39c1449cf76133eca129f8cd591",
       "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
       "source": "backend/app/integrations/neo4j.py",
-      "source_line": 235,
+      "source_line": 236,
       "transition_pr": "ER3 PR H/I"
     },
     {
       "category": "delete",
-      "name": "inline:508",
+      "name": "inline:509",
       "owner": "ER3",
       "query": "MATCH (node {world_id: $world_id}) WITH node LIMIT $batch_size DETACH DELETE node RETURN count(node) AS removed_count",
       "query_sha256": "4cd5c176911100cca62317b33946203d168c710a1d947c46ddeb2bf5bbf91bd7",
       "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
       "source": "backend/app/integrations/neo4j.py",
-      "source_line": 508,
+      "source_line": 509,
       "transition_pr": "ER3 PR H/I"
     },
     {
       "category": "digest-or-maintenance",
-      "name": "inline:526",
+      "name": "inline:527",
       "owner": "ER3",
       "query": "MATCH (node:WorldCharacter {world_id: $world_id}) RETURN DISTINCT node.world_character_id AS world_character_id ORDER BY world_character_id",
       "query_sha256": "1f9c8af0a73fd1d7e42db48911fa4c5ab6a62380e5f380ee3a0b3d94bf6d21f5",
       "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
       "source": "backend/app/integrations/neo4j.py",
-      "source_line": 526,
+      "source_line": 527,
       "transition_pr": "ER3 PR H/I"
     },
     {
       "category": "digest-or-maintenance",
-      "name": "inline:534",
+      "name": "inline:535",
       "owner": "ER3",
       "query": "MATCH (event:SocialEvent {world_id: $world_id}) RETURN DISTINCT event.event_id AS event_id ORDER BY event_id",
       "query_sha256": "248c1b4aed3d989caa7cd69ff63229ad35e9307583610917898f599ceb9a2e2b",
       "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
       "source": "backend/app/integrations/neo4j.py",
-      "source_line": 534,
+      "source_line": 535,
       "transition_pr": "ER3 PR H/I"
     },
     {
       "category": "digest-or-maintenance",
-      "name": "inline:541",
+      "name": "inline:542",
       "owner": "ER3",
       "query": "MATCH (actor:WorldCharacter {world_id: $world_id})-[relationship:RELATES_TO {world_id: $world_id}]->(target:WorldCharacter {world_id: $world_id}) RETURN relationship.relationship_state_id AS relationship_state_id, actor.world_character_id AS actor_id, target.world_character_id AS target_id, relationship.relationship_version AS relationship_version, relationship.familiarity AS familiarity, relationship.affinity AS affinity, relationship.trust AS trust, relationship.tension AS tension, relationship.interaction_count AS interaction_count ORDER BY relationship_state_id",
       "query_sha256": "f4d6feb527a58821bfc1a482b3a63c60e00d24665f511a58d2b2e4859f58b664",
       "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
       "source": "backend/app/integrations/neo4j.py",
-      "source_line": 541,
+      "source_line": 542,
       "transition_pr": "ER3 PR H/I"
     },
     {
       "category": "digest-or-maintenance",
-      "name": "inline:559",
+      "name": "inline:560",
       "owner": "ER3",
       "query": "MATCH (actor:WorldCharacter {world_id: $world_id})-[grounded:RELATIONSHIP_GROUNDED_IN {world_id: $world_id}]->(event:SocialEvent {world_id: $world_id}) RETURN grounded.relationship_state_id AS relationship_state_id, actor.world_character_id AS actor_id, grounded.target_world_character_id AS target_id, event.event_id AS event_id, grounded.relationship_version AS relationship_version ORDER BY relationship_state_id, actor_id, target_id, event_id, relationship_version",
       "query_sha256": "16ce6f1b699c6cc37926cd93b1c3baad0c2fc0f9fb53e4d0234ee2c4727049db",
       "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
       "source": "backend/app/integrations/neo4j.py",
-      "source_line": 559,
+      "source_line": 560,
       "transition_pr": "ER3 PR H/I"
     }
   ],

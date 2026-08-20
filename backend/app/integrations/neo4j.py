@@ -16,6 +16,9 @@ from neo4j.exceptions import (
 )
 
 from app.services.graph_projection_metrics import graph_metrics
+from app.domains.relationships.ports.projection import (
+    RelationshipProjectionBackendError,
+)
 from app.domains.relationships.projection.commands import (
     NoGraphMutationCommand,
     ProjectionCommand,
@@ -25,10 +28,8 @@ from app.domains.relationships.projection.commands import (
 )
 
 
-class GraphClientError(RuntimeError):
-    def __init__(self, error_class: str) -> None:
-        super().__init__(error_class)
-        self.error_class = error_class
+class GraphClientError(RelationshipProjectionBackendError):
+    """Backward-compatible Neo4j error under the provider-neutral contract."""
 
 
 class GraphQueryTemplate(StrEnum):

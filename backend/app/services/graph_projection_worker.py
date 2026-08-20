@@ -9,9 +9,11 @@ import time
 from typing import Callable
 
 from app.domains.relationships.ports.outbox import OutboxPort, ProjectionWorkItem
-from app.domains.relationships.ports.projection import RelationshipProjectionPort
+from app.domains.relationships.ports.projection import (
+    RelationshipProjectionBackendError,
+    RelationshipProjectionPort,
+)
 from app.domains.relationships.projection.commands import ProjectionCommandError
-from app.integrations.neo4j import GraphClientError
 from app.runtime.graph_projection.sqlalchemy_outbox import (
     SessionFactory,
     SqlAlchemyProjectionOutbox,
@@ -150,7 +152,7 @@ class GraphProjectionWorker:
                 terminal=exc.terminal,
                 cancelled=exc.cancelled,
             )
-        except GraphClientError as exc:
+        except RelationshipProjectionBackendError as exc:
             error_class = exc.error_class
             status = self._finalize_failure(
                 outbox_id,
@@ -288,7 +290,7 @@ class GraphProjectionWorker:
                 if connectivity_probe is not None:
                     try:
                         connectivity_probe()
-                    except GraphClientError:
+                    except RelationshipProjectionBackendError:
                         if state_listener is not None:
                             state_listener("degraded")
                     except Exception:
