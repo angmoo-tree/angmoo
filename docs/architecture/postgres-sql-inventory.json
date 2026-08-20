@@ -1013,16 +1013,16 @@
     {
       "markers": {
         "driver_or_url": [
-          19
+          20
         ],
         "pgvector": [
-          17
+          18
         ]
       },
       "owner": "ER1-ER2",
       "path": "backend/pyproject.toml",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "5e6cd241716a5e60e43dd49f8edb86fb5d75ca555c7a84cc343e806d509796e3",
+      "source_sha256": "359f4bf108e831bd6b6928a2af472118b5f6e3fde4074991b52b46a5f43d99aa",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {

@@ -3,7 +3,7 @@
 This inventory is generated from the locked Angmoo dependencies.
 Package authors retain all rights granted by their respective licenses.
 
-## Python packages (77)
+## Python packages (78)
 
 - `alembic 1.19.0` — MIT
 - `annotated-doc 0.0.4` — MIT
@@ -29,6 +29,7 @@ Package authors retain all rights granted by their respective licenses.
 - `iniconfig 2.3.0` — MIT
 - `jsonpatch 1.33` — Modified BSD License
 - `jsonpointer 3.1.1` — Modified BSD License
+- `ladybug 0.19.1` — MIT
 - `langchain-core 1.4.3` — MIT
 - `langchain-protocol 0.0.16` — MIT
 - `langgraph 1.2.2` — MIT

@@ -70,8 +70,10 @@ manifests, Docker bases, future Rust/LadybugDB owners, and license evidence.
 
 The current dependency baseline is Python `>=3.13`, Node via
 `pnpm@11.22.0`, Next `16.3.0`, Neo4j Python driver `>=6.2,<7`, PostgreSQL via
-`psycopg[binary]`, and `pgvector`. Rust/Tauri and LadybugDB are not current
-dependencies; ER1 may introduce spike-only dependencies after review.
+`psycopg[binary]`, `pgvector`, and the pinned `ladybug==0.19.1` adapter runtime.
+LadybugDB is installed for ER3 adapter validation but is not the production
+graph default. Rust/Tauri remains confined to the reviewed ER1 spike until
+later Tauri implementation gates.
 
 ## Resource baseline
 
@@ -116,7 +118,9 @@ not these outcomes.
 
 ## ER0 closeout boundary
 
-ER0 can be marked complete only after the Draft PR passes required Actions, the
-user reviews this ADR and the synthetic migration policy, the PR is merged, its
-exact merge SHA is recorded, and the user separately approves ER1. Until then,
-SQLite, LadybugDB, Tauri, and the canonical switch remain unimplemented.
+ER0 and ER1 are complete, and ER2 has implemented the SQLite adapter,
+concurrency, FTS5, and offline migration proof without changing the production
+canonical. ER3 PR H introduces a real LadybugDB write adapter behind the
+existing projection port. Typed graph-read parity, production selection,
+Tauri, and the final canonical switch remain unimplemented until their
+separate gates pass.

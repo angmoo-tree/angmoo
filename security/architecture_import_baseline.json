@@ -1,7 +1,7 @@
 {
-  "edge_count": 882,
-  "external_import_count": 1388,
-  "module_count": 420,
+  "edge_count": 884,
+  "external_import_count": 1401,
+  "module_count": 421,
   "modules": [
     {
       "external_imports": [],
@@ -3444,6 +3444,30 @@
     {
       "external_imports": [
         "__future__",
+        "ctypes",
+        "datetime",
+        "fcntl",
+        "gc",
+        "json",
+        "ladybug",
+        "msvcrt",
+        "os",
+        "pathlib",
+        "subprocess",
+        "threading",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.relationships.ports.projection",
+        "app.domains.relationships.projection.commands"
+      ],
+      "module": "app.integrations.ladybug_projection",
+      "path": "backend/app/integrations/ladybug_projection.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "concurrent.futures",
         "enum",
         "json",
@@ -3453,6 +3477,7 @@
         "typing"
       ],
       "imports": [
+        "app.domains.relationships.ports.projection",
         "app.domains.relationships.projection.commands",
         "app.services.graph_projection_metrics"
       ],
@@ -4965,7 +4990,6 @@
         "app.domains.relationships.ports.outbox",
         "app.domains.relationships.ports.projection",
         "app.domains.relationships.projection.commands",
-        "app.integrations.neo4j",
         "app.runtime.graph_projection.sqlalchemy_outbox",
         "app.services.graph_projection_metrics"
       ],

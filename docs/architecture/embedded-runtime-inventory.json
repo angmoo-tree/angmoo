@@ -35,7 +35,7 @@
     },
     {
       "path": "backend/app/services/graph_projection_worker.py",
-      "sha256": "7af434504f179a5b609ee5a5e758922f34b07906e371c90911cc4fe653bc4901"
+      "sha256": "1982182145d99bb56ba8800ccdbd1012cf3714565a3d5b29fce7c8fb9e4cc3bb"
     }
   ],
   "dependencies": {
@@ -46,6 +46,7 @@
         "fastapi>=0.141.1",
         "google-auth[requests]>=2.40.0",
         "google-genai>=2.17.0",
+        "ladybug==0.19.1",
         "langgraph>=1.0.4",
         "neo4j>=6.2.0,<7.0.0",
         "oci>=2.175.0",
@@ -275,7 +276,7 @@
       "owner": "ER4",
       "path": "backend/app/services/graph_projection_worker.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "7af434504f179a5b609ee5a5e758922f34b07906e371c90911cc4fe653bc4901",
+      "source_sha256": "1982182145d99bb56ba8800ccdbd1012cf3714565a3d5b29fce7c8fb9e4cc3bb",
       "transition_pr": "ER4 PR J"
     },
     {
