@@ -1,7 +1,7 @@
 {
-  "edge_count": 875,
-  "external_import_count": 1371,
-  "module_count": 418,
+  "edge_count": 882,
+  "external_import_count": 1388,
+  "module_count": 420,
   "modules": [
     {
       "external_imports": [],
@@ -2885,6 +2885,7 @@
       "imports": [
         "app.domains.runtime.ports.application_runtime_probe",
         "app.domains.runtime.ports.migration_source",
+        "app.domains.runtime.ports.offline_migration",
         "app.domains.runtime.ports.runtime_data_path",
         "app.domains.runtime.ports.scheduler_lease_repository",
         "app.domains.runtime.ports.search_index",
@@ -2915,6 +2916,17 @@
       "imports": [],
       "module": "app.domains.runtime.ports.migration_source",
       "path": "backend/app/domains/runtime/ports/migration_source.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.runtime.ports.offline_migration",
+      "path": "backend/app/domains/runtime/ports/offline_migration.py",
       "wildcard_imports": []
     },
     {
@@ -3946,7 +3958,8 @@
     {
       "external_imports": [],
       "imports": [
-        "app.runtime.migrations.alembic_source"
+        "app.runtime.migrations.alembic_source",
+        "app.runtime.migrations.postgres_to_sqlite"
       ],
       "module": "app.runtime.migrations",
       "path": "backend/app/runtime/migrations/__init__.py",
@@ -3964,6 +3977,34 @@
       ],
       "module": "app.runtime.migrations.alembic_source",
       "path": "backend/app/runtime/migrations/alembic_source.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "base64",
+        "collections.abc",
+        "dataclasses",
+        "datetime",
+        "decimal",
+        "enum",
+        "hashlib",
+        "json",
+        "pathlib",
+        "shutil",
+        "sqlalchemy",
+        "typing",
+        "uuid"
+      ],
+      "imports": [
+        "app.domains.runtime.ports.migration_source",
+        "app.domains.runtime.ports.offline_migration",
+        "app.domains.runtime.ports.runtime_data_path",
+        "app.runtime.persistence.sqlite_database",
+        "app.runtime.persistence.sqlite_schema"
+      ],
+      "module": "app.runtime.migrations.postgres_to_sqlite",
+      "path": "backend/app/runtime/migrations/postgres_to_sqlite.py",
       "wildcard_imports": []
     },
     {

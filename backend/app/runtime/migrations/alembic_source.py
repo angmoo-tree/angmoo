@@ -30,6 +30,10 @@ class AlembicMigrationSource:
         revisions: list[MigrationRevision] = []
         for path in sorted(self._versions_path.glob("*.py")):
             raw = path.read_bytes()
+            # Git may materialize the same migration as CRLF on Windows and LF
+            # on Linux. Lineage identity is based on canonical source content,
+            # not on the checkout's line-ending policy.
+            canonical = raw.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
             tree = ast.parse(raw.decode("utf-8"), filename=str(path))
             revision = _literal_assignment(tree, "revision")
             if not revision:
@@ -39,7 +43,7 @@ class AlembicMigrationSource:
                     revision=revision,
                     down_revision=_literal_assignment(tree, "down_revision"),
                     path=path.name,
-                    sha256=sha256(raw).hexdigest(),
+                    sha256=sha256(canonical).hexdigest(),
                 )
             )
         return tuple(revisions)

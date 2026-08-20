@@ -22,7 +22,7 @@ stale, incomplete, or violates the frozen corpus.
 
 | Surface | Count | Artifact | Transition owner |
 |---|---:|---|---|
-| PostgreSQL-coupled source files | 67 | `postgres-sql-inventory.json` | ER1/ER2/ER4 |
+| PostgreSQL-coupled source files | 74 | `postgres-sql-inventory.json` | ER1/ER2/ER4 |
 | Alembic version files | 81 | `migration-conversion-inventory.json` | ER2 |
 | Neo4j static queries | 24 | `neo4j-query-corpus.json` | ER3 |
 | Next pages and route handlers | 38 | `next-static-compatibility.json` | ER5 |

@@ -7,6 +7,12 @@ from app.domains.runtime.ports.migration_source import (
     MigrationRevision,
     MigrationSourcePort,
 )
+from app.domains.runtime.ports.offline_migration import (
+    OfflineCanonicalMigrationPort,
+    OfflineMigrationManifest,
+    OfflineMigrationReport,
+    OfflineMigrationTableParity,
+)
 from app.domains.runtime.ports.runtime_data_path import (
     RuntimeDataPathPort,
     RuntimeDataPaths,
@@ -27,6 +33,10 @@ __all__ = [
     "ClaimLeasePort",
     "MigrationRevision",
     "MigrationSourcePort",
+    "OfflineCanonicalMigrationPort",
+    "OfflineMigrationManifest",
+    "OfflineMigrationReport",
+    "OfflineMigrationTableParity",
     "RuntimeDataPathPort",
     "RuntimeDataPaths",
     "SchedulerLeaseRepository",
