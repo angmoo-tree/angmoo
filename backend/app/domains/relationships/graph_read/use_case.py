@@ -29,6 +29,7 @@ from app.domains.relationships.graph_read.repository import (
 
 
 GraphView = Literal["neighborhood", "direct", "evidence"]
+GraphProvider = Literal["neo4j", "ladybug"]
 
 
 @dataclass(frozen=True)
@@ -263,6 +264,7 @@ def get_owner_relationship_graph(
     limit: int = 20,
     graph_projection_enabled: bool = True,
     repository: RelationshipGraphQueryPort | None = None,
+    graph_provider: GraphProvider = "neo4j",
 ) -> schemas.RelationshipGraphRead:
     if view not in {"neighborhood", "direct", "evidence"}:
         raise RelationshipGraphRequestError("graph_view_invalid")
@@ -297,7 +299,7 @@ def get_owner_relationship_graph(
         oldest_pending_age_seconds=lag,
     )
 
-    source: Literal["neo4j", "postgres_fallback"] = "neo4j"
+    source: Literal["neo4j", "ladybug", "postgres_fallback"] = graph_provider
     fallback_reason: str | None = None
     template = {
         "neighborhood": f"visualization_neighborhood_{depth}",
@@ -373,7 +375,11 @@ def get_owner_relationship_graph(
         )
 
     event_ids: list[str] = []
-    if view == "evidence" and repository is not None and source == "neo4j":
+    if (
+        view == "evidence"
+        and repository is not None
+        and source != "postgres_fallback"
+    ):
         try:
             event_hits = repository.list_relationship_evidence(
                 world_id=world_id,

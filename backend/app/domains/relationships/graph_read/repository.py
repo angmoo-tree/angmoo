@@ -4,11 +4,36 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+from enum import StrEnum
 from typing import Literal, Protocol, runtime_checkable
 
 
 DirectionMode = Literal["outgoing", "incoming", "either"]
 RankingMode = Literal["positive", "tense", "recent"]
+
+
+class GraphQueryTemplate(StrEnum):
+    """Provider-neutral names for the bounded relationship read workload."""
+
+    DIRECT_RELATIONSHIP = "direct_relationship"
+    SHARED_NEIGHBORS_OUTGOING = "shared_neighbors_outgoing"
+    SHARED_NEIGHBORS_INCOMING = "shared_neighbors_incoming"
+    SHARED_NEIGHBORS_EITHER = "shared_neighbors_either"
+    SHORTEST_PATH_OUTGOING_1 = "shortest_path_outgoing_1"
+    SHORTEST_PATH_OUTGOING_2 = "shortest_path_outgoing_2"
+    SHORTEST_PATH_OUTGOING_3 = "shortest_path_outgoing_3"
+    SHORTEST_PATH_INCOMING_1 = "shortest_path_incoming_1"
+    SHORTEST_PATH_INCOMING_2 = "shortest_path_incoming_2"
+    SHORTEST_PATH_INCOMING_3 = "shortest_path_incoming_3"
+    SHORTEST_PATH_EITHER_1 = "shortest_path_either_1"
+    SHORTEST_PATH_EITHER_2 = "shortest_path_either_2"
+    SHORTEST_PATH_EITHER_3 = "shortest_path_either_3"
+    RANK_POSITIVE = "ranked_related_positive"
+    RANK_TENSE = "ranked_related_tense"
+    RANK_RECENT = "ranked_related_recent"
+    RELATIONSHIP_EVIDENCE = "relationship_evidence"
+    VISUALIZATION_1 = "visualization_neighborhood_1"
+    VISUALIZATION_2 = "visualization_neighborhood_2"
 
 
 @dataclass(frozen=True)

@@ -31,13 +31,16 @@ from app.domains.relationships.graph_read.repository import (
 )
 from app.domains.relationships.graph_read.use_case import GraphProjectionCounts
 from app.integrations.neo4j import GraphClientError
+from app.domains.relationships.ports.projection import (
+    RelationshipProjectionBackendError,
+)
 from app.integrations.relationship_graph_read import RelationshipGraphRepository
 from app.services.graph_projection_metrics import graph_metrics
 from app.services.graph_projection_runtime import graph_client_from_settings
 
 
 class _BackendErrorMappingRepository:
-    """Normalize Neo4j transport errors before they enter the domain."""
+    """Normalize graph-provider transport errors before they enter the domain."""
 
     def __init__(self, delegate: RelationshipGraphQueryPort) -> None:
         self._delegate = delegate
@@ -45,7 +48,7 @@ class _BackendErrorMappingRepository:
     def _call(self, method_name: str, **kwargs):
         try:
             return getattr(self._delegate, method_name)(**kwargs)
-        except GraphClientError as exc:
+        except RelationshipProjectionBackendError as exc:
             raise GraphReadBackendError(exc.error_class) from exc
 
     def get_direct_relationship(self, **kwargs) -> list[GraphRelationshipHit]:
@@ -470,6 +473,7 @@ def get_owner_relationship_graph(
     limit: int = 20,
     config: Settings = settings,
     repository: RelationshipGraphQueryPort | None = None,
+    graph_provider: relationships.GraphProvider = "neo4j",
 ) -> relationships.RelationshipGraphRead:
     """Preserve the legacy call signature while delegating to the domain."""
 
@@ -490,6 +494,7 @@ def get_owner_relationship_graph(
         limit=limit,
         graph_projection_enabled=config.graph_projection_enabled,
         repository=mapped_repository,
+        graph_provider=graph_provider,
     )
 
 

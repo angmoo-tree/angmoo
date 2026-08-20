@@ -312,6 +312,17 @@ def build_neo4j_inventory() -> dict[str, Any]:
     source = ROOT / "backend" / "app" / "integrations" / "neo4j.py"
     text = source.read_text(encoding="utf-8")
     tree = ast.parse(text, filename=str(source))
+    template_source = (
+        ROOT
+        / "backend"
+        / "app"
+        / "domains"
+        / "relationships"
+        / "graph_read"
+        / "repository.py"
+    )
+    template_text = template_source.read_text(encoding="utf-8")
+    template_tree = ast.parse(template_text, filename=str(template_source))
     query_entries: list[dict[str, Any]] = []
 
     for node in tree.body:
@@ -374,7 +385,7 @@ def build_neo4j_inventory() -> dict[str, Any]:
         )
 
     templates: list[dict[str, str]] = []
-    for node in tree.body:
+    for node in template_tree.body:
         if not isinstance(node, ast.ClassDef) or node.name != "GraphQueryTemplate":
             continue
         for child in node.body:

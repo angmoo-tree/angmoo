@@ -9,9 +9,9 @@ from app.domains.relationships.graph_read.repository import (
     GraphEvidenceHit,
     GraphNeighborhoodHit,
     GraphPathHit,
+    GraphQueryTemplate,
     GraphRelationshipHit,
 )
-from app.integrations.neo4j import GraphQueryTemplate
 
 
 DirectionMode = Literal["outgoing", "incoming", "either"]

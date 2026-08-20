@@ -45,7 +45,7 @@ export type RelationshipGraphRead = {
   evidence: RelationshipGraphEvidence[];
   meta: {
     template: string;
-    source: "neo4j" | "postgres_fallback";
+    source: "neo4j" | "ladybug" | "postgres_fallback";
     graph_status: RelationshipGraphStatus;
     truncated: boolean;
     projection_lag_seconds: number | null;

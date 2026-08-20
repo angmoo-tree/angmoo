@@ -621,7 +621,7 @@
       "owner": "ER1-ER2",
       "path": "backend/app/models/graph_projection.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "c108f496306119b268b444e2e521fccf1718946cc18feb28d85c520c12336845",
+      "source_sha256": "83f8f08bba74541932e5c607bad477433e6048eefd84fea8c5ce4a83410a11be",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
@@ -963,7 +963,7 @@
       "owner": "ER1-ER2",
       "path": "backend/app/services/relationship_graph_read.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "a5f3a2b4ead27112c0e099c22599b58a668d0c07fff616d06e5c815b1eca5057",
+      "source_sha256": "59a7743abf2b496a18778e84b0da7f5dfeffac4159868bb98102bdc73a4ea4b6",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {

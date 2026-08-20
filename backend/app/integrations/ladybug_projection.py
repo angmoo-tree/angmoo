@@ -8,6 +8,7 @@ can be deleted and rebuilt without losing canonical user data.
 from __future__ import annotations
 
 import ctypes
+from collections import defaultdict, deque
 from datetime import datetime
 import gc
 import json
@@ -22,6 +23,7 @@ import ladybug as lb
 from app.domains.relationships.ports.projection import (
     RelationshipProjectionBackendError,
 )
+from app.domains.relationships.graph_read.repository import GraphQueryTemplate
 from app.domains.relationships.projection.commands import (
     NoGraphMutationCommand,
     ProjectionCommand,
@@ -291,6 +293,301 @@ class LadybugRelationshipProjection:
             rows = self._execute("RETURN 1")
             if rows != [[1]]:
                 raise LadybugProjectionError("ladybug_unavailable")
+
+    @staticmethod
+    def _relationship_payload(row: list[Any]) -> dict[str, Any]:
+        return {
+            "world_id": str(row[2]),
+            "relationship_state_id": str(row[3]),
+            "familiarity": int(row[4] or 0),
+            "affinity": int(row[5] or 0),
+            "trust": int(row[6] or 0),
+            "tension": int(row[7] or 0),
+            "interaction_count": int(row[8] or 0),
+            "last_event_id": str(row[9]) if row[9] is not None else None,
+            "last_event_at": str(row[10]) if row[10] is not None else None,
+            "updated_at": str(row[11]) if row[11] is not None else None,
+            "relationship_version": int(row[12] or 0),
+        }
+
+    def _relationship_rows(self, *, world_id: str) -> list[dict[str, Any]]:
+        rows = self._execute(
+            """
+            MATCH (actor:WorldCharacter)-[relationship:RELATES_TO]->
+                  (target:WorldCharacter)
+            WHERE actor.world_id = $world_id
+              AND target.world_id = $world_id
+              AND relationship.world_id = $world_id
+            RETURN actor.world_character_id,
+                   target.world_character_id,
+                   relationship.world_id,
+                   relationship.relationship_state_id,
+                   relationship.familiarity,
+                   relationship.affinity,
+                   relationship.trust,
+                   relationship.tension,
+                   relationship.interaction_count,
+                   relationship.last_event_id,
+                   relationship.last_event_at,
+                   relationship.updated_at,
+                   relationship.relationship_version
+            """,
+            {"world_id": world_id},
+        )
+        return [
+            {
+                "actor_id": str(row[0]),
+                "target_id": str(row[1]),
+                "relationship": self._relationship_payload(row),
+            }
+            for row in rows
+        ]
+
+    @staticmethod
+    def _ordered_relationships(
+        rows: list[dict[str, Any]], *, mode: str
+    ) -> list[dict[str, Any]]:
+        # Stable sorts reproduce the Neo4j ORDER BY clauses without relying on
+        # provider-specific NULL ordering or relationship helper functions.
+        rows = sorted(rows, key=lambda row: str(row["target_id"]))
+        if mode == "positive":
+            rows = sorted(
+                rows,
+                key=lambda row: (
+                    -int(row["relationship"]["familiarity"]),
+                    -int(row["relationship"]["affinity"]),
+                    -int(row["relationship"]["trust"]),
+                    int(row["relationship"]["tension"]),
+                ),
+            )
+        elif mode == "tense":
+            rows = sorted(
+                rows,
+                key=lambda row: str(row["relationship"]["updated_at"] or ""),
+                reverse=True,
+            )
+            rows = sorted(
+                rows,
+                key=lambda row: (
+                    -int(row["relationship"]["tension"]),
+                    int(row["relationship"]["affinity"]),
+                ),
+            )
+        else:
+            rows = sorted(
+                rows,
+                key=lambda row: (
+                    str(row["relationship"]["updated_at"] or ""),
+                    int(row["relationship"]["interaction_count"]),
+                ),
+                reverse=True,
+            )
+        return rows
+
+    @staticmethod
+    def _adjacency(
+        rows: list[dict[str, Any]], *, direction: str
+    ) -> dict[str, list[tuple[str, dict[str, Any]]]]:
+        adjacency: dict[str, list[tuple[str, dict[str, Any]]]] = defaultdict(list)
+        for row in rows:
+            actor = str(row["actor_id"])
+            target = str(row["target_id"])
+            if direction in {"outgoing", "either"}:
+                adjacency[actor].append((target, row))
+            if direction in {"incoming", "either"}:
+                adjacency[target].append((actor, row))
+        for values in adjacency.values():
+            values.sort(
+                key=lambda item: (
+                    item[0],
+                    str(item[1]["actor_id"]),
+                    str(item[1]["target_id"]),
+                    str(item[1]["relationship"]["relationship_state_id"]),
+                )
+            )
+        return adjacency
+
+    @classmethod
+    def _shortest_path(
+        cls,
+        rows: list[dict[str, Any]],
+        *,
+        source_id: str,
+        target_id: str,
+        direction: str,
+        max_hops: int,
+    ) -> list[dict[str, Any]]:
+        if source_id == target_id:
+            return []
+        adjacency = cls._adjacency(rows, direction=direction)
+        queue: deque[tuple[str, list[str], list[dict[str, Any]]]] = deque(
+            [(source_id, [source_id], [])]
+        )
+        while queue:
+            current, nodes, edges = queue.popleft()
+            if len(edges) >= max_hops:
+                continue
+            for neighbor, edge in adjacency.get(current, []):
+                if neighbor in nodes:
+                    continue
+                next_nodes = [*nodes, neighbor]
+                next_edges = [*edges, edge]
+                if neighbor == target_id:
+                    return [
+                        {
+                            "world_character_ids": next_nodes,
+                            "oriented_edges": next_edges,
+                            "hop_count": len(next_edges),
+                        }
+                    ]
+                queue.append((neighbor, next_nodes, next_edges))
+        return []
+
+    def run_template(
+        self,
+        template: GraphQueryTemplate,
+        parameters: dict[str, Any],
+    ) -> list[dict[str, Any]]:
+        """Execute the bounded P7 read workload against LadybugDB.
+
+        LadybugDB and Neo4j expose different Cypher helper functions.  The
+        adapter therefore reads explicit typed relationship columns and keeps
+        traversal/ranking limits in deterministic Python code while returning
+        the exact provider-neutral row contract consumed by
+        ``RelationshipGraphRepository``.
+        """
+
+        world_id = str(parameters["world_id"])
+        source_id = str(parameters.get("source_id") or "")
+        target_id = str(parameters.get("target_id") or "")
+        with self._access_lock:
+            relationships = self._relationship_rows(world_id=world_id)
+
+            if template == GraphQueryTemplate.DIRECT_RELATIONSHIP:
+                return [
+                    row
+                    for row in relationships
+                    if row["actor_id"] == source_id
+                    and row["target_id"] == target_id
+                ][:1]
+
+            if template in {
+                GraphQueryTemplate.SHARED_NEIGHBORS_OUTGOING,
+                GraphQueryTemplate.SHARED_NEIGHBORS_INCOMING,
+                GraphQueryTemplate.SHARED_NEIGHBORS_EITHER,
+            }:
+                direction = {
+                    GraphQueryTemplate.SHARED_NEIGHBORS_OUTGOING: "outgoing",
+                    GraphQueryTemplate.SHARED_NEIGHBORS_INCOMING: "incoming",
+                    GraphQueryTemplate.SHARED_NEIGHBORS_EITHER: "either",
+                }[template]
+                adjacency = self._adjacency(relationships, direction=direction)
+                left = {value for value, _ in adjacency.get(source_id, [])}
+                right = {value for value, _ in adjacency.get(target_id, [])}
+                limit = int(parameters.get("limit") or 20)
+                return [
+                    {"world_character_id": value}
+                    for value in sorted(left & right)[:limit]
+                ]
+
+            if template.value.startswith("shortest_path_"):
+                _, _, direction, raw_hops = template.value.rsplit("_", 3)
+                return self._shortest_path(
+                    relationships,
+                    source_id=source_id,
+                    target_id=target_id,
+                    direction=direction,
+                    max_hops=int(raw_hops),
+                )
+
+            if template in {
+                GraphQueryTemplate.RANK_POSITIVE,
+                GraphQueryTemplate.RANK_TENSE,
+                GraphQueryTemplate.RANK_RECENT,
+            }:
+                mode = {
+                    GraphQueryTemplate.RANK_POSITIVE: "positive",
+                    GraphQueryTemplate.RANK_TENSE: "tense",
+                    GraphQueryTemplate.RANK_RECENT: "recent",
+                }[template]
+                limit = int(parameters.get("limit") or 20)
+                outgoing = [
+                    row for row in relationships if row["actor_id"] == source_id
+                ]
+                return self._ordered_relationships(outgoing, mode=mode)[:limit]
+
+            if template == GraphQueryTemplate.RELATIONSHIP_EVIDENCE:
+                rows = self._execute(
+                    """
+                    MATCH (actor:WorldCharacter)-[grounded:RELATIONSHIP_GROUNDED_IN]->
+                          (event:SocialEvent)
+                    WHERE actor.world_character_id = $source_id
+                      AND actor.world_id = $world_id
+                      AND event.world_id = $world_id
+                      AND grounded.world_id = $world_id
+                      AND grounded.target_world_character_id = $target_id
+                    RETURN event.event_id,
+                           event.event_type,
+                           event.occurred_at,
+                           grounded.relationship_state_id,
+                           grounded.relationship_version
+                    ORDER BY event.occurred_at DESC, event.event_id DESC
+                    LIMIT $evidence_limit
+                    """,
+                    parameters,
+                )
+                return [
+                    {
+                        "event_id": str(row[0]),
+                        "event_type": str(row[1]),
+                        "occurred_at": str(row[2]),
+                        "relationship_state_id": str(row[3]),
+                        "relationship_version": int(row[4] or 0),
+                    }
+                    for row in rows
+                ]
+
+            if template in {
+                GraphQueryTemplate.VISUALIZATION_1,
+                GraphQueryTemplate.VISUALIZATION_2,
+            }:
+                depth = 1 if template == GraphQueryTemplate.VISUALIZATION_1 else 2
+                edge_limit = int(parameters.get("edge_limit") or 40)
+                adjacency = self._adjacency(relationships, direction="either")
+                expanded = {source_id}
+                frontier = {source_id}
+                selected: dict[tuple[str, str, str], dict[str, Any]] = {}
+                for _ in range(depth):
+                    next_frontier: set[str] = set()
+                    for node_id in sorted(frontier):
+                        for neighbor, row in adjacency.get(node_id, []):
+                            key = (
+                                str(row["actor_id"]),
+                                str(row["target_id"]),
+                                str(
+                                    row["relationship"]["relationship_state_id"]
+                                ),
+                            )
+                            selected[key] = row
+                            if neighbor not in expanded:
+                                next_frontier.add(neighbor)
+                    expanded.update(next_frontier)
+                    frontier = next_frontier
+                ordered = sorted(
+                    selected.values(),
+                    key=lambda row: (
+                        str(row["actor_id"]),
+                        str(row["target_id"]),
+                    ),
+                )
+                ordered = sorted(
+                    ordered,
+                    key=lambda row: str(row["relationship"]["updated_at"] or ""),
+                    reverse=True,
+                )
+                return ordered[:edge_limit]
+
+        raise LadybugProjectionError("ladybug_query_template_unsupported")
 
     def close(self) -> None:
         with self._access_lock:

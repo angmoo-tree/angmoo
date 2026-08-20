@@ -123,7 +123,11 @@ export function RelationshipGraphClient({
                 </p>
               </div>
               <span className="rounded-full bg-surface-container px-3 py-2 text-xs font-bold">
-                {graph.meta.source === "neo4j" ? "Neo4j 검증 결과" : "PostgreSQL 안전 대체"}
+                {graph.meta.source === "neo4j"
+                  ? "Neo4j 검증 결과"
+                  : graph.meta.source === "ladybug"
+                    ? "LadybugDB 검증 결과"
+                    : "PostgreSQL 안전 대체"}
               </span>
             </div>
 
