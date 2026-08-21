@@ -26,8 +26,10 @@ def test_tauri_product_shell_is_pinned_and_keeps_sidecar_out_of_js_shell_scope()
     assert "shell:" not in serialized
     assert 'tauri-plugin-shell = "=2.3.5"' in cargo
     assert 'tauri-plugin-single-instance = "=2.4.3"' in cargo
+    assert 'features = ["macos-private-api"]' in cargo
     config = json.loads(_read("desktop/src-tauri/tauri.conf.json"))
     assert config["bundle"]["externalBin"] == ["binaries/angmoo-sidecar"]
+    assert config["app"]["macOSPrivateApi"] is True
 
 
 def test_product_sidecar_has_fixed_commands_hash_and_lifecycle_contract() -> None:
@@ -93,7 +95,8 @@ def test_phone_window_has_no_browser_chrome_and_applies_scaling_policy() -> None
         "DWMWA_BORDER_COLOR",
         "DWMWA_COLOR_NONE",
         "DWMWA_WINDOW_CORNER_PREFERENCE",
-        "request_compositor_rounding",
+        "DWMWCP_DONOTROUND_VALUE",
+        "disable_compositor_rounding",
         "phone_contains_point",
         "HTNOWHERE",
         "SetWindowSubclass",
@@ -116,6 +119,8 @@ def test_phone_window_has_no_browser_chrome_and_applies_scaling_policy() -> None
         "HTBOTTOMRIGHT",
     ):
         assert marker in resize
+    assert "request_compositor_rounding" not in resize
+    assert "DWMWCP_ROUND_VALUE" not in resize
     for aliased_region_marker in (
         "CreateRoundRectRgn",
         "SetWindowRgn",
