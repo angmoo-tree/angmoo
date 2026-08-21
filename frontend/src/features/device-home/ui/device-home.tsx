@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Cog, Globe2, Hammer, Plus } from "lucide-react";
+import { BrainCircuit, Cog, Globe2, Hammer, Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import {
@@ -35,12 +35,14 @@ const FIXED_VISUALS = {
   settings: <Cog size={30} strokeWidth={2.2} />,
   studio: <Hammer size={30} strokeWidth={2.2} />,
   "world-import": <Plus size={32} strokeWidth={2.2} />,
+  "memory-explorer": <BrainCircuit size={30} strokeWidth={2.1} />,
 } as const;
 
 const FIXED_BACKGROUNDS = {
   settings: "linear-gradient(145deg, #f7d6d5, #fff4ef)",
   studio: "linear-gradient(145deg, #ffe1a6, #fff5da)",
   "world-import": "linear-gradient(145deg, #dce7f5, #f5f8fc)",
+  "memory-explorer": "linear-gradient(145deg, #ded7f4, #f7f2ff)",
 } as const;
 
 export function DeviceHome({ authStatus }: DeviceHomeProps) {

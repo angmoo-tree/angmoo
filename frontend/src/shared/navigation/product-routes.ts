@@ -13,3 +13,10 @@ export function worldAppRoute(worldId: string): string {
 export function studioWorldRoute(worldId: string): string {
   return `/studio/worlds/${encodeURIComponent(worldId)}`;
 }
+
+export function relationshipGraphRoute(
+  characterId: string,
+  worldId: string,
+): string {
+  return `/characters/${encodeURIComponent(characterId)}/worlds/${encodeURIComponent(worldId)}/relationship-graph`;
+}

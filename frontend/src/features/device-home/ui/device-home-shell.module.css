@@ -42,6 +42,15 @@
   gap: 22px 12px;
 }
 
+:global(body[data-angmoo-desktop-window="phone"]) .root {
+  width: 100vw;
+  height: 100dvh;
+  min-height: 0;
+  align-items: stretch;
+  padding: 0;
+  background: transparent;
+}
+
 @media (max-width: 479px) {
   .root {
     padding: 0;

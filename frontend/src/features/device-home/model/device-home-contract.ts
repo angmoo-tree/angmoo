@@ -1,6 +1,10 @@
 import { PRODUCT_ROUTES } from "@/shared/navigation/public";
 
-export type DeviceHomeFixedAppId = "settings" | "studio" | "world-import";
+export type DeviceHomeFixedAppId =
+  | "settings"
+  | "studio"
+  | "world-import"
+  | "memory-explorer";
 
 export type DeviceHomeFixedApp = {
   id: DeviceHomeFixedAppId;
@@ -63,6 +67,12 @@ export const DEVICE_HOME_FIXED_APPS: readonly DeviceHomeFixedApp[] = [
     id: "world-import",
     label: "World 추가·가져오기",
     href: PRODUCT_ROUTES.studioImport,
+    availability: "planned",
+  },
+  {
+    id: "memory-explorer",
+    label: "Memory Explorer",
+    href: "/memory-explorer",
     availability: "planned",
   },
 ] as const;

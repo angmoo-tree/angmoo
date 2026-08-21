@@ -134,6 +134,27 @@
   text-transform: uppercase;
 }
 
+.capabilityAction {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  border-radius: 999px;
+  background: #9f413d;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 850;
+  padding: 11px 18px;
+  text-decoration: none;
+}
+
+.capabilityAction:hover,
+.capabilityAction:focus-visible {
+  background: #81322f;
+  outline: 3px solid rgb(159 65 61 / 22%);
+}
+
 .legacyNotice {
   text-align: left;
 }

@@ -1,5 +1,6 @@
 export {
   PRODUCT_ROUTES,
+  relationshipGraphRoute,
   studioWorldRoute,
   worldAppRoute,
 } from "./product-routes";

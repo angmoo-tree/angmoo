@@ -17,6 +17,10 @@ import { StudioRouteClient } from "@/app/studio/studio-route-client";
 import { WorldAppRouteClient } from "@/app/world-app-route-client";
 import { CreatorStudioFrame } from "@/features/creator-studio/public";
 import {
+  currentDesktopRoute,
+  subscribeDesktopRoute,
+} from "@/shared/desktop/public";
+import {
   worldAppSectionFromSegment,
   type WorldAppSectionId,
 } from "@/features/world-app/public";
@@ -46,8 +50,11 @@ function decodedSegment(value: string) {
 
 export function StaticProductRouter() {
   const locationValue = useSyncExternalStore(
-    () => () => undefined,
-    () => `${window.location.pathname}\n${window.location.search}`,
+    subscribeDesktopRoute,
+    () => {
+      const route = new URL(currentDesktopRoute(), "http://angmoo.local");
+      return `${route.pathname}\n${route.search}`;
+    },
     () => "",
   );
   if (!locationValue) {
@@ -228,13 +235,8 @@ function StaticPostRoute({ postId }: { postId: string }) {
 
 function StaticLoadingScreen() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#fff8f7] px-6 text-center">
-      <div>
-        <p className="text-sm font-extrabold uppercase tracking-[0.16em] text-[#8c706f]">
-          Angmoo Local
-        </p>
-        <p className="mt-3 text-xl font-bold text-[#251818]">제품 화면을 준비하고 있습니다...</p>
-      </div>
+    <main className="min-h-screen bg-transparent" aria-live="polite">
+      <span className="sr-only">Angmoo 제품 화면을 준비하고 있습니다.</span>
     </main>
   );
 }

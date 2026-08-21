@@ -12,7 +12,10 @@ import {
 import { useEffect, useState, type ReactNode } from "react";
 
 import type { WorldSurfaceItem } from "@/features/device-home/public";
-import { PRODUCT_ROUTES } from "@/shared/navigation/public";
+import {
+  PRODUCT_ROUTES,
+  relationshipGraphRoute,
+} from "@/shared/navigation/public";
 import { StatusBadge } from "@/shared/ui/public";
 import {
   getLocalWorldApp,
@@ -203,6 +206,32 @@ function WorldSection({
 
   if (activeSection.id === "feed") {
     return <WorldManualFeed ownerActor={ownerActor} worldId={worldId} />;
+  }
+
+  if (activeSection.id === "relationships") {
+    return (
+      <section className={styles.capability}>
+        <div className={styles.capabilityIcon}>{SECTION_ICONS[activeSection.id]}</div>
+        <p className={styles.capabilityKicker}>{activeSection.label}</p>
+        <h2>이 World의 관계망</h2>
+        {ownerActor ? (
+          <>
+            <p>
+              기준 캐릭터: {ownerActor.profile.display_name}. 이 World 안의 관계와
+              근거를 확인합니다.
+            </p>
+            <Link
+              className={styles.capabilityAction}
+              href={relationshipGraphRoute(ownerActor.character_id, worldId)}
+            >
+              내 조종 앵무 관계망 열기
+            </Link>
+          </>
+        ) : (
+          <p>Creator Studio에서 사용자 조종 앵무를 만든 뒤 관계망을 열 수 있습니다.</p>
+        )}
+      </section>
+    );
   }
 
   return (

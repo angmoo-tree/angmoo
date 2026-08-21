@@ -67,3 +67,364 @@ for (const route of ROUTES) {
     await expect(page.locator("body")).not.toBeEmpty();
   });
 }
+
+test("Tauri Phone delegates Studio to a reusable wide product window", async ({ page }) => {
+  await page.addInitScript(() => {
+    const desktop = window as unknown as {
+      __ANGMOO_DESKTOP_INVOCATIONS__: Array<{
+        command: string;
+        args?: Record<string, unknown>;
+      }>;
+      __ANGMOO_DESKTOP_WINDOW__: { kind: "phone"; route: string };
+      __TAURI__: {
+        core: {
+          invoke: (command: string, args?: Record<string, unknown>) => Promise<void>;
+        };
+      };
+    };
+    desktop.__ANGMOO_DESKTOP_INVOCATIONS__ = [];
+    desktop.__ANGMOO_DESKTOP_WINDOW__ = { kind: "phone", route: "/" };
+    desktop.__TAURI__ = {
+      core: {
+        invoke: async (command, args) => {
+          desktop.__ANGMOO_DESKTOP_INVOCATIONS__.push({ command, args });
+        },
+      },
+    };
+  });
+  await page.goto("/");
+
+  await expect(page.locator("body")).toHaveAttribute(
+    "data-angmoo-desktop-window",
+    "phone",
+  );
+  await expect(page.locator("body")).toHaveAttribute("data-angmoo-window-drag", "manual");
+  await expect(page.locator("[data-tauri-drag-region]")).toHaveCount(0);
+  await expect(page.locator('[data-window-route="/"]')).toHaveAttribute(
+    "data-window-drag-disabled",
+    "true",
+  );
+  const phoneGeometry = await page.locator('[data-product-shell="device"]').evaluate((node) => {
+    const rect = node.getBoundingClientRect();
+    const root = node.parentElement;
+    return {
+      height: rect.height,
+      rootBackground: root ? getComputedStyle(root).backgroundColor : null,
+      viewportHeight: window.innerHeight,
+      viewportWidth: window.innerWidth,
+      width: rect.width,
+    };
+  });
+  expect(Math.abs(phoneGeometry.width - phoneGeometry.viewportWidth)).toBeLessThanOrEqual(1);
+  expect(Math.abs(phoneGeometry.height - phoneGeometry.viewportHeight)).toBeLessThanOrEqual(1);
+  expect(phoneGeometry.rootBackground).toBe("rgba(0, 0, 0, 0)");
+
+  const radius = Math.min(
+    42,
+    Math.max(26, phoneGeometry.viewportWidth * 0.0725),
+  );
+  const cornerOffset = radius - radius / Math.sqrt(2);
+  const resizeProbes = [
+    {
+      cursor: "ns-resize",
+      direction: "north",
+      x: phoneGeometry.viewportWidth / 2,
+      y: 2,
+    },
+    {
+      cursor: "nesw-resize",
+      direction: "north-east",
+      x: phoneGeometry.viewportWidth - cornerOffset,
+      y: cornerOffset,
+    },
+    {
+      cursor: "ew-resize",
+      direction: "east",
+      x: phoneGeometry.viewportWidth - 2,
+      y: phoneGeometry.viewportHeight / 2,
+    },
+    {
+      cursor: "nwse-resize",
+      direction: "south-east",
+      x: phoneGeometry.viewportWidth - cornerOffset,
+      y: phoneGeometry.viewportHeight - cornerOffset,
+    },
+    {
+      cursor: "ns-resize",
+      direction: "south",
+      x: phoneGeometry.viewportWidth / 2,
+      y: phoneGeometry.viewportHeight - 2,
+    },
+    {
+      cursor: "nesw-resize",
+      direction: "south-west",
+      x: cornerOffset,
+      y: phoneGeometry.viewportHeight - cornerOffset,
+    },
+    {
+      cursor: "ew-resize",
+      direction: "west",
+      x: 2,
+      y: phoneGeometry.viewportHeight / 2,
+    },
+    {
+      cursor: "nwse-resize",
+      direction: "north-west",
+      x: cornerOffset,
+      y: cornerOffset,
+    },
+  ] as const;
+  for (const probe of resizeProbes) {
+    await page.locator('[data-product-shell="device"]').dispatchEvent("pointermove", {
+      buttons: 0,
+      clientX: probe.x,
+      clientY: probe.y,
+      isPrimary: true,
+      pointerType: "mouse",
+    });
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-angmoo-window-resize",
+      probe.direction,
+    );
+    await expect(page.locator("html")).toHaveCSS("cursor", probe.cursor);
+    await page.locator('[data-product-shell="device"]').dispatchEvent("pointerdown", {
+      button: 0,
+      buttons: 1,
+      clientX: probe.x,
+      clientY: probe.y,
+      isPrimary: true,
+      pointerType: "mouse",
+    });
+  }
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const desktop = window as unknown as {
+          __ANGMOO_DESKTOP_INVOCATIONS__: unknown[];
+        };
+        return desktop.__ANGMOO_DESKTOP_INVOCATIONS__;
+      }),
+    )
+    .toEqual(
+      resizeProbes.map(({ direction }) => ({
+        command: "start_product_window_resize",
+        args: { direction },
+      })),
+    );
+  await page.evaluate(() => {
+    const desktop = window as unknown as {
+      __ANGMOO_DESKTOP_INVOCATIONS__: unknown[];
+    };
+    desktop.__ANGMOO_DESKTOP_INVOCATIONS__ = [];
+  });
+  await page.locator('[data-product-shell="device"]').dispatchEvent("pointermove", {
+    buttons: 0,
+    clientX: phoneGeometry.viewportWidth / 2,
+    clientY: phoneGeometry.viewportHeight / 2,
+    isPrimary: true,
+    pointerType: "mouse",
+  });
+  await expect(page.locator("html")).not.toHaveAttribute("data-angmoo-window-resize", /.+/);
+
+  await page.locator('[data-product-shell="device"]').dispatchEvent("pointerdown", {
+    button: 0,
+    buttons: 1,
+    clientX: phoneGeometry.viewportWidth / 2,
+    clientY: phoneGeometry.viewportHeight / 2,
+    isPrimary: true,
+    pointerType: "mouse",
+  });
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const desktop = window as unknown as {
+          __ANGMOO_DESKTOP_INVOCATIONS__: Array<{ command: string }>;
+        };
+        return desktop.__ANGMOO_DESKTOP_INVOCATIONS__.map(({ command }) => command);
+      }),
+    )
+    .toEqual(["start_product_window_drag"]);
+
+  await expect(page.getByLabel("Memory Explorer는 후속 단계에서 연결됩니다")).toHaveAttribute(
+    "data-disabled",
+    "true",
+  );
+  await page.getByRole("link", { name: "Creator Studio 열기" }).dispatchEvent("pointerdown", {
+    button: 0,
+    buttons: 1,
+    isPrimary: true,
+    pointerType: "mouse",
+  });
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const desktop = window as unknown as {
+          __ANGMOO_DESKTOP_INVOCATIONS__: Array<{ command: string }>;
+        };
+        return desktop.__ANGMOO_DESKTOP_INVOCATIONS__.filter(
+          ({ command }) => command === "start_product_window_drag",
+        ).length;
+      }),
+    )
+    .toBe(1);
+  await page.getByRole("link", { name: "Creator Studio 열기" }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const desktop = window as unknown as {
+          __ANGMOO_DESKTOP_INVOCATIONS__: unknown[];
+        };
+        return desktop.__ANGMOO_DESKTOP_INVOCATIONS__;
+      }),
+    )
+    .toContainEqual({
+      command: "open_product_window",
+      args: { kind: "studio", route: "/studio" },
+    });
+  await expect(page).toHaveURL(/\/$/);
+
+  await page.getByRole("button", { name: "Angmoo 창 최소화" }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const desktop = window as unknown as {
+          __ANGMOO_DESKTOP_INVOCATIONS__: Array<{ command: string }>;
+        };
+        return desktop.__ANGMOO_DESKTOP_INVOCATIONS__.map(({ command }) => command);
+      }),
+    )
+    .toContain("minimize_product_window");
+});
+
+test("Tauri Phone opens the owner relationship graph in a wide product window", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const desktop = window as unknown as {
+      __ANGMOO_DESKTOP_INVOCATIONS__: Array<{
+        command: string;
+        args?: Record<string, unknown>;
+      }>;
+      __ANGMOO_DESKTOP_WINDOW__: { kind: "phone"; route: string };
+      __TAURI__: {
+        core: {
+          invoke: (command: string, args?: Record<string, unknown>) => Promise<void>;
+        };
+      };
+    };
+    desktop.__ANGMOO_DESKTOP_INVOCATIONS__ = [];
+    desktop.__ANGMOO_DESKTOP_WINDOW__ = {
+      kind: "phone",
+      route: "/worlds/world-static-probe/relationships",
+    };
+    desktop.__TAURI__ = {
+      core: {
+        invoke: async (command, args) => {
+          desktop.__ANGMOO_DESKTOP_INVOCATIONS__.push({ command, args });
+        },
+      },
+    };
+  });
+  await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+    const pathname = new URL(route.request().url()).pathname;
+    if (pathname === "/api/v1/worlds/mine/world-static-probe") {
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          schema_version: "local-world-app-v1",
+          surface: "world_app",
+          world: {
+            world_id: "world-static-probe",
+            name: "Static World",
+            tagline: "Relationship window probe",
+            banner_media_id: null,
+            banner_alt_text: "",
+            status: "published",
+            visibility: "public",
+            readiness_status: "publish_ready",
+            membership_role: "owner",
+            updated_at: "2026-08-21T00:00:00Z",
+            launchable: true,
+            launch_block_reason: null,
+          },
+        },
+        status: 200,
+      });
+      return;
+    }
+    if (pathname === "/api/v1/worlds/world-static-probe/owner-character") {
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          schema_version: "owner-controlled-world-character-v1",
+          world_character_id: "wc-static-owner",
+          world_id: "world-static-probe",
+          character_id: "character-static-owner",
+          control_mode: "owner_controlled",
+          status: "active",
+          autonomous_enabled: false,
+          version: 1,
+          profile: {
+            display_name: "Static Owner Parrot",
+            avatar_url: "http://127.0.0.1:3000/icon.svg",
+            intro: "Static relationship probe",
+            role_key: null,
+            preferred_address: "Owner",
+            interests: [],
+            background: "",
+          },
+        },
+        status: 200,
+      });
+      return;
+    }
+    await route.fallback();
+  });
+
+  await page.goto("/worlds/world-static-probe/relationships");
+  await page.getByRole("link", { name: "내 조종 앵무 관계망 열기" }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const desktop = window as unknown as {
+          __ANGMOO_DESKTOP_INVOCATIONS__: unknown[];
+        };
+        return desktop.__ANGMOO_DESKTOP_INVOCATIONS__;
+      }),
+    )
+    .toContainEqual({
+      command: "open_product_window",
+      args: {
+        kind: "relationship-graph",
+        route:
+          "/characters/character-static-owner/worlds/world-static-probe/relationship-graph",
+      },
+    });
+  await expect(page).toHaveURL(/\/worlds\/world-static-probe\/relationships$/);
+});
+
+test("Tauri wide marker opens the shared static Studio route without a server page", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const desktop = window as unknown as {
+      __ANGMOO_DESKTOP_WINDOW__: { kind: "studio"; route: string };
+      __TAURI__: {
+        core: { invoke: () => Promise<void> };
+      };
+    };
+    desktop.__ANGMOO_DESKTOP_WINDOW__ = {
+      kind: "studio",
+      route: "/studio",
+    };
+    desktop.__TAURI__ = { core: { invoke: async () => undefined } };
+  });
+  await page.goto("/");
+
+  await expect(page.locator('[data-product-shell="creator-studio"]')).toBeVisible();
+  await expect(page.locator("body")).toHaveAttribute(
+    "data-angmoo-desktop-window",
+    "studio",
+  );
+  await expect(page.getByText("지원하지 않는 Angmoo 경로입니다.")).toHaveCount(0);
+});

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { AuthProvider } from "@/components/auth-provider";
+import { DesktopWindowBridge } from "@/shared/desktop/public";
 import { StaticNavigationBridge } from "@/shared/navigation/public";
 import "./static-globals.css";
 
@@ -12,9 +13,10 @@ export const metadata: Metadata = {
 
 export default function StaticRootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko">
+    <html lang="ko" data-angmoo-runtime-profile="tauri-static">
       <body className="antialiased">
         <AuthProvider>
+          <DesktopWindowBridge />
           <StaticNavigationBridge />
           {children}
         </AuthProvider>
