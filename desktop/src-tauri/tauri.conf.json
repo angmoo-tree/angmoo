@@ -17,9 +17,11 @@
         "title": "Angmoo",
         "width": 468,
         "height": 916,
-        "resizable": false,
+        "resizable": true,
         "maximizable": false,
         "decorations": false,
+        "transparent": true,
+        "backgroundColor": "#00000000",
         "shadow": true,
         "center": true,
         "visible": true

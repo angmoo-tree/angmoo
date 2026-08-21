@@ -32,24 +32,64 @@ def test_phone_window_has_no_browser_chrome_and_applies_scaling_policy() -> None
     config = json.loads(_read("desktop/src-tauri/tauri.conf.json"))
     phone = config["app"]["windows"][0]
     policy = _read("desktop/src-tauri/src/window_policy.rs")
+    resize = _read("desktop/src-tauri/src/phone_resize.rs")
 
     assert phone["label"] == "main"
     assert phone["decorations"] is False
-    assert phone["resizable"] is False
+    assert phone["resizable"] is True
     assert phone["maximizable"] is False
+    assert phone["transparent"] is True
+    assert phone["backgroundColor"] == "#00000000"
     assert config["app"]["withGlobalTauri"] is True
     for marker in (
         "PHONE_TARGET_WIDTH",
         "PHONE_TARGET_HEIGHT",
-        "phone_size_for_monitor",
+        "phone_bounds_for_monitor",
         "scale_factor",
         "set_min_size",
         "set_max_size",
-        "set_resizable(false)",
+        "set_resizable(true)",
+        "PHONE_MIN_SCALE",
+        "PHONE_MAX_SCALE",
     ):
         assert marker in policy
+    for marker in (
+        "SetWindowSubclass",
+        "RemoveWindowSubclass",
+        "WM_SIZING",
+        "WM_NCDESTROY",
+        "WMSZ_LEFT",
+        "WMSZ_RIGHT",
+        "WMSZ_TOP",
+        "WMSZ_BOTTOM",
+        "WMSZ_TOPLEFT",
+        "WMSZ_TOPRIGHT",
+        "WMSZ_BOTTOMLEFT",
+        "WMSZ_BOTTOMRIGHT",
+    ):
+        assert marker in resize
     for scale in ("1.0", "1.25", "1.5"):
         assert scale in policy
+
+
+def test_phone_static_shell_has_no_outer_margin_and_uses_deep_drag_opt_outs() -> None:
+    layout = _read("frontend/static-shell/app/layout.tsx")
+    globals_css = _read("frontend/src/app/globals.css")
+    frame = _read("frontend/src/shared/ui/device-frame.tsx")
+    frame_css = _read("frontend/src/shared/ui/device-frame.module.css")
+    bridge = _read("frontend/src/shared/desktop/desktop-window-bridge.tsx")
+    static_router = _read("frontend/src/composition/static-product-router.tsx")
+
+    assert 'data-angmoo-runtime-profile="tauri-static"' in layout
+    assert 'body[data-angmoo-desktop-window="phone"]' in globals_css
+    assert "background: transparent" in globals_css
+    assert 'data-tauri-drag-region="deep"' in frame
+    assert "width: 100vw" in frame_css
+    assert "height: 100dvh" in frame_css
+    assert 'setAttribute("data-tauri-drag-region", "deep")' in bridge
+    assert 'data-tauri-drag-region="false"' in bridge
+    assert '<main className="min-h-screen bg-transparent" aria-live="polite">' in static_router
+    assert '<p className="mt-3 text-xl font-bold text-[#251818]">제품 화면을 준비하고 있습니다...</p>' not in static_router
 
 
 def test_wide_windows_use_explicit_route_boundaries_and_single_labels() -> None:

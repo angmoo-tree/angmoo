@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function StaticRootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko">
+    <html lang="ko" data-angmoo-runtime-profile="tauri-static">
       <body className="antialiased">
         <AuthProvider>
           <DesktopWindowBridge />

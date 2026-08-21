@@ -1,3 +1,4 @@
+mod phone_resize;
 mod product_windows;
 mod window_policy;
 
@@ -42,6 +43,7 @@ pub fn run() {
                 .get_webview_window("main")
                 .ok_or("configured phone window is missing")?;
             window_policy::apply_phone_window_policy(&phone)?;
+            phone_resize::install_phone_aspect_ratio_lock(&phone)?;
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![

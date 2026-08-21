@@ -68,11 +68,29 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  margin: 0;
+}
+
 body {
   min-height: 100vh;
   background-color: var(--color-background);
   color: var(--color-on-background);
   font-family: var(--font-sans);
+}
+
+html[data-angmoo-runtime-profile="tauri-static"],
+html[data-angmoo-runtime-profile="tauri-static"] body,
+body[data-angmoo-desktop-window="phone"] {
+  background: transparent;
+}
+
+body[data-angmoo-desktop-window="phone"] {
+  width: 100vw;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
 }
 
 button,

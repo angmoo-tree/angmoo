@@ -27,6 +27,9 @@ export function DesktopWindowBridge() {
     if (!state) return;
     window.__ANGMOO_DESKTOP_WINDOW__ = state;
     document.body.dataset.angmooDesktopWindow = state.kind;
+    if (state.kind === "phone") {
+      document.body.setAttribute("data-tauri-drag-region", "deep");
+    }
 
     function handleClick(event: MouseEvent) {
       if (
@@ -73,12 +76,17 @@ export function DesktopWindowBridge() {
     return () => {
       document.removeEventListener("click", handleClick, true);
       delete document.body.dataset.angmooDesktopWindow;
+      document.body.removeAttribute("data-tauri-drag-region");
     };
   }, []);
 
   if (!active) return null;
   return (
-    <div className={styles.controls} data-window-route={currentDesktopRoute()}>
+    <div
+      className={styles.controls}
+      data-tauri-drag-region="false"
+      data-window-route={currentDesktopRoute()}
+    >
       <button
         aria-label="Angmoo 창 이동"
         className={styles.dragHandle}

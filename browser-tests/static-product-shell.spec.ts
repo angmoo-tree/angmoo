@@ -94,6 +94,34 @@ test("Tauri Phone delegates Studio to a reusable wide product window", async ({ 
   });
   await page.goto("/");
 
+  await expect(page.locator("body")).toHaveAttribute(
+    "data-angmoo-desktop-window",
+    "phone",
+  );
+  await expect(page.locator("body")).toHaveAttribute("data-tauri-drag-region", "deep");
+  await expect(page.locator('[data-product-shell="device"]')).toHaveAttribute(
+    "data-tauri-drag-region",
+    "deep",
+  );
+  await expect(page.locator('[data-window-route="/"]')).toHaveAttribute(
+    "data-tauri-drag-region",
+    "false",
+  );
+  const phoneGeometry = await page.locator('[data-product-shell="device"]').evaluate((node) => {
+    const rect = node.getBoundingClientRect();
+    const root = node.parentElement;
+    return {
+      height: rect.height,
+      rootBackground: root ? getComputedStyle(root).backgroundColor : null,
+      viewportHeight: window.innerHeight,
+      viewportWidth: window.innerWidth,
+      width: rect.width,
+    };
+  });
+  expect(Math.abs(phoneGeometry.width - phoneGeometry.viewportWidth)).toBeLessThanOrEqual(1);
+  expect(Math.abs(phoneGeometry.height - phoneGeometry.viewportHeight)).toBeLessThanOrEqual(1);
+  expect(phoneGeometry.rootBackground).toBe("rgba(0, 0, 0, 0)");
+
   await expect(page.getByLabel("Memory Explorer는 후속 단계에서 연결됩니다")).toHaveAttribute(
     "data-disabled",
     "true",

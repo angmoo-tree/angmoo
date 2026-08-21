@@ -16,7 +16,12 @@ export function DeviceFrame({
   header,
 }: DeviceFrameProps) {
   return (
-    <section className={styles.frame} aria-label={ariaLabel} data-product-shell="device">
+    <section
+      className={styles.frame}
+      aria-label={ariaLabel}
+      data-product-shell="device"
+      data-tauri-drag-region="deep"
+    >
       <div className={styles.screen}>
         {header ? <header className={styles.header}>{header}</header> : null}
         <div className={styles.content}>{children}</div>
