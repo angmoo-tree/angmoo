@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hmac
 import math
 from datetime import datetime, timezone
 from urllib.parse import urlsplit
@@ -7,6 +8,7 @@ from urllib.parse import urlsplit
 from fastapi import HTTPException, Request, Response, status
 
 from app.core.config import Settings, settings
+from app.core.desktop_loopback import LAUNCH_TOKEN_HEADER
 
 
 SESSION_COOKIE_NAME = "angmoo_browser_session"
@@ -79,6 +81,34 @@ def validate_browser_session_settings(config: Settings = settings) -> None:
     allowed_origins(config)
 
 
+def _is_authenticated_desktop_request(
+    request: Request,
+    config: Settings,
+) -> bool:
+    launch_token = config.desktop_launch_token
+    if not launch_token:
+        return False
+
+    supplied_tokens = request.headers.getlist(LAUNCH_TOKEN_HEADER)
+    origins = request.headers.getlist("origin")
+    forwarded_origins = request.headers.getlist(LOCAL_FRONTEND_ORIGIN_HEADER)
+    if len(supplied_tokens) != 1 or len(origins) != 1 or len(forwarded_origins) != 1:
+        return False
+
+    try:
+        desktop_origin = canonical_origin(config.desktop_allowed_origin)
+        origin = canonical_origin(origins[0])
+        forwarded_origin = canonical_origin(forwarded_origins[0])
+    except BrowserSessionConfigurationError:
+        return False
+
+    return (
+        hmac.compare_digest(supplied_tokens[0], launch_token)
+        and origin == desktop_origin
+        and forwarded_origin == desktop_origin
+    )
+
+
 def require_browser_origin(request: Request, config: Settings = settings) -> None:
     origins = request.headers.getlist("origin")
     if len(origins) != 1:
@@ -90,7 +120,10 @@ def require_browser_origin(request: Request, config: Settings = settings) -> Non
         raise _csrf_error() from exc
     if origin not in configured:
         raise _csrf_error()
-    if request.headers.get("sec-fetch-site", "").strip().lower() == "cross-site":
+    if (
+        request.headers.get("sec-fetch-site", "").strip().lower() == "cross-site"
+        and not _is_authenticated_desktop_request(request, config)
+    ):
         raise _csrf_error()
 
 
@@ -178,14 +211,15 @@ def set_session_cookie(
     max_age = SESSION_MAX_AGE_SECONDS if max_age_seconds is None else max_age_seconds
     if max_age < 0:
         raise ValueError("session cookie max age must not be negative")
+    secure, same_site = _cookie_security(config)
     response.set_cookie(
         key=SESSION_COOKIE_NAME,
         value=token,
         max_age=max_age,
         path=COOKIE_PATH,
-        secure=config.app_env == "production",
+        secure=secure,
         httponly=True,
-        samesite="lax",
+        samesite=same_site,
     )
 
 
@@ -194,12 +228,13 @@ def delete_session_cookie(
     *,
     config: Settings = settings,
 ) -> None:
+    secure, same_site = _cookie_security(config)
     response.delete_cookie(
         key=SESSION_COOKIE_NAME,
         path=COOKIE_PATH,
-        secure=config.app_env == "production",
+        secure=secure,
         httponly=True,
-        samesite="lax",
+        samesite=same_site,
     )
 
 
@@ -210,14 +245,15 @@ def set_bootstrap_challenge_cookie(
     max_age_seconds: int = BOOTSTRAP_CHALLENGE_MAX_AGE_SECONDS,
     config: Settings = settings,
 ) -> None:
+    secure, same_site = _cookie_security(config)
     response.set_cookie(
         key=BOOTSTRAP_CHALLENGE_COOKIE_NAME,
         value=token,
         max_age=max(0, max_age_seconds),
         path=COOKIE_PATH,
-        secure=config.app_env == "production",
+        secure=secure,
         httponly=True,
-        samesite="lax",
+        samesite=same_site,
     )
 
 
@@ -226,12 +262,13 @@ def delete_bootstrap_challenge_cookie(
     *,
     config: Settings = settings,
 ) -> None:
+    secure, same_site = _cookie_security(config)
     response.delete_cookie(
         key=BOOTSTRAP_CHALLENGE_COOKIE_NAME,
         path=COOKIE_PATH,
-        secure=config.app_env == "production",
+        secure=secure,
         httponly=True,
-        samesite="lax",
+        samesite=same_site,
     )
 
 
@@ -251,14 +288,15 @@ def set_google_pending_cookie(
     *,
     config: Settings = settings,
 ) -> None:
+    secure, same_site = _cookie_security(config)
     response.set_cookie(
         key=GOOGLE_PENDING_COOKIE_NAME,
         value=token,
         max_age=GOOGLE_PENDING_MAX_AGE_SECONDS,
         path=COOKIE_PATH,
-        secure=config.app_env == "production",
+        secure=secure,
         httponly=True,
-        samesite="lax",
+        samesite=same_site,
     )
 
 
@@ -267,13 +305,23 @@ def delete_google_pending_cookie(
     *,
     config: Settings = settings,
 ) -> None:
+    secure, same_site = _cookie_security(config)
     response.delete_cookie(
         key=GOOGLE_PENDING_COOKIE_NAME,
         path=COOKIE_PATH,
-        secure=config.app_env == "production",
+        secure=secure,
         httponly=True,
-        samesite="lax",
+        samesite=same_site,
     )
+
+
+def _cookie_security(config: Settings) -> tuple[bool, str]:
+    if config.desktop_launch_token:
+        # The packaged WebView is served from tauri.localhost while its private
+        # sidecar uses a dynamic 127.0.0.1 port. Chromium therefore treats the
+        # credentialed fetch as cross-site and requires SameSite=None; Secure.
+        return True, "none"
+    return config.app_env == "production", "lax"
 
 
 def _csrf_error() -> HTTPException:

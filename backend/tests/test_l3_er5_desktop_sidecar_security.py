@@ -4,10 +4,15 @@ import json
 from pathlib import Path
 
 import pytest
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 from fastapi.testclient import TestClient
 
-from app.core.browser_session import allowed_origins, require_local_frontend_request
+from app.core.browser_session import (
+    allowed_origins,
+    require_local_frontend_request,
+    set_bootstrap_challenge_cookie,
+    set_session_cookie,
+)
 from app.core.config import Settings
 from app.core.desktop_loopback import (
     DesktopLoopbackPolicy,
@@ -86,21 +91,56 @@ def test_desktop_origin_is_allowed_only_with_process_launch_token() -> None:
     assert allowed_origins(config) == (ORIGIN,)
 
     app = FastAPI()
+    app.add_middleware(
+        DesktopLoopbackSecurityMiddleware,
+        policy=DesktopLoopbackPolicy(TOKEN, ORIGIN),
+    )
 
     @app.post("/mutation")
     async def mutation(request: Request):
         require_local_frontend_request(request, mutation=True, config=config)
         return {"status": "ok"}
 
+    @app.post("/cookies")
+    async def cookies(request: Request):
+        require_local_frontend_request(request, mutation=True, config=config)
+        response = Response(status_code=204)
+        set_bootstrap_challenge_cookie(response, "challenge", config=config)
+        set_session_cookie(response, "session", config=config)
+        return response
+
     client = TestClient(app, base_url="http://127.0.0.1:49152")
     response = client.post(
         "/mutation",
         headers={
             "Origin": ORIGIN,
-            "X-Angmoo-Frontend-Origin": ORIGIN,
+            "Sec-Fetch-Site": "cross-site",
+            "X-Angmoo-Launcher-Token": TOKEN,
         },
     )
     assert response.status_code == 200
+
+    cookie_response = client.post(
+        "/cookies",
+        headers={
+            "Origin": ORIGIN,
+            "Sec-Fetch-Site": "cross-site",
+            "X-Angmoo-Launcher-Token": TOKEN,
+        },
+    )
+    assert cookie_response.status_code == 204
+    cookies = cookie_response.headers.get_list("set-cookie")
+    assert len(cookies) == 2
+    assert all("HttpOnly" in cookie for cookie in cookies)
+    assert all("Path=/api" in cookie for cookie in cookies)
+    assert all("SameSite=none" in cookie for cookie in cookies)
+    assert all("Secure" in cookie for cookie in cookies)
+
+    missing_token = client.post(
+        "/mutation",
+        headers={"Origin": ORIGIN, "Sec-Fetch-Site": "cross-site"},
+    )
+    assert missing_token.status_code == 401
 
 
 def test_runtime_metadata_never_persists_launch_token(tmp_path: Path) -> None:

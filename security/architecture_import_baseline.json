@@ -1,6 +1,6 @@
 {
-  "edge_count": 904,
-  "external_import_count": 1437,
+  "edge_count": 905,
+  "external_import_count": 1438,
   "module_count": 427,
   "modules": [
     {
@@ -1395,11 +1395,13 @@
         "__future__",
         "datetime",
         "fastapi",
+        "hmac",
         "math",
         "urllib.parse"
       ],
       "imports": [
-        "app.core.config"
+        "app.core.config",
+        "app.core.desktop_loopback"
       ],
       "module": "app.core.browser_session",
       "path": "backend/app/core/browser_session.py",
