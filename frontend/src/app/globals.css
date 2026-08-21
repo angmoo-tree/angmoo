@@ -86,6 +86,34 @@ body[data-angmoo-desktop-window="phone"] {
   background: transparent;
 }
 
+html[data-angmoo-window-resize="east"],
+html[data-angmoo-window-resize="east"] *,
+html[data-angmoo-window-resize="west"],
+html[data-angmoo-window-resize="west"] * {
+  cursor: ew-resize !important;
+}
+
+html[data-angmoo-window-resize="north"],
+html[data-angmoo-window-resize="north"] *,
+html[data-angmoo-window-resize="south"],
+html[data-angmoo-window-resize="south"] * {
+  cursor: ns-resize !important;
+}
+
+html[data-angmoo-window-resize="north-east"],
+html[data-angmoo-window-resize="north-east"] *,
+html[data-angmoo-window-resize="south-west"],
+html[data-angmoo-window-resize="south-west"] * {
+  cursor: nesw-resize !important;
+}
+
+html[data-angmoo-window-resize="north-west"],
+html[data-angmoo-window-resize="north-west"] *,
+html[data-angmoo-window-resize="south-east"],
+html[data-angmoo-window-resize="south-east"] * {
+  cursor: nwse-resize !important;
+}
+
 body[data-angmoo-desktop-window="phone"] {
   width: 100vw;
   height: 100dvh;

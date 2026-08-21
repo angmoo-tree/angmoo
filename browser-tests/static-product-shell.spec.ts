@@ -119,9 +119,118 @@ test("Tauri Phone delegates Studio to a reusable wide product window", async ({ 
   expect(Math.abs(phoneGeometry.height - phoneGeometry.viewportHeight)).toBeLessThanOrEqual(1);
   expect(phoneGeometry.rootBackground).toBe("rgba(0, 0, 0, 0)");
 
+  const radius = Math.min(
+    42,
+    Math.max(26, phoneGeometry.viewportWidth * 0.0725),
+  );
+  const cornerOffset = radius - radius / Math.sqrt(2);
+  const resizeProbes = [
+    {
+      cursor: "ns-resize",
+      direction: "north",
+      x: phoneGeometry.viewportWidth / 2,
+      y: 2,
+    },
+    {
+      cursor: "nesw-resize",
+      direction: "north-east",
+      x: phoneGeometry.viewportWidth - cornerOffset,
+      y: cornerOffset,
+    },
+    {
+      cursor: "ew-resize",
+      direction: "east",
+      x: phoneGeometry.viewportWidth - 2,
+      y: phoneGeometry.viewportHeight / 2,
+    },
+    {
+      cursor: "nwse-resize",
+      direction: "south-east",
+      x: phoneGeometry.viewportWidth - cornerOffset,
+      y: phoneGeometry.viewportHeight - cornerOffset,
+    },
+    {
+      cursor: "ns-resize",
+      direction: "south",
+      x: phoneGeometry.viewportWidth / 2,
+      y: phoneGeometry.viewportHeight - 2,
+    },
+    {
+      cursor: "nesw-resize",
+      direction: "south-west",
+      x: cornerOffset,
+      y: phoneGeometry.viewportHeight - cornerOffset,
+    },
+    {
+      cursor: "ew-resize",
+      direction: "west",
+      x: 2,
+      y: phoneGeometry.viewportHeight / 2,
+    },
+    {
+      cursor: "nwse-resize",
+      direction: "north-west",
+      x: cornerOffset,
+      y: cornerOffset,
+    },
+  ] as const;
+  for (const probe of resizeProbes) {
+    await page.locator('[data-product-shell="device"]').dispatchEvent("pointermove", {
+      buttons: 0,
+      clientX: probe.x,
+      clientY: probe.y,
+      isPrimary: true,
+      pointerType: "mouse",
+    });
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-angmoo-window-resize",
+      probe.direction,
+    );
+    await expect(page.locator("html")).toHaveCSS("cursor", probe.cursor);
+    await page.locator('[data-product-shell="device"]').dispatchEvent("pointerdown", {
+      button: 0,
+      buttons: 1,
+      clientX: probe.x,
+      clientY: probe.y,
+      isPrimary: true,
+      pointerType: "mouse",
+    });
+  }
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const desktop = window as unknown as {
+          __ANGMOO_DESKTOP_INVOCATIONS__: unknown[];
+        };
+        return desktop.__ANGMOO_DESKTOP_INVOCATIONS__;
+      }),
+    )
+    .toEqual(
+      resizeProbes.map(({ direction }) => ({
+        command: "start_product_window_resize",
+        args: { direction },
+      })),
+    );
+  await page.evaluate(() => {
+    const desktop = window as unknown as {
+      __ANGMOO_DESKTOP_INVOCATIONS__: unknown[];
+    };
+    desktop.__ANGMOO_DESKTOP_INVOCATIONS__ = [];
+  });
+  await page.locator('[data-product-shell="device"]').dispatchEvent("pointermove", {
+    buttons: 0,
+    clientX: phoneGeometry.viewportWidth / 2,
+    clientY: phoneGeometry.viewportHeight / 2,
+    isPrimary: true,
+    pointerType: "mouse",
+  });
+  await expect(page.locator("html")).not.toHaveAttribute("data-angmoo-window-resize", /.+/);
+
   await page.locator('[data-product-shell="device"]').dispatchEvent("pointerdown", {
     button: 0,
     buttons: 1,
+    clientX: phoneGeometry.viewportWidth / 2,
+    clientY: phoneGeometry.viewportHeight / 2,
     isPrimary: true,
     pointerType: "mouse",
   });

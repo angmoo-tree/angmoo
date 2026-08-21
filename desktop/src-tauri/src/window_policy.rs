@@ -70,6 +70,10 @@ pub fn apply_phone_window_policy(window: &WebviewWindow) -> tauri::Result<PhoneW
     };
     window.set_resizable(true)?;
     window.set_maximizable(false)?;
+    // Tauri documents that an undecorated Windows window with shadow enabled
+    // receives a one-pixel white border. The CSS/WebView Phone silhouette owns
+    // its own antialiased bezel, so the native Phone shadow must stay disabled.
+    window.set_shadow(false)?;
     window.set_min_size(Some(LogicalSize::new(
         bounds.minimum.width,
         bounds.minimum.height,

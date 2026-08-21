@@ -8,6 +8,16 @@ export type AngmooDesktopWindowState = {
   route: string;
 };
 
+export type AngmooPhoneResizeDirection =
+  | "east"
+  | "north"
+  | "north-east"
+  | "north-west"
+  | "south"
+  | "south-east"
+  | "south-west"
+  | "west";
+
 type TauriInvoke = <T>(
   command: string,
   args?: Record<string, unknown>,
@@ -111,6 +121,15 @@ export async function invokeDesktopWindowCommand(
   const invoke = window.__TAURI__?.core?.invoke;
   if (!invoke) return false;
   await invoke(command);
+  return true;
+}
+
+export async function startDesktopWindowResize(
+  direction: AngmooPhoneResizeDirection,
+) {
+  const invoke = window.__TAURI__?.core?.invoke;
+  if (!invoke) return false;
+  await invoke("start_product_window_resize", { direction });
   return true;
 }
 

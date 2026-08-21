@@ -40,6 +40,7 @@ def test_phone_window_has_no_browser_chrome_and_applies_scaling_policy() -> None
     assert phone["maximizable"] is False
     assert phone["transparent"] is True
     assert phone["backgroundColor"] == "#00000000"
+    assert phone["shadow"] is False
     assert config["app"]["withGlobalTauri"] is True
     for marker in (
         "PHONE_TARGET_WIDTH",
@@ -49,6 +50,7 @@ def test_phone_window_has_no_browser_chrome_and_applies_scaling_policy() -> None
         "set_min_size",
         "set_max_size",
         "set_resizable(true)",
+        "set_shadow(false)",
         "PHONE_MIN_SCALE",
         "PHONE_MAX_SCALE",
     ):
@@ -109,6 +111,12 @@ def test_phone_static_shell_has_no_outer_margin_and_uses_manual_surface_drag() -
     assert 'addEventListener("pointerdown", handlePointerDown, true)' in bridge
     assert "WINDOW_DRAG_INTERACTIVE_SELECTOR" in bridge
     assert 'invokeDesktopWindowCommand("start_product_window_drag")' in bridge
+    assert "startDesktopWindowResize" in bridge
+    assert "start_product_window_resize" in _read(
+        "desktop/src-tauri/src/lib.rs"
+    )
+    assert "PHONE_RESIZE_EDGE_THICKNESS" in bridge
+    assert "dataset.angmooWindowResize" in bridge
     assert 'data-window-drag-disabled="true"' in bridge
     assert "data-tauri-drag-region" not in bridge
     assert '<main className="min-h-screen bg-transparent" aria-live="polite">' in static_router
