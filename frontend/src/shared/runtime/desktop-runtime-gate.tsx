@@ -79,18 +79,18 @@ export function DesktopRuntimeGate({ children }: { children: ReactNode }) {
       aria-live="polite"
       data-desktop-runtime-state={crashed ? "crashed" : "starting"}
     >
-      <section className="max-w-sm text-center">
+      <section className="w-full min-w-0 max-w-sm text-center">
         <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#9c6d68]">
           Local Device
         </p>
         <h1 className="mt-3 text-3xl font-bold">Angmoo</h1>
         {crashed ? (
           <>
-            <p className="mt-6 text-base leading-7 text-[#765f5c]">
+            <p className="mt-6 break-keep text-base leading-7 text-[#765f5c]">
               로컬 엔진 연결이 중단되었습니다. 데이터는 보존되어 있으며 다시
               시작할 수 있습니다.
             </p>
-            <p className="mt-2 text-xs text-[#9c6d68]">
+            <p className="mt-2 break-all text-xs text-[#9c6d68]">
               진단 코드: {state.status.diagnosticCode ?? "sidecar_stopped"}
             </p>
             <button
