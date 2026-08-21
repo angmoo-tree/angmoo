@@ -1,3 +1,5 @@
+import { runtimeFetch } from "@/shared/runtime/public";
+
 export type WorldDaypart = "dawn" | "morning" | "afternoon" | "evening";
 export type WorldVisibility = "private" | "unlisted" | "public";
 export type WorldJoinPolicy =
@@ -180,7 +182,7 @@ export function requestValidationFields(detail: unknown) {
 
 async function apiRequest<T>(path: string, options: RequestOptions = {}) {
   const { body, headers, ...rest } = options;
-  const response = await fetch(`/api/backend${path}`, {
+  const response = await runtimeFetch(`/api/backend${path}`, {
     ...rest,
     body: body === undefined ? undefined : JSON.stringify(body),
     cache: "no-store",

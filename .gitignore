@@ -8,6 +8,9 @@
 *credentials*.local
 
 .next/
+frontend/static-shell/out/
+frontend/static-shell/.next/
+frontend/static-shell/next-env.d.ts
 .pytest_cache/
 .venv/
 __pycache__/

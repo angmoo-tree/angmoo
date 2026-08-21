@@ -156,6 +156,14 @@ jobs:
           NEXT_PUBLIC_EXPERIMENTAL_IMAGE_ENABLED: "false"
         run: pnpm build
         working-directory: frontend
+      - name: Build Tauri static frontend profile
+        env:
+          NEXT_PUBLIC_EXPERIMENTAL_IMAGE_ENABLED: "false"
+        run: pnpm build:static
+        working-directory: frontend
+      - name: Verify Tauri static direct-open routes
+        run: pnpm exec playwright test --config playwright.static.config.ts
+        working-directory: browser-tests
       - name: Reject remote build-time dependencies
         shell: bash
         run: |

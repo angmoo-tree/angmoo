@@ -1,7 +1,10 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import {
+  useRuntimeRouter as useRouter,
+  useRuntimeSearchParams as useSearchParams,
+} from "@/shared/navigation/public";
 import type { FormEvent } from "react";
 import { useState } from "react";
 

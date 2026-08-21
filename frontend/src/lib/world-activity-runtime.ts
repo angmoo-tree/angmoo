@@ -1,3 +1,5 @@
+import { runtimeFetch } from "@/shared/runtime/public";
+
 export type ActivityDaypart = "dawn" | "morning" | "afternoon" | "evening";
 export type ActivityRuntimeMode = "legacy_resident_v1" | "routine_resident_v1";
 
@@ -181,7 +183,7 @@ export class DailyActivityPlanApiError extends Error {
 
 async function apiRequest<T>(path: string, options: RequestOptions = {}) {
   const { body, headers, ...rest } = options;
-  const response = await fetch(`/api/backend${path}`, {
+  const response = await runtimeFetch(`/api/backend${path}`, {
     ...rest,
     body: body === undefined ? undefined : JSON.stringify(body),
     cache: "no-store",

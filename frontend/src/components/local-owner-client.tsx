@@ -1,7 +1,7 @@
 "use client";
 
 import { Bird, Database, LockKeyhole } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 
 import {

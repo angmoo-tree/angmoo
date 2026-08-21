@@ -1,4 +1,5 @@
 import type { ProductRuntimeState } from "../model/runtime-status-contract";
+import { runtimeFetch } from "@/shared/runtime/public";
 
 
 type RuntimeStatusEnvelope = {
@@ -29,7 +30,7 @@ const PRODUCT_STATE: Record<
 export async function getProductRuntimeState(
   options: { signal?: AbortSignal } = {},
 ): Promise<ProductRuntimeState> {
-  const response = await fetch("/api/backend/runtime/status", {
+  const response = await runtimeFetch("/api/backend/runtime/status", {
     cache: "no-store",
     credentials: "same-origin",
     headers: { Accept: "application/json" },

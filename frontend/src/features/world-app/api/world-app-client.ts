@@ -1,4 +1,5 @@
 import type { WorldSurfaceItem } from "@/features/device-home/public";
+import { runtimeFetch } from "@/shared/runtime/public";
 
 
 export type LocalWorldAppRead = {
@@ -74,7 +75,7 @@ export async function getLocalWorldApp(
   worldId: string,
   options: { signal?: AbortSignal } = {},
 ): Promise<LocalWorldAppRead> {
-  const response = await fetch(
+  const response = await runtimeFetch(
     `/api/backend/worlds/mine/${encodeURIComponent(worldId)}`,
     {
       cache: "no-store",
@@ -118,7 +119,7 @@ export async function getOwnerControlledActor(
   worldId: string,
   options: { signal?: AbortSignal } = {},
 ): Promise<OwnerControlledActorRead | null> {
-  const response = await fetch(
+  const response = await runtimeFetch(
     `/api/backend/worlds/${encodeURIComponent(worldId)}/owner-character`,
     {
       cache: "no-store",
@@ -169,7 +170,7 @@ async function manualSocialRequest<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const response = await fetch(path, {
+  const response = await runtimeFetch(path, {
     cache: "no-store",
     credentials: "same-origin",
     ...options,

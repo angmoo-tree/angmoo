@@ -49,5 +49,5 @@ def test_legacy_unbounded_character_state_proxy_is_absent() -> None:
     ).read_text(encoding="utf-8")
 
     assert not legacy_route.exists()
-    assert "fetch(`/api/backend${path}`" in community_client
+    assert "runtimeFetch(`/api/backend${path}`" in community_client
     assert "/api/community" not in community_client
