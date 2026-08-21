@@ -48,9 +48,9 @@ def test_product_sidecar_has_fixed_commands_hash_and_lifecycle_contract() -> Non
         "retry_desktop_runtime",
         '"/__angmoo/desktop/shutdown"',
         "desktop_sidecar_health_lost",
-        "HEALTH_FAILURE_LIMIT",
+        "const HEALTH_FAILURE_LIMIT: u8 = 15;",
         "consecutive_health_failures",
-        "sidecar_terminated",
+        "drain_sidecar_events",
     ):
         assert marker in runtime or marker in host
     assert "PyInstaller 6.16.0" in build
@@ -66,8 +66,9 @@ def test_product_sidecar_has_fixed_commands_hash_and_lifecycle_contract() -> Non
         assert forbidden not in runtime
 
     runtime_gate = _read("frontend/src/shared/runtime/desktop-runtime-gate.tsx")
-    assert 'className="w-full min-w-0 max-w-sm text-center"' in runtime_gate
-    assert 'className="mt-6 break-keep text-base' in runtime_gate
+    assert 'width: "min(24rem, calc(100vw - 4rem))"' in runtime_gate
+    assert 'wordBreak: "keep-all"' in runtime_gate
+    assert "sidecar_terminated" not in runtime
 
 
 def test_phone_window_has_no_browser_chrome_and_applies_scaling_policy() -> None:

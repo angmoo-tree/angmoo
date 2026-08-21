@@ -17,7 +17,7 @@ use tauri_plugin_shell::{
 use uuid::Uuid;
 
 const DESKTOP_ORIGIN: &str = "http://tauri.localhost";
-const HEALTH_FAILURE_LIMIT: u8 = 3;
+const HEALTH_FAILURE_LIMIT: u8 = 15;
 
 #[derive(Clone, Debug, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -155,13 +155,8 @@ fn response_is_ok(response: &str) -> bool {
         .is_some_and(|line| line.contains(" 200 "))
 }
 
-fn sidecar_terminated(receiver: &mut tauri::async_runtime::Receiver<CommandEvent>) -> bool {
-    while let Ok(event) = receiver.try_recv() {
-        if matches!(event, CommandEvent::Terminated(_)) {
-            return true;
-        }
-    }
-    receiver.is_closed()
+fn drain_sidecar_events(receiver: &mut tauri::async_runtime::Receiver<CommandEvent>) {
+    while receiver.try_recv().is_ok() {}
 }
 
 fn health_failure_is_terminal(consecutive_failures: u8) -> bool {
@@ -278,10 +273,11 @@ pub fn start(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> 
             if current != Some((generation, "ready")) {
                 break;
             }
-            if sidecar_terminated(&mut receiver) {
-                mark_crashed(&managed, generation, "desktop_sidecar_exited");
-                break;
-            }
+            // PyInstaller's one-file bootloader may finish its wrapper process after
+            // spawning the real server process. Keep draining stdout/stderr events so
+            // the pipe cannot fill, but use the authenticated health endpoint as the
+            // runtime liveness contract instead of the wrapper's termination event.
+            drain_sidecar_events(&mut receiver);
             if http_request(ready.port, "GET", "/health", &token)
                 .is_ok_and(|response| response_is_ok(&response))
             {
