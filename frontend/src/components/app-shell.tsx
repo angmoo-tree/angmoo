@@ -108,7 +108,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f6f7f9] font-sans text-[#101828]">
+    <div className="angmoo-app-shell min-h-screen bg-[#f6f7f9] font-sans text-[#101828]">
       <div className="angmoo-shell">
         <aside className="angmoo-left-rail sticky top-0 hidden h-screen flex-col items-center border-r border-[#eaedf2] bg-[#f6f7f9] px-3 py-6 md:flex">
           <Link
