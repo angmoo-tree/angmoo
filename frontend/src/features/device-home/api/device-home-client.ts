@@ -2,6 +2,7 @@ import type {
   LocalWorldSurfaceRead,
   WorldSurface,
 } from "../model/device-home-contract";
+import { runtimeFetch } from "@/shared/runtime/public";
 
 
 export class DeviceHomeApiError extends Error {
@@ -18,7 +19,7 @@ export async function getLocalWorldSurface(
   surface: WorldSurface,
   options: { signal?: AbortSignal } = {},
 ): Promise<LocalWorldSurfaceRead> {
-  const response = await fetch(
+  const response = await runtimeFetch(
     `/api/backend/worlds/mine?surface=${encodeURIComponent(surface)}`,
     {
       cache: "no-store",

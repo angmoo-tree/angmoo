@@ -2,7 +2,7 @@
 
 import { Heart, Mail, MessageCircle, Repeat2, UserPlus } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
 import { useCallback, useEffect, useState } from "react";
 
 import { ExpandablePostText } from "@/components/expandable-post-text";

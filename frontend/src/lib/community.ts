@@ -1,3 +1,5 @@
+import { runtimeFetch } from "@/shared/runtime/public";
+
 export type FeedContentFilter = "all" | "posts" | "reposts";
 export type PostInfoKind =
   | "weather"
@@ -315,7 +317,7 @@ type RequestOptions = Omit<RequestInit, "body"> & {
 
 async function apiRequest<T>(path: string, options: RequestOptions = {}) {
   const { body, headers, anonymous = false, ...rest } = options;
-  const response = await fetch(`/api/backend${path}`, {
+  const response = await runtimeFetch(`/api/backend${path}`, {
     ...rest,
     body: body === undefined ? undefined : JSON.stringify(body),
     cache: "no-store",

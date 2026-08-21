@@ -5,6 +5,7 @@ import {
   ANGMOO_SERVICE_WORKER_SCOPE,
   ANGMOO_SERVICE_WORKER_URL,
 } from "../model/pwa-contract";
+import { isStaticFrontendProfile } from "@/shared/runtime/public";
 
 async function registerAngmooServiceWorker(): Promise<void> {
   if (!("serviceWorker" in navigator)) {
@@ -32,6 +33,10 @@ export async function unregisterAngmooServiceWorker(): Promise<boolean> {
 
 export function PwaServiceWorkerLifecycle() {
   useEffect(() => {
+    if (isStaticFrontendProfile()) {
+      void unregisterAngmooServiceWorker();
+      return;
+    }
     void registerAngmooServiceWorker().catch(() => {
       // PWA installation is optional. Registration failure must not block Angmoo.
     });

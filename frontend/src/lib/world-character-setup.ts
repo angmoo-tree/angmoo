@@ -1,3 +1,5 @@
+import { runtimeFetch } from "@/shared/runtime/public";
+
 export type WorldSetupStage = "community_profile" | "repertoire" | "approval";
 export type WorldSetupState =
   | "ready"
@@ -170,7 +172,7 @@ export class WorldCharacterSetupApiError extends Error {
 
 async function apiRequest<T>(path: string, options: RequestOptions = {}) {
   const { body, headers, ...rest } = options;
-  const response = await fetch(`/api/backend${path}`, {
+  const response = await runtimeFetch(`/api/backend${path}`, {
     ...rest,
     body: body === undefined ? undefined : JSON.stringify(body),
     cache: "no-store",

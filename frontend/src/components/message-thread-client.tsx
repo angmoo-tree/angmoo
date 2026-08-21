@@ -2,7 +2,10 @@
 
 import { ArrowLeft, Loader2, RotateCcw, Send, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import {
+  useRuntimeRouter as useRouter,
+  useRuntimeSearchParams as useSearchParams,
+} from "@/shared/navigation/public";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useAuth } from "@/components/auth-provider";

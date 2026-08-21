@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertTriangle, KeyRound, LogOut, Save, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
 import { useEffect, useState } from "react";
 
 import { useAuth } from "@/components/auth-provider";
@@ -91,7 +91,7 @@ export function SettingsClient() {
       serverRevoked = false;
     } finally {
       clearAuth();
-      window.location.href = serverRevoked ? "/login" : "/login?logout=local-only";
+      router.replace(serverRevoked ? "/login" : "/login?logout=local-only");
     }
   }
 
@@ -102,7 +102,7 @@ export function SettingsClient() {
     try {
       await deleteCurrentAccount({ confirmation: ACCOUNT_DELETE_CONFIRMATION });
       clearAuth();
-      window.location.href = "/login";
+      router.replace("/login");
     } catch (err) {
       const message =
         err instanceof Error

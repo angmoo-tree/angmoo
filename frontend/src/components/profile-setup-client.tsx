@@ -1,7 +1,7 @@
 "use client";
 
 import { Check } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
 import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 

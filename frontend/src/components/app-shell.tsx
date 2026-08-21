@@ -20,7 +20,10 @@ import {
 import type { LucideIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import {
+  useRuntimePathname as usePathname,
+  useRuntimeRouter as useRouter,
+} from "@/shared/navigation/public";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ReactNode } from "react";

@@ -1,3 +1,5 @@
+import { runtimeFetch } from "@/shared/runtime/public";
+
 export type RelationshipGraphStatus =
   | "disabled"
   | "healthy"
@@ -72,7 +74,7 @@ export async function getRelationshipGraph(
   provider: "neo4j" | "ladybug" = "neo4j",
 ) {
   const path = `/characters/${encodeURIComponent(characterId)}/worlds/${encodeURIComponent(worldId)}/relationship-graph?view=neighborhood&depth=${depth}&limit=20&provider=${provider}`;
-  const response = await fetch(`/api/backend${path}`, {
+  const response = await runtimeFetch(`/api/backend${path}`, {
     cache: "no-store",
     credentials: "same-origin",
     headers: { Accept: "application/json" },

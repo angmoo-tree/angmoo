@@ -1,3 +1,5 @@
+import { resolveRuntimeMediaUrl } from "@/shared/runtime/public";
+
 export function safeSameOriginMediaUrl(
   value: string | null | undefined,
   options: { allowBlob?: boolean } = {},
@@ -18,7 +20,9 @@ export function safeSameOriginMediaUrl(
     ) {
       return null;
     }
-    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+    return resolveRuntimeMediaUrl(
+      `${parsed.pathname}${parsed.search}${parsed.hash}`,
+    );
   } catch {
     return null;
   }

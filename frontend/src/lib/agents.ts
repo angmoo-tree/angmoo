@@ -5,6 +5,7 @@ import type {
   PostDetail,
   ProfileRef,
 } from "@/lib/community";
+import { runtimeFetch } from "@/shared/runtime/public";
 
 export const GOOGLE_GEMINI_MODELS = [
   { value: "gemma-4-26b-a4b-it", label: "Gemma 4 26B" },
@@ -862,7 +863,7 @@ async function apiRequest<T>(path: string, options: RequestOptions = {}) {
     ...rest
   } = options;
   const isFormDataBody = typeof FormData !== "undefined" && body instanceof FormData;
-  const response = await fetch(`/api/backend${path}`, {
+  const response = await runtimeFetch(`/api/backend${path}`, {
     ...rest,
     body:
       body === undefined
@@ -909,7 +910,7 @@ export async function fetchAuthenticatedMediaObjectUrl(apiPath: string) {
   const normalizedPath = apiPath.startsWith("/api/v1")
     ? apiPath.slice("/api/v1".length)
     : apiPath;
-  const response = await fetch(`/api/backend${normalizedPath}`, {
+  const response = await runtimeFetch(`/api/backend${normalizedPath}`, {
     cache: "no-store",
     credentials: "same-origin",
   });

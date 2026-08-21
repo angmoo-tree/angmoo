@@ -2,7 +2,7 @@
 
 import { Plus, Power, PowerOff, RefreshCw } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
 import { useCallback, useEffect, useState } from "react";
 
 import { ProfileAvatar } from "@/components/profile-avatar";
