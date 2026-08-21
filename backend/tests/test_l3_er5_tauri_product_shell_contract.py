@@ -95,3 +95,14 @@ def test_memory_explorer_is_an_explicit_inactive_placeholder() -> None:
     assert 'id: "memory-explorer"' in contract
     assert 'label: "Memory Explorer"' in contract
     assert 'availability: "planned"' in contract
+
+
+def test_desktop_build_outputs_never_enter_docker_build_context() -> None:
+    dockerignore = _read(".dockerignore")
+    for ignored_output in (
+        "**/node_modules",
+        "**/.next",
+        "**/out",
+        "**/target",
+    ):
+        assert ignored_output in dockerignore

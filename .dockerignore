@@ -18,6 +18,10 @@
 **/node_modules/**
 **/.next
 **/.next/**
+**/out
+**/out/**
+**/target
+**/target/**
 **/.pytest_cache
 **/.pytest_cache/**
 **/__pycache__
