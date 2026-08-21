@@ -1,6 +1,9 @@
 const STATIC_FRONTEND_PROFILE = "tauri-static";
 const DEFAULT_STATIC_API_BASE = "http://127.0.0.1:8080";
 
+export const DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT =
+  "angmoo:desktop-runtime-config-changed";
+
 export type AngmooRuntimeConfig = {
   apiBaseUrl: string;
   launchToken?: string;
@@ -62,17 +65,29 @@ export function installDesktopRuntimeConfig(
   if (launchToken.length < 32) {
     throw new Error("Angmoo desktop launch token is invalid.");
   }
+  const previous = window.__ANGMOO_RUNTIME_CONFIG__;
   window.__ANGMOO_RUNTIME_CONFIG__ = {
     apiBaseUrl: normalizedBase,
     launchToken,
     profile: STATIC_FRONTEND_PROFILE,
   };
+  if (
+    previous?.apiBaseUrl !== normalizedBase ||
+    previous?.launchToken !== launchToken
+  ) {
+    window.dispatchEvent(new Event(DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT));
+  }
 }
 
 export function clearDesktopRuntimeConfig() {
-  if (typeof window !== "undefined") {
-    delete window.__ANGMOO_RUNTIME_CONFIG__;
+  if (
+    typeof window === "undefined" ||
+    !window.__ANGMOO_RUNTIME_CONFIG__
+  ) {
+    return;
   }
+  delete window.__ANGMOO_RUNTIME_CONFIG__;
+  window.dispatchEvent(new Event(DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT));
 }
 
 export function resolveRuntimeRequestUrl(input: string) {

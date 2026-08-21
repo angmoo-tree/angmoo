@@ -17,6 +17,7 @@ from app.core.config import Settings
 from app.core.desktop_loopback import (
     DesktopLoopbackPolicy,
     DesktopLoopbackSecurityMiddleware,
+    is_authenticated_desktop_webview_request,
 )
 from app.runtime import desktop_sidecar
 from app.runtime.desktop_sidecar import RuntimeOwnership
@@ -40,6 +41,12 @@ def _client() -> TestClient:
     @app.post("/mutation")
     async def mutation() -> dict[str, str]:
         return {"status": "ok"}
+
+    @app.get("/desktop-webview-auth")
+    async def desktop_webview_auth(request: Request) -> dict[str, bool]:
+        return {
+            "authenticated": is_authenticated_desktop_webview_request(request)
+        }
 
     return TestClient(app)
 
@@ -78,6 +85,15 @@ def test_desktop_loopback_accepts_exact_token_and_strict_cors() -> None:
     assert "x-angmoo-launcher-token" in preflight.headers[
         "access-control-allow-headers"
     ]
+
+    assert client.get(
+        "/desktop-webview-auth",
+        headers={"X-Angmoo-Launcher-Token": TOKEN},
+    ).json() == {"authenticated": False}
+    assert client.get(
+        "/desktop-webview-auth",
+        headers={"X-Angmoo-Launcher-Token": TOKEN, "Origin": ORIGIN},
+    ).json() == {"authenticated": True}
 
 
 def test_desktop_origin_is_allowed_only_with_process_launch_token() -> None:

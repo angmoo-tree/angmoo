@@ -34,6 +34,17 @@ endpoint, and listening socket rather than raw PID count.
 
 - The sidecar accepts only an HMAC-verified `X-Angmoo-Launcher-Token` generated
   for the current launch.
+- After that token and the exact `http://tauri.localhost` origin pass the
+  sidecar middleware, the packaged WebView resolves the already-claimed
+  installation owner directly. It does not depend on a cross-site HttpOnly
+  cookie surviving the `tauri.localhost` to dynamic `127.0.0.1` boundary.
+  Token-authenticated host health probes omit `Origin` and never inherit an
+  owner identity.
+- The static shell may mount before Tauri has returned the sidecar's dynamic
+  loopback port and launch token. Installing that runtime configuration emits
+  an in-process configuration-change event; the shared auth provider retries
+  `/auth/me` on that event instead of preserving an early fallback-port
+  failure as an unauthenticated Device Home.
 - Browser-originated product requests must use the exact
   `http://tauri.localhost` origin. CORS preflight is limited to that origin,
   the declared methods, and the launch-token/content-type headers.

@@ -20,6 +20,7 @@ import {
   issueLocalSession,
   type UserRead,
 } from "@/lib/agents";
+import { DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT } from "@/shared/runtime/public";
 
 type AuthStatus = "checking" | "authenticated" | "unauthenticated";
 
@@ -70,9 +71,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       void refresh();
     };
     window.addEventListener(AUTH_CHANGED_EVENT, handleAuthChanged);
+    window.addEventListener(
+      DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT,
+      handleAuthChanged,
+    );
     return () => {
       window.clearTimeout(refreshId);
       window.removeEventListener(AUTH_CHANGED_EVENT, handleAuthChanged);
+      window.removeEventListener(
+        DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT,
+        handleAuthChanged,
+      );
     };
   }, [refresh]);
 
