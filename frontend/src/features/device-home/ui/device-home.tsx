@@ -9,7 +9,10 @@ import {
   RuntimeStatusSummary,
   type ProductRuntimeState,
 } from "@/features/runtime-status/public";
-import { safeSameOriginMediaUrl } from "@/shared/media/public";
+import {
+  safeSameOriginMediaUrl,
+  useRuntimeMediaUrl,
+} from "@/shared/media/public";
 import { PRODUCT_ROUTES, worldAppRoute } from "@/shared/navigation/public";
 import { AppIcon } from "@/shared/ui/public";
 
@@ -150,13 +153,14 @@ function WorldAppIcon({ world }: { world: WorldSurfaceItem }) {
 
 function WorldVisual({ world }: { world: WorldSurfaceItem }) {
   const bannerUrl = safeSameOriginMediaUrl(world.banner_media_id);
-  if (bannerUrl) {
+  const resolvedBannerUrl = useRuntimeMediaUrl(bannerUrl);
+  if (resolvedBannerUrl) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
         alt=""
         className={styles.worldBanner}
-        src={bannerUrl}
+        src={resolvedBannerUrl}
       />
     );
   }

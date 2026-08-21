@@ -18,6 +18,13 @@ export type AngmooPhoneResizeDirection =
   | "south-west"
   | "west";
 
+export type AngmooDesktopRuntimeStatus = {
+  phase: "starting" | "ready" | "crashed" | "stopped";
+  apiBaseUrl?: string;
+  launchToken?: string;
+  diagnosticCode?: string;
+};
+
 type TauriInvoke = <T>(
   command: string,
   args?: Record<string, unknown>,
@@ -130,6 +137,19 @@ export async function startDesktopWindowResize(
   const invoke = window.__TAURI__?.core?.invoke;
   if (!invoke) return false;
   await invoke("start_product_window_resize", { direction });
+  return true;
+}
+
+export async function getDesktopRuntimeStatus() {
+  const invoke = window.__TAURI__?.core?.invoke;
+  if (!invoke) return null;
+  return invoke<AngmooDesktopRuntimeStatus>("desktop_runtime_status");
+}
+
+export async function retryDesktopRuntime() {
+  const invoke = window.__TAURI__?.core?.invoke;
+  if (!invoke) return false;
+  await invoke("retry_desktop_runtime");
   return true;
 }
 

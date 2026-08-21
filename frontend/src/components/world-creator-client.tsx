@@ -17,6 +17,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
 import { PRODUCT_ROUTES, studioWorldRoute } from "@/shared/navigation/public";
+import {
+  safeSameOriginMediaUrl,
+  useRuntimeMediaUrl,
+} from "@/shared/media/public";
 
 import { useAuth } from "@/components/auth-provider";
 import {
@@ -196,6 +200,9 @@ export function WorldCreatorClient({ worldId }: { worldId?: string }) {
   const [pending, setPending] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const worldBannerUrl = useRuntimeMediaUrl(
+    safeSameOriginMediaUrl(context?.world.banner_media_id),
+  );
 
   const returnPath = worldId
     ? studioWorldRoute(worldId)
@@ -370,12 +377,12 @@ export function WorldCreatorClient({ worldId }: { worldId?: string }) {
     <main className="min-h-screen bg-[#f7f8fa] px-4 py-8 md:px-8">
       <div className="mx-auto max-w-6xl space-y-6">
         <header className="overflow-hidden rounded-[28px] border border-[#e1e5eb] bg-white shadow-sm">
-          {context?.world.banner_media_id ? (
+          {worldBannerUrl ? (
             <div className="relative h-44 bg-[#eef1f5]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={context.world.banner_media_id}
-                alt={context.world.banner_alt_text || `${definition.name} 배너`}
+                src={worldBannerUrl}
+                alt={context?.world.banner_alt_text || `${definition.name} 배너`}
                 className="size-full object-cover"
               />
             </div>

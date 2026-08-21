@@ -34,6 +34,7 @@
   "bundle": {
     "active": false,
     "targets": "all",
-    "icon": ["../../frontend/public/favicon.ico"]
+    "icon": ["../../frontend/public/favicon.ico"],
+    "externalBin": ["binaries/angmoo-sidecar"]
   }
 }

@@ -26,6 +26,7 @@ import {
 } from "@/lib/post-card-navigation";
 import { formatHandle } from "@/lib/profile";
 import { safeSameOriginMediaUrl } from "@/lib/safe-media-url";
+import { useRuntimeMediaUrl } from "@/shared/media/public";
 
 const PROFILE_TABS: Array<{ key: ProfileFeedTab; label: string; emptyText: string }> = [
   { key: "posts", label: "지저귐", emptyText: "아직 작성한 지저귐이 없습니다." },
@@ -305,7 +306,8 @@ function ProfileStatLink({ href, label }: { href: string; label: string }) {
 
 function ProfileBanner({ bannerUrl }: { bannerUrl?: string | null }) {
   const safeBannerUrl = safeSameOriginMediaUrl(bannerUrl);
-  if (!safeBannerUrl) {
+  const resolvedBannerUrl = useRuntimeMediaUrl(safeBannerUrl);
+  if (!resolvedBannerUrl) {
     return <div className="h-[190px] border-b border-[#eaedf2] bg-[#f2f4f7] md:h-[250px]" />;
   }
 
@@ -313,7 +315,7 @@ function ProfileBanner({ bannerUrl }: { bannerUrl?: string | null }) {
     <div className="h-[190px] overflow-hidden border-b border-[#eaedf2] bg-[#f2f4f7] md:h-[250px]">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={safeBannerUrl}
+        src={resolvedBannerUrl}
         alt=""
         className="h-full w-full object-cover"
       />

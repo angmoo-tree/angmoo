@@ -193,6 +193,20 @@ jobs:
       - name: Install pinned Tauri CLI
         run: npm ci --ignore-scripts
         working-directory: desktop
+      - uses: astral-sh/setup-uv@bba9b3c20f99fb22a54d29c494628d5157dc8a40 # v7.2.0
+        with:
+          version: "0.10.8"
+          enable-cache: false
+      - name: Install pinned product sidecar build environment
+        shell: pwsh
+        working-directory: backend
+        run: |
+          uv python install 3.13.12
+          uv sync --frozen --python 3.13.12
+          uv pip install --python .venv\Scripts\python.exe PyInstaller==6.16.0
+      - name: Package and attest the product sidecar
+        run: npm run build:sidecar
+        working-directory: desktop
       - name: Verify pinned Rust product-window contracts
         shell: pwsh
         working-directory: desktop/src-tauri

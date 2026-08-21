@@ -1,2 +1,4 @@
 /target/
 /gen/
+/binaries/*.exe
+/binaries/*.sha256

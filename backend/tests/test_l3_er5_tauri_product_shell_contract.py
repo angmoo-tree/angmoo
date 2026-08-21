@@ -11,7 +11,7 @@ def _read(relative: str) -> str:
     return (ROOT / relative).read_text(encoding="utf-8")
 
 
-def test_tauri_product_shell_is_pinned_and_has_no_sidecar_or_raw_shell_scope() -> None:
+def test_tauri_product_shell_is_pinned_and_keeps_sidecar_out_of_js_shell_scope() -> None:
     cargo = _read("desktop/src-tauri/Cargo.toml")
     package = json.loads(_read("desktop/package.json"))
     capability = json.loads(
@@ -24,8 +24,41 @@ def test_tauri_product_shell_is_pinned_and_has_no_sidecar_or_raw_shell_scope() -
     assert capability["permissions"] == ["core:default"]
     serialized = json.dumps(capability, sort_keys=True)
     assert "shell:" not in serialized
-    assert "sidecar" not in cargo.lower()
-    assert "tauri-plugin-shell" not in cargo
+    assert 'tauri-plugin-shell = "=2.3.5"' in cargo
+    assert 'tauri-plugin-single-instance = "=2.4.3"' in cargo
+    config = json.loads(_read("desktop/src-tauri/tauri.conf.json"))
+    assert config["bundle"]["externalBin"] == ["binaries/angmoo-sidecar"]
+
+
+def test_product_sidecar_has_fixed_commands_hash_and_lifecycle_contract() -> None:
+    runtime = _read("desktop/src-tauri/src/desktop_runtime.rs")
+    host = _read("desktop/src-tauri/src/lib.rs")
+    build = _read("desktop/scripts/build-sidecar.ps1")
+    sidecar = _read("backend/app/runtime/desktop_sidecar.py")
+    middleware = _read("backend/app/core/desktop_loopback.py")
+
+    for marker in (
+        "verify_packaged_sidecar",
+        "ANGMOO_SIDECAR_SHA256",
+        'Uuid::new_v4()',
+        'sidecar("angmoo-sidecar")',
+        "desktop_runtime_status",
+        "retry_desktop_runtime",
+        '"/__angmoo/desktop/shutdown"',
+        "desktop_sidecar_health_lost",
+    ):
+        assert marker in runtime or marker in host
+    assert "PyInstaller 6.16.0" in build
+    assert "System.Security.Cryptography.SHA256" in build
+    assert 'listener.bind(("127.0.0.1", 0))' in sidecar
+    assert '"sidecar.owner.json"' in sidecar
+    assert '"sidecar.endpoint.json"' in sidecar
+    assert "launch_token" not in sidecar.split("publish_endpoint", 1)[1].split(
+        "def release", 1
+    )[0]
+    assert "hmac.compare_digest" in middleware
+    for forbidden in ("execute_sql", "execute_cypher", "raw_shell"):
+        assert forbidden not in runtime
 
 
 def test_phone_window_has_no_browser_chrome_and_applies_scaling_policy() -> None:

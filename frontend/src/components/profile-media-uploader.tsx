@@ -7,6 +7,7 @@ import type { ChangeEvent } from "react";
 import { ProfileAvatar } from "@/components/profile-avatar";
 import type { AgentProfileMediaUploadInput } from "@/lib/agents";
 import { usePrivateMediaUrl } from "@/lib/use-private-media-url";
+import { useRuntimeMediaUrl } from "@/shared/media/public";
 
 type MediaKind = "avatar" | "banner";
 
@@ -51,7 +52,8 @@ export function ProfileMediaUploader({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const resolvedAvatarUrl = usePrivateMediaUrl(avatarUrl);
-  const resolvedBannerUrl = usePrivateMediaUrl(bannerUrl);
+  const privateBannerUrl = usePrivateMediaUrl(bannerUrl);
+  const resolvedBannerUrl = useRuntimeMediaUrl(privateBannerUrl);
 
   useEffect(() => {
     return () => {

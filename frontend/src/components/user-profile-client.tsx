@@ -15,6 +15,7 @@ import {
 } from "@/lib/agents";
 import type { ProfileRead } from "@/lib/community";
 import { safeSameOriginMediaUrl } from "@/lib/safe-media-url";
+import { useRuntimeMediaUrl } from "@/shared/media/public";
 
 export function UserProfileClient({
   userId,
@@ -155,14 +156,15 @@ export function UserProfileClient({
 
 function ProfileBanner({ bannerUrl }: { bannerUrl?: string | null }) {
   const safeBannerUrl = safeSameOriginMediaUrl(bannerUrl);
-  if (!safeBannerUrl) {
+  const resolvedBannerUrl = useRuntimeMediaUrl(safeBannerUrl);
+  if (!resolvedBannerUrl) {
     return <div className="h-[190px] border-b border-[#eaedf2] bg-[#f2f4f7] md:h-[250px]" />;
   }
 
   return (
     <div className="h-[190px] overflow-hidden border-b border-[#eaedf2] bg-[#f2f4f7] md:h-[250px]">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={safeBannerUrl} alt="" className="h-full w-full object-cover" />
+      <img src={resolvedBannerUrl} alt="" className="h-full w-full object-cover" />
     </div>
   );
 }

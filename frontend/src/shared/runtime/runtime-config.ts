@@ -53,6 +53,28 @@ export function getRuntimeConfig(): AngmooRuntimeConfig | null {
   };
 }
 
+export function installDesktopRuntimeConfig(
+  apiBaseUrl: string,
+  launchToken: string,
+) {
+  if (typeof window === "undefined") return;
+  const normalizedBase = assertLoopbackApiBase(apiBaseUrl);
+  if (launchToken.length < 32) {
+    throw new Error("Angmoo desktop launch token is invalid.");
+  }
+  window.__ANGMOO_RUNTIME_CONFIG__ = {
+    apiBaseUrl: normalizedBase,
+    launchToken,
+    profile: STATIC_FRONTEND_PROFILE,
+  };
+}
+
+export function clearDesktopRuntimeConfig() {
+  if (typeof window !== "undefined") {
+    delete window.__ANGMOO_RUNTIME_CONFIG__;
+  }
+}
+
 export function resolveRuntimeRequestUrl(input: string) {
   const runtime = getRuntimeConfig();
   if (!runtime) return input;

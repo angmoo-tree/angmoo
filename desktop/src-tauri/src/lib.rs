@@ -1,3 +1,4 @@
+mod desktop_runtime;
 mod phone_resize;
 mod product_windows;
 mod window_policy;
@@ -5,6 +6,21 @@ mod window_policy;
 use product_windows::{ProductWindowKind, current_window, open_product_window_impl};
 use tauri::{Manager, WebviewWindow, Window};
 use tauri_runtime::ResizeDirection;
+
+#[tauri::command]
+fn desktop_runtime_status(
+    state: tauri::State<'_, desktop_runtime::DesktopRuntimeState>,
+) -> Result<desktop_runtime::DesktopRuntimeStatus, String> {
+    desktop_runtime::status(&state)
+}
+
+#[tauri::command]
+fn retry_desktop_runtime(
+    app: tauri::AppHandle,
+    state: tauri::State<'_, desktop_runtime::DesktopRuntimeState>,
+) -> Result<(), String> {
+    desktop_runtime::retry(app, &state)
+}
 
 #[tauri::command]
 async fn open_product_window(
@@ -63,12 +79,24 @@ fn start_product_window_resize(window: Window, direction: String) -> Result<(), 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_single_instance::init(|app, _, _| {
+            if let Some(phone) = app.get_webview_window("main") {
+                let _ = phone.show();
+                let _ = phone.set_focus();
+            }
+        }))
+        .plugin(tauri_plugin_shell::init())
+        .manage(desktop_runtime::DesktopRuntimeState::default())
         .setup(|app| {
             let phone = app
                 .get_webview_window("main")
                 .ok_or("configured phone window is missing")?;
             window_policy::apply_phone_window_policy(&phone)?;
             phone_resize::install_phone_aspect_ratio_lock(&phone)?;
+            desktop_runtime::start(
+                app.handle().clone(),
+                &app.state::<desktop_runtime::DesktopRuntimeState>(),
+            )?;
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -77,9 +105,19 @@ pub fn run() {
             close_product_window,
             start_product_window_drag,
             start_product_window_resize,
+            desktop_runtime_status,
+            retry_desktop_runtime,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running Angmoo Tauri product shell");
+        .build(tauri::generate_context!())
+        .expect("error while building Angmoo Tauri product shell")
+        .run(|app, event| {
+            if matches!(
+                event,
+                tauri::RunEvent::ExitRequested { .. } | tauri::RunEvent::Exit
+            ) {
+                desktop_runtime::shutdown(&app.state::<desktop_runtime::DesktopRuntimeState>());
+            }
+        });
 }
 
 #[cfg(test)]

@@ -62,8 +62,14 @@ def allowed_origins(config: Settings = settings) -> tuple[str, ...]:
     if not raw_origins:
         raise BrowserSessionConfigurationError("missing_browser_session_origin")
     origins = tuple(dict.fromkeys(canonical_origin(item) for item in raw_origins))
+    desktop_origin = (
+        canonical_origin(config.desktop_allowed_origin)
+        if config.desktop_launch_token
+        else None
+    )
     if config.app_env == "production" and any(
-        not origin.startswith("https://") for origin in origins
+        not origin.startswith("https://") and origin != desktop_origin
+        for origin in origins
     ):
         raise BrowserSessionConfigurationError("invalid_browser_session_origin")
     return origins
@@ -116,11 +122,12 @@ def require_local_frontend_request(
             raise _csrf_error() from exc
 
     parsed = urlsplit(frontend_origin)
-    if frontend_origin not in configured or parsed.hostname not in {
-        "127.0.0.1",
-        "localhost",
-        "::1",
-    }:
+    permitted_hosts = {"127.0.0.1", "localhost", "::1"}
+    if config.desktop_launch_token:
+        desktop_origin = canonical_origin(config.desktop_allowed_origin)
+        if frontend_origin == desktop_origin:
+            permitted_hosts.add(urlsplit(desktop_origin).hostname or "")
+    if frontend_origin not in configured or parsed.hostname not in permitted_hosts:
         raise _csrf_error()
 
     if mutation:
