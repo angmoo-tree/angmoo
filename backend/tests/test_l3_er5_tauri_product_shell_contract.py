@@ -54,9 +54,20 @@ def test_phone_window_has_no_browser_chrome_and_applies_scaling_policy() -> None
     ):
         assert marker in policy
     for marker in (
+        "DwmSetWindowAttribute",
+        "DWMWA_BORDER_COLOR",
+        "DWMWA_COLOR_NONE",
+        "CreateRoundRectRgn",
+        "SetWindowRgn",
+        "DeleteObject",
         "SetWindowSubclass",
+        "GetWindowSubclass",
         "RemoveWindowSubclass",
         "WM_SIZING",
+        "WM_NCHITTEST",
+        "WM_SIZE",
+        "WM_WINDOWPOSCHANGED",
+        "WM_DPICHANGED",
         "WM_NCDESTROY",
         "WMSZ_LEFT",
         "WMSZ_RIGHT",
@@ -66,6 +77,11 @@ def test_phone_window_has_no_browser_chrome_and_applies_scaling_policy() -> None
         "WMSZ_TOPRIGHT",
         "WMSZ_BOTTOMLEFT",
         "WMSZ_BOTTOMRIGHT",
+        "HTTOPLEFT",
+        "HTTOPRIGHT",
+        "HTBOTTOMLEFT",
+        "HTBOTTOMRIGHT",
+        "region_update_in_progress",
     ):
         assert marker in resize
     for scale in ("1.0", "1.25", "1.5"):
