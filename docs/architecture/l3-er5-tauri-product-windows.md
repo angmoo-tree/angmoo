@@ -38,7 +38,9 @@ same React feature source used by browser contributors.
 
 PR L grants only `core:default` to the three product windows. It does not include
 `tauri-plugin-shell`, raw shell permission, sidecar execution, database commands,
-installer behavior, or per-launch credentials. PR M must separately prove:
+installer behavior, or per-launch credentials. PR M implements and verifies the
+separate lifecycle contract documented in
+`docs/architecture/l3-er5-tauri-sidecar-lifecycle.md`:
 
 - packaged sidecar path and hash validation;
 - dynamic loopback port and per-launch token;

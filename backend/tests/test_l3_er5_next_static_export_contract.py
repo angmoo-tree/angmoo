@@ -46,6 +46,37 @@ def test_runtime_adapter_restricts_injection_to_loopback_and_maps_proxy_paths() 
     assert 'input.startsWith("/media/")' in runtime
     assert "runtime.launchToken && isSidecarRequest" in runtime
     assert 'headers.set("X-Angmoo-Launcher-Token"' in runtime
+    assert "installDesktopRuntimeConfig" in runtime
+
+
+def test_static_product_waits_for_packaged_runtime_and_exposes_only_retry() -> None:
+    gate = _read("frontend/src/shared/runtime/desktop-runtime-gate.tsx")
+    desktop = _read("frontend/src/shared/desktop/product-window.ts")
+    router = _read("frontend/src/composition/static-product-router.tsx")
+    assert "DesktopRuntimeGate" in router
+    assert 'phase: "starting" | "ready" | "crashed" | "stopped"' in desktop
+    assert 'invoke<AngmooDesktopRuntimeStatus>("desktop_runtime_status")' in desktop
+    assert 'invoke("retry_desktop_runtime")' in desktop
+    assert "로컬 엔진과 저장된 World를 준비하고 있습니다." in gate
+    assert "로컬 엔진 다시 시작" in gate
+    assert "desktop_runtime_unreachable" in gate
+    for forbidden in ("shell", "sql", "cypher", "commandArgs"):
+        assert forbidden not in gate
+
+
+def test_static_media_uses_authenticated_fetch_and_blob_urls() -> None:
+    media_hook = _read("frontend/src/shared/media/use-runtime-media-url.ts")
+    assert "runtimeFetch(resolvedSource" in media_hook
+    assert 'cache: "no-store"' in media_hook
+    assert "URL.createObjectURL(blob)" in media_hook
+    assert "URL.revokeObjectURL" in media_hook
+    for relative in (
+        "frontend/src/components/profile-avatar.tsx",
+        "frontend/src/components/post-media-grid.tsx",
+        "frontend/src/components/world-creator-client.tsx",
+        "frontend/src/features/device-home/ui/device-home.tsx",
+    ):
+        assert "useRuntimeMediaUrl" in _read(relative)
 
 
 def test_static_route_matrix_and_dynamic_fallback_are_explicit() -> None:

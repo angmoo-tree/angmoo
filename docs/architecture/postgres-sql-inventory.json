@@ -263,14 +263,14 @@
       "markers": {
         "driver_or_url": [
           26,
-          161,
-          162
+          163,
+          164
         ]
       },
       "owner": "ER1-ER2",
       "path": "backend/app/core/config.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "56ffaa0ba3b3aeead1d37b9063cfb395ea4e0553d767292910c9ad0cd6922249",
+      "source_sha256": "c533d7d075a836756ac8d9258dc8d30b5a6023afb8b6c9a2851dcca5b377a8be",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {

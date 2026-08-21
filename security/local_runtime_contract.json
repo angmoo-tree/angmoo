@@ -11,6 +11,7 @@
     {"disposition": "keep", "module": "app.core.browser_session", "owner_stage": "L1", "removal_condition": null},
     {"disposition": "keep", "module": "app.core.config", "owner_stage": "L0", "removal_condition": null},
     {"disposition": "keep", "module": "app.core.db", "owner_stage": "L0", "removal_condition": null},
+    {"disposition": "keep", "module": "app.core.desktop_loopback", "owner_stage": "L3-ER5", "removal_condition": null},
     {"disposition": "keep", "module": "app.core.ids", "owner_stage": "L0", "removal_condition": null},
     {"disposition": "migrate", "module": "app.core.image_generation", "owner_stage": "L6", "removal_condition": "Move media generation policy behind the media domain public API."},
     {"disposition": "migrate", "module": "app.core.public_media", "owner_stage": "L6", "removal_condition": "Move public media mounting behind the media domain composition API."},

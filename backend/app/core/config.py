@@ -29,6 +29,8 @@ class Settings(BaseSettings):
     LOGIN_THROTTLE_HMAC_SECRET: SecretStr | None = None
     LOGIN_TRUSTED_PROXY_CIDRS: str = ""
     BROWSER_SESSION_ALLOWED_ORIGINS: str = "http://127.0.0.1:3000"
+    DESKTOP_LAUNCH_TOKEN: SecretStr | None = None
+    DESKTOP_ALLOWED_ORIGIN: str = "http://tauri.localhost"
     GOOGLE_AUTH_VERIFY_SOURCE_PER_MINUTE: int = 5
     GOOGLE_AUTH_VERIFY_SOURCE_PER_15_MINUTES: int = 20
     GOOGLE_AUTH_VERIFY_GLOBAL_PER_MINUTE: int = 60
@@ -211,6 +213,17 @@ class Settings(BaseSettings):
     @property
     def signup_enabled(self) -> bool:
         return self.SIGNUP_ENABLED
+
+    @property
+    def desktop_launch_token(self) -> str | None:
+        if self.DESKTOP_LAUNCH_TOKEN is None:
+            return None
+        value = self.DESKTOP_LAUNCH_TOKEN.get_secret_value().strip()
+        return value or None
+
+    @property
+    def desktop_allowed_origin(self) -> str:
+        return self.DESKTOP_ALLOWED_ORIGIN.strip()
 
     @property
     def password_signup_enabled(self) -> bool:

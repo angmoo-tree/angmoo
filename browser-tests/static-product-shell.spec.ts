@@ -25,13 +25,13 @@ test.beforeEach(async ({ page }) => {
       __ANGMOO_RUNTIME_CONFIG__: {
         profile: "tauri-static",
         apiBaseUrl: "http://127.0.0.1:8080",
-        launchToken: "static-route-probe-token",
+        launchToken: "static-route-probe-token-000000000000",
       },
     });
   });
   await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
     expect(route.request().headers()["x-angmoo-launcher-token"]).toBe(
-      "static-route-probe-token",
+      "static-route-probe-token-000000000000",
     );
     const pathname = new URL(route.request().url()).pathname;
     if (pathname === "/api/v1/auth/me") {
@@ -78,7 +78,7 @@ test("Tauri Phone delegates Studio to a reusable wide product window", async ({ 
       __ANGMOO_DESKTOP_WINDOW__: { kind: "phone"; route: string };
       __TAURI__: {
         core: {
-          invoke: (command: string, args?: Record<string, unknown>) => Promise<void>;
+          invoke: (command: string, args?: Record<string, unknown>) => Promise<unknown>;
         };
       };
     };
@@ -87,7 +87,15 @@ test("Tauri Phone delegates Studio to a reusable wide product window", async ({ 
     desktop.__TAURI__ = {
       core: {
         invoke: async (command, args) => {
+          if (command === "desktop_runtime_status") {
+            return {
+              phase: "ready",
+              apiBaseUrl: "http://127.0.0.1:8080",
+              launchToken: "static-route-probe-token-000000000000",
+            };
+          }
           desktop.__ANGMOO_DESKTOP_INVOCATIONS__.push({ command, args });
+          return undefined;
         },
       },
     };
@@ -308,7 +316,7 @@ test("Tauri Phone opens the owner relationship graph in a wide product window", 
       __ANGMOO_DESKTOP_WINDOW__: { kind: "phone"; route: string };
       __TAURI__: {
         core: {
-          invoke: (command: string, args?: Record<string, unknown>) => Promise<void>;
+          invoke: (command: string, args?: Record<string, unknown>) => Promise<unknown>;
         };
       };
     };
@@ -320,7 +328,15 @@ test("Tauri Phone opens the owner relationship graph in a wide product window", 
     desktop.__TAURI__ = {
       core: {
         invoke: async (command, args) => {
+          if (command === "desktop_runtime_status") {
+            return {
+              phase: "ready",
+              apiBaseUrl: "http://127.0.0.1:8080",
+              launchToken: "static-route-probe-token-000000000000",
+            };
+          }
           desktop.__ANGMOO_DESKTOP_INVOCATIONS__.push({ command, args });
+          return undefined;
         },
       },
     };
@@ -403,6 +419,97 @@ test("Tauri Phone opens the owner relationship graph in a wide product window", 
   await expect(page).toHaveURL(/\/worlds\/world-static-probe\/relationships$/);
 });
 
+test("static Device Home authenticates sidecar media before rendering a blob URL", async ({
+  page,
+}) => {
+  const mediaRequests: string[] = [];
+  await page.route("http://127.0.0.1:8080/**", async (route) => {
+    expect(route.request().headers()["x-angmoo-launcher-token"]).toBe(
+      "static-route-probe-token-000000000000",
+    );
+    const pathname = new URL(route.request().url()).pathname;
+    if (pathname === "/api/v1/auth/me") {
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          id: "owner-static-probe",
+          email: null,
+          display_name: "Static Owner",
+          display_name_updated_at: null,
+          display_name_change_available_at: null,
+          profile_setup_completed: true,
+          feed_content_filter: "all",
+          is_admin: false,
+        },
+        status: 200,
+      });
+      return;
+    }
+    if (pathname === "/api/v1/worlds/mine") {
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          schema_version: "local-world-surface-v1",
+          surface: "device_home",
+          items: [
+            {
+              world_id: "world-media-probe",
+              name: "Media World",
+              tagline: "Authenticated media probe",
+              banner_media_id: "/media/probe.png",
+              banner_alt_text: "",
+              status: "published",
+              visibility: "public",
+              readiness_status: "publish_ready",
+              membership_role: "owner",
+              updated_at: "2026-08-21T00:00:00Z",
+              launchable: true,
+              launch_block_reason: null,
+            },
+          ],
+          next_cursor: null,
+        },
+        status: 200,
+      });
+      return;
+    }
+    if (pathname === "/api/v1/runtime/status") {
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          schema_version: "local-runtime-status-v1",
+          installation_state: "ready",
+        },
+        status: 200,
+      });
+      return;
+    }
+    if (pathname === "/media/probe.png") {
+      mediaRequests.push(route.request().url());
+      await route.fulfill({
+        body: Buffer.from(
+          "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl2lU8AAAAASUVORK5CYII=",
+          "base64",
+        ),
+        contentType: "image/png",
+        status: 200,
+      });
+      return;
+    }
+    await route.fulfill({
+      contentType: "application/json",
+      json: { detail: "unexpected_static_media_probe" },
+      status: 503,
+    });
+  });
+
+  await page.goto("/");
+
+  await expect(page.getByRole("link", { name: "Media World World 열기" })).toBeVisible();
+  await expect(page.locator('img[src^="blob:"]')).toBeVisible();
+  expect(mediaRequests).toHaveLength(1);
+});
+
 test("Tauri wide marker opens the shared static Studio route without a server page", async ({
   page,
 }) => {
@@ -410,14 +517,25 @@ test("Tauri wide marker opens the shared static Studio route without a server pa
     const desktop = window as unknown as {
       __ANGMOO_DESKTOP_WINDOW__: { kind: "studio"; route: string };
       __TAURI__: {
-        core: { invoke: () => Promise<void> };
+        core: { invoke: (command: string) => Promise<unknown> };
       };
     };
     desktop.__ANGMOO_DESKTOP_WINDOW__ = {
       kind: "studio",
       route: "/studio",
     };
-    desktop.__TAURI__ = { core: { invoke: async () => undefined } };
+    desktop.__TAURI__ = {
+      core: {
+        invoke: async (command) =>
+          command === "desktop_runtime_status"
+            ? {
+                phase: "ready",
+                apiBaseUrl: "http://127.0.0.1:8080",
+                launchToken: "static-route-probe-token-000000000000",
+              }
+            : undefined,
+      },
+    };
   });
   await page.goto("/");
 

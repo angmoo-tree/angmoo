@@ -31,6 +31,7 @@ import {
   type PostThreadRead,
 } from "@/lib/community";
 import { safeLoginReturnTo } from "@/lib/safe-navigation";
+import { DesktopRuntimeGate } from "@/shared/runtime/desktop-runtime-gate";
 
 type BrowserLocation = {
   pathname: string;
@@ -58,14 +59,20 @@ export function StaticProductRouter() {
     () => "",
   );
   if (!locationValue) {
-    return <StaticLoadingScreen />;
+    return (
+      <DesktopRuntimeGate>
+        <StaticLoadingScreen />
+      </DesktopRuntimeGate>
+    );
   }
   const [rawPathname, search = ""] = locationValue.split("\n", 2);
   const location: BrowserLocation = {
     pathname: rawPathname.replace(/\/+$/, "") || "/",
     search,
   };
-  return renderStaticRoute(location);
+  return (
+    <DesktopRuntimeGate>{renderStaticRoute(location)}</DesktopRuntimeGate>
+  );
 }
 
 function renderStaticRoute(location: BrowserLocation) {

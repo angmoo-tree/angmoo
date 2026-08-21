@@ -1,0 +1,394 @@
+use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
+use std::{
+    fs,
+    io::{Read, Write},
+    net::{SocketAddr, TcpStream},
+    path::PathBuf,
+    process,
+    sync::Mutex,
+    time::Duration,
+};
+use tauri::{AppHandle, Manager};
+use tauri_plugin_shell::{
+    ShellExt,
+    process::{CommandChild, CommandEvent},
+};
+use uuid::Uuid;
+
+const DESKTOP_ORIGIN: &str = "http://tauri.localhost";
+
+#[derive(Clone, Debug, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct DesktopRuntimeStatus {
+    phase: &'static str,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    api_base_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    launch_token: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    diagnostic_code: Option<&'static str>,
+}
+
+impl DesktopRuntimeStatus {
+    fn starting() -> Self {
+        Self {
+            phase: "starting",
+            api_base_url: None,
+            launch_token: None,
+            diagnostic_code: None,
+        }
+    }
+
+    fn ready(port: u16, launch_token: String) -> Self {
+        Self {
+            phase: "ready",
+            api_base_url: Some(format!("http://127.0.0.1:{port}")),
+            launch_token: Some(launch_token),
+            diagnostic_code: None,
+        }
+    }
+
+    fn crashed(code: &'static str) -> Self {
+        Self {
+            phase: "crashed",
+            api_base_url: None,
+            launch_token: None,
+            diagnostic_code: Some(code),
+        }
+    }
+
+    fn stopped() -> Self {
+        Self {
+            phase: "stopped",
+            api_base_url: None,
+            launch_token: None,
+            diagnostic_code: None,
+        }
+    }
+}
+
+struct PrivateRuntime {
+    status: DesktopRuntimeStatus,
+    child: Option<CommandChild>,
+    generation: u64,
+    runtime_root: Option<PathBuf>,
+}
+
+pub struct DesktopRuntimeState(Mutex<PrivateRuntime>);
+
+impl Default for DesktopRuntimeState {
+    fn default() -> Self {
+        Self(Mutex::new(PrivateRuntime {
+            status: DesktopRuntimeStatus::stopped(),
+            child: None,
+            generation: 0,
+            runtime_root: None,
+        }))
+    }
+}
+
+#[derive(Debug, Deserialize)]
+struct ReadyEvent {
+    event: String,
+    host: String,
+    port: u16,
+}
+
+pub fn status(state: &DesktopRuntimeState) -> Result<DesktopRuntimeStatus, String> {
+    state
+        .0
+        .lock()
+        .map(|runtime| runtime.status.clone())
+        .map_err(|_| "desktop_runtime_state_poisoned".to_owned())
+}
+
+fn verify_packaged_sidecar() -> Result<(), String> {
+    let expected = env!("ANGMOO_SIDECAR_SHA256");
+    if expected.len() != 64 || !expected.bytes().all(|byte| byte.is_ascii_hexdigit()) {
+        return Err("desktop_sidecar_hash_missing".to_owned());
+    }
+    let file_name = if cfg!(windows) {
+        "angmoo-sidecar.exe"
+    } else {
+        "angmoo-sidecar"
+    };
+    let bundled = std::env::current_exe()
+        .ok()
+        .and_then(|path| path.parent().map(|parent| parent.join(file_name)));
+    let source = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("binaries")
+        .join(format!(
+            "angmoo-sidecar-{}{}",
+            env!("ANGMOO_TARGET_TRIPLE"),
+            if cfg!(windows) { ".exe" } else { "" }
+        ));
+    let path = bundled
+        .filter(|candidate| candidate.is_file())
+        .unwrap_or(source);
+    let bytes = fs::read(path).map_err(|_| "desktop_sidecar_missing".to_owned())?;
+    let actual = format!("{:x}", Sha256::digest(bytes));
+    if actual != expected {
+        return Err("desktop_sidecar_hash_mismatch".to_owned());
+    }
+    Ok(())
+}
+
+fn http_request(port: u16, method: &str, path: &str, token: &str) -> std::io::Result<String> {
+    let address = SocketAddr::from(([127, 0, 0, 1], port));
+    let mut stream = TcpStream::connect_timeout(&address, Duration::from_secs(2))?;
+    stream.set_read_timeout(Some(Duration::from_secs(2)))?;
+    let request = format!(
+        "{method} {path} HTTP/1.1\r\nHost: 127.0.0.1:{port}\r\nOrigin: {DESKTOP_ORIGIN}\r\nX-Angmoo-Launcher-Token: {token}\r\nConnection: close\r\nContent-Length: 0\r\n\r\n"
+    );
+    stream.write_all(request.as_bytes())?;
+    let mut response = String::new();
+    stream.read_to_string(&mut response)?;
+    Ok(response)
+}
+
+fn response_is_ok(response: &str) -> bool {
+    response
+        .lines()
+        .next()
+        .is_some_and(|line| line.contains(" 200 "))
+}
+
+pub fn start(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> {
+    verify_packaged_sidecar()?;
+    let generation = {
+        let mut runtime = state
+            .0
+            .lock()
+            .map_err(|_| "desktop_runtime_state_poisoned")?;
+        if matches!(runtime.status.phase, "starting" | "ready") {
+            return Ok(());
+        }
+        runtime.generation += 1;
+        runtime.status = DesktopRuntimeStatus::starting();
+        runtime.child = None;
+        runtime.runtime_root = None;
+        runtime.generation
+    };
+
+    let token = Uuid::new_v4().simple().to_string();
+    let runtime_root = app
+        .path()
+        .app_local_data_dir()
+        .map_err(|error| error.to_string())?
+        .join("runtime");
+    fs::create_dir_all(&runtime_root).map_err(|_| "desktop_runtime_root_unavailable")?;
+    let parent_pid = process::id().to_string();
+    let runtime_root_argument = runtime_root.to_string_lossy().into_owned();
+    let command = app
+        .shell()
+        .sidecar("angmoo-sidecar")
+        .map_err(|_| "desktop_sidecar_command_invalid")?
+        .args([
+            "--parent-pid",
+            &parent_pid,
+            "--runtime-root",
+            &runtime_root_argument,
+        ])
+        .env("DESKTOP_LAUNCH_TOKEN", &token)
+        .env("DESKTOP_ALLOWED_ORIGIN", DESKTOP_ORIGIN)
+        .env("BROWSER_SESSION_ALLOWED_ORIGINS", DESKTOP_ORIGIN)
+        .env("API_DOCS_ENABLED", "false")
+        .env("SIGNUP_ENABLED", "false");
+    let (mut receiver, child) = command
+        .spawn()
+        .map_err(|_| "desktop_sidecar_spawn_failed")?;
+    {
+        let mut runtime = state
+            .0
+            .lock()
+            .map_err(|_| "desktop_runtime_state_poisoned")?;
+        runtime.child = Some(child);
+        runtime.runtime_root = Some(runtime_root);
+    }
+    let app_handle = app.clone();
+    tauri::async_runtime::spawn(async move {
+        let managed = app_handle.state::<DesktopRuntimeState>();
+        let mut ready: Option<ReadyEvent> = None;
+        while let Some(event) = receiver.recv().await {
+            match event {
+                CommandEvent::Stdout(bytes) => {
+                    let line = String::from_utf8_lossy(&bytes);
+                    if let Ok(candidate) = serde_json::from_str::<ReadyEvent>(line.trim())
+                        && candidate.event == "ready"
+                    {
+                        ready = Some(candidate);
+                        break;
+                    }
+                }
+                CommandEvent::Terminated(_) => break,
+                _ => {}
+            }
+        }
+        let Some(ready) = ready else {
+            mark_crashed(&managed, generation, "desktop_sidecar_startup_failed");
+            return;
+        };
+        if ready.host != "127.0.0.1" || ready.port == 0 {
+            mark_crashed(&managed, generation, "desktop_sidecar_endpoint_invalid");
+            return;
+        }
+        let mut healthy = false;
+        for _ in 0..60 {
+            if http_request(ready.port, "GET", "/health", &token)
+                .is_ok_and(|response| response_is_ok(&response))
+            {
+                healthy = true;
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(100));
+        }
+        if !healthy {
+            mark_crashed(&managed, generation, "desktop_sidecar_health_timeout");
+            return;
+        }
+        if let Ok(mut runtime) = managed.0.lock()
+            && runtime.generation == generation
+        {
+            runtime.status = DesktopRuntimeStatus::ready(ready.port, token.clone());
+        }
+
+        loop {
+            std::thread::sleep(Duration::from_secs(2));
+            let current = managed
+                .0
+                .lock()
+                .ok()
+                .map(|runtime| (runtime.generation, runtime.status.phase));
+            if current != Some((generation, "ready")) {
+                break;
+            }
+            if !http_request(ready.port, "GET", "/health", &token)
+                .is_ok_and(|response| response_is_ok(&response))
+            {
+                mark_crashed(&managed, generation, "desktop_sidecar_health_lost");
+                break;
+            }
+        }
+    });
+    Ok(())
+}
+
+fn mark_crashed(state: &DesktopRuntimeState, generation: u64, code: &'static str) {
+    let cleanup = if let Ok(mut runtime) = state.0.lock()
+        && runtime.generation == generation
+    {
+        runtime.status = DesktopRuntimeStatus::crashed(code);
+        Some((runtime.child.take(), runtime.runtime_root.take()))
+    } else {
+        None
+    };
+    if let Some((child, runtime_root)) = cleanup {
+        if let Some(child) = child {
+            let _ = child.kill();
+        }
+        if let Some(runtime_root) = runtime_root {
+            cleanup_runtime_metadata(&runtime_root);
+        }
+    }
+}
+
+pub fn shutdown(state: &DesktopRuntimeState) {
+    let (port, token, child, runtime_root) = if let Ok(mut runtime) = state.0.lock() {
+        let port = runtime
+            .status
+            .api_base_url
+            .as_deref()
+            .and_then(|value| value.rsplit(':').next())
+            .and_then(|value| value.parse::<u16>().ok());
+        let token = runtime.status.launch_token.clone();
+        runtime.generation += 1;
+        runtime.status = DesktopRuntimeStatus::stopped();
+        (
+            port,
+            token,
+            runtime.child.take(),
+            runtime.runtime_root.take(),
+        )
+    } else {
+        (None, None, None, None)
+    };
+    let graceful_requested = if let (Some(port), Some(token)) = (port, token) {
+        let _ = http_request(port, "POST", "/__angmoo/desktop/shutdown", &token);
+        true
+    } else {
+        false
+    };
+    if let Some(child) = child {
+        if graceful_requested && let Some(runtime_root) = runtime_root.as_ref() {
+            let owner_path = runtime_root.join("sidecar.owner.json");
+            let endpoint_path = runtime_root.join("sidecar.endpoint.json");
+            for _ in 0..80 {
+                if !owner_path.exists() && !endpoint_path.exists() {
+                    return;
+                }
+                std::thread::sleep(Duration::from_millis(100));
+            }
+        }
+        if !graceful_requested || runtime_root.is_some() {
+            let _ = child.kill();
+        }
+    }
+    if let Some(runtime_root) = runtime_root {
+        cleanup_runtime_metadata(&runtime_root);
+    }
+}
+
+fn cleanup_runtime_metadata(runtime_root: &std::path::Path) {
+    let _ = fs::remove_file(runtime_root.join("sidecar.owner.json"));
+    let _ = fs::remove_file(runtime_root.join("sidecar.endpoint.json"));
+}
+
+pub fn retry(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> {
+    shutdown(state);
+    start(app, state)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn public_status_never_contains_sidecar_path_or_arbitrary_command() {
+        let status = DesktopRuntimeStatus::ready(49152, "a".repeat(32));
+        let json = serde_json::to_string(&status).unwrap();
+        assert!(json.contains("http://127.0.0.1:49152"));
+        assert!(!json.contains("sidecar.exe"));
+        assert!(!json.contains("command"));
+    }
+
+    #[test]
+    fn stopped_and_crashed_statuses_do_not_retain_launch_token() {
+        for status in [
+            DesktopRuntimeStatus::stopped(),
+            DesktopRuntimeStatus::crashed("sidecar_stopped"),
+        ] {
+            assert!(status.launch_token.is_none());
+            assert!(status.api_base_url.is_none());
+        }
+    }
+
+    #[test]
+    fn runtime_metadata_cleanup_removes_only_owned_runtime_files() {
+        let root = std::env::temp_dir().join(format!(
+            "angmoo-er5-runtime-cleanup-{}",
+            Uuid::new_v4().simple()
+        ));
+        fs::create_dir_all(&root).unwrap();
+        fs::write(root.join("sidecar.owner.json"), "{}").unwrap();
+        fs::write(root.join("sidecar.endpoint.json"), "{}").unwrap();
+        fs::write(root.join("keep.txt"), "keep").unwrap();
+
+        cleanup_runtime_metadata(&root);
+
+        assert!(!root.join("sidecar.owner.json").exists());
+        assert!(!root.join("sidecar.endpoint.json").exists());
+        assert!(root.join("keep.txt").exists());
+        fs::remove_dir_all(root).unwrap();
+    }
+}

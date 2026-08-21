@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { getProfileColor, getProfileInitial } from "@/lib/profile";
 import { safeSameOriginMediaUrl } from "@/lib/safe-media-url";
+import { useRuntimeMediaUrl } from "@/shared/media/public";
 
 export function ProfileAvatar({
   name,
@@ -22,12 +23,13 @@ export function ProfileAvatar({
 }) {
   const [imageFailed, setImageFailed] = useState(false);
   const safeAvatarUrl = safeSameOriginMediaUrl(avatarUrl, { allowBlob });
+  const resolvedAvatarUrl = useRuntimeMediaUrl(safeAvatarUrl);
 
-  if (safeAvatarUrl && !imageFailed) {
+  if (resolvedAvatarUrl && !imageFailed) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
-        src={safeAvatarUrl}
+        src={resolvedAvatarUrl}
         alt={`${name} 프로필 이미지`}
         onError={() => setImageFailed(true)}
         className={`${sizeClassName} shrink-0 rounded-full bg-[#f3f4f6] object-cover text-transparent ${className}`}

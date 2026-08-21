@@ -308,7 +308,10 @@ mod windows {
     };
 
     const PHONE_ASPECT_SUBCLASS_ID: usize = 0x414E_474D_4F4F;
-    const DWMWCP_ROUND_VALUE: u32 = 2;
+    // The WebView/CSS frame is the only visible Phone silhouette. Asking DWM
+    // to round the rectangular host window can reintroduce a faint native
+    // outline around the otherwise transparent corner cutouts.
+    const DWMWCP_DONOTROUND_VALUE: u32 = 1;
 
     struct PhoneWindowSubclassState;
 
@@ -350,9 +353,10 @@ mod windows {
         // Do not clip this window with an HRGN. Region edges are integer-pixel masks
         // and visibly staircase at the Phone's large radius. The transparent
         // WebView and CSS frame own the antialiased silhouette; native code only
-        // suppresses the rectangular DWM border and owns hit testing.
-        suppress_native_border(hwnd);
-        request_compositor_rounding(hwnd);
+        // suppresses the rectangular DWM frame and owns hit testing. Disable DWM
+        // rounding first, then suppress the border last so the compositor cannot
+        // restore a faint rectangular outline around the transparent cutouts.
+        apply_native_phone_frame_policy(hwnd);
         Ok(())
     }
 
@@ -403,28 +407,37 @@ mod windows {
         unsafe { DefSubclassProc(hwnd, message, wparam, lparam) }
     }
 
-    fn suppress_native_border(hwnd: HWND) {
+    fn apply_native_phone_frame_policy(hwnd: HWND) {
+        if let Err(error) = disable_compositor_rounding(hwnd) {
+            eprintln!("angmoo phone DWM corner policy unavailable: {error}");
+        }
+        if let Err(error) = suppress_native_border(hwnd) {
+            eprintln!("angmoo phone DWM border suppression unavailable: {error}");
+        }
+    }
+
+    fn suppress_native_border(hwnd: HWND) -> windows::core::Result<()> {
         let border_color = DWMWA_COLOR_NONE;
-        let _ = unsafe {
+        unsafe {
             DwmSetWindowAttribute(
                 hwnd,
                 DWMWA_BORDER_COLOR,
                 (&border_color as *const u32).cast::<c_void>(),
                 size_of::<u32>() as u32,
             )
-        };
+        }
     }
 
-    fn request_compositor_rounding(hwnd: HWND) {
-        let preference = DWMWCP_ROUND_VALUE;
-        let _ = unsafe {
+    fn disable_compositor_rounding(hwnd: HWND) -> windows::core::Result<()> {
+        let preference = DWMWCP_DONOTROUND_VALUE;
+        unsafe {
             DwmSetWindowAttribute(
                 hwnd,
                 DWMWA_WINDOW_CORNER_PREFERENCE,
                 (&preference as *const u32).cast::<c_void>(),
                 size_of::<u32>() as u32,
             )
-        };
+        }
     }
 
     fn current_region_geometry(hwnd: HWND) -> Result<PhoneRegionGeometry, String> {

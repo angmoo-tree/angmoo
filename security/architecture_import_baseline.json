@@ -1,7 +1,7 @@
 {
-  "edge_count": 902,
-  "external_import_count": 1418,
-  "module_count": 425,
+  "edge_count": 904,
+  "external_import_count": 1437,
+  "module_count": 427,
   "modules": [
     {
       "external_imports": [],
@@ -1428,6 +1428,21 @@
       ],
       "module": "app.core.db",
       "path": "backend/app/core/db.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "dataclasses",
+        "hmac",
+        "starlette.datastructures",
+        "starlette.types",
+        "urllib.parse"
+      ],
+      "imports": [],
+      "module": "app.core.desktop_loopback",
+      "path": "backend/app/core/desktop_loopback.py",
       "wildcard_imports": []
     },
     {
@@ -3998,6 +4013,29 @@
       "imports": [],
       "module": "app.runtime",
       "path": "backend/app/runtime/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "argparse",
+        "ctypes",
+        "json",
+        "os",
+        "pathlib",
+        "socket",
+        "sys",
+        "threading",
+        "time",
+        "typing",
+        "uvicorn"
+      ],
+      "imports": [
+        "app.core.desktop_loopback",
+        "app.public_main"
+      ],
+      "module": "app.runtime.desktop_sidecar",
+      "path": "backend/app/runtime/desktop_sidecar.py",
       "wildcard_imports": []
     },
     {

@@ -5,8 +5,10 @@
   "license": "GPL-3.0-only",
   "scripts": {
     "tauri": "tauri",
-    "dev": "tauri dev",
-    "build:shell": "tauri build --no-bundle"
+    "build:sidecar": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/build-sidecar.ps1",
+    "dev": "npm run build:sidecar && tauri dev",
+    "build:shell": "tauri build --no-bundle",
+    "build:product": "npm run build:sidecar && npm run build:shell"
   },
   "devDependencies": {
     "@tauri-apps/cli": "2.11.4"
