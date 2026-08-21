@@ -72,6 +72,11 @@ def test_wide_windows_use_explicit_route_boundaries_and_single_labels() -> None:
     assert 'invoke("open_product_window"' in desktop_runtime
     assert "desktopWindowKindForRoute" in bridge
     assert "targetKind === currentKind" in bridge
+    world_app = _read("frontend/src/features/world-app/ui/world-app.tsx")
+    product_routes = _read("frontend/src/shared/navigation/product-routes.ts")
+    assert "relationshipGraphRoute(ownerActor.character_id, worldId)" in world_app
+    assert "내 조종 앵무 관계망 열기" in world_app
+    assert "export function relationshipGraphRoute" in product_routes
 
 
 def test_static_and_next_profiles_share_the_same_window_bridge() -> None:

@@ -127,6 +127,113 @@ test("Tauri Phone delegates Studio to a reusable wide product window", async ({ 
     .toContain("minimize_product_window");
 });
 
+test("Tauri Phone opens the owner relationship graph in a wide product window", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const desktop = window as unknown as {
+      __ANGMOO_DESKTOP_INVOCATIONS__: Array<{
+        command: string;
+        args?: Record<string, unknown>;
+      }>;
+      __ANGMOO_DESKTOP_WINDOW__: { kind: "phone"; route: string };
+      __TAURI__: {
+        core: {
+          invoke: (command: string, args?: Record<string, unknown>) => Promise<void>;
+        };
+      };
+    };
+    desktop.__ANGMOO_DESKTOP_INVOCATIONS__ = [];
+    desktop.__ANGMOO_DESKTOP_WINDOW__ = {
+      kind: "phone",
+      route: "/worlds/world-static-probe/relationships",
+    };
+    desktop.__TAURI__ = {
+      core: {
+        invoke: async (command, args) => {
+          desktop.__ANGMOO_DESKTOP_INVOCATIONS__.push({ command, args });
+        },
+      },
+    };
+  });
+  await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+    const pathname = new URL(route.request().url()).pathname;
+    if (pathname === "/api/v1/worlds/mine/world-static-probe") {
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          schema_version: "local-world-app-v1",
+          surface: "world_app",
+          world: {
+            world_id: "world-static-probe",
+            name: "Static World",
+            tagline: "Relationship window probe",
+            banner_media_id: null,
+            banner_alt_text: "",
+            status: "published",
+            visibility: "public",
+            readiness_status: "publish_ready",
+            membership_role: "owner",
+            updated_at: "2026-08-21T00:00:00Z",
+            launchable: true,
+            launch_block_reason: null,
+          },
+        },
+        status: 200,
+      });
+      return;
+    }
+    if (pathname === "/api/v1/worlds/world-static-probe/owner-character") {
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          schema_version: "owner-controlled-world-character-v1",
+          world_character_id: "wc-static-owner",
+          world_id: "world-static-probe",
+          character_id: "character-static-owner",
+          control_mode: "owner_controlled",
+          status: "active",
+          autonomous_enabled: false,
+          version: 1,
+          profile: {
+            display_name: "Static Owner Parrot",
+            avatar_url: "http://127.0.0.1:3000/icon.svg",
+            intro: "Static relationship probe",
+            role_key: null,
+            preferred_address: "Owner",
+            interests: [],
+            background: "",
+          },
+        },
+        status: 200,
+      });
+      return;
+    }
+    await route.fallback();
+  });
+
+  await page.goto("/worlds/world-static-probe/relationships");
+  await page.getByRole("link", { name: "내 조종 앵무 관계망 열기" }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const desktop = window as unknown as {
+          __ANGMOO_DESKTOP_INVOCATIONS__: unknown[];
+        };
+        return desktop.__ANGMOO_DESKTOP_INVOCATIONS__;
+      }),
+    )
+    .toContainEqual({
+      command: "open_product_window",
+      args: {
+        kind: "relationship-graph",
+        route:
+          "/characters/character-static-owner/worlds/world-static-probe/relationship-graph",
+      },
+    });
+  await expect(page).toHaveURL(/\/worlds\/world-static-probe\/relationships$/);
+});
+
 test("Tauri wide marker opens the shared static Studio route without a server page", async ({
   page,
 }) => {

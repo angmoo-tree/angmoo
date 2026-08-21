@@ -45,8 +45,8 @@ export const WORLD_APP_SECTIONS: readonly WorldAppSection[] = [
     segment: "characters",
   },
   {
-    availability: "unavailable",
-    description: "Character를 선택하는 World 관계 진입점이 준비된 뒤 연결됩니다.",
+    availability: "available",
+    description: "내가 조종하는 앵무의 관계망을 이 World 범위로 엽니다.",
     id: "relationships",
     label: "Relationships",
     segment: "relationships",
