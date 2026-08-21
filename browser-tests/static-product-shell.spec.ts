@@ -98,14 +98,11 @@ test("Tauri Phone delegates Studio to a reusable wide product window", async ({ 
     "data-angmoo-desktop-window",
     "phone",
   );
-  await expect(page.locator("body")).toHaveAttribute("data-tauri-drag-region", "deep");
-  await expect(page.locator('[data-product-shell="device"]')).toHaveAttribute(
-    "data-tauri-drag-region",
-    "deep",
-  );
+  await expect(page.locator("body")).toHaveAttribute("data-angmoo-window-drag", "manual");
+  await expect(page.locator("[data-tauri-drag-region]")).toHaveCount(0);
   await expect(page.locator('[data-window-route="/"]')).toHaveAttribute(
-    "data-tauri-drag-region",
-    "false",
+    "data-window-drag-disabled",
+    "true",
   );
   const phoneGeometry = await page.locator('[data-product-shell="device"]').evaluate((node) => {
     const rect = node.getBoundingClientRect();
@@ -122,10 +119,45 @@ test("Tauri Phone delegates Studio to a reusable wide product window", async ({ 
   expect(Math.abs(phoneGeometry.height - phoneGeometry.viewportHeight)).toBeLessThanOrEqual(1);
   expect(phoneGeometry.rootBackground).toBe("rgba(0, 0, 0, 0)");
 
+  await page.locator('[data-product-shell="device"]').dispatchEvent("pointerdown", {
+    button: 0,
+    buttons: 1,
+    isPrimary: true,
+    pointerType: "mouse",
+  });
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const desktop = window as unknown as {
+          __ANGMOO_DESKTOP_INVOCATIONS__: Array<{ command: string }>;
+        };
+        return desktop.__ANGMOO_DESKTOP_INVOCATIONS__.map(({ command }) => command);
+      }),
+    )
+    .toEqual(["start_product_window_drag"]);
+
   await expect(page.getByLabel("Memory Explorer는 후속 단계에서 연결됩니다")).toHaveAttribute(
     "data-disabled",
     "true",
   );
+  await page.getByRole("link", { name: "Creator Studio 열기" }).dispatchEvent("pointerdown", {
+    button: 0,
+    buttons: 1,
+    isPrimary: true,
+    pointerType: "mouse",
+  });
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const desktop = window as unknown as {
+          __ANGMOO_DESKTOP_INVOCATIONS__: Array<{ command: string }>;
+        };
+        return desktop.__ANGMOO_DESKTOP_INVOCATIONS__.filter(
+          ({ command }) => command === "start_product_window_drag",
+        ).length;
+      }),
+    )
+    .toBe(1);
   await page.getByRole("link", { name: "Creator Studio 열기" }).click();
   await expect
     .poll(() =>

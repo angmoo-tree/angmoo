@@ -159,6 +159,41 @@ fn phone_resize_hit_test(point: WindowPoint, geometry: PhoneRegionGeometry) -> O
     None
 }
 
+fn phone_contains_point(point: WindowPoint, geometry: PhoneRegionGeometry) -> bool {
+    let point = WindowPoint {
+        x: point.x - geometry.offset_x,
+        y: point.y - geometry.offset_y,
+    };
+    if point.x < 0 || point.y < 0 || point.x >= geometry.width || point.y >= geometry.height {
+        return false;
+    }
+
+    let radius = geometry
+        .radius
+        .clamp(1, geometry.width.min(geometry.height) / 2);
+    let right_corner_start = geometry.width - radius;
+    let bottom_corner_start = geometry.height - radius;
+    let inside_corner = |center_x: i32, center_y: i32| {
+        let dx = i64::from(point.x - center_x);
+        let dy = i64::from(point.y - center_y);
+        dx * dx + dy * dy <= i64::from(radius) * i64::from(radius)
+    };
+
+    if point.x < radius && point.y < radius {
+        return inside_corner(radius, radius);
+    }
+    if point.x >= right_corner_start && point.y < radius {
+        return inside_corner(right_corner_start, radius);
+    }
+    if point.x < radius && point.y >= bottom_corner_start {
+        return inside_corner(radius, bottom_corner_start);
+    }
+    if point.x >= right_corner_start && point.y >= bottom_corner_start {
+        return inside_corner(right_corner_start, bottom_corner_start);
+    }
+    true
+}
+
 fn ratio_locked_rect(
     proposed: ResizeRect,
     edge: SizingEdge,
@@ -248,33 +283,38 @@ fn ratio_locked_rect(
 mod windows {
     use super::{
         NonClientInsets, PhoneRegionGeometry, ResizeRect, SizingEdge, WindowPoint, WindowSize,
-        phone_region_geometry, phone_resize_hit_test, ratio_locked_rect,
+        phone_contains_point, phone_region_geometry, phone_resize_hit_test, ratio_locked_rect,
     };
     use std::{ffi::c_void, mem::size_of};
     use windows::Win32::{
         Foundation::{HWND, LPARAM, LRESULT, POINT, RECT, WPARAM},
         Graphics::{
-            Dwm::{DWMWA_BORDER_COLOR, DWMWA_COLOR_NONE, DwmSetWindowAttribute},
-            Gdi::{ClientToScreen, CreateRoundRectRgn, DeleteObject, SetWindowRgn},
+            Dwm::{
+                DWMWA_BORDER_COLOR, DWMWA_COLOR_NONE, DWMWA_WINDOW_CORNER_PREFERENCE,
+                DwmSetWindowAttribute,
+            },
+            Gdi::ClientToScreen,
         },
         UI::{
             HiDpi::GetDpiForWindow,
             Shell::{DefSubclassProc, GetWindowSubclass, RemoveWindowSubclass, SetWindowSubclass},
             WindowsAndMessaging::{
                 GetClientRect, GetWindowRect, HTBOTTOM, HTBOTTOMLEFT, HTBOTTOMRIGHT, HTLEFT,
-                HTRIGHT, HTTOP, HTTOPLEFT, HTTOPRIGHT, WM_DPICHANGED, WM_NCDESTROY, WM_NCHITTEST,
-                WM_SIZE, WM_SIZING, WM_WINDOWPOSCHANGED, WMSZ_BOTTOM, WMSZ_BOTTOMLEFT,
-                WMSZ_BOTTOMRIGHT, WMSZ_LEFT, WMSZ_RIGHT, WMSZ_TOP, WMSZ_TOPLEFT, WMSZ_TOPRIGHT,
+                HTNOWHERE, HTRIGHT, HTTOP, HTTOPLEFT, HTTOPRIGHT, WM_NCDESTROY, WM_NCHITTEST,
+                WM_SIZING, WMSZ_BOTTOM, WMSZ_BOTTOMLEFT, WMSZ_BOTTOMRIGHT, WMSZ_LEFT, WMSZ_RIGHT,
+                WMSZ_TOP, WMSZ_TOPLEFT, WMSZ_TOPRIGHT,
             },
         },
     };
 
     const PHONE_ASPECT_SUBCLASS_ID: usize = 0x414E_474D_4F4F;
+    const DWMWCP_ROUND_VALUE: u32 = 2;
 
-    #[derive(Default)]
-    struct PhoneWindowSubclassState {
-        region_update_in_progress: bool,
-        last_region: Option<PhoneRegionGeometry>,
+    struct PhoneWindowSubclassState;
+
+    enum NativePhoneHit {
+        Resize(SizingEdge),
+        OutsideSilhouette,
     }
 
     pub fn install(window: &tauri::WebviewWindow) -> Result<(), String> {
@@ -292,7 +332,7 @@ mod windows {
             return Ok(());
         }
 
-        let state = Box::new(PhoneWindowSubclassState::default());
+        let state = Box::new(PhoneWindowSubclassState);
         let state_ptr = Box::into_raw(state);
         let attached = unsafe {
             SetWindowSubclass(
@@ -307,14 +347,12 @@ mod windows {
             return Err(windows::core::Error::from_win32().to_string());
         }
 
+        // Do not clip this window with an HRGN. Region edges are integer-pixel masks
+        // and visibly staircase at the Phone's large radius. The transparent
+        // WebView and CSS frame own the antialiased silhouette; native code only
+        // suppresses the rectangular DWM border and owns hit testing.
         suppress_native_border(hwnd);
-        if let Err(error) = unsafe { refresh_phone_region(hwnd, state_ptr) } {
-            let _ = unsafe {
-                RemoveWindowSubclass(hwnd, Some(phone_aspect_subclass), PHONE_ASPECT_SUBCLASS_ID)
-            };
-            unsafe { drop(Box::from_raw(state_ptr)) };
-            return Err(error);
-        }
+        request_compositor_rounding(hwnd);
         Ok(())
     }
 
@@ -345,17 +383,12 @@ mod windows {
                 }
             }
         } else if message == WM_NCHITTEST {
-            if let Some(edge) = native_resize_hit(hwnd, lparam) {
-                return LRESULT(resize_hit_code(edge));
-            }
-        } else if matches!(message, WM_SIZE | WM_WINDOWPOSCHANGED | WM_DPICHANGED) {
-            let result = unsafe { DefSubclassProc(hwnd, message, wparam, lparam) };
-            if ref_data != 0 {
-                let _ = unsafe {
-                    refresh_phone_region(hwnd, ref_data as *mut PhoneWindowSubclassState)
+            if let Some(hit) = native_phone_hit(hwnd, lparam) {
+                return match hit {
+                    NativePhoneHit::Resize(edge) => LRESULT(resize_hit_code(edge)),
+                    NativePhoneHit::OutsideSilhouette => LRESULT(HTNOWHERE as isize),
                 };
             }
-            return result;
         } else if message == WM_NCDESTROY {
             let _ = unsafe {
                 RemoveWindowSubclass(hwnd, Some(phone_aspect_subclass), PHONE_ASPECT_SUBCLASS_ID)
@@ -382,25 +415,16 @@ mod windows {
         };
     }
 
-    unsafe fn refresh_phone_region(
-        hwnd: HWND,
-        state_ptr: *mut PhoneWindowSubclassState,
-    ) -> Result<(), String> {
-        if state_ptr.is_null() || unsafe { (*state_ptr).region_update_in_progress } {
-            return Ok(());
-        }
-        let geometry = current_region_geometry(hwnd)?;
-        if unsafe { (*state_ptr).last_region == Some(geometry) } {
-            return Ok(());
-        }
-
-        unsafe { (*state_ptr).region_update_in_progress = true };
-        let result = apply_phone_region(hwnd, geometry);
-        unsafe { (*state_ptr).region_update_in_progress = false };
-        if result.is_ok() {
-            unsafe { (*state_ptr).last_region = Some(geometry) };
-        }
-        result
+    fn request_compositor_rounding(hwnd: HWND) {
+        let preference = DWMWCP_ROUND_VALUE;
+        let _ = unsafe {
+            DwmSetWindowAttribute(
+                hwnd,
+                DWMWA_WINDOW_CORNER_PREFERENCE,
+                (&preference as *const u32).cast::<c_void>(),
+                size_of::<u32>() as u32,
+            )
+        };
     }
 
     fn current_region_geometry(hwnd: HWND) -> Result<PhoneRegionGeometry, String> {
@@ -429,48 +453,20 @@ mod windows {
             .ok_or_else(|| "phone window has invalid region geometry".to_owned())
     }
 
-    fn apply_phone_region(hwnd: HWND, geometry: PhoneRegionGeometry) -> Result<(), String> {
-        let diameter = geometry.radius.saturating_mul(2);
-        let region = unsafe {
-            CreateRoundRectRgn(
-                geometry.offset_x,
-                geometry.offset_y,
-                geometry
-                    .offset_x
-                    .saturating_add(geometry.width)
-                    .saturating_add(1),
-                geometry
-                    .offset_y
-                    .saturating_add(geometry.height)
-                    .saturating_add(1),
-                diameter,
-                diameter,
-            )
-        };
-        if region.is_invalid() {
-            return Err(windows::core::Error::from_win32().to_string());
-        }
-        if unsafe { SetWindowRgn(hwnd, Some(region), true) } == 0 {
-            let error = windows::core::Error::from_win32().to_string();
-            let _ = unsafe { DeleteObject(region.into()) };
-            return Err(error);
-        }
-        Ok(())
-    }
-
-    fn native_resize_hit(hwnd: HWND, lparam: LPARAM) -> Option<SizingEdge> {
+    fn native_phone_hit(hwnd: HWND, lparam: LPARAM) -> Option<NativePhoneHit> {
         let geometry = current_region_geometry(hwnd).ok()?;
         let mut window_rect = RECT::default();
         unsafe { GetWindowRect(hwnd, &mut window_rect) }.ok()?;
         let screen_x = (lparam.0 & 0xffff) as u16 as i16 as i32;
         let screen_y = ((lparam.0 >> 16) & 0xffff) as u16 as i16 as i32;
-        phone_resize_hit_test(
-            WindowPoint {
-                x: screen_x - window_rect.left,
-                y: screen_y - window_rect.top,
-            },
-            geometry,
-        )
+        let point = WindowPoint {
+            x: screen_x - window_rect.left,
+            y: screen_y - window_rect.top,
+        };
+        if let Some(edge) = phone_resize_hit_test(point, geometry) {
+            return Some(NativePhoneHit::Resize(edge));
+        }
+        (!phone_contains_point(point, geometry)).then_some(NativePhoneHit::OutsideSilhouette)
     }
 
     fn resize_hit_code(edge: SizingEdge) -> isize {
@@ -703,5 +699,33 @@ mod tests {
             phone_resize_hit_test(WindowPoint { x: 241, y: 462 }, geometry),
             None
         );
+    }
+
+    #[test]
+    fn compositor_silhouette_excludes_only_the_rounded_corner_cutouts() {
+        let geometry = PhoneRegionGeometry {
+            offset_x: 7,
+            offset_y: 4,
+            width: 468,
+            height: 916,
+            radius: 34,
+            resize_hit_thickness: 8,
+        };
+        for point in [
+            WindowPoint { x: 7, y: 4 },
+            WindowPoint { x: 474, y: 4 },
+            WindowPoint { x: 7, y: 919 },
+            WindowPoint { x: 474, y: 919 },
+        ] {
+            assert!(!phone_contains_point(point, geometry));
+        }
+        for point in [
+            WindowPoint { x: 41, y: 4 },
+            WindowPoint { x: 241, y: 4 },
+            WindowPoint { x: 7, y: 38 },
+            WindowPoint { x: 241, y: 462 },
+        ] {
+            assert!(phone_contains_point(point, geometry));
+        }
     }
 }

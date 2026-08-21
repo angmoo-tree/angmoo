@@ -57,17 +57,15 @@ def test_phone_window_has_no_browser_chrome_and_applies_scaling_policy() -> None
         "DwmSetWindowAttribute",
         "DWMWA_BORDER_COLOR",
         "DWMWA_COLOR_NONE",
-        "CreateRoundRectRgn",
-        "SetWindowRgn",
-        "DeleteObject",
+        "DWMWA_WINDOW_CORNER_PREFERENCE",
+        "request_compositor_rounding",
+        "phone_contains_point",
+        "HTNOWHERE",
         "SetWindowSubclass",
         "GetWindowSubclass",
         "RemoveWindowSubclass",
         "WM_SIZING",
         "WM_NCHITTEST",
-        "WM_SIZE",
-        "WM_WINDOWPOSCHANGED",
-        "WM_DPICHANGED",
         "WM_NCDESTROY",
         "WMSZ_LEFT",
         "WMSZ_RIGHT",
@@ -81,14 +79,19 @@ def test_phone_window_has_no_browser_chrome_and_applies_scaling_policy() -> None
         "HTTOPRIGHT",
         "HTBOTTOMLEFT",
         "HTBOTTOMRIGHT",
-        "region_update_in_progress",
     ):
         assert marker in resize
+    for aliased_region_marker in (
+        "CreateRoundRectRgn",
+        "SetWindowRgn",
+        "DeleteObject",
+    ):
+        assert aliased_region_marker not in resize
     for scale in ("1.0", "1.25", "1.5"):
         assert scale in policy
 
 
-def test_phone_static_shell_has_no_outer_margin_and_uses_deep_drag_opt_outs() -> None:
+def test_phone_static_shell_has_no_outer_margin_and_uses_manual_surface_drag() -> None:
     layout = _read("frontend/static-shell/app/layout.tsx")
     globals_css = _read("frontend/src/app/globals.css")
     frame = _read("frontend/src/shared/ui/device-frame.tsx")
@@ -99,11 +102,15 @@ def test_phone_static_shell_has_no_outer_margin_and_uses_deep_drag_opt_outs() ->
     assert 'data-angmoo-runtime-profile="tauri-static"' in layout
     assert 'body[data-angmoo-desktop-window="phone"]' in globals_css
     assert "background: transparent" in globals_css
-    assert 'data-tauri-drag-region="deep"' in frame
+    assert "data-tauri-drag-region" not in frame
     assert "width: 100vw" in frame_css
     assert "height: 100dvh" in frame_css
-    assert 'setAttribute("data-tauri-drag-region", "deep")' in bridge
-    assert 'data-tauri-drag-region="false"' in bridge
+    assert 'dataset.angmooWindowDrag = "manual"' in bridge
+    assert 'addEventListener("pointerdown", handlePointerDown, true)' in bridge
+    assert "WINDOW_DRAG_INTERACTIVE_SELECTOR" in bridge
+    assert 'invokeDesktopWindowCommand("start_product_window_drag")' in bridge
+    assert 'data-window-drag-disabled="true"' in bridge
+    assert "data-tauri-drag-region" not in bridge
     assert '<main className="min-h-screen bg-transparent" aria-live="polite">' in static_router
     assert '<p className="mt-3 text-xl font-bold text-[#251818]">제품 화면을 준비하고 있습니다...</p>' not in static_router
 
