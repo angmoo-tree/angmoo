@@ -1,0 +1,78 @@
+.controls {
+  position: fixed;
+  z-index: 2147483647;
+  top: 7px;
+  right: 9px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid rgb(48 52 59 / 12%);
+  border-radius: 999px;
+  background: rgb(255 248 247 / 78%);
+  box-shadow: 0 4px 16px rgb(27 20 20 / 8%);
+  backdrop-filter: blur(12px);
+}
+
+.dragHandle,
+.windowButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  border: 0;
+  color: #655655;
+}
+
+.dragHandle {
+  width: 34px;
+  cursor: grab;
+  background: transparent;
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.dragHandle span {
+  width: 18px;
+  height: 3px;
+  border-radius: 999px;
+  background: #8f8281;
+}
+
+.windowButton {
+  width: 25px;
+  border-radius: 50%;
+  cursor: pointer;
+  background: rgb(255 255 255 / 66%);
+}
+
+.windowButton:hover,
+.windowButton:focus-visible {
+  background: #ffffff;
+  color: #302829;
+  outline: 2px solid rgb(174 47 52 / 24%);
+  outline-offset: 1px;
+}
+
+.closeButton:hover,
+.closeButton:focus-visible {
+  background: #ae2f34;
+  color: #ffffff;
+}
+
+@media (max-width: 520px) {
+  .controls {
+    top: 5px;
+    right: 7px;
+    transform: scale(0.92);
+    transform-origin: top right;
+  }
+}
+
+@media print {
+  .controls {
+    display: none;
+  }
+}

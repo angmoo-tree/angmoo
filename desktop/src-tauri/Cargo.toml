@@ -1,0 +1,20 @@
+[package]
+name = "angmoo-desktop"
+version = "0.4.0-preview.1"
+description = "Angmoo Tauri product windows"
+authors = ["Angmoo contributors"]
+license = "GPL-3.0-only"
+edition = "2024"
+rust-version = "1.97.1"
+
+[lib]
+name = "angmoo_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "=2.6.3", features = [] }
+
+[dependencies]
+serde = { version = "=1.0.229", features = ["derive"] }
+serde_json = "=1.0.151"
+tauri = { version = "=2.11.5", features = [] }

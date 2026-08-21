@@ -47,8 +47,8 @@
 }
 
 @media (max-width: 479px) {
-  .frame,
-  .screen {
+  :global(body:not([data-angmoo-desktop-window])) .frame,
+  :global(body:not([data-angmoo-desktop-window])) .screen {
     width: 100%;
     height: 100dvh;
     min-height: 0;

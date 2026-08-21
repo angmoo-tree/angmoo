@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { AuthProvider } from "@/components/auth-provider";
+import { DesktopWindowBridge } from "@/shared/desktop/public";
 import { StaticNavigationBridge } from "@/shared/navigation/public";
 import "./static-globals.css";
 
@@ -15,6 +16,7 @@ export default function StaticRootLayout({ children }: { children: React.ReactNo
     <html lang="ko">
       <body className="antialiased">
         <AuthProvider>
+          <DesktopWindowBridge />
           <StaticNavigationBridge />
           {children}
         </AuthProvider>

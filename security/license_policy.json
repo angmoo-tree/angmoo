@@ -274,6 +274,22 @@
       "source": "https://github.com/tauri-apps/tauri/blob/tauri-cli-v2.11.4/LICENSE_APACHE-2.0"
     },
     {
+      "name": "Tauri Angmoo product shell",
+      "source_path": "desktop/src-tauri/Cargo.toml",
+      "reference": "tauri = { version = \"=2.11.5\"",
+      "license_expression": "Apache-2.0 OR MIT",
+      "distribution_boundary": "Pinned Tauri runtime used to build the Angmoo Phone, Creator Studio, and Relationship Graph Windows product shell; transitive packages are recorded in generated SPDX SBOMs.",
+      "source": "https://github.com/tauri-apps/tauri/blob/tauri-v2.11.5/LICENSE_APACHE-2.0"
+    },
+    {
+      "name": "Tauri CLI Angmoo product shell",
+      "source_path": "desktop/package.json",
+      "reference": "\"@tauri-apps/cli\": \"2.11.4\"",
+      "license_expression": "Apache-2.0 OR MIT",
+      "distribution_boundary": "Pinned build CLI used to create the Angmoo Windows product shell; it is build tooling rather than an independent runtime service.",
+      "source": "https://github.com/tauri-apps/tauri/blob/tauri-cli-v2.11.4/LICENSE_APACHE-2.0"
+    },
+    {
       "name": "PyInstaller ER1 sidecar packager",
       "source_path": "spikes/l3-er1-native-runtime/python/requirements.lock",
       "reference": "pyinstaller==6.16.0",

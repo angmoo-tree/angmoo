@@ -7,9 +7,14 @@ import {
 } from "next/navigation";
 import { useMemo } from "react";
 
+import {
+  currentDesktopRoute,
+  navigateCurrentDesktopRoute,
+} from "@/shared/desktop/public";
 import { isStaticFrontendProfile } from "@/shared/runtime/public";
 
 function staticNavigate(href: string, replace: boolean) {
+  if (navigateCurrentDesktopRoute(href, replace)) return;
   if (replace) window.location.replace(href);
   else window.location.assign(href);
 }
@@ -34,7 +39,7 @@ export function useRuntimeRouter() {
 export function useRuntimePathname() {
   const pathname = useNextPathname();
   if (isStaticFrontendProfile() && typeof window !== "undefined") {
-    return window.location.pathname;
+    return new URL(currentDesktopRoute(), "http://angmoo.local").pathname;
   }
   return pathname;
 }
@@ -42,7 +47,7 @@ export function useRuntimePathname() {
 export function useRuntimeSearchParams() {
   const searchParams = useNextSearchParams();
   if (isStaticFrontendProfile() && typeof window !== "undefined") {
-    return new URLSearchParams(window.location.search);
+    return new URL(currentDesktopRoute(), "http://angmoo.local").searchParams;
   }
   return searchParams;
 }

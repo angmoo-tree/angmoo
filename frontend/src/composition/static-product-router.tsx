@@ -17,6 +17,10 @@ import { StudioRouteClient } from "@/app/studio/studio-route-client";
 import { WorldAppRouteClient } from "@/app/world-app-route-client";
 import { CreatorStudioFrame } from "@/features/creator-studio/public";
 import {
+  currentDesktopRoute,
+  subscribeDesktopRoute,
+} from "@/shared/desktop/public";
+import {
   worldAppSectionFromSegment,
   type WorldAppSectionId,
 } from "@/features/world-app/public";
@@ -46,8 +50,11 @@ function decodedSegment(value: string) {
 
 export function StaticProductRouter() {
   const locationValue = useSyncExternalStore(
-    () => () => undefined,
-    () => `${window.location.pathname}\n${window.location.search}`,
+    subscribeDesktopRoute,
+    () => {
+      const route = new URL(currentDesktopRoute(), "http://angmoo.local");
+      return `${route.pathname}\n${route.search}`;
+    },
     () => "",
   );
   if (!locationValue) {

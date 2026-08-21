@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AuthProvider } from "@/components/auth-provider";
 import { PwaServiceWorkerLifecycle } from "@/features/pwa-shell/public";
+import { DesktopWindowBridge } from "@/shared/desktop/public";
 import {
   SITE_DESCRIPTION,
   SITE_ICON,
@@ -54,6 +55,7 @@ export default function RootLayout({
     <html lang="ko">
       <body className="antialiased">
         <AuthProvider>
+          <DesktopWindowBridge />
           <PwaServiceWorkerLifecycle />
           {children}
         </AuthProvider>
