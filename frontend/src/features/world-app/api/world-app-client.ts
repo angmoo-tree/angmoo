@@ -1,5 +1,8 @@
 import type { WorldSurfaceItem } from "@/features/device-home/public";
-import { runtimeFetch } from "@/shared/runtime/public";
+import {
+  RuntimeFetchError,
+  runtimeFetch,
+} from "@/shared/runtime/public";
 
 
 export type LocalWorldAppRead = {
@@ -170,20 +173,29 @@ async function manualSocialRequest<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const response = await runtimeFetch(path, {
-    cache: "no-store",
-    credentials: "same-origin",
-    ...options,
-    headers: {
-      Accept: "application/json",
-      ...options.headers,
-    },
-  });
+  let response: Response;
+  try {
+    response = await runtimeFetch(path, {
+      cache: "no-store",
+      credentials: "same-origin",
+      ...options,
+      headers: {
+        Accept: "application/json",
+        ...options.headers,
+      },
+    });
+  } catch (reason) {
+    if (reason instanceof RuntimeFetchError) {
+      throw new WorldAppApiError(503, reason.code);
+    }
+    throw reason;
+  }
   const payload = (await response.json().catch(() => null)) as unknown;
   if (!response.ok) {
+    const detail = detailFromPayload(payload, response.status);
     throw new WorldAppApiError(
       response.status,
-      detailFromPayload(payload, response.status),
+      detail === "desktop_token_invalid" ? "launcher_token_invalid" : detail,
     );
   }
   if (
@@ -205,6 +217,27 @@ export function getManualSocialFeed(
     `/api/backend/worlds/${encodeURIComponent(worldId)}/manual-social/feed`,
     { signal: options.signal },
   );
+}
+
+export async function getManualSocialPostThread(
+  worldId: string,
+  postId: string,
+  options: { signal?: AbortSignal } = {},
+): Promise<ManualSocialFeedRead> {
+  const result = await manualSocialRequest<ManualSocialFeedRead>(
+    `/api/backend/worlds/${encodeURIComponent(worldId)}/manual-social/posts/${encodeURIComponent(postId)}`,
+    { signal: options.signal },
+  );
+  if (
+    result.world_id !== worldId ||
+    result.items.length === 0 ||
+    result.items[0]?.id !== postId ||
+    result.items[0]?.reply_to_post_id !== null ||
+    result.items.some((item) => item.world_id !== worldId)
+  ) {
+    throw new WorldAppApiError(502, "manual_social_thread_scope_mismatch");
+  }
+  return result;
 }
 
 export function createOwnerManualPost(

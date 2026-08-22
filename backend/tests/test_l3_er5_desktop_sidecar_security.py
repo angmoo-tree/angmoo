@@ -78,13 +78,29 @@ def test_desktop_loopback_accepts_exact_token_and_strict_cors() -> None:
         headers={
             "Origin": ORIGIN,
             "Access-Control-Request-Method": "POST",
-            "Access-Control-Request-Headers": "content-type, x-angmoo-launcher-token",
+            "Access-Control-Request-Headers": (
+                "content-type, idempotency-key, x-angmoo-launcher-token"
+            ),
         },
     )
     assert preflight.status_code == 204
+    assert "idempotency-key" in preflight.headers[
+        "access-control-allow-headers"
+    ]
     assert "x-angmoo-launcher-token" in preflight.headers[
         "access-control-allow-headers"
     ]
+
+    rejected_preflight = client.options(
+        "/mutation",
+        headers={
+            "Origin": ORIGIN,
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "x-untrusted-header",
+        },
+    )
+    assert rejected_preflight.status_code == 403
+    assert rejected_preflight.json() == {"detail": "desktop_headers_invalid"}
 
     assert client.get(
         "/desktop-webview-auth",

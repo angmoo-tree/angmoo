@@ -35,6 +35,7 @@ if ($LASTEXITCODE -ne 0) {
     --noconfirm `
     --onefile `
     --noconsole `
+    --noupx `
     --name angmoo-sidecar `
     --paths $backendRoot `
     --collect-all ladybug `

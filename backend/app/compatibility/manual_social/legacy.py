@@ -245,6 +245,48 @@ def list_owner_world_feed(
     )
 
 
+def get_owner_world_post_thread(
+    db: Session,
+    *,
+    world_id: str,
+    post_id: str,
+    current_user_id: str,
+) -> ManualSocialFeedRead:
+    """Read one root post and its visible replies inside an exact World scope."""
+
+    actor, _character = _owner_actor(
+        db, world_id=world_id, current_user_id=current_user_id
+    )
+    root = db.get(models.Post, post_id)
+    if (
+        root is None
+        or root.world_id != world_id
+        or root.reply_to_post_id is not None
+        or root.visibility != "public"
+        or root.deleted_at is not None
+        or root.report_hidden_at is not None
+    ):
+        raise ManualSocialNotFoundError("post_not_in_world")
+    replies = list(
+        db.scalars(
+            select(models.Post)
+            .where(
+                models.Post.world_id == world_id,
+                models.Post.reply_to_post_id == root.id,
+                models.Post.visibility == "public",
+                models.Post.deleted_at.is_(None),
+                models.Post.report_hidden_at.is_(None),
+            )
+            .order_by(models.Post.created_at.asc(), models.Post.id.asc())
+        )
+    )
+    return ManualSocialFeedRead(
+        world_id=world_id,
+        owner_world_character_id=actor.id,
+        items=[_post_read(db, root), *[_post_read(db, reply) for reply in replies]],
+    )
+
+
 def create_owner_post(
     db: Session,
     *,

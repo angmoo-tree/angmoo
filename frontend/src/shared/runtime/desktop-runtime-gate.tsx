@@ -40,9 +40,14 @@ export function DesktopRuntimeGate({ children }: { children: ReactNode }) {
         if (
           status.phase === "ready" &&
           status.apiBaseUrl &&
-          status.launchToken
+          status.launchToken &&
+          status.graphProvider === "ladybug"
         ) {
-          installDesktopRuntimeConfig(status.apiBaseUrl, status.launchToken);
+          installDesktopRuntimeConfig(
+            status.apiBaseUrl,
+            status.launchToken,
+            status.graphProvider,
+          );
           setState({ kind: "ready" });
           timer = setTimeout(refresh, 2_000);
           return;

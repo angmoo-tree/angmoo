@@ -5,6 +5,7 @@ import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useAuth } from "@/components/auth-provider";
+import { worldPostDetailRoute } from "@/shared/navigation/public";
 import { getAgent, type AgentDetailRead } from "@/lib/agents";
 import {
   DailyActivityPlanApiError,
@@ -874,7 +875,7 @@ export function WorldCharacterAutonomySetupClient({
                                 성공 beat #{item.episode?.last_successful_sequence_no ?? "-"} · 댓글 근거 {item.episode?.used_event_count ?? 0}/{item.episode?.considered_event_count ?? 0} · 입력 상한 초과 {item.episode?.overflow_event_count ?? 0}
                               </p>
                               {item.episode?.last_successful_post_id ? (
-                                <Link className="mt-2 inline-block font-bold text-primary underline" href={`/posts/${item.episode.last_successful_post_id}`}>
+                                <Link className="mt-2 inline-block font-bold text-primary underline" href={worldPostDetailRoute(worldId, item.episode.last_successful_post_id)}>
                                   마지막 성공 게시글 보기
                                 </Link>
                               ) : null}
@@ -1105,7 +1106,7 @@ export function WorldCharacterAutonomySetupClient({
                                 }).format(new Date(event.occurred_at))}
                               </p>
                               {sourcePostId && !excluded ? (
-                                <Link className="mt-2 inline-block text-sm font-bold text-primary underline" href={`/posts/${sourcePostId}`}>
+                                <Link className="mt-2 inline-block text-sm font-bold text-primary underline" href={worldPostDetailRoute(worldId, sourcePostId)}>
                                   근거 게시글 보기
                                 </Link>
                               ) : null}

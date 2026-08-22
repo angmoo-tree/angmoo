@@ -10,6 +10,7 @@ const ROUTES = [
   "/worlds/world-static-probe/chat",
   "/worlds/world-static-probe/characters",
   "/worlds/world-static-probe/relationships",
+  "/worlds/world-static-probe/posts/post-static-probe",
   "/characters/character-static-probe/worlds/world-static-probe/autonomy-setup",
   "/characters/character-static-probe/worlds/world-static-probe/relationship-graph?provider=ladybug",
   "/agents/character-static-probe",
@@ -25,6 +26,7 @@ test.beforeEach(async ({ page }) => {
       __ANGMOO_RUNTIME_CONFIG__: {
         profile: "tauri-static",
         apiBaseUrl: "http://127.0.0.1:8080",
+        graphProvider: "ladybug",
         launchToken: "static-route-probe-token-000000000000",
       },
     });
@@ -68,6 +70,158 @@ for (const route of ROUTES) {
   });
 }
 
+test("static P4 evidence opens the exact World-scoped post thread", async ({
+  page,
+}) => {
+  const requestedPaths: string[] = [];
+  await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+    const pathname = new URL(route.request().url()).pathname;
+    requestedPaths.push(pathname);
+    if (pathname === "/api/v1/worlds/mine/world-static-probe") {
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          schema_version: "local-world-app-v1",
+          surface: "world_app",
+          world: {
+            world_id: "world-static-probe",
+            name: "Static World",
+            tagline: "World-scoped post probe",
+            banner_media_id: null,
+            banner_alt_text: "",
+            status: "published",
+            visibility: "public",
+            readiness_status: "publish_ready",
+            membership_role: "owner",
+            updated_at: "2026-08-22T00:00:00Z",
+            launchable: true,
+            launch_block_reason: null,
+          },
+        },
+        status: 200,
+      });
+      return;
+    }
+    if (pathname === "/api/v1/worlds/world-static-probe/owner-character") {
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          schema_version: "owner-controlled-world-character-v1",
+          world_character_id: "wc-static-owner",
+          world_id: "world-static-probe",
+          character_id: "character-static-owner",
+          control_mode: "owner_controlled",
+          status: "active",
+          autonomous_enabled: false,
+          version: 1,
+          profile: {
+            display_name: "Static Owner Parrot",
+            avatar_url: "http://127.0.0.1:3000/icon.svg",
+            intro: "Static post probe",
+            role_key: null,
+            preferred_address: "Owner",
+            interests: [],
+            background: "",
+          },
+        },
+        status: 200,
+      });
+      return;
+    }
+    if (
+      pathname ===
+      "/api/v1/worlds/world-static-probe/manual-social/posts/post-static-probe"
+    ) {
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          schema_version: "owner-manual-social-v1",
+          world_id: "world-static-probe",
+          owner_world_character_id: "wc-static-owner",
+          items: [
+            {
+              id: "post-static-probe",
+              world_id: "world-static-probe",
+              author_world_character_id: "wc-static-autonomous",
+              author_name: "Static Mango",
+              title: "World-scoped evidence",
+              body: "This post belongs only to Static World.",
+              post_type: "text",
+              reply_to_post_id: null,
+              created_at: "2026-08-22T00:00:00Z",
+              can_owner_reply: true,
+            },
+          ],
+        },
+        status: 200,
+      });
+      return;
+    }
+    await route.fallback();
+  });
+
+  await page.goto("/worlds/world-static-probe/posts/post-static-probe");
+  await expect(page.getByRole("heading", { name: "게시글과 답글" })).toBeVisible();
+  await expect(page.getByText("World-scoped evidence")).toBeVisible();
+  await expect(page.getByRole("link", { name: "World Feed로 돌아가기" })).toHaveAttribute(
+    "href",
+    /\/worlds\/world-static-probe\/feed\/?$/,
+  );
+  expect(requestedPaths).toContain(
+    "/api/v1/worlds/world-static-probe/manual-social/posts/post-static-probe",
+  );
+  expect(requestedPaths).not.toContain("/api/v1/posts/post-static-probe");
+});
+
+test("static installed relationship route always requests the Ladybug provider", async ({
+  page,
+}) => {
+  const requestedProviders: Array<string | null> = [];
+  await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname.endsWith("/relationship-graph")) {
+      requestedProviders.push(url.searchParams.get("provider"));
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          world_id: "world-static-probe",
+          center_world_character_id: "wc-static-owner",
+          nodes: [
+            {
+              world_character_id: "wc-static-owner",
+              character_id: "character-static-owner",
+              display_name: "Static Owner Parrot",
+              is_center: true,
+            },
+          ],
+          edges: [],
+          evidence: [],
+          meta: {
+            template: "neighborhood",
+            source: "ladybug",
+            graph_status: "healthy",
+            truncated: false,
+            projection_lag_seconds: 0,
+            revalidated_node_count: 1,
+            revalidated_edge_count: 0,
+            fallback_reason: null,
+          },
+        },
+        status: 200,
+      });
+      return;
+    }
+    await route.fallback();
+  });
+
+  await page.goto(
+    "/characters/character-static-owner/worlds/world-static-probe/relationship-graph",
+  );
+  await expect(page.getByText("설치형 Angmoo의 canonical 관계망 provider는 LadybugDB입니다.")).toBeVisible();
+  await expect(page.getByText("관계망 최신 상태")).toBeVisible();
+  expect(requestedProviders).toEqual(["ladybug"]);
+});
+
 test("Tauri Phone keeps the local owner bootstrap form scrollable above navigation", async ({
   page,
 }) => {
@@ -92,6 +246,7 @@ test("Tauri Phone keeps the local owner bootstrap form scrollable above navigati
             return {
               phase: "ready",
               apiBaseUrl: "http://127.0.0.1:8080",
+              graphProvider: "ladybug",
               launchToken: "static-route-probe-token-000000000000",
             };
           }
@@ -185,6 +340,7 @@ test("Tauri Phone delegates Studio to a reusable wide product window", async ({ 
             return {
               phase: "ready",
               apiBaseUrl: "http://127.0.0.1:8080",
+              graphProvider: "ladybug",
               launchToken: "static-route-probe-token-000000000000",
             };
           }
@@ -426,6 +582,7 @@ test("Tauri Phone opens the owner relationship graph in a wide product window", 
             return {
               phase: "ready",
               apiBaseUrl: "http://127.0.0.1:8080",
+              graphProvider: "ladybug",
               launchToken: "static-route-probe-token-000000000000",
             };
           }
@@ -625,6 +782,7 @@ test("Tauri wide marker opens the shared static Studio route without a server pa
             ? {
                 phase: "ready",
                 apiBaseUrl: "http://127.0.0.1:8080",
+                graphProvider: "ladybug",
                 launchToken: "static-route-probe-token-000000000000",
               }
             : undefined,

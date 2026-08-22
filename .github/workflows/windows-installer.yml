@@ -143,6 +143,13 @@ jobs:
       - name: Defender scan NSIS installer
         shell: pwsh
         run: |
+          function Assert-NoActiveDefenderDetection([string]$Stage) {
+            $active = @(Get-MpThreat -ErrorAction Stop | Where-Object { $_.IsActive })
+            if ($active.Count -gt 0) {
+              $active | ConvertTo-Json -Depth 5 | Write-Error
+              throw "Defender active detection at $Stage"
+            }
+          }
           $installer = Get-ChildItem (Join-Path $env:RUNNER_TEMP 'angmoo-installer') -Filter '*setup*.exe' -Recurse |
             Select-Object -First 1
           if (-not $installer) {
@@ -150,10 +157,42 @@ jobs:
               Select-Object -First 1
           }
           if (-not $installer) { throw 'NSIS installer is missing' }
+          $beforeHash = (Get-FileHash $installer.FullName -Algorithm SHA256).Hash
           Start-MpScan -ScanType CustomScan -ScanPath $installer.FullName
+          if (-not (Test-Path -LiteralPath $installer.FullName)) {
+            throw 'Defender removed or quarantined the NSIS installer'
+          }
+          if ((Get-FileHash $installer.FullName -Algorithm SHA256).Hash -ne $beforeHash) {
+            throw 'NSIS installer changed during Defender scan'
+          }
+          Assert-NoActiveDefenderDetection 'installer_preinstall_scan'
       - name: Install and run without developer runtimes
         shell: pwsh
         run: |
+          function Assert-NoActiveDefenderDetection([string]$Stage) {
+            $active = @(Get-MpThreat -ErrorAction Stop | Where-Object { $_.IsActive })
+            if ($active.Count -gt 0) {
+              $active | ConvertTo-Json -Depth 5 | Write-Error
+              throw "Defender active detection at $Stage"
+            }
+          }
+          function Get-InstallFileManifest([string]$Root) {
+            $manifest = @{}
+            Get-ChildItem -LiteralPath $Root -Recurse -File | ForEach-Object {
+              $manifest[$_.FullName] = (Get-FileHash $_.FullName -Algorithm SHA256).Hash
+            }
+            return $manifest
+          }
+          function Assert-InstallFileManifest([hashtable]$Manifest, [string]$Stage) {
+            foreach ($entry in $Manifest.GetEnumerator()) {
+              if (-not (Test-Path -LiteralPath $entry.Key)) {
+                throw "Defender removed or quarantined installed artifact at ${Stage}: $($entry.Key)"
+              }
+              if ((Get-FileHash $entry.Key -Algorithm SHA256).Hash -ne $entry.Value) {
+                throw "Installed artifact changed at ${Stage}: $($entry.Key)"
+              }
+            }
+          }
           $root = Join-Path $env:RUNNER_TEMP 'angmoo-installer'
           $installer = Get-ChildItem $root -Filter '*setup*.exe' -Recurse | Select-Object -First 1
           if (-not $installer) { $installer = Get-ChildItem $root -Filter '*.exe' -Recurse | Select-Object -First 1 }
@@ -171,6 +210,16 @@ jobs:
           $app = Get-ChildItem $installRoot -Filter 'angmoo-desktop.exe' -Recurse -ErrorAction SilentlyContinue |
             Select-Object -First 1
           if (-not $app) { throw 'Installed angmoo-desktop.exe is missing' }
+          $sidecarFile = Get-ChildItem $installRoot -Filter 'angmoo-sidecar.exe' -Recurse -ErrorAction SilentlyContinue |
+            Select-Object -First 1
+          if (-not $sidecarFile) { throw 'Installed angmoo-sidecar.exe is missing' }
+          $installManifest = Get-InstallFileManifest $installRoot
+          foreach ($target in @($app.FullName, $sidecarFile.FullName, $installRoot)) {
+            Write-Host "Defender custom scan: $target"
+            Start-MpScan -ScanType CustomScan -ScanPath $target
+            Assert-InstallFileManifest $installManifest 'installed_prelaunch_scan'
+            Assert-NoActiveDefenderDetection 'installed_prelaunch_scan'
+          }
           # Snapshot forbidden developer/server runtime processes before the
           # product starts. Comparing process IDs avoids a Win32_Process WMI
           # inventory, which can stall indefinitely on hosted Windows images.
@@ -219,6 +268,8 @@ jobs:
           Write-Host "No developer/server runtime child process was detected"
           $sidecars = @(Get-Process -Name 'angmoo-sidecar' -ErrorAction SilentlyContinue)
           if (-not $sidecars) { throw 'Packaged angmoo-sidecar process was not detected' }
+          Assert-InstallFileManifest $installManifest 'runtime_behavior_scan'
+          Assert-NoActiveDefenderDetection 'runtime_behavior_scan'
           $sentinel = Join-Path $dataRoot 'er6-uninstall-preserve.txt'
           Set-Content -LiteralPath $sentinel -Value 'preserve' -Encoding ascii
           $null = $product.CloseMainWindow()
@@ -232,6 +283,9 @@ jobs:
           foreach ($sidecar in $sidecars) {
             Stop-Process -Id $sidecar.Id -Force -ErrorAction SilentlyContinue
           }
+          Start-MpScan -ScanType CustomScan -ScanPath $installRoot
+          Assert-InstallFileManifest $installManifest 'installed_postrun_scan'
+          Assert-NoActiveDefenderDetection 'installed_postrun_scan'
           $uninstaller = Get-ChildItem $installRoot -Filter 'uninstall.exe' -Recurse |
             Select-Object -First 1
           if (-not $uninstaller) { throw 'NSIS uninstaller is missing' }
@@ -243,3 +297,25 @@ jobs:
           }
           if ($uninstall.ExitCode -ne 0) { throw "NSIS uninstall failed: $($uninstall.ExitCode)" }
           if (-not (Test-Path $sentinel)) { throw 'Silent uninstall deleted local data' }
+      - name: Capture hosted Defender evidence
+        if: always()
+        shell: pwsh
+        run: |
+          $evidence = Join-Path $env:RUNNER_TEMP 'angmoo-defender-evidence'
+          New-Item -ItemType Directory -Force -Path $evidence | Out-Null
+          Get-MpComputerStatus |
+            Select-Object AMEngineVersion, AMProductVersion, AntivirusSignatureVersion, AntivirusSignatureLastUpdated, RealTimeProtectionEnabled |
+            ConvertTo-Json -Depth 4 |
+            Set-Content -LiteralPath (Join-Path $evidence 'computer-status.json') -Encoding utf8
+          @(Get-MpThreat -ErrorAction SilentlyContinue) |
+            Select-Object ThreatID, ThreatName, SeverityID, IsActive, DidThreatExecute, Resources |
+            ConvertTo-Json -Depth 6 |
+            Set-Content -LiteralPath (Join-Path $evidence 'threats.json') -Encoding utf8
+      - name: Upload hosted Defender evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: angmoo-windows-defender-evidence-${{ github.sha }}
+          if-no-files-found: error
+          retention-days: 14
+          path: ${{ runner.temp }}/angmoo-defender-evidence

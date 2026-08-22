@@ -332,6 +332,49 @@ def test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets() -> None:
         assert actor is not None and actor.autonomous_enabled is False
 
 
+def test_owner_world_post_thread_is_exactly_world_scoped() -> None:
+    client, engine, principal = _fixture()
+    _seed(engine, principal)
+    identity = client.post(
+        "/api/v1/worlds/world-manual/owner-character",
+        headers=FRONTEND_HEADERS,
+        json=_owner_payload(),
+    )
+    assert identity.status_code == 201
+    reply = client.post(
+        "/api/v1/worlds/world-manual/manual-social/posts/post-autonomous-target/replies",
+        headers={**FRONTEND_HEADERS, "Idempotency-Key": "manual-thread-reply-1"},
+        json={"body": "이 답글도 같은 World 상세에만 표시됩니다."},
+    )
+    assert reply.status_code == 201
+
+    thread = client.get(
+        "/api/v1/worlds/world-manual/manual-social/posts/post-autonomous-target",
+        headers=FRONTEND_HEADERS,
+    )
+    assert thread.status_code == 200
+    payload = thread.json()
+    assert payload["world_id"] == "world-manual"
+    assert [item["id"] for item in payload["items"]] == [
+        "post-autonomous-target",
+        reply.json()["post"]["id"],
+    ]
+    assert all(item["world_id"] == "world-manual" for item in payload["items"])
+
+    wrong_world = client.get(
+        "/api/v1/worlds/not-this-world/manual-social/posts/post-autonomous-target",
+        headers=FRONTEND_HEADERS,
+    )
+    assert wrong_world.status_code in {403, 404}
+
+    reply_as_root = client.get(
+        f"/api/v1/worlds/world-manual/manual-social/posts/{reply.json()['post']['id']}",
+        headers=FRONTEND_HEADERS,
+    )
+    assert reply_as_root.status_code == 404
+    assert reply_as_root.json() == {"detail": "post_not_in_world"}
+
+
 def test_owner_manual_social_migration_refuses_history_losing_downgrade(
     monkeypatch,
 ) -> None:

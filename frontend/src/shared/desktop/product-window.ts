@@ -21,6 +21,7 @@ export type AngmooPhoneResizeDirection =
 export type AngmooDesktopRuntimeStatus = {
   phase: "starting" | "ready" | "crashed" | "stopped";
   apiBaseUrl?: string;
+  graphProvider?: "ladybug";
   launchToken?: string;
   diagnosticCode?: string;
 };

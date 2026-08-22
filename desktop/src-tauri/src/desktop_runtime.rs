@@ -17,6 +17,7 @@ use tauri_plugin_shell::{
 use uuid::Uuid;
 
 const DESKTOP_ORIGIN: &str = "http://tauri.localhost";
+const PRODUCT_GRAPH_PROVIDER: &str = "ladybug";
 const HEALTH_FAILURE_LIMIT: u8 = 15;
 
 #[derive(Clone, Debug, Serialize, PartialEq, Eq)]
@@ -25,6 +26,8 @@ pub struct DesktopRuntimeStatus {
     phase: &'static str,
     #[serde(skip_serializing_if = "Option::is_none")]
     api_base_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    graph_provider: Option<&'static str>,
     #[serde(skip_serializing_if = "Option::is_none")]
     launch_token: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -36,6 +39,7 @@ impl DesktopRuntimeStatus {
         Self {
             phase: "starting",
             api_base_url: None,
+            graph_provider: None,
             launch_token: None,
             diagnostic_code: None,
         }
@@ -45,6 +49,7 @@ impl DesktopRuntimeStatus {
         Self {
             phase: "ready",
             api_base_url: Some(format!("http://127.0.0.1:{port}")),
+            graph_provider: Some(PRODUCT_GRAPH_PROVIDER),
             launch_token: Some(launch_token),
             diagnostic_code: None,
         }
@@ -54,6 +59,7 @@ impl DesktopRuntimeStatus {
         Self {
             phase: "crashed",
             api_base_url: None,
+            graph_provider: None,
             launch_token: None,
             diagnostic_code: Some(code),
         }
@@ -63,6 +69,7 @@ impl DesktopRuntimeStatus {
         Self {
             phase: "stopped",
             api_base_url: None,
+            graph_provider: None,
             launch_token: None,
             diagnostic_code: None,
         }
@@ -402,6 +409,7 @@ mod tests {
         let status = DesktopRuntimeStatus::ready(49152, "a".repeat(32));
         let json = serde_json::to_string(&status).unwrap();
         assert!(json.contains("http://127.0.0.1:49152"));
+        assert!(json.contains(r#""graphProvider":"ladybug""#));
         assert!(!json.contains("sidecar.exe"));
         assert!(!json.contains("command"));
     }
@@ -414,6 +422,7 @@ mod tests {
         ] {
             assert!(status.launch_token.is_none());
             assert!(status.api_base_url.is_none());
+            assert!(status.graph_provider.is_none());
         }
     }
 

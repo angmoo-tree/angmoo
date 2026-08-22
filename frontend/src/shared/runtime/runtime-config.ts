@@ -6,9 +6,21 @@ export const DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT =
 
 export type AngmooRuntimeConfig = {
   apiBaseUrl: string;
+  graphProvider: "ladybug";
   launchToken?: string;
   profile: typeof STATIC_FRONTEND_PROFILE;
 };
+
+export type RuntimeFetchErrorCode =
+  | "runtime_interrupted"
+  | "runtime_not_ready";
+
+export class RuntimeFetchError extends Error {
+  constructor(readonly code: RuntimeFetchErrorCode) {
+    super(code);
+    this.name = "RuntimeFetchError";
+  }
+}
 
 declare global {
   interface Window {
@@ -51,6 +63,7 @@ export function getRuntimeConfig(): AngmooRuntimeConfig | null {
   );
   return {
     apiBaseUrl,
+    graphProvider: injected?.graphProvider ?? "ladybug",
     launchToken: injected?.launchToken,
     profile: STATIC_FRONTEND_PROFILE,
   };
@@ -59,6 +72,7 @@ export function getRuntimeConfig(): AngmooRuntimeConfig | null {
 export function installDesktopRuntimeConfig(
   apiBaseUrl: string,
   launchToken: string,
+  graphProvider: "ladybug",
 ) {
   if (typeof window === "undefined") return;
   const normalizedBase = assertLoopbackApiBase(apiBaseUrl);
@@ -68,11 +82,13 @@ export function installDesktopRuntimeConfig(
   const previous = window.__ANGMOO_RUNTIME_CONFIG__;
   window.__ANGMOO_RUNTIME_CONFIG__ = {
     apiBaseUrl: normalizedBase,
+    graphProvider,
     launchToken,
     profile: STATIC_FRONTEND_PROFILE,
   };
   if (
     previous?.apiBaseUrl !== normalizedBase ||
+    previous?.graphProvider !== graphProvider ||
     previous?.launchToken !== launchToken
   ) {
     window.dispatchEvent(new Event(DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT));
@@ -115,18 +131,31 @@ export async function runtimeFetch(
     resolvedInput === runtime.apiBaseUrl ||
     resolvedInput.startsWith(`${runtime.apiBaseUrl}/`);
   const headers = new Headers(init.headers);
+  const isTauriProduct =
+    typeof window !== "undefined" &&
+    typeof window.__TAURI__?.core?.invoke === "function";
+  if (isTauriProduct && isSidecarRequest && !runtime.launchToken) {
+    throw new RuntimeFetchError("runtime_not_ready");
+  }
   if (runtime.launchToken && isSidecarRequest) {
     headers.set("X-Angmoo-Launcher-Token", runtime.launchToken);
   }
-  return fetch(resolvedInput, {
-    ...init,
-    credentials: isSidecarRequest
-      ? init.credentials === "omit"
-        ? "omit"
-        : "include"
-      : init.credentials,
-    headers,
-  });
+  try {
+    return await fetch(resolvedInput, {
+      ...init,
+      credentials: isSidecarRequest
+        ? init.credentials === "omit"
+          ? "omit"
+          : "include"
+        : init.credentials,
+      headers,
+    });
+  } catch (reason) {
+    if (isTauriProduct && isSidecarRequest && reason instanceof TypeError) {
+      throw new RuntimeFetchError("runtime_interrupted");
+    }
+    throw reason;
+  }
 }
 
 export function resolveRuntimeMediaUrl(path: string) {

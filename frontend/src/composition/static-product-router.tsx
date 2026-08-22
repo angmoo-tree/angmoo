@@ -32,6 +32,7 @@ import {
 } from "@/lib/community";
 import { safeLoginReturnTo } from "@/lib/safe-navigation";
 import { DesktopRuntimeGate } from "@/shared/runtime/desktop-runtime-gate";
+import { getRuntimeConfig } from "@/shared/runtime/public";
 
 type BrowserLocation = {
   pathname: string;
@@ -123,6 +124,17 @@ function renderStaticRoute(location: BrowserLocation) {
       );
     }
   }
+  if (
+    segments[0] === "worlds" &&
+    segments[2] === "posts" &&
+    segments.length === 4
+  ) {
+    const worldId = decodedSegment(segments[1]);
+    const postId = decodedSegment(segments[3]);
+    if (worldId && postId) {
+      return <WorldAppRouteClient postId={postId} sectionId="feed" worldId={worldId} />;
+    }
+  }
   if (segments[0] === "worlds" && segments.length >= 2 && segments.length <= 3) {
     const worldId = decodedSegment(segments[1]);
     const section = staticWorldSection(segments[2]);
@@ -162,12 +174,12 @@ function renderStaticRoute(location: BrowserLocation) {
       );
     }
     if (characterId && worldId && segments[4] === "relationship-graph") {
-      const provider = new URLSearchParams(search).get("provider");
+      const provider = getRuntimeConfig()?.graphProvider ?? "ladybug";
       return (
         <AppShell>
           <RelationshipGraphClient
             characterId={characterId}
-            provider={provider === "ladybug" ? "ladybug" : "neo4j"}
+            provider={provider}
             worldId={worldId}
           />
         </AppShell>

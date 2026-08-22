@@ -53,8 +53,8 @@ def test_public_runtime_exposes_only_approved_routes() -> None:
     operations = _operations()
     paths = {path for _, path in operations}
 
-    assert len(paths) == 127
-    assert len(operations) == 159
+    assert len(paths) == 128
+    assert len(operations) == 160
     assert (
         "GET",
         "/api/v1/worlds/mine/{world_id}",
@@ -67,6 +67,10 @@ def test_public_runtime_exposes_only_approved_routes() -> None:
     } <= operations
     assert {
         ("GET", "/api/v1/worlds/{world_id}/manual-social/feed"),
+        (
+            "GET",
+            "/api/v1/worlds/{world_id}/manual-social/posts/{post_id}",
+        ),
         ("POST", "/api/v1/worlds/{world_id}/manual-social/posts"),
         (
             "POST",
