@@ -466,14 +466,13 @@
     {
       "markers": {
         "driver_or_url": [
-          64,
-          70
+          60
         ]
       },
       "owner": "ER1-ER2",
       "path": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "1cf834d75dbcd4320dcf2fed23812ecce2f3a406018bdaa3e7b4fd0f4cae91ad",
+      "source_sha256": "54f76bd1344c114626f71d61b424944f94c394040d84c911560bb379e8dedcff",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
