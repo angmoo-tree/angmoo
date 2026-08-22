@@ -7,6 +7,12 @@ license = "GPL-3.0-only"
 edition = "2024"
 rust-version = "1.97.1"
 
+[package.metadata.tauri-winres]
+OriginalFilename = "angmoo-desktop.exe"
+InternalName = "Angmoo"
+LegalCopyright = "Copyright (c) 2026 Angmoo contributors"
+Comments = "Local-first AI character social world"
+
 [lib]
 name = "angmoo_desktop_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]

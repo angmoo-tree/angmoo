@@ -69,6 +69,11 @@ def main() -> int:
         "installed_postrun_scan",
         "angmoo-sidecar.exe",
         "angmoo-windows-defender-evidence",
+        "check_er6_desktop_supply_chain.py",
+        "run_er6_defender_trigger_matrix.ps1",
+        "er6-defender-trigger-matrix.json",
+        "Get-MpThreatDetection",
+        "NoNewDefenderDetection",
     ):
         _require(required in workflow, f"installer workflow contract missing: {required}")
 
@@ -77,6 +82,20 @@ def main() -> int:
     )
     _require("--noconsole" in sidecar_build, "packaged sidecar console must be hidden")
     _require("--noupx" in sidecar_build, "packaged sidecar must explicitly disable UPX")
+    _require('ValidateSet("OneFile", "OneDir")' in sidecar_build, "sidecar layout comparison is missing")
+    _require("--exclude-module psycopg" in sidecar_build, "legacy PostgreSQL driver must be excluded from product sidecar")
+    _require("--hidden-import psycopg" not in sidecar_build, "legacy PostgreSQL driver must not be a hidden import")
+
+    cargo_manifest = (ROOT / "desktop" / "src-tauri" / "Cargo.toml").read_text(
+        encoding="utf-8"
+    )
+    for required in (
+        "[package.metadata.tauri-winres]",
+        'OriginalFilename = "angmoo-desktop.exe"',
+        'InternalName = "Angmoo"',
+        "LegalCopyright",
+    ):
+        _require(required in cargo_manifest, f"Windows product metadata missing: {required}")
     tauri_main = (ROOT / "desktop" / "src-tauri" / "src" / "main.rs").read_text(
         encoding="utf-8"
     )

@@ -61,6 +61,8 @@ jobs:
             backend\tests\test_l3_er3_graph_query_parity.py `
             backend\tests\test_l3_er4_single_backend_runtime.py
           backend\.venv\Scripts\python.exe scripts\ci\check_desktop_installer_contract.py
+          backend\.venv\Scripts\python.exe scripts\ci\check_er6_desktop_supply_chain.py `
+            --evidence .codex-temp\er6-supply-chain-audit.json
       - name: Audit locked runtime dependencies
         shell: pwsh
         run: |
@@ -70,6 +72,28 @@ jobs:
         shell: pwsh
         working-directory: desktop
         run: npm run build:installer
+      - name: Build Defender trigger matrix binaries
+        shell: pwsh
+        run: |
+          $env:CARGO_TARGET_DIR = (Resolve-Path 'desktop\src-tauri\target').Path
+          cargo build --manifest-path desktop\security\defender-matrix\Cargo.toml `
+            --release --locked --bins
+      - name: Run pre-install Defender trigger matrix
+        shell: pwsh
+        run: |
+          $release = 'desktop\src-tauri\target\release'
+          $installer = Get-ChildItem "$release\bundle\nsis" -Filter '*setup*.exe' | Select-Object -First 1
+          if (-not $installer) { throw 'NSIS installer is missing for Defender matrix' }
+          .\scripts\ci\run_er6_defender_trigger_matrix.ps1 `
+            -MinimalHost "$release\angmoo-defender-matrix-host.exe" `
+            -StubHost "$release\angmoo-defender-matrix-stub-host.exe" `
+            -RealSidecarHost "$release\angmoo-defender-matrix-real-host.exe" `
+            -StubSidecar "$release\angmoo-defender-matrix-stub.exe" `
+            -ActualHost "$release\angmoo-desktop.exe" `
+            -ActualSidecar "$release\angmoo-sidecar.exe" `
+            -Installer $installer.FullName `
+            -OutputRoot '.codex-temp\er6-defender-trigger-matrix' `
+            -FailOnDetection
       - name: Verify packaged executables do not open consoles
         shell: pwsh
         run: |
@@ -109,6 +133,8 @@ jobs:
             .codex-temp/er6-release-metadata/angmoo-installer.provenance.json
             .codex-temp/er6-release-metadata/THIRD_PARTY_NOTICES.md
             .codex-temp/er6-release-metadata/LICENSE
+            .codex-temp/er6-supply-chain-audit.json
+            .codex-temp/er6-defender-trigger-matrix/er6-defender-trigger-matrix.json
       - name: Attest Windows installers
         if: github.event_name != 'pull_request'
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
@@ -143,11 +169,28 @@ jobs:
       - name: Defender scan NSIS installer
         shell: pwsh
         run: |
+          $detectionBaseline = Join-Path $env:RUNNER_TEMP 'angmoo-defender-detection-baseline.json'
+          $knownDetectionIds = @(
+            Get-MpThreatDetection -ErrorAction SilentlyContinue |
+              Select-Object -ExpandProperty DetectionID
+          )
+          ConvertTo-Json -InputObject $knownDetectionIds |
+            Set-Content -LiteralPath $detectionBaseline -Encoding utf8
           function Assert-NoActiveDefenderDetection([string]$Stage) {
             $active = @(Get-MpThreat -ErrorAction Stop | Where-Object { $_.IsActive })
             if ($active.Count -gt 0) {
               $active | ConvertTo-Json -Depth 5 | Write-Error
               throw "Defender active detection at $Stage"
+            }
+          }
+          function Assert-NoNewDefenderDetection([string]$Stage) {
+            $known = @(Get-Content -LiteralPath $detectionBaseline -Raw | ConvertFrom-Json)
+            $new = @(Get-MpThreatDetection -ErrorAction SilentlyContinue |
+              Where-Object DetectionID -notin $known)
+            if ($new.Count -gt 0) {
+              $new | Select-Object DetectionID, ThreatID, InitialDetectionTime, CleaningActionID, ActionSuccess |
+                ConvertTo-Json -Depth 5 | Write-Error
+              throw "Defender created a new detection at $Stage"
             }
           }
           $installer = Get-ChildItem (Join-Path $env:RUNNER_TEMP 'angmoo-installer') -Filter '*setup*.exe' -Recurse |
@@ -166,14 +209,26 @@ jobs:
             throw 'NSIS installer changed during Defender scan'
           }
           Assert-NoActiveDefenderDetection 'installer_preinstall_scan'
+          Assert-NoNewDefenderDetection 'installer_preinstall_scan'
       - name: Install and run without developer runtimes
         shell: pwsh
         run: |
+          $detectionBaseline = Join-Path $env:RUNNER_TEMP 'angmoo-defender-detection-baseline.json'
           function Assert-NoActiveDefenderDetection([string]$Stage) {
             $active = @(Get-MpThreat -ErrorAction Stop | Where-Object { $_.IsActive })
             if ($active.Count -gt 0) {
               $active | ConvertTo-Json -Depth 5 | Write-Error
               throw "Defender active detection at $Stage"
+            }
+          }
+          function Assert-NoNewDefenderDetection([string]$Stage) {
+            $known = @(Get-Content -LiteralPath $detectionBaseline -Raw | ConvertFrom-Json)
+            $new = @(Get-MpThreatDetection -ErrorAction SilentlyContinue |
+              Where-Object DetectionID -notin $known)
+            if ($new.Count -gt 0) {
+              $new | Select-Object DetectionID, ThreatID, InitialDetectionTime, CleaningActionID, ActionSuccess |
+                ConvertTo-Json -Depth 5 | Write-Error
+              throw "Defender created a new detection at $Stage"
             }
           }
           function Get-InstallFileManifest([string]$Root) {
@@ -219,6 +274,7 @@ jobs:
             Start-MpScan -ScanType CustomScan -ScanPath $target
             Assert-InstallFileManifest $installManifest 'installed_prelaunch_scan'
             Assert-NoActiveDefenderDetection 'installed_prelaunch_scan'
+            Assert-NoNewDefenderDetection 'installed_prelaunch_scan'
           }
           # Snapshot forbidden developer/server runtime processes before the
           # product starts. Comparing process IDs avoids a Win32_Process WMI
@@ -270,6 +326,7 @@ jobs:
           if (-not $sidecars) { throw 'Packaged angmoo-sidecar process was not detected' }
           Assert-InstallFileManifest $installManifest 'runtime_behavior_scan'
           Assert-NoActiveDefenderDetection 'runtime_behavior_scan'
+          Assert-NoNewDefenderDetection 'runtime_behavior_scan'
           $sentinel = Join-Path $dataRoot 'er6-uninstall-preserve.txt'
           Set-Content -LiteralPath $sentinel -Value 'preserve' -Encoding ascii
           $null = $product.CloseMainWindow()
@@ -286,6 +343,7 @@ jobs:
           Start-MpScan -ScanType CustomScan -ScanPath $installRoot
           Assert-InstallFileManifest $installManifest 'installed_postrun_scan'
           Assert-NoActiveDefenderDetection 'installed_postrun_scan'
+          Assert-NoNewDefenderDetection 'installed_postrun_scan'
           $uninstaller = Get-ChildItem $installRoot -Filter 'uninstall.exe' -Recurse |
             Select-Object -First 1
           if (-not $uninstaller) { throw 'NSIS uninstaller is missing' }
@@ -311,6 +369,10 @@ jobs:
             Select-Object ThreatID, ThreatName, SeverityID, IsActive, DidThreatExecute, Resources |
             ConvertTo-Json -Depth 6 |
             Set-Content -LiteralPath (Join-Path $evidence 'threats.json') -Encoding utf8
+          @(Get-MpThreatDetection -ErrorAction SilentlyContinue) |
+            Select-Object DetectionID, ThreatID, InitialDetectionTime, RemediationTime, DetectionSourceTypeID, CleaningActionID, ActionSuccess |
+            ConvertTo-Json -Depth 6 |
+            Set-Content -LiteralPath (Join-Path $evidence 'threat-detections.json') -Encoding utf8
       - name: Upload hosted Defender evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

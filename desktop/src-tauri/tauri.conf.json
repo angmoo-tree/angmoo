@@ -36,6 +36,7 @@
     "active": true,
     "targets": ["nsis", "msi"],
     "publisher": "Angmoo contributors",
+    "copyright": "Copyright (c) 2026 Angmoo contributors",
     "homepage": "https://github.com/angmoo-tree/angmoo",
     "license": "GPL-3.0-only",
     "licenseFile": "../../LICENSE",

@@ -1,7 +1,10 @@
 [CmdletBinding()]
 param(
     [string]$Python = "",
-    [string]$WorkRoot = ""
+    [string]$WorkRoot = "",
+    [ValidateSet("OneFile", "OneDir")]
+    [string]$Layout = "OneFile",
+    [switch]$DiagnosticOnly
 )
 
 $ErrorActionPreference = "Stop"
@@ -30,18 +33,20 @@ if ($LASTEXITCODE -ne 0) {
     throw "PyInstaller 6.16.0 is required in the selected Python environment"
 }
 
+$layoutArgument = if ($Layout -eq "OneFile") { "--onefile" } else { "--onedir" }
+
 & $Python -m PyInstaller `
     --clean `
     --noconfirm `
-    --onefile `
+    $layoutArgument `
     --noconsole `
     --noupx `
     --name angmoo-sidecar `
     --paths $backendRoot `
     --collect-all ladybug `
     --hidden-import sqlalchemy.dialects.sqlite `
-    --hidden-import sqlalchemy.dialects.postgresql `
-    --hidden-import psycopg `
+    --exclude-module psycopg `
+    --exclude-module psycopg_binary `
     --exclude-module oci `
     --exclude-module pytest `
     --distpath $distRoot `
@@ -52,11 +57,31 @@ if ($LASTEXITCODE -ne 0) { throw "Angmoo product sidecar packaging failed" }
 
 $targetTriple = (& rustc --print host-tuple).Trim()
 if (-not $targetTriple) { throw "Rust host target could not be determined" }
-$source = Join-Path $distRoot "angmoo-sidecar.exe"
+$source = if ($Layout -eq "OneFile") {
+    Join-Path $distRoot "angmoo-sidecar.exe"
+}
+else {
+    Join-Path $distRoot "angmoo-sidecar\angmoo-sidecar.exe"
+}
+$sourceDirectory = if ($Layout -eq "OneDir") {
+    Join-Path $distRoot "angmoo-sidecar"
+}
+else {
+    $null
+}
+if (-not (Test-Path -LiteralPath $source -PathType Leaf)) {
+    throw "Angmoo packaged sidecar output is missing: $source"
+}
 $target = Join-Path $binaryRoot "angmoo-sidecar-$targetTriple.exe"
 $hashTarget = "$target.sha256"
-Copy-Item -LiteralPath $source -Destination $target -Force
-$stream = [System.IO.File]::OpenRead($target)
+if (-not $DiagnosticOnly) {
+    if ($Layout -ne "OneFile") {
+        throw "Only the OneFile layout can be copied into Tauri externalBin"
+    }
+    Copy-Item -LiteralPath $source -Destination $target -Force
+}
+$packagedBinary = if ($DiagnosticOnly) { $source } else { $target }
+$stream = [System.IO.File]::OpenRead($packagedBinary)
 try {
     $hasher = [System.Security.Cryptography.SHA256]::Create()
     try {
@@ -70,13 +95,18 @@ finally {
     $stream.Dispose()
 }
 $hash = [System.BitConverter]::ToString($hashBytes).Replace("-", "").ToLowerInvariant()
-Set-Content -LiteralPath $hashTarget -Value $hash -Encoding ascii -NoNewline
+if (-not $DiagnosticOnly) {
+    Set-Content -LiteralPath $hashTarget -Value $hash -Encoding ascii -NoNewline
+}
 
 [ordered]@{
     schema_version = 1
     status = "PASS"
     target = $targetTriple
-    sidecar = $target
+    layout = $Layout
+    diagnostic_only = [bool]$DiagnosticOnly
+    sidecar = if ($DiagnosticOnly) { $source } else { $target }
+    distribution_directory = $sourceDirectory
     sha256 = $hash
-    bytes = (Get-Item -LiteralPath $target).Length
+    bytes = (Get-Item -LiteralPath $packagedBinary).Length
 } | ConvertTo-Json

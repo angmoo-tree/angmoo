@@ -1095,6 +1095,19 @@
     {
       "markers": {
         "driver_or_url": [
+          86,
+          87
+        ]
+      },
+      "owner": "ER7",
+      "path": "scripts/ci/check_desktop_installer_contract.py",
+      "removal_condition": "embedded canonical rollback window PASS and user-approved legacy-default removal",
+      "source_sha256": "3c815375521725f643aea73897aa25b9d901dca696981b6a8fbfb48175de354b",
+      "transition_pr": "ER7 PR P"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
           18,
           33,
           94,
@@ -1139,6 +1152,19 @@
     {
       "markers": {
         "driver_or_url": [
+          87,
+          100
+        ]
+      },
+      "owner": "ER7",
+      "path": "scripts/ci/compare_er6_sidecar_layouts.ps1",
+      "removal_condition": "embedded canonical rollback window PASS and user-approved legacy-default removal",
+      "source_sha256": "9d6b074a9af687cdf2987f7c7666350a91226cebbb53ea363ef93a6093a67374",
+      "transition_pr": "ER7 PR P"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
           23,
           27,
           28,
@@ -1177,10 +1203,10 @@
       "transition_pr": "ER7 PR P"
     }
   ],
-  "entry_count": 75,
+  "entry_count": 77,
   "marker_counts": {
     "advisory_lock": 8,
-    "driver_or_url": 51,
+    "driver_or_url": 53,
     "jsonb": 8,
     "pgvector": 7,
     "row_lock": 22,
