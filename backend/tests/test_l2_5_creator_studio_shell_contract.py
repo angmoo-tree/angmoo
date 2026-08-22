@@ -65,3 +65,24 @@ def test_studio_shell_is_wide_and_preserves_small_viewport_accessibility() -> No
     assert "grid-template-columns: 1fr" in shell_css
     assert "width: min(100%, 1180px)" in dashboard_css
     assert 'href={PRODUCT_ROUTES.deviceHome}' in frame
+
+
+def test_studio_world_character_surface_is_read_only_and_links_existing_setup() -> None:
+    creator = _read("components/world-creator-client.tsx")
+    surface = _read(
+        "features/creator-studio/ui/studio-world-character-list.tsx"
+    )
+    client = _read(
+        "features/creator-studio/api/studio-world-character-client.ts"
+    )
+
+    assert "StudioWorldCharacterList" in creator
+    assert "이 World의 캐릭터" in surface
+    assert "활동 준비·상태 보기" in surface
+    assert "/autonomy-setup`" in surface
+    assert 'import Link from "next/link"' in surface
+    assert "useRuntimeRouter" not in surface
+    assert "생성·삭제는 P10-L에서 제공합니다." in surface
+    assert "?surface=studio" in client
+    assert 'method: "POST"' not in surface
+    assert 'method: "DELETE"' not in surface

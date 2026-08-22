@@ -1,0 +1,383 @@
+name: Windows Installer
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-installer-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONUTF8: "1"
+
+jobs:
+  release-candidate:
+    name: release-candidate
+    runs-on: windows-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+      attestations: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: "11.22.0"
+          run_install: false
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.12.5"
+          enable-cache: false
+      - name: Install locked release-candidate dependencies
+        shell: pwsh
+        run: |
+          uv python install 3.13.12
+          uv sync --frozen --directory backend --python 3.13.12
+          uv pip install --python backend\.venv\Scripts\python.exe PyInstaller==6.16.0
+          pnpm --dir frontend install --frozen-lockfile
+          npm ci --ignore-scripts --prefix desktop
+          rustup toolchain install 1.97.1 --profile minimal --component rustfmt --component clippy
+          rustup override set 1.97.1 --path desktop\src-tauri
+      - name: Verify ER6 migration, restore, and installer contracts
+        shell: pwsh
+        run: |
+          backend\.venv\Scripts\python.exe -m pytest -q `
+            backend\tests\test_l3_er6_release_candidate.py `
+            backend\tests\test_l3_er5_desktop_sidecar_security.py `
+            backend\tests\test_l3_er3_ladybug_projection.py `
+            backend\tests\test_l3_er3_graph_query_parity.py `
+            backend\tests\test_l3_er4_single_backend_runtime.py
+          backend\.venv\Scripts\python.exe scripts\ci\check_desktop_installer_contract.py
+          backend\.venv\Scripts\python.exe scripts\ci\check_er6_desktop_supply_chain.py `
+            --evidence .codex-temp\er6-supply-chain-audit.json
+      - name: Audit locked runtime dependencies
+        shell: pwsh
+        run: |
+          uv audit --project backend --locked
+          pnpm --dir frontend audit --prod --audit-level high
+      - name: Build NSIS Setup and MSI
+        shell: pwsh
+        working-directory: desktop
+        run: npm run build:installer
+      - name: Build Defender trigger matrix binaries
+        shell: pwsh
+        run: |
+          $env:CARGO_TARGET_DIR = (Resolve-Path 'desktop\src-tauri\target').Path
+          cargo build --manifest-path desktop\security\defender-matrix\Cargo.toml `
+            --release --locked --bins
+      - name: Run pre-install Defender trigger matrix
+        shell: pwsh
+        run: |
+          $release = 'desktop\src-tauri\target\release'
+          $installer = Get-ChildItem "$release\bundle\nsis" -Filter '*setup*.exe' | Select-Object -First 1
+          if (-not $installer) { throw 'NSIS installer is missing for Defender matrix' }
+          .\scripts\ci\run_er6_defender_trigger_matrix.ps1 `
+            -MinimalHost "$release\angmoo-defender-matrix-host.exe" `
+            -StubHost "$release\angmoo-defender-matrix-stub-host.exe" `
+            -RealSidecarHost "$release\angmoo-defender-matrix-real-host.exe" `
+            -StubSidecar "$release\angmoo-defender-matrix-stub.exe" `
+            -ActualHost "$release\angmoo-desktop.exe" `
+            -ActualSidecar "$release\angmoo-sidecar.exe" `
+            -Installer $installer.FullName `
+            -OutputRoot '.codex-temp\er6-defender-trigger-matrix' `
+            -FailOnDetection
+      - name: Verify packaged executables do not open consoles
+        shell: pwsh
+        run: |
+          $release = 'desktop\src-tauri\target\release'
+          $desktop = Join-Path $release 'angmoo-desktop.exe'
+          $sidecar = 'desktop\src-tauri\binaries\angmoo-sidecar-x86_64-pc-windows-msvc.exe'
+          backend\.venv\Scripts\python.exe scripts\ci\check_windows_gui_subsystems.py `
+            $desktop $sidecar
+      - name: Reject private migration artifacts
+        shell: pwsh
+        run: |
+          $forbidden = Get-ChildItem desktop\src-tauri\target\release\bundle -Recurse -File |
+            Where-Object { $_.Name -in @('release-candidate-backup.json', 'synthetic-fixture.json', 'app-secret') }
+          if ($forbidden) {
+            $forbidden | ForEach-Object { Write-Error "Private artifact refused: $($_.FullName)" }
+            exit 1
+          }
+      - name: Build checksums, SPDX SBOM, provenance, and notices
+        shell: pwsh
+        run: |
+          backend\.venv\Scripts\python.exe scripts\ci\build_desktop_release_metadata.py `
+            --bundle-root desktop\src-tauri\target\release\bundle `
+            --output-root .codex-temp\er6-release-metadata `
+            --version 0.4.0-1 `
+            --commit $env:GITHUB_SHA
+      - name: Upload release-candidate evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: angmoo-windows-installer-${{ github.sha }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            desktop/src-tauri/target/release/bundle/nsis/*.exe
+            desktop/src-tauri/target/release/bundle/msi/*.msi
+            .codex-temp/er6-release-metadata/SHA256SUMS
+            .codex-temp/er6-release-metadata/angmoo-installer.spdx.json
+            .codex-temp/er6-release-metadata/angmoo-installer.provenance.json
+            .codex-temp/er6-release-metadata/THIRD_PARTY_NOTICES.md
+            .codex-temp/er6-release-metadata/LICENSE
+            .codex-temp/er6-supply-chain-audit.json
+            .codex-temp/er6-defender-trigger-matrix/er6-defender-trigger-matrix.json
+      - name: Attest Windows installers
+        if: github.event_name != 'pull_request'
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: |
+            desktop/src-tauri/target/release/bundle/nsis/*.exe
+            desktop/src-tauri/target/release/bundle/msi/*.msi
+
+  installed-runtime-smoke:
+    name: installed-runtime-smoke
+    needs: release-candidate
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: angmoo-windows-installer-${{ github.sha }}
+          path: ${{ runner.temp }}/angmoo-installer
+      - name: Verify installer digests
+        shell: pwsh
+        run: |
+          $root = Join-Path $env:RUNNER_TEMP 'angmoo-installer'
+          $sums = Get-Content (Get-ChildItem $root -Filter SHA256SUMS -Recurse | Select-Object -First 1)
+          foreach ($line in $sums) {
+            if ($line -notmatch '^([0-9a-f]{64})  (.+)$') { throw "Invalid checksum line: $line" }
+            $file = Get-ChildItem $root -Filter $Matches[2] -Recurse | Select-Object -First 1
+            if (-not $file) { throw "Artifact is missing: $($Matches[2])" }
+            if ((Get-FileHash $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant() -ne $Matches[1]) {
+              throw "Artifact digest mismatch: $($Matches[2])"
+            }
+          }
+      - name: Defender scan NSIS installer
+        shell: pwsh
+        run: |
+          $detectionBaseline = Join-Path $env:RUNNER_TEMP 'angmoo-defender-detection-baseline.json'
+          $knownDetectionIds = @(
+            Get-MpThreatDetection -ErrorAction SilentlyContinue |
+              Select-Object -ExpandProperty DetectionID
+          )
+          ConvertTo-Json -InputObject $knownDetectionIds |
+            Set-Content -LiteralPath $detectionBaseline -Encoding utf8
+          function Assert-NoActiveDefenderDetection([string]$Stage) {
+            $active = @(Get-MpThreat -ErrorAction Stop | Where-Object { $_.IsActive })
+            if ($active.Count -gt 0) {
+              $active | ConvertTo-Json -Depth 5 | Write-Error
+              throw "Defender active detection at $Stage"
+            }
+          }
+          function Assert-NoNewDefenderDetection([string]$Stage) {
+            $known = @(Get-Content -LiteralPath $detectionBaseline -Raw | ConvertFrom-Json)
+            $new = @(Get-MpThreatDetection -ErrorAction SilentlyContinue |
+              Where-Object DetectionID -notin $known)
+            if ($new.Count -gt 0) {
+              $new | Select-Object DetectionID, ThreatID, InitialDetectionTime, CleaningActionID, ActionSuccess |
+                ConvertTo-Json -Depth 5 | Write-Error
+              throw "Defender created a new detection at $Stage"
+            }
+          }
+          $installer = Get-ChildItem (Join-Path $env:RUNNER_TEMP 'angmoo-installer') -Filter '*setup*.exe' -Recurse |
+            Select-Object -First 1
+          if (-not $installer) {
+            $installer = Get-ChildItem (Join-Path $env:RUNNER_TEMP 'angmoo-installer') -Filter '*.exe' -Recurse |
+              Select-Object -First 1
+          }
+          if (-not $installer) { throw 'NSIS installer is missing' }
+          $beforeHash = (Get-FileHash $installer.FullName -Algorithm SHA256).Hash
+          Start-MpScan -ScanType CustomScan -ScanPath $installer.FullName
+          if (-not (Test-Path -LiteralPath $installer.FullName)) {
+            throw 'Defender removed or quarantined the NSIS installer'
+          }
+          if ((Get-FileHash $installer.FullName -Algorithm SHA256).Hash -ne $beforeHash) {
+            throw 'NSIS installer changed during Defender scan'
+          }
+          Assert-NoActiveDefenderDetection 'installer_preinstall_scan'
+          Assert-NoNewDefenderDetection 'installer_preinstall_scan'
+      - name: Install and run without developer runtimes
+        shell: pwsh
+        run: |
+          $detectionBaseline = Join-Path $env:RUNNER_TEMP 'angmoo-defender-detection-baseline.json'
+          function Assert-NoActiveDefenderDetection([string]$Stage) {
+            $active = @(Get-MpThreat -ErrorAction Stop | Where-Object { $_.IsActive })
+            if ($active.Count -gt 0) {
+              $active | ConvertTo-Json -Depth 5 | Write-Error
+              throw "Defender active detection at $Stage"
+            }
+          }
+          function Assert-NoNewDefenderDetection([string]$Stage) {
+            $known = @(Get-Content -LiteralPath $detectionBaseline -Raw | ConvertFrom-Json)
+            $new = @(Get-MpThreatDetection -ErrorAction SilentlyContinue |
+              Where-Object DetectionID -notin $known)
+            if ($new.Count -gt 0) {
+              $new | Select-Object DetectionID, ThreatID, InitialDetectionTime, CleaningActionID, ActionSuccess |
+                ConvertTo-Json -Depth 5 | Write-Error
+              throw "Defender created a new detection at $Stage"
+            }
+          }
+          function Get-InstallFileManifest([string]$Root) {
+            $manifest = @{}
+            Get-ChildItem -LiteralPath $Root -Recurse -File | ForEach-Object {
+              $manifest[$_.FullName] = (Get-FileHash $_.FullName -Algorithm SHA256).Hash
+            }
+            return $manifest
+          }
+          function Assert-InstallFileManifest([hashtable]$Manifest, [string]$Stage) {
+            foreach ($entry in $Manifest.GetEnumerator()) {
+              if (-not (Test-Path -LiteralPath $entry.Key)) {
+                throw "Defender removed or quarantined installed artifact at ${Stage}: $($entry.Key)"
+              }
+              if ((Get-FileHash $entry.Key -Algorithm SHA256).Hash -ne $entry.Value) {
+                throw "Installed artifact changed at ${Stage}: $($entry.Key)"
+              }
+            }
+          }
+          $root = Join-Path $env:RUNNER_TEMP 'angmoo-installer'
+          $installer = Get-ChildItem $root -Filter '*setup*.exe' -Recurse | Select-Object -First 1
+          if (-not $installer) { $installer = Get-ChildItem $root -Filter '*.exe' -Recurse | Select-Object -First 1 }
+          $installRoot = Join-Path $env:RUNNER_TEMP 'angmoo-installed'
+          New-Item -ItemType Directory -Force -Path $installRoot | Out-Null
+          Write-Host "Installing $($installer.FullName) into $installRoot"
+          $install = Start-Process $installer.FullName -ArgumentList @('/S', "/D=$installRoot") -PassThru
+          if (-not $install.WaitForExit(120000)) {
+            Stop-Process -Id $install.Id -Force -ErrorAction SilentlyContinue
+            throw 'NSIS install timed out after 120 seconds'
+          }
+          if ($install.ExitCode -ne 0) { throw "NSIS install failed: $($install.ExitCode)" }
+          # Tauri's productName is "Angmoo", but the generated NSIS contract
+          # installs the mainBinaryName as angmoo-desktop.exe.
+          $app = Get-ChildItem $installRoot -Filter 'angmoo-desktop.exe' -Recurse -ErrorAction SilentlyContinue |
+            Select-Object -First 1
+          if (-not $app) { throw 'Installed angmoo-desktop.exe is missing' }
+          $sidecarFile = Get-ChildItem $installRoot -Filter 'angmoo-sidecar.exe' -Recurse -ErrorAction SilentlyContinue |
+            Select-Object -First 1
+          if (-not $sidecarFile) { throw 'Installed angmoo-sidecar.exe is missing' }
+          $installManifest = Get-InstallFileManifest $installRoot
+          foreach ($target in @($app.FullName, $sidecarFile.FullName, $installRoot)) {
+            Write-Host "Defender custom scan: $target"
+            Start-MpScan -ScanType CustomScan -ScanPath $target
+            Assert-InstallFileManifest $installManifest 'installed_prelaunch_scan'
+            Assert-NoActiveDefenderDetection 'installed_prelaunch_scan'
+            Assert-NoNewDefenderDetection 'installed_prelaunch_scan'
+          }
+          # Snapshot forbidden developer/server runtime processes before the
+          # product starts. Comparing process IDs avoids a Win32_Process WMI
+          # inventory, which can stall indefinitely on hosted Windows images.
+          $forbiddenPattern = '^(python|pythonw|node|java|postgres|neo4j|docker).*'
+          $forbiddenBefore = @(Get-Process -ErrorAction SilentlyContinue |
+            Where-Object ProcessName -match $forbiddenPattern |
+            Select-Object -ExpandProperty Id)
+          Write-Host "Launching installed product $($app.FullName)"
+          $product = Start-Process $app.FullName -PassThru
+          $dataRoot = Join-Path $env:LOCALAPPDATA 'com.angmoo.desktop'
+          $endpoint = Join-Path $dataRoot 'runtime\sidecar.endpoint.json'
+          $database = Join-Path $dataRoot 'canonical\generations\er6-preview-v1\angmoo.sqlite3'
+          $deadline = (Get-Date).AddSeconds(60)
+          while ((Get-Date) -lt $deadline -and (-not (Test-Path $endpoint) -or -not (Test-Path $database))) {
+            Start-Sleep -Milliseconds 500
+          }
+          if (-not (Test-Path $endpoint)) { throw 'Installed sidecar endpoint was not created' }
+          if (-not (Test-Path $database)) { throw 'Installed SQLite canonical database was not created' }
+          $endpointText = Get-Content -LiteralPath $endpoint -Raw
+          $endpointMetadata = $endpointText | ConvertFrom-Json
+          if ($endpointMetadata.schema_version -ne 1) {
+            throw 'Installed sidecar endpoint schema version is invalid'
+          }
+          if ([int]$endpointMetadata.logical_sidecar_pid -le 0) {
+            throw 'Installed sidecar endpoint logical PID is invalid'
+          }
+          if ($endpointMetadata.host -ne '127.0.0.1') {
+            throw 'Installed sidecar endpoint host is not loopback'
+          }
+          if ([int]$endpointMetadata.dynamic_port -le 0) {
+            throw 'Installed sidecar endpoint dynamic port is invalid'
+          }
+          if ([string]::IsNullOrWhiteSpace([string]$endpointMetadata.generation)) {
+            throw 'Installed sidecar endpoint generation is missing'
+          }
+          if ($endpointText -match '(?i)launch_token|app_secret|api[_-]?key|credential') {
+            throw 'Installed sidecar endpoint leaked secret-bearing metadata'
+          }
+          Write-Host "Installed sidecar endpoint and SQLite canonical database are ready"
+          $forbidden = @(Get-Process -ErrorAction SilentlyContinue |
+            Where-Object {
+              $_.ProcessName -match $forbiddenPattern -and
+              $_.Id -notin $forbiddenBefore
+            })
+          if ($forbidden) { throw "Developer/server runtime child detected: $($forbidden.Name -join ', ')" }
+          Write-Host "No developer/server runtime child process was detected"
+          $sidecars = @(Get-Process -Name 'angmoo-sidecar' -ErrorAction SilentlyContinue)
+          if (-not $sidecars) { throw 'Packaged angmoo-sidecar process was not detected' }
+          Assert-InstallFileManifest $installManifest 'runtime_behavior_scan'
+          Assert-NoActiveDefenderDetection 'runtime_behavior_scan'
+          Assert-NoNewDefenderDetection 'runtime_behavior_scan'
+          $sentinel = Join-Path $dataRoot 'er6-uninstall-preserve.txt'
+          Set-Content -LiteralPath $sentinel -Value 'preserve' -Encoding ascii
+          $null = $product.CloseMainWindow()
+          if (-not $product.WaitForExit(10000)) {
+            Stop-Process -Id $product.Id -Force -ErrorAction SilentlyContinue
+            $product.WaitForExit(5000) | Out-Null
+          }
+          # A headless GitHub runner may not deliver a normal window-close
+          # lifecycle. Stop the already-audited packaged sidecars before
+          # uninstall so an install-root binary cannot keep NSIS open.
+          foreach ($sidecar in $sidecars) {
+            Stop-Process -Id $sidecar.Id -Force -ErrorAction SilentlyContinue
+          }
+          Start-MpScan -ScanType CustomScan -ScanPath $installRoot
+          Assert-InstallFileManifest $installManifest 'installed_postrun_scan'
+          Assert-NoActiveDefenderDetection 'installed_postrun_scan'
+          Assert-NoNewDefenderDetection 'installed_postrun_scan'
+          $uninstaller = Get-ChildItem $installRoot -Filter 'uninstall.exe' -Recurse |
+            Select-Object -First 1
+          if (-not $uninstaller) { throw 'NSIS uninstaller is missing' }
+          Write-Host "Running silent uninstall while preserving local data"
+          $uninstall = Start-Process $uninstaller.FullName -ArgumentList '/S' -PassThru
+          if (-not $uninstall.WaitForExit(30000)) {
+            Stop-Process -Id $uninstall.Id -Force -ErrorAction SilentlyContinue
+            throw 'NSIS uninstall timed out after 30 seconds'
+          }
+          if ($uninstall.ExitCode -ne 0) { throw "NSIS uninstall failed: $($uninstall.ExitCode)" }
+          if (-not (Test-Path $sentinel)) { throw 'Silent uninstall deleted local data' }
+      - name: Capture hosted Defender evidence
+        if: always()
+        shell: pwsh
+        run: |
+          $evidence = Join-Path $env:RUNNER_TEMP 'angmoo-defender-evidence'
+          New-Item -ItemType Directory -Force -Path $evidence | Out-Null
+          Get-MpComputerStatus |
+            Select-Object AMEngineVersion, AMProductVersion, AntivirusSignatureVersion, AntivirusSignatureLastUpdated, RealTimeProtectionEnabled |
+            ConvertTo-Json -Depth 4 |
+            Set-Content -LiteralPath (Join-Path $evidence 'computer-status.json') -Encoding utf8
+          @(Get-MpThreat -ErrorAction SilentlyContinue) |
+            Select-Object ThreatID, ThreatName, SeverityID, IsActive, DidThreatExecute, Resources |
+            ConvertTo-Json -Depth 6 |
+            Set-Content -LiteralPath (Join-Path $evidence 'threats.json') -Encoding utf8
+          @(Get-MpThreatDetection -ErrorAction SilentlyContinue) |
+            Select-Object DetectionID, ThreatID, InitialDetectionTime, RemediationTime, DetectionSourceTypeID, CleaningActionID, ActionSuccess |
+            ConvertTo-Json -Depth 6 |
+            Set-Content -LiteralPath (Join-Path $evidence 'threat-detections.json') -Encoding utf8
+      - name: Upload hosted Defender evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: angmoo-windows-defender-evidence-${{ github.sha }}
+          if-no-files-found: error
+          retention-days: 14
+          path: ${{ runner.temp }}/angmoo-defender-evidence

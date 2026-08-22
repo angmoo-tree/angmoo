@@ -47,6 +47,17 @@ class SqlAlchemyIdentityRepository:
     def __init__(self, db: Session) -> None:
         self._db = db
 
+    def ensure_local_installation_identity(self, *, now: datetime) -> str:
+        """Create the unclaimed device identity needed by local workers.
+
+        This is deliberately narrower than owner bootstrap: it creates no
+        user, challenge, or session and therefore cannot claim ownership.
+        """
+
+        identity = self._get_or_create_identity(now)
+        self._db.commit()
+        return identity.installation_id
+
     def get_bootstrap_status(self) -> LocalBootstrapStatus:
         identity = self._db.get(InstallationIdentity, LOCAL_INSTALLATION_KEY)
         if identity is not None and identity.bootstrap_state == "recovery_required":

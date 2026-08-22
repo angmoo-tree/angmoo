@@ -15,6 +15,7 @@ from app.compatibility.manual_social.legacy import (
     ManualSocialNotFoundError,
     create_owner_post,
     create_owner_reply,
+    get_owner_world_post_thread,
     list_owner_world_feed,
 )
 from app.domains.manual_social.domain.inbox import ManualInboxInteractionCandidate
@@ -33,5 +34,6 @@ __all__ = [
     "release_manual_inbox_claims",
     "create_owner_post",
     "create_owner_reply",
+    "get_owner_world_post_thread",
     "list_owner_world_feed",
 ]

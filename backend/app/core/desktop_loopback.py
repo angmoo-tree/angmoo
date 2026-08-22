@@ -15,6 +15,7 @@ DESKTOP_WEBVIEW_AUTHENTICATED_SCOPE_KEY = (
 )
 _ALLOWED_REQUEST_HEADERS = (
     "content-type",
+    "idempotency-key",
     LAUNCH_TOKEN_HEADER,
     "x-angmoo-frontend-origin",
 )

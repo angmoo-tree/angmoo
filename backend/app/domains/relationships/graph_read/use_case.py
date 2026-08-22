@@ -189,6 +189,7 @@ def _evidence_reads(
             or candidate.retrieval_status != "eligible"
         ):
             continue
+        root_post_id = None
         source_post_id = None
         valid = True
         for post in candidate.posts:
@@ -201,7 +202,8 @@ def _evidence_reads(
             ):
                 valid = False
                 break
-            source_post_id = post.source_post_id or post.post_id
+            root_post_id = root_post_id or post.root_post_id
+            source_post_id = source_post_id or post.source_post_id or post.post_id
         if valid:
             result.append(
                 schemas.RelationshipGraphEvidenceRead(
@@ -214,6 +216,7 @@ def _evidence_reads(
                     target_world_character_id=(
                         candidate.target_world_character_id
                     ),
+                    root_post_id=root_post_id,
                     source_post_id=source_post_id,
                 )
             )

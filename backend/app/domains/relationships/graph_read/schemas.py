@@ -50,6 +50,7 @@ class RelationshipGraphEvidenceRead(RelationshipGraphSchema):
     occurred_at: datetime
     actor_world_character_id: str
     target_world_character_id: str | None = None
+    root_post_id: str | None = None
     source_post_id: str | None = None
 
 

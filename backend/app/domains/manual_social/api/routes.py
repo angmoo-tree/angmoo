@@ -21,6 +21,7 @@ from app.domains.manual_social.public import (
     ManualSocialNotFoundError,
     create_owner_post,
     create_owner_reply,
+    get_owner_world_post_thread,
     list_owner_world_feed,
 )
 from app.domains.world_characters.public import (
@@ -59,6 +60,30 @@ def read_manual_social_feed(
     try:
         return list_owner_world_feed(
             db, world_id=world_id, current_user_id=current_user.id
+        )
+    except (ManualSocialError, OwnerControlledIdentityError) as exc:
+        _raise_error(exc)
+        raise AssertionError("unreachable")
+
+
+@router.get(
+    "/{world_id}/manual-social/posts/{post_id}",
+    response_model=ManualSocialFeedRead,
+)
+def read_manual_social_post_thread(
+    world_id: str,
+    post_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+) -> ManualSocialFeedRead:
+    browser_session.require_local_frontend_request(request, mutation=False)
+    try:
+        return get_owner_world_post_thread(
+            db,
+            world_id=world_id,
+            post_id=post_id,
+            current_user_id=current_user.id,
         )
     except (ManualSocialError, OwnerControlledIdentityError) as exc:
         _raise_error(exc)

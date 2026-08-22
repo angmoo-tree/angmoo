@@ -26,6 +26,22 @@ def _production_settings(**overrides: object) -> Settings:
     return Settings(_env_file=None, **values)
 
 
+def _local_settings(**overrides: object) -> Settings:
+    values: dict[str, object] = {
+        "APP_ENV": "local",
+        "APP_SECRET": SecretStr("synthetic-local-secret-for-tests"),
+        "API_DOCS_ENABLED": False,
+        "SIGNUP_ENABLED": False,
+        "DATABASE_URL": "sqlite+pysqlite:///C:/synthetic/angmoo.sqlite3",
+        "BROWSER_SESSION_ALLOWED_ORIGINS": "http://tauri.localhost",
+        "DESKTOP_ALLOWED_ORIGIN": "http://tauri.localhost",
+        "DESKTOP_LAUNCH_TOKEN": SecretStr("a" * 32),
+        "CREDENTIAL_ENCRYPTION_PROVIDER": "local",
+    }
+    values.update(overrides)
+    return Settings(_env_file=None, **values)
+
+
 @pytest.mark.parametrize(
     ("overrides", "expected_code"),
     [
@@ -71,6 +87,31 @@ def test_production_startup_accepts_matching_fake_kms_round_trip() -> None:
 
     assert len(observed) == 1
     assert len(observed[0]) >= 32
+
+
+def test_local_desktop_startup_accepts_embedded_security_contract() -> None:
+    validate_startup_security(_local_settings())
+
+
+@pytest.mark.parametrize(
+    ("overrides", "expected_code"),
+    [
+        ({"APP_SECRET": SecretStr(DEFAULT_APP_SECRET)}, "unsafe_app_secret"),
+        ({"CREDENTIAL_ENCRYPTION_PROVIDER": "oci_kms"}, "unsafe_credential_provider"),
+        ({"DATABASE_URL": "postgresql+psycopg://localhost/angmoo"}, "local_database_required"),
+        ({"DESKTOP_LAUNCH_TOKEN": SecretStr("too-short")}, "local_desktop_token_required"),
+        ({"DESKTOP_ALLOWED_ORIGIN": "http://127.0.0.1:3000"}, "local_desktop_origin_invalid"),
+        ({"API_DOCS_ENABLED": True}, "local_api_docs_forbidden"),
+        ({"SIGNUP_ENABLED": True}, "local_signup_forbidden"),
+    ],
+)
+def test_local_desktop_startup_rejects_drifted_security_configuration(
+    overrides: dict[str, object], expected_code: str
+) -> None:
+    with pytest.raises(StartupSecurityError) as exc_info:
+        validate_startup_security(_local_settings(**overrides))
+
+    assert exc_info.value.code == expected_code
 
 
 @pytest.mark.parametrize("failure_mode", ["exception", "mismatch"])

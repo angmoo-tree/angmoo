@@ -3,6 +3,7 @@ export {
   relationshipGraphRoute,
   studioWorldRoute,
   worldAppRoute,
+  worldPostDetailRoute,
 } from "./product-routes";
 export {
   useRuntimePathname,

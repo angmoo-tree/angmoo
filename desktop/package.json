@@ -1,6 +1,6 @@
 {
   "name": "angmoo-desktop",
-  "version": "0.4.0-preview.1",
+  "version": "0.4.0-1",
   "private": true,
   "license": "GPL-3.0-only",
   "scripts": {
@@ -8,7 +8,8 @@
     "build:sidecar": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/build-sidecar.ps1",
     "dev": "npm run build:sidecar && tauri dev",
     "build:shell": "tauri build --no-bundle",
-    "build:product": "npm run build:sidecar && npm run build:shell"
+    "build:product": "npm run build:sidecar && npm run build:shell",
+    "build:installer": "npm run build:sidecar && tauri build --bundles nsis,msi"
   },
   "devDependencies": {
     "@tauri-apps/cli": "2.11.4"

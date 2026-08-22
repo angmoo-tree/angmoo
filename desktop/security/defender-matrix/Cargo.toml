@@ -1,0 +1,31 @@
+[package]
+name = "angmoo-defender-matrix"
+version = "0.0.0"
+description = "Non-shipping ER6 Defender trigger isolation host"
+authors = ["Angmoo contributors"]
+license = "GPL-3.0-only"
+edition = "2024"
+rust-version = "1.97.1"
+publish = false
+
+[build-dependencies]
+tauri-build = { version = "=2.6.3", features = [] }
+
+[dependencies]
+tauri = { version = "=2.11.5", features = [] }
+
+[[bin]]
+name = "angmoo-defender-matrix-host"
+path = "src/main.rs"
+
+[[bin]]
+name = "angmoo-defender-matrix-stub-host"
+path = "src/bin/stub_host.rs"
+
+[[bin]]
+name = "angmoo-defender-matrix-real-host"
+path = "src/bin/real_host.rs"
+
+[[bin]]
+name = "angmoo-defender-matrix-stub"
+path = "src/bin/stub.rs"

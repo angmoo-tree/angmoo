@@ -11,6 +11,7 @@ export {
   createOwnerManualPost,
   createOwnerManualReply,
   getManualSocialFeed,
+  getManualSocialPostThread,
   getOwnerControlledActor,
   getLocalWorldApp,
   WorldAppApiError,

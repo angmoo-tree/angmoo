@@ -270,7 +270,7 @@
       "owner": "ER1-ER2",
       "path": "backend/app/core/config.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "c533d7d075a836756ac8d9258dc8d30b5a6023afb8b6c9a2851dcca5b377a8be",
+      "source_sha256": "f0e8c6e71033e974808de84ecb15f3479486752182307a40452bfe23987ed3a5",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
@@ -372,15 +372,15 @@
     {
       "markers": {
         "row_lock": [
-          133,
-          148,
-          213
+          144,
+          159,
+          224
         ]
       },
       "owner": "ER1-ER2",
       "path": "backend/app/domains/identity/infrastructure/sqlalchemy_identity_repository.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "959b224d6bbe5535e3d19a635981c931f75054a482ef9cdd863829184f73dada",
+      "source_sha256": "fe01ded9b6140409b660f0c20fcacca0883f709b5e86d6f4a8e20df4ea3d1e87",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
@@ -466,14 +466,13 @@
     {
       "markers": {
         "driver_or_url": [
-          64,
-          70
+          60
         ]
       },
       "owner": "ER1-ER2",
       "path": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "1cf834d75dbcd4320dcf2fed23812ecce2f3a406018bdaa3e7b4fd0f4cae91ad",
+      "source_sha256": "54f76bd1344c114626f71d61b424944f94c394040d84c911560bb379e8dedcff",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
@@ -801,13 +800,13 @@
     {
       "markers": {
         "pgvector": [
-          478
+          483
         ]
       },
       "owner": "ER1-ER2",
       "path": "backend/app/services/character_lore.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "dd8fea9a86c4bf20a66580b855997a3f4599837548d94f20b7967dc6c26e98e2",
+      "source_sha256": "8f6558b3da68bb9f01b3df435efb6c8910aab8aed36e07613d130cdc1a3cdf06",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
@@ -963,7 +962,7 @@
       "owner": "ER1-ER2",
       "path": "backend/app/services/relationship_graph_read.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "13a8fe2aae4de1ea9c17411dd00002c8db2b5f57e4dc4e0b2ddf34ebc096b980",
+      "source_sha256": "21b1b4ea56bb62f288befb33c569a31972f92db9d367075b457dcf5c6ee6e310",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
@@ -1029,13 +1028,15 @@
       "markers": {
         "driver_or_url": [
           1,
-          27
+          29,
+          59,
+          60
         ]
       },
       "owner": "ER1-ER2",
       "path": "backend/scripts/dry_run_postgres_to_sqlite.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "ea0d2063430e69dd1940aadea12495d2d5ea315e2a6fc4356f0578c5c03f9356",
+      "source_sha256": "1ea501511a776a83e9eac9762966603dd4ecc8241980ee0a0f55fead0e8ff7ba",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
@@ -1094,6 +1095,19 @@
     {
       "markers": {
         "driver_or_url": [
+          86,
+          87
+        ]
+      },
+      "owner": "ER7",
+      "path": "scripts/ci/check_desktop_installer_contract.py",
+      "removal_condition": "embedded canonical rollback window PASS and user-approved legacy-default removal",
+      "source_sha256": "3c815375521725f643aea73897aa25b9d901dca696981b6a8fbfb48175de354b",
+      "transition_pr": "ER7 PR P"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
           18,
           33,
           94,
@@ -1138,6 +1152,19 @@
     {
       "markers": {
         "driver_or_url": [
+          87,
+          100
+        ]
+      },
+      "owner": "ER7",
+      "path": "scripts/ci/compare_er6_sidecar_layouts.ps1",
+      "removal_condition": "embedded canonical rollback window PASS and user-approved legacy-default removal",
+      "source_sha256": "9d6b074a9af687cdf2987f7c7666350a91226cebbb53ea363ef93a6093a67374",
+      "transition_pr": "ER7 PR P"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
           23,
           27,
           28,
@@ -1176,10 +1203,10 @@
       "transition_pr": "ER7 PR P"
     }
   ],
-  "entry_count": 75,
+  "entry_count": 77,
   "marker_counts": {
     "advisory_lock": 8,
-    "driver_or_url": 51,
+    "driver_or_url": 53,
     "jsonb": 8,
     "pgvector": 7,
     "row_lock": 22,

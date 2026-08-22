@@ -273,3 +273,8 @@ jobs:
           fi
           uv run alembic upgrade head
           uv run alembic current | grep -F "$head_revision"
+      - name: Verify ER6 PostgreSQL to installed-runtime round trip
+        env:
+          ER6_POSTGRES_MIGRATION: "1"
+        working-directory: backend
+        run: uv run python -m pytest -q tests/test_l3_er6_postgres_installer_roundtrip.py

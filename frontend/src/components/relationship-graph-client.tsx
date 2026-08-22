@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
+import {
+  useRuntimeRouter as useRouter,
+  worldPostDetailRoute,
+} from "@/shared/navigation/public";
 import { useEffect, useMemo, useState } from "react";
 
 import { useAuth } from "@/components/auth-provider";
@@ -11,13 +14,22 @@ import {
 } from "@/lib/relationship-graph";
 
 const STATUS_LABELS: Record<string, string> = {
-  disabled: "관계망 기능 꺼짐 · PostgreSQL 직접 관계 표시",
+  disabled: "관계망 기능 꺼짐 · Canonical DB 직접 관계 표시",
   healthy: "관계망 최신 상태",
   lagging: "새 사건을 관계망에 반영하는 중",
   rebuilding: "관계망을 다시 구성하는 중 · 직접 관계만 표시",
   unavailable: "관계망 일시 사용 불가 · 직접 관계만 표시",
   timeout: "관계망 조회 시간 초과 · 직접 관계만 표시",
   misconfigured: "관계망 설정 확인 필요 · 직접 관계만 표시",
+};
+
+const ERROR_LABELS: Record<string, string> = {
+  runtime_not_ready: "로컬 엔진이 아직 준비되지 않았습니다. 잠시 후 다시 시도해주세요.",
+  runtime_interrupted: "로컬 엔진 연결이 중단되었습니다. 설정에서 runtime 상태를 확인해주세요.",
+  launcher_token_invalid: "설치형 앱의 실행 인증이 만료되었습니다. Angmoo를 다시 실행해주세요.",
+  graph_projection_rebuilding: "관계망을 다시 구성하고 있습니다. Canonical DB의 직접 관계는 보존됩니다.",
+  graph_provider_unavailable: "LadybugDB 관계망을 지금 사용할 수 없습니다. 복구 후 다시 시도해주세요.",
+  relationship_query_failed: "관계망 조회를 완료하지 못했습니다. 데이터는 변경되지 않았습니다.",
 };
 
 function position(index: number, count: number) {
@@ -57,7 +69,8 @@ export function RelationshipGraphClient({
       })
       .catch((nextError) => {
         if (active) {
-          setError(nextError instanceof Error ? nextError.message : "관계망을 불러오지 못했습니다.");
+          const code = nextError instanceof Error ? nextError.message : "relationship_query_failed";
+          setError(ERROR_LABELS[code] ?? code);
         }
       })
       .finally(() => {
@@ -92,7 +105,7 @@ export function RelationshipGraphClient({
         </p>
         {provider === "ladybug" ? (
           <p className="mt-3 rounded-2xl bg-tertiary-container px-4 py-3 text-sm font-bold text-on-tertiary-container">
-            LadybugDB 개발자 검증 모드 · production 기본 provider는 아직 Neo4j입니다.
+            설치형 Angmoo의 canonical 관계망 provider는 LadybugDB입니다.
           </p>
         ) : null}
         <div className="mt-5 flex flex-wrap items-center gap-3">
@@ -134,7 +147,7 @@ export function RelationshipGraphClient({
                   ? "Neo4j 검증 결과"
                   : graph.meta.source === "ladybug"
                     ? "LadybugDB 검증 결과"
-                    : "PostgreSQL 안전 대체"}
+                    : "Canonical DB 안전 대체"}
               </span>
             </div>
 
@@ -206,7 +219,14 @@ export function RelationshipGraphClient({
                   <article key={event.event_id} className="rounded-2xl border border-outline-variant p-4">
                     <p className="font-bold">{event.event_type}</p>
                     <p className="mt-1 text-xs text-on-surface-variant">{new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(event.occurred_at))}</p>
-                    {event.source_post_id ? <Link className="mt-2 inline-block text-sm font-bold text-primary underline" href={`/posts/${event.source_post_id}`}>근거 게시글 보기</Link> : null}
+                    {event.root_post_id || event.source_post_id ? (
+                      <Link
+                        className="mt-2 inline-block text-sm font-bold text-primary underline"
+                        href={worldPostDetailRoute(worldId, event.root_post_id ?? event.source_post_id!)}
+                      >
+                        근거 게시글 보기
+                      </Link>
+                    ) : null}
                   </article>
                 ))}
               </div>

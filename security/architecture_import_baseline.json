@@ -1,7 +1,7 @@
 {
-  "edge_count": 906,
-  "external_import_count": 1439,
-  "module_count": 427,
+  "edge_count": 926,
+  "external_import_count": 1467,
+  "module_count": 433,
   "modules": [
     {
       "external_imports": [],
@@ -2998,6 +2998,17 @@
       "external_imports": [
         "__future__",
         "dataclasses",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.runtime.ports.release_candidate",
+      "path": "backend/app/domains/runtime/ports/release_candidate.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
         "pathlib",
         "typing"
       ],
@@ -3086,7 +3097,8 @@
       "external_imports": [
         "__future__",
         "fastapi",
-        "sqlalchemy.orm"
+        "sqlalchemy.orm",
+        "typing"
       ],
       "imports": [
         "app.api.v1.deps",
@@ -3094,8 +3106,11 @@
         "app.core.db",
         "app.domains.world_characters.api.schemas",
         "app.domains.world_characters.application.owner_controlled_identity",
+        "app.domains.world_characters.application.studio_surface",
         "app.domains.world_characters.domain.owner_controlled_identity",
-        "app.domains.world_characters.infrastructure.sqlalchemy_owner_controlled_identity"
+        "app.domains.world_characters.infrastructure.sqlalchemy_owner_controlled_identity",
+        "app.domains.world_characters.infrastructure.sqlalchemy_studio_surface",
+        "app.domains.worlds.public"
       ],
       "module": "app.domains.world_characters.api.routes",
       "path": "backend/app/domains/world_characters/api/routes.py",
@@ -3104,12 +3119,14 @@
     {
       "external_imports": [
         "__future__",
+        "dataclasses",
         "pydantic",
         "typing",
         "urllib.parse"
       ],
       "imports": [
-        "app.domains.world_characters.domain.owner_controlled_identity"
+        "app.domains.world_characters.domain.owner_controlled_identity",
+        "app.domains.world_characters.domain.studio_surface"
       ],
       "module": "app.domains.world_characters.api.schemas",
       "path": "backend/app/domains/world_characters/api/schemas.py",
@@ -3150,6 +3167,18 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__"
+      ],
+      "imports": [
+        "app.domains.world_characters.domain.studio_surface",
+        "app.domains.world_characters.ports.studio_surface"
+      ],
+      "module": "app.domains.world_characters.application.studio_surface",
+      "path": "backend/app/domains/world_characters/application/studio_surface.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.domains.world_characters.domain",
@@ -3164,6 +3193,17 @@
       "imports": [],
       "module": "app.domains.world_characters.domain.owner_controlled_identity",
       "path": "backend/app/domains/world_characters/domain/owner_controlled_identity.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.world_characters.domain.studio_surface",
+      "path": "backend/app/domains/world_characters/domain/studio_surface.py",
       "wildcard_imports": []
     },
     {
@@ -3305,6 +3345,23 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.characters.public",
+        "app.domains.world_characters.domain.studio_surface",
+        "app.domains.world_characters.infrastructure.sqlalchemy_models",
+        "app.domains.world_characters.infrastructure.sqlalchemy_setup_models",
+        "app.domains.worlds.public"
+      ],
+      "module": "app.domains.world_characters.infrastructure.sqlalchemy_studio_surface",
+      "path": "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_surface.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.domains.world_characters.ports",
@@ -3321,6 +3378,18 @@
       ],
       "module": "app.domains.world_characters.ports.owner_controlled_identity",
       "path": "backend/app/domains/world_characters/ports/owner_controlled_identity.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.world_characters.domain.studio_surface"
+      ],
+      "module": "app.domains.world_characters.ports.studio_surface",
+      "path": "backend/app/domains/world_characters/ports/studio_surface.py",
       "wildcard_imports": []
     },
     {
@@ -4023,10 +4092,12 @@
       "external_imports": [
         "__future__",
         "argparse",
+        "collections.abc",
         "ctypes",
         "json",
         "os",
         "pathlib",
+        "secrets",
         "socket",
         "sys",
         "threading",
@@ -4035,8 +4106,13 @@
         "uvicorn"
       ],
       "imports": [
+        "app.core.db",
         "app.core.desktop_loopback",
-        "app.public_main"
+        "app.domains.identity.application.local_owner",
+        "app.domains.identity.infrastructure.sqlalchemy_identity_repository",
+        "app.public_main",
+        "app.runtime.persistence.runtime_data_path",
+        "app.runtime.persistence.sqlite_database"
       ],
       "module": "app.runtime.desktop_sidecar",
       "path": "backend/app/runtime/desktop_sidecar.py",
@@ -4122,6 +4198,27 @@
       ],
       "module": "app.runtime.migrations.postgres_to_sqlite",
       "path": "backend/app/runtime/migrations/postgres_to_sqlite.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "json",
+        "pathlib",
+        "shutil",
+        "typing",
+        "uuid"
+      ],
+      "imports": [
+        "app.domains.runtime.ports.release_candidate",
+        "app.domains.runtime.ports.runtime_data_path"
+      ],
+      "module": "app.runtime.migrations.release_candidate",
+      "path": "backend/app/runtime/migrations/release_candidate.py",
       "wildcard_imports": []
     },
     {
@@ -5074,10 +5171,14 @@
     },
     {
       "external_imports": [
-        "__future__"
+        "__future__",
+        "threading",
+        "typing"
       ],
       "imports": [
         "app.core.config",
+        "app.domains.relationships.ports.projection",
+        "app.integrations.ladybug_projection",
         "app.integrations.neo4j"
       ],
       "module": "app.services.graph_projection_runtime",
@@ -5530,7 +5631,6 @@
         "app.domains.relationships.ports.projection",
         "app.domains.relationships.public",
         "app.integrations.ladybug_projection",
-        "app.integrations.neo4j",
         "app.integrations.relationship_graph_read",
         "app.models",
         "app.services.graph_projection_metrics",
