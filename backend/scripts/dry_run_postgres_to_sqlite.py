@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 from pathlib import Path
 import sys
 
+from sqlalchemy import text
 
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
 REPOSITORY_ROOT = BACKEND_ROOT.parent
@@ -33,11 +35,63 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--app-version", required=True)
     parser.add_argument("--media-root", type=Path)
     parser.add_argument("--media-manifest", type=Path)
+    parser.add_argument(
+        "--confirm-source-stopped",
+        action="store_true",
+        help="Confirm the source application is stopped before taking the snapshot.",
+    )
+    parser.add_argument(
+        "--minimum-free-gib",
+        type=float,
+        default=2.0,
+        help="Fail before migration when the target volume has less free space.",
+    )
     return parser
+
+
+def _directory_bytes(root: Path | None) -> int:
+    if root is None or not root.exists():
+        return 0
+    return sum(path.stat().st_size for path in root.rglob("*") if path.is_file())
+
+
+def _disk_preflight(args: argparse.Namespace) -> dict[str, int]:
+    if engine.dialect.name != "postgresql":
+        raise SystemExit("ER6 migration source must be PostgreSQL")
+    with engine.connect() as connection:
+        source_database_bytes = int(
+            connection.scalar(text("SELECT pg_database_size(current_database())"))
+            or 0
+        )
+    media_bytes = _directory_bytes(args.media_root)
+    target_parent = args.output_root.resolve()
+    while not target_parent.exists():
+        target_parent = target_parent.parent
+    free_bytes = shutil.disk_usage(target_parent).free
+    minimum_bytes = max(0, int(args.minimum_free_gib * 1024**3))
+    estimated_required_bytes = max(
+        minimum_bytes,
+        source_database_bytes * 2 + media_bytes + 512 * 1024**2,
+    )
+    if free_bytes < estimated_required_bytes:
+        raise SystemExit(
+            "migration_disk_preflight_failed "
+            f"free_bytes={free_bytes} "
+            f"estimated_required_bytes={estimated_required_bytes}"
+        )
+    return {
+        "source_database_bytes": source_database_bytes,
+        "media_bytes": media_bytes,
+        "free_bytes": free_bytes,
+        "estimated_required_bytes": estimated_required_bytes,
+    }
 
 
 def main() -> int:
     args = _parser().parse_args()
+    if not args.confirm_source_stopped:
+        raise SystemExit("--confirm-source-stopped is required")
+    disk_preflight = _disk_preflight(args)
     migration = PostgresToSqliteOfflineDryRun(
         source_engine=engine,
         source_metadata=Base.metadata,
@@ -72,6 +126,7 @@ def main() -> int:
         "integrity_check": report.integrity_check,
         "source_read_only": report.source_read_only,
         "production_switched": report.production_switched,
+        "disk_preflight": disk_preflight,
     }
     print(
         json.dumps(

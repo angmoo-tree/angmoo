@@ -41,6 +41,7 @@ jobs:
           uv run --project backend python scripts/ci/check_secret_allowlist_metadata.py
           uv run --project backend python scripts/ci/check_container_release_contract.py
           uv run --project backend python scripts/ci/check_local_launcher_contract.py
+          uv run --project backend python scripts/ci/check_desktop_installer_contract.py
           uv run --project backend python scripts/ci/generate_architecture_inventory.py --check
           uv run --project backend python scripts/ci/generate_deferred_runtime_inventory.py --check
       - name: Scan current repository and full history

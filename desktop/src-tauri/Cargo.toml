@@ -1,6 +1,6 @@
 [package]
 name = "angmoo-desktop"
-version = "0.4.0-preview.1"
+version = "0.4.0-1"
 description = "Angmoo Tauri product windows"
 authors = ["Angmoo contributors"]
 license = "GPL-3.0-only"

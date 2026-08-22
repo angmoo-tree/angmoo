@@ -1,7 +1,7 @@
 {
-  "edge_count": 906,
-  "external_import_count": 1439,
-  "module_count": 427,
+  "edge_count": 915,
+  "external_import_count": 1454,
+  "module_count": 429,
   "modules": [
     {
       "external_imports": [],
@@ -2998,6 +2998,17 @@
       "external_imports": [
         "__future__",
         "dataclasses",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.runtime.ports.release_candidate",
+      "path": "backend/app/domains/runtime/ports/release_candidate.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
         "pathlib",
         "typing"
       ],
@@ -4023,10 +4034,12 @@
       "external_imports": [
         "__future__",
         "argparse",
+        "collections.abc",
         "ctypes",
         "json",
         "os",
         "pathlib",
+        "secrets",
         "socket",
         "sys",
         "threading",
@@ -4035,8 +4048,13 @@
         "uvicorn"
       ],
       "imports": [
+        "app.core.db",
         "app.core.desktop_loopback",
-        "app.public_main"
+        "app.domains.identity.application.local_owner",
+        "app.domains.identity.infrastructure.sqlalchemy_identity_repository",
+        "app.public_main",
+        "app.runtime.persistence.runtime_data_path",
+        "app.runtime.persistence.sqlite_database"
       ],
       "module": "app.runtime.desktop_sidecar",
       "path": "backend/app/runtime/desktop_sidecar.py",
@@ -4122,6 +4140,27 @@
       ],
       "module": "app.runtime.migrations.postgres_to_sqlite",
       "path": "backend/app/runtime/migrations/postgres_to_sqlite.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "json",
+        "pathlib",
+        "shutil",
+        "typing",
+        "uuid"
+      ],
+      "imports": [
+        "app.domains.runtime.ports.release_candidate",
+        "app.domains.runtime.ports.runtime_data_path"
+      ],
+      "module": "app.runtime.migrations.release_candidate",
+      "path": "backend/app/runtime/migrations/release_candidate.py",
       "wildcard_imports": []
     },
     {
@@ -5078,6 +5117,8 @@
       ],
       "imports": [
         "app.core.config",
+        "app.domains.relationships.ports.projection",
+        "app.integrations.ladybug_projection",
         "app.integrations.neo4j"
       ],
       "module": "app.services.graph_projection_runtime",

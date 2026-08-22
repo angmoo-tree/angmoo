@@ -18,6 +18,7 @@ EXPECTED_WORKFLOWS = {
     "local-smoke.yml",
     "native-runtime-spike.yml",
     "security.yml",
+    "windows-installer.yml",
     "windows-smoke.yml",
     "release-images.yml",
 }
@@ -44,7 +45,6 @@ FORBIDDEN_TEXT = {
     "${{ secrets.": "repository secret reference",
     "secrets: inherit": "inherited secrets",
     "angmoo-private": "private repository reference",
-    "actions/upload-artifact@": "raw artifact upload",
     "permissions: write": "write permission",
 }
 
@@ -141,6 +141,19 @@ def check_workflow(path: Path) -> tuple[list[str], list[str]]:
         for marker, label in FORBIDDEN_TEXT.items()
         if marker in text
     )
+    if "actions/upload-artifact@" in text and path.name != "windows-installer.yml":
+        errors.append("raw artifact upload is limited to windows-installer.yml")
+    if path.name == "windows-installer.yml":
+        for forbidden_path in (
+            "release-candidate-backup.json",
+            "synthetic-fixture.json",
+            "app-secret",
+        ):
+            if forbidden_path not in text:
+                errors.append(
+                    "installer private-artifact rejection is missing: "
+                    f"{forbidden_path}"
+                )
     for action in ACTION.findall(text):
         if not action.startswith("./") and not FULL_SHA.fullmatch(action):
             errors.append(f"action is not pinned to a full commit SHA: {action}")
@@ -197,7 +210,7 @@ def main() -> int:
         print(error, file=sys.stderr)
     if errors:
         return 1
-    print("Local OSS CI policy check passed: required=10 advisory=1 workflows=6")
+    print("Local OSS CI policy check passed: required=10 advisory=1 workflows=7")
     return 0
 
 

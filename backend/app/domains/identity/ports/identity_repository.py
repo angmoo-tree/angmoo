@@ -11,6 +11,8 @@ from app.domains.identity.domain.local_owner import (
 
 
 class IdentityRepository(Protocol):
+    def ensure_local_installation_identity(self, *, now: datetime) -> str: ...
+
     def get_bootstrap_status(self) -> LocalBootstrapStatus: ...
 
     def create_bootstrap_challenge(

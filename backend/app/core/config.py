@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Angmoo"
     API_V1_PREFIX: str = "/api/v1"
     API_DOCS_ENABLED: bool = True
-    APP_ENV: Literal["development", "test", "production"] = "development"
+    APP_ENV: Literal["development", "test", "local", "production"] = "development"
     APP_SECRET: SecretStr = SecretStr(DEFAULT_APP_SECRET)
     APP_SECRET_FILE: str | None = None
     DATABASE_URL: str = "postgresql+psycopg://postgres:postgres@localhost:5432/angmoo"

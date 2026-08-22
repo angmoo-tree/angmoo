@@ -80,6 +80,24 @@ def _challenge_cookie(response: httpx.Response) -> str:
     return response.cookies[browser_session.BOOTSTRAP_CHALLENGE_COOKIE_NAME]
 
 
+def test_runtime_prepare_creates_only_an_unclaimed_installation_identity() -> None:
+    _, engine = _app_and_engine()
+    now = datetime(2026, 8, 22, 9, 0, tzinfo=timezone.utc)
+
+    with Session(engine) as db:
+        repository = SqlAlchemyIdentityRepository(db)
+        first = repository.ensure_local_installation_identity(now=now)
+        second = repository.ensure_local_installation_identity(now=now)
+
+        identity = db.get(InstallationIdentity, LOCAL_INSTALLATION_KEY)
+        assert identity is not None
+        assert first == second == identity.installation_id
+        assert identity.bootstrap_state == "unclaimed"
+        assert identity.owner_user_id is None
+        assert db.scalar(select(models.User.id)) is None
+        assert db.scalar(select(LocalOwnerBootstrapChallenge.challenge_hash)) is None
+
+
 def test_clean_bootstrap_claims_one_owner_and_stores_only_session_hash() -> None:
     app, engine = _app_and_engine()
 

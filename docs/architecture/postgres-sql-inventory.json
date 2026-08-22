@@ -270,7 +270,7 @@
       "owner": "ER1-ER2",
       "path": "backend/app/core/config.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "c533d7d075a836756ac8d9258dc8d30b5a6023afb8b6c9a2851dcca5b377a8be",
+      "source_sha256": "f0e8c6e71033e974808de84ecb15f3479486752182307a40452bfe23987ed3a5",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
@@ -372,15 +372,15 @@
     {
       "markers": {
         "row_lock": [
-          133,
-          148,
-          213
+          144,
+          159,
+          224
         ]
       },
       "owner": "ER1-ER2",
       "path": "backend/app/domains/identity/infrastructure/sqlalchemy_identity_repository.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "959b224d6bbe5535e3d19a635981c931f75054a482ef9cdd863829184f73dada",
+      "source_sha256": "fe01ded9b6140409b660f0c20fcacca0883f709b5e86d6f4a8e20df4ea3d1e87",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
@@ -1029,13 +1029,15 @@
       "markers": {
         "driver_or_url": [
           1,
-          27
+          29,
+          59,
+          60
         ]
       },
       "owner": "ER1-ER2",
       "path": "backend/scripts/dry_run_postgres_to_sqlite.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "ea0d2063430e69dd1940aadea12495d2d5ea315e2a6fc4356f0578c5c03f9356",
+      "source_sha256": "1ea501511a776a83e9eac9762966603dd4ecc8241980ee0a0f55fead0e8ff7ba",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
