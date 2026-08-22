@@ -17,6 +17,7 @@ use tauri_plugin_shell::{
 use uuid::Uuid;
 
 const DESKTOP_ORIGIN: &str = "http://tauri.localhost";
+const HEALTH_FAILURE_LIMIT: u8 = 15;
 
 #[derive(Clone, Debug, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -154,6 +155,14 @@ fn response_is_ok(response: &str) -> bool {
         .is_some_and(|line| line.contains(" 200 "))
 }
 
+fn drain_sidecar_events(receiver: &mut tauri::async_runtime::Receiver<CommandEvent>) {
+    while receiver.try_recv().is_ok() {}
+}
+
+fn health_failure_is_terminal(consecutive_failures: u8) -> bool {
+    consecutive_failures >= HEALTH_FAILURE_LIMIT
+}
+
 pub fn start(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> {
     verify_packaged_sidecar()?;
     let generation = {
@@ -253,6 +262,7 @@ pub fn start(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> 
             runtime.status = DesktopRuntimeStatus::ready(ready.port, token.clone());
         }
 
+        let mut consecutive_health_failures = 0_u8;
         loop {
             std::thread::sleep(Duration::from_secs(2));
             let current = managed
@@ -263,9 +273,19 @@ pub fn start(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> 
             if current != Some((generation, "ready")) {
                 break;
             }
-            if !http_request(ready.port, "GET", "/health", &token)
+            // PyInstaller's one-file bootloader may finish its wrapper process after
+            // spawning the real server process. Keep draining stdout/stderr events so
+            // the pipe cannot fill, but use the authenticated health endpoint as the
+            // runtime liveness contract instead of the wrapper's termination event.
+            drain_sidecar_events(&mut receiver);
+            if http_request(ready.port, "GET", "/health", &token)
                 .is_ok_and(|response| response_is_ok(&response))
             {
+                consecutive_health_failures = 0;
+                continue;
+            }
+            consecutive_health_failures = consecutive_health_failures.saturating_add(1);
+            if health_failure_is_terminal(consecutive_health_failures) {
                 mark_crashed(&managed, generation, "desktop_sidecar_health_lost");
                 break;
             }
@@ -390,5 +410,12 @@ mod tests {
         assert!(!root.join("sidecar.endpoint.json").exists());
         assert!(root.join("keep.txt").exists());
         fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn transient_health_failures_do_not_stop_the_sidecar() {
+        assert!(!health_failure_is_terminal(1));
+        assert!(!health_failure_is_terminal(HEALTH_FAILURE_LIMIT - 1));
+        assert!(health_failure_is_terminal(HEALTH_FAILURE_LIMIT));
     }
 }

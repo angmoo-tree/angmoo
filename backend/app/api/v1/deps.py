@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app import models
 from app.core import browser_session
 from app.core.db import get_db
+from app.core.desktop_loopback import is_authenticated_desktop_webview_request
 from app.services import auth as auth_service
 from app.services import demo_lock
 from app.services import local_bot as local_bot_service
@@ -18,8 +19,9 @@ AuthorizationHeader = Annotated[str | None, Header(alias="Authorization")]
 @dataclass(frozen=True)
 class AuthenticatedSessionContext:
     user: models.User
-    session: models.AuthSession
+    session: models.AuthSession | None
     cookie_authenticated: bool
+    auth_method: str
 
 
 def _bearer_token(authorization: str | None) -> str:
@@ -55,7 +57,7 @@ def get_current_user_allow_incomplete(
     db: Session = Depends(get_db),
 ) -> models.User:
     context = resolve_authenticated_session_context(request, authorization, db)
-    _ensure_demo_request_allowed(context.user, context.session, request)
+    _ensure_demo_request_allowed(context.user, context.auth_method, request)
     return context.user
 
 
@@ -64,6 +66,14 @@ def resolve_authenticated_session_context(
     authorization: AuthorizationHeader = None,
     db: Session = Depends(get_db),
 ) -> AuthenticatedSessionContext:
+    if (
+        browser_session.session_cookie_token(request) is None
+        and authorization is None
+        and is_authenticated_desktop_webview_request(request)
+    ):
+        context = _resolve_desktop_owner_context(db)
+        if context is not None:
+            return context
     token, cookie_authenticated = _user_token_from_request(request, authorization)
     context = _resolve_session_context(
         request,
@@ -125,6 +135,15 @@ def get_optional_current_user(
         token = bearer.strip()
         cookie_authenticated = False
     else:
+        if is_authenticated_desktop_webview_request(request):
+            context = _resolve_desktop_owner_context(db)
+            if context is not None:
+                _ensure_demo_request_allowed(
+                    context.user,
+                    context.auth_method,
+                    request,
+                )
+                return context.user
         return None
     context = _resolve_session_context(
         request,
@@ -134,7 +153,7 @@ def get_optional_current_user(
     )
     if context is None:
         return None
-    _ensure_demo_request_allowed(context.user, context.session, request)
+    _ensure_demo_request_allowed(context.user, context.auth_method, request)
     return context.user
 
 
@@ -172,18 +191,40 @@ def _resolve_session_context(
         user=user,
         session=session,
         cookie_authenticated=cookie_authenticated,
+        auth_method=session.auth_method,
+    )
+
+
+def _resolve_desktop_owner_context(
+    db: Session,
+) -> AuthenticatedSessionContext | None:
+    installation = db.get(models.InstallationIdentity, "local-installation")
+    if (
+        installation is None
+        or installation.bootstrap_state != "claimed"
+        or installation.owner_user_id is None
+    ):
+        return None
+    user = db.get(models.User, installation.owner_user_id)
+    if user is None or user.deleted_at is not None:
+        return None
+    return AuthenticatedSessionContext(
+        user=user,
+        session=None,
+        cookie_authenticated=False,
+        auth_method="local_owner",
     )
 
 
 def _ensure_demo_request_allowed(
     user: models.User,
-    session: models.AuthSession,
+    auth_method: str,
     request: Request,
 ) -> None:
     try:
         demo_lock.ensure_demo_request_allowed(
             user,
-            auth_method=session.auth_method,
+            auth_method=auth_method,
             method=request.method,
         )
     except demo_lock.DemoAccountLockedError as exc:

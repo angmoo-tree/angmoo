@@ -68,6 +68,100 @@ for (const route of ROUTES) {
   });
 }
 
+test("Tauri Phone keeps the local owner bootstrap form scrollable above navigation", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 433, height: 848 });
+  await page.addInitScript(() => {
+    const desktop = window as unknown as {
+      __ANGMOO_DESKTOP_WINDOW__: { kind: "phone"; route: string };
+      __TAURI__: {
+        core: {
+          invoke: (command: string) => Promise<unknown>;
+        };
+      };
+    };
+    desktop.__ANGMOO_DESKTOP_WINDOW__ = {
+      kind: "phone",
+      route: "/login?returnTo=%2F",
+    };
+    desktop.__TAURI__ = {
+      core: {
+        invoke: async (command) => {
+          if (command === "desktop_runtime_status") {
+            return {
+              phase: "ready",
+              apiBaseUrl: "http://127.0.0.1:8080",
+              launchToken: "static-route-probe-token-000000000000",
+            };
+          }
+          return undefined;
+        },
+      },
+    };
+  });
+  await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+    const pathname = new URL(route.request().url()).pathname;
+    if (pathname === "/api/v1/auth/local/bootstrap") {
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          state: "unclaimed",
+          installation_id: "installation-static-owner-scroll",
+          local_label: null,
+          owner: null,
+          candidates: [
+            {
+              user_id: "owner-static-probe",
+              display_name: "Demo User",
+              character_count: 1,
+              world_count: 0,
+              credential_count: 1,
+              suggested: true,
+            },
+          ],
+        },
+        status: 200,
+      });
+      return;
+    }
+    await route.fallback();
+  });
+
+  await page.goto("/login?returnTo=%2F");
+  await expect(page.getByRole("heading", { name: "이 장치의 owner 준비" })).toBeVisible();
+
+  const scrollSurface = page.locator(".angmoo-main");
+  await expect(scrollSurface).toHaveCSS("overflow-y", "auto");
+  const initialGeometry = await scrollSurface.evaluate((node) => ({
+    clientHeight: node.clientHeight,
+    scrollHeight: node.scrollHeight,
+    scrollTop: node.scrollTop,
+  }));
+  expect(initialGeometry.scrollHeight).toBeGreaterThan(initialGeometry.clientHeight);
+  expect(initialGeometry.scrollTop).toBe(0);
+
+  await scrollSurface.hover();
+  await page.mouse.wheel(0, 900);
+  await expect.poll(() => scrollSurface.evaluate((node) => node.scrollTop)).toBeGreaterThan(0);
+
+  await scrollSurface.evaluate((node) => {
+    node.scrollTop = node.scrollHeight;
+  });
+  const submitButton = page.getByRole("button", { name: "이 owner로 Angmoo 시작" });
+  const mobileNavigation = page.getByRole("navigation", { name: "모바일 주요 메뉴" });
+  await expect(submitButton).toBeVisible();
+  const bottomGeometry = await Promise.all([
+    submitButton.boundingBox(),
+    mobileNavigation.boundingBox(),
+  ]);
+  expect(bottomGeometry[0]).not.toBeNull();
+  expect(bottomGeometry[1]).not.toBeNull();
+  expect(bottomGeometry[0]!.y + bottomGeometry[0]!.height).toBeLessThanOrEqual(
+    bottomGeometry[1]!.y,
+  );
+});
+
 test("Tauri Phone delegates Studio to a reusable wide product window", async ({ page }) => {
   await page.addInitScript(() => {
     const desktop = window as unknown as {

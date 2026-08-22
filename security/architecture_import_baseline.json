@@ -1,6 +1,6 @@
 {
-  "edge_count": 904,
-  "external_import_count": 1437,
+  "edge_count": 906,
+  "external_import_count": 1439,
   "module_count": 427,
   "modules": [
     {
@@ -944,6 +944,7 @@
       "imports": [
         "app.core.browser_session",
         "app.core.db",
+        "app.core.desktop_loopback",
         "app.models",
         "app.services.auth",
         "app.services.demo_lock",
@@ -1395,11 +1396,13 @@
         "__future__",
         "datetime",
         "fastapi",
+        "hmac",
         "math",
         "urllib.parse"
       ],
       "imports": [
-        "app.core.config"
+        "app.core.config",
+        "app.core.desktop_loopback"
       ],
       "module": "app.core.browser_session",
       "path": "backend/app/core/browser_session.py",
@@ -2908,6 +2911,7 @@
         "os",
         "socket",
         "sqlalchemy",
+        "sqlalchemy.exc",
         "sqlalchemy.orm",
         "typing",
         "urllib.parse"

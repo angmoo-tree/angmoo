@@ -8,6 +8,7 @@ from typing import Any
 from urllib.parse import urlparse
 
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -114,7 +115,23 @@ class SqlAlchemyApplicationRuntimeProbe:
         )
 
     def _migration_status(self) -> MigrationRuntimeStatus:
-        current = self._db.execute(text("SELECT version_num FROM alembic_version")).scalar()
+        try:
+            current = self._db.execute(
+                text("SELECT version_num FROM alembic_version")
+            ).scalar()
+        except SQLAlchemyError:
+            # A first-run or synthetic preview database can exist before
+            # Alembic has created its metadata table. Runtime diagnostics must
+            # report that recoverable state instead of aborting Device Home
+            # with an uncaught 500 response. Roll back the failed statement so
+            # the request-scoped session remains usable by later probes.
+            self._db.rollback()
+            return MigrationRuntimeStatus(
+                state=RuntimeComponentState.DEGRADED,
+                current_revision=None,
+                head_revision=RUNTIME_MIGRATION_HEAD,
+                reason_code=RuntimeDiagnosticCode.MIGRATION_NOT_CURRENT,
+            )
         current_revision = str(current) if current is not None else None
         is_current = current_revision == RUNTIME_MIGRATION_HEAD
         return MigrationRuntimeStatus(

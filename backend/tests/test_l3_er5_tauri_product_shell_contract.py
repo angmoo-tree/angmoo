@@ -48,6 +48,9 @@ def test_product_sidecar_has_fixed_commands_hash_and_lifecycle_contract() -> Non
         "retry_desktop_runtime",
         '"/__angmoo/desktop/shutdown"',
         "desktop_sidecar_health_lost",
+        "const HEALTH_FAILURE_LIMIT: u8 = 15;",
+        "consecutive_health_failures",
+        "drain_sidecar_events",
     ):
         assert marker in runtime or marker in host
     assert "PyInstaller 6.16.0" in build
@@ -61,6 +64,11 @@ def test_product_sidecar_has_fixed_commands_hash_and_lifecycle_contract() -> Non
     assert "hmac.compare_digest" in middleware
     for forbidden in ("execute_sql", "execute_cypher", "raw_shell"):
         assert forbidden not in runtime
+
+    runtime_gate = _read("frontend/src/shared/runtime/desktop-runtime-gate.tsx")
+    assert 'width: "min(24rem, calc(100vw - 4rem))"' in runtime_gate
+    assert 'wordBreak: "keep-all"' in runtime_gate
+    assert "sidecar_terminated" not in runtime
 
 
 def test_phone_window_has_no_browser_chrome_and_applies_scaling_policy() -> None:

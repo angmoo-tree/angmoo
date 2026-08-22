@@ -14,6 +14,7 @@ from app import models, schemas
 from app.api.v1 import deps as api_deps
 from app.api.v1.routes import auth as auth_routes
 from app.core import browser_session, security
+from app.core.desktop_loopback import DESKTOP_WEBVIEW_AUTHENTICATED_SCOPE_KEY
 from app.core.config import settings
 from app.services import auth as auth_service
 
@@ -30,6 +31,7 @@ def _request(
     *,
     cookie_token: str | None = None,
     origin: str | None = None,
+    desktop_webview_authenticated: bool = False,
 ) -> Request:
     headers: list[tuple[bytes, bytes]] = []
     if cookie_token is not None:
@@ -43,8 +45,7 @@ def _request(
         )
     if origin is not None:
         headers.append((b"origin", origin.encode("ascii")))
-    return Request(
-        {
+    scope = {
             "type": "http",
             "method": method,
             "path": "/api/v1/auth/me",
@@ -54,12 +55,15 @@ def _request(
             "scheme": "http",
             "query_string": b"",
         }
-    )
+    if desktop_webview_authenticated:
+        scope[DESKTOP_WEBVIEW_AUTHENTICATED_SCOPE_KEY] = True
+    return Request(scope)
 
 
 def _create_tables(engine) -> None:
     models.User.__table__.create(engine)
     models.AuthSession.__table__.create(engine)
+    models.InstallationIdentity.__table__.create(engine)
 
 
 def _store_user(db: Session, suffix: str = "context") -> models.User:
@@ -117,6 +121,45 @@ def test_authenticated_session_context_resolves_bearer_without_exposing_token(
         assert stored is not None
         assert stored.token_hash != issued.token
         assert issued.expires_at == now + timedelta(hours=2)
+
+
+def test_authenticated_desktop_webview_resolves_claimed_installation_owner(
+) -> None:
+    engine = create_engine("sqlite:///:memory:")
+    _create_tables(engine)
+
+    with Session(engine) as db:
+        user = _store_user(db, "desktop-owner")
+        now = datetime(2026, 8, 22, 0, 0, tzinfo=timezone.utc)
+        db.add(
+            models.InstallationIdentity(
+                singleton_key="local-installation",
+                installation_id="installation-desktop-owner",
+                owner_user_id=user.id,
+                bootstrap_state="claimed",
+                claimed_at=now,
+            )
+        )
+        db.commit()
+
+        context = api_deps.resolve_authenticated_session_context(
+            _request(desktop_webview_authenticated=True),
+            None,
+            db,
+        )
+
+        assert context.user.id == user.id
+        assert context.session is None
+        assert context.cookie_authenticated is False
+        assert context.auth_method == "local_owner"
+
+        optional = api_deps.get_optional_current_user(
+            _request(desktop_webview_authenticated=True),
+            None,
+            db,
+        )
+        assert optional is not None
+        assert optional.id == user.id
 
 
 def test_authenticated_session_context_rejects_cookie_origin_and_token_ambiguity(

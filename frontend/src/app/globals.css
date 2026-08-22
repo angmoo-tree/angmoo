@@ -121,6 +121,21 @@ body[data-angmoo-desktop-window="phone"] {
   overflow: hidden;
 }
 
+body[data-angmoo-desktop-window="phone"] .angmoo-app-shell,
+body[data-angmoo-desktop-window="phone"] .angmoo-shell {
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+body[data-angmoo-desktop-window="phone"] .angmoo-main {
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+}
+
 button,
 input,
 textarea {

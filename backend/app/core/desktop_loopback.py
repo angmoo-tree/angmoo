@@ -10,6 +10,9 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 
 LAUNCH_TOKEN_HEADER = "x-angmoo-launcher-token"
+DESKTOP_WEBVIEW_AUTHENTICATED_SCOPE_KEY = (
+    "angmoo.desktop_webview_authenticated"
+)
 _ALLOWED_REQUEST_HEADERS = (
     "content-type",
     LAUNCH_TOKEN_HEADER,
@@ -98,6 +101,12 @@ class DesktopLoopbackSecurityMiddleware:
         )
         scoped = dict(scope)
         scoped["headers"] = raw_headers
+        # Only an exact-origin WebView request may inherit the installation
+        # owner's local identity. Token-authenticated host probes intentionally
+        # omit Origin and therefore never become user-authenticated requests.
+        scoped[DESKTOP_WEBVIEW_AUTHENTICATED_SCOPE_KEY] = (
+            origin == self.policy.allowed_origin
+        )
 
         async def send_with_cors(message: Message) -> None:
             if message["type"] == "http.response.start" and origin:
@@ -141,3 +150,11 @@ class DesktopLoopbackSecurityMiddleware:
             }
         )
         await send({"type": "http.response.body", "body": body})
+
+
+def is_authenticated_desktop_webview_request(request: object) -> bool:
+    scope = getattr(request, "scope", None)
+    return bool(
+        isinstance(scope, dict)
+        and scope.get(DESKTOP_WEBVIEW_AUTHENTICATED_SCOPE_KEY) is True
+    )

@@ -1,4 +1,5 @@
 export {
+  DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT,
   getRuntimeConfig,
   isStaticFrontendProfile,
   resolveRuntimeMediaUrl,

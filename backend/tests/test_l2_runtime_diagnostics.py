@@ -5,12 +5,16 @@ from types import SimpleNamespace
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import Session
 
 from app.api.v1.deps import get_current_user
 from app.api.v1.routes import runtime_status as runtime_routes
 from app.core.db import get_db
 from app.domains.runtime import public as runtime
 from app.domains.runtime.infrastructure.sqlalchemy_application_runtime_probe import (
+    RUNTIME_MIGRATION_HEAD,
+    SqlAlchemyApplicationRuntimeProbe,
     _find_opaque_id,
     _lane_result_code,
     _provider_call_count,
@@ -173,3 +177,20 @@ def test_provider_failure_classifier_returns_normalized_class_only() -> None:
     )
 
     assert failure is runtime.ProviderFailureClass.TIMEOUT
+
+
+def test_application_probe_degrades_when_alembic_metadata_is_missing() -> None:
+    engine = create_engine("sqlite+pysqlite:///:memory:")
+
+    with Session(engine) as session:
+        migration = SqlAlchemyApplicationRuntimeProbe(session)._migration_status()
+
+        assert migration.state is runtime.RuntimeComponentState.DEGRADED
+        assert migration.current_revision is None
+        assert migration.head_revision == RUNTIME_MIGRATION_HEAD
+        assert (
+            migration.reason_code
+            is runtime.RuntimeDiagnosticCode.MIGRATION_NOT_CURRENT
+        )
+        # The failed metadata query must not poison the request-scoped session.
+        assert session.execute(text("SELECT 1")).scalar_one() == 1

@@ -39,6 +39,7 @@ def test_static_profile_reuses_product_source_and_has_no_server_hooks() -> None:
 
 def test_runtime_adapter_restricts_injection_to_loopback_and_maps_proxy_paths() -> None:
     runtime = _read("frontend/src/shared/runtime/runtime-config.ts")
+    auth_provider = _read("frontend/src/components/auth-provider.tsx")
     assert 'new Set(["127.0.0.1", "localhost", "[::1]"])' in runtime
     assert 'parsed.protocol !== "http:"' in runtime
     assert 'input.startsWith("/api/backend")' in runtime
@@ -47,6 +48,13 @@ def test_runtime_adapter_restricts_injection_to_loopback_and_maps_proxy_paths() 
     assert "runtime.launchToken && isSidecarRequest" in runtime
     assert 'headers.set("X-Angmoo-Launcher-Token"' in runtime
     assert "installDesktopRuntimeConfig" in runtime
+    assert "DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT" in runtime
+    assert "window.dispatchEvent" in runtime
+    assert "DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT" in auth_provider
+    assert (
+        "window.addEventListener(\n"
+        "      DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT" in auth_provider
+    )
 
 
 def test_static_product_waits_for_packaged_runtime_and_exposes_only_retry() -> None:
