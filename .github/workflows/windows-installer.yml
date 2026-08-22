@@ -70,6 +70,14 @@ jobs:
         shell: pwsh
         working-directory: desktop
         run: npm run build:installer
+      - name: Verify packaged executables do not open consoles
+        shell: pwsh
+        run: |
+          $release = 'desktop\src-tauri\target\release'
+          $desktop = Join-Path $release 'angmoo-desktop.exe'
+          $sidecar = 'desktop\src-tauri\binaries\angmoo-sidecar-x86_64-pc-windows-msvc.exe'
+          backend\.venv\Scripts\python.exe scripts\ci\check_windows_gui_subsystems.py `
+            $desktop $sidecar
       - name: Reject private migration artifacts
         shell: pwsh
         run: |

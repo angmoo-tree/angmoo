@@ -63,6 +63,7 @@ def main() -> int:
         "release-candidate-backup.json",
         "angmoo-desktop.exe",
         "runtime\\sidecar.endpoint.json",
+        "check_windows_gui_subsystems.py",
     ):
         _require(required in workflow, f"installer workflow contract missing: {required}")
 
@@ -70,6 +71,14 @@ def main() -> int:
         encoding="utf-8"
     )
     _require("--noconsole" in sidecar_build, "packaged sidecar console must be hidden")
+    tauri_main = (ROOT / "desktop" / "src-tauri" / "src" / "main.rs").read_text(
+        encoding="utf-8"
+    )
+    _require(
+        'cfg_attr(not(debug_assertions), windows_subsystem = "windows")'
+        in tauri_main,
+        "packaged Tauri host console must be hidden",
+    )
     launcher = (
         ROOT / "desktop" / "src-tauri" / "src" / "desktop_runtime.rs"
     ).read_text(encoding="utf-8")
