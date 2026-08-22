@@ -10,7 +10,7 @@ from app.cruds import graph_projection as graph_projection_crud
 from app.services.relationship_graph_read import (
     SqlAlchemyRelationshipGraphReadGateway,
 )
-from app.core.config import settings
+from app.core.config import Settings, settings
 from app.cruds import social_memory as social_memory_crud
 from app.domains.relationships import public as relationships
 
@@ -117,6 +117,7 @@ def get_owner_diagnostics(
     character_id: str,
     world_id: str,
     user: models.User,
+    config: Settings = settings,
 ) -> schemas.SocialMemoryDiagnosticsRead:
     character = db.get(models.Character, character_id)
     if character is None or character.deleted_at is not None:
@@ -231,7 +232,14 @@ def get_owner_diagnostics(
     else:
         oldest_pending_age = None
 
-    graph_gateway = SqlAlchemyRelationshipGraphReadGateway(db, config=settings)
+    graph_provider: relationships.GraphProvider = (
+        "ladybug" if config.ladybug_graph_preview_enabled else "neo4j"
+    )
+    graph_gateway = SqlAlchemyRelationshipGraphReadGateway(
+        db,
+        config=config,
+        graph_provider=graph_provider,
+    )
     graph = relationships.get_owner_relationship_graph(
         graph_gateway,
         character_id=character_id,
@@ -240,7 +248,8 @@ def get_owner_diagnostics(
         view="neighborhood",
         depth=1,
         limit=20,
-        graph_projection_enabled=settings.graph_projection_enabled,
+        graph_projection_enabled=config.graph_projection_enabled,
+        graph_provider=graph_provider,
     )
     latest_relationship_version_parity: bool | None = None
     if graph.meta.source in {"neo4j", "ladybug"} and not graph.meta.truncated:

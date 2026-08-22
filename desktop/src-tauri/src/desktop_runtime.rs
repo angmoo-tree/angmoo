@@ -19,6 +19,11 @@ use uuid::Uuid;
 const DESKTOP_ORIGIN: &str = "http://tauri.localhost";
 const PRODUCT_GRAPH_PROVIDER: &str = "ladybug";
 const HEALTH_FAILURE_LIMIT: u8 = 15;
+// A cold PyInstaller one-file sidecar must unpack and import the full FastAPI
+// graph before it can publish its endpoint.  On Windows with real-time
+// Defender enabled that took about 20 seconds on the ER6 user machine, so the
+// previous 12-second budget falsely declared a healthy sidecar crashed.
+const ENDPOINT_READY_ATTEMPTS: usize = 600;
 
 #[derive(Clone, Debug, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -116,11 +121,17 @@ fn read_endpoint_metadata(
     };
     let endpoint: EndpointMetadata =
         serde_json::from_str(&contents).map_err(|_| "desktop_sidecar_endpoint_invalid")?;
+    // A previous abnormal exit may leave valid metadata for an older launch.
+    // It is not an invalid endpoint for the new child; wait for the current
+    // generation to atomically replace it.  The launcher token health check
+    // below still prevents a stale process from becoming ready.
+    if endpoint.generation != expected_generation {
+        return Ok(None);
+    }
     if endpoint.schema_version != 1
         || endpoint.logical_sidecar_pid == 0
         || endpoint.host != "127.0.0.1"
         || endpoint.dynamic_port == 0
-        || endpoint.generation != expected_generation
     {
         return Err("desktop_sidecar_endpoint_invalid");
     }
@@ -254,7 +265,7 @@ pub fn start(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> 
     tauri::async_runtime::spawn(async move {
         let managed = app_handle.state::<DesktopRuntimeState>();
         let mut ready: Option<EndpointMetadata> = None;
-        for _ in 0..120 {
+        for _ in 0..ENDPOINT_READY_ATTEMPTS {
             drain_sidecar_events(&mut receiver);
             match read_endpoint_metadata(&endpoint_path, &launch_id) {
                 Ok(Some(endpoint)) => {
@@ -466,13 +477,19 @@ mod tests {
 
         let endpoint = read_endpoint_metadata(&path, "launch-a").unwrap().unwrap();
         assert_eq!(endpoint.dynamic_port, 49152);
-        assert_eq!(
-            read_endpoint_metadata(&path, "launch-b"),
-            Err("desktop_sidecar_endpoint_invalid")
-        );
+        assert_eq!(read_endpoint_metadata(&path, "launch-b"), Ok(None));
         let contents = fs::read_to_string(&path).unwrap();
         assert!(!contents.contains("launch_token"));
         assert!(!contents.contains("APP_SECRET"));
         fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn cold_windows_sidecar_has_at_least_a_sixty_second_endpoint_budget() {
+        let attempts = std::hint::black_box(ENDPOINT_READY_ATTEMPTS);
+        assert!(
+            attempts * 100 >= 60_000,
+            "the endpoint budget must cover one-file unpack and AV import overhead"
+        );
     }
 }

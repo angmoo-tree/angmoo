@@ -100,6 +100,7 @@ class RelationshipRevalidationFacts:
 @dataclass(frozen=True)
 class EvidencePostFacts:
     post_id: str
+    root_post_id: str | None
     source_post_id: str | None
     exists: bool
     world_id: str | None

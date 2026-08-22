@@ -1,6 +1,6 @@
 {
-  "edge_count": 927,
-  "external_import_count": 1465,
+  "edge_count": 926,
+  "external_import_count": 1467,
   "module_count": 433,
   "modules": [
     {
@@ -5171,7 +5171,9 @@
     },
     {
       "external_imports": [
-        "__future__"
+        "__future__",
+        "threading",
+        "typing"
       ],
       "imports": [
         "app.core.config",
@@ -5629,7 +5631,6 @@
         "app.domains.relationships.ports.projection",
         "app.domains.relationships.public",
         "app.integrations.ladybug_projection",
-        "app.integrations.neo4j",
         "app.integrations.relationship_graph_read",
         "app.models",
         "app.services.graph_projection_metrics",

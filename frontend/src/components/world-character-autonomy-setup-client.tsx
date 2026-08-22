@@ -1088,7 +1088,10 @@ export function WorldCharacterAutonomySetupClient({
                       <div className="mt-5 space-y-3">
                         <h3 className="font-black">최근 사건 근거</h3>
                         {socialMemory.recent_events.slice(0, 8).map((event) => {
-                          const sourcePostId = event.evidence.find((item) => item.source_post_id)?.source_post_id;
+                          const evidencePostId = event.evidence.find(
+                            (item) => item.root_post_id || item.source_post_id,
+                          );
+                          const threadPostId = evidencePostId?.root_post_id ?? evidencePostId?.source_post_id;
                           const excluded = event.evidence.some((item) => item.source_status === "excluded");
                           return (
                             <article key={event.id} className="rounded-2xl border border-outline-variant bg-white p-4">
@@ -1105,8 +1108,8 @@ export function WorldCharacterAutonomySetupClient({
                                   timeStyle: "short",
                                 }).format(new Date(event.occurred_at))}
                               </p>
-                              {sourcePostId && !excluded ? (
-                                <Link className="mt-2 inline-block text-sm font-bold text-primary underline" href={worldPostDetailRoute(worldId, sourcePostId)}>
+                              {threadPostId && !excluded ? (
+                                <Link className="mt-2 inline-block text-sm font-bold text-primary underline" href={worldPostDetailRoute(worldId, threadPostId)}>
                                   근거 게시글 보기
                                 </Link>
                               ) : null}

@@ -800,13 +800,13 @@
     {
       "markers": {
         "pgvector": [
-          478
+          483
         ]
       },
       "owner": "ER1-ER2",
       "path": "backend/app/services/character_lore.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "dd8fea9a86c4bf20a66580b855997a3f4599837548d94f20b7967dc6c26e98e2",
+      "source_sha256": "8f6558b3da68bb9f01b3df435efb6c8910aab8aed36e07613d130cdc1a3cdf06",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
@@ -962,7 +962,7 @@
       "owner": "ER1-ER2",
       "path": "backend/app/services/relationship_graph_read.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "13a8fe2aae4de1ea9c17411dd00002c8db2b5f57e4dc4e0b2ddf34ebc096b980",
+      "source_sha256": "21b1b4ea56bb62f288befb33c569a31972f92db9d367075b457dcf5c6ee6e310",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {

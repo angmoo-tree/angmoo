@@ -219,7 +219,14 @@ export function RelationshipGraphClient({
                   <article key={event.event_id} className="rounded-2xl border border-outline-variant p-4">
                     <p className="font-bold">{event.event_type}</p>
                     <p className="mt-1 text-xs text-on-surface-variant">{new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(event.occurred_at))}</p>
-                    {event.source_post_id ? <Link className="mt-2 inline-block text-sm font-bold text-primary underline" href={worldPostDetailRoute(worldId, event.source_post_id)}>근거 게시글 보기</Link> : null}
+                    {event.root_post_id || event.source_post_id ? (
+                      <Link
+                        className="mt-2 inline-block text-sm font-bold text-primary underline"
+                        href={worldPostDetailRoute(worldId, event.root_post_id ?? event.source_post_id!)}
+                      >
+                        근거 게시글 보기
+                      </Link>
+                    ) : null}
                   </article>
                 ))}
               </div>

@@ -30,14 +30,16 @@ from app.domains.relationships.graph_read.repository import (
     RelationshipRevalidationFacts,
 )
 from app.domains.relationships.graph_read.use_case import GraphProjectionCounts
-from app.integrations.neo4j import GraphClientError
 from app.integrations.ladybug_projection import LadybugRelationshipProjection
 from app.domains.relationships.ports.projection import (
     RelationshipProjectionBackendError,
 )
 from app.integrations.relationship_graph_read import RelationshipGraphRepository
 from app.services.graph_projection_metrics import graph_metrics
-from app.services.graph_projection_runtime import graph_client_from_settings
+from app.services.graph_projection_runtime import (
+    borrow_process_graph_client,
+    graph_client_from_settings,
+)
 
 
 class _BackendErrorMappingRepository:
@@ -85,6 +87,7 @@ class SqlAlchemyRelationshipGraphReadGateway:
         self._config = config
         self._graph_provider = graph_provider
         self._client = None
+        self._client_owned = False
 
     def owner_access(
         self,
@@ -158,12 +161,24 @@ class SqlAlchemyRelationshipGraphReadGateway:
         if self._graph_provider == "ladybug":
             if not self._config.ladybug_graph_preview_enabled:
                 raise GraphReadBackendError("ladybug_preview_disabled")
+            shared = borrow_process_graph_client(self._config)
+            if shared is not None:
+                try:
+                    shared.verify_connectivity()
+                except RelationshipProjectionBackendError as exc:
+                    raise GraphReadBackendError(exc.error_class) from exc
+                self._client = shared
+                self._client_owned = False
+                return _BackendErrorMappingRepository(
+                    RelationshipGraphRepository(shared)
+                )
             projection = None
             try:
                 projection = LadybugRelationshipProjection(
                     database_root=self._config.ladybug_database_root
                 )
                 self._client = projection
+                self._client_owned = True
                 projection.verify_connectivity()
             except RelationshipProjectionBackendError as exc:
                 if projection is not None:
@@ -178,8 +193,9 @@ class SqlAlchemyRelationshipGraphReadGateway:
         try:
             client = graph_client_from_settings(self._config)
             self._client = client
+            self._client_owned = True
             client.verify_connectivity()
-        except GraphClientError as exc:
+        except RelationshipProjectionBackendError as exc:
             if client is not None:
                 client.close()
             self._client = None
@@ -188,8 +204,10 @@ class SqlAlchemyRelationshipGraphReadGateway:
 
     def close_graph_repository(self) -> None:
         if self._client is not None:
-            self._client.close()
+            if self._client_owned:
+                self._client.close()
             self._client = None
+            self._client_owned = False
 
     def record_fallback(self, *, reason: str) -> None:
         graph_metrics.increment("graph_query_fallback_total", reason=reason)
@@ -413,6 +431,7 @@ class SqlAlchemyRelationshipGraphReadGateway:
                 posts.append(
                     EvidencePostFacts(
                         post_id=post_id,
+                        root_post_id=evidence_row.root_post_id,
                         source_post_id=evidence_row.source_post_id,
                         exists=post is not None,
                         world_id=post.world_id if post is not None else None,

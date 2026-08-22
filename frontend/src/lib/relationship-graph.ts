@@ -39,6 +39,7 @@ export type RelationshipGraphEvidence = {
   occurred_at: string;
   actor_world_character_id: string;
   target_world_character_id: string | null;
+  root_post_id: string | null;
   source_post_id: string | null;
 };
 

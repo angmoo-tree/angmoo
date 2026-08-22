@@ -287,7 +287,7 @@
       "owner": "ER4",
       "path": "backend/app/services/graph_projection_runtime.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "ae826e73a6019a14ab4d1a5d7f5cf14c32a0bbe574c7c76900b0e52d778dce6b",
+      "source_sha256": "ec32da416aed7b5ef9c1cc895d7be47261843289d94e6db06afc85e24a826032",
       "transition_pr": "ER4 PR J"
     },
     {

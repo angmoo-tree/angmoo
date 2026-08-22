@@ -55,7 +55,12 @@ MAX_DOCX_COMPRESSION_RATIO = 100
 MAX_PDF_PAGES = 200
 MAX_PDF_OBJECTS = 20_000
 MAX_PARSED_TEXT_CHARS = 100_000
-LORE_PARSER_TIMEOUT_SECONDS = 8.0
+# Windows uses the spawn multiprocessing start method and must import the
+# application module graph in the isolated child.  Real-time antivirus scanning
+# can make that startup alone exceed the POSIX parser budget even for a tiny,
+# valid document.  Keep the parser isolated and bounded while allowing the
+# measured Windows startup overhead.
+LORE_PARSER_TIMEOUT_SECONDS = 15.0 if os.name == "nt" else 8.0
 LORE_PARSER_MEMORY_BYTES = 512 * 1024 * 1024
 LORE_PARSER_CPU_SECONDS = 6
 MAX_LORE_SOURCES_PER_CHARACTER = 1

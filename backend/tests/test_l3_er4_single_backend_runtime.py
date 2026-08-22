@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 from datetime import UTC, datetime
 from pathlib import Path
+import threading
 from types import SimpleNamespace
 
 import pytest
@@ -31,6 +32,7 @@ from app.runtime.single_backend_components import (
     SingleBackendRuntimeComponents,
     SingleBackendRuntimeStartupError,
 )
+from app.services.graph_projection_runtime import borrow_process_graph_client
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -287,6 +289,59 @@ def test_fastapi_lifespan_owns_component_start_and_stop(monkeypatch) -> None:
     asyncio.run(scenario())
 
     assert calls == ["start", "stop"]
+
+
+def test_projector_publishes_process_graph_client_for_its_exact_lifetime(
+    monkeypatch,
+) -> None:
+    from app.compatibility.runtime import single_backend_workers
+    from app.core.config import settings
+
+    calls: list[str] = []
+
+    class FakeClient:
+        def verify_connectivity(self) -> None:
+            calls.append("verify")
+
+        def bootstrap(self) -> None:
+            calls.append("bootstrap")
+
+        def close(self) -> None:
+            calls.append("close")
+
+    client = FakeClient()
+
+    class FakeWorker:
+        def __init__(self, **kwargs) -> None:
+            assert kwargs["store"] is client
+            calls.append("worker")
+
+        def run_loop(self, **_kwargs) -> None:
+            assert borrow_process_graph_client(settings) is client
+            calls.append("run")
+
+    monkeypatch.setattr(settings, "LOCAL_RUNTIME_COMPONENT_MODE", "in_process")
+    monkeypatch.setattr(settings, "LADYBUG_GRAPH_PREVIEW_ENABLED", True)
+    monkeypatch.setattr(
+        single_backend_workers,
+        "graph_client_from_settings",
+        lambda: client,
+    )
+    monkeypatch.setattr(
+        single_backend_workers,
+        "GraphProjectionWorker",
+        FakeWorker,
+    )
+
+    states: list[str] = []
+    single_backend_workers.run_legacy_projector_component(
+        threading.Event(),
+        states.append,
+    )
+
+    assert states == ["ready"]
+    assert calls == ["verify", "bootstrap", "worker", "run", "close"]
+    assert borrow_process_graph_client(settings) is None
 
 
 def test_in_process_compose_override_parks_external_workers() -> None:
