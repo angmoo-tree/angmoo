@@ -181,6 +181,26 @@ jobs:
           }
           if (-not (Test-Path $endpoint)) { throw 'Installed sidecar endpoint was not created' }
           if (-not (Test-Path $database)) { throw 'Installed SQLite canonical database was not created' }
+          $endpointText = Get-Content -LiteralPath $endpoint -Raw
+          $endpointMetadata = $endpointText | ConvertFrom-Json
+          if ($endpointMetadata.schema_version -ne 1) {
+            throw 'Installed sidecar endpoint schema version is invalid'
+          }
+          if ([int]$endpointMetadata.logical_sidecar_pid -le 0) {
+            throw 'Installed sidecar endpoint logical PID is invalid'
+          }
+          if ($endpointMetadata.host -ne '127.0.0.1') {
+            throw 'Installed sidecar endpoint host is not loopback'
+          }
+          if ([int]$endpointMetadata.dynamic_port -le 0) {
+            throw 'Installed sidecar endpoint dynamic port is invalid'
+          }
+          if ([string]::IsNullOrWhiteSpace([string]$endpointMetadata.generation)) {
+            throw 'Installed sidecar endpoint generation is missing'
+          }
+          if ($endpointText -match '(?i)launch_token|app_secret|api[_-]?key|credential') {
+            throw 'Installed sidecar endpoint leaked secret-bearing metadata'
+          }
           Write-Host "Installed sidecar endpoint and SQLite canonical database are ready"
           $forbidden = @(Get-Process -ErrorAction SilentlyContinue |
             Where-Object {

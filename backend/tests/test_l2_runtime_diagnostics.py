@@ -16,9 +16,13 @@ from app.domains.runtime.infrastructure.sqlalchemy_application_runtime_probe imp
     RUNTIME_MIGRATION_HEAD,
     SqlAlchemyApplicationRuntimeProbe,
     _find_opaque_id,
+    _graph_backend_available,
     _lane_result_code,
     _provider_call_count,
     _provider_failure_class,
+)
+from app.domains.runtime.infrastructure import (
+    sqlalchemy_application_runtime_probe as runtime_probe_module,
 )
 
 
@@ -194,3 +198,56 @@ def test_application_probe_degrades_when_alembic_metadata_is_missing() -> None:
         )
         # The failed metadata query must not poison the request-scoped session.
         assert session.execute(text("SELECT 1")).scalar_one() == 1
+
+
+def test_application_probe_reads_embedded_sqlite_schema_lineage(monkeypatch) -> None:
+    engine = create_engine("sqlite+pysqlite:///:memory:")
+    monkeypatch.setattr(
+        runtime_probe_module.settings,
+        "DATABASE_URL",
+        "sqlite+pysqlite:///:memory:",
+    )
+
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                """
+                CREATE TABLE angmoo_schema_version (
+                    singleton_key INTEGER PRIMARY KEY,
+                    source_revision TEXT NOT NULL
+                )
+                """
+            )
+        )
+        connection.execute(
+            text(
+                """
+                INSERT INTO angmoo_schema_version (
+                    singleton_key, source_revision
+                ) VALUES (1, :revision)
+                """
+            ),
+            {"revision": RUNTIME_MIGRATION_HEAD},
+        )
+
+    with Session(engine) as session:
+        migration = SqlAlchemyApplicationRuntimeProbe(session)._migration_status()
+
+    assert migration.state is runtime.RuntimeComponentState.READY
+    assert migration.current_revision == RUNTIME_MIGRATION_HEAD
+    assert migration.reason_code is None
+
+
+def test_embedded_ladybug_uses_in_process_health_signal(monkeypatch) -> None:
+    monkeypatch.setattr(
+        runtime_probe_module.settings,
+        "LADYBUG_GRAPH_PREVIEW_ENABLED",
+        True,
+    )
+    monkeypatch.setattr(
+        runtime_probe_module,
+        "_neo4j_available",
+        lambda: False,
+    )
+
+    assert _graph_backend_available() is True

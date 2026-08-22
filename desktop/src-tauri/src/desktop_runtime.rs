@@ -89,11 +89,35 @@ impl Default for DesktopRuntimeState {
     }
 }
 
-#[derive(Debug, Deserialize)]
-struct ReadyEvent {
-    event: String,
+#[derive(Debug, Deserialize, PartialEq, Eq)]
+struct EndpointMetadata {
+    schema_version: u8,
+    logical_sidecar_pid: u32,
     host: String,
-    port: u16,
+    dynamic_port: u16,
+    generation: String,
+}
+
+fn read_endpoint_metadata(
+    endpoint_path: &std::path::Path,
+    expected_generation: &str,
+) -> Result<Option<EndpointMetadata>, &'static str> {
+    let contents = match fs::read_to_string(endpoint_path) {
+        Ok(contents) => contents,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+        Err(_) => return Err("desktop_sidecar_endpoint_unavailable"),
+    };
+    let endpoint: EndpointMetadata =
+        serde_json::from_str(&contents).map_err(|_| "desktop_sidecar_endpoint_invalid")?;
+    if endpoint.schema_version != 1
+        || endpoint.logical_sidecar_pid == 0
+        || endpoint.host != "127.0.0.1"
+        || endpoint.dynamic_port == 0
+        || endpoint.generation != expected_generation
+    {
+        return Err("desktop_sidecar_endpoint_invalid");
+    }
+    Ok(Some(endpoint))
 }
 
 pub fn status(state: &DesktopRuntimeState) -> Result<DesktopRuntimeStatus, String> {
@@ -181,6 +205,7 @@ pub fn start(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> 
     };
 
     let token = Uuid::new_v4().simple().to_string();
+    let launch_id = Uuid::new_v4().simple().to_string();
     let runtime_root = app
         .path()
         .app_local_data_dir()
@@ -198,6 +223,8 @@ pub fn start(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> 
             &parent_pid,
             "--runtime-root",
             &runtime_root_argument,
+            "--launch-id",
+            &launch_id,
         ])
         .env("DESKTOP_LAUNCH_TOKEN", &token)
         .env("DESKTOP_ALLOWED_ORIGIN", DESKTOP_ORIGIN)
@@ -213,38 +240,35 @@ pub fn start(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> 
             .lock()
             .map_err(|_| "desktop_runtime_state_poisoned")?;
         runtime.child = Some(child);
-        runtime.runtime_root = Some(runtime_root);
+        runtime.runtime_root = Some(runtime_root.clone());
     }
+    let endpoint_path = runtime_root.join("sidecar.endpoint.json");
     let app_handle = app.clone();
     tauri::async_runtime::spawn(async move {
         let managed = app_handle.state::<DesktopRuntimeState>();
-        let mut ready: Option<ReadyEvent> = None;
-        while let Some(event) = receiver.recv().await {
-            match event {
-                CommandEvent::Stdout(bytes) => {
-                    let line = String::from_utf8_lossy(&bytes);
-                    if let Ok(candidate) = serde_json::from_str::<ReadyEvent>(line.trim())
-                        && candidate.event == "ready"
-                    {
-                        ready = Some(candidate);
-                        break;
-                    }
+        let mut ready: Option<EndpointMetadata> = None;
+        for _ in 0..120 {
+            drain_sidecar_events(&mut receiver);
+            match read_endpoint_metadata(&endpoint_path, &launch_id) {
+                Ok(Some(endpoint)) => {
+                    ready = Some(endpoint);
+                    break;
                 }
-                CommandEvent::Terminated(_) => break,
-                _ => {}
+                Ok(None) => {}
+                Err(code) => {
+                    mark_crashed(&managed, generation, code);
+                    return;
+                }
             }
+            std::thread::sleep(Duration::from_millis(100));
         }
         let Some(ready) = ready else {
             mark_crashed(&managed, generation, "desktop_sidecar_startup_failed");
             return;
         };
-        if ready.host != "127.0.0.1" || ready.port == 0 {
-            mark_crashed(&managed, generation, "desktop_sidecar_endpoint_invalid");
-            return;
-        }
         let mut healthy = false;
         for _ in 0..60 {
-            if http_request(ready.port, "GET", "/health", &token)
+            if http_request(ready.dynamic_port, "GET", "/health", &token)
                 .is_ok_and(|response| response_is_ok(&response))
             {
                 healthy = true;
@@ -259,7 +283,7 @@ pub fn start(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> 
         if let Ok(mut runtime) = managed.0.lock()
             && runtime.generation == generation
         {
-            runtime.status = DesktopRuntimeStatus::ready(ready.port, token.clone());
+            runtime.status = DesktopRuntimeStatus::ready(ready.dynamic_port, token.clone());
         }
 
         let mut consecutive_health_failures = 0_u8;
@@ -278,7 +302,7 @@ pub fn start(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> 
             // the pipe cannot fill, but use the authenticated health endpoint as the
             // runtime liveness contract instead of the wrapper's termination event.
             drain_sidecar_events(&mut receiver);
-            if http_request(ready.port, "GET", "/health", &token)
+            if http_request(ready.dynamic_port, "GET", "/health", &token)
                 .is_ok_and(|response| response_is_ok(&response))
             {
                 consecutive_health_failures = 0;
@@ -417,5 +441,29 @@ mod tests {
         assert!(!health_failure_is_terminal(1));
         assert!(!health_failure_is_terminal(HEALTH_FAILURE_LIMIT - 1));
         assert!(health_failure_is_terminal(HEALTH_FAILURE_LIMIT));
+    }
+
+    #[test]
+    fn endpoint_metadata_requires_current_generation_and_loopback() {
+        let root =
+            std::env::temp_dir().join(format!("angmoo-er6-endpoint-{}", Uuid::new_v4().simple()));
+        fs::create_dir_all(&root).unwrap();
+        let path = root.join("sidecar.endpoint.json");
+        fs::write(
+            &path,
+            r#"{"schema_version":1,"logical_sidecar_pid":42,"host":"127.0.0.1","dynamic_port":49152,"generation":"launch-a"}"#,
+        )
+        .unwrap();
+
+        let endpoint = read_endpoint_metadata(&path, "launch-a").unwrap().unwrap();
+        assert_eq!(endpoint.dynamic_port, 49152);
+        assert_eq!(
+            read_endpoint_metadata(&path, "launch-b"),
+            Err("desktop_sidecar_endpoint_invalid")
+        );
+        let contents = fs::read_to_string(&path).unwrap();
+        assert!(!contents.contains("launch_token"));
+        assert!(!contents.contains("APP_SECRET"));
+        fs::remove_dir_all(root).unwrap();
     }
 }

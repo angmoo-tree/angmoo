@@ -160,14 +160,20 @@ def test_desktop_origin_is_allowed_only_with_process_launch_token() -> None:
 
 
 def test_runtime_metadata_never_persists_launch_token(tmp_path: Path) -> None:
-    ownership = RuntimeOwnership(tmp_path)
+    ownership = RuntimeOwnership(tmp_path, launch_id="launch-fixture")
     ownership.acquire()
     ownership.publish_endpoint(49152)
     lock = json.loads(ownership.lock_path.read_text(encoding="utf-8"))
     endpoint = json.loads(ownership.endpoint_path.read_text(encoding="utf-8"))
-    assert lock == {"schema_version": 1, "pid": ownership.pid}
+    assert lock == {
+        "schema_version": 1,
+        "pid": ownership.pid,
+        "generation": "launch-fixture",
+    }
     assert endpoint["host"] == "127.0.0.1"
-    assert endpoint["port"] == 49152
+    assert endpoint["dynamic_port"] == 49152
+    assert endpoint["logical_sidecar_pid"] == ownership.pid
+    assert endpoint["generation"] == "launch-fixture"
     assert TOKEN not in ownership.lock_path.read_text(encoding="utf-8")
     assert TOKEN not in ownership.endpoint_path.read_text(encoding="utf-8")
     ownership.release()
@@ -178,9 +184,9 @@ def test_runtime_metadata_never_persists_launch_token(tmp_path: Path) -> None:
 def test_runtime_ownership_rejects_duplicate_and_replaces_stale_owner(
     tmp_path: Path,
 ) -> None:
-    ownership = RuntimeOwnership(tmp_path)
+    ownership = RuntimeOwnership(tmp_path, launch_id="launch-a")
     ownership.acquire()
-    duplicate = RuntimeOwnership(tmp_path)
+    duplicate = RuntimeOwnership(tmp_path, launch_id="launch-b")
     with pytest.raises(RuntimeError, match="desktop_sidecar_already_owned"):
         duplicate.acquire()
     ownership.release()
@@ -190,7 +196,7 @@ def test_runtime_ownership_rejects_duplicate_and_replaces_stale_owner(
         encoding="utf-8",
     )
     ownership.endpoint_path.write_text("{}", encoding="utf-8")
-    replacement = RuntimeOwnership(tmp_path)
+    replacement = RuntimeOwnership(tmp_path, launch_id="launch-c")
     replacement.acquire()
     assert json.loads(replacement.lock_path.read_text(encoding="utf-8"))["pid"] == replacement.pid
     assert not replacement.endpoint_path.exists()
@@ -200,7 +206,7 @@ def test_runtime_ownership_rejects_duplicate_and_replaces_stale_owner(
 def test_runtime_release_cleans_own_endpoint_even_when_lock_was_removed(
     tmp_path: Path,
 ) -> None:
-    ownership = RuntimeOwnership(tmp_path)
+    ownership = RuntimeOwnership(tmp_path, launch_id="launch-a")
     ownership.acquire()
     ownership.publish_endpoint(49152)
     ownership.lock_path.unlink()

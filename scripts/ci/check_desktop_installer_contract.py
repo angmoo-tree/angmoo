@@ -65,6 +65,22 @@ def main() -> int:
         "runtime\\sidecar.endpoint.json",
     ):
         _require(required in workflow, f"installer workflow contract missing: {required}")
+
+    sidecar_build = (ROOT / "desktop" / "scripts" / "build-sidecar.ps1").read_text(
+        encoding="utf-8"
+    )
+    _require("--noconsole" in sidecar_build, "packaged sidecar console must be hidden")
+    launcher = (
+        ROOT / "desktop" / "src-tauri" / "src" / "desktop_runtime.rs"
+    ).read_text(encoding="utf-8")
+    for required in (
+        "sidecar.endpoint.json",
+        "logical_sidecar_pid",
+        "dynamic_port",
+        "expected_generation",
+        'http_request(ready.dynamic_port, "GET", "/health", &token)',
+    ):
+        _require(required in launcher, f"no-console readiness contract missing: {required}")
     print("desktop-installer-contract: PASS")
     return 0
 

@@ -51,8 +51,19 @@ class SqlAlchemyApplicationRuntimeProbe:
         migration = self._migration_status()
         owner = self._owner_status()
         scheduler = self._scheduler_status()
-        projector, neo4j_state = self._projector_status()
+        projector, graph_state = self._projector_status()
         activity, provider_usage = self._activity_status(owner.owner_user_id)
+
+        persistence_name = (
+            "sqlite"
+            if settings.database_url.startswith("sqlite")
+            else "postgresql"
+        )
+        graph_name = (
+            "ladybugdb"
+            if settings.ladybug_graph_preview_enabled
+            else "neo4j"
+        )
 
         components = (
             RuntimeComponentStatus(
@@ -61,22 +72,22 @@ class SqlAlchemyApplicationRuntimeProbe:
                 version=_runtime_version(),
                 dependencies=(
                     RuntimeDependencyStatus(
-                        name="postgresql",
+                        name=persistence_name,
                         state=RuntimeComponentState.READY,
                     ),
                 ),
             ),
             RuntimeComponentStatus(
-                name="postgresql",
+                name=persistence_name,
                 state=RuntimeComponentState.READY,
                 reason_code=migration.reason_code,
             ),
             RuntimeComponentStatus(
-                name="neo4j",
-                state=neo4j_state,
+                name=graph_name,
+                state=graph_state,
                 reason_code=(
                     RuntimeDiagnosticCode.GRAPH_DEGRADED
-                    if neo4j_state is RuntimeComponentState.DEGRADED
+                    if graph_state is RuntimeComponentState.DEGRADED
                     else None
                 ),
             ),
@@ -86,7 +97,7 @@ class SqlAlchemyApplicationRuntimeProbe:
             migration=migration,
             scheduler=scheduler,
             projector=projector,
-            neo4j_state=neo4j_state,
+            graph_state=graph_state,
         )
         return ApplicationRuntimeStatus(
             installation_state=installation_state,
@@ -115,10 +126,14 @@ class SqlAlchemyApplicationRuntimeProbe:
         )
 
     def _migration_status(self) -> MigrationRuntimeStatus:
+        revision_query = (
+            "SELECT source_revision FROM angmoo_schema_version "
+            "WHERE singleton_key = 1"
+            if settings.database_url.startswith("sqlite")
+            else "SELECT version_num FROM alembic_version"
+        )
         try:
-            current = self._db.execute(
-                text("SELECT version_num FROM alembic_version")
-            ).scalar()
+            current = self._db.execute(text(revision_query)).scalar()
         except SQLAlchemyError:
             # A first-run or synthetic preview database can exist before
             # Alembic has created its metadata table. Runtime diagnostics must
@@ -293,11 +308,11 @@ class SqlAlchemyApplicationRuntimeProbe:
 
         if not settings.graph_projection_enabled:
             projector_state = RuntimeComponentState.NOT_AVAILABLE
-            neo4j_state = RuntimeComponentState.NOT_AVAILABLE
+            graph_state = RuntimeComponentState.NOT_AVAILABLE
         else:
-            neo4j_available = _neo4j_available()
+            graph_available = _graph_backend_available()
             degraded = (
-                not neo4j_available
+                not graph_available
                 or failed_count > 0
                 or dead_letter_count > 0
             )
@@ -306,9 +321,9 @@ class SqlAlchemyApplicationRuntimeProbe:
                 if degraded
                 else RuntimeComponentState.READY
             )
-            neo4j_state = (
+            graph_state = (
                 RuntimeComponentState.READY
-                if neo4j_available
+                if graph_available
                 else RuntimeComponentState.DEGRADED
             )
         return (
@@ -328,7 +343,7 @@ class SqlAlchemyApplicationRuntimeProbe:
                     else None
                 ),
             ),
-            neo4j_state,
+            graph_state,
         )
 
     def _activity_status(
@@ -406,7 +421,7 @@ def _installation_state(
     migration: MigrationRuntimeStatus,
     scheduler: SchedulerRuntimeStatus,
     projector: ProjectorRuntimeStatus,
-    neo4j_state: RuntimeComponentState,
+    graph_state: RuntimeComponentState,
 ) -> InstallationState:
     if owner.bootstrap_state == "recovery_required":
         return InstallationState.RECOVERY_REQUIRED
@@ -421,9 +436,19 @@ def _installation_state(
         return InstallationState.DEGRADED
     if projector.state is RuntimeComponentState.DEGRADED:
         return InstallationState.DEGRADED
-    if neo4j_state is RuntimeComponentState.DEGRADED:
+    if graph_state is RuntimeComponentState.DEGRADED:
         return InstallationState.DEGRADED
     return InstallationState.READY
+
+
+def _graph_backend_available() -> bool:
+    # LadybugDB is embedded in the single backend process. Its in-process
+    # projector observation and durable outbox errors are the authoritative
+    # runtime failure signals; probing it by opening a second writer would
+    # contend with the process-owned writer lock.
+    if settings.ladybug_graph_preview_enabled:
+        return True
+    return _neo4j_available()
 
 
 def _neo4j_available() -> bool:

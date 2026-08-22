@@ -382,6 +382,11 @@
       "module": "app.api.v1.routes.worlds",
       "endpoint": "get_world"
     },
+    "GET /api/v1/worlds/{world_id}/characters": {
+      "access": "owner-only",
+      "module": "app.domains.world_characters.api.routes",
+      "endpoint": "read_studio_world_characters"
+    },
     "GET /api/v1/worlds/{world_id}/characters/{character_id}": {
       "access": "owner-only",
       "module": "app.api.v1.routes.worlds",

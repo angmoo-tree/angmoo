@@ -42,11 +42,12 @@ def _process_alive(pid: int) -> bool:
 
 
 class RuntimeOwnership:
-    def __init__(self, runtime_root: Path) -> None:
+    def __init__(self, runtime_root: Path, *, launch_id: str = "test-launch") -> None:
         self.runtime_root = runtime_root
         self.lock_path = runtime_root / "sidecar.owner.json"
         self.endpoint_path = runtime_root / "sidecar.endpoint.json"
         self.pid = os.getpid()
+        self.launch_id = launch_id
 
     def acquire(self) -> None:
         self.runtime_root.mkdir(parents=True, exist_ok=True)
@@ -60,17 +61,26 @@ class RuntimeOwnership:
                 raise RuntimeError("desktop_sidecar_already_owned")
             self.lock_path.unlink(missing_ok=True)
             self.endpoint_path.unlink(missing_ok=True)
-        payload = {"schema_version": 1, "pid": self.pid}
-        self.lock_path.write_text(json.dumps(payload), encoding="utf-8")
+        payload = {
+            "schema_version": 1,
+            "pid": self.pid,
+            "generation": self.launch_id,
+        }
+        temporary = self.lock_path.with_suffix(".tmp")
+        temporary.write_text(json.dumps(payload), encoding="utf-8")
+        temporary.replace(self.lock_path)
 
     def publish_endpoint(self, port: int) -> None:
         payload = {
             "schema_version": 1,
-            "pid": self.pid,
+            "logical_sidecar_pid": self.pid,
             "host": "127.0.0.1",
-            "port": port,
+            "dynamic_port": port,
+            "generation": self.launch_id,
         }
-        self.endpoint_path.write_text(json.dumps(payload), encoding="utf-8")
+        temporary = self.endpoint_path.with_suffix(".tmp")
+        temporary.write_text(json.dumps(payload), encoding="utf-8")
+        temporary.replace(self.endpoint_path)
 
     def release(self) -> None:
         try:
@@ -86,7 +96,10 @@ class RuntimeOwnership:
             )
         except (OSError, json.JSONDecodeError):
             current_endpoint = {}
-        if current_endpoint.get("pid") == self.pid:
+        if (
+            current_endpoint.get("logical_sidecar_pid") == self.pid
+            and current_endpoint.get("generation") == self.launch_id
+        ):
             self.endpoint_path.unlink(missing_ok=True)
 
 
@@ -94,6 +107,7 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Angmoo packaged desktop sidecar")
     parser.add_argument("--parent-pid", type=int, required=True)
     parser.add_argument("--runtime-root", type=Path, required=True)
+    parser.add_argument("--launch-id", required=True)
     return parser.parse_args()
 
 
@@ -240,7 +254,10 @@ def main() -> int:
     args = _parse_args()
     token = _required_environment("DESKTOP_LAUNCH_TOKEN")
     origin = _required_environment("DESKTOP_ALLOWED_ORIGIN")
-    ownership = RuntimeOwnership(args.runtime_root.resolve())
+    ownership = RuntimeOwnership(
+        args.runtime_root.resolve(),
+        launch_id=args.launch_id,
+    )
     ownership.acquire()
     data_root, generation = _configure_embedded_release_candidate(
         ownership.runtime_root
@@ -275,7 +292,7 @@ def main() -> int:
         runtime_app,
         host="127.0.0.1",
         port=port,
-        log_level="info",
+        log_config=None,
         access_log=False,
     )
     server = uvicorn.Server(config)
@@ -291,17 +308,6 @@ def main() -> int:
         return 0
 
     ownership.publish_endpoint(port)
-    print(
-        json.dumps(
-            {
-                "event": "ready",
-                "host": "127.0.0.1",
-                "port": port,
-                "pid": os.getpid(),
-            }
-        ),
-        flush=True,
-    )
     watcher = threading.Thread(
         target=_watch_parent,
         args=(args.parent_pid, server),
@@ -321,9 +327,10 @@ if __name__ == "__main__":
     try:
         raise SystemExit(main())
     except Exception as exc:  # noqa: BLE001 - process boundary must emit one code
-        print(
-            json.dumps({"event": "fatal", "code": str(exc)[:120]}),
-            file=sys.stderr,
-            flush=True,
-        )
+        if sys.stderr is not None:
+            print(
+                json.dumps({"event": "fatal", "code": str(exc)[:120]}),
+                file=sys.stderr,
+                flush=True,
+            )
         raise SystemExit(1) from None
