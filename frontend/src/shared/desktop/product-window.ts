@@ -43,6 +43,13 @@ declare global {
 }
 
 export const DESKTOP_ROUTE_EVENT = "angmoo:desktop-route";
+const DESKTOP_WINDOW_KIND_QUERY = "__angmoo_window_kind";
+const DESKTOP_WINDOW_ROUTE_QUERY = "__angmoo_window_route";
+const DESKTOP_WINDOW_KINDS = new Set<AngmooDesktopWindowKind>([
+  "phone",
+  "studio",
+  "relationship-graph",
+]);
 
 export function isTauriDesktopRuntime() {
   return (
@@ -52,13 +59,48 @@ export function isTauriDesktopRuntime() {
 }
 
 export function getDesktopWindowState(): AngmooDesktopWindowState | null {
-  if (typeof window === "undefined" || !isTauriDesktopRuntime()) return null;
-  return (
-    window.__ANGMOO_DESKTOP_WINDOW__ ?? {
-      kind: "phone",
-      route: `${window.location.pathname}${window.location.search}`,
-    }
-  );
+  if (typeof window === "undefined") return null;
+  if (window.__ANGMOO_DESKTOP_WINDOW__) {
+    return window.__ANGMOO_DESKTOP_WINDOW__;
+  }
+  const bootstrap = desktopWindowStateFromBootstrapQuery();
+  if (bootstrap) return bootstrap;
+  if (!isTauriDesktopRuntime()) return null;
+  return {
+    kind: "phone",
+    route: `${window.location.pathname}${window.location.search}`,
+  };
+}
+
+function desktopWindowStateFromBootstrapQuery(): AngmooDesktopWindowState | null {
+  const params = new URLSearchParams(window.location.search);
+  const kind = params.get(DESKTOP_WINDOW_KIND_QUERY);
+  const route = params.get(DESKTOP_WINDOW_ROUTE_QUERY);
+  if (!kind || !DESKTOP_WINDOW_KINDS.has(kind as AngmooDesktopWindowKind) || !route) {
+    return null;
+  }
+  try {
+    return {
+      kind: kind as AngmooDesktopWindowKind,
+      route: normalizeInternalRoute(route),
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function consumeDesktopWindowBootstrapRoute(
+  state: AngmooDesktopWindowState,
+) {
+  if (typeof window === "undefined") return;
+  const params = new URLSearchParams(window.location.search);
+  if (
+    !params.has(DESKTOP_WINDOW_KIND_QUERY) &&
+    !params.has(DESKTOP_WINDOW_ROUTE_QUERY)
+  ) {
+    return;
+  }
+  window.history.replaceState(null, "", state.route);
 }
 
 export function desktopWindowKindForRoute(

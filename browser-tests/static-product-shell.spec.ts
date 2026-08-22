@@ -222,6 +222,198 @@ test("static installed relationship route always requests the Ladybug provider",
   expect(requestedProviders).toEqual(["ladybug"]);
 });
 
+test("installed wide-window bootstrap restores the exact relationship route", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const desktop = window as unknown as {
+      __TAURI__: {
+        core: { invoke: (command: string) => Promise<unknown> };
+      };
+    };
+    desktop.__TAURI__ = {
+      core: {
+        invoke: async (command) =>
+          command === "desktop_runtime_status"
+            ? {
+                phase: "ready",
+                apiBaseUrl: "http://127.0.0.1:8080",
+                graphProvider: "ladybug",
+                launchToken: "static-route-probe-token-000000000000",
+              }
+            : undefined,
+      },
+    };
+  });
+  await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname.endsWith("/relationship-graph")) {
+      expect(url.searchParams.get("provider")).toBe("ladybug");
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          world_id: "world-static-probe",
+          center_world_character_id: "wc-static-owner",
+          nodes: [
+            {
+              world_character_id: "wc-static-owner",
+              character_id: "character-static-owner",
+              display_name: "Static Owner Parrot",
+              is_center: true,
+            },
+          ],
+          edges: [],
+          evidence: [],
+          meta: {
+            template: "neighborhood",
+            source: "ladybug",
+            graph_status: "healthy",
+            truncated: false,
+            projection_lag_seconds: 0,
+            revalidated_node_count: 1,
+            revalidated_edge_count: 0,
+            fallback_reason: null,
+          },
+        },
+        status: 200,
+      });
+      return;
+    }
+    await route.fallback();
+  });
+
+  const relationshipRoute =
+    "/characters/character-static-owner/worlds/world-static-probe/relationship-graph?provider=ladybug";
+  const bootstrap = new URLSearchParams({
+    __angmoo_window_kind: "relationship-graph",
+    __angmoo_window_route: relationshipRoute,
+  });
+  await page.goto(`/?${bootstrap.toString()}`);
+
+  await expect(page.locator("body")).toHaveAttribute(
+    "data-angmoo-desktop-window",
+    "relationship-graph",
+  );
+  await expect(page.getByRole("heading", { name: "World 관계망" })).toBeVisible();
+  await expect(page.getByText("관계망 최신 상태")).toBeVisible();
+  await expect(page.getByText("LOCAL DEVICE")).toHaveCount(0);
+  await expect(page).toHaveURL(new RegExp(`${relationshipRoute.replace("?", "\\?")}$`));
+});
+
+test("installed wide window keeps its route while runtime auth becomes ready", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const desktop = window as unknown as {
+      __ANGMOO_RUNTIME_CONFIG__?: unknown;
+      __TAURI__: {
+        core: { invoke: (command: string) => Promise<unknown> };
+      };
+    };
+    delete desktop.__ANGMOO_RUNTIME_CONFIG__;
+    desktop.__TAURI__ = {
+      core: {
+        invoke: async (command) => {
+          if (command !== "desktop_runtime_status") return undefined;
+          await new Promise((resolve) => window.setTimeout(resolve, 120));
+          return {
+            phase: "ready",
+            apiBaseUrl: "http://127.0.0.1:8080",
+            graphProvider: "ladybug",
+            launchToken: "static-route-probe-token-000000000000",
+          };
+        },
+      },
+    };
+  });
+  await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname.endsWith("/relationship-graph")) {
+      expect(url.searchParams.get("provider")).toBe("ladybug");
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          world_id: "world-static-probe",
+          center_world_character_id: "wc-static-owner",
+          nodes: [
+            {
+              world_character_id: "wc-static-owner",
+              character_id: "character-static-owner",
+              display_name: "Static Owner Parrot",
+              is_center: true,
+            },
+          ],
+          edges: [],
+          evidence: [],
+          meta: {
+            template: "neighborhood",
+            source: "ladybug",
+            graph_status: "healthy",
+            truncated: false,
+            projection_lag_seconds: 0,
+            revalidated_node_count: 1,
+            revalidated_edge_count: 0,
+            fallback_reason: null,
+          },
+        },
+        status: 200,
+      });
+      return;
+    }
+    await route.fallback();
+  });
+
+  const relationshipRoute =
+    "/characters/character-static-owner/worlds/world-static-probe/relationship-graph?provider=ladybug";
+  const bootstrap = new URLSearchParams({
+    __angmoo_window_kind: "relationship-graph",
+    __angmoo_window_route: relationshipRoute,
+  });
+  await page.goto(`/?${bootstrap.toString()}`);
+
+  await expect(page.getByRole("heading", { name: "World 관계망" })).toBeVisible();
+  await expect(page.getByText("관계망 최신 상태")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "제품 창 경로를 열지 못했습니다." })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "이 장치의 owner 준비" })).toHaveCount(0);
+  await expect(page).toHaveURL(new RegExp(`${relationshipRoute.replace("?", "\\?")}$`));
+});
+
+test("wide-window route mismatch fails closed instead of rendering Device Home", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const desktop = window as unknown as {
+      __TAURI__: {
+        core: { invoke: (command: string) => Promise<unknown> };
+      };
+    };
+    desktop.__TAURI__ = {
+      core: {
+        invoke: async (command) =>
+          command === "desktop_runtime_status"
+            ? {
+                phase: "ready",
+                apiBaseUrl: "http://127.0.0.1:8080",
+                graphProvider: "ladybug",
+                launchToken: "static-route-probe-token-000000000000",
+              }
+            : undefined,
+      },
+    };
+  });
+  const bootstrap = new URLSearchParams({
+    __angmoo_window_kind: "relationship-graph",
+    __angmoo_window_route: "/",
+  });
+
+  await page.goto(`/?${bootstrap.toString()}`);
+
+  await expect(
+    page.getByRole("heading", { name: "제품 창 경로를 열지 못했습니다." }),
+  ).toBeVisible();
+  await expect(page.getByText("LOCAL DEVICE")).toHaveCount(0);
+});
+
 test("Tauri Phone keeps the local owner bootstrap form scrollable above navigation", async ({
   page,
 }) => {

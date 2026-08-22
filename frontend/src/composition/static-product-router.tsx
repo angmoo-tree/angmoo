@@ -18,6 +18,8 @@ import { WorldAppRouteClient } from "@/app/world-app-route-client";
 import { CreatorStudioFrame } from "@/features/creator-studio/public";
 import {
   currentDesktopRoute,
+  desktopWindowKindForRoute,
+  getDesktopWindowState,
   subscribeDesktopRoute,
 } from "@/shared/desktop/public";
 import {
@@ -71,8 +73,49 @@ export function StaticProductRouter() {
     pathname: rawPathname.replace(/\/+$/, "") || "/",
     search,
   };
+  const desktopState = getDesktopWindowState();
+  const route = `${location.pathname}${location.search}`;
+  if (
+    desktopState &&
+    desktopWindowKindForRoute(route) !== desktopState.kind
+  ) {
+    return (
+      <DesktopRuntimeGate>
+        <StaticWindowRouteMismatch
+          actualRoute={route}
+          expectedWindow={desktopState.kind}
+        />
+      </DesktopRuntimeGate>
+    );
+  }
   return (
     <DesktopRuntimeGate>{renderStaticRoute(location)}</DesktopRuntimeGate>
+  );
+}
+
+function StaticWindowRouteMismatch({
+  actualRoute,
+  expectedWindow,
+}: {
+  actualRoute: string;
+  expectedWindow: string;
+}) {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-surface p-8 text-on-surface">
+      <section className="max-w-xl rounded-[32px] border border-outline-variant bg-surface-container-lowest p-8 shadow-sm">
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">
+          Product window boundary
+        </p>
+        <h1 className="mt-3 text-2xl font-black">제품 창 경로를 열지 못했습니다.</h1>
+        <p className="mt-4 text-sm leading-6 text-on-surface-variant">
+          {expectedWindow} 창이 허용하지 않는 경로를 받아 Device Home으로 대체하지
+          않았습니다. 창을 닫고 원래 화면에서 다시 열어주세요.
+        </p>
+        <p className="mt-4 break-all font-mono text-xs text-on-surface-variant">
+          {actualRoute}
+        </p>
+      </section>
+    </main>
   );
 }
 
