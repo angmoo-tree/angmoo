@@ -1,9 +1,12 @@
 mod desktop_runtime;
 mod phone_resize;
+mod product_paths;
 mod product_windows;
 mod window_policy;
 
-use product_windows::{ProductWindowKind, current_window, open_product_window_impl};
+use product_windows::{
+    ProductWindowKind, create_phone_window, current_window, open_product_window_impl,
+};
 use tauri::{Manager, WebviewWindow, Window};
 use tauri_runtime::ResizeDirection;
 
@@ -88,9 +91,9 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .manage(desktop_runtime::DesktopRuntimeState::default())
         .setup(|app| {
-            let phone = app
-                .get_webview_window("main")
-                .ok_or("configured phone window is missing")?;
+            let product_paths = product_paths::ProductDataPaths::resolve(app.handle())?;
+            product_paths.prepare_runtime_owned_directories()?;
+            let phone = create_phone_window(app.handle(), &product_paths)?;
             window_policy::apply_phone_window_policy(&phone)?;
             phone_resize::install_phone_aspect_ratio_lock(&phone)?;
             desktop_runtime::start(

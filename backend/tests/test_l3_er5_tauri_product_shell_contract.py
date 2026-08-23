@@ -73,17 +73,24 @@ def test_product_sidecar_has_fixed_commands_hash_and_lifecycle_contract() -> Non
 
 def test_phone_window_has_no_browser_chrome_and_applies_scaling_policy() -> None:
     config = json.loads(_read("desktop/src-tauri/tauri.conf.json"))
-    phone = config["app"]["windows"][0]
+    product_windows = _read("desktop/src-tauri/src/product_windows.rs")
     policy = _read("desktop/src-tauri/src/window_policy.rs")
     resize = _read("desktop/src-tauri/src/phone_resize.rs")
 
-    assert phone["label"] == "main"
-    assert phone["decorations"] is False
-    assert phone["resizable"] is True
-    assert phone["maximizable"] is False
-    assert phone["transparent"] is True
-    assert phone["backgroundColor"] == "#00000000"
-    assert phone["shadow"] is False
+    # Product windows are created programmatically so every one receives the
+    # canonical data directory before WebView initialization.  Keep the static
+    # config empty and assert the Phone builder contract at its real owner.
+    assert config["app"]["windows"] == []
+    for marker in (
+        "ProductWindowKind::Phone.label()",
+        ".inner_size(468.0, 916.0)",
+        ".decorations(false)",
+        ".transparent(true)",
+        ".resizable(true)",
+        ".maximizable(false)",
+        ".shadow(false)",
+    ):
+        assert marker in product_windows
     assert config["app"]["withGlobalTauri"] is True
     for marker in (
         "PHONE_TARGET_WIDTH",
