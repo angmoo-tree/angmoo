@@ -57,6 +57,10 @@ def main() -> int:
         "Permanently delete every Angmoo World",
         "ANGMOO_VERIFY_NOT_REPARSE",
         "$LOCALAPPDATA\\com.angmoo.desktop",
+        "$LOCALAPPDATA\\Angmoo.__casefix__",
+        'SetOutPath "$TEMP"',
+        'Rename "$LOCALAPPDATA\\angmoo" "$LOCALAPPDATA\\Angmoo.__casefix__"',
+        'Rename "$LOCALAPPDATA\\Angmoo.__casefix__" "$LOCALAPPDATA\\Angmoo"',
     ):
         _require(required in hooks, f"uninstall safety contract missing: {required}")
     for required in (
@@ -120,6 +124,8 @@ def main() -> int:
         "interactive_full_delete = 'user_gate_required'",
         "Get-MpThreatDetection",
         "NoNewDefenderDetection",
+        "legacy_launcher_secret_merge",
+        "product_root_actual_name",
     ):
         _require(required in workflow, f"installer workflow contract missing: {required}")
 

@@ -22,6 +22,12 @@ _PERSISTENT_DIRECTORIES = (
     "media",
     "secrets",
 )
+_ALLOWED_PRODUCT_SECRET_SUPPLEMENTS = frozenset(
+    {
+        "secrets/app-secret.dpapi",
+        "secrets/neo4j-local-password.dpapi",
+    }
+)
 
 
 class LocalAppDataMigrationError(RuntimeError):
@@ -88,15 +94,15 @@ class LegacyLocalAppDataMigration:
                 app_secret_sha256=None,
                 webview_policy="product_profile_fresh_or_reconnect",
             )
-        if _contains_persistent_data(self.target_root):
-            raise LocalAppDataMigrationConflict(
-                "legacy_and_product_data_conflict"
-            )
+        product_secret_supplements = _product_secret_supplements(
+            self.target_root
+        )
 
         self.runtime_root.mkdir(parents=True, exist_ok=True)
         self._acquire_lock()
         staging = self.target_root / f".migration-{uuid4().hex}"
-        installed: list[Path] = []
+        installed_directories: list[Path] = []
+        installed_files: list[Path] = []
         try:
             staging.mkdir(parents=True)
             for name in _PERSISTENT_DIRECTORIES:
@@ -105,8 +111,21 @@ class LegacyLocalAppDataMigration:
                     _copy_tree_without_links(source, staging / name)
 
             source_summary = _file_summary(self.source_root)
+            expected_summary = dict(source_summary)
+            for relative, digest in product_secret_supplements.items():
+                existing_digest = expected_summary.get(relative)
+                if existing_digest is not None and existing_digest != digest:
+                    raise LocalAppDataMigrationConflict(
+                        "legacy_and_product_secret_conflict"
+                    )
+                expected_summary[relative] = digest
+                destination = staging / Path(relative)
+                if not destination.exists():
+                    destination.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(self.target_root / Path(relative), destination)
+
             staged_summary = _file_summary(staging)
-            if source_summary != staged_summary:
+            if expected_summary != staged_summary:
                 raise LocalAppDataMigrationIntegrityError(
                     "legacy_migration_staging_digest_mismatch"
                 )
@@ -119,15 +138,23 @@ class LegacyLocalAppDataMigration:
                 destination = self.target_root / name
                 if destination.exists():
                     if any(destination.iterdir()):
-                        raise LocalAppDataMigrationConflict(
-                            "legacy_and_product_data_conflict"
+                        if name != "secrets":
+                            raise LocalAppDataMigrationConflict(
+                                "legacy_and_product_data_conflict"
+                            )
+                        installed_files.extend(
+                            _merge_staged_tree_into_existing_directory(
+                                staged,
+                                destination,
+                            )
                         )
+                        continue
                     destination.rmdir()
                 staged.replace(destination)
-                installed.append(destination)
+                installed_directories.append(destination)
 
             installed_summary = _file_summary(self.target_root)
-            if installed_summary != source_summary:
+            if installed_summary != expected_summary:
                 raise LocalAppDataMigrationIntegrityError(
                     "legacy_migration_installed_digest_mismatch"
                 )
@@ -152,7 +179,10 @@ class LegacyLocalAppDataMigration:
             _write_json_atomic(self.marker_path, asdict(report))
             return report
         except BaseException:
-            for destination in reversed(installed):
+            for destination in reversed(installed_files):
+                destination.unlink(missing_ok=True)
+            _remove_empty_secret_descendants(self.target_root / "secrets")
+            for destination in reversed(installed_directories):
                 shutil.rmtree(destination, ignore_errors=True)
                 destination.mkdir(parents=True, exist_ok=True)
             raise
@@ -236,6 +266,112 @@ def _contains_persistent_data(root: Path) -> bool:
         directory.exists() and any(directory.rglob("*"))
         for directory in (root / name for name in _PERSISTENT_DIRECTORIES)
     )
+
+
+def _product_secret_supplements(root: Path) -> dict[str, str]:
+    """Accept only the two launcher-era DPAPI files in an occupied target.
+
+    The first LocalAppData product installer already placed those files below
+    ``%LOCALAPPDATA%\\angmoo\\secrets``.  The ER6 preview runtime stored the
+    SQLite canonical data and the raw APP_SECRET in ``com.angmoo.desktop``.
+    This narrow allow-list lets those two independently owned legacy layouts
+    be synthesized without weakening the fail-closed canonical conflict rule.
+    """
+
+    supplements: dict[str, str] = {}
+    for name in _PERSISTENT_DIRECTORIES:
+        directory = root / name
+        if not directory.exists():
+            continue
+        if directory.is_symlink():
+            raise LocalAppDataMigrationIntegrityError(
+                "legacy_migration_link_not_allowed"
+            )
+        for path in sorted(directory.rglob("*")):
+            if path.is_symlink():
+                raise LocalAppDataMigrationIntegrityError(
+                    "legacy_migration_link_not_allowed"
+                )
+            relative = path.relative_to(root).as_posix()
+            if path.is_dir():
+                if not any(
+                    allowed.startswith(relative + "/")
+                    for allowed in _ALLOWED_PRODUCT_SECRET_SUPPLEMENTS
+                ):
+                    raise LocalAppDataMigrationConflict(
+                        "legacy_and_product_data_conflict"
+                    )
+                continue
+            if not path.is_file():
+                raise LocalAppDataMigrationIntegrityError(
+                    "legacy_migration_unsupported_file"
+                )
+            if relative not in _ALLOWED_PRODUCT_SECRET_SUPPLEMENTS:
+                raise LocalAppDataMigrationConflict(
+                    "legacy_and_product_data_conflict"
+                )
+            supplements[relative] = _sha256(path)
+    return supplements
+
+
+def _merge_staged_tree_into_existing_directory(
+    staged: Path,
+    destination: Path,
+) -> list[Path]:
+    installed: list[Path] = []
+    try:
+        for source in sorted(staged.rglob("*")):
+            if source.is_symlink():
+                raise LocalAppDataMigrationIntegrityError(
+                    "legacy_migration_link_not_allowed"
+                )
+            if not source.is_file():
+                continue
+            relative = source.relative_to(staged)
+            target = destination / relative
+            if target.exists():
+                if target.is_symlink() or not target.is_file():
+                    raise LocalAppDataMigrationIntegrityError(
+                        "legacy_migration_link_not_allowed"
+                    )
+                if _sha256(target) != _sha256(source):
+                    raise LocalAppDataMigrationConflict(
+                        "legacy_and_product_secret_conflict"
+                    )
+                continue
+            target.parent.mkdir(parents=True, exist_ok=True)
+            temporary = target.with_name(
+                f".{target.name}.tmp-{uuid4().hex}"
+            )
+            try:
+                shutil.copy2(source, temporary)
+                temporary.replace(target)
+                installed.append(target)
+            finally:
+                temporary.unlink(missing_ok=True)
+    except BaseException:
+        # The caller cannot receive a partially built return value.  Roll back
+        # every file installed by this helper before propagating the failure;
+        # its outer cleanup then removes any empty secret subdirectories.
+        for target in reversed(installed):
+            target.unlink(missing_ok=True)
+        raise
+    return installed
+
+
+def _remove_empty_secret_descendants(root: Path) -> None:
+    if not root.is_dir():
+        return
+    directories = sorted(
+        (path for path in root.rglob("*") if path.is_dir()),
+        key=lambda path: len(path.parts),
+        reverse=True,
+    )
+    for directory in directories:
+        try:
+            directory.rmdir()
+        except OSError:
+            pass
 
 
 def _copy_tree_without_links(source: Path, target: Path) -> None:

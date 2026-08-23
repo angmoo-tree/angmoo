@@ -14,13 +14,52 @@
   IntOp $1 $0 & 0x400
   ${If} $1 <> 0
     MessageBox MB_OK|MB_ICONSTOP \
-      "Angmoo data removal stopped because an owned path is a reparse point: ${Target}"
+      "Angmoo filesystem operation stopped because an owned path is a reparse point: ${Target}"
     Abort
   ${EndIf}
 ${Label}_verified:
 !macroend
 
 !macro NSIS_HOOK_PREINSTALL
+  ; Tauri's generated NSIS section calls SetOutPath $INSTDIR immediately
+  ; before this hook. Release that current-directory handle first; Windows
+  ; cannot rename the product root while the installer itself is positioned
+  ; inside its app child.
+  SetOutPath "$TEMP"
+  ; Windows resolves LocalAppData paths case-insensitively but preserves the
+  ; spelling of the first directory creation.  The launcher-era preview used
+  ; `angmoo`, so a case-only round trip is required before the installer
+  ; materializes the canonical `Angmoo\app` path.  No user data is copied or
+  ; deleted by this operation.
+  IfFileExists "$LOCALAPPDATA\angmoo" angmoo_case_root_exists angmoo_case_root_done
+angmoo_case_root_exists:
+  IfFileExists "$LOCALAPPDATA\Angmoo.__casefix__" angmoo_case_temp_conflict angmoo_case_begin
+angmoo_case_temp_conflict:
+  MessageBox MB_OK|MB_ICONSTOP \
+    "Angmoo installation stopped because a stale product-root case migration directory exists."
+  Abort
+angmoo_case_begin:
+  !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\angmoo" angmoo_case_root
+  ClearErrors
+  Rename "$LOCALAPPDATA\angmoo" "$LOCALAPPDATA\Angmoo.__casefix__"
+  IfErrors angmoo_case_first_failed angmoo_case_second
+angmoo_case_first_failed:
+  MessageBox MB_OK|MB_ICONSTOP \
+    "Angmoo installation could not normalize the LocalAppData product directory name."
+  Abort
+angmoo_case_second:
+  ClearErrors
+  Rename "$LOCALAPPDATA\Angmoo.__casefix__" "$LOCALAPPDATA\Angmoo"
+  IfErrors angmoo_case_second_failed angmoo_case_root_done
+angmoo_case_second_failed:
+  ; Best-effort rollback preserves the original lowercase directory if the
+  ; second case-only rename cannot complete.
+  ClearErrors
+  Rename "$LOCALAPPDATA\Angmoo.__casefix__" "$LOCALAPPDATA\angmoo"
+  MessageBox MB_OK|MB_ICONSTOP \
+    "Angmoo installation could not finish the LocalAppData directory case migration."
+  Abort
+angmoo_case_root_done:
   StrCpy $INSTDIR "$LOCALAPPDATA\Angmoo\app"
   CreateDirectory "$INSTDIR"
   SetOutPath "$INSTDIR"

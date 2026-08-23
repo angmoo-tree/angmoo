@@ -148,6 +148,89 @@ def test_migration_fails_closed_when_both_roots_have_data(tmp_path: Path) -> Non
     assert (source / "secrets" / "app-secret").is_file()
 
 
+def test_preview_data_and_launcher_dpapi_secrets_are_synthesized(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "com.angmoo.desktop"
+    target = tmp_path / "angmoo"
+    _preview_fixture(source)
+    launcher_secrets = {
+        "app-secret.dpapi": b"synthetic-launcher-app-secret-dpapi",
+        "neo4j-local-password.dpapi": b"synthetic-neo4j-password-dpapi",
+    }
+    for name, value in launcher_secrets.items():
+        path = target / "secrets" / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(value)
+    original_hashes = {
+        name: _sha256(target / "secrets" / name)
+        for name in launcher_secrets
+    }
+
+    report = _migration(source, target).migrate_if_needed()
+
+    assert report.status == "migrated"
+    assert (target / "secrets" / "app-secret").is_file()
+    for name, expected_hash in original_hashes.items():
+        assert _sha256(target / "secrets" / name) == expected_hash
+        assert not (source / "secrets" / name).exists()
+    assert report.copied_file_count >= 7
+    assert json.loads(
+        (target / MIGRATION_MARKER_NAME).read_text(encoding="utf-8")
+    )["copied_file_count"] == report.copied_file_count
+
+
+def test_synthesized_migration_still_rejects_unknown_product_secret(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "com.angmoo.desktop"
+    target = tmp_path / "Angmoo"
+    _preview_fixture(source)
+    unknown = target / "secrets" / "unexpected-secret"
+    unknown.parent.mkdir(parents=True)
+    unknown.write_text("must-not-merge", encoding="utf-8")
+
+    with pytest.raises(
+        LocalAppDataMigrationConflict,
+        match="legacy_and_product_data_conflict",
+    ):
+        _migration(source, target).migrate_if_needed()
+
+    assert unknown.read_text(encoding="utf-8") == "must-not-merge"
+    assert not (target / MIGRATION_MARKER_NAME).exists()
+    assert (source / "secrets" / "app-secret").is_file()
+
+
+def test_synthesized_migration_failure_preserves_launcher_dpapi_secret(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "com.angmoo.desktop"
+    target = tmp_path / "angmoo"
+    _preview_fixture(source)
+    database = (
+        source
+        / "canonical"
+        / "generations"
+        / "er6-preview-v1"
+        / "angmoo.sqlite3"
+    )
+    database.write_bytes(b"not-sqlite")
+    dpapi = target / "secrets" / "app-secret.dpapi"
+    dpapi.parent.mkdir(parents=True)
+    dpapi.write_bytes(b"synthetic-launcher-app-secret-dpapi")
+    expected_hash = _sha256(dpapi)
+
+    with pytest.raises(
+        LocalAppDataMigrationIntegrityError,
+        match="legacy_migration_canonical_invalid",
+    ):
+        _migration(source, target).migrate_if_needed()
+
+    assert _sha256(dpapi) == expected_hash
+    assert not (target / "secrets" / "app-secret").exists()
+    assert not (target / MIGRATION_MARKER_NAME).exists()
+
+
 def test_corrupt_canonical_rolls_back_without_touching_source(
     tmp_path: Path,
 ) -> None:

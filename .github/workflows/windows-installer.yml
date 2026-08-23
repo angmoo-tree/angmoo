@@ -311,6 +311,22 @@ jobs:
           if (-not $fixtureManifest.synthetic_fixture -or $fixtureManifest.contains_real_credentials) {
             throw 'Installed lifecycle refuses a personal or real-credential fixture'
           }
+          # Reproduce the field layout that exposed the ER6 migration gap:
+          # launcher-era DPAPI files under a lowercase product root coexist
+          # with canonical preview data under com.angmoo.desktop.
+          $lowercaseProductRoot = Join-Path $env:LOCALAPPDATA 'angmoo'
+          $legacyLauncherSecrets = [ordered]@{
+            'app-secret.dpapi' = 'synthetic-launcher-app-secret-dpapi'
+            'neo4j-local-password.dpapi' = 'synthetic-neo4j-password-dpapi'
+          }
+          $legacyLauncherSecretHashes = @{}
+          foreach ($entry in $legacyLauncherSecrets.GetEnumerator()) {
+            $path = Join-Path $lowercaseProductRoot "secrets\$($entry.Key)"
+            New-Item -ItemType Directory -Force -Path (Split-Path $path) | Out-Null
+            Set-Content -LiteralPath $path -Value $entry.Value -Encoding ascii -NoNewline
+            $legacyLauncherSecretHashes[$entry.Key] =
+              (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash
+          }
           Write-Host "Installing $($installer.FullName) into the canonical app root $installRoot"
           $install = Start-Process $installer.FullName -ArgumentList '/S' -PassThru
           if (-not $install.WaitForExit(120000)) {
@@ -318,6 +334,12 @@ jobs:
             throw 'NSIS install timed out after 120 seconds'
           }
           if ($install.ExitCode -ne 0) { throw "NSIS install failed: $($install.ExitCode)" }
+          $productEntries = @(Get-ChildItem -LiteralPath $env:LOCALAPPDATA -Directory -Force |
+            Where-Object { $_.Name -ieq 'Angmoo' })
+          if ($productEntries.Count -ne 1 -or $productEntries[0].Name -cne 'Angmoo') {
+            throw "Installer did not canonicalize the product-root casing to Angmoo"
+          }
+          $productRootActualName = $productEntries[0].Name
           # Tauri's productName is "Angmoo", but the generated NSIS contract
           # installs the mainBinaryName as angmoo-desktop.exe.
           $app = Get-ChildItem $installRoot -Filter 'angmoo-desktop.exe' -Recurse -ErrorAction SilentlyContinue |
@@ -365,6 +387,16 @@ jobs:
           }
           if ($migrationMarker.app_secret_sha256 -ne $fixtureManifest.app_secret_sha256) {
             throw 'Migrated APP_SECRET digest does not match the synthetic fixture'
+          }
+          foreach ($entry in $legacyLauncherSecrets.GetEnumerator()) {
+            $path = Join-Path $dataRoot "secrets\$($entry.Key)"
+            if (-not (Test-Path -LiteralPath $path)) {
+              throw "Synthesized migration lost launcher secret: $($entry.Key)"
+            }
+            if ((Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -ne
+                $legacyLauncherSecretHashes[$entry.Key]) {
+              throw "Synthesized migration changed launcher secret: $($entry.Key)"
+            }
           }
           foreach ($property in $fixtureManifest.persistent_files.PSObject.Properties) {
             $relative = $property.Name -replace '/', '\'
@@ -471,6 +503,13 @@ jobs:
           if ((Get-StableFileHash $mediaProof 'preserving_uninstall') -ne $mediaHashAfterFirstRun) {
             throw 'Silent uninstall changed local media'
           }
+          foreach ($entry in $legacyLauncherSecrets.GetEnumerator()) {
+            $path = Join-Path $dataRoot "secrets\$($entry.Key)"
+            if ((Get-StableFileHash $path 'preserving_uninstall') -ne
+                $legacyLauncherSecretHashes[$entry.Key]) {
+              throw "Silent uninstall changed launcher secret: $($entry.Key)"
+            }
+          }
 
           Write-Host 'Reinstalling into the preserved product data namespace'
           $reinstall = Start-Process $installer.FullName -ArgumentList '/S' -PassThru
@@ -490,6 +529,13 @@ jobs:
           }
           if ((Get-StableFileHash $mediaProof 'preserved_reinstall') -ne $mediaHashAfterFirstRun) {
             throw 'Reinstall changed preserved local media before launch'
+          }
+          foreach ($entry in $legacyLauncherSecrets.GetEnumerator()) {
+            $path = Join-Path $dataRoot "secrets\$($entry.Key)"
+            if ((Get-StableFileHash $path 'preserved_reinstall') -ne
+                $legacyLauncherSecretHashes[$entry.Key]) {
+              throw "Reinstall changed launcher secret: $($entry.Key)"
+            }
           }
 
           $secondProduct = Start-Process $reinstalledApp.FullName -PassThru
@@ -565,6 +611,8 @@ jobs:
             silent_uninstall_preserved_data = $true
             reinstall_reused_data = $true
             final_silent_uninstall_preserved_data = $true
+            legacy_launcher_secret_merge = $true
+            product_root_actual_name = $productRootActualName
             interactive_full_delete = 'user_gate_required'
             app_secret_sha256 = $secretHashAfterFirstRun.ToLowerInvariant()
           } | ConvertTo-Json -Depth 5 |
