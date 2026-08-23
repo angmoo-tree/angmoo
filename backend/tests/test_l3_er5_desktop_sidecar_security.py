@@ -184,6 +184,7 @@ def test_runtime_metadata_never_persists_launch_token(tmp_path: Path) -> None:
     assert lock == {
         "schema_version": 1,
         "pid": ownership.pid,
+        "process_start_token": ownership.process_start_token,
         "generation": "launch-fixture",
     }
     assert endpoint["host"] == "127.0.0.1"
@@ -215,6 +216,26 @@ def test_runtime_ownership_rejects_duplicate_and_replaces_stale_owner(
     replacement = RuntimeOwnership(tmp_path, launch_id="launch-c")
     replacement.acquire()
     assert json.loads(replacement.lock_path.read_text(encoding="utf-8"))["pid"] == replacement.pid
+    assert not replacement.endpoint_path.exists()
+    replacement.release()
+
+
+def test_runtime_ownership_replaces_pid_reuse_with_different_start_token(
+    tmp_path: Path,
+) -> None:
+    ownership = RuntimeOwnership(tmp_path, launch_id="launch-a")
+    ownership.acquire()
+    stale = json.loads(ownership.lock_path.read_text(encoding="utf-8"))
+    stale["process_start_token"] = "reused-pid-from-an-older-process"
+    ownership.lock_path.write_text(json.dumps(stale), encoding="utf-8")
+    ownership.endpoint_path.write_text("{}", encoding="utf-8")
+
+    replacement = RuntimeOwnership(tmp_path, launch_id="launch-b")
+    replacement.acquire()
+
+    current = json.loads(replacement.lock_path.read_text(encoding="utf-8"))
+    assert current["generation"] == "launch-b"
+    assert current["process_start_token"] == replacement.process_start_token
     assert not replacement.endpoint_path.exists()
     replacement.release()
 

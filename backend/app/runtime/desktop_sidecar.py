@@ -41,12 +41,53 @@ def _process_alive(pid: int) -> bool:
         ctypes.windll.kernel32.CloseHandle(handle)  # type: ignore[attr-defined]
 
 
+def _process_start_token(pid: int) -> str | None:
+    """Return an OS-issued process-start identity that survives PID reuse."""
+
+    if pid <= 0:
+        return None
+    if os.name != "nt":
+        try:
+            # Linux /proc stat field 22 is the process start time in clock ticks.
+            # It is stable for the process lifetime and changes when a PID is reused.
+            fields = (Path("/proc") / str(pid) / "stat").read_text(
+                encoding="utf-8"
+            ).split()
+            return f"proc:{fields[21]}"
+        except (OSError, IndexError, UnicodeError):
+            return None
+
+    process_query_limited_information = 0x1000
+    handle = ctypes.windll.kernel32.OpenProcess(  # type: ignore[attr-defined]
+        process_query_limited_information, False, pid
+    )
+    if not handle:
+        return None
+    try:
+        creation = ctypes.c_ulonglong()
+        exit_time = ctypes.c_ulonglong()
+        kernel = ctypes.c_ulonglong()
+        user = ctypes.c_ulonglong()
+        if not ctypes.windll.kernel32.GetProcessTimes(  # type: ignore[attr-defined]
+            handle,
+            ctypes.byref(creation),
+            ctypes.byref(exit_time),
+            ctypes.byref(kernel),
+            ctypes.byref(user),
+        ):
+            return None
+        return f"win-filetime:{creation.value}"
+    finally:
+        ctypes.windll.kernel32.CloseHandle(handle)  # type: ignore[attr-defined]
+
+
 class RuntimeOwnership:
     def __init__(self, runtime_root: Path, *, launch_id: str = "test-launch") -> None:
         self.runtime_root = runtime_root
         self.lock_path = runtime_root / "sidecar.owner.json"
         self.endpoint_path = runtime_root / "sidecar.endpoint.json"
         self.pid = os.getpid()
+        self.process_start_token = _process_start_token(self.pid)
         self.launch_id = launch_id
 
     def acquire(self) -> None:
@@ -58,12 +99,25 @@ class RuntimeOwnership:
             except (OSError, ValueError, TypeError, json.JSONDecodeError):
                 existing_pid = 0
             if _process_alive(existing_pid):
-                raise RuntimeError("desktop_sidecar_already_owned")
+                expected_start_token = str(
+                    existing.get("process_start_token", "")
+                ).strip()
+                actual_start_token = _process_start_token(existing_pid)
+                # A matching token proves that the same process still owns the
+                # runtime. If the OS cannot provide a token, fail closed. A
+                # different token means Windows/Linux has reused a stale PID.
+                if (
+                    not expected_start_token
+                    or actual_start_token is None
+                    or actual_start_token == expected_start_token
+                ):
+                    raise RuntimeError("desktop_sidecar_already_owned")
             self.lock_path.unlink(missing_ok=True)
             self.endpoint_path.unlink(missing_ok=True)
         payload = {
             "schema_version": 1,
             "pid": self.pid,
+            "process_start_token": self.process_start_token,
             "generation": self.launch_id,
         }
         temporary = self.lock_path.with_suffix(".tmp")
