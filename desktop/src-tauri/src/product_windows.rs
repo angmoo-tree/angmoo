@@ -40,6 +40,14 @@ impl ProductWindowKind {
             Self::RelationshipGraph => "Angmoo Relationship Graph",
         }
     }
+
+    fn bootstrap_kind(self) -> &'static str {
+        match self {
+            Self::Phone => "phone",
+            Self::Studio => "studio",
+            Self::RelationshipGraph => "relationship-graph",
+        }
+    }
 }
 
 pub fn validate_product_route(kind: ProductWindowKind, route: &str) -> Result<String, String> {
@@ -141,7 +149,7 @@ fn static_window_path(kind: ProductWindowKind, route: &str) -> Result<PathBuf, S
         .map_err(|_| "window_bootstrap_url_invalid".to_owned())?;
     bootstrap
         .query_pairs_mut()
-        .append_pair(WINDOW_KIND_QUERY, kind.label())
+        .append_pair(WINDOW_KIND_QUERY, kind.bootstrap_kind())
         .append_pair(WINDOW_ROUTE_QUERY, route);
     let query = bootstrap
         .query()
@@ -215,7 +223,8 @@ pub fn create_phone_window(
     .resizable(true)
     .maximizable(false)
     .shadow(false)
-    .center();
+    .center()
+    .initialization_script(initial_state_script(ProductWindowKind::Phone, "/")?);
     configure_product_webview_data_directory(builder, paths)
         .build()
         .map_err(|error| error.to_string())
@@ -330,6 +339,26 @@ mod tests {
         assert_eq!(
             query.get(WINDOW_ROUTE_QUERY).map(|value| value.as_ref()),
             Some("/characters/mango/worlds/arcana/relationship-graph?provider=ladybug")
+        );
+    }
+
+    #[test]
+    fn phone_static_window_bootstraps_the_logical_phone_home() {
+        let path =
+            static_window_path(ProductWindowKind::Phone, "/").expect("phone static window path");
+        let parsed = tauri::Url::parse(&format!("http://angmoo.local/{}", path.to_string_lossy()))
+            .expect("parse phone static window path");
+        let query = parsed
+            .query_pairs()
+            .collect::<std::collections::HashMap<_, _>>();
+
+        assert_eq!(
+            query.get(WINDOW_KIND_QUERY).map(|value| value.as_ref()),
+            Some("phone")
+        );
+        assert_eq!(
+            query.get(WINDOW_ROUTE_QUERY).map(|value| value.as_ref()),
+            Some("/")
         );
     }
 }
