@@ -444,7 +444,6 @@ jobs:
           if ($endpointText -match '(?i)launch_token|app_secret|api[_-]?key|credential') {
             throw 'Installed sidecar endpoint leaked secret-bearing metadata'
           }
-          $firstLogicalSidecarPid = [int]$endpointMetadata.logical_sidecar_pid
           $firstEndpointGeneration = [string]$endpointMetadata.generation
           Write-Host "Installed sidecar endpoint and SQLite canonical database are ready"
           $forbidden = @(Get-Process -ErrorAction SilentlyContinue |
@@ -546,8 +545,16 @@ jobs:
             if (Test-Path -LiteralPath $endpoint) {
               try {
                 $candidate = Get-Content -LiteralPath $endpoint -Raw | ConvertFrom-Json
-                if ([int]$candidate.logical_sidecar_pid -gt 0 -and
-                    [int]$candidate.logical_sidecar_pid -ne $firstLogicalSidecarPid) {
+                $candidatePid = [int]$candidate.logical_sidecar_pid
+                $candidateGeneration = [string]$candidate.generation
+                # Windows may immediately reuse a PID after the first
+                # sidecar exits. The launch generation is the durable
+                # identity boundary; require it to change and independently
+                # prove that the advertised sidecar process is alive.
+                if ($candidatePid -gt 0 -and
+                    -not [string]::IsNullOrWhiteSpace($candidateGeneration) -and
+                    $candidateGeneration -ne $firstEndpointGeneration -and
+                    (Get-Process -Id $candidatePid -ErrorAction SilentlyContinue)) {
                   $secondEndpoint = $candidate
                   break
                 }
