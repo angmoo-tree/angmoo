@@ -106,6 +106,7 @@ class RuntimeOwnership:
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Angmoo packaged desktop sidecar")
     parser.add_argument("--parent-pid", type=int, required=True)
+    parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument("--runtime-root", type=Path, required=True)
     parser.add_argument("--launch-id", required=True)
     return parser.parse_args()
@@ -162,13 +163,17 @@ def _selected_generation(data_root: Path) -> str:
 
 
 def _configure_embedded_release_candidate(
+    data_root: Path,
     runtime_root: Path,
     *,
     environ: MutableMapping[str, str] | None = None,
 ) -> tuple[Path, str]:
     """Opt the packaged sidecar into ER6 without changing Docker defaults."""
 
-    data_root = runtime_root.parent.resolve()
+    data_root = data_root.resolve()
+    runtime_root = runtime_root.resolve()
+    if runtime_root != data_root / "runtime":
+        raise RuntimeError("runtime_root_outside_product_data_root")
     generation = _selected_generation(data_root)
     database_path = (
         data_root
@@ -260,7 +265,8 @@ def main() -> int:
     )
     ownership.acquire()
     data_root, generation = _configure_embedded_release_candidate(
-        ownership.runtime_root
+        args.data_root.resolve(),
+        ownership.runtime_root,
     )
 
     # Import the public composition root only after the launcher environment is

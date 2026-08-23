@@ -1102,7 +1102,7 @@
       "owner": "ER7",
       "path": "scripts/ci/check_desktop_installer_contract.py",
       "removal_condition": "embedded canonical rollback window PASS and user-approved legacy-default removal",
-      "source_sha256": "3c815375521725f643aea73897aa25b9d901dca696981b6a8fbfb48175de354b",
+      "source_sha256": "8d410908cde8fc4fba3a0a2f70bbc55dee4baa321626cb12738fa85e9869b4d4",
       "transition_pr": "ER7 PR P"
     },
     {

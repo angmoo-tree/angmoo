@@ -307,6 +307,7 @@ def test_packaged_sidecar_creates_secret_once_and_reuses_it(
     runtime_root = tmp_path / "한글 사용자" / "Angmoo" / "runtime"
     runtime_root.mkdir(parents=True)
     first_root, first_generation = _configure_embedded_release_candidate(
+        runtime_root.parent,
         runtime_root,
         environ=environment,
     )
@@ -314,6 +315,7 @@ def test_packaged_sidecar_creates_secret_once_and_reuses_it(
     first_secret = secret_path.read_text(encoding="utf-8")
 
     second_root, second_generation = _configure_embedded_release_candidate(
+        runtime_root.parent,
         runtime_root,
         environ=environment,
     )
@@ -328,3 +330,17 @@ def test_packaged_sidecar_creates_secret_once_and_reuses_it(
     assert environment["BROWSER_SESSION_ALLOWED_ORIGINS"] == (
         "http://tauri.localhost"
     )
+
+
+def test_packaged_sidecar_rejects_runtime_root_outside_product_root(
+    tmp_path: Path,
+) -> None:
+    with pytest.raises(
+        RuntimeError,
+        match="runtime_root_outside_product_data_root",
+    ):
+        _configure_embedded_release_candidate(
+            tmp_path / "Angmoo",
+            tmp_path / "unowned-runtime",
+            environ={},
+        )

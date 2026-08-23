@@ -16,6 +16,8 @@ use tauri_plugin_shell::{
 };
 use uuid::Uuid;
 
+use crate::product_paths::ProductDataPaths;
+
 const DESKTOP_ORIGIN: &str = "http://tauri.localhost";
 const PRODUCT_GRAPH_PROVIDER: &str = "ladybug";
 const HEALTH_FAILURE_LIMIT: u8 = 15;
@@ -224,13 +226,12 @@ pub fn start(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> 
 
     let token = Uuid::new_v4().simple().to_string();
     let launch_id = Uuid::new_v4().simple().to_string();
-    let runtime_root = app
-        .path()
-        .app_local_data_dir()
-        .map_err(|error| error.to_string())?
-        .join("runtime");
-    fs::create_dir_all(&runtime_root).map_err(|_| "desktop_runtime_root_unavailable")?;
+    let product_paths = ProductDataPaths::resolve(&app)?;
+    product_paths.prepare_runtime_owned_directories()?;
+    let data_root = product_paths.root;
+    let runtime_root = product_paths.runtime;
     let parent_pid = process::id().to_string();
+    let data_root_argument = data_root.to_string_lossy().into_owned();
     let runtime_root_argument = runtime_root.to_string_lossy().into_owned();
     let command = app
         .shell()
@@ -239,6 +240,8 @@ pub fn start(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> 
         .args([
             "--parent-pid",
             &parent_pid,
+            "--data-root",
+            &data_root_argument,
             "--runtime-root",
             &runtime_root_argument,
             "--launch-id",

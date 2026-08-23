@@ -112,11 +112,15 @@ class LocalAppDataRuntimeDataPath:
         root = root.resolve()
         return RuntimeDataPaths(
             root=root,
+            app=root / "app",
             canonical=root / "canonical",
             graph=root / "graph",
             search=root / "search",
             media=root / "media",
             secrets=root / "secrets",
+            runtime=root / "runtime",
+            logs=root / "logs",
+            webview=root / "webview",
         )
 
 

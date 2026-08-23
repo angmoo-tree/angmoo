@@ -14,11 +14,15 @@ class StaticRuntimeDataPath:
     def resolve(self) -> RuntimeDataPaths:
         return RuntimeDataPaths(
             root=self._root,
+            app=self._root / "app",
             canonical=self._root / "canonical",
             graph=self._root / "graph",
             search=self._root / "search",
             media=self._root / "media",
             secrets=self._root / "secrets",
+            runtime=self._root / "runtime",
+            logs=self._root / "logs",
+            webview=self._root / "webview",
         )
 
 

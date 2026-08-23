@@ -285,7 +285,7 @@ jobs:
             Select-Object -ExpandProperty Id)
           Write-Host "Launching installed product $($app.FullName)"
           $product = Start-Process $app.FullName -PassThru
-          $dataRoot = Join-Path $env:LOCALAPPDATA 'com.angmoo.desktop'
+          $dataRoot = Join-Path $env:LOCALAPPDATA 'Angmoo'
           $endpoint = Join-Path $dataRoot 'runtime\sidecar.endpoint.json'
           $database = Join-Path $dataRoot 'canonical\generations\er6-preview-v1\angmoo.sqlite3'
           $deadline = (Get-Date).AddSeconds(60)

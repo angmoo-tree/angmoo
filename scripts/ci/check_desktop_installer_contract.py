@@ -108,6 +108,8 @@ def main() -> int:
         ROOT / "desktop" / "src-tauri" / "src" / "desktop_runtime.rs"
     ).read_text(encoding="utf-8")
     for required in (
+        "ProductDataPaths::resolve",
+        '"--data-root"',
         "sidecar.endpoint.json",
         "logical_sidecar_pid",
         "dynamic_port",

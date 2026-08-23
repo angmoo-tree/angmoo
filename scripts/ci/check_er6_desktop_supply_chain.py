@@ -129,6 +129,7 @@ def main() -> int:
     for required in (
         '.sidecar("angmoo-sidecar")',
         '"--parent-pid"',
+        '"--data-root"',
         '"--runtime-root"',
         '"--launch-id"',
         '"DESKTOP_LAUNCH_TOKEN"',
@@ -208,7 +209,12 @@ def main() -> int:
             "frontend_permissions": capability["permissions"],
             "external_binaries": config["bundle"]["externalBin"],
             "sidecar_bind": "127.0.0.1:ephemeral",
-            "sidecar_arguments": ["parent-pid", "runtime-root", "launch-id"],
+            "sidecar_arguments": [
+                "parent-pid",
+                "data-root",
+                "runtime-root",
+                "launch-id",
+            ],
             "recursive_delete_roots": ["LOCALAPPDATA/com.angmoo.desktop"],
             "autostart_registration": False,
             "runtime_download_or_self_update": False,

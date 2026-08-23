@@ -2,6 +2,8 @@ use serde::Serialize;
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
 
+use crate::product_paths::ProductDataPaths;
+
 const WINDOW_KIND_QUERY: &str = "__angmoo_window_kind";
 const WINDOW_ROUTE_QUERY: &str = "__angmoo_window_route";
 
@@ -182,6 +184,43 @@ fn configure_wide_window(
     }
 }
 
+fn configure_product_webview_data_directory<'a>(
+    builder: WebviewWindowBuilder<'a, tauri::Wry, AppHandle<tauri::Wry>>,
+    paths: &ProductDataPaths,
+) -> WebviewWindowBuilder<'a, tauri::Wry, AppHandle<tauri::Wry>> {
+    #[cfg(windows)]
+    {
+        builder.data_directory(paths.webview.clone())
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = paths;
+        builder
+    }
+}
+
+pub fn create_phone_window(
+    app: &AppHandle,
+    paths: &ProductDataPaths,
+) -> Result<WebviewWindow, String> {
+    let builder = WebviewWindowBuilder::new(
+        app,
+        ProductWindowKind::Phone.label(),
+        window_url(app, ProductWindowKind::Phone, "/")?,
+    )
+    .title(ProductWindowKind::Phone.title())
+    .inner_size(468.0, 916.0)
+    .decorations(false)
+    .transparent(true)
+    .resizable(true)
+    .maximizable(false)
+    .shadow(false)
+    .center();
+    configure_product_webview_data_directory(builder, paths)
+        .build()
+        .map_err(|error| error.to_string())
+}
+
 pub async fn open_product_window_impl(
     app: AppHandle,
     kind: ProductWindowKind,
@@ -201,6 +240,8 @@ pub async fn open_product_window_impl(
         return Err("phone_window_missing".to_owned());
     }
 
+    let product_paths = ProductDataPaths::resolve(&app)?;
+
     let builder = WebviewWindowBuilder::new(&app, kind.label(), window_url(&app, kind, &route)?)
         .title(kind.title())
         .decorations(false)
@@ -209,6 +250,7 @@ pub async fn open_product_window_impl(
         .shadow(true)
         .center()
         .initialization_script(initial_state_script(kind, &route)?);
+    let builder = configure_product_webview_data_directory(builder, &product_paths);
     configure_wide_window(builder, kind)
         .build()
         .map_err(|error| error.to_string())?;

@@ -10,11 +10,15 @@ from typing import Protocol, runtime_checkable
 @dataclass(frozen=True)
 class RuntimeDataPaths:
     root: Path
+    app: Path
     canonical: Path
     graph: Path
     search: Path
     media: Path
     secrets: Path
+    runtime: Path
+    logs: Path
+    webview: Path
 
 
 @runtime_checkable
