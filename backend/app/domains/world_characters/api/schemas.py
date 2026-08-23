@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import asdict
 from typing import Literal
 from urllib.parse import urlsplit
 
@@ -9,6 +10,7 @@ from app.domains.world_characters.domain.owner_controlled_identity import (
     OwnerControlledIdentitySnapshot,
     OwnerControlledProfile,
 )
+from app.domains.world_characters.domain.studio_surface import StudioWorldCharacter
 
 
 def _clean(value: str) -> str:
@@ -99,6 +101,37 @@ class OwnerControlledIdentityRead(BaseModel):
     profile: OwnerControlledProfileRead
 
 
+class StudioWorldCharacterRead(BaseModel):
+    world_character_id: str
+    character_id: str
+    display_name: str
+    avatar_url: str | None
+    intro: str
+    role_key: str | None
+    control_mode: Literal["autonomous", "owner_controlled"]
+    status: str
+    autonomous_enabled: bool
+    version: int
+    activity_setup_state: Literal[
+        "not_started",
+        "generated",
+        "approved",
+        "unavailable_for_owner_controlled",
+    ]
+
+    @classmethod
+    def from_snapshot(cls, snapshot: StudioWorldCharacter) -> "StudioWorldCharacterRead":
+        return cls(**asdict(snapshot))
+
+
+class StudioWorldCharacterListRead(BaseModel):
+    schema_version: Literal["studio-world-character-list-v1"] = (
+        "studio-world-character-list-v1"
+    )
+    world_id: str
+    items: list[StudioWorldCharacterRead]
+
+
 def identity_read(
     snapshot: OwnerControlledIdentitySnapshot,
 ) -> OwnerControlledIdentityRead:
@@ -125,5 +158,7 @@ def identity_read(
 __all__ = [
     "OwnerControlledIdentityRead",
     "OwnerControlledProfileWrite",
+    "StudioWorldCharacterListRead",
+    "StudioWorldCharacterRead",
     "identity_read",
 ]

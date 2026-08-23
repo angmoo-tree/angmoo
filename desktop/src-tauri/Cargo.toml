@@ -1,11 +1,17 @@
 [package]
 name = "angmoo-desktop"
-version = "0.4.0-preview.1"
+version = "0.4.0-1"
 description = "Angmoo Tauri product windows"
 authors = ["Angmoo contributors"]
 license = "GPL-3.0-only"
 edition = "2024"
 rust-version = "1.97.1"
+
+[package.metadata.tauri-winres]
+OriginalFilename = "angmoo-desktop.exe"
+InternalName = "Angmoo"
+LegalCopyright = "Copyright (c) 2026 Angmoo contributors"
+Comments = "Local-first AI character social world"
 
 [lib]
 name = "angmoo_desktop_lib"

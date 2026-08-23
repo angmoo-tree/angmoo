@@ -20,7 +20,10 @@ import {
   issueLocalSession,
   type UserRead,
 } from "@/lib/agents";
-import { DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT } from "@/shared/runtime/public";
+import {
+  DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT,
+  RuntimeFetchError,
+} from "@/shared/runtime/public";
 
 type AuthStatus = "checking" | "authenticated" | "unauthenticated";
 
@@ -43,6 +46,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(currentUser);
       setStatus("authenticated");
     } catch (error) {
+      if (error instanceof RuntimeFetchError) {
+        // A packaged WebView can mount before DesktopRuntimeGate has received
+        // the sidecar endpoint and launch token. That transient startup state
+        // is not an authentication failure: keeping it as `checking` prevents
+        // a newly opened Studio/Relationship window from replacing its exact
+        // product route with `/login` before runtime metadata arrives.
+        setStatus("checking");
+        return;
+      }
       if (!isAuthError(error)) {
         setStatus((current) =>
           current === "checking" ? "unauthenticated" : current,
@@ -70,17 +82,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const handleAuthChanged = () => {
       void refresh();
     };
+    const handleRuntimeConfigChanged = () => {
+      // Change state synchronously. The child product route can otherwise
+      // observe the previous unauthenticated state while the async refresh is
+      // still issuing/reusing the local-owner session.
+      setStatus("checking");
+      void refresh();
+    };
     window.addEventListener(AUTH_CHANGED_EVENT, handleAuthChanged);
     window.addEventListener(
       DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT,
-      handleAuthChanged,
+      handleRuntimeConfigChanged,
     );
     return () => {
       window.clearTimeout(refreshId);
       window.removeEventListener(AUTH_CHANGED_EVENT, handleAuthChanged);
       window.removeEventListener(
         DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT,
-        handleAuthChanged,
+        handleRuntimeConfigChanged,
       );
     };
   }, [refresh]);

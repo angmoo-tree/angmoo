@@ -5,9 +5,11 @@ import { WorldApp, type WorldAppSectionId } from "@/features/world-app/public";
 
 
 export function WorldAppRouteClient({
+  postId,
   sectionId,
   worldId,
 }: {
+  postId?: string;
   sectionId: WorldAppSectionId;
   worldId: string;
 }) {
@@ -16,6 +18,7 @@ export function WorldAppRouteClient({
     <WorldApp
       authStatus={status}
       key={worldId}
+      postId={postId}
       sectionId={sectionId}
       worldId={worldId}
     />

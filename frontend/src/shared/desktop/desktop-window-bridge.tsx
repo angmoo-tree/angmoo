@@ -5,6 +5,7 @@ import { useEffect, useSyncExternalStore } from "react";
 
 import {
   type AngmooPhoneResizeDirection,
+  consumeDesktopWindowBootstrapRoute,
   currentDesktopRoute,
   desktopWindowKindForRoute,
   getDesktopWindowState,
@@ -102,6 +103,7 @@ export function DesktopWindowBridge() {
     if (!state) return;
     const windowKind = state.kind;
     window.__ANGMOO_DESKTOP_WINDOW__ = state;
+    consumeDesktopWindowBootstrapRoute(state);
     document.body.dataset.angmooDesktopWindow = windowKind;
     if (windowKind === "phone") {
       document.body.dataset.angmooWindowDrag = "manual";

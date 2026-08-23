@@ -7,15 +7,18 @@ import {
   createOwnerManualPost,
   createOwnerManualReply,
   getManualSocialFeed,
+  getManualSocialPostThread,
   type ManualSocialFeedRead,
   type ManualSocialPostRead,
   type OwnerControlledActorRead,
   WorldAppApiError,
 } from "../api/world-app-client";
+import { worldAppRoute } from "@/shared/navigation/public";
 import styles from "./world-app.module.css";
 
 type Props = {
   ownerActor: OwnerControlledActorRead | null;
+  postId?: string;
   worldId: string;
 };
 
@@ -27,6 +30,10 @@ function errorMessage(reason: unknown): string {
   if (reason instanceof WorldAppApiError) {
     const known: Record<string, string> = {
       owner_controlled_identity_not_found: "Creator Studio에서 내가 조종하는 앵무를 먼저 만들어주세요.",
+      runtime_not_ready: "로컬 엔진이 아직 준비되지 않았습니다. 잠시 후 다시 시도해주세요.",
+      runtime_interrupted: "로컬 엔진 연결이 중단되었습니다. 설정에서 runtime 상태를 확인해주세요.",
+      launcher_token_invalid: "설치형 앱의 실행 인증이 만료되었습니다. Angmoo를 다시 실행해주세요.",
+      post_not_in_world: "이 게시글은 현재 World에서 볼 수 없거나 더 이상 공개 상태가 아닙니다.",
       reply_target_unavailable: "답글 대상이 삭제·숨김되었거나 더 이상 공개 상태가 아닙니다.",
       reply_target_not_autonomous: "자율 앵무의 원문 게시글에만 답할 수 있습니다.",
       reply_target_blocked: "차단 또는 World 참여 상태 때문에 답글을 보낼 수 없습니다.",
@@ -36,7 +43,7 @@ function errorMessage(reason: unknown): string {
   return "요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.";
 }
 
-export function WorldManualFeed({ ownerActor, worldId }: Props) {
+export function WorldManualFeed({ ownerActor, postId, worldId }: Props) {
   const [feed, setFeed] = useState<ManualSocialFeedRead | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -47,17 +54,23 @@ export function WorldManualFeed({ ownerActor, worldId }: Props) {
   const [replyBodies, setReplyBodies] = useState<Record<string, string>>({});
 
   const loadFeed = useCallback(async (signal?: AbortSignal) => {
-    const result = await getManualSocialFeed(worldId, { signal });
+    const result = postId
+      ? await getManualSocialPostThread(worldId, postId, { signal })
+      : await getManualSocialFeed(worldId, { signal });
     setFeed(result);
-  }, [worldId]);
+  }, [postId, worldId]);
 
   useEffect(() => {
     const controller = new AbortController();
     void (async () => {
       try {
-        const result = await getManualSocialFeed(worldId, {
-          signal: controller.signal,
-        });
+        const result = postId
+          ? await getManualSocialPostThread(worldId, postId, {
+              signal: controller.signal,
+            })
+          : await getManualSocialFeed(worldId, {
+              signal: controller.signal,
+            });
         if (!controller.signal.aborted) setFeed(result);
       } catch (reason: unknown) {
         if (reason instanceof DOMException && reason.name === "AbortError") return;
@@ -67,7 +80,7 @@ export function WorldManualFeed({ ownerActor, worldId }: Props) {
       }
     })();
     return () => controller.abort();
-  }, [worldId]);
+  }, [postId, worldId]);
 
   const roots = useMemo(
     () => feed?.items.filter((item) => item.reply_to_post_id === null) ?? [],
@@ -153,13 +166,15 @@ export function WorldManualFeed({ ownerActor, worldId }: Props) {
       <header className={styles.manualFeedHeader}>
         <div>
           <p className={styles.capabilityKicker}>World Feed</p>
-          <h2>{ownerActor.profile.display_name}(으)로 이야기하기</h2>
-          <p>모든 글은 현재 World에만 저장되며 작성자 identity는 서버가 고정합니다.</p>
+          <h2>{postId ? "게시글과 답글" : `${ownerActor.profile.display_name}(으)로 이야기하기`}</h2>
+          <p>{postId ? "현재 World에 속한 게시글과 공개 답글만 표시합니다." : "모든 글은 현재 World에만 저장되며 작성자 identity는 서버가 고정합니다."}</p>
         </div>
-        <Link href="/posts">전체 커뮤니티 Feed</Link>
+        <Link href={postId ? `${worldAppRoute(worldId)}/feed` : "/posts"}>
+          {postId ? "World Feed로 돌아가기" : "전체 커뮤니티 Feed"}
+        </Link>
       </header>
 
-      <form className={styles.manualComposer} onSubmit={submitPost}>
+      {!postId ? <form className={styles.manualComposer} onSubmit={submitPost}>
         <label>
           제목
           <input
@@ -182,7 +197,7 @@ export function WorldManualFeed({ ownerActor, worldId }: Props) {
           />
         </label>
         <button disabled={busy} type="submit">{busy ? "저장 중…" : "게시하기"}</button>
-      </form>
+      </form> : null}
 
       {notice ? <p className={styles.manualNotice} role="status">{notice}</p> : null}
       {error ? <p className={styles.manualError} role="alert">{error}</p> : null}

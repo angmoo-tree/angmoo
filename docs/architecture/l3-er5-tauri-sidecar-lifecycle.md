@@ -24,6 +24,20 @@ closeout; ER7 still owns removal of the legacy PostgreSQL and Neo4j defaults.
    metadata to disappear, and uses a kill fallback only if the sidecar does not
    drain in time.
 
+ER6 packages the Windows sidecar with PyInstaller's no-console subsystem. The
+host therefore does not depend on stdout for readiness: every launch receives
+a random generation identifier, polls an atomically replaced
+`sidecar.endpoint.json`, validates schema/PID/loopback/dynamic-port/generation,
+and only then performs the authenticated health request. Endpoint metadata
+contains no launch token, APP_SECRET, credential, or API key. Docker, direct
+backend execution, and `tauri dev` keep their normal developer diagnostics.
+
+The ER6 Studio lifecycle surface remains read-only. A creator opens a World and
+retrieves only that World's existing WorldCharacter summaries through the
+`world_characters` domain. Autonomous entries link to the existing P2/P3/P4
+setup route; owner-controlled entries link to the existing World profile area.
+Creation, deletion, placement, archive, and recovery remain deferred to P10-L.
+
 The packaged one-file Python executable appears as two Windows PIDs while it is
 running: a PyInstaller bootloader and its child Python worker. They represent
 one logical sidecar, one owner record, one listening port, and one FastAPI

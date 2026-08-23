@@ -41,6 +41,7 @@ export type WorldAppAuthStatus =
 
 type WorldAppProps = {
   authStatus: WorldAppAuthStatus;
+  postId?: string;
   sectionId: WorldAppSectionId;
   worldId: string;
 };
@@ -53,7 +54,7 @@ const SECTION_ICONS: Record<WorldAppSectionId, ReactNode> = {
   relationships: <Network size={19} strokeWidth={2.2} />,
 };
 
-export function WorldApp({ authStatus, sectionId, worldId }: WorldAppProps) {
+export function WorldApp({ authStatus, postId, sectionId, worldId }: WorldAppProps) {
   const [world, setWorld] = useState<WorldSurfaceItem | null>(null);
   const [ownerActor, setOwnerActor] = useState<OwnerControlledActorRead | null>(null);
   const [loading, setLoading] = useState(true);
@@ -132,6 +133,7 @@ export function WorldApp({ authStatus, sectionId, worldId }: WorldAppProps) {
       <WorldSection
         activeSection={activeSection}
         ownerActor={ownerActor}
+        postId={postId}
         world={world}
         worldId={worldId}
       />
@@ -169,11 +171,13 @@ function WorldNavigation({
 function WorldSection({
   activeSection,
   ownerActor,
+  postId,
   world,
   worldId,
 }: {
   activeSection: WorldAppSection;
   ownerActor: OwnerControlledActorRead | null;
+  postId?: string;
   world: WorldSurfaceItem;
   worldId: string;
 }) {
@@ -205,7 +209,7 @@ function WorldSection({
   }
 
   if (activeSection.id === "feed") {
-    return <WorldManualFeed ownerActor={ownerActor} worldId={worldId} />;
+    return <WorldManualFeed ownerActor={ownerActor} postId={postId} worldId={worldId} />;
   }
 
   if (activeSection.id === "relationships") {

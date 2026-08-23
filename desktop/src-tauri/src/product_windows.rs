@@ -1,5 +1,9 @@
 use serde::Serialize;
+use std::path::PathBuf;
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
+
+const WINDOW_KIND_QUERY: &str = "__angmoo_window_kind";
+const WINDOW_ROUTE_QUERY: &str = "__angmoo_window_route";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
@@ -130,7 +134,20 @@ fn navigation_script(kind: ProductWindowKind, route: &str) -> Result<String, Str
     ))
 }
 
-fn window_url(app: &AppHandle, route: &str) -> Result<WebviewUrl, String> {
+fn static_window_path(kind: ProductWindowKind, route: &str) -> Result<PathBuf, String> {
+    let mut bootstrap = tauri::Url::parse("http://angmoo.local/index.html")
+        .map_err(|_| "window_bootstrap_url_invalid".to_owned())?;
+    bootstrap
+        .query_pairs_mut()
+        .append_pair(WINDOW_KIND_QUERY, kind.label())
+        .append_pair(WINDOW_ROUTE_QUERY, route);
+    let query = bootstrap
+        .query()
+        .ok_or_else(|| "window_bootstrap_query_missing".to_owned())?;
+    Ok(format!("index.html?{query}").into())
+}
+
+fn window_url(app: &AppHandle, kind: ProductWindowKind, route: &str) -> Result<WebviewUrl, String> {
     if tauri::is_dev() {
         let base = app
             .config()
@@ -143,7 +160,10 @@ fn window_url(app: &AppHandle, route: &str) -> Result<WebviewUrl, String> {
             .map_err(|_| "tauri_dev_route_invalid".to_owned())?;
         Ok(WebviewUrl::External(url))
     } else {
-        Ok(WebviewUrl::App("index.html".into()))
+        // The initialization script is the primary document-start contract.
+        // Keep an encoded copy in the app URL as a recovery channel because a
+        // real WebView can hydrate before that global becomes observable.
+        Ok(WebviewUrl::App(static_window_path(kind, route)?))
     }
 }
 
@@ -181,7 +201,7 @@ pub async fn open_product_window_impl(
         return Err("phone_window_missing".to_owned());
     }
 
-    let builder = WebviewWindowBuilder::new(&app, kind.label(), window_url(&app, &route)?)
+    let builder = WebviewWindowBuilder::new(&app, kind.label(), window_url(&app, kind, &route)?)
         .title(kind.title())
         .decorations(false)
         .resizable(true)
@@ -246,5 +266,28 @@ mod tests {
             .expect("state script");
         assert!(script.contains("kind:\"studio\""));
         assert!(script.contains("route:\"/studio/worlds/world-1\""));
+    }
+
+    #[test]
+    fn static_window_path_carries_the_exact_kind_and_route() {
+        let path = static_window_path(
+            ProductWindowKind::RelationshipGraph,
+            "/characters/mango/worlds/arcana/relationship-graph?provider=ladybug",
+        )
+        .expect("static window path");
+        let parsed = tauri::Url::parse(&format!("http://angmoo.local/{}", path.to_string_lossy()))
+            .expect("parse static window path");
+        let query = parsed
+            .query_pairs()
+            .collect::<std::collections::HashMap<_, _>>();
+
+        assert_eq!(
+            query.get(WINDOW_KIND_QUERY).map(|value| value.as_ref()),
+            Some("relationship-graph")
+        );
+        assert_eq!(
+            query.get(WINDOW_ROUTE_QUERY).map(|value| value.as_ref()),
+            Some("/characters/mango/worlds/arcana/relationship-graph?provider=ladybug")
+        );
     }
 }

@@ -23,6 +23,7 @@ import {
 } from "@/shared/media/public";
 
 import { useAuth } from "@/components/auth-provider";
+import { StudioWorldCharacterList } from "@/features/creator-studio/public";
 import {
   createOwnerControlledIdentity,
   createWorld,
@@ -471,10 +472,15 @@ export function WorldCreatorClient({ worldId }: { worldId?: string }) {
             <OptionalSettings definition={definition} change={change} />
 
             {context ? (
-              <OwnerControlledIdentityPanel
-                roles={definition.roles}
-                worldId={context.world.id}
-              />
+              <>
+                <StudioWorldCharacterList worldId={context.world.id} />
+                <div id="owner-controlled-identity" className="scroll-mt-6">
+                  <OwnerControlledIdentityPanel
+                    roles={definition.roles}
+                    worldId={context.world.id}
+                  />
+                </div>
+              </>
             ) : null}
 
             <Panel title="배너 이미지 (선택)" description="초안을 저장한 뒤 업로드할 수 있습니다. 이미지 변경은 캐릭터 일과 생성 계약 hash를 바꾸지 않습니다.">

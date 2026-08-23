@@ -11,7 +11,11 @@ from app.core.db import SessionLocal
 from app.domains.relationships.ports.projection import (
     RelationshipProjectionBackendError,
 )
-from app.services.graph_projection_runtime import graph_client_from_settings
+from app.services.graph_projection_runtime import (
+    graph_client_from_settings,
+    register_process_graph_client,
+    unregister_process_graph_client,
+)
 from app.services.graph_projection_worker import GraphProjectionWorker
 from app.services.resident_tick_scheduler import run_resident_tick_scheduler
 
@@ -47,10 +51,13 @@ def run_legacy_projector_component(
 
     while not stop_event.is_set():
         client: ClosableProjectionStore | None = None
+        client_registered = False
         try:
             client = graph_client_from_settings()
             client.verify_connectivity()
             client.bootstrap()
+            register_process_graph_client(client)
+            client_registered = True
             worker_id = settings.graph_projector_worker_id or (
                 f"in-process-{socket.gethostname()}-{threading.get_native_id()}"
             )
@@ -81,6 +88,8 @@ def run_legacy_projector_component(
                 return
         finally:
             if client is not None:
+                if client_registered:
+                    unregister_process_graph_client(client)
                 client.close()
 
 

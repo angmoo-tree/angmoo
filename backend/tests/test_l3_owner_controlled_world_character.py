@@ -232,6 +232,142 @@ def test_owner_identity_rejects_cross_owner_and_cross_world_role() -> None:
     assert invalid_role.json() == {"detail": "owner_controlled_role_invalid"}
 
 
+def test_creator_studio_lists_existing_world_characters_without_writes() -> None:
+    client, engine, principal = _fixture()
+    owner, outsider = _seed_world(engine, principal)
+    owner_identity = client.post(
+        "/api/v1/worlds/world-a/owner-character",
+        headers=FRONTEND_HEADERS,
+        json=_payload(display_name="모모"),
+    ).json()
+    now = datetime.now(UTC)
+    autonomous = models.Character(
+        id="autonomous-studio",
+        owner_id=owner.id,
+        name="망고",
+        handle="autonomous-studio",
+        avatar_url="https://example.test/mango.png",
+        one_liner="마법학교의 자율 앵무",
+        personality="",
+        speech_style="",
+        worldview="",
+        topic_preferences="",
+        safety_rules="",
+        status="active",
+        execution_mode="llm",
+        persona_summary="fixture",
+    )
+    with Session(engine) as db:
+        db.add(autonomous)
+        db.flush()
+        db.add(
+            models.WorldCharacter(
+                id="wc-autonomous-studio",
+                world_id="world-a",
+                character_id=autonomous.id,
+                membership_id="membership-owner-a",
+                role_key="student",
+                status="active",
+                control_mode="autonomous",
+                owner_user_id=None,
+                autonomous_enabled=False,
+                version=3,
+            )
+        )
+        db.add(
+            models.WorldCommunityProfile(
+                id="profile-studio",
+                world_character_id="wc-autonomous-studio",
+                status="ready",
+                visible_summary="fixture",
+                core_interests=["books"],
+                adjacent_interests=[],
+                avoid_topics=[],
+                discovery_openness=50,
+                search_keywords=["books"],
+                action_profile={},
+                schema_version=1,
+                generator_version="fixture",
+                character_contract_hash="c" * 64,
+                world_contract_hash="w" * 64,
+                provider="fake",
+                model="fixture",
+                credential_id="credential-fixture",
+                generated_at=now,
+                approved_at=now,
+            )
+        )
+        db.flush()
+        db.add(
+            models.WorldActivityRepertoire(
+                id="repertoire-studio",
+                world_character_id="wc-autonomous-studio",
+                status="ready",
+                schema_version=1,
+                generator_version="fixture",
+                character_contract_hash="c" * 64,
+                world_contract_hash="w" * 64,
+                community_profile_id="profile-studio",
+                provider="fake",
+                model="fixture",
+                credential_id="credential-fixture",
+                validation_summary={"count": 40},
+                generated_at=now,
+                approved_at=now,
+            )
+        )
+        db.commit()
+
+    before = None
+    with Session(engine) as db:
+        before = (
+            db.query(models.Post).count(),
+            db.query(models.Comment).count(),
+            db.query(models.AgentRun).count(),
+        )
+
+    response = client.get(
+        "/api/v1/worlds/world-a/characters?surface=studio",
+        headers=FRONTEND_HEADERS,
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["schema_version"] == "studio-world-character-list-v1"
+    assert payload["world_id"] == "world-a"
+    by_mode = {item["control_mode"]: item for item in payload["items"]}
+    assert by_mode["autonomous"] == {
+        "world_character_id": "wc-autonomous-studio",
+        "character_id": "autonomous-studio",
+        "display_name": "망고",
+        "avatar_url": "https://example.test/mango.png",
+        "intro": "마법학교의 자율 앵무",
+        "role_key": "student",
+        "control_mode": "autonomous",
+        "status": "active",
+        "autonomous_enabled": False,
+        "version": 3,
+        "activity_setup_state": "approved",
+    }
+    assert by_mode["owner_controlled"]["character_id"] == owner_identity["character_id"]
+    assert by_mode["owner_controlled"]["activity_setup_state"] == (
+        "unavailable_for_owner_controlled"
+    )
+
+    with Session(engine) as db:
+        assert before == (
+            db.query(models.Post).count(),
+            db.query(models.Comment).count(),
+            db.query(models.AgentRun).count(),
+        )
+
+    principal["user"] = outsider
+    forbidden = client.get(
+        "/api/v1/worlds/world-a/characters?surface=studio",
+        headers=FRONTEND_HEADERS,
+    )
+    assert forbidden.status_code == 403
+
+
 def test_scheduler_claim_excludes_owner_controlled_but_keeps_autonomous() -> None:
     client, engine, principal = _fixture()
     owner, _ = _seed_world(engine, principal)

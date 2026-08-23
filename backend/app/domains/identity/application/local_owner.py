@@ -22,6 +22,16 @@ class GetLocalBootstrapStatus:
         return self._repository.get_bootstrap_status()
 
 
+class EnsureLocalInstallationIdentity:
+    """Prepare the device identity without claiming a local owner."""
+
+    def __init__(self, repository: IdentityRepository) -> None:
+        self._repository = repository
+
+    def execute(self) -> str:
+        return self._repository.ensure_local_installation_identity(now=utcnow())
+
+
 class CreateLocalBootstrapChallenge:
     def __init__(self, repository: IdentityRepository) -> None:
         self._repository = repository
