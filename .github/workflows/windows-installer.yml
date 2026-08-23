@@ -513,6 +513,55 @@ jobs:
           $secretHashAfterFirstRun = Get-StableFileHash $secretPath 'first_runtime_shutdown'
           $mediaProof = Join-Path $dataRoot 'media\world-er6\banner.txt'
           $mediaHashAfterFirstRun = Get-StableFileHash $mediaProof 'first_runtime_shutdown'
+
+          # Exercise the path that was previously missing from this workflow:
+          # an installer/updater is run directly over an existing canonical
+          # installation without an explicit uninstall in between.  Corrupt a
+          # replaceable app-owned file first so the subsequent manifest check
+          # proves that the payload was actually rewritten rather than merely
+          # observing the pre-existing files.
+          $noticePath = Join-Path $installRoot 'THIRD_PARTY_NOTICES.md'
+          Set-Content -LiteralPath $noticePath -Value 'stale in-place upgrade payload' -Encoding ascii
+          if ((Get-FileHash -LiteralPath $noticePath -Algorithm SHA256).Hash -eq
+              $installManifest[$noticePath]) {
+            throw 'In-place upgrade proof did not change the replaceable app payload'
+          }
+          Write-Host 'Running direct in-place installer update over the existing canonical installation'
+          $inPlaceUpgrade = Start-Process $installer.FullName -ArgumentList '/S', '/UPDATE' -PassThru
+          if (-not $inPlaceUpgrade.WaitForExit(120000)) {
+            Stop-Process -Id $inPlaceUpgrade.Id -Force -ErrorAction SilentlyContinue
+            throw 'Direct in-place installer update timed out after 120 seconds'
+          }
+          if ($inPlaceUpgrade.ExitCode -ne 0) {
+            throw "Direct in-place installer update failed: $($inPlaceUpgrade.ExitCode)"
+          }
+          Assert-InstallFileManifest $installManifest 'direct_in_place_upgrade'
+          if (Test-Path -LiteralPath (Join-Path $env:LOCALAPPDATA 'Angmoo.__casefix__')) {
+            throw 'Direct in-place installer update left a case-normalization staging directory'
+          }
+          if ((Get-StableFileHash $database 'direct_in_place_upgrade') -ne $databaseHashAfterFirstRun) {
+            throw 'Direct in-place installer update changed the canonical SQLite database'
+          }
+          if ((Get-StableFileHash $secretPath 'direct_in_place_upgrade') -ne $secretHashAfterFirstRun) {
+            throw 'Direct in-place installer update changed APP_SECRET'
+          }
+          if ((Get-StableFileHash $mediaProof 'direct_in_place_upgrade') -ne $mediaHashAfterFirstRun) {
+            throw 'Direct in-place installer update changed local media'
+          }
+          foreach ($entry in $legacyLauncherSecrets.GetEnumerator()) {
+            $path = Join-Path $dataRoot "secrets\$($entry.Key)"
+            if ((Get-StableFileHash $path 'direct_in_place_upgrade') -ne
+                $legacyLauncherSecretHashes[$entry.Key]) {
+              throw "Direct in-place installer update changed launcher secret: $($entry.Key)"
+            }
+          }
+          $registeredInstallLocation =
+            Get-ItemPropertyValue `
+              -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Angmoo' `
+              -Name InstallLocation
+          if ($registeredInstallLocation.Trim('"') -ne $installRoot) {
+            throw "Direct in-place installer update registered an unexpected install location: $registeredInstallLocation"
+          }
           Start-MpScan -ScanType CustomScan -ScanPath $installRoot
           Assert-InstallFileManifest $installManifest 'installed_postrun_scan'
           Assert-NoActiveDefenderDetection 'installed_postrun_scan'
@@ -682,6 +731,8 @@ jobs:
             legacy_runtime_excluded = $true
             legacy_webview_excluded = $true
             silent_uninstall_preserved_data = $true
+            direct_in_place_upgrade_replaced_app = $true
+            direct_in_place_upgrade_preserved_data = $true
             reinstall_reused_data = $true
             final_silent_uninstall_preserved_data = $true
             legacy_launcher_secret_merge = $true

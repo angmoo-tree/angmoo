@@ -11,6 +11,9 @@ import pytest
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 HOOKS_PATH = REPOSITORY_ROOT / "desktop" / "src-tauri" / "installer-hooks.nsh"
+WINDOWS_INSTALLER_WORKFLOW = (
+    REPOSITORY_ROOT / ".github" / "workflows" / "windows-installer.yml"
+)
 OWNED_DATA_CHILDREN = (
     "canonical",
     "graph",
@@ -112,6 +115,45 @@ def test_confirmed_state_is_ordered_after_all_validations() -> None:
     assert warning < final_validation < confirmed < first_delete
     assert "${If} $AngmooFullDeleteConfirmed = 1" in post
     assert "$DeleteAppDataCheckboxState" not in post
+
+
+def test_existing_canonical_install_skips_product_root_case_rename() -> None:
+    hooks = HOOKS_PATH.read_text(encoding="utf-8")
+    preinstall = hooks.split("!macro NSIS_HOOK_PREINSTALL", 1)[1].split(
+        "!macroend", 1
+    )[0]
+
+    registered = preinstall.index(
+        'ReadRegStr $R9 SHCTX "${MANUPRODUCTKEY}" ""'
+    )
+    parent = preinstall.index('${GetParent} "$R9" $R8')
+    canonical_short_circuit = preinstall.index(
+        'StrCmp "$R8" "$LOCALAPPDATA\\Angmoo" angmoo_case_root_done 0'
+    )
+    case_rename = preinstall.index(
+        'Rename "$LOCALAPPDATA\\angmoo" "$LOCALAPPDATA\\Angmoo.__casefix__"'
+    )
+
+    assert registered < parent < canonical_short_circuit < case_rename
+
+
+def test_windows_installer_exercises_direct_in_place_upgrade() -> None:
+    workflow = WINDOWS_INSTALLER_WORKFLOW.read_text(encoding="utf-8")
+
+    direct_upgrade = workflow.index(
+        "Running direct in-place installer update over the existing canonical installation"
+    )
+    explicit_uninstall = workflow.index(
+        "Running silent uninstall while preserving local data"
+    )
+
+    assert direct_upgrade < explicit_uninstall
+    assert "-ArgumentList '/S', '/UPDATE'" in workflow
+    assert "Assert-InstallFileManifest $installManifest 'direct_in_place_upgrade'" in workflow
+    assert "Direct in-place installer update changed the canonical SQLite database" in workflow
+    assert "Direct in-place installer update changed APP_SECRET" in workflow
+    assert "direct_in_place_upgrade_replaced_app = $true" in workflow
+    assert "direct_in_place_upgrade_preserved_data = $true" in workflow
 
 
 @pytest.mark.parametrize(
