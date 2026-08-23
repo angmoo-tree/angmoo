@@ -54,15 +54,28 @@ jobs:
       - name: Verify ER6 migration, restore, and installer contracts
         shell: pwsh
         run: |
-          backend\.venv\Scripts\python.exe -m pytest -q `
-            backend\tests\test_l3_er6_release_candidate.py `
-            backend\tests\test_l3_er5_desktop_sidecar_security.py `
-            backend\tests\test_l3_er3_ladybug_projection.py `
-            backend\tests\test_l3_er3_graph_query_parity.py `
-            backend\tests\test_l3_er4_single_backend_runtime.py
+          Push-Location backend
+          .\.venv\Scripts\python.exe -m pytest -q `
+            tests\test_l3_er6_release_candidate.py `
+            tests\test_l3_er6_localappdata_closeout.py `
+            tests\test_l3_er6_interactive_remove_data.py `
+            tests\test_l3_er5_desktop_sidecar_security.py `
+            tests\test_l3_er3_ladybug_projection.py `
+            tests\test_l3_er3_graph_query_parity.py `
+            tests\test_l3_er4_single_backend_runtime.py
+          Pop-Location
           backend\.venv\Scripts\python.exe scripts\ci\check_desktop_installer_contract.py
           backend\.venv\Scripts\python.exe scripts\ci\check_er6_desktop_supply_chain.py `
             --evidence .codex-temp\er6-supply-chain-audit.json
+      - name: Build synthetic legacy LocalAppData lifecycle fixture
+        shell: pwsh
+        run: |
+          $fixtureRoot = '.codex-temp\er6-localappdata-lifecycle\legacy'
+          backend\.venv\Scripts\python.exe `
+            scripts\ci\build_er6_localappdata_lifecycle_fixture.py `
+            --output-root $fixtureRoot
+          $archive = '.codex-temp\er6-localappdata-lifecycle\er6-localappdata-lifecycle.zip'
+          Compress-Archive -Path "$fixtureRoot\*" -DestinationPath $archive
       - name: Audit locked runtime dependencies
         shell: pwsh
         run: |
@@ -135,6 +148,7 @@ jobs:
             .codex-temp/er6-release-metadata/LICENSE
             .codex-temp/er6-supply-chain-audit.json
             .codex-temp/er6-defender-trigger-matrix/er6-defender-trigger-matrix.json
+            .codex-temp/er6-localappdata-lifecycle/er6-localappdata-lifecycle.zip
       - name: Attest Windows installers
         if: github.event_name != 'pull_request'
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
@@ -248,13 +262,100 @@ jobs:
               }
             }
           }
+          function Get-StableFileHash([string]$Path, [string]$Stage) {
+            $lastError = $null
+            for ($attempt = 1; $attempt -le 40; $attempt++) {
+              try {
+                return (Get-FileHash -LiteralPath $Path -Algorithm SHA256 -ErrorAction Stop).Hash
+              } catch [System.IO.IOException] {
+                $lastError = $_
+                Start-Sleep -Milliseconds 250
+              }
+            }
+            throw "Timed out waiting for a stable file hash at ${Stage}: $Path ($lastError)"
+          }
+          function Wait-InstalledApplicationRemoved([string]$Root, [string]$Stage) {
+            # NSIS completes the visible uninstaller process before its
+            # self-delete helper removes the application payload. Wait for
+            # that bounded, expected cleanup without weakening the assertion.
+            $deadline = (Get-Date).AddSeconds(30)
+            while ((Get-Date) -lt $deadline) {
+              $remaining = Get-ChildItem $Root -Filter 'angmoo-desktop.exe' -Recurse `
+                -ErrorAction SilentlyContinue | Select-Object -First 1
+              if (-not $remaining) { return }
+              Start-Sleep -Milliseconds 250
+            }
+            throw "NSIS uninstall left the installed application executable behind at ${Stage}"
+          }
+          function Stop-ProductWebViewProcesses(
+            [string]$ProfileRoot,
+            [int[]]$BaselineProcessIds,
+            [string]$Stage
+          ) {
+            # A headless runner can force-kill the frameless Tauri host after
+            # CloseMainWindow(), leaving WebView2 children alive for a short
+            # time. Those processes keep the preserved profile locked and can
+            # make the next Tauri setup exit before it starts the sidecar.
+            # Match only WebView2 processes created by this product profile;
+            # never terminate a runner/system WebView that predates Angmoo.
+            $profileNeedle = $ProfileRoot.ToLowerInvariant()
+            $deadline = (Get-Date).AddSeconds(20)
+            do {
+              $owned = @(Get-CimInstance Win32_Process -Filter "Name = 'msedgewebview2.exe'" `
+                -ErrorAction SilentlyContinue |
+                Where-Object {
+                  $_.ProcessId -notin $BaselineProcessIds -and
+                  -not [string]::IsNullOrWhiteSpace([string]$_.CommandLine) -and
+                  $_.CommandLine.ToLowerInvariant().Contains($profileNeedle)
+                })
+              if ($owned.Count -eq 0) { return }
+              foreach ($process in $owned) {
+                Stop-Process -Id $process.ProcessId -Force -ErrorAction SilentlyContinue
+              }
+              Start-Sleep -Milliseconds 250
+            } while ((Get-Date) -lt $deadline)
+            throw "Product WebView2 profile remained locked at ${Stage}: $ProfileRoot"
+          }
           $root = Join-Path $env:RUNNER_TEMP 'angmoo-installer'
           $installer = Get-ChildItem $root -Filter '*setup*.exe' -Recurse | Select-Object -First 1
           if (-not $installer) { $installer = Get-ChildItem $root -Filter '*.exe' -Recurse | Select-Object -First 1 }
+          $fixtureArchive = Get-ChildItem $root -Filter 'er6-localappdata-lifecycle.zip' -Recurse |
+            Select-Object -First 1
+          if (-not $fixtureArchive) { throw 'Synthetic LocalAppData lifecycle fixture is missing' }
+          $legacyRoot = Join-Path $env:LOCALAPPDATA 'com.angmoo.desktop'
           $productRoot = Join-Path $env:LOCALAPPDATA 'Angmoo'
           $installRoot = Join-Path $productRoot 'app'
+          if (Test-Path -LiteralPath $legacyRoot) {
+            throw "Hosted runner legacy root was not clean before fixture restore: $legacyRoot"
+          }
           if (Test-Path -LiteralPath $productRoot) {
             throw "Hosted runner product root was not clean before install: $productRoot"
+          }
+          New-Item -ItemType Directory -Force -Path $legacyRoot | Out-Null
+          Expand-Archive -LiteralPath $fixtureArchive.FullName -DestinationPath $legacyRoot
+          $fixtureManifestPath = Join-Path $legacyRoot 'fixture-manifest.json'
+          if (-not (Test-Path -LiteralPath $fixtureManifestPath)) {
+            throw 'Synthetic LocalAppData fixture manifest is missing after restore'
+          }
+          $fixtureManifest = Get-Content -LiteralPath $fixtureManifestPath -Raw | ConvertFrom-Json
+          if (-not $fixtureManifest.synthetic_fixture -or $fixtureManifest.contains_real_credentials) {
+            throw 'Installed lifecycle refuses a personal or real-credential fixture'
+          }
+          # Reproduce the field layout that exposed the ER6 migration gap:
+          # launcher-era DPAPI files under a lowercase product root coexist
+          # with canonical preview data under com.angmoo.desktop.
+          $lowercaseProductRoot = Join-Path $env:LOCALAPPDATA 'angmoo'
+          $legacyLauncherSecrets = [ordered]@{
+            'app-secret.dpapi' = 'synthetic-launcher-app-secret-dpapi'
+            'neo4j-local-password.dpapi' = 'synthetic-neo4j-password-dpapi'
+          }
+          $legacyLauncherSecretHashes = @{}
+          foreach ($entry in $legacyLauncherSecrets.GetEnumerator()) {
+            $path = Join-Path $lowercaseProductRoot "secrets\$($entry.Key)"
+            New-Item -ItemType Directory -Force -Path (Split-Path $path) | Out-Null
+            Set-Content -LiteralPath $path -Value $entry.Value -Encoding ascii -NoNewline
+            $legacyLauncherSecretHashes[$entry.Key] =
+              (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash
           }
           Write-Host "Installing $($installer.FullName) into the canonical app root $installRoot"
           $install = Start-Process $installer.FullName -ArgumentList '/S' -PassThru
@@ -263,6 +364,12 @@ jobs:
             throw 'NSIS install timed out after 120 seconds'
           }
           if ($install.ExitCode -ne 0) { throw "NSIS install failed: $($install.ExitCode)" }
+          $productEntries = @(Get-ChildItem -LiteralPath $env:LOCALAPPDATA -Directory -Force |
+            Where-Object { $_.Name -ieq 'Angmoo' })
+          if ($productEntries.Count -ne 1 -or $productEntries[0].Name -cne 'Angmoo') {
+            throw "Installer did not canonicalize the product-root casing to Angmoo"
+          }
+          $productRootActualName = $productEntries[0].Name
           # Tauri's productName is "Angmoo", but the generated NSIS contract
           # installs the mainBinaryName as angmoo-desktop.exe.
           $app = Get-ChildItem $installRoot -Filter 'angmoo-desktop.exe' -Recurse -ErrorAction SilentlyContinue |
@@ -286,6 +393,8 @@ jobs:
           $forbiddenBefore = @(Get-Process -ErrorAction SilentlyContinue |
             Where-Object ProcessName -match $forbiddenPattern |
             Select-Object -ExpandProperty Id)
+          $webViewBefore = @(Get-Process -Name 'msedgewebview2' -ErrorAction SilentlyContinue |
+            Select-Object -ExpandProperty Id)
           Write-Host "Launching installed product $($app.FullName)"
           $product = Start-Process $app.FullName -PassThru
           $dataRoot = $productRoot
@@ -297,6 +406,55 @@ jobs:
           }
           if (-not (Test-Path $endpoint)) { throw 'Installed sidecar endpoint was not created' }
           if (-not (Test-Path $database)) { throw 'Installed SQLite canonical database was not created' }
+          $migrationMarkerPath = Join-Path $dataRoot 'localappdata-migration-v1.json'
+          if (-not (Test-Path -LiteralPath $migrationMarkerPath)) {
+            throw 'Installed runtime did not write the LocalAppData migration marker'
+          }
+          $migrationMarker = Get-Content -LiteralPath $migrationMarkerPath -Raw | ConvertFrom-Json
+          if ($migrationMarker.status -ne 'migrated') {
+            throw "Unexpected LocalAppData migration status: $($migrationMarker.status)"
+          }
+          if ($migrationMarker.generation -ne $fixtureManifest.generation) {
+            throw 'Migrated generation does not match the synthetic fixture'
+          }
+          if ($migrationMarker.app_secret_sha256 -ne $fixtureManifest.app_secret_sha256) {
+            throw 'Migrated APP_SECRET digest does not match the synthetic fixture'
+          }
+          foreach ($entry in $legacyLauncherSecrets.GetEnumerator()) {
+            $path = Join-Path $dataRoot "secrets\$($entry.Key)"
+            if (-not (Test-Path -LiteralPath $path)) {
+              throw "Synthesized migration lost launcher secret: $($entry.Key)"
+            }
+            if ((Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -ne
+                $legacyLauncherSecretHashes[$entry.Key]) {
+              throw "Synthesized migration changed launcher secret: $($entry.Key)"
+            }
+          }
+          foreach ($property in $fixtureManifest.persistent_files.PSObject.Properties) {
+            $relative = $property.Name -replace '/', '\'
+            $source = Join-Path $legacyRoot $relative
+            if (-not (Test-Path -LiteralPath $source)) {
+              throw "Legacy rollback source was changed during migration: $relative"
+            }
+            if ((Get-FileHash $source -Algorithm SHA256).Hash.ToLowerInvariant() -ne [string]$property.Value) {
+              throw "Legacy rollback source digest changed during migration: $relative"
+            }
+            if ($relative -notlike 'canonical\*') {
+              $target = Join-Path $dataRoot $relative
+              if (-not (Test-Path -LiteralPath $target)) {
+                throw "Migrated persistent file is missing: $relative"
+              }
+              if ((Get-FileHash $target -Algorithm SHA256).Hash.ToLowerInvariant() -ne [string]$property.Value) {
+                throw "Migrated persistent file digest mismatch: $relative"
+              }
+            }
+          }
+          if (Test-Path -LiteralPath (Join-Path $dataRoot 'runtime\legacy-owner.lock')) {
+            throw 'Legacy runtime ownership state must not migrate'
+          }
+          if (Test-Path -LiteralPath (Join-Path $dataRoot 'WebView2\Cookies')) {
+            throw 'Legacy WebView profile must not migrate'
+          }
           $endpointText = Get-Content -LiteralPath $endpoint -Raw
           $endpointMetadata = $endpointText | ConvertFrom-Json
           if ($endpointMetadata.schema_version -ne 1) {
@@ -317,6 +475,7 @@ jobs:
           if ($endpointText -match '(?i)launch_token|app_secret|api[_-]?key|credential') {
             throw 'Installed sidecar endpoint leaked secret-bearing metadata'
           }
+          $firstEndpointGeneration = [string]$endpointMetadata.generation
           Write-Host "Installed sidecar endpoint and SQLite canonical database are ready"
           $forbidden = @(Get-Process -ErrorAction SilentlyContinue |
             Where-Object {
@@ -330,7 +489,8 @@ jobs:
           Assert-InstallFileManifest $installManifest 'runtime_behavior_scan'
           Assert-NoActiveDefenderDetection 'runtime_behavior_scan'
           Assert-NoNewDefenderDetection 'runtime_behavior_scan'
-          $sentinel = Join-Path $dataRoot 'er6-uninstall-preserve.txt'
+          $sentinel = Join-Path $dataRoot 'logs\er6-uninstall-preserve.txt'
+          New-Item -ItemType Directory -Force -Path (Split-Path $sentinel) | Out-Null
           Set-Content -LiteralPath $sentinel -Value 'preserve' -Encoding ascii
           $null = $product.CloseMainWindow()
           if (-not $product.WaitForExit(10000)) {
@@ -342,7 +502,17 @@ jobs:
           # uninstall so an install-root binary cannot keep NSIS open.
           foreach ($sidecar in $sidecars) {
             Stop-Process -Id $sidecar.Id -Force -ErrorAction SilentlyContinue
+            Wait-Process -Id $sidecar.Id -Timeout 10 -ErrorAction SilentlyContinue
           }
+          Stop-ProductWebViewProcesses `
+            (Join-Path $dataRoot 'webview') `
+            $webViewBefore `
+            'first_runtime_shutdown'
+          $databaseHashAfterFirstRun = Get-StableFileHash $database 'first_runtime_shutdown'
+          $secretPath = Join-Path $dataRoot 'secrets\app-secret'
+          $secretHashAfterFirstRun = Get-StableFileHash $secretPath 'first_runtime_shutdown'
+          $mediaProof = Join-Path $dataRoot 'media\world-er6\banner.txt'
+          $mediaHashAfterFirstRun = Get-StableFileHash $mediaProof 'first_runtime_shutdown'
           Start-MpScan -ScanType CustomScan -ScanPath $installRoot
           Assert-InstallFileManifest $installManifest 'installed_postrun_scan'
           Assert-NoActiveDefenderDetection 'installed_postrun_scan'
@@ -358,6 +528,168 @@ jobs:
           }
           if ($uninstall.ExitCode -ne 0) { throw "NSIS uninstall failed: $($uninstall.ExitCode)" }
           if (-not (Test-Path $sentinel)) { throw 'Silent uninstall deleted local data' }
+          Wait-InstalledApplicationRemoved $installRoot 'preserving_uninstall'
+          if ((Get-StableFileHash $database 'preserving_uninstall') -ne $databaseHashAfterFirstRun) {
+            throw 'Silent uninstall changed the canonical SQLite database'
+          }
+          if ((Get-StableFileHash $secretPath 'preserving_uninstall') -ne $secretHashAfterFirstRun) {
+            throw 'Silent uninstall changed APP_SECRET'
+          }
+          if ((Get-StableFileHash $mediaProof 'preserving_uninstall') -ne $mediaHashAfterFirstRun) {
+            throw 'Silent uninstall changed local media'
+          }
+          foreach ($entry in $legacyLauncherSecrets.GetEnumerator()) {
+            $path = Join-Path $dataRoot "secrets\$($entry.Key)"
+            if ((Get-StableFileHash $path 'preserving_uninstall') -ne
+                $legacyLauncherSecretHashes[$entry.Key]) {
+              throw "Silent uninstall changed launcher secret: $($entry.Key)"
+            }
+          }
+
+          Write-Host 'Reinstalling into the preserved product data namespace'
+          $reinstall = Start-Process $installer.FullName -ArgumentList '/S' -PassThru
+          if (-not $reinstall.WaitForExit(120000)) {
+            Stop-Process -Id $reinstall.Id -Force -ErrorAction SilentlyContinue
+            throw 'NSIS reinstall timed out after 120 seconds'
+          }
+          if ($reinstall.ExitCode -ne 0) { throw "NSIS reinstall failed: $($reinstall.ExitCode)" }
+          $reinstalledApp = Get-ChildItem $installRoot -Filter 'angmoo-desktop.exe' -Recurse |
+            Select-Object -First 1
+          if (-not $reinstalledApp) { throw 'Reinstalled angmoo-desktop.exe is missing' }
+          if ((Get-StableFileHash $database 'preserved_reinstall') -ne $databaseHashAfterFirstRun) {
+            throw 'Reinstall changed the preserved canonical SQLite database before launch'
+          }
+          if ((Get-StableFileHash $secretPath 'preserved_reinstall') -ne $secretHashAfterFirstRun) {
+            throw 'Reinstall changed the preserved APP_SECRET before launch'
+          }
+          if ((Get-StableFileHash $mediaProof 'preserved_reinstall') -ne $mediaHashAfterFirstRun) {
+            throw 'Reinstall changed preserved local media before launch'
+          }
+          foreach ($entry in $legacyLauncherSecrets.GetEnumerator()) {
+            $path = Join-Path $dataRoot "secrets\$($entry.Key)"
+            if ((Get-StableFileHash $path 'preserved_reinstall') -ne
+                $legacyLauncherSecretHashes[$entry.Key]) {
+              throw "Reinstall changed launcher secret: $($entry.Key)"
+            }
+          }
+
+          $secondProduct = Start-Process $reinstalledApp.FullName -PassThru
+          $secondDeadline = (Get-Date).AddSeconds(60)
+          $secondEndpoint = $null
+          while ((Get-Date) -lt $secondDeadline) {
+            if (Test-Path -LiteralPath $endpoint) {
+              try {
+                $candidate = Get-Content -LiteralPath $endpoint -Raw | ConvertFrom-Json
+                $candidatePid = [int]$candidate.logical_sidecar_pid
+                $candidateGeneration = [string]$candidate.generation
+                # Windows may immediately reuse a PID after the first
+                # sidecar exits. The launch generation is the durable
+                # identity boundary; require it to change and independently
+                # prove that the advertised sidecar process is alive.
+                if ($candidatePid -gt 0 -and
+                    -not [string]::IsNullOrWhiteSpace($candidateGeneration) -and
+                    $candidateGeneration -ne $firstEndpointGeneration -and
+                    (Get-Process -Id $candidatePid -ErrorAction SilentlyContinue)) {
+                  $secondEndpoint = $candidate
+                  break
+                }
+              } catch {
+                # The sidecar publishes the endpoint atomically. Retry until
+                # the new generation is fully readable.
+              }
+            }
+            Start-Sleep -Milliseconds 500
+          }
+          if (-not $secondEndpoint) {
+            $secondHostState = if ($secondProduct.HasExited) {
+              "exited:$($secondProduct.ExitCode)"
+            } else {
+              'running'
+            }
+            Write-Host "Reinstalled Tauri host state: $secondHostState"
+            @(Get-Process -Name 'angmoo-sidecar' -ErrorAction SilentlyContinue) |
+              Select-Object Id, ProcessName, StartTime |
+              Format-Table -AutoSize |
+              Out-String |
+              Write-Host
+            foreach ($metadataName in @('sidecar.owner.json', 'sidecar.endpoint.json')) {
+              $metadataPath = Join-Path $dataRoot "runtime\$metadataName"
+              if (-not (Test-Path -LiteralPath $metadataPath)) { continue }
+              try {
+                $metadata = Get-Content -LiteralPath $metadataPath -Raw | ConvertFrom-Json
+                [ordered]@{
+                  file = $metadataName
+                  schema_version = $metadata.schema_version
+                  logical_sidecar_pid = $metadata.logical_sidecar_pid
+                  parent_pid = $metadata.parent_pid
+                  dynamic_port = $metadata.dynamic_port
+                  generation = $metadata.generation
+                } | ConvertTo-Json -Compress | Write-Host
+              } catch {
+                Write-Host "Runtime metadata was not readable: $metadataName"
+              }
+            }
+            throw 'Reinstalled runtime did not publish a fresh sidecar endpoint'
+          }
+          if ([string]::IsNullOrWhiteSpace([string]$secondEndpoint.generation) -or
+              [string]$secondEndpoint.generation -eq $firstEndpointGeneration) {
+            throw 'Reinstalled runtime did not publish a fresh launch generation'
+          }
+          # The ER6 preview fixture intentionally represents the one approved
+          # markerless canonical layout. Its selected data generation is
+          # attested by the LocalAppData migration marker, while later release
+          # candidates may additionally publish canonical/current-generation.
+          $reinstalledGenerationMarker =
+            Get-Content -LiteralPath $migrationMarkerPath -Raw | ConvertFrom-Json
+          if ($reinstalledGenerationMarker.generation -ne $fixtureManifest.generation) {
+            throw 'Reinstalled runtime did not reuse the migrated canonical generation'
+          }
+          if ((Get-StableFileHash $secretPath 'reinstalled_runtime') -ne $secretHashAfterFirstRun) {
+            throw 'Reinstalled runtime regenerated APP_SECRET'
+          }
+          $null = $secondProduct.CloseMainWindow()
+          if (-not $secondProduct.WaitForExit(10000)) {
+            Stop-Process -Id $secondProduct.Id -Force -ErrorAction SilentlyContinue
+            $secondProduct.WaitForExit(5000) | Out-Null
+          }
+          Get-Process -Name 'angmoo-sidecar' -ErrorAction SilentlyContinue |
+            Stop-Process -Force -ErrorAction SilentlyContinue
+
+          $secondUninstaller = Get-ChildItem $installRoot -Filter 'uninstall.exe' -Recurse |
+            Select-Object -First 1
+          if (-not $secondUninstaller) { throw 'Reinstalled NSIS uninstaller is missing' }
+          $finalUninstall = Start-Process $secondUninstaller.FullName -ArgumentList '/S' -PassThru
+          if (-not $finalUninstall.WaitForExit(30000)) {
+            Stop-Process -Id $finalUninstall.Id -Force -ErrorAction SilentlyContinue
+            throw 'Final NSIS uninstall timed out after 30 seconds'
+          }
+          if ($finalUninstall.ExitCode -ne 0) {
+            throw "Final NSIS uninstall failed: $($finalUninstall.ExitCode)"
+          }
+          if (-not (Test-Path $sentinel)) { throw 'Final silent uninstall deleted local data' }
+          Wait-InstalledApplicationRemoved $installRoot 'final_preserving_uninstall'
+          if ((Get-StableFileHash $secretPath 'final_preserving_uninstall') -ne $secretHashAfterFirstRun) {
+            throw 'Final silent uninstall changed APP_SECRET'
+          }
+          $lifecycleEvidence = Join-Path $env:RUNNER_TEMP 'angmoo-defender-evidence'
+          New-Item -ItemType Directory -Force -Path $lifecycleEvidence | Out-Null
+          [ordered]@{
+            schema_version = 1
+            fixture_id = $fixtureManifest.fixture_id
+            migration_status = $migrationMarker.status
+            generation = $migrationMarker.generation
+            legacy_source_preserved = $true
+            legacy_runtime_excluded = $true
+            legacy_webview_excluded = $true
+            silent_uninstall_preserved_data = $true
+            reinstall_reused_data = $true
+            final_silent_uninstall_preserved_data = $true
+            legacy_launcher_secret_merge = $true
+            product_root_actual_name = $productRootActualName
+            interactive_full_delete = 'user_gate_required'
+            app_secret_sha256 = $secretHashAfterFirstRun.ToLowerInvariant()
+          } | ConvertTo-Json -Depth 5 |
+            Set-Content -LiteralPath (Join-Path $lifecycleEvidence 'localappdata-lifecycle.json') -Encoding utf8
       - name: Capture hosted Defender evidence
         if: always()
         shell: pwsh

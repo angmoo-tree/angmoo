@@ -68,13 +68,18 @@ export function getDesktopWindowState(): AngmooDesktopWindowState | null {
   if (!isTauriDesktopRuntime()) return null;
   return {
     kind: "phone",
-    route: `${window.location.pathname}${window.location.search}`,
+    route: normalizeInternalRoute(
+      `${window.location.pathname}${window.location.search}`,
+    ),
   };
 }
 
 function desktopWindowStateFromBootstrapQuery(): AngmooDesktopWindowState | null {
   const params = new URLSearchParams(window.location.search);
-  const kind = params.get(DESKTOP_WINDOW_KIND_QUERY);
+  const rawKind = params.get(DESKTOP_WINDOW_KIND_QUERY);
+  // `main` was the Tauri window label used by early ER6 installers. Window
+  // labels are host details; recover those candidates as the logical Phone.
+  const kind = rawKind === "main" ? "phone" : rawKind;
   const route = params.get(DESKTOP_WINDOW_ROUTE_QUERY);
   if (!kind || !DESKTOP_WINDOW_KINDS.has(kind as AngmooDesktopWindowKind) || !route) {
     return null;
@@ -200,6 +205,13 @@ export function normalizeInternalRoute(route: string) {
   const parsed = new URL(route, "http://angmoo.local");
   if (parsed.origin !== "http://angmoo.local") {
     throw new Error("desktop_route_must_be_internal");
+  }
+  if (parsed.pathname === "/index.html") {
+    const bootstrapRoute = parsed.searchParams.get(DESKTOP_WINDOW_ROUTE_QUERY);
+    if (bootstrapRoute && bootstrapRoute !== route) {
+      return normalizeInternalRoute(bootstrapRoute);
+    }
+    return "/";
   }
   const pathname = parsed.pathname.replace(/\/+$/, "") || "/";
   return `${pathname}${parsed.search}${parsed.hash}`;

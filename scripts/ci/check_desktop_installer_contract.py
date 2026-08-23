@@ -54,9 +54,17 @@ def main() -> int:
         "IfSilent angmoo_keep_local_data",
         "$LOCALAPPDATA\\Angmoo\\app",
         "$DeleteAppDataCheckboxState <> 1",
+        "Var AngmooFullDeleteConfirmed",
+        "StrCpy $AngmooFullDeleteConfirmed 0",
+        "StrCpy $AngmooFullDeleteConfirmed 1",
+        "${If} $AngmooFullDeleteConfirmed = 1",
         "Permanently delete every Angmoo World",
         "ANGMOO_VERIFY_NOT_REPARSE",
         "$LOCALAPPDATA\\com.angmoo.desktop",
+        "$LOCALAPPDATA\\Angmoo.__casefix__",
+        'SetOutPath "$TEMP"',
+        'Rename "$LOCALAPPDATA\\angmoo" "$LOCALAPPDATA\\Angmoo.__casefix__"',
+        'Rename "$LOCALAPPDATA\\Angmoo.__casefix__" "$LOCALAPPDATA\\Angmoo"',
     ):
         _require(required in hooks, f"uninstall safety contract missing: {required}")
     for required in (
@@ -73,6 +81,27 @@ def main() -> int:
     _require(
         'RMDir /r "$LOCALAPPDATA\\Angmoo"' not in hooks,
         "the whole product namespace must never be recursively deleted",
+    )
+    _require(
+        "${If} $DeleteAppDataCheckboxState = 1" not in hooks,
+        "post-uninstall cleanup must not treat a checked box as confirmation",
+    )
+    confirmation = hooks.index("StrCpy $AngmooFullDeleteConfirmed 1")
+    final_warning = hooks.index("Permanently delete every Angmoo World")
+    final_validation = hooks.index(
+        '!insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\\com.angmoo.desktop" angmoo_legacy'
+    )
+    first_recursive_delete = hooks.index(
+        'RMDir /r "$LOCALAPPDATA\\Angmoo\\canonical"'
+    )
+    _require(
+        final_warning < final_validation < confirmation < first_recursive_delete,
+        "full-delete confirmation must follow final Yes and all validations",
+    )
+    post_uninstall = hooks.split("!macro NSIS_HOOK_POSTUNINSTALL", 1)[1]
+    _require(
+        "$DeleteAppDataCheckboxState" not in post_uninstall,
+        "post-uninstall must be guarded only by confirmed full deletion",
     )
 
     wix_template = (
@@ -112,8 +141,17 @@ def main() -> int:
         "check_er6_desktop_supply_chain.py",
         "run_er6_defender_trigger_matrix.ps1",
         "er6-defender-trigger-matrix.json",
+        "build_er6_localappdata_lifecycle_fixture.py",
+        "test_l3_er6_interactive_remove_data.py",
+        "er6-localappdata-lifecycle.zip",
+        "localappdata-migration-v1.json",
+        "silent_uninstall_preserved_data",
+        "reinstall_reused_data",
+        "interactive_full_delete = 'user_gate_required'",
         "Get-MpThreatDetection",
         "NoNewDefenderDetection",
+        "legacy_launcher_secret_merge",
+        "product_root_actual_name",
     ):
         _require(required in workflow, f"installer workflow contract missing: {required}")
 

@@ -300,6 +300,47 @@ test("installed wide-window bootstrap restores the exact relationship route", as
   await expect(page).toHaveURL(new RegExp(`${relationshipRoute.replace("?", "\\?")}$`));
 });
 
+for (const bootstrapKind of ["phone", "main"] as const) {
+  test(`installed Phone bootstrap ${bootstrapKind} opens Device Home instead of /index.html`, async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      const desktop = window as unknown as {
+        __TAURI__: {
+          core: { invoke: (command: string) => Promise<unknown> };
+        };
+      };
+      desktop.__TAURI__ = {
+        core: {
+          invoke: async (command) =>
+            command === "desktop_runtime_status"
+              ? {
+                  phase: "ready",
+                  apiBaseUrl: "http://127.0.0.1:8080",
+                  graphProvider: "ladybug",
+                  launchToken: "static-route-probe-token-000000000000",
+                }
+              : undefined,
+        },
+      };
+    });
+    const bootstrap = new URLSearchParams({
+      __angmoo_window_kind: bootstrapKind,
+      __angmoo_window_route: "/",
+    });
+
+    await page.goto(`/index.html?${bootstrap.toString()}`);
+
+    await expect(page.locator("body")).toHaveAttribute(
+      "data-angmoo-desktop-window",
+      "phone",
+    );
+    await expect(page.locator('main[data-product-surface="device-home"]')).toBeVisible();
+    await expect(page.getByText("지원하지 않는 Angmoo 경로입니다.")).toHaveCount(0);
+    await expect(page).toHaveURL(/\/$/);
+  });
+}
+
 test("installed wide window keeps its route while runtime auth becomes ready", async ({
   page,
 }) => {
