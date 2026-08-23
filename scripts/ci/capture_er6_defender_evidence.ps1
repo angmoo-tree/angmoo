@@ -2,7 +2,7 @@
 param(
     [Parameter(Mandatory = $true)]
     [string]$OutputRoot,
-    [string]$DataRoot = (Join-Path $env:LOCALAPPDATA 'com.angmoo.desktop'),
+    [string]$DataRoot = (Join-Path $env:LOCALAPPDATA 'Angmoo'),
     [string[]]$CandidatePaths = @()
 )
 

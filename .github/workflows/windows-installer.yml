@@ -251,10 +251,13 @@ jobs:
           $root = Join-Path $env:RUNNER_TEMP 'angmoo-installer'
           $installer = Get-ChildItem $root -Filter '*setup*.exe' -Recurse | Select-Object -First 1
           if (-not $installer) { $installer = Get-ChildItem $root -Filter '*.exe' -Recurse | Select-Object -First 1 }
-          $installRoot = Join-Path $env:RUNNER_TEMP 'angmoo-installed'
-          New-Item -ItemType Directory -Force -Path $installRoot | Out-Null
-          Write-Host "Installing $($installer.FullName) into $installRoot"
-          $install = Start-Process $installer.FullName -ArgumentList @('/S', "/D=$installRoot") -PassThru
+          $productRoot = Join-Path $env:LOCALAPPDATA 'Angmoo'
+          $installRoot = Join-Path $productRoot 'app'
+          if (Test-Path -LiteralPath $productRoot) {
+            throw "Hosted runner product root was not clean before install: $productRoot"
+          }
+          Write-Host "Installing $($installer.FullName) into the canonical app root $installRoot"
+          $install = Start-Process $installer.FullName -ArgumentList '/S' -PassThru
           if (-not $install.WaitForExit(120000)) {
             Stop-Process -Id $install.Id -Force -ErrorAction SilentlyContinue
             throw 'NSIS install timed out after 120 seconds'
@@ -285,7 +288,7 @@ jobs:
             Select-Object -ExpandProperty Id)
           Write-Host "Launching installed product $($app.FullName)"
           $product = Start-Process $app.FullName -PassThru
-          $dataRoot = Join-Path $env:LOCALAPPDATA 'Angmoo'
+          $dataRoot = $productRoot
           $endpoint = Join-Path $dataRoot 'runtime\sidecar.endpoint.json'
           $database = Join-Path $dataRoot 'canonical\generations\er6-preview-v1\angmoo.sqlite3'
           $deadline = (Get-Date).AddSeconds(60)
