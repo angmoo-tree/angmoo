@@ -287,6 +287,35 @@ jobs:
             }
             throw "NSIS uninstall left the installed application executable behind at ${Stage}"
           }
+          function Stop-ProductWebViewProcesses(
+            [string]$ProfileRoot,
+            [int[]]$BaselineProcessIds,
+            [string]$Stage
+          ) {
+            # A headless runner can force-kill the frameless Tauri host after
+            # CloseMainWindow(), leaving WebView2 children alive for a short
+            # time. Those processes keep the preserved profile locked and can
+            # make the next Tauri setup exit before it starts the sidecar.
+            # Match only WebView2 processes created by this product profile;
+            # never terminate a runner/system WebView that predates Angmoo.
+            $profileNeedle = $ProfileRoot.ToLowerInvariant()
+            $deadline = (Get-Date).AddSeconds(20)
+            do {
+              $owned = @(Get-CimInstance Win32_Process -Filter "Name = 'msedgewebview2.exe'" `
+                -ErrorAction SilentlyContinue |
+                Where-Object {
+                  $_.ProcessId -notin $BaselineProcessIds -and
+                  -not [string]::IsNullOrWhiteSpace([string]$_.CommandLine) -and
+                  $_.CommandLine.ToLowerInvariant().Contains($profileNeedle)
+                })
+              if ($owned.Count -eq 0) { return }
+              foreach ($process in $owned) {
+                Stop-Process -Id $process.ProcessId -Force -ErrorAction SilentlyContinue
+              }
+              Start-Sleep -Milliseconds 250
+            } while ((Get-Date) -lt $deadline)
+            throw "Product WebView2 profile remained locked at ${Stage}: $ProfileRoot"
+          }
           $root = Join-Path $env:RUNNER_TEMP 'angmoo-installer'
           $installer = Get-ChildItem $root -Filter '*setup*.exe' -Recurse | Select-Object -First 1
           if (-not $installer) { $installer = Get-ChildItem $root -Filter '*.exe' -Recurse | Select-Object -First 1 }
@@ -363,6 +392,8 @@ jobs:
           $forbiddenPattern = '^(python|pythonw|node|java|postgres|neo4j|docker).*'
           $forbiddenBefore = @(Get-Process -ErrorAction SilentlyContinue |
             Where-Object ProcessName -match $forbiddenPattern |
+            Select-Object -ExpandProperty Id)
+          $webViewBefore = @(Get-Process -Name 'msedgewebview2' -ErrorAction SilentlyContinue |
             Select-Object -ExpandProperty Id)
           Write-Host "Launching installed product $($app.FullName)"
           $product = Start-Process $app.FullName -PassThru
@@ -473,6 +504,10 @@ jobs:
             Stop-Process -Id $sidecar.Id -Force -ErrorAction SilentlyContinue
             Wait-Process -Id $sidecar.Id -Timeout 10 -ErrorAction SilentlyContinue
           }
+          Stop-ProductWebViewProcesses `
+            (Join-Path $dataRoot 'webview') `
+            $webViewBefore `
+            'first_runtime_shutdown'
           $databaseHashAfterFirstRun = Get-StableFileHash $database 'first_runtime_shutdown'
           $secretPath = Join-Path $dataRoot 'secrets\app-secret'
           $secretHashAfterFirstRun = Get-StableFileHash $secretPath 'first_runtime_shutdown'
@@ -565,7 +600,37 @@ jobs:
             }
             Start-Sleep -Milliseconds 500
           }
-          if (-not $secondEndpoint) { throw 'Reinstalled runtime did not publish a fresh sidecar endpoint' }
+          if (-not $secondEndpoint) {
+            $secondHostState = if ($secondProduct.HasExited) {
+              "exited:$($secondProduct.ExitCode)"
+            } else {
+              'running'
+            }
+            Write-Host "Reinstalled Tauri host state: $secondHostState"
+            @(Get-Process -Name 'angmoo-sidecar' -ErrorAction SilentlyContinue) |
+              Select-Object Id, ProcessName, StartTime |
+              Format-Table -AutoSize |
+              Out-String |
+              Write-Host
+            foreach ($metadataName in @('sidecar.owner.json', 'sidecar.endpoint.json')) {
+              $metadataPath = Join-Path $dataRoot "runtime\$metadataName"
+              if (-not (Test-Path -LiteralPath $metadataPath)) { continue }
+              try {
+                $metadata = Get-Content -LiteralPath $metadataPath -Raw | ConvertFrom-Json
+                [ordered]@{
+                  file = $metadataName
+                  schema_version = $metadata.schema_version
+                  logical_sidecar_pid = $metadata.logical_sidecar_pid
+                  parent_pid = $metadata.parent_pid
+                  dynamic_port = $metadata.dynamic_port
+                  generation = $metadata.generation
+                } | ConvertTo-Json -Compress | Write-Host
+              } catch {
+                Write-Host "Runtime metadata was not readable: $metadataName"
+              }
+            }
+            throw 'Reinstalled runtime did not publish a fresh sidecar endpoint'
+          }
           if ([string]::IsNullOrWhiteSpace([string]$secondEndpoint.generation) -or
               [string]$secondEndpoint.generation -eq $firstEndpointGeneration) {
             throw 'Reinstalled runtime did not publish a fresh launch generation'
