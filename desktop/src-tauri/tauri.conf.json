@@ -41,7 +41,8 @@
       },
       "wix": {
         "upgradeCode": "329f3c25-fab8-4513-9592-448d11cde37a",
-        "language": "en-US"
+        "language": "en-US",
+        "template": "wix/product-main.wxs"
       },
       "nsis": {
         "installMode": "currentUser",

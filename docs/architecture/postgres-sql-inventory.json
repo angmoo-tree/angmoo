@@ -1108,14 +1108,14 @@
     {
       "markers": {
         "driver_or_url": [
-          86,
-          87
+          126,
+          127
         ]
       },
       "owner": "ER7",
       "path": "scripts/ci/check_desktop_installer_contract.py",
       "removal_condition": "embedded canonical rollback window PASS and user-approved legacy-default removal",
-      "source_sha256": "8d410908cde8fc4fba3a0a2f70bbc55dee4baa321626cb12738fa85e9869b4d4",
+      "source_sha256": "9e131d8f66979a1cadb1b96f563fd5e862ef5391618e0f2345298c85d6676a99",
       "transition_pr": "ER7 PR P"
     },
     {

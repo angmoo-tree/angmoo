@@ -172,10 +172,33 @@ def main() -> int:
     recursive_deletes = [
         line.strip() for line in hooks.splitlines() if re.search(r"\bRMDir\s+/r\b", line)
     ]
+    approved_recursive_deletes = [
+        f'RMDir /r "$LOCALAPPDATA\\Angmoo\\{child}"'
+        for child in (
+            "canonical",
+            "graph",
+            "search",
+            "media",
+            "secrets",
+            "runtime",
+            "logs",
+            "webview",
+        )
+    ]
     _require(
-        recursive_deletes == ['RMDir /r "$LOCALAPPDATA\\com.angmoo.desktop"'],
-        "uninstaller recursive deletion escaped the one approved app-data root",
+        recursive_deletes == approved_recursive_deletes,
+        "uninstaller recursive deletion escaped the approved product-data children",
     )
+    _require(
+        'RMDir /r "$LOCALAPPDATA\\Angmoo"' not in hooks,
+        "uninstaller must never recursively delete the whole product namespace",
+    )
+    for required in (
+        "ANGMOO_VERIFY_NOT_REPARSE",
+        "$DeleteAppDataCheckboxState <> 1",
+        "Permanently delete every Angmoo World",
+    ):
+        _require(required in hooks, f"full-delete safety contract missing: {required}")
     combined_desktop_sources = "\n".join(
         path.read_text(encoding="utf-8")
         for path in sorted((ROOT / "desktop" / "src-tauri" / "src").glob("*.rs"))
@@ -217,7 +240,19 @@ def main() -> int:
                 "runtime-root",
                 "launch-id",
             ],
-            "recursive_delete_roots": ["LOCALAPPDATA/com.angmoo.desktop"],
+            "recursive_delete_roots": [
+                f"LOCALAPPDATA/Angmoo/{child}"
+                for child in (
+                    "canonical",
+                    "graph",
+                    "search",
+                    "media",
+                    "secrets",
+                    "runtime",
+                    "logs",
+                    "webview",
+                )
+            ],
             "autostart_registration": False,
             "runtime_download_or_self_update": False,
         },

@@ -339,7 +339,7 @@ if ($InstallCandidate) {
         throw 'ER6 matrix NSIS install timed out'
     }
     Start-Sleep -Seconds 10
-    $installRoot = Join-Path $env:LOCALAPPDATA 'angmoo'
+    $installRoot = Join-Path $env:LOCALAPPDATA 'Angmoo\app'
     $installedHost = Join-Path $installRoot 'angmoo-desktop.exe'
     $installedSidecar = Join-Path $installRoot 'angmoo-sidecar.exe'
 
@@ -359,7 +359,7 @@ if ($InstallCandidate) {
     $installedRuntimeReady = $false
     if ($ExerciseInstalledRuntime -and (Test-Path -LiteralPath $installedHost) -and (Test-Path -LiteralPath $installedSidecar)) {
         $process = Start-IsolatedProcess $installedHost @() @{}
-        $installedEndpoint = Join-Path $env:LOCALAPPDATA 'com.angmoo.desktop\runtime\sidecar.endpoint.json'
+        $installedEndpoint = Join-Path $env:LOCALAPPDATA 'Angmoo\runtime\sidecar.endpoint.json'
         $deadline = (Get-Date).AddSeconds(60)
         while ((Get-Date) -lt $deadline -and -not (Test-Path -LiteralPath $installedEndpoint)) {
             Start-Sleep -Milliseconds 500

@@ -40,16 +40,56 @@ def main() -> int:
     _require(nsis["installMode"] == "currentUser", "per-user install is required")
     _require(nsis["installerHooks"] == "installer-hooks.nsh", "hooks missing")
     _require(bool(wix["upgradeCode"]), "stable MSI upgrade code missing")
+    _require(
+        wix["template"] == "wix/product-main.wxs",
+        "the reviewed per-user WiX template is required",
+    )
 
     hooks = (ROOT / "desktop" / "src-tauri" / "installer-hooks.nsh").read_text(
         encoding="utf-8"
     )
     for required in (
+        "NSIS_HOOK_PREINSTALL",
         "NSIS_HOOK_PREUNINSTALL",
         "IfSilent angmoo_keep_local_data",
+        "$LOCALAPPDATA\\Angmoo\\app",
+        "$DeleteAppDataCheckboxState <> 1",
+        "Permanently delete every Angmoo World",
+        "ANGMOO_VERIFY_NOT_REPARSE",
         "$LOCALAPPDATA\\com.angmoo.desktop",
     ):
         _require(required in hooks, f"uninstall safety contract missing: {required}")
+    for required in (
+        "$LOCALAPPDATA\\Angmoo\\canonical",
+        "$LOCALAPPDATA\\Angmoo\\graph",
+        "$LOCALAPPDATA\\Angmoo\\search",
+        "$LOCALAPPDATA\\Angmoo\\media",
+        "$LOCALAPPDATA\\Angmoo\\secrets",
+        "$LOCALAPPDATA\\Angmoo\\runtime",
+        "$LOCALAPPDATA\\Angmoo\\logs",
+        "$LOCALAPPDATA\\Angmoo\\webview",
+    ):
+        _require(required in hooks, f"owned data child missing: {required}")
+    _require(
+        'RMDir /r "$LOCALAPPDATA\\Angmoo"' not in hooks,
+        "the whole product namespace must never be recursively deleted",
+    )
+
+    wix_template = (
+        ROOT / "desktop" / "src-tauri" / "wix" / "product-main.wxs"
+    ).read_text(encoding="utf-8")
+    for required in (
+        'InstallScope="perUser"',
+        'Directory Id="$(var.PlatformProgramFilesFolder)"',
+        'Directory Id="INSTALLDIR" Name="Angmoo"',
+        'Id="INSTALLDIR"',
+        'Value="[LocalAppDataFolder]Angmoo\\app"',
+        'Before="CostFinalize"',
+        'Sequence="both"',
+    ):
+        _require(required in wix_template, f"WiX app-root contract missing: {required}")
+    for forbidden in ('InstallScope="perMachine"',):
+        _require(forbidden not in wix_template, f"machine-wide WiX path forbidden: {forbidden}")
 
     workflow = (ROOT / ".github" / "workflows" / "windows-installer.yml").read_text(
         encoding="utf-8"
