@@ -6,6 +6,11 @@
 ; - every recursive target is a literal approved product child and is rejected
 ;   when the root or child is a junction/symlink (reparse point).
 
+; This state is deliberately separate from Tauri's generated checkbox state.
+; A checked box is only a request; deletion becomes authorized only after the
+; final irreversible-action confirmation and every target validation pass.
+Var AngmooFullDeleteConfirmed
+
 !macro ANGMOO_VERIFY_NOT_REPARSE Target Label
   System::Call 'kernel32::GetFileAttributesW(w "${Target}") i .r0'
   ${If} $0 = -1
@@ -75,6 +80,7 @@ angmoo_case_root_done:
 !macroend
 
 !macro NSIS_HOOK_PREUNINSTALL
+  StrCpy $AngmooFullDeleteConfirmed 0
   IfSilent angmoo_keep_local_data 0
   ${If} $UpdateMode = 1
     Goto angmoo_keep_local_data
@@ -97,13 +103,29 @@ angmoo_case_root_done:
   !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\Angmoo\webview" angmoo_webview
   !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\com.angmoo.desktop" angmoo_legacy
 
+  ; Set this only after the user said Yes and every target was validated. The
+  ; post-uninstall hook must never infer authorization from the checkbox.
+  StrCpy $AngmooFullDeleteConfirmed 1
+
+  ; Revalidate immediately before each recursive operation. The complete
+  ; validation pass above guarantees that a pre-existing reparse trap aborts
+  ; before any child is removed; these checks also narrow the replacement
+  ; window between validation and deletion.
+  !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\Angmoo\canonical" angmoo_delete_canonical
   RMDir /r "$LOCALAPPDATA\Angmoo\canonical"
+  !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\Angmoo\graph" angmoo_delete_graph
   RMDir /r "$LOCALAPPDATA\Angmoo\graph"
+  !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\Angmoo\search" angmoo_delete_search
   RMDir /r "$LOCALAPPDATA\Angmoo\search"
+  !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\Angmoo\media" angmoo_delete_media
   RMDir /r "$LOCALAPPDATA\Angmoo\media"
+  !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\Angmoo\secrets" angmoo_delete_secrets
   RMDir /r "$LOCALAPPDATA\Angmoo\secrets"
+  !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\Angmoo\runtime" angmoo_delete_runtime
   RMDir /r "$LOCALAPPDATA\Angmoo\runtime"
+  !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\Angmoo\logs" angmoo_delete_logs
   RMDir /r "$LOCALAPPDATA\Angmoo\logs"
+  !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\Angmoo\webview" angmoo_delete_webview
   RMDir /r "$LOCALAPPDATA\Angmoo\webview"
 angmoo_keep_local_data:
 !macroend
@@ -112,8 +134,7 @@ angmoo_keep_local_data:
   ; The marker belongs to the migration mechanism, not to user content. This
   ; removes the product root only when full deletion emptied it; keep-data
   ; uninstall leaves the non-empty data root intact.
-  ${If} $DeleteAppDataCheckboxState = 1
-  ${AndIf} $UpdateMode <> 1
+  ${If} $AngmooFullDeleteConfirmed = 1
     Delete "$LOCALAPPDATA\Angmoo\localappdata-migration-v1.json"
     RMDir "$LOCALAPPDATA\Angmoo"
   ${EndIf}

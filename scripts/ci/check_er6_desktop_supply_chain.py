@@ -196,9 +196,28 @@ def main() -> int:
     for required in (
         "ANGMOO_VERIFY_NOT_REPARSE",
         "$DeleteAppDataCheckboxState <> 1",
+        "Var AngmooFullDeleteConfirmed",
+        "StrCpy $AngmooFullDeleteConfirmed 0",
+        "StrCpy $AngmooFullDeleteConfirmed 1",
+        "${If} $AngmooFullDeleteConfirmed = 1",
         "Permanently delete every Angmoo World",
     ):
         _require(required in hooks, f"full-delete safety contract missing: {required}")
+    _require(
+        "${If} $DeleteAppDataCheckboxState = 1" not in hooks,
+        "checkbox state must never authorize post-uninstall cleanup",
+    )
+    confirmation = hooks.index("StrCpy $AngmooFullDeleteConfirmed 1")
+    all_targets_validated = hooks.index(
+        '!insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\\com.angmoo.desktop" angmoo_legacy'
+    )
+    first_recursive_delete = hooks.index(
+        'RMDir /r "$LOCALAPPDATA\\Angmoo\\canonical"'
+    )
+    _require(
+        all_targets_validated < confirmation < first_recursive_delete,
+        "full-delete confirmation ordering drifted",
+    )
     combined_desktop_sources = "\n".join(
         path.read_text(encoding="utf-8")
         for path in sorted((ROOT / "desktop" / "src-tauri" / "src").glob("*.rs"))

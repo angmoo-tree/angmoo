@@ -58,6 +58,7 @@ jobs:
           .\.venv\Scripts\python.exe -m pytest -q `
             tests\test_l3_er6_release_candidate.py `
             tests\test_l3_er6_localappdata_closeout.py `
+            tests\test_l3_er6_interactive_remove_data.py `
             tests\test_l3_er5_desktop_sidecar_security.py `
             tests\test_l3_er3_ladybug_projection.py `
             tests\test_l3_er3_graph_query_parity.py `
