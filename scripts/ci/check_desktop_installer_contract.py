@@ -112,6 +112,12 @@ def main() -> int:
         "check_er6_desktop_supply_chain.py",
         "run_er6_defender_trigger_matrix.ps1",
         "er6-defender-trigger-matrix.json",
+        "build_er6_localappdata_lifecycle_fixture.py",
+        "er6-localappdata-lifecycle.zip",
+        "localappdata-migration-v1.json",
+        "silent_uninstall_preserved_data",
+        "reinstall_reused_data",
+        "interactive_full_delete = 'user_gate_required'",
         "Get-MpThreatDetection",
         "NoNewDefenderDetection",
     ):
