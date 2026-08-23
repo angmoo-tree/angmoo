@@ -107,6 +107,7 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Angmoo packaged desktop sidecar")
     parser.add_argument("--parent-pid", type=int, required=True)
     parser.add_argument("--data-root", type=Path, required=True)
+    parser.add_argument("--legacy-data-root", type=Path, required=True)
     parser.add_argument("--runtime-root", type=Path, required=True)
     parser.add_argument("--launch-id", required=True)
     return parser.parse_args()
@@ -264,10 +265,24 @@ def main() -> int:
         launch_id=args.launch_id,
     )
     ownership.acquire()
-    data_root, generation = _configure_embedded_release_candidate(
-        args.data_root.resolve(),
-        ownership.runtime_root,
-    )
+    try:
+        from app.runtime.migrations.local_app_data import (
+            LegacyLocalAppDataMigration,
+        )
+
+        LegacyLocalAppDataMigration(
+            source_root=args.legacy_data_root,
+            target_root=args.data_root,
+            runtime_root=ownership.runtime_root,
+            process_alive=_process_alive,
+        ).migrate_if_needed()
+        data_root, generation = _configure_embedded_release_candidate(
+            args.data_root.resolve(),
+            ownership.runtime_root,
+        )
+    except BaseException:
+        ownership.release()
+        raise
 
     # Import the public composition root only after the launcher environment is
     # complete. Its normal route/service composition registers the canonical

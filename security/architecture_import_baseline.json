@@ -1,7 +1,7 @@
 {
-  "edge_count": 926,
-  "external_import_count": 1467,
-  "module_count": 433,
+  "edge_count": 927,
+  "external_import_count": 1481,
+  "module_count": 434,
   "modules": [
     {
       "external_imports": [],
@@ -4111,6 +4111,7 @@
         "app.domains.identity.application.local_owner",
         "app.domains.identity.infrastructure.sqlalchemy_identity_repository",
         "app.public_main",
+        "app.runtime.migrations.local_app_data",
         "app.runtime.persistence.runtime_data_path",
         "app.runtime.persistence.sqlite_database"
       ],
@@ -4149,7 +4150,11 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [],
+      "external_imports": [
+        "__future__",
+        "importlib",
+        "typing"
+      ],
       "imports": [
         "app.runtime.migrations.alembic_source",
         "app.runtime.migrations.postgres_to_sqlite"
@@ -4170,6 +4175,25 @@
       ],
       "module": "app.runtime.migrations.alembic_source",
       "path": "backend/app/runtime/migrations/alembic_source.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "dataclasses",
+        "hashlib",
+        "json",
+        "os",
+        "pathlib",
+        "shutil",
+        "sqlite3",
+        "typing",
+        "uuid"
+      ],
+      "imports": [],
+      "module": "app.runtime.migrations.local_app_data",
+      "path": "backend/app/runtime/migrations/local_app_data.py",
       "wildcard_imports": []
     },
     {

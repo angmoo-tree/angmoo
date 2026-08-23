@@ -638,6 +638,19 @@
     {
       "markers": {
         "driver_or_url": [
+          7,
+          8
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/runtime/migrations/__init__.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "a5d5ae7560f4026010570451c7a797079ed1c927bc0ee5ba4ca3a1f141b44a11",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
           1,
           318,
           333
@@ -1203,10 +1216,10 @@
       "transition_pr": "ER7 PR P"
     }
   ],
-  "entry_count": 77,
+  "entry_count": 78,
   "marker_counts": {
     "advisory_lock": 8,
-    "driver_or_url": 53,
+    "driver_or_url": 54,
     "jsonb": 8,
     "pgvector": 7,
     "row_lock": 22,
