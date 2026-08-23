@@ -31,6 +31,15 @@ ${Label}_verified:
   ; cannot rename the product root while the installer itself is positioned
   ; inside its app child.
   SetOutPath "$TEMP"
+  ; An installed release already records the exact canonical app directory in
+  ; MANUPRODUCTKEY.  Do not rename the complete product root during an
+  ; in-place reinstall or updater run: canonical, graph, secrets, WebView and
+  ; runtime files may legitimately have short-lived handles even after the UI
+  ; closes.  Only launcher-era roots that are not already registered as
+  ; `%LOCALAPPDATA%\Angmoo\app` need the case-only migration below.
+  ReadRegStr $R9 SHCTX "${MANUPRODUCTKEY}" ""
+  ${GetParent} "$R9" $R8
+  StrCmp "$R8" "$LOCALAPPDATA\Angmoo" angmoo_case_root_done 0
   ; Windows resolves LocalAppData paths case-insensitively but preserves the
   ; spelling of the first directory creation.  The launcher-era preview used
   ; `angmoo`, so a case-only round trip is required before the installer
