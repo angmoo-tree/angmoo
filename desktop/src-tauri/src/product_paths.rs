@@ -7,6 +7,7 @@ pub const PRODUCT_DATA_DIRECTORY: &str = "Angmoo";
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ProductDataPaths {
     pub root: PathBuf,
+    pub legacy_preview_root: PathBuf,
     pub app: PathBuf,
     pub canonical: PathBuf,
     pub graph: PathBuf,
@@ -22,6 +23,7 @@ impl ProductDataPaths {
     pub fn from_local_data_directory(local_data_directory: &Path) -> Self {
         let root = local_data_directory.join(PRODUCT_DATA_DIRECTORY);
         Self {
+            legacy_preview_root: local_data_directory.join("com.angmoo.desktop"),
             app: root.join("app"),
             canonical: root.join("canonical"),
             graph: root.join("graph"),
@@ -75,6 +77,7 @@ mod tests {
         let paths = ProductDataPaths::from_local_data_directory(&local);
 
         assert_eq!(paths.root, local.join("Angmoo"));
+        assert_eq!(paths.legacy_preview_root, local.join("com.angmoo.desktop"));
         for child in [
             &paths.app,
             &paths.canonical,

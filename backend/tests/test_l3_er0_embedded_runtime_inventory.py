@@ -52,9 +52,11 @@ def test_storage_frontend_runtime_and_parity_corpora_are_complete() -> None:
     # writer/lease adapters, ER3 PR I adds the development-only LadybugDB
     # replay helper that reads the current PostgreSQL canonical source, and
     # ER6 adds the sidecar layout/installer checks that explicitly audit the
-    # remaining PostgreSQL driver boundary. They remain inventoried until
-    # canonical cutover.
-    assert postgres["entry_count"] == 77
+    # remaining PostgreSQL driver boundary. PR B also makes the migrations
+    # package's compatibility exports lazy so the installed SQLite sidecar can
+    # import its LocalAppData migration without initializing that driver; the
+    # compatibility boundary remains inventoried until canonical cutover.
+    assert postgres["entry_count"] == 78
     assert graph["query_count"] == 24
     assert frontend["route_count"] == 39
     assert {item["phase"] for item in runtime["parity"]["workloads"]} == {

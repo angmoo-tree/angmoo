@@ -228,10 +228,12 @@ pub fn start(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> 
     let launch_id = Uuid::new_v4().simple().to_string();
     let product_paths = ProductDataPaths::resolve(&app)?;
     product_paths.prepare_runtime_owned_directories()?;
+    let legacy_data_root = product_paths.legacy_preview_root;
     let data_root = product_paths.root;
     let runtime_root = product_paths.runtime;
     let parent_pid = process::id().to_string();
     let data_root_argument = data_root.to_string_lossy().into_owned();
+    let legacy_data_root_argument = legacy_data_root.to_string_lossy().into_owned();
     let runtime_root_argument = runtime_root.to_string_lossy().into_owned();
     let command = app
         .shell()
@@ -242,6 +244,8 @@ pub fn start(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> 
             &parent_pid,
             "--data-root",
             &data_root_argument,
+            "--legacy-data-root",
+            &legacy_data_root_argument,
             "--runtime-root",
             &runtime_root_argument,
             "--launch-id",

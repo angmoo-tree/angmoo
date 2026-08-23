@@ -130,6 +130,7 @@ def main() -> int:
         '.sidecar("angmoo-sidecar")',
         '"--parent-pid"',
         '"--data-root"',
+        '"--legacy-data-root"',
         '"--runtime-root"',
         '"--launch-id"',
         '"DESKTOP_LAUNCH_TOKEN"',
@@ -212,6 +213,7 @@ def main() -> int:
             "sidecar_arguments": [
                 "parent-pid",
                 "data-root",
+                "legacy-data-root",
                 "runtime-root",
                 "launch-id",
             ],
