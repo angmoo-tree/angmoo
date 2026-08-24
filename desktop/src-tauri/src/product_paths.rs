@@ -59,7 +59,7 @@ impl ProductDataPaths {
         #[cfg(debug_assertions)]
         {
             let _ = app;
-            return Ok(Self::contributor());
+            Ok(Self::contributor())
         }
         #[cfg(not(debug_assertions))]
         let local_data_directory = app
