@@ -20,6 +20,7 @@ export type AngmooPhoneResizeDirection =
 
 export type AngmooDesktopRuntimeStatus = {
   phase: "starting" | "ready" | "crashed" | "stopped";
+  runtimeMode?: "installed-sidecar" | "contributor-docker-bridge";
   apiBaseUrl?: string;
   graphProvider?: "ladybug";
   launchToken?: string;

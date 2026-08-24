@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "contract_id": "angmoo-windows-host-tauri-dev-v1",
+  "status": "supported-reference-environment",
+  "runtime_mode": "contributor-docker-bridge",
+  "host": {
+    "operating_system": "windows",
+    "minimum_build": 22000,
+    "architectures": ["x86_64"],
+    "reference_environment": {
+      "edition": "Windows 11 Home",
+      "release": "25H2",
+      "build": 26200,
+      "revision": 9168,
+      "architecture": "x86_64"
+    },
+    "unverified": ["windows-10", "windows-arm64", "windows-server", "wine", "wsl-gui", "macos"]
+  },
+  "toolchain": {
+    "node_minimum": "20.9.0",
+    "rust_exact": "1.97.1",
+    "tauri_cli_exact": "2.11.4",
+    "compose_minimum": "2.22.0",
+    "visual_cpp_component": "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+    "windows_sdk_minimum": "10.0.22000.0",
+    "webview2": "evergreen-runtime"
+  },
+  "docker": {
+    "compose_files": ["compose.yml", "compose.dev.yml"],
+    "services": ["backend", "frontend"],
+    "frontend_url": "http://127.0.0.1:3000",
+    "backend_profile": "CONTRIBUTOR_EMBEDDED",
+    "persistence": "sqlite",
+    "graph": "ladybug",
+    "scheduler": "in-process",
+    "projector": "in-process",
+    "named_volume": "angmoo_contributor_embedded_data"
+  },
+  "host_shell": {
+    "tauri_config": "desktop/src-tauri/tauri.contributor-docker.conf.json",
+    "cargo_feature": "contributor-docker-bridge",
+    "repository_data_root": ".angmoo-dev",
+    "allowed_writable_child": "webview",
+    "forbidden_processes": ["angmoo-sidecar", "postgres", "neo4j", "java", "javaw"],
+    "forbidden_installed_data_root": "%LOCALAPPDATA%\\Angmoo",
+    "window_labels": {
+      "phone": "main",
+      "studio": "studio",
+      "relationship_graph": "relationship-graph"
+    },
+    "routes": {
+      "phone": "/",
+      "studio_prefix": "/studio",
+      "relationship_graph_pattern": "/characters/{character_id}/worlds/{world_id}/relationship-graph?provider=ladybug"
+    }
+  },
+  "lifecycle": {
+    "start_or_reuse_docker_stack": true,
+    "stop_host_tauri_on_exit": true,
+    "preserve_docker_stack_on_exit": true,
+    "preserve_named_volume_on_exit": true,
+    "spawn_host_sidecar": false,
+    "read_or_write_installed_product_data": false
+  }
+}

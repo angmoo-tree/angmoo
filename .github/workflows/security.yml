@@ -42,6 +42,7 @@ jobs:
           uv run --project backend python scripts/ci/check_container_release_contract.py
           uv run --project backend python scripts/ci/check_local_launcher_contract.py
           uv run --project backend python scripts/ci/check_desktop_installer_contract.py
+          uv run --project backend python scripts/ci/check_windows_host_tauri_dev_contract.py
           uv run --project backend python scripts/ci/generate_architecture_inventory.py --check
           uv run --project backend python scripts/ci/generate_deferred_runtime_inventory.py --check
       - name: Scan current repository and full history
@@ -150,3 +151,5 @@ jobs:
             tests/test_t2_architecture_inventory.py \
             tests/test_t2_5_architecture_boundaries.py \
             tests/test_l2_5_frontend_architecture_boundaries.py
+          uv run --directory backend python -m pytest -q \
+            tests/test_l3_er7_windows_host_tauri_dev_contract.py

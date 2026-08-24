@@ -74,6 +74,26 @@ SPDX SBOM 검증과 격리된 Linux clean-clone lifecycle fixture도 실행합�
 검증하며 macOS 패키징 구현은 아직 공식 지원으로 주장하지 않습니다.
 provider 관련 검사는 fake provider만 사용하고 외부 모델을 호출하지 않습니다.
 
+지원하는 Windows 11 x64 host에서는 고정된 desktop dependency를 설치하고
+fail-closed preflight와 bridge를 실행합니다.
+
+```powershell
+npm ci --ignore-scripts --prefix desktop
+.\scripts\dev\desktop-preflight.ps1
+.\scripts\dev\desktop-dev.ps1
+```
+
+wrapper는 Docker dev stack을 시작하거나 재사용하고 host의 Phone·Studio·Graph
+Tauri shell만 엽니다. host `angmoo-sidecar`를 시작하거나
+`%LOCALAPPDATA%\Angmoo`를 사용하거나 Docker stack·named volume을 삭제해서는
+안 됩니다. 지원 범위와 사용자 확인은
+`docs/public/windows-host-tauri-dev.md`를 참고하세요.
+
+CODEOWNERS의 platform-shell 보호 경계를 바꾸는 PR은 Hosted Windows PASS 뒤
+명시적인 **platform-shell maintainer review** 기록이 필요합니다. 1인 maintainer
+기간에는 불가능한 자기 Approve가 아니라 오너의 검토 기록을 뜻합니다. 사용자
+Phone·wide-window 화면 Gate는 기술 CI와 별도로 유지합니다.
+
 ## Branch, commit과 Pull Request
 
 모든 변경은 PR을 통해 `main`에 들어갑니다. required check 의미는 다음을
@@ -90,6 +110,7 @@ provider 관련 검사는 fake provider만 사용하고 외부 모델을 호출�
 - `dco`
 - `architecture-boundary`
 - `tauri-windows`
+- `tauri-windows-host-dev`
 - Windows installer release-candidate·installed-runtime smoke
 
 `windows-local-smoke`, `codeql`은 advisory check로 유지합니다. Advisory는

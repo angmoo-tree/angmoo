@@ -7,6 +7,7 @@
     "tauri": "tauri",
     "build:sidecar": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/build-sidecar.ps1",
     "dev": "npm run build:sidecar && tauri dev",
+    "dev:docker-bridge": "tauri dev --config src-tauri/tauri.contributor-docker.conf.json --features contributor-docker-bridge",
     "build:shell": "tauri build --no-bundle",
     "build:product": "npm run build:sidecar && npm run build:shell",
     "build:installer": "npm run build:sidecar && tauri build --bundles nsis,msi"

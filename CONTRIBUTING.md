@@ -59,6 +59,26 @@ the same Docker stack. They must not point it at installed-user data. Windows
 packaging and installed-runtime behavior are verified on Windows Actions;
 macOS packaging is not yet claimed as implemented.
 
+On a supported Windows 11 x64 host, install the locked desktop dependencies,
+run the fail-closed preflight, and start the bridge:
+
+```powershell
+npm ci --ignore-scripts --prefix desktop
+.\scripts\dev\desktop-preflight.ps1
+.\scripts\dev\desktop-dev.ps1
+```
+
+The wrapper starts or reuses the Docker dev stack and opens only the host Tauri
+Phone/Studio/Graph shell. It must not start `angmoo-sidecar`, use
+`%LOCALAPPDATA%\Angmoo`, stop the Docker stack, or delete its named volume. See
+`docs/public/windows-host-tauri-dev.md` for support limits and the user check.
+
+Changes under the CODEOWNERS platform-shell boundary require an explicit
+**platform-shell maintainer review** record after Hosted Windows checks pass.
+During the single-maintainer period this is a documented owner review Gate, not
+an impossible self-approval requirement. The final user Phone and wide-window
+screen Gate remains separate from technical CI.
+
 Do not add PostgreSQL/Neo4j server runtime behavior or a second implementation.
 PostgreSQL is allowed only inside the frozen, read-only `LEGACY_MIGRATION` tool;
 Neo4j parity survives only as static fixtures.
@@ -100,6 +120,7 @@ include:
 - `dco`
 - `architecture-boundary`
 - `tauri-windows`
+- `tauri-windows-host-dev`
 - Windows installer release-candidate and installed-runtime smoke
 
 `windows-local-smoke` and `codeql` remain advisory checks. Advisory does not

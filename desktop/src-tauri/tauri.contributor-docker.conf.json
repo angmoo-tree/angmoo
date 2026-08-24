@@ -1,0 +1,28 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Angmoo",
+  "identifier": "com.angmoo.desktop.contributor-docker",
+  "build": {
+    "beforeDevCommand": null,
+    "devUrl": "http://127.0.0.1:3000"
+  },
+  "app": {
+    "security": {
+      "capabilities": [
+        {
+          "identifier": "contributor-docker-bridge",
+          "description": "Core window commands for the repository-local Windows Host Tauri dev bridge.",
+          "windows": ["main", "studio", "relationship-graph"],
+          "remote": {
+            "urls": ["http://127.0.0.1:3000/*"]
+          },
+          "permissions": ["core:default"]
+        }
+      ]
+    }
+  },
+  "bundle": {
+    "active": false,
+    "externalBin": []
+  }
+}
