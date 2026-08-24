@@ -332,6 +332,10 @@ def test_product_dependencies_exclude_server_database_runtimes() -> None:
 
     for forbidden in ("neo4j", "psycopg", "pgvector"):
         assert not any(forbidden in dependency.lower() for dependency in dependencies)
+    # Windows does not ship an IANA timezone database for Python's zoneinfo.
+    # The packaged sidecar must therefore own tzdata explicitly rather than
+    # inheriting it accidentally from the legacy PostgreSQL extra.
+    assert any(dependency.lower().startswith("tzdata") for dependency in dependencies)
     assert any("psycopg" in dependency.lower() for dependency in legacy)
     assert any("pgvector" in dependency.lower() for dependency in legacy)
 

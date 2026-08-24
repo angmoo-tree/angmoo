@@ -225,6 +225,8 @@ function Complete-Stage(
 }
 
 $stages = @()
+$runtimeReady = $null
+$installedRuntimeReady = $null
 
 if (-not $SkipBehaviorMatrix) {
 # 1. Minimal Tauri host, no sidecar present or executed.
@@ -402,4 +404,10 @@ if ($FailOnDetection -and $payload.detection_count -gt 0) {
 }
 if ($FailOnDetection -and $payload.scan_error_count -gt 0) {
     throw "ER6 Defender trigger matrix found $($payload.scan_error_count) scan error(s)"
+}
+if (-not $SkipBehaviorMatrix -and -not $runtimeReady) {
+    throw 'ER6 Defender trigger matrix real sidecar did not publish its runtime endpoint'
+}
+if ($InstallCandidate -and $ExerciseInstalledRuntime -and -not $installedRuntimeReady) {
+    throw 'ER6 Defender trigger matrix installed runtime did not publish its endpoint'
 }

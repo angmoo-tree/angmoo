@@ -164,6 +164,18 @@ def main() -> int:
     _require("--exclude-module psycopg" in sidecar_build, "legacy PostgreSQL driver must be excluded from product sidecar")
     _require("--hidden-import psycopg" not in sidecar_build, "legacy PostgreSQL driver must not be a hidden import")
 
+    defender_matrix = (
+        ROOT / "scripts" / "ci" / "run_er6_defender_trigger_matrix.ps1"
+    ).read_text(encoding="utf-8")
+    for required in (
+        "real sidecar did not publish its runtime endpoint",
+        "installed runtime did not publish its endpoint",
+    ):
+        _require(
+            required in defender_matrix,
+            f"Defender matrix runtime readiness contract missing: {required}",
+        )
+
     cargo_manifest = (ROOT / "desktop" / "src-tauri" / "Cargo.toml").read_text(
         encoding="utf-8"
     )

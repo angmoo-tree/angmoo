@@ -20,6 +20,7 @@ dependencies = [
     "python-docx>=1.2.0",
     "python-multipart>=0.0.30",
     "sqlalchemy>=2.0.51",
+    "tzdata>=2026.2",
     "uvicorn>=0.52.1",
     "websockets>=16.0",
 ]

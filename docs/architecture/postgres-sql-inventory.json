@@ -955,16 +955,16 @@
     {
       "markers": {
         "driver_or_url": [
-          30
+          31
         ],
         "pgvector": [
-          29
+          30
         ]
       },
       "owner": "ER2-ER7",
       "path": "backend/pyproject.toml",
       "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
-      "source_sha256": "3c9f4a3a1e98613821b04c7978e453a40e580d027ff245fcc4dad8db1a371ae2",
+      "source_sha256": "a46db19880bf2d93b5163a2d6bd5d0a930be51d6b85e56ca2194783b23921970",
       "transition_pr": "ER2 PR D/E/G; ER7 PR P"
     },
     {
@@ -1021,7 +1021,7 @@
       "owner": "ER7",
       "path": "scripts/ci/check_desktop_installer_contract.py",
       "removal_condition": "embedded canonical rollback window PASS and user-approved legacy-default removal",
-      "source_sha256": "2fd1cd39a2d718b84899c220822f0f3bc2e1ec3d8fe12f7b6e90aaccc0868a96",
+      "source_sha256": "46c58a5dd48b5c1293b390d9d46152326a2bd97de92fac2eea0c7f357a9a1f54",
       "transition_pr": "ER7 PR P"
     },
     {
