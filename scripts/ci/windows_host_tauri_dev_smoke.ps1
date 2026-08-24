@@ -116,3 +116,4 @@ try {
 }
 
 Write-Host 'windows-host-tauri-dev-smoke: PASS cases=11'
+exit 0
