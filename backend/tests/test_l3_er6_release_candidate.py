@@ -12,7 +12,7 @@ from sqlalchemy import select
 from app import models as _models  # noqa: F401 - register canonical metadata
 from app.core import security
 from app.runtime.desktop_sidecar import (
-    _configure_embedded_release_candidate,
+    _build_local_embedded_runtime_config,
     _selected_generation,
 )
 from app.runtime.migrations.release_candidate import (
@@ -303,33 +303,31 @@ def test_generation_promote_and_rollback_are_atomic(tmp_path: Path) -> None:
 def test_packaged_sidecar_creates_secret_once_and_reuses_it(
     tmp_path: Path,
 ) -> None:
-    environment: dict[str, str] = {}
-    runtime_root = tmp_path / "한글 사용자" / "Angmoo" / "runtime"
+    data_root = tmp_path / "한글 사용자" / "Angmoo"
+    runtime_root = data_root / "runtime"
     runtime_root.mkdir(parents=True)
-    first_root, first_generation = _configure_embedded_release_candidate(
-        runtime_root.parent,
+    original_environment = dict(os.environ)
+    first_config = _build_local_embedded_runtime_config(
+        data_root,
         runtime_root,
-        environ=environment,
+        desktop_launch_token="a" * 32,
+        desktop_allowed_origin="http://tauri.localhost",
     )
-    secret_path = first_root / "secrets" / "app-secret"
+    secret_path = data_root / "secrets" / "app-secret"
     first_secret = secret_path.read_text(encoding="utf-8")
 
-    second_root, second_generation = _configure_embedded_release_candidate(
-        runtime_root.parent,
+    second_config = _build_local_embedded_runtime_config(
+        data_root,
         runtime_root,
-        environ=environment,
+        desktop_launch_token="b" * 32,
+        desktop_allowed_origin="http://tauri.localhost",
     )
 
-    assert second_root == first_root
-    assert first_generation == second_generation == "er6-preview-v1"
+    assert first_config.data_paths.root == data_root
+    assert second_config.data_paths.root == data_root
+    assert first_config.generation == second_config.generation == "er6-preview-v1"
     assert secret_path.read_text(encoding="utf-8") == first_secret
-    assert Path(environment["APP_SECRET_FILE"]) == secret_path
-    assert environment["APP_ENV"] == "local"
-    assert environment["API_DOCS_ENABLED"] == "false"
-    assert environment["SIGNUP_ENABLED"] == "false"
-    assert environment["BROWSER_SESSION_ALLOWED_ORIGINS"] == (
-        "http://tauri.localhost"
-    )
+    assert dict(os.environ) == original_environment
 
 
 def test_packaged_sidecar_rejects_runtime_root_outside_product_root(
@@ -339,8 +337,9 @@ def test_packaged_sidecar_rejects_runtime_root_outside_product_root(
         RuntimeError,
         match="runtime_root_outside_product_data_root",
     ):
-        _configure_embedded_release_candidate(
+        _build_local_embedded_runtime_config(
             tmp_path / "Angmoo",
             tmp_path / "unowned-runtime",
-            environ={},
+            desktop_launch_token="a" * 32,
+            desktop_allowed_origin="http://tauri.localhost",
         )

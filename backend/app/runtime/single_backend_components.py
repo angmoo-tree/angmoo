@@ -4,6 +4,8 @@ import asyncio
 from collections.abc import Awaitable, Callable
 import logging
 import threading
+from functools import partial
+from typing import Any
 
 from app.compatibility.runtime.single_backend_workers import (
     run_legacy_projector_component,
@@ -306,10 +308,31 @@ class SingleBackendRuntimeComponents:
 
 def create_single_backend_runtime_components(
     config: Settings = settings,
+    *,
+    session_factory: Callable[[], Any] | None = None,
 ) -> SingleBackendRuntimeComponents | None:
     if config.LOCAL_RUNTIME_COMPONENT_MODE != "in_process":
         return None
-    return SingleBackendRuntimeComponents()
+    if session_factory is None:
+        return SingleBackendRuntimeComponents()
+    return SingleBackendRuntimeComponents(
+        scheduler_runner=partial(
+            run_legacy_scheduler_component,
+            config=config,
+            session_factory=session_factory,
+        ),
+        projector_runner=partial(
+            run_legacy_projector_component,
+            config=config,
+            session_factory=session_factory,
+        ),
+        startup_timeout_seconds=(
+            config.LOCAL_RUNTIME_COMPONENT_STARTUP_TIMEOUT_SECONDS
+        ),
+        shutdown_timeout_seconds=(
+            config.LOCAL_RUNTIME_COMPONENT_SHUTDOWN_TIMEOUT_SECONDS
+        ),
+    )
 
 
 __all__ = [

@@ -1,24 +1,45 @@
 # Contributor development
 
-The Docker-first runtime target, support tiers, port boundary, and staged
-transition status are documented in [local-runtime.md](local-runtime.md).
+The supported contributor profile is `CONTRIBUTOR_EMBEDDED`. It uses the same
+SQLite canonical store, LadybugDB graph projection, and in-process scheduler
+and projector as the installed Angmoo product. Only the frontend delivery mode
+changes between Next.js dev, Tauri dev, and a static release build.
 
-The supported contributor path is:
+Start the backend from one terminal:
 
-1. start PostgreSQL+pgvector with root `compose.yml`;
-2. install locked backend and frontend dependencies;
-3. apply every Alembic revision;
-4. run `app.public_main:app`;
-5. run the Next.js frontend;
-6. validate with synthetic data and fake providers.
+```powershell
+cd backend
+uv sync --frozen
+uv run python -m app.runtime.contributor_backend --data-root ..\.angmoo-dev
+```
 
-Copy the checked-in examples to `backend/.env` and `frontend/.env.local`.
-Those local files are ignored and must never be committed.
+Start the frontend from a second terminal:
 
-The public profile requires LangGraph/direct and keeps the scheduler, image
-worker, service image, and experimental image UI off. Do not place a real
-provider key in contributor tests. Host-native PostgreSQL, alternative
-container runtimes, and operating systems not covered by CI are best-effort.
+```powershell
+cd frontend
+pnpm install --frozen-lockfile
+pnpm dev
+```
 
-Use `docker compose down` to stop the database. Add `--volumes` only when you
-intentionally want to remove your local development data.
+The explicit `.angmoo-dev` root keeps contributor data separate from the
+installed `%LOCALAPPDATA%\Angmoo` product data. Runtime profile, database,
+graph provider, and component ownership are assembled by typed Python config;
+parent `DATABASE_URL`, `NEO4J_URI`, and external-worker variables do not change
+the embedded result.
+
+For Phone, Creator Studio, Relationship Graph, native window, or sidecar work:
+
+```powershell
+cd desktop
+npm install
+npm run dev
+```
+
+The debug Tauri host uses `CONTRIBUTOR_EMBEDDED` and the checkout-local data
+root. Release builds use `LOCAL_EMBEDDED` and `%LOCALAPPDATA%\Angmoo`.
+
+Use synthetic data and fake providers for tests. Do not place real provider
+credentials, APP_SECRET values, private content, or personal runtime data in
+logs, Issues, or pull requests. The old PostgreSQL/Neo4j six-service Compose
+path is a temporary ER7 rollback surface only; it is not a second supported
+runtime for new features.

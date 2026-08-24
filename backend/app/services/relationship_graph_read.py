@@ -159,7 +159,10 @@ class SqlAlchemyRelationshipGraphReadGateway:
 
     def open_graph_repository(self) -> RelationshipGraphQueryPort:
         if self._graph_provider == "ladybug":
-            if not self._config.ladybug_graph_preview_enabled:
+            if (
+                self._config.graph_provider != "ladybug"
+                and not self._config.ladybug_graph_preview_enabled
+            ):
                 raise GraphReadBackendError("ladybug_preview_disabled")
             shared = borrow_process_graph_client(self._config)
             if shared is not None:

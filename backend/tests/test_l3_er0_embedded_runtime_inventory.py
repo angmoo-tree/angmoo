@@ -55,8 +55,11 @@ def test_storage_frontend_runtime_and_parity_corpora_are_complete() -> None:
     # remaining PostgreSQL driver boundary. PR B also makes the migrations
     # package's compatibility exports lazy so the installed SQLite sidecar can
     # import its LocalAppData migration without initializing that driver; the
-    # compatibility boundary remains inventoried until canonical cutover.
-    assert postgres["entry_count"] == 78
+    # compatibility boundary remains inventoried until PR P removes the
+    # server runtime. ER7 PR O adds typed profile and contributor entrypoint
+    # files that explicitly reject PostgreSQL as an embedded runtime, so those
+    # references remain visible in the generated inventory as well.
+    assert postgres["entry_count"] == 81
     assert graph["query_count"] == 24
     assert frontend["route_count"] == 39
     assert {item["phase"] for item in runtime["parity"]["workloads"]} == {

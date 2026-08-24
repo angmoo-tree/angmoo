@@ -26,3 +26,7 @@ build/
 playwright-report/
 test-results/
 frontend/next-env.d.ts
+
+# Local build, verification, and release-candidate artifacts
+.codex-temp/
+.angmoo-dev/

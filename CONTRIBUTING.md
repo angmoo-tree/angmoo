@@ -21,31 +21,52 @@ reference in the pull request.
 
 ## Local development and checks
 
-The contributor baseline requires Git and Docker Compose 2.22.0 or newer. Start
-the complete development stack from the repository root:
+The contributor baseline requires Git, Python 3.13 with `uv`, and the
+repository-pinned Node/pnpm toolchain. The official contributor runtime is
+`CONTRIBUTOR_EMBEDDED`: SQLite canonical persistence, LadybugDB projection, and
+scheduler/projector in the FastAPI process. Start the backend with an explicit
+checkout-local data root:
+
+```powershell
+cd backend
+uv sync --frozen
+uv run python -m app.runtime.contributor_backend --data-root ..\.angmoo-dev
+```
+
+In another terminal, start the normal Next.js development frontend:
+
+```powershell
+cd frontend
+pnpm install --frozen-lockfile
+pnpm dev
+```
+
+The backend logs remain in its terminal and frontend compile, route, console,
+and network diagnostics remain in the Next.js terminal and browser DevTools.
+`.angmoo-dev` is ignored and is never shared with the installed product's
+`%LOCALAPPDATA%\Angmoo` data. Tauri window work may use `cd desktop; npm run
+dev`; debug builds use the same contributor embedded profile and checkout-local
+data root.
+
+Run checks with the locked local toolchains:
+
+```powershell
+cd backend
+uv run python -m pytest -q
+
+cd ..\frontend
+pnpm lint
+pnpm typecheck
+pnpm build
+```
+
+The previous six-service Compose environment is a temporary ER7 rollback
+surface, not the canonical contributor architecture. Do not add new
+PostgreSQL/Neo4j runtime behavior or a second implementation for that path.
+During PR O only, the exact rollback command remains:
 
 ```powershell
 docker compose -f compose.yml -f compose.dev.yml up --watch
-```
-
-This builds the public Dockerfiles from the checkout and starts frontend,
-backend, PostgreSQL, scheduler, Neo4j, and projector. Source changes are synced
-or rebuilt through Compose Watch. Stop it without deleting development data:
-
-```powershell
-docker compose -f compose.yml -f compose.dev.yml down
-```
-
-Run checks inside the same development containers so host Python, uv, Node.js,
-and pnpm versions cannot drift:
-
-```powershell
-docker compose -f compose.yml -f compose.dev.yml exec -T backend uv run python -m pytest -q
-docker compose -f compose.yml -f compose.dev.yml exec -T backend uv run alembic upgrade head
-docker compose -f compose.yml -f compose.dev.yml exec -T backend uv run python ../scripts/check_ci_policy.py
-docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm lint
-docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm typecheck
-docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm build
 ```
 
 Product-shell changes also run a required Chromium smoke in Core CI. A
@@ -67,7 +88,7 @@ user data.
 The required `local-core-smoke` check additionally builds the release targets,
 scans image vulnerabilities and secrets, validates SPDX SBOM output, and runs
 the isolated Linux clean-clone lifecycle fixtures. PostgreSQL and Neo4j test
-state is disposable. Provider-dependent tests use fake providers and must not
+legacy database state is disposable. Provider-dependent tests use fake providers and must not
 make external model calls.
 ## Pull requests and merge ownership
 

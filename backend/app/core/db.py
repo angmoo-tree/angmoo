@@ -10,8 +10,7 @@ class Base(DeclarativeBase):
     pass
 
 
-def _create_engine():
-    database_url = settings.database_url
+def create_database_engine(database_url: str):
     sqlite = database_url.startswith("sqlite")
     engine = create_engine(
         database_url,
@@ -19,6 +18,7 @@ def _create_engine():
         connect_args={"check_same_thread": False} if sqlite else {},
     )
     if sqlite:
+
         @event.listens_for(engine, "connect")
         def _configure_sqlite(dbapi_connection, _connection_record) -> None:
             cursor = dbapi_connection.cursor()
@@ -33,8 +33,16 @@ def _create_engine():
     return engine
 
 
-engine = _create_engine()
-SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+def create_session_factory(database_engine):
+    return sessionmaker(
+        bind=database_engine,
+        autoflush=False,
+        autocommit=False,
+    )
+
+
+engine = create_database_engine(settings.database_url)
+SessionLocal = create_session_factory(engine)
 
 
 def get_db() -> Generator[Session]:

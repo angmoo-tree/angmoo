@@ -31,7 +31,7 @@
     },
     {
       "path": "backend/app/services/resident_tick_scheduler.py",
-      "sha256": "723178ed681db0ae40e3a14c1e8b9e620ba6f67eea437a898fe81effd79e7c20"
+      "sha256": "92d0852beafc0a5ac5011e8eee0b7e6d30982ba5d81cad3d346b98b1e5f45d16"
     },
     {
       "path": "backend/app/services/graph_projection_worker.py",
@@ -237,7 +237,7 @@
       "owner": "ER4",
       "path": "backend/app/services/resident_tick_scheduler.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "723178ed681db0ae40e3a14c1e8b9e620ba6f67eea437a898fe81effd79e7c20",
+      "source_sha256": "92d0852beafc0a5ac5011e8eee0b7e6d30982ba5d81cad3d346b98b1e5f45d16",
       "transition_pr": "ER4 PR J"
     },
     {
@@ -287,7 +287,7 @@
       "owner": "ER4",
       "path": "backend/app/services/graph_projection_runtime.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "ec32da416aed7b5ef9c1cc895d7be47261843289d94e6db06afc85e24a826032",
+      "source_sha256": "e631a6fbd77c6ad4118b01b19421b583eb5cdcaa6f9be1c894ff43bd3a97b671",
       "transition_pr": "ER4 PR J"
     },
     {

@@ -247,6 +247,18 @@
     },
     {
       "markers": {
+        "driver_or_url": [
+          67
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/api/v1/routes/runtime_status.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "3db03459023a4078508f5c00a01449315d3fcf6952f55aec688f73790d11ba73",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
         "row_lock": [
           212,
           259,
@@ -263,14 +275,14 @@
       "markers": {
         "driver_or_url": [
           26,
-          163,
-          164
+          164,
+          165
         ]
       },
       "owner": "ER1-ER2",
       "path": "backend/app/core/config.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "f0e8c6e71033e974808de84ecb15f3479486752182307a40452bfe23987ed3a5",
+      "source_sha256": "734a5f5f89d7812ba82dc2e5c39a2e6a60ca17962109a8c3308708bdd63eb38e",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
@@ -466,13 +478,26 @@
     {
       "markers": {
         "driver_or_url": [
-          60
+          109,
+          131
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/domains/runtime/api/runtime_schemas.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "f0f83788a23596831c007904162cd373f25f0b2fa3b8363a34fc6ca91874ebce",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          67
         ]
       },
       "owner": "ER1-ER2",
       "path": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "54f76bd1344c114626f71d61b424944f94c394040d84c911560bb379e8dedcff",
+      "source_sha256": "ba421d5d0ba9dc036c9d3c2d8fad17c51c459b04b07c526d700fa766dde6a3de",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
@@ -621,6 +646,19 @@
       "path": "backend/app/models/graph_projection.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
       "source_sha256": "83f8f08bba74541932e5c607bad477433e6048eefd84fea8c5ce4a83410a11be",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          163,
+          164
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/runtime/configuration.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "21c866162c92e923b1d50f0e0c4dda7a43631f08a23936ecce0e5d955fb61642",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
@@ -975,7 +1013,7 @@
       "owner": "ER1-ER2",
       "path": "backend/app/services/relationship_graph_read.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "21b1b4ea56bb62f288befb33c569a31972f92db9d367075b457dcf5c6ee6e310",
+      "source_sha256": "a6564eadc617ecef5701c09c6c3ab3ce323bcf537f9e6082c281790fb301bb0d",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
@@ -987,7 +1025,7 @@
       "owner": "ER1-ER2",
       "path": "backend/app/services/resident_tick_scheduler.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "723178ed681db0ae40e3a14c1e8b9e620ba6f67eea437a898fe81effd79e7c20",
+      "source_sha256": "92d0852beafc0a5ac5011e8eee0b7e6d30982ba5d81cad3d346b98b1e5f45d16",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
@@ -1216,10 +1254,10 @@
       "transition_pr": "ER7 PR P"
     }
   ],
-  "entry_count": 78,
+  "entry_count": 81,
   "marker_counts": {
     "advisory_lock": 8,
-    "driver_or_url": 54,
+    "driver_or_url": 57,
     "jsonb": 8,
     "pgvector": 7,
     "row_lock": 22,
