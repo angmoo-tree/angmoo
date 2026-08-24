@@ -3,9 +3,7 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 import json
 import os
-import socket
 from typing import Any
-from urllib.parse import urlparse
 
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
@@ -61,16 +59,8 @@ class SqlAlchemyApplicationRuntimeProbe:
         projector, graph_state = self._projector_status()
         activity, provider_usage = self._activity_status(owner.owner_user_id)
 
-        persistence_name = (
-            "sqlite"
-            if self._config.database_url.startswith("sqlite")
-            else "postgresql"
-        )
-        graph_name = (
-            "ladybugdb"
-            if self._config.graph_provider == "ladybug"
-            else "neo4j"
-        )
+        persistence_name = "sqlite"
+        graph_name = "ladybugdb"
 
         components = (
             RuntimeComponentStatus(
@@ -457,24 +447,7 @@ def _graph_backend_available(config: Settings = settings) -> bool:
     # projector observation and durable outbox errors are the authoritative
     # runtime failure signals; probing it by opening a second writer would
     # contend with the process-owned writer lock.
-    if (
-        config.graph_provider == "ladybug"
-        or config.ladybug_graph_preview_enabled
-    ):
-        return True
-    return _neo4j_available(config)
-
-
-def _neo4j_available(config: Settings) -> bool:
-    parsed = urlparse(config.NEO4J_URI)
-    if not parsed.hostname:
-        return False
-    port = parsed.port or 7687
-    try:
-        with socket.create_connection((parsed.hostname, port), timeout=0.5):
-            return True
-    except OSError:
-        return False
+    return config.graph_provider == "ladybug"
 
 
 def _provider_call_count(value: dict[str, Any]) -> int:

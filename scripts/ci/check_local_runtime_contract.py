@@ -15,15 +15,13 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CONTRACT = ROOT / "security/local_runtime_contract.json"
 DEFAULT_DOC = ROOT / "docs/public/local-runtime.md"
 FORBIDDEN_CORE_PREFIXES = ("app.domains", "app.integrations", "app.runtime")
-EXPECTED_DEFAULT_SERVICES = {
-    "backend", "frontend", "neo4j", "postgresql", "projector", "scheduler"
-}
+EXPECTED_DEFAULT_SERVICES = {"backend", "frontend"}
 EXPECTED_STATES = {
     "blocked", "degraded", "healthy", "stale_state", "starting", "stopped", "stopping"
 }
 EXPECTED_ERROR_CODES = {
     "container_engine_unavailable", "data_path_unwritable", "database_unavailable",
-    "image_build_failed", "image_pull_failed", "migration_mismatch", "neo4j_unavailable",
+    "graph_unavailable", "image_build_failed", "image_pull_failed", "migration_mismatch",
     "not_implemented_until_L5", "port_conflict", "projector_backlog",
     "provider_not_configured", "runtime_state_stale", "secret_mismatch",
     "secret_missing", "unsupported_tool_version",
@@ -61,7 +59,6 @@ EXPECTED_SUPPLY_CHAIN = {
         "62b1e65e8869bc4b4c6aa4fa2b21595256c7c2f6018a9d9ad61caf87187c1969"
     ),
 }
-IMMUTABLE_IMAGE = re.compile(r"^[^@\s]+@sha256:[0-9a-f]{64}$")
 
 
 def _core_modules(root: Path) -> set[str]:
@@ -95,7 +92,7 @@ def validate_contract(payload: Any, *, root: Path = ROOT) -> list[str]:
     if payload.get("canonical_commands") != EXPECTED_COMMANDS:
         errors.append("canonical_commands mismatch")
     if set(payload.get("default_services", [])) != EXPECTED_DEFAULT_SERVICES:
-        errors.append("default_services must contain the complete Angmoo stack")
+        errors.append("default_services must contain the two-service embedded stack")
     if set(payload.get("states", [])) != EXPECTED_STATES:
         errors.append("runtime states mismatch")
     if set(payload.get("error_codes", [])) != EXPECTED_ERROR_CODES:
@@ -115,17 +112,12 @@ def validate_contract(payload: Any, *, root: Path = ROOT) -> list[str]:
     }:
         errors.append("frontend host publication contract mismatch")
 
-    databases = payload.get("databases")
-    if not isinstance(databases, dict) or set(databases) != {"postgresql", "neo4j"}:
-        errors.append("database contract must define PostgreSQL and Neo4j")
-    else:
-        for name, record in databases.items():
-            if not isinstance(record, dict) or not IMMUTABLE_IMAGE.fullmatch(
-                str(record.get("image", ""))
-            ):
-                errors.append(f"database image must be digest pinned: {name}")
-            if not str(record.get("version", "")).strip():
-                errors.append(f"database semantic version is missing: {name}")
+    if payload.get("embedded_storage") != {
+        "canonical": "sqlite",
+        "graph": "ladybug",
+        "search": "fts5",
+    }:
+        errors.append("embedded storage contract mismatch")
 
     support = payload.get("support")
     if not isinstance(support, dict):
@@ -173,11 +165,11 @@ def check_repo(
     except (OSError, json.JSONDecodeError, SyntaxError) as exc:
         return [f"runtime contract cannot be read: {exc}"]
     for required in (
-        "docker compose up -d",
         "docker compose -f compose.yml -f compose.dev.yml up --watch",
-        "https://github.com/angmoo-tree/angmoo/issues/36",
-        "ghcr.io/angmoo-tree/angmoo-backend:v0.3.0",
-        "ghcr.io/angmoo-tree/angmoo-frontend:v0.3.0",
+        "angmoo_contributor_embedded_data",
+        "CONTRIBUTOR_EMBEDDED",
+        "SQLite",
+        "LadybugDB",
     ):
         if required not in document:
             errors.append(f"local runtime document is missing: {required}")

@@ -1,7 +1,7 @@
 {
-  "edge_count": 936,
-  "external_import_count": 1494,
-  "module_count": 436,
+  "edge_count": 935,
+  "external_import_count": 1488,
+  "module_count": 435,
   "modules": [
     {
       "external_imports": [],
@@ -1324,27 +1324,6 @@
       "imports": [],
       "module": "app.compatibility.runtime",
       "path": "backend/app/compatibility/runtime/__init__.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "asyncio",
-        "collections.abc",
-        "socket",
-        "threading",
-        "typing"
-      ],
-      "imports": [
-        "app.core.config",
-        "app.core.db",
-        "app.domains.relationships.ports.projection",
-        "app.services.graph_projection_runtime",
-        "app.services.graph_projection_worker",
-        "app.services.resident_tick_scheduler"
-      ],
-      "module": "app.compatibility.runtime.single_backend_workers",
-      "path": "backend/app/compatibility/runtime/single_backend_workers.py",
       "wildcard_imports": []
     },
     {
@@ -2910,12 +2889,10 @@
         "datetime",
         "json",
         "os",
-        "socket",
         "sqlalchemy",
         "sqlalchemy.exc",
         "sqlalchemy.orm",
-        "typing",
-        "urllib.parse"
+        "typing"
       ],
       "imports": [
         "app.core.config",
@@ -3606,26 +3583,6 @@
     {
       "external_imports": [
         "__future__",
-        "concurrent.futures",
-        "json",
-        "neo4j",
-        "neo4j.exceptions",
-        "time",
-        "typing"
-      ],
-      "imports": [
-        "app.domains.relationships.graph_read.repository",
-        "app.domains.relationships.ports.projection",
-        "app.domains.relationships.projection.commands",
-        "app.services.graph_projection_metrics"
-      ],
-      "module": "app.integrations.neo4j",
-      "path": "backend/app/integrations/neo4j.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
         "datetime",
         "typing"
       ],
@@ -3788,9 +3745,10 @@
     {
       "external_imports": [
         "datetime",
-        "pgvector.sqlalchemy",
+        "json",
         "sqlalchemy",
         "sqlalchemy.orm",
+        "sqlalchemy.types",
         "typing"
       ],
       "imports": [
@@ -4057,6 +4015,7 @@
         "contextlib",
         "dataclasses",
         "fastapi",
+        "sqlalchemy",
         "typing",
         "uvicorn"
       ],
@@ -4068,6 +4027,8 @@
         "app.core.request_limits",
         "app.core.startup_security",
         "app.cruds.community",
+        "app.domains.runtime.public",
+        "app.runtime.component_workers",
         "app.runtime.configuration",
         "app.runtime.single_backend_components",
         "app.services.hosted_configuration"
@@ -4088,6 +4049,27 @@
       "imports": [],
       "module": "app.runtime",
       "path": "backend/app/runtime/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "asyncio",
+        "collections.abc",
+        "socket",
+        "threading",
+        "typing"
+      ],
+      "imports": [
+        "app.core.config",
+        "app.core.db",
+        "app.domains.relationships.ports.projection",
+        "app.services.graph_projection_runtime",
+        "app.services.graph_projection_worker",
+        "app.services.resident_tick_scheduler"
+      ],
+      "module": "app.runtime.component_workers",
+      "path": "backend/app/runtime/component_workers.py",
       "wildcard_imports": []
     },
     {
@@ -4115,11 +4097,15 @@
       "external_imports": [
         "__future__",
         "argparse",
+        "json",
+        "os",
         "pathlib",
         "secrets",
         "uvicorn"
       ],
       "imports": [
+        "app.core.redaction",
+        "app.domains.runtime.public",
         "app.public_main",
         "app.runtime.configuration",
         "app.runtime.persistence.runtime_data_path",
@@ -4399,10 +4385,8 @@
         "__future__",
         "hashlib",
         "json",
-        "pgvector.sqlalchemy",
         "re",
-        "sqlalchemy",
-        "sqlalchemy.ext.compiler"
+        "sqlalchemy"
       ],
       "imports": [
         "app.core.db"
@@ -4491,9 +4475,9 @@
         "typing"
       ],
       "imports": [
-        "app.compatibility.runtime.single_backend_workers",
         "app.core.config",
-        "app.domains.runtime.public"
+        "app.domains.runtime.public",
+        "app.runtime.component_workers"
       ],
       "module": "app.runtime.single_backend_components",
       "path": "backend/app/runtime/single_backend_components.py",
@@ -5027,6 +5011,7 @@
         "docx",
         "hashlib",
         "io",
+        "math",
         "multiprocessing",
         "os",
         "pathlib",
@@ -5242,8 +5227,7 @@
       "imports": [
         "app.core.config",
         "app.domains.relationships.ports.projection",
-        "app.integrations.ladybug_projection",
-        "app.integrations.neo4j"
+        "app.integrations.ladybug_projection"
       ],
       "module": "app.services.graph_projection_runtime",
       "path": "backend/app/services/graph_projection_runtime.py",

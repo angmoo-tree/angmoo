@@ -29,7 +29,7 @@ from app.domains.relationships.graph_read.repository import (
 
 
 GraphView = Literal["neighborhood", "direct", "evidence"]
-GraphProvider = Literal["neo4j", "ladybug"]
+GraphProvider = Literal["ladybug"]
 
 
 @dataclass(frozen=True)
@@ -67,7 +67,7 @@ class RelationshipGraphReadGateway(Protocol):
 
     def record_stale_edge(self) -> None: ...
 
-    def postgres_direct_hits(
+    def canonical_direct_hits(
         self,
         *,
         world_id: str,
@@ -267,7 +267,7 @@ def get_owner_relationship_graph(
     limit: int = 20,
     graph_projection_enabled: bool = True,
     repository: RelationshipGraphQueryPort | None = None,
-    graph_provider: GraphProvider = "neo4j",
+    graph_provider: GraphProvider = "ladybug",
 ) -> schemas.RelationshipGraphRead:
     if view not in {"neighborhood", "direct", "evidence"}:
         raise RelationshipGraphRequestError("graph_view_invalid")
@@ -302,7 +302,7 @@ def get_owner_relationship_graph(
         oldest_pending_age_seconds=lag,
     )
 
-    source: Literal["neo4j", "ladybug", "postgres_fallback"] = graph_provider
+    source: Literal["ladybug", "canonical_fallback"] = graph_provider
     fallback_reason: str | None = None
     template = {
         "neighborhood": f"visualization_neighborhood_{depth}",
@@ -352,19 +352,19 @@ def get_owner_relationship_graph(
         )
     except GraphReadBackendError as exc:
         gateway.record_fallback(reason=exc.error_class)
-        source = "postgres_fallback"
+        source = "canonical_fallback"
         fallback_reason = exc.error_class
         if exc.error_class == "graph_disabled":
             graph_status = "disabled"
         elif exc.error_class == "graph_rebuilding":
             graph_status = "rebuilding"
-        elif exc.error_class == "neo4j_query_timeout":
+        elif exc.error_class == "ladybug_query_timeout":
             graph_status = "timeout"
-        elif exc.error_class in {"neo4j_auth_invalid", "schema_not_ready"}:
+        elif exc.error_class == "schema_not_ready":
             graph_status = "misconfigured"
         else:
             graph_status = "unavailable"
-        graph_hits = gateway.postgres_direct_hits(
+        graph_hits = gateway.canonical_direct_hits(
             world_id=world_id,
             center_id=center_id,
             target_id=target_world_character_id,
@@ -381,7 +381,7 @@ def get_owner_relationship_graph(
     if (
         view == "evidence"
         and repository is not None
-        and source != "postgres_fallback"
+        and source != "canonical_fallback"
     ):
         try:
             event_hits = repository.list_relationship_evidence(

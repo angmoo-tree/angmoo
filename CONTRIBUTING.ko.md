@@ -3,10 +3,10 @@
 [English](CONTRIBUTING.md) | 한국어
 
 Angmoo 개선에 참여해 주셔서 감사합니다. 공식 저장소는
-`angmoo-tree/angmoo`입니다. Issue와 Pull Request는 한국어와 영어 모두
-사용할 수 있으며 번역 내용이 다르면 영어 문서를 기준으로 합니다.
+`angmoo-tree/angmoo`입니다. Issue와 Pull Request는 한국어와 영어 모두 사용할 수 있습니다.
+번역 내용이 다르면 영어 문서를 기준으로 합니다.
 
-## 작업 전 확인
+## Issue와 작업 범위
 
 - `docs/public/architecture.md`와 `docs/public/contribution-map.md`를 읽습니다.
 - 최신 `main`에서 branch 또는 fork를 만듭니다.
@@ -20,7 +20,7 @@ Angmoo 개선에 참여해 주셔서 감사합니다. 공식 저장소는
 있습니다. Issue 연결은 기계적으로 강제하지 않습니다. 관련 Issue가 있으면
 PR 본문에 `Closes #번호` 또는 명시적 reference를 남깁니다.
 
-## 로컬 개발과 검사
+## 개발 환경
 
 기여자 기준선에는 Git과 Docker Compose 2.22.0 이상이 필요합니다. repository
 root에서 전체 개발 stack을 시작합니다.
@@ -29,10 +29,11 @@ root에서 전체 개발 stack을 시작합니다.
 docker compose -f compose.yml -f compose.dev.yml up --watch
 ```
 
-checkout한 공개 Dockerfile을 build하고 frontend, backend, PostgreSQL,
-scheduler, Neo4j, projector를 모두 시작합니다. source 변경은 Compose Watch가
-sync하거나 rebuild합니다. 개발 데이터를 지우지 않고 종료하려면 다음을
-실행합니다.
+checkout한 공개 Dockerfile을 build하고 Next.js frontend와
+`CONTRIBUTOR_EMBEDDED` FastAPI backend 두 service만 시작합니다. backend 안에서
+SQLite·FTS5·LadybugDB·scheduler·projector가 함께 실행됩니다. source 변경은
+Compose Watch가 sync하거나 rebuild합니다. 개발 데이터를 지우지 않고
+종료하려면 다음을 실행합니다.
 
 ```powershell
 docker compose -f compose.yml -f compose.dev.yml down
@@ -67,23 +68,29 @@ profile을 이 검사 대상으로 사용하면 안 됩니다.
 
 required `local-core-smoke`는 release target build, image 취약점·secret scan,
 SPDX SBOM 검증과 격리된 Linux clean-clone lifecycle fixture도 실행합니다.
-PostgreSQL·Neo4j test state는 폐기 가능하며 provider 관련 검사는 fake
-provider만 사용하고 외부 모델을 호출하지 않습니다.
-## Pull Request와 merge 권한
+기여자 named volume은 설치형 `%LOCALAPPDATA%\Angmoo`와 완전히 분리됩니다.
+실제 Phone·wide native window를 수정하는 경우에만 같은 Docker stack에
+선택적 Host Tauri dev를 연결합니다. Windows 패키징은 Windows Actions에서
+검증하며 macOS 패키징 구현은 아직 공식 지원으로 주장하지 않습니다.
+provider 관련 검사는 fake provider만 사용하고 외부 모델을 호출하지 않습니다.
 
-모든 변경은 PR을 통해 `main`에 들어갑니다. required checks 10개는 다음과
-같습니다.
+## Branch, commit과 Pull Request
+
+모든 변경은 PR을 통해 `main`에 들어갑니다. required check 의미는 다음을
+포함합니다.
 
 - `backend`
 - `frontend`
-- `migration-postgres`
+- `legacy-migration`
 - `local-core-smoke`
 - `local-autonomy-smoke`
-- `local-full-graph`
+- `local-full-graph` (LadybugDB와 동결된 static parity fixture)
 - `oss-boundary`
 - `dependency-license`
 - `dco`
 - `architecture-boundary`
+- `tauri-windows`
+- Windows installer release-candidate·installed-runtime smoke
 
 `windows-local-smoke`, `codeql`은 advisory check로 유지합니다. Advisory는
 실패를 무시한다는 뜻이 아니며 실패 원인과 required 승격 조건을 기록하고

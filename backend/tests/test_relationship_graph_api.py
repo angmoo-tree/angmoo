@@ -21,7 +21,7 @@ from app.services.relationship_graph_read import (
 from p7_graph_support import seed_projection_fixture, sqlite_engine
 
 
-def test_owner_read_falls_back_to_directional_postgres_when_graph_disabled() -> None:
+def test_owner_read_falls_back_to_directional_canonical_when_graph_disabled() -> None:
     engine = sqlite_engine()
     with Session(engine, expire_on_commit=False) as db:
         fixture = seed_projection_fixture(db)
@@ -32,7 +32,7 @@ def test_owner_read_falls_back_to_directional_postgres_when_graph_disabled() -> 
             user=fixture.owner,
             config=Settings(GRAPH_PROJECTION_ENABLED=False),
         )
-    assert result.meta.source == "postgres_fallback"
+    assert result.meta.source == "canonical_fallback"
     assert result.meta.graph_status == "disabled"
     assert result.meta.fallback_reason == "graph_disabled"
     assert len(result.edges) == 1
@@ -54,7 +54,7 @@ def test_other_owner_cannot_read_character_graph() -> None:
                 config=Settings(GRAPH_PROJECTION_ENABLED=False),
             )
 
-def test_failed_world_rebuild_falls_back_to_postgres_as_unavailable() -> None:
+def test_failed_world_rebuild_falls_back_to_canonical_as_unavailable() -> None:
     engine = sqlite_engine()
     with Session(engine, expire_on_commit=False) as db:
         fixture = seed_projection_fixture(db, suffix="failed-rebuild")
@@ -74,25 +74,21 @@ def test_failed_world_rebuild_falls_back_to_postgres_as_unavailable() -> None:
             character_id=fixture.actor.id,
             world_id=fixture.world.id,
             user=fixture.owner,
-            config=Settings(
-                GRAPH_PROJECTION_ENABLED=True,
-                NEO4J_PASSWORD="local-test-only",
-            ),
+            config=Settings(GRAPH_PROJECTION_ENABLED=True),
         )
-    assert result.meta.source == "postgres_fallback"
+    assert result.meta.source == "canonical_fallback"
     assert result.meta.graph_status == "unavailable"
     assert result.meta.fallback_reason == "graph_rebuild_failed"
     assert len(result.edges) == 1
 
 
-def test_ladybug_preview_reads_projection_and_recovers_from_lock(
+def test_ladybug_reads_projection_and_recovers_from_lock(
     tmp_path: Path,
 ) -> None:
     engine = sqlite_engine()
-    database_root = tmp_path / "ladybug-ui-preview"
+    database_root = tmp_path / "ladybug-ui"
     config = Settings(
         GRAPH_PROJECTION_ENABLED=True,
-        LADYBUG_GRAPH_PREVIEW_ENABLED=True,
         LADYBUG_DATABASE_ROOT=str(database_root),
     )
     with Session(engine, expire_on_commit=False) as db:
@@ -130,7 +126,7 @@ def test_ladybug_preview_reads_projection_and_recovers_from_lock(
                 config=config,
                 graph_provider="ladybug",
             )
-    assert degraded.meta.source == "postgres_fallback"
+    assert degraded.meta.source == "canonical_fallback"
     assert degraded.meta.graph_status == "unavailable"
     assert degraded.meta.fallback_reason == "ladybug_writer_lock_unavailable"
     assert len(degraded.edges) == 1
@@ -155,7 +151,6 @@ def test_in_process_projector_connection_is_shared_with_graph_and_p6_reads(
     database_root = tmp_path / "ladybug-in-process"
     config = Settings(
         GRAPH_PROJECTION_ENABLED=True,
-        LADYBUG_GRAPH_PREVIEW_ENABLED=True,
         LADYBUG_DATABASE_ROOT=str(database_root),
         LOCAL_RUNTIME_COMPONENT_MODE="in_process",
     )
@@ -195,7 +190,7 @@ def test_in_process_projector_connection_is_shared_with_graph_and_p6_reads(
             unregister_process_graph_client(projection)
 
 
-def test_ladybug_preview_disabled_falls_back_without_opening_provider(
+def test_obsolete_preview_flag_cannot_disable_canonical_ladybug_provider(
     tmp_path: Path,
 ) -> None:
     engine = sqlite_engine()
@@ -215,7 +210,7 @@ def test_ladybug_preview_disabled_falls_back_without_opening_provider(
             graph_provider="ladybug",
         )
 
-    assert result.meta.source == "postgres_fallback"
-    assert result.meta.graph_status == "unavailable"
-    assert result.meta.fallback_reason == "ladybug_preview_disabled"
-    assert not config.ladybug_database_root.exists()
+    assert result.meta.source == "ladybug"
+    assert result.meta.graph_status == "lagging"
+    assert result.meta.fallback_reason is None
+    assert config.ladybug_database_root.exists()

@@ -51,7 +51,7 @@ export type RelationshipGraphRead = {
   evidence: RelationshipGraphEvidence[];
   meta: {
     template: string;
-    source: "neo4j" | "ladybug" | "postgres_fallback";
+    source: "ladybug" | "canonical_fallback";
     graph_status: RelationshipGraphStatus;
     truncated: boolean;
     projection_lag_seconds: number | null;
@@ -75,7 +75,7 @@ export async function getRelationshipGraph(
   characterId: string,
   worldId: string,
   depth: 1 | 2,
-  provider: "neo4j" | "ladybug" = "neo4j",
+  provider: "ladybug" = "ladybug",
 ) {
   const path = `/characters/${encodeURIComponent(characterId)}/worlds/${encodeURIComponent(worldId)}/relationship-graph?view=neighborhood&depth=${depth}&limit=20&provider=${provider}`;
   let response: Response;
@@ -102,7 +102,7 @@ export async function getRelationshipGraph(
       ? "launcher_token_invalid"
       : rawCode.includes("graph_provider") ||
           rawCode.includes("ladybug") ||
-          rawCode.includes("neo4j")
+          rawCode.includes("ladybug")
         ? "graph_provider_unavailable"
         : response.status >= 500
           ? "relationship_query_failed"

@@ -24,7 +24,7 @@ from app.domains.runtime.ports.search_index import (
     SearchIndexPort,
 )
 from app.domains.runtime.ports.unit_of_work import UnitOfWorkPort
-from app.integrations.neo4j import Neo4jGraphClient
+from app.integrations.ladybug_projection import LadybugRelationshipProjection
 from app.integrations.relationship_graph_read import RelationshipGraphRepository
 from app.runtime.graph_projection.sqlalchemy_outbox import SqlAlchemyProjectionOutbox
 from app.runtime.migrations.alembic_source import AlembicMigrationSource
@@ -43,7 +43,9 @@ def test_current_adapters_satisfy_er1_runtime_ports() -> None:
         object.__new__(SqlAlchemySchedulerLeaseRepository), ClaimLeasePort
     )
     assert isinstance(object.__new__(SqlAlchemyProjectionOutbox), OutboxPort)
-    assert isinstance(object.__new__(Neo4jGraphClient), RelationshipProjectionPort)
+    assert isinstance(
+        object.__new__(LadybugRelationshipProjection), RelationshipProjectionPort
+    )
     assert isinstance(
         object.__new__(RelationshipGraphRepository), RelationshipGraphQueryPort
     )

@@ -47,29 +47,20 @@ def test_storage_frontend_runtime_and_parity_corpora_are_complete() -> None:
     frontend = _load("next-static-compatibility.json")
     runtime = _load("embedded-runtime-inventory.json")
 
-    # ER1 adds the current SQLAlchemy projection-outbox adapter, ER2 PR D adds
-    # the OFF-by-default SQLite schema/codec adapters, PR E adds the SQLite
-    # writer/lease adapters, ER3 PR I adds the development-only LadybugDB
-    # replay helper that reads the current PostgreSQL canonical source, and
-    # ER6 adds the sidecar layout/installer checks that explicitly audit the
-    # remaining PostgreSQL driver boundary. PR B also makes the migrations
-    # package's compatibility exports lazy so the installed SQLite sidecar can
-    # import its LocalAppData migration without initializing that driver; the
-    # compatibility boundary remains inventoried until PR P removes the
-    # server runtime. ER7 PR O adds typed profile and contributor entrypoint
-    # files that explicitly reject PostgreSQL as an embedded runtime, so those
-    # references remain visible in the generated inventory as well.
-    # ER7 PR O keeps the transitional PostgreSQL default behind an explicit,
-    # lazy accessor so importing the packaged embedded application does not
-    # load psycopg.  The compatibility marker remains inventoried until PR P.
-    assert postgres["entry_count"] == 82
+    # PR P removes PostgreSQL/Neo4j from every public and contributor runtime.
+    # PostgreSQL markers may remain only in the frozen read-only importer,
+    # historical Alembic source, and dialect-neutral schema translation
+    # metadata.  The inventory must shrink from PR O's 82-file transition
+    # baseline and explain that residual-only purpose explicitly.
+    assert 0 < postgres["entry_count"] < 82
+    assert "LEGACY_MIGRATION" in postgres["purpose"]
     assert graph["query_count"] == 24
     assert frontend["route_count"] == 39
     assert {item["phase"] for item in runtime["parity"]["workloads"]} == {
         "P1", "P2", "P3", "P4", "P5", "P6", "P7"
     }
     assert all(not item["missing_tests"] for item in runtime["parity"]["workloads"])
-    assert len(runtime["runtime_coupling"]) == 10
+    assert len(runtime["runtime_coupling"]) == 9
     assert all(
         item["owner"] and item["transition_pr"] and item["removal_condition"]
         for item in runtime["runtime_coupling"]
@@ -82,7 +73,7 @@ def test_er0_records_behavior_zero_and_privacy_safe_resource_evidence() -> None:
     resources = _load("embedded-runtime-resource-baseline.json")
 
     assert "ER0 does not add SQLite, LadybugDB" in adr
-    assert "Runtime behavior change: **zero**" in summary
+    assert "ER0 baseline behavior change: **zero**" in summary
     assert resources["services"]["healthy"] == 6
     assert resources["volumes"]["canonical_count"] == 5
     serialized = json.dumps(resources, ensure_ascii=False).lower()

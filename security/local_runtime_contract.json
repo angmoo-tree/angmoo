@@ -22,22 +22,15 @@
     {"disposition": "keep", "module": "app.core.startup_security", "owner_stage": "L1", "removal_condition": null},
     {"disposition": "keep", "module": "app.core.unit_of_work", "owner_stage": "L0", "removal_condition": null}
   ],
-  "databases": {
-    "neo4j": {
-      "image": "neo4j:2026.06.0@sha256:42fd5b9ead4dd4211f6f91bd831c358e4e2117367d04633fbf88682ca4792b30",
-      "role": "rebuildable_projection",
-      "version": "2026.06.0"
-    },
-    "postgresql": {
-      "image": "pgvector/pgvector:pg16@sha256:1d533553fefe4f12e5d80c7b80622ba0c382abb5758856f52983d8789179f0fb",
-      "role": "source_of_truth",
-      "version": "16.14"
-    }
+  "embedded_storage": {
+    "canonical": "sqlite",
+    "graph": "ladybug",
+    "search": "fts5"
   },
-  "default_services": ["backend", "frontend", "neo4j", "postgresql", "projector", "scheduler"],
+  "default_services": ["backend", "frontend"],
   "error_codes": [
     "container_engine_unavailable", "data_path_unwritable", "database_unavailable",
-    "image_build_failed", "image_pull_failed", "migration_mismatch", "neo4j_unavailable",
+    "graph_unavailable", "image_build_failed", "image_pull_failed", "migration_mismatch",
     "not_implemented_until_L5", "port_conflict", "projector_backlog",
     "provider_not_configured", "runtime_state_stale", "secret_mismatch",
     "secret_missing", "unsupported_tool_version"
@@ -52,13 +45,10 @@
   },
   "issue": "https://github.com/angmoo-tree/angmoo/issues/36",
   "network": {
-    "backend": "http://backend:8080",
-    "neo4j": "bolt://neo4j:7687",
-    "postgresql": "postgresql:5432"
+    "backend": "http://backend:8080"
   },
   "reduced_modes": {
-    "autonomy": ["backend", "frontend", "postgresql", "scheduler"],
-    "core": ["backend", "frontend", "postgresql"]
+    "core": ["backend", "frontend"]
   },
   "runtime_images": {
     "backend": {"python": "3.13", "uv": "0.12.5"},

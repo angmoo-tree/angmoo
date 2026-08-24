@@ -1,8 +1,4 @@
-"""SQLite-native bounded writer coordination for the embedded runtime.
-
-The production runtime still uses PostgreSQL.  These primitives deliberately stay
-small and OFF by default so ER2 can prove SQLite semantics before composition.
-"""
+"""SQLite-native bounded writer coordination for the canonical runtime."""
 
 from __future__ import annotations
 
@@ -107,7 +103,7 @@ def run_sqlite_immediate(
 
 
 class SqliteBoundedTaskQueue:
-    """One-process bounded executor used by the future FastAPI sidecar.
+    """One-process bounded executor used by the FastAPI runtime.
 
     The default is one writer thread.  Callers may reserve a small number of
     additional workers for read/CPU tasks, but database writer serialization

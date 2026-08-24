@@ -47,7 +47,7 @@ has runtime consumers. Do not combine a move with unrelated behavior changes.
 ## Validation map
 
 All PRs run these required checks: `backend`, `frontend`,
-`migration-postgres`, `local-core-smoke`, `local-autonomy-smoke`,
+`legacy-migration`, `local-core-smoke`, `local-autonomy-smoke`,
 `local-full-graph`, `oss-boundary`, `dependency-license`, `dco`, and
 `architecture-boundary`.
 
@@ -61,9 +61,11 @@ it is not an additional pull-request check.
 rather than silently ignored and are promoted only after their deterministic
 contract is stable.
 
-Use synthetic users and fake providers. Disposable PostgreSQL and Neo4j
-services are allowed; production credentials, user data, and external LLM
-calls are not. Changes to REST/OpenAPI, Alembic, routine/social/graph state,
+Use synthetic users and fake providers. Contributor SQLite/LadybugDB fixtures
+are disposable; production credentials, user data, and external LLM calls are
+not allowed. PostgreSQL is limited to the frozen offline legacy-import test and
+Neo4j remains static parity evidence only. Changes to REST/OpenAPI, SQLite
+migrations, routine/social/graph state,
 authorization, credentials, or retry/lease behavior require focused contract
 tests and a rollback note.
 

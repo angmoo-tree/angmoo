@@ -1,4 +1,4 @@
-"""Write boundary implemented by Neo4j today and LadybugDB after ER3."""
+"""Storage-neutral write boundary implemented by canonical LadybugDB."""
 
 from __future__ import annotations
 

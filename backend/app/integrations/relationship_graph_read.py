@@ -1,4 +1,4 @@
-"""Neo4j adapter for relationship-graph read query ports."""
+"""Provider-neutral adapter for relationship-graph read query ports."""
 
 from __future__ import annotations
 
@@ -48,8 +48,8 @@ def _graph_datetime(
     if isinstance(value, (datetime, str)):
         return value
 
-    # Neo4j temporal values are driver-specific objects. Keep them inside the
-    # graph repository boundary so API schemas only receive native datetimes.
+    # Provider-specific temporal values stay inside the graph repository
+    # boundary so API schemas only receive native datetimes.
     to_native = getattr(value, "to_native", None)
     if callable(to_native):
         native = to_native()

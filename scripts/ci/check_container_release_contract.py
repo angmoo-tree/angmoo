@@ -166,8 +166,8 @@ def validate_contract(root: Path = ROOT) -> list[str]:
             errors.append(f"CI Compose override marker is missing: {marker}")
 
     docs = {
-        "README.md": "docker compose up -d",
-        "README.ko.md": "docker compose up -d",
+        "README.md": "docker compose -f compose.yml -f compose.dev.yml up --watch",
+        "README.ko.md": "docker compose -f compose.yml -f compose.dev.yml up --watch",
         "CONTRIBUTING.md": "docker compose -f compose.yml -f compose.dev.yml up --watch",
         "CONTRIBUTING.ko.md": "docker compose -f compose.yml -f compose.dev.yml up --watch",
     }

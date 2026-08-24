@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -22,6 +23,9 @@ from app.runtime.configuration import (
     settings_from_runtime_config,
 )
 from app.runtime.contributor_backend import create_contributor_runtime_app
+
+
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def _write_secret(data_root: Path) -> None:
@@ -85,10 +89,18 @@ def test_poisoned_parent_environment_cannot_change_embedded_composition(
         profile=RuntimeProfile.CONTRIBUTOR_EMBEDDED,
         name="contributor",
     )
-    product_settings = settings_from_runtime_config(product, base=Settings())
+    neutral_base = Settings(
+        _env_file=None,
+        DATABASE_URL="sqlite+pysqlite:///neutral.sqlite3",
+        GRAPH_PROVIDER="ladybug",
+        GRAPH_PROJECTION_ENABLED=True,
+        LOCAL_RUNTIME_COMPONENT_MODE="in_process",
+        LADYBUG_DATABASE_ROOT=str(tmp_path / "neutral-graph"),
+    )
+    product_settings = settings_from_runtime_config(product, base=neutral_base)
     contributor_settings = settings_from_runtime_config(
         contributor,
-        base=Settings(),
+        base=neutral_base,
     )
 
     for config, resolved in (
@@ -122,7 +134,23 @@ def test_create_app_owns_explicit_embedded_session_and_runtime_state(
             app.state.runtime_composition.engine
         )
     finally:
-        app.state.runtime_composition.dispose()
+        app.state.restore_process_settings()
+
+
+def test_typed_runtime_materializes_secret_and_media_for_legacy_service_refs(
+    tmp_path: Path,
+) -> None:
+    from app.core.config import settings
+
+    config = _embedded_config(tmp_path)
+    app = create_app(runtime_config=config)
+    try:
+        assert settings.app_secret == "synthetic-er7-secret"
+        assert settings.media_root_path == config.data_paths.media.resolve()
+        assert (config.data_paths.media / "characters").is_dir()
+        assert (config.data_paths.media / "posts").is_dir()
+    finally:
+        app.state.restore_process_settings()
 
 
 def test_public_composition_import_does_not_load_postgres_dbapi() -> None:
@@ -163,7 +191,13 @@ def test_contributor_entrypoint_uses_an_explicit_isolated_data_root(
         config = app.state.runtime_config
         response = client.get("/health")
         assert response.status_code == 200
-        assert response.json() == {"status": "ok"}
+        assert response.json() == {
+            "status": "ok",
+            "profile": "CONTRIBUTOR_EMBEDDED",
+            "persistence": "sqlite",
+            "graph": "ladybug",
+            "components": {"scheduler": "ready", "projector": "ready"},
+        }
         assert config.profile is RuntimeProfile.CONTRIBUTOR_EMBEDDED
         assert config.data_paths.root == contributor_root.resolve()
         assert app.state.runtime_settings.app_env == "development"
@@ -253,3 +287,38 @@ def test_unknown_profile_does_not_create_database_or_secret(tmp_path: Path) -> N
         )
 
     assert not data_root.exists()
+
+
+def test_product_dependencies_exclude_server_database_runtimes() -> None:
+    project = tomllib.loads(
+        (ROOT / "backend/pyproject.toml").read_text(encoding="utf-8")
+    )
+    dependencies = tuple(project["project"]["dependencies"])
+    legacy = tuple(project["project"]["optional-dependencies"]["legacy-migration"])
+
+    for forbidden in ("neo4j", "psycopg", "pgvector"):
+        assert not any(forbidden in dependency.lower() for dependency in dependencies)
+    assert any("psycopg" in dependency.lower() for dependency in legacy)
+    assert any("pgvector" in dependency.lower() for dependency in legacy)
+
+
+def test_server_runtime_assets_and_external_worker_entrypoints_are_removed() -> None:
+    removed = (
+        "compose.neo4j.yml",
+        "compose.in-process.yml",
+        "scripts/docker/neo4j-entrypoint.sh",
+        "scripts/docker/postgresql-entrypoint.sh",
+        "backend/app/integrations/neo4j.py",
+        "backend/scripts/run_graph_projection_worker.py",
+        "backend/scripts/run_resident_tick_scheduler.py",
+    )
+
+    for relative in removed:
+        assert not (ROOT / relative).exists(), relative
+
+    compose = (ROOT / "compose.yml").read_text(encoding="utf-8")
+    assert "angmoo_contributor_embedded_data" in compose
+    assert "postgresql:" not in compose
+    assert "neo4j:" not in compose
+    assert "scheduler:" not in compose
+    assert "projector:" not in compose

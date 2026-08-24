@@ -106,8 +106,8 @@ class LocalRuntimeStatusRead(RuntimeStatusSchema):
         "LEGACY_MIGRATION",
     ] | None = None
     canonical_generation: str | None = None
-    persistence_provider: Literal["sqlite", "postgresql"] | None = None
-    graph_provider: Literal["ladybug", "neo4j", "none"] | None = None
+    persistence_provider: Literal["sqlite"] | None = None
+    graph_provider: Literal["ladybug", "none"] | None = None
     components: list[RuntimeComponentRead] = Field(default_factory=list)
     migration: MigrationRuntimeRead
     scheduler: SchedulerRuntimeRead
@@ -128,8 +128,8 @@ def runtime_status_read(
         "LEGACY_MIGRATION",
     ] | None = None,
     canonical_generation: str | None = None,
-    persistence_provider: Literal["sqlite", "postgresql"] | None = None,
-    graph_provider: Literal["ladybug", "neo4j", "none"] | None = None,
+    persistence_provider: Literal["sqlite"] | None = None,
+    graph_provider: Literal["ladybug", "none"] | None = None,
 ) -> LocalRuntimeStatusRead:
     return LocalRuntimeStatusRead(
         installation_state=status.installation_state,

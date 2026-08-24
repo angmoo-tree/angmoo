@@ -1,120 +1,123 @@
-# Local Docker runtime contract
+# Local embedded runtime contract
 
-Angmoo is transitioning from a host-native contributor setup to one canonical
-Docker Compose topology. This document records the L0 contract and its
-Dockerfiles and Compose implementation. The proposal and acceptance matrix are
-tracked in
-[`#36`](https://github.com/angmoo-tree/angmoo/issues/36).
+Angmoo has one official persistence, graph, and lifecycle meaning. Installed
+users and contributors differ only in how the frontend and backend are
+packaged; they do not use different databases or worker topologies.
 
-## Canonical topology
-
-The default user and contributor environments both contain the complete local
-application:
+## Canonical components
 
 ```text
-frontend -> backend -> PostgreSQL
-                 \-> Neo4j
-scheduler -> PostgreSQL
-projector -> PostgreSQL + Neo4j
+frontend
+   ↓
+FastAPI backend
+├─ SQLite canonical store
+├─ FTS5 search projection
+├─ LadybugDB graph projection
+├─ scheduler component
+└─ projector component
 ```
 
-Only the frontend is published to the host, at `127.0.0.1:3000` by default.
-The backend, PostgreSQL, and Neo4j use service names on the internal Compose
-network. Changing `ANGMOO_PORT` may move the frontend port; Angmoo never kills
-another listener or silently chooses a different port.
+SQLite is the only canonical relational source. LadybugDB is rebuilt from
+successful canonical events and is never an independent source of truth. The
+scheduler and projector are supervised in the FastAPI process; there are no
+external scheduler or projector services.
 
-The user command is:
+The four typed profiles are:
 
-```powershell
-docker compose up -d
-```
+- `LOCAL_EMBEDDED`: Tauri static frontend and bundled FastAPI sidecar.
+- `CONTRIBUTOR_EMBEDDED`: Docker or optional host development frontend with
+  the same SQLite/LadybugDB/in-process backend meaning.
+- `TEST`: isolated SQLite/LadybugDB or explicitly supplied fakes.
+- `LEGACY_MIGRATION`: frozen PostgreSQL read-only input to an offline SQLite
+  generation. Public API, scheduler, projector, SNS writes, and provider calls
+  are prohibited.
 
-The contributor command is:
+There is no supported PostgreSQL/Neo4j server runtime or
+`DOCKER_COMPATIBILITY` profile. Neo4j parity is retained as static ER3 fixtures,
+not as a server, driver, JVM, or second query implementation.
+
+## Contributor Docker topology
+
+The official cross-platform contributor command is:
 
 ```powershell
 docker compose -f compose.yml -f compose.dev.yml up --watch
 ```
 
-The contributor overlay builds the same Dockerfiles locally and enables
-Compose Watch. Release Compose uses the versioned official images
-`ghcr.io/angmoo-tree/angmoo-backend:v0.3.0` and
-`ghcr.io/angmoo-tree/angmoo-frontend:v0.3.0`. An approved `v*.*.*` release tag
-publishes both images after the complete container Gate; ordinary pull requests
-never publish a stable image. See [Container release](container-release.md).
+It starts exactly two Linux containers:
 
-Reduced diagnostic starts are explicit service selections and are not the
-general Quickstart:
-
-```powershell
-# core
-docker compose up -d postgresql backend frontend
-
-# autonomy
-docker compose up -d postgresql backend scheduler frontend
+```text
+host browser -> frontend: Next.js dev, HMR, frontend logs
+                         ↓
+                backend: CONTRIBUTOR_EMBEDDED
+                         ├─ FastAPI reload and logs
+                         ├─ SQLite + FTS5
+                         ├─ LadybugDB
+                         ├─ scheduler
+                         └─ projector
 ```
 
-## Support tiers
+Only the frontend is published to the host, at `127.0.0.1:3000` by default.
+Changing `ANGMOO_PORT` may move that loopback port. Angmoo never kills another
+listener or silently chooses a new port.
 
-- Tier 1: Windows 11 with PowerShell 5.1 or 7 and Docker Desktop.
-- Tier 2: current Ubuntu LTS with Docker Engine and Compose v2.
-- Best effort: macOS. It is not an L0 release blocker until it has a clean
-  clone smoke.
+Contributor state is stored in the Docker named volume
+`angmoo_contributor_embedded_data`, under these logical directories:
 
-Compose 2.22.0 or newer is required because the contributor contract uses
-Compose Watch. Engine support is capability-based: digest-pinned pulls,
-healthchecks, named volumes, loopback publication, project isolation, and
-dependency readiness must work. The first Windows baseline was recorded with
-Docker 29.6.1 and Compose 5.3.0 on `linux/amd64` containers.
+```text
+canonical/
+graph/
+media/
+secrets/
+runtime/
+logs/
+```
 
-Application images use Python 3.13 with uv 0.12.5 and Node.js 22 with pnpm
-11.22.0. PostgreSQL 16.14 with pgvector is the source of truth. Neo4j
-2026.06.0 is a disposable, replayable relationship projection. Database
-images are pinned by digest in `security/local_runtime_contract.json`.
+Compose never mounts or copies installed-user `%LOCALAPPDATA%\Angmoo` data.
+Parent `DATABASE_URL`, `NEO4J_URI`, graph-provider, or external-worker variables
+cannot change the typed contributor profile.
 
-## Modes
+Normal shutdown preserves the named volume:
 
-The default is always the full six-service Angmoo stack. Reduced modes exist
-only for CI, diagnosis, and low-resource development:
+```powershell
+docker compose -f compose.yml -f compose.dev.yml down
+```
 
-- `core`: frontend, backend, PostgreSQL
-- `autonomy`: core plus scheduler
+`--volumes` is a separate destructive reset and must be intentional. Removing
+PostgreSQL or Neo4j services from Compose never prunes an old
+`angmoo_postgresql_data`, `angmoo_neo4j_data`, or `angmoo_neo4j_logs` volume.
 
-A reduced mode must be reported as intentional, not as a healthy full stack.
-BYOK absence produces `provider_not_configured` and no external provider call.
+## Installed product topology
 
-## State and error vocabulary
+The Windows installed product runs the Tauri host and bundled FastAPI sidecar.
+It does not require Docker, Node, Python, PostgreSQL, Neo4j, or a JVM on the
+user's system. Its data remains under `%LOCALAPPDATA%\Angmoo`, with the `app`
+payload lifetime separated from canonical user data.
+
+The contributor named volume and installed product root must never be shared.
+Default uninstall preserves user data; explicit remove-data remains a separate
+interactive action.
+
+## Optional platform-shell development
+
+General feature work uses Docker and the host browser. Contributors changing
+the actual Phone window, drag/resize, wide windows, or sidecar host lifecycle
+may connect a host Tauri dev process to the same Docker stack. This is not a
+second runtime architecture and must not use installed-user data.
+
+Windows packaging is built and tested by Windows Actions. macOS packaging is
+not claimed as implemented until a separate target-OS plan and validation pass.
+
+## State, privacy, and recovery
 
 Runtime state uses `stopped`, `starting`, `healthy`, `degraded`, `blocked`,
-`stale_state`, and `stopping`. Stable error codes are defined in the machine
-contract. Human output and JSON output use the same code and must not expose a
-secret or an internal stack trace.
+`stale_state`, and `stopping`. Human and JSON diagnostics use stable reason
+codes without secrets or stack traces.
 
-Normal shutdown is:
+`APP_SECRET`, provider credentials, local content, and media never enter image
+build arguments, image layers, tracked environment files, frontend containers,
+or logs. Status and doctor may report only safe metadata.
 
-```powershell
-docker compose down
-```
-
-It does not delete PostgreSQL, Neo4j, media, or secret state. Volume removal
-and data reset remain separate destructive actions and require an explicit
-user decision.
-
-## Secret boundary
-
-`APP_SECRET`, provider credentials, database credentials, certificates, local
-data, and media never enter a Docker build argument, image layer, tracked
-environment file, frontend container, or log. L0 fixes the process and path
-boundary; L1 owns persistent owner bootstrap, the separate Docker runtime-secret
-volume, `local-v2` credential encryption, rotation, and credential recovery.
-
-## Core audit
-
-`security/local_runtime_contract.json` assigns every current `app.core` module
-an owner stage and disposition. Configuration, DB, IDs, transaction primitives,
-redaction, request limits, and security primitives remain in core. Activity,
-search, and media policy migrate to their owning domain/runtime stages. Core
-must not import domains, runtime orchestration, or concrete integrations.
-
-Device Home is owned by L2.5, local owner and persistent secrets by L1, and
-World Package staging/import by L3.5. L0 only fixes the runtime route and data
-boundaries; it does not implement those product surfaces.
+Rollback uses Git commits/tags, prior installer artifacts, SQLite generations,
+atomic migration markers, and preserved secrets/media. Angmoo does not keep a
+second PostgreSQL/Neo4j runtime merely as a rollback path.

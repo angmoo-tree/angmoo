@@ -56,7 +56,7 @@ class RelationshipGraphEvidenceRead(RelationshipGraphSchema):
 
 class RelationshipGraphQueryMetaRead(RelationshipGraphSchema):
     template: str
-    source: Literal["neo4j", "ladybug", "postgres_fallback"]
+    source: Literal["ladybug", "canonical_fallback"]
     graph_status: GraphStatus
     truncated: bool = False
     projection_lag_seconds: float | None = None

@@ -61,10 +61,6 @@ def get_runtime_status(
         canonical_generation=(
             runtime_config.generation if runtime_config is not None else None
         ),
-        persistence_provider=(
-            "sqlite"
-            if runtime_settings.database_url.startswith("sqlite")
-            else "postgresql"
-        ),
+        persistence_provider="sqlite",
         graph_provider=runtime_settings.graph_provider,
     )

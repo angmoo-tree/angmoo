@@ -1,45 +1,74 @@
 # Contributor development
 
-The supported contributor profile is `CONTRIBUTOR_EMBEDDED`. It uses the same
-SQLite canonical store, LadybugDB graph projection, and in-process scheduler
-and projector as the installed Angmoo product. Only the frontend delivery mode
-changes between Next.js dev, Tauri dev, and a static release build.
+The official contributor profile is `CONTRIBUTOR_EMBEDDED`. It uses the same
+SQLite canonical store, FTS5 search, LadybugDB projection, and in-process
+scheduler/projector semantics as the installed product.
 
-Start the backend from one terminal:
+## Docker-first workflow
 
-```powershell
-cd backend
-uv sync --frozen
-uv run python -m app.runtime.contributor_backend --data-root ..\.angmoo-dev
-```
-
-Start the frontend from a second terminal:
+From the repository root:
 
 ```powershell
-cd frontend
-pnpm install --frozen-lockfile
-pnpm dev
+docker compose -f compose.yml -f compose.dev.yml up --watch
 ```
 
-The explicit `.angmoo-dev` root keeps contributor data separate from the
-installed `%LOCALAPPDATA%\Angmoo` product data. Runtime profile, database,
-graph provider, and component ownership are assembled by typed Python config;
-parent `DATABASE_URL`, `NEO4J_URI`, and external-worker variables do not change
-the embedded result.
+This starts:
 
-For Phone, Creator Studio, Relationship Graph, native window, or sidecar work:
+- `frontend`: Next.js dev server, HMR, compile and route logs;
+- `backend`: FastAPI reload, API/runtime logs, SQLite, LadybugDB, scheduler, and
+  projector.
+
+Open <http://127.0.0.1:3000>. Use the browser DevTools for frontend console and
+network diagnostics. Use `docker compose ... logs -f backend` or `frontend` for
+container logs.
+
+Run deterministic checks inside the pinned containers:
 
 ```powershell
-cd desktop
-npm install
-npm run dev
+docker compose -f compose.yml -f compose.dev.yml exec -T backend uv run python -m pytest -q
+docker compose -f compose.yml -f compose.dev.yml exec -T backend uv run python ../scripts/check_ci_policy.py
+docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm lint
+docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm typecheck
+docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm build
 ```
 
-The debug Tauri host uses `CONTRIBUTOR_EMBEDDED` and the checkout-local data
-root. Release builds use `LOCAL_EMBEDDED` and `%LOCALAPPDATA%\Angmoo`.
+The contributor named volume is separate from installed
+`%LOCALAPPDATA%\Angmoo`. Parent `DATABASE_URL`, `NEO4J_URI`, graph-provider, or
+external-worker settings do not change the typed Docker profile.
 
-Use synthetic data and fake providers for tests. Do not place real provider
-credentials, APP_SECRET values, private content, or personal runtime data in
-logs, Issues, or pull requests. The old PostgreSQL/Neo4j six-service Compose
-path is a temporary ER7 rollback surface only; it is not a second supported
-runtime for new features.
+## Optional Docker + Host Tauri dev
+
+General feature development uses the host browser. A contributor changing the
+actual Phone window, native drag/resize, wide windows, or sidecar host lifecycle
+may run a host Tauri dev process that loads the Docker frontend and connects to
+the same Docker backend.
+
+This is platform-shell development, not a second frontend, backend, or database
+implementation. It must use the checkout's contributor endpoint and must never
+read or write installed-user data. The host must provide the repository-pinned
+Rust/Tauri prerequisites and the target OS WebView runtime.
+
+Windows is the current reference shell environment and is also verified by
+Windows Actions. macOS host development and app/DMG packaging require a future
+target-OS contract; they are not claimed by this document.
+
+## Native maintainer fallback
+
+Maintainers may run Next.js and FastAPI natively for focused debugging, with an
+explicit checkout-local data root. This is a convenience fallback, not the
+cross-platform Quickstart or a different runtime profile.
+
+## Legacy migration boundary
+
+PostgreSQL may be started only for the frozen `LEGACY_MIGRATION` test/tool.
+That profile reads a supported source revision offline and read-only, writes a
+temporary SQLite generation, validates counts/IDs/FKs/digests, and promotes it
+atomically. It cannot start public API routes, scheduler, projector, SNS writes,
+sessions, or providers.
+
+Neo4j has no development runtime. LadybugDB tests use frozen ER3 direct,
+reverse, evidence, World-scope, and bounded-path parity fixtures.
+
+Use synthetic data and fake providers. Never place credentials, APP_SECRET,
+private content, personal runtime data, or raw logs in commits, Issues, or pull
+requests.

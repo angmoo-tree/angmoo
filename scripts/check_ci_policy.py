@@ -25,7 +25,7 @@ EXPECTED_WORKFLOWS = {
 REQUIRED_JOBS = {
     "backend",
     "frontend",
-    "migration-postgres",
+    "legacy-migration",
     "local-core-smoke",
     "local-autonomy-smoke",
     "local-full-graph",

@@ -4,9 +4,10 @@
 
 ER4 changes lifecycle ownership only. It does not change scheduler decisions,
 provider calls, canonical rows, projection commands, or public HTTP contracts.
-The production/default Compose path continues to run separate scheduler and
-projector services. The in-process path is enabled only by the explicit
-`compose.in-process.yml` override.
+At the time of ER4, the in-process path was enabled by an explicit
+`compose.in-process.yml` proof override. ER7 later promoted that ownership to
+the canonical installed and contributor runtimes and removed the override and
+external worker services.
 
 ## Ownership
 
@@ -21,7 +22,7 @@ FastAPI lifespan
 `app.runtime.single_backend_components` owns task creation, startup readiness,
 bounded shutdown, and privacy-safe observations. API status reads consume only
 `app.domains.runtime.public`. The three exact imports from
-`app.compatibility.runtime.single_backend_workers` to the existing workers are
+`app.runtime.component_workers` to the existing worker logic are
 reviewed compatibility edges. They preserve the L2 behavior while ER4 changes
 only the owner process; the policy requires their later removal behind
 canonical runtime ports.
@@ -52,9 +53,11 @@ unaffected.
 
 Contributor validation uses:
 
+The historical ER4 override command is no longer executable. The canonical ER7
+contributor command is:
+
 ```powershell
-docker compose -f compose.yml -f compose.dev.yml down
-docker compose -f compose.yml -f compose.dev.yml -f compose.in-process.yml up -d --build
+docker compose -f compose.yml -f compose.dev.yml up --watch
 ```
 
 The Windows thin launcher exposes the same explicit profile and reports four
@@ -71,15 +74,10 @@ and projector without deleting volumes. It only treats a repeated start as an
 idempotent no-op when the backend diagnostic payload confirms both components
 are already ready.
 
-The override sets `LOCAL_RUNTIME_COMPONENT_MODE=in_process` on `backend` and
-parks `scheduler` and `projector` behind the non-default `external-workers`
-profile. Compose does not automatically stop containers from a previously
-active profile, so the mode-switch `down` step is mandatory and deliberately
-omits `-v`. If an old owner is still running, the scheduler lease rejects the
-new backend startup instead of allowing two writers.
-
-Default Quickstart remains unchanged until ER7 receives a separate canonical
-switch approval.
+The typed ER7 profile now starts both components in process and has no
+`external-workers` profile. A stale pre-ER7 worker, if manually left running,
+still cannot become a second writer because the scheduler lease and projector
+claim fencing fail closed.
 
 ## Preserved behavior and evidence
 

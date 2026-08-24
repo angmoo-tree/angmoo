@@ -40,73 +40,30 @@ def _configs() -> tuple[dict[str, object], dict[str, object]]:
     return _compose("compose.yml"), _compose("compose.yml", "compose.dev.yml")
 
 
-def _ci_config() -> dict[str, object]:
-    return _compose("compose.yml", "compose.ci.yml")
-
-
 def test_repository_docker_runtime_assets_pass() -> None:
     release, development = _configs()
     assert CHECKER.validate_resolved_compose(release, development, root=ROOT) == []
 
 
-def test_backend_entrypoint_runs_schema_and_credential_migrations() -> None:
-    content = (ROOT / "scripts/docker/backend-entrypoint.sh").read_text(
-        encoding="utf-8"
-    )
-    assert "prepare_database()" in content
-    assert "alembic upgrade head" in content
-    assert "python -m scripts.migrate_local_credentials" in content
-    assert 'APP_SECRET_FILE="$secret_dir/app_secret"' in content
-    assert "export APP_SECRET " not in content
-    assert 'APP_SECRET="$(cat' not in content
-    assert content.index("alembic upgrade head") < content.index(
-        "python -m scripts.migrate_local_credentials"
-    )
+def test_backend_entrypoint_uses_only_typed_embedded_runtime() -> None:
+    content = (ROOT / "scripts/docker/backend-entrypoint.sh").read_text("utf-8")
+    assert "contributor-api|contributor-api-dev" in content
+    assert "app.runtime.contributor_backend" in content
+    assert "ANGMOO_CONTRIBUTOR_DATA_ROOT" in content
+    for legacy in (
+        "postgresql_password",
+        "neo4j_password",
+        "DATABASE_URL=",
+        "run_resident_tick_scheduler",
+    ):
+        assert legacy not in content
 
 
-def test_existing_database_requires_its_persistent_secrets() -> None:
-    content = (ROOT / "scripts/docker/postgresql-entrypoint.sh").read_text(
-        encoding="utf-8"
-    )
-    assert 'if [ -s "$data_dir/PG_VERSION" ]; then' in content
-    assert "credential_recovery_required secret=app_secret" in content
-    assert "validate_secret app_secret" in content
-    assert 'chown 10001:10001 "$target"' in content
-    assert "secret_acl_unsafe secret=app_secret" in content
-    assert "secret_volume_unavailable" in content
-    assert content.index('if [ -s "$data_dir/PG_VERSION" ]; then') < content.index(
-        "create_secret app_secret"
-    )
-
-
-def test_frontend_never_receives_the_runtime_secret_volume() -> None:
+def test_frontend_never_receives_embedded_data_volume() -> None:
     release, _ = _configs()
     assert release["services"]["frontend"].get("volumes", []) == []
-    for service_name in ("backend", "scheduler", "projector"):
-        mounts = release["services"][service_name]["volumes"]
-        assert any(
-            mount.get("target") == "/run/angmoo-secrets"
-            and mount.get("read_only") is True
-            for mount in mounts
-        )
-
-
-def test_runtime_version_matches_release_and_contributor_images() -> None:
-    release, development = _configs()
-    for service_name in ("backend", "scheduler", "projector"):
-        assert (
-            release["services"][service_name]["environment"]["ANGMOO_VERSION"]
-            == "v0.3.0"
-        )
-        assert (
-            development["services"][service_name]["environment"]["ANGMOO_VERSION"]
-            == "0.3.0-dev"
-        )
-
-
-def test_frontend_build_source_is_writable_by_the_non_root_builder() -> None:
-    content = (ROOT / "Dockerfile.frontend").read_text(encoding="utf-8")
-    assert content.count("COPY --chown=node:node frontend ./") == 2
+    mounts = release["services"]["backend"]["volumes"]
+    assert any(mount.get("target") == "/var/lib/angmoo" for mount in mounts)
 
 
 def test_runtime_assets_reject_an_extra_host_port() -> None:
@@ -115,19 +72,17 @@ def test_runtime_assets_reject_an_extra_host_port() -> None:
     mutated["services"]["backend"]["ports"] = [
         {"host_ip": "127.0.0.1", "target": 8080, "published": "8080"}
     ]
-    assert (
-        "only frontend may publish a host port: backend"
-        in CHECKER.validate_resolved_compose(mutated, development, root=ROOT)
+    assert "only frontend may publish a host port: backend" in CHECKER.validate_resolved_compose(
+        mutated, development, root=ROOT
     )
 
 
-def test_runtime_assets_reject_plaintext_secret_environment() -> None:
+def test_runtime_assets_reject_legacy_runtime_environment() -> None:
     release, development = _configs()
     mutated = deepcopy(release)
-    mutated["services"]["backend"]["environment"]["APP_SECRET"] = "unsafe"
-    assert (
-        "plaintext runtime secret environment is forbidden: backend"
-        in CHECKER.validate_resolved_compose(mutated, development, root=ROOT)
+    mutated["services"]["backend"]["environment"]["DATABASE_URL"] = "postgresql://unsafe"
+    assert "plaintext or legacy runtime environment is forbidden: backend" in CHECKER.validate_resolved_compose(
+        mutated, development, root=ROOT
     )
 
 
@@ -141,13 +96,36 @@ def test_runtime_assets_require_compose_watch() -> None:
 
 
 def test_ci_compose_reuses_only_locally_built_application_images() -> None:
-    assert CHECKER.validate_ci_compose(_ci_config()) == []
+    assert CHECKER.validate_ci_compose(
+        _compose("compose.yml", "compose.ci.yml")
+    ) == []
 
 
-def test_ci_compose_rejects_registry_pull_for_frontend() -> None:
-    mutated = deepcopy(_ci_config())
-    mutated["services"]["frontend"]["pull_policy"] = "missing"
-    assert (
-        "CI frontend must not pull an unverified registry image"
-        in CHECKER.validate_ci_compose(mutated)
-    )
+def test_container_smoke_accepts_windows_compose_ndjson() -> None:
+    smoke_path = ROOT / "scripts/ci/run_l0_container_smoke.py"
+    spec = importlib.util.spec_from_file_location("run_l0_container_smoke", smoke_path)
+    assert spec is not None and spec.loader is not None
+    smoke = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(smoke)
+
+    class Harness:
+        @staticmethod
+        def run(*_arguments: str):
+            return type(
+                "Result",
+                (),
+                {
+                    "stdout": (
+                        '{"Service":"backend"}\n'
+                        '{"Service":"frontend"}\n'
+                    )
+                },
+            )()
+
+    assert smoke._service_names(Harness()) == {"backend", "frontend"}
+
+
+def test_container_smoke_reads_the_canonical_app_secret_path() -> None:
+    content = (ROOT / "scripts/ci/run_l0_container_smoke.py").read_text("utf-8")
+    assert "/var/lib/angmoo/secrets/app-secret" in content
+    assert "/var/lib/angmoo/secrets/app_secret" not in content

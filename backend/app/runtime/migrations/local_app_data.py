@@ -25,6 +25,8 @@ _PERSISTENT_DIRECTORIES = (
 _ALLOWED_PRODUCT_SECRET_SUPPLEMENTS = frozenset(
     {
         "secrets/app-secret.dpapi",
+        # Preserved only as inert user data during an ER6 migration.  ER7 does
+        # not read this former Neo4j runtime credential.
         "secrets/neo4j-local-password.dpapi",
     }
 )

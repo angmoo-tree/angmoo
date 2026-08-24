@@ -19,7 +19,9 @@ secret은 이 저장소 밖에서 관리합니다.
 
 ## 공개 v0.3 범위
 
-- FastAPI, Next.js, PostgreSQL 16, pgvector
+- FastAPI, Next.js, SQLite·FTS5, LadybugDB
+- 설치형 제품과 기여자가 공유하는 하나의 typed embedded runtime
+- FastAPI process가 소유하는 scheduler·graph projector component
 - LangGraph resident 흐름과 direct provider adapter
 - 공식 text provider인 Gemini와 네트워크 요청이 없는 fake provider
 - 공식 기능: 단일 장치 local owner, 캐릭터 생성, 커뮤니티
@@ -35,38 +37,37 @@ infrastructure와 private runbook은 public source에 포함하지 않습니다.
 - Git
 - Docker Compose 2.22.0 이상을 포함한 Docker Desktop 또는 Docker Engine
 
-사용자 빠른 시작에는 host Python, Node.js, PostgreSQL, Neo4j 설치가 필요하지
-않습니다.
+기여자 빠른 시작에는 host Python, Node.js, PostgreSQL, Neo4j, JVM 설치가
+필요하지 않습니다.
 
 ## 빠른 시작
 
 ```bash
 git clone https://github.com/angmoo-tree/angmoo.git
 cd angmoo
-docker compose up -d
-docker compose ps
+docker compose -f compose.yml -f compose.dev.yml up --watch
+docker compose -f compose.yml -f compose.dev.yml ps
 ```
+
+checkout에서 정확히 두 Linux container를 시작합니다. frontend는 Next.js dev와
+HMR을 제공하고, backend는 `CONTRIBUTOR_EMBEDDED`로 SQLite·FTS5·LadybugDB와
+in-process scheduler·projector를 소유합니다. 두 service가 healthy가 되면
+<http://127.0.0.1:3000>을 엽니다.
 
 Windows에서는 선택적 thin launcher로 host preflight를 실행한 뒤 동일한
-canonical Compose stack을 시작할 수 있습니다. 별도 runtime은 추가되지 않습니다.
+기여자 Compose stack을 시작할 수 있습니다. 별도 runtime은 추가되지 않습니다.
 
 ```powershell
-.\angmoo.ps1 start
-.\angmoo.ps1 status
-.\angmoo.ps1 doctor
+.\angmoo.ps1 start --contributor
+.\angmoo.ps1 status --contributor
+.\angmoo.ps1 doctor --contributor
 ```
 
-기존 `docker compose up -d` Quickstart도 계속 공식 지원합니다. JSON 출력,
-기여자 mode, 디스크 안내, volume 보존 lifecycle은
+JSON 출력, 기여자 mode, 디스크 안내, volume 보존 lifecycle은
 [local launcher 계약](docs/public/local-launcher.md)을 참고하십시오.
 
 로컬 P1~P4 World 루프, Local Owner 참여 경계, 재시작 의미, provider 호출 계약은
 [`docs/public/l3-local-vertical-loop.md`](docs/public/l3-local-vertical-loop.md)에 정리되어 있습니다.
-
-기본 명령은 frontend, backend, PostgreSQL, scheduler, Neo4j, projector의 전체
-6-service Angmoo stack을 시작합니다. 첫 실행에서는 GHCR의 공식 `v0.3.0`
-backend·frontend image를 내려받습니다. 모든 service가 healthy가 되면
-<http://127.0.0.1:3000>을 엽니다.
 
 root 화면은 기존 커뮤니티 Feed가 아니라 핸드폰형 **Device Home**입니다.
 이 설치의 owner가 관리하는 `published + publish_ready + public|unlisted`
@@ -87,14 +88,14 @@ BYOK를 추가하기 전에는 scheduler와 SNS runtime이 실제 모델 요청�
 ### 종료와 재시작
 
 ```bash
-docker compose down
-docker compose up -d
+docker compose -f compose.yml -f compose.dev.yml down
+docker compose -f compose.yml -f compose.dev.yml up --watch
 ```
 
-일반 `down`은 PostgreSQL, Neo4j, media, runtime-secret named volume을
-보존합니다. local state를 의도적으로 지우는 경우가 아니면 `--volumes`를
-추가하지 마세요. 명시적으로 image를 갱신하려면 재시작 전에 선택적으로
-`docker compose pull`을 실행합니다.
+일반 `down`은 기여자 전용 `angmoo_contributor_embedded_data` named volume에
+있는 SQLite·LadybugDB·media·secret·runtime·log를 보존합니다. 개발 fixture를
+의도적으로 지우는 경우가 아니면 `--volumes`를 추가하지 마세요. Compose는
+설치형 제품의 `%LOCALAPPDATA%\Angmoo`를 mount하거나 복사하지 않습니다.
 
 ### port 충돌
 
@@ -104,21 +105,25 @@ process를 직접 정리하거나 시작 전에 다른 frontend port를 명시�
 
 ```powershell
 $env:ANGMOO_PORT = '3010'
-docker compose up -d
+docker compose -f compose.yml -f compose.dev.yml up --watch
 ```
 
 ### 기여자 개발
 
 기여자는 checkout한 source로 같은 Dockerfile을 build하고 Compose Watch를
-사용합니다.
+사용합니다. Windows·macOS·Linux의 Docker 지원 host에서 persistence·graph·
+scheduler 의미가 같습니다.
 
 ```bash
 docker compose -f compose.yml -f compose.dev.yml up --watch
 ```
 
-container 내부 test·lint·migration과 release 검사는 `CONTRIBUTING.ko.md`를
-확인하세요. lifecycle 계약은 `docs/public/local-runtime.md`, tag에서만 실행되는
-GHCR release Gate는 `docs/public/container-release.md`에 있습니다.
+일반 기능 개발은 host browser에서 확인합니다. 실제 Phone·wide native window를
+다루는 기여자만 선택적으로 `Docker + Host Tauri dev`를 사용하며, 이것은 같은
+Docker backend에 연결될 뿐 별도 database architecture가 아닙니다. Windows
+패키징은 Windows Actions에서 검증하고 macOS 패키징 구현은 아직 주장하지
+않습니다. container 내부 test·lint·migration과 release 검사는
+`CONTRIBUTING.ko.md`를 확인하세요.
 ## 로컬 검사
 
 ```bash

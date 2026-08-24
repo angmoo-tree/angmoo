@@ -205,9 +205,6 @@ def settings_from_runtime_config(
             "MEDIA_ROOT": str(config.data_paths.media),
             "GRAPH_PROJECTION_ENABLED": True,
             "GRAPH_PROVIDER": config.graph_provider.value,
-            # Transitional read compatibility; canonical selection uses
-            # GRAPH_PROVIDER and PR P removes this preview-era field.
-            "LADYBUG_GRAPH_PREVIEW_ENABLED": True,
             "LADYBUG_DATABASE_ROOT": str(config.graph_database_root),
             "LOCAL_RUNTIME_COMPONENT_MODE": config.component_mode.value,
             "RESIDENT_TICK_PROCESS_LOCK_PATH": str(

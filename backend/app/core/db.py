@@ -47,12 +47,12 @@ _default_session_factory: sessionmaker[Session] | None = None
 
 
 def get_default_engine() -> Engine:
-    """Create the transitional default engine only for a legacy caller.
+    """Create the embedded SQLite default engine for a compatibility caller.
 
     Official embedded composition passes an explicit SQLite engine and session
-    factory. Importing the public application must therefore not load the
-    PostgreSQL DBAPI, which is deliberately absent from the packaged sidecar,
-    merely because compatibility callers remain before PR P.
+    factory.  Older domain code may still call ``SessionLocal`` while its ports
+    are migrated, but that facade resolves to the same embedded default and
+    cannot select a server database from the parent process.
     """
 
     global _default_engine, _default_session_factory
@@ -71,7 +71,7 @@ def get_default_session_factory() -> sessionmaker[Session]:
 
 
 def SessionLocal() -> Session:
-    """Compatibility callable retained until PR P removes legacy globals."""
+    """Compatibility callable backed by the embedded SQLite default."""
 
     return get_default_session_factory()()
 

@@ -48,6 +48,8 @@ Supported versions and security-update windows are stated in GitHub Releases.
 
 ## 한국어 신고 안내
 
+신고는 한국어나 영어로 작성할 수 있습니다.
+
 보안 문제는 [GitHub 비공개 취약점 신고](https://github.com/angmoo-tree/angmoo/security/advisories/new)를
 사용해 주세요. credential, exploit, 개인정보, 로컬 DB dump, World Package,
 backup, 원문 log를 public Issue·Discussion·PR에 올리지 마세요.

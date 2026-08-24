@@ -20,7 +20,8 @@ List the exact checks and user scenarios run.
 
 - [ ] Focused backend tests when applicable
 - [ ] Frontend lint, typecheck, and build when applicable
-- [ ] PostgreSQL / Neo4j migration or graph checks when applicable
+- [ ] SQLite / FTS5 / LadybugDB migration, replay, or graph checks when applicable
+- [ ] Frozen `LEGACY_MIGRATION` check only when the offline PostgreSQL importer changes
 - [ ] No production credential, personal data, raw log, or external provider call used
 - [ ] Every human commit includes a DCO 1.1 `Signed-off-by` trailer (`git commit -s`)
 - [ ] I understand accepted contributions are provided under `GPL-3.0-only` unless explicitly stated otherwise

@@ -6,10 +6,11 @@ from dataclasses import dataclass
 from typing import Any
 
 import uvicorn
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, FastAPI, HTTPException, Request, status
+from sqlalchemy import text
 
 from app.api.v1.public import create_public_api_router
-from app.core.config import settings
+from app.core.config import Settings, settings
 from app.core.db import SessionLocal, get_db
 from app.core.request_limits import RequestBodyLimitMiddleware
 from app.core.public_media import mount_public_media
@@ -104,7 +105,7 @@ def create_lifespan(
     demo_seed: Callable[[Any], None] = seed_demo_data,
     component_manager_factory: Callable[
         [], SingleBackendRuntimeComponents | None
-    ] = create_single_backend_runtime_components,
+    ] = lambda: None,
     runtime_settings=settings,
     runtime_disposer: Callable[[], None] | None = None,
 ) -> LifespanHandler:
@@ -193,14 +194,33 @@ def create_app(
     *,
     lifespan_handler: LifespanHandler | None = None,
     runtime_config: RuntimeConfig | None = None,
+    prepare_media_directories: bool = True,
 ) -> FastAPI:
     composition: RuntimeComposition | None = None
     runtime_settings = settings
     runtime_lifespan = lifespan_handler
+    process_settings_snapshot: dict[str, object] | None = None
     if runtime_config is not None:
         runtime_config.require_public_runtime()
         composition = compose_runtime(runtime_config, base_settings=settings)
         runtime_settings = composition.settings
+        # Existing service modules retain a reference to the process Settings
+        # singleton. Materialize the typed profile into that object without
+        # consulting or rewriting parent-shell environment variables.
+        process_settings_snapshot = settings.model_dump()
+        for field_name in Settings.model_fields:
+            setattr(settings, field_name, getattr(runtime_settings, field_name))
+
+        def dispose_runtime() -> None:
+            composition.dispose()
+            assert process_settings_snapshot is not None
+            for field_name in Settings.model_fields:
+                setattr(
+                    settings,
+                    field_name,
+                    process_settings_snapshot[field_name],
+                )
+
         if runtime_lifespan is None:
             runtime_lifespan = create_lifespan(
                 extension,
@@ -215,7 +235,7 @@ def create_app(
                     )
                 ),
                 runtime_settings=runtime_settings,
-                runtime_disposer=composition.dispose,
+                runtime_disposer=dispose_runtime,
             )
     runtime_app = FastAPI(
         title=runtime_settings.project_name,
@@ -231,10 +251,17 @@ def create_app(
         create_public_api_router(extension.routers if extension else ()),
         prefix=runtime_settings.api_v1_prefix,
     )
-    mount_public_media(runtime_app, runtime_settings)
+    mount_public_media(
+        runtime_app,
+        runtime_settings,
+        prepare_directories=prepare_media_directories,
+    )
     runtime_app.state.runtime_settings = runtime_settings
     runtime_app.state.runtime_config = runtime_config
     runtime_app.state.runtime_composition = composition
+    runtime_app.state.restore_process_settings = (
+        dispose_runtime if composition is not None else None
+    )
     if composition is not None:
 
         def runtime_database_dependency():
@@ -245,7 +272,7 @@ def create_app(
                 db.close()
 
         runtime_app.dependency_overrides[get_db] = runtime_database_dependency
-    runtime_app.add_api_route("/health", health, methods=["GET"])
+    runtime_app.add_api_route("/health", runtime_health, methods=["GET"])
     return runtime_app
 
 
@@ -253,7 +280,65 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-app = create_app(lifespan_handler=lifespan)
+def runtime_health(request: Request) -> dict[str, object]:
+    """Bounded, privacy-safe readiness for the composed embedded runtime."""
+
+    composition = getattr(request.app.state, "runtime_composition", None)
+    runtime_config = getattr(request.app.state, "runtime_config", None)
+    if composition is None or runtime_config is None:
+        return health()
+
+    try:
+        with composition.session_factory() as db:
+            db.execute(text("SELECT 1")).scalar_one()
+
+        from app.domains.runtime.public import (
+            RuntimeComponentState,
+            component_observations,
+        )
+        from app.runtime.component_workers import (
+            borrow_runtime_graph_client,
+        )
+
+        observations = {
+            item.name: item for item in component_observations.snapshot()
+        }
+        allowed = {
+            RuntimeComponentState.READY,
+            RuntimeComponentState.RUNNING,
+            RuntimeComponentState.DEGRADED,
+        }
+        for component in ("scheduler", "projector"):
+            observed = observations.get(component)
+            if observed is None or observed.state not in allowed:
+                raise RuntimeError(f"{component}_not_ready")
+
+        graph = borrow_runtime_graph_client(composition.settings)
+        if graph is None:
+            raise RuntimeError("ladybug_not_ready")
+        graph.verify_connectivity()
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="embedded_runtime_not_ready",
+        ) from exc
+
+    return {
+        "status": "ok",
+        "profile": runtime_config.profile.value,
+        "persistence": "sqlite",
+        "graph": "ladybug",
+        "components": {
+            name: observations[name].state.value
+            for name in ("scheduler", "projector")
+        },
+    }
+
+
+app = create_app(
+    lifespan_handler=lifespan,
+    prepare_media_directories=False,
+)
 
 
 def main() -> None:

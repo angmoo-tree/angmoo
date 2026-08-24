@@ -31,14 +31,14 @@ def test_l3_representative_suites_are_required_by_local_smoke() -> None:
         assert test_file in workflow
 
 
-def test_container_gate_owns_l3_migration_round_trip_and_cleanup() -> None:
+def test_container_gate_owns_embedded_restart_and_cleanup() -> None:
     smoke = CONTAINER_SMOKE.read_text(encoding="utf-8")
 
-    assert 'L3_PREVIOUS_REVISION = "20260816_0080"' in smoke
-    assert "_l3_migration_round_trip" in smoke
+    assert 'EMBEDDED_VOLUME = "angmoo_contributor_embedded_data"' in smoke
+    assert "_runtime_health" in smoke
     assert "digest_after != digest_before" in smoke
     assert "harness.cleanup(volumes=True)" in smoke
-    assert "L3 migration round trip passed" in smoke
+    assert "Embedded container smoke passed" in smoke
 
 
 def test_l3_docs_record_completed_closeout_and_separate_release_gate() -> None:

@@ -12,6 +12,7 @@ from app.domains.relationships.ports.projection import (
     RelationshipProjectionBackendError,
 )
 from app.services.graph_projection_runtime import (
+    borrow_process_graph_client,
     graph_client_from_settings,
     register_process_graph_client,
     unregister_process_graph_client,
@@ -31,14 +32,20 @@ class ClosableProjectionStore(Protocol):
     def close(self) -> None: ...
 
 
-async def run_legacy_scheduler_component(
+def borrow_runtime_graph_client(config: Settings) -> ClosableProjectionStore | None:
+    """Expose the process-owned graph client through the runtime boundary."""
+
+    return borrow_process_graph_client(config)
+
+
+async def run_scheduler_component(
     stop_event: asyncio.Event,
     state_listener: ComponentStateListener,
     *,
     config: Settings = settings,
     session_factory: Callable[[], Any] = SessionLocal,
 ) -> None:
-    """Run the L2 scheduler unchanged under the ER4 lifespan owner."""
+    """Run the scheduler as an in-process backend component."""
 
     await run_resident_tick_scheduler(
         stop_event=stop_event,
@@ -48,14 +55,14 @@ async def run_legacy_scheduler_component(
     )
 
 
-def run_legacy_projector_component(
+def run_projector_component(
     stop_event: threading.Event,
     state_listener: ComponentStateListener,
     *,
     config: Settings = settings,
     session_factory: Callable[[], Any] = SessionLocal,
 ) -> None:
-    """Run the current outbox projector under the ER4 lifespan owner."""
+    """Run the outbox projector as an in-process backend component."""
 
     while not stop_event.is_set():
         client: ClosableProjectionStore | None = None
@@ -102,6 +109,7 @@ def run_legacy_projector_component(
 
 
 __all__ = [
-    "run_legacy_projector_component",
-    "run_legacy_scheduler_component",
+    "borrow_runtime_graph_client",
+    "run_projector_component",
+    "run_scheduler_component",
 ]

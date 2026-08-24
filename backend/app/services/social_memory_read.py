@@ -232,14 +232,7 @@ def get_owner_diagnostics(
     else:
         oldest_pending_age = None
 
-    graph_provider: relationships.GraphProvider = (
-        "ladybug"
-        if (
-            config.graph_provider == "ladybug"
-            or config.ladybug_graph_preview_enabled
-        )
-        else "neo4j"
-    )
+    graph_provider: relationships.GraphProvider = "ladybug"
     graph_gateway = SqlAlchemyRelationshipGraphReadGateway(
         db,
         config=config,
@@ -257,7 +250,7 @@ def get_owner_diagnostics(
         graph_provider=graph_provider,
     )
     latest_relationship_version_parity: bool | None = None
-    if graph.meta.source in {"neo4j", "ladybug"} and not graph.meta.truncated:
+    if graph.meta.source == "ladybug" and not graph.meta.truncated:
         graph_versions = {
             edge.relationship_state_id: edge.relationship_version
             for edge in graph.edges

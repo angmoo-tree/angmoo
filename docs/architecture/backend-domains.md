@@ -4,6 +4,13 @@ This document is the contributor-facing architecture contract for Angmoo's
 incremental domain-first refactor. It describes the target direction; it does
 not claim that every legacy module has already moved.
 
+> **ER7 runtime note (2026-08-24):** the official installed and contributor
+> runtimes are SQLite/FTS5 + LadybugDB with scheduler and projector owned by one
+> FastAPI process. PostgreSQL is a frozen read-only offline migration source,
+> and Neo4j is static parity evidence only. The historical trees and counts
+> below explain earlier refactor stages; they are not a supported server-runtime
+> topology.
+
 The T2.5 umbrella proposal is
 [`#32`](https://github.com/angmoo-tree/angmoo/issues/32). The architecture
 PR A recorded its baseline from `main` commit
@@ -102,7 +109,7 @@ backend/app/
 ├── integrations/
 │   ├── llm/
 │   ├── image/
-│   └── neo4j/
+│   └── graph/                # LadybugDB adapter; static Neo4j parity fixtures live in docs/tests
 ├── compatibility/           # temporary facade with an owner and removal gate
 └── main.py
 ```

@@ -238,16 +238,5 @@ def test_application_probe_reads_embedded_sqlite_schema_lineage(monkeypatch) -> 
     assert migration.reason_code is None
 
 
-def test_embedded_ladybug_uses_in_process_health_signal(monkeypatch) -> None:
-    monkeypatch.setattr(
-        runtime_probe_module.settings,
-        "LADYBUG_GRAPH_PREVIEW_ENABLED",
-        True,
-    )
-    monkeypatch.setattr(
-        runtime_probe_module,
-        "_neo4j_available",
-        lambda: False,
-    )
-
+def test_embedded_ladybug_uses_in_process_health_signal() -> None:
     assert _graph_backend_available() is True

@@ -36,7 +36,7 @@ class SchedulerProcessLockHeld(RuntimeError):
 
 
 class SchedulerProcessLock:
-    """Best-effort same-filesystem lock; PostgreSQL remains the authority."""
+    """Same-filesystem singleton guard paired with the durable SQLite lease."""
 
     def __init__(self, path: str) -> None:
         self._path = Path(path)

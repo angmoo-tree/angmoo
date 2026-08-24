@@ -33,22 +33,21 @@ def test_contract_rejects_an_extra_host_publication() -> None:
     )
 
 
-def test_contract_rejects_mutable_database_images() -> None:
+def test_contract_rejects_noncanonical_embedded_storage() -> None:
     payload = deepcopy(CONTRACT)
-    payload["databases"]["postgresql"]["image"] = "pgvector/pgvector:pg16"
+    payload["embedded_storage"]["canonical"] = "postgresql"
 
-    assert (
-        "database image must be digest pinned: postgresql"
-        in CHECKER.validate_contract(payload, root=ROOT)
+    assert "embedded storage contract mismatch" in CHECKER.validate_contract(
+        payload, root=ROOT
     )
 
 
 def test_contract_rejects_incomplete_default_stack() -> None:
     payload = deepcopy(CONTRACT)
-    payload["default_services"].remove("projector")
+    payload["default_services"].append("postgresql")
 
     assert (
-        "default_services must contain the complete Angmoo stack"
+        "default_services must contain the two-service embedded stack"
         in CHECKER.validate_contract(payload, root=ROOT)
     )
 

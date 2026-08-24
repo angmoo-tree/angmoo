@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     APP_ENV: Literal["development", "test", "local", "production"] = "development"
     APP_SECRET: SecretStr = SecretStr(DEFAULT_APP_SECRET)
     APP_SECRET_FILE: str | None = None
-    DATABASE_URL: str = "postgresql+psycopg://postgres:postgres@localhost:5432/angmoo"
+    DATABASE_URL: str = f"sqlite+pysqlite:///{(BACKEND_DIR / '.angmoo-dev' / 'angmoo.sqlite3').as_posix()}"
     SEED_DEMO_DATA: bool = True
     SIGNUP_ENABLED: bool = False
     LOGIN_THROTTLE_HMAC_SECRET: SecretStr | None = None
@@ -112,7 +112,7 @@ class Settings(BaseSettings):
     RESIDENT_TICK_INITIAL_SPREAD_SECONDS: int = 600
     RESIDENT_TICK_RETRY_SPREAD_SECONDS: int = 300
     RESIDENT_TICK_BATCH_START_SPACING_SECONDS: int = 10
-    LOCAL_RUNTIME_COMPONENT_MODE: Literal["external", "in_process"] = "external"
+    LOCAL_RUNTIME_COMPONENT_MODE: Literal["in_process"] = "in_process"
     LOCAL_RUNTIME_COMPONENT_STARTUP_TIMEOUT_SECONDS: float = 10.0
     LOCAL_RUNTIME_COMPONENT_SHUTDOWN_TIMEOUT_SECONDS: float = 30.0
     POST_IMAGE_JOB_WORKER_ENABLED: bool = False
@@ -137,14 +137,9 @@ class Settings(BaseSettings):
     PUBLIC_BASE_URL: str | None = None
     MEDIA_UPLOAD_MAX_BYTES: int = 5 * 1024 * 1024
     CREDENTIAL_ENCRYPTION_PROVIDER: str = "local"
-    GRAPH_PROJECTION_ENABLED: bool = False
-    GRAPH_PROVIDER: Literal["neo4j", "ladybug"] = "neo4j"
-    LADYBUG_GRAPH_PREVIEW_ENABLED: bool = False
-    LADYBUG_DATABASE_ROOT: str = str(BACKEND_DIR / ".ladybug-preview")
-    NEO4J_URI: str = "bolt://127.0.0.1:7687"
-    NEO4J_DATABASE: str = "neo4j"
-    NEO4J_USERNAME: str = "neo4j"
-    NEO4J_PASSWORD: SecretStr | None = None
+    GRAPH_PROJECTION_ENABLED: bool = True
+    GRAPH_PROVIDER: Literal["ladybug"] = "ladybug"
+    LADYBUG_DATABASE_ROOT: str = str(BACKEND_DIR / ".angmoo-dev" / "graph")
     GRAPH_PROJECTOR_BATCH_SIZE: int = 50
     GRAPH_PROJECTOR_POLL_INTERVAL_SECONDS: float = 2.0
     GRAPH_PROJECTOR_WORKER_ID: str = ""
@@ -156,14 +151,6 @@ class Settings(BaseSettings):
     OCI_KMS_CRYPTO_ENDPOINT: str | None = None
     OCI_REGION: str | None = None
     OCI_AUTH_MODE: str = "instance_principal"
-
-    @field_validator("DATABASE_URL", mode="before")
-    @classmethod
-    def normalize_database_url(cls, value: str) -> str:
-        url = str(value)
-        if url.startswith("postgresql://"):
-            return url.replace("postgresql://", "postgresql+psycopg://", 1)
-        return url
 
     @field_validator("OPENCLAW_GATEWAY_URL", mode="before")
     @classmethod
@@ -703,38 +690,12 @@ class Settings(BaseSettings):
         return self.GRAPH_PROJECTION_ENABLED
 
     @property
-    def graph_provider(self) -> Literal["neo4j", "ladybug"]:
+    def graph_provider(self) -> Literal["ladybug"]:
         return self.GRAPH_PROVIDER
-
-    @property
-    def ladybug_graph_preview_enabled(self) -> bool:
-        return self.LADYBUG_GRAPH_PREVIEW_ENABLED
 
     @property
     def ladybug_database_root(self) -> Path:
         return Path(self.LADYBUG_DATABASE_ROOT).resolve()
-
-    @property
-    def neo4j_uri(self) -> str:
-        value = self.NEO4J_URI.strip()
-        if not value.startswith(("bolt://", "bolt+s://", "neo4j://", "neo4j+s://")):
-            raise ValueError("NEO4J_URI must use a Neo4j driver scheme")
-        return value
-
-    @property
-    def neo4j_database(self) -> str:
-        return self.NEO4J_DATABASE.strip() or "neo4j"
-
-    @property
-    def neo4j_username(self) -> str:
-        return self.NEO4J_USERNAME.strip() or "neo4j"
-
-    @property
-    def neo4j_password(self) -> str | None:
-        if self.NEO4J_PASSWORD is None:
-            return None
-        value = self.NEO4J_PASSWORD.get_secret_value()
-        return value if value else None
 
     @property
     def graph_projector_batch_size(self) -> int:

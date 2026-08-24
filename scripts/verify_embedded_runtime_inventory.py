@@ -164,9 +164,9 @@ def _postgres_owner(path: str) -> tuple[str, str, str]:
             "embedded canonical rollback window PASS and user-approved legacy-default removal",
         )
     return (
-        "ER1-ER2",
-        "ER1 PR B; ER2 PR D/E",
-        "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+        "ER2-ER7",
+        "ER2 PR D/E/G; ER7 PR P",
+        "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
     )
 
 
@@ -214,7 +214,10 @@ def build_postgres_inventory() -> dict[str, Any]:
             marker: sum(marker in entry["markers"] for entry in entries)
             for marker in sorted(POSTGRES_MARKERS)
         },
-        "purpose": "L3-ER0 PostgreSQL-specific source binding inventory",
+        "purpose": (
+            "Residual PostgreSQL bindings retained only for the frozen read-only "
+            "LEGACY_MIGRATION source and historical schema evidence"
+        ),
         "schema_version": 1,
     }
 
@@ -309,121 +312,10 @@ def _query_category(name: str, query: str) -> str:
 
 
 def build_neo4j_inventory() -> dict[str, Any]:
-    source = ROOT / "backend" / "app" / "integrations" / "neo4j.py"
-    text = source.read_text(encoding="utf-8")
-    tree = ast.parse(text, filename=str(source))
-    template_source = (
-        ROOT
-        / "backend"
-        / "app"
-        / "domains"
-        / "relationships"
-        / "graph_read"
-        / "repository.py"
-    )
-    template_text = template_source.read_text(encoding="utf-8")
-    template_tree = ast.parse(template_text, filename=str(template_source))
-    query_entries: list[dict[str, Any]] = []
-
-    for node in tree.body:
-        if not isinstance(node, ast.Assign) or len(node.targets) != 1:
-            continue
-        target = node.targets[0]
-        if not isinstance(target, ast.Name) or not target.id.startswith("_"):
-            continue
-        values = _literal_strings(node.value)
-        if values is None:
-            continue
-        for index, query in enumerate(values):
-            upper = query.upper()
-            if not any(token in upper for token in ("MATCH", "MERGE", "CREATE ", "DELETE")):
-                continue
-            name = target.id if len(values) == 1 else f"{target.id}[{index}]"
-            query_entries.append(
-                {
-                    "category": _query_category(target.id, query),
-                    "name": name,
-                    "owner": "ER3",
-                    "query": query.strip(),
-                    "query_sha256": _sha256_bytes(query.strip().encode("utf-8")),
-                    "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
-                    "source": _relative(source),
-                    "source_line": node.lineno,
-                    "transition_pr": "ER3 PR H/I",
-                }
-            )
-
-    for node in ast.walk(tree):
-        if not isinstance(node, ast.Call) or not node.args:
-            continue
-        function = node.func
-        if not isinstance(function, ast.Attribute) or function.attr not in {
-            "run",
-            "_bounded_execute",
-        }:
-            continue
-        query = _literal_string(node.args[0])
-        if query is None or not any(
-            token in query.upper() for token in ("MATCH", "MERGE", "CREATE ", "DELETE")
-        ):
-            continue
-        digest = _sha256_bytes(query.strip().encode("utf-8"))
-        if any(entry["query_sha256"] == digest for entry in query_entries):
-            continue
-        query_entries.append(
-            {
-                "category": _query_category(f"inline:{node.lineno}", query),
-                "name": f"inline:{node.lineno}",
-                "owner": "ER3",
-                "query": query.strip(),
-                "query_sha256": digest,
-                "removal_condition": "LadybugDB projection and typed-query digest parity PASS",
-                "source": _relative(source),
-                "source_line": node.lineno,
-                "transition_pr": "ER3 PR H/I",
-            }
-        )
-
-    templates: list[dict[str, str]] = []
-    for node in template_tree.body:
-        if not isinstance(node, ast.ClassDef) or node.name != "GraphQueryTemplate":
-            continue
-        for child in node.body:
-            if not isinstance(child, ast.Assign) or len(child.targets) != 1:
-                continue
-            target = child.targets[0]
-            value = _literal_string(child.value)
-            if isinstance(target, ast.Name) and value is not None:
-                templates.append({"enum": target.id, "template": value})
-
-    path_generator = next(
-        node
-        for node in tree.body
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-        and node.name == "_path_query"
-    )
-    segment = ast.get_source_segment(text, path_generator) or ""
-    return {
-        "baseline_commit": BASELINE_COMMIT,
-        "dynamic_query_generators": [
-            {
-                "directions": ["outgoing", "incoming", "either"],
-                "hop_bounds": [1, 2, 3],
-                "name": "_path_query",
-                "owner": "ER3",
-                "removal_condition": "LadybugDB bounded 1-3 hop query parity PASS",
-                "source": _relative(source),
-                "source_line": path_generator.lineno,
-                "source_sha256": _sha256_bytes(segment.encode("utf-8")),
-                "transition_pr": "ER3 PR I",
-            }
-        ],
-        "purpose": "L3-ER0 Neo4j DDL, projection-write, maintenance, and typed-read query corpus",
-        "queries": sorted(query_entries, key=lambda item: (item["source_line"], item["name"])),
-        "query_count": len(query_entries),
-        "schema_version": 1,
-        "typed_query_templates": sorted(templates, key=lambda item: item["template"]),
-    }
+    # ER7 removes the live Neo4j adapter and Python driver.  The ER3 corpus is
+    # retained as immutable parity evidence, not regenerated from a server
+    # runtime that is no longer part of Angmoo.
+    return json.loads(NEO4J_OUTPUT.read_text(encoding="utf-8"))
 
 
 def _next_route(path: Path) -> str:
@@ -542,15 +434,14 @@ def _coupling_entry(path: str, component: str, markers: list[str]) -> dict[str, 
 
 def _runtime_coupling() -> list[dict[str, Any]]:
     entries = (
-        ("compose.yml", "shared", ["six-service topology", "scheduler/projector commands", "health dependencies"]),
-        ("compose.dev.yml", "shared", ["contributor watch overrides"]),
-        ("backend/scripts/run_resident_tick_scheduler.py", "scheduler", ["process entrypoint", "signal bridge"]),
+        ("compose.yml", "shared", ["two-service topology", "embedded data volume", "backend health dependency"]),
+        ("compose.dev.yml", "shared", ["frontend HMR", "backend reload", "contributor logs"]),
+        ("backend/app/runtime/single_backend_components.py", "shared", ["in-process scheduler/projector ownership", "bounded drain"]),
         ("backend/app/services/resident_tick_scheduler.py", "scheduler", ["singleton process lock", "database lease", "heartbeat", "bounded drain"]),
         ("backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py", "scheduler", ["lease repository", "fencing epoch"]),
-        ("backend/scripts/run_graph_projection_worker.py", "projector", ["process entrypoint", "signal bridge", "readiness marker"]),
         ("backend/app/services/graph_projection_worker.py", "projector", ["outbox claim", "thread pool", "bounded drain", "degraded state"]),
         ("backend/app/services/graph_projection_runtime.py", "projector", ["graph client construction"]),
-        ("backend/app/main.py", "api", ["FastAPI lifespan", "public profile worker rejection"]),
+        ("backend/app/public_main.py", "api", ["typed RuntimeConfig", "FastAPI lifespan", "component ownership"]),
         ("backend/app/runtime/shutdown.py", "shared", ["cooperative signal bridge"]),
     )
     return [_coupling_entry(*entry) for entry in entries]

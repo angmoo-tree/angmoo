@@ -1,104 +1,87 @@
 # Local launcher contract
 
-Angmoo keeps Docker Compose as its canonical runtime. The Windows launcher is a
-thin convenience wrapper: it validates the host, calls the same Compose files,
-and reports stable results. It does not run a second supervisor, read database
-rows, reveal APP_SECRET, or mount the Docker socket into an application service.
+The Windows PowerShell launcher is an optional thin wrapper around the official
+two-service contributor Compose files. It validates the host, runs Compose,
+and reports stable results. It does not supervise a second backend, read raw
+database rows, reveal secrets, or mount the Docker socket into an application
+service.
 
-## Commands
-
-Run these commands from any working directory by using the checkout's script
-path. The script always resolves the installation root that contains it.
-
-```powershell
-.\angmoo.ps1 start
-.\angmoo.ps1 status
-.\angmoo.ps1 doctor
-.\angmoo.ps1 doctor --json
-.\angmoo.ps1 logs
-.\angmoo.ps1 restart
-.\angmoo.ps1 stop
-```
-
-`start`, `restart`, and `stop` are serialized by an installation-scoped host
-lock. Repeated `start` and `stop` calls are idempotent. Normal lifecycle commands
-preserve PostgreSQL, Neo4j, media, and APP_SECRET named volumes. Options such as
-`--volumes`, `-v`, and `--purge` are rejected.
-
-The original Quickstart remains official and starts the same six services:
-
-```powershell
-docker compose up -d
-```
-
-## Contributor mode
-
-Use the contributor overlay when the checkout should build backend and frontend
-development images:
+## Contributor commands
 
 ```powershell
 .\angmoo.ps1 start --contributor
+.\angmoo.ps1 status --contributor
+.\angmoo.ps1 doctor --contributor
+.\angmoo.ps1 doctor --contributor --json
+.\angmoo.ps1 logs --contributor
+.\angmoo.ps1 restart --contributor
+.\angmoo.ps1 stop --contributor
+```
+
+The equivalent canonical command is:
+
+```powershell
 docker compose -f compose.yml -f compose.dev.yml up --watch
 ```
 
-The launcher starts the development stack in the background and prints the
-canonical Watch command. Compose Watch remains attached to the contributor's
-terminal rather than becoming a hidden launcher daemon.
+The launcher starts the development containers in the background and prints
+the Watch command. Compose Watch remains attached to the contributor terminal;
+the launcher does not become a hidden daemon.
+
+`start`, `restart`, and `stop` are serialized by a checkout-scoped host lock.
+Repeated starts and stops are idempotent. Normal lifecycle commands preserve
+`angmoo_contributor_embedded_data`. Destructive options such as `--volumes`,
+`-v`, and `--purge` are rejected.
+
+The plain non-contributor image mode is retained only for explicit container
+artifact validation. It is not the installed-user product path and does not
+restore PostgreSQL/Neo4j server compatibility. The canonical user product is
+the Tauri installer.
 
 ## Aggregate status and doctor
 
-`status` combines two deliberately separate sources into the versioned
+`status` combines two separate safe sources in an
 `angmoo-launcher-result-v1` result:
 
-- the owner-protected backend application snapshot reports migration, local
-  owner, World and WorldCharacter counts, scheduler lease, recent provider-use
-  metadata, last successful activity identifiers, Outbox, projector, and Neo4j
-  state;
-- the host launcher reports Compose service health, restart counts, short image
-  digests, loopback ports, disk pressure, Docker storage categories, named
-  volumes, and a point-in-time container CPU and memory sample.
+- the backend snapshot reports SQLite migration/integrity, local owner, World
+  and WorldCharacter counts, scheduler lease, recent safe provider metadata,
+  last successful activity identifiers, outbox/projector state, and LadybugDB
+  health;
+- the host launcher reports the two Compose services, restart counts, short
+  image digests, loopback ports, disk pressure, Docker storage categories, the
+  contributor named volume, and point-in-time container resource samples.
 
 The backend never receives the Docker socket or host filesystem paths. If the
-backend is unavailable, application checks become `unknown` while `doctor`
-continues to report Docker, Compose, port, disk, image, cache, container, and
-volume diagnostics from the host.
-
-`doctor` evaluates the same snapshot used by `status`. A disk-space warning can
-therefore produce a degraded exit code even when all Angmoo services and the
-application runtime are ready; the human output identifies the warning rather
-than reporting a false service failure.
+backend is unavailable, application checks become `unknown` while host Docker
+diagnostics remain available.
 
 ## Diagnostic privacy
 
-Launcher human output, JSON, and test diagnostics pass through the same
-recursive sanitizer. They may contain opaque IDs, aggregate counts, normalized
-reason codes, timestamps, restart counts, resource measurements, and shortened
-image digests. They do not contain APP_SECRET, database passwords, provider API
-keys, credential envelopes, cookies, authorization headers, prompts, private
-messages, post or comment content, container IDs, or host absolute paths.
+Human output, JSON, and tests share one recursive sanitizer. They may contain
+opaque IDs, aggregate counts, normalized reason codes, timestamps, restart
+counts, resource measurements, and shortened image digests. They never contain
+APP_SECRET, provider keys, credential envelopes, cookies, authorization
+headers, prompts, private content, full container IDs, or host absolute paths.
 
-Status and doctor are read-only. They never decrypt credentials, prune Docker
-objects, mutate scheduler leases, replay Outbox rows, or call an LLM provider.
+Status and doctor are read-only. They do not decrypt credentials, prune Docker
+objects, mutate scheduler leases, replay outbox rows, or call a provider.
 
 ## Preflight and disk policy
 
-Preflight verifies Docker Engine, Docker Compose, the supported CPU architecture,
-canonical Compose configuration, the configured loopback port, disk space, and
-the relationship between persistent database and secret volumes. It reports only
-secret metadata such as `present` or `missing`.
+Preflight verifies Docker Engine, Compose capability, CPU architecture,
+canonical Compose configuration, the loopback port, disk space, and the
+contributor volume. It never mounts `%LOCALAPPDATA%\Angmoo`.
 
-- Fresh release-image pull: warn below 15 GB, fail below 10 GB, recommend 20 GB.
-- Existing release stack restart: fail only at critical filesystem pressure.
 - Contributor local build: warn below 30 GB, fail below 10 GB, recommend 40 GB.
+- Existing stack restart: fail only at critical filesystem pressure.
 
 Neither `start` nor `doctor` prunes images, build cache, containers, or volumes.
-`doctor` reports low disk as a degraded result so cleanup remains an explicit
-owner action.
+Cleanup remains an explicit owner action.
 
 ## JSON and exit codes
 
 `--json` emits `angmoo-launcher-result-v1`. Human and JSON output use the same
-state, error code, and exit code. Important exit codes are `0` for success or an
-idempotent no-op, `10` for Docker/Compose unavailable, `11` for host preflight
-failure, `20` for startup failure, `21` for recovery or lifecycle-lock ownership,
-`30` for a degraded doctor result, and `40` for a blocked destructive option.
+state, error code, and exit code. Important exit codes are `0` success or an
+idempotent no-op, `10` Docker/Compose unavailable, `11` preflight failure,
+`20` startup failure, `21` recovery or lifecycle-lock ownership, `30` degraded
+doctor, and `40` blocked destructive option.
