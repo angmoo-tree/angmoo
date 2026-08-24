@@ -105,6 +105,18 @@ the actual Phone window, drag/resize, wide windows, or sidecar host lifecycle
 may connect a host Tauri dev process to the same Docker stack. This is not a
 second runtime architecture and must not use installed-user data.
 
+The implemented Windows path is:
+
+```powershell
+.\scripts\dev\desktop-preflight.ps1
+.\scripts\dev\desktop-dev.ps1
+```
+
+It loads the Docker frontend at `127.0.0.1:3000`, never starts a host sidecar,
+and writes only the repository-local `.angmoo-dev/webview` profile. The complete
+support, safety, and screen-check contract is in
+[`windows-host-tauri-dev.md`](windows-host-tauri-dev.md).
+
 Windows packaging is built and tested by Windows Actions. macOS packaging is
 not claimed as implemented until a separate target-OS plan and validation pass.
 

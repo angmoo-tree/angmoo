@@ -43,6 +43,30 @@ public source tree.
 Python, Node.js, PostgreSQL, Neo4j, and a JVM do not need to be installed on the
 host for the contributor Quickstart.
 
+## Four execution paths
+
+Choose one path by purpose. All four use the same SQLite, LadybugDB, scheduler,
+projector, API, and frontend behavior; only packaging and data location differ.
+
+1. **Windows installer — recommended user path.** Install a published Angmoo
+   release and run the native Tauri Phone. No Docker or development toolchain is
+   required. A public GitHub Release is a separate release Gate; current CI
+   artifacts are release candidates, not an announced release.
+2. **Docker Browser Run — optional user path.** Run production-style images
+   with `docker compose up -d --wait`, then open
+   <http://127.0.0.1:3000>. This has no HMR or native Tauri windows. Until a new
+   coordinated release changes `ANGMOO_VERSION`, the Compose default remains
+   the documented `v0.3.0` image tag rather than the latest `main` source.
+3. **Docker contributor development — default contributor path.** Run the
+   checked-out source with
+   `docker compose -f compose.yml -f compose.dev.yml up --watch`, then use the
+   host browser, HMR/reload, and container logs.
+4. **Windows Host Tauri dev — platform-shell path.** On a supported Windows 11
+   x64 host, run `.\scripts\dev\desktop-preflight.ps1` followed by
+   `.\scripts\dev\desktop-dev.ps1`. The real Phone, Studio, and Graph windows
+   reuse the same Docker dev frontend/backend and never use installed-user
+   data. See the [Windows Host Tauri dev guide](docs/public/windows-host-tauri-dev.md).
+
 ## Quickstart
 
 ```bash
@@ -127,7 +151,9 @@ Native Next.js/FastAPI development remains an optional maintainer workflow.
 Phone or wide native windows and connects to the same Docker stack; it is not a
 second database architecture and does not use installed-user data. Windows
 packaging is verified on the Windows Actions runner. macOS packaging is not yet
-claimed as implemented.
+claimed as implemented. The concrete Windows preflight and one-command bridge
+are documented in
+[`docs/public/windows-host-tauri-dev.md`](docs/public/windows-host-tauri-dev.md).
 
 See `CONTRIBUTING.md` for backend tests, frontend lint/build, migration, and release
 checks. See `docs/public/local-runtime.md` for the lifecycle contract and

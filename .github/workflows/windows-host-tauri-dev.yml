@@ -1,0 +1,91 @@
+name: Windows Host Tauri Dev
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "desktop/**"
+      - "scripts/dev/desktop-preflight.ps1"
+      - "scripts/dev/desktop-dev.ps1"
+      - "scripts/ci/windows_host_tauri_dev_smoke.ps1"
+      - "scripts/ci/check_windows_host_tauri_dev_contract.py"
+      - "backend/tests/test_l3_er7_windows_host_tauri_dev_contract.py"
+      - ".github/CODEOWNERS"
+      - ".github/workflows/windows-host-tauri-dev.yml"
+      - "README.md"
+      - "README.ko.md"
+      - "CONTRIBUTING.md"
+      - "CONTRIBUTING.ko.md"
+      - "docs/architecture/l3-er7-windows-host-tauri-dev.md"
+      - "docs/public/windows-host-tauri-dev.md"
+  pull_request:
+    paths:
+      - "desktop/**"
+      - "scripts/dev/desktop-preflight.ps1"
+      - "scripts/dev/desktop-dev.ps1"
+      - "scripts/ci/windows_host_tauri_dev_smoke.ps1"
+      - "scripts/ci/check_windows_host_tauri_dev_contract.py"
+      - "backend/tests/test_l3_er7_windows_host_tauri_dev_contract.py"
+      - ".github/CODEOWNERS"
+      - ".github/workflows/windows-host-tauri-dev.yml"
+      - "README.md"
+      - "README.ko.md"
+      - "CONTRIBUTING.md"
+      - "CONTRIBUTING.ko.md"
+      - "docs/architecture/l3-er7-windows-host-tauri-dev.md"
+      - "docs/public/windows-host-tauri-dev.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-host-tauri-dev-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tauri-windows-host-dev:
+    name: tauri-windows-host-dev
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: "11.22.0"
+          run_install: false
+      - name: Install pinned desktop toolchain
+        shell: pwsh
+        run: |
+          pnpm --dir frontend install --frozen-lockfile
+          npm ci --ignore-scripts --prefix desktop
+          rustup toolchain install 1.97.1 --profile minimal --component rustfmt
+          rustup override set 1.97.1 --path desktop\src-tauri
+      - name: Verify repository and fail-closed preflight contracts
+        shell: pwsh
+        run: |
+          python scripts\ci\check_windows_host_tauri_dev_contract.py
+          .\scripts\ci\windows_host_tauri_dev_smoke.ps1
+      - name: Verify installed and Docker-bridge Rust modes
+        shell: pwsh
+        run: |
+          cargo fmt --manifest-path desktop\src-tauri\Cargo.toml -- --check
+          $env:TAURI_CONFIG = Get-Content -LiteralPath desktop\src-tauri\tauri.contributor-docker.conf.json -Raw
+          cargo test --manifest-path desktop\src-tauri\Cargo.toml --locked --no-default-features
+          cargo test --manifest-path desktop\src-tauri\Cargo.toml --locked --features contributor-docker-bridge
+          Remove-Item Env:\TAURI_CONFIG
+      - name: Link the additive Docker-bridge Tauri configuration
+        shell: pwsh
+        working-directory: desktop
+        run: >-
+          node node_modules/@tauri-apps/cli/tauri.js build
+          --debug
+          --no-bundle
+          --config src-tauri/tauri.contributor-docker.conf.json
+          --features contributor-docker-bridge

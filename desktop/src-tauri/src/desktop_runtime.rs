@@ -31,6 +31,7 @@ const ENDPOINT_READY_ATTEMPTS: usize = 600;
 #[serde(rename_all = "camelCase")]
 pub struct DesktopRuntimeStatus {
     phase: &'static str,
+    runtime_mode: &'static str,
     #[serde(skip_serializing_if = "Option::is_none")]
     api_base_url: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -45,6 +46,7 @@ impl DesktopRuntimeStatus {
     fn starting() -> Self {
         Self {
             phase: "starting",
+            runtime_mode: "installed-sidecar",
             api_base_url: None,
             graph_provider: None,
             launch_token: None,
@@ -55,6 +57,7 @@ impl DesktopRuntimeStatus {
     fn ready(port: u16, launch_token: String) -> Self {
         Self {
             phase: "ready",
+            runtime_mode: "installed-sidecar",
             api_base_url: Some(format!("http://127.0.0.1:{port}")),
             graph_provider: Some(PRODUCT_GRAPH_PROVIDER),
             launch_token: Some(launch_token),
@@ -65,6 +68,7 @@ impl DesktopRuntimeStatus {
     fn crashed(code: &'static str) -> Self {
         Self {
             phase: "crashed",
+            runtime_mode: "installed-sidecar",
             api_base_url: None,
             graph_provider: None,
             launch_token: None,
@@ -75,8 +79,20 @@ impl DesktopRuntimeStatus {
     fn stopped() -> Self {
         Self {
             phase: "stopped",
+            runtime_mode: "installed-sidecar",
             api_base_url: None,
             graph_provider: None,
+            launch_token: None,
+            diagnostic_code: None,
+        }
+    }
+
+    fn contributor_bridge_ready() -> Self {
+        Self {
+            phase: "ready",
+            runtime_mode: "contributor-docker-bridge",
+            api_base_url: None,
+            graph_provider: Some(PRODUCT_GRAPH_PROVIDER),
             launch_token: None,
             diagnostic_code: None,
         }
@@ -146,6 +162,19 @@ pub fn status(state: &DesktopRuntimeState) -> Result<DesktopRuntimeStatus, Strin
         .lock()
         .map(|runtime| runtime.status.clone())
         .map_err(|_| "desktop_runtime_state_poisoned".to_owned())
+}
+
+pub fn activate_contributor_bridge(state: &DesktopRuntimeState) -> Result<(), String> {
+    let mut runtime = state
+        .0
+        .lock()
+        .map_err(|_| "desktop_runtime_state_poisoned".to_owned())?;
+    if runtime.child.is_some() || runtime.runtime_root.is_some() {
+        return Err("contributor_bridge_host_sidecar_forbidden".to_owned());
+    }
+    runtime.generation += 1;
+    runtime.status = DesktopRuntimeStatus::contributor_bridge_ready();
+    Ok(())
 }
 
 fn verify_packaged_sidecar() -> Result<(), String> {
@@ -427,8 +456,25 @@ mod tests {
         let json = serde_json::to_string(&status).unwrap();
         assert!(json.contains("http://127.0.0.1:49152"));
         assert!(json.contains(r#""graphProvider":"ladybug""#));
+        assert!(json.contains(r#""runtimeMode":"installed-sidecar""#));
         assert!(!json.contains("sidecar.exe"));
         assert!(!json.contains("command"));
+    }
+
+    #[test]
+    fn contributor_bridge_status_has_no_host_api_or_launch_token() {
+        let state = DesktopRuntimeState::default();
+        activate_contributor_bridge(&state).unwrap();
+        let status = status(&state).unwrap();
+
+        assert_eq!(status.phase, "ready");
+        assert_eq!(status.runtime_mode, "contributor-docker-bridge");
+        assert_eq!(status.graph_provider, Some("ladybug"));
+        assert!(status.api_base_url.is_none());
+        assert!(status.launch_token.is_none());
+        let runtime = state.0.lock().unwrap();
+        assert!(runtime.child.is_none());
+        assert!(runtime.runtime_root.is_none());
     }
 
     #[test]

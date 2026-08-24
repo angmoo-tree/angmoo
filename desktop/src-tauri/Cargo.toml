@@ -17,6 +17,13 @@ Comments = "Local-first AI character social world"
 name = "angmoo_desktop_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
+[features]
+default = []
+# Compile-time only development profile used by scripts/dev/desktop-dev.ps1.
+# It deliberately cannot spawn the bundled FastAPI sidecar or select installed
+# product data. Release builds never enable this feature.
+contributor-docker-bridge = []
+
 [build-dependencies]
 tauri-build = { version = "=2.6.3", features = [] }
 

@@ -1,4 +1,5 @@
 mod desktop_runtime;
+mod launch_mode;
 mod phone_resize;
 mod product_paths;
 mod product_windows;
@@ -21,8 +22,13 @@ fn desktop_runtime_status(
 fn retry_desktop_runtime(
     app: tauri::AppHandle,
     state: tauri::State<'_, desktop_runtime::DesktopRuntimeState>,
+    mode: tauri::State<'_, launch_mode::DesktopLaunchMode>,
 ) -> Result<(), String> {
-    desktop_runtime::retry(app, &state)
+    if mode.is_contributor_docker_bridge() {
+        desktop_runtime::activate_contributor_bridge(&state)
+    } else {
+        desktop_runtime::retry(app, &state)
+    }
 }
 
 #[tauri::command]
@@ -81,6 +87,8 @@ fn start_product_window_resize(window: Window, direction: String) -> Result<(), 
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    let launch_mode = launch_mode::DesktopLaunchMode::current()
+        .expect("invalid Angmoo desktop compile-time launch mode");
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app, _, _| {
             if let Some(phone) = app.get_webview_window("main") {
@@ -89,17 +97,29 @@ pub fn run() {
             }
         }))
         .plugin(tauri_plugin_shell::init())
+        .manage(launch_mode)
         .manage(desktop_runtime::DesktopRuntimeState::default())
         .setup(|app| {
+            let launch_mode = *app.state::<launch_mode::DesktopLaunchMode>();
             let product_paths = product_paths::ProductDataPaths::resolve(app.handle())?;
-            product_paths.prepare_runtime_owned_directories()?;
+            if launch_mode.is_contributor_docker_bridge() {
+                product_paths.prepare_contributor_bridge_directory()?;
+            } else {
+                product_paths.prepare_runtime_owned_directories()?;
+            }
             let phone = create_phone_window(app.handle(), &product_paths)?;
             window_policy::apply_phone_window_policy(&phone)?;
             phone_resize::install_phone_aspect_ratio_lock(&phone)?;
-            desktop_runtime::start(
-                app.handle().clone(),
-                &app.state::<desktop_runtime::DesktopRuntimeState>(),
-            )?;
+            if launch_mode.is_contributor_docker_bridge() {
+                desktop_runtime::activate_contributor_bridge(
+                    &app.state::<desktop_runtime::DesktopRuntimeState>(),
+                )?;
+            } else {
+                desktop_runtime::start(
+                    app.handle().clone(),
+                    &app.state::<desktop_runtime::DesktopRuntimeState>(),
+                )?;
+            }
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![

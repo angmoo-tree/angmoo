@@ -129,3 +129,10 @@ def test_container_smoke_reads_the_canonical_app_secret_path() -> None:
     content = (ROOT / "scripts/ci/run_l0_container_smoke.py").read_text("utf-8")
     assert "/var/lib/angmoo/secrets/app-secret" in content
     assert "/var/lib/angmoo/secrets/app_secret" not in content
+    assert "site_operation_settings" in content
+    assert "CREATE TABLE" not in content
+    assert "sqlite_write_stable=true" in content
+    assert "ladybug_ready=true" in content
+    assert "provider_calls=0" in content
+    assert "contributor-diagnostics" in content
+    assert "compose_logs=" in content

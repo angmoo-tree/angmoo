@@ -10,6 +10,7 @@ import socket
 import subprocess
 import sys
 from typing import Any
+import uuid
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -119,6 +120,56 @@ def _secret_digest(harness: ComposeHarness) -> str:
     return harness.run("exec", "-T", "backend", "python", "-c", command).stdout.strip()
 
 
+def _provider_call_count(harness: ComposeHarness) -> int:
+    output = harness.run(
+        "exec",
+        "-T",
+        "backend",
+        "/usr/local/bin/angmoo-backend-entrypoint",
+        "contributor-diagnostics",
+    ).stdout
+    payload = json.loads(output)
+    assert payload["runtime_profile"] == "CONTRIBUTOR_EMBEDDED"
+    assert payload["persistence_provider"] == "sqlite"
+    assert payload["graph_provider"] == "ladybug"
+    return int(payload["provider_usage"]["recent_call_count"])
+
+
+def _write_sqlite_marker(harness: ComposeHarness, marker: str) -> None:
+    command = (
+        "import sqlite3; "
+        "p='/var/lib/angmoo/canonical/generations/contributor-v1/angmoo.sqlite3'; "
+        "c=sqlite3.connect(p); "
+        "c.execute(\"INSERT INTO site_operation_settings"
+        "(key,value,updated_by_user_id,updated_at) VALUES (?, ?, NULL, CURRENT_TIMESTAMP)\", "
+        f"({marker!r}, {marker!r})); "
+        "c.commit(); c.close()"
+    )
+    harness.run("exec", "-T", "backend", "python", "-c", command)
+
+
+def _sqlite_marker_exists(harness: ComposeHarness, marker: str) -> bool:
+    command = (
+        "import sqlite3; "
+        "p='/var/lib/angmoo/canonical/generations/contributor-v1/angmoo.sqlite3'; "
+        "c=sqlite3.connect(p); "
+        f"print(c.execute('SELECT COUNT(*) FROM site_operation_settings WHERE key=? AND value=?', ({marker!r}, {marker!r})).fetchone()[0]); "
+        "c.close()"
+    )
+    return harness.run("exec", "-T", "backend", "python", "-c", command).stdout.strip() == "1"
+
+
+def _delete_sqlite_marker(harness: ComposeHarness, marker: str) -> None:
+    command = (
+        "import sqlite3; "
+        "p='/var/lib/angmoo/canonical/generations/contributor-v1/angmoo.sqlite3'; "
+        "c=sqlite3.connect(p); "
+        f"c.execute('DELETE FROM site_operation_settings WHERE key=?', ({marker!r},)); "
+        "c.commit(); c.close()"
+    )
+    harness.run("exec", "-T", "backend", "python", "-c", command)
+
+
 def run_smoke(*, tag: str, project: str, port: int) -> None:
     harness = ComposeHarness(project=project, tag=tag, port=port)
     harness.cleanup(volumes=True)
@@ -127,7 +178,11 @@ def run_smoke(*, tag: str, project: str, port: int) -> None:
         if _service_names(harness) != EXPECTED_SERVICES:
             raise RuntimeError("runtime_state_stale: two-service topology mismatch")
         _runtime_health(harness)
+        if _provider_call_count(harness) != 0:
+            raise RuntimeError("provider_call_regression: fresh Browser Run called a provider")
         digest_before = _secret_digest(harness)
+        marker = f"browser-run-{uuid.uuid4().hex}"
+        _write_sqlite_marker(harness, marker)
         volumes = harness.run("config", "--volumes").stdout.splitlines()
         if EMBEDDED_VOLUME not in volumes:
             raise RuntimeError("runtime_state_stale: embedded volume missing")
@@ -135,13 +190,27 @@ def run_smoke(*, tag: str, project: str, port: int) -> None:
         harness.run("stop", "--timeout", "30")
         harness.run("up", "-d", "--wait", "--wait-timeout", "300")
         _runtime_health(harness)
+        if not _sqlite_marker_exists(harness, marker):
+            raise RuntimeError("sqlite_write_lost: canonical marker did not survive restart")
+        _delete_sqlite_marker(harness, marker)
+        if _provider_call_count(harness) != 0:
+            raise RuntimeError("provider_call_regression: restart called a provider")
         digest_after = _secret_digest(harness)
         if digest_after != digest_before:
             raise RuntimeError("secret_mismatch: APP_SECRET changed after restart")
         print(
             "Embedded container smoke passed: "
-            f"services=2 volume={EMBEDDED_VOLUME} restart_secret_stable=true"
+            f"services=2 volume={EMBEDDED_VOLUME} sqlite_write_stable=true "
+            "ladybug_ready=true scheduler_ready=true projector_ready=true "
+            "provider_calls=0 restart_secret_stable=true"
         )
+    except (AssertionError, json.JSONDecodeError, OSError, RuntimeError) as exc:
+        completed = harness.run(
+            "logs", "--no-color", "--tail", "200", check=False
+        )
+        logs = (completed.stdout or completed.stderr).strip()
+        detail = logs if logs else "compose logs unavailable"
+        raise RuntimeError(f"{exc}; compose_logs={detail}") from exc
     finally:
         harness.cleanup(volumes=True)
 

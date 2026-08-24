@@ -24,6 +24,7 @@ def test_architecture_boundary_is_the_tenth_required_check() -> None:
     assert checker.ADVISORY_JOBS == {"windows-local-smoke"}
     assert "release-images.yml" in checker.EXPECTED_WORKFLOWS
     assert "native-runtime-spike.yml" in checker.EXPECTED_WORKFLOWS
+    assert "windows-host-tauri-dev.yml" in checker.EXPECTED_WORKFLOWS
     assert "windows-installer.yml" in checker.EXPECTED_WORKFLOWS
 
 

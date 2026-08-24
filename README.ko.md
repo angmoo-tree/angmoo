@@ -40,6 +40,29 @@ infrastructure와 private runbook은 public source에 포함하지 않습니다.
 기여자 빠른 시작에는 host Python, Node.js, PostgreSQL, Neo4j, JVM 설치가
 필요하지 않습니다.
 
+## 네 가지 실행 경로
+
+목적에 맞는 한 경로를 선택합니다. 네 경로는 SQLite·LadybugDB·scheduler·
+projector·API·frontend 의미가 같고 포장과 데이터 위치만 다릅니다.
+
+1. **Windows installer — 일반 사용자 권장.** 공개 릴리즈의 설치 파일로
+   native Tauri Phone을 실행합니다. Docker나 개발 도구가 필요 없습니다. 공개
+   GitHub Release는 별도 승인 Gate이며 현재 Actions artifact는 공개 릴리즈가
+   아니라 release candidate입니다.
+2. **Docker Browser Run — Docker 사용자 선택.**
+   `docker compose up -d --wait` 후 <http://127.0.0.1:3000>을 엽니다. HMR과
+   native Tauri 창은 없습니다. 새 release가 `ANGMOO_VERSION`을 함께 갱신하기
+   전까지 Compose 기본값은 최신 `main`이 아니라 문서화된 `v0.3.0` image입니다.
+3. **Docker contributor development — 일반 기여자 기본.**
+   `docker compose -f compose.yml -f compose.dev.yml up --watch`로 checkout의
+   source를 실행하고 host browser·HMR/reload·container log를 사용합니다.
+4. **Windows Host Tauri dev — 제품 shell 개발.** 지원하는 Windows 11 x64
+   host에서 `.\scripts\dev\desktop-preflight.ps1`,
+   `.\scripts\dev\desktop-dev.ps1` 순서로 실행합니다. 실제 Phone·Studio·Graph
+   창이 같은 Docker dev frontend/backend를 사용하며 설치형 사용자 데이터에는
+   접근하지 않습니다. [Windows Host Tauri dev 가이드](docs/public/windows-host-tauri-dev.md)를
+   확인하세요.
+
 ## 빠른 시작
 
 ```bash
@@ -122,7 +145,9 @@ docker compose -f compose.yml -f compose.dev.yml up --watch
 다루는 기여자만 선택적으로 `Docker + Host Tauri dev`를 사용하며, 이것은 같은
 Docker backend에 연결될 뿐 별도 database architecture가 아닙니다. Windows
 패키징은 Windows Actions에서 검증하고 macOS 패키징 구현은 아직 주장하지
-않습니다. container 내부 test·lint·migration과 release 검사는
+않습니다. 실제 Windows preflight와 one-command bridge는
+[`docs/public/windows-host-tauri-dev.md`](docs/public/windows-host-tauri-dev.md)에
+정리되어 있습니다. container 내부 test·lint·migration과 release 검사는
 `CONTRIBUTING.ko.md`를 확인하세요.
 ## 로컬 검사
 

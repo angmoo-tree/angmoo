@@ -97,6 +97,15 @@ impl ProductDataPaths {
         }
         Ok(())
     }
+
+    pub fn prepare_contributor_bridge_directory(&self) -> Result<(), String> {
+        // The Host Tauri bridge is a window-only development process. Its one
+        // writable location is the repository-local WebView profile; canonical
+        // data, graph data, secrets, media, logs, and runtime ownership remain
+        // exclusively inside the contributor Docker named volume.
+        std::fs::create_dir_all(&self.webview)
+            .map_err(|_| "contributor_bridge_webview_directory_unavailable".to_owned())
+    }
 }
 
 #[cfg(test)]
@@ -148,5 +157,29 @@ mod tests {
             assert!(child.is_dir());
         }
         std::fs::remove_dir_all(local).unwrap();
+    }
+
+    #[test]
+    fn contributor_bridge_prepares_only_its_webview_profile() {
+        let root =
+            std::env::temp_dir().join(format!("angmoo-bridge-paths-{}", Uuid::new_v4().simple()));
+        let paths = ProductDataPaths::from_root(root.clone(), root.join("no-legacy-import"));
+
+        paths.prepare_contributor_bridge_directory().unwrap();
+
+        assert!(paths.webview.is_dir());
+        for child in [
+            &paths.app,
+            &paths.canonical,
+            &paths.graph,
+            &paths.search,
+            &paths.media,
+            &paths.secrets,
+            &paths.runtime,
+            &paths.logs,
+        ] {
+            assert!(!child.exists(), "bridge created {}", child.display());
+        }
+        std::fs::remove_dir_all(root).unwrap();
     }
 }

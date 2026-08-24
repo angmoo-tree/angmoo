@@ -1,0 +1,11 @@
+# Platform-shell changes require designated maintainer review. During the
+# single-maintainer phase, target-OS CI plus the user's explicit review Gate is
+# recorded before Ready/merge; authorship alone is not treated as approval.
+/desktop/src-tauri/ @jingujeon
+/desktop/platform/ @jingujeon
+/scripts/dev/desktop-preflight.ps1 @jingujeon
+/scripts/dev/desktop-dev.ps1 @jingujeon
+/scripts/ci/windows_host_tauri_dev_smoke.ps1 @jingujeon
+/.github/workflows/windows-host-tauri-dev.yml @jingujeon
+/docs/architecture/l3-er7-windows-host-tauri-dev.md @jingujeon
+/docs/public/windows-host-tauri-dev.md @jingujeon
