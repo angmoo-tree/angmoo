@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from io import BytesIO
 import hashlib
+import math
 import multiprocessing
 import os
 from pathlib import PurePosixPath
@@ -455,12 +456,12 @@ async def retrieve_lore_for_query_tracked(
 def _retrieve_lore_rows(
     db: Session, *, character_id: str, query_embedding: list[float]
 ) -> list[tuple[models.CharacterLoreChunk, float]]:
-    distance = models.CharacterLoreChunk.embedding.cosine_distance(query_embedding).label(
-        "distance"
-    )
-    return list(
-        db.execute(
-            select(models.CharacterLoreChunk, distance)
+    # A character is bounded to 100 lore chunks, so in-process cosine ranking
+    # is deterministic and comfortably small.  This preserves retrieval
+    # behavior without retaining a PostgreSQL/pgvector runtime dependency.
+    chunks = list(
+        db.scalars(
+            select(models.CharacterLoreChunk)
             .join(models.CharacterLoreSource)
             .where(
                 models.CharacterLoreChunk.character_id == character_id,
@@ -468,10 +469,27 @@ def _retrieve_lore_rows(
                 models.CharacterLoreChunk.embedding.is_not(None),
                 models.CharacterLoreSource.status.in_(("ready", "partial")),
             )
-            .order_by(distance)
-            .limit(RETRIEVAL_CANDIDATE_LIMIT)
+            .order_by(models.CharacterLoreChunk.id)
         )
     )
+    ranked = [
+        (chunk, _cosine_distance(chunk.embedding or [], query_embedding))
+        for chunk in chunks
+    ]
+    ranked.sort(key=lambda item: (item[1], item[0].id))
+    return ranked[:RETRIEVAL_CANDIDATE_LIMIT]
+
+
+def _cosine_distance(left: list[float], right: list[float]) -> float:
+    if not left or len(left) != len(right):
+        return 1.0
+    dot = sum(a * b for a, b in zip(left, right, strict=True))
+    left_norm = math.sqrt(sum(value * value for value in left))
+    right_norm = math.sqrt(sum(value * value for value in right))
+    if left_norm == 0.0 or right_norm == 0.0:
+        return 1.0
+    similarity = max(-1.0, min(1.0, dot / (left_norm * right_norm)))
+    return 1.0 - similarity
 
 
 def _lore_result_from_rows(

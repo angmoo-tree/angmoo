@@ -1,1 +1,1 @@
-"""PostgreSQL and system-clock adapters for routines."""
+"""SQLAlchemy persistence and system-clock adapters for routines."""

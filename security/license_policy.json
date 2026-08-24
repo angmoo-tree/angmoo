@@ -298,22 +298,6 @@
       "source": "https://github.com/pyinstaller/pyinstaller/blob/v6.16.0/COPYING.txt"
     },
     {
-      "name": "pgvector PostgreSQL image",
-      "source_path": "compose.yml",
-      "reference": "pgvector/pgvector:pg16@sha256:1d533553fefe4f12e5d80c7b80622ba0c382abb5758856f52983d8789179f0fb",
-      "license_expression": "PostgreSQL",
-      "distribution_boundary": "Independent local database container; image components retain their respective licenses.",
-      "source": "https://github.com/pgvector/pgvector/blob/master/LICENSE"
-    },
-    {
-      "name": "Neo4j Community Edition",
-      "source_path": "compose.yml",
-      "reference": "neo4j:2026.06.0@sha256:42fd5b9ead4dd4211f6f91bd831c358e4e2117367d04633fbf88682ca4792b30",
-      "license_expression": "GPL-3.0-only",
-      "distribution_boundary": "Optional independent graph database service, not embedded application code.",
-      "source": "https://neo4j.com/licensing/"
-    },
-    {
       "name": "Trivy container scanner",
       "source_path": "scripts/ci/run_container_gate.sh",
       "reference": "ghcr.io/aquasecurity/trivy:0.74.0@sha256:62b1e65e8869bc4b4c6aa4fa2b21595256c7c2f6018a9d9ad61caf87187c1969",

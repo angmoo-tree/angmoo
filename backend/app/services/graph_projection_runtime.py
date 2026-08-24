@@ -4,9 +4,11 @@ import threading
 from typing import Any, Protocol
 
 from app.core.config import Settings, settings
-from app.domains.relationships.ports.projection import RelationshipProjectionPort
+from app.domains.relationships.ports.projection import (
+    RelationshipProjectionBackendError,
+    RelationshipProjectionPort,
+)
 from app.integrations.ladybug_projection import LadybugRelationshipProjection
-from app.integrations.neo4j import GraphClientError, Neo4jGraphClient
 
 
 class ProcessGraphClient(RelationshipProjectionPort, Protocol):
@@ -44,7 +46,9 @@ def register_process_graph_client(client: ProcessGraphClient) -> None:
             _process_graph_client is not None
             and _process_graph_client is not client
         ):
-            raise GraphClientError("graph_process_client_already_registered")
+            raise RelationshipProjectionBackendError(
+                "graph_process_client_already_registered"
+            )
         _process_graph_client = client
 
 
@@ -64,10 +68,7 @@ def borrow_process_graph_client(
 
     if (
         config.LOCAL_RUNTIME_COMPONENT_MODE != "in_process"
-        or (
-            config.graph_provider != "ladybug"
-            and not config.ladybug_graph_preview_enabled
-        )
+        or config.graph_provider != "ladybug"
     ):
         return None
     with _process_client_lock:
@@ -80,22 +81,11 @@ def graph_client_from_settings(
     require_enabled: bool = True,
 ) -> RelationshipProjectionPort:
     if require_enabled and not config.graph_projection_enabled:
-        raise GraphClientError("graph_disabled")
-    if (
-        config.graph_provider == "ladybug"
-        or config.ladybug_graph_preview_enabled
-    ):
-        return LadybugRelationshipProjection(
-            database_root=config.ladybug_database_root,
-        )
-    password = config.neo4j_password
-    if not password:
-        raise GraphClientError("neo4j_auth_invalid")
-    return Neo4jGraphClient(
-        uri=config.neo4j_uri,
-        username=config.neo4j_username,
-        password=password,
-        database=config.neo4j_database,
+        raise RelationshipProjectionBackendError("graph_disabled")
+    if config.graph_provider != "ladybug":
+        raise RelationshipProjectionBackendError("graph_provider_unsupported")
+    return LadybugRelationshipProjection(
+        database_root=config.ladybug_database_root,
     )
 
 

@@ -21,7 +21,6 @@ from app.integrations.ladybug_projection import (
     LadybugProjectionError,
     LadybugRelationshipProjection,
 )
-from app.integrations.neo4j import Neo4jGraphClient
 from app.integrations.relationship_graph_read import RelationshipGraphRepository
 from app.services.graph_projection_replay import (
     GraphProjectionReplayService,
@@ -498,57 +497,3 @@ def test_ladybug_outage_backlog_recovers_to_zero_lag(tmp_path: Path) -> None:
         assert db.query(models.GraphProjectionOutbox).filter(
             models.GraphProjectionOutbox.status.in_(("pending", "processing"))
         ).count() == 0
-
-
-@pytest.mark.skipif(
-    os.getenv("P7_NEO4J_INTEGRATION") != "1",
-    reason="set P7_NEO4J_INTEGRATION=1 for Neo4j/Ladybug parity",
-)
-def test_real_neo4j_and_ladybug_return_identical_typed_queries(
-    tmp_path: Path,
-) -> None:
-    suffix = uuid4().hex
-    world_id = f"er3-parity-world-{suffix}"
-    commands = _commands(world_id=world_id, suffix=suffix)
-    password = settings.neo4j_password
-    assert password is not None
-    neo4j = Neo4jGraphClient(
-        uri=settings.neo4j_uri,
-        username=settings.neo4j_username,
-        password=password,
-        database=settings.neo4j_database,
-    )
-    with LadybugRelationshipProjection(
-        database_root=tmp_path / "ladybug-neo4j-parity"
-    ) as ladybug:
-        try:
-            neo4j.verify_connectivity()
-            neo4j.bootstrap()
-            for command in commands:
-                assert neo4j.apply(command, timeout_seconds=10.0) == "applied"
-                assert ladybug.apply(command) == "applied"
-            neo4j_snapshot = _query_snapshot(
-                RelationshipGraphRepository(neo4j),
-                world_id=world_id,
-                suffix=suffix,
-            )
-            ladybug_snapshot = _query_snapshot(
-                RelationshipGraphRepository(ladybug),
-                world_id=world_id,
-                suffix=suffix,
-            )
-            _assert_expected_snapshot(neo4j_snapshot, suffix=suffix)
-            assert ladybug_snapshot == neo4j_snapshot
-            assert ladybug.world_digest(world_id) == neo4j.world_digest(world_id)
-
-            exclusion = SourceExclusionProjectionCommand(
-                world_id=world_id,
-                event_id=commands[0].event.event_id,
-                reason="source_deleted",
-            )
-            assert neo4j.apply(exclusion, timeout_seconds=10.0) == "removed"
-            assert ladybug.apply(exclusion) == "removed"
-            assert ladybug.world_digest(world_id) == neo4j.world_digest(world_id)
-        finally:
-            neo4j.clear_world(world_id)
-            neo4j.close()

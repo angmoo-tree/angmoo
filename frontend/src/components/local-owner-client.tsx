@@ -224,7 +224,7 @@ export function LocalOwnerClient({
               className="mt-1"
             />
             <span className="text-[14px] font-semibold leading-6 text-[#344054]">
-              PostgreSQL 데이터와 local secret은 이 장치에 보존되고, owner claim은 한 번만 가능하다는 점을 확인했습니다.
+              SQLite 데이터와 local secret은 이 장치에 보존되고, owner claim은 한 번만 가능하다는 점을 확인했습니다.
             </span>
           </label>
 

@@ -51,7 +51,6 @@ def _dependabot_path_allowed(path: str) -> bool:
         "frontend/package.json",
         "frontend/pnpm-lock.yaml",
         "compose.yml",
-        "compose.neo4j.yml",
     }:
         return True
     return pure.parts[:2] == (".github", "workflows") and pure.suffix in {

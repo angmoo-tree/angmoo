@@ -1,4 +1,4 @@
-"""Current PostgreSQL/SQLAlchemy implementation of the projection outbox port."""
+"""SQLAlchemy outbox ports with canonical SQLite claim/finalize semantics."""
 
 from __future__ import annotations
 

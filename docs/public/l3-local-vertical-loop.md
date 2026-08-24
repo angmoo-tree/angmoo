@@ -47,14 +47,15 @@ named volumes:
 .\angmoo.ps1 stop
 ```
 
-`stop` preserves PostgreSQL, Neo4j, media, and runtime-secret volumes. Never add
-`--volumes` unless performing an explicitly approved factory reset.
+`stop` preserves the contributor SQLite/LadybugDB/media/secret/runtime named
+volume. Never add `--volumes` unless performing an explicitly approved
+contributor fixture reset.
 
 ## Recovery and privacy
 
 - Restart restores the same daily plan, owner binding, manual writes, Inbox
   status, and APP_SECRET. Missed routine ticks do not create catch-up posts.
-- Neo4j is a replayable projection. If it is unavailable, the PostgreSQL
+- LadybugDB is a replayable projection. If it is unavailable, the SQLite
   canonical loop remains usable and graph diagnostics become degraded.
 - World IDs are validated on every write and read. Cross-World author or target
   spoofing fails closed.

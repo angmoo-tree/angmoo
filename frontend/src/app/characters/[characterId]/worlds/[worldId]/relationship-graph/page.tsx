@@ -6,7 +6,6 @@ import { NO_INDEX_ROBOTS } from "@/lib/seo";
 
 type PageProps = {
   params: Promise<{ characterId: string; worldId: string }>;
-  searchParams: Promise<{ provider?: string }>;
 };
 
 export const dynamic = "force-dynamic";
@@ -16,16 +15,14 @@ export const metadata: Metadata = {
   robots: NO_INDEX_ROBOTS,
 };
 
-export default async function RelationshipGraphPage({ params, searchParams }: PageProps) {
+export default async function RelationshipGraphPage({ params }: PageProps) {
   const { characterId, worldId } = await params;
-  const { provider: requestedProvider } = await searchParams;
-  const provider = requestedProvider === "ladybug" ? "ladybug" : "neo4j";
   return (
     <AppShell>
       <RelationshipGraphClient
         characterId={characterId}
         worldId={worldId}
-        provider={provider}
+        provider="ladybug"
       />
     </AppShell>
   );

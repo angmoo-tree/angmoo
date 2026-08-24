@@ -15,7 +15,13 @@ fn main() {
                 .parent()
                 .ok_or("matrix_data_root_missing")?
                 .to_path_buf();
-            let legacy_root = data_root.join("no-legacy-import");
+            // Legacy import input must never live below the product data root.
+            // Keep this synthetic source as a sibling so the matrix exercises
+            // the same LocalAppData ownership boundary as the Tauri product.
+            let legacy_root = data_root
+                .parent()
+                .ok_or("matrix_legacy_parent_missing")?
+                .join("no-legacy-import");
             let runtime_root = runtime_root.to_string_lossy().into_owned();
             let data_root = data_root.to_string_lossy().into_owned();
             let legacy_root = legacy_root.to_string_lossy().into_owned();
@@ -44,7 +50,11 @@ fn main() {
 
             let handle = app.handle().clone();
             thread::spawn(move || {
-                thread::sleep(Duration::from_secs(8));
+                // The CI matrix gives a freshly extracted one-file sidecar up
+                // to 60 seconds to publish its endpoint. Keep the parent host
+                // alive beyond that deadline; the matrix stops it as soon as
+                // readiness is observed.
+                thread::sleep(Duration::from_secs(75));
                 handle.exit(0);
             });
             Ok(())

@@ -1,9 +1,8 @@
-"""L4-owned legacy adapter from SQLAlchemy/runtime to graph-read domain.
+"""L4-owned adapter from SQLAlchemy/runtime to graph-read domain.
 
-Current consumers: the relationship-graph API route, social-memory diagnostics,
-and the legacy ``app.services.relationship_graph_read`` import facade.
-Removal condition: move relationship PostgreSQL repositories and graph runtime
-composition behind L4 integration ports, then delete this bridge.
+Current consumers are the relationship-graph API route and social-memory
+diagnostics. SQLite supplies canonical fallback facts and LadybugDB supplies
+the replayable graph projection.
 """
 
 from __future__ import annotations
@@ -38,7 +37,6 @@ from app.integrations.relationship_graph_read import RelationshipGraphRepository
 from app.services.graph_projection_metrics import graph_metrics
 from app.services.graph_projection_runtime import (
     borrow_process_graph_client,
-    graph_client_from_settings,
 )
 
 
@@ -81,7 +79,7 @@ class SqlAlchemyRelationshipGraphReadGateway:
         db: Session,
         *,
         config: Settings = settings,
-        graph_provider: relationships.GraphProvider = "neo4j",
+        graph_provider: relationships.GraphProvider = "ladybug",
     ) -> None:
         self._db = db
         self._config = config
@@ -158,52 +156,35 @@ class SqlAlchemyRelationshipGraphReadGateway:
         )
 
     def open_graph_repository(self) -> RelationshipGraphQueryPort:
-        if self._graph_provider == "ladybug":
-            if (
-                self._config.graph_provider != "ladybug"
-                and not self._config.ladybug_graph_preview_enabled
-            ):
-                raise GraphReadBackendError("ladybug_preview_disabled")
-            shared = borrow_process_graph_client(self._config)
-            if shared is not None:
-                try:
-                    shared.verify_connectivity()
-                except RelationshipProjectionBackendError as exc:
-                    raise GraphReadBackendError(exc.error_class) from exc
-                self._client = shared
-                self._client_owned = False
-                return _BackendErrorMappingRepository(
-                    RelationshipGraphRepository(shared)
-                )
-            projection = None
+        if self._graph_provider != "ladybug":
+            raise GraphReadBackendError("graph_provider_unsupported")
+        shared = borrow_process_graph_client(self._config)
+        if shared is not None:
             try:
-                projection = LadybugRelationshipProjection(
-                    database_root=self._config.ladybug_database_root
-                )
-                self._client = projection
-                self._client_owned = True
-                projection.verify_connectivity()
+                shared.verify_connectivity()
             except RelationshipProjectionBackendError as exc:
-                if projection is not None:
-                    projection.close()
-                self._client = None
                 raise GraphReadBackendError(exc.error_class) from exc
+            self._client = shared
+            self._client_owned = False
             return _BackendErrorMappingRepository(
-                RelationshipGraphRepository(projection)
+                RelationshipGraphRepository(shared)
             )
-
-        client = None
+        projection = None
         try:
-            client = graph_client_from_settings(self._config)
-            self._client = client
+            projection = LadybugRelationshipProjection(
+                database_root=self._config.ladybug_database_root
+            )
+            self._client = projection
             self._client_owned = True
-            client.verify_connectivity()
+            projection.verify_connectivity()
         except RelationshipProjectionBackendError as exc:
-            if client is not None:
-                client.close()
+            if projection is not None:
+                projection.close()
             self._client = None
             raise GraphReadBackendError(exc.error_class) from exc
-        return _BackendErrorMappingRepository(RelationshipGraphRepository(client))
+        return _BackendErrorMappingRepository(
+            RelationshipGraphRepository(projection)
+        )
 
     def close_graph_repository(self) -> None:
         if self._client is not None:
@@ -253,7 +234,7 @@ class SqlAlchemyRelationshipGraphReadGateway:
             updated_at=row.updated_at,
         )
 
-    def postgres_direct_hits(
+    def canonical_direct_hits(
         self,
         *,
         world_id: str,
@@ -522,7 +503,7 @@ def get_owner_relationship_graph(
     limit: int = 20,
     config: Settings = settings,
     repository: RelationshipGraphQueryPort | None = None,
-    graph_provider: relationships.GraphProvider = "neo4j",
+    graph_provider: relationships.GraphProvider = "ladybug",
 ) -> relationships.RelationshipGraphRead:
     """Preserve the legacy call signature while delegating to the domain."""
 

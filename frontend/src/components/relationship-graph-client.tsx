@@ -42,11 +42,11 @@ function position(index: number, count: number) {
 export function RelationshipGraphClient({
   characterId,
   worldId,
-  provider = "neo4j",
+  provider = "ladybug",
 }: {
   characterId: string;
   worldId: string;
-  provider?: "neo4j" | "ladybug";
+  provider?: "ladybug";
 }) {
   const router = useRouter();
   const { status } = useAuth();
@@ -143,9 +143,7 @@ export function RelationshipGraphClient({
                 </p>
               </div>
               <span className="rounded-full bg-surface-container px-3 py-2 text-xs font-bold">
-                {graph.meta.source === "neo4j"
-                  ? "Neo4j 검증 결과"
-                  : graph.meta.source === "ladybug"
+                {graph.meta.source === "ladybug"
                     ? "LadybugDB 검증 결과"
                     : "Canonical DB 안전 대체"}
               </span>

@@ -7,9 +7,9 @@ import threading
 from functools import partial
 from typing import Any
 
-from app.compatibility.runtime.single_backend_workers import (
-    run_legacy_projector_component,
-    run_legacy_scheduler_component,
+from app.runtime.component_workers import (
+    run_projector_component,
+    run_scheduler_component,
 )
 from app.core.config import Settings, settings
 from app.domains.runtime.public import (
@@ -45,8 +45,8 @@ class SingleBackendRuntimeComponents:
     def __init__(
         self,
         *,
-        scheduler_runner: SchedulerRunner = run_legacy_scheduler_component,
-        projector_runner: ProjectorRunner = run_legacy_projector_component,
+        scheduler_runner: SchedulerRunner = run_scheduler_component,
+        projector_runner: ProjectorRunner = run_projector_component,
         startup_timeout_seconds: float | None = None,
         shutdown_timeout_seconds: float | None = None,
         scheduler_restart_delay_seconds: float = 1.0,
@@ -317,12 +317,12 @@ def create_single_backend_runtime_components(
         return SingleBackendRuntimeComponents()
     return SingleBackendRuntimeComponents(
         scheduler_runner=partial(
-            run_legacy_scheduler_component,
+            run_scheduler_component,
             config=config,
             session_factory=session_factory,
         ),
         projector_runner=partial(
-            run_legacy_projector_component,
+            run_projector_component,
             config=config,
             session_factory=session_factory,
         ),

@@ -23,17 +23,32 @@ and Tauri debug runs use the checkout-local `.angmoo-dev` root. Neither may
 silently fall back to PostgreSQL, Neo4j, an external worker, a relative SQLite
 file, or a newly generated secret when profile resolution fails.
 
-## Transitional compatibility allowlist
+## ER7 PR P canonical contributor runtime
 
-Until the separately approved ER7 legacy-removal PR lands, the following old
-surfaces remain present but are not canonical defaults:
+The official contributor path now runs the same persistence, graph, and
+component meanings as the installed product:
 
-- module-level `app.public_main:app` for existing CI and rollback tests;
-- `LADYBUG_GRAPH_PREVIEW_ENABLED` as a read-compatible alias in old fixtures;
-- PostgreSQL/Neo4j adapters and the six-service Compose files;
-- explicit `provider=ladybug` query support used by ER3 regression fixtures.
+```text
+Linux Docker
+├─ frontend — Next.js dev, HMR, browser logs
+└─ backend — CONTRIBUTOR_EMBEDDED
+   ├─ SQLite + FTS5
+   ├─ LadybugDB
+   ├─ scheduler in process
+   └─ projector in process
+```
 
-New product and contributor code must use `GRAPH_PROVIDER=ladybug` through the
-typed composition. The allowlist may shrink but must not grow. PR P removes the
-legacy runtime only after PR O merge, rollback evidence, and separate user
-approval.
+The Compose project contains only `frontend` and `backend`. Its named volume is
+development-only and is never shared with `%LOCALAPPDATA%\Angmoo`. PostgreSQL,
+Neo4j, JVM, and external scheduler/projector processes are not supported public
+or contributor runtimes.
+
+PostgreSQL remains only as the frozen read-only input of
+`LEGACY_MIGRATION`. The optional migration dependencies, last supported source
+revision, and synthetic import tests are not a second runtime. Neo4j remains
+only in static ER3 parity fixtures; no live server, driver, or JVM is required.
+
+The module-level `app.public_main:app` and old environment-shaped settings are
+test and rollback compatibility surfaces. Product and contributor entrypoints
+must pass a typed `RuntimeConfig` directly and must not use those surfaces to
+select a provider or persistence backend.

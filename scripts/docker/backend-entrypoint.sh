@@ -1,66 +1,50 @@
 #!/bin/sh
 set -eu
 
-secret_dir="${ANGMOO_SECRET_DIR:-/run/angmoo-secrets}"
-attempt=0
-while [ ! -s "$secret_dir/app_secret" ] \
-  || [ ! -s "$secret_dir/postgresql_password" ] \
-  || [ ! -s "$secret_dir/neo4j_password" ]; do
-  attempt=$((attempt + 1))
-  if [ "$attempt" -ge 60 ]; then
-    echo "secret_missing" >&2
-    exit 78
+embedded_data_root="${ANGMOO_CONTRIBUTOR_DATA_ROOT:-/var/lib/angmoo}"
+embedded_frontend_origin="${ANGMOO_FRONTEND_ORIGIN:-http://127.0.0.1:3000}"
+
+run_as_angmoo() {
+  if [ "$(id -u)" = "0" ]; then
+    exec setpriv --reuid=10001 --regid=10001 --init-groups -- "$@"
   fi
-  sleep 1
-done
-
-if [ -L "$secret_dir/app_secret" ] \
-  || [ ! -f "$secret_dir/app_secret" ] \
-  || [ ! -r "$secret_dir/app_secret" ]; then
-  echo "secret_volume_unavailable" >&2
-  exit 78
-fi
-app_secret_mode="$(stat -c '%a' "$secret_dir/app_secret")"
-if [ "$app_secret_mode" != "400" ]; then
-  echo "secret_acl_unsafe secret=app_secret" >&2
-  exit 78
-fi
-
-APP_SECRET_FILE="$secret_dir/app_secret"
-NEO4J_PASSWORD="$(cat "$secret_dir/neo4j_password")"
-postgresql_password="$(cat "$secret_dir/postgresql_password")"
-database_scheme="postgresql+psycopg"
-database_authority="${ANGMOO_POSTGRES_USER:-angmoo}:${postgresql_password}@${ANGMOO_POSTGRES_HOST:-postgresql}:5432"
-export APP_SECRET_FILE NEO4J_PASSWORD
-export DATABASE_URL="${database_scheme}://${database_authority}/${ANGMOO_POSTGRES_DB:-angmoo}"
-
-prepare_database() {
-  alembic upgrade head
-  python -m scripts.migrate_local_credentials
+  exec "$@"
 }
 
-mode="${1:-api}"
+prepare_embedded_data_root() {
+  if [ "$(id -u)" = "0" ]; then
+    install -d -o 10001 -g 10001 -m 0700 "$embedded_data_root"
+    for directory in canonical graph search media secrets runtime logs; do
+      install -d -o 10001 -g 10001 -m 0700 "$embedded_data_root/$directory"
+    done
+  elif [ ! -d "$embedded_data_root" ] || [ ! -w "$embedded_data_root" ]; then
+    echo "contributor_data_root_unwritable" >&2
+    exit 78
+  fi
+}
+
+mode="${1:-contributor-api}"
 case "$mode" in
-  api)
-    prepare_database
-    exec uvicorn app.public_main:app --host 0.0.0.0 --port 8080
+  contributor-api|contributor-api-dev)
+    prepare_embedded_data_root
+    reload_argument=""
+    if [ "$mode" = "contributor-api-dev" ]; then
+      reload_argument="--reload"
+    fi
+    # shellcheck disable=SC2086
+    run_as_angmoo python -m app.runtime.contributor_backend \
+      --data-root "$embedded_data_root" \
+      --host 0.0.0.0 \
+      --port 8080 \
+      --frontend-origin "$embedded_frontend_origin" \
+      $reload_argument
     ;;
-  api-dev)
-    prepare_database
-    exec uvicorn app.public_main:app --host 0.0.0.0 --port 8080 --reload
-    ;;
-  migrate)
-    alembic upgrade head
-    exec python -m scripts.migrate_local_credentials
-    ;;
-  scheduler)
-    exec python scripts/run_resident_tick_scheduler.py
-    ;;
-  projector)
-    exec python scripts/run_graph_projection_worker.py --loop --bootstrap
-    ;;
-  diagnostics)
-    exec python scripts/read_runtime_status.py
+  contributor-diagnostics)
+    prepare_embedded_data_root
+    run_as_angmoo python -m app.runtime.contributor_backend \
+      --data-root "$embedded_data_root" \
+      --frontend-origin "$embedded_frontend_origin" \
+      --diagnostics
     ;;
   *)
     echo "unsupported_runtime_process" >&2

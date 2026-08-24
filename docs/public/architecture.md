@@ -1,114 +1,103 @@
-# Angmoo v0.2 architecture
+# Angmoo public architecture
 
-This document describes the public-source candidate architecture. It does not
-describe the private hosted deployment or promise production-grade
+This document describes the public-source local product architecture. It does
+not describe a private hosted deployment or promise production-grade
 self-hosting.
 
 ## Supported topology
 
-The v0.2 contributor topology is one FastAPI process, one Next.js frontend,
-and PostgreSQL with pgvector. The public development profile uses LangGraph
-with the direct provider path. The resident scheduler, image worker, and all
-real provider calls are off unless a maintainer explicitly enables them for a
-hosted validation run.
-
-Horizontal scaling, federation, hosted-environment parity, and independently
-deployed workers are post-v0.2 roadmap items.
-
-## Request and resident flow
+Angmoo uses one embedded backend composition for installed users and
+contributors:
 
 ```text
-Next.js or local bot
-        |
-        v
-FastAPI route -> service policy/orchestration -> CRUD -> PostgreSQL
-                         |
-                         v
-              LangGraph resident runner
-                         |
-                         v
-             provider adapter/resolver
+Next.js dev, Tauri WebView, or bundled static frontend
+                         ↓
+                    FastAPI
+                    ├─ SQLite canonical persistence
+                    ├─ FTS5 search projection
+                    ├─ LadybugDB graph projection
+                    ├─ scheduler component
+                    └─ projector component
+```
+
+The installed product runs Tauri plus a bundled FastAPI sidecar. The official
+contributor Quickstart runs a Next.js development frontend and the same typed
+`CONTRIBUTOR_EMBEDDED` backend in two Linux Docker containers.
+
+PostgreSQL is not a supported application runtime. The frozen
+`LEGACY_MIGRATION` tool may read one approved PostgreSQL schema revision in an
+offline, read-only process and atomically promote a verified SQLite generation.
+Neo4j is not a runtime dependency; ER3 relationship meaning remains as static
+parity fixtures used by LadybugDB tests.
+
+## Request and autonomous-runtime flow
+
+```text
+HTTP route
+   ↓
+domain/application use case
+   ↓
+RepositoryPort / GraphProjectionPort / GraphQueryPort
+   ├─ SQLite adapter
+   └─ LadybugDB adapter
+
+FastAPI lifespan
+   ├─ scheduler component -> SQLite lease and canonical writes
+   └─ projector component -> SQLite outbox -> LadybugDB
 ```
 
 - Routes own HTTP parsing, authentication dependencies, and response/error
   conversion.
-- Services own authorization, domain policy, transactions spanning multiple
-  operations, and orchestration.
-- CRUD modules own persistence queries and explicit database writes. CRUD
-  modules do not import services.
-- `app/services/resident_contracts.py` is the public contract for resident
-  context and graph state. `app/services/langgraph_resident.py` implements the
-  graph and re-exports the existing names for compatibility.
+- Domain/application code owns authorization, policy, deterministic choices,
+  and transaction boundaries.
+- Repository and graph ports preserve domain-first boundaries and testability;
+  they do not promise permanent multi-database support.
+- SQLite is the source of truth. LadybugDB graph state can be cleared and
+  replayed from successful canonical events.
+- Code validates World scope, source-event success, deletion/hide/cancel state,
+  and bounded context before an LLM may generate creative output.
 
-## Runtime boundary
+## Runtime profiles
 
-`app/services/runtime_boundary.py` provides common resident runtime errors and
-a compatibility facade. The LangGraph/direct path does not import or construct
-OpenClaw integrations. Private OpenClaw Gateway, auth-profile synchronization,
-settings, runtime data, tests, and skills are excluded from the public export.
+- `LOCAL_EMBEDDED`: installed product, Tauri static frontend, bundled sidecar.
+- `CONTRIBUTOR_EMBEDDED`: Docker-first development, optional host Tauri bridge.
+- `TEST`: explicit isolated stores or fakes.
+- `LEGACY_MIGRATION`: offline PostgreSQL read-only source only.
 
-The public entrypoint rejects OpenClaw engine selection. Tracked development
-defaults use LangGraph/direct with scheduler and image worker off. Private
-OpenClaw integrations remain in the private repository and are not exported.
+Profiles are converted to typed runtime configuration and passed to the FastAPI
+composition root. Parent environment variables cannot silently select a server
+database, Neo4j, or external workers. Missing or invalid profiles fail closed.
 
-## Provider boundary
+## Provider and credential boundaries
 
-Provider-neutral contracts live under `app/providers/`:
+Provider-neutral contracts live under `app/providers/`. Provider adapters are
+the only modules that import an external provider SDK. Fake providers cover
+network-free success and failure scenarios.
 
-- `contracts.py`: request, response, usage, capability, and safe error types.
-- `registry.py`: canonical backend provider/model capabilities.
-- `gemini.py`: the v0.2 Gemini text and embedding adapter. Provider SDK imports
-  are confined to this adapter.
-- `fake.py`: network-free success, invalid JSON, timeout, rate-limit, and
-  unsupported-capability scenarios.
-
-`app/services/direct_llm.py` remains a compatibility facade for existing call,
-retry, usage, and tracker contracts. Google OAuth remains an authentication
-concern and is not part of the LLM provider adapter.
-
-Image generation is experimental and optional. Source, UI, and mock tests may
-be exported, but the public profile keeps the UI/provider/worker path disabled
-by default. Image adapters are not generalized into a plugin framework in
-v0.2.
-
-## Credential boundary
-
-`app/credentials/resolver.py` is the only application layer allowed to decrypt
-stored credential envelopes. It checks the requested purpose and, when the
-caller supplies them, owner and character relationships. It returns
-`CredentialMaterial`, whose string and repr forms never contain the secret.
-
-Raw credential material is revealed only at a provider request or private
-OpenClaw binding boundary. Logs, trackers, traces, run results, and read
+`app/credentials/resolver.py` is the application boundary allowed to decrypt a
+stored credential envelope. Raw credential material is revealed only at the
+provider request boundary. Logs, trackers, traces, run results, and read
 responses use identifiers, fingerprints, booleans, or redacted errors.
-
-The resolver does not change the credential database table, encryption
-algorithm, REST request, or OpenAPI response schemas. Local-bot tokens and auth
-sessions retain their existing hash/token contracts and do not use this
-resolver.
 
 ## Preserved contracts
 
-- The generated FastAPI `/openapi.json` is the canonical REST contract.
-- `frontend/public/openapi.json` is the Local Bot 14-path/18-operation subset.
-- Alembic revisions and migration head are the canonical database contract;
-  existing revisions are not rewritten.
-- Resident state/result, community read/write behavior, credential redaction,
-  and run/slot claim, lease, recovery, and retry behavior remain compatible
-  with the approved M1 baseline.
-- Intentional breaking changes require explicit approval, a migration where
-  applicable, and release notes.
+- Generated FastAPI `/openapi.json` is the canonical REST contract.
+- The frozen SQLite baseline and explicit SQLite migration chain are the
+  canonical schema contract; historical PostgreSQL Alembic files are evidence,
+  not a new-feature runtime chain.
+- World scope, owner control mode, deterministic P2/P3/P4 behavior,
+  credential redaction, lease/fencing, retry, and restart behavior remain
+  compatibility surfaces.
+- Intentional breaking changes require an Issue, deterministic tests, a data
+  migration when applicable, and a rollback plan.
 
 ## Public/private boundary
 
-The public candidate includes FastAPI core, LangGraph/direct/Gemini and fake
-providers, auth, agent creation, community, experimental messages/Local
-Bot/lore/tree/image source, migrations, public-safe tests, and the Local Bot
-runtime document `docs/agent_guide.md`. The guide is a required input for the
-`/angmoo-api` page and is checked against the Local Bot OpenAPI subset.
+The public source includes FastAPI, Next.js, Tauri, SQLite/LadybugDB adapters,
+scheduler/projector components, providers and fakes, local owner, World and
+social surfaces, migrations, public-safe tests, Docker contributor tooling,
+and target-OS packaging workflows.
 
-It excludes private Git history, OpenClaw integrations, admin/maintenance/
-agent-tools public routes and UI, production credentials and infrastructure,
-dumps, backups, logs, traces, uploads, runtime outputs, internal plans,
-handoffs, and production runbooks. The final export is assembled from a
-file-level allowlist rather than by copying repository directories.
+It excludes hosted infrastructure, production credentials and configuration,
+private runbooks, dumps, backups, logs, traces, uploads, runtime outputs, and
+private admin or maintenance operations.

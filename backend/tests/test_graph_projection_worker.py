@@ -8,7 +8,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import models
-from app.integrations.neo4j import GraphClientError
+from app.domains.relationships.ports.projection import (
+    RelationshipProjectionBackendError,
+)
 from app.services.graph_projection_worker import GraphProjectionWorker
 from p7_graph_support import seed_projection_fixture, sqlite_engine
 
@@ -21,7 +23,7 @@ class RecordingStore:
     def apply(self, command, *, timeout_seconds: float = 5.0) -> str:
         self.commands.append(command)
         if self.failure:
-            raise GraphClientError(self.failure)
+            raise RelationshipProjectionBackendError(self.failure)
         return "applied"
 
 
@@ -56,7 +58,7 @@ def test_transient_failure_retries_without_losing_row() -> None:
     with Session(engine, expire_on_commit=False) as db:
         fixture = seed_projection_fixture(db, suffix="retry")
         outbox_id = fixture.outbox.id
-    failing = RecordingStore(failure="neo4j_unavailable")
+    failing = RecordingStore(failure="ladybug_unavailable")
     result = GraphProjectionWorker(
         session_factory=_session_factory(engine), store=failing, worker_id="worker-a"
     ).process_batch()
@@ -65,7 +67,7 @@ def test_transient_failure_retries_without_losing_row() -> None:
         assert row is not None
         assert row.status == "pending"
         assert row.next_attempt_at is not None
-        assert row.last_error_class == "neo4j_unavailable"
+        assert row.last_error_class == "ladybug_unavailable"
         row.next_attempt_at = datetime.now(UTC) - timedelta(seconds=1)
         db.commit()
     recovered = RecordingStore()
@@ -178,7 +180,7 @@ def test_idle_connectivity_failure_marks_projector_degraded_without_exiting() ->
 
     def probe() -> None:
         stop.set()
-        raise GraphClientError("neo4j_unavailable")
+        raise RelationshipProjectionBackendError("ladybug_unavailable")
 
     GraphProjectionWorker(
         session_factory=_session_factory(engine),

@@ -158,7 +158,7 @@ def get_world_character_relationship_graph(
     target_world_character_id: str | None = Query(default=None, max_length=64),
     depth: int = Query(default=1, ge=1, le=2),
     limit: int = Query(default=20, ge=1, le=20),
-    provider: Literal["neo4j", "ladybug"] | None = Query(default=None),
+    provider: Literal["ladybug"] | None = Query(default=None),
     db: Session = Depends(get_db),
     user: models.User = Depends(get_current_user),
 ) -> relationships.RelationshipGraphRead:

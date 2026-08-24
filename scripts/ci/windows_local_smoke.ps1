@@ -2,10 +2,12 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
-$localScripts = Get-ChildItem -LiteralPath (Join-Path $repoRoot 'scripts\local') -Filter '*.ps1' -File
-if (-not $localScripts) {
-    throw 'windows_local_scripts_missing'
-}
+$localScriptRoot = Join-Path $repoRoot 'scripts\local'
+$localScripts = @(
+    if (Test-Path -LiteralPath $localScriptRoot -PathType Container) {
+        Get-ChildItem -LiteralPath $localScriptRoot -Filter '*.ps1' -File
+    }
+)
 
 foreach ($script in $localScripts) {
     $tokens = $null
@@ -66,13 +68,13 @@ echo %* | findstr /C:" port frontend 3000" >nul && (
 )
 echo %* | findstr /C:" ps --all --format json" >nul && (
   if "%ANGMOO_FAKE_RUNNING%"=="1" (
-    echo [{"Service":"backend","Name":"synthetic-backend","State":"running","Health":"healthy","Image":"synthetic"},{"Service":"frontend","Name":"synthetic-frontend","State":"running","Health":"healthy","Image":"synthetic"},{"Service":"neo4j","Name":"synthetic-neo4j","State":"running","Health":"healthy","Image":"synthetic"},{"Service":"postgresql","Name":"synthetic-postgresql","State":"running","Health":"healthy","Image":"synthetic"},{"Service":"projector","Name":"synthetic-projector","State":"running","Health":"healthy","Image":"synthetic"},{"Service":"scheduler","Name":"synthetic-scheduler","State":"running","Health":"healthy","Image":"synthetic"}]
+    echo [{"Service":"backend","Name":"synthetic-backend","State":"running","Health":"healthy","Image":"synthetic"},{"Service":"frontend","Name":"synthetic-frontend","State":"running","Health":"healthy","Image":"synthetic"}]
   ) else (
     echo []
   )
   exit /b 0
 )
-echo %* | findstr /C:" exec -T backend /usr/local/bin/angmoo-backend-entrypoint diagnostics" >nul && (
+echo %* | findstr /C:" exec -T backend /usr/local/bin/angmoo-backend-entrypoint contributor-diagnostics" >nul && (
   echo {"schema_version":"local-runtime-status-v1","installation_state":"ready","version":"0.3.0","components":[],"migration":{"state":"ready","current_revision":"20260816_0080","head_revision":"20260816_0080"},"scheduler":{"state":"running","fencing_epoch":7},"projector":{"state":"ready","pending_count":0,"retry_count":0,"failed_count":0,"dead_letter_count":0},"provider_usage":{"recent_call_count":0,"kill_switch_enabled":false},"owner":{"bootstrap_state":"claimed","registered_world_count":1,"active_world_count":1,"active_world_character_count":1},"activity":{},"capabilities":{}}
   exit /b 0
 )
@@ -121,22 +123,12 @@ try {
     if ($doctorPayload.details.host.docker_storage.state -ne 'ready') {
         throw 'launcher_host_storage_status_missing'
     }
-    if (@($doctorPayload.details.host.container_resources).Count -ne 6) {
+    if (@($doctorPayload.details.host.container_resources).Count -ne 2) {
         throw 'launcher_container_resource_status_missing'
     }
-    $inProcessDoctorPayload = & $launcher doctor --json --in-process --project-name synthetic-l2 --port 45999 | ConvertFrom-Json
-    if ($LASTEXITCODE -ne 0 -or $inProcessDoctorPayload.state -ne 'ready') {
-        throw 'launcher_in_process_doctor_failed'
-    }
-    if (@($inProcessDoctorPayload.details.host.container_resources).Count -ne 4) {
-        throw 'launcher_in_process_resource_status_mismatch'
-    }
-    $inProcessStartPayload = & $launcher start --json --contributor --in-process --project-name synthetic-l2 --port 45999 | ConvertFrom-Json
-    if ($LASTEXITCODE -ne 0 -or -not $inProcessStartPayload.details.watch_command.Contains('compose.in-process.yml')) {
-        throw 'launcher_in_process_watch_command_mismatch'
-    }
-    if (-not ((Get-Content -LiteralPath $fakeLog -Raw).Contains('compose.in-process.yml'))) {
-        throw 'launcher_in_process_compose_override_missing'
+    $contributorStartPayload = & $launcher start --json --contributor --project-name synthetic-l2 --port 45999 | ConvertFrom-Json
+    if ($LASTEXITCODE -ne 0 -or -not $contributorStartPayload.details.watch_command.Contains('compose.dev.yml')) {
+        throw 'launcher_contributor_watch_command_mismatch'
     }
     $doctorSerialized = $doctorPayload | ConvertTo-Json -Depth 20 -Compress
     if ($doctorSerialized -match 'AIzaZZZZ' -or $doctorSerialized -match 'APP_SECRET=AIza') {
@@ -226,39 +218,5 @@ try {
     Remove-Item -LiteralPath $fakeRoot -Recurse -Force -ErrorAction SilentlyContinue
 }
 
-$secretScript = Get-Content -LiteralPath (Join-Path $repoRoot 'scripts\local\neo4j-local-secret.ps1') -Raw -Encoding utf8
-foreach ($marker in @(
-    'Set-AngmooCurrentUserOnlyAcl',
-    'ConvertFrom-SecureString',
-    'ConvertFrom-AngmooSecureStringInMemory',
-    'Clear-AngmooNeo4jLocalEnvironment'
-)) {
-    if (-not $secretScript.Contains($marker)) {
-        throw "neo4j_secret_contract_missing:$marker"
-    }
-}
-
-$plain = "synthetic-dpapi-$([Guid]::NewGuid().ToString('N'))"
-try {
-    $secure = ConvertTo-SecureString -String $plain -AsPlainText -Force
-    $ciphertext = ConvertFrom-SecureString -SecureString $secure
-    $roundTripSecure = ConvertTo-SecureString -String $ciphertext
-    $pointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($roundTripSecure)
-    try {
-        $roundTrip = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($pointer)
-    } finally {
-        [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($pointer)
-    }
-    if ($roundTrip -ne $plain) {
-        throw 'dpapi_round_trip_mismatch'
-    }
-} finally {
-    $plain = $null
-    $roundTrip = $null
-    $secure = $null
-    $roundTripSecure = $null
-    $ciphertext = $null
-}
-
-Write-Host "windows_local_smoke=pass scripts=$($localScripts.Count) launcher=pass dpapi=pass"
+Write-Host "windows_local_smoke=pass scripts=$(@($localScripts).Count) launcher=pass embedded=pass"
 exit 0

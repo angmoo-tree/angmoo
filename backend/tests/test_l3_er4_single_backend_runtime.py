@@ -90,12 +90,11 @@ def test_single_backend_runtime_starts_and_stops_both_components() -> None:
 
     asyncio.run(scenario())
 
-    assert calls == [
-        "scheduler:start",
-        "projector:start",
-        "scheduler:stop",
-        "projector:stop",
-    ]
+    assert calls[:2] == ["scheduler:start", "projector:start"]
+    # Shutdown signals are delivered together. The async task and projector
+    # thread may acknowledge them in either order without changing lifecycle
+    # semantics.
+    assert set(calls[2:]) == {"scheduler:stop", "projector:stop"}
     assert {item.name: item.state for item in registry.snapshot()} == {
         "projector": RuntimeComponentState.STOPPED,
         "scheduler": RuntimeComponentState.STOPPED,
@@ -294,8 +293,8 @@ def test_fastapi_lifespan_owns_component_start_and_stop(monkeypatch) -> None:
 def test_projector_publishes_process_graph_client_for_its_exact_lifetime(
     monkeypatch,
 ) -> None:
-    from app.compatibility.runtime import single_backend_workers
     from app.core.config import settings
+    from app.runtime import component_workers
 
     calls: list[str] = []
 
@@ -321,20 +320,19 @@ def test_projector_publishes_process_graph_client_for_its_exact_lifetime(
             calls.append("run")
 
     monkeypatch.setattr(settings, "LOCAL_RUNTIME_COMPONENT_MODE", "in_process")
-    monkeypatch.setattr(settings, "LADYBUG_GRAPH_PREVIEW_ENABLED", True)
     monkeypatch.setattr(
-        single_backend_workers,
+        component_workers,
         "graph_client_from_settings",
         lambda _config=settings: client,
     )
     monkeypatch.setattr(
-        single_backend_workers,
+        component_workers,
         "GraphProjectionWorker",
         FakeWorker,
     )
 
     states: list[str] = []
-    single_backend_workers.run_legacy_projector_component(
+    component_workers.run_projector_component(
         threading.Event(),
         states.append,
     )
@@ -344,25 +342,28 @@ def test_projector_publishes_process_graph_client_for_its_exact_lifetime(
     assert borrow_process_graph_client(settings) is None
 
 
-def test_in_process_compose_override_parks_external_workers() -> None:
-    payload = yaml.safe_load((ROOT / "compose.in-process.yml").read_text("utf-8"))
+def test_contributor_compose_uses_two_services_and_in_process_components() -> None:
+    payload = yaml.safe_load((ROOT / "compose.yml").read_text("utf-8"))
 
-    assert payload["services"]["backend"]["environment"] == {
-        "LOCAL_RUNTIME_COMPONENT_MODE": "in_process"
-    }
-    assert payload["services"]["scheduler"]["profiles"] == ["external-workers"]
-    assert payload["services"]["projector"]["profiles"] == ["external-workers"]
+    assert set(payload["services"]) == {"backend", "frontend"}
+    assert payload["services"]["backend"]["command"] == ["contributor-api"]
+    assert payload["services"]["backend"]["volumes"] == [
+        "angmoo_contributor_embedded_data:/var/lib/angmoo"
+    ]
+    assert "postgresql" not in payload["services"]
+    assert "neo4j" not in payload["services"]
+    assert "scheduler" not in payload["services"]
+    assert "projector" not in payload["services"]
 
     development = yaml.safe_load((ROOT / "compose.dev.yml").read_text("utf-8"))
     frontend_command = development["services"]["frontend"]["command"]
     assert "rm -rf .next/dev" in frontend_command[-1]
     assert "exec pnpm dev --hostname 0.0.0.0" in frontend_command[-1]
 
-    contract = (
-        ROOT / "docs/architecture/l3-er4-single-backend-runtime.md"
-    ).read_text("utf-8")
-    assert "compose.dev.yml down" in contract
-    assert "compose.dev.yml down -v" not in contract
+    readme = (ROOT / "README.md").read_text("utf-8")
+    stop = "docker compose -f compose.yml -f compose.dev.yml down"
+    assert stop in readme
+    assert f"{stop} --volumes" not in readme
 
 
 def test_observation_timestamps_are_bounded_runtime_metadata() -> None:

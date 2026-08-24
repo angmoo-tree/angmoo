@@ -73,7 +73,7 @@ cache-free service worker lifecycle. It only changes the browser chrome:
 
 - ordinary browser use remains the complete default experience;
 - standalone launch starts at the canonical Device Home and keeps the same
-  local owner session, PostgreSQL data, and routes;
+  local owner session, SQLite data, and routes;
 - Creator Studio still leaves the phone frame for its wide workspace;
 - the service worker has no fetch handler, Cache API use, offline response
   store, background write queue, or API/auth/credential persistence;

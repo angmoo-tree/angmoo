@@ -6,9 +6,7 @@ import hashlib
 import json
 import re
 
-from pgvector.sqlalchemy import Vector
 from sqlalchemy import Connection, MetaData, text
-from sqlalchemy.ext.compiler import compiles
 
 from app.core.db import Base
 
@@ -18,15 +16,6 @@ SOURCE_ALEMBIC_REVISION = "20260819_0082"
 SOURCE_ALEMBIC_MIGRATION_COUNT = 81
 EXPECTED_CANONICAL_TABLE_COUNT = 83
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
-
-
-@compiles(Vector, "sqlite")
-def _compile_vector_for_sqlite(
-    _type: Vector, _compiler: object, **_kwargs: object
-) -> str:
-    # Vector recall stays OFF in ER2. Existing values use a deterministic JSON-like
-    # text representation until the optional vector port is explicitly enabled.
-    return "TEXT"
 
 
 def build_sqlite_baseline_metadata() -> MetaData:

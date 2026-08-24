@@ -6,36 +6,14 @@ x-backend-dev-build: &backend-dev-build
     VCS_REF: ${ANGMOO_VCS_REF:-dev}
     VERSION: ${ANGMOO_VERSION:-0.3.0-dev}
 
-x-backend-dev-environment: &backend-dev-environment
-  ANGMOO_VERSION: ${ANGMOO_VERSION:-0.3.0-dev}
-
 services:
-  ladybug-preview-init:
-    image: angmoo-backend-dev
-    pull_policy: never
-    user: "0:0"
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - install -d -o 10001 -g 10001 /var/lib/angmoo/ladybug-preview
-    volumes:
-      - angmoo_ladybug_preview:/var/lib/angmoo/ladybug-preview
-    restart: "no"
-
   backend:
     image: angmoo-backend-dev
     pull_policy: build
     build: *backend-dev-build
-    command: ["api-dev"]
+    command: ["contributor-api-dev"]
     environment:
-      <<: *backend-dev-environment
-      API_DOCS_ENABLED: "true"
-      LADYBUG_GRAPH_PREVIEW_ENABLED: "true"
-      LADYBUG_DATABASE_ROOT: /var/lib/angmoo/ladybug-preview
-    volumes:
-      - angmoo_ladybug_preview:/var/lib/angmoo/ladybug-preview
-    depends_on:
-      ladybug-preview-init:
-        condition: service_completed_successfully
+      ANGMOO_VERSION: ${ANGMOO_VERSION:-0.3.0-dev}
     develop:
       watch:
         - action: sync
@@ -56,16 +34,6 @@ services:
         - action: rebuild
           path: ./scripts/docker/backend-entrypoint.sh
 
-  scheduler:
-    image: angmoo-backend-dev
-    pull_policy: never
-    environment: *backend-dev-environment
-
-  projector:
-    image: angmoo-backend-dev
-    pull_policy: never
-    environment: *backend-dev-environment
-
   frontend:
     image: angmoo-frontend-dev
     pull_policy: build
@@ -76,16 +44,8 @@ services:
       args:
         VCS_REF: ${ANGMOO_VCS_REF:-dev}
         VERSION: ${ANGMOO_VERSION:-0.3.0-dev}
-    # Compose Watch can preserve a Turbopack route manifest from an earlier
-    # source snapshot across a container restart.  Clear only the disposable
-    # development cache before Next starts so real App Router pages do not
-    # intermittently resolve to the framework 404 page.
     command:
-      [
-        "sh",
-        "-c",
-        "rm -rf .next/dev && exec pnpm dev --hostname 0.0.0.0",
-      ]
+      ["sh", "-c", "rm -rf .next/dev && exec pnpm dev --hostname 0.0.0.0"]
     environment:
       NODE_ENV: development
       ANGMOO_API_BASE_URL: http://backend:8080
@@ -105,6 +65,3 @@ services:
           path: ./frontend/next.config.ts
         - action: rebuild
           path: ./Dockerfile.frontend
-
-volumes:
-  angmoo_ladybug_preview:

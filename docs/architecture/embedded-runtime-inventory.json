@@ -3,19 +3,19 @@
   "behavior_critical_file_hashes": [
     {
       "path": "compose.yml",
-      "sha256": "411fa784217a4e41209b6925794e87f25b4e83d34922ed5d69753e9210ded2d7"
+      "sha256": "fed88b0b5de7723defb681ef2e55ba2dda048a9fdc59349d13c292f6a639dee9"
     },
     {
       "path": "compose.dev.yml",
-      "sha256": "3b228b4a128ced275fda1edd7d9828bde391e11b709cba594d04c4a07adb790d"
+      "sha256": "f57989ddb348cea11c8fd409fa89cc40947aaaccd6a5993f2d4411bb28005493"
     },
     {
       "path": "compose.ci.yml",
-      "sha256": "679ee334a512930df23d73874200c25a6e83b2e958280652288e6839682e518f"
+      "sha256": "4df75aae90aca90a6cf94cdead9e4ccb1c189c8225fb20aa0e24443fece660b7"
     },
     {
       "path": "Dockerfile.backend",
-      "sha256": "49d7d90b19344b17abb1c921474a4d910704990fcca0c10e7658ad50fb2855de"
+      "sha256": "7bbbe128d7e282d50e16173076791cb5bacbbab246ef99f53d520c1f72b6997d"
     },
     {
       "path": "Dockerfile.frontend",
@@ -31,7 +31,7 @@
     },
     {
       "path": "backend/app/services/resident_tick_scheduler.py",
-      "sha256": "92d0852beafc0a5ac5011e8eee0b7e6d30982ba5d81cad3d346b98b1e5f45d16"
+      "sha256": "645bf6b21505c733fa2aa51428e56580d4667699292bc95a2037f9e984a06eb0"
     },
     {
       "path": "backend/app/services/graph_projection_worker.py",
@@ -48,16 +48,14 @@
         "google-genai>=2.17.0",
         "ladybug==0.19.1",
         "langgraph>=1.0.4",
-        "neo4j>=6.2.0,<7.0.0",
         "oci>=2.175.0",
-        "pgvector>=0.5.0",
         "pillow>=12.0.0",
-        "psycopg[binary]>=3.3.2",
         "pydantic-settings>=2.12.0",
         "pypdf>=6.15.0",
         "python-docx>=1.2.0",
         "python-multipart>=0.0.30",
         "sqlalchemy>=2.0.51",
+        "tzdata>=2026.2",
         "uvicorn>=0.52.1",
         "websockets>=16.0"
       ],
@@ -193,37 +191,39 @@
     {
       "component": "shared",
       "markers": [
-        "six-service topology",
-        "scheduler/projector commands",
-        "health dependencies"
+        "two-service topology",
+        "embedded data volume",
+        "backend health dependency"
       ],
       "owner": "ER4",
       "path": "compose.yml",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "411fa784217a4e41209b6925794e87f25b4e83d34922ed5d69753e9210ded2d7",
+      "source_sha256": "fed88b0b5de7723defb681ef2e55ba2dda048a9fdc59349d13c292f6a639dee9",
       "transition_pr": "ER4 PR J"
     },
     {
       "component": "shared",
       "markers": [
-        "contributor watch overrides"
+        "frontend HMR",
+        "backend reload",
+        "contributor logs"
       ],
       "owner": "ER4",
       "path": "compose.dev.yml",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "3b228b4a128ced275fda1edd7d9828bde391e11b709cba594d04c4a07adb790d",
+      "source_sha256": "f57989ddb348cea11c8fd409fa89cc40947aaaccd6a5993f2d4411bb28005493",
       "transition_pr": "ER4 PR J"
     },
     {
-      "component": "scheduler",
+      "component": "shared",
       "markers": [
-        "process entrypoint",
-        "signal bridge"
+        "in-process scheduler/projector ownership",
+        "bounded drain"
       ],
       "owner": "ER4",
-      "path": "backend/scripts/run_resident_tick_scheduler.py",
+      "path": "backend/app/runtime/single_backend_components.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "66780597dc617e0e04ec113ebeabfb38fe799d14c5a86483369a96df7c86ba19",
+      "source_sha256": "87c62df07d92c3d72a47a0c6afc286ccb40fd4169043f7f7ef30a5ef1fc9bad8",
       "transition_pr": "ER4 PR J"
     },
     {
@@ -237,7 +237,7 @@
       "owner": "ER4",
       "path": "backend/app/services/resident_tick_scheduler.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "92d0852beafc0a5ac5011e8eee0b7e6d30982ba5d81cad3d346b98b1e5f45d16",
+      "source_sha256": "645bf6b21505c733fa2aa51428e56580d4667699292bc95a2037f9e984a06eb0",
       "transition_pr": "ER4 PR J"
     },
     {
@@ -250,19 +250,6 @@
       "path": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
       "source_sha256": "f5e7e7781295ef0a30480fe7a4bbc090f16ce4db3488b67c651a65dba057db5f",
-      "transition_pr": "ER4 PR J"
-    },
-    {
-      "component": "projector",
-      "markers": [
-        "process entrypoint",
-        "signal bridge",
-        "readiness marker"
-      ],
-      "owner": "ER4",
-      "path": "backend/scripts/run_graph_projection_worker.py",
-      "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "39108e6e789f2e3964f0455159f0f93256c67f8adc0f8f0315aa5b468aa9af44",
       "transition_pr": "ER4 PR J"
     },
     {
@@ -287,19 +274,20 @@
       "owner": "ER4",
       "path": "backend/app/services/graph_projection_runtime.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "e631a6fbd77c6ad4118b01b19421b583eb5cdcaa6f9be1c894ff43bd3a97b671",
+      "source_sha256": "7fb975159013af2d8dfdeba0ebb0ce7366b0f5e93d2f6e5ccb4d9a20d2d841c8",
       "transition_pr": "ER4 PR J"
     },
     {
       "component": "api",
       "markers": [
+        "typed RuntimeConfig",
         "FastAPI lifespan",
-        "public profile worker rejection"
+        "component ownership"
       ],
       "owner": "ER4",
-      "path": "backend/app/main.py",
+      "path": "backend/app/public_main.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "36fbd1f3b77a557ea49d419709b2ba1397553ec2f4e70d65490d69b5edd4f9ae",
+      "source_sha256": "e2766e1374b6f8b7b70ef18e73d0b7bd8cf1900a42ff88e7be5551db1a82f180",
       "transition_pr": "ER4 PR J"
     },
     {

@@ -20,7 +20,9 @@ configuration, and secrets are maintained outside this repository.
 
 ## Public v0.3 scope
 
-- FastAPI, Next.js, PostgreSQL 16, and pgvector
+- FastAPI, Next.js, SQLite with FTS5, and LadybugDB
+- one typed embedded runtime shared by the installed product and contributors
+- scheduler and graph projector components owned by the FastAPI process
 - LangGraph resident flow with the direct provider adapter
 - Gemini as the official text provider and a network-free fake provider
 - single-device local owner, character creation, and community as supported surfaces
@@ -38,39 +40,38 @@ public source tree.
 - Git
 - Docker Desktop or Docker Engine with Docker Compose 2.22.0 or newer
 
-Python, Node.js, PostgreSQL, and Neo4j do not need to be installed on the host
-for the user Quickstart.
+Python, Node.js, PostgreSQL, Neo4j, and a JVM do not need to be installed on the
+host for the contributor Quickstart.
 
 ## Quickstart
 
 ```bash
 git clone https://github.com/angmoo-tree/angmoo.git
 cd angmoo
-docker compose up -d
-docker compose ps
+docker compose -f compose.yml -f compose.dev.yml up --watch
+docker compose -f compose.yml -f compose.dev.yml ps
 ```
 
-On Windows, the optional thin launcher runs host preflight and the same canonical
-Compose stack without adding another runtime:
+This starts exactly two Linux containers from the checkout: a Next.js development
+frontend and a FastAPI `CONTRIBUTOR_EMBEDDED` backend. The backend owns SQLite,
+FTS5, LadybugDB, scheduler, and projector in process. Open
+<http://127.0.0.1:3000> after both services report healthy.
+
+On Windows, the optional thin launcher can run host preflight and the same
+contributor Compose stack without adding another runtime:
 
 ```powershell
-.\angmoo.ps1 start
-.\angmoo.ps1 status
-.\angmoo.ps1 doctor
+.\angmoo.ps1 start --contributor
+.\angmoo.ps1 status --contributor
+.\angmoo.ps1 doctor --contributor
 ```
 
-The direct `docker compose up -d` Quickstart remains fully supported. See the
-[local launcher contract](docs/public/local-launcher.md) for JSON output,
+See the [local launcher contract](docs/public/local-launcher.md) for JSON output,
 contributor mode, disk guidance, and volume-preserving lifecycle commands.
 
 The local P1-P4 World loop, Local Owner participation boundary, restart
 semantics, and provider-call contracts are summarized in
 [`docs/public/l3-local-vertical-loop.md`](docs/public/l3-local-vertical-loop.md).
-
-The default command starts the complete six-service Angmoo stack: frontend,
-backend, PostgreSQL, scheduler, Neo4j, and projector. The first run pulls the
-official `v0.3.0` backend and frontend images from GHCR. Open
-<http://127.0.0.1:3000> after all services report healthy.
 
 The root page is the phone-like **Device Home**, not the legacy community Feed.
 Published, publish-ready public or unlisted Worlds owned by this installation
@@ -91,14 +92,15 @@ not make a real model request.
 ### Stop and restart
 
 ```bash
-docker compose down
-docker compose up -d
+docker compose -f compose.yml -f compose.dev.yml down
+docker compose -f compose.yml -f compose.dev.yml up --watch
 ```
 
-Normal `down` preserves the PostgreSQL, Neo4j, media, and runtime-secret named
-volumes. Do not add `--volumes` unless you intentionally want to erase local
-state. `docker compose pull` is an optional explicit image update before a
-restart.
+Normal `down` preserves the contributor-only
+`angmoo_contributor_embedded_data` named volume, including SQLite, LadybugDB,
+media, secrets, runtime state, and logs. Do not add `--volumes` unless you
+intentionally want to erase that development fixture. The Compose stack never
+mounts or copies the installed product's `%LOCALAPPDATA%\Angmoo` data.
 
 ### Port conflict
 
@@ -109,28 +111,23 @@ port before starting:
 
 ```powershell
 $env:ANGMOO_PORT = '3010'
-docker compose up -d
+docker compose -f compose.yml -f compose.dev.yml up --watch
 ```
 
 ### Contributor development
 
-The canonical contributor runtime uses the same SQLite, LadybugDB, and
-in-process scheduler/projector composition as the installed product. Start it
-with an explicit checkout-local data root, then run the Next.js development
-frontend in a second terminal:
+The Docker Quickstart is the canonical contributor environment across Windows,
+macOS, and Linux hosts supported by Docker. It gives frontend HMR and logs,
+backend reload and logs, and the same SQLite/LadybugDB lifecycle meaning as the
+installed product. Parent-shell `DATABASE_URL`, `NEO4J_URI`, or external-worker
+settings cannot change this profile.
 
-```powershell
-cd backend
-uv run python -m app.runtime.contributor_backend --data-root ..\.angmoo-dev
-
-cd ..\frontend
-pnpm dev
-```
-
-This development path does not read or modify `%LOCALAPPDATA%\Angmoo` and does
-not select PostgreSQL or Neo4j from parent-shell environment variables. The
-six-service Compose path remains temporarily available only during the ER7
-rollback window and is removed in the separately reviewed legacy-removal PR.
+Native Next.js/FastAPI development remains an optional maintainer workflow.
+`Docker + Host Tauri dev` is reserved for contributors working on the actual
+Phone or wide native windows and connects to the same Docker stack; it is not a
+second database architecture and does not use installed-user data. Windows
+packaging is verified on the Windows Actions runner. macOS packaging is not yet
+claimed as implemented.
 
 See `CONTRIBUTING.md` for backend tests, frontend lint/build, migration, and release
 checks. See `docs/public/local-runtime.md` for the lifecycle contract and

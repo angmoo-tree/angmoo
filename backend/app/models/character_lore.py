@@ -1,7 +1,7 @@
 from datetime import datetime
+import json
 from typing import Optional
 
-from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
     CheckConstraint,
     DateTime,
@@ -12,9 +12,37 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
 )
+from sqlalchemy.types import TypeDecorator
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.db import Base
+
+
+class EmbeddingJsonText(TypeDecorator[list[float] | None]):
+    """Persist embeddings as deterministic JSON inside the existing TEXT column.
+
+    ER2 froze the SQLite physical schema with ``embedding`` as TEXT.  Keeping
+    the storage type stable avoids an unnecessary generation migration while
+    removing the PostgreSQL/pgvector runtime dependency.
+    """
+
+    impl = Text
+    cache_ok = True
+
+    def process_bind_param(self, value, dialect):  # type: ignore[no-untyped-def]
+        del dialect
+        if value is None:
+            return None
+        return json.dumps([float(item) for item in value], separators=(",", ":"))
+
+    def process_result_value(self, value, dialect):  # type: ignore[no-untyped-def]
+        del dialect
+        if value is None or isinstance(value, list):
+            return value
+        parsed = json.loads(value)
+        if not isinstance(parsed, list):
+            raise ValueError("character_lore_embedding_not_a_list")
+        return [float(item) for item in parsed]
 
 
 class CharacterLoreSource(Base):
@@ -78,7 +106,10 @@ class CharacterLoreChunk(Base):
     section_hint: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
     text: Mapped[str] = mapped_column(Text, nullable=False)
     content_hash: Mapped[str] = mapped_column(String(64), nullable=False)
-    embedding: Mapped[Optional[list[float]]] = mapped_column(Vector(768), nullable=True)
+    # Embeddings are canonical payload, not a database-specific vector index.
+    embedding: Mapped[Optional[list[float]]] = mapped_column(
+        EmbeddingJsonText(), nullable=True
+    )
     embedding_model: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
     embedding_dimension: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     status: Mapped[str] = mapped_column(

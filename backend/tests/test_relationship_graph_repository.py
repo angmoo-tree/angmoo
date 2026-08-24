@@ -1,17 +1,8 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-import time
 
-from neo4j.exceptions import ClientError
-from neo4j.time import DateTime as Neo4jDateTime
-import pytest
-
-from app.integrations.neo4j import (
-    GraphClientError,
-    GraphQueryTemplate,
-    Neo4jGraphClient,
-)
+from app.domains.relationships.graph_read.repository import GraphQueryTemplate
 from app.integrations.relationship_graph_read import RelationshipGraphRepository
 
 
@@ -89,26 +80,29 @@ def test_query_result_caps_are_enforced_in_repository() -> None:
     assert neighborhood.truncated is True
 
 
-def test_neo4j_temporal_values_are_normalized_to_native_datetimes() -> None:
+def test_provider_temporal_values_are_normalized_to_native_datetimes() -> None:
     occurred_at = datetime(2026, 8, 13, 4, 5, 6, tzinfo=UTC)
+
+    class ProviderDateTime:
+        def __init__(self, native: datetime) -> None:
+            self.native = native
+
+        def to_native(self) -> datetime:
+            return self.native
 
     class TemporalExecutor:
         def run_template(self, template, parameters):
             if template == GraphQueryTemplate.DIRECT_RELATIONSHIP:
                 row = _relationship("actor", "target")
-                row["relationship"]["last_event_at"] = Neo4jDateTime.from_native(
-                    occurred_at
-                )
-                row["relationship"]["updated_at"] = Neo4jDateTime.from_native(
-                    occurred_at
-                )
+                row["relationship"]["last_event_at"] = ProviderDateTime(occurred_at)
+                row["relationship"]["updated_at"] = ProviderDateTime(occurred_at)
                 return [row]
             if template == GraphQueryTemplate.RELATIONSHIP_EVIDENCE:
                 return [
                     {
                         "event_id": "event-1",
                         "event_type": "reply_created",
-                        "occurred_at": Neo4jDateTime.from_native(occurred_at),
+                        "occurred_at": ProviderDateTime(occurred_at),
                         "relationship_state_id": "relationship-actor-target",
                         "relationship_version": 2,
                     }
@@ -133,32 +127,3 @@ def test_neo4j_temporal_values_are_normalized_to_native_datetimes() -> None:
     assert relationship.updated_at == occurred_at
     assert type(evidence.occurred_at) is datetime
     assert evidence.occurred_at == occurred_at
-
-
-def test_neo4j_server_timeout_is_classified_as_query_timeout() -> None:
-    client = object.__new__(Neo4jGraphClient)
-    error = ClientError("transaction timed out")
-    error._neo4j_code = "Neo.ClientError.Transaction.TransactionTimedOut"
-    mapped = client._mapped_error(error)
-    assert mapped.error_class == "neo4j_query_timeout"
-
-
-def test_neo4j_client_timeout_returns_without_waiting_for_query_thread() -> None:
-    client = object.__new__(Neo4jGraphClient)
-
-    def slow_execute(*args, **kwargs):
-        time.sleep(0.25)
-        return []
-
-    client._execute = slow_execute
-    started = time.monotonic()
-    with pytest.raises(GraphClientError) as captured:
-        client._bounded_execute(
-            "RETURN 1",
-            {},
-            server_timeout_seconds=1.5,
-            client_timeout_seconds=0.01,
-        )
-    elapsed = time.monotonic() - started
-    assert captured.value.error_class == "neo4j_query_timeout"
-    assert elapsed < 0.15

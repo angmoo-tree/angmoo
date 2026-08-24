@@ -66,72 +66,100 @@ def _require_loopback_backend(backend_url: str) -> None:
         raise SmokeError("local session bootstrap requires a loopback backend URL")
 
 
-def _bootstrap_local_session(marker: str, backend_url: str) -> str:
+def _bootstrap_local_session(
+    marker: str,
+    backend_url: str,
+    *,
+    data_root: Path,
+) -> tuple[str, str]:
     _require_loopback_backend(backend_url)
     backend_root = Path(__file__).resolve().parents[1] / "backend"
     if str(backend_root) not in sys.path:
         sys.path.insert(0, str(backend_root))
 
-    from sqlalchemy.engine import make_url
-
     from app import models
     from app.core import security
-    from app.core.config import settings
-    from app.core.db import SessionLocal
     from app.domains.identity.domain.local_owner import LOCAL_INSTALLATION_KEY
+    from app.runtime.contributor_backend import CONTRIBUTOR_GENERATION
+    from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
+    from app.runtime.persistence.sqlite_database import (
+        SqliteCanonicalDatabase,
+        SqliteCanonicalSettings,
+    )
 
-    if make_url(settings.database_url).host not in {"127.0.0.1", "::1", "localhost"}:
-        raise SmokeError("local session bootstrap requires a loopback database")
+    resolved_data_root = data_root.resolve()
+    if not (resolved_data_root / "canonical").is_dir():
+        raise SmokeError("local session bootstrap data root is not initialized")
 
     now = datetime.now(UTC)
     user_id = f"user-{uuid4().hex}"
+    post_id = f"post-{uuid4().hex}"
     token = security.create_token()
-    with SessionLocal() as db:
-        db.add(
-            models.User(
-                id=user_id,
-                email=f"{marker}@example.test",
-                google_sub=f"quickstart-{uuid4().hex}",
-                password_hash=None,
-                display_name=marker,
-                display_name_normalized=marker,
-                privacy_policy_agreed_at=now,
-                terms_agreed_at=now,
-                privacy_policy_version="2026-06-22",
-                terms_version="2026-06-22",
-                profile_setup_completed=True,
+    database = SqliteCanonicalDatabase(
+        StaticRuntimeDataPath(resolved_data_root),
+        settings=SqliteCanonicalSettings(generation=CONTRIBUTOR_GENERATION),
+    )
+    database.open()
+    try:
+        with database.session() as db:
+            db.add(
+                models.User(
+                    id=user_id,
+                    email=f"{marker}@example.test",
+                    google_sub=f"quickstart-{uuid4().hex}",
+                    password_hash=None,
+                    display_name=marker,
+                    display_name_normalized=marker,
+                    privacy_policy_agreed_at=now,
+                    terms_agreed_at=now,
+                    privacy_policy_version="2026-06-22",
+                    terms_version="2026-06-22",
+                    profile_setup_completed=True,
+                )
             )
-        )
-        installation = db.get(models.InstallationIdentity, LOCAL_INSTALLATION_KEY)
-        if installation is None:
-            installation = models.InstallationIdentity(
-                singleton_key=LOCAL_INSTALLATION_KEY,
-                installation_id=f"installation-{uuid4().hex}",
-                bootstrap_state="unclaimed",
-                created_at=now,
-                updated_at=now,
+            installation = db.get(
+                models.InstallationIdentity,
+                LOCAL_INSTALLATION_KEY,
             )
-            db.add(installation)
-        elif (
-            installation.owner_user_id is not None
-            or installation.bootstrap_state != "unclaimed"
-        ):
-            raise SmokeError("local installation is already claimed")
-        installation.owner_user_id = user_id
-        installation.bootstrap_state = "claimed"
-        installation.claimed_at = now
-        installation.updated_at = now
-        db.add(
-            models.AuthSession(
-                token_hash=security.hash_token(token),
-                user_id=user_id,
-                auth_method="local_owner",
-                created_at=now,
-                expires_at=now + timedelta(days=7),
+            if installation is None:
+                installation = models.InstallationIdentity(
+                    singleton_key=LOCAL_INSTALLATION_KEY,
+                    installation_id=f"installation-{uuid4().hex}",
+                    bootstrap_state="unclaimed",
+                    created_at=now,
+                    updated_at=now,
+                )
+                db.add(installation)
+            elif (
+                installation.owner_user_id is not None
+                or installation.bootstrap_state != "unclaimed"
+            ):
+                raise SmokeError("local installation is already claimed")
+            installation.owner_user_id = user_id
+            installation.bootstrap_state = "claimed"
+            installation.claimed_at = now
+            installation.updated_at = now
+            db.add(
+                models.AuthSession(
+                    token_hash=security.hash_token(token),
+                    user_id=user_id,
+                    auth_method="local_owner",
+                    created_at=now,
+                    expires_at=now + timedelta(days=7),
+                )
             )
-        )
-        db.commit()
-    return token
+            db.add(
+                models.Post(
+                    id=post_id,
+                    author_name="Quickstart fixture",
+                    title="Synthetic embedded runtime smoke",
+                    body=marker,
+                )
+            )
+            db.commit()
+    finally:
+        database.close()
+    return token, post_id
 
 
 def run_smoke(
@@ -139,20 +167,33 @@ def run_smoke(
     frontend_url: str | None,
     *,
     bootstrap_local_session: bool = False,
+    bootstrap_data_root: Path | None = None,
 ) -> dict[str, object]:
     marker = f"m4-quickstart-{uuid4().hex[:12]}"
     status, health = _request(backend_url, "/health")
     _expect(status, 200, "health")
+
+    token: str | None = None
+    target_post_id = "post-001"
+    if bootstrap_local_session:
+        if bootstrap_data_root is None:
+            raise SmokeError(
+                "--bootstrap-data-root is required with --bootstrap-local-session"
+            )
+        token, target_post_id = _bootstrap_local_session(
+            marker,
+            backend_url,
+            data_root=bootstrap_data_root,
+        )
+
     status, posts = _request(backend_url, "/api/v1/posts")
     _expect(status, 200, "posts")
     if not isinstance(posts, list):
         raise SmokeError("posts response is not a list")
-    if not any(item.get("id") == "post-001" for item in posts):
-        raise SmokeError("seed post-001 is missing")
+    if not any(item.get("id") == target_post_id for item in posts):
+        raise SmokeError("synthetic source post is missing")
 
-    if bootstrap_local_session:
-        token = _bootstrap_local_session(marker, backend_url)
-    else:
+    if not bootstrap_local_session:
         status, auth = _request(
             backend_url,
             "/api/v1/auth/signup",
@@ -167,6 +208,8 @@ def run_smoke(
         )
         _expect(status, 201, "signup")
         token = str(auth["token"])
+    if token is None:
+        raise SmokeError("local session bootstrap did not issue a token")
     status, agent = _request(
         backend_url,
         "/api/v1/agents",
@@ -200,7 +243,7 @@ def run_smoke(
         write_cookie = f"{SESSION_COOKIE_NAME}={token}"
     status, reply = _request(
         write_base,
-        f"{write_prefix}/posts/post-001/replies",
+        f"{write_prefix}/posts/{target_post_id}/replies",
         method="POST",
         token=write_token,
         cookie=write_cookie,
@@ -260,7 +303,12 @@ def run_smoke(
 
     frontend_checks: dict[str, int] = {}
     if frontend_url:
-        for path in ("/", "/posts", "/posts/post-001", f"/characters/{character_id}/activity"):
+        for path in (
+            "/",
+            "/posts",
+            f"/posts/{target_post_id}",
+            f"/characters/{character_id}/activity",
+        ):
             request = Request(f"{frontend_url.rstrip('/')}{path}", method="GET")
             with urlopen(request, timeout=20) as response:
                 frontend_checks[path] = response.status
@@ -288,12 +336,18 @@ def main() -> int:
         action="store_true",
         help="seed a synthetic local-owner session in a loopback disposable database",
     )
+    parser.add_argument(
+        "--bootstrap-data-root",
+        type=Path,
+        help="explicit disposable contributor data root used by local bootstrap",
+    )
     args = parser.parse_args()
     try:
         result = run_smoke(
             args.backend_url,
             args.frontend_url,
             bootstrap_local_session=args.bootstrap_local_session,
+            bootstrap_data_root=args.bootstrap_data_root,
         )
     except (OSError, KeyError, TypeError, SmokeError, json.JSONDecodeError) as exc:
         print(f"Quickstart smoke failed: {exc}")

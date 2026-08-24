@@ -1,8 +1,8 @@
 # Contributing to Angmoo
 
 Thank you for helping improve Angmoo. The canonical repository is
-`angmoo-tree/angmoo`. Issues and pull requests may be written in English or
-Korean; the English guide is canonical if translations differ.
+`angmoo-tree/angmoo`. Issues and pull requests may be written in English or Korean;
+the English guide is canonical if translations differ.
 
 ## Before opening a change
 
@@ -21,53 +21,47 @@ reference in the pull request.
 
 ## Local development and checks
 
-The contributor baseline requires Git, Python 3.13 with `uv`, and the
-repository-pinned Node/pnpm toolchain. The official contributor runtime is
-`CONTRIBUTOR_EMBEDDED`: SQLite canonical persistence, LadybugDB projection, and
-scheduler/projector in the FastAPI process. Start the backend with an explicit
-checkout-local data root:
-
-```powershell
-cd backend
-uv sync --frozen
-uv run python -m app.runtime.contributor_backend --data-root ..\.angmoo-dev
-```
-
-In another terminal, start the normal Next.js development frontend:
-
-```powershell
-cd frontend
-pnpm install --frozen-lockfile
-pnpm dev
-```
-
-The backend logs remain in its terminal and frontend compile, route, console,
-and network diagnostics remain in the Next.js terminal and browser DevTools.
-`.angmoo-dev` is ignored and is never shared with the installed product's
-`%LOCALAPPDATA%\Angmoo` data. Tauri window work may use `cd desktop; npm run
-dev`; debug builds use the same contributor embedded profile and checkout-local
-data root.
-
-Run checks with the locked local toolchains:
-
-```powershell
-cd backend
-uv run python -m pytest -q
-
-cd ..\frontend
-pnpm lint
-pnpm typecheck
-pnpm build
-```
-
-The previous six-service Compose environment is a temporary ER7 rollback
-surface, not the canonical contributor architecture. Do not add new
-PostgreSQL/Neo4j runtime behavior or a second implementation for that path.
-During PR O only, the exact rollback command remains:
+The official contributor baseline requires Git and Docker Compose 2.22.0 or
+newer. It is a reproducible Linux Docker environment with exactly two services:
+Next.js development frontend and FastAPI `CONTRIBUTOR_EMBEDDED` backend. Start
+it from the repository root:
 
 ```powershell
 docker compose -f compose.yml -f compose.dev.yml up --watch
 ```
+
+The backend process owns SQLite canonical persistence, FTS5, LadybugDB,
+scheduler, and projector. Frontend HMR and logs are available from the frontend
+container and browser DevTools; FastAPI reload and runtime logs are available
+from the backend container. The named volume is contributor-only and never
+mounts or copies `%LOCALAPPDATA%\Angmoo`.
+
+Run checks in the pinned containers:
+
+```powershell
+docker compose -f compose.yml -f compose.dev.yml exec -T backend uv run python -m pytest -q
+docker compose -f compose.yml -f compose.dev.yml exec -T backend uv run python ../scripts/check_ci_policy.py
+docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm lint
+docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm typecheck
+docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm build
+```
+
+Stop without deleting the contributor data volume:
+
+```powershell
+docker compose -f compose.yml -f compose.dev.yml down
+```
+
+Native Next.js/FastAPI commands remain an optional maintainer convenience, not
+the cross-platform baseline. Contributors who change the actual Phone or wide
+native windows may use the documented `Docker + Host Tauri dev` bridge against
+the same Docker stack. They must not point it at installed-user data. Windows
+packaging and installed-runtime behavior are verified on Windows Actions;
+macOS packaging is not yet claimed as implemented.
+
+Do not add PostgreSQL/Neo4j server runtime behavior or a second implementation.
+PostgreSQL is allowed only inside the frozen, read-only `LEGACY_MIGRATION` tool;
+Neo4j parity survives only as static fixtures.
 
 Product-shell changes also run a required Chromium smoke in Core CI. A
 contributor with the repository-pinned Node/pnpm toolchain on the host can run
@@ -87,24 +81,26 @@ user data.
 
 The required `local-core-smoke` check additionally builds the release targets,
 scans image vulnerabilities and secrets, validates SPDX SBOM output, and runs
-the isolated Linux clean-clone lifecycle fixtures. PostgreSQL and Neo4j test
-legacy database state is disposable. Provider-dependent tests use fake providers and must not
-make external model calls.
+the isolated two-service Linux clean-clone lifecycle fixtures. Provider-dependent
+tests use fake providers and must not make external model calls.
+
 ## Pull requests and merge ownership
 
-Every change reaches `main` through a pull request. The ten required checks
-are:
+Every change reaches `main` through a pull request. The required check meanings
+include:
 
 - `backend`
 - `frontend`
-- `migration-postgres`
+- `legacy-migration`
 - `local-core-smoke`
 - `local-autonomy-smoke`
-- `local-full-graph`
+- `local-full-graph` (LadybugDB plus frozen static parity fixtures)
 - `oss-boundary`
 - `dependency-license`
 - `dco`
 - `architecture-boundary`
+- `tauri-windows`
+- Windows installer release-candidate and installed-runtime smoke
 
 `windows-local-smoke` and `codeql` remain advisory checks. Advisory does not
 mean ignored: failures and promotion conditions must be documented and

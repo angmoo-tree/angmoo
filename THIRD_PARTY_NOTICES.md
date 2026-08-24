@@ -3,7 +3,7 @@
 This inventory is generated from the locked Angmoo dependencies.
 Package authors retain all rights granted by their respective licenses.
 
-## Python packages (78)
+## Python packages (77)
 
 - `alembic 1.19.0` — MIT
 - `annotated-doc 0.0.4` — MIT
@@ -40,7 +40,6 @@ Package authors retain all rights granted by their respective licenses.
 - `lxml 6.1.1` — BSD-3-Clause
 - `mako 1.3.12` — MIT
 - `markupsafe 3.0.3` — BSD-3-Clause
-- `neo4j 6.2.0` — Apache-2.0 AND Python-2.0
 - `oci 2.184.1` — Universal Permissive License 1.0 or Apache License 2.0
 - `orjson 3.11.9` — MPL-2.0 AND (Apache-2.0 OR MIT)
 - `ormsgpack 1.12.2` — Apache-2.0 OR MIT
@@ -215,8 +214,6 @@ These services and CI tools are separate components and retain their own license
 - **Tauri Angmoo product shell** — `Apache-2.0 OR MIT`; reference `tauri = { version = "=2.11.5"`; source <https://github.com/tauri-apps/tauri/blob/tauri-v2.11.5/LICENSE_APACHE-2.0>
 - **Tauri CLI Angmoo product shell** — `Apache-2.0 OR MIT`; reference `"@tauri-apps/cli": "2.11.4"`; source <https://github.com/tauri-apps/tauri/blob/tauri-cli-v2.11.4/LICENSE_APACHE-2.0>
 - **PyInstaller ER1 sidecar packager** — `GPL-2.0-or-later WITH Bootloader-exception`; reference `pyinstaller==6.16.0`; source <https://github.com/pyinstaller/pyinstaller/blob/v6.16.0/COPYING.txt>
-- **pgvector PostgreSQL image** — `PostgreSQL`; reference `pgvector/pgvector:pg16@sha256:1d533553fefe4f12e5d80c7b80622ba0c382abb5758856f52983d8789179f0fb`; source <https://github.com/pgvector/pgvector/blob/master/LICENSE>
-- **Neo4j Community Edition** — `GPL-3.0-only`; reference `neo4j:2026.06.0@sha256:42fd5b9ead4dd4211f6f91bd831c358e4e2117367d04633fbf88682ca4792b30`; source <https://neo4j.com/licensing/>
 - **Trivy container scanner** — `Apache-2.0`; reference `ghcr.io/aquasecurity/trivy:0.74.0@sha256:62b1e65e8869bc4b4c6aa4fa2b21595256c7c2f6018a9d9ad61caf87187c1969`; source <https://github.com/aquasecurity/trivy/blob/v0.74.0/LICENSE>
 - **Syft SBOM generator** — `Apache-2.0`; reference `anchore/syft:v1.51.0@sha256:678bfa565b60f747aac0f8e964fe5588a24445b8d0a480e91f6efd70020dfbb0`; source <https://github.com/anchore/syft/blob/v1.51.0/LICENSE>
 - **actions/checkout** — `MIT`; reference `actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1`; source <https://github.com/actions/checkout/blob/3d3c42e5aac5ba805825da76410c181273ba90b1/LICENSE>

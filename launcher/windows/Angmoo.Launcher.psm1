@@ -4,7 +4,6 @@ $ErrorActionPreference = 'Stop'
 $script:LauncherRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $script:ContractPath = Join-Path $script:LauncherRoot 'launcher\contract\local-launcher-v1.json'
 $script:Contract = Get-Content -LiteralPath $script:ContractPath -Raw -Encoding utf8 | ConvertFrom-Json
-$script:InProcessMode = $false
 
 function Protect-AngmooDiagnosticText {
     param([AllowNull()][string]$Value)
@@ -101,7 +100,6 @@ function ConvertFrom-AngmooLauncherArguments {
     $parsed = [ordered]@{
         json = $false
         contributor = $false
-        in_process = $false
         project_name = if ($env:COMPOSE_PROJECT_NAME) { $env:COMPOSE_PROJECT_NAME } else { [string]$script:Contract.default_project }
         port = if ($env:ANGMOO_PORT) { $env:ANGMOO_PORT } else { [string]$script:Contract.default_port }
         follow = $false
@@ -115,8 +113,6 @@ function ConvertFrom-AngmooLauncherArguments {
             '-json' { $parsed.json = $true; continue }
             '--contributor' { $parsed.contributor = $true; continue }
             '-contributor' { $parsed.contributor = $true; continue }
-            '--in-process' { $parsed.in_process = $true; continue }
-            '-inprocess' { $parsed.in_process = $true; continue }
             '--follow' { $parsed.follow = $true; continue }
             '-follow' { $parsed.follow = $true; continue }
             '--project-name' {
@@ -190,25 +186,16 @@ function Invoke-AngmooDocker {
 function Get-AngmooComposeFiles {
     param([bool]$Contributor)
     $relativeFiles = if ($Contributor) { @($script:Contract.compose.contributor_files) } else { @($script:Contract.compose.release_files) }
-    if ($script:InProcessMode) {
-        $relativeFiles = @($relativeFiles) + @([string]$script:Contract.compose.in_process_file)
-    }
     return @($relativeFiles | ForEach-Object { (Resolve-Path (Join-Path $script:LauncherRoot $_)).Path })
 }
 
 function Get-AngmooRequiredServices {
-    if ($script:InProcessMode) {
-        return @($script:Contract.compose.in_process_required_services)
-    }
     return @($script:Contract.compose.required_services)
 }
 
 function Get-AngmooWatchCommand {
     param([bool]$Contributor)
     if (-not $Contributor) { return $null }
-    if ($script:InProcessMode) {
-        return 'docker compose -f compose.yml -f compose.dev.yml -f compose.in-process.yml up --watch'
-    }
     return 'docker compose -f compose.yml -f compose.dev.yml up --watch'
 }
 
@@ -232,22 +219,8 @@ function Invoke-AngmooCompose {
     return Invoke-AngmooDocker -Arguments @($all)
 }
 
-function Stop-AngmooExternalWorkersForInProcessMode {
+function Test-AngmooEmbeddedComponentsReady {
     param([string]$Project, [bool]$Contributor)
-    if (-not $script:InProcessMode) {
-        return [pscustomobject]@{ exit_code = 0; output = @() }
-    }
-    $all = [System.Collections.Generic.List[string]]::new()
-    foreach ($item in (Get-AngmooComposeArguments -Project $Project -Contributor $Contributor)) { $all.Add($item) }
-    $all.Add('--profile'); $all.Add('external-workers')
-    $all.Add('stop'); $all.Add('--timeout'); $all.Add([string]$script:Contract.timeouts_seconds.stop)
-    $all.Add('scheduler'); $all.Add('projector')
-    return Invoke-AngmooDocker -Arguments @($all)
-}
-
-function Test-AngmooInProcessComponentsReady {
-    param([string]$Project, [bool]$Contributor)
-    if (-not $script:InProcessMode) { return $true }
     $application = Get-AngmooApplicationStatus -Project $Project -Contributor $Contributor
     if ($application.state -ne 'ready' -or $null -eq $application.payload) { return $false }
     return (
@@ -347,15 +320,9 @@ function Invoke-AngmooPreflight {
     }
 
     $volumes = @(Get-AngmooVolumeInventory -Project $Project)
-    $databaseVolume = "$($Project)_angmoo_postgresql_data"
-    $secretVolume = "$($Project)_angmoo_runtime_secrets"
-    $databasePresent = $volumes -contains $databaseVolume
-    $secretPresent = $volumes -contains $secretVolume
-    if ($databasePresent -and -not $secretPresent) {
-        return [pscustomobject]@{ ok = $false; degraded = $false; exit_code = (Get-AngmooExitCode 'recovery_required'); error_code = 'credential_recovery_required'; message = 'The database volume exists but its persistent secret volume is missing.'; checks = @($checks); volumes = $volumes; secret_state = 'missing' }
-    }
-    $secretState = if ($secretPresent) { 'present' } else { 'missing' }
-    $checks.Add([pscustomobject]@{ name = 'persistent_secret'; state = if ($databasePresent -and $secretPresent) { 'ready' } else { 'not_initialized' }; detail = $secretState })
+    $dataVolume = "$($Project)_angmoo_contributor_embedded_data"
+    $dataState = if ($volumes -contains $dataVolume) { 'present' } else { 'not_initialized' }
+    $checks.Add([pscustomobject]@{ name = 'embedded_data'; state = if ($dataState -eq 'present') { 'ready' } else { 'not_initialized' }; detail = $dataState })
 
     $freeGiB = Get-AngmooFreeDiskGiB
     $diskState = 'unknown'
@@ -374,7 +341,7 @@ function Invoke-AngmooPreflight {
             $warn = $fail
         }
         if ($freeGiB -lt $fail) {
-            return [pscustomobject]@{ ok = $false; degraded = $false; exit_code = (Get-AngmooExitCode 'preflight_failed'); error_code = 'runtime_disk_space_low'; message = "Host disk is critically low: $freeGiB GiB free."; checks = @($checks); free_disk_gib = $freeGiB; secret_state = $secretState; volumes = $volumes }
+            return [pscustomobject]@{ ok = $false; degraded = $false; exit_code = (Get-AngmooExitCode 'preflight_failed'); error_code = 'runtime_disk_space_low'; message = "Host disk is critically low: $freeGiB GiB free."; checks = @($checks); free_disk_gib = $freeGiB; data_state = $dataState; volumes = $volumes }
         }
         if ($freeGiB -lt $warn) {
             $diskState = 'warning'; $diskMessage = "$freeGiB GiB free; this mode recommends at least $warn GiB before a large pull or build."; $degraded = $true
@@ -383,7 +350,7 @@ function Invoke-AngmooPreflight {
         }
     }
     $checks.Add([pscustomobject]@{ name = 'host_disk'; state = $diskState; detail = $diskMessage })
-    return [pscustomobject]@{ ok = $true; degraded = $degraded; exit_code = 0; error_code = $null; message = 'Host preflight passed.'; checks = @($checks); free_disk_gib = $freeGiB; secret_state = $secretState; volumes = $volumes }
+    return [pscustomobject]@{ ok = $true; degraded = $degraded; exit_code = 0; error_code = $null; message = 'Host preflight passed.'; checks = @($checks); free_disk_gib = $freeGiB; data_state = $dataState; volumes = $volumes }
 }
 
 function Get-AngmooComposeStatus {
@@ -425,7 +392,7 @@ function Get-AngmooComposeStatus {
 function Get-AngmooApplicationStatus {
     param([string]$Project, [bool]$Contributor)
     $result = Invoke-AngmooCompose -Project $Project -Contributor $Contributor -Arguments @(
-        'exec', '-T', 'backend', '/usr/local/bin/angmoo-backend-entrypoint', 'diagnostics'
+        'exec', '-T', 'backend', '/usr/local/bin/angmoo-backend-entrypoint', 'contributor-diagnostics'
     )
     if ($result.exit_code -ne 0) {
         return [pscustomobject]@{
@@ -672,16 +639,12 @@ function Invoke-AngmooLockedLifecycle {
         if (-not $preflight.ok) {
             return New-AngmooLauncherResult -Command $Command -Project $Project -Mode $(if ($Contributor) { 'contributor' } else { 'release' }) -Ok $false -State 'failed' -ExitCode $preflight.exit_code -ErrorCode $preflight.error_code -Message $preflight.message -Details @{ checks = @($preflight.checks) }
         }
-        $parkedWorkers = Stop-AngmooExternalWorkersForInProcessMode -Project $Project -Contributor $Contributor
-        if ($parkedWorkers.exit_code -ne 0) {
-            return New-AngmooLauncherResult -Command $Command -Project $Project -Mode $(if ($Contributor) { 'contributor' } else { 'release' }) -Ok $false -State 'failed' -ExitCode (Get-AngmooExitCode 'recovery_required') -ErrorCode 'lifecycle_stop_failed' -Message 'External scheduler or projector could not be parked before in-process startup.' -Details @{ compose_output = @($parkedWorkers.output); volumes_preserved = $true }
-        }
         if ($Command -eq 'start') {
             $current = Get-AngmooComposeStatus -Project $Project -Contributor $Contributor
             if (
                 $current.state -eq 'ready' -and
                 (Test-AngmooOwnsPort -Project $Project -Contributor $Contributor -Port $Port) -and
-                (Test-AngmooInProcessComponentsReady -Project $Project -Contributor $Contributor)
+                (Test-AngmooEmbeddedComponentsReady -Project $Project -Contributor $Contributor)
             ) {
                 return New-AngmooLauncherResult -Command $Command -Project $Project -Mode $(if ($Contributor) { 'contributor' } else { 'release' }) -Ok $true -State 'ready' -ExitCode 0 -ErrorCode $null -Message 'Angmoo is already ready; no container was recreated.' -Details @{ checks = @($preflight.checks); services = $current.services; idempotent_no_op = $true; volumes_preserved = $true; watch_command = (Get-AngmooWatchCommand -Contributor $Contributor) }
             }
@@ -709,13 +672,12 @@ function Invoke-AngmooLauncher {
     $options = ConvertFrom-AngmooLauncherArguments -Tokens $Arguments
     $normalizedCommand = $Command.ToLowerInvariant()
     $mode = if ($options.contributor) { 'contributor' } else { 'release' }
-    $script:InProcessMode = [bool]$options.in_process
     $hadPortEnvironment = Test-Path Env:ANGMOO_PORT
     $previousPortEnvironment = $env:ANGMOO_PORT
     $env:ANGMOO_PORT = [string]$options.port
     try {
     if ($normalizedCommand -eq 'help') {
-        $result = New-AngmooLauncherResult -Command 'help' -Project $options.project_name -Mode $mode -Ok $true -State 'not_started' -ExitCode 0 -ErrorCode $null -Message 'Usage: .\angmoo.ps1 <start|stop|restart|status|logs|doctor> [--json] [--contributor] [--in-process] [--project-name NAME] [--port PORT]'
+        $result = New-AngmooLauncherResult -Command 'help' -Project $options.project_name -Mode $mode -Ok $true -State 'not_started' -ExitCode 0 -ErrorCode $null -Message 'Usage: .\angmoo.ps1 <start|stop|restart|status|logs|doctor> [--json] [--contributor] [--project-name NAME] [--port PORT]'
         return [pscustomobject]@{ result = $result; json_requested = $options.json }
     }
     if ($options.errors.Count -gt 0) {
@@ -772,14 +734,14 @@ function Invoke-AngmooLauncher {
             $hostDiagnostics = Get-AngmooHostDiagnostics -Project $options.project_name -Contributor $options.contributor -IncludeResources ($status.state -in @('ready', 'degraded'))
             $applicationDegraded = $status.state -eq 'ready' -and $application.state -notin @('ready')
             $isDegraded = $preflight.degraded -or $status.state -notin @('ready', 'stopped') -or $applicationDegraded -or (-not $privacyReady)
-            $result = New-AngmooLauncherResult -Command $normalizedCommand -Project $options.project_name -Mode $mode -Ok (-not $isDegraded) -State $(if ($isDegraded) { 'degraded' } else { $status.state }) -ExitCode $(if ($isDegraded) { Get-AngmooExitCode 'doctor_degraded' } else { 0 }) -ErrorCode $(if ($isDegraded) { 'doctor_degraded' } else { $null }) -Message $(if ($isDegraded) { 'Doctor found a degraded host or Compose condition.' } else { 'Doctor checks passed.' }) -Details @{ checks = @($preflight.checks); services = $status.services; free_disk_gib = $preflight.free_disk_gib; secret_state = $preflight.secret_state; volume_count = @($preflight.volumes).Count }
+            $result = New-AngmooLauncherResult -Command $normalizedCommand -Project $options.project_name -Mode $mode -Ok (-not $isDegraded) -State $(if ($isDegraded) { 'degraded' } else { $status.state }) -ExitCode $(if ($isDegraded) { Get-AngmooExitCode 'doctor_degraded' } else { 0 }) -ErrorCode $(if ($isDegraded) { 'doctor_degraded' } else { $null }) -Message $(if ($isDegraded) { 'Doctor found a degraded host or Compose condition.' } else { 'Doctor checks passed.' }) -Details @{ checks = @($preflight.checks); services = $status.services; free_disk_gib = $preflight.free_disk_gib; data_state = $preflight.data_state; volume_count = @($preflight.volumes).Count }
             $result.details = Protect-AngmooDiagnosticValue -Value ([ordered]@{
                 checks = @($checks)
                 services = $status.services
                 application = $application
                 host = $hostDiagnostics
                 free_disk_gib = $preflight.free_disk_gib
-                secret_state = $preflight.secret_state
+                data_state = $preflight.data_state
                 volume_count = @($preflight.volumes).Count
             })
         }
@@ -791,7 +753,6 @@ function Invoke-AngmooLauncher {
     $result = New-AngmooLauncherResult -Command $normalizedCommand -Project $options.project_name -Mode $mode -Ok ($logs.exit_code -eq 0) -State $(if ($logs.exit_code -eq 0) { 'observed' } else { 'failed' }) -ExitCode $(if ($logs.exit_code -eq 0) { 0 } else { Get-AngmooExitCode 'preflight_failed' }) -ErrorCode $(if ($logs.exit_code -eq 0) { $null } else { 'compose_config_invalid' }) -Message $(if ($logs.exit_code -eq 0) { 'Compose logs collected.' } else { 'Compose logs could not be read.' }) -Details @{ log_lines = @($logs.output) }
     return [pscustomobject]@{ result = $result; json_requested = $options.json }
     } finally {
-        $script:InProcessMode = $false
         if ($hadPortEnvironment) {
             $env:ANGMOO_PORT = $previousPortEnvironment
         } else {

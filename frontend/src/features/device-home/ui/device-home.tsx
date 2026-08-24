@@ -111,7 +111,7 @@ export function DeviceHome({ authStatus }: DeviceHomeProps) {
       ) : loading ? (
         <HomeMessage
           title="World 앱을 불러오는 중"
-          description="PostgreSQL의 owner 범위 목록만 읽고 있어요."
+          description="SQLite의 owner 범위 World 목록만 읽고 있어요."
         />
       ) : error ? (
         <HomeMessage

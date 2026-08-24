@@ -1,66 +1,27 @@
 name: angmoo
 
+# The official contributor runtime is the same embedded architecture shipped
+# by the installed product. Docker is only the reproducible Linux packaging:
+# it does not select PostgreSQL, Neo4j, or external worker processes.
 x-backend-image: &backend-image ghcr.io/angmoo-tree/angmoo-backend:${ANGMOO_VERSION:-v0.3.0}
 x-backend-environment: &backend-environment
-  APP_ENV: development
   ANGMOO_VERSION: ${ANGMOO_VERSION:-v0.3.0}
-  APP_SECRET_FILE: /run/angmoo-secrets/app_secret
-  API_DOCS_ENABLED: "false"
-  SEED_DEMO_DATA: "true"
-  SIGNUP_ENABLED: "false"
-  AGENT_ACTIVITY_ENGINE: langgraph
-  SERVER_LLM_ENGINE: direct
-  RESIDENT_TICK_SCHEDULER_ENABLED: "false"
-  POST_IMAGE_JOB_WORKER_ENABLED: "false"
-  POLLINATIONS_SERVICE_IMAGE_ENABLED: "false"
-  CREDENTIAL_ENCRYPTION_PROVIDER: local
-  GRAPH_PROJECTION_ENABLED: "true"
-  NEO4J_URI: bolt://neo4j:7687
-  NEO4J_DATABASE: neo4j
-  NEO4J_USERNAME: neo4j
-  ANGMOO_POSTGRES_HOST: postgresql
-  ANGMOO_POSTGRES_DB: angmoo
-  ANGMOO_POSTGRES_USER: angmoo
-  MEDIA_ROOT: /var/lib/angmoo/media
-  BROWSER_SESSION_ALLOWED_ORIGINS: http://127.0.0.1:${ANGMOO_PORT:-3000}
-x-backend-volumes: &backend-volumes
-  - angmoo_runtime_secrets:/run/angmoo-secrets:ro
-  - angmoo_media:/var/lib/angmoo/media
+  ANGMOO_CONTRIBUTOR_DATA_ROOT: /var/lib/angmoo
+  ANGMOO_FRONTEND_ORIGIN: http://127.0.0.1:${ANGMOO_PORT:-3000}
 
 services:
-  postgresql:
-    image: pgvector/pgvector:pg16@sha256:1d533553fefe4f12e5d80c7b80622ba0c382abb5758856f52983d8789179f0fb
-    restart: unless-stopped
-    entrypoint: ["sh", "/opt/angmoo/postgresql-entrypoint.sh"]
-    command: ["postgres"]
-    environment:
-      POSTGRES_DB: angmoo
-      POSTGRES_USER: angmoo
-      ANGMOO_SECRET_DIR: /run/angmoo-secrets
-    volumes:
-      - angmoo_postgresql_data:/var/lib/postgresql/data
-      - angmoo_runtime_secrets:/run/angmoo-secrets
-      - ./scripts/docker/postgresql-entrypoint.sh:/opt/angmoo/postgresql-entrypoint.sh:ro
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U angmoo -d angmoo"]
-      interval: 2s
-      timeout: 5s
-      retries: 30
-      start_period: 5s
-    stop_grace_period: 30s
-
   backend:
     image: *backend-image
     pull_policy: missing
     restart: unless-stopped
     init: true
-    command: ["api"]
+    # Root is used only to initialize ownership on a new named volume. The
+    # entrypoint drops to uid/gid 10001 before Python starts.
+    user: "0:0"
+    command: ["contributor-api"]
     environment: *backend-environment
-    volumes: *backend-volumes
-    depends_on:
-      postgresql:
-        condition: service_healthy
-        restart: true
+    volumes:
+      - angmoo_contributor_embedded_data:/var/lib/angmoo
     expose:
       - "8080"
     healthcheck:
@@ -68,87 +29,11 @@ services:
         - CMD
         - python
         - -c
-        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=3)"
+        - "import json,urllib.request; p=json.load(urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=3)); assert p['status']=='ok' and p['persistence']=='sqlite' and p['graph']=='ladybug'"
       interval: 5s
       timeout: 5s
       retries: 24
       start_period: 30s
-    stop_grace_period: 30s
-
-  neo4j:
-    image: neo4j:2026.06.0@sha256:42fd5b9ead4dd4211f6f91bd831c358e4e2117367d04633fbf88682ca4792b30
-    restart: unless-stopped
-    entrypoint: ["tini", "-g", "--", "sh", "/opt/angmoo/neo4j-entrypoint.sh"]
-    command: ["neo4j"]
-    environment:
-      ANGMOO_SECRET_DIR: /run/angmoo-secrets
-      NEO4J_server_memory_heap_initial__size: 256m
-      NEO4J_server_memory_heap_max__size: 512m
-      NEO4J_server_memory_pagecache_size: 256m
-      NEO4J_db_memory_transaction_total_max: 192m
-      NEO4J_db_memory_transaction_max: 64m
-    volumes:
-      - angmoo_neo4j_data:/data
-      - angmoo_neo4j_logs:/logs
-      - angmoo_runtime_secrets:/run/angmoo-secrets:ro
-      - ./scripts/docker/neo4j-entrypoint.sh:/opt/angmoo/neo4j-entrypoint.sh:ro
-    depends_on:
-      postgresql:
-        condition: service_healthy
-        restart: true
-    expose:
-      - "7474"
-      - "7687"
-    healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:7474/ || exit 1"]
-      interval: 5s
-      timeout: 10s
-      retries: 24
-      start_period: 20s
-    stop_grace_period: 30s
-    mem_limit: 1536m
-
-  scheduler:
-    image: *backend-image
-    pull_policy: missing
-    restart: unless-stopped
-    init: true
-    command: ["scheduler"]
-    environment: *backend-environment
-    volumes: *backend-volumes
-    depends_on:
-      backend:
-        condition: service_healthy
-        restart: true
-    healthcheck:
-      test: ["CMD-SHELL", "grep -qx 'state=ready' /tmp/angmoo-worker-ready && kill -0 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 6
-      start_period: 10s
-    stop_grace_period: 30s
-
-  projector:
-    image: *backend-image
-    pull_policy: missing
-    restart: unless-stopped
-    init: true
-    command: ["projector"]
-    environment: *backend-environment
-    volumes: *backend-volumes
-    depends_on:
-      backend:
-        condition: service_healthy
-        restart: true
-      neo4j:
-        condition: service_healthy
-        restart: true
-    healthcheck:
-      test: ["CMD-SHELL", "grep -qx 'state=ready' /tmp/angmoo-worker-ready && kill -0 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 6
-      start_period: 10s
     stop_grace_period: 30s
 
   frontend:
@@ -179,8 +64,5 @@ services:
     stop_grace_period: 20s
 
 volumes:
-  angmoo_postgresql_data:
-  angmoo_neo4j_data:
-  angmoo_neo4j_logs:
-  angmoo_media:
-  angmoo_runtime_secrets:
+  # Contributor-only. Never bind or copy installed %LOCALAPPDATA%\Angmoo data.
+  angmoo_contributor_embedded_data:

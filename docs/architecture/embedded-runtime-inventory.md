@@ -1,9 +1,9 @@
-# L3-ER0 embedded runtime inventory
+# L3-ER0 inventory and ER7 residual audit
 
 - Source baseline: `db1c32510f66cee20a3e64a01e85c5ea8753d77e`
 - Public tracking issue: [#97](https://github.com/angmoo-tree/angmoo/issues/97)
-- Runtime behavior change: **zero**
-- Database/UI/default process change: **zero**
+- ER0 baseline behavior change: **zero**
+- ER7 PR P current default: **SQLite/FTS5 + LadybugDB + in-process components**
 
 ## Reproduce the inventory
 
@@ -22,12 +22,12 @@ stale, incomplete, or violates the frozen corpus.
 
 | Surface | Count | Artifact | Transition owner |
 |---|---:|---|---|
-| PostgreSQL-coupled source files | 74 | `postgres-sql-inventory.json` | ER1/ER2/ER4 |
+| Residual PostgreSQL-marker files | 67 | `postgres-sql-inventory.json` | frozen migration/history audit |
 | Alembic version files | 81 | `migration-conversion-inventory.json` | ER2 |
 | Neo4j static queries | 24 | `neo4j-query-corpus.json` | ER3 |
-| Next pages and route handlers | 38 | `next-static-compatibility.json` | ER5 |
+| Next pages and route handlers | 39 | `next-static-compatibility.json` | ER5 |
 | P1-P7 parity workloads | 7 | `embedded-runtime-inventory.json` | ER0-ER7 |
-| Scheduler/projector/API coupling files | 10 | `embedded-runtime-inventory.json` | ER1/ER4 |
+| Scheduler/projector/API coupling files | 9 | `embedded-runtime-inventory.json` | ER4/ER7 |
 
 Every generated entry carries an owner, transition PR, source hash or line,
 and removal condition. Existing compatibility paths can be removed only when
@@ -37,8 +37,9 @@ their recorded condition passes.
 
 `postgres-sql-inventory.json` searches Python, Compose, scripts, and dependency
 metadata for drivers/URLs, JSONB, pgvector, row locks, `SKIP LOCKED`, and
-advisory locks. This is a conservative transition inventory: a hit can be a
-configuration or test reference, but an unowned hit cannot silently disappear.
+advisory locks. After ER7 PR P, a hit must be frozen `LEGACY_MIGRATION` input,
+historical Alembic source, or dialect-neutral SQLite schema translation
+metadata. It is not evidence of a supported PostgreSQL application runtime.
 
 `migration-conversion-inventory.json` parses every file under
 `backend/alembic/versions`. All 81 paths and revision identifiers must be
@@ -47,33 +48,33 @@ unique. Files with PostgreSQL-specific markers are marked
 
 ## Neo4j query corpus
 
-`neo4j-query-corpus.json` freezes bootstrap DDL, projection writes,
+`neo4j-query-corpus.json` freezes the former bootstrap DDL, projection writes,
 delete/source-exclusion behavior, maintenance/digest queries, typed reads, and
 the dynamic bounded 1-3 hop path generator. The typed corpus includes direct,
 reverse-capable shared-neighbor, path, positive/tense/recent ranking, evidence,
-and visualization semantics. ER3 must reproduce their World-scoped results and
-the L3 oracle digest before Neo4j can cease to be canonical runtime behavior.
+and visualization semantics. ER3 reproduced their World-scoped results and the
+L3 oracle digest in LadybugDB. ER7 consumes this file as static evidence only;
+there is no live Neo4j server, driver, JVM, or public runtime.
 
 ## Next.js static compatibility
 
-The current frontend uses `output: standalone` and implements `headers`,
-`redirects`, and `rewrites`. These server hooks plus route handlers are explicit
-ER5 adapter work; Tauri static export cannot be declared complete merely because
-the pages compile. Browser development remains supported from the same source.
+The same frontend source supports Next.js development in the Docker contributor
+stack and the static-export profile embedded by Tauri. The route inventory keeps
+direct-open and static-router compatibility reproducible.
 
 ## Runtime coupling and dependencies
 
-`embedded-runtime-inventory.json` records the six-service Compose topology,
-scheduler lease/fencing and signal paths, projector outbox/worker/degraded
+`embedded-runtime-inventory.json` records the two-service contributor topology,
+scheduler lease/fencing and signal paths, projector outbox/component/degraded
 paths, FastAPI lifespan, behavior-critical file hashes, Python and Node package
 manifests, Docker bases, future Rust/LadybugDB owners, and license evidence.
 
-The current dependency baseline is Python `>=3.13`, Node via
-`pnpm@11.22.0`, Next `16.3.0`, Neo4j Python driver `>=6.2,<7`, PostgreSQL via
-`psycopg[binary]`, `pgvector`, and the pinned `ladybug==0.19.1` adapter runtime.
-LadybugDB is installed for ER3 adapter validation but is not the production
-graph default. Rust/Tauri remains confined to the reviewed ER1 spike until
-later Tauri implementation gates.
+The current default dependency baseline is Python `>=3.13`, Node via
+`pnpm@11.22.0`, Next `16.3.0`, and pinned `ladybug==0.19.1`. `psycopg` and
+`pgvector` are isolated in the optional `legacy-migration` dependency group;
+the Neo4j Python driver is absent. Rust/Tauri remains the installed-product and
+optional platform-shell layer, while ordinary contributor development uses the
+Linux Docker two-service stack.
 
 ## Resource baseline
 
@@ -118,9 +119,8 @@ not these outcomes.
 
 ## ER0 closeout boundary
 
-ER0 and ER1 are complete, and ER2 has implemented the SQLite adapter,
-concurrency, FTS5, and offline migration proof without changing the production
-canonical. ER3 PR H introduces a real LadybugDB write adapter behind the
-existing projection port. Typed graph-read parity, production selection,
-Tauri, and the final canonical switch remain unimplemented until their
-separate gates pass.
+ER0-ER6 are complete. ER7 PR O made typed embedded composition canonical and
+PR P removes the default PostgreSQL/Neo4j server topology while establishing
+the official Docker `frontend + backend` contributor runtime. Final ER7 PASS
+still requires PR P local/Hosted/user gates and merge; this inventory alone is
+not completion evidence.

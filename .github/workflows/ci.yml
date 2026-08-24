@@ -21,32 +21,19 @@ jobs:
   backend:
     runs-on: ubuntu-latest
     timeout-minutes: 40
-    services:
-      postgres:
-        image: pgvector/pgvector@sha256:1d533553fefe4f12e5d80c7b80622ba0c382abb5758856f52983d8789179f0fb
-        env:
-          POSTGRES_DB: angmoo
-          POSTGRES_USER: angmoo
-          POSTGRES_PASSWORD: angmoo-dev-only
-        ports:
-          - 55432:5432
-        options: >-
-          --health-cmd "pg_isready -U angmoo -d angmoo"
-          --health-interval 2s
-          --health-timeout 5s
-          --health-retries 30
     env:
       APP_ENV: test
       APP_SECRET: synthetic-ci-${{ github.repository_id }}-${{ github.run_id }}
-      DATABASE_URL: postgresql+psycopg://angmoo@127.0.0.1:55432/angmoo
-      PGPASSWORD: angmoo-dev-only
+      DATABASE_URL: sqlite+pysqlite:///./.ci/angmoo.sqlite3
+      LADYBUG_DATABASE_ROOT: ./.ci/graph
+      GRAPH_PROVIDER: ladybug
+      LOCAL_RUNTIME_COMPONENT_MODE: in_process
       AGENT_ACTIVITY_ENGINE: langgraph
       SERVER_LLM_ENGINE: direct
       RESIDENT_TICK_SCHEDULER_ENABLED: "false"
       POST_IMAGE_JOB_WORKER_ENABLED: "false"
       POLLINATIONS_SERVICE_IMAGE_ENABLED: "false"
       CREDENTIAL_ENCRYPTION_PROVIDER: local
-      SECURITY_CONCURRENCY_DATABASE_URL: postgresql+psycopg://angmoo@127.0.0.1:55432/angmoo
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -59,10 +46,14 @@ jobs:
       - name: Install locked backend dependencies
         run: uv sync --frozen
         working-directory: backend
-      - name: Compile and migrate
+      - name: Compile and materialize the embedded baseline
         run: |
           uv run python -m compileall -q app
-          uv run alembic upgrade head
+          mkdir -p ./.ci
+          uv run python -m app.runtime.contributor_backend \
+            --data-root ./.ci/contributor \
+            --diagnostics > ./.ci/contributor-status.json
+          python -c "import json; p=json.load(open('./.ci/contributor-status.json', encoding='utf-8')); assert p['runtime_profile']=='CONTRIBUTOR_EMBEDDED' and p['persistence_provider']=='sqlite' and p['graph_provider']=='ladybug'"
         working-directory: backend
       - name: Preserve approved test nodes
         run: uv run python ../scripts/check_test_node_baseline.py --profile public
@@ -219,7 +210,7 @@ jobs:
         run: npm run build:shell
         working-directory: desktop
 
-  migration-postgres:
+  legacy-migration:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     services:
@@ -250,29 +241,15 @@ jobs:
           version: "0.12.5"
           python-version: "3.13"
           enable-cache: false
-      - name: Install locked backend dependencies
-        run: uv sync --frozen
+      - name: Install frozen legacy migration dependencies
+        run: uv sync --frozen --extra legacy-migration
         working-directory: backend
-      - name: Verify one head and round-trip
-        shell: bash
+      - name: Build the frozen read-only PostgreSQL source fixture
+        run: uv run alembic upgrade 20260819_0082
         working-directory: backend
-        run: |
-          set -euo pipefail
-          mapfile -t heads < <(uv run alembic heads | awk '{print $1}')
-          if [[ "${#heads[@]}" -ne 1 ]]; then
-            echo "Expected exactly one Alembic head"
-            exit 1
-          fi
-          head_revision="${heads[0]}"
-          uv run alembic upgrade head
-          uv run alembic current | grep -F "$head_revision"
-          uv run alembic downgrade -1
-          if uv run alembic current | grep -F "$head_revision"; then
-            echo "Downgrade did not leave head"
-            exit 1
-          fi
-          uv run alembic upgrade head
-          uv run alembic current | grep -F "$head_revision"
+      - name: Verify synthetic offline migration contracts
+        run: uv run python -m pytest -q tests/test_l3_er2_postgres_sqlite_offline_migration.py
+        working-directory: backend
       - name: Verify ER6 PostgreSQL to installed-runtime round trip
         env:
           ER6_POSTGRES_MIGRATION: "1"

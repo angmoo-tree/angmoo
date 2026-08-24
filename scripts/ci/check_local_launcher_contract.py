@@ -16,9 +16,7 @@ ROOT_WRAPPER = ROOT / "angmoo.ps1"
 PUBLIC_DOC = ROOT / "docs/public/local-launcher.md"
 
 EXPECTED_COMMANDS = ["start", "stop", "restart", "status", "logs", "doctor"]
-EXPECTED_SERVICES = {
-    "backend", "frontend", "neo4j", "postgresql", "projector", "scheduler"
-}
+EXPECTED_SERVICES = {"backend", "frontend"}
 EXPECTED_EXIT_CODES = {
     "success": 0,
     "invalid_argument": 2,
@@ -93,7 +91,7 @@ def validate_contract(payload: Any, *, root: Path = ROOT) -> list[str]:
         errors.append("launcher exit-code contract mismatch")
     compose = payload.get("compose", {})
     if set(compose.get("required_services", [])) != EXPECTED_SERVICES:
-        errors.append("launcher must target the complete Angmoo stack")
+        errors.append("launcher must target the two-service embedded stack")
     if compose.get("release_files") != ["compose.yml"]:
         errors.append("release launcher must reuse compose.yml")
     if compose.get("contributor_files") != ["compose.yml", "compose.dev.yml"]:
@@ -159,10 +157,10 @@ def check_repo(*, root: Path = ROOT) -> list[str]:
         if snippet.lower() in lowered:
             errors.append(f"destructive or privileged launcher path found: {snippet}")
     for marker in (
-        ".\\angmoo.ps1 start",
-        ".\\angmoo.ps1 doctor --json",
-        "docker compose up -d",
-        "named volumes",
+        ".\\angmoo.ps1 start --contributor",
+        ".\\angmoo.ps1 doctor --contributor --json",
+        "docker compose -f compose.yml -f compose.dev.yml up --watch",
+        "named volume",
         "30 GB",
     ):
         if marker not in document:

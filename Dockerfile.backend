@@ -63,7 +63,7 @@ RUN uv sync --frozen --no-install-project
 ENV PATH="/workspace/backend/.venv/bin:${PATH}"
 USER angmoo
 ENTRYPOINT ["/usr/local/bin/angmoo-backend-entrypoint"]
-CMD ["api-dev"]
+CMD ["contributor-api-dev"]
 
 FROM source AS runtime
 RUN rm -rf \
@@ -80,4 +80,4 @@ EXPOSE 8080
 HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=6 \
   CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=3)"
 ENTRYPOINT ["/usr/local/bin/angmoo-backend-entrypoint"]
-CMD ["api"]
+CMD ["contributor-api"]
