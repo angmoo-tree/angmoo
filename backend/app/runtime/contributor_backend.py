@@ -7,6 +7,7 @@ installed product root or selecting providers from process environment values.
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
 import os
 from pathlib import Path
@@ -27,6 +28,18 @@ from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
 
 
 CONTRIBUTOR_GENERATION = "contributor-v1"
+
+
+def _register_canonical_models() -> None:
+    """Load the composition root before the SQLite baseline is inspected.
+
+    Domain-owned SQLAlchemy models are registered as the public API routers
+    are imported.  A diagnostics-only process must perform the same import as
+    the serving path; otherwise a fresh checkout would materialize only the
+    small set of models imported by the runtime module itself.
+    """
+
+    importlib.import_module("app.public_main")
 
 
 def _parse_args() -> argparse.Namespace:
@@ -89,6 +102,7 @@ def create_contributor_runtime_app(
     # Import the composition root before materializing the SQLite baseline so
     # every canonical SQLAlchemy model is registered in Base.metadata. This is
     # the same fail-closed ordering used by the packaged desktop sidecar.
+    _register_canonical_models()
     from app.public_main import create_app
 
     data_root = data_root.resolve()
@@ -139,6 +153,8 @@ def contributor_runtime_status_payload(
     accepts only lifecycle paths and never lets environment variables select
     persistence, graph, or worker providers.
     """
+
+    _register_canonical_models()
 
     from app.core.redaction import sanitize_support_bundle_metadata
     from app.domains.runtime.public import (

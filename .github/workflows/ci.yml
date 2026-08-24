@@ -46,10 +46,14 @@ jobs:
       - name: Install locked backend dependencies
         run: uv sync --frozen
         working-directory: backend
-      - name: Compile and migrate
+      - name: Compile and materialize the embedded baseline
         run: |
           uv run python -m compileall -q app
-          uv run alembic upgrade head
+          mkdir -p ./.ci
+          uv run python -m app.runtime.contributor_backend \
+            --data-root ./.ci/contributor \
+            --diagnostics > ./.ci/contributor-status.json
+          python -c "import json; p=json.load(open('./.ci/contributor-status.json', encoding='utf-8')); assert p['runtime_profile']=='CONTRIBUTOR_EMBEDDED' and p['persistence_provider']=='sqlite' and p['graph_provider']=='ladybug'"
         working-directory: backend
       - name: Preserve approved test nodes
         run: uv run python ../scripts/check_test_node_baseline.py --profile public

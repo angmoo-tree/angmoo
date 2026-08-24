@@ -1,6 +1,6 @@
 {
   "edge_count": 935,
-  "external_import_count": 1488,
+  "external_import_count": 1489,
   "module_count": 435,
   "modules": [
     {
@@ -4097,6 +4097,7 @@
       "external_imports": [
         "__future__",
         "argparse",
+        "importlib",
         "json",
         "os",
         "pathlib",

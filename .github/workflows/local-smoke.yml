@@ -77,7 +77,8 @@ jobs:
           uv run --directory backend python ../scripts/quickstart_smoke.py \
             --backend-url http://127.0.0.1:8080 \
             --frontend-url http://127.0.0.1:3000 \
-            --bootstrap-local-session
+            --bootstrap-local-session \
+            --bootstrap-data-root "$data_root"
           test -f "$data_root/canonical/generations/contributor-v1/angmoo.sqlite3"
           test -f "$data_root/secrets/app-secret"
           if grep -E 'https?://(generativelanguage|api\.pollinations|api\.replicate)' "$RUNNER_TEMP/backend.log"; then

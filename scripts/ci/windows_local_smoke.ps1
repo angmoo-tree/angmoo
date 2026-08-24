@@ -2,7 +2,12 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
-$localScripts = Get-ChildItem -LiteralPath (Join-Path $repoRoot 'scripts\local') -Filter '*.ps1' -File
+$localScriptRoot = Join-Path $repoRoot 'scripts\local'
+$localScripts = @(
+    if (Test-Path -LiteralPath $localScriptRoot -PathType Container) {
+        Get-ChildItem -LiteralPath $localScriptRoot -Filter '*.ps1' -File
+    }
+)
 
 foreach ($script in $localScripts) {
     $tokens = $null

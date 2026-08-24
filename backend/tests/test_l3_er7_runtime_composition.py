@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 import tomllib
@@ -204,6 +205,39 @@ def test_contributor_entrypoint_uses_an_explicit_isolated_data_root(
         assert app.state.runtime_settings.graph_provider == "ladybug"
         assert config.database_path.is_file()
         assert config.app_secret_file.is_file()
+
+
+def test_contributor_diagnostics_registers_all_models_in_a_fresh_process(
+    tmp_path: Path,
+) -> None:
+    contributor_root = tmp_path / "diagnostics" / ".angmoo-dev"
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "app.runtime.contributor_backend",
+            "--data-root",
+            str(contributor_root),
+            "--diagnostics",
+        ],
+        cwd=Path(__file__).resolve().parents[1],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    payload = json.loads(completed.stdout)
+    assert payload["runtime_profile"] == "CONTRIBUTOR_EMBEDDED"
+    assert payload["persistence_provider"] == "sqlite"
+    assert payload["graph_provider"] == "ladybug"
+    assert (
+        contributor_root
+        / "canonical"
+        / "generations"
+        / "contributor-v1"
+        / "angmoo.sqlite3"
+    ).is_file()
 
 
 def test_relationship_route_uses_runtime_provider_when_query_is_omitted(
