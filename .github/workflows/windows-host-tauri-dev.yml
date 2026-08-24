@@ -76,8 +76,10 @@ jobs:
         shell: pwsh
         run: |
           cargo fmt --manifest-path desktop\src-tauri\Cargo.toml -- --check
+          $env:TAURI_CONFIG = Get-Content -LiteralPath desktop\src-tauri\tauri.contributor-docker.conf.json -Raw
           cargo test --manifest-path desktop\src-tauri\Cargo.toml --locked --no-default-features
           cargo test --manifest-path desktop\src-tauri\Cargo.toml --locked --features contributor-docker-bridge
+          Remove-Item Env:\TAURI_CONFIG
       - name: Link the additive Docker-bridge Tauri configuration
         shell: pwsh
         working-directory: desktop
