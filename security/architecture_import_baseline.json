@@ -1,6 +1,6 @@
 {
   "edge_count": 936,
-  "external_import_count": 1493,
+  "external_import_count": 1494,
   "module_count": 436,
   "modules": [
     {
@@ -1424,6 +1424,7 @@
       "external_imports": [
         "collections.abc",
         "sqlalchemy",
+        "sqlalchemy.engine",
         "sqlalchemy.orm"
       ],
       "imports": [

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import subprocess
+import sys
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -121,6 +123,35 @@ def test_create_app_owns_explicit_embedded_session_and_runtime_state(
         )
     finally:
         app.state.runtime_composition.dispose()
+
+
+def test_public_composition_import_does_not_load_postgres_dbapi() -> None:
+    script = """
+import builtins
+
+original_import = builtins.__import__
+
+def guarded_import(name, *args, **kwargs):
+    if name == "psycopg" or name.startswith("psycopg."):
+        raise ImportError("packaged sidecar excludes psycopg")
+    return original_import(name, *args, **kwargs)
+
+builtins.__import__ = guarded_import
+import app.public_main  # noqa: F401
+from app.core import db
+
+assert db._default_engine is None
+assert db._default_session_factory is None
+"""
+    completed = subprocess.run(
+        [sys.executable, "-c", script],
+        cwd=Path(__file__).resolve().parents[1],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert completed.returncode == 0, completed.stderr
 
 
 def test_contributor_entrypoint_uses_an_explicit_isolated_data_root(

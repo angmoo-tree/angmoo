@@ -16,7 +16,7 @@ if str(BACKEND_ROOT) not in sys.path:
     sys.path.insert(0, str(BACKEND_ROOT))
 
 from app import models as _models  # noqa: F401 - registers canonical metadata
-from app.core.db import Base, engine
+from app.core.db import Base, get_default_engine
 from app.runtime.migrations.alembic_source import AlembicMigrationSource
 from app.runtime.migrations.postgres_to_sqlite import (
     PostgresToSqliteOfflineDryRun,
@@ -56,6 +56,7 @@ def _directory_bytes(root: Path | None) -> int:
 
 
 def _disk_preflight(args: argparse.Namespace) -> dict[str, int]:
+    engine = get_default_engine()
     if engine.dialect.name != "postgresql":
         raise SystemExit("ER6 migration source must be PostgreSQL")
     with engine.connect() as connection:
@@ -92,6 +93,7 @@ def main() -> int:
     if not args.confirm_source_stopped:
         raise SystemExit("--confirm-source-stopped is required")
     disk_preflight = _disk_preflight(args)
+    engine = get_default_engine()
     migration = PostgresToSqliteOfflineDryRun(
         source_engine=engine,
         source_metadata=Base.metadata,

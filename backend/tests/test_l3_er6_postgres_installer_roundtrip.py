@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app import models
 from app.core import security
-from app.core.db import Base, engine
+from app.core.db import Base, get_default_engine
 from app.integrations.ladybug_projection import LadybugRelationshipProjection
 from app.runtime.desktop_sidecar import _selected_generation
 from app.runtime.migrations.alembic_source import AlembicMigrationSource
@@ -62,6 +62,7 @@ def _synthetic_marker(root: Path) -> None:
 def test_postgres_to_installed_runtime_roundtrip(
     tmp_path: Path,
 ) -> None:
+    engine = get_default_engine()
     assert engine.dialect.name == "postgresql"
     with engine.connect() as connection:
         assert connection.scalar(select(models.User.id).limit(1)) is None

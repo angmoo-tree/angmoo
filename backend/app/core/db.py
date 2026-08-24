@@ -1,6 +1,7 @@
 from collections.abc import Generator
 
 from sqlalchemy import create_engine, event
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from app.core.config import settings
@@ -41,8 +42,38 @@ def create_session_factory(database_engine):
     )
 
 
-engine = create_database_engine(settings.database_url)
-SessionLocal = create_session_factory(engine)
+_default_engine: Engine | None = None
+_default_session_factory: sessionmaker[Session] | None = None
+
+
+def get_default_engine() -> Engine:
+    """Create the transitional default engine only for a legacy caller.
+
+    Official embedded composition passes an explicit SQLite engine and session
+    factory. Importing the public application must therefore not load the
+    PostgreSQL DBAPI, which is deliberately absent from the packaged sidecar,
+    merely because compatibility callers remain before PR P.
+    """
+
+    global _default_engine, _default_session_factory
+    if _default_engine is None:
+        _default_engine = create_database_engine(settings.database_url)
+        _default_session_factory = create_session_factory(_default_engine)
+    return _default_engine
+
+
+def get_default_session_factory() -> sessionmaker[Session]:
+    global _default_session_factory
+    if _default_session_factory is None:
+        get_default_engine()
+    assert _default_session_factory is not None
+    return _default_session_factory
+
+
+def SessionLocal() -> Session:
+    """Compatibility callable retained until PR P removes legacy globals."""
+
+    return get_default_session_factory()()
 
 
 def get_db() -> Generator[Session]:

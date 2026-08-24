@@ -288,6 +288,18 @@
     {
       "markers": {
         "driver_or_url": [
+          54
+        ]
+      },
+      "owner": "ER1-ER2",
+      "path": "backend/app/core/db.py",
+      "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
+      "source_sha256": "76f25dfca19bb48b2d878fd1c58e62153f285beb20a55a6c21cbda9b1ba0723a",
+      "transition_pr": "ER1 PR B; ER2 PR D/E"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
           42
         ]
       },
@@ -1080,14 +1092,14 @@
         "driver_or_url": [
           1,
           29,
-          59,
-          60
+          60,
+          61
         ]
       },
       "owner": "ER1-ER2",
       "path": "backend/scripts/dry_run_postgres_to_sqlite.py",
       "removal_condition": "current PostgreSQL adapter regression plus SQLite parity and concurrency PASS",
-      "source_sha256": "1ea501511a776a83e9eac9762966603dd4ecc8241980ee0a0f55fead0e8ff7ba",
+      "source_sha256": "6b70b39c5520e5c75823277771e9e6703bd6af7c85e0e2d90e98fbe9c093a2fa",
       "transition_pr": "ER1 PR B; ER2 PR D/E"
     },
     {
@@ -1254,10 +1266,10 @@
       "transition_pr": "ER7 PR P"
     }
   ],
-  "entry_count": 81,
+  "entry_count": 82,
   "marker_counts": {
     "advisory_lock": 8,
-    "driver_or_url": 57,
+    "driver_or_url": 58,
     "jsonb": 8,
     "pgvector": 7,
     "row_lock": 22,

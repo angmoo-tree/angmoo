@@ -59,7 +59,10 @@ def test_storage_frontend_runtime_and_parity_corpora_are_complete() -> None:
     # server runtime. ER7 PR O adds typed profile and contributor entrypoint
     # files that explicitly reject PostgreSQL as an embedded runtime, so those
     # references remain visible in the generated inventory as well.
-    assert postgres["entry_count"] == 81
+    # ER7 PR O keeps the transitional PostgreSQL default behind an explicit,
+    # lazy accessor so importing the packaged embedded application does not
+    # load psycopg.  The compatibility marker remains inventoried until PR P.
+    assert postgres["entry_count"] == 82
     assert graph["query_count"] == 24
     assert frontend["route_count"] == 39
     assert {item["phase"] for item in runtime["parity"]["workloads"]} == {
