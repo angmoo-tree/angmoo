@@ -18,6 +18,7 @@ EXPECTED_WORKFLOWS = {
     "local-smoke.yml",
     "native-runtime-spike.yml",
     "security.yml",
+    "windows-host-tauri-dev.yml",
     "windows-installer.yml",
     "windows-smoke.yml",
     "release-images.yml",
@@ -210,7 +211,11 @@ def main() -> int:
         print(error, file=sys.stderr)
     if errors:
         return 1
-    print("Local OSS CI policy check passed: required=10 advisory=1 workflows=7")
+    print(
+        "Local OSS CI policy check passed: "
+        f"required={len(REQUIRED_JOBS)} advisory={len(ADVISORY_JOBS)} "
+        f"workflows={len(EXPECTED_WORKFLOWS)}"
+    )
     return 0
 
 
