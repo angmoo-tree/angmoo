@@ -6,11 +6,11 @@ import os
 from pathlib import Path
 from time import monotonic
 from types import TracebackType
-from typing import Awaitable, Callable
+from typing import Awaitable, Callable, Any
 from uuid import uuid4
 
 from app import schemas
-from app.core.config import settings
+from app.core.config import Settings, settings
 from app.core.db import SessionLocal
 from app.domains.runtime.public import (
     SchedulerLeaseCoordinator,
@@ -92,24 +92,32 @@ class SchedulerProcessLock:
             self._handle = None
 
 
-def _coordinator() -> SchedulerLeaseCoordinator:
+def _coordinator(
+    config: Settings = settings,
+    session_factory: Callable[[], Any] | None = None,
+) -> SchedulerLeaseCoordinator:
+    resolved_session_factory = session_factory or SessionLocal
     if (
-        settings.RESIDENT_TICK_HEARTBEAT_INTERVAL_SECONDS
-        >= settings.RESIDENT_TICK_LEASE_TTL_SECONDS
+        config.RESIDENT_TICK_HEARTBEAT_INTERVAL_SECONDS
+        >= config.RESIDENT_TICK_LEASE_TTL_SECONDS
     ):
         raise ValueError(
             "RESIDENT_TICK_HEARTBEAT_INTERVAL_SECONDS must be shorter than "
             "RESIDENT_TICK_LEASE_TTL_SECONDS"
         )
     return SchedulerLeaseCoordinator(
-        SqlAlchemySchedulerLeaseRepository(SessionLocal),
-        ttl_seconds=settings.RESIDENT_TICK_LEASE_TTL_SECONDS,
-        interval_seconds=settings.resident_tick_interval_seconds,
+        SqlAlchemySchedulerLeaseRepository(resolved_session_factory),
+        ttl_seconds=config.RESIDENT_TICK_LEASE_TTL_SECONDS,
+        interval_seconds=config.resident_tick_interval_seconds,
     )
 
 
-async def _tick_once() -> schemas.ResidentSlotTickRead:
-    with SessionLocal() as db:
+async def _tick_once(
+    config: Settings = settings,
+    session_factory: Callable[[], Any] | None = None,
+) -> schemas.ResidentSlotTickRead:
+    resolved_session_factory = session_factory or SessionLocal
+    with resolved_session_factory() as db:
         transition = agent_runs.reconcile_all_elapsed_routines(db)
         if transition.completed or transition.skipped:
             logger.info(
@@ -120,9 +128,9 @@ async def _tick_once() -> schemas.ResidentSlotTickRead:
         return await agent_runs.tick_resident_slots(
             db,
             schemas.ResidentSlotTickCreate(
-                post_id=settings.resident_tick_post_id,
-                max_runs=settings.resident_tick_max_runs,
-                timeout_seconds=settings.openclaw_timeout_seconds,
+                post_id=config.resident_tick_post_id,
+                max_runs=config.resident_tick_max_runs,
+                timeout_seconds=config.openclaw_timeout_seconds,
             ),
         )
 
@@ -136,6 +144,7 @@ async def _run_fenced_tick_with_heartbeat(
     sleep: Callable[[float], Awaitable[None]],
     stop_event: asyncio.Event | None = None,
     drain_timeout_seconds: float | None = None,
+    config: Settings = settings,
 ) -> schemas.ResidentSlotTickRead:
     async def run_tick() -> schemas.ResidentSlotTickRead:
         with scheduler_fence(owner_id=owner_id, fencing_epoch=fencing_epoch):
@@ -143,7 +152,7 @@ async def _run_fenced_tick_with_heartbeat(
 
     async def heartbeat() -> None:
         while True:
-            await sleep(settings.RESIDENT_TICK_HEARTBEAT_INTERVAL_SECONDS)
+            await sleep(config.RESIDENT_TICK_HEARTBEAT_INTERVAL_SECONDS)
             coordinator.heartbeat(owner_id=owner_id, fencing_epoch=fencing_epoch)
 
     tick_task = asyncio.create_task(run_tick())
@@ -167,7 +176,7 @@ async def _run_fenced_tick_with_heartbeat(
         raise SchedulerLeaseLostError("scheduler heartbeat stopped unexpectedly")
     if stop_task is not None and stop_task in done and tick_task not in done:
         timeout = (
-            settings.resident_tick_shutdown_drain_seconds
+            config.resident_tick_shutdown_drain_seconds
             if drain_timeout_seconds is None
             else max(0.1, drain_timeout_seconds)
         )
@@ -209,11 +218,12 @@ async def _sleep_until_next_tick_with_heartbeat(
     sleep: Callable[[float], Awaitable[None]],
     monotonic_clock: Callable[[], float] = monotonic,
     stop_event: asyncio.Event | None = None,
+    config: Settings = settings,
 ) -> bool:
     deadline = monotonic_clock() + max(0.0, duration_seconds)
     heartbeat_interval = max(
         1.0,
-        float(settings.RESIDENT_TICK_HEARTBEAT_INTERVAL_SECONDS),
+        float(config.RESIDENT_TICK_HEARTBEAT_INTERVAL_SECONDS),
     )
     while (remaining := deadline - monotonic_clock()) > 0:
         if stop_event is not None and stop_event.is_set():
@@ -243,7 +253,7 @@ async def run_resident_tick_scheduler(
     *,
     coordinator: SchedulerLeaseCoordinator | None = None,
     owner_id: str | None = None,
-    tick_runner: Callable[[], Awaitable[schemas.ResidentSlotTickRead]] = _tick_once,
+    tick_runner: Callable[[], Awaitable[schemas.ResidentSlotTickRead]] | None = None,
     sleep: Callable[[float], Awaitable[None]] = asyncio.sleep,
     monotonic_clock: Callable[[], float] = monotonic,
     process_lock: SchedulerProcessLock | None = None,
@@ -251,13 +261,22 @@ async def run_resident_tick_scheduler(
     stop_event: asyncio.Event | None = None,
     drain_timeout_seconds: float | None = None,
     state_listener: SchedulerStateListener | None = None,
+    config: Settings = settings,
+    session_factory: Callable[[], Any] | None = None,
 ) -> None:
-    lease_coordinator = coordinator or _coordinator()
+    resolved_session_factory = session_factory or SessionLocal
+    lease_coordinator = coordinator or _coordinator(
+        config,
+        resolved_session_factory,
+    )
+    run_tick = tick_runner or (
+        lambda: _tick_once(config, resolved_session_factory)
+    )
     lease_owner_id = owner_id or f"scheduler-{uuid4()}"
     lock = process_lock or SchedulerProcessLock(
-        settings.RESIDENT_TICK_PROCESS_LOCK_PATH
+        config.RESIDENT_TICK_PROCESS_LOCK_PATH
     )
-    readiness = Path(ready_path or settings.RESIDENT_TICK_READY_PATH)
+    readiness = Path(ready_path or config.RESIDENT_TICK_READY_PATH)
     stop = stop_event or asyncio.Event()
     lease = None
 
@@ -288,10 +307,11 @@ async def run_resident_tick_scheduler(
                             coordinator=lease_coordinator,
                             owner_id=lease_owner_id,
                             fencing_epoch=lease.fencing_epoch,
-                            tick_runner=tick_runner,
+                            tick_runner=run_tick,
                             sleep=sleep,
                             stop_event=stop,
                             drain_timeout_seconds=drain_timeout_seconds,
+                            config=config,
                         )
                     except asyncio.CancelledError:
                         raise
@@ -335,10 +355,11 @@ async def run_resident_tick_scheduler(
                     coordinator=lease_coordinator,
                     owner_id=lease_owner_id,
                     fencing_epoch=lease.fencing_epoch,
-                    duration_seconds=settings.resident_tick_interval_seconds,
+                    duration_seconds=config.resident_tick_interval_seconds,
                     sleep=sleep,
                     monotonic_clock=monotonic_clock,
                     stop_event=stop,
+                    config=config,
                 )
                 if not completed_wait:
                     break

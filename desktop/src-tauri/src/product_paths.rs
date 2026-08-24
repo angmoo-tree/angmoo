@@ -1,7 +1,12 @@
-use std::path::{Path, PathBuf};
+#[cfg(any(not(debug_assertions), test))]
+use std::path::Path;
+use std::path::PathBuf;
 
-use tauri::{AppHandle, Manager};
+use tauri::AppHandle;
+#[cfg(not(debug_assertions))]
+use tauri::Manager;
 
+#[cfg(any(not(debug_assertions), test))]
 pub const PRODUCT_DATA_DIRECTORY: &str = "Angmoo";
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -20,10 +25,9 @@ pub struct ProductDataPaths {
 }
 
 impl ProductDataPaths {
-    pub fn from_local_data_directory(local_data_directory: &Path) -> Self {
-        let root = local_data_directory.join(PRODUCT_DATA_DIRECTORY);
+    fn from_root(root: PathBuf, legacy_preview_root: PathBuf) -> Self {
         Self {
-            legacy_preview_root: local_data_directory.join("com.angmoo.desktop"),
+            legacy_preview_root,
             app: root.join("app"),
             canonical: root.join("canonical"),
             graph: root.join("graph"),
@@ -37,12 +41,41 @@ impl ProductDataPaths {
         }
     }
 
+    #[cfg(any(not(debug_assertions), test))]
+    pub fn from_local_data_directory(local_data_directory: &Path) -> Self {
+        let root = local_data_directory.join(PRODUCT_DATA_DIRECTORY);
+        Self::from_root(root, local_data_directory.join("com.angmoo.desktop"))
+    }
+
+    #[cfg(debug_assertions)]
+    fn contributor() -> Self {
+        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../..")
+            .join(".angmoo-dev");
+        Self::from_root(root.clone(), root.join("no-legacy-import"))
+    }
+
     pub fn resolve(app: &AppHandle) -> Result<Self, String> {
+        #[cfg(debug_assertions)]
+        {
+            let _ = app;
+            Ok(Self::contributor())
+        }
+        #[cfg(not(debug_assertions))]
         let local_data_directory = app
             .path()
             .local_data_dir()
             .map_err(|_| "product_local_data_directory_unavailable".to_owned())?;
+        #[cfg(not(debug_assertions))]
         Ok(Self::from_local_data_directory(&local_data_directory))
+    }
+
+    pub const fn runtime_profile() -> &'static str {
+        if cfg!(debug_assertions) {
+            "CONTRIBUTOR_EMBEDDED"
+        } else {
+            "LOCAL_EMBEDDED"
+        }
     }
 
     pub fn prepare_runtime_owned_directories(&self) -> Result<(), String> {

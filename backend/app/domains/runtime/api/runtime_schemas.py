@@ -99,6 +99,15 @@ class LocalRuntimeStatusRead(RuntimeStatusSchema):
     )
     installation_state: InstallationState
     version: str
+    runtime_profile: Literal[
+        "LOCAL_EMBEDDED",
+        "CONTRIBUTOR_EMBEDDED",
+        "TEST",
+        "LEGACY_MIGRATION",
+    ] | None = None
+    canonical_generation: str | None = None
+    persistence_provider: Literal["sqlite", "postgresql"] | None = None
+    graph_provider: Literal["ladybug", "neo4j", "none"] | None = None
     components: list[RuntimeComponentRead] = Field(default_factory=list)
     migration: MigrationRuntimeRead
     scheduler: SchedulerRuntimeRead
@@ -109,10 +118,26 @@ class LocalRuntimeStatusRead(RuntimeStatusSchema):
     capabilities: dict[str, RuntimeCapabilityRead] = Field(default_factory=dict)
 
 
-def runtime_status_read(status: ApplicationRuntimeStatus) -> LocalRuntimeStatusRead:
+def runtime_status_read(
+    status: ApplicationRuntimeStatus,
+    *,
+    runtime_profile: Literal[
+        "LOCAL_EMBEDDED",
+        "CONTRIBUTOR_EMBEDDED",
+        "TEST",
+        "LEGACY_MIGRATION",
+    ] | None = None,
+    canonical_generation: str | None = None,
+    persistence_provider: Literal["sqlite", "postgresql"] | None = None,
+    graph_provider: Literal["ladybug", "neo4j", "none"] | None = None,
+) -> LocalRuntimeStatusRead:
     return LocalRuntimeStatusRead(
         installation_state=status.installation_state,
         version=status.version,
+        runtime_profile=runtime_profile,
+        canonical_generation=canonical_generation,
+        persistence_provider=persistence_provider,
+        graph_provider=graph_provider,
         components=[
             RuntimeComponentRead(
                 name=component.name,

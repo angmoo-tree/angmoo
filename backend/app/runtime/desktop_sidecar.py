@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-from collections.abc import MutableMapping
 import ctypes
 import json
 import os
@@ -164,6 +163,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--legacy-data-root", type=Path, required=True)
     parser.add_argument("--runtime-root", type=Path, required=True)
     parser.add_argument("--launch-id", required=True)
+    parser.add_argument("--runtime-profile", required=True)
     return parser.parse_args()
 
 
@@ -172,10 +172,6 @@ def _required_environment(name: str) -> str:
     if not value:
         raise RuntimeError(f"missing_{name.lower()}")
     return value
-
-
-def _sqlite_url(path: Path) -> str:
-    return "sqlite+pysqlite:///" + path.resolve().as_posix()
 
 
 def _write_new_secret(path: Path) -> None:
@@ -217,26 +213,25 @@ def _selected_generation(data_root: Path) -> str:
     return generation
 
 
-def _configure_embedded_release_candidate(
+def _build_embedded_runtime_config(
     data_root: Path,
     runtime_root: Path,
     *,
-    environ: MutableMapping[str, str] | None = None,
-) -> tuple[Path, str]:
-    """Opt the packaged sidecar into ER6 without changing Docker defaults."""
+    profile,
+    desktop_launch_token: str,
+    desktop_allowed_origin: str,
+):
+    """Build an explicit embedded profile without mutating the environment."""
+
+    from app.runtime.configuration import (
+        build_embedded_runtime_config,
+    )
 
     data_root = data_root.resolve()
     runtime_root = runtime_root.resolve()
     if runtime_root != data_root / "runtime":
         raise RuntimeError("runtime_root_outside_product_data_root")
     generation = _selected_generation(data_root)
-    database_path = (
-        data_root
-        / "canonical"
-        / "generations"
-        / generation
-        / "angmoo.sqlite3"
-    )
     secret_path = data_root / "secrets" / "app-secret"
     if not secret_path.is_file():
         canonical = data_root / "canonical"
@@ -244,30 +239,34 @@ def _configure_embedded_release_candidate(
         if has_existing_data:
             raise RuntimeError("app_secret_missing_for_existing_data")
         _write_new_secret(secret_path)
-
-    target_environment = os.environ if environ is None else environ
-    target_environment.update(
-        {
-            "APP_ENV": "local",
-            "APP_SECRET_FILE": str(secret_path),
-            "API_DOCS_ENABLED": "false",
-            "SIGNUP_ENABLED": "false",
-            "BROWSER_SESSION_ALLOWED_ORIGINS": "http://tauri.localhost",
-            "CREDENTIAL_ENCRYPTION_PROVIDER": "local",
-            "DATABASE_URL": _sqlite_url(database_path),
-            "MEDIA_ROOT": str(data_root / "media"),
-            "GRAPH_PROJECTION_ENABLED": "true",
-            "LADYBUG_GRAPH_PREVIEW_ENABLED": "true",
-            "LADYBUG_DATABASE_ROOT": str(data_root / "graph" / "ladybug"),
-            "LOCAL_RUNTIME_COMPONENT_MODE": "in_process",
-            "RESIDENT_TICK_PROCESS_LOCK_PATH": str(
-                runtime_root / "scheduler.lock"
-            ),
-            "RESIDENT_TICK_READY_PATH": str(runtime_root / "scheduler.ready"),
-            "GRAPH_PROJECTOR_READY_PATH": str(runtime_root / "projector.ready"),
-        }
+    return build_embedded_runtime_config(
+        profile=profile,
+        data_root=data_root,
+        runtime_root=runtime_root,
+        generation=generation,
+        desktop_launch_token=desktop_launch_token,
+        desktop_allowed_origin=desktop_allowed_origin,
     )
-    return data_root, generation
+
+
+def _build_local_embedded_runtime_config(
+    data_root: Path,
+    runtime_root: Path,
+    *,
+    desktop_launch_token: str,
+    desktop_allowed_origin: str,
+):
+    """Compatibility facade for focused ER6 lifecycle tests."""
+
+    from app.runtime.configuration import RuntimeProfile
+
+    return _build_embedded_runtime_config(
+        data_root,
+        runtime_root,
+        profile=RuntimeProfile.LOCAL_EMBEDDED,
+        desktop_launch_token=desktop_launch_token,
+        desktop_allowed_origin=desktop_allowed_origin,
+    )
 
 
 def _initialize_embedded_schema(data_root: Path, generation: str) -> None:
@@ -285,23 +284,6 @@ def _initialize_embedded_schema(data_root: Path, generation: str) -> None:
     database.close()
 
 
-def _initialize_embedded_installation_identity() -> None:
-    """Create only the unclaimed local-device identity before workers start."""
-
-    from app.core.db import SessionLocal
-    from app.domains.identity.application.local_owner import (
-        EnsureLocalInstallationIdentity,
-    )
-    from app.domains.identity.infrastructure.sqlalchemy_identity_repository import (
-        SqlAlchemyIdentityRepository,
-    )
-
-    with SessionLocal() as db:
-        EnsureLocalInstallationIdentity(
-            SqlAlchemyIdentityRepository(db)
-        ).execute()
-
-
 def _watch_parent(parent_pid: int, server: Any) -> None:
     while not server.should_exit:
         if not _process_alive(parent_pid):
@@ -312,6 +294,9 @@ def _watch_parent(parent_pid: int, server: Any) -> None:
 
 def main() -> int:
     args = _parse_args()
+    from app.runtime.configuration import RuntimeProfile
+
+    runtime_profile = RuntimeProfile.parse(args.runtime_profile)
     token = _required_environment("DESKTOP_LAUNCH_TOKEN")
     origin = _required_environment("DESKTOP_ALLOWED_ORIGIN")
     ownership = RuntimeOwnership(
@@ -324,15 +309,19 @@ def main() -> int:
             LegacyLocalAppDataMigration,
         )
 
-        LegacyLocalAppDataMigration(
-            source_root=args.legacy_data_root,
-            target_root=args.data_root,
-            runtime_root=ownership.runtime_root,
-            process_alive=_process_alive,
-        ).migrate_if_needed()
-        data_root, generation = _configure_embedded_release_candidate(
+        if runtime_profile is RuntimeProfile.LOCAL_EMBEDDED:
+            LegacyLocalAppDataMigration(
+                source_root=args.legacy_data_root,
+                target_root=args.data_root,
+                runtime_root=ownership.runtime_root,
+                process_alive=_process_alive,
+            ).migrate_if_needed()
+        runtime_config = _build_embedded_runtime_config(
             args.data_root.resolve(),
             ownership.runtime_root,
+            profile=runtime_profile,
+            desktop_launch_token=token,
+            desktop_allowed_origin=origin,
         )
     except BaseException:
         ownership.release()
@@ -342,9 +331,12 @@ def main() -> int:
     # complete. Its normal route/service composition registers the canonical
     # model metadata without creating a new runtime -> legacy models edge.
     from app.public_main import create_app
+    from app.runtime.configuration import initialize_local_installation_identity
 
-    _initialize_embedded_schema(data_root, generation)
-    _initialize_embedded_installation_identity()
+    _initialize_embedded_schema(
+        runtime_config.data_paths.root,
+        runtime_config.generation,
+    )
 
     listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -360,7 +352,10 @@ def main() -> int:
         DesktopLoopbackPolicy,
         DesktopLoopbackSecurityMiddleware,
     )
-    runtime_app = create_app()
+    runtime_app = create_app(runtime_config=runtime_config)
+    initialize_local_installation_identity(
+        runtime_app.state.runtime_composition.session_factory
+    )
     policy = DesktopLoopbackPolicy(token, origin)
     runtime_app.add_middleware(DesktopLoopbackSecurityMiddleware, policy=policy)
     config = uvicorn.Config(

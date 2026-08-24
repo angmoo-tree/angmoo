@@ -41,11 +41,30 @@ def get_runtime_status(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="local_owner_required",
         )
-    runtime_status = ReadApplicationRuntimeStatus(
-        SqlAlchemyApplicationRuntimeProbe(db)
-    ).execute()
+    runtime_settings = getattr(request.app.state, "runtime_settings", settings)
+    runtime_config = getattr(request.app.state, "runtime_config", None)
+    probe = (
+        SqlAlchemyApplicationRuntimeProbe(db, config=runtime_settings)
+        if runtime_config is not None
+        else SqlAlchemyApplicationRuntimeProbe(db)
+    )
+    runtime_status = ReadApplicationRuntimeStatus(probe).execute()
     runtime_status = overlay_in_process_component_status(
         runtime_status,
-        config=settings,
+        config=runtime_settings,
     )
-    return runtime_status_read(runtime_status)
+    return runtime_status_read(
+        runtime_status,
+        runtime_profile=(
+            runtime_config.profile.value if runtime_config is not None else None
+        ),
+        canonical_generation=(
+            runtime_config.generation if runtime_config is not None else None
+        ),
+        persistence_provider=(
+            "sqlite"
+            if runtime_settings.database_url.startswith("sqlite")
+            else "postgresql"
+        ),
+        graph_provider=runtime_settings.graph_provider,
+    )

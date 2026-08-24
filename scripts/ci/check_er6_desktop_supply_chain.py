@@ -133,6 +133,8 @@ def main() -> int:
         '"--legacy-data-root"',
         '"--runtime-root"',
         '"--launch-id"',
+        '"--runtime-profile"',
+        'ProductDataPaths::runtime_profile()',
         '"DESKTOP_LAUNCH_TOKEN"',
         '"DESKTOP_ALLOWED_ORIGIN"',
     ):
@@ -147,6 +149,18 @@ def main() -> int:
         _require(
             forbidden not in launcher.lower(),
             f"unexpected launcher capability or network behavior: {forbidden}",
+        )
+    for forbidden_runtime_injection in (
+        '.env("DATABASE_URL"',
+        '.env("NEO4J_URI"',
+        '.env("GRAPH_PROVIDER"',
+        '.env("LOCAL_RUNTIME_COMPONENT_MODE"',
+        '.env("LADYBUG_DATABASE_ROOT"',
+    ):
+        _require(
+            forbidden_runtime_injection not in launcher,
+            "desktop launcher must not select embedded runtime through environment: "
+            f"{forbidden_runtime_injection}",
         )
     launcher_urls = re.findall(r"https?://[^\"'\s]+", launcher)
     _require(
@@ -258,7 +272,9 @@ def main() -> int:
                 "legacy-data-root",
                 "runtime-root",
                 "launch-id",
+                "runtime-profile",
             ],
+            "runtime_profile_selection": "typed ProductDataPaths profile",
             "recursive_delete_roots": [
                 f"LOCALAPPDATA/Angmoo/{child}"
                 for child in (

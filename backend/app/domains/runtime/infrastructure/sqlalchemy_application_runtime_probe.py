@@ -11,7 +11,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
+from app.core.config import Settings, settings
 from app.domains.runtime.domain.diagnostic_codes import RuntimeDiagnosticCode
 from app.domains.runtime.domain.installation_state import (
     ActivityRuntimeStatus,
@@ -43,8 +43,15 @@ class SqlAlchemyApplicationRuntimeProbe:
     belong here. Those are collected by the thin launcher on the host.
     """
 
-    def __init__(self, db: Session, *, now: datetime | None = None) -> None:
+    def __init__(
+        self,
+        db: Session,
+        *,
+        config: Settings = settings,
+        now: datetime | None = None,
+    ) -> None:
         self._db = db
+        self._config = config
         self._now = _aware_utc(now or datetime.now(UTC))
 
     def read_status(self) -> ApplicationRuntimeStatus:
@@ -56,12 +63,12 @@ class SqlAlchemyApplicationRuntimeProbe:
 
         persistence_name = (
             "sqlite"
-            if settings.database_url.startswith("sqlite")
+            if self._config.database_url.startswith("sqlite")
             else "postgresql"
         )
         graph_name = (
             "ladybugdb"
-            if settings.ladybug_graph_preview_enabled
+            if self._config.graph_provider == "ladybug"
             else "neo4j"
         )
 
@@ -129,7 +136,7 @@ class SqlAlchemyApplicationRuntimeProbe:
         revision_query = (
             "SELECT source_revision FROM angmoo_schema_version "
             "WHERE singleton_key = 1"
-            if settings.database_url.startswith("sqlite")
+            if self._config.database_url.startswith("sqlite")
             else "SELECT version_num FROM alembic_version"
         )
         try:
@@ -306,11 +313,11 @@ class SqlAlchemyApplicationRuntimeProbe:
             else 0.0
         )
 
-        if not settings.graph_projection_enabled:
+        if not self._config.graph_projection_enabled:
             projector_state = RuntimeComponentState.NOT_AVAILABLE
             graph_state = RuntimeComponentState.NOT_AVAILABLE
         else:
-            graph_available = _graph_backend_available()
+            graph_available = _graph_backend_available(self._config)
             degraded = (
                 not graph_available
                 or failed_count > 0
@@ -351,7 +358,9 @@ class SqlAlchemyApplicationRuntimeProbe:
     ) -> tuple[ActivityRuntimeStatus, ProviderUsageRuntimeStatus]:
         if owner_user_id is None:
             return ActivityRuntimeStatus(), ProviderUsageRuntimeStatus(
-                kill_switch_enabled=settings.AGENT_ACTIVITY_MAINTENANCE_ENABLED
+                kill_switch_enabled=(
+                    self._config.AGENT_ACTIVITY_MAINTENANCE_ENABLED
+                )
             )
         rows = self._db.execute(
             text(
@@ -407,7 +416,9 @@ class SqlAlchemyApplicationRuntimeProbe:
         return activity, ProviderUsageRuntimeStatus(
             recent_call_count=provider_call_count,
             recent_failure_class=recent_failure_class,
-            kill_switch_enabled=settings.AGENT_ACTIVITY_MAINTENANCE_ENABLED,
+            kill_switch_enabled=(
+                self._config.AGENT_ACTIVITY_MAINTENANCE_ENABLED
+            ),
         )
 
 
@@ -441,18 +452,21 @@ def _installation_state(
     return InstallationState.READY
 
 
-def _graph_backend_available() -> bool:
+def _graph_backend_available(config: Settings = settings) -> bool:
     # LadybugDB is embedded in the single backend process. Its in-process
     # projector observation and durable outbox errors are the authoritative
     # runtime failure signals; probing it by opening a second writer would
     # contend with the process-owned writer lock.
-    if settings.ladybug_graph_preview_enabled:
+    if (
+        config.graph_provider == "ladybug"
+        or config.ladybug_graph_preview_enabled
+    ):
         return True
-    return _neo4j_available()
+    return _neo4j_available(config)
 
 
-def _neo4j_available() -> bool:
-    parsed = urlparse(settings.NEO4J_URI)
+def _neo4j_available(config: Settings) -> bool:
+    parsed = urlparse(config.NEO4J_URI)
     if not parsed.hostname:
         return False
     port = parsed.port or 7687

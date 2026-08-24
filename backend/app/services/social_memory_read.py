@@ -233,7 +233,12 @@ def get_owner_diagnostics(
         oldest_pending_age = None
 
     graph_provider: relationships.GraphProvider = (
-        "ladybug" if config.ladybug_graph_preview_enabled else "neo4j"
+        "ladybug"
+        if (
+            config.graph_provider == "ladybug"
+            or config.ladybug_graph_preview_enabled
+        )
+        else "neo4j"
     )
     graph_gateway = SqlAlchemyRelationshipGraphReadGateway(
         db,

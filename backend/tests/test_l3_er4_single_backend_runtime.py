@@ -325,7 +325,7 @@ def test_projector_publishes_process_graph_client_for_its_exact_lifetime(
     monkeypatch.setattr(
         single_backend_workers,
         "graph_client_from_settings",
-        lambda: client,
+        lambda _config=settings: client,
     )
     monkeypatch.setattr(
         single_backend_workers,

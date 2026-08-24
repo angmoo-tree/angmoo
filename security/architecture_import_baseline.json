@@ -1,7 +1,7 @@
 {
-  "edge_count": 927,
-  "external_import_count": 1481,
-  "module_count": 434,
+  "edge_count": 936,
+  "external_import_count": 1494,
+  "module_count": 436,
   "modules": [
     {
       "external_imports": [],
@@ -1424,6 +1424,7 @@
       "external_imports": [
         "collections.abc",
         "sqlalchemy",
+        "sqlalchemy.engine",
         "sqlalchemy.orm"
       ],
       "imports": [
@@ -4067,6 +4068,7 @@
         "app.core.request_limits",
         "app.core.startup_security",
         "app.cruds.community",
+        "app.runtime.configuration",
         "app.runtime.single_backend_components",
         "app.services.hosted_configuration"
       ],
@@ -4091,8 +4093,46 @@
     {
       "external_imports": [
         "__future__",
+        "dataclasses",
+        "enum",
+        "pathlib",
+        "sqlalchemy.engine",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.config",
+        "app.core.db",
+        "app.domains.identity.application.local_owner",
+        "app.domains.identity.infrastructure.sqlalchemy_identity_repository",
+        "app.domains.runtime.ports.runtime_data_path",
+        "app.runtime.persistence.runtime_data_path"
+      ],
+      "module": "app.runtime.configuration",
+      "path": "backend/app/runtime/configuration.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "argparse",
-        "collections.abc",
+        "pathlib",
+        "secrets",
+        "uvicorn"
+      ],
+      "imports": [
+        "app.public_main",
+        "app.runtime.configuration",
+        "app.runtime.persistence.runtime_data_path",
+        "app.runtime.persistence.sqlite_database"
+      ],
+      "module": "app.runtime.contributor_backend",
+      "path": "backend/app/runtime/contributor_backend.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "argparse",
         "ctypes",
         "json",
         "os",
@@ -4106,11 +4146,9 @@
         "uvicorn"
       ],
       "imports": [
-        "app.core.db",
         "app.core.desktop_loopback",
-        "app.domains.identity.application.local_owner",
-        "app.domains.identity.infrastructure.sqlalchemy_identity_repository",
         "app.public_main",
+        "app.runtime.configuration",
         "app.runtime.migrations.local_app_data",
         "app.runtime.persistence.runtime_data_path",
         "app.runtime.persistence.sqlite_database"
@@ -4447,8 +4485,10 @@
         "__future__",
         "asyncio",
         "collections.abc",
+        "functools",
         "logging",
-        "threading"
+        "threading",
+        "typing"
       ],
       "imports": [
         "app.compatibility.runtime.single_backend_workers",

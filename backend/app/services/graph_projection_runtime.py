@@ -64,7 +64,10 @@ def borrow_process_graph_client(
 
     if (
         config.LOCAL_RUNTIME_COMPONENT_MODE != "in_process"
-        or not config.ladybug_graph_preview_enabled
+        or (
+            config.graph_provider != "ladybug"
+            and not config.ladybug_graph_preview_enabled
+        )
     ):
         return None
     with _process_client_lock:
@@ -78,7 +81,10 @@ def graph_client_from_settings(
 ) -> RelationshipProjectionPort:
     if require_enabled and not config.graph_projection_enabled:
         raise GraphClientError("graph_disabled")
-    if config.ladybug_graph_preview_enabled:
+    if (
+        config.graph_provider == "ladybug"
+        or config.ladybug_graph_preview_enabled
+    ):
         return LadybugRelationshipProjection(
             database_root=config.ladybug_database_root,
         )

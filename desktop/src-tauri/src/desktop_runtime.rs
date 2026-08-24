@@ -250,12 +250,11 @@ pub fn start(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> 
             &runtime_root_argument,
             "--launch-id",
             &launch_id,
+            "--runtime-profile",
+            ProductDataPaths::runtime_profile(),
         ])
         .env("DESKTOP_LAUNCH_TOKEN", &token)
-        .env("DESKTOP_ALLOWED_ORIGIN", DESKTOP_ORIGIN)
-        .env("BROWSER_SESSION_ALLOWED_ORIGINS", DESKTOP_ORIGIN)
-        .env("API_DOCS_ENABLED", "false")
-        .env("SIGNUP_ENABLED", "false");
+        .env("DESKTOP_ALLOWED_ORIGIN", DESKTOP_ORIGIN);
     let (mut receiver, child) = command
         .spawn()
         .map_err(|_| "desktop_sidecar_spawn_failed")?;

@@ -295,9 +295,10 @@ $stages += Complete-Stage '04a_product_host_static_copy_not_executed' @($stage4a
     canonical_user_data_used = $false
 }
 
-# 4. A dedicated host starts the real PyInstaller sidecar with the same three
-# launcher arguments and loopback token contract. Supplying runtime-root
-# directly is what makes this stage truly isolated from canonical user data.
+# 4. A dedicated host starts the real PyInstaller sidecar with the reviewed
+# data-root, legacy-root, runtime-root, launch-id, typed runtime-profile, and
+# loopback token contract. Supplying the isolated data root directly keeps this
+# stage separate from canonical user data.
 $stage4 = Join-Path $work '04-real-runtime'
 $stage4RuntimeRoot = Join-Path $stage4 'isolated-data\runtime'
 New-Item -ItemType Directory -Force -Path $stage4,$stage4RuntimeRoot | Out-Null

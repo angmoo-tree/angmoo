@@ -114,14 +114,25 @@ docker compose up -d
 
 ### Contributor development
 
-Contributors build the same Dockerfiles from the checked-out source and enable
-Compose Watch:
+The canonical contributor runtime uses the same SQLite, LadybugDB, and
+in-process scheduler/projector composition as the installed product. Start it
+with an explicit checkout-local data root, then run the Next.js development
+frontend in a second terminal:
 
-```bash
-docker compose -f compose.yml -f compose.dev.yml up --watch
+```powershell
+cd backend
+uv run python -m app.runtime.contributor_backend --data-root ..\.angmoo-dev
+
+cd ..\frontend
+pnpm dev
 ```
 
-See `CONTRIBUTING.md` for container-internal tests, lint, migration, and release
+This development path does not read or modify `%LOCALAPPDATA%\Angmoo` and does
+not select PostgreSQL or Neo4j from parent-shell environment variables. The
+six-service Compose path remains temporarily available only during the ER7
+rollback window and is removed in the separately reviewed legacy-removal PR.
+
+See `CONTRIBUTING.md` for backend tests, frontend lint/build, migration, and release
 checks. See `docs/public/local-runtime.md` for the lifecycle contract and
 `docs/public/container-release.md` for the tag-only GHCR release Gate.
 ## Local checks
