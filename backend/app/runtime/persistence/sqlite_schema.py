@@ -14,7 +14,16 @@ from app.core.db import Base
 SQLITE_SCHEMA_VERSION = 1
 SOURCE_ALEMBIC_REVISION = "20260819_0082"
 SOURCE_ALEMBIC_MIGRATION_COUNT = 81
-EXPECTED_CANONICAL_TABLE_COUNT = 83
+LEGACY_MIGRATION_SOURCE_TABLE_COUNT = 83
+LEGACY_MIGRATION_TARGET_ONLY_TABLES = frozenset(
+    {
+        "world_package_exports",
+        "world_package_import_id_maps",
+        "world_package_imports",
+        "world_package_sources",
+    }
+)
+EXPECTED_CANONICAL_TABLE_COUNT = 87
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 
 
@@ -92,6 +101,8 @@ def _normalize_sql(value: str) -> str:
 
 __all__ = [
     "EXPECTED_CANONICAL_TABLE_COUNT",
+    "LEGACY_MIGRATION_SOURCE_TABLE_COUNT",
+    "LEGACY_MIGRATION_TARGET_ONLY_TABLES",
     "SCHEMA_VERSION_TABLE",
     "SOURCE_ALEMBIC_MIGRATION_COUNT",
     "SOURCE_ALEMBIC_REVISION",

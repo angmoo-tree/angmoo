@@ -57,10 +57,31 @@ class SqlAlchemyOwnerControlledIdentityRepository:
         current_user_id: str,
         profile: OwnerControlledProfile,
     ) -> OwnerControlledIdentitySnapshot:
+        try:
+            character, world_character = self.seed_create(
+                world_id=world_id,
+                current_user_id=current_user_id,
+                profile=profile,
+            )
+            self._db.commit()
+        except IntegrityError as exc:
+            self._db.rollback()
+            raise OwnerControlledIdentityConflictError(world_id) from exc
+        self._db.refresh(character)
+        self._db.refresh(world_character)
+        return _snapshot(character, world_character)
+
+    def seed_create(
+        self,
+        *,
+        world_id: str,
+        current_user_id: str,
+        profile: OwnerControlledProfile,
+    ) -> tuple[Character, WorldCharacter]:
+        """Flush owner-controlled identity rows under a caller-owned UoW."""
+
         self._require_local_owner(current_user_id)
-        membership = self._require_owned_world_membership(
-            world_id, current_user_id
-        )
+        membership = self._require_owned_world_membership(world_id, current_user_id)
         self._validate_role(world_id, profile.role_key)
         if self._find_identity(world_id, current_user_id) is not None:
             raise OwnerControlledIdentityConflictError(world_id)
@@ -109,20 +130,12 @@ class SqlAlchemyOwnerControlledIdentityRepository:
                 character_id=character_id,
                 world_character_id=world_character_id,
                 selected_at=datetime.now(UTC),
-                idempotency_key=(
-                    f"owner-controlled:{world_id}:{current_user_id}"
-                ),
+                idempotency_key=f"owner-controlled:{world_id}:{current_user_id}",
                 version=1,
             )
         )
-        try:
-            self._db.commit()
-        except IntegrityError as exc:
-            self._db.rollback()
-            raise OwnerControlledIdentityConflictError(world_id) from exc
-        self._db.refresh(character)
-        self._db.refresh(world_character)
-        return _snapshot(character, world_character)
+        self._db.flush()
+        return character, world_character
 
     def update(
         self,

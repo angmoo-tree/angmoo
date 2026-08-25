@@ -23,6 +23,7 @@ from app.runtime.migrations.release_candidate import (
     RuntimeGenerationController,
     SyntheticReleaseCandidateBackup,
 )
+from app.runtime.persistence.sqlite_schema import SOURCE_ALEMBIC_REVISION
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
 from app.services.graph_projection_replay import (
     GraphProjectionReplayService,
@@ -101,7 +102,8 @@ def test_postgres_to_installed_runtime_roundtrip(
         source_metadata=Base.metadata,
         data_paths=StaticRuntimeDataPath(runtime_root),
         migration_source=AlembicMigrationSource(
-            BACKEND_ROOT / "app" / "alembic" / "versions"
+            BACKEND_ROOT / "app" / "alembic" / "versions",
+            head_revision=SOURCE_ALEMBIC_REVISION,
         ),
         conversion_inventory_path=(
             REPOSITORY_ROOT

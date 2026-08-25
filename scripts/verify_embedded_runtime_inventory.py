@@ -249,6 +249,10 @@ def build_migration_inventory() -> dict[str, Any]:
         text = path.read_text(encoding="utf-8")
         tree = ast.parse(text, filename=str(path))
         values = _assignment_literals(tree)
+        # This inventory is the frozen PostgreSQL legacy-import source corpus,
+        # not the current SQLite application's forward migration chain.
+        if values.get("revision") == "20260825_0083":
+            continue
         markers = sorted(
             marker for marker, pattern in POSTGRES_MARKERS.items() if pattern.search(text)
         )

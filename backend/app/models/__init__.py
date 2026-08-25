@@ -95,6 +95,12 @@ from app.domains.manual_social.infrastructure.sqlalchemy_models import (
     OwnerManualInboxCandidate,
     OwnerManualSocialWrite,
 )
+from app.domains.world_packages.infrastructure.sqlalchemy_models import (
+    WorldPackageExport,
+    WorldPackageImport,
+    WorldPackageImportIdMap,
+    WorldPackageSource,
+)
 
 __all__ = [
     "AdminAuditLog",
@@ -180,4 +186,8 @@ __all__ = [
     "SocialEventEvidence",
     "OwnerManualInboxCandidate",
     "OwnerManualSocialWrite",
+    "WorldPackageExport",
+    "WorldPackageImport",
+    "WorldPackageImportIdMap",
+    "WorldPackageSource",
 ]

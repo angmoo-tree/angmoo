@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import datetime, timezone
 import re
 import unicodedata
@@ -24,6 +25,13 @@ _T = TypeVar("_T")
 
 class UserIdentity(Protocol):
     id: str
+
+
+@dataclass(frozen=True, slots=True)
+class WorldSeedOutcome:
+    world: models.World
+    membership: models.WorldMembership
+    replayed: bool
 
 
 class WorldServiceError(Exception):
@@ -389,12 +397,16 @@ def _creator_context(
     )
 
 
-def create_world(
+def seed_world(
     db: Session,
     *,
     user: UserIdentity,
     data: schemas.WorldDraftCreate,
-) -> schemas.WorldCreatorContextRead:
+    status: str = "draft",
+    membership_reason: str = "world_created",
+) -> WorldSeedOutcome:
+    """Flush a World aggregate without owning commit or rollback."""
+
     existing = db.scalar(
         select(models.World).where(
             models.World.owner_user_id == user.id,
@@ -405,7 +417,7 @@ def create_world(
         membership = get_active_membership(db, world_id=existing.id, user_id=user.id)
         if membership is None or membership.role != "owner":
             raise WorldMembershipRequiredError(existing.id)
-        return _creator_context(db, world=existing, membership=membership)
+        return WorldSeedOutcome(existing, membership, True)
 
     world_id = uuid7_string()
     world = models.World(
@@ -424,7 +436,7 @@ def create_world(
         language=data.language,
         visibility=data.visibility,
         join_policy=data.join_policy,
-        status="draft",
+        status=status,
         definition_version=1,
         row_version=1,
         contract_version=world_definitions.WORLD_CONTRACT_VERSION,
@@ -442,24 +454,40 @@ def create_world(
         requested_by_user_id=user.id,
         approved_by_user_id=user.id,
         joined_at=datetime.now(timezone.utc),
-        reason="world_created",
+        reason=membership_reason,
     )
     db.add_all([world, membership])
+    db.flush()
+    _sync_optional_definition(
+        db,
+        world=world,
+        data=schemas.WorldUpdate(
+            row_version=1,
+            places=data.places,
+            roles=data.roles,
+            daypart_profiles=data.daypart_profiles,
+            rules=data.rules,
+            glossary=data.glossary,
+        ),
+    )
+    db.flush()
+    world_definitions.refresh_world_contract(db, world)
+    db.flush()
+    return WorldSeedOutcome(world, membership, False)
+
+
+def create_world(
+    db: Session,
+    *,
+    user: UserIdentity,
+    data: schemas.WorldDraftCreate,
+) -> schemas.WorldCreatorContextRead:
     try:
-        db.flush()
-        _sync_optional_definition(
-            db,
-            world=world,
-            data=schemas.WorldUpdate(
-                row_version=1,
-                places=data.places,
-                roles=data.roles,
-                daypart_profiles=data.daypart_profiles,
-                rules=data.rules,
-                glossary=data.glossary,
-            ),
-        )
-        world_definitions.refresh_world_contract(db, world)
+        outcome = seed_world(db, user=user, data=data)
+        if outcome.replayed:
+            return _creator_context(
+                db, world=outcome.world, membership=outcome.membership
+            )
         db.commit()
     except IntegrityError as exc:
         db.rollback()
@@ -478,8 +506,10 @@ def create_world(
                     db, world=replay, membership=replay_membership
                 )
         raise exc
-    db.refresh(world)
-    return _creator_context(db, world=world, membership=membership)
+    db.refresh(outcome.world)
+    return _creator_context(
+        db, world=outcome.world, membership=outcome.membership
+    )
 
 
 def get_creator_context(

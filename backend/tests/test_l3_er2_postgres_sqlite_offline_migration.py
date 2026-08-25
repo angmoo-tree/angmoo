@@ -28,6 +28,8 @@ from app.runtime.persistence.sqlite_codecs import (
 )
 from app.runtime.persistence.sqlite_schema import (
     EXPECTED_CANONICAL_TABLE_COUNT,
+    LEGACY_MIGRATION_SOURCE_TABLE_COUNT,
+    LEGACY_MIGRATION_TARGET_ONLY_TABLES,
     SOURCE_ALEMBIC_MIGRATION_COUNT,
     SOURCE_ALEMBIC_REVISION,
     build_sqlite_baseline_metadata,
@@ -52,6 +54,13 @@ def _source(tmp_path: Path) -> tuple[Engine, MetaData]:
     )
     metadata.create_all(engine)
     with engine.begin() as connection:
+        for table_name in (
+            "world_package_import_id_maps",
+            "world_package_imports",
+            "world_package_exports",
+            "world_package_sources",
+        ):
+            connection.exec_driver_sql(f"DROP TABLE {table_name}")
         connection.exec_driver_sql(
             "CREATE TABLE alembic_version (version_num VARCHAR(32) NOT NULL PRIMARY KEY)"
         )
@@ -74,7 +83,9 @@ def _dry_run(
         source_engine=source_engine,
         source_metadata=source_metadata,
         data_paths=StaticRuntimeDataPath(runtime_root),
-        migration_source=AlembicMigrationSource(VERSIONS_PATH),
+        migration_source=AlembicMigrationSource(
+            VERSIONS_PATH, head_revision=SOURCE_ALEMBIC_REVISION
+        ),
         conversion_inventory_path=CONVERSION_INVENTORY,
         generation=generation,
         app_version="0.3.0",
@@ -323,6 +334,17 @@ def test_empty_offline_dry_run_freezes_all_tables_and_lineage(tmp_path: Path) ->
     assert report.manifest.source_migration_count == SOURCE_ALEMBIC_MIGRATION_COUNT
     assert len(report.manifest.tables) == EXPECTED_CANONICAL_TABLE_COUNT
     assert all(table.row_count == 0 for table in report.manifest.tables)
+    assert (
+        EXPECTED_CANONICAL_TABLE_COUNT
+        == LEGACY_MIGRATION_SOURCE_TABLE_COUNT
+        + len(LEGACY_MIGRATION_TARGET_ONLY_TABLES)
+    )
+    summaries = {table.table_name: table for table in report.manifest.tables}
+    assert set(LEGACY_MIGRATION_TARGET_ONLY_TABLES) <= set(summaries)
+    assert all(
+        summaries[table_name].row_count == 0
+        for table_name in LEGACY_MIGRATION_TARGET_ONLY_TABLES
+    )
     assert report.source_read_only is True
     assert report.production_switched is False
     assert report.foreign_key_violation_count == 0
@@ -525,7 +547,9 @@ def test_bad_revision_and_non_postgresql_source_fail_before_target_creation(
         source_engine=source_engine,
         source_metadata=metadata,
         data_paths=StaticRuntimeDataPath(tmp_path / "strict-runtime"),
-        migration_source=AlembicMigrationSource(VERSIONS_PATH),
+        migration_source=AlembicMigrationSource(
+            VERSIONS_PATH, head_revision=SOURCE_ALEMBIC_REVISION
+        ),
         conversion_inventory_path=CONVERSION_INVENTORY,
         generation="strict",
         app_version="0.3.0",

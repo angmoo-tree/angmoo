@@ -28,7 +28,7 @@ from app.domains.runtime.domain.installation_state import (
 )
 
 
-RUNTIME_MIGRATION_HEAD = "20260819_0082"
+RUNTIME_MIGRATION_HEAD = "20260825_0083"
 LOCAL_INSTALLATION_KEY = "local-installation"
 SCHEDULER_SINGLETON_KEY = "resident-tick-scheduler"
 RECENT_PROVIDER_WINDOW = timedelta(hours=1)

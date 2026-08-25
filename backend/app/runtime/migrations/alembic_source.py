@@ -23,8 +23,11 @@ def _literal_assignment(tree: ast.Module, name: str) -> str | None:
 
 
 class AlembicMigrationSource:
-    def __init__(self, versions_path: Path) -> None:
+    def __init__(
+        self, versions_path: Path, *, head_revision: str | None = None
+    ) -> None:
         self._versions_path = versions_path.resolve()
+        self._head_revision = head_revision
 
     def revisions(self) -> tuple[MigrationRevision, ...]:
         revisions: list[MigrationRevision] = []
@@ -46,7 +49,18 @@ class AlembicMigrationSource:
                     sha256=sha256(canonical).hexdigest(),
                 )
             )
-        return tuple(revisions)
+        if self._head_revision is None:
+            return tuple(revisions)
+
+        by_revision = {item.revision: item for item in revisions}
+        selected: set[str] = set()
+        current: str | None = self._head_revision
+        while current is not None:
+            if current in selected or current not in by_revision:
+                raise ValueError("frozen Alembic head is absent or cyclic")
+            selected.add(current)
+            current = by_revision[current].down_revision
+        return tuple(item for item in revisions if item.revision in selected)
 
 
 __all__ = ["AlembicMigrationSource"]

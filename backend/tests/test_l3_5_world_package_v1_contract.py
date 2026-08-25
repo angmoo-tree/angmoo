@@ -291,11 +291,17 @@ def test_world_package_domain_has_no_route_provider_or_framework_dependency() ->
         "app.providers",
         "app.runtime",
         "fastapi",
+        "pathlib",
         "sqlalchemy",
     )
     violations: dict[str, list[str]] = {}
 
-    for path in sorted(root.rglob("*.py")):
+    pure_paths = [
+        root / "public.py",
+        *sorted((root / "domain").rglob("*.py")),
+        *sorted((root / "ports").rglob("*.py")),
+    ]
+    for path in pure_paths:
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         imports: list[str] = []
         for node in ast.walk(tree):

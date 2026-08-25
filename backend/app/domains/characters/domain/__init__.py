@@ -1,0 +1,1 @@
+"""Pure Character domain contracts."""
