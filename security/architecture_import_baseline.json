@@ -1,7 +1,7 @@
 {
-  "edge_count": 935,
-  "external_import_count": 1489,
-  "module_count": 435,
+  "edge_count": 943,
+  "external_import_count": 1513,
+  "module_count": 450,
   "modules": [
     {
       "external_imports": [],
@@ -3382,6 +3382,152 @@
       ],
       "module": "app.domains.world_characters.public",
       "path": "backend/app/domains/world_characters/public.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.world_packages",
+      "path": "backend/app/domains/world_packages/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.world_packages.api",
+      "path": "backend/app/domains/world_packages/api/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.world_packages.application",
+      "path": "backend/app/domains/world_packages/application/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.world_packages.domain",
+      "path": "backend/app/domains/world_packages/domain/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "hashlib",
+        "json",
+        "math",
+        "pydantic",
+        "typing",
+        "unicodedata"
+      ],
+      "imports": [],
+      "module": "app.domains.world_packages.domain.canonical",
+      "path": "backend/app/domains/world_packages/domain/canonical.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.world_packages.domain.content",
+      "path": "backend/app/domains/world_packages/domain/content.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "enum"
+      ],
+      "imports": [],
+      "module": "app.domains.world_packages.domain.errors",
+      "path": "backend/app/domains/world_packages/domain/errors.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "enum"
+      ],
+      "imports": [],
+      "module": "app.domains.world_packages.domain.import_state",
+      "path": "backend/app/domains/world_packages/domain/import_state.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "pydantic",
+        "re",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.world_packages.domain.canonical"
+      ],
+      "module": "app.domains.world_packages.domain.manifest",
+      "path": "backend/app/domains/world_packages/domain/manifest.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "re",
+        "typing",
+        "unicodedata"
+      ],
+      "imports": [
+        "app.domains.world_packages.domain.errors"
+      ],
+      "module": "app.domains.world_packages.domain.package_policy",
+      "path": "backend/app/domains/world_packages/domain/package_policy.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.world_packages.infrastructure",
+      "path": "backend/app/domains/world_packages/infrastructure/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.world_packages.ports",
+      "path": "backend/app/domains/world_packages/ports/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.world_packages.domain.canonical",
+        "app.domains.world_packages.domain.content",
+        "app.domains.world_packages.domain.errors",
+        "app.domains.world_packages.domain.import_state",
+        "app.domains.world_packages.domain.manifest",
+        "app.domains.world_packages.domain.package_policy"
+      ],
+      "module": "app.domains.world_packages.public",
+      "path": "backend/app/domains/world_packages/public.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.world_packages.schemas",
+      "path": "backend/app/domains/world_packages/schemas/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.world_packages.schemas.v1",
+      "path": "backend/app/domains/world_packages/schemas/v1/__init__.py",
       "wildcard_imports": []
     },
     {

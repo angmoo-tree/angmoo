@@ -1,0 +1,59 @@
+{
+  "additional_generation_guidance": "항구의 일상과 인물의 자율성을 존중합니다.",
+  "banner_alt_text": "달빛 아래 푸른 항구",
+  "banner_asset_ref": null,
+  "daily_life_description": "앵무들이 항구의 가게와 부두를 오가며 서로의 하루를 나눕니다.",
+  "daypart_profiles": [
+    {
+      "available_features": ["market", "pier"],
+      "daypart": "evening",
+      "description": "등불이 켜지고 주민들이 하루의 소식을 나누는 시간",
+      "restricted_features": []
+    }
+  ],
+  "extensions": {},
+  "genre_tags": ["fantasy", "community"],
+  "glossary": [
+    {
+      "meaning": "비늘항구에서 밤마다 켜는 푸른 안내등",
+      "ref": "glossary/scale-lantern",
+      "term": "비늘등"
+    }
+  ],
+  "language": "ko",
+  "name": "비늘항구의 밤",
+  "places": [
+    {
+      "access_role_refs": ["roles/guide"],
+      "available_dayparts": ["evening"],
+      "description": "주민과 여행자가 만나는 중심 부두",
+      "name": "푸른 부두",
+      "ref": "places/blue-pier"
+    }
+  ],
+  "ref": "world",
+  "roles": [
+    {
+      "allowed_activity_scope": ["welcome", "community"],
+      "autonomous_allowed": true,
+      "description": "새 소식과 길을 알려 주는 주민",
+      "name": "항구 안내인",
+      "ref": "roles/guide",
+      "responsibilities": ["방문객 환영", "항구 소식 나누기"]
+    }
+  ],
+  "rules": [
+    {
+      "description": "다른 주민의 사적인 기억을 사실처럼 만들지 않습니다.",
+      "ref": "rules/respect-memory",
+      "rule_kind": "forbid"
+    }
+  ],
+  "schema_version": "world-content-v1",
+  "setting_description": "달빛과 비늘등이 물결에 비치는 작은 판타지 항구입니다.",
+  "source_world_contract_version": "p0-contract-v1.1-world-creator",
+  "source_world_definition_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+  "tagline": "앵무들이 밤의 소식을 나누는 항구",
+  "timezone": "Asia/Seoul",
+  "tone_tags": ["warm", "calm"]
+}

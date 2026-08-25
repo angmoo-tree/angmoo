@@ -13,6 +13,7 @@ PUBLIC_BOUNDARIES = (
     "routines",
     "routine_posts",
 )
+L3_5_PUBLIC_BOUNDARIES = ("world_packages",)
 
 
 def _function_names(path: Path) -> set[str]:
@@ -146,7 +147,7 @@ def test_l3_public_package_anchors_have_no_reverse_dependencies() -> None:
         "sqlalchemy",
     )
 
-    for boundary in PUBLIC_BOUNDARIES:
+    for boundary in (*PUBLIC_BOUNDARIES, *L3_5_PUBLIC_BOUNDARIES):
         path = APP_ROOT / "domains" / boundary / "public.py"
         assert path.is_file(), path
         imports = _imports(path)
@@ -156,3 +157,12 @@ def test_l3_public_package_anchors_have_no_reverse_dependencies() -> None:
             if imported in forbidden_prefixes
             or imported.startswith(tuple(f"{prefix}." for prefix in forbidden_prefixes))
         }
+
+
+def test_l3_5_world_package_boundary_is_documented_and_pure() -> None:
+    contract = REPO_ROOT / "docs" / "architecture" / "l3-5-world-package-v1.md"
+    text = contract.read_text(encoding="utf-8")
+
+    assert "app.domains.world_packages.public" in text
+    assert "zero provider calls" in text
+    assert "no route, DB table, archive/filesystem adapter" in text

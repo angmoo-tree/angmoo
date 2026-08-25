@@ -1,0 +1,138 @@
+{
+  "$defs": {
+    "AutonomousCharacterTemplate": {
+      "additionalProperties": false,
+      "properties": {
+        "avatar_asset_ref": {
+          "anyOf": [
+            {
+              "pattern": "^assets/sha256-[0-9a-f]{64}\\.webp$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Avatar Asset Ref"
+        },
+        "banner_asset_ref": {
+          "anyOf": [
+            {
+              "pattern": "^assets/sha256-[0-9a-f]{64}\\.webp$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Banner Asset Ref"
+        },
+        "display_name": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Display Name",
+          "type": "string"
+        },
+        "extensions": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "maxProperties": 32,
+          "title": "Extensions",
+          "type": "object"
+        },
+        "handle_hint": {
+          "maxLength": 50,
+          "minLength": 1,
+          "title": "Handle Hint",
+          "type": "string"
+        },
+        "one_liner": {
+          "default": "",
+          "maxLength": 200,
+          "title": "One Liner",
+          "type": "string"
+        },
+        "persona_summary": {
+          "default": "",
+          "maxLength": 2000,
+          "title": "Persona Summary",
+          "type": "string"
+        },
+        "personality": {
+          "default": "",
+          "maxLength": 4000,
+          "title": "Personality",
+          "type": "string"
+        },
+        "ref": {
+          "pattern": "^characters/[a-z][a-z0-9-]{0,63}$",
+          "title": "Ref",
+          "type": "string"
+        },
+        "safety_rules": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 30,
+          "title": "Safety Rules",
+          "type": "array"
+        },
+        "speech_style": {
+          "default": "",
+          "maxLength": 2000,
+          "title": "Speech Style",
+          "type": "string"
+        },
+        "topic_preferences": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 30,
+          "title": "Topic Preferences",
+          "type": "array"
+        },
+        "worldview": {
+          "default": "",
+          "maxLength": 3000,
+          "title": "Worldview",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref",
+        "display_name",
+        "handle_hint"
+      ],
+      "title": "AutonomousCharacterTemplate",
+      "type": "object"
+    },
+    "JsonValue": {}
+  },
+  "$id": "https://angmoo.dev/schemas/world-package/v1/characters.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "characters": {
+      "items": {
+        "$ref": "#/$defs/AutonomousCharacterTemplate"
+      },
+      "maxItems": 50,
+      "title": "Characters",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "characters-content-v1",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "characters"
+  ],
+  "title": "CharactersDocument",
+  "type": "object"
+}

@@ -1,0 +1,7 @@
+{
+  "assets-index.schema.json": "82db46fd0eaf67428fcd4ed2b219ec34dbfbbe678e3db60534c0655e0a438014",
+  "characters.schema.json": "13b10429011c3e64cc7bfca05a52d51df967835a29c5edf7959e663067cf0c55",
+  "manifest.schema.json": "7e0ccafbb815adf07876f71c8aa0a524a02e0a8ee5e2ee9d34dd403b064a61bc",
+  "world-characters.schema.json": "dceafbd6698ca0a969260fa1eb97b20dc4f6751851b725d274144fe644eb6fe9",
+  "world.schema.json": "ca5e090090a33ce495b9045565df4f04bb54e95784e537ef054f53f57f02deb3"
+}
