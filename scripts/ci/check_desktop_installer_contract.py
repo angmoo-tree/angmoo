@@ -161,6 +161,16 @@ def main() -> int:
     _require("--noconsole" in sidecar_build, "packaged sidecar console must be hidden")
     _require("--noupx" in sidecar_build, "packaged sidecar must explicitly disable UPX")
     _require('ValidateSet("OneFile", "OneDir")' in sidecar_build, "sidecar layout comparison is missing")
+    for required in (
+        "sqlite_versions/manifests",
+        "ladybug_versions/manifests",
+        "--add-data $sqliteManifestData",
+        "--add-data $ladybugManifestData",
+    ):
+        _require(
+            required in sidecar_build.replace("\\", "/"),
+            f"packaged embedded migration manifest missing: {required}",
+        )
     _require("--exclude-module psycopg" in sidecar_build, "legacy PostgreSQL driver must be excluded from product sidecar")
     _require("--hidden-import psycopg" not in sidecar_build, "legacy PostgreSQL driver must not be a hidden import")
 
