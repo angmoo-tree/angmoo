@@ -352,6 +352,11 @@ def test_alembic_0082_upgrade_downgrade_upgrade_on_sqlite(
         } <= tables
 
 
-def test_package_portable_seed_surface_does_not_add_api_routes() -> None:
+def test_package_routes_do_not_reenter_the_legacy_api_route_folder() -> None:
     route_root = Path(__file__).resolve().parents[1] / "app/api/v1/routes"
     assert not any("world_package" in path.name for path in route_root.glob("*.py"))
+    domain_route = (
+        Path(__file__).resolve().parents[1]
+        / "app/domains/world_packages/api/routes.py"
+    )
+    assert domain_route.is_file()

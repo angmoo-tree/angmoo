@@ -20,6 +20,7 @@ class WorldPackageReasonCode(StrEnum):
     INTEGRITY_MISMATCH = "world_package_integrity_mismatch"
     LICENSE_MISSING = "world_package_license_missing"
     ASSET_UNSUPPORTED = "world_package_asset_unsupported"
+    ASSET_MISSING = "world_package_asset_missing"
     REFERENCE_INVALID = "world_package_reference_invalid"
     DUPLICATE = "world_package_duplicate"
     TAMPERED_VERSION = "world_package_tampered_version"
@@ -27,6 +28,8 @@ class WorldPackageReasonCode(StrEnum):
     PREVIEW_CHANGED = "world_package_preview_changed"
     COMMIT_CONFLICT = "world_package_commit_conflict"
     COMMIT_FAILED = "world_package_commit_failed"
+    DELIVERY_EXPIRED = "world_package_delivery_expired"
+    DELIVERY_FORBIDDEN = "world_package_delivery_forbidden"
 
 
 class WorldPackageContractError(ValueError):

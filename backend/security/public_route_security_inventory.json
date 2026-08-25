@@ -367,6 +367,11 @@
       "module": "app.api.v1.routes.world_character_setup",
       "endpoint": "get_world_feed_status"
     },
+    "GET /api/v1/world-package-exports/{operation_id}/download": {
+      "access": "owner-only",
+      "module": "app.domains.world_packages.api.routes",
+      "endpoint": "download_world_package_export"
+    },
     "GET /api/v1/worlds/mine": {
       "access": "owner-only",
       "module": "app.domains.device_home.api.routes",
@@ -761,6 +766,16 @@
       "access": "owner-only",
       "module": "app.domains.world_characters.api.routes",
       "endpoint": "create_owner_character"
+    },
+    "POST /api/v1/worlds/{world_id}/package-exports": {
+      "access": "owner-only",
+      "module": "app.domains.world_packages.api.routes",
+      "endpoint": "prepare_world_package_export"
+    },
+    "POST /api/v1/worlds/{world_id}/package-exports/preview": {
+      "access": "owner-only",
+      "module": "app.domains.world_packages.api.routes",
+      "endpoint": "preview_world_package_export"
     },
     "POST /api/v1/worlds/{world_id}/publish": {
       "access": "owner-only",
