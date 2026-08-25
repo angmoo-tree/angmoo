@@ -617,14 +617,14 @@
       "markers": {
         "driver_or_url": [
           1,
-          318,
-          333
+          316,
+          331
         ]
       },
       "owner": "ER2-ER7",
       "path": "backend/app/runtime/migrations/postgres_to_sqlite.py",
       "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
-      "source_sha256": "2a8f57ca24f6909256662153948c3dd5c91cbbfdaad8564a2bf5245a2ba69609",
+      "source_sha256": "68f6d5d124c2c91691f399a63a54584ecfab639d9ed64fe358eed74d2414b9c2",
       "transition_pr": "ER2 PR D/E/G; ER7 PR P"
     },
     {
@@ -654,15 +654,15 @@
     {
       "markers": {
         "driver_or_url": [
-          34,
-          35,
-          37
+          43,
+          44,
+          46
         ]
       },
       "owner": "ER2-ER7",
       "path": "backend/app/runtime/persistence/sqlite_schema.py",
       "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
-      "source_sha256": "c124d928a7bf4b4a7501d7a4353de884a52ecf6d095cb4719dd113d35827a518",
+      "source_sha256": "5129fd9cd18efb91751e93431c76640c745a3b388364e7de1fb76c135a44c204",
       "transition_pr": "ER2 PR D/E/G; ER7 PR P"
     },
     {

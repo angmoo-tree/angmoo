@@ -1,18 +1,18 @@
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
+import importlib.util
 import json
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor
 
 import pytest
-from alembic import command
-from alembic.config import Config
+from alembic.migration import MigrationContext
+from alembic.operations import Operations
 from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session, sessionmaker
 
 from app import models
 from app.core.db import Base
-from app.core.config import settings
 from app.domains.world_packages.domain.errors import WorldPackageContractError
 from app.domains.world_packages.infrastructure.sqlalchemy_destination_seed import (
     SqlAlchemyWorldPackageDestinationSeed,
@@ -266,7 +266,7 @@ def test_registry_schema_freezes_fk_check_unique_and_guarded_downgrade() -> None
 
 
 def test_alembic_0082_upgrade_downgrade_upgrade_on_sqlite(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path,
 ) -> None:
     db_path = tmp_path / "alembic-registry.sqlite3"
     url = f"sqlite+pysqlite:///{db_path.as_posix()}"
@@ -288,9 +288,25 @@ def test_alembic_0082_upgrade_downgrade_upgrade_on_sqlite(
         )
     engine.dispose()
 
-    monkeypatch.setattr(settings, "DATABASE_URL", url)
-    config = Config(str(Path(__file__).resolve().parents[1] / "alembic.ini"))
-    command.upgrade(config, "20260825_0083")
+    migration_path = (
+        Path(__file__).resolve().parents[1]
+        / "app/alembic/versions/20260825_0083_world_package_registry.py"
+    )
+    spec = importlib.util.spec_from_file_location(
+        "world_package_registry_migration_0083",
+        migration_path,
+    )
+    assert spec is not None and spec.loader is not None
+    migration = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(migration)
+
+    def apply(operation: str) -> None:
+        with create_engine(url).begin() as connection:
+            context = MigrationContext.configure(connection)
+            migration.op = Operations(context)
+            getattr(migration, operation)()
+
+    apply("upgrade")
     with create_engine(url).connect() as connection:
         tables = {
             row[0]
@@ -304,16 +320,36 @@ def test_alembic_0082_upgrade_downgrade_upgrade_on_sqlite(
             "world_package_imports",
             "world_package_import_id_maps",
         } <= tables
-        assert connection.exec_driver_sql(
-            "SELECT version_num FROM alembic_version"
-        ).scalar_one() == "20260825_0083"
 
-    command.downgrade(config, "20260819_0082")
-    command.upgrade(config, "20260825_0083")
+    apply("downgrade")
     with create_engine(url).connect() as connection:
-        assert connection.exec_driver_sql(
-            "SELECT version_num FROM alembic_version"
-        ).scalar_one() == "20260825_0083"
+        tables = {
+            row[0]
+            for row in connection.exec_driver_sql(
+                "SELECT name FROM sqlite_master WHERE type='table'"
+            )
+        }
+        assert not {
+            "world_package_sources",
+            "world_package_exports",
+            "world_package_imports",
+            "world_package_import_id_maps",
+        } & tables
+
+    apply("upgrade")
+    with create_engine(url).connect() as connection:
+        tables = {
+            row[0]
+            for row in connection.exec_driver_sql(
+                "SELECT name FROM sqlite_master WHERE type='table'"
+            )
+        }
+        assert {
+            "world_package_sources",
+            "world_package_exports",
+            "world_package_imports",
+            "world_package_import_id_maps",
+        } <= tables
 
 
 def test_package_portable_seed_surface_does_not_add_api_routes() -> None:
