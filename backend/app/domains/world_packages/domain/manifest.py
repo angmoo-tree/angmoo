@@ -40,8 +40,8 @@ class WorldPackageLicense(WorldPackageSchema):
     def _license_ref_requires_text(self) -> "WorldPackageLicense":
         if self.expression.startswith("LicenseRef-") and self.license_text_path is None:
             raise ValueError("LicenseRef expressions require LICENSE.txt")
-        if self.source_url is not None and not self.source_url.startswith(("https://", "http://")):
-            raise ValueError("license source_url must use http or https")
+        if self.source_url is not None and not self.source_url.startswith("https://"):
+            raise ValueError("license source_url must use https")
         return self
 
 

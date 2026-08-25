@@ -8,8 +8,17 @@ from __future__ import annotations
 
 from typing import Protocol
 
+from app.domains.world_packages.domain.export import (
+    WorldPackageMediaCandidate,
+    WorldPackageResolvedAssets,
+)
+
 
 class ManagedPackageAssetPort(Protocol):
+    def resolve_export_assets(
+        self, *, candidates: tuple[WorldPackageMediaCandidate, ...]
+    ) -> WorldPackageResolvedAssets: ...
+
     def stage_verified_asset(
         self, *, content: bytes, sha256: str, media_type: str
     ) -> str: ...

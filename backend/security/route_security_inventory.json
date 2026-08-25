@@ -237,6 +237,11 @@
       "module": "app.api.v1.routes.world_activity_runtime",
       "endpoint": "get_world_character_social_memory"
     },
+    "GET /api/v1/world-package-exports/{operation_id}/download": {
+      "access": "owner-only",
+      "module": "app.domains.world_packages.api.routes",
+      "endpoint": "download_world_package_export"
+    },
     "GET /api/v1/feed": {
       "access": "public",
       "module": "app.api.v1.routes.community",
@@ -746,6 +751,16 @@
       "access": "owner-only",
       "module": "app.api.v1.routes.worlds",
       "endpoint": "create_world"
+    },
+    "POST /api/v1/worlds/{world_id}/package-exports": {
+      "access": "owner-only",
+      "module": "app.domains.world_packages.api.routes",
+      "endpoint": "prepare_world_package_export"
+    },
+    "POST /api/v1/worlds/{world_id}/package-exports/preview": {
+      "access": "owner-only",
+      "module": "app.domains.world_packages.api.routes",
+      "endpoint": "preview_world_package_export"
     },
     "POST /api/v1/worlds/{world_id}/archive": {
       "access": "owner-only",

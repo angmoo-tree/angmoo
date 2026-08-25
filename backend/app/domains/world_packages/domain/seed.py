@@ -10,6 +10,7 @@ from app.domains.world_packages.domain.content import (
     PortableWorldCharacterSeed,
     PortableWorldDefinition,
 )
+from app.domains.world_packages.domain.export import WorldPackageMediaCandidate
 from app.domains.world_packages.domain.errors import (
     WorldPackageContractError,
     WorldPackageReasonCode,
@@ -51,11 +52,12 @@ class WorldPackageDestinationSeedResult:
 @dataclass(frozen=True, slots=True)
 class WorldPackageSourceSnapshot:
     source_world_id: str
-    package_id: str
-    package_version: int
+    source_fingerprint: str
     world: PortableWorldDefinition
     characters: tuple[AutonomousCharacterTemplate, ...]
     world_characters: tuple[PortableWorldCharacterSeed, ...]
+    media_candidates: tuple[WorldPackageMediaCandidate, ...] = ()
+    excluded_owner_controlled_characters: int = 0
 
 
 @dataclass(frozen=True, slots=True)

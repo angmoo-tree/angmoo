@@ -8,7 +8,9 @@ from app.domains.world_packages.domain.seed import WorldPackageSourceSnapshot
 
 
 class WorldPackageSourceSnapshotPort(Protocol):
-    def snapshot(self, *, source_world_id: str) -> WorldPackageSourceSnapshot: ...
+    def snapshot(
+        self, *, source_world_id: str, local_owner_id: str
+    ) -> WorldPackageSourceSnapshot: ...
 
 
 __all__ = ["WorldPackageSourceSnapshotPort"]

@@ -283,7 +283,7 @@ def test_v1_trust_labels_do_not_claim_a_verified_author() -> None:
     }
 
 
-def test_world_package_domain_has_no_route_provider_or_framework_dependency() -> None:
+def test_world_package_domain_and_ports_have_no_framework_dependency() -> None:
     root = APP_ROOT / "domains" / "world_packages"
     forbidden_imports = (
         "app.api",
@@ -319,7 +319,7 @@ def test_world_package_domain_has_no_route_provider_or_framework_dependency() ->
             violations[path.relative_to(APP_ROOT).as_posix()] = forbidden
 
     assert violations == {}
-    assert not (root / "api" / "routes.py").exists()
+    assert (root / "api" / "routes.py").exists()
 
 
 def test_public_boundary_exports_only_world_package_domain_modules() -> None:

@@ -1,7 +1,7 @@
 """Public contract for World Package v1.
 
-The public surface remains storage-neutral. PR B adds caller-owned seed and
-registry contracts while routes, archive I/O, and UI remain later work.
+The public surface remains storage-neutral. PR C adds deterministic export
+contracts while API and filesystem adapters remain behind the domain boundary.
 """
 
 from app.domains.world_packages.domain.canonical import (
@@ -21,6 +21,18 @@ from app.domains.world_packages.domain.content import (
 from app.domains.world_packages.domain.errors import (
     WorldPackageContractError,
     WorldPackageReasonCode,
+)
+from app.domains.world_packages.domain.export import (
+    WorldPackageBuiltArchive,
+    WorldPackageExportPreview,
+    WorldPackageExportRegistryRecord,
+    WorldPackageMediaCandidate,
+    WorldPackageResolvedAsset,
+    WorldPackageResolvedAssets,
+    WorldPackageSourceIdentity,
+    WorldPackageVersionPreview,
+    recommended_world_package_filename,
+    world_package_seed_digest,
 )
 from app.domains.world_packages.domain.import_state import (
     WorldPackageImportState,
@@ -55,21 +67,31 @@ __all__ = [
     "PortableWorldDefinition",
     "WorldCharactersDocument",
     "WorldPackageCompatibility",
+    "WorldPackageBuiltArchive",
     "WorldPackageContractError",
     "WorldPackageDestinationSeedRequest",
     "WorldPackageDestinationSeedResult",
     "WorldPackageEntry",
+    "WorldPackageExportPreview",
+    "WorldPackageExportRegistryRecord",
     "WorldPackageImportState",
     "WorldPackageImportIdMapping",
     "WorldPackageImportRegistryRecord",
     "WorldPackageLicense",
     "WorldPackageManifest",
+    "WorldPackageMediaCandidate",
     "WorldPackagePolicy",
     "WorldPackageProducer",
     "WorldPackageReasonCode",
+    "WorldPackageResolvedAsset",
+    "WorldPackageResolvedAssets",
+    "WorldPackageSourceIdentity",
     "WorldPackageSourceSnapshot",
     "WorldPackageTrustState",
+    "WorldPackageVersionPreview",
     "canonical_entry_index_digest",
     "canonical_json_bytes",
     "canonical_sha256",
+    "recommended_world_package_filename",
+    "world_package_seed_digest",
 ]

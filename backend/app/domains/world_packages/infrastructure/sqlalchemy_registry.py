@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import timezone
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -10,9 +12,16 @@ from app.domains.world_packages.domain.seed import (
     WorldPackageImportIdMapping,
     WorldPackageImportRegistryRecord,
 )
+from app.domains.world_packages.domain.export import (
+    WorldPackageExportRegistryRecord,
+    WorldPackageSourceIdentity,
+    WorldPackageVersionPreview,
+)
 from app.domains.world_packages.infrastructure.sqlalchemy_models import (
+    WorldPackageExport,
     WorldPackageImport,
     WorldPackageImportIdMap,
+    WorldPackageSource,
 )
 
 
@@ -57,6 +66,96 @@ class SqlAlchemyWorldPackageRegistry:
             id_mappings=mappings,
         )
 
+    def resolve_export_source(
+        self, *, source_world_id: str
+    ) -> WorldPackageSourceIdentity:
+        item = self._db.scalar(
+            select(WorldPackageSource).where(
+                WorldPackageSource.source_world_id == source_world_id
+            )
+        )
+        if item is None:
+            item = WorldPackageSource(
+                package_id=uuid7_string(),
+                source_world_id=source_world_id,
+                next_version=1,
+            )
+            self._db.add(item)
+            self._db.flush()
+            self._db.refresh(item)
+        created_at = item.created_at
+        if created_at.tzinfo is None:
+            created_at = created_at.replace(tzinfo=timezone.utc)
+        else:
+            created_at = created_at.astimezone(timezone.utc)
+        return WorldPackageSourceIdentity(
+            package_id=item.package_id,
+            next_version=item.next_version,
+            created_at=created_at,
+        )
+
+    def preview_export_version(
+        self, *, package_id: str, seed_digest: str
+    ) -> WorldPackageVersionPreview:
+        existing = self._db.scalar(
+            select(WorldPackageExport).where(
+                WorldPackageExport.package_id == package_id,
+                WorldPackageExport.seed_digest == seed_digest,
+            )
+        )
+        if existing is not None:
+            return WorldPackageVersionPreview(
+                package_version=existing.package_version,
+                replayed_seed=True,
+            )
+        source = self._db.get(WorldPackageSource, package_id)
+        if source is None:
+            raise RuntimeError("world_package_source_missing")
+        return WorldPackageVersionPreview(
+            package_version=source.next_version,
+            replayed_seed=False,
+        )
+
+    def record_export_delivery(
+        self, record: WorldPackageExportRegistryRecord
+    ) -> WorldPackageExportRegistryRecord:
+        existing = self._db.scalar(
+            select(WorldPackageExport).where(
+                WorldPackageExport.package_id == record.package_id,
+                WorldPackageExport.package_version == record.package_version,
+            )
+        )
+        if existing is not None:
+            if (
+                existing.seed_digest != record.seed_digest
+                or existing.manifest_digest != record.manifest_digest
+                or existing.source_world_id != record.source_world_id
+                or existing.license_expression != record.license_expression
+            ):
+                raise RuntimeError("world_package_export_version_conflict")
+            return _export_record(existing)
+
+        source = self._db.get(WorldPackageSource, record.package_id)
+        if source is None or source.source_world_id != record.source_world_id:
+            raise RuntimeError("world_package_source_missing")
+        if source.next_version != record.package_version:
+            raise RuntimeError("world_package_export_version_conflict")
+        row = WorldPackageExport(
+            export_id=record.export_id,
+            package_id=record.package_id,
+            package_version=record.package_version,
+            source_world_id=record.source_world_id,
+            seed_digest=record.seed_digest,
+            manifest_digest=record.manifest_digest,
+            license_expression=record.license_expression,
+            delivery_mode=record.delivery_mode,
+            delivered_at=record.delivered_at,
+        )
+        self._db.add(row)
+        source.next_version += 1
+        self._db.flush()
+        return record
+
     def add_import(self, record: WorldPackageImportRegistryRecord) -> None:
         self._db.add(
             WorldPackageImport(
@@ -73,6 +172,7 @@ class SqlAlchemyWorldPackageRegistry:
             )
         )
         self._db.flush()
+
         self._db.add_all(
             [
                 WorldPackageImportIdMap(
@@ -86,6 +186,23 @@ class SqlAlchemyWorldPackageRegistry:
             ]
         )
         self._db.flush()
+
+
+def _export_record(item: WorldPackageExport) -> WorldPackageExportRegistryRecord:
+    delivered_at = item.delivered_at
+    if delivered_at.tzinfo is None:
+        delivered_at = delivered_at.replace(tzinfo=timezone.utc)
+    return WorldPackageExportRegistryRecord(
+        export_id=item.export_id,
+        package_id=item.package_id,
+        package_version=item.package_version,
+        source_world_id=item.source_world_id,
+        seed_digest=item.seed_digest,
+        manifest_digest=item.manifest_digest,
+        license_expression=item.license_expression,
+        delivery_mode=item.delivery_mode,
+        delivered_at=delivered_at,
+    )
 
 
 __all__ = ["SqlAlchemyWorldPackageRegistry"]

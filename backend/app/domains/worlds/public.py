@@ -38,6 +38,9 @@ from app.domains.worlds.infrastructure.sqlalchemy_world_creator import (
 from app.domains.worlds.infrastructure.generation_context import (
     build_world_generation_context,
 )
+from app.domains.worlds.infrastructure.definition_repository import (
+    world_contract_hash,
+)
 from app.domains.worlds.api.schemas import (
     WorldDaypartProfileInput,
     WorldDraftCreate,
@@ -95,4 +98,5 @@ __all__ = [
     "update_world",
     "upload_world_banner",
     "validate_world_definition",
+    "world_contract_hash",
 ]
