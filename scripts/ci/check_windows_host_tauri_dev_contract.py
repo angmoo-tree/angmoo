@@ -229,6 +229,8 @@ def check_repo(*, root: Path = ROOT) -> list[str]:
         "contributor-docker-bridge",
         "check_windows_host_tauri_dev_contract.py",
         "tauri.contributor-docker.conf.json",
+        'python-version: "3.13.12"',
+        "uv sync --frozen --directory backend --python 3.13.12",
         "--no-bundle",
     ):
         if marker not in workflow:

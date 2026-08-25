@@ -75,14 +75,15 @@ jobs:
       - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
           version: "0.12.5"
-          python-version: "3.13"
+          python-version: "3.13.12"
           enable-cache: false
       - name: Install pinned desktop toolchain
         shell: pwsh
         run: |
           pnpm --dir frontend install --frozen-lockfile
           npm ci --ignore-scripts --prefix desktop
-          uv sync --frozen --directory backend
+          uv python install 3.13.12
+          uv sync --frozen --directory backend --python 3.13.12
           rustup toolchain install 1.97.1 --profile minimal --component rustfmt
           rustup override set 1.97.1 --path desktop\src-tauri
       - name: Verify repository and fail-closed preflight contracts

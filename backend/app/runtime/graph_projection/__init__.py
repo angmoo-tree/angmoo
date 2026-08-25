@@ -2,7 +2,12 @@
 
 from app.runtime.graph_projection.sqlalchemy_outbox import (
     SqlAlchemyProjectionOutbox,
+    SqlAlchemyProjectionReplaySource,
     SqliteProjectionOutbox,
 )
 
-__all__ = ["SqlAlchemyProjectionOutbox", "SqliteProjectionOutbox"]
+__all__ = [
+    "SqlAlchemyProjectionOutbox",
+    "SqlAlchemyProjectionReplaySource",
+    "SqliteProjectionOutbox",
+]

@@ -1,7 +1,7 @@
 {
-  "edge_count": 997,
+  "edge_count": 1002,
   "external_import_count": 1583,
-  "module_count": 472,
+  "module_count": 474,
   "modules": [
     {
       "external_imports": [],
@@ -2332,7 +2332,8 @@
       "imports": [
         "app.domains.relationships.ports.outbox",
         "app.domains.relationships.ports.projection",
-        "app.domains.relationships.ports.query"
+        "app.domains.relationships.ports.query",
+        "app.domains.relationships.ports.replay"
       ],
       "module": "app.domains.relationships.ports",
       "path": "backend/app/domains/relationships/ports/__init__.py",
@@ -2374,9 +2375,22 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [],
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
       "imports": [
         "app.domains.relationships.projection.commands"
+      ],
+      "module": "app.domains.relationships.ports.replay",
+      "path": "backend/app/domains/relationships/ports/replay.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.relationships.projection.commands",
+        "app.domains.relationships.projection.digest"
       ],
       "module": "app.domains.relationships.projection",
       "path": "backend/app/domains/relationships/projection/__init__.py",
@@ -2392,6 +2406,18 @@
       "imports": [],
       "module": "app.domains.relationships.projection.commands",
       "path": "backend/app/domains/relationships/projection/commands.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "json"
+      ],
+      "imports": [
+        "app.domains.relationships.projection.commands"
+      ],
+      "module": "app.domains.relationships.projection.digest",
+      "path": "backend/app/domains/relationships/projection/digest.py",
       "wildcard_imports": []
     },
     {
@@ -4602,6 +4628,7 @@
       "imports": [
         "app.domains.runtime.ports.runtime_data_path",
         "app.integrations.ladybug_projection",
+        "app.runtime.graph_projection.sqlalchemy_outbox",
         "app.runtime.migrations.generation",
         "app.runtime.migrations.ladybug_versions.registry"
       ],
@@ -4619,16 +4646,12 @@
     {
       "external_imports": [
         "__future__",
-        "collections.abc",
-        "pathlib",
-        "sqlalchemy",
-        "typing"
+        "pathlib"
       ],
       "imports": [
-        "app.integrations.ladybug_projection",
-        "app.models",
-        "app.services.graph_projection_commands",
-        "app.services.graph_projection_replay"
+        "app.domains.relationships.ports.replay",
+        "app.domains.relationships.projection.digest",
+        "app.integrations.ladybug_projection"
       ],
       "module": "app.runtime.migrations.ladybug_versions.rebuild",
       "path": "backend/app/runtime/migrations/ladybug_versions/rebuild.py",
@@ -5661,7 +5684,6 @@
       "external_imports": [
         "__future__",
         "datetime",
-        "json",
         "sqlalchemy",
         "sqlalchemy.orm",
         "time",
@@ -5669,6 +5691,7 @@
       ],
       "imports": [
         "app.core.ids",
+        "app.domains.relationships.projection.digest",
         "app.models",
         "app.services.graph_projection_commands",
         "app.services.graph_projection_metrics",

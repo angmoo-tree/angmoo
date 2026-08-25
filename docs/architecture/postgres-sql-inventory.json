@@ -779,14 +779,14 @@
     {
       "markers": {
         "row_lock": [
-          195,
-          275
+          118,
+          198
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/graph_projection_replay.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "c80586d4f10775ac359f7ec5d1e8367c0234743d16a13c510a386cbade3b3b31",
+      "source_sha256": "a1b8ad0582937eb4a06bace95e474713047c507dddaf187e87ef3e249ae715c8",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

@@ -2,16 +2,11 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from pathlib import Path
-from typing import Any
 
-from sqlalchemy import select
-
-from app import models
+from app.domains.relationships.ports.replay import ProjectionReplaySource
+from app.domains.relationships.projection.digest import projection_digest
 from app.integrations.ladybug_projection import LadybugRelationshipProjection
-from app.services.graph_projection_commands import build_projection_command
-from app.services.graph_projection_replay import projection_digest
 
 
 class LadybugRebuildError(RuntimeError):
@@ -21,39 +16,13 @@ class LadybugRebuildError(RuntimeError):
 def rebuild_projection_v1(
     *,
     database_root: Path,
-    session_factory: Callable[[], Any],
+    replay_source: ProjectionReplaySource,
 ) -> dict[str, dict[str, list[str]]]:
     expected_by_world: dict[str, dict[str, list[str]]] = {}
     with LadybugRelationshipProjection(database_root=database_root) as projection:
-        with session_factory() as db:
-            world_ids = tuple(
-                str(value)
-                for value in db.scalars(
-                    select(models.World.id).order_by(models.World.id)
-                )
-            )
-        for world_id in world_ids:
-            with session_factory() as db:
-                outbox_ids = tuple(
-                    str(value)
-                    for value in db.scalars(
-                        select(models.GraphProjectionOutbox.id)
-                        .where(models.GraphProjectionOutbox.world_id == world_id)
-                        .order_by(
-                            models.GraphProjectionOutbox.created_at,
-                            models.GraphProjectionOutbox.id,
-                        )
-                    )
-                )
-            commands = []
-            for outbox_id in outbox_ids:
-                with session_factory() as db:
-                    command = build_projection_command(
-                        db,
-                        outbox_id=outbox_id,
-                        replay_relationship_snapshot=True,
-                    )
-                commands.append(command)
+        for world_id in replay_source.world_ids():
+            commands = replay_source.commands_for_world(world_id)
+            for command in commands:
                 projection.apply(command)
             expected = projection_digest(commands)
             actual = projection.world_digest(world_id)

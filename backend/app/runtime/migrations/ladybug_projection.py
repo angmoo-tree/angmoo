@@ -26,6 +26,9 @@ from app.runtime.migrations.ladybug_versions.registry import (
     rebuild_for_version,
     validate_latest_ladybug_contract,
 )
+from app.runtime.graph_projection.sqlalchemy_outbox import (
+    SqlAlchemyProjectionReplaySource,
+)
 
 
 GRAPH_MANIFEST_NAME = "projection-manifest.json"
@@ -54,7 +57,7 @@ class LadybugProjectionUpgradeCoordinator:
         session_factory: sessionmaker[Session],
     ) -> None:
         self._paths = data_paths.resolve()
-        self._session_factory = session_factory
+        self._replay_source = SqlAlchemyProjectionReplaySource(session_factory)
         self._controller = EmbeddedGenerationController(
             self._paths.graph,
             artifact_relative_path="relationships.lbdb",
@@ -162,7 +165,7 @@ class LadybugProjectionUpgradeCoordinator:
         try:
             builder(
                 database_root=staging,
-                session_factory=self._session_factory,
+                replay_source=self._replay_source,
             )
             with LadybugRelationshipProjection(database_root=staging) as graph:
                 graph.verify_connectivity()
