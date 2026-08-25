@@ -31,7 +31,9 @@ def check_repo(*, root: Path = ROOT) -> list[str]:
         paths = _read(root, "desktop/src-tauri/src/product_paths.rs")
         preflight = _read(root, "scripts/dev/desktop-preflight.ps1")
         launcher = _read(root, "scripts/dev/desktop-dev.ps1")
+        utf8_support = _read(root, "scripts/dev/windows-host-tauri-utf8.ps1")
         smoke = _read(root, "scripts/ci/windows_host_tauri_dev_smoke.ps1")
+        utf8_smoke = _read(root, "scripts/ci/windows_host_tauri_utf8_smoke.ps1")
         codeowners = _read(root, ".github/CODEOWNERS")
         workflow = _read(root, ".github/workflows/windows-host-tauri-dev.yml")
         architecture = _read(
@@ -162,6 +164,38 @@ def check_repo(*, root: Path = ROOT) -> list[str]:
     ):
         if marker not in launcher:
             errors.append(f"one-command lifecycle guard missing: {marker}")
+    for marker in (
+        "Enter-AngmooUtf8NativeCommandScope",
+        "Exit-AngmooUtf8NativeCommandScope",
+        "Invoke-AngmooNativeJsonCommand",
+        "compose_json_decode_failed",
+        "MaximumAttempts = 2",
+        "chars=$CharacterLength",
+        "bytes=$ByteLength",
+        "reason=$Reason",
+    ):
+        if marker not in utf8_support:
+            errors.append(f"UTF-8 native command contract missing: {marker}")
+    for script_name, script in (("preflight", preflight), ("launcher", launcher)):
+        for marker in (
+            "windows-host-tauri-utf8.ps1",
+            "Enter-AngmooUtf8NativeCommandScope",
+            "Exit-AngmooUtf8NativeCommandScope",
+            "finally",
+        ):
+            if marker not in script:
+                errors.append(f"{script_name} UTF-8 scope missing: {marker}")
+    for marker in (
+        "windows-powershell-5.1",
+        "powershell-7",
+        "code_page = 949",
+        "code_page = 65001",
+        "utf8_retry_bound_mismatch",
+        "utf8_failure_leaked_raw_json",
+        "utf8_pipeline_scope_not_restored",
+    ):
+        if marker not in utf8_smoke:
+            errors.append(f"UTF-8 Windows regression case missing: {marker}")
     for forbidden in (
         "docker compose down",
         "--volumes",
@@ -176,12 +210,15 @@ def check_repo(*, root: Path = ROOT) -> list[str]:
         "/desktop/platform/",
         "/scripts/dev/desktop-preflight.ps1",
         "/scripts/dev/desktop-dev.ps1",
+        "/scripts/dev/windows-host-tauri-utf8.ps1",
+        "/scripts/ci/windows_host_tauri_utf8_smoke.ps1",
         "@jingujeon",
     ):
         if protected not in codeowners:
             errors.append(f"platform-shell review boundary missing: {protected}")
     for marker in (
         "windows_host_tauri_dev_smoke.ps1",
+        "windows_host_tauri_utf8_smoke.ps1",
         "contributor-docker-bridge",
         "check_windows_host_tauri_dev_contract.py",
         "tauri.contributor-docker.conf.json",

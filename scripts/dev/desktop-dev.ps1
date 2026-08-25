@@ -6,6 +6,12 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+$utf8Support = Join-Path $PSScriptRoot 'windows-host-tauri-utf8.ps1'
+. $utf8Support
+$utf8Scope = Enter-AngmooUtf8NativeCommandScope
+
+try {
+
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $preflightScript = Join-Path $PSScriptRoot 'desktop-preflight.ps1'
 $composeFiles = @('-f', 'compose.yml', '-f', 'compose.dev.yml')
@@ -39,11 +45,11 @@ function Get-ProtectedDataFingerprint {
 }
 
 function Get-ComposeRecords {
-    $lines = @(& docker compose @composeFiles ps --format json 2>$null)
-    $content = ($lines -join "`n").Trim()
-    if (-not $content) { return @() }
-    if ($content.StartsWith('[')) { return @($content | ConvertFrom-Json) }
-    return @($lines | Where-Object { $_.Trim() } | ForEach-Object { $_ | ConvertFrom-Json })
+    return @(
+        Invoke-AngmooNativeJsonCommand -CommandType 'compose-ps' -AllowEmpty -JsonLines -Command {
+            & docker compose @composeFiles ps --format json 2>$null
+        }
+    )
 }
 
 function Assert-ComposeReady {
@@ -54,9 +60,11 @@ function Assert-ComposeReady {
             throw "docker_service_not_ready:$service"
         }
     }
-    $diagnosticsRaw = & docker compose @composeFiles exec -T backend /usr/local/bin/angmoo-backend-entrypoint contributor-diagnostics
-    if ($LASTEXITCODE -ne 0) { throw 'docker_backend_diagnostics_failed' }
-    $diagnostics = $diagnosticsRaw | ConvertFrom-Json
+    $diagnostics = @(
+        Invoke-AngmooNativeJsonCommand -CommandType 'compose-backend-diagnostics' -Command {
+            & docker compose @composeFiles exec -T backend /usr/local/bin/angmoo-backend-entrypoint contributor-diagnostics 2>$null
+        }
+    )[0]
     if (
         $diagnostics.runtime_profile -ne 'CONTRIBUTOR_EMBEDDED' -or
         $diagnostics.persistence_provider -ne 'sqlite' -or
@@ -64,10 +72,12 @@ function Assert-ComposeReady {
     ) {
         throw 'docker_backend_runtime_contract_mismatch'
     }
-    $healthRaw = & docker compose @composeFiles exec -T backend python -c `
-        "import json,urllib.request; print(json.dumps(json.load(urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=5)), separators=(',', ':')))"
-    if ($LASTEXITCODE -ne 0) { throw 'docker_backend_health_failed' }
-    $health = $healthRaw | ConvertFrom-Json
+    $health = @(
+        Invoke-AngmooNativeJsonCommand -CommandType 'compose-backend-health' -Command {
+            & docker compose @composeFiles exec -T backend python -c `
+                "import json,urllib.request; print(json.dumps(json.load(urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=5)), separators=(',', ':')))" 2>$null
+        }
+    )[0]
     if (
         $health.profile -ne 'CONTRIBUTOR_EMBEDDED' -or
         $health.persistence -ne 'sqlite' -or
@@ -94,7 +104,8 @@ if ($preflightExit -ne 0) {
     if ($preflightOutput) { Write-Host $preflightOutput }
     throw "windows_host_tauri_preflight_failed:$preflightExit"
 }
-$preflight = $preflightOutput | ConvertFrom-Json
+$preflight = @(ConvertFrom-AngmooJsonText -Content (($preflightOutput -join "`n").Trim()) `
+    -FailureCode 'preflight_json_decode_failed')[0]
 if ($preflight.state -ne 'passed') { throw 'windows_host_tauri_preflight_blocked' }
 
 $beforeFingerprint = Get-ProtectedDataFingerprint -Root $protectedDataRoot
@@ -165,3 +176,6 @@ try {
 
 Write-Host 'Angmoo Windows Host Tauri dev stopped cleanly.'
 Write-Host 'Docker frontend/backend and angmoo_contributor_embedded_data were preserved.'
+} finally {
+    Exit-AngmooUtf8NativeCommandScope -State $utf8Scope
+}
