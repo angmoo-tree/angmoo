@@ -287,10 +287,11 @@ uniqueness, and source-reference mapping uniqueness are enforced by SQLite.
 Downgrade is allowed only while all four registry tables are empty; otherwise it
 fails closed so lineage is not silently discarded.
 
-The frozen PostgreSQL legacy migration source remains revision
-`20260819_0082`. Revision `0083` belongs to the SQLite canonical product and is
-not added to the old PostgreSQL input contract. The legacy reader explicitly
-traces only ancestors of its frozen source revision.
+The PostgreSQL offline importer ended before the first public SQLite-only
+release. Revision `20260819_0082` remains immutable provenance for the SQLite
+baseline, while revision `0083` belongs to the current SQLite canonical
+product. Historical revisions are evidence and are not an executable import
+contract.
 
 The PR B ports are intentionally narrower than the later archive workflows:
 

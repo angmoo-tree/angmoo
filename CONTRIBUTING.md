@@ -79,8 +79,8 @@ During the single-maintainer period this is a documented owner review Gate, not
 an impossible self-approval requirement. The final user Phone and wide-window
 screen Gate remains separate from technical CI.
 
-Do not add PostgreSQL/Neo4j server runtime behavior or a second implementation.
-PostgreSQL is allowed only inside the frozen, read-only `LEGACY_MIGRATION` tool;
+Do not add PostgreSQL/Neo4j server runtime behavior, an offline PostgreSQL
+importer, or a second implementation. SQLite is the only canonical store;
 Neo4j parity survives only as static fixtures.
 
 Product-shell changes also run a required Chromium smoke in Core CI. A
@@ -111,7 +111,7 @@ include:
 
 - `backend`
 - `frontend`
-- `legacy-migration`
+- `sqlite-canonical-migration`
 - `local-core-smoke`
 - `local-autonomy-smoke`
 - `local-full-graph` (LadybugDB plus frozen static parity fixtures)

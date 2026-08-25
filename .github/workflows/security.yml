@@ -92,9 +92,8 @@ jobs:
       - name: Install locked dependencies
         shell: bash
         run: |
-          # Audit the complete lock, including the frozen read-only legacy
-          # importer, without adding it to the official embedded runtime.
-          uv sync --frozen --directory backend --extra legacy-migration
+          # Audit the complete SQLite-only product and contributor lock.
+          uv sync --frozen --directory backend
           pnpm --dir frontend install --frozen-lockfile
       - name: Audit vulnerabilities
         shell: bash

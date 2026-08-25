@@ -201,7 +201,6 @@ def create_app(
     runtime_lifespan = lifespan_handler
     process_settings_snapshot: dict[str, object] | None = None
     if runtime_config is not None:
-        runtime_config.require_public_runtime()
         composition = compose_runtime(runtime_config, base_settings=settings)
         runtime_settings = composition.settings
         # Existing service modules retain a reference to the process Settings

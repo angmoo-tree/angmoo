@@ -24,11 +24,10 @@ The installed product runs Tauri plus a bundled FastAPI sidecar. The official
 contributor Quickstart runs a Next.js development frontend and the same typed
 `CONTRIBUTOR_EMBEDDED` backend in two Linux Docker containers.
 
-PostgreSQL is not a supported application runtime. The frozen
-`LEGACY_MIGRATION` tool may read one approved PostgreSQL schema revision in an
-offline, read-only process and atomically promote a verified SQLite generation.
-Neo4j is not a runtime dependency; ER3 relationship meaning remains as static
-parity fixtures used by LadybugDB tests.
+PostgreSQL is not a supported application runtime or migration input. The
+repository ships no PostgreSQL offline importer. Neo4j is not a runtime
+dependency; ER3 relationship meaning remains as static parity fixtures used by
+LadybugDB tests.
 
 ## Request and autonomous-runtime flow
 
@@ -62,7 +61,6 @@ FastAPI lifespan
 - `LOCAL_EMBEDDED`: installed product, Tauri static frontend, bundled sidecar.
 - `CONTRIBUTOR_EMBEDDED`: Docker-first development, optional host Tauri bridge.
 - `TEST`: explicit isolated stores or fakes.
-- `LEGACY_MIGRATION`: offline PostgreSQL read-only source only.
 
 Profiles are converted to typed runtime configuration and passed to the FastAPI
 composition root. Parent environment variables cannot silently select a server

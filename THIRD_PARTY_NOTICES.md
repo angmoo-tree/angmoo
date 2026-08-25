@@ -3,7 +3,7 @@
 This inventory is generated from the locked Angmoo dependencies.
 Package authors retain all rights granted by their respective licenses.
 
-## Python packages (77)
+## Python packages (74)
 
 - `alembic 1.19.0` — MIT
 - `annotated-doc 0.0.4` — MIT
@@ -44,11 +44,8 @@ Package authors retain all rights granted by their respective licenses.
 - `orjson 3.11.9` — MPL-2.0 AND (Apache-2.0 OR MIT)
 - `ormsgpack 1.12.2` — Apache-2.0 OR MIT
 - `packaging 26.2` — Apache-2.0 OR BSD-2-Clause
-- `pgvector 0.5.0` — MIT
 - `pillow 12.3.0` — MIT-CMU
 - `pluggy 1.6.0` — MIT
-- `psycopg 3.3.4` — LGPL-3.0-only
-- `psycopg-binary 3.3.4` — LGPL-3.0-only
 - `pyasn1 0.6.4` — BSD-2-Clause
 - `pyasn1-modules 0.4.2` — BSD
 - `pycparser 3.0` — BSD-3-Clause
@@ -183,26 +180,6 @@ Package authors retain all rights granted by their respective licenses.
 - Recorded obligations:
   - Preserve upstream license and copyright notices.
   - Keep MPL-covered file modifications available under MPL-2.0 if modified.
-
-### `python/psycopg 3.3.4`
-
-- Reported license: `LGPL-3.0-only`
-- Normalized license: `LGPL-3.0-only`
-- Distribution boundary: Separately imported PostgreSQL client library.
-- Upstream license source: <https://github.com/psycopg/psycopg/blob/master/LICENSE.txt>
-- Recorded obligations:
-  - Preserve the LGPL-3.0-only notice and source availability for redistributed library code.
-  - Do not prevent users from replacing or relinking the separately distributed library.
-
-### `python/psycopg-binary 3.3.4`
-
-- Reported license: `LGPL-3.0-only`
-- Normalized license: `LGPL-3.0-only`
-- Distribution boundary: Bundled binary wheel installed as a replaceable Python dependency.
-- Upstream license source: <https://github.com/psycopg/psycopg/blob/master/LICENSE.txt>
-- Recorded obligations:
-  - Preserve the LGPL-3.0-only notice and corresponding source offer when redistributing the binary package.
-  - Keep the dependency replaceable rather than merging it into a proprietary binary.
 
 ## Infrastructure and build tooling
 

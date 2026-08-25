@@ -9,7 +9,6 @@ fail-closed:
 | `LOCAL_EMBEDDED` | SQLite | LadybugDB | in process | yes |
 | `CONTRIBUTOR_EMBEDDED` | isolated SQLite | isolated LadybugDB | in process | yes |
 | `TEST` | isolated SQLite or explicit fake | isolated LadybugDB or explicit fake | test-owned | test-owned |
-| `LEGACY_MIGRATION` | PostgreSQL read-only input to SQLite generation | none during import | disabled | no |
 
 `RuntimeConfig` owns the resolved data paths, SQLite generation, graph root,
 component mode, origin policy, and product flags. `create_app(runtime_config=)`
@@ -43,10 +42,10 @@ development-only and is never shared with `%LOCALAPPDATA%\Angmoo`. PostgreSQL,
 Neo4j, JVM, and external scheduler/projector processes are not supported public
 or contributor runtimes.
 
-PostgreSQL remains only as the frozen read-only input of
-`LEGACY_MIGRATION`. The optional migration dependencies, last supported source
-revision, and synthetic import tests are not a second runtime. Neo4j remains
-only in static ER3 parity fixtures; no live server, driver, or JVM is required.
+PostgreSQL runtime and offline import support ended before the first public
+SQLite-only release. Historical Alembic revisions remain provenance evidence,
+not an executable import chain. Neo4j remains only in static ER3 parity
+fixtures; no live server, driver, or JVM is required.
 
 The module-level `app.public_main:app` and old environment-shaped settings are
 test and rollback compatibility surfaces. Product and contributor entrypoints

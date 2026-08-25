@@ -41,6 +41,11 @@ development defaults remain unchanged.
 
 ## Offline PostgreSQL to SQLite migration
 
+> Historical ER6 evidence: the command and importer described in this section
+> were removed before the first public SQLite-only release. They are retained
+> here only to preserve the verified transition record and are no longer
+> executable or supported.
+
 The current Docker source is stopped before migration. The connection string,
 including its password, is supplied only through `DATABASE_URL`; it is never a
 command argument or report field.

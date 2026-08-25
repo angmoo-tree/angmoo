@@ -28,7 +28,6 @@ class RuntimeProfile(StrEnum):
     LOCAL_EMBEDDED = "LOCAL_EMBEDDED"
     CONTRIBUTOR_EMBEDDED = "CONTRIBUTOR_EMBEDDED"
     TEST = "TEST"
-    LEGACY_MIGRATION = "LEGACY_MIGRATION"
 
     @classmethod
     def parse(cls, value: str | None) -> "RuntimeProfile":
@@ -42,12 +41,10 @@ class RuntimeProfile(StrEnum):
 
 class RuntimeGraphProvider(StrEnum):
     LADYBUG = "ladybug"
-    NONE = "none"
 
 
 class RuntimeComponentMode(StrEnum):
     IN_PROCESS = "in_process"
-    DISABLED = "disabled"
 
 
 @dataclass(frozen=True)
@@ -65,22 +62,10 @@ class RuntimeConfig:
     api_docs_enabled: bool = False
     signup_enabled: bool = False
     seed_demo_data: bool = False
-    public_runtime_enabled: bool = True
-    source_database_url: str | None = field(default=None, repr=False)
 
     def __post_init__(self) -> None:
         if not self.generation.strip():
             raise RuntimeConfigurationError("runtime_generation_required")
-        if self.profile is RuntimeProfile.LEGACY_MIGRATION:
-            if self.public_runtime_enabled:
-                raise RuntimeConfigurationError("legacy_public_runtime_forbidden")
-            if self.component_mode is not RuntimeComponentMode.DISABLED:
-                raise RuntimeConfigurationError("legacy_components_forbidden")
-            if self.graph_provider is not RuntimeGraphProvider.NONE:
-                raise RuntimeConfigurationError("legacy_graph_forbidden")
-            if not self.source_database_url:
-                raise RuntimeConfigurationError("legacy_source_required")
-            return
         if not self.database_url.startswith("sqlite+pysqlite:///"):
             raise RuntimeConfigurationError("embedded_sqlite_required")
         if self.graph_provider is not RuntimeGraphProvider.LADYBUG:
@@ -106,11 +91,6 @@ class RuntimeConfig:
             / self.generation
             / "angmoo.sqlite3"
         )
-
-    def require_public_runtime(self) -> None:
-        if not self.public_runtime_enabled:
-            raise RuntimeConfigurationError("runtime_public_surface_forbidden")
-
 
 def _sqlite_url(path: Path) -> str:
     return "sqlite+pysqlite:///" + path.resolve().as_posix()
@@ -154,36 +134,11 @@ def build_embedded_runtime_config(
     )
 
 
-def build_legacy_migration_runtime_config(
-    *,
-    source_database_url: str,
-    target_root: Path,
-) -> RuntimeConfig:
-    paths = StaticRuntimeDataPath(target_root).resolve()
-    if not source_database_url.startswith("postgresql"):
-        raise RuntimeConfigurationError("legacy_postgresql_source_required")
-    return RuntimeConfig(
-        profile=RuntimeProfile.LEGACY_MIGRATION,
-        data_paths=paths,
-        generation="legacy-import",
-        database_url="",
-        app_secret_file=paths.secrets / "app-secret",
-        graph_provider=RuntimeGraphProvider.NONE,
-        graph_database_root=None,
-        component_mode=RuntimeComponentMode.DISABLED,
-        desktop_allowed_origin="",
-        desktop_launch_token="",
-        public_runtime_enabled=False,
-        source_database_url=source_database_url,
-    )
-
-
 def settings_from_runtime_config(
     config: RuntimeConfig,
     *,
     base: Settings | None = None,
 ) -> Settings:
-    config.require_public_runtime()
     values = (base or Settings()).model_dump()
     app_env = {
         RuntimeProfile.LOCAL_EMBEDDED: "local",
@@ -273,7 +228,6 @@ __all__ = [
     "RuntimeGraphProvider",
     "RuntimeProfile",
     "build_embedded_runtime_config",
-    "build_legacy_migration_runtime_config",
     "compose_runtime",
     "initialize_local_installation_identity",
     "settings_from_runtime_config",

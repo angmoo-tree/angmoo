@@ -47,7 +47,7 @@ has runtime consumers. Do not combine a move with unrelated behavior changes.
 ## Validation map
 
 All PRs run these required checks: `backend`, `frontend`,
-`legacy-migration`, `local-core-smoke`, `local-autonomy-smoke`,
+`sqlite-canonical-migration`, `local-core-smoke`, `local-autonomy-smoke`,
 `local-full-graph`, `oss-boundary`, `dependency-license`, `dco`, and
 `architecture-boundary`.
 
@@ -63,8 +63,8 @@ contract is stable.
 
 Use synthetic users and fake providers. Contributor SQLite/LadybugDB fixtures
 are disposable; production credentials, user data, and external LLM calls are
-not allowed. PostgreSQL is limited to the frozen offline legacy-import test and
-Neo4j remains static parity evidence only. Changes to REST/OpenAPI, SQLite
+not allowed. PostgreSQL runtime and offline import are unsupported; Neo4j
+remains static parity evidence only. Changes to REST/OpenAPI, SQLite
 migrations, routine/social/graph state,
 authorization, credentials, or retry/lease behavior require focused contract
 tests and a rollback note.

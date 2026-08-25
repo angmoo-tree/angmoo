@@ -287,7 +287,7 @@
       "owner": "ER4",
       "path": "backend/app/public_main.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "e2766e1374b6f8b7b70ef18e73d0b7bd8cf1900a42ff88e7be5551db1a82f180",
+      "source_sha256": "4a5054bd5aafbd9e11fdba19e38fa9c26a8febd76a7bb2b286c3cf4f839648df",
       "transition_pr": "ER4 PR J"
     },
     {

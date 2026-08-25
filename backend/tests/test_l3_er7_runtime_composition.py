@@ -14,12 +14,9 @@ from app.api.v1.routes import world_activity_runtime
 from app.core.config import Settings
 from app.public_main import create_app
 from app.runtime.configuration import (
-    RuntimeComponentMode,
     RuntimeConfigurationError,
-    RuntimeGraphProvider,
     RuntimeProfile,
     build_embedded_runtime_config,
-    build_legacy_migration_runtime_config,
     compose_runtime,
     settings_from_runtime_config,
 )
@@ -53,12 +50,11 @@ def _embedded_config(
     )
 
 
-def test_runtime_profile_is_closed_to_the_four_approved_values() -> None:
+def test_runtime_profile_is_closed_to_the_three_sqlite_only_values() -> None:
     assert tuple(profile.value for profile in RuntimeProfile) == (
         "LOCAL_EMBEDDED",
         "CONTRIBUTOR_EMBEDDED",
         "TEST",
-        "LEGACY_MIGRATION",
     )
     assert RuntimeProfile.parse("contributor_embedded") is (
         RuntimeProfile.CONTRIBUTOR_EMBEDDED
@@ -289,23 +285,6 @@ def test_relationship_route_uses_runtime_provider_when_query_is_omitted(
     assert observed["graph_provider"] == "ladybug"
 
 
-def test_legacy_migration_has_no_public_runtime_surface(tmp_path: Path) -> None:
-    config = build_legacy_migration_runtime_config(
-        source_database_url="postgresql+psycopg://legacy/read_only",
-        target_root=tmp_path / "migration-target",
-    )
-
-    assert config.profile is RuntimeProfile.LEGACY_MIGRATION
-    assert config.graph_provider is RuntimeGraphProvider.NONE
-    assert config.component_mode is RuntimeComponentMode.DISABLED
-    assert config.public_runtime_enabled is False
-    with pytest.raises(
-        RuntimeConfigurationError,
-        match="runtime_public_surface_forbidden",
-    ):
-        create_app(runtime_config=config)
-
-
 def test_unknown_profile_does_not_create_database_or_secret(tmp_path: Path) -> None:
     data_root = tmp_path / "must-not-exist"
 
@@ -328,16 +307,34 @@ def test_product_dependencies_exclude_server_database_runtimes() -> None:
         (ROOT / "backend/pyproject.toml").read_text(encoding="utf-8")
     )
     dependencies = tuple(project["project"]["dependencies"])
-    legacy = tuple(project["project"]["optional-dependencies"]["legacy-migration"])
+    optional_dependencies = project["project"].get("optional-dependencies", {})
 
     for forbidden in ("neo4j", "psycopg", "pgvector"):
         assert not any(forbidden in dependency.lower() for dependency in dependencies)
+        assert not any(
+            forbidden in dependency.lower()
+            for group in optional_dependencies.values()
+            for dependency in group
+        )
     # Windows does not ship an IANA timezone database for Python's zoneinfo.
     # The packaged sidecar must therefore own tzdata explicitly rather than
-    # inheriting it accidentally from the legacy PostgreSQL extra.
+    # inheriting it accidentally from a removed PostgreSQL dependency group.
     assert any(dependency.lower().startswith("tzdata") for dependency in dependencies)
-    assert any("psycopg" in dependency.lower() for dependency in legacy)
-    assert any("pgvector" in dependency.lower() for dependency in legacy)
+
+
+def test_postgresql_offline_importer_is_removed_from_active_source() -> None:
+    removed = (
+        "backend/app/domains/runtime/ports/migration_source.py",
+        "backend/app/domains/runtime/ports/offline_migration.py",
+        "backend/app/runtime/migrations/alembic_source.py",
+        "backend/app/runtime/migrations/postgres_to_sqlite.py",
+        "backend/scripts/dry_run_postgres_to_sqlite.py",
+        "backend/tests/test_l3_er2_postgres_sqlite_offline_migration.py",
+        "backend/tests/test_l3_er6_postgres_installer_roundtrip.py",
+    )
+
+    for relative in removed:
+        assert not (ROOT / relative).exists(), relative
 
 
 def test_server_runtime_assets_and_external_worker_entrypoints_are_removed() -> None:
