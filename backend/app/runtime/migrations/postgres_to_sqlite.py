@@ -35,7 +35,8 @@ from app.runtime.persistence.sqlite_database import (
     SqliteCanonicalSettings,
 )
 from app.runtime.persistence.sqlite_schema import (
-    EXPECTED_CANONICAL_TABLE_COUNT,
+    LEGACY_MIGRATION_SOURCE_TABLE_COUNT,
+    LEGACY_MIGRATION_TARGET_ONLY_TABLES,
     SOURCE_ALEMBIC_MIGRATION_COUNT,
     SOURCE_ALEMBIC_REVISION,
     SQLITE_SCHEMA_VERSION,
@@ -151,13 +152,10 @@ class PostgresToSqliteOfflineDryRun:
                         foreign_key_violation_count,
                         integrity_check,
                     ) = self._verify_target(target_database)
-                    if source_summaries != target_summaries:
-                        raise OfflineMigrationParityError(
-                            _describe_parity_mismatch(
-                                source_summaries,
-                                target_summaries,
-                            )
-                        )
+                    _verify_source_target_parity(
+                        source_summaries,
+                        target_summaries,
+                    )
                     self._fault_injector("before-manifest")
                     manifest = self._build_manifest(
                         source_dialect=source_dialect,
@@ -166,7 +164,7 @@ class PostgresToSqliteOfflineDryRun:
                         target_schema_sha256=target_doctor.schema_digest,
                         conversion_inventory_sha256=inventory_sha256,
                         media_audit=media_audit,
-                        tables=source_summaries,
+                        tables=target_summaries,
                     )
                     manifest_path = temporary_directory / OFFLINE_MIGRATION_MANIFEST_NAME
                     _write_manifest_atomic(manifest_path, manifest)
@@ -341,13 +339,13 @@ class PostgresToSqliteOfflineDryRun:
     ) -> str:
         inspector = inspect(connection)
         actual_tables = set(inspector.get_table_names())
-        expected_tables = set(self._source_metadata.tables)
+        expected_tables = self._legacy_source_table_names()
         missing_tables = sorted(expected_tables - actual_tables)
         if missing_tables:
             raise OfflineMigrationSourceError(
                 "source canonical tables are missing: " + ", ".join(missing_tables)
             )
-        if len(expected_tables) != EXPECTED_CANONICAL_TABLE_COUNT:
+        if len(expected_tables) != LEGACY_MIGRATION_SOURCE_TABLE_COUNT:
             raise OfflineMigrationSourceError(
                 "source metadata canonical table count does not match"
             )
@@ -406,7 +404,7 @@ class PostgresToSqliteOfflineDryRun:
             target_connection.commit()
             transaction = target_connection.begin()
             try:
-                for table_name in sorted(self._source_metadata.tables):
+                for table_name in sorted(self._legacy_source_table_names()):
                     self._check_cancelled()
                     self._fault_injector(f"before-table:{table_name}")
                     source_table = self._source_metadata.tables[table_name]
@@ -428,6 +426,21 @@ class PostgresToSqliteOfflineDryRun:
                 target_connection.exec_driver_sql("PRAGMA foreign_keys = ON")
                 target_connection.commit()
         return tuple(summaries)
+
+    def _legacy_source_table_names(self) -> set[str]:
+        target_tables = set(build_sqlite_baseline_metadata().tables)
+        if not LEGACY_MIGRATION_TARGET_ONLY_TABLES <= target_tables:
+            raise OfflineMigrationSourceError(
+                "legacy migration target-only table contract drifted"
+            )
+        source_tables = target_tables - LEGACY_MIGRATION_TARGET_ONLY_TABLES
+        missing_metadata = sorted(source_tables - set(self._source_metadata.tables))
+        if missing_metadata:
+            raise OfflineMigrationSourceError(
+                "source metadata canonical tables are missing: "
+                + ", ".join(missing_metadata)
+            )
+        return source_tables
 
     def _verify_target(
         self,
@@ -652,6 +665,36 @@ def _describe_parity_mismatch(
         if source_by_table.get(table_name) != target_by_table.get(table_name)
     ]
     return "source/target row parity failed for: " + ", ".join(mismatches)
+
+
+def _verify_source_target_parity(
+    source: tuple[OfflineMigrationTableParity, ...],
+    target: tuple[OfflineMigrationTableParity, ...],
+) -> None:
+    source_by_table = {summary.table_name: summary for summary in source}
+    target_by_table = {summary.table_name: summary for summary in target}
+    target_only_tables = set(target_by_table) - set(source_by_table)
+    if target_only_tables != LEGACY_MIGRATION_TARGET_ONLY_TABLES:
+        raise OfflineMigrationParityError(
+            _describe_parity_mismatch(source, target)
+        )
+    copied_target = tuple(
+        target_by_table[table_name] for table_name in sorted(source_by_table)
+    )
+    if source != copied_target:
+        raise OfflineMigrationParityError(
+            _describe_parity_mismatch(source, copied_target)
+        )
+    non_empty_target_only = sorted(
+        table_name
+        for table_name in target_only_tables
+        if target_by_table[table_name].row_count != 0
+    )
+    if non_empty_target_only:
+        raise OfflineMigrationParityError(
+            "legacy migration target-only tables are not empty: "
+            + ", ".join(non_empty_target_only)
+        )
 
 
 def _order_revision_chain(revisions: Sequence[Any]) -> tuple[str, ...]:
