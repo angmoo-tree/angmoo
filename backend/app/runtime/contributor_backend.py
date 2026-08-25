@@ -20,10 +20,6 @@ from app.runtime.configuration import (
     build_embedded_runtime_config,
     initialize_local_installation_identity,
 )
-from app.runtime.persistence.sqlite_database import (
-    SqliteCanonicalDatabase,
-    SqliteCanonicalSettings,
-)
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
 
 
@@ -71,7 +67,7 @@ def _parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def _prepare_contributor_data_root(data_root: Path) -> None:
+def _prepare_contributor_data_root(data_root: Path):
     data_root = data_root.resolve()
     secret_path = data_root / "secrets" / "app-secret"
     if not secret_path.is_file():
@@ -86,12 +82,14 @@ def _prepare_contributor_data_root(data_root: Path) -> None:
         )
         temporary.replace(secret_path)
 
-    database = SqliteCanonicalDatabase(
-        StaticRuntimeDataPath(data_root),
-        settings=SqliteCanonicalSettings(generation=CONTRIBUTOR_GENERATION),
+    from app.runtime.migrations.embedded_data import (
+        EmbeddedDataUpgradeCoordinator,
     )
-    database.open()
-    database.close()
+
+    return EmbeddedDataUpgradeCoordinator(
+        StaticRuntimeDataPath(data_root),
+        fallback_generation=CONTRIBUTOR_GENERATION,
+    ).upgrade()
 
 
 def create_contributor_runtime_app(
@@ -106,14 +104,16 @@ def create_contributor_runtime_app(
     from app.public_main import create_app
 
     data_root = data_root.resolve()
-    _prepare_contributor_data_root(data_root)
+    upgraded = _prepare_contributor_data_root(data_root)
     runtime_config = build_embedded_runtime_config(
         profile=RuntimeProfile.CONTRIBUTOR_EMBEDDED,
         data_root=data_root,
         runtime_root=data_root / "runtime",
-        generation=CONTRIBUTOR_GENERATION,
+        generation=upgraded.canonical.generation,
         desktop_launch_token="",
         desktop_allowed_origin=frontend_origin,
+        graph_database_root=upgraded.graph.database_root,
+        graph_projection_enabled=not upgraded.graph.degraded,
     )
     app = create_app(runtime_config=runtime_config)
     initialize_local_installation_identity(
@@ -165,14 +165,16 @@ def contributor_runtime_status_payload(
     from app.runtime.configuration import compose_runtime
 
     data_root = data_root.resolve()
-    _prepare_contributor_data_root(data_root)
+    upgraded = _prepare_contributor_data_root(data_root)
     runtime_config = build_embedded_runtime_config(
         profile=RuntimeProfile.CONTRIBUTOR_EMBEDDED,
         data_root=data_root,
         runtime_root=data_root / "runtime",
-        generation=CONTRIBUTOR_GENERATION,
+        generation=upgraded.canonical.generation,
         desktop_launch_token="",
         desktop_allowed_origin=frontend_origin,
+        graph_database_root=upgraded.graph.database_root,
+        graph_projection_enabled=not upgraded.graph.degraded,
     )
     composition = compose_runtime(runtime_config)
     try:

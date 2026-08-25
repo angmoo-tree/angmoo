@@ -67,7 +67,7 @@ REQUIRED_MARKERS = {
         "## Issue와 작업 범위",
         "## Branch, commit과 Pull Request",
         "`CONTRIBUTOR_EMBEDDED`",
-        "`sqlite-canonical-migration`",
+        "`embedded-data-migration`",
         "GPL-3.0-only",
         "Developer Certificate of Origin 1.1",
         "git commit -s",

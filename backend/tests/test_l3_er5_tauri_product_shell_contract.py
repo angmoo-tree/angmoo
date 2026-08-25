@@ -55,6 +55,11 @@ def test_product_sidecar_has_fixed_commands_hash_and_lifecycle_contract() -> Non
         assert marker in runtime or marker in host
     assert "PyInstaller 6.16.0" in build
     assert "System.Security.Cryptography.SHA256" in build
+    normalized_build = build.replace("\\", "/")
+    assert "sqlite_versions/manifests" in normalized_build
+    assert "ladybug_versions/manifests" in normalized_build
+    assert "--add-data $sqliteManifestData" in build
+    assert "--add-data $ladybugManifestData" in build
     assert 'listener.bind(("127.0.0.1", 0))' in sidecar
     assert '"sidecar.owner.json"' in sidecar
     assert '"sidecar.endpoint.json"' in sidecar

@@ -8,6 +8,7 @@ from app.domains.relationships.projection.commands import (
     SocialEventProjectionCommand,
     SourceExclusionProjectionCommand,
 )
+from app.domains.relationships.projection.digest import projection_digest
 
 __all__ = [
     "NoGraphMutationCommand",
@@ -16,4 +17,5 @@ __all__ = [
     "RelationshipStateProjectionCommand",
     "SocialEventProjectionCommand",
     "SourceExclusionProjectionCommand",
+    "projection_digest",
 ]

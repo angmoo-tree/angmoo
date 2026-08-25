@@ -101,7 +101,7 @@ Phone·wide-window 화면 Gate는 기술 CI와 별도로 유지합니다.
 
 - `backend`
 - `frontend`
-- `sqlite-canonical-migration`
+- `embedded-data-migration`
 - `local-core-smoke`
 - `local-autonomy-smoke`
 - `local-full-graph` (LadybugDB와 동결된 static parity fixture)

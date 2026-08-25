@@ -24,6 +24,7 @@ from app.domains.relationships.ports import (
     OutboxFinalizeStatus,
     OutboxPort,
     ProjectionWorkItem,
+    ProjectionReplaySource,
     RelationshipProjectionPort,
     RelationshipQueryPort,
 )
@@ -34,6 +35,7 @@ from app.domains.relationships.projection import (
     RelationshipStateProjectionCommand,
     SocialEventProjectionCommand,
     SourceExclusionProjectionCommand,
+    projection_digest,
 )
 
 
@@ -47,6 +49,7 @@ __all__ = [
     "ProjectionCommand",
     "ProjectionCommandError",
     "ProjectionWorkItem",
+    "ProjectionReplaySource",
     "RelationshipGraphEdgeRead",
     "RelationshipGraphEvidenceRead",
     "RelationshipGraphForbiddenError",
@@ -62,5 +65,6 @@ __all__ = [
     "RelationshipStateProjectionCommand",
     "SocialEventProjectionCommand",
     "SourceExclusionProjectionCommand",
+    "projection_digest",
     "get_owner_relationship_graph",
 ]

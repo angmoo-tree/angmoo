@@ -626,15 +626,15 @@
     {
       "markers": {
         "driver_or_url": [
-          34,
-          35,
-          37
+          45,
+          46,
+          48
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/persistence/sqlite_schema.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "c124d928a7bf4b4a7501d7a4353de884a52ecf6d095cb4719dd113d35827a518",
+      "source_sha256": "8749bd65614c7296d89b3e9641389034215e9164607bdd479f43bae530f158d9",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -779,14 +779,14 @@
     {
       "markers": {
         "row_lock": [
-          195,
-          275
+          118,
+          198
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/graph_projection_replay.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "c80586d4f10775ac359f7ec5d1e8367c0234743d16a13c510a386cbade3b3b31",
+      "source_sha256": "a1b8ad0582937eb4a06bace95e474713047c507dddaf187e87ef3e249ae715c8",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -956,14 +956,14 @@
     {
       "markers": {
         "driver_or_url": [
-          164,
-          165
+          174,
+          175
         ]
       },
       "owner": "ER7",
       "path": "scripts/ci/check_desktop_installer_contract.py",
       "removal_condition": "embedded canonical rollback window PASS and user-approved legacy-default removal",
-      "source_sha256": "46c58a5dd48b5c1293b390d9d46152326a2bd97de92fac2eea0c7f357a9a1f54",
+      "source_sha256": "0c7ec9f96228dfd8cb06d51cc8294a340d34a4f0f9f25a8a0b13a150010b0c3f",
       "transition_pr": "ER7 PR P"
     },
     {

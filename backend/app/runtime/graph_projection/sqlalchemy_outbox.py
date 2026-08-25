@@ -16,15 +16,56 @@ from app.domains.relationships.ports.outbox import (
     ProjectionWorkItem,
 )
 from app.domains.relationships.projection.commands import ProjectionCommand
-from app.services.graph_projection_commands import build_projection_command
 from app.runtime.persistence.sqlite_concurrency import (
     SqliteRetryPolicy,
     run_sqlite_immediate,
 )
+from app.services.graph_projection_commands import build_projection_command
 
 
 SessionFactory = Callable[[], Session]
 LEASE_TTL_SECONDS = 60
+
+
+class SqlAlchemyProjectionReplaySource:
+    """Read deterministic replay commands from the canonical SQLite outbox."""
+
+    def __init__(self, session_factory: SessionFactory) -> None:
+        self._session_factory = session_factory
+
+    def world_ids(self) -> tuple[str, ...]:
+        with self._session_factory() as db:
+            return tuple(
+                str(value)
+                for value in db.scalars(
+                    select(models.World.id).order_by(models.World.id)
+                )
+            )
+
+    def commands_for_world(
+        self,
+        world_id: str,
+    ) -> tuple[ProjectionCommand, ...]:
+        with self._session_factory() as db:
+            outbox_ids = tuple(
+                str(value)
+                for value in db.scalars(
+                    select(models.GraphProjectionOutbox.id)
+                    .where(models.GraphProjectionOutbox.world_id == world_id)
+                    .order_by(
+                        models.GraphProjectionOutbox.created_at,
+                        models.GraphProjectionOutbox.id,
+                    )
+                )
+            )
+            return tuple(
+                build_projection_command(
+                    db,
+                    outbox_id=outbox_id,
+                    replay_relationship_snapshot=True,
+                )
+                for outbox_id in outbox_ids
+            )
 
 
 class SqlAlchemyProjectionOutbox:

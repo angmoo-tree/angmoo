@@ -223,15 +223,12 @@ def _build_embedded_runtime_config(
 ):
     """Build an explicit embedded profile without mutating the environment."""
 
-    from app.runtime.configuration import (
-        build_embedded_runtime_config,
-    )
+    from app.runtime.configuration import build_embedded_runtime_config
 
     data_root = data_root.resolve()
     runtime_root = runtime_root.resolve()
     if runtime_root != data_root / "runtime":
         raise RuntimeError("runtime_root_outside_product_data_root")
-    generation = _selected_generation(data_root)
     secret_path = data_root / "secrets" / "app-secret"
     if not secret_path.is_file():
         canonical = data_root / "canonical"
@@ -239,13 +236,30 @@ def _build_embedded_runtime_config(
         if has_existing_data:
             raise RuntimeError("app_secret_missing_for_existing_data")
         _write_new_secret(secret_path)
+    # Register the complete canonical model inventory before inspecting or
+    # creating a SQLite generation. The same ordering is used by the
+    # contributor entrypoint and is required for an exact v1/v2 manifest.
+    import importlib
+
+    importlib.import_module("app.public_main")
+    from app.runtime.migrations.embedded_data import (
+        EmbeddedDataUpgradeCoordinator,
+    )
+    from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
+
+    upgraded = EmbeddedDataUpgradeCoordinator(
+        StaticRuntimeDataPath(data_root),
+        fallback_generation="er6-preview-v1",
+    ).upgrade()
     return build_embedded_runtime_config(
         profile=profile,
         data_root=data_root,
         runtime_root=runtime_root,
-        generation=generation,
+        generation=upgraded.canonical.generation,
         desktop_launch_token=desktop_launch_token,
         desktop_allowed_origin=desktop_allowed_origin,
+        graph_database_root=upgraded.graph.database_root,
+        graph_projection_enabled=not upgraded.graph.degraded,
     )
 
 
@@ -267,21 +281,6 @@ def _build_local_embedded_runtime_config(
         desktop_launch_token=desktop_launch_token,
         desktop_allowed_origin=desktop_allowed_origin,
     )
-
-
-def _initialize_embedded_schema(data_root: Path, generation: str) -> None:
-    from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
-    from app.runtime.persistence.sqlite_database import (
-        SqliteCanonicalDatabase,
-        SqliteCanonicalSettings,
-    )
-
-    database = SqliteCanonicalDatabase(
-        StaticRuntimeDataPath(data_root),
-        settings=SqliteCanonicalSettings(generation=generation),
-    )
-    database.open()
-    database.close()
 
 
 def _watch_parent(parent_pid: int, server: Any) -> None:
@@ -332,11 +331,6 @@ def main() -> int:
     # model metadata without creating a new runtime -> legacy models edge.
     from app.public_main import create_app
     from app.runtime.configuration import initialize_local_installation_identity
-
-    _initialize_embedded_schema(
-        runtime_config.data_paths.root,
-        runtime_config.generation,
-    )
 
     listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

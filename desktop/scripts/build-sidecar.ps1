@@ -22,6 +22,10 @@ if (-not $WorkRoot) {
 
 $backendRoot = Join-Path $repoRoot "backend"
 $entrypoint = Join-Path $backendRoot "app\runtime\desktop_sidecar.py"
+$sqliteManifestRoot = Join-Path $backendRoot "app\runtime\migrations\sqlite_versions\manifests"
+$ladybugManifestRoot = Join-Path $backendRoot "app\runtime\migrations\ladybug_versions\manifests"
+$sqliteManifestData = "$sqliteManifestRoot;app/runtime/migrations/sqlite_versions/manifests"
+$ladybugManifestData = "$ladybugManifestRoot;app/runtime/migrations/ladybug_versions/manifests"
 $distRoot = Join-Path $WorkRoot "dist"
 $buildRoot = Join-Path $WorkRoot "build"
 $specRoot = Join-Path $WorkRoot "spec"
@@ -44,6 +48,8 @@ $layoutArgument = if ($Layout -eq "OneFile") { "--onefile" } else { "--onedir" }
     --name angmoo-sidecar `
     --paths $backendRoot `
     --collect-all ladybug `
+    --add-data $sqliteManifestData `
+    --add-data $ladybugManifestData `
     --hidden-import sqlalchemy.dialects.sqlite `
     --exclude-module psycopg `
     --exclude-module psycopg_binary `

@@ -220,8 +220,16 @@ $requiredServices = @($contract.docker.services | Sort-Object)
 $serviceMatch = ($services -join ',') -eq ($requiredServices -join ',')
 $portValue = [string]$probe.environment.angmoo_port
 $portAllowed = [string]::IsNullOrWhiteSpace($portValue) -or $portValue -eq '3000'
-$stackAllowed = [string]$probe.docker.stack_state -in @('absent', 'healthy')
-$portConflict = [bool]$probe.docker.port_3000_in_use -and $probe.docker.stack_state -ne 'healthy'
+$stackAllowed = [string]$probe.docker.stack_state -in @(
+    'absent',
+    'healthy',
+    'partial-or-unhealthy'
+)
+# A partial Angmoo Compose stack can still own port 3000. desktop-dev.ps1
+# deliberately repairs that stack with `up --build` while preserving its
+# named volume, so only an unrelated listener with no Angmoo stack is a
+# preflight conflict.
+$portConflict = [bool]$probe.docker.port_3000_in_use -and $probe.docker.stack_state -eq 'absent'
 
 $checks = @(
     (New-Check 'windows-host' ([bool]$probe.os.is_windows) ([string]$probe.os.caption) 'unsupported_host_os'),
@@ -231,7 +239,7 @@ $checks = @(
     (New-Check 'docker-engine' ([bool]$probe.tools.engine_ready) 'engine' 'docker_engine_unavailable'),
     (New-Check 'compose-version' ($null -ne $actualCompose -and $actualCompose -ge $minimumCompose) ([string]$probe.tools.compose_version) 'compose_version_unsupported'),
     (New-Check 'compose-services' $serviceMatch ($services -join ',') 'compose_service_contract_mismatch'),
-    (New-Check 'compose-state' $stackAllowed ([string]$probe.docker.stack_state) 'docker_stack_partial_or_unhealthy'),
+    (New-Check 'compose-state' $stackAllowed ([string]$probe.docker.stack_state) 'docker_stack_state_unknown'),
     (New-Check 'frontend-port' (-not $portConflict) "in_use=$($probe.docker.port_3000_in_use)" 'frontend_port_conflict'),
     (New-Check 'frontend-port-contract' $portAllowed "ANGMOO_PORT=$portValue" 'frontend_port_must_be_3000'),
     (New-Check 'node-version' ($null -ne $actualNode -and $actualNode -ge $minimumNode) ([string]$probe.tools.node_version) 'node_version_unsupported'),
