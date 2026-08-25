@@ -1,0 +1,368 @@
+{
+  "$defs": {
+    "JsonValue": {},
+    "PortableDaypartProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "available_features": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 12,
+          "title": "Available Features",
+          "type": "array"
+        },
+        "daypart": {
+          "enum": [
+            "dawn",
+            "morning",
+            "afternoon",
+            "evening"
+          ],
+          "title": "Daypart",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Description",
+          "type": "string"
+        },
+        "restricted_features": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 12,
+          "title": "Restricted Features",
+          "type": "array"
+        }
+      },
+      "required": [
+        "daypart"
+      ],
+      "title": "PortableDaypartProfile",
+      "type": "object"
+    },
+    "PortableGlossaryTerm": {
+      "additionalProperties": false,
+      "properties": {
+        "meaning": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Meaning",
+          "type": "string"
+        },
+        "ref": {
+          "pattern": "^glossary/[a-z][a-z0-9-]{0,63}$",
+          "title": "Ref",
+          "type": "string"
+        },
+        "term": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Term",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref",
+        "term",
+        "meaning"
+      ],
+      "title": "PortableGlossaryTerm",
+      "type": "object"
+    },
+    "PortablePlace": {
+      "additionalProperties": false,
+      "properties": {
+        "access_role_refs": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20,
+          "title": "Access Role Refs",
+          "type": "array"
+        },
+        "available_dayparts": {
+          "items": {
+            "enum": [
+              "dawn",
+              "morning",
+              "afternoon",
+              "evening"
+            ],
+            "type": "string"
+          },
+          "maxItems": 4,
+          "title": "Available Dayparts",
+          "type": "array"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Description",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "ref": {
+          "pattern": "^places/[a-z][a-z0-9-]{0,63}$",
+          "title": "Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref",
+        "name"
+      ],
+      "title": "PortablePlace",
+      "type": "object"
+    },
+    "PortableRole": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_activity_scope": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 12,
+          "title": "Allowed Activity Scope",
+          "type": "array"
+        },
+        "autonomous_allowed": {
+          "default": true,
+          "title": "Autonomous Allowed",
+          "type": "boolean"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Description",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "ref": {
+          "pattern": "^roles/[a-z][a-z0-9-]{0,63}$",
+          "title": "Ref",
+          "type": "string"
+        },
+        "responsibilities": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 12,
+          "title": "Responsibilities",
+          "type": "array"
+        }
+      },
+      "required": [
+        "ref",
+        "name"
+      ],
+      "title": "PortableRole",
+      "type": "object"
+    },
+    "PortableRule": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "ref": {
+          "pattern": "^rules/[a-z][a-z0-9-]{0,63}$",
+          "title": "Ref",
+          "type": "string"
+        },
+        "rule_kind": {
+          "enum": [
+            "allow",
+            "forbid"
+          ],
+          "title": "Rule Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref",
+        "rule_kind",
+        "description"
+      ],
+      "title": "PortableRule",
+      "type": "object"
+    }
+  },
+  "$id": "https://angmoo.dev/schemas/world-package/v1/world.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "additional_generation_guidance": {
+      "default": "",
+      "maxLength": 1000,
+      "title": "Additional Generation Guidance",
+      "type": "string"
+    },
+    "banner_alt_text": {
+      "default": "",
+      "maxLength": 500,
+      "title": "Banner Alt Text",
+      "type": "string"
+    },
+    "banner_asset_ref": {
+      "anyOf": [
+        {
+          "pattern": "^assets/sha256-[0-9a-f]{64}\\.webp$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Banner Asset Ref"
+    },
+    "daily_life_description": {
+      "default": "",
+      "maxLength": 3000,
+      "title": "Daily Life Description",
+      "type": "string"
+    },
+    "daypart_profiles": {
+      "items": {
+        "$ref": "#/$defs/PortableDaypartProfile"
+      },
+      "maxItems": 4,
+      "title": "Daypart Profiles",
+      "type": "array"
+    },
+    "extensions": {
+      "additionalProperties": {
+        "$ref": "#/$defs/JsonValue"
+      },
+      "maxProperties": 32,
+      "title": "Extensions",
+      "type": "object"
+    },
+    "genre_tags": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 5,
+      "title": "Genre Tags",
+      "type": "array"
+    },
+    "glossary": {
+      "items": {
+        "$ref": "#/$defs/PortableGlossaryTerm"
+      },
+      "maxItems": 100,
+      "title": "Glossary",
+      "type": "array"
+    },
+    "language": {
+      "maxLength": 16,
+      "minLength": 2,
+      "title": "Language",
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 120,
+      "minLength": 2,
+      "title": "Name",
+      "type": "string"
+    },
+    "places": {
+      "items": {
+        "$ref": "#/$defs/PortablePlace"
+      },
+      "maxItems": 40,
+      "title": "Places",
+      "type": "array"
+    },
+    "ref": {
+      "const": "world",
+      "title": "Ref",
+      "type": "string"
+    },
+    "roles": {
+      "items": {
+        "$ref": "#/$defs/PortableRole"
+      },
+      "maxItems": 30,
+      "title": "Roles",
+      "type": "array"
+    },
+    "rules": {
+      "items": {
+        "$ref": "#/$defs/PortableRule"
+      },
+      "maxItems": 50,
+      "title": "Rules",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "world-content-v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "setting_description": {
+      "default": "",
+      "maxLength": 4000,
+      "title": "Setting Description",
+      "type": "string"
+    },
+    "source_world_contract_version": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Source World Contract Version",
+      "type": "string"
+    },
+    "source_world_definition_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source World Definition Hash",
+      "type": "string"
+    },
+    "tagline": {
+      "default": "",
+      "maxLength": 160,
+      "title": "Tagline",
+      "type": "string"
+    },
+    "timezone": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Timezone",
+      "type": "string"
+    },
+    "tone_tags": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 5,
+      "title": "Tone Tags",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "ref",
+    "name",
+    "timezone",
+    "language",
+    "source_world_contract_version",
+    "source_world_definition_hash"
+  ],
+  "title": "PortableWorldDefinition",
+  "type": "object"
+}

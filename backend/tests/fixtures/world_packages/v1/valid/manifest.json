@@ -1,0 +1,51 @@
+{
+  "compatibility": {
+    "min_reader_version": "0.4.0-1",
+    "world_contract_version": "p0-contract-v1.1-world-creator"
+  },
+  "content_digest": "63869bfe5211fba82f6e454ac2cd57621ca07550a88400e2ff68cddb081e8f4e",
+  "created_at": "2026-08-25T00:00:00Z",
+  "entries": [
+    {
+      "bytes": 48,
+      "media_type": "application/json",
+      "path": "assets/index.json",
+      "sha256": "a64d26e3e01357c543a377d67d047eaa5fcc10d78b2b2747f29e71caae299a3a"
+    },
+    {
+      "bytes": 753,
+      "media_type": "application/json",
+      "path": "content/characters.json",
+      "sha256": "235be7e96876db88a0a81da0998487a2b1d58707625f6e862c01efb1aa957ec6"
+    },
+    {
+      "bytes": 391,
+      "media_type": "application/json",
+      "path": "content/world-characters.json",
+      "sha256": "3c5b23e4c76e37b8a5d8c0986a96a001e9feb240623e925b02ed5ca4878ca8de"
+    },
+    {
+      "bytes": 1729,
+      "media_type": "application/json",
+      "path": "content/world.json",
+      "sha256": "22d5abaf1faea3d39e0c21c29e3d51af21e3e90b95de8f33f4953e92b9af70f4"
+    }
+  ],
+  "format": "angmoo-world-package",
+  "format_version": 1,
+  "license": {
+    "attribution": "Angmoo synthetic contract fixture",
+    "expression": "CC-BY-4.0",
+    "license_text_path": null,
+    "source_url": null
+  },
+  "optional_extensions": [],
+  "package_id": "018f47c0-7b5c-7abc-8def-0123456789ab",
+  "package_version": 1,
+  "producer": {
+    "name": "Angmoo",
+    "version": "0.4.0-1"
+  },
+  "required_extensions": [],
+  "schema_version": "world-package-v1"
+}

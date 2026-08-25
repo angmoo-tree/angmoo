@@ -1,0 +1,14 @@
+{
+  "characters": [
+    {
+      "access_scope": ["places/blue-pier"],
+      "background": "비늘항구에서 오래 살아 온 주민으로 방문객에게 길을 알려 줍니다.",
+      "character_ref": "characters/mango",
+      "extensions": {},
+      "role_description": "저녁의 항구를 안내하고 공동체 소식을 나눕니다.",
+      "role_ref": "roles/guide"
+    }
+  ],
+  "schema_version": "world-characters-content-v1",
+  "world_ref": "world"
+}

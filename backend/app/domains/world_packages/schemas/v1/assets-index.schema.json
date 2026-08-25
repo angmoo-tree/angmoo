@@ -1,0 +1,82 @@
+{
+  "$defs": {
+    "ManagedImageAsset": {
+      "additionalProperties": false,
+      "properties": {
+        "alt_text": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Alt Text",
+          "type": "string"
+        },
+        "bytes": {
+          "maximum": 5242880,
+          "minimum": 1,
+          "title": "Bytes",
+          "type": "integer"
+        },
+        "height": {
+          "maximum": 4096,
+          "minimum": 1,
+          "title": "Height",
+          "type": "integer"
+        },
+        "media_type": {
+          "const": "image/webp",
+          "title": "Media Type",
+          "type": "string"
+        },
+        "ref": {
+          "pattern": "^assets/sha256-[0-9a-f]{64}\\.webp$",
+          "title": "Ref",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "width": {
+          "maximum": 4096,
+          "minimum": 1,
+          "title": "Width",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "ref",
+        "sha256",
+        "bytes",
+        "media_type",
+        "width",
+        "height"
+      ],
+      "title": "ManagedImageAsset",
+      "type": "object"
+    }
+  },
+  "$id": "https://angmoo.dev/schemas/world-package/v1/assets-index.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "assets": {
+      "items": {
+        "$ref": "#/$defs/ManagedImageAsset"
+      },
+      "maxItems": 100,
+      "title": "Assets",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "assets-index-v1",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "assets"
+  ],
+  "title": "AssetIndexDocument",
+  "type": "object"
+}

@@ -1,0 +1,227 @@
+{
+  "$defs": {
+    "WorldPackageCompatibility": {
+      "additionalProperties": false,
+      "properties": {
+        "min_reader_version": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Min Reader Version",
+          "type": "string"
+        },
+        "world_contract_version": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "World Contract Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "min_reader_version",
+        "world_contract_version"
+      ],
+      "title": "WorldPackageCompatibility",
+      "type": "object"
+    },
+    "WorldPackageEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "bytes": {
+          "maximum": 5242880,
+          "minimum": 0,
+          "title": "Bytes",
+          "type": "integer"
+        },
+        "media_type": {
+          "enum": [
+            "application/json",
+            "image/webp",
+            "text/plain"
+          ],
+          "title": "Media Type",
+          "type": "string"
+        },
+        "path": {
+          "maxLength": 240,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,239}$",
+          "title": "Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "sha256",
+        "bytes",
+        "media_type"
+      ],
+      "title": "WorldPackageEntry",
+      "type": "object"
+    },
+    "WorldPackageLicense": {
+      "additionalProperties": false,
+      "properties": {
+        "attribution": {
+          "default": "",
+          "maxLength": 1000,
+          "title": "Attribution",
+          "type": "string"
+        },
+        "expression": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Expression",
+          "type": "string"
+        },
+        "license_text_path": {
+          "anyOf": [
+            {
+              "const": "LICENSE.txt",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "License Text Path"
+        },
+        "source_url": {
+          "anyOf": [
+            {
+              "maxLength": 2048,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Url"
+        }
+      },
+      "required": [
+        "expression"
+      ],
+      "title": "WorldPackageLicense",
+      "type": "object"
+    },
+    "WorldPackageProducer": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "title": "WorldPackageProducer",
+      "type": "object"
+    }
+  },
+  "$id": "https://angmoo.dev/schemas/world-package/v1/manifest.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "compatibility": {
+      "$ref": "#/$defs/WorldPackageCompatibility"
+    },
+    "content_digest": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Content Digest",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "entries": {
+      "items": {
+        "$ref": "#/$defs/WorldPackageEntry"
+      },
+      "maxItems": 255,
+      "minItems": 4,
+      "title": "Entries",
+      "type": "array"
+    },
+    "format": {
+      "const": "angmoo-world-package",
+      "title": "Format",
+      "type": "string"
+    },
+    "format_version": {
+      "const": 1,
+      "title": "Format Version",
+      "type": "integer"
+    },
+    "license": {
+      "$ref": "#/$defs/WorldPackageLicense"
+    },
+    "optional_extensions": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 32,
+      "title": "Optional Extensions",
+      "type": "array"
+    },
+    "package_id": {
+      "format": "uuid7",
+      "title": "Package Id",
+      "type": "string"
+    },
+    "package_version": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "title": "Package Version",
+      "type": "integer"
+    },
+    "producer": {
+      "$ref": "#/$defs/WorldPackageProducer"
+    },
+    "required_extensions": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 32,
+      "title": "Required Extensions",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "world-package-v1",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "format",
+    "format_version",
+    "schema_version",
+    "package_id",
+    "package_version",
+    "created_at",
+    "producer",
+    "compatibility",
+    "license",
+    "entries",
+    "content_digest"
+  ],
+  "title": "WorldPackageManifest",
+  "type": "object"
+}
