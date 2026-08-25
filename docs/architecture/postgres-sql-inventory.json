@@ -956,14 +956,14 @@
     {
       "markers": {
         "driver_or_url": [
-          164,
-          165
+          174,
+          175
         ]
       },
       "owner": "ER7",
       "path": "scripts/ci/check_desktop_installer_contract.py",
       "removal_condition": "embedded canonical rollback window PASS and user-approved legacy-default removal",
-      "source_sha256": "46c58a5dd48b5c1293b390d9d46152326a2bd97de92fac2eea0c7f357a9a1f54",
+      "source_sha256": "0c7ec9f96228dfd8cb06d51cc8294a340d34a4f0f9f25a8a0b13a150010b0c3f",
       "transition_pr": "ER7 PR P"
     },
     {
