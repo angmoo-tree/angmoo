@@ -1,7 +1,7 @@
 """Fail-closed archive metadata policy for World Package v1.
 
-This module performs no file I/O. A later archive adapter must supply bounded
-metadata descriptors and enforce the same policy while streaming bytes.
+This module performs no file I/O. Archive adapters supply bounded metadata
+descriptors and enforce the same policy while streaming bytes.
 """
 
 from __future__ import annotations
@@ -33,6 +33,7 @@ class WorldPackagePolicy:
     MAX_UNCOMPRESSED_BYTES: ClassVar[int] = 256 * 1024 * 1024
     MAX_ARCHIVE_ENTRIES: ClassVar[int] = 256
     MAX_MANIFEST_BYTES: ClassVar[int] = 256 * 1024
+    MAX_LICENSE_TEXT_BYTES: ClassVar[int] = 256 * 1024
     MAX_JSON_ENTRY_BYTES: ClassVar[int] = 2 * 1024 * 1024
     MAX_IMAGE_BYTES: ClassVar[int] = 5 * 1024 * 1024
     MAX_CHARACTERS: ClassVar[int] = 50
@@ -88,6 +89,12 @@ class WorldPackagePolicy:
             or total_uncompressed < 0
         ):
             cls._fail(WorldPackageReasonCode.ARCHIVE_LIMIT_EXCEEDED)
+        if (
+            total_compressed
+            and total_uncompressed
+            > total_compressed * cls.MAX_COMPRESSION_RATIO
+        ):
+            cls._fail(WorldPackageReasonCode.ARCHIVE_LIMIT_EXCEEDED)
 
         cls.validate_path_collisions(item.path for item in audited)
         paths: set[str] = set()
@@ -133,6 +140,11 @@ class WorldPackagePolicy:
         if entry.path.endswith(".json") and entry.uncompressed_bytes > cls.MAX_JSON_ENTRY_BYTES:
             cls._fail(WorldPackageReasonCode.ARCHIVE_LIMIT_EXCEEDED)
         if entry.path.startswith("assets/") and entry.uncompressed_bytes > cls.MAX_IMAGE_BYTES:
+            cls._fail(WorldPackageReasonCode.ARCHIVE_LIMIT_EXCEEDED)
+        if (
+            entry.path == "LICENSE.txt"
+            and entry.uncompressed_bytes > cls.MAX_LICENSE_TEXT_BYTES
+        ):
             cls._fail(WorldPackageReasonCode.ARCHIVE_LIMIT_EXCEEDED)
 
     @classmethod

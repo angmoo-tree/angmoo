@@ -2,14 +2,24 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterator
+from collections.abc import AsyncIterator, Callable, Iterator
 from datetime import datetime, timezone
 from pathlib import Path
 import threading
 from typing import Annotated
 from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Header,
+    HTTPException,
+    Request,
+    Response,
+    UploadFile,
+    status,
+)
 from fastapi.responses import StreamingResponse
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, sessionmaker
@@ -21,10 +31,15 @@ from app.core.ids import uuid7_string
 from app.domains.world_packages.api.schemas import (
     WorldPackageExportPreviewRead,
     WorldPackageExportRequest,
+    WorldPackageImportPreviewRead,
     WorldPackagePreparedExportRead,
+    WorldPackagePreparedImportPreviewRead,
 )
 from app.domains.world_packages.application.export_world_package import (
     ExportWorldPackage,
+)
+from app.domains.world_packages.application.stage_world_package import (
+    StageWorldPackage,
 )
 from app.domains.world_packages.domain.errors import (
     WorldPackageContractError,
@@ -38,17 +53,26 @@ from app.domains.world_packages.infrastructure.filesystem_export_artifacts impor
     ExportArtifact,
     FilesystemWorldPackageExportArtifacts,
 )
+from app.domains.world_packages.infrastructure.filesystem_staging import (
+    FilesystemWorldPackageStaging,
+)
 from app.domains.world_packages.infrastructure.managed_media_assets import (
     ManagedMediaPackageAssets,
 )
 from app.domains.world_packages.infrastructure.sqlalchemy_registry import (
     SqlAlchemyWorldPackageRegistry,
 )
+from app.domains.world_packages.infrastructure.sqlalchemy_preview_probe import (
+    SqlAlchemyWorldPackagePreviewProbe,
+)
 from app.domains.world_packages.infrastructure.sqlalchemy_source_snapshot import (
     SqlAlchemyWorldPackageSourceSnapshot,
 )
 from app.domains.world_packages.infrastructure.zip_archive import (
     DeterministicWorldPackageZipArchive,
+)
+from app.domains.world_packages.infrastructure.zip_import_archive import (
+    ZipWorldPackageImportValidator,
 )
 
 
@@ -60,6 +84,10 @@ IdempotencyKey = Annotated[
 DownloadToken = Annotated[
     str,
     Header(alias="X-World-Package-Download-Token", min_length=32, max_length=128),
+]
+PreviewToken = Annotated[
+    str,
+    Header(alias="X-World-Package-Preview-Token", min_length=32, max_length=128),
 ]
 _STORE_LOCK = threading.Lock()
 
@@ -94,6 +122,23 @@ def _artifacts(request: Request) -> FilesystemWorldPackageExportArtifacts:
     return existing
 
 
+def _staging(request: Request) -> FilesystemWorldPackageStaging:
+    existing = getattr(request.app.state, "world_package_import_staging", None)
+    if existing is not None:
+        return existing
+    with _STORE_LOCK:
+        existing = getattr(
+            request.app.state,
+            "world_package_import_staging",
+            None,
+        )
+        if existing is None:
+            _media_root, runtime_root, _media_url_path = _paths(request)
+            existing = FilesystemWorldPackageStaging(runtime_root)
+            request.app.state.world_package_import_staging = existing
+    return existing
+
+
 def _exporter(request: Request, db: Session) -> ExportWorldPackage:
     media_root, _runtime_root, media_url_path = _paths(request)
     return ExportWorldPackage(
@@ -104,6 +149,15 @@ def _exporter(request: Request, db: Session) -> ExportWorldPackage:
         ),
         registry=SqlAlchemyWorldPackageRegistry(db),
         archive=DeterministicWorldPackageZipArchive(),
+    )
+
+
+def _stager(request: Request, db: Session) -> StageWorldPackage:
+    staging = _staging(request)
+    return StageWorldPackage(
+        staging=staging,
+        validator=ZipWorldPackageImportValidator(staging),
+        preview_probe=SqlAlchemyWorldPackagePreviewProbe(db),
     )
 
 
@@ -121,19 +175,108 @@ def _raise_contract_error(exc: WorldPackageContractError) -> None:
     if reason in {
         WorldPackageReasonCode.OWNER_REQUIRED,
         WorldPackageReasonCode.DELIVERY_FORBIDDEN,
+        WorldPackageReasonCode.STAGE_FORBIDDEN,
     }:
         code = status.HTTP_403_FORBIDDEN
-    elif reason is WorldPackageReasonCode.DELIVERY_EXPIRED:
+    elif reason in {
+        WorldPackageReasonCode.DELIVERY_EXPIRED,
+        WorldPackageReasonCode.STAGE_EXPIRED,
+    }:
         code = status.HTTP_410_GONE
+    elif reason is WorldPackageReasonCode.UPLOAD_TOO_LARGE:
+        code = status.HTTP_413_REQUEST_ENTITY_TOO_LARGE
     elif reason in {
         WorldPackageReasonCode.SOURCE_CHANGED,
         WorldPackageReasonCode.COMMIT_CONFLICT,
         WorldPackageReasonCode.WORLD_NOT_EXPORTABLE,
+        WorldPackageReasonCode.DUPLICATE,
+        WorldPackageReasonCode.TAMPERED_VERSION,
+        WorldPackageReasonCode.PREVIEW_CHANGED,
     }:
         code = status.HTTP_409_CONFLICT
     else:
         code = status.HTTP_422_UNPROCESSABLE_ENTITY
     raise HTTPException(status_code=code, detail=reason.value) from exc
+
+
+@router.post(
+    "/world-package-imports/stage",
+    response_model=WorldPackagePreparedImportPreviewRead,
+    status_code=status.HTTP_201_CREATED,
+)
+async def stage_world_package_import(
+    request: Request,
+    package: Annotated[UploadFile, File(...)],
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+) -> WorldPackagePreparedImportPreviewRead:
+    browser_session.require_local_frontend_request(request, mutation=True)
+    operation_id = uuid7_string()
+
+    async def chunks() -> AsyncIterator[bytes]:
+        while chunk := await package.read(64 * 1024):
+            yield chunk
+
+    try:
+        prepared = await _stager(request, db).stage(
+            operation_id=operation_id,
+            local_owner_id=current_user.id,
+            chunks=chunks(),
+        )
+        return WorldPackagePreparedImportPreviewRead.from_domain(prepared)
+    except WorldPackageContractError as exc:
+        _raise_contract_error(exc)
+        raise AssertionError("unreachable")
+    finally:
+        await package.close()
+
+
+@router.get(
+    "/world-package-imports/{operation_id}/preview",
+    response_model=WorldPackageImportPreviewRead,
+)
+def read_world_package_import_preview(
+    operation_id: str,
+    request: Request,
+    preview_token: PreviewToken,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+) -> WorldPackageImportPreviewRead:
+    browser_session.require_local_frontend_request(request, mutation=False)
+    try:
+        preview = _stager(request, db).read_preview(
+            operation_id=operation_id,
+            local_owner_id=current_user.id,
+            preview_token=preview_token,
+        )
+        return WorldPackageImportPreviewRead.from_domain(preview)
+    except WorldPackageContractError as exc:
+        _raise_contract_error(exc)
+        raise AssertionError("unreachable")
+
+
+@router.delete(
+    "/world-package-imports/{operation_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def discard_world_package_import_preview(
+    operation_id: str,
+    request: Request,
+    preview_token: PreviewToken,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+) -> Response:
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        _stager(request, db).discard(
+            operation_id=operation_id,
+            local_owner_id=current_user.id,
+            preview_token=preview_token,
+        )
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    except WorldPackageContractError as exc:
+        _raise_contract_error(exc)
+        raise AssertionError("unreachable")
 
 
 @router.post(

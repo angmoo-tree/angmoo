@@ -113,7 +113,7 @@ class SqlAlchemyApplicationRuntimeProbe:
                 ),
                 RuntimeCapabilityStatus(
                     name="world_package_staging",
-                    state=RuntimeComponentState.NOT_AVAILABLE,
+                    state=RuntimeComponentState.READY,
                 ),
                 RuntimeCapabilityStatus(
                     name="world_package_rollback",

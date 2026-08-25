@@ -39,6 +39,7 @@ from app.domains.worlds.infrastructure.generation_context import (
     build_world_generation_context,
 )
 from app.domains.worlds.infrastructure.definition_repository import (
+    WORLD_CONTRACT_VERSION,
     world_contract_hash,
 )
 from app.domains.worlds.api.schemas import (
@@ -70,6 +71,7 @@ __all__ = [
     "WorldRowVersionConflictError",
     "WorldServiceError",
     "WorldSeedOutcome",
+    "WORLD_CONTRACT_VERSION",
     "World",
     "WorldDaypartProfileInput",
     "WorldDraftCreate",

@@ -25,6 +25,7 @@ class WorldPackageReasonCode(StrEnum):
     DUPLICATE = "world_package_duplicate"
     TAMPERED_VERSION = "world_package_tampered_version"
     STAGE_EXPIRED = "world_package_stage_expired"
+    STAGE_FORBIDDEN = "world_package_stage_forbidden"
     PREVIEW_CHANGED = "world_package_preview_changed"
     COMMIT_CONFLICT = "world_package_commit_conflict"
     COMMIT_FAILED = "world_package_commit_failed"
