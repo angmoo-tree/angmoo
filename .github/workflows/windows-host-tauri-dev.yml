@@ -13,6 +13,10 @@ on:
       - "scripts/ci/windows_host_tauri_utf8_smoke.ps1"
       - "scripts/ci/check_windows_host_tauri_dev_contract.py"
       - "backend/tests/test_l3_er7_windows_host_tauri_dev_contract.py"
+      - "backend/app/runtime/migrations/**"
+      - "backend/app/runtime/contributor_backend.py"
+      - "backend/tests/test_embedded_data_migration.py"
+      - "backend/tests/test_embedded_data_migration_contract.py"
       - ".github/CODEOWNERS"
       - ".github/workflows/windows-host-tauri-dev.yml"
       - "README.md"
@@ -31,6 +35,10 @@ on:
       - "scripts/ci/windows_host_tauri_utf8_smoke.ps1"
       - "scripts/ci/check_windows_host_tauri_dev_contract.py"
       - "backend/tests/test_l3_er7_windows_host_tauri_dev_contract.py"
+      - "backend/app/runtime/migrations/**"
+      - "backend/app/runtime/contributor_backend.py"
+      - "backend/tests/test_embedded_data_migration.py"
+      - "backend/tests/test_embedded_data_migration_contract.py"
       - ".github/CODEOWNERS"
       - ".github/workflows/windows-host-tauri-dev.yml"
       - "README.md"
@@ -64,11 +72,17 @@ jobs:
         with:
           version: "11.22.0"
           run_install: false
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.12.5"
+          python-version: "3.13"
+          enable-cache: false
       - name: Install pinned desktop toolchain
         shell: pwsh
         run: |
           pnpm --dir frontend install --frozen-lockfile
           npm ci --ignore-scripts --prefix desktop
+          uv sync --frozen --directory backend
           rustup toolchain install 1.97.1 --profile minimal --component rustfmt
           rustup override set 1.97.1 --path desktop\src-tauri
       - name: Verify repository and fail-closed preflight contracts
@@ -77,6 +91,11 @@ jobs:
           python scripts\ci\check_windows_host_tauri_dev_contract.py
           .\scripts\ci\windows_host_tauri_dev_smoke.ps1
           .\scripts\ci\windows_host_tauri_utf8_smoke.ps1
+          Push-Location backend
+          .\.venv\Scripts\python.exe -m pytest -q `
+            tests\test_embedded_data_migration_contract.py `
+            tests\test_embedded_data_migration.py
+          Pop-Location
       - name: Verify installed and Docker-bridge Rust modes
         shell: pwsh
         run: |

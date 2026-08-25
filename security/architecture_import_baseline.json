@@ -1,7 +1,7 @@
 {
-  "edge_count": 970,
-  "external_import_count": 1529,
-  "module_count": 462,
+  "edge_count": 997,
+  "external_import_count": 1583,
+  "module_count": 472,
   "modules": [
     {
       "external_imports": [],
@@ -3900,9 +3900,11 @@
         "__future__",
         "collections",
         "ctypes",
+        "dataclasses",
         "datetime",
         "fcntl",
         "gc",
+        "hashlib",
         "json",
         "ladybug",
         "msvcrt",
@@ -4451,8 +4453,8 @@
         "app.domains.runtime.public",
         "app.public_main",
         "app.runtime.configuration",
-        "app.runtime.persistence.runtime_data_path",
-        "app.runtime.persistence.sqlite_database"
+        "app.runtime.migrations.embedded_data",
+        "app.runtime.persistence.runtime_data_path"
       ],
       "module": "app.runtime.contributor_backend",
       "path": "backend/app/runtime/contributor_backend.py",
@@ -4463,6 +4465,7 @@
         "__future__",
         "argparse",
         "ctypes",
+        "importlib",
         "json",
         "os",
         "pathlib",
@@ -4478,9 +4481,9 @@
         "app.core.desktop_loopback",
         "app.public_main",
         "app.runtime.configuration",
+        "app.runtime.migrations.embedded_data",
         "app.runtime.migrations.local_app_data",
-        "app.runtime.persistence.runtime_data_path",
-        "app.runtime.persistence.sqlite_database"
+        "app.runtime.persistence.runtime_data_path"
       ],
       "module": "app.runtime.desktop_sidecar",
       "path": "backend/app/runtime/desktop_sidecar.py",
@@ -4526,6 +4529,132 @@
     {
       "external_imports": [
         "__future__",
+        "dataclasses",
+        "hashlib",
+        "pathlib"
+      ],
+      "imports": [
+        "app.core.db",
+        "app.domains.runtime.ports.runtime_data_path",
+        "app.integrations.ladybug_projection",
+        "app.runtime.migrations.embedded_sqlite",
+        "app.runtime.migrations.generation",
+        "app.runtime.migrations.ladybug_projection",
+        "app.runtime.migrations.ladybug_versions.rebuild",
+        "app.runtime.migrations.ladybug_versions.registry"
+      ],
+      "module": "app.runtime.migrations.embedded_data",
+      "path": "backend/app/runtime/migrations/embedded_data.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "os",
+        "pathlib",
+        "shutil",
+        "sqlalchemy",
+        "sqlite3",
+        "uuid"
+      ],
+      "imports": [
+        "app.domains.runtime.ports.runtime_data_path",
+        "app.runtime.migrations.generation",
+        "app.runtime.migrations.sqlite_versions.registry",
+        "app.runtime.persistence.sqlite_codecs",
+        "app.runtime.persistence.sqlite_database",
+        "app.runtime.persistence.sqlite_schema"
+      ],
+      "module": "app.runtime.migrations.embedded_sqlite",
+      "path": "backend/app/runtime/migrations/embedded_sqlite.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "fcntl",
+        "json",
+        "msvcrt",
+        "os",
+        "pathlib",
+        "shutil",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.runtime.migrations.generation",
+      "path": "backend/app/runtime/migrations/generation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "hashlib",
+        "json",
+        "pathlib",
+        "shutil",
+        "sqlalchemy.orm",
+        "uuid"
+      ],
+      "imports": [
+        "app.domains.runtime.ports.runtime_data_path",
+        "app.integrations.ladybug_projection",
+        "app.runtime.migrations.generation",
+        "app.runtime.migrations.ladybug_versions.registry"
+      ],
+      "module": "app.runtime.migrations.ladybug_projection",
+      "path": "backend/app/runtime/migrations/ladybug_projection.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.runtime.migrations.ladybug_versions",
+      "path": "backend/app/runtime/migrations/ladybug_versions/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "pathlib",
+        "sqlalchemy",
+        "typing"
+      ],
+      "imports": [
+        "app.integrations.ladybug_projection",
+        "app.models",
+        "app.services.graph_projection_commands",
+        "app.services.graph_projection_replay"
+      ],
+      "module": "app.runtime.migrations.ladybug_versions.rebuild",
+      "path": "backend/app/runtime/migrations/ladybug_versions/rebuild.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "dataclasses",
+        "hashlib",
+        "json",
+        "pathlib",
+        "typing"
+      ],
+      "imports": [
+        "app.integrations.ladybug_projection",
+        "app.runtime.migrations.ladybug_versions.rebuild"
+      ],
+      "module": "app.runtime.migrations.ladybug_versions.registry",
+      "path": "backend/app/runtime/migrations/ladybug_versions/registry.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "collections.abc",
         "dataclasses",
         "hashlib",
@@ -4561,6 +4690,43 @@
       ],
       "module": "app.runtime.migrations.release_candidate",
       "path": "backend/app/runtime/migrations/release_candidate.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.runtime.migrations.sqlite_versions",
+      "path": "backend/app/runtime/migrations/sqlite_versions/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "dataclasses",
+        "hashlib",
+        "json",
+        "pathlib",
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.runtime.migrations.sqlite_versions.v1_to_v2_world_package_registry",
+        "app.runtime.persistence.sqlite_schema"
+      ],
+      "module": "app.runtime.migrations.sqlite_versions.registry",
+      "path": "backend/app/runtime/migrations/sqlite_versions/registry.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.runtime.persistence.sqlite_schema"
+      ],
+      "module": "app.runtime.migrations.sqlite_versions.v1_to_v2_world_package_registry",
+      "path": "backend/app/runtime/migrations/sqlite_versions/v1_to_v2_world_package_registry.py",
       "wildcard_imports": []
     },
     {

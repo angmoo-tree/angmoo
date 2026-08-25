@@ -26,6 +26,7 @@ EXPECTED_WORKFLOWS = {
 REQUIRED_JOBS = {
     "backend",
     "frontend",
+    "embedded-data-migration",
     "sqlite-canonical-migration",
     "local-core-smoke",
     "local-autonomy-smoke",

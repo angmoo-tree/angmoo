@@ -47,7 +47,7 @@ has runtime consumers. Do not combine a move with unrelated behavior changes.
 ## Validation map
 
 All PRs run these required checks: `backend`, `frontend`,
-`sqlite-canonical-migration`, `local-core-smoke`, `local-autonomy-smoke`,
+`embedded-data-migration`, `local-core-smoke`, `local-autonomy-smoke`,
 `local-full-graph`, `oss-boundary`, `dependency-license`, `dco`, and
 `architecture-boundary`.
 

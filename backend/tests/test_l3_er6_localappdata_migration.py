@@ -22,6 +22,7 @@ from app.runtime.persistence.sqlite_database import (
     SqliteCanonicalDatabase,
     SqliteCanonicalSettings,
 )
+from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION
 
 
 def test_localappdata_import_does_not_initialize_postgres_runtime() -> None:
@@ -103,7 +104,7 @@ def test_preview_data_migrates_once_with_hash_and_schema_evidence(
 
     assert first.status == "migrated"
     assert first.generation == "er6-preview-v1"
-    assert first.schema_version == 1
+    assert first.schema_version == SQLITE_SCHEMA_VERSION
     assert first.canonical_table_count is not None
     assert first.canonical_table_count > 0
     assert first.copied_file_count >= 5

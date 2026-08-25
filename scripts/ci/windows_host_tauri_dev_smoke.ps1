@@ -86,7 +86,16 @@ try {
 
     $partial = Copy-Fixture
     $partial.docker.stack_state = 'partial-or-unhealthy'
-    Invoke-Case 'fail-partial-stack' $partial 40 'docker_stack_partial_or_unhealthy'
+    Invoke-Case 'pass-repair-owned-partial-stack' $partial 0
+
+    $partialWithPort = Copy-Fixture
+    $partialWithPort.docker.stack_state = 'partial-or-unhealthy'
+    $partialWithPort.docker.port_3000_in_use = $true
+    Invoke-Case 'pass-repair-owned-partial-stack-with-port' $partialWithPort 0
+
+    $unknownStack = Copy-Fixture
+    $unknownStack.docker.stack_state = 'unknown'
+    Invoke-Case 'fail-unknown-stack' $unknownStack 40 'docker_stack_state_unknown'
 
     $sidecar = Copy-Fixture
     $sidecar.processes.angmoo_sidecar = 1
@@ -115,5 +124,5 @@ try {
     Remove-Item -LiteralPath $fixtureRoot -Recurse -Force -ErrorAction SilentlyContinue
 }
 
-Write-Host 'windows-host-tauri-dev-smoke: PASS cases=11'
+Write-Host 'windows-host-tauri-dev-smoke: PASS cases=13'
 exit 0

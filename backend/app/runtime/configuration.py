@@ -56,6 +56,7 @@ class RuntimeConfig:
     app_secret_file: Path
     graph_provider: RuntimeGraphProvider
     graph_database_root: Path | None
+    graph_projection_enabled: bool
     component_mode: RuntimeComponentMode
     desktop_allowed_origin: str
     desktop_launch_token: str = field(repr=False)
@@ -92,6 +93,7 @@ class RuntimeConfig:
             / "angmoo.sqlite3"
         )
 
+
 def _sqlite_url(path: Path) -> str:
     return "sqlite+pysqlite:///" + path.resolve().as_posix()
 
@@ -104,6 +106,8 @@ def build_embedded_runtime_config(
     generation: str,
     desktop_launch_token: str,
     desktop_allowed_origin: str,
+    graph_database_root: Path | None = None,
+    graph_projection_enabled: bool = True,
 ) -> RuntimeConfig:
     if profile not in {
         RuntimeProfile.LOCAL_EMBEDDED,
@@ -127,7 +131,10 @@ def build_embedded_runtime_config(
         database_url=_sqlite_url(database_path),
         app_secret_file=secret_path,
         graph_provider=RuntimeGraphProvider.LADYBUG,
-        graph_database_root=paths.graph / "ladybug",
+        graph_database_root=(
+            graph_database_root or paths.graph / "ladybug"
+        ).resolve(),
+        graph_projection_enabled=graph_projection_enabled,
         component_mode=RuntimeComponentMode.IN_PROCESS,
         desktop_allowed_origin=desktop_allowed_origin,
         desktop_launch_token=desktop_launch_token,
@@ -158,7 +165,7 @@ def settings_from_runtime_config(
             "CREDENTIAL_ENCRYPTION_PROVIDER": "local",
             "DATABASE_URL": config.database_url,
             "MEDIA_ROOT": str(config.data_paths.media),
-            "GRAPH_PROJECTION_ENABLED": True,
+            "GRAPH_PROJECTION_ENABLED": config.graph_projection_enabled,
             "GRAPH_PROVIDER": config.graph_provider.value,
             "LADYBUG_DATABASE_ROOT": str(config.graph_database_root),
             "LOCAL_RUNTIME_COMPONENT_MODE": config.component_mode.value,

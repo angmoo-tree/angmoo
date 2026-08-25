@@ -111,7 +111,7 @@ include:
 
 - `backend`
 - `frontend`
-- `sqlite-canonical-migration`
+- `embedded-data-migration`
 - `local-core-smoke`
 - `local-autonomy-smoke`
 - `local-full-graph` (LadybugDB plus frozen static parity fixtures)

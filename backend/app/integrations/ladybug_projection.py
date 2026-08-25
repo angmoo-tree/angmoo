@@ -9,8 +9,10 @@ from __future__ import annotations
 
 import ctypes
 from collections import defaultdict, deque
+from dataclasses import fields
 from datetime import datetime
 import gc
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -35,9 +37,107 @@ from app.domains.relationships.projection.commands import (
 
 LADYBUG_PROJECTION_SCHEMA_VERSION = 1
 
+_QUERY_RESULT_CONTRACT = {
+    "direct_relationship": ("actor_id", "target_id", "relationship"),
+    "shared_neighbors": ("world_character_id",),
+    "shortest_path": ("world_character_ids", "oriented_edges", "hop_count"),
+    "ranked_related": ("actor_id", "target_id", "relationship"),
+    "relationship_evidence": (
+        "event_id",
+        "event_type",
+        "occurred_at",
+        "relationship_state_id",
+        "relationship_version",
+    ),
+    "visualization": ("actor_id", "target_id", "relationship"),
+}
+
+
+def ladybug_projection_contract() -> dict[str, object]:
+    """Return a stable contract fingerprint independent of graph contents."""
+
+    def digest(payload: object) -> str:
+        return hashlib.sha256(
+            json.dumps(
+                payload,
+                ensure_ascii=True,
+                sort_keys=True,
+                separators=(",", ":"),
+            ).encode("utf-8")
+        ).hexdigest()
+
+    command_types = (
+        SocialEventProjectionCommand,
+        RelationshipStateProjectionCommand,
+        SourceExclusionProjectionCommand,
+        NoGraphMutationCommand,
+    )
+    commands = {
+        command.__name__: [
+            {"name": field.name, "type": str(field.type)}
+            for field in fields(command)
+        ]
+        for command in command_types
+    }
+    schema = [" ".join(statement.split()) for statement in _BOOTSTRAP_STATEMENTS]
+    queries = {
+        "templates": [template.value for template in GraphQueryTemplate],
+        "results": _QUERY_RESULT_CONTRACT,
+    }
+    return {
+        "projection_schema_version": LADYBUG_PROJECTION_SCHEMA_VERSION,
+        "schema_digest": digest(schema),
+        "projection_command_digest": digest(commands),
+        "typed_query_digest": digest(queries),
+        "parity_contract_version": 1,
+        "minimum_ladybug_version": "0.19.1",
+    }
+
 
 class LadybugProjectionError(RelationshipProjectionBackendError):
     """Stable, sanitized LadybugDB error exposed to the projection worker."""
+
+
+def inspect_ladybug_projection_schema_version(database_root: Path) -> int | None:
+    """Read ProjectionMeta without changing or bootstrapping the graph."""
+
+    root = database_root.resolve()
+    if not (root / "relationships.lbdb").exists():
+        return None
+    writer_lock = _ExclusiveWriterLock(root / "relationships.writer.lock")
+    path_alias = _WindowsAsciiPathAlias(root)
+    database: Any | None = None
+    connection: Any | None = None
+    try:
+        writer_lock.acquire()
+        native_root = path_alias.open()
+        database = lb.Database(str(native_root / "relationships.lbdb"))
+        connection = lb.Connection(database)
+        try:
+            rows = _rows(
+                connection.execute(
+                    "MATCH (meta:ProjectionMeta {id: $id}) "
+                    "RETURN meta.schema_version",
+                    parameters={"id": "relationship_projection"},
+                )
+            )
+        except Exception:
+            return 0
+        if not rows:
+            return 0
+        return int(rows[0][0])
+    except LadybugProjectionError:
+        raise
+    except Exception:
+        raise LadybugProjectionError("ladybug_unavailable") from None
+    finally:
+        connection = None
+        database = None
+        gc.collect()
+        try:
+            path_alias.close()
+        finally:
+            writer_lock.release()
 
 
 class _ExclusiveWriterLock:
@@ -275,10 +375,37 @@ class LadybugRelationshipProjection:
         with self._access_lock:
             for statement in _BOOTSTRAP_STATEMENTS:
                 self._execute(statement)
+            rows = self._execute(
+                "MATCH (meta:ProjectionMeta {id: $id}) "
+                "RETURN meta.schema_version, meta.adapter",
+                {"id": "relationship_projection"},
+            )
+            if rows:
+                version = int(rows[0][0])
+                adapter = str(rows[0][1])
+                if (
+                    version != LADYBUG_PROJECTION_SCHEMA_VERSION
+                    or adapter != "ladybug"
+                ):
+                    raise LadybugProjectionError(
+                        "ladybug_schema_version_mismatch"
+                    )
+                return
+            populated = 0
+            for label in ("World", "WorldCharacter", "SocialEvent"):
+                count_rows = self._execute(
+                    f"MATCH (node:{label}) RETURN count(node)"
+                )
+                populated += int(count_rows[0][0])
+            if populated:
+                raise LadybugProjectionError("ladybug_schema_unversioned")
             self._execute(
                 """
-                MERGE (meta:ProjectionMeta {id: $id})
-                SET meta.schema_version = $schema_version, meta.adapter = $adapter
+                CREATE (meta:ProjectionMeta {
+                  id: $id,
+                  schema_version: $schema_version,
+                  adapter: $adapter
+                })
                 RETURN meta.schema_version
                 """,
                 {
@@ -287,6 +414,17 @@ class LadybugRelationshipProjection:
                     "adapter": "ladybug",
                 },
             )
+
+    def projection_schema_version(self) -> int:
+        with self._access_lock:
+            rows = self._execute(
+                "MATCH (meta:ProjectionMeta {id: $id}) "
+                "RETURN meta.schema_version",
+                {"id": "relationship_projection"},
+            )
+            if len(rows) != 1:
+                raise LadybugProjectionError("ladybug_schema_version_missing")
+            return int(rows[0][0])
 
     def verify_connectivity(self) -> None:
         with self._access_lock:
@@ -871,4 +1009,6 @@ __all__ = [
     "LADYBUG_PROJECTION_SCHEMA_VERSION",
     "LadybugProjectionError",
     "LadybugRelationshipProjection",
+    "inspect_ladybug_projection_schema_version",
+    "ladybug_projection_contract",
 ]

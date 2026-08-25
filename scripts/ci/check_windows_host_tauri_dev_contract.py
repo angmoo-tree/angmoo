@@ -143,7 +143,8 @@ def check_repo(*, root: Path = ROOT) -> list[str]:
 
     for marker in (
         "unsupported_windows_build",
-        "docker_stack_partial_or_unhealthy",
+        "partial-or-unhealthy",
+        "docker_stack_state_unknown",
         "frontend_port_conflict",
         "host_sidecar_process_running",
         "installed_data_root_override_forbidden",
@@ -153,6 +154,12 @@ def check_repo(*, root: Path = ROOT) -> list[str]:
     ):
         if marker not in preflight or marker not in smoke:
             errors.append(f"preflight fail-closed case missing: {marker}")
+    for marker in (
+        "pass-repair-owned-partial-stack",
+        "pass-repair-owned-partial-stack-with-port",
+    ):
+        if marker not in smoke:
+            errors.append(f"recoverable stack case missing: {marker}")
     for marker in (
         "Get-ProtectedDataFingerprint",
         "contributor_bridge_spawned_host_sidecar",
