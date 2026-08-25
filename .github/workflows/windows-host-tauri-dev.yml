@@ -8,7 +8,9 @@ on:
       - "desktop/**"
       - "scripts/dev/desktop-preflight.ps1"
       - "scripts/dev/desktop-dev.ps1"
+      - "scripts/dev/windows-host-tauri-utf8.ps1"
       - "scripts/ci/windows_host_tauri_dev_smoke.ps1"
+      - "scripts/ci/windows_host_tauri_utf8_smoke.ps1"
       - "scripts/ci/check_windows_host_tauri_dev_contract.py"
       - "backend/tests/test_l3_er7_windows_host_tauri_dev_contract.py"
       - ".github/CODEOWNERS"
@@ -24,7 +26,9 @@ on:
       - "desktop/**"
       - "scripts/dev/desktop-preflight.ps1"
       - "scripts/dev/desktop-dev.ps1"
+      - "scripts/dev/windows-host-tauri-utf8.ps1"
       - "scripts/ci/windows_host_tauri_dev_smoke.ps1"
+      - "scripts/ci/windows_host_tauri_utf8_smoke.ps1"
       - "scripts/ci/check_windows_host_tauri_dev_contract.py"
       - "backend/tests/test_l3_er7_windows_host_tauri_dev_contract.py"
       - ".github/CODEOWNERS"
@@ -72,6 +76,7 @@ jobs:
         run: |
           python scripts\ci\check_windows_host_tauri_dev_contract.py
           .\scripts\ci\windows_host_tauri_dev_smoke.ps1
+          .\scripts\ci\windows_host_tauri_utf8_smoke.ps1
       - name: Verify installed and Docker-bridge Rust modes
         shell: pwsh
         run: |

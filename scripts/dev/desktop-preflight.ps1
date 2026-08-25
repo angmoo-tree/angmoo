@@ -7,6 +7,12 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+$utf8Support = Join-Path $PSScriptRoot 'windows-host-tauri-utf8.ps1'
+. $utf8Support
+$utf8Scope = Enter-AngmooUtf8NativeCommandScope
+
+try {
+
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $contractPath = Join-Path $repoRoot 'desktop\platform\windows-host-tauri-dev.json'
 $contract = Get-Content -LiteralPath $contractPath -Raw | ConvertFrom-Json
@@ -20,14 +26,6 @@ function ConvertTo-NormalizedVersion {
         [int]$match.Groups[2].Value,
         [int]$match.Groups[3].Value
     )
-}
-
-function ConvertFrom-ComposeJsonLines {
-    param([string[]]$Lines)
-    $content = ($Lines -join "`n").Trim()
-    if (-not $content) { return @() }
-    if ($content.StartsWith('[')) { return @($content | ConvertFrom-Json) }
-    return @($Lines | Where-Object { $_.Trim() } | ForEach-Object { $_ | ConvertFrom-Json })
 }
 
 function Get-ActualProbe {
@@ -60,7 +58,11 @@ function Get-ActualProbe {
             Push-Location $repoRoot
             try {
                 $composeServices = @(& docker compose @composeArgs config --services 2>$null)
-                $records = @(ConvertFrom-ComposeJsonLines @(& docker compose @composeArgs ps --format json 2>$null))
+                $records = @(
+                    Invoke-AngmooNativeJsonCommand -CommandType 'compose-ps' -AllowEmpty -JsonLines -Command {
+                        & docker compose @composeArgs ps --format json 2>$null
+                    }
+                )
             } finally {
                 Pop-Location
             }
@@ -280,5 +282,8 @@ if ($Json) {
     }
 }
 
-if ($errors.Count -gt 0) { exit 40 }
-exit 0
+$scriptExitCode = if ($errors.Count -gt 0) { 40 } else { 0 }
+} finally {
+    Exit-AngmooUtf8NativeCommandScope -State $utf8Scope
+}
+exit $scriptExitCode

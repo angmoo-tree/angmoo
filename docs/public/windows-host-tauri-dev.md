@@ -44,6 +44,25 @@ not needed:
 .\scripts\dev\desktop-dev.ps1 -NoWatch
 ```
 
+## Windows PowerShell encoding safety
+
+Both commands support Windows PowerShell 5.1 and PowerShell 7 when the host
+console starts in CP949 or UTF-8. They temporarily decode native Docker Compose
+JSON as UTF-8 without BOM, retry a failed decode at most once, and restore the
+previous console input, console output, and pipeline output encodings in a
+`finally` block.
+
+If Docker exits unsuccessfully, returns an unexpected empty response, or still
+cannot produce valid JSON after the bounded retry, the command fails closed
+with `compose_json_decode_failed`. Diagnostics include only the command type,
+exit code, character and byte length, retry attempt, PowerShell version, active
+code page, and a redacted reason. Raw Docker JSON, secrets, labels, mounts, and
+local paths are never printed as part of that failure.
+
+Do not work around an encoding failure by changing the machine-wide system
+locale or permanently running `chcp 65001`. A supported Host Tauri checkout
+must handle the active Windows console encoding itself.
+
 ## What to verify
 
 1. The Phone window opens at Device Home and can move and resize.
