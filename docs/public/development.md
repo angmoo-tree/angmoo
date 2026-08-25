@@ -58,13 +58,12 @@ Maintainers may run Next.js and FastAPI natively for focused debugging, with an
 explicit checkout-local data root. This is a convenience fallback, not the
 cross-platform Quickstart or a different runtime profile.
 
-## Legacy migration boundary
+## SQLite-only boundary
 
-PostgreSQL may be started only for the frozen `LEGACY_MIGRATION` test/tool.
-That profile reads a supported source revision offline and read-only, writes a
-temporary SQLite generation, validates counts/IDs/FKs/digests, and promotes it
-atomically. It cannot start public API routes, scheduler, projector, SNS writes,
-sessions, or providers.
+PostgreSQL and Neo4j are not contributor runtime services, and the repository
+does not ship a PostgreSQL offline importer. Schema changes target the current
+SQLite baseline and explicit SQLite generation lifecycle. Historical Alembic
+revisions remain provenance evidence and are not an alternate runtime chain.
 
 Neo4j has no development runtime. LadybugDB tests use frozen ER3 direct,
 reverse, evidence, World-scope, and bounded-path parity fixtures.

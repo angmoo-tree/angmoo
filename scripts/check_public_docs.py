@@ -55,7 +55,7 @@ REQUIRED_MARKERS = {
     "CONTRIBUTING.md": (
         "Issues and pull requests may be written in English or Korean",
         "`CONTRIBUTOR_EMBEDDED`",
-        "frozen, read-only `LEGACY_MIGRATION` tool",
+        "SQLite is the only canonical store",
         "GPL-3.0-only",
         "Developer Certificate of Origin 1.1",
         "git commit -s",
@@ -67,7 +67,7 @@ REQUIRED_MARKERS = {
         "## Issue와 작업 범위",
         "## Branch, commit과 Pull Request",
         "`CONTRIBUTOR_EMBEDDED`",
-        "`legacy-migration`",
+        "`sqlite-canonical-migration`",
         "GPL-3.0-only",
         "Developer Certificate of Origin 1.1",
         "git commit -s",
@@ -75,7 +75,7 @@ REQUIRED_MARKERS = {
     ),
     ".github/PULL_REQUEST_TEMPLATE.md": (
         "SQLite / FTS5 / LadybugDB migration, replay, or graph checks",
-        "Frozen `LEGACY_MIGRATION` check",
+        "SQLite canonical baseline, generation lifecycle",
         "GPL-3.0-only",
         "DCO 1.1",
         "Signed-off-by",

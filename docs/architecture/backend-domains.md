@@ -209,6 +209,11 @@ graph projection, and the existing HTTP schemas, scheduler/projector process
 model, transaction results, provider calls and user-visible behavior remain
 unchanged.
 
+This section records the historical ER1 boundary. The PostgreSQL migration
+source port and adapter were removed before the first public SQLite-only
+release; current runtime ports begin at `RuntimeDataPathPort` and the SQLite
+generation lifecycle.
+
 The storage-neutral contracts are now explicit:
 
 ```text

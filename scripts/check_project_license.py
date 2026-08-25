@@ -22,8 +22,6 @@ EXPECTED_CONDITIONAL_REVIEWS = {
     ("python", "certifi"),
     ("python", "crc32c"),
     ("python", "orjson"),
-    ("python", "psycopg"),
-    ("python", "psycopg-binary"),
     ("node", "caniuse-lite"),
 }
 

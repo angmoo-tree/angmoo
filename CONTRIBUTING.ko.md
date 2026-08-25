@@ -101,7 +101,7 @@ Phone·wide-window 화면 Gate는 기술 CI와 별도로 유지합니다.
 
 - `backend`
 - `frontend`
-- `legacy-migration`
+- `sqlite-canonical-migration`
 - `local-core-smoke`
 - `local-autonomy-smoke`
 - `local-full-graph` (LadybugDB와 동결된 static parity fixture)
@@ -116,6 +116,10 @@ Phone·wide-window 화면 Gate는 기술 CI와 별도로 유지합니다.
 `windows-local-smoke`, `codeql`은 advisory check로 유지합니다. Advisory는
 실패를 무시한다는 뜻이 아니며 실패 원인과 required 승격 조건을 기록하고
 보안 finding은 해결하거나 명시적으로 판정해야 합니다.
+
+PostgreSQL·Neo4j server runtime이나 PostgreSQL offline importer를 다시
+추가하지 않습니다. SQLite가 유일한 canonical store이며 Neo4j parity는
+정적 fixture로만 보존합니다.
 
 외부 기여자는 PR을 제출하며 `main`에 직접 push하거나 PR을 merge할 수
 없습니다. required checks 통과와 conversation 해결 뒤 저장소 오너가 최종

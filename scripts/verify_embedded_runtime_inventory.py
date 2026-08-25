@@ -164,9 +164,9 @@ def _postgres_owner(path: str) -> tuple[str, str, str]:
             "embedded canonical rollback window PASS and user-approved legacy-default removal",
         )
     return (
-        "ER2-ER7",
-        "ER2 PR D/E/G; ER7 PR P",
-        "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+        "ER2-ER7 legacy evidence",
+        "ER2 PR D/E/G; Legacy Removal PR",
+        "historical revision, serialized compatibility value, or negative reintroduction guard only",
     )
 
 
@@ -215,8 +215,9 @@ def build_postgres_inventory() -> dict[str, Any]:
             for marker in sorted(POSTGRES_MARKERS)
         },
         "purpose": (
-            "Residual PostgreSQL bindings retained only for the frozen read-only "
-            "LEGACY_MIGRATION source and historical schema evidence"
+            "Residual PostgreSQL markers retained only as historical schema "
+            "evidence, serialized compatibility values, and negative "
+            "reintroduction guards"
         ),
         "schema_version": 1,
     }
@@ -249,8 +250,8 @@ def build_migration_inventory() -> dict[str, Any]:
         text = path.read_text(encoding="utf-8")
         tree = ast.parse(text, filename=str(path))
         values = _assignment_literals(tree)
-        # This inventory is the frozen PostgreSQL legacy-import source corpus,
-        # not the current SQLite application's forward migration chain.
+        # This inventory preserves PostgreSQL-era schema provenance. It is not
+        # an executable import source or the current SQLite forward chain.
         if values.get("revision") == "20260825_0083":
             continue
         markers = sorted(
@@ -265,7 +266,7 @@ def build_migration_inventory() -> dict[str, Any]:
                 "manual_review_markers": markers,
                 "owner": "ER2",
                 "path": _relative(path),
-                "removal_condition": "offline PostgreSQL-to-SQLite migration and clean synthetic restore parity PASS",
+                "removal_condition": "preserve immutable historical revision identity; do not execute as the current SQLite runtime chain",
                 "revision": values.get("revision"),
                 "source_sha256": _sha256_file(path),
                 "strategy": "translate-and-validate" if markers else "schema-parity-review",
@@ -276,7 +277,7 @@ def build_migration_inventory() -> dict[str, Any]:
         "baseline_commit": BASELINE_COMMIT,
         "entries": entries,
         "migration_count": len(entries),
-        "purpose": "L3-ER0 Alembic-to-SQLite conversion inventory",
+        "purpose": "PostgreSQL-era Alembic provenance retained as immutable historical evidence",
         "schema_version": 1,
     }
 

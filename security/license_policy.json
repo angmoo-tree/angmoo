@@ -197,32 +197,6 @@
       "source": "https://github.com/ijl/orjson#license"
     },
     {
-      "ecosystem": "python",
-      "name": "psycopg",
-      "version": "3.3.4",
-      "reported_expression": "LGPL-3.0-only",
-      "normalized_expression": "LGPL-3.0-only",
-      "distribution_boundary": "Separately imported PostgreSQL client library.",
-      "obligations": [
-        "Preserve the LGPL-3.0-only notice and source availability for redistributed library code.",
-        "Do not prevent users from replacing or relinking the separately distributed library."
-      ],
-      "source": "https://github.com/psycopg/psycopg/blob/master/LICENSE.txt"
-    },
-    {
-      "ecosystem": "python",
-      "name": "psycopg-binary",
-      "version": "3.3.4",
-      "reported_expression": "LGPL-3.0-only",
-      "normalized_expression": "LGPL-3.0-only",
-      "distribution_boundary": "Bundled binary wheel installed as a replaceable Python dependency.",
-      "obligations": [
-        "Preserve the LGPL-3.0-only notice and corresponding source offer when redistributing the binary package.",
-        "Keep the dependency replaceable rather than merging it into a proprietary binary."
-      ],
-      "source": "https://github.com/psycopg/psycopg/blob/master/LICENSE.txt"
-    },
-    {
       "ecosystem": "node",
       "name": "caniuse-lite",
       "version": "1.0.30001809",

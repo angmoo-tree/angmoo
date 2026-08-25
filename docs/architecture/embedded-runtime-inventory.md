@@ -22,7 +22,7 @@ stale, incomplete, or violates the frozen corpus.
 
 | Surface | Count | Artifact | Transition owner |
 |---|---:|---|---|
-| Residual PostgreSQL-marker files | 67 | `postgres-sql-inventory.json` | frozen migration/history audit |
+| Residual PostgreSQL-marker files | 63 | `postgres-sql-inventory.json` | historical evidence/negative-guard audit |
 | Alembic version files | 81 | `migration-conversion-inventory.json` | ER2 |
 | Neo4j static queries | 24 | `neo4j-query-corpus.json` | ER3 |
 | Next pages and route handlers | 39 | `next-static-compatibility.json` | ER5 |
@@ -37,9 +37,10 @@ their recorded condition passes.
 
 `postgres-sql-inventory.json` searches Python, Compose, scripts, and dependency
 metadata for drivers/URLs, JSONB, pgvector, row locks, `SKIP LOCKED`, and
-advisory locks. After ER7 PR P, a hit must be frozen `LEGACY_MIGRATION` input,
-historical Alembic source, or dialect-neutral SQLite schema translation
-metadata. It is not evidence of a supported PostgreSQL application runtime.
+advisory locks. After the Legacy Removal PR, a hit must be historical Alembic
+evidence, a serialized compatibility value, or a negative reintroduction
+guard. It is not evidence of a supported PostgreSQL application runtime or
+offline importer.
 
 `migration-conversion-inventory.json` parses every file under
 `backend/alembic/versions`. All 81 paths and revision identifiers must be
@@ -70,11 +71,11 @@ paths, FastAPI lifespan, behavior-critical file hashes, Python and Node package
 manifests, Docker bases, future Rust/LadybugDB owners, and license evidence.
 
 The current default dependency baseline is Python `>=3.13`, Node via
-`pnpm@11.22.0`, Next `16.3.0`, and pinned `ladybug==0.19.1`. `psycopg` and
-`pgvector` are isolated in the optional `legacy-migration` dependency group;
-the Neo4j Python driver is absent. Rust/Tauri remains the installed-product and
-optional platform-shell layer, while ordinary contributor development uses the
-Linux Docker two-service stack.
+`pnpm@11.22.0`, Next `16.3.0`, and pinned `ladybug==0.19.1`. `psycopg`,
+`pgvector`, and the Neo4j Python driver are absent from active dependencies.
+Rust/Tauri remains the installed-product and optional platform-shell layer,
+while ordinary contributor development uses the Linux Docker two-service
+stack.
 
 ## Resource baseline
 

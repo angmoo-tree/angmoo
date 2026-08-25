@@ -15,7 +15,6 @@ from app.domains.routines.ports.clock import ClockPort
 from app.domains.runtime.infrastructure.sqlalchemy_scheduler_lease import (
     SqlAlchemySchedulerLeaseRepository,
 )
-from app.domains.runtime.ports.migration_source import MigrationSourcePort
 from app.domains.runtime.ports.runtime_data_path import RuntimeDataPathPort
 from app.domains.runtime.ports.scheduler_lease_repository import ClaimLeasePort
 from app.domains.runtime.ports.search_index import (
@@ -27,7 +26,6 @@ from app.domains.runtime.ports.unit_of_work import UnitOfWorkPort
 from app.integrations.ladybug_projection import LadybugRelationshipProjection
 from app.integrations.relationship_graph_read import RelationshipGraphRepository
 from app.runtime.graph_projection.sqlalchemy_outbox import SqlAlchemyProjectionOutbox
-from app.runtime.migrations.alembic_source import AlembicMigrationSource
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
 from app.runtime.persistence.sqlalchemy_unit_of_work import SqlAlchemyUnitOfWork
 from app.runtime.search.callback_index import CallbackSearchIndexAdapter
@@ -99,29 +97,6 @@ def test_runtime_data_path_is_deterministic_and_side_effect_free(tmp_path: Path)
     assert paths.media == paths.root / "media"
     assert paths.secrets == paths.root / "secrets"
     assert not paths.root.exists()
-
-
-def test_alembic_migration_source_is_stable_and_read_only(tmp_path: Path) -> None:
-    versions = tmp_path / "versions"
-    versions.mkdir()
-    first = versions / "001_first.py"
-    first.write_text(
-        'revision = "001"\ndown_revision = None\n', encoding="utf-8"
-    )
-    second = versions / "002_second.py"
-    second.write_text(
-        'revision: str = "002"\ndown_revision: str | None = "001"\n',
-        encoding="utf-8",
-    )
-    adapter = AlembicMigrationSource(versions)
-    assert isinstance(adapter, MigrationSourcePort)
-    revisions = adapter.revisions()
-    assert [(item.revision, item.down_revision, item.path) for item in revisions] == [
-        ("001", None, "001_first.py"),
-        ("002", "001", "002_second.py"),
-    ]
-    assert revisions == adapter.revisions()
-    assert all(len(item.sha256) == 64 for item in revisions)
 
 
 def test_callback_search_adapter_keeps_current_search_behind_port() -> None:

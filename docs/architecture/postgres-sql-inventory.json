@@ -253,11 +253,11 @@
           284
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/compatibility/manual_social/inbox.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "f67c47c6faa2063236b47e6cc42b53744591aab6ddf434c4cdf793489d6f5b1d",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -265,11 +265,11 @@
           42
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/core/redaction.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "13e886940c090baec8a7bea84be633c53dbb953d06080210b6e45c0b0cde7cc8",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -298,11 +298,11 @@
           1026
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/cruds/agent_runs.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "e70c867394a52714f4908445bbe1edadf0904c21b53b77cc029d1de027f25d3a",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -322,11 +322,11 @@
           494
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/cruds/community.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "fafaca3d91a8043549e2b4f223493b6fa3968945fceb68b70eb4809f1381a2cc",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -337,11 +337,11 @@
           65
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/cruds/graph_projection.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "1a2ca72c76048c25158646eb36667782d716602fc40ce5805376e0f7fa358ff7",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -349,11 +349,11 @@
           143
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/identity/infrastructure/sqlalchemy_auth_models.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "2ba0d043766b551021ff6c039b638d5517a58497ecea025e16c66247eeec7966",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -363,11 +363,11 @@
           224
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/identity/infrastructure/sqlalchemy_identity_repository.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "fe01ded9b6140409b660f0c20fcacca0883f709b5e86d6f4a8e20df4ea3d1e87",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -375,11 +375,11 @@
           99
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "3513533f0d2613e36f940345b6df1219361f0b11ce0cc1c382eaac4e9975fc37",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -391,11 +391,11 @@
           267
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/routines/infrastructure/sqlalchemy_joint_reservations.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "f2b8ad3394b85ec7f9be580f65a5e8ae7b0b2319b4dd7a5d2ec59751dc86e614",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -417,11 +417,11 @@
           131
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/routines/infrastructure/sqlalchemy_lifecycle.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "5c0f3e7e132d284baf1983269c6125a56effc565179e6930c599e9ff972879c8",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -431,11 +431,11 @@
           339
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/routines/infrastructure/sqlalchemy_models.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "5d662d4b5b2361df43796e48b6df7186d2e68ff27c4bc43ee959470207143fe0",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -452,11 +452,11 @@
           298
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "f5e7e7781295ef0a30480fe7a4bbc090f16ce4db3488b67c651a65dba057db5f",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -467,11 +467,11 @@
           809
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "7fac3c6187d1384e70beb5b8a6934c0c93fc761218c264505b0a9c328c489560",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -485,11 +485,11 @@
           29
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/world_characters/infrastructure/sqlalchemy_models.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "5f9e08c4daa21e6e930cf6854340df8a33ee79515026afc475876279cc169d02",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -499,11 +499,11 @@
           242
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/world_characters/infrastructure/sqlalchemy_setup_models.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "ddbc5ce7a06510ce8480a363d3b91ce2aebe6a54fc789c28b05c17b5870af2d5",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -516,11 +516,11 @@
           25
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/worlds/infrastructure/sqlalchemy_models.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "d6f673952b9a17ad778e7877a2601b5b9431fb78b70fd6ad1c3c3a163ae8effc",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -528,11 +528,11 @@
           89
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "a02af836470e5dfa086ca05b7eef957a340e2afe8ce077c0379a515efab86f80",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -540,11 +540,11 @@
           17
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/models/agent_slots.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "05f6b354c0f174a4b2e82693646b5b0ebd58726df697f27b6b89a4568bf0f236",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -555,11 +555,11 @@
           26
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/models/character_lore.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "ec8e38b4ca6404eebf4d880b03c7a51420233878366f443765b4a85142f4e8b6",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -569,11 +569,11 @@
           287
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/models/community.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "adcba42a7940b762aa4ff47b8595961d4ff88399ee30b70a49dcf09777cd3a95",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -581,51 +581,23 @@
           45
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/models/graph_projection.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "83f8f08bba74541932e5c607bad477433e6048eefd84fea8c5ce4a83410a11be",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
         "driver_or_url": [
-          163,
-          164
+          3
         ]
       },
-      "owner": "ER2-ER7",
-      "path": "backend/app/runtime/configuration.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
-      "source_sha256": "3c9fbb569b6d86dd7901cd9b8033317d80666ae15d66bc72f24a36c5dd33d12a",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
-    },
-    {
-      "markers": {
-        "driver_or_url": [
-          7,
-          8
-        ]
-      },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/migrations/__init__.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
-      "source_sha256": "a5d5ae7560f4026010570451c7a797079ed1c927bc0ee5ba4ca3a1f141b44a11",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
-    },
-    {
-      "markers": {
-        "driver_or_url": [
-          1,
-          316,
-          331
-        ]
-      },
-      "owner": "ER2-ER7",
-      "path": "backend/app/runtime/migrations/postgres_to_sqlite.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
-      "source_sha256": "68f6d5d124c2c91691f399a63a54584ecfab639d9ed64fe358eed74d2414b9c2",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "a41a74c84aec77a000b7fa8700639cb82bdb451948c560da171002af939c7d82",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -633,11 +605,11 @@
           80
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/persistence/sqlite_codecs.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "d1ad4a897ce41fc80e988fcdf1db8314d378fa21ef431541a700c9575e634c52",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -645,25 +617,25 @@
           36
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/persistence/sqlite_scheduler_lease.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "f6cc859e64d671779b9ba2ddd38e45b0dcca67b2e2b0a7725e40142b1908b1fb",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
         "driver_or_url": [
-          43,
-          44,
-          46
+          34,
+          35,
+          37
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/persistence/sqlite_schema.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
-      "source_sha256": "5129fd9cd18efb91751e93431c76640c745a3b388364e7de1fb76c135a44c204",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "c124d928a7bf4b4a7501d7a4353de884a52ecf6d095cb4719dd113d35827a518",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -671,11 +643,11 @@
           418
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/activity_proposal_runtime.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "c46639f00a6ee1a227710335ad93999ce89defdb861d331b050109eff413ba7b",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -708,11 +680,11 @@
           701
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/activity_runtime.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "90d75369d8c0afa24309c7d22a62998e747223b5d0631a9c90005cf7d2c87e8d",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -723,11 +695,11 @@
           1428
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/agent_creation_drafts.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "69b44031ddcf00c7b280a267f20c23f1d40b7ae0033cac30bb3f07850d553533",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -742,11 +714,11 @@
           3000
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/agents.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "8ebec245a85f13e2a50a332e45f4555d57cd3cd9efd7d2815b7974e8b0807ac1",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -754,11 +726,11 @@
           1202
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/auth.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "cd4d2f1e261753ddb4608fc439aaace3b88248de9305de6d56620ebfe3821c22",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -770,11 +742,11 @@
           501
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/character_lore.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "976b9a4c3cc73e58d7ec0f8a42a63e2b89a99a22bafd70f3d0b9ee4ac8fefcf3",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -782,11 +754,11 @@
           63
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/community_abuse_quota.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "e3f1250d6945e80c7456dc6f3afb26f93801046a61c307a80ead42cdb802489a",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -798,11 +770,11 @@
           202
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/external_auth_verification.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "f1d87d0f7a0b16a28aff2b17dc543bff680624c296586a9361917ec02c750389",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -811,11 +783,11 @@
           275
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/graph_projection_replay.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "c80586d4f10775ac359f7ec5d1e8367c0234743d16a13c510a386cbade3b3b31",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -836,11 +808,11 @@
           968
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/joint_activity_runtime.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "aa43ef72b110128998625ff87b6a181f624f020df2994dc9bbffdabe521a200d",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -858,11 +830,11 @@
           431
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/joint_activity_scheduling.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "041a9b9ac03f661dbc98b9e7e3e4559dc6ae8c25cc3ec657347a05edc2374154",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -871,11 +843,11 @@
           118
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/local_bot_quota.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "3ad187dd3c7af40882b79ca086eeb911cd18cecacd9848a5092b3895a1e12f2a",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -883,11 +855,11 @@
           98
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/login_throttle.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "429ad023bd3a8e8c6c72aee5097461778f90f4da5d03bec01020c84938933e2e",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -899,11 +871,11 @@
           51
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/lore_parser_quota.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "3fc781ea9ccb0caff9a1986e99da09de91abaaefcbd4585019630bd55e746033",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -914,11 +886,11 @@
           166
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/messages.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "dd9312f76309d204f7a8c4a5c4ec8389d5a3ec8d165550cd6d2acc4e8eac9784",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -928,11 +900,11 @@
           531
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/social_event_runtime.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "e5f3281b7ad8d012d16d4ac852e84c6cefa8c34bda4bcad00d5717fd721d671d",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -946,41 +918,11 @@
           776
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/world_feed_search.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "93cf272a7012519802f0e871294bda573a5b3c66fb416a9bcbd2b7370284b27e",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
-    },
-    {
-      "markers": {
-        "driver_or_url": [
-          31
-        ],
-        "pgvector": [
-          30
-        ]
-      },
-      "owner": "ER2-ER7",
-      "path": "backend/pyproject.toml",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
-      "source_sha256": "a46db19880bf2d93b5163a2d6bd5d0a930be51d6b85e56ca2194783b23921970",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
-    },
-    {
-      "markers": {
-        "driver_or_url": [
-          1,
-          30,
-          61,
-          62
-        ]
-      },
-      "owner": "ER2-ER7",
-      "path": "backend/scripts/dry_run_postgres_to_sqlite.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
-      "source_sha256": "d848b2515de85296da8f9bae053fb7306defdaf9b27ad1e8638b5082556e6bc9",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -993,11 +935,11 @@
           33
         ]
       },
-      "owner": "ER2-ER7",
+      "owner": "ER2-ER7 legacy evidence",
       "path": "backend/scripts/migrate_local_credentials.py",
-      "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "755b4e1dee90e5892e5432e0f86cb4bf0eb97de572aa3f4e97d0a873840bd3ef",
-      "transition_pr": "ER2 PR D/E/G; ER7 PR P"
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
@@ -1050,15 +992,15 @@
       "transition_pr": "ER7 PR P"
     }
   ],
-  "entry_count": 67,
+  "entry_count": 63,
   "marker_counts": {
     "advisory_lock": 8,
-    "driver_or_url": 45,
+    "driver_or_url": 41,
     "jsonb": 8,
-    "pgvector": 5,
+    "pgvector": 4,
     "row_lock": 22,
     "skip_locked": 7
   },
-  "purpose": "Residual PostgreSQL bindings retained only for the frozen read-only LEGACY_MIGRATION source and historical schema evidence",
+  "purpose": "Residual PostgreSQL markers retained only as historical schema evidence, serialized compatibility values, and negative reintroduction guards",
   "schema_version": 1
 }

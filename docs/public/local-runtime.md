@@ -28,13 +28,11 @@ The four typed profiles are:
 - `CONTRIBUTOR_EMBEDDED`: Docker or optional host development frontend with
   the same SQLite/LadybugDB/in-process backend meaning.
 - `TEST`: isolated SQLite/LadybugDB or explicitly supplied fakes.
-- `LEGACY_MIGRATION`: frozen PostgreSQL read-only input to an offline SQLite
-  generation. Public API, scheduler, projector, SNS writes, and provider calls
-  are prohibited.
 
 There is no supported PostgreSQL/Neo4j server runtime or
-`DOCKER_COMPATIBILITY` profile. Neo4j parity is retained as static ER3 fixtures,
-not as a server, driver, JVM, or second query implementation.
+`DOCKER_COMPATIBILITY` profile, and no supported PostgreSQL offline importer.
+Neo4j parity is retained as static ER3 fixtures, not as a server, driver, JVM,
+or second query implementation.
 
 ## Contributor Docker topology
 

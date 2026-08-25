@@ -103,7 +103,6 @@ class LocalRuntimeStatusRead(RuntimeStatusSchema):
         "LOCAL_EMBEDDED",
         "CONTRIBUTOR_EMBEDDED",
         "TEST",
-        "LEGACY_MIGRATION",
     ] | None = None
     canonical_generation: str | None = None
     persistence_provider: Literal["sqlite"] | None = None
@@ -125,7 +124,6 @@ def runtime_status_read(
         "LOCAL_EMBEDDED",
         "CONTRIBUTOR_EMBEDDED",
         "TEST",
-        "LEGACY_MIGRATION",
     ] | None = None,
     canonical_generation: str | None = None,
     persistence_provider: Literal["sqlite"] | None = None,

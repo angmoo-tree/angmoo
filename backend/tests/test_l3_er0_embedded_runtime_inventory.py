@@ -48,12 +48,13 @@ def test_storage_frontend_runtime_and_parity_corpora_are_complete() -> None:
     runtime = _load("embedded-runtime-inventory.json")
 
     # PR P removes PostgreSQL/Neo4j from every public and contributor runtime.
-    # PostgreSQL markers may remain only in the frozen read-only importer,
-    # historical Alembic source, and dialect-neutral schema translation
-    # metadata.  The inventory must shrink from PR O's 82-file transition
-    # baseline and explain that residual-only purpose explicitly.
+    # PostgreSQL markers may remain only in historical Alembic evidence,
+    # serialized compatibility values, and negative reintroduction guards.
+    # The active importer is gone, so the inventory must explain the
+    # residual-only purpose explicitly.
     assert 0 < postgres["entry_count"] < 82
-    assert "LEGACY_MIGRATION" in postgres["purpose"]
+    assert "historical schema evidence" in postgres["purpose"]
+    assert "reintroduction guards" in postgres["purpose"]
     assert graph["query_count"] == 24
     assert frontend["route_count"] == 39
     assert {item["phase"] for item in runtime["parity"]["workloads"]} == {
