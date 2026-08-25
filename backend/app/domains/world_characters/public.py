@@ -6,6 +6,9 @@ from app.domains.world_characters.infrastructure.sqlalchemy_owner_controlled_ide
 from app.domains.world_characters.domain.owner_controlled_identity import (
     OwnerControlledIdentityError,
 )
+from app.domains.world_characters.domain.seed import (
+    AutonomousWorldCharacterSeedData,
+)
 from app.domains.world_characters.infrastructure.autonomous_setup_contracts import (
     character_contract_hash,
 )
@@ -33,6 +36,9 @@ from app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup imp
     retry_setup,
     set_active_world_character_autonomy,
 )
+from app.domains.world_characters.infrastructure.sqlalchemy_seed import (
+    seed_autonomous_world_character,
+)
 
 
 def is_owner_controlled_character(db, character_id: str) -> bool:
@@ -50,6 +56,7 @@ def owner_controlled_character_ids(
 
 __all__ = [
     "OWNER_REGENERATION_LIMIT_24H",
+    "AutonomousWorldCharacterSeedData",
     "OwnerControlledIdentityError",
     "PROFILE_REGENERATION_LIMIT_24H",
     "WorldCharacterSetupConflictError",
@@ -74,4 +81,5 @@ __all__ = [
     "reject_setup",
     "retry_setup",
     "set_active_world_character_autonomy",
+    "seed_autonomous_world_character",
 ]

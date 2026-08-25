@@ -22,6 +22,7 @@ from app.runtime.migrations.postgres_to_sqlite import (
     PostgresToSqliteOfflineDryRun,
 )
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
+from app.runtime.persistence.sqlite_schema import SOURCE_ALEMBIC_REVISION
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -99,7 +100,8 @@ def main() -> int:
         source_metadata=Base.metadata,
         data_paths=StaticRuntimeDataPath(args.output_root),
         migration_source=AlembicMigrationSource(
-            BACKEND_ROOT / "app" / "alembic" / "versions"
+            BACKEND_ROOT / "app" / "alembic" / "versions",
+            head_revision=SOURCE_ALEMBIC_REVISION,
         ),
         conversion_inventory_path=(
             REPOSITORY_ROOT

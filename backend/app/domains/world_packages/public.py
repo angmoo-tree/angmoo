@@ -1,8 +1,7 @@
 """Public contract for World Package v1.
 
-PR A intentionally exports only pure contract types and deterministic helpers.
-Routes, persistence, archive I/O, and provider integrations arrive behind this
-boundary in later, separately reviewed pull requests.
+The public surface remains storage-neutral. PR B adds caller-owned seed and
+registry contracts while routes, archive I/O, and UI remain later work.
 """
 
 from app.domains.world_packages.domain.canonical import (
@@ -38,6 +37,13 @@ from app.domains.world_packages.domain.package_policy import (
     ArchiveEntryDescriptor,
     WorldPackagePolicy,
 )
+from app.domains.world_packages.domain.seed import (
+    WorldPackageDestinationSeedRequest,
+    WorldPackageDestinationSeedResult,
+    WorldPackageImportIdMapping,
+    WorldPackageImportRegistryRecord,
+    WorldPackageSourceSnapshot,
+)
 
 __all__ = [
     "ArchiveEntryDescriptor",
@@ -50,13 +56,18 @@ __all__ = [
     "WorldCharactersDocument",
     "WorldPackageCompatibility",
     "WorldPackageContractError",
+    "WorldPackageDestinationSeedRequest",
+    "WorldPackageDestinationSeedResult",
     "WorldPackageEntry",
     "WorldPackageImportState",
+    "WorldPackageImportIdMapping",
+    "WorldPackageImportRegistryRecord",
     "WorldPackageLicense",
     "WorldPackageManifest",
     "WorldPackagePolicy",
     "WorldPackageProducer",
     "WorldPackageReasonCode",
+    "WorldPackageSourceSnapshot",
     "WorldPackageTrustState",
     "canonical_entry_index_digest",
     "canonical_json_bytes",

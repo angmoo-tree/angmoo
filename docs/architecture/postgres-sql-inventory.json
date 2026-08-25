@@ -525,13 +525,13 @@
     {
       "markers": {
         "row_lock": [
-          81
+          89
         ]
       },
       "owner": "ER2-ER7",
       "path": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py",
       "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
-      "source_sha256": "e9d028bf78cf8fbd668cf03a7ec9cbccbab2016b7337f7ef25372e1ff53e20fd",
+      "source_sha256": "a02af836470e5dfa086ca05b7eef957a340e2afe8ce077c0379a515efab86f80",
       "transition_pr": "ER2 PR D/E/G; ER7 PR P"
     },
     {
@@ -662,7 +662,7 @@
       "owner": "ER2-ER7",
       "path": "backend/app/runtime/persistence/sqlite_schema.py",
       "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
-      "source_sha256": "7b443c4c4b6c999468b7374cc098d3bca23c47b003dc0e57eeaab3a79684b5fd",
+      "source_sha256": "c124d928a7bf4b4a7501d7a4353de884a52ecf6d095cb4719dd113d35827a518",
       "transition_pr": "ER2 PR D/E/G; ER7 PR P"
     },
     {
@@ -971,15 +971,15 @@
       "markers": {
         "driver_or_url": [
           1,
-          29,
-          60,
-          61
+          30,
+          61,
+          62
         ]
       },
       "owner": "ER2-ER7",
       "path": "backend/scripts/dry_run_postgres_to_sqlite.py",
       "removal_condition": "frozen legacy-import evidence or dialect-neutral schema metadata only; no public PostgreSQL runtime",
-      "source_sha256": "6b70b39c5520e5c75823277771e9e6703bd6af7c85e0e2d90e98fbe9c093a2fa",
+      "source_sha256": "d848b2515de85296da8f9bae053fb7306defdaf9b27ad1e8638b5082556e6bc9",
       "transition_pr": "ER2 PR D/E/G; ER7 PR P"
     },
     {

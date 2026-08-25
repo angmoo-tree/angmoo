@@ -4,5 +4,14 @@ from app.domains.characters.infrastructure.sqlalchemy_models import (
     Character,
     CharacterState,
 )
+from app.domains.characters.domain.seed import AutonomousCharacterSeedData
+from app.domains.characters.infrastructure.sqlalchemy_seed import (
+    seed_autonomous_character,
+)
 
-__all__ = ["Character", "CharacterState"]
+__all__ = [
+    "AutonomousCharacterSeedData",
+    "Character",
+    "CharacterState",
+    "seed_autonomous_character",
+]

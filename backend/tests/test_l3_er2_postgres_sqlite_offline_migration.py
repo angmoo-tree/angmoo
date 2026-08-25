@@ -74,7 +74,9 @@ def _dry_run(
         source_engine=source_engine,
         source_metadata=source_metadata,
         data_paths=StaticRuntimeDataPath(runtime_root),
-        migration_source=AlembicMigrationSource(VERSIONS_PATH),
+        migration_source=AlembicMigrationSource(
+            VERSIONS_PATH, head_revision=SOURCE_ALEMBIC_REVISION
+        ),
         conversion_inventory_path=CONVERSION_INVENTORY,
         generation=generation,
         app_version="0.3.0",
@@ -525,7 +527,9 @@ def test_bad_revision_and_non_postgresql_source_fail_before_target_creation(
         source_engine=source_engine,
         source_metadata=metadata,
         data_paths=StaticRuntimeDataPath(tmp_path / "strict-runtime"),
-        migration_source=AlembicMigrationSource(VERSIONS_PATH),
+        migration_source=AlembicMigrationSource(
+            VERSIONS_PATH, head_revision=SOURCE_ALEMBIC_REVISION
+        ),
         conversion_inventory_path=CONVERSION_INVENTORY,
         generation="strict",
         app_version="0.3.0",

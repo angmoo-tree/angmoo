@@ -1,15 +1,20 @@
 # L3.5 World Package v1 format and security contract
 
-Status: **FROZEN FOR PR A REVIEW**
+Status: **FORMAT FROZEN · PR A MERGED · PR B IMPLEMENTED FOR REVIEW**
 
 Owner: `app.domains.world_packages`
 
-Public Issue: [#150](https://github.com/angmoo-tree/angmoo/issues/150)
+Public Issues:
 
-This document freezes the data-only interchange contract before any upload,
-archive extraction, database migration, or UI behavior is implemented. A World
-Package is an initial, portable World seed. It is not a database backup, a
-running World snapshot, an Angmoo Nest publication, or proof of authorship.
+- format/security contract: [#150](https://github.com/angmoo-tree/angmoo/issues/150)
+- caller-owned UoW/registry: [#152](https://github.com/angmoo-tree/angmoo/issues/152)
+
+This document freezes the data-only interchange contract. PR B adds the
+canonical registry and an internal caller-owned transaction boundary, but still
+does not add upload, archive extraction, filesystem delivery, public API, or UI
+behavior. A World Package is an initial, portable World seed. It is not a
+database backup, a running World snapshot, an Angmoo Nest publication, or proof
+of authorship.
 
 ## Product boundary
 
@@ -219,9 +224,9 @@ The parser and archive adapter must reject:
 - missing entries, size/digest mismatch, trailing polyglot content
 - nested archives, executables, scripts, HTML, SVG, fonts, and unsupported media
 
-PR A validates pure archive metadata only. It does not read or write user files.
-The streaming ZIP adapter, MIME decoder, staging ACL, and trailing-content checks
-belong to later PRs and must enforce this same policy.
+PR A validates pure archive metadata only. PR B still does not read or write
+user files. The streaming ZIP adapter, MIME decoder, staging ACL, and
+trailing-content checks belong to later PRs and must enforce this same policy.
 
 ## Safe error and observability contract
 
@@ -243,6 +248,61 @@ runtime implementations, another domain's infrastructure, or filesystem path
 selection. Frontend and Tauri never open SQLite or LadybugDB directly.
 
 PR A intentionally contains no route, DB table, archive/filesystem adapter,
-provider call, or frontend behavior. PR B will introduce caller-owned UoW and
-portable seed ports; subsequent PRs will add export, staged import, UI/native
-file dialogs, and clean-clone closeout behind this frozen contract.
+provider call, or frontend behavior. PR B adds caller-owned UoW, portable seed
+ports, and registry tables without adding an endpoint or user-visible behavior.
+Subsequent PRs will add export, staged import, UI/native file dialogs, and
+clean-clone closeout behind this frozen contract.
+
+## PR B transaction and registry boundary
+
+The package destination seed is composed under exactly one caller-owned
+SQLAlchemy/SQLite transaction:
+
+```text
+WorldPackageImportUnitOfWork
+├─ worlds.seed_world(...)
+├─ characters.seed_autonomous_character(...)
+├─ world_characters.seed_autonomous_world_character(...)
+├─ WorldPackageImportRegistryPort
+├─ WorldPackageImportIdMapping
+└─ caller commit once
+```
+
+The owner domain seed commands may `flush()` so generated IDs and constraint
+failures are visible to the caller, but they must not call `commit()` or
+`rollback()`. Existing user-facing create use cases retain their previous
+transaction ownership by invoking the same seed command and committing in their
+existing boundary. A failed package seed therefore leaves zero World,
+Character, WorldCharacter, registry, or ID-mapping rows.
+
+Alembic revision `20260825_0083` adds:
+
+- `world_package_sources`
+- `world_package_exports`
+- `world_package_imports`
+- `world_package_import_id_maps`
+
+Foreign keys, check constraints, idempotency uniqueness, package-version
+uniqueness, and source-reference mapping uniqueness are enforced by SQLite.
+Downgrade is allowed only while all four registry tables are empty; otherwise it
+fails closed so lineage is not silently discarded.
+
+The frozen PostgreSQL legacy migration source remains revision
+`20260819_0082`. Revision `0083` belongs to the SQLite canonical product and is
+not added to the old PostgreSQL input contract. The legacy reader explicitly
+traces only ancestors of its frozen source revision.
+
+The PR B ports are intentionally narrower than the later archive workflows:
+
+- `WorldPackageSourceSnapshotPort` describes a consistent source seed read.
+- `WorldPackageDestinationSeedPort` applies already validated portable seed
+  documents to owner-domain seed commands.
+- `ManagedPackageAssetPort` reserves managed-media promotion ownership without
+  implementing archive extraction in PR B.
+- the registry port records successful lineage and package-local-to-local ID
+  mappings.
+
+Sequential and concurrent retries with the same local owner and idempotency key
+resolve to one successful import. The transaction does not make provider calls,
+write package archives, promote media, modify LadybugDB directly, or expose a
+FastAPI route.
