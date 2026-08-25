@@ -32,8 +32,10 @@ def check_repo(*, root: Path = ROOT) -> list[str]:
         preflight = _read(root, "scripts/dev/desktop-preflight.ps1")
         launcher = _read(root, "scripts/dev/desktop-dev.ps1")
         utf8_support = _read(root, "scripts/dev/windows-host-tauri-utf8.ps1")
+        watch_support = _read(root, "scripts/dev/windows-host-tauri-watch.ps1")
         smoke = _read(root, "scripts/ci/windows_host_tauri_dev_smoke.ps1")
         utf8_smoke = _read(root, "scripts/ci/windows_host_tauri_utf8_smoke.ps1")
+        watch_smoke = _read(root, "scripts/ci/windows_host_tauri_watch_smoke.ps1")
         codeowners = _read(root, ".github/CODEOWNERS")
         workflow = _read(root, ".github/workflows/windows-host-tauri-dev.yml")
         architecture = _read(
@@ -168,9 +170,35 @@ def check_repo(*, root: Path = ROOT) -> list[str]:
         "npm.cmd --prefix",
         "dev:docker-bridge",
         "preserved",
+        "Clear-AngmooOwnedComposeWatchOrphans",
+        "Wait-AngmooOwnedComposeWatchCount -ExpectedCount 1",
+        "Stop-AngmooOwnedComposeWatch",
+        "docker_compose_watch_exited_early",
     ):
         if marker not in launcher:
             errors.append(f"one-command lifecycle guard missing: {marker}")
+    for marker in (
+        "Test-AngmooOwnedComposeWatchCommandLine",
+        "Get-AngmooOwnedComposeWatchWorkers",
+        "Get-AngmooLegacyUnscopedComposeWatchWorkers",
+        "Wait-AngmooOwnedComposeWatchCount",
+        "Stop-AngmooProcessTree",
+        "taskkill.exe",
+        "/T",
+        "repo_compose_watch_already_running",
+        "repo_compose_watch_count_mismatch",
+    ):
+        if marker not in watch_support:
+            errors.append(f"Compose Watch ownership contract missing: {marker}")
+    for marker in (
+        "owned_compose_watch_not_detected",
+        "foreign_or_non_watch_process_claimed",
+        "process_tree_parent_survived",
+        "process_tree_child_survived",
+        "windows-host-tauri-watch-smoke: PASS",
+    ):
+        if marker not in watch_smoke:
+            errors.append(f"Compose Watch Windows regression case missing: {marker}")
     for marker in (
         "Enter-AngmooUtf8NativeCommandScope",
         "Exit-AngmooUtf8NativeCommandScope",
@@ -218,7 +246,9 @@ def check_repo(*, root: Path = ROOT) -> list[str]:
         "/scripts/dev/desktop-preflight.ps1",
         "/scripts/dev/desktop-dev.ps1",
         "/scripts/dev/windows-host-tauri-utf8.ps1",
+        "/scripts/dev/windows-host-tauri-watch.ps1",
         "/scripts/ci/windows_host_tauri_utf8_smoke.ps1",
+        "/scripts/ci/windows_host_tauri_watch_smoke.ps1",
         "@jingujeon",
     ):
         if protected not in codeowners:
@@ -226,6 +256,7 @@ def check_repo(*, root: Path = ROOT) -> list[str]:
     for marker in (
         "windows_host_tauri_dev_smoke.ps1",
         "windows_host_tauri_utf8_smoke.ps1",
+        "windows_host_tauri_watch_smoke.ps1",
         "contributor-docker-bridge",
         "check_windows_host_tauri_dev_contract.py",
         "tauri.contributor-docker.conf.json",

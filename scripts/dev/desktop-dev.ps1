@@ -8,13 +8,17 @@ $ErrorActionPreference = 'Stop'
 
 $utf8Support = Join-Path $PSScriptRoot 'windows-host-tauri-utf8.ps1'
 . $utf8Support
+$watchSupport = Join-Path $PSScriptRoot 'windows-host-tauri-watch.ps1'
+. $watchSupport
 $utf8Scope = Enter-AngmooUtf8NativeCommandScope
 
 try {
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $preflightScript = Join-Path $PSScriptRoot 'desktop-preflight.ps1'
-$composeFiles = @('-f', 'compose.yml', '-f', 'compose.dev.yml')
+$baseComposePath = Join-Path $repoRoot 'compose.yml'
+$devComposePath = Join-Path $repoRoot 'compose.dev.yml'
+$composeFiles = @('-f', $baseComposePath, '-f', $devComposePath)
 $protectedDataRoot = Join-Path $env:LOCALAPPDATA 'Angmoo'
 $protectedChildren = @('canonical', 'graph', 'media', 'secrets')
 $watchProcess = $null
@@ -133,13 +137,22 @@ try {
 
         if (-not $NoWatch) {
             Write-Host 'Starting Docker Compose Watch; containers and the named volume remain after Tauri exits.'
+            Clear-AngmooOwnedComposeWatchOrphans -BaseComposePath $baseComposePath `
+                -DevComposePath $devComposePath
             $watchArguments = @(
                 'compose', '--ansi', 'never',
-                '-f', 'compose.yml', '-f', 'compose.dev.yml',
+                '-f', $baseComposePath, '-f', $devComposePath,
                 'watch', '--no-up'
             )
             $watchProcess = Start-Process -FilePath (Get-Command docker).Source `
                 -ArgumentList $watchArguments -WorkingDirectory $repoRoot -NoNewWindow -PassThru
+            if ($watchProcess.WaitForExit(1500)) {
+                $legacyPids = @(Get-AngmooLegacyUnscopedComposeWatchWorkers |
+                    ForEach-Object { $_.ProcessId }) -join ','
+                throw "docker_compose_watch_exited_early:exit=$($watchProcess.ExitCode) legacy_unscoped_pids=$legacyPids"
+            }
+            Wait-AngmooOwnedComposeWatchCount -ExpectedCount 1 -BaseComposePath $baseComposePath `
+                -DevComposePath $devComposePath | Out-Null
         }
 
         Write-Host "Launching Angmoo Host Tauri dev for exact commit $commit"
@@ -150,9 +163,13 @@ try {
         Pop-Location
     }
 } finally {
-    if ($watchProcess -and -not $watchProcess.HasExited) {
-        Stop-Process -Id $watchProcess.Id -Force -ErrorAction SilentlyContinue
-        $watchProcess.WaitForExit(5000) | Out-Null
+    try {
+        if (-not $NoWatch) {
+            Stop-AngmooOwnedComposeWatch -LauncherProcess $watchProcess `
+                -BaseComposePath $baseComposePath -DevComposePath $devComposePath
+        }
+    } catch {
+        $cleanupError = $_.Exception.Message
     }
     try {
         Assert-NoHostSidecar
@@ -161,7 +178,7 @@ try {
             $cleanupError = 'installed_product_data_changed_during_contributor_bridge'
         }
     } catch {
-        $cleanupError = $_.Exception.Message
+        if (-not $cleanupError) { $cleanupError = $_.Exception.Message }
     }
     foreach ($name in $previousEnvironment.Keys) {
         $value = $previousEnvironment[$name]
