@@ -18,11 +18,11 @@ def test_current_local_oss_workflow_policy_passes() -> None:
     assert checker.check_repo(REPO_ROOT) == []
 
 
-def test_required_checks_include_embedded_data_migration_transition() -> None:
+def test_required_checks_use_embedded_data_migration() -> None:
     assert "architecture-boundary" in checker.REQUIRED_JOBS
     assert "embedded-data-migration" in checker.REQUIRED_JOBS
-    assert "sqlite-canonical-migration" in checker.REQUIRED_JOBS
-    assert len(checker.REQUIRED_JOBS) == 11
+    assert "sqlite-canonical-migration" not in checker.REQUIRED_JOBS
+    assert len(checker.REQUIRED_JOBS) == 10
     assert checker.ADVISORY_JOBS == {"windows-local-smoke"}
     assert "release-images.yml" in checker.EXPECTED_WORKFLOWS
     assert "native-runtime-spike.yml" in checker.EXPECTED_WORKFLOWS

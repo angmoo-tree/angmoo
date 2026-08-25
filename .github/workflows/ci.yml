@@ -243,14 +243,3 @@ jobs:
           tests/test_l3_er6_localappdata_migration.py
           tests/test_l3_er7_runtime_composition.py
         working-directory: backend
-
-  # Temporary compatibility status while the repository ruleset moves from
-  # sqlite-canonical-migration to embedded-data-migration. Remove this alias
-  # after both names pass once and the required-check ruleset is updated.
-  sqlite-canonical-migration:
-    needs: embedded-data-migration
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Report compatibility status
-        run: echo "embedded-data-migration passed"
