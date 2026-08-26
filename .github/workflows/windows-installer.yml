@@ -69,6 +69,7 @@ jobs:
             tests\test_l3_5_world_package_closeout_contract.py
           Pop-Location
           backend\.venv\Scripts\python.exe scripts\ci\check_desktop_installer_contract.py
+          .\desktop\scripts\test-installer-payload-verifier.ps1
           backend\.venv\Scripts\python.exe scripts\ci\check_er6_desktop_supply_chain.py `
             --evidence .codex-temp\er6-supply-chain-audit.json
       - name: Build synthetic legacy LocalAppData lifecycle fixture
@@ -382,6 +383,9 @@ jobs:
           $sidecarFile = Get-ChildItem $installRoot -Filter 'angmoo-sidecar.exe' -Recurse -ErrorAction SilentlyContinue |
             Select-Object -First 1
           if (-not $sidecarFile) { throw 'Installed angmoo-sidecar.exe is missing' }
+          & (Join-Path $installRoot 'verify-installed-payload.ps1') -AppRoot $installRoot
+          if ($LASTEXITCODE -ne 0) { throw 'Installed host and sidecar payload digest parity failed' }
+          Write-Host 'installer_payload_digest_parity_pass:first_install'
           $installManifest = Get-InstallFileManifest $installRoot
           foreach ($target in @($app.FullName, $sidecarFile.FullName, $installRoot)) {
             Write-Host "Defender custom scan: $target"
@@ -539,6 +543,9 @@ jobs:
           if ($inPlaceUpgrade.ExitCode -ne 0) {
             throw "Direct in-place installer update failed: $($inPlaceUpgrade.ExitCode)"
           }
+          & (Join-Path $installRoot 'verify-installed-payload.ps1') -AppRoot $installRoot
+          if ($LASTEXITCODE -ne 0) { throw 'Updated host and sidecar payload digest parity failed' }
+          Write-Host 'installer_payload_digest_parity_pass:direct_update'
           Assert-InstallFileManifest $installManifest 'direct_in_place_upgrade'
           if (Test-Path -LiteralPath (Join-Path $env:LOCALAPPDATA 'Angmoo.__casefix__')) {
             throw 'Direct in-place installer update left a case-normalization staging directory'
@@ -606,6 +613,9 @@ jobs:
             throw 'NSIS reinstall timed out after 120 seconds'
           }
           if ($reinstall.ExitCode -ne 0) { throw "NSIS reinstall failed: $($reinstall.ExitCode)" }
+          & (Join-Path $installRoot 'verify-installed-payload.ps1') -AppRoot $installRoot
+          if ($LASTEXITCODE -ne 0) { throw 'Reinstalled host and sidecar payload digest parity failed' }
+          Write-Host 'installer_payload_digest_parity_pass:reinstall'
           $reinstalledApp = Get-ChildItem $installRoot -Filter 'angmoo-desktop.exe' -Recurse |
             Select-Object -First 1
           if (-not $reinstalledApp) { throw 'Reinstalled angmoo-desktop.exe is missing' }

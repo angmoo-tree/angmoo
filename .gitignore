@@ -26,6 +26,7 @@ build/
 playwright-report/
 test-results/
 frontend/next-env.d.ts
+desktop/src-tauri/installer-payload.json
 
 # Local build, verification, and release-candidate artifacts
 .codex-temp/

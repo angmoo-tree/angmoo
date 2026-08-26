@@ -80,6 +80,10 @@ try {
     $oldWindows.os.build = 19045
     Invoke-Case 'fail-windows-build' $oldWindows 40 'unsupported_windows_build'
 
+    $unsupportedArchitecture = Copy-Fixture
+    $unsupportedArchitecture.os.architecture = 'arm64'
+    Invoke-Case 'fail-architecture' $unsupportedArchitecture 40 'unsupported_architecture'
+
     $conflict = Copy-Fixture
     $conflict.docker.port_3000_in_use = $true
     Invoke-Case 'fail-port-conflict' $conflict 40 'frontend_port_conflict'
@@ -124,5 +128,5 @@ try {
     Remove-Item -LiteralPath $fixtureRoot -Recurse -Force -ErrorAction SilentlyContinue
 }
 
-Write-Host 'windows-host-tauri-dev-smoke: PASS cases=13'
+Write-Host 'windows-host-tauri-dev-smoke: PASS cases=14'
 exit 0

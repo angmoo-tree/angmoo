@@ -20,7 +20,7 @@ from app.core.desktop_loopback import (
     is_authenticated_desktop_webview_request,
 )
 from app.runtime import desktop_sidecar
-from app.runtime.desktop_sidecar import RuntimeOwnership
+from app.runtime.desktop_sidecar import RuntimeOwnership, _stable_fatal_code
 
 
 TOKEN = "a" * 64
@@ -259,3 +259,25 @@ def test_shutdown_endpoint_has_no_request_parameters() -> None:
     assert 'async def shutdown() -> dict[str, str]:' in source
     assert "server.should_exit = True" in source
     assert "BackgroundTasks" not in source
+
+
+@pytest.mark.parametrize(
+    ("message", "expected"),
+    [
+        (
+            "unsupported SQLite schema version: 2",
+            "desktop_sidecar_schema_unsupported",
+        ),
+        ("desktop_sidecar_already_owned", "desktop_sidecar_already_owned"),
+        (
+            "embedded_data_migration_failed:private-path",
+            "desktop_sidecar_data_migration_failed",
+        ),
+        ("C:/private/path failed", "desktop_sidecar_startup_failed"),
+    ],
+)
+def test_fatal_boundary_emits_only_stable_content_free_codes(
+    message: str,
+    expected: str,
+) -> None:
+    assert _stable_fatal_code(RuntimeError(message)) == expected

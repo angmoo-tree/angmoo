@@ -128,6 +128,26 @@ struct EndpointMetadata {
     generation: String,
 }
 
+#[derive(Debug, Deserialize)]
+struct SidecarProcessEvent {
+    event: String,
+    code: String,
+}
+
+fn stable_sidecar_fatal_code(bytes: &[u8]) -> Option<&'static str> {
+    let event: SidecarProcessEvent = serde_json::from_slice(bytes).ok()?;
+    if event.event != "fatal" {
+        return None;
+    }
+    match event.code.as_str() {
+        "desktop_sidecar_schema_unsupported" => Some("desktop_sidecar_schema_unsupported"),
+        "desktop_sidecar_already_owned" => Some("desktop_sidecar_already_owned"),
+        "desktop_sidecar_data_migration_failed" => Some("desktop_sidecar_data_migration_failed"),
+        "desktop_sidecar_startup_failed" => Some("desktop_sidecar_startup_failed"),
+        _ => None,
+    }
+}
+
 fn read_endpoint_metadata(
     endpoint_path: &std::path::Path,
     expected_generation: &str,
@@ -228,8 +248,23 @@ fn response_is_ok(response: &str) -> bool {
         .is_some_and(|line| line.contains(" 200 "))
 }
 
-fn drain_sidecar_events(receiver: &mut tauri::async_runtime::Receiver<CommandEvent>) {
-    while receiver.try_recv().is_ok() {}
+fn drain_sidecar_events(
+    receiver: &mut tauri::async_runtime::Receiver<CommandEvent>,
+    fatal_code: &mut Option<&'static str>,
+) -> bool {
+    let mut terminated = false;
+    while let Ok(event) = receiver.try_recv() {
+        match event {
+            CommandEvent::Stderr(bytes) => {
+                if let Some(code) = stable_sidecar_fatal_code(&bytes) {
+                    *fatal_code = Some(code);
+                }
+            }
+            CommandEvent::Terminated(_) => terminated = true,
+            _ => {}
+        }
+    }
+    terminated
 }
 
 fn health_failure_is_terminal(consecutive_failures: u8) -> bool {
@@ -300,8 +335,9 @@ pub fn start(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> 
     tauri::async_runtime::spawn(async move {
         let managed = app_handle.state::<DesktopRuntimeState>();
         let mut ready: Option<EndpointMetadata> = None;
+        let mut fatal_code: Option<&'static str> = None;
         for _ in 0..ENDPOINT_READY_ATTEMPTS {
-            drain_sidecar_events(&mut receiver);
+            let terminated = drain_sidecar_events(&mut receiver, &mut fatal_code);
             match read_endpoint_metadata(&endpoint_path, &launch_id) {
                 Ok(Some(endpoint)) => {
                     ready = Some(endpoint);
@@ -313,10 +349,17 @@ pub fn start(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> 
                     return;
                 }
             }
+            if terminated && fatal_code.is_some() {
+                break;
+            }
             std::thread::sleep(Duration::from_millis(100));
         }
         let Some(ready) = ready else {
-            mark_crashed(&managed, generation, "desktop_sidecar_startup_failed");
+            mark_crashed(
+                &managed,
+                generation,
+                fatal_code.unwrap_or("desktop_sidecar_startup_failed"),
+            );
             return;
         };
         let mut healthy = false;
@@ -354,7 +397,7 @@ pub fn start(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> 
             // spawning the real server process. Keep draining stdout/stderr events so
             // the pipe cannot fill, but use the authenticated health endpoint as the
             // runtime liveness contract instead of the wrapper's termination event.
-            drain_sidecar_events(&mut receiver);
+            let _ = drain_sidecar_events(&mut receiver, &mut fatal_code);
             if http_request(ready.dynamic_port, "GET", "/health", &token)
                 .is_ok_and(|response| response_is_ok(&response))
             {
@@ -363,7 +406,11 @@ pub fn start(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> 
             }
             consecutive_health_failures = consecutive_health_failures.saturating_add(1);
             if health_failure_is_terminal(consecutive_health_failures) {
-                mark_crashed(&managed, generation, "desktop_sidecar_health_lost");
+                mark_crashed(
+                    &managed,
+                    generation,
+                    fatal_code.unwrap_or("desktop_sidecar_health_lost"),
+                );
                 break;
             }
         }
@@ -543,5 +590,20 @@ mod tests {
             attempts * 100 >= 60_000,
             "the endpoint budget must cover one-file unpack and AV import overhead"
         );
+    }
+
+    #[test]
+    fn sidecar_fatal_parser_accepts_only_stable_redacted_codes() {
+        assert_eq!(
+            stable_sidecar_fatal_code(
+                br#"{"event":"fatal","code":"desktop_sidecar_schema_unsupported"}"#
+            ),
+            Some("desktop_sidecar_schema_unsupported")
+        );
+        assert_eq!(
+            stable_sidecar_fatal_code(br#"{"event":"fatal","code":"C:\\private\\angmoo.sqlite3"}"#),
+            None
+        );
+        assert_eq!(stable_sidecar_fatal_code(b"not-json"), None);
     }
 }

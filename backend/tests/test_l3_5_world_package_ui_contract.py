@@ -43,6 +43,8 @@ def test_import_ui_uses_file_selection_digest_approval_and_atomic_navigation() -
     assert "Device Home에서 보기" in source
     assert "studioWorldRoute(result.imported_world_id)" in source
     assert "서명 없음" in source
+    assert "이전 가져오기 미리보기를 정리하지 못해 새 파일을 열지 않았습니다" in source
+    assert "return;" in source.split("이전 가져오기 미리보기를 정리하지 못해 새 파일을 열지 않았습니다", 1)[1]
 
 
 def test_export_ui_has_preview_browser_delivery_and_opaque_native_save_as() -> None:
@@ -66,3 +68,6 @@ def test_export_ui_has_preview_browser_delivery_and_opaque_native_save_as() -> N
     assert "world_package_destination" in host
     assert "fs:" not in capability
     assert "dialog:" not in capability
+    assert "pendingCleanup" in panel
+    assert "retryCleanup" in panel
+    assert "실패 작업 정리 후 다시 시도" in panel

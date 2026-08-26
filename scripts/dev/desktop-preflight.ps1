@@ -28,6 +28,42 @@ function ConvertTo-NormalizedVersion {
     )
 }
 
+function Get-AngmooHostArchitecture {
+    $rawArchitecture = ''
+    try {
+        # Use reflection instead of direct static property access. Long-lived
+        # Windows PowerShell sessions can have an older RuntimeInformation
+        # assembly loaded by a user profile; under StrictMode that made a
+        # normal `desktop-preflight.ps1` invocation terminate before the
+        # Windows-native environment fallback could run.
+        $runtimeInformationType = [System.Runtime.InteropServices.RuntimeInformation]
+        $osArchitectureProperty = $runtimeInformationType.GetProperty('OSArchitecture')
+        if ($null -ne $osArchitectureProperty) {
+            $rawArchitecture = [string]$osArchitectureProperty.GetValue($null, $null)
+        }
+    } catch {
+        $rawArchitecture = ''
+    }
+
+    if ([string]::IsNullOrWhiteSpace($rawArchitecture)) {
+        # PROCESSOR_ARCHITEW6432 exposes the native host architecture when a
+        # 32-bit PowerShell process runs on 64-bit Windows. Otherwise the
+        # ordinary process architecture is the correct host signal.
+        $rawArchitecture = [Environment]::GetEnvironmentVariable('PROCESSOR_ARCHITEW6432')
+        if ([string]::IsNullOrWhiteSpace($rawArchitecture)) {
+            $rawArchitecture = [Environment]::GetEnvironmentVariable('PROCESSOR_ARCHITECTURE')
+        }
+    }
+
+    $normalizedArchitecture = ([string]$rawArchitecture).Trim().ToUpperInvariant()
+    switch ($normalizedArchitecture) {
+        { $_ -in @('AMD64', 'X64') } { return 'x86_64' }
+        'ARM64' { return 'arm64' }
+        { $_ -in @('X86', 'I386') } { return 'x86' }
+        default { return 'unknown' }
+    }
+}
+
 function Get-ActualProbe {
     $windowsHost = $env:OS -eq 'Windows_NT'
     $osBuild = 0
@@ -37,8 +73,7 @@ function Get-ActualProbe {
         $osBuild = [int]$os.BuildNumber
         $osCaption = [string]$os.Caption
     }
-    $architecture = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()
-    if ($architecture -eq 'X64') { $architecture = 'x86_64' }
+    $architecture = Get-AngmooHostArchitecture
 
     $dockerPresent = $null -ne (Get-Command docker -ErrorAction SilentlyContinue)
     $engineReady = $false
