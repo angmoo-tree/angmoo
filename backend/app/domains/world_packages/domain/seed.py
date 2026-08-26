@@ -15,6 +15,9 @@ from app.domains.world_packages.domain.errors import (
     WorldPackageContractError,
     WorldPackageReasonCode,
 )
+from app.domains.world_packages.domain.collision_policy import (
+    WorldPackageCollisionPlan,
+)
 
 
 WorldPackageEntityKind = Literal["world", "character", "world_character", "asset"]
@@ -25,6 +28,13 @@ class WorldPackageImportIdMapping:
     source_ref: str
     entity_kind: WorldPackageEntityKind
     local_id: str
+
+
+@dataclass(frozen=True, slots=True)
+class WorldPackageImportedAsset:
+    source_ref: str
+    local_url: str
+    sha256: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -39,6 +49,9 @@ class WorldPackageDestinationSeedRequest:
     world: PortableWorldDefinition
     characters: tuple[AutonomousCharacterTemplate, ...]
     world_characters: tuple[PortableWorldCharacterSeed, ...]
+    import_id: str | None = None
+    collision_plan: WorldPackageCollisionPlan | None = None
+    imported_assets: tuple[WorldPackageImportedAsset, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -98,6 +111,7 @@ __all__ = [
     "WorldPackageDestinationSeedResult",
     "WorldPackageEntityKind",
     "WorldPackageImportIdMapping",
+    "WorldPackageImportedAsset",
     "WorldPackageImportRegistryRecord",
     "WorldPackageSourceSnapshot",
     "resolve_world_package_import_replay",

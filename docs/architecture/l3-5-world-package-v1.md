@@ -307,3 +307,64 @@ Sequential and concurrent retries with the same local owner and idempotency key
 resolve to one successful import. The transaction does not make provider calls,
 write package archives, promote media, modify LadybugDB directly, or expose a
 FastAPI route.
+
+## PR C-D deterministic archive and bounded preview boundary
+
+PR C turns an owner-approved, publish-ready World seed into one deterministic
+`.angmoo-world` archive. Managed local WebP assets are read through bounded
+Angmoo-owned paths, normalized metadata is represented by content digests, and
+external HTTP(S) media is excluded rather than fetched. Export delivery is
+operation-owned and does not mutate the source World.
+
+PR D receives an untrusted archive into a process-owned staging directory,
+validates the frozen v1 schema and security corpus, normalizes supported image
+bytes, and produces a digest-bound preview. The opaque preview token is bound to
+operation ID, local owner, and content digest. Preview, discard, expiry, and
+startup orphan cleanup remain canonical-write free: no World, character,
+registry, managed media, Device Home, provider, or graph projection state is
+created before explicit commit.
+
+## PR E atomic import commit and Device Home registration
+
+The commit path is the first boundary allowed to turn a validated package into
+canonical local state:
+
+```text
+POST /api/v1/world-package-imports/{operation_id}/commit
+├─ resolve an already committed idempotent replay
+├─ claim preview token for the same owner, operation, digest, and expiry
+├─ revalidate the staged archive and exact approved preview
+├─ BEGIN IMMEDIATE
+│  ├─ recompute trust, duplicate, slug, and handle collision plan
+│  ├─ prepare normalized media under an import-owned journal
+│  ├─ seed World, owner membership, autonomous Characters, and WorldCharacters
+│  ├─ write import lineage and source-to-local ID mappings
+│  ├─ validate current World contract and exact zero-runtime-state invariants
+│  └─ verify one launchable Device Home read-after-write result
+├─ promote only the journal-owned media directory
+├─ commit SQLite once
+└─ clear the journal and staging operation
+```
+
+The imported World is an independent local copy with a newly allocated World
+ID, character IDs, and WorldCharacter IDs. It is published as `unlisted`, has
+one active owner membership, and becomes visible exactly once on Device Home.
+Every imported WorldCharacter is autonomous but starts with
+`autonomous_enabled = false`; owner-controlled characters, credentials, P2/P3/P4
+state, posts, comments, social events, relationship state, provider calls, and
+graph outbox rows are not imported.
+
+The commit rechecks the collision plan inside the serialized SQLite transaction.
+If another write changed the approved slug, handle, trust, or duplicate result,
+the stale preview fails closed and must be staged again. A previously imported
+package is rejected by default; an explicit `independent_copy` decision creates
+another independently mapped World. Reusing the same local-owner idempotency key
+and digest returns the original import without additional writes.
+
+Media bytes move through `prepared` and `promoted` journal states. A failure
+before SQLite commit removes only that import's staged/final paths and rolls back
+all canonical rows. A crash after SQLite commit is resolved at backend startup:
+an import registry row preserves the promoted media and removes the journal,
+while an uncommitted journal is discarded. Recovery runs before the in-process
+scheduler and projector start. LadybugDB is not written during import and graph
+outbox count for the new World must remain zero.

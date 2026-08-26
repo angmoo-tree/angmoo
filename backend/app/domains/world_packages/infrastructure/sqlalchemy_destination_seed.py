@@ -58,6 +58,17 @@ class SqlAlchemyWorldPackageDestinationSeed:
             return resolve_world_package_import_replay(request, replay)
 
         world_data = request.world
+        asset_urls = {
+            item.source_ref: item.local_url for item in request.imported_assets
+        }
+        planned_handles = (
+            {
+                item.source_ref: item.planned_handle
+                for item in request.collision_plan.characters
+            }
+            if request.collision_plan is not None
+            else {}
+        )
         world_outcome = seed_world(
             self._db,
             user=SimpleNamespace(id=request.local_owner_id),
@@ -123,6 +134,17 @@ class SqlAlchemyWorldPackageDestinationSeed:
             ),
             status="published",
             membership_reason="world_package_import",
+            planned_slug=(
+                request.collision_plan.planned_world_slug
+                if request.collision_plan is not None
+                else None
+            ),
+            banner_media_id=(
+                asset_urls.get(world_data.banner_asset_ref)
+                if world_data.banner_asset_ref is not None
+                else None
+            ),
+            banner_alt_text=world_data.banner_alt_text,
         )
         if world_outcome.replayed:
             raise RuntimeError("world_package_registry_missing_for_existing_seed")
@@ -147,6 +169,17 @@ class SqlAlchemyWorldPackageDestinationSeed:
                     topic_preferences=tuple(item.topic_preferences),
                     safety_rules=tuple(item.safety_rules),
                     persona_summary=item.persona_summary,
+                    planned_handle=planned_handles.get(item.ref),
+                    avatar_url=(
+                        asset_urls.get(item.avatar_asset_ref)
+                        if item.avatar_asset_ref is not None
+                        else None
+                    ),
+                    banner_url=(
+                        asset_urls.get(item.banner_asset_ref)
+                        if item.banner_asset_ref is not None
+                        else None
+                    ),
                 ),
             )
             character_ids[item.ref] = character.id
@@ -182,8 +215,16 @@ class SqlAlchemyWorldPackageDestinationSeed:
                 )
             )
 
+        mappings.extend(
+            WorldPackageImportIdMapping(
+                source_ref=item.source_ref,
+                entity_kind="asset",
+                local_id=item.local_url,
+            )
+            for item in request.imported_assets
+        )
         record = WorldPackageImportRegistryRecord(
-            import_id=uuid7_string(),
+            import_id=request.import_id or uuid7_string(),
             local_owner_id=request.local_owner_id,
             package_id=request.package_id,
             package_version=request.package_version,

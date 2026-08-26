@@ -5,6 +5,7 @@ FROM ${PYTHON_IMAGE} AS base
 
 ARG UV_VERSION=0.12.5
 ARG UTIL_LINUX_MIN_VERSION=2.41.5-0+deb13u1
+ARG OPENSSL_MIN_VERSION=3.5.7-1~deb13u2
 ARG VCS_REF=unknown
 ARG VERSION=0.3.0
 
@@ -27,14 +28,20 @@ RUN apt-get update \
         libblkid1 \
         liblastlog2-2 \
         libmount1 \
+        libssl3t64 \
         libsmartcols1 \
         libuuid1 \
         login \
         mount \
+        openssl \
+        openssl-provider-legacy \
         util-linux \
     && dpkg --compare-versions \
         "$(dpkg-query -W -f='${Version}' util-linux)" \
         ge "${UTIL_LINUX_MIN_VERSION}" \
+    && dpkg --compare-versions \
+        "$(dpkg-query -W -f='${Version}' openssl)" \
+        ge "${OPENSSL_MIN_VERSION}" \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd --gid 10001 angmoo \
     && useradd --uid 10001 --gid 10001 --create-home --shell /usr/sbin/nologin angmoo \

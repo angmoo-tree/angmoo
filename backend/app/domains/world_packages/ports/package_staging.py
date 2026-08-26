@@ -44,6 +44,19 @@ class WorldPackageStagingPort(Protocol):
         preview_token: str,
     ) -> WorldPackageImportPreview: ...
 
+    def begin_commit(
+        self,
+        *,
+        operation_id: str,
+        owner_id: str,
+        preview_token: str,
+        expected_content_digest: str,
+    ) -> WorldPackageImportPreview: ...
+
+    def restore_preview(self, *, operation_id: str, owner_id: str) -> None: ...
+
+    def complete_commit(self, *, operation_id: str, owner_id: str) -> None: ...
+
     def discard(
         self,
         *,

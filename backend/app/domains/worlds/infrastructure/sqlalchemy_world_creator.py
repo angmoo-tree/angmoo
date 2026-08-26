@@ -404,6 +404,9 @@ def seed_world(
     data: schemas.WorldDraftCreate,
     status: str = "draft",
     membership_reason: str = "world_created",
+    planned_slug: str | None = None,
+    banner_media_id: str | None = None,
+    banner_alt_text: str = "",
 ) -> WorldSeedOutcome:
     """Flush a World aggregate without owning commit or rollback."""
 
@@ -420,9 +423,14 @@ def seed_world(
         return WorldSeedOutcome(existing, membership, True)
 
     world_id = uuid7_string()
+    slug = planned_slug or _available_slug(db, name=data.name, world_id=world_id)
+    if not slug or len(slug) > 96 or db.scalar(
+        select(models.World.id).where(models.World.slug == slug)
+    ):
+        raise WorldDefinitionValidationError("world_slug_unavailable")
     world = models.World(
         id=world_id,
-        slug=_available_slug(db, name=data.name, world_id=world_id),
+        slug=slug,
         owner_user_id=user.id,
         name=data.name,
         tagline=data.tagline,
@@ -430,8 +438,8 @@ def seed_world(
         daily_life_description=data.daily_life_description,
         genre_tags=data.genre_tags,
         tone_tags=data.tone_tags,
-        banner_media_id=None,
-        banner_alt_text="",
+        banner_media_id=banner_media_id,
+        banner_alt_text=banner_alt_text,
         timezone=data.timezone,
         language=data.language,
         visibility=data.visibility,

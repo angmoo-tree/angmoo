@@ -185,6 +185,48 @@ class FilesystemWorldPackageStaging:
         assert operation.preview is not None
         return operation.preview
 
+    def begin_commit(
+        self,
+        *,
+        operation_id: str,
+        owner_id: str,
+        preview_token: str,
+        expected_content_digest: str,
+    ) -> WorldPackageImportPreview:
+        with self._lock:
+            operation = self._claim(
+                operation_id=operation_id,
+                owner_id=owner_id,
+                preview_token=preview_token,
+            )
+            if operation.content_digest != expected_content_digest:
+                raise WorldPackageContractError(
+                    WorldPackageReasonCode.PREVIEW_CHANGED
+                )
+            assert operation.preview is not None
+            operation.state = WorldPackageImportState.COMMITTING
+            self._write_operation(operation)
+            return operation.preview
+
+    def restore_preview(self, *, operation_id: str, owner_id: str) -> None:
+        with self._lock:
+            operation = self._owned(operation_id, owner_id)
+            if operation.state is not WorldPackageImportState.COMMITTING:
+                return
+            operation.state = WorldPackageImportState.PREVIEW_READY
+            self._write_operation(operation)
+
+    def complete_commit(self, *, operation_id: str, owner_id: str) -> None:
+        with self._lock:
+            operation = self._owned(operation_id, owner_id)
+            if operation.state is not WorldPackageImportState.COMMITTING:
+                raise WorldPackageContractError(
+                    WorldPackageReasonCode.COMMIT_CONFLICT
+                )
+            operation.state = WorldPackageImportState.COMMITTED
+            self._write_operation(operation)
+        self._remove(operation_id)
+
     def discard(
         self,
         *,
