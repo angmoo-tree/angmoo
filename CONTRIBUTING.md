@@ -104,6 +104,27 @@ scans image vulnerabilities and secrets, validates SPDX SBOM output, and runs
 the isolated two-service Linux clean-clone lifecycle fixtures. Provider-dependent
 tests use fake providers and must not make external model calls.
 
+World Package changes must use synthetic fixtures only. The representative
+closeout suite verifies a source-to-target round trip, final-artifact exclusion,
+bounded staging, atomic commit/recovery, and independent target evolution:
+
+```powershell
+docker compose -f compose.yml -f compose.dev.yml exec -T backend `
+  uv run python -m pytest -q `
+  tests/test_l3_5_world_package_v1_contract.py `
+  tests/test_l3_5_world_package_export.py `
+  tests/test_l3_5_world_package_preview.py `
+  tests/test_l3_5_world_package_import_commit.py `
+  tests/test_l3_5_world_package_closeout.py `
+  tests/test_l3_5_world_package_closeout_contract.py
+```
+
+Never upload a real `.angmoo-world` to a public Issue, pull request, Action
+artifact, or log. Create a minimal synthetic package for ordinary bugs. Follow
+`SECURITY.md` and agree on a private transfer before sharing a real artifact for
+a vulnerability investigation. See `docs/public/world-package-v1.md` for the
+portable-data and local-runtime exclusion boundary.
+
 ## Pull requests and merge ownership
 
 Every change reaches `main` through a pull request. The required check meanings

@@ -71,6 +71,21 @@ def _malicious_archive_metadata_corpus() -> list[tuple[str, list[ArchiveEntryDes
             WorldPackageReasonCode.PATH_UNSAFE,
         ),
         (
+            "absolute_path",
+            [*valid, ArchiveEntryDescriptor("/escape.json", 1, 1)],
+            WorldPackageReasonCode.PATH_UNSAFE,
+        ),
+        (
+            "windows_drive_path",
+            [*valid, ArchiveEntryDescriptor("C:/escape.json", 1, 1)],
+            WorldPackageReasonCode.PATH_UNSAFE,
+        ),
+        (
+            "unc_path",
+            [*valid, ArchiveEntryDescriptor("//server/share.json", 1, 1)],
+            WorldPackageReasonCode.PATH_UNSAFE,
+        ),
+        (
             "backslash_path",
             [*valid, ArchiveEntryDescriptor(r"assets\\escape.webp", 1, 1)],
             WorldPackageReasonCode.PATH_UNSAFE,
@@ -88,6 +103,32 @@ def _malicious_archive_metadata_corpus() -> list[tuple[str, list[ArchiveEntryDes
                     item.compressed_bytes,
                     item.uncompressed_bytes,
                     kind="symlink" if item.path == "manifest.json" else item.kind,
+                )
+                for item in valid
+            ],
+            WorldPackageReasonCode.ARCHIVE_INVALID,
+        ),
+        (
+            "hardlink",
+            [
+                ArchiveEntryDescriptor(
+                    item.path,
+                    item.compressed_bytes,
+                    item.uncompressed_bytes,
+                    kind="hardlink" if item.path == "manifest.json" else item.kind,
+                )
+                for item in valid
+            ],
+            WorldPackageReasonCode.ARCHIVE_INVALID,
+        ),
+        (
+            "device_entry",
+            [
+                ArchiveEntryDescriptor(
+                    item.path,
+                    item.compressed_bytes,
+                    item.uncompressed_bytes,
+                    kind="device" if item.path == "manifest.json" else item.kind,
                 )
                 for item in valid
             ],
@@ -117,6 +158,44 @@ def _malicious_archive_metadata_corpus() -> list[tuple[str, list[ArchiveEntryDes
                 for item in valid
             ],
             WorldPackageReasonCode.ARCHIVE_LIMIT_EXCEEDED,
+        ),
+        (
+            "negative_forged_size",
+            [
+                ArchiveEntryDescriptor(
+                    item.path,
+                    -1 if item.path == "content/world.json" else item.compressed_bytes,
+                    item.uncompressed_bytes,
+                )
+                for item in valid
+            ],
+            WorldPackageReasonCode.ARCHIVE_INVALID,
+        ),
+        (
+            "too_many_entries",
+            [
+                *valid,
+                *[
+                    ArchiveEntryDescriptor(f"unexpected-{index}.txt", 1, 1)
+                    for index in range(WorldPackagePolicy.MAX_ARCHIVE_ENTRIES)
+                ],
+            ],
+            WorldPackageReasonCode.ARCHIVE_LIMIT_EXCEEDED,
+        ),
+        (
+            "path_depth_limit",
+            [*valid, ArchiveEntryDescriptor("a/b/c/d/e/f.json", 1, 1)],
+            WorldPackageReasonCode.PATH_UNSAFE,
+        ),
+        (
+            "windows_device_name",
+            [*valid, ArchiveEntryDescriptor("assets/con/file.webp", 1, 1)],
+            WorldPackageReasonCode.PATH_UNSAFE,
+        ),
+        (
+            "nested_archive",
+            [*valid, ArchiveEntryDescriptor("assets/nested.angmoo-world", 1, 1)],
+            WorldPackageReasonCode.ARCHIVE_INVALID,
         ),
         (
             "unknown_root_entry",
