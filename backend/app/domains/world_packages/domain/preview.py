@@ -42,6 +42,16 @@ class WorldPackageNormalizedAsset:
     alt_text: str
 
 
+@dataclass(frozen=True, slots=True, repr=False)
+class WorldPackageNormalizedAssetPayload:
+    """Commit-only normalized bytes; never serialized into preview or logs."""
+
+    source_ref: str
+    normalized_ref: str
+    normalized_sha256: str
+    content: bytes
+
+
 @dataclass(frozen=True, slots=True)
 class ValidatedWorldPackage:
     operation_id: str
@@ -53,6 +63,7 @@ class ValidatedWorldPackage:
     world_characters: WorldCharactersDocument
     asset_index: AssetIndexDocument
     normalized_assets: tuple[WorldPackageNormalizedAsset, ...]
+    normalized_asset_payloads: tuple[WorldPackageNormalizedAssetPayload, ...]
     license_text: str | None
     license_assessment: WorldPackageLicenseAssessment
 
@@ -110,6 +121,7 @@ __all__ = [
     "ValidatedWorldPackage",
     "WorldPackageImportPreview",
     "WorldPackageNormalizedAsset",
+    "WorldPackageNormalizedAssetPayload",
     "WorldPackagePreparedPreview",
     "WorldPackagePreviewAssessment",
 ]

@@ -22,6 +22,7 @@ from fastapi import (
 )
 from fastapi.responses import StreamingResponse
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.api.v1.deps import get_current_user
@@ -32,6 +33,8 @@ from app.domains.world_packages.api.schemas import (
     WorldPackageExportPreviewRead,
     WorldPackageExportRequest,
     WorldPackageImportPreviewRead,
+    WorldPackageImportCommitRequestRead,
+    WorldPackageImportCommitResultRead,
     WorldPackagePreparedExportRead,
     WorldPackagePreparedImportPreviewRead,
 )
@@ -40,6 +43,9 @@ from app.domains.world_packages.application.export_world_package import (
 )
 from app.domains.world_packages.application.stage_world_package import (
     StageWorldPackage,
+)
+from app.domains.world_packages.application.commit_world_package import (
+    CommitWorldPackageImport,
 )
 from app.domains.world_packages.domain.errors import (
     WorldPackageContractError,
@@ -56,6 +62,9 @@ from app.domains.world_packages.infrastructure.filesystem_export_artifacts impor
 from app.domains.world_packages.infrastructure.filesystem_staging import (
     FilesystemWorldPackageStaging,
 )
+from app.domains.world_packages.infrastructure.filesystem_import_media import (
+    FilesystemWorldPackageImportMedia,
+)
 from app.domains.world_packages.infrastructure.managed_media_assets import (
     ManagedMediaPackageAssets,
 )
@@ -67,6 +76,9 @@ from app.domains.world_packages.infrastructure.sqlalchemy_preview_probe import (
 )
 from app.domains.world_packages.infrastructure.sqlalchemy_source_snapshot import (
     SqlAlchemyWorldPackageSourceSnapshot,
+)
+from app.domains.world_packages.infrastructure.sqlalchemy_import_commit import (
+    SqlAlchemyWorldPackageImportCommitter,
 )
 from app.domains.world_packages.infrastructure.zip_archive import (
     DeterministicWorldPackageZipArchive,
@@ -170,6 +182,33 @@ def _delivery_session_factory(
     return sessionmaker(bind=db.get_bind(), expire_on_commit=False)
 
 
+def _import_committer(
+    request: Request, db: Session
+) -> SqlAlchemyWorldPackageImportCommitter:
+    existing = getattr(
+        request.app.state, "world_package_import_committer", None
+    )
+    if existing is not None:
+        return existing
+    with _STORE_LOCK:
+        existing = getattr(
+            request.app.state, "world_package_import_committer", None
+        )
+        if existing is None:
+            media_root, runtime_root, media_url_path = _paths(request)
+            existing = SqlAlchemyWorldPackageImportCommitter(
+                _delivery_session_factory(request, db),
+                media=FilesystemWorldPackageImportMedia(
+                    media_root=media_root,
+                    runtime_root=runtime_root,
+                    media_url_path=media_url_path,
+                ),
+            )
+            existing.recover_media()
+            request.app.state.world_package_import_committer = existing
+    return existing
+
+
 def _raise_contract_error(exc: WorldPackageContractError) -> None:
     reason = exc.reason_code
     if reason in {
@@ -192,6 +231,7 @@ def _raise_contract_error(exc: WorldPackageContractError) -> None:
         WorldPackageReasonCode.DUPLICATE,
         WorldPackageReasonCode.TAMPERED_VERSION,
         WorldPackageReasonCode.PREVIEW_CHANGED,
+        WorldPackageReasonCode.COMMIT_FAILED,
     }:
         code = status.HTTP_409_CONFLICT
     else:
@@ -277,6 +317,52 @@ def discard_world_package_import_preview(
     except WorldPackageContractError as exc:
         _raise_contract_error(exc)
         raise AssertionError("unreachable")
+
+
+@router.post(
+    "/world-package-imports/{operation_id}/commit",
+    response_model=WorldPackageImportCommitResultRead,
+    status_code=status.HTTP_201_CREATED,
+)
+def commit_world_package_import(
+    operation_id: str,
+    data: WorldPackageImportCommitRequestRead,
+    request: Request,
+    preview_token: PreviewToken,
+    idempotency_key: IdempotencyKey,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+) -> WorldPackageImportCommitResultRead:
+    browser_session.require_local_frontend_request(request, mutation=True)
+    normalized_key = idempotency_key.strip()
+    if len(normalized_key) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="idempotency_key_invalid",
+        )
+    try:
+        staging = _staging(request)
+        result = CommitWorldPackageImport(
+            staging=staging,
+            validator=ZipWorldPackageImportValidator(staging),
+            committer=_import_committer(request, db),
+        ).commit(
+            operation_id=operation_id,
+            local_owner_id=current_user.id,
+            preview_token=preview_token,
+            expected_content_digest=data.expected_content_digest,
+            idempotency_key=normalized_key,
+            duplicate_strategy=data.duplicate_strategy,
+        )
+        return WorldPackageImportCommitResultRead.from_domain(result)
+    except WorldPackageContractError as exc:
+        _raise_contract_error(exc)
+        raise AssertionError("unreachable")
+    except (IntegrityError, OperationalError) as exc:
+        _raise_contract_error(
+            WorldPackageContractError(WorldPackageReasonCode.COMMIT_FAILED)
+        )
+        raise AssertionError("unreachable") from exc
 
 
 @router.post(

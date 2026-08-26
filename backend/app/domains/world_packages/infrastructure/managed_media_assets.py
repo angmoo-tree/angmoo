@@ -95,6 +95,14 @@ class ManagedMediaPackageAssets:
                     WorldPackageReasonCode.ARCHIVE_LIMIT_EXCEEDED
                 )
             digest = hashlib.sha256(content).hexdigest()
+            relative = source_url[len(self._url_prefix) :]
+            portable = PurePosixPath(relative)
+            if portable.parts[0] == "world-package-imports" and (
+                portable.parts[-1] != f"sha256-{digest}.webp"
+            ):
+                raise WorldPackageContractError(
+                    WorldPackageReasonCode.INTEGRITY_MISMATCH
+                )
             asset = by_digest.get(digest)
             if asset is None:
                 asset = ManagedImageAsset(
@@ -152,11 +160,35 @@ class ManagedMediaPackageAssets:
         expected_group = (
             "worlds" if candidate.slot == "world_banner" else "characters"
         )
-        if portable.parts[:2] != (expected_group, candidate.source_entity_id):
-            raise WorldPackageContractError(WorldPackageReasonCode.PATH_UNSAFE)
-        expected_root = (
-            self._media_root / expected_group / candidate.source_entity_id
-        ).resolve()
+        if portable.parts[0] == "world-package-imports":
+            if (
+                len(portable.parts) != 3
+                or any(
+                    character not in "0123456789abcdef-"
+                    for character in portable.parts[1]
+                )
+                or not portable.parts[2].startswith("sha256-")
+                or not portable.parts[2].endswith(".webp")
+            ):
+                raise WorldPackageContractError(
+                    WorldPackageReasonCode.PATH_UNSAFE
+                )
+            expected_root = (
+                self._media_root
+                / "world-package-imports"
+                / portable.parts[1]
+            ).resolve()
+        else:
+            if portable.parts[:2] != (
+                expected_group,
+                candidate.source_entity_id,
+            ):
+                raise WorldPackageContractError(
+                    WorldPackageReasonCode.PATH_UNSAFE
+                )
+            expected_root = (
+                self._media_root / expected_group / candidate.source_entity_id
+            ).resolve()
         lexical = self._media_root.joinpath(*portable.parts)
         cursor = self._media_root
         for part in portable.parts:

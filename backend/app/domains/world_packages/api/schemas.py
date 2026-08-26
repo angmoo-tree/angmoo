@@ -13,6 +13,9 @@ from app.domains.world_packages.domain.preview import (
     WorldPackageImportPreview,
     WorldPackagePreparedPreview,
 )
+from app.domains.world_packages.domain.import_commit import (
+    WorldPackageImportCommitResult,
+)
 
 
 class WorldPackageExportSchema(BaseModel):
@@ -220,10 +223,35 @@ class WorldPackagePreparedImportPreviewRead(WorldPackageExportSchema):
         )
 
 
+class WorldPackageImportCommitRequestRead(WorldPackageExportSchema):
+    expected_content_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
+    duplicate_strategy: Literal["reject", "independent_copy"] = "reject"
+
+
+class WorldPackageImportCommitResultRead(WorldPackageExportSchema):
+    import_id: str
+    imported_world_id: str
+    device_home_world_id: str
+    replayed: bool
+
+    @classmethod
+    def from_domain(
+        cls, value: WorldPackageImportCommitResult
+    ) -> "WorldPackageImportCommitResultRead":
+        return cls(
+            import_id=value.import_id,
+            imported_world_id=value.imported_world_id,
+            device_home_world_id=value.device_home_world_id,
+            replayed=value.replayed,
+        )
+
+
 __all__ = [
     "WorldPackageExportPreviewRead",
     "WorldPackageExportRequest",
     "WorldPackageImportPreviewRead",
+    "WorldPackageImportCommitRequestRead",
+    "WorldPackageImportCommitResultRead",
     "WorldPackagePreparedExportRead",
     "WorldPackagePreparedImportPreviewRead",
 ]

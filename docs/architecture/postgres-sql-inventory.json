@@ -531,7 +531,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "a02af836470e5dfa086ca05b7eef957a340e2afe8ce077c0379a515efab86f80",
+      "source_sha256": "54e68de128e7ced693bdb7c3aed31b03540f80ee49aa2ccf4294d9bec06f972f",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

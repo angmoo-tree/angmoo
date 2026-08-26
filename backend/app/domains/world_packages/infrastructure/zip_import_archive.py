@@ -44,6 +44,7 @@ from app.domains.world_packages.domain.package_policy import (
 from app.domains.world_packages.domain.preview import (
     ValidatedWorldPackage,
     WorldPackageNormalizedAsset,
+    WorldPackageNormalizedAssetPayload,
 )
 from app.domains.world_packages.infrastructure.filesystem_staging import (
     FilesystemWorldPackageStaging,
@@ -285,7 +286,7 @@ def _validate_payloads(
         world_characters=world_characters,
         asset_index=asset_index,
     )
-    normalized_assets = _validate_and_normalize_assets(
+    normalized_assets, normalized_asset_payloads = _validate_and_normalize_assets(
         asset_index=asset_index,
         payloads=payloads,
         extracted=extracted,
@@ -300,6 +301,7 @@ def _validate_payloads(
         world_characters=world_characters,
         asset_index=asset_index,
         normalized_assets=normalized_assets,
+        normalized_asset_payloads=normalized_asset_payloads,
         license_text=license_text,
         license_assessment=license_assessment,
     )
@@ -454,10 +456,14 @@ def _validate_and_normalize_assets(
     asset_index: AssetIndexDocument,
     payloads: Mapping[str, _ExtractedEntry],
     extracted: Path,
-) -> tuple[WorldPackageNormalizedAsset, ...]:
+) -> tuple[
+    tuple[WorldPackageNormalizedAsset, ...],
+    tuple[WorldPackageNormalizedAssetPayload, ...],
+]:
     normalized_root = extracted / "normalized"
     normalized_root.mkdir(mode=0o700, exist_ok=False)
     results: list[WorldPackageNormalizedAsset] = []
+    payload_results: list[WorldPackageNormalizedAssetPayload] = []
     total_pixels = 0
     for asset in asset_index.assets:
         entry = payloads.get(asset.ref)
@@ -529,7 +535,15 @@ def _validate_and_normalize_assets(
                 alt_text=asset.alt_text,
             )
         )
-    return tuple(results)
+        payload_results.append(
+            WorldPackageNormalizedAssetPayload(
+                source_ref=asset.ref,
+                normalized_ref=normalized_ref,
+                normalized_sha256=digest,
+                content=normalized,
+            )
+        )
+    return tuple(results), tuple(payload_results)
 
 
 def _looks_like_exact_webp(payload: bytes) -> bool:

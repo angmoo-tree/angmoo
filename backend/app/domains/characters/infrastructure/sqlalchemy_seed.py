@@ -37,13 +37,20 @@ def seed_autonomous_character(
     db: Session, *, data: AutonomousCharacterSeedData
 ) -> Character:
     character_id = uuid7_string()
+    handle = data.planned_handle or _available_handle(
+        db, hint=data.handle_hint, character_id=character_id
+    )
+    if not handle or len(handle) > 40 or db.scalar(
+        select(Character.id).where(Character.handle == handle)
+    ):
+        raise ValueError("character_handle_unavailable")
     character = Character(
         id=character_id,
         owner_id=data.owner_id,
         name=data.display_name,
-        handle=_available_handle(db, hint=data.handle_hint, character_id=character_id),
-        avatar_url=None,
-        banner_url=None,
+        handle=handle,
+        avatar_url=data.avatar_url,
+        banner_url=data.banner_url,
         one_liner=data.one_liner,
         personality=data.personality,
         speech_style=data.speech_style,

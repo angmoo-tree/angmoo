@@ -62,6 +62,7 @@ from app.domains.world_packages.domain.preview import (
     ValidatedWorldPackage,
     WorldPackageImportPreview,
     WorldPackageNormalizedAsset,
+    WorldPackageNormalizedAssetPayload,
     WorldPackagePreparedPreview,
     WorldPackagePreviewAssessment,
 )
@@ -69,8 +70,14 @@ from app.domains.world_packages.domain.seed import (
     WorldPackageDestinationSeedRequest,
     WorldPackageDestinationSeedResult,
     WorldPackageImportIdMapping,
+    WorldPackageImportedAsset,
     WorldPackageImportRegistryRecord,
     WorldPackageSourceSnapshot,
+)
+from app.domains.world_packages.domain.import_commit import (
+    WorldPackageDuplicateStrategy,
+    WorldPackageImportCommitRequest,
+    WorldPackageImportCommitResult,
 )
 
 __all__ = [
@@ -98,6 +105,10 @@ __all__ = [
     "WorldPackageExportPreview",
     "WorldPackageExportRegistryRecord",
     "WorldPackageImportIdMapping",
+    "WorldPackageImportedAsset",
+    "WorldPackageImportCommitRequest",
+    "WorldPackageImportCommitResult",
+    "WorldPackageDuplicateStrategy",
     "WorldPackageImportPreview",
     "WorldPackageImportRegistryRecord",
     "WorldPackageImportState",
@@ -106,6 +117,7 @@ __all__ = [
     "WorldPackageManifest",
     "WorldPackageMediaCandidate",
     "WorldPackageNormalizedAsset",
+    "WorldPackageNormalizedAssetPayload",
     "WorldPackagePolicy",
     "WorldPackagePreparedPreview",
     "WorldPackagePreviewAssessment",

@@ -767,6 +767,11 @@
       "module": "app.domains.world_packages.api.routes",
       "endpoint": "stage_world_package_import"
     },
+    "POST /api/v1/world-package-imports/{operation_id}/commit": {
+      "access": "owner-only",
+      "module": "app.domains.world_packages.api.routes",
+      "endpoint": "commit_world_package_import"
+    },
     "POST /api/v1/worlds/{world_id}/package-exports": {
       "access": "owner-only",
       "module": "app.domains.world_packages.api.routes",

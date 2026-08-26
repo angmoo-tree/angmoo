@@ -106,6 +106,7 @@ def create_lifespan(
     component_manager_factory: Callable[
         [], SingleBackendRuntimeComponents | None
     ] = lambda: None,
+    startup_recovery: Callable[[], None] = lambda: None,
     runtime_settings=settings,
     runtime_disposer: Callable[[], None] | None = None,
 ) -> LifespanHandler:
@@ -119,6 +120,7 @@ def create_lifespan(
         if runtime_settings.seed_demo_data:
             with session_factory() as db:
                 demo_seed(db)
+        startup_recovery()
 
         if extension is not None:
             if (
@@ -197,12 +199,28 @@ def create_app(
     prepare_media_directories: bool = True,
 ) -> FastAPI:
     composition: RuntimeComposition | None = None
+    world_package_import_committer = None
     runtime_settings = settings
     runtime_lifespan = lifespan_handler
     process_settings_snapshot: dict[str, object] | None = None
     if runtime_config is not None:
         composition = compose_runtime(runtime_config, base_settings=settings)
         runtime_settings = composition.settings
+        from app.domains.world_packages.infrastructure.filesystem_import_media import (
+            FilesystemWorldPackageImportMedia,
+        )
+        from app.domains.world_packages.infrastructure.sqlalchemy_import_commit import (
+            SqlAlchemyWorldPackageImportCommitter,
+        )
+
+        world_package_import_committer = SqlAlchemyWorldPackageImportCommitter(
+            composition.session_factory,
+            media=FilesystemWorldPackageImportMedia(
+                media_root=runtime_config.data_paths.media,
+                runtime_root=runtime_config.data_paths.runtime,
+                media_url_path=runtime_settings.media_url_path,
+            ),
+        )
         # Existing service modules retain a reference to the process Settings
         # singleton. Materialize the typed profile into that object without
         # consulting or rewriting parent-shell environment variables.
@@ -233,6 +251,9 @@ def create_app(
                         session_factory=composition.session_factory,
                     )
                 ),
+                startup_recovery=(
+                    world_package_import_committer.recover_media
+                ),
                 runtime_settings=runtime_settings,
                 runtime_disposer=dispose_runtime,
             )
@@ -258,6 +279,9 @@ def create_app(
     runtime_app.state.runtime_settings = runtime_settings
     runtime_app.state.runtime_config = runtime_config
     runtime_app.state.runtime_composition = composition
+    runtime_app.state.world_package_import_committer = (
+        world_package_import_committer
+    )
     runtime_app.state.restore_process_settings = (
         dispose_runtime if composition is not None else None
     )

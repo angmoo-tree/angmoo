@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from app.core.config import Settings, settings
 
 
-PUBLIC_MEDIA_DIRECTORIES = ("characters", "posts")
+PUBLIC_MEDIA_DIRECTORIES = ("characters", "posts", "world-package-imports")
 
 
 def mount_public_media(

@@ -66,6 +66,9 @@ class SqlAlchemyWorldPackageRegistry:
             id_mappings=mappings,
         )
 
+    def import_exists(self, *, import_id: str) -> bool:
+        return self._db.get(WorldPackageImport, import_id) is not None
+
     def resolve_export_source(
         self, *, source_world_id: str
     ) -> WorldPackageSourceIdentity:

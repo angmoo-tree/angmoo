@@ -17,6 +17,9 @@ class AutonomousCharacterSeedData:
     topic_preferences: tuple[str, ...]
     safety_rules: tuple[str, ...]
     persona_summary: str
+    planned_handle: str | None = None
+    avatar_url: str | None = None
+    banner_url: str | None = None
 
 
 __all__ = ["AutonomousCharacterSeedData"]
