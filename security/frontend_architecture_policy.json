@@ -5,7 +5,8 @@
     "device-home",
     "pwa-shell",
     "runtime-status",
-    "world-app"
+    "world-app",
+    "world-packages"
   ],
   "legacy_import_exceptions": [],
   "legacy_import_prefixes": [
@@ -70,6 +71,7 @@
     "frontend/src/features/world-app/model/world-app-contract.ts",
     "frontend/src/features/world-app/public.ts",
     "frontend/src/features/world-app/ui/world-app.tsx",
+    "frontend/src/features/world-packages/public.ts",
     "frontend/src/shared/navigation/public.ts",
     "frontend/src/shared/ui/app-icon.tsx",
     "frontend/src/shared/ui/device-frame.tsx",

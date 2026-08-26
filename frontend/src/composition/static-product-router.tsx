@@ -13,6 +13,7 @@ import { SettingsClient } from "@/components/settings-client";
 import { WorldCharacterAutonomySetupClient } from "@/components/world-character-autonomy-setup-client";
 import { WorldCreatorClient } from "@/components/world-creator-client";
 import { DeviceHomeRouteClient } from "@/app/device-home-route-client";
+import { StudioImportRouteClient } from "@/app/studio/import/studio-import-route-client";
 import { StudioRouteClient } from "@/app/studio/studio-route-client";
 import { WorldAppRouteClient } from "@/app/world-app-route-client";
 import { CreatorStudioFrame } from "@/features/creator-studio/public";
@@ -133,6 +134,13 @@ function renderStaticRoute(location: BrowserLocation) {
     return (
       <CreatorStudioFrame activeSection="new-world">
         <WorldCreatorClient />
+      </CreatorStudioFrame>
+    );
+  }
+  if (pathname === "/studio/import") {
+    return (
+      <CreatorStudioFrame activeSection="import">
+        <StudioImportRouteClient />
       </CreatorStudioFrame>
     );
   }

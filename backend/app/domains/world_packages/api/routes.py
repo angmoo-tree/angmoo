@@ -6,7 +6,7 @@ from collections.abc import AsyncIterator, Callable, Iterator
 from datetime import datetime, timezone
 from pathlib import Path
 import threading
-from typing import Annotated
+from typing import Annotated, Literal
 from urllib.parse import quote
 
 from fastapi import (
@@ -472,6 +472,10 @@ def download_world_package_export(
     operation_id: str,
     request: Request,
     download_token: DownloadToken,
+    delivery_mode: Literal["browser_download", "tauri_save_as"] = Header(
+        default="browser_download",
+        alias="X-World-Package-Delivery-Mode",
+    ),
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ) -> StreamingResponse:
@@ -488,12 +492,17 @@ def download_world_package_export(
         raise AssertionError("unreachable")
 
     session_factory = _delivery_session_factory(request, db)
-    response = StreamingResponse(
+    stream = (
         _stream_and_record_delivery(
             artifact=artifact,
             artifact_store=artifact_store,
             session_factory=session_factory,
-        ),
+        )
+        if delivery_mode == "browser_download"
+        else _stream_pending_native_delivery(artifact=artifact)
+    )
+    response = StreamingResponse(
+        stream,
         media_type=WorldPackagePolicy.MEDIA_TYPE,
         headers={
             "Cache-Control": "no-store",
@@ -506,6 +515,87 @@ def download_world_package_export(
         },
     )
     return response
+
+
+@router.post(
+    "/world-package-exports/{operation_id}/delivery-ack",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def acknowledge_world_package_export_delivery(
+    operation_id: str,
+    request: Request,
+    download_token: DownloadToken,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+) -> Response:
+    """Commit a native Save As only after the host reports a durable write."""
+
+    browser_session.require_local_frontend_request(request, mutation=True)
+    artifact_store = _artifacts(request)
+    try:
+        artifact = artifact_store.claim(
+            operation_id=operation_id,
+            owner_id=current_user.id,
+            token=download_token,
+        )
+        SqlAlchemyWorldPackageRegistry(db).record_export_delivery(
+            WorldPackageExportRegistryRecord(
+                export_id=artifact.operation_id,
+                package_id=artifact.package_id,
+                package_version=artifact.package_version,
+                source_world_id=artifact.source_world_id,
+                seed_digest=artifact.seed_digest,
+                manifest_digest=artifact.manifest_digest,
+                license_expression=artifact.license_expression,
+                delivery_mode="tauri_save_as",
+                delivered_at=datetime.now(timezone.utc),
+            )
+        )
+        db.commit()
+    except WorldPackageContractError as exc:
+        db.rollback()
+        _raise_contract_error(exc)
+        raise AssertionError("unreachable")
+    except BaseException:
+        db.rollback()
+        raise
+    artifact_store.discard(operation_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.delete(
+    "/world-package-exports/{operation_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def discard_world_package_export(
+    operation_id: str,
+    request: Request,
+    download_token: DownloadToken,
+    current_user=Depends(get_current_user),
+) -> Response:
+    """Discard a prepared artifact after Save As cancellation or failure."""
+
+    browser_session.require_local_frontend_request(request, mutation=True)
+    artifact_store = _artifacts(request)
+    try:
+        artifact_store.claim(
+            operation_id=operation_id,
+            owner_id=current_user.id,
+            token=download_token,
+        )
+    except WorldPackageContractError as exc:
+        _raise_contract_error(exc)
+        raise AssertionError("unreachable")
+    artifact_store.discard(operation_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+def _stream_pending_native_delivery(*, artifact: ExportArtifact) -> Iterator[bytes]:
+    """Stream bytes without consuming the version or removing the artifact."""
+
+    with artifact.path.open("rb") as source:
+        while chunk := source.read(64 * 1024):
+            yield chunk
 
 
 def _stream_and_record_delivery(
