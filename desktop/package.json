@@ -10,6 +10,7 @@
     "dev:docker-bridge": "tauri dev --config src-tauri/tauri.contributor-docker.conf.json --features contributor-docker-bridge",
     "build:shell": "tauri build --no-bundle",
     "build:product": "npm run build:sidecar && npm run build:shell",
+    "build:installer-payload": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/prepare-installer-payload.ps1",
     "build:installer": "npm run build:sidecar && tauri build --bundles nsis,msi"
   },
   "devDependencies": {

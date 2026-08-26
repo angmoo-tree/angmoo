@@ -34,8 +34,10 @@ export function WorldPackageExportPanel({ worldId }: { worldId: string }) {
     exclusions: false,
   });
   const [preview, setPreview] = useState<WorldPackageExportPreview | null>(null);
-  const [pending, setPending] = useState<"preview" | "delivery" | "ack" | null>(null);
+  const [pending, setPending] = useState<"preview" | "delivery" | "ack" | "cleanup" | null>(null);
   const [pendingAcknowledgement, setPendingAcknowledgement] =
+    useState<PreparedWorldPackageExport | null>(null);
+  const [pendingCleanup, setPendingCleanup] =
     useState<PreparedWorldPackageExport | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -119,13 +121,41 @@ export function WorldPackageExportPanel({ worldId }: { worldId: string }) {
         setPendingAcknowledgement(prepared);
         setError("파일은 저장됐지만 Angmoo의 전달 확인이 끝나지 않았습니다. 아래에서 확인을 다시 시도해 주세요.");
       } else {
-        if (prepared) await discardPreparedWorldPackageExport(prepared).catch(() => undefined);
+        if (prepared) {
+          try {
+            await discardPreparedWorldPackageExport(prepared);
+          } catch {
+            setPendingCleanup(prepared);
+            setError(
+              "내보내기 전달과 실패 작업 정리가 모두 끝나지 않았습니다. 같은 World를 다시 내보내기 전에 아래에서 정리를 재시도해 주세요.",
+            );
+            return;
+          }
+        }
+        setPendingCleanup(null);
         setError(exportError(reason));
       }
     } finally {
       if (destinationToken) {
         await discardNativeWorldPackageDestination(destinationToken).catch(() => undefined);
       }
+      setPending(null);
+    }
+  }
+
+  async function retryCleanup() {
+    if (!pendingCleanup) return;
+    setPending("cleanup");
+    setError(null);
+    try {
+      await discardPreparedWorldPackageExport(pendingCleanup);
+      setPendingCleanup(null);
+      setMessage("완료되지 않은 내보내기 작업을 정리했습니다. 다시 내보낼 수 있습니다.");
+    } catch (reason) {
+      setError(
+        `완료되지 않은 내보내기 작업을 아직 정리하지 못했습니다. (${exportError(reason)})`,
+      );
+    } finally {
       setPending(null);
     }
   }
@@ -233,7 +263,12 @@ export function WorldPackageExportPanel({ worldId }: { worldId: string }) {
         </button>
         <button
           className={primaryButtonClass}
-          disabled={!preview || pending !== null || Boolean(pendingAcknowledgement)}
+          disabled={
+            !preview ||
+            pending !== null ||
+            Boolean(pendingAcknowledgement) ||
+            Boolean(pendingCleanup)
+          }
           onClick={() => void handleDelivery()}
           type="button"
         >
@@ -252,6 +287,17 @@ export function WorldPackageExportPanel({ worldId }: { worldId: string }) {
         >
           {pending === "ack" ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
           전달 확인 다시 시도
+        </button>
+      ) : null}
+      {pendingCleanup ? (
+        <button
+          className={secondaryButtonClass}
+          disabled={pending !== null}
+          onClick={() => void retryCleanup()}
+          type="button"
+        >
+          {pending === "cleanup" ? <Loader2 className="size-4 animate-spin" /> : <ShieldCheck className="size-4" />}
+          실패 작업 정리 후 다시 시도
         </button>
       ) : null}
       {error ? <p className="mt-4 rounded-[18px] bg-[#fff1f0] p-4 text-sm font-bold text-[#b42318]" role="alert">{error}</p> : null}

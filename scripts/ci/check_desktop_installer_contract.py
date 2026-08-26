@@ -65,6 +65,10 @@ def main() -> int:
         'SetOutPath "$TEMP"',
         'Rename "$LOCALAPPDATA\\angmoo" "$LOCALAPPDATA\\Angmoo.__casefix__"',
         'Rename "$LOCALAPPDATA\\Angmoo.__casefix__" "$LOCALAPPDATA\\Angmoo"',
+        "installer-preflight.ps1",
+        "$LOCALAPPDATA\\Angmoo\\app.__install_backup__",
+        "verify-installed-payload.ps1",
+        "The previous app was preserved",
     ):
         _require(required in hooks, f"uninstall safety contract missing: {required}")
     for required in (
@@ -152,6 +156,7 @@ def main() -> int:
         "NoNewDefenderDetection",
         "legacy_launcher_secret_merge",
         "product_root_actual_name",
+        "installer_payload_digest_parity_pass",
     ):
         _require(required in workflow, f"installer workflow contract missing: {required}")
 
@@ -215,8 +220,49 @@ def main() -> int:
         "dynamic_port",
         "expected_generation",
         'http_request(ready.dynamic_port, "GET", "/health", &token)',
+        "desktop_sidecar_schema_unsupported",
+        "desktop_sidecar_data_migration_failed",
     ):
         _require(required in launcher, f"no-console readiness contract missing: {required}")
+
+    desktop_package = json.loads(
+        (ROOT / "desktop" / "package.json").read_text(encoding="utf-8")
+    )
+    installer_command = desktop_package["scripts"]["build:installer"]
+    _require(
+        "tauri build --bundles nsis,msi" in installer_command,
+        "installer build must run the reviewed Tauri bundle path",
+    )
+    for marker in (
+        "!system",
+        "prepare-installer-payload.ps1",
+        "MAINBINARYSRCPATH",
+        "-SkipHostBuild",
+        "-HostPath",
+        "-SidecarPath",
+        "-ManifestPath",
+    ):
+        _require(
+            marker in hooks,
+            f"NSIS must freeze the final host and sidecar digests: {marker}",
+        )
+    for script_name in (
+        "prepare-installer-payload.ps1",
+        "installer-preflight.ps1",
+        "verify-installed-payload.ps1",
+        "test-installer-payload-verifier.ps1",
+    ):
+        _require(
+            (ROOT / "desktop" / "scripts" / script_name).is_file(),
+            f"installer payload script missing: {script_name}",
+        )
+    verifier = (
+        ROOT / "desktop" / "scripts" / "verify-installed-payload.ps1"
+    ).read_text(encoding="utf-8")
+    _require(
+        "installer_payload_digest_parity_pass" in verifier,
+        "installed payload verifier must emit the stable parity success code",
+    )
     print("desktop-installer-contract: PASS")
     return 0
 

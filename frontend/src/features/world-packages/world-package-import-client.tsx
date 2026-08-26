@@ -41,7 +41,19 @@ export function WorldPackageImportClient({
       setError(".angmoo-world 파일만 선택할 수 있습니다.");
       return;
     }
-    if (prepared) await discardWorldPackageImport(prepared).catch(() => undefined);
+    if (prepared) {
+      setPending("discard");
+      try {
+        await discardWorldPackageImport(prepared);
+      } catch (reason) {
+        setError(
+          `이전 가져오기 미리보기를 정리하지 못해 새 파일을 열지 않았습니다. (${importError(reason)})`,
+        );
+        setPending(null);
+        if (inputRef.current) inputRef.current.value = "";
+        return;
+      }
+    }
     setPrepared(null);
     setApprovedDigest(null);
     setResult(null);

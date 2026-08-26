@@ -387,13 +387,24 @@ def main() -> int:
         ownership.release()
 
 
+def _stable_fatal_code(exc: Exception) -> str:
+    message = str(exc)
+    if message.startswith("unsupported SQLite schema version:"):
+        return "desktop_sidecar_schema_unsupported"
+    if message == "desktop_sidecar_already_owned":
+        return "desktop_sidecar_already_owned"
+    if "embedded_data_migration" in message:
+        return "desktop_sidecar_data_migration_failed"
+    return "desktop_sidecar_startup_failed"
+
+
 if __name__ == "__main__":
     try:
         raise SystemExit(main())
     except Exception as exc:  # noqa: BLE001 - process boundary must emit one code
         if sys.stderr is not None:
             print(
-                json.dumps({"event": "fatal", "code": str(exc)[:120]}),
+                json.dumps({"event": "fatal", "code": _stable_fatal_code(exc)}),
                 file=sys.stderr,
                 flush=True,
             )

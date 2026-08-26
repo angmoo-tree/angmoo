@@ -11,6 +11,7 @@
     "preview:static": "node ./scripts/serve-static.mjs",
     "start": "next start",
     "lint": "eslint",
+    "test:world-package-proxy": "node ./scripts/test-world-package-proxy.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

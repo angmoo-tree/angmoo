@@ -186,7 +186,11 @@ def main() -> int:
     recursive_deletes = [
         line.strip() for line in hooks.splitlines() if re.search(r"\bRMDir\s+/r\b", line)
     ]
-    approved_recursive_deletes = [
+    approved_app_transaction_deletes = [
+        'RMDir /r "$INSTDIR"',
+        'RMDir /r "$LOCALAPPDATA\\Angmoo\\app.__install_backup__"',
+    ]
+    approved_product_data_deletes = [
         f'RMDir /r "$LOCALAPPDATA\\Angmoo\\{child}"'
         for child in (
             "canonical",
@@ -200,8 +204,39 @@ def main() -> int:
         )
     ]
     _require(
-        recursive_deletes == approved_recursive_deletes,
-        "uninstaller recursive deletion escaped the approved product-data children",
+        recursive_deletes
+        == approved_app_transaction_deletes + approved_product_data_deletes,
+        "recursive deletion escaped the installer-owned app transaction or approved product-data children",
+    )
+    post_install = hooks.split("!macro NSIS_HOOK_POSTINSTALL", 1)[1].split(
+        "!macro NSIS_HOOK_PREUNINSTALL", 1
+    )[0]
+    for required in (
+        'StrCpy $INSTDIR "$LOCALAPPDATA\\Angmoo\\app"',
+        '!insertmacro ANGMOO_VERIFY_NOT_REPARSE "$INSTDIR" angmoo_failed_new_app',
+        'RMDir /r "$INSTDIR"',
+        '!insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\\Angmoo\\app.__install_backup__" angmoo_verified_backup',
+        'RMDir /r "$LOCALAPPDATA\\Angmoo\\app.__install_backup__"',
+    ):
+        _require(
+            required in hooks,
+            f"installer-owned app payload deletion contract missing: {required}",
+        )
+    _require(
+        post_install.index(
+            '!insertmacro ANGMOO_VERIFY_NOT_REPARSE "$INSTDIR" angmoo_failed_new_app'
+        )
+        < post_install.index('RMDir /r "$INSTDIR"'),
+        "failed app payload must be validated before recursive rollback deletion",
+    )
+    _require(
+        post_install.index(
+            '!insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\\Angmoo\\app.__install_backup__" angmoo_verified_backup'
+        )
+        < post_install.index(
+            'RMDir /r "$LOCALAPPDATA\\Angmoo\\app.__install_backup__"'
+        ),
+        "verified app backup must be validated before recursive cleanup",
     )
     _require(
         'RMDir /r "$LOCALAPPDATA\\Angmoo"' not in hooks,

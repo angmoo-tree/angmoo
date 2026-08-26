@@ -28,6 +28,9 @@ EVIDENCE = (
 USER_GUIDE = REPO_ROOT / "docs" / "public" / "world-package-v1.md"
 README = REPO_ROOT / "README.md"
 CONTRIBUTING = REPO_ROOT / "CONTRIBUTING.md"
+CORE_CI = REPO_ROOT / ".github" / "workflows" / "ci.yml"
+FRONTEND_PACKAGE = REPO_ROOT / "frontend" / "package.json"
+PROXY_SMOKE = REPO_ROOT / "frontend" / "scripts" / "test-world-package-proxy.mjs"
 
 
 WORLD_PACKAGE_SUITES = (
@@ -60,6 +63,22 @@ def test_windows_product_paths_pin_file_ux_and_closeout_contracts() -> None:
         workflow = workflow_path.read_text(encoding="utf-8")
         assert "tests\\test_l3_5_world_package_ui_contract.py" in workflow
         assert "tests\\test_l3_5_world_package_closeout_contract.py" in workflow
+
+
+def test_core_ci_runs_the_real_world_package_proxy_smoke() -> None:
+    workflow = CORE_CI.read_text(encoding="utf-8")
+    package = FRONTEND_PACKAGE.read_text(encoding="utf-8")
+    smoke = PROXY_SMOKE.read_text(encoding="utf-8")
+
+    assert "pnpm test:world-package-proxy" in workflow
+    assert '"test:world-package-proxy"' in package
+    for capability in (
+        "X-World-Package-Download-Token",
+        "X-World-Package-Delivery-Mode",
+        "X-World-Package-Preview-Token",
+    ):
+        assert capability in smoke
+    assert "world_package_proxy_capability_smoke_pass" in smoke
 
 
 def test_exclusion_scanner_is_allow_listed_and_redacts_private_values() -> None:

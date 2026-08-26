@@ -20,6 +20,12 @@ import that file as a new, independent World. The file extension is
 Canceling Save As is not a successful export. Angmoo removes temporary output
 and does not record a delivered package.
 
+If the delivery failed and Angmoo reports that pending output could not be
+removed, use the on-screen cleanup retry before starting another export. Do not
+delete the Angmoo data directory or a Docker volume to clear a pending export.
+An interrupted process-owned export is removed safely when the backend starts
+again; the source World remains unchanged.
+
 ## Import a package
 
 1. On Device Home, choose **Add World** and select **Import package**.
@@ -32,6 +38,11 @@ and does not record a delivered package.
 Drag-and-drop and manual extraction are not v1 contracts. Angmoo owns staging,
 normalization, canonical writes, managed-media promotion, and cleanup. Failed
 validation or a canceled preview creates no World. A retry is idempotent.
+
+If discarding a prior import preview fails, Angmoo keeps that preview visible
+and blocks selecting another package until cleanup succeeds. A backend restart
+removes abandoned uncommitted staging only; it never removes a committed World
+or the runtime's canonical data.
 
 ## What the package contains
 

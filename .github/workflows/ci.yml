@@ -93,6 +93,9 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
         working-directory: frontend
+      - name: Verify World Package proxy capabilities
+        run: pnpm test:world-package-proxy
+        working-directory: frontend
       - name: Install Chromium for product-shell smoke
         shell: bash
         env:

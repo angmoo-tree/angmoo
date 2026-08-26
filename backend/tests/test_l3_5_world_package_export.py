@@ -797,3 +797,21 @@ def test_pending_changed_seed_cannot_reuse_the_same_package_version(
     assert retry.package_version == 1
     assert replayed is False
     store.discard(retry.operation_id)
+
+
+def test_export_artifact_store_removes_startup_orphans(
+    tmp_path: Path,
+) -> None:
+    runtime_root = tmp_path / "runtime"
+    orphan_directory = (
+        runtime_root
+        / "world-packages"
+        / "exports"
+        / "019ff9d5-559d-7452-b0f5-68f4964a2d50"
+    )
+    orphan_directory.mkdir(parents=True)
+    (orphan_directory / "package.pending").write_bytes(b"interrupted-export")
+
+    FilesystemWorldPackageExportArtifacts(runtime_root)
+
+    assert not orphan_directory.exists()
