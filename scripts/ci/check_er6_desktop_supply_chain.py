@@ -109,6 +109,9 @@ def main() -> int:
     build_script = (
         ROOT / "desktop" / "scripts" / "build-sidecar.ps1"
     ).read_text(encoding="utf-8")
+    installer_transaction = (
+        ROOT / "desktop" / "scripts" / "installer-payload-transaction.ps1"
+    ).read_text(encoding="utf-8")
 
     _require(
         config["bundle"]["externalBin"] == ["binaries/angmoo-sidecar"],
@@ -186,10 +189,6 @@ def main() -> int:
     recursive_deletes = [
         line.strip() for line in hooks.splitlines() if re.search(r"\bRMDir\s+/r\b", line)
     ]
-    approved_app_transaction_deletes = [
-        'RMDir /r "$INSTDIR"',
-        'RMDir /r "$LOCALAPPDATA\\Angmoo\\app.__install_backup__"',
-    ]
     approved_product_data_deletes = [
         f'RMDir /r "$LOCALAPPDATA\\Angmoo\\{child}"'
         for child in (
@@ -204,39 +203,41 @@ def main() -> int:
         )
     ]
     _require(
-        recursive_deletes
-        == approved_app_transaction_deletes + approved_product_data_deletes,
-        "recursive deletion escaped the installer-owned app transaction or approved product-data children",
+        recursive_deletes == approved_product_data_deletes,
+        "NSIS recursive deletion escaped approved product-data children",
     )
-    post_install = hooks.split("!macro NSIS_HOOK_POSTINSTALL", 1)[1].split(
-        "!macro NSIS_HOOK_PREUNINSTALL", 1
-    )[0]
     for required in (
-        'StrCpy $INSTDIR "$LOCALAPPDATA\\Angmoo\\app"',
-        '!insertmacro ANGMOO_VERIFY_NOT_REPARSE "$INSTDIR" angmoo_failed_new_app',
-        'RMDir /r "$INSTDIR"',
-        '!insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\\Angmoo\\app.__install_backup__" angmoo_verified_backup',
-        'RMDir /r "$LOCALAPPDATA\\Angmoo\\app.__install_backup__"',
+        "Assert-ExactProductRoot $ProductRoot",
+        "(Join-Path $env:LOCALAPPDATA 'Angmoo')",
+        "$app = Join-Path $script:productRoot 'app'",
+        "$staging = Join-Path $script:productRoot 'app.__install_staging__'",
+        "$backup = Join-Path $script:productRoot 'app.__install_backup__'",
+        "Assert-NoReparsePoint $Path -Recursive",
+        "Remove-Item -LiteralPath $Path -Recurse -Force",
     ):
         _require(
-            required in hooks,
-            f"installer-owned app payload deletion contract missing: {required}",
+            required in installer_transaction,
+            f"installer-owned app transaction safety contract missing: {required}",
         )
+    transaction_recursive_deletes = [
+        line.strip()
+        for line in installer_transaction.splitlines()
+        if "Remove-Item" in line and "-Recurse" in line
+    ]
     _require(
-        post_install.index(
-            '!insertmacro ANGMOO_VERIFY_NOT_REPARSE "$INSTDIR" angmoo_failed_new_app'
-        )
-        < post_install.index('RMDir /r "$INSTDIR"'),
-        "failed app payload must be validated before recursive rollback deletion",
+        transaction_recursive_deletes
+        == ["Remove-Item -LiteralPath $Path -Recurse -Force"],
+        "app transaction must expose exactly one guarded recursive delete primitive",
+    )
+    remove_owned_calls = re.findall(
+        r"^\s*Remove-OwnedDirectory\s+(\$[A-Za-z][A-Za-z0-9]*)\s*$",
+        installer_transaction,
+        flags=re.MULTILINE,
     )
     _require(
-        post_install.index(
-            '!insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\\Angmoo\\app.__install_backup__" angmoo_verified_backup'
-        )
-        < post_install.index(
-            'RMDir /r "$LOCALAPPDATA\\Angmoo\\app.__install_backup__"'
-        ),
-        "verified app backup must be validated before recursive cleanup",
+        remove_owned_calls
+        and set(remove_owned_calls) <= {"$app", "$staging", "$backup"},
+        "app transaction recursive cleanup escaped app, staging, or backup roots",
     )
     _require(
         'RMDir /r "$LOCALAPPDATA\\Angmoo"' not in hooks,
