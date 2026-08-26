@@ -23,7 +23,7 @@ def test_creator_studio_canonical_routes_use_public_feature_shell() -> None:
     assert 'activeSection="new-world"' in new_page
     assert "WorldCreatorClient" in new_page
     assert "WorldCreatorClient" in edit_page
-    assert "서명된 World Package" in import_page
+    assert "StudioImportRouteClient" in import_page
 
 
 def test_creator_studio_reads_owner_surface_and_groups_blocked_worlds() -> None:

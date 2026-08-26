@@ -4,6 +4,7 @@ mod phone_resize;
 mod product_paths;
 mod product_windows;
 mod window_policy;
+mod world_package_delivery;
 
 use product_windows::{
     ProductWindowKind, create_phone_window, current_window, open_product_window_impl,
@@ -97,8 +98,10 @@ pub fn run() {
             }
         }))
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_dialog::init())
         .manage(launch_mode)
         .manage(desktop_runtime::DesktopRuntimeState::default())
+        .manage(world_package_delivery::WorldPackageDestinationState::default())
         .setup(|app| {
             let launch_mode = *app.state::<launch_mode::DesktopLaunchMode>();
             let product_paths = product_paths::ProductDataPaths::resolve(app.handle())?;
@@ -130,6 +133,9 @@ pub fn run() {
             start_product_window_resize,
             desktop_runtime_status,
             retry_desktop_runtime,
+            world_package_delivery::select_world_package_export_destination,
+            world_package_delivery::write_world_package_export_destination,
+            world_package_delivery::discard_world_package_export_destination,
         ])
         .build(tauri::generate_context!())
         .expect("error while building Angmoo Tauri product shell")

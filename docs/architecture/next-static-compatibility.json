@@ -320,7 +320,7 @@
       "path": "frontend/src/app/studio/import/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/studio/import",
-      "source_sha256": "6a49ea6d7af2cb8907ddf098555aa5bebfd4308fcd7992107cb32bcb0a49e46e",
+      "source_sha256": "9c9fcc1710561c0f366fcd8fbebf02b90e7a234f397cbe2c5d5f46ee3539aedc",
       "transition_pr": "ER5 PR K"
     },
     {

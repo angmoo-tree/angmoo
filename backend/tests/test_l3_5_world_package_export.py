@@ -657,6 +657,89 @@ def test_cancelled_stream_removes_artifact_without_consuming_version(
     engine.dispose()
 
 
+def test_native_save_as_requires_ack_and_cancel_does_not_consume_version(
+    tmp_path: Path,
+) -> None:
+    engine, factory, owner = _database_fixture(tmp_path)
+    app = FastAPI()
+    app.include_router(router, prefix="/api/v1")
+    media_root = tmp_path / "media"
+    media_root.mkdir()
+    app.state.runtime_settings = SimpleNamespace(
+        media_root_path=media_root,
+        media_url_path="/media",
+    )
+    app.state.runtime_config = None
+    app.state.runtime_composition = None
+
+    def db_dependency():
+        with factory() as db:
+            yield db
+
+    app.dependency_overrides[get_db] = db_dependency
+    app.dependency_overrides[get_current_user] = lambda: owner
+    client = TestClient(app, base_url="http://127.0.0.1:3000")
+
+    first = client.post(
+        "/api/v1/worlds/private-source-world-id/package-exports",
+        headers={**FRONTEND_HEADERS, "Idempotency-Key": "native-export-1"},
+        json=LICENSE_REQUEST,
+    ).json()
+    native_download = client.get(
+        first["download_path"],
+        headers={
+            **FRONTEND_HEADERS,
+            "X-World-Package-Download-Token": first["download_token"],
+            "X-World-Package-Delivery-Mode": "tauri_save_as",
+        },
+    )
+    assert native_download.status_code == 200
+    with factory() as db:
+        assert int(db.scalar(select(func.count()).select_from(WorldPackageExport)) or 0) == 0
+        assert db.scalar(select(WorldPackageSource.next_version)) == 1
+
+    acknowledgement = client.post(
+        f"/api/v1/world-package-exports/{first['operation_id']}/delivery-ack",
+        headers={
+            **FRONTEND_HEADERS,
+            "X-World-Package-Download-Token": first["download_token"],
+        },
+    )
+    assert acknowledgement.status_code == 204
+    with factory() as db:
+        delivery = db.scalar(select(WorldPackageExport))
+        assert delivery is not None
+        assert delivery.delivery_mode == "tauri_save_as"
+        assert db.scalar(select(WorldPackageSource.next_version)) == 2
+
+    second = client.post(
+        "/api/v1/worlds/private-source-world-id/package-exports",
+        headers={**FRONTEND_HEADERS, "Idempotency-Key": "native-export-2"},
+        json=LICENSE_REQUEST,
+    ).json()
+    cancelled = client.delete(
+        f"/api/v1/world-package-exports/{second['operation_id']}",
+        headers={
+            **FRONTEND_HEADERS,
+            "X-World-Package-Download-Token": second["download_token"],
+        },
+    )
+    assert cancelled.status_code == 204
+    expired = client.get(
+        second["download_path"],
+        headers={
+            **FRONTEND_HEADERS,
+            "X-World-Package-Download-Token": second["download_token"],
+            "X-World-Package-Delivery-Mode": "tauri_save_as",
+        },
+    )
+    assert expired.status_code == 410
+    with factory() as db:
+        assert int(db.scalar(select(func.count()).select_from(WorldPackageExport)) or 0) == 1
+        assert db.scalar(select(WorldPackageSource.next_version)) == 2
+    engine.dispose()
+
+
 def test_pending_changed_seed_cannot_reuse_the_same_package_version(
     tmp_path: Path,
 ) -> None:

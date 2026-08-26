@@ -67,7 +67,7 @@ export const DEVICE_HOME_FIXED_APPS: readonly DeviceHomeFixedApp[] = [
     id: "world-import",
     label: "World 추가·가져오기",
     href: PRODUCT_ROUTES.studioImport,
-    availability: "planned",
+    availability: "available",
   },
   {
     id: "memory-explorer",

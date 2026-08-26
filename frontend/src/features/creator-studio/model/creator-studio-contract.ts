@@ -26,6 +26,6 @@ export const CREATOR_STUDIO_SECTIONS: readonly CreatorStudioSection[] = [
     id: "import",
     label: "Import",
     href: PRODUCT_ROUTES.studioImport,
-    availability: "planned",
+    availability: "available",
   },
 ] as const;

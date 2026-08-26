@@ -24,6 +24,7 @@ import {
 
 import { useAuth } from "@/components/auth-provider";
 import { StudioWorldCharacterList } from "@/features/creator-studio/public";
+import { WorldPackageExportPanel } from "@/features/world-packages/public";
 import {
   createOwnerControlledIdentity,
   createWorld,
@@ -474,6 +475,7 @@ export function WorldCreatorClient({ worldId }: { worldId?: string }) {
             {context ? (
               <>
                 <StudioWorldCharacterList worldId={context.world.id} />
+                <WorldPackageExportPanel worldId={context.world.id} />
                 <div id="owner-controlled-identity" className="scroll-mt-6">
                   <OwnerControlledIdentityPanel
                     roles={definition.roles}

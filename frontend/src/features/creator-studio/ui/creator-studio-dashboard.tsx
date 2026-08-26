@@ -91,9 +91,14 @@ export function CreatorStudioDashboard({
             owner와 활성 creator membership 범위만 읽습니다.
           </p>
         </div>
-        <Link className={styles.primaryAction} href={PRODUCT_ROUTES.studioNewWorld}>
-          새 World 만들기
-        </Link>
+        <div className={styles.actions}>
+          <Link className={styles.secondaryAction} href={PRODUCT_ROUTES.studioImport}>
+            Package 가져오기
+          </Link>
+          <Link className={styles.primaryAction} href={PRODUCT_ROUTES.studioNewWorld}>
+            새 World 만들기
+          </Link>
+        </div>
       </header>
 
       {worlds.length === 0 ? (
