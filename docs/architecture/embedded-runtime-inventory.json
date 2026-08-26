@@ -15,7 +15,7 @@
     },
     {
       "path": "Dockerfile.backend",
-      "sha256": "7bbbe128d7e282d50e16173076791cb5bacbbab246ef99f53d520c1f72b6997d"
+      "sha256": "c9e5c9cd974cd4f4d401f7c6dfd73e8aa63c9e0f5e71bb4f4688d93aaa7ecc47"
     },
     {
       "path": "Dockerfile.frontend",
