@@ -16,6 +16,7 @@ from app.integrations.relationship_graph_read import RelationshipGraphRepository
 from app.runtime.migrations.embedded_data import EmbeddedDataUpgradeCoordinator
 from app.runtime.migrations.embedded_sqlite import SqliteCanonicalUpgradeError
 from app.runtime.migrations.ladybug_versions import registry as graph_registry
+from app.runtime.migrations.local_app_data import LegacyLocalAppDataMigration
 from app.runtime.migrations.sqlite_versions import registry as sqlite_registry
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
 from app.runtime.persistence.sqlite_codecs import encode_utc_timestamp
@@ -38,7 +39,12 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def _seed_v1(root: Path, *, with_graph: bool = True) -> Path:
+def _seed_v1(
+    root: Path,
+    *,
+    with_graph: bool = True,
+    generation: str = GENERATION,
+) -> Path:
     secret = root / "secrets" / "app-secret"
     secret.parent.mkdir(parents=True)
     secret.write_text("embedded-migration-fixture-secret\n", encoding="utf-8")
@@ -49,7 +55,7 @@ def _seed_v1(root: Path, *, with_graph: bool = True) -> Path:
         root
         / "canonical"
         / "generations"
-        / GENERATION
+        / generation
         / "angmoo.sqlite3"
     )
     database.parent.mkdir(parents=True)
@@ -89,6 +95,44 @@ def _seed_v1(root: Path, *, with_graph: bool = True) -> Path:
         ) as graph:
             graph.verify_connectivity()
     return database
+
+
+def test_legacy_marker_survives_forward_sqlite_generation_upgrade(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "com.angmoo.desktop"
+    target = tmp_path / "Angmoo"
+    legacy_generation = "er6-preview-v1"
+    _seed_v1(source, generation=legacy_generation)
+
+    legacy_migration = LegacyLocalAppDataMigration(
+        source_root=source,
+        target_root=target,
+        runtime_root=target / "runtime",
+        process_alive=lambda _pid: False,
+    )
+    imported = legacy_migration.migrate_if_needed()
+    assert imported.status == "migrated"
+    assert imported.generation == legacy_generation
+    assert imported.schema_version == 1
+    assert imported.canonical_table_count == 83
+
+    upgraded = EmbeddedDataUpgradeCoordinator(
+        StaticRuntimeDataPath(target),
+        fallback_generation=legacy_generation,
+    ).upgrade()
+    assert upgraded.canonical.source_version == 1
+    assert upgraded.canonical.target_version == 2
+    assert upgraded.canonical.migrated is True
+    assert upgraded.canonical.generation != legacy_generation
+
+    # The ER6 marker attests the immutable v1 generation that was imported.
+    # It must not reject the later active v2 generation as marker corruption.
+    completed = legacy_migration.migrate_if_needed()
+    assert completed.status == "already_migrated"
+    assert completed.generation == legacy_generation
+    assert completed.schema_version == 1
+    assert completed.canonical_table_count == 83
 
 
 def test_v1_sqlite_is_copied_to_v2_and_existing_data_is_preserved(
