@@ -1,7 +1,7 @@
 """Managed media boundary for package assets.
 
-PR B freezes ownership only. Archive extraction and filesystem promotion are
-implemented by later PRs.
+Export resolution is implemented. Canonical import promotion remains behind
+the PR E commit boundary; PR D only normalizes assets inside runtime staging.
 """
 
 from __future__ import annotations

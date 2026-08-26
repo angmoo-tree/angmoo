@@ -1,1 +1,1 @@
-"""Application layer placeholder; use cases begin in L3.5 PR B/C."""
+"""World Package export, bounded preview, and later commit orchestration."""

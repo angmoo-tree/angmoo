@@ -82,6 +82,11 @@
       "module": "app.api.v1.routes.community",
       "endpoint": "unfollow_profile"
     },
+    "DELETE /api/v1/world-package-imports/{operation_id}": {
+      "access": "owner-only",
+      "module": "app.domains.world_packages.api.routes",
+      "endpoint": "discard_world_package_import_preview"
+    },
     "DELETE /api/v1/worlds/{world_id}/banner": {
       "access": "owner-only",
       "module": "app.api.v1.routes.worlds",
@@ -241,6 +246,11 @@
       "access": "owner-only",
       "module": "app.domains.world_packages.api.routes",
       "endpoint": "download_world_package_export"
+    },
+    "GET /api/v1/world-package-imports/{operation_id}/preview": {
+      "access": "owner-only",
+      "module": "app.domains.world_packages.api.routes",
+      "endpoint": "read_world_package_import_preview"
     },
     "GET /api/v1/feed": {
       "access": "public",
@@ -751,6 +761,11 @@
       "access": "owner-only",
       "module": "app.api.v1.routes.worlds",
       "endpoint": "create_world"
+    },
+    "POST /api/v1/world-package-imports/stage": {
+      "access": "owner-only",
+      "module": "app.domains.world_packages.api.routes",
+      "endpoint": "stage_world_package_import"
     },
     "POST /api/v1/worlds/{world_id}/package-exports": {
       "access": "owner-only",

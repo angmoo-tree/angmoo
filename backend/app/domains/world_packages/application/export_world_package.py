@@ -23,6 +23,10 @@ from app.domains.world_packages.domain.export import (
     world_package_seed_digest,
 )
 from app.domains.world_packages.domain.manifest import WorldPackageLicense
+from app.domains.world_packages.domain.license_policy import (
+    SUPPORTED_LICENSE_EXPRESSIONS,
+    validate_world_package_license,
+)
 from app.domains.world_packages.domain.package_policy import WorldPackagePolicy
 from app.domains.world_packages.domain.seed import WorldPackageSourceSnapshot
 from app.domains.world_packages.ports.managed_assets import ManagedPackageAssetPort
@@ -30,17 +34,6 @@ from app.domains.world_packages.ports.package_archive import WorldPackageArchive
 from app.domains.world_packages.ports.registry import WorldPackageRegistryPort
 from app.domains.world_packages.ports.source_snapshot import (
     WorldPackageSourceSnapshotPort,
-)
-
-
-SUPPORTED_LICENSE_EXPRESSIONS = frozenset(
-    {
-        "CC0-1.0",
-        "CC-BY-4.0",
-        "CC-BY-SA-4.0",
-        "GPL-3.0-only",
-        "LicenseRef-Angmoo-Private",
-    }
 )
 
 
@@ -238,23 +231,7 @@ class ExportWorldPackage:
 def _validate_license(
     license: WorldPackageLicense, license_text: str | None
 ) -> str | None:
-    expression = license.expression
-    if (
-        expression not in SUPPORTED_LICENSE_EXPRESSIONS
-        and not expression.startswith("LicenseRef-")
-    ):
-        raise WorldPackageContractError(WorldPackageReasonCode.LICENSE_MISSING)
-    if expression.startswith("LicenseRef-"):
-        if license.license_text_path != "LICENSE.txt" or not license_text:
-            raise WorldPackageContractError(WorldPackageReasonCode.LICENSE_MISSING)
-    elif license.license_text_path is not None or license_text is not None:
-        raise WorldPackageContractError(WorldPackageReasonCode.ARCHIVE_INVALID)
-    if license_text is not None:
-        encoded = license_text.encode("utf-8")
-        if not encoded or len(encoded) > WorldPackagePolicy.MAX_MANIFEST_BYTES:
-            raise WorldPackageContractError(
-                WorldPackageReasonCode.ARCHIVE_LIMIT_EXCEEDED
-            )
+    validate_world_package_license(license, license_text)
     return license_text
 
 

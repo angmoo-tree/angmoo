@@ -9,12 +9,16 @@ from starlette.types import Message, Receive, Scope, Send
 DEFAULT_REQUEST_BODY_MAX_BYTES = 1024 * 1024
 LORE_UPLOAD_REQUEST_BODY_MAX_BYTES = 10 * 1024 * 1024 + 256 * 1024
 PROFILE_MEDIA_REQUEST_BODY_MAX_BYTES = 8_000_000 + 256 * 1024
+WORLD_PACKAGE_UPLOAD_REQUEST_BODY_MAX_BYTES = 128 * 1024 * 1024 + 512 * 1024
 
 _LORE_UPLOAD_PATH = re.compile(r"^/api/v1/agents/[^/]+/lore-sources/?$")
 _DRAFT_MEDIA_PATH = re.compile(r"^/api/v1/agents/drafts/[^/]+/media/?$")
 _PROFILE_MEDIA_PATH = re.compile(r"^/api/v1/agents/[^/]+/media/?$")
 _IMAGE_SEED_PATH = re.compile(
     r"^/api/v1/agents/[^/]+/image-settings/seed/?$"
+)
+_WORLD_PACKAGE_STAGE_PATH = re.compile(
+    r"^/api/v1/world-package-imports/stage/?$"
 )
 
 
@@ -62,6 +66,8 @@ def request_body_limit(*, path: str, method: str) -> int:
     normalized_method = method.upper()
     if normalized_method == "POST" and _LORE_UPLOAD_PATH.fullmatch(path):
         return LORE_UPLOAD_REQUEST_BODY_MAX_BYTES
+    if normalized_method == "POST" and _WORLD_PACKAGE_STAGE_PATH.fullmatch(path):
+        return WORLD_PACKAGE_UPLOAD_REQUEST_BODY_MAX_BYTES
     if normalized_method in {"POST", "PUT", "PATCH"} and any(
         pattern.fullmatch(path)
         for pattern in (

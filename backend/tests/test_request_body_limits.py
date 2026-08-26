@@ -6,6 +6,7 @@ from app.core.request_limits import (
     LORE_UPLOAD_REQUEST_BODY_MAX_BYTES,
     PROFILE_MEDIA_REQUEST_BODY_MAX_BYTES,
     RequestBodyLimitMiddleware,
+    WORLD_PACKAGE_UPLOAD_REQUEST_BODY_MAX_BYTES,
     request_body_limit,
 )
 
@@ -38,6 +39,10 @@ def test_request_body_limit_classifies_large_upload_routes() -> None:
         path="/api/v1/agents/char-1/image-settings/seed",
         method="POST",
     ) == PROFILE_MEDIA_REQUEST_BODY_MAX_BYTES
+    assert request_body_limit(
+        path="/api/v1/world-package-imports/stage",
+        method="POST",
+    ) == WORLD_PACKAGE_UPLOAD_REQUEST_BODY_MAX_BYTES
     assert request_body_limit(
         path="/api/v1/posts",
         method="POST",
