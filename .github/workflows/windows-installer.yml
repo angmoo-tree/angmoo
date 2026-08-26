@@ -58,6 +58,7 @@ jobs:
           .\.venv\Scripts\python.exe -m pytest -q `
             tests\test_embedded_data_migration_contract.py `
             tests\test_embedded_data_migration.py `
+            tests\test_installer_update.py `
             tests\test_l3_er6_release_candidate.py `
             tests\test_l3_er6_localappdata_closeout.py `
             tests\test_l3_er6_interactive_remove_data.py `
@@ -70,6 +71,7 @@ jobs:
           Pop-Location
           backend\.venv\Scripts\python.exe scripts\ci\check_desktop_installer_contract.py
           .\desktop\scripts\test-installer-payload-verifier.ps1
+          .\desktop\scripts\test-installer-payload-transaction.ps1
           backend\.venv\Scripts\python.exe scripts\ci\check_er6_desktop_supply_chain.py `
             --evidence .codex-temp\er6-supply-chain-audit.json
       - name: Build synthetic legacy LocalAppData lifecycle fixture
@@ -386,6 +388,25 @@ jobs:
           & (Join-Path $installRoot 'verify-installed-payload.ps1') -AppRoot $installRoot
           if ($LASTEXITCODE -ne 0) { throw 'Installed host and sidecar payload digest parity failed' }
           Write-Host 'installer_payload_digest_parity_pass:first_install'
+          $payloadIdentity = Get-Content -LiteralPath (Join-Path $installRoot 'installer-payload.json') -Raw |
+            ConvertFrom-Json
+          if ($payloadIdentity.schema_version -ne 2) {
+            throw 'Installed payload manifest did not use build identity schema 2'
+          }
+          if ($payloadIdentity.build_commit -ne '${{ github.sha }}') {
+            throw "Installed payload build commit mismatch: $($payloadIdentity.build_commit)"
+          }
+          if ([string]$payloadIdentity.payload_generation -notmatch '^[0-9a-f]{64}$') {
+            throw 'Installed payload generation is invalid'
+          }
+          foreach ($transactionRoot in @(
+              (Join-Path $productRoot 'app.__install_staging__'),
+              (Join-Path $productRoot 'app.__install_backup__')
+            )) {
+            if (Test-Path -LiteralPath $transactionRoot) {
+              throw "Successful install left app transaction root: $transactionRoot"
+            }
+          }
           $installManifest = Get-InstallFileManifest $installRoot
           foreach ($target in @($app.FullName, $sidecarFile.FullName, $installRoot)) {
             Write-Host "Defender custom scan: $target"
@@ -524,15 +545,19 @@ jobs:
 
           # Exercise the path that was previously missing from this workflow:
           # an installer/updater is run directly over an existing canonical
-          # installation without an explicit uninstall in between.  Corrupt a
-          # replaceable app-owned file first so the subsequent manifest check
-          # proves that the payload was actually rewritten rather than merely
-          # observing the pre-existing files.
-          $noticePath = Join-Path $installRoot 'THIRD_PARTY_NOTICES.md'
-          Set-Content -LiteralPath $noticePath -Value 'stale in-place upgrade payload' -Encoding ascii
-          if ((Get-FileHash -LiteralPath $noticePath -Algorithm SHA256).Hash -eq
-              $installManifest[$noticePath]) {
-            throw 'In-place upgrade proof did not change the replaceable app payload'
+          # installation without an explicit uninstall in between. Reproduce
+          # the observed mixed-payload incident by leaving the candidate
+          # manifest in place while replacing only the sidecar bytes. The new
+          # installer must classify this app as mixed, build a complete staging
+          # candidate, and never trust the mixed app as rollback material.
+          $sidecarPath = Join-Path $installRoot 'angmoo-sidecar.exe'
+          [System.IO.File]::WriteAllBytes(
+            $sidecarPath,
+            [byte[]](0x4d, 0x5a, 0x00, 0x01)
+          )
+          if ((Get-FileHash -LiteralPath $sidecarPath -Algorithm SHA256).Hash -eq
+              $installManifest[$sidecarPath]) {
+            throw 'Mixed-payload direct update proof did not change the sidecar'
           }
           Write-Host 'Running direct in-place installer update over the existing canonical installation'
           $inPlaceUpgrade = Start-Process $installer.FullName -ArgumentList '/S', '/UPDATE' -PassThru
@@ -547,6 +572,14 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Updated host and sidecar payload digest parity failed' }
           Write-Host 'installer_payload_digest_parity_pass:direct_update'
           Assert-InstallFileManifest $installManifest 'direct_in_place_upgrade'
+          foreach ($transactionRoot in @(
+              (Join-Path $productRoot 'app.__install_staging__'),
+              (Join-Path $productRoot 'app.__install_backup__')
+            )) {
+            if (Test-Path -LiteralPath $transactionRoot) {
+              throw "Direct update left app transaction root: $transactionRoot"
+            }
+          }
           if (Test-Path -LiteralPath (Join-Path $env:LOCALAPPDATA 'Angmoo.__casefix__')) {
             throw 'Direct in-place installer update left a case-normalization staging directory'
           }
