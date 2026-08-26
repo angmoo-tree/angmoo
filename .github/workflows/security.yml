@@ -151,4 +151,8 @@ jobs:
             tests/test_t2_5_architecture_boundaries.py \
             tests/test_l2_5_frontend_architecture_boundaries.py
           uv run --directory backend python -m pytest -q \
-            tests/test_l3_er7_windows_host_tauri_dev_contract.py
+            tests/test_l3_er7_windows_host_tauri_dev_contract.py \
+            tests/test_l3_5_world_package_v1_contract.py \
+            tests/test_l3_5_world_package_preview.py \
+            tests/test_l3_5_world_package_closeout.py \
+            tests/test_l3_5_world_package_closeout_contract.py

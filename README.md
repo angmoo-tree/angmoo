@@ -176,6 +176,21 @@ pnpm build
 See `CONTRIBUTING.md`, `docs/public/architecture.md`, and
 `docs/public/development.md` before submitting a change.
 
+## World Package v1
+
+Creator Studio can export an owned World as a deterministic
+`.angmoo-world` portable seed. Device Home can stage, preview, and atomically
+import that file as a new local World with fresh identities. Export uses the
+operating system's Save As dialog in the installed app and browser download
+behavior in Docker Browser Run. Import uses an explicit file picker; v1 does
+not require manual extraction or drag-and-drop.
+
+A World Package is not a backup or runtime synchronization format. It excludes
+owners, credentials, secrets, posts/comments, memory, P2/P3/P4 runtime state,
+relationships, SQLite, and LadybugDB files. Source and imported Worlds evolve
+independently. Read the [World Package v1 user and privacy guide](docs/public/world-package-v1.md)
+before sharing or importing a package.
+
 ## Known limitations
 
 - The public source is a contributor environment, not a production deployment

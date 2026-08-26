@@ -64,7 +64,9 @@ jobs:
             tests\test_l3_er5_desktop_sidecar_security.py `
             tests\test_l3_er3_ladybug_projection.py `
             tests\test_l3_er3_graph_query_parity.py `
-            tests\test_l3_er4_single_backend_runtime.py
+            tests\test_l3_er4_single_backend_runtime.py `
+            tests\test_l3_5_world_package_ui_contract.py `
+            tests\test_l3_5_world_package_closeout_contract.py
           Pop-Location
           backend\.venv\Scripts\python.exe scripts\ci\check_desktop_installer_contract.py
           backend\.venv\Scripts\python.exe scripts\ci\check_er6_desktop_supply_chain.py `

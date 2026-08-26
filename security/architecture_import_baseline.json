@@ -1,7 +1,7 @@
 {
   "edge_count": 1150,
-  "external_import_count": 1700,
-  "module_count": 497,
+  "external_import_count": 1708,
+  "module_count": 498,
   "modules": [
     {
       "external_imports": [],
@@ -3560,6 +3560,22 @@
       ],
       "module": "app.domains.world_packages.application.commit_world_package",
       "path": "backend/app/domains/world_packages/application/commit_world_package.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "io",
+        "json",
+        "pathlib",
+        "re",
+        "typing",
+        "zipfile"
+      ],
+      "imports": [],
+      "module": "app.domains.world_packages.application.exclusion_scan",
+      "path": "backend/app/domains/world_packages/application/exclusion_scan.py",
       "wildcard_imports": []
     },
     {
