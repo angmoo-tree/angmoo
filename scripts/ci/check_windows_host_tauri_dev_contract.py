@@ -144,6 +144,15 @@ def check_repo(*, root: Path = ROOT) -> list[str]:
         errors.append("installed product bootstrap must remain available")
 
     for marker in (
+        "Get-AngmooHostArchitecture",
+        "GetProperty('OSArchitecture')",
+        "PROCESSOR_ARCHITEW6432",
+        "PROCESSOR_ARCHITECTURE",
+        "return 'unknown'",
+    ):
+        if marker not in preflight:
+            errors.append(f"preflight architecture fallback missing: {marker}")
+    for marker in (
         "unsupported_windows_build",
         "partial-or-unhealthy",
         "docker_stack_state_unknown",
