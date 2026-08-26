@@ -393,7 +393,7 @@ jobs:
           if ($payloadIdentity.schema_version -ne 2) {
             throw 'Installed payload manifest did not use build identity schema 2'
           }
-          if ($payloadIdentity.build_commit -ne '${{ github.sha }}') {
+          if ($payloadIdentity.build_commit -ne $env:GITHUB_SHA) {
             throw "Installed payload build commit mismatch: $($payloadIdentity.build_commit)"
           }
           if ([string]$payloadIdentity.payload_generation -notmatch '^[0-9a-f]{64}$') {
