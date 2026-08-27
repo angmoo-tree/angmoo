@@ -84,6 +84,21 @@ or `features/social -> lib` imports fail CI, stale exceptions fail CI, route
 and composition imports must use `features/social/public.ts`, and no Tauri-only
 social UI fork is permitted.
 
+L4 PR C moves the World Feed composer/thread UI, its owner-write DTOs and its
+typed write client under `features/social`. `features/world-app` now composes
+that feature only through `features/social/public.ts`; it no longer owns a
+second social client or the post/reply UI. The general Feed DTO and the list,
+following, delete and report calls also moved out of `lib/community`, removing
+the three PR-C-owned legacy import exceptions while leaving the unrelated
+presentation edges for PR F.
+
+The World Feed keeps a pending idempotency key across a retryable SQLite busy
+response. An unchanged post or reply is retried with the same key and cannot
+be duplicated; editing the payload creates a new logical request. The typed
+`sqlite_busy_retry_exhausted` state tells the user that another activity is
+being saved and that the same request can be retried. Browser, static/Tauri and
+Windows Host Tauri dev all use this one feature implementation.
+
 The optional PWA shell is implemented as a standards-based manifest plus a
 cache-free service worker lifecycle. It only changes the browser chrome:
 

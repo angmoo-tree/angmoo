@@ -48,6 +48,29 @@ frontend candidate consumer edges, seven feature public surfaces, and 89
 focused parity nodes. The PR A SHA remains the historical entry baseline; these
 current counts are intentionally regenerated with the ownership move.
 
+## PR C reviewed behavior delta
+
+PR C moves owner manual post/reply writes and validated autonomous-result
+apply behind `app.domains.social.public`. A real file-backed SQLite regression
+uses two sessions, two threads and a barrier: under normal short contention the
+owner and autonomous writes both commit exactly once. A forced long
+`BEGIN IMMEDIATE` lock instead returns `sqlite_busy_retry_exhausted`, commits no
+partial source/event/evidence/Inbox/ledger rows, and the same request succeeds
+once after the lock is released.
+
+Failure injection after the source post, event, evidence and Inbox candidate
+also proves rollback of the whole caller-owned UoW. The source event is
+`audit_only`; `RelationshipState` and graph outbox counts remain zero until the
+separate PR D observation transaction. The autonomous fixture calls the
+production apply use case with a deterministic validated result and performs
+zero provider calls, so this PR does not claim scheduler, observation or
+follow-up user-scenario completion.
+
+On the frontend the World Feed composer and thread move from `world-app` to
+`features/social`, and the PR-C-owned `lib/community` DTO/client exceptions are
+removed. The generated inventory and exact consumer-edge count are regenerated
+with this reviewed ownership reduction.
+
 ## Runtime and upgrade baseline
 
 The supported SQLite chain is consecutive and copy-on-write:

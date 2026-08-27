@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 1746,
-      "internal_edge_count": 1194,
+      "external_import_count": 1760,
+      "internal_edge_count": 1208,
       "legacy_import_exception_count": 0,
-      "module_count": 514,
+      "module_count": 518,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -20,6 +20,7 @@
               "app.core.db",
               "app.domains.manual_social.api.schemas",
               "app.domains.manual_social.public",
+              "app.domains.social.public",
               "app.domains.world_characters.public"
             ],
             "module": "app.domains.manual_social.api.routes",
@@ -51,7 +52,8 @@
             "imports": [
               "app.compatibility.manual_social.inbox",
               "app.compatibility.manual_social.legacy",
-              "app.domains.manual_social.domain.inbox"
+              "app.domains.manual_social.domain.inbox",
+              "app.domains.social.public"
             ],
             "module": "app.domains.manual_social.public",
             "path": "backend/app/domains/manual_social/public.py"
@@ -167,7 +169,8 @@
           {
             "imports": [
               "app.domains.social.application.keyword_feed",
-              "app.domains.social.application.search_runtime"
+              "app.domains.social.application.search_runtime",
+              "app.domains.social.application.writes"
             ],
             "module": "app.domains.social.application",
             "path": "backend/app/domains/social/application/__init__.py"
@@ -190,7 +193,16 @@
           },
           {
             "imports": [
-              "app.domains.social.domain.search_state"
+              "app.domains.social.domain.writes",
+              "app.domains.social.ports.write_unit_of_work"
+            ],
+            "module": "app.domains.social.application.writes",
+            "path": "backend/app/domains/social/application/writes.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.domain.search_state",
+              "app.domains.social.domain.writes"
             ],
             "module": "app.domains.social.domain",
             "path": "backend/app/domains/social/domain/__init__.py"
@@ -201,8 +213,29 @@
             "path": "backend/app/domains/social/domain/search_state.py"
           },
           {
+            "imports": [],
+            "module": "app.domains.social.domain.writes",
+            "path": "backend/app/domains/social/domain/writes.py"
+          },
+          {
             "imports": [
-              "app.domains.social.ports.search_index"
+              "app.core.ids",
+              "app.core.unit_of_work",
+              "app.domains.manual_social.infrastructure.sqlalchemy_models",
+              "app.domains.social.domain.writes",
+              "app.domains.world_characters.public",
+              "app.models",
+              "app.runtime.persistence.sqlite_concurrency",
+              "app.schemas.community",
+              "app.services.community"
+            ],
+            "module": "app.domains.social.infrastructure.sqlalchemy_write_unit_of_work",
+            "path": "backend/app/domains/social/infrastructure/sqlalchemy_write_unit_of_work.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.ports.search_index",
+              "app.domains.social.ports.write_unit_of_work"
             ],
             "module": "app.domains.social.ports",
             "path": "backend/app/domains/social/ports/__init__.py"
@@ -216,8 +249,16 @@
           },
           {
             "imports": [
+              "app.domains.social.domain.writes"
+            ],
+            "module": "app.domains.social.ports.write_unit_of_work",
+            "path": "backend/app/domains/social/ports/write_unit_of_work.py"
+          },
+          {
+            "imports": [
               "app.domains.social.application",
               "app.domains.social.domain",
+              "app.domains.social.infrastructure.sqlalchemy_write_unit_of_work",
               "app.domains.social.ports"
             ],
             "module": "app.domains.social.public",
@@ -276,14 +317,10 @@
           },
           {
             "imports": [
-              "app.core.ids",
-              "app.core.unit_of_work",
               "app.domains.manual_social.api.schemas",
-              "app.domains.manual_social.infrastructure.sqlalchemy_models",
+              "app.domains.social.domain",
               "app.domains.world_characters.public",
-              "app.models",
-              "app.schemas.community",
-              "app.services.community"
+              "app.models"
             ],
             "module": "app.compatibility.manual_social.legacy",
             "path": "backend/app/compatibility/manual_social/legacy.py"
@@ -428,7 +465,7 @@
       "policy_allowed_cycle_count": 0
     },
     "frontend": {
-      "candidate_consumer_edge_count": 36,
+      "candidate_consumer_edge_count": 33,
       "candidate_consumers": {
         "frontend/src/app/api/community/characters/[characterId]/activity/route.ts": [],
         "frontend/src/app/api/community/posts/[postId]/comments/route.ts": [],
@@ -445,7 +482,7 @@
           "frontend/src/composition/static-product-router.tsx"
         ],
         "frontend/src/features/social/ui/post-list-client.tsx": [],
-        "frontend/src/features/world-app/ui/world-manual-feed.tsx": [],
+        "frontend/src/features/social/ui/world-social-feed.tsx": [],
         "frontend/src/lib/community.ts": [
           "frontend/src/app/characters/[characterId]/activity/page.tsx",
           "frontend/src/app/posts/[postId]/page.tsx",
@@ -474,9 +511,6 @@
           "frontend/src/components/tree-post-detail-client.tsx",
           "frontend/src/components/user-profile-client.tsx",
           "frontend/src/composition/static-product-router.tsx",
-          "frontend/src/features/social/api/social-feed-client.ts",
-          "frontend/src/features/social/model/social-feed-contract.ts",
-          "frontend/src/features/social/ui/post-list-client.tsx",
           "frontend/src/lib/agents.ts"
         ],
         "frontend/src/lib/relationship-graph.ts": [
@@ -587,13 +621,14 @@
             "PostListClient"
           ],
           "imports": [
+            "../api/social-feed-client",
+            "../model/social-feed-contract",
             "@/components/active-agent-card",
             "@/components/expandable-post-text",
             "@/components/mentioned-text",
             "@/components/post-media-grid",
             "@/components/profile-avatar",
             "@/lib/agents",
-            "@/lib/community",
             "@/lib/post-card-navigation",
             "@/lib/profile",
             "@/lib/use-mobile-pull-to-refresh",
@@ -605,21 +640,22 @@
             "react-dom"
           ],
           "path": "frontend/src/features/social/ui/post-list-client.tsx",
-          "sha256": "6021fc12c53504708c734b535e53d2da7696139ef2867c756a4ab0164d28dbc7"
+          "sha256": "05587f8e8035cfa1632e515a05bbaa0db5a93775dc822c3f8505a54535f01835"
         },
         {
           "exports": [
-            "WorldManualFeed"
+            "WorldSocialFeed"
           ],
           "imports": [
-            "../api/world-app-client",
-            "./world-app.module.css",
+            "../api/social-write-client",
+            "../model/social-write-contract",
+            "./world-social-feed.module.css",
             "@/shared/navigation/public",
             "next/link",
             "react"
           ],
-          "path": "frontend/src/features/world-app/ui/world-manual-feed.tsx",
-          "sha256": "c46e43b393eb718f23d058222d8848ede80edaf3fba4c97c23793d285bbbe800"
+          "path": "frontend/src/features/social/ui/world-social-feed.tsx",
+          "sha256": "61eef90e66647d17afa9b50d2d63681748364b4d8aabfee13282cb8f77a4d0af"
         },
         {
           "exports": [
@@ -814,7 +850,7 @@
       },
       {
         "path": "backend/tests/test_l3_owner_manual_social_inbox.py",
-        "sha256": "26efe77a687dced44618c3c27b1679f24c30260bbb81edc1a49d7143cee5ae0d"
+        "sha256": "ef7453a9f73347425993fcc276240e58d388a8ff8f18847bb59a04167619380c"
       },
       {
         "path": "backend/tests/test_l4_social_search_projection.py",

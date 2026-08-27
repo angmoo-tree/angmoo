@@ -8,10 +8,18 @@ from app.domains.social.application.search_runtime import (
     register_social_search,
     unregister_social_search,
 )
+from app.domains.social.application.writes import (
+    apply_validated_autonomous_result,
+    create_owner_post,
+    create_owner_reply,
+)
 
 __all__ = [
     "KeywordPostLookup",
     "SocialSearchBinding",
+    "apply_validated_autonomous_result",
+    "create_owner_post",
+    "create_owner_reply",
     "current_social_search",
     "find_keyword_post_ids",
     "register_social_search",

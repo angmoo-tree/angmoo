@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import asyncio
+import os
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from hashlib import sha256
-import os
 from threading import Barrier
 from types import SimpleNamespace
 from zoneinfo import ZoneInfo
@@ -19,15 +19,17 @@ from app import models, schemas
 from app.core.db import Base
 from app.cruds import agents as agent_crud
 from app.domains.manual_social.api.schemas import OwnerManualReplyWrite
-from app.domains.manual_social.public import (
-    create_owner_reply,
-)
+from app.domains.social.public import create_owner_reply
 from app.providers.gemini import build_generate_content_config
-from app.services import activity_state_contracts, daily_activity_plans
+from app.services import (
+    activity_state_contracts,
+    daily_activity_plans,
+    langgraph_resident,
+    routine_post_runtime,
+    world_character_contracts,
+)
 from app.services import agents as agent_service
 from app.services import community as community_service
-from app.services import langgraph_resident, routine_post_runtime
-from app.services import world_character_contracts
 from app.services.agent_activity_policy import ActivityPolicy
 from app.services.direct_llm import DirectLlmCallContext, DirectLlmError
 from app.services.resident_contracts import LangGraphResidentContext
@@ -42,7 +44,6 @@ from app.services.routine_post_planner import (
     allowed_continuity_facts,
     build_routine_beat_plan_response_schema,
 )
-
 
 DAYPARTS = ("dawn", "morning", "afternoon", "evening")
 
@@ -119,8 +120,9 @@ def test_routine_planner_schema_binds_continuation_to_server_evidence() -> None:
     assert properties["used_source_event_ids"]["items"]["enum"] == event_ids
     assert properties["used_detail_keys"]["items"]["enum"] == detail_keys
     assert (
-        properties["source_event_effects"]["items"]["properties"]
-        ["source_event_id"]["enum"]
+        properties["source_event_effects"]["items"]["properties"]["source_event_id"][
+            "enum"
+        ]
         == event_ids
     )
 
@@ -473,7 +475,7 @@ def _seed(db: Session, *, autonomous_enabled: bool = True) -> RoutineFixture:
                 ),
                 social_mode="open_to_interaction",
                 canonical_signature=sha256(
-                    f"{daypart}:{candidate_ordinal}".encode("utf-8")
+                    f"{daypart}:{candidate_ordinal}".encode()
                 ).hexdigest(),
                 enabled=True,
             )
@@ -714,7 +716,9 @@ def test_context_bounds_events_and_excludes_cross_world_input() -> None:
         assert "cross-world" not in context.considered_source_event_ids
 
 
-def test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once() -> None:
+def test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once() -> (
+    None
+):
     engine = _engine()
     first_now = _utc(datetime(2026, 8, 10, 10, 5))
     second_now = _utc(datetime(2026, 8, 10, 11, 5))
@@ -832,12 +836,8 @@ def test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_on
             and event.target_world_character_id is None
             for event in post_events
         )
-        assert (
-            db.scalar(select(func.count(models.SocialEventEvidence.id))) == 2
-        )
-        assert (
-            db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 2
-        )
+        assert db.scalar(select(func.count(models.SocialEventEvidence.id))) == 2
+        assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 2
         assert beats[1].source_post_id == posts[1].id
         assert beats[1].result_snapshot["used_source_event_ids"] == ["event-reply-1"]
         assert consumption is not None
@@ -874,7 +874,9 @@ def test_owner_manual_reply_is_observed_once_on_next_allowed_beat() -> None:
         provider = FakeRoutineProvider()
         first = asyncio.run(
             routine_post_runtime.run_routine_post_runtime(
-                _resident_context(db, fixture, run_id="manual-inbox-first", now=first_now),
+                _resident_context(
+                    db, fixture, run_id="manual-inbox-first", now=first_now
+                ),
                 provider=provider,
             )
         )
@@ -891,7 +893,9 @@ def test_owner_manual_reply_is_observed_once_on_next_allowed_beat() -> None:
                 claimed_at=first_now,
             )
         )
-        membership = db.get(models.WorldMembership, fixture.world_character.membership_id)
+        membership = db.get(
+            models.WorldMembership, fixture.world_character.membership_id
+        )
         assert membership is not None
         membership.role = "owner"
 
@@ -965,7 +969,9 @@ def test_owner_manual_reply_is_observed_once_on_next_allowed_beat() -> None:
 
         second = asyncio.run(
             routine_post_runtime.run_routine_post_runtime(
-                _resident_context(db, fixture, run_id="manual-inbox-second", now=second_now),
+                _resident_context(
+                    db, fixture, run_id="manual-inbox-second", now=second_now
+                ),
                 provider=provider,
             )
         )
@@ -1033,24 +1039,24 @@ def test_runtime_closes_elapsed_episode_before_activating_current_daypart() -> N
                 _resident_context(
                     db,
                     fixture,
-                    run_id='run-morning-before-pause',
+                    run_id="run-morning-before-pause",
                     now=morning_now,
                 ),
                 provider=provider,
             )
         )
-        morning_post_id = first['publish_result']['post_id']
-        morning_item = db.get(models.DailyActivityPlanItem, 'item-morning')
-        assert first['routine_outcome'] == 'POST_SUCCEEDED'
-        assert morning_item is not None and morning_item.status == 'active'
-        assert fixture.morning_episode.status == 'active'
+        morning_post_id = first["publish_result"]["post_id"]
+        morning_item = db.get(models.DailyActivityPlanItem, "item-morning")
+        assert first["routine_outcome"] == "POST_SUCCEEDED"
+        assert morning_item is not None and morning_item.status == "active"
+        assert fixture.morning_episode.status == "active"
 
         second = asyncio.run(
             routine_post_runtime.run_routine_post_runtime(
                 _resident_context(
                     db,
                     fixture,
-                    run_id='run-afternoon-after-resume',
+                    run_id="run-afternoon-after-resume",
                     now=afternoon_now,
                 ),
                 provider=provider,
@@ -1059,32 +1065,35 @@ def test_runtime_closes_elapsed_episode_before_activating_current_daypart() -> N
 
         db.refresh(fixture.morning_episode)
         db.refresh(morning_item)
-        dawn_item = db.get(models.DailyActivityPlanItem, 'item-dawn')
-        dawn_episode = db.get(models.ActivityEpisode, 'episode-dawn')
-        afternoon_item = db.get(models.DailyActivityPlanItem, 'item-afternoon')
-        afternoon_episode = db.get(models.ActivityEpisode, 'episode-afternoon')
+        dawn_item = db.get(models.DailyActivityPlanItem, "item-dawn")
+        dawn_episode = db.get(models.ActivityEpisode, "episode-dawn")
+        afternoon_item = db.get(models.DailyActivityPlanItem, "item-afternoon")
+        afternoon_episode = db.get(models.ActivityEpisode, "episode-afternoon")
 
-        assert second['routine_outcome'] == 'POST_SUCCEEDED'
-        assert morning_item.status == 'completed'
-        assert morning_item.terminal_reason_code == 'daypart_completed'
-        assert fixture.morning_episode.status == 'completed'
-        assert fixture.morning_episode.terminal_reason_code == 'daypart_completed'
+        assert second["routine_outcome"] == "POST_SUCCEEDED"
+        assert morning_item.status == "completed"
+        assert morning_item.terminal_reason_code == "daypart_completed"
+        assert fixture.morning_episode.status == "completed"
+        assert fixture.morning_episode.terminal_reason_code == "daypart_completed"
         assert fixture.morning_episode.completion_summary == {
-            'successful_beat_count': 1,
-            'successful_post_ids': [morning_post_id],
+            "successful_beat_count": 1,
+            "successful_post_ids": [morning_post_id],
         }
-        assert dawn_item is not None and dawn_item.status == 'skipped'
-        assert dawn_item.terminal_reason_code == 'daypart_window_elapsed'
-        assert dawn_episode is not None and dawn_episode.status == 'cancelled'
-        assert afternoon_item is not None and afternoon_item.status == 'active'
-        assert afternoon_episode is not None and afternoon_episode.status == 'active'
+        assert dawn_item is not None and dawn_item.status == "skipped"
+        assert dawn_item.terminal_reason_code == "daypart_window_elapsed"
+        assert dawn_episode is not None and dawn_episode.status == "cancelled"
+        assert afternoon_item is not None and afternoon_item.status == "active"
+        assert afternoon_episode is not None and afternoon_episode.status == "active"
         assert provider.calls == 2
         assert db.scalar(select(func.count(models.Post.id))) == 2
-        assert db.scalar(
-            select(func.count(models.ActivityBeat.id)).where(
-                models.ActivityBeat.episode_id == 'episode-dawn'
+        assert (
+            db.scalar(
+                select(func.count(models.ActivityBeat.id)).where(
+                    models.ActivityBeat.episode_id == "episode-dawn"
+                )
             )
-        ) == 0
+            == 0
+        )
 
 
 def test_transient_provider_failure_retries_same_beat_without_duplicate_post() -> None:
@@ -1208,7 +1217,9 @@ def test_runtime_mode_readiness_does_not_enable_autonomy() -> None:
         assert fixture.world_character.autonomous_enabled is False
 
 
-def test_langgraph_routes_routine_mode_without_building_legacy_graph(monkeypatch) -> None:
+def test_langgraph_routes_routine_mode_without_building_legacy_graph(
+    monkeypatch,
+) -> None:
     context = SimpleNamespace(
         db=object(),
         character=SimpleNamespace(id="character-routine"),
@@ -1225,16 +1236,16 @@ def test_langgraph_routes_routine_mode_without_building_legacy_graph(monkeypatch
     def legacy_graph_must_not_run(*_args, **_kwargs):
         raise AssertionError("legacy graph must not run for routine mode")
 
-    monkeypatch.setattr(
-        langgraph_resident, "run_routine_post_runtime", fake_routine
-    )
+    monkeypatch.setattr(langgraph_resident, "run_routine_post_runtime", fake_routine)
     monkeypatch.setattr(langgraph_resident, "_build_graph", legacy_graph_must_not_run)
 
     result = asyncio.run(langgraph_resident.run_resident_langgraph(context))
     assert result == {"engine": "routine_resident_v1", "status": "completed"}
 
 
-def test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode(monkeypatch) -> None:
+def test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode(
+    monkeypatch,
+) -> None:
     context = SimpleNamespace(
         db=object(),
         character=SimpleNamespace(id="character-keyword-feed"),
@@ -1281,12 +1292,8 @@ def test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode(monkeypatch
             "llm_usage_summary": {"provider_call_count": 0},
         }
 
-    monkeypatch.setattr(
-        langgraph_resident, "run_routine_post_runtime", fake_routine
-    )
-    monkeypatch.setattr(
-        langgraph_resident, "_run_combined_inbox_lane", fake_inbox
-    )
+    monkeypatch.setattr(langgraph_resident, "run_routine_post_runtime", fake_routine)
+    monkeypatch.setattr(langgraph_resident, "_run_combined_inbox_lane", fake_inbox)
     monkeypatch.setattr(langgraph_resident, "run_world_keyword_feed", fake_feed)
 
     result = asyncio.run(langgraph_resident.run_resident_langgraph(context))
@@ -1318,9 +1325,7 @@ def test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run(
         character=SimpleNamespace(id="character-inbox-no-action"),
         run_id="run-inbox-no-action",
     )
-    monkeypatch.setattr(
-        langgraph_resident, "_current_daypart_context", lambda _ctx: {}
-    )
+    monkeypatch.setattr(langgraph_resident, "_current_daypart_context", lambda _ctx: {})
     monkeypatch.setattr(
         langgraph_resident, "_inbox_lane_relationship_memory", lambda _ctx: {}
     )
@@ -1375,9 +1380,7 @@ def test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run(
         ),
     )
 
-    no_action = asyncio.run(
-        langgraph_resident._run_combined_inbox_lane(context)
-    )
+    no_action = asyncio.run(langgraph_resident._run_combined_inbox_lane(context))
 
     assert no_action["outcome"] == "LLM_DECIDED_NO_ACTION"
     assert no_action["planner_invoked"] is True
@@ -1402,9 +1405,7 @@ def test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run(
         "_build_graph",
         lambda _ctx, _tracker: NotRunGraph(),
     )
-    not_run = asyncio.run(
-        langgraph_resident._run_combined_inbox_lane(context)
-    )
+    not_run = asyncio.run(langgraph_resident._run_combined_inbox_lane(context))
 
     assert not_run["outcome"] == "INBOX_NOT_RUN"
     assert not_run["planner_invoked"] is False

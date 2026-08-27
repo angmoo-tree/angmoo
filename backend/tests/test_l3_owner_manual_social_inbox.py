@@ -1,16 +1,16 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
 import importlib.util
-from pathlib import Path
 import sys
+from datetime import UTC, datetime
+from pathlib import Path
 
+import pytest
 from fastapi import FastAPI, HTTPException, status
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
-import pytest
 
 from app import models
 from app.api.v1.deps import get_current_user
@@ -18,7 +18,6 @@ from app.core.db import Base, get_db
 from app.domains.manual_social.api.routes import router as manual_social_router
 from app.domains.world_characters.api.routes import router as owner_identity_router
 from app.services import world_character_contracts
-
 
 FRONTEND_HEADERS = {"Origin": "http://127.0.0.1:3000"}
 MIGRATION_PATH = (
@@ -282,7 +281,18 @@ def test_owner_manual_post_and_reply_are_idempotent_and_provider_free() -> None:
         candidate = db.scalar(select(models.OwnerManualInboxCandidate))
         assert candidate is not None and candidate.status == "pending"
         assert db.scalar(select(func.count(models.AgentRun.id))) == 0
-        assert db.scalar(select(func.count(models.SocialEvent.id))) == 0
+        assert db.scalar(select(func.count(models.SocialEvent.id))) == 2
+        assert db.scalar(select(func.count(models.SocialEventEvidence.id))) == 2
+        source_events = list(
+            db.scalars(
+                select(models.SocialEvent).order_by(models.SocialEvent.created_at)
+            )
+        )
+        assert [event.event_type for event in source_events] == [
+            "post_published",
+            "reply_created",
+        ]
+        assert all(event.retrieval_status == "audit_only" for event in source_events)
         assert db.scalar(select(func.count(models.RelationshipState.id))) == 0
         assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 0
 

@@ -12,6 +12,7 @@ import {
 import { useEffect, useState, type ReactNode } from "react";
 
 import type { WorldSurfaceItem } from "@/features/device-home/public";
+import { WorldSocialFeed } from "@/features/social/public";
 import {
   PRODUCT_ROUTES,
   relationshipGraphRoute,
@@ -30,7 +31,6 @@ import {
   type WorldAppSectionId,
 } from "../model/world-app-contract";
 import { WorldAppShell } from "./world-app-shell";
-import { WorldManualFeed } from "./world-manual-feed";
 import styles from "./world-app.module.css";
 
 
@@ -209,7 +209,7 @@ function WorldSection({
   }
 
   if (activeSection.id === "feed") {
-    return <WorldManualFeed ownerActor={ownerActor} postId={postId} worldId={worldId} />;
+    return <WorldSocialFeed ownerActor={ownerActor} postId={postId} worldId={worldId} />;
   }
 
   if (activeSection.id === "relationships") {

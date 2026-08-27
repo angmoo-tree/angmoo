@@ -456,6 +456,31 @@ one exact `app.runtime.search.social_projection -> app.models` adapter edge is
 recorded in the architecture policy. It is runtime-owned, has a dated removal
 condition, and must not expand into another service/model/CRUD dependency.
 
+### L4 PR C canonical social source writes
+
+`app.domains.social.public` now owns the owner manual post/reply application
+boundary and the apply boundary for an already validated autonomous post or
+reply result. Both paths enter the same SQLite adapter and acquire the single
+writer with `BEGIN IMMEDIATE`; no provider or LLM call is allowed inside that
+transaction.
+
+One caller-owned transaction contains the source `Post`, its audit-only
+`SocialEvent`, one `SocialEventEvidence` row, the idempotency ledger and, for an
+owner reply to an autonomous actor, the pending Inbox candidate. A failure at
+any stage rolls all of them back. A bounded lock exhaustion is exposed as the
+typed retryable reason `sqlite_busy_retry_exhausted`; retrying the same request
+identifier can therefore complete exactly once after the lock is released.
+
+This is source transaction T1 only. A successful post/reply does not update
+`RelationshipState` and does not enqueue a graph projection. PR D owns the
+later observation transaction that may create a directional relationship
+delta and outbox evidence after the target actor actually observes the source.
+
+`app.compatibility.manual_social.legacy` has consequently become a read-only
+feed/thread facade. Its former write implementation and commits were removed;
+the manual Inbox runtime remains as an explicitly owned compatibility surface
+until PR D moves observation ownership.
+
 ## Contributor workflow
 
 Before adding a backend feature:

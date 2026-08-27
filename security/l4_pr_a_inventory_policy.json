@@ -82,7 +82,7 @@
       "frontend/src/components/post-detail-client.tsx",
       "frontend/src/components/relationship-graph-client.tsx",
       "frontend/src/features/social/ui/post-list-client.tsx",
-      "frontend/src/features/world-app/ui/world-manual-feed.tsx",
+      "frontend/src/features/social/ui/world-social-feed.tsx",
       "frontend/src/lib/community.ts",
       "frontend/src/lib/relationship-graph.ts"
     ],
@@ -99,9 +99,10 @@
         "relationship_query_failed",
         "rebuilding"
       ],
-      "frontend/src/features/world-app/ui/world-manual-feed.tsx": [
+      "frontend/src/features/social/ui/world-social-feed.tsx": [
         "post_not_in_world",
-        "reply_target_unavailable"
+        "reply_target_unavailable",
+        "sqlite_busy_retry_exhausted"
       ],
       "frontend/src/lib/community.ts": [
         "getPostThread",
