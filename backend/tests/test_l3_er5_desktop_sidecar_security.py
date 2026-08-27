@@ -112,6 +112,83 @@ def test_desktop_loopback_accepts_exact_token_and_strict_cors() -> None:
     ).json() == {"authenticated": True}
 
 
+@pytest.mark.parametrize(
+    ("method", "capability_headers"),
+    [
+        (
+            "GET",
+            "x-angmoo-launcher-token, x-world-package-download-token, "
+            "x-world-package-delivery-mode",
+        ),
+        (
+            "POST",
+            "content-type, x-angmoo-launcher-token, "
+            "x-world-package-download-token",
+        ),
+        (
+            "DELETE",
+            "x-angmoo-launcher-token, x-world-package-download-token",
+        ),
+        (
+            "POST",
+            "content-type, idempotency-key, x-angmoo-launcher-token, "
+            "x-world-package-preview-token",
+        ),
+        (
+            "DELETE",
+            "x-angmoo-launcher-token, x-world-package-preview-token",
+        ),
+    ],
+)
+def test_desktop_loopback_allows_exact_world_package_capability_preflights(
+    method: str,
+    capability_headers: str,
+) -> None:
+    response = _client().options(
+        "/mutation",
+        headers={
+            "Origin": ORIGIN,
+            "Access-Control-Request-Method": method,
+            "Access-Control-Request-Headers": capability_headers,
+        },
+    )
+
+    assert response.status_code == 204
+    allowed_headers = {
+        item.strip().lower()
+        for item in response.headers["access-control-allow-headers"].split(",")
+    }
+    assert {
+        item.strip().lower() for item in capability_headers.split(",")
+    } <= allowed_headers
+    assert response.headers["access-control-allow-origin"] == ORIGIN
+
+
+def test_desktop_loopback_world_package_preflight_stays_fail_closed() -> None:
+    client = _client()
+    wildcard = client.options(
+        "/mutation",
+        headers={
+            "Origin": ORIGIN,
+            "Access-Control-Request-Method": "DELETE",
+            "Access-Control-Request-Headers": "*",
+        },
+    )
+    query_token_substitute = client.options(
+        "/mutation?preview_token=unsafe",
+        headers={
+            "Origin": ORIGIN,
+            "Access-Control-Request-Method": "DELETE",
+            "Access-Control-Request-Headers": "x-untrusted-capability-token",
+        },
+    )
+
+    assert wildcard.status_code == 403
+    assert wildcard.json() == {"detail": "desktop_headers_invalid"}
+    assert query_token_substitute.status_code == 403
+    assert query_token_substitute.json() == {"detail": "desktop_headers_invalid"}
+
+
 def test_desktop_origin_is_allowed_only_with_process_launch_token() -> None:
     config = Settings(
         APP_ENV="production",

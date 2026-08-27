@@ -18,6 +18,9 @@ _ALLOWED_REQUEST_HEADERS = (
     "idempotency-key",
     LAUNCH_TOKEN_HEADER,
     "x-angmoo-frontend-origin",
+    "x-world-package-download-token",
+    "x-world-package-preview-token",
+    "x-world-package-delivery-mode",
 )
 _ALLOWED_METHODS = "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS"
 
