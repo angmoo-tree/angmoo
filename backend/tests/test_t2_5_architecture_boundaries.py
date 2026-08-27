@@ -117,7 +117,7 @@ def test_valid_domain_public_dependency_passes() -> None:
     assert checker.check_inventory(inventory, _policy()) == []
 
 
-def test_relationship_graph_cleanup_removes_usage_zero_compatibility_modules() -> None:
+def test_relationship_graph_cleanup_removes_horizontal_compatibility_modules() -> None:
     inventory = json.loads(
         (REPO_ROOT / "security/architecture_import_baseline.json").read_text(
             encoding="utf-8"
@@ -127,8 +127,26 @@ def test_relationship_graph_cleanup_removes_usage_zero_compatibility_modules() -
 
     assert "app.schemas.relationship_graph" not in modules
     assert "app.repositories.relationship_graph" not in modules
-    assert "app.services.relationship_graph_read" in modules
+    assert "app.services.relationship_graph_read" not in modules
+    assert "app.services.graph_projection_worker" not in modules
+    assert "app.services.graph_projection_replay" not in modules
+    assert "app.services.social_event_runtime" not in modules
+    assert "app.services.social_memory_read" not in modules
+    assert "app.cruds.graph_projection" not in modules
+    assert "app.cruds.social_memory" not in modules
+    assert "app.models.graph_projection" not in modules
+    assert "app.models.social_memory" not in modules
     assert "app.domains.relationships.public" in modules
+    assert (
+        "app.runtime.graph_projection.relationship_graph_read" in modules
+    )
+    assert "app.runtime.graph_projection.worker" in modules
+    assert "app.runtime.graph_projection.replay" in modules
+    assert "app.runtime.relationships.sqlalchemy_social_event" in modules
+    assert (
+        "app.domains.relationships.infrastructure.sqlalchemy_social_models"
+        in modules
+    )
 
 
 def test_cross_domain_deep_import_fails_with_actionable_message() -> None:

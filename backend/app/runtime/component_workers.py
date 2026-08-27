@@ -11,13 +11,13 @@ from app.core.db import SessionLocal
 from app.domains.relationships.ports.projection import (
     RelationshipProjectionBackendError,
 )
-from app.services.graph_projection_runtime import (
+from app.runtime.graph_projection.process_client import (
     borrow_process_graph_client,
     graph_client_from_settings,
     register_process_graph_client,
     unregister_process_graph_client,
 )
-from app.services.graph_projection_worker import GraphProjectionWorker
+from app.runtime.graph_projection.worker import GraphProjectionWorker
 from app.services.resident_tick_scheduler import run_resident_tick_scheduler
 
 

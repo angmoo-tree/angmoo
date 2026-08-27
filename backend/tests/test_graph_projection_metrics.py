@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from app.services.graph_projection_metrics import GraphMetricRegistry
+from app.runtime.graph_projection.metrics import GraphMetricRegistry
 
 
 def test_graph_metrics_keep_only_declared_low_cardinality_labels() -> None:

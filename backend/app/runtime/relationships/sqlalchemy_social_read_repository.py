@@ -1,3 +1,5 @@
+"""Runtime SQLAlchemy read adapter for canonical social-memory diagnostics."""
+
 from __future__ import annotations
 
 from sqlalchemy import func, or_, select

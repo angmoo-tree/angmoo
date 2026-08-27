@@ -18,7 +18,7 @@ from app.runtime.graph_projection.sqlalchemy_outbox import (
     SessionFactory,
     SqlAlchemyProjectionOutbox,
 )
-from app.services.graph_projection_metrics import graph_metrics
+from app.runtime.graph_projection.metrics import graph_metrics
 
 
 logger = logging.getLogger(__name__)

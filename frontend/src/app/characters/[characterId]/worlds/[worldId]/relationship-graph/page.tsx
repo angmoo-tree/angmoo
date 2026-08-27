@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { AppShell } from "@/components/app-shell";
-import { RelationshipGraphClient } from "@/components/relationship-graph-client";
+import { RelationshipGraphClient } from "@/features/relationships/public";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 
 type PageProps = {

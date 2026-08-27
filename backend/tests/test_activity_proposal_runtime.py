@@ -8,10 +8,12 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app import models, schemas
+from app.runtime.relationships import (
+    sqlalchemy_social_event as social_event_runtime,
+)
 from app.services import (
     activity_proposal_runtime,
     joint_activity_runtime,
-    social_event_runtime,
 )
 from test_daily_activity_runtime import _engine, _prepare, _seed, _utc
 

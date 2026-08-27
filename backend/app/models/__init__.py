@@ -82,8 +82,10 @@ from app.models.world_feed import (
     WorldCharacterFeedCursor,
     WorldCharacterFeedObservation,
 )
-from app.models.graph_projection import GraphProjectionReplayRun
-from app.models.social_memory import (
+from app.domains.relationships.infrastructure.sqlalchemy_models import (
+    GraphProjectionReplayRun,
+)
+from app.domains.relationships.infrastructure.sqlalchemy_social_models import (
     ActivityProposal,
     GraphProjectionOutbox,
     RelationshipState,

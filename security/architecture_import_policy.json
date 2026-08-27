@@ -169,14 +169,6 @@
           "importer": "app.api.v1.routes.world_activity_runtime"
         },
         {
-          "imported": "app.services.relationship_graph_read",
-          "importer": "app.api.v1.routes.world_activity_runtime"
-        },
-        {
-          "imported": "app.services.social_memory_read",
-          "importer": "app.api.v1.routes.world_activity_runtime"
-        },
-        {
           "imported": "app.models",
           "importer": "app.api.v1.routes.world_character_setup"
         },
@@ -219,14 +211,6 @@
         {
           "imported": "app.schemas",
           "importer": "app.cruds.community"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.cruds.graph_projection"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.cruds.social_memory"
         },
         {
           "imported": "app.models",
@@ -277,10 +261,6 @@
           "importer": "app.models"
         },
         {
-          "imported": "app.models.graph_projection",
-          "importer": "app.models"
-        },
-        {
           "imported": "app.models.local_bot_quotas",
           "importer": "app.models"
         },
@@ -290,10 +270,6 @@
         },
         {
           "imported": "app.models.profile_images",
-          "importer": "app.models"
-        },
-        {
-          "imported": "app.models.social_memory",
           "importer": "app.models"
         },
         {
@@ -315,10 +291,6 @@
         {
           "imported": "app.models.worlds",
           "importer": "app.models"
-        },
-        {
-          "imported": "app.models.worlds",
-          "importer": "app.models.social_memory"
         },
         {
           "imported": "app.models.worlds",
@@ -817,10 +789,6 @@
           "importer": "app.services.community"
         },
         {
-          "imported": "app.services.social_event_runtime",
-          "importer": "app.services.community"
-        },
-        {
           "imported": "app.models",
           "importer": "app.services.community_abuse_quota"
         },
@@ -853,30 +821,6 @@
           "importer": "app.services.feed_reaction_planner"
         },
         {
-          "imported": "app.models",
-          "importer": "app.services.graph_projection_commands"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.graph_projection_replay"
-        },
-        {
-          "imported": "app.services.graph_projection_commands",
-          "importer": "app.services.graph_projection_replay"
-        },
-        {
-          "imported": "app.services.graph_projection_metrics",
-          "importer": "app.services.graph_projection_replay"
-        },
-        {
-          "imported": "app.services.graph_projection_worker",
-          "importer": "app.services.graph_projection_replay"
-        },
-        {
-          "imported": "app.services.graph_projection_metrics",
-          "importer": "app.services.graph_projection_worker"
-        },
-        {
           "imported": "app.services.pollinations_image",
           "importer": "app.services.image_provider"
         },
@@ -886,10 +830,6 @@
         },
         {
           "imported": "app.models",
-          "importer": "app.services.joint_activity_runtime"
-        },
-        {
-          "imported": "app.services.social_event_runtime",
           "importer": "app.services.joint_activity_runtime"
         },
         {
@@ -962,10 +902,6 @@
         },
         {
           "imported": "app.services.activity_proposal_runtime",
-          "importer": "app.services.langgraph_social_apply"
-        },
-        {
-          "imported": "app.services.social_event_runtime",
           "importer": "app.services.langgraph_social_apply"
         },
         {
@@ -1121,22 +1057,6 @@
           "importer": "app.services.post_image_job_worker"
         },
         {
-          "imported": "app.cruds.graph_projection",
-          "importer": "app.services.relationship_graph_read"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.relationship_graph_read"
-        },
-        {
-          "imported": "app.services.graph_projection_metrics",
-          "importer": "app.services.relationship_graph_read"
-        },
-        {
-          "imported": "app.services.graph_projection_runtime",
-          "importer": "app.services.relationship_graph_read"
-        },
-        {
           "imported": "app.services.bounded_http",
           "importer": "app.services.replicate_image"
         },
@@ -1159,34 +1079,6 @@
         {
           "imported": "app.services.agent_runs",
           "importer": "app.services.resident_tick_scheduler"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.social_event_runtime"
-        },
-        {
-          "imported": "app.models.social_memory",
-          "importer": "app.services.social_event_runtime"
-        },
-        {
-          "imported": "app.cruds.graph_projection",
-          "importer": "app.services.social_memory_read"
-        },
-        {
-          "imported": "app.cruds.social_memory",
-          "importer": "app.services.social_memory_read"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.social_memory_read"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.services.social_memory_read"
-        },
-        {
-          "imported": "app.services.relationship_graph_read",
-          "importer": "app.services.social_memory_read"
         },
         {
           "imported": "app.cruds.community",
@@ -1277,10 +1169,6 @@
           "importer": "app.services.world_feed_social_apply"
         },
         {
-          "imported": "app.services.social_event_runtime",
-          "importer": "app.services.world_feed_social_apply"
-        },
-        {
           "imported": "app.services.world_feed_search",
           "importer": "app.services.world_feed_social_apply"
         },
@@ -1348,10 +1236,6 @@
         {
           "imported": "app.services.resident_contracts",
           "importer": "app.compatibility.routine_posts.legacy"
-        },
-        {
-          "imported": "app.services.social_event_runtime",
-          "importer": "app.compatibility.routine_posts.legacy"
         }
       ],
       "id": "l3-routine-post-legacy-persistence-bridge",
@@ -1405,14 +1289,6 @@
     {
       "edges": [
         {
-          "imported": "app.services.graph_projection_runtime",
-          "importer": "app.runtime.component_workers"
-        },
-        {
-          "imported": "app.services.graph_projection_worker",
-          "importer": "app.runtime.component_workers"
-        },
-        {
           "imported": "app.services.resident_tick_scheduler",
           "importer": "app.runtime.component_workers"
         }
@@ -1426,23 +1302,47 @@
     {
       "edges": [
         {
-          "imported": "app.cruds.graph_projection",
-          "importer": "app.runtime.graph_projection.sqlalchemy_outbox"
+          "imported": "app.models",
+          "importer": "app.runtime.graph_projection.relationship_graph_read"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.runtime.graph_projection.replay"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.runtime.graph_projection.social_memory_read"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.runtime.graph_projection.social_memory_read"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.runtime.graph_projection.sqlalchemy_commands"
         },
         {
           "imported": "app.models",
           "importer": "app.runtime.graph_projection.sqlalchemy_outbox"
         },
         {
-          "imported": "app.services.graph_projection_commands",
-          "importer": "app.runtime.graph_projection.sqlalchemy_outbox"
+          "imported": "app.models",
+          "importer": "app.runtime.graph_projection.sqlalchemy_state"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.runtime.relationships.sqlalchemy_social_event"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.runtime.relationships.sqlalchemy_social_read_repository"
         }
       ],
-      "id": "er1-current-graph-outbox-adapter",
+      "id": "l4-relationship-projection-runtime-persistence",
       "owner_stage": "L4",
-      "reason": "The canonical SQLite outbox port still reuses pre-L4 model, CRUD, and command-builder modules behind its storage-neutral runtime boundary.",
-      "removal_condition": "Remove these exact edges when L4 moves the outbox model and command builder behind canonical domain repositories.",
-      "review_date": "2026-11-19"
+      "reason": "The L4 relationship and graph runtimes own SQLAlchemy composition while the aggregate app.models and app.schemas exports remain registered ORM and HTTP-schema boundaries. Relationship domain infrastructure itself has no legacy-layer import.",
+      "removal_condition": "Replace the aggregate ORM export with domain-specific persistence registries without changing Alembic metadata discovery.",
+      "review_date": "2026-12-01"
     }
   ],
   "legacy_module_cycles": [],

@@ -13,11 +13,12 @@ final merge after required checks pass.
 | World and Studio | World routes/services/models | `features/device-home`, `features/creator-studio`, `features/world-app` public entries plus legacy World routes | schema, migration, package boundary |
 | Routine runtime | routine planners/runtime | agent activity surfaces | deterministic tick, duplicate write |
 | SNS and Inbox | community/social services | posts, notifications | event ordering, relationship direction |
-| Relationship graph | `app.domains.relationships.public` + `app.integrations.relationship_graph_read`; the SQLAlchemy gateway remains an L4 adapter | relationship graph | read parity, replay, outage, World isolation |
+| Relationship graph | `app.domains.relationships.public` + domain-owned ORM definitions + `app.runtime.relationships` SQLAlchemy composition + `app.runtime.graph_projection`; LadybugDB remains the replayable adapter | `features/relationships/public.ts` | read parity, replay, outage, World isolation |
 | Providers and credentials | `backend/app/providers`, `backend/app/credentials` | settings/model forms | BYOK redaction, fake provider |
 | Local Bot | bot route/schema | `frontend/src/app/angmoo-api` | quota and response contracts |
 
-Legacy frontend API calls remain behind `frontend/src/lib`. New product-shell
+Legacy frontend API calls remain behind `frontend/src/lib` only for surfaces
+that have not moved yet. New product-shell
 work belongs to `frontend/src/features/<feature>` and exposes only `public.ts`;
 feature-local API clients stay under that feature instead of inventing backend
 contracts in route components. See `docs/architecture/frontend-product-shell.md`.
@@ -40,9 +41,11 @@ Compatibility facades may preserve stable imports during refactoring only when
 they name an owner, current consumer, removal stage, and usage-zero deletion
 gate. They re-export canonical types or compose adapters; they do not duplicate
 use-case logic. T2.5 PR C removed the unused relationship schema and repository
-aliases after both `rg` and the AST inventory reported zero importers. The
-SQLAlchemy relationship gateway remains an L4-owned adapter because it still
-has runtime consumers. Do not combine a move with unrelated behavior changes.
+aliases after both `rg` and the AST inventory reported zero importers. L4 PR E
+removes the horizontal relationship graph/event/model/CRUD bridges. Runtime
+consumers now enter through the relationships public boundary, the isolated
+runtime SQLAlchemy composition and graph-projection runtime boundary. Do not
+combine a move with unrelated behavior changes.
 
 ## Validation map
 

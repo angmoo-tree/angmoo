@@ -10,12 +10,12 @@ from sqlalchemy.orm import Session
 from app import models
 from app.core.ids import uuid7_string
 from app.domains.relationships.projection.digest import projection_digest
-from app.services.graph_projection_commands import (
+from app.runtime.graph_projection.sqlalchemy_commands import (
     ProjectionCommand,
     build_projection_command,
 )
-from app.services.graph_projection_metrics import graph_metrics
-from app.services.graph_projection_worker import ProjectionStore, SessionFactory
+from app.runtime.graph_projection.metrics import graph_metrics
+from app.runtime.graph_projection.worker import ProjectionStore, SessionFactory
 
 
 class ReplayStore(ProjectionStore, Protocol):

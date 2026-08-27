@@ -1,3 +1,5 @@
+"""Build domain projection commands from canonical SQLAlchemy facts."""
+
 from __future__ import annotations
 
 from datetime import datetime

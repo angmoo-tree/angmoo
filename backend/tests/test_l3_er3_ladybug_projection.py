@@ -18,7 +18,8 @@ from app.integrations.ladybug_projection import (
     LadybugProjectionError,
     LadybugRelationshipProjection,
 )
-from app.services.graph_projection_worker import GraphProjectionWorker
+from app.integrations import ladybug_projection
+from app.runtime.graph_projection.worker import GraphProjectionWorker
 from p7_graph_support import seed_projection_fixture, sqlite_engine
 
 
@@ -70,6 +71,13 @@ def _relationship(
 
 def _root(tmp_path: Path) -> Path:
     return tmp_path / "한글 사용자" / "Angmoo graph"
+
+
+def test_projection_schema_contains_no_human_node_table() -> None:
+    bootstrap = "\n".join(ladybug_projection._BOOTSTRAP_STATEMENTS)
+
+    assert "CREATE NODE TABLE IF NOT EXISTS WorldCharacter" in bootstrap
+    assert "CREATE NODE TABLE IF NOT EXISTS Human" not in bootstrap
 
 
 def test_schema_projection_is_idempotent_and_reopens(tmp_path: Path) -> None:

@@ -9,7 +9,10 @@ from sqlalchemy.pool import StaticPool
 
 from app import models
 from app.core.db import Base
-from app.services import social_event_runtime, world_character_contracts
+from app.runtime.relationships import (
+    sqlalchemy_social_event as social_event_runtime,
+)
+from app.services import world_character_contracts
 
 
 @dataclass(frozen=True)

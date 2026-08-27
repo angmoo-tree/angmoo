@@ -10,8 +10,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/components/auth-provider";
 import {
   getRelationshipGraph,
+} from "@/features/relationships/api/relationship-graph";
+import {
+  relationshipGraphPresentationState,
   type RelationshipGraphRead,
-} from "@/lib/relationship-graph";
+} from "@/features/relationships/model/relationship-graph";
 
 const STATUS_LABELS: Record<string, string> = {
   disabled: "관계망 기능 꺼짐 · Canonical DB 직접 관계 표시",
@@ -93,6 +96,11 @@ export function RelationshipGraphClient({
     () => new Map(orderedNodes.map((node, index) => [node.world_character_id, position(index, orderedNodes.length)])),
     [orderedNodes],
   );
+  const presentationState = relationshipGraphPresentationState({
+    graph,
+    loading,
+    error,
+  });
 
   return (
     <main className="mx-auto w-full max-w-5xl space-y-6 px-4 py-8 sm:px-6">
@@ -129,8 +137,35 @@ export function RelationshipGraphClient({
         </div>
       </header>
 
-      {loading ? <p className="rounded-3xl bg-surface-container p-5">관계 근거를 확인하는 중입니다.</p> : null}
-      {error ? <p role="alert" className="rounded-3xl bg-error-container p-5 text-on-error-container">{error}</p> : null}
+      {presentationState === "loading" ? (
+        <p data-relationship-graph-state="loading" className="rounded-3xl bg-surface-container p-5">
+          관계 근거를 확인하는 중입니다.
+        </p>
+      ) : null}
+      {presentationState === "failed" ? (
+        <p data-relationship-graph-state="failed" role="alert" className="rounded-3xl bg-error-container p-5 text-on-error-container">
+          {error}
+        </p>
+      ) : null}
+
+      {presentationState === "rebuilding" ? (
+        <p data-relationship-graph-state="rebuilding" role="status" className="rounded-3xl bg-tertiary-container p-5 text-on-tertiary-container">
+          LadybugDB 관계망을 다시 구성하고 있습니다. 그동안 Canonical DB의 직접 관계와 근거 요약만 안전하게 표시합니다.
+        </p>
+      ) : null}
+
+      {presentationState === "degraded" ? (
+        <p data-relationship-graph-state="degraded" role="status" className="rounded-3xl bg-tertiary-container p-5 text-on-tertiary-container">
+          관계망 projection을 사용할 수 없어 Canonical DB의 직접 관계만 표시합니다.
+          {graph?.meta.fallback_reason ? ` 사유: ${graph.meta.fallback_reason}` : ""}
+        </p>
+      ) : null}
+
+      {presentationState === "empty" ? (
+        <p data-relationship-graph-state="empty" role="status" className="rounded-3xl bg-surface-container p-5">
+          아직 관찰에 성공한 방향 관계와 사건 근거가 없습니다.
+        </p>
+      ) : null}
 
       {graph ? (
         <>

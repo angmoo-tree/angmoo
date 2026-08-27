@@ -22,13 +22,15 @@ from app.integrations.ladybug_projection import (
     LadybugRelationshipProjection,
 )
 from app.integrations.relationship_graph_read import RelationshipGraphRepository
-from app.services.graph_projection_replay import (
+from app.runtime.graph_projection.replay import (
     GraphProjectionReplayService,
     create_replay_run,
     projection_digest,
 )
-from app.services.graph_projection_worker import GraphProjectionWorker
-from app.services.relationship_graph_read import get_owner_relationship_graph
+from app.runtime.graph_projection.worker import GraphProjectionWorker
+from app.runtime.graph_projection.relationship_graph_read import (
+    get_owner_relationship_graph,
+)
 from p7_graph_support import seed_projection_fixture, sqlite_engine
 
 

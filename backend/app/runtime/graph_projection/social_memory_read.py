@@ -1,3 +1,5 @@
+"""Owner diagnostics composed from canonical facts and graph projection state."""
+
 from __future__ import annotations
 
 from datetime import UTC, datetime
@@ -6,12 +8,14 @@ from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app import models, schemas
-from app.cruds import graph_projection as graph_projection_crud
-from app.services.relationship_graph_read import (
+from app.runtime.graph_projection import sqlalchemy_state as graph_projection_crud
+from app.runtime.graph_projection.relationship_graph_read import (
     SqlAlchemyRelationshipGraphReadGateway,
 )
 from app.core.config import Settings, settings
-from app.cruds import social_memory as social_memory_crud
+from app.runtime.relationships import (
+    sqlalchemy_social_read_repository as social_memory_crud,
+)
 from app.domains.relationships import public as relationships
 
 

@@ -10,7 +10,7 @@ from sqlalchemy import create_engine, delete, select
 from sqlalchemy.orm import Session
 
 from app import models
-from app.cruds import graph_projection as graph_projection_crud
+from app.runtime.graph_projection import sqlalchemy_state as graph_projection_crud
 
 
 DATABASE_URL = os.getenv("P7_GRAPH_POSTGRES_DATABASE_URL")

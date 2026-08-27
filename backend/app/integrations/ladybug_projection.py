@@ -52,7 +52,6 @@ _QUERY_RESULT_CONTRACT = {
     "visualization": ("actor_id", "target_id", "relationship"),
 }
 
-
 def ladybug_projection_contract() -> dict[str, object]:
     """Return a stable contract fingerprint independent of graph contents."""
 

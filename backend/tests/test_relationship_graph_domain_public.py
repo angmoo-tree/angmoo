@@ -2,14 +2,12 @@ from __future__ import annotations
 
 from sqlalchemy.orm import Session
 
-from app.services.relationship_graph_read import (
+from app.runtime.graph_projection.relationship_graph_read import (
     SqlAlchemyRelationshipGraphReadGateway,
 )
 from app.core.config import Settings
 from app.domains.relationships import public as relationships
 from app.domains.relationships.graph_read.errors import GraphReadBackendError
-from app.schemas import RelationshipGraphRead as LegacySchemaExport
-from app.services import relationship_graph_read as legacy_service
 from p7_graph_support import seed_projection_fixture, sqlite_engine
 
 
@@ -31,18 +29,6 @@ def test_domain_public_read_preserves_canonical_fallback_contract() -> None:
     assert result.meta.graph_status == "disabled"
     assert result.meta.fallback_reason == "graph_disabled"
     assert len(result.edges) == 1
-
-
-def test_legacy_exports_are_narrow_aliases_of_domain_contracts() -> None:
-    assert LegacySchemaExport is relationships.RelationshipGraphRead
-    assert (
-        legacy_service.RelationshipGraphReadError
-        is relationships.RelationshipGraphReadError
-    )
-    assert (
-        legacy_service.RelationshipGraphForbiddenError
-        is relationships.RelationshipGraphForbiddenError
-    )
 
 
 def test_domain_public_read_maps_ladybug_schema_error_to_fallback(

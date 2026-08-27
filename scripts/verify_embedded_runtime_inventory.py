@@ -444,8 +444,8 @@ def _runtime_coupling() -> list[dict[str, Any]]:
         ("backend/app/runtime/single_backend_components.py", "shared", ["in-process scheduler/projector ownership", "bounded drain"]),
         ("backend/app/services/resident_tick_scheduler.py", "scheduler", ["singleton process lock", "database lease", "heartbeat", "bounded drain"]),
         ("backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py", "scheduler", ["lease repository", "fencing epoch"]),
-        ("backend/app/services/graph_projection_worker.py", "projector", ["outbox claim", "thread pool", "bounded drain", "degraded state"]),
-        ("backend/app/services/graph_projection_runtime.py", "projector", ["graph client construction"]),
+        ("backend/app/runtime/graph_projection/worker.py", "projector", ["outbox claim", "thread pool", "bounded drain", "degraded state"]),
+        ("backend/app/runtime/graph_projection/process_client.py", "projector", ["graph client construction"]),
         ("backend/app/public_main.py", "api", ["typed RuntimeConfig", "FastAPI lifespan", "component ownership"]),
         ("backend/app/runtime/shutdown.py", "shared", ["cooperative signal bridge"]),
     )
@@ -462,7 +462,7 @@ def _behavior_file_hashes() -> list[dict[str, str]]:
         "frontend/next.config.ts",
         "backend/app/main.py",
         "backend/app/services/resident_tick_scheduler.py",
-        "backend/app/services/graph_projection_worker.py",
+        "backend/app/runtime/graph_projection/worker.py",
     )
     return [
         {"path": path, "sha256": _sha256_file(ROOT / path)}

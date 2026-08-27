@@ -105,7 +105,8 @@ backend/app/
 ├── runtime/
 │   ├── resident/
 │   ├── scheduler/
-│   └── graph_projection/
+│   ├── graph_projection/
+│   └── relationships/          # SQLAlchemy composition over the aggregate ORM registry
 ├── integrations/
 │   ├── llm/
 │   ├── image/
@@ -124,8 +125,8 @@ backend/app/
 | `worlds`, `world_characters`, `routines`, `routine_posts`, owner manual social | each domain's `public.py` | L3 | P1-P3 are active; PR F moves P4 continuation and atomic publication behind the routine-post public boundary; PR G moves owner manual writes and Inbox observation behind a stable public boundary |
 | `world_packages` | `app.domains.world_packages.public` | L3.5 | new Local feature later |
 | feed and `social` | `app.domains.social.public` | L4 | PR B owns the P5 keyword candidate/search boundary; later L4 PRs move writes and causal apply |
-| `relationships` graph read | `app.domains.relationships.public` | T2.5 pilot | canonical read slice active; PR C removes usage-zero aliases; write path unchanged |
-| relationships write and graph projection | domain/runtime public ports | L4 | unchanged by the read pilot |
+| `relationships` graph read | `app.domains.relationships.public` | T2.5/L4 | canonical read slice active; PR E owns its runtime composition under `app.runtime.graph_projection` |
+| relationships write and graph projection | domain/runtime public ports | L4 | PR E removes horizontal service/CRUD/model bridges; runtime SQLAlchemy composition is isolated under `app.runtime.relationships` and graph lifecycle under `app.runtime.graph_projection` |
 | `chat` and chat memory | `app.domains.chat.public` | P8-L | blocked by Local transition gates |
 | remaining active legacy or ownerless shim | none | L6 | final removal gate |
 
@@ -255,26 +256,29 @@ world_activity_runtime route
 → app.domains.relationships.public
 → graph_read/use_case.py
 → graph_read/repository.py ports and result types
-→ app.services.relationship_graph_read composition
+→ app.runtime.graph_projection.relationship_graph_read composition
 → app.integrations.ladybug_projection
    with bounded SQLite canonical fallback when projection is unavailable
 ```
 
-The L4-owned `app.services.relationship_graph_read` module composes the
-existing SQLAlchemy models over SQLite, canonical fallback queries, projection
-metrics and the shared in-process LadybugDB runtime into the domain gateway. It
-is not a second use-case implementation. Current runtime consumers are the API
-route and social-memory diagnostics; compatibility tests also cover its legacy
-facade. L4 moves this composition only after relationship persistence and graph
-runtime have canonical ports.
+The L4-owned `app.runtime.graph_projection.relationship_graph_read` module
+composes the registered SQLAlchemy models over SQLite, canonical fallback
+queries, projection metrics and the shared in-process LadybugDB runtime into
+the domain gateway. It is not a second use-case implementation. Current
+runtime consumers are the API route and social-memory diagnostics. PR E moves
+relationship-owned ORM definitions under
+`app.domains.relationships.infrastructure`, isolates concrete aggregate
+SQLAlchemy writes and reads under `app.runtime.relationships`, moves
+worker/replay/metrics and diagnostics under `app.runtime.graph_projection`,
+and deletes the former horizontal service/CRUD/model modules rather than
+retaining compatibility facades. Domain infrastructure does not import the
+aggregate `app.models` registry; only the runtime composition edge is reviewed.
 
 PR C's `rg` and AST inventory found zero importers for
 `app.schemas.relationship_graph` and `app.repositories.relationship_graph`.
 Those aliases were therefore deleted instead of being retained until L4.
-Schema consumers import the canonical domain schema. The active L4 service
-adapter is intentionally retained because its runtime consumer count is not
-zero. Neo4j query documents remain immutable parity fixtures; no Neo4j driver
-or server is composed.
+Schema consumers import the canonical domain schema. Neo4j query documents
+remain immutable parity fixtures; no Neo4j driver or server is composed.
 
 The historical pilot did not modify `SocialEvent`, `RelationshipState` writes,
 `GraphProjectionOutbox`, projector leases or retries, replay commands,

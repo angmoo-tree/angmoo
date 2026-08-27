@@ -13,11 +13,11 @@ import socket
 import threading
 
 from app.core.db import SessionLocal
-from app.services.graph_projection_replay import (
+from app.runtime.graph_projection.replay import (
     GraphProjectionReplayService,
     create_replay_run,
 )
-from app.services.graph_projection_runtime import graph_client_from_settings
+from app.runtime.graph_projection.process_client import graph_client_from_settings
 
 
 def main() -> int:

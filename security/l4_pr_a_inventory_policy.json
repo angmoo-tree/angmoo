@@ -11,20 +11,12 @@
     "legacy_horizontal": [
       "app.compatibility.manual_social",
       "app.cruds.community",
-      "app.cruds.graph_projection",
-      "app.cruds.social_memory",
       "app.models.community",
-      "app.models.graph_projection",
-      "app.models.social_memory",
       "app.models.world_feed",
       "app.schemas.community",
       "app.schemas.social_memory",
       "app.schemas.world_feed",
       "app.services.feed_reaction_planner",
-      "app.services.graph_projection",
-      "app.services.relationship_graph_read",
-      "app.services.social_event_runtime",
-      "app.services.social_memory_read",
       "app.services.social_routine_interactions",
       "app.services.world_feed"
     ]
@@ -80,11 +72,13 @@
       "frontend/src/app/characters/[characterId]/worlds/[worldId]/relationship-graph/page.tsx",
       "frontend/src/app/feed-page.tsx",
       "frontend/src/components/post-detail-client.tsx",
-      "frontend/src/components/relationship-graph-client.tsx",
+      "frontend/src/features/relationships/api/relationship-graph.ts",
+      "frontend/src/features/relationships/model/relationship-graph.ts",
+      "frontend/src/features/relationships/public.ts",
+      "frontend/src/features/relationships/ui/relationship-graph-client.tsx",
       "frontend/src/features/social/ui/post-list-client.tsx",
       "frontend/src/features/social/ui/world-social-feed.tsx",
-      "frontend/src/lib/community.ts",
-      "frontend/src/lib/relationship-graph.ts"
+      "frontend/src/lib/community.ts"
     ],
     "current_route_globs": [
       "frontend/src/app/api/community/**/route.ts"
@@ -94,7 +88,7 @@
       "social"
     ],
     "required_ui_markers": {
-      "frontend/src/components/relationship-graph-client.tsx": [
+      "frontend/src/features/relationships/ui/relationship-graph-client.tsx": [
         "graph_projection_rebuilding",
         "relationship_query_failed",
         "rebuilding"
@@ -109,10 +103,14 @@
         "createPost",
         "createReply"
       ],
-      "frontend/src/lib/relationship-graph.ts": [
+      "frontend/src/features/relationships/api/relationship-graph.ts": [
         "RelationshipGraphApiError",
-        "fallback_reason",
         "getRelationshipGraph"
+      ],
+      "frontend/src/features/relationships/model/relationship-graph.ts": [
+        "RelationshipGraphPresentationState",
+        "fallback_reason",
+        "relationshipGraphPresentationState"
       ]
     }
   },
