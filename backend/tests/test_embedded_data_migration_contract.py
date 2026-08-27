@@ -13,6 +13,7 @@ from app.runtime.migrations.ladybug_versions.registry import (
 )
 from app.runtime.migrations.sqlite_versions.registry import (
     MIGRATIONS,
+    MIGRATION_CONTRACTS,
     SqliteVersionContractError,
     load_sqlite_manifest,
     migration_chain,
@@ -56,7 +57,14 @@ def test_sqlite_manifests_match_frozen_v1_and_latest_model_contract(
     )
     assert latest.canonical_table_count == 87
     assert tuple(version for version, _step in migration_chain(1)) == (1, 2)
-    assert {1, 2} <= set(MIGRATIONS)
+    assert set(MIGRATIONS) == {1, 2}
+    assert set(MIGRATION_CONTRACTS) == set(MIGRATIONS)
+    assert all(
+        contract.source_version == source_version
+        and contract.target_version == source_version + 1
+        and contract.mutable_identity_tables
+        for source_version, contract in MIGRATION_CONTRACTS.items()
+    )
 
 
 def test_ladybug_manifest_matches_adapter_command_and_query_contract() -> None:
@@ -93,6 +101,18 @@ def test_missing_sqlite_migration_step_is_rejected(
     with pytest.raises(
         SqliteVersionContractError,
         match="sqlite_migration_step_missing:v1_to_v2",
+    ):
+        migration_chain(1)
+
+
+def test_missing_sqlite_expected_delta_contract_is_rejected(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delitem(MIGRATION_CONTRACTS, 1)
+
+    with pytest.raises(
+        SqliteVersionContractError,
+        match="sqlite_migration_contract_missing:v1_to_v2",
     ):
         migration_chain(1)
 

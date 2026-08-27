@@ -142,7 +142,11 @@ include:
 - `architecture-boundary`
 - `tauri-windows`
 - `tauri-windows-host-dev`
-- Windows installer release-candidate and installed-runtime smoke
+- `windows-installer-build` for the exact-SHA NSIS/MSI candidate
+- `windows-installer-clean-install` for an empty LocalAppData install/start
+- `windows-installer-supported-upgrade` for every supported predecessor
+- `windows-installer-failure-recovery` for fail-closed app/data rollback
+- final `windows-installer` only when the complete installer matrix passes
 
 `windows-local-smoke` and `codeql` remain advisory checks. Advisory does not
 mean ignored: failures and promotion conditions must be documented and

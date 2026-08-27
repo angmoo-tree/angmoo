@@ -11,11 +11,18 @@ from pathlib import Path
 from sqlalchemy import Connection
 
 from app.runtime.migrations.sqlite_versions.v1_to_v2_world_package_registry import (
+    MUTABLE_IDENTITY_TABLES as V1_TO_V2_MUTABLE_TABLES,
+    capture_v1_to_v2_delta,
     upgrade_v1_to_v2,
+    verify_v1_to_v2_delta,
 )
 from app.runtime.migrations.sqlite_versions.v2_to_v3_no_specific_role import (
+    MUTABLE_IDENTITY_TABLES as V2_TO_V3_MUTABLE_TABLES,
+    capture_v2_to_v3_delta,
     upgrade_v2_to_v3,
+    verify_v2_to_v3_delta,
 )
+from app.runtime.migrations.sqlite_versions.contracts import SqliteMigrationContract
 from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION
 
 
@@ -60,6 +67,34 @@ MIGRATIONS: dict[int, SqliteMigration] = {
     2: upgrade_v2_to_v3,
 }
 
+MIGRATION_CONTRACTS: dict[int, SqliteMigrationContract] = {
+    1: SqliteMigrationContract(
+        source_version=1,
+        target_version=2,
+        name="world_package_registry",
+        mutable_identity_tables=V1_TO_V2_MUTABLE_TABLES,
+        capture=capture_v1_to_v2_delta,
+        verify=verify_v1_to_v2_delta,
+    ),
+    2: SqliteMigrationContract(
+        source_version=2,
+        target_version=3,
+        name="no_specific_role",
+        mutable_identity_tables=V2_TO_V3_MUTABLE_TABLES,
+        capture=capture_v2_to_v3_delta,
+        verify=verify_v2_to_v3_delta,
+    ),
+}
+
+
+def migration_contract(source_version: int) -> SqliteMigrationContract:
+    contract = MIGRATION_CONTRACTS.get(source_version)
+    if contract is None or contract.target_version != source_version + 1:
+        raise SqliteVersionContractError(
+            f"sqlite_migration_contract_missing:v{source_version}_to_v{source_version + 1}"
+        )
+    return contract
+
 
 def load_sqlite_manifest(version: int) -> SqliteVersionManifest:
     path = _MANIFEST_ROOT / f"v{version}.json"
@@ -99,15 +134,18 @@ def migration_chain(
             )
         load_sqlite_manifest(version)
         load_sqlite_manifest(version + 1)
+        migration_contract(version)
         steps.append((version, migration))
     return tuple(steps)
 
 
 __all__ = [
     "MIGRATIONS",
+    "MIGRATION_CONTRACTS",
     "SqliteMigration",
     "SqliteVersionContractError",
     "SqliteVersionManifest",
     "load_sqlite_manifest",
+    "migration_contract",
     "migration_chain",
 ]

@@ -230,7 +230,7 @@ angmoo_staging_verify_abort:
 
   ; The staged new sidecar, not NSIS and not the old installed executable,
   ; decides whether the active SQLite/Ladybug generations are readable.
-  nsExec::ExecToStack '"$INSTDIR\angmoo-sidecar.exe" --installer-data-preflight --data-root "$LOCALAPPDATA\Angmoo" --legacy-data-root "$LOCALAPPDATA\com.angmoo.desktop" --runtime-root "$LOCALAPPDATA\Angmoo\runtime" --payload-manifest "$INSTDIR\installer-payload.json"'
+  nsExec::ExecToStack '"$INSTDIR\angmoo-sidecar.exe" --installer-data-preflight --data-root "$LOCALAPPDATA\Angmoo" --legacy-data-root "$LOCALAPPDATA\com.angmoo.desktop" --runtime-root "$LOCALAPPDATA\Angmoo\runtime" --payload-manifest "$INSTDIR\installer-payload.json" --installer-result-path "$LOCALAPPDATA\Angmoo\runtime\installer-data-upgrade-result.json"'
   Pop $R7
   Pop $R6
   ${If} $R7 <> 0
@@ -302,15 +302,34 @@ angmoo_promote_abort:
 
   ; Only the verified, promoted sidecar may invoke the existing copy-on-write
   ; SQLite generation upgrade and Ladybug canonical replay/rebuild.
-  nsExec::ExecToStack '"$INSTDIR\angmoo-sidecar.exe" --installer-data-upgrade --data-root "$LOCALAPPDATA\Angmoo" --legacy-data-root "$LOCALAPPDATA\com.angmoo.desktop" --runtime-root "$LOCALAPPDATA\Angmoo\runtime" --payload-manifest "$INSTDIR\installer-payload.json"'
+  nsExec::ExecToStack '"$INSTDIR\angmoo-sidecar.exe" --installer-data-upgrade --data-root "$LOCALAPPDATA\Angmoo" --legacy-data-root "$LOCALAPPDATA\com.angmoo.desktop" --runtime-root "$LOCALAPPDATA\Angmoo\runtime" --payload-manifest "$INSTDIR\installer-payload.json" --installer-result-path "$LOCALAPPDATA\Angmoo\runtime\installer-data-upgrade-result.json"'
   Pop $R7
   Pop $R6
   ${If} $R7 <> 0
-    nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "$PLUGINSDIR\angmoo-installer-payload-transaction.ps1" -Action RecordFailure -FailureCode installer_embedded_data_migration_failed -ProductRoot "$LOCALAPPDATA\Angmoo" -VerifierPath "$PLUGINSDIR\angmoo-verify-installed-payload.ps1"'
+    ; The new app is verified but its data migration failed. Restore the exact
+    ; verified predecessor before restoring registration and reporting failure;
+    ; never leave a new manifest paired with an older executable or vice versa.
+    SetOutPath "$TEMP"
+    nsExec::ExecToStack '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "$PLUGINSDIR\angmoo-installer-payload-transaction.ps1" -Action RestoreFailure -FailureCode installer_embedded_data_migration_failed -ResultPath "$LOCALAPPDATA\Angmoo\runtime\installer-data-upgrade-result.json" -ProductRoot "$LOCALAPPDATA\Angmoo" -VerifierPath "$PLUGINSDIR\angmoo-verify-installed-payload.ps1"'
+    Pop $R5
+    Pop $R4
+    ${If} $R5 <> 0
+      IfSilent angmoo_data_restore_silent angmoo_data_restore_interactive
+angmoo_data_restore_interactive:
+      MessageBox MB_OK|MB_ICONSTOP \
+        "Angmoo local data could not be upgraded and the verified previous app could not be restored automatically. Existing data generations were preserved."
+      Goto angmoo_data_restore_abort
+angmoo_data_restore_silent:
+      Goto angmoo_data_restore_abort
+angmoo_data_restore_abort:
+      SetErrorLevel 50
+      Quit
+    ${EndIf}
+    !insertmacro ANGMOO_RESTORE_PREVIOUS_REGISTRATION
     IfSilent angmoo_data_upgrade_silent angmoo_data_upgrade_interactive
 angmoo_data_upgrade_interactive:
     MessageBox MB_OK|MB_ICONSTOP \
-      "Angmoo app files were updated, but local data could not be upgraded safely. Existing data generations were preserved; rerun this installer to retry."
+      "Angmoo local data could not be upgraded safely. The verified previous app was restored and existing data generations were preserved."
     Goto angmoo_data_upgrade_abort
 angmoo_data_upgrade_silent:
     Goto angmoo_data_upgrade_abort

@@ -22,7 +22,11 @@ from app.runtime.migrations.sqlite_versions.registry import (
     SqliteMigration,
     SqliteVersionManifest,
     load_sqlite_manifest,
+    migration_contract,
     migration_chain,
+)
+from app.runtime.migrations.sqlite_versions.contracts import (
+    SqliteMigrationDeltaError,
 )
 from app.runtime.persistence.sqlite_codecs import encode_utc_timestamp
 from app.runtime.persistence.sqlite_database import (
@@ -54,7 +58,7 @@ class SqliteCanonicalUpgradeResult:
 @dataclass(frozen=True)
 class _TableIdentity:
     row_count: int
-    primary_key_sha256: str
+    content_sha256: str
 
 
 class SqliteCanonicalUpgradeCoordinator:
@@ -116,16 +120,6 @@ class SqliteCanonicalUpgradeCoordinator:
         if not chain:
             raise SqliteCanonicalUpgradeError("sqlite_migration_registry_gap")
         _require_staging_capacity(source_database, self._paths.canonical)
-        migration_mutable_tables = {
-            "world_package_exports",
-            "world_package_import_id_maps",
-            "world_package_imports",
-            "world_package_sources",
-        }
-        source_identity = _database_identity(
-            source_database,
-            excluded_tables=migration_mutable_tables,
-        )
         source_fingerprint = _database_file_fingerprint(source_database)
         final_generation = _target_generation_name(
             source_root.name,
@@ -148,13 +142,6 @@ class SqliteCanonicalUpgradeCoordinator:
             _backup_database(source_database, staging_database)
             _apply_chain(staging_database, chain)
             _validate_database(staging_database, latest)
-            if _database_identity(
-                staging_database,
-                excluded_tables=migration_mutable_tables,
-            ) != source_identity:
-                raise SqliteCanonicalUpgradeError(
-                    "sqlite_migration_identity_changed"
-                )
             if _database_file_fingerprint(source_database) != source_fingerprint:
                 raise SqliteCanonicalUpgradeError(
                     "sqlite_migration_previous_generation_changed"
@@ -301,7 +288,21 @@ def _apply_chain(
         with engine.begin() as connection:
             connection.exec_driver_sql("PRAGMA foreign_keys = ON")
             for source_version, migration in chain:
+                contract = migration_contract(source_version)
+                protected_identity = _connection_identity(
+                    connection,
+                    excluded_tables=set(contract.mutable_identity_tables),
+                )
+                snapshot = contract.capture(connection)
                 migration(connection)
+                contract.verify(connection, snapshot)
+                if _connection_identity(
+                    connection,
+                    excluded_tables=set(contract.mutable_identity_tables),
+                ) != protected_identity:
+                    raise SqliteCanonicalUpgradeError(
+                        "sqlite_migration_identity_changed"
+                    )
                 target = load_sqlite_manifest(source_version + 1)
                 contract_digest = sqlite_schema_contract_digest(connection)
                 if contract_digest != target.schema_digest:
@@ -323,6 +324,8 @@ def _apply_chain(
                 )
     except SqliteCanonicalUpgradeError:
         raise
+    except SqliteMigrationDeltaError as exc:
+        raise SqliteCanonicalUpgradeError(str(exc)) from exc
     except Exception as exc:
         raise SqliteCanonicalUpgradeError("sqlite_migration_step_failed") from exc
     finally:
@@ -345,50 +348,53 @@ def _backup_database(source: Path, target: Path) -> None:
         source_connection.close()
 
 
-def _database_identity(
-    path: Path,
+def _connection_identity(
+    connection: object,
     *,
     excluded_tables: set[str] | None = None,
 ) -> dict[str, _TableIdentity]:
     excluded = excluded_tables or set()
-    connection = sqlite3.connect(f"file:{path.as_posix()}?mode=ro", uri=True)
-    try:
-        tables = [
-            str(row[0])
-            for row in connection.execute(
-                "SELECT name FROM sqlite_master "
-                "WHERE type = 'table' AND name NOT LIKE 'sqlite_%' "
-                "AND name != ? ORDER BY name",
-                (SCHEMA_VERSION_TABLE,),
-            )
-            if str(row[0]) not in excluded
+    execute = getattr(connection, "exec_driver_sql")
+    tables = [
+        str(row[0])
+        for row in execute(
+            "SELECT name FROM sqlite_master "
+            "WHERE type = 'table' AND name NOT LIKE 'sqlite_%' "
+            "AND name != ? ORDER BY name",
+            (SCHEMA_VERSION_TABLE,),
+        )
+        if str(row[0]) not in excluded
+    ]
+    result: dict[str, _TableIdentity] = {}
+    for table in tables:
+        quoted = '"' + table.replace('"', '""') + '"'
+        table_info = list(execute(f"PRAGMA table_info({quoted})"))
+        columns = [str(row[1]) for row in table_info]
+        primary_keys = [
+            str(row[1])
+            for row in sorted(table_info, key=lambda item: int(item[5]))
+            if int(row[5]) > 0
         ]
-        result: dict[str, _TableIdentity] = {}
-        for table in tables:
-            quoted = '"' + table.replace('"', '""') + '"'
-            row_count = int(
-                connection.execute(f"SELECT count(*) FROM {quoted}").fetchone()[0]
-            )
-            primary_keys = [
-                str(row[1])
-                for row in connection.execute(f"PRAGMA table_info({quoted})")
-                if int(row[5]) > 0
-            ]
-            digest = hashlib.sha256()
-            if primary_keys:
-                columns = ",".join(
-                    '"' + column.replace('"', '""') + '"'
-                    for column in primary_keys
-                )
-                for row in connection.execute(
-                    f"SELECT {columns} FROM {quoted} ORDER BY {columns}"
-                ):
-                    digest.update(repr(tuple(row)).encode("utf-8"))
-                    digest.update(b"\n")
-            result[table] = _TableIdentity(row_count, digest.hexdigest())
-        return result
-    finally:
-        connection.close()
+        select_columns = ",".join(
+            '"' + column.replace('"', '""') + '"' for column in columns
+        )
+        order_columns = primary_keys or columns
+        order_by = ",".join(
+            '"' + column.replace('"', '""') + '"'
+            for column in order_columns
+        )
+        digest = hashlib.sha256()
+        digest.update(repr(tuple(columns)).encode("utf-8"))
+        digest.update(b"\n")
+        row_count = 0
+        for row in execute(
+            f"SELECT {select_columns} FROM {quoted} ORDER BY {order_by}"
+        ):
+            row_count += 1
+            digest.update(repr(tuple(row)).encode("utf-8"))
+            digest.update(b"\n")
+        result[table] = _TableIdentity(row_count, digest.hexdigest())
+    return result
 
 
 def _database_file_fingerprint(path: Path) -> str:

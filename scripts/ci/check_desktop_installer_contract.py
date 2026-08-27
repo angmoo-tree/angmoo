@@ -71,6 +71,8 @@ def main() -> int:
         "installer-payload-transaction.ps1",
         "--installer-data-preflight",
         "--installer-data-upgrade",
+        "--installer-result-path",
+        "-Action RestoreFailure",
         "installer_staging_digest_mismatch",
         "installer_embedded_data_migration_failed",
     ):
@@ -161,6 +163,16 @@ def main() -> int:
         "legacy_launcher_secret_merge",
         "product_root_actual_name",
         "installer_payload_digest_parity_pass",
+        "supported-v1.zip",
+        "supported-v2.zip",
+        "conflicting-v2.zip",
+        "name: windows-installer-build",
+        "name: windows-installer-clean-install",
+        "windows-installer-supported-upgrade",
+        "windows-installer-failure-recovery",
+        "SUPPORTED_UPGRADE_RESULT",
+        "FAILURE_RECOVERY_RESULT",
+        "windows_installer_required_matrix_pass",
     ):
         _require(required in workflow, f"installer workflow contract missing: {required}")
 
@@ -261,6 +273,29 @@ def main() -> int:
         _require(
             (ROOT / "desktop" / "scripts" / script_name).is_file(),
             f"installer payload script missing: {script_name}",
+        )
+    for relative in (
+        "scripts/ci/check_windows_installer_supported_upgrade_matrix.py",
+        "scripts/ci/build_windows_installer_supported_upgrade_fixture.py",
+        "scripts/ci/run_windows_installer_supported_upgrade.ps1",
+        "scripts/ci/verify_windows_installer_supported_upgrade_fixture.py",
+    ):
+        _require(
+            (ROOT / relative).is_file(),
+            f"supported predecessor installer Gate missing: {relative}",
+        )
+    transaction = (
+        ROOT / "desktop" / "scripts" / "installer-payload-transaction.ps1"
+    ).read_text(encoding="utf-8")
+    for required in (
+        "Read-InstallerFailureResult",
+        "Assert-RollbackDataCompatibility",
+        "installer_previous_payload_restored",
+        "installer_active_data_generation_changed",
+    ):
+        _require(
+            required in transaction,
+            f"installer rollback contract missing: {required}",
         )
     verifier = (
         ROOT / "desktop" / "scripts" / "verify-installed-payload.ps1"

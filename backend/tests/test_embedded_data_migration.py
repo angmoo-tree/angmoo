@@ -7,10 +7,14 @@ from pathlib import Path
 import sqlite3
 
 import pytest
-from sqlalchemy import URL, create_engine
+from sqlalchemy import URL, create_engine, select
 from sqlalchemy.orm import Session
 
-from app import models as _models  # noqa: F401 - register canonical metadata
+from app import models
+from app.domains.worlds.domain.reserved_roles import (
+    NO_SPECIFIC_ROLE_DESCRIPTION,
+    NO_SPECIFIC_ROLE_NAME,
+)
 from app.integrations.ladybug_projection import LadybugRelationshipProjection
 from app.integrations.relationship_graph_read import RelationshipGraphRepository
 from app.runtime.migrations.embedded_data import EmbeddedDataUpgradeCoordinator
@@ -20,6 +24,10 @@ from app.runtime.migrations.local_app_data import LegacyLocalAppDataMigration
 from app.runtime.migrations.sqlite_versions import registry as sqlite_registry
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
 from app.runtime.persistence.sqlite_codecs import encode_utc_timestamp
+from app.runtime.persistence.sqlite_database import (
+    SqliteCanonicalDatabase,
+    SqliteCanonicalSettings,
+)
 from app.runtime.persistence.sqlite_schema import (
     SCHEMA_VERSION_TABLE,
     SQLITE_V1_SOURCE_ALEMBIC_MIGRATION_COUNT,
@@ -34,6 +42,7 @@ from p7_graph_support import seed_projection_fixture
 
 
 GENERATION = "contributor-v1"
+V2_GENERATION = "supported-v2"
 
 
 def _sha256(path: Path) -> str:
@@ -96,6 +105,264 @@ def _seed_v1(
         ) as graph:
             graph.verify_connectivity()
     return database
+
+
+def _seed_v2_roleless(
+    root: Path,
+    *,
+    reserved_role_conflict: bool = False,
+    canonical_reserved_role: bool = False,
+    roleless_autonomous: bool = True,
+    second_roleless_world: bool = False,
+) -> Path:
+    """Build a supported v2 predecessor with semantic rows that v3 changes."""
+
+    secret = root / "secrets" / "app-secret"
+    secret.parent.mkdir(parents=True)
+    secret.write_text("supported-v2-secret\n", encoding="utf-8")
+    database = SqliteCanonicalDatabase(
+        StaticRuntimeDataPath(root),
+        settings=SqliteCanonicalSettings(generation=V2_GENERATION),
+    )
+    database.open()
+    old_world_hash = "b" * 64
+    with database.session() as session:
+        owner = models.User(
+            id="owner-v2",
+            email="owner-v2@example.test",
+            display_name="Existing Owner",
+            display_name_normalized="existing owner v2",
+            privacy_policy_version="test",
+            terms_version="test",
+            profile_setup_completed=True,
+        )
+        world = models.World(
+            id="world-v2",
+            slug="supported-world-v2",
+            owner_user_id=owner.id,
+            name="Supported World",
+            tagline="Existing data",
+            setting_description="Existing setting",
+            daily_life_description="Existing daily life",
+            genre_tags=["fixture"],
+            tone_tags=["stable"],
+            timezone="Asia/Seoul",
+            language="ko",
+            visibility="private",
+            join_policy="private",
+            status="published",
+            contract_version="world-v1",
+            contract_hash=old_world_hash,
+            readiness_status="publish_ready",
+            create_idempotency_key="supported-world-v2",
+        )
+        membership = models.WorldMembership(
+            id="membership-v2",
+            world_id=world.id,
+            user_id=owner.id,
+            role="owner",
+            status="active",
+            joined_at=datetime.now(UTC),
+        )
+        character_count = 4 if second_roleless_world else 3
+        characters = [
+            models.Character(
+                id=f"character-v2-{index}",
+                owner_id=owner.id,
+                name=f"Character {index}",
+                handle=f"supported-v2-{index}",
+                one_liner="Existing character",
+                personality="Careful",
+                speech_style="Calm",
+                worldview="Stable",
+                topic_preferences="Migration",
+                safety_rules="Safe",
+                moderation_status="active",
+                persona_summary="A supported predecessor character.",
+            )
+            for index in range(1, character_count + 1)
+        ]
+        session.add(owner)
+        session.flush()
+        session.add_all([world, *characters])
+        session.flush()
+        session.add(
+            models.WorldRole(
+                id="custom-role-v2",
+                world_id=world.id,
+                role_key="harbor_guide",
+                name="Harbor Guide",
+                description="A role that must remain unchanged.",
+                responsibilities=["guide"],
+                allowed_activity_scope=["harbor"],
+                autonomous_allowed=True,
+                status="enabled",
+            )
+        )
+        if reserved_role_conflict:
+            session.add(
+                models.WorldRole(
+                    id="conflicting-reserved-role-v2",
+                    world_id=world.id,
+                    role_key="no_specific_role",
+                    name="Conflicting Name",
+                    description="Not the canonical reserved role.",
+                    responsibilities=["unexpected"],
+                    allowed_activity_scope=[],
+                    autonomous_allowed=True,
+                    status="enabled",
+                )
+            )
+        elif canonical_reserved_role:
+            session.add(
+                models.WorldRole(
+                    id="canonical-reserved-role-v2",
+                    world_id=world.id,
+                    role_key="no_specific_role",
+                    name=NO_SPECIFIC_ROLE_NAME,
+                    description=NO_SPECIFIC_ROLE_DESCRIPTION,
+                    responsibilities=[],
+                    allowed_activity_scope=[],
+                    autonomous_allowed=True,
+                    status="enabled",
+                    version=3,
+                )
+            )
+        session.add(membership)
+        session.flush()
+        session.add_all(
+            [
+                models.WorldCharacter(
+                    id="autonomous-v2-a",
+                    world_id=world.id,
+                    character_id=characters[0].id,
+                    membership_id=membership.id,
+                    role_key=(None if roleless_autonomous else "harbor_guide"),
+                    status="active",
+                    control_mode="autonomous",
+                    autonomous_enabled=True,
+                    world_contract_hash=old_world_hash,
+                    local_profile={"existing": True},
+                    version=4,
+                ),
+                models.WorldCharacter(
+                    id="autonomous-v2-b",
+                    world_id=world.id,
+                    character_id=characters[1].id,
+                    membership_id=membership.id,
+                    role_key=(None if roleless_autonomous else "harbor_guide"),
+                    status="active",
+                    control_mode="autonomous",
+                    autonomous_enabled=False,
+                    world_contract_hash=old_world_hash,
+                    local_profile={"existing": True},
+                    version=7,
+                ),
+                models.WorldCharacter(
+                    id="owner-controlled-v2",
+                    world_id=world.id,
+                    character_id=characters[2].id,
+                    membership_id=membership.id,
+                    role_key=None,
+                    status="active",
+                    control_mode="owner_controlled",
+                    owner_user_id=owner.id,
+                    autonomous_enabled=False,
+                    world_contract_hash=old_world_hash,
+                    local_profile={"existing": True},
+                    version=2,
+                ),
+                models.LlmCredential(
+                    id="credential-v2",
+                    owner_id=owner.id,
+                    character_id=characters[0].id,
+                    provider="google",
+                    purpose="agent",
+                    model="fixture-model",
+                    auth_profile_id="fixture-profile",
+                    label="Existing credential",
+                    encrypted_api_key="fixture-ciphertext",
+                    key_fingerprint="fixture-fingerprint",
+                    enabled=True,
+                ),
+            ]
+        )
+        if second_roleless_world:
+            second_world = models.World(
+                id="world-v2-second",
+                slug="supported-world-v2-second",
+                owner_user_id=owner.id,
+                name="Second Supported World",
+                tagline="Existing second world",
+                setting_description="Another existing setting",
+                daily_life_description="Another existing daily life",
+                genre_tags=["fixture"],
+                tone_tags=["stable"],
+                timezone="Asia/Seoul",
+                language="ko",
+                visibility="private",
+                join_policy="private",
+                status="published",
+                contract_version="world-v1",
+                contract_hash="c" * 64,
+                readiness_status="publish_ready",
+                create_idempotency_key="supported-world-v2-second",
+            )
+            second_membership = models.WorldMembership(
+                id="membership-v2-second",
+                world_id=second_world.id,
+                user_id=owner.id,
+                role="owner",
+                status="active",
+                joined_at=datetime.now(UTC),
+            )
+            session.add(second_world)
+            session.flush()
+            session.add(second_membership)
+            session.flush()
+            session.add(
+                models.WorldCharacter(
+                    id="autonomous-v2-second-world",
+                    world_id=second_world.id,
+                    character_id=characters[3].id,
+                    membership_id=second_membership.id,
+                    role_key=None,
+                    status="active",
+                    control_mode="autonomous",
+                    autonomous_enabled=True,
+                    world_contract_hash="c" * 64,
+                    local_profile={"existing": True},
+                    version=9,
+                )
+            )
+        session.commit()
+    database.checkpoint(truncate=True)
+    path = database.database_path
+    database.close()
+
+    manifest = sqlite_registry.load_sqlite_manifest(2)
+    connection = sqlite3.connect(path)
+    try:
+        current_digest = connection.execute(
+            f"SELECT schema_digest FROM {SCHEMA_VERSION_TABLE} "
+            "WHERE singleton_key = 1"
+        ).fetchone()[0]
+        connection.execute(
+            f"UPDATE {SCHEMA_VERSION_TABLE} "
+            "SET schema_version = ?, source_revision = ?, "
+            "source_migration_count = ?, schema_digest = ? "
+            "WHERE singleton_key = 1",
+            (
+                manifest.schema_version,
+                manifest.source_revision,
+                manifest.source_migration_count,
+                current_digest,
+            ),
+        )
+        connection.commit()
+    finally:
+        connection.close()
+    return path
 
 
 def test_legacy_marker_survives_forward_sqlite_generation_upgrade(
@@ -211,6 +478,225 @@ def test_v1_sqlite_is_copied_to_latest_and_existing_data_is_preserved(
     ).read_bytes() == graph_current_before
 
 
+def test_supported_v2_roleless_rows_are_promoted_by_exact_expected_delta(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "supported-v2"
+    source = _seed_v2_roleless(root)
+    source_sha = _sha256(source)
+    secret_sha = _sha256(root / "secrets" / "app-secret")
+
+    first = EmbeddedDataUpgradeCoordinator(
+        StaticRuntimeDataPath(root),
+        fallback_generation=V2_GENERATION,
+    ).upgrade()
+
+    assert first.canonical.source_version == 2
+    assert first.canonical.target_version == SQLITE_SCHEMA_VERSION
+    assert first.canonical.migrated is True
+    assert first.canonical.generation != V2_GENERATION
+    assert _sha256(source) == source_sha
+    assert _sha256(root / "secrets" / "app-secret") == secret_sha
+
+    database = SqliteCanonicalDatabase(
+        StaticRuntimeDataPath(root),
+        settings=SqliteCanonicalSettings(generation=first.canonical.generation),
+    )
+    doctor = database.open()
+    assert doctor.schema_version == SQLITE_SCHEMA_VERSION
+    with database.session() as session:
+        reserved_roles = list(
+            session.scalars(
+                select(models.WorldRole).where(
+                    models.WorldRole.world_id == "world-v2",
+                    models.WorldRole.role_key == "no_specific_role",
+                )
+            )
+        )
+        assert len(reserved_roles) == 1
+        assert reserved_roles[0].name == "역할 없음"
+        autonomous = {
+            row.id: row
+            for row in session.scalars(
+                select(models.WorldCharacter).where(
+                    models.WorldCharacter.id.in_(
+                        ("autonomous-v2-a", "autonomous-v2-b")
+                    )
+                )
+            )
+        }
+        assert autonomous["autonomous-v2-a"].role_key == "no_specific_role"
+        assert autonomous["autonomous-v2-a"].version == 5
+        assert autonomous["autonomous-v2-b"].role_key == "no_specific_role"
+        assert autonomous["autonomous-v2-b"].version == 8
+        owner_controlled = session.get(
+            models.WorldCharacter,
+            "owner-controlled-v2",
+        )
+        assert owner_controlled is not None
+        assert owner_controlled.role_key is None
+        assert owner_controlled.version == 2
+        custom_role = session.get(models.WorldRole, "custom-role-v2")
+        assert custom_role is not None
+        assert custom_role.role_key == "harbor_guide"
+        assert custom_role.version == 1
+        credential = session.get(models.LlmCredential, "credential-v2")
+        assert credential is not None
+        assert credential.encrypted_api_key == "fixture-ciphertext"
+        assert credential.key_fingerprint == "fixture-fingerprint"
+    database.close()
+
+    previous = json.loads(
+        (root / "canonical" / "previous-generation.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert previous["generation"] == V2_GENERATION
+    assert previous["data_version"] == 2
+
+    marker_before = (
+        root / "canonical" / "current-generation.json"
+    ).read_bytes()
+    second = EmbeddedDataUpgradeCoordinator(
+        StaticRuntimeDataPath(root),
+        fallback_generation=V2_GENERATION,
+    ).upgrade()
+    assert second.canonical.migrated is False
+    assert second.canonical.database_path == first.canonical.database_path
+    assert (
+        root / "canonical" / "current-generation.json"
+    ).read_bytes() == marker_before
+
+
+def test_supported_v2_without_roleless_rows_adds_no_reserved_role(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "supported-v2-no-roleless"
+    _seed_v2_roleless(root, roleless_autonomous=False)
+
+    result = EmbeddedDataUpgradeCoordinator(
+        StaticRuntimeDataPath(root),
+        fallback_generation=V2_GENERATION,
+    ).upgrade()
+
+    database = SqliteCanonicalDatabase(
+        StaticRuntimeDataPath(root),
+        settings=SqliteCanonicalSettings(generation=result.canonical.generation),
+    )
+    database.open()
+    with database.session() as session:
+        reserved = list(
+            session.scalars(
+                select(models.WorldRole).where(
+                    models.WorldRole.role_key == "no_specific_role"
+                )
+            )
+        )
+        assert reserved == []
+        autonomous = list(
+            session.scalars(
+                select(models.WorldCharacter)
+                .where(models.WorldCharacter.control_mode == "autonomous")
+                .order_by(models.WorldCharacter.id)
+            )
+        )
+        assert [(row.role_key, row.version) for row in autonomous] == [
+            ("harbor_guide", 4),
+            ("harbor_guide", 7),
+        ]
+    database.close()
+
+
+def test_supported_v2_reuses_existing_canonical_reserved_role(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "supported-v2-existing-reserved"
+    _seed_v2_roleless(root, canonical_reserved_role=True)
+
+    result = EmbeddedDataUpgradeCoordinator(
+        StaticRuntimeDataPath(root),
+        fallback_generation=V2_GENERATION,
+    ).upgrade()
+
+    database = SqliteCanonicalDatabase(
+        StaticRuntimeDataPath(root),
+        settings=SqliteCanonicalSettings(generation=result.canonical.generation),
+    )
+    database.open()
+    with database.session() as session:
+        reserved = list(
+            session.scalars(
+                select(models.WorldRole).where(
+                    models.WorldRole.world_id == "world-v2",
+                    models.WorldRole.role_key == "no_specific_role",
+                )
+            )
+        )
+        assert len(reserved) == 1
+        assert reserved[0].id == "canonical-reserved-role-v2"
+        assert reserved[0].version == 3
+    database.close()
+
+
+def test_supported_v2_creates_one_reserved_role_per_affected_world(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "supported-v2-multiple-worlds"
+    _seed_v2_roleless(root, second_roleless_world=True)
+
+    result = EmbeddedDataUpgradeCoordinator(
+        StaticRuntimeDataPath(root),
+        fallback_generation=V2_GENERATION,
+    ).upgrade()
+
+    database = SqliteCanonicalDatabase(
+        StaticRuntimeDataPath(root),
+        settings=SqliteCanonicalSettings(generation=result.canonical.generation),
+    )
+    database.open()
+    with database.session() as session:
+        reserved = list(
+            session.scalars(
+                select(models.WorldRole)
+                .where(models.WorldRole.role_key == "no_specific_role")
+                .order_by(models.WorldRole.world_id)
+            )
+        )
+        assert [row.world_id for row in reserved] == [
+            "world-v2",
+            "world-v2-second",
+        ]
+        second = session.get(
+            models.WorldCharacter,
+            "autonomous-v2-second-world",
+        )
+        assert second is not None
+        assert second.role_key == "no_specific_role"
+        assert second.version == 10
+    database.close()
+
+
+def test_supported_v2_reserved_role_conflict_fails_closed(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "supported-v2-conflict"
+    source = _seed_v2_roleless(root, reserved_role_conflict=True)
+    source_sha = _sha256(source)
+
+    with pytest.raises(
+        SqliteCanonicalUpgradeError,
+        match="sqlite_migration_reserved_role_conflict",
+    ):
+        EmbeddedDataUpgradeCoordinator(
+            StaticRuntimeDataPath(root),
+            fallback_generation=V2_GENERATION,
+        ).upgrade()
+
+    assert _sha256(source) == source_sha
+    assert not (root / "canonical" / "current-generation.json").exists()
+    assert not list((root / "canonical" / "generations").glob(".*.tmp-*"))
+
+
 def test_failed_sqlite_step_keeps_v1_active_and_removes_staging(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -224,6 +710,37 @@ def test_failed_sqlite_step_keeps_v1_active_and_removes_staging(
 
     monkeypatch.setitem(sqlite_registry.MIGRATIONS, 1, fail_step)
     with pytest.raises(SqliteCanonicalUpgradeError, match="step_failed"):
+        EmbeddedDataUpgradeCoordinator(
+            StaticRuntimeDataPath(root),
+            fallback_generation=GENERATION,
+        ).upgrade()
+
+    assert _sha256(source) == source_sha
+    assert not (root / "canonical" / "current-generation.json").exists()
+    assert not list((root / "canonical" / "generations").glob(".*.tmp-*"))
+
+
+def test_each_consecutive_step_rejects_undeclared_identity_changes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root = tmp_path / "undeclared-step-delta"
+    source = _seed_v1(root)
+    source_sha = _sha256(source)
+    original = sqlite_registry.MIGRATIONS[1]
+
+    def mutate_unowned_table(connection) -> None:
+        original(connection)
+        connection.exec_driver_sql(
+            "UPDATE users SET display_name = 'Unexpected change' "
+            "WHERE id = 'owner-v1'"
+        )
+
+    monkeypatch.setitem(sqlite_registry.MIGRATIONS, 1, mutate_unowned_table)
+    with pytest.raises(
+        SqliteCanonicalUpgradeError,
+        match="sqlite_migration_identity_changed",
+    ):
         EmbeddedDataUpgradeCoordinator(
             StaticRuntimeDataPath(root),
             fallback_generation=GENERATION,
