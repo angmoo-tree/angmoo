@@ -55,8 +55,8 @@ def test_sqlite_manifests_match_frozen_v1_and_latest_model_contract(
         version=SQLITE_SCHEMA_VERSION,
     )
     assert latest.canonical_table_count == 87
-    assert tuple(version for version, _step in migration_chain(1)) == (1,)
-    assert 1 in MIGRATIONS
+    assert tuple(version for version, _step in migration_chain(1)) == (1, 2)
+    assert {1, 2} <= set(MIGRATIONS)
 
 
 def test_ladybug_manifest_matches_adapter_command_and_query_contract() -> None:

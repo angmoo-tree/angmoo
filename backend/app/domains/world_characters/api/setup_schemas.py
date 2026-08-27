@@ -218,6 +218,16 @@ class WorldCharacterEntryRead(WorldCharacterSetupSchema):
     reused: bool = False
 
 
+class WorldCharacterRoleUpdate(WorldCharacterSetupSchema):
+    role_key: str = Field(min_length=1, max_length=64)
+    version: int = Field(ge=1)
+
+    @field_validator("role_key")
+    @classmethod
+    def _role_key(cls, value: str) -> str:
+        return normalize_bounded_text(value)
+
+
 class WorldCommunityProfileRead(WorldCommunityProfilePayload):
     id: str
     world_character_id: str

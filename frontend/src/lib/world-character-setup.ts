@@ -214,7 +214,7 @@ export function enterWorldWithCharacter(
   worldId: string,
   data: {
     character_id: string;
-    role_key: string | null;
+    role_key: string;
     local_background: string;
     idempotency_key: string;
   },
@@ -222,6 +222,17 @@ export function enterWorldWithCharacter(
   return apiRequest<WorldCharacterEntryRead>(
     `/worlds/${encodeURIComponent(worldId)}/characters`,
     { method: "POST", body: data },
+  );
+}
+
+export function updateWorldCharacterRole(
+  worldId: string,
+  characterId: string,
+  data: { role_key: string; version: number },
+) {
+  return apiRequest<WorldCharacterEntryRead>(
+    `/worlds/${encodeURIComponent(worldId)}/characters/${encodeURIComponent(characterId)}/role`,
+    { method: "PATCH", body: data },
   );
 }
 

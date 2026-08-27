@@ -57,6 +57,7 @@ const DAYPARTS: { key: WorldDaypart; label: string; hours: string }[] = [
   { key: "evening", label: "저녁", hours: "18:00~24:00" },
 ];
 const DAYPART_KEYS = DAYPARTS.map((entry) => entry.key);
+const NO_SPECIFIC_ROLE_KEY = "no_specific_role";
 
 const EMPTY_DEFINITION: WorldDefinition = {
   name: "",
@@ -132,16 +133,18 @@ function worldToDefinition(context: WorldCreatorContext): WorldDefinition {
       available_dayparts,
       access_role_keys,
     })),
-    roles: world.roles.map(
-      ({ key, name, description, responsibilities, allowed_activity_scope, autonomous_allowed }) => ({
-        key,
-        name,
-        description,
-        responsibilities,
-        allowed_activity_scope,
-        autonomous_allowed,
-      }),
-    ),
+    roles: world.roles
+      .filter(({ key }) => key !== NO_SPECIFIC_ROLE_KEY)
+      .map(
+        ({ key, name, description, responsibilities, allowed_activity_scope, autonomous_allowed }) => ({
+          key,
+          name,
+          description,
+          responsibilities,
+          allowed_activity_scope,
+          autonomous_allowed,
+        }),
+      ),
     daypart_profiles: world.daypart_profiles.map(
       ({ daypart, description, available_features, restricted_features }) => ({
         daypart,

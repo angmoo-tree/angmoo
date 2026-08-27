@@ -26,6 +26,7 @@ import {
   preflightWorldCharacterSetup,
   rejectWorldCharacterSetup,
   retryWorldCharacterSetup,
+  updateWorldCharacterRole,
   WorldCharacterSetupApiError,
   type WorldActivityDaypart,
   type WorldCharacterEntryRead,
@@ -34,6 +35,8 @@ import {
   type WorldCharacterSetupRead,
 } from "@/lib/world-character-setup";
 import { getWorld, type WorldRead } from "@/lib/worlds";
+
+const NO_SPECIFIC_ROLE_KEY = "no_specific_role";
 
 const DAYPARTS: Array<{ key: WorldActivityDaypart; label: string; time: string }> = [
   { key: "dawn", label: "새벽", time: "00:00–06:00" },
@@ -200,8 +203,6 @@ export function WorldCharacterAutonomySetupClient({
           setPreflight(nextPreflight);
           return;
         }
-        const allowedRoles = nextWorld.roles.filter((role) => role.autonomous_allowed);
-        if (allowedRoles.length === 1) setRoleKey(allowedRoles[0].key);
       })
       .catch((nextError) => {
         if (active) setError(errorMessage(nextError));
@@ -270,7 +271,10 @@ export function WorldCharacterAutonomySetupClient({
     };
   }, [characterId, setup?.autonomy_ready, worldId]);
   const allowedRoles = useMemo(
-    () => world?.roles.filter((role) => role.autonomous_allowed) ?? [],
+    () =>
+      world?.roles.filter(
+        (role) => role.autonomous_allowed && role.key !== NO_SPECIFIC_ROLE_KEY,
+      ) ?? [],
     [world],
   );
   const candidates = useMemo(
@@ -308,13 +312,14 @@ export function WorldCharacterAutonomySetupClient({
   }
 
   async function handleEnterWorld() {
+    if (!roleKey) return;
     setPending("entry");
     setError(null);
     setNotice(null);
     try {
       const nextEntry = await enterWorldWithCharacter(worldId, {
         character_id: characterId,
-        role_key: roleKey || null,
+        role_key: roleKey,
         local_background: localBackground,
         idempotency_key: entryKey.current,
       });
@@ -327,6 +332,29 @@ export function WorldCharacterAutonomySetupClient({
       );
     } catch (nextError) {
       setError(errorMessage(nextError));
+    } finally {
+      setPending(null);
+    }
+  }
+
+  async function handleRoleUpdate() {
+    if (!entry || !roleKey || roleKey === entry.role_key) return;
+    setPending("role-update");
+    setError(null);
+    setNotice(null);
+    try {
+      const nextEntry = await updateWorldCharacterRole(worldId, characterId, {
+        role_key: roleKey,
+        version: entry.version,
+      });
+      setEntry(nextEntry);
+      await refreshSetup(nextEntry.id);
+      setNotice(
+        "역할을 변경했습니다. 기존 활동 준비 결과가 있다면 새 역할에 맞게 다시 생성·승인해 주세요.",
+      );
+    } catch (nextError) {
+      setError(errorMessage(nextError));
+      setRoleKey(entry.role_key ?? "");
     } finally {
       setPending(null);
     }
@@ -516,13 +544,8 @@ export function WorldCharacterAutonomySetupClient({
               onChange={(event) => setRoleKey(event.target.value)}
               className="mt-2 w-full rounded-2xl border border-outline-variant bg-white px-4 py-3"
             >
-              <option value="">
-                {allowedRoles.length === 0
-                  ? "지정 역할 없음 (일반 참여자)"
-                  : allowedRoles.length === 1
-                    ? "자동 선택"
-                    : "역할을 선택하세요"}
-              </option>
+              <option value="">역할을 선택하세요</option>
+              <option value={NO_SPECIFIC_ROLE_KEY}>역할 없음</option>
               {allowedRoles.map((role) => (
                 <option key={role.key} value={role.key}>{role.name}</option>
               ))}
@@ -541,7 +564,7 @@ export function WorldCharacterAutonomySetupClient({
             <button
               type="button"
               onClick={() => void handleEnterWorld()}
-              disabled={pending !== null || (allowedRoles.length > 1 && !roleKey)}
+              disabled={pending !== null || !roleKey}
               className="mt-5 rounded-full bg-primary px-6 py-3 font-bold text-on-primary disabled:cursor-not-allowed disabled:opacity-50"
             >
               {pending === "entry" ? "입장 준비 중…" : "이 World에서 활동 준비하기"}
@@ -552,6 +575,38 @@ export function WorldCharacterAutonomySetupClient({
         {entry && preflight && setup ? (
           <>
             <section className="rounded-[28px] border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
+              <div className="rounded-2xl border border-outline-variant bg-surface-container-low p-4">
+                <label className="block text-sm font-bold" htmlFor="existing-world-role">
+                  이 World에서의 역할
+                </label>
+                <div className="mt-2 flex flex-wrap items-center gap-3">
+                  <select
+                    id="existing-world-role"
+                    value={roleKey}
+                    onChange={(event) => setRoleKey(event.target.value)}
+                    className="min-w-56 flex-1 rounded-2xl border border-outline-variant bg-white px-4 py-3"
+                  >
+                    <option value="">역할을 선택하세요</option>
+                    <option value={NO_SPECIFIC_ROLE_KEY}>역할 없음</option>
+                    {allowedRoles.map((role) => (
+                      <option key={role.key} value={role.key}>{role.name}</option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => void handleRoleUpdate()}
+                    disabled={
+                      pending !== null || !roleKey || roleKey === entry.role_key
+                    }
+                    className="rounded-full bg-primary px-5 py-3 font-bold text-on-primary disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {pending === "role-update" ? "저장 중…" : "역할 저장"}
+                  </button>
+                </div>
+                <p className="mt-2 text-xs text-on-surface-variant">
+                  역할을 바꾸면 기존 활동 준비 결과를 새 역할 기준으로 다시 확인해야 합니다.
+                </p>
+              </div>
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-black">2. 생성 전 확인</h2>

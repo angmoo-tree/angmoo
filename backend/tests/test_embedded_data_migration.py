@@ -24,6 +24,7 @@ from app.runtime.persistence.sqlite_schema import (
     SCHEMA_VERSION_TABLE,
     SQLITE_V1_SOURCE_ALEMBIC_MIGRATION_COUNT,
     SQLITE_V1_SOURCE_ALEMBIC_REVISION,
+    SQLITE_SCHEMA_VERSION,
     WORLD_PACKAGE_REGISTRY_TABLES,
     build_sqlite_v1_metadata,
     create_schema_version_table,
@@ -122,12 +123,12 @@ def test_legacy_marker_survives_forward_sqlite_generation_upgrade(
         fallback_generation=legacy_generation,
     ).upgrade()
     assert upgraded.canonical.source_version == 1
-    assert upgraded.canonical.target_version == 2
+    assert upgraded.canonical.target_version == SQLITE_SCHEMA_VERSION
     assert upgraded.canonical.migrated is True
     assert upgraded.canonical.generation != legacy_generation
 
     # The ER6 marker attests the immutable v1 generation that was imported.
-    # It must not reject the later active v2 generation as marker corruption.
+    # It must not reject a later active generation as marker corruption.
     completed = legacy_migration.migrate_if_needed()
     assert completed.status == "already_migrated"
     assert completed.generation == legacy_generation
@@ -135,7 +136,7 @@ def test_legacy_marker_survives_forward_sqlite_generation_upgrade(
     assert completed.canonical_table_count == 83
 
 
-def test_v1_sqlite_is_copied_to_v2_and_existing_data_is_preserved(
+def test_v1_sqlite_is_copied_to_latest_and_existing_data_is_preserved(
     tmp_path: Path,
 ) -> None:
     root = tmp_path / "한글 contributor data"
@@ -150,7 +151,7 @@ def test_v1_sqlite_is_copied_to_v2_and_existing_data_is_preserved(
     ).upgrade()
 
     assert first.canonical.source_version == 1
-    assert first.canonical.target_version == 2
+    assert first.canonical.target_version == SQLITE_SCHEMA_VERSION
     assert first.canonical.migrated is True
     assert first.canonical.generation != GENERATION
     assert source.is_file()
@@ -177,7 +178,7 @@ def test_v1_sqlite_is_copied_to_v2_and_existing_data_is_preserved(
         }
     finally:
         connection.close()
-    assert version == 2
+    assert version == SQLITE_SCHEMA_VERSION
     assert owner == "Existing Owner"
     assert set(WORLD_PACKAGE_REGISTRY_TABLES) <= tables
 
@@ -326,7 +327,7 @@ def test_graph_rebuild_failure_degrades_without_replacing_previous(
         fallback_generation=GENERATION,
     ).upgrade()
 
-    assert result.canonical.target_version == 2
+    assert result.canonical.target_version == SQLITE_SCHEMA_VERSION
     assert result.graph.degraded is True
     assert result.graph.error_code == "ladybug_rebuild_injected"
     assert _sha256(previous_graph) == previous_sha

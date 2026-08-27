@@ -26,6 +26,8 @@ from app.domains.world_packages.infrastructure.sqlalchemy_registry import (
     SqlAlchemyWorldPackageRegistry,
 )
 from app.domains.worlds.public import (
+    NO_SPECIFIC_ROLE_KEY,
+    NO_SPECIFIC_ROLE_PORTABLE_REF,
     WorldDaypartProfileInput,
     WorldDraftCreate,
     WorldGlossaryTermInput,
@@ -37,6 +39,8 @@ from app.domains.worlds.public import (
 
 
 def _local_ref(value: str) -> str:
+    if value == NO_SPECIFIC_ROLE_PORTABLE_REF:
+        return NO_SPECIFIC_ROLE_KEY
     return value.split("/", 1)[-1]
 
 
@@ -145,6 +149,7 @@ class SqlAlchemyWorldPackageDestinationSeed:
                 else None
             ),
             banner_alt_text=world_data.banner_alt_text,
+            allow_system_roles=True,
         )
         if world_outcome.replayed:
             raise RuntimeError("world_package_registry_missing_for_existing_seed")

@@ -497,6 +497,56 @@ def test_semantically_invalid_world_references_fail_after_integrity_passes(
     )
 
 
+def test_reserved_no_role_payload_is_accepted_only_with_canonical_content(
+    tmp_path: Path,
+) -> None:
+    payloads = _payloads(_archive())
+    world = json.loads(payloads["content/world.json"])
+    world["roles"].append(
+        {
+            "allowed_activity_scope": [],
+            "autonomous_allowed": True,
+            "description": "별도의 World 역할을 지정하지 않은 캐릭터",
+            "name": "역할 없음",
+            "ref": "roles/no-specific-role",
+            "responsibilities": [],
+        }
+    )
+    world_characters = json.loads(payloads["content/world-characters.json"])
+    world_characters["characters"][0]["role_ref"] = "roles/no-specific-role"
+    _replace_indexed_payload(
+        payloads,
+        path="content/world.json",
+        content=canonical_json_bytes(world),
+    )
+    valid_content = _replace_indexed_payload(
+        payloads,
+        path="content/world-characters.json",
+        content=canonical_json_bytes(world_characters),
+    )
+
+    _store, _use_case, prepared = _stage(tmp_path / "valid", valid_content)
+    assert prepared.preview.state is WorldPackageImportState.PREVIEW_READY
+
+    tampered_payloads = _payloads(valid_content)
+    tampered_world = json.loads(tampered_payloads["content/world.json"])
+    reserved = next(
+        role
+        for role in tampered_world["roles"]
+        if role["ref"] == "roles/no-specific-role"
+    )
+    reserved["name"] = "위조된 역할"
+    tampered_content = _replace_indexed_payload(
+        tampered_payloads,
+        path="content/world.json",
+        content=canonical_json_bytes(tampered_world),
+    )
+
+    with pytest.raises(WorldPackageContractError) as rejected:
+        _stage(tmp_path / "tampered", tampered_content)
+    assert rejected.value.reason_code is WorldPackageReasonCode.REFERENCE_INVALID
+
+
 def test_webp_preview_is_decoded_bounded_and_metadata_stripped(
     tmp_path: Path,
 ) -> None:

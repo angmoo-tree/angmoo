@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.core.ids import uuid7_string
 from app.domains.worlds.api import schemas
+from app.domains.worlds.domain import reserved_roles
 from app.domains.worlds.infrastructure import definition_repository as world_definitions
 from app.domains.worlds.infrastructure import generation_context as world_generation_context
 from app.domains.worlds.infrastructure import sqlalchemy_models as models
@@ -215,6 +216,7 @@ def _sync_rows(
     row_identity: Callable[[Any], Any],
     create_values: Callable[[_T], dict[str, Any]],
     update_values: Callable[[_T], dict[str, Any]],
+    preserve_identities: set[Any] | None = None,
 ) -> None:
     _assert_unique(inputs, identity, model.__tablename__)
     existing = list(db.scalars(select(model).where(model.world_id == world_id)))
@@ -244,8 +246,13 @@ def _sync_rows(
         if semantic_changed or row.status != "enabled":
             row.version += 1
         row.status = "enabled"
+    preserved = preserve_identities or set()
     for row in existing:
-        if row_identity(row) not in active_keys and row.status != "archived":
+        if (
+            row_identity(row) not in active_keys
+            and row_identity(row) not in preserved
+            and row.status != "archived"
+        ):
             row.status = "archived"
             row.version += 1
 
@@ -261,6 +268,7 @@ def _sync_optional_definition(
     *,
     world: models.World,
     data: schemas.WorldUpdate,
+    allow_system_roles: bool = False,
 ) -> None:
     fields = data.model_fields_set
     if "places" in fields:
@@ -288,6 +296,17 @@ def _sync_optional_definition(
         )
     if "roles" in fields:
         roles = data.roles or []
+        for item in roles:
+            if item.key != reserved_roles.NO_SPECIFIC_ROLE_KEY:
+                continue
+            if not allow_system_roles or not (
+                item.name == reserved_roles.NO_SPECIFIC_ROLE_NAME
+                and item.description == reserved_roles.NO_SPECIFIC_ROLE_DESCRIPTION
+                and item.responsibilities == []
+                and item.allowed_activity_scope == []
+                and item.autonomous_allowed is True
+            ):
+                raise WorldDefinitionValidationError("reserved_world_role")
         _sync_rows(
             db,
             world_id=world.id,
@@ -310,6 +329,7 @@ def _sync_optional_definition(
                 "allowed_activity_scope": item.allowed_activity_scope,
                 "autonomous_allowed": item.autonomous_allowed,
             },
+            preserve_identities={reserved_roles.NO_SPECIFIC_ROLE_KEY},
         )
     if "daypart_profiles" in fields:
         profiles = data.daypart_profiles or []
@@ -407,6 +427,7 @@ def seed_world(
     planned_slug: str | None = None,
     banner_media_id: str | None = None,
     banner_alt_text: str = "",
+    allow_system_roles: bool = False,
 ) -> WorldSeedOutcome:
     """Flush a World aggregate without owning commit or rollback."""
 
@@ -477,6 +498,7 @@ def seed_world(
             rules=data.rules,
             glossary=data.glossary,
         ),
+        allow_system_roles=allow_system_roles,
     )
     db.flush()
     world_definitions.refresh_world_contract(db, world)

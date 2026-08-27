@@ -16,6 +16,14 @@ from app.api.v1.routes import worlds as world_routes
 from app.api.v1.routes import world_character_setup as setup_routes
 from app.core import security
 from app.core.db import Base
+from app.domains.worlds.domain.reserved_roles import (
+    NO_SPECIFIC_ROLE_DESCRIPTION,
+    NO_SPECIFIC_ROLE_KEY,
+    NO_SPECIFIC_ROLE_NAME,
+)
+from app.runtime.migrations.sqlite_versions.v2_to_v3_no_specific_role import (
+    upgrade_v2_to_v3,
+)
 from app.services import world_character_provider, world_character_setup
 
 
@@ -777,7 +785,7 @@ def test_world_entry_creates_pending_world_character_without_provider_or_autonom
         assert db.scalar(select(models.WorldCharacterSetupAttempt)) is None
 
 
-def test_world_entry_without_configured_roles_uses_general_participant() -> None:
+def test_world_entry_requires_explicit_no_specific_role_selection() -> None:
     engine = _engine()
     with Session(engine, expire_on_commit=False) as db:
         owner, _world_character = _seed(db)
@@ -804,7 +812,7 @@ def test_world_entry_without_configured_roles_uses_general_participant() -> None
     principal: dict[str, models.User | None] = {"user": owner}
     app = _app(engine, principal)
 
-    entered = _request(
+    missing_role = _request(
         app,
         "POST",
         "/api/v1/worlds/world-a/characters",
@@ -816,7 +824,106 @@ def test_world_entry_without_configured_roles_uses_general_participant() -> None
         },
     )
 
+    assert missing_role.status_code == 422
+    assert missing_role.json() == {"detail": "role_required"}
+
+    entered = _request(
+        app,
+        "POST",
+        "/api/v1/worlds/world-a/characters",
+        json={
+            "character_id": "character-no-role",
+            "role_key": NO_SPECIFIC_ROLE_KEY,
+            "local_background": "A visitor learning the academy's everyday customs",
+            "idempotency_key": "enter-character-no-role-world-a-explicit",
+        },
+    )
+
     assert entered.status_code == 201
-    assert entered.json()["role_key"] is None
+    assert entered.json()["role_key"] == NO_SPECIFIC_ROLE_KEY
     assert entered.json()["status"] == "pending"
     assert entered.json()["autonomous_enabled"] is False
+    with Session(engine) as db:
+        reserved = db.scalar(
+            select(models.WorldRole).where(
+                models.WorldRole.world_id == "world-a",
+                models.WorldRole.role_key == NO_SPECIFIC_ROLE_KEY,
+            )
+        )
+        assert reserved is not None
+        assert reserved.name == NO_SPECIFIC_ROLE_NAME
+        assert reserved.description == NO_SPECIFIC_ROLE_DESCRIPTION
+        assert reserved.autonomous_allowed is True
+        assert reserved.status == "enabled"
+
+
+def test_v2_to_v3_normalizes_existing_autonomous_null_role_idempotently() -> None:
+    engine = _engine()
+    with Session(engine, expire_on_commit=False) as db:
+        owner, world_character = _seed(db)
+        original_owner_id = owner.id
+        original_character_id = world_character.character_id
+        original_world_id = world_character.world_id
+        world_character.role_key = None
+        db.commit()
+
+    with engine.begin() as connection:
+        upgrade_v2_to_v3(connection)
+    with engine.begin() as connection:
+        upgrade_v2_to_v3(connection)
+
+    with Session(engine) as db:
+        migrated = db.get(models.WorldCharacter, "world-character-a")
+        assert migrated is not None
+        assert migrated.world_id == original_world_id
+        assert migrated.character_id == original_character_id
+        assert migrated.role_key == NO_SPECIFIC_ROLE_KEY
+        assert db.get(models.User, original_owner_id) is not None
+        assert db.get(models.Character, original_character_id) is not None
+        reserved = db.scalar(
+            select(models.WorldRole).where(
+                models.WorldRole.world_id == original_world_id,
+                models.WorldRole.role_key == NO_SPECIFIC_ROLE_KEY,
+            )
+        )
+        assert reserved is not None
+        assert reserved.name == NO_SPECIFIC_ROLE_NAME
+        assert db.scalar(
+            select(func.count())
+            .select_from(models.WorldRole)
+            .where(
+                models.WorldRole.world_id == original_world_id,
+                models.WorldRole.role_key == NO_SPECIFIC_ROLE_KEY,
+            )
+        ) == 1
+
+
+def test_existing_world_character_role_can_be_changed_to_explicit_no_role() -> None:
+    engine = _engine()
+    with Session(engine, expire_on_commit=False) as db:
+        owner, world_character = _seed(db)
+        initial_version = world_character.version
+    principal: dict[str, models.User | None] = {"user": owner}
+    app = _app(engine, principal)
+
+    changed = _request(
+        app,
+        "PATCH",
+        "/api/v1/worlds/world-a/characters/character-a/role",
+        json={
+            "role_key": NO_SPECIFIC_ROLE_KEY,
+            "version": initial_version,
+        },
+    )
+
+    assert changed.status_code == 200
+    assert changed.json()["role_key"] == NO_SPECIFIC_ROLE_KEY
+    assert changed.json()["version"] == initial_version + 1
+    stale = _request(
+        app,
+        "PATCH",
+        "/api/v1/worlds/world-a/characters/character-a/role",
+        json={"role_key": "student", "version": initial_version},
+    )
+    assert stale.status_code == 409
+    assert stale.json() == {"detail": "row_version_conflict"}

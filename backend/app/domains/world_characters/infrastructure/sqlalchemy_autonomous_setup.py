@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -21,7 +21,13 @@ from app.domains.world_characters.infrastructure import (
     autonomous_setup_models as models,
     direct_llm_setup_provider as world_character_provider,
 )
-from app.domains.worlds.public import build_world_generation_context
+from app.domains.worlds.public import (
+    NO_SPECIFIC_ROLE_KEY,
+    ReservedWorldRoleConflictError,
+    build_world_generation_context,
+    ensure_no_specific_role,
+    refresh_world_contract,
+)
 from app.integrations import direct_llm
 from app.providers.registry import get_model_spec
 
@@ -151,16 +157,23 @@ def enter_world(
         models.WorldRole.autonomous_allowed.is_(True),
     )
     roles = list(db.scalars(role_statement))
-    if data.role_key is not None:
+    if data.role_key is None:
+        raise WorldCharacterSetupValidationError("role_required")
+    if data.role_key == NO_SPECIFIC_ROLE_KEY:
+        try:
+            role = ensure_no_specific_role(db, world_id=world_id)
+        except ReservedWorldRoleConflictError as exc:
+            raise WorldCharacterSetupValidationError(
+                "world_reference_invalid"
+            ) from exc
+        if refresh_world_contract(db, world):
+            world.definition_version += 1
+            world.row_version += 1
+        db.flush()
+    else:
         role = next((item for item in roles if item.role_key == data.role_key), None)
         if role is None:
             raise WorldCharacterSetupValidationError("world_reference_invalid")
-    elif len(roles) == 1:
-        role = roles[0]
-    elif not roles:
-        role = None
-    else:
-        raise WorldCharacterSetupValidationError("role_required")
 
     existing = db.scalar(
         select(models.WorldCharacter).where(
@@ -187,7 +200,7 @@ def enter_world(
         world_id=world_id,
         character_id=character.id,
         membership_id=membership.id,
-        role_key=role.role_key if role is not None else None,
+        role_key=role.role_key,
         status="pending",
         autonomous_enabled=False,
         local_profile=local_profile,
@@ -255,6 +268,101 @@ def get_world_entry(
         user=user,
     )
     return _entry_read(scope.world_character, reused=True)
+
+
+def update_world_character_role(
+    db: Session,
+    *,
+    world_id: str,
+    character_id: str,
+    user: models.User,
+    data: schemas.WorldCharacterRoleUpdate,
+) -> schemas.WorldCharacterEntryRead:
+    character = db.get(models.Character, character_id)
+    if character is None or character.deleted_at is not None:
+        raise WorldCharacterSetupNotFoundError(character_id)
+    if character.owner_id != user.id:
+        raise WorldCharacterSetupForbiddenError(character_id)
+    world_character = db.scalar(
+        select(models.WorldCharacter)
+        .where(
+            models.WorldCharacter.world_id == world_id,
+            models.WorldCharacter.character_id == character_id,
+        )
+        .with_for_update()
+    )
+    if world_character is None:
+        raise WorldCharacterSetupNotFoundError(character_id)
+    if world_character.control_mode != "autonomous":
+        raise WorldCharacterSetupValidationError(
+            "owner_controlled_automation_disabled"
+        )
+    if world_character.version != data.version:
+        raise WorldCharacterSetupConflictError("row_version_conflict")
+    world = db.get(models.World, world_id)
+    if world is None:
+        raise WorldCharacterSetupNotFoundError(world_id)
+    if data.role_key == NO_SPECIFIC_ROLE_KEY:
+        try:
+            role = ensure_no_specific_role(db, world_id=world_id)
+        except ReservedWorldRoleConflictError as exc:
+            raise WorldCharacterSetupValidationError(
+                "world_reference_invalid"
+            ) from exc
+        if refresh_world_contract(db, world):
+            world.definition_version += 1
+            world.row_version += 1
+    else:
+        role = db.scalar(
+            select(models.WorldRole).where(
+                models.WorldRole.world_id == world_id,
+                models.WorldRole.role_key == data.role_key,
+                models.WorldRole.status == "enabled",
+                models.WorldRole.autonomous_allowed.is_(True),
+            )
+        )
+        if role is None:
+            raise WorldCharacterSetupValidationError("world_reference_invalid")
+    if world_character.role_key != role.role_key:
+        world_character.role_key = role.role_key
+        world_character.version += 1
+        db.execute(
+            update(models.WorldCommunityProfile)
+            .where(
+                models.WorldCommunityProfile.world_character_id
+                == world_character.id,
+                models.WorldCommunityProfile.status.in_({"draft", "ready"}),
+            )
+            .values(status="stale")
+        )
+        db.execute(
+            update(models.WorldActivityRepertoire)
+            .where(
+                models.WorldActivityRepertoire.world_character_id
+                == world_character.id,
+                models.WorldActivityRepertoire.status.in_({"draft", "ready"}),
+            )
+            .values(status="stale")
+        )
+    db.commit()
+    db.refresh(world_character)
+    return _entry_read(world_character, reused=False)
+
+
+def _require_autonomous_role(db: Session, scope: SetupScope) -> models.WorldRole:
+    if scope.world_character.role_key is None:
+        raise WorldCharacterSetupValidationError("role_required")
+    role = db.scalar(
+        select(models.WorldRole).where(
+            models.WorldRole.world_id == scope.world.id,
+            models.WorldRole.role_key == scope.world_character.role_key,
+            models.WorldRole.status == "enabled",
+            models.WorldRole.autonomous_allowed.is_(True),
+        )
+    )
+    if role is None:
+        raise WorldCharacterSetupValidationError("world_reference_invalid")
+    return role
 
 
 def _load_scope(
@@ -365,6 +473,7 @@ def preflight_setup(
     user: models.User,
 ) -> schemas.WorldCharacterSetupPreflightRead:
     scope = _load_scope(db, world_character_id=world_character_id, user=user)
+    _require_autonomous_role(db, scope)
     material: CredentialMaterial | None = None
     reason: str | None = None
     try:
@@ -410,6 +519,7 @@ async def generate_setup(
         user=user,
         lock_for_update=True,
     )
+    _require_autonomous_role(db, scope)
     material = _resolve_material(db, scope)
     character_hash = world_character_contracts.character_contract_hash(scope.character)
     world_hash = scope.world.contract_hash

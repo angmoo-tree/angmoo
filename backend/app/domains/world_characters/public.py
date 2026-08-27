@@ -35,6 +35,7 @@ from app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup imp
     reject_setup,
     retry_setup,
     set_active_world_character_autonomy,
+    update_world_character_role,
 )
 from app.domains.world_characters.infrastructure.sqlalchemy_seed import (
     seed_autonomous_world_character,
@@ -81,5 +82,6 @@ __all__ = [
     "reject_setup",
     "retry_setup",
     "set_active_world_character_autonomy",
+    "update_world_character_role",
     "seed_autonomous_world_character",
 ]

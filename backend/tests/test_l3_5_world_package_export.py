@@ -60,6 +60,12 @@ from app.domains.world_packages.infrastructure.sqlalchemy_source_snapshot import
 from app.domains.world_packages.infrastructure.zip_archive import (
     DeterministicWorldPackageZipArchive,
 )
+from app.domains.worlds.domain.reserved_roles import (
+    NO_SPECIFIC_ROLE_PORTABLE_REF,
+)
+from app.domains.worlds.infrastructure.sqlalchemy_reserved_roles import (
+    ensure_no_specific_role,
+)
 from app.domains.worlds.public import world_contract_hash
 
 
@@ -486,6 +492,80 @@ def test_sqlalchemy_snapshot_filters_owner_controlled_and_runtime_state(
             local_owner_id="private-owner-id",
         )
         assert seed_changed.source_fingerprint != first.source_fingerprint
+    engine.dispose()
+
+
+def test_sqlalchemy_snapshot_exports_explicit_no_role_portably_and_deterministically(
+    tmp_path: Path,
+) -> None:
+    engine, factory, _owner = _database_fixture(tmp_path)
+    with factory() as db:
+        autonomous = db.get(models.WorldCharacter, "autonomous-world-character-id")
+        world = db.get(models.World, "private-source-world-id")
+        assert autonomous is not None
+        assert world is not None
+        ensure_no_specific_role(db, world_id=world.id)
+        autonomous.role_key = "no_specific_role"
+        db.flush()
+        world.contract_hash = world_contract_hash(db, world)
+        db.commit()
+
+    with factory() as db:
+        adapter = SqlAlchemyWorldPackageSourceSnapshot(db)
+        first = adapter.snapshot(
+            source_world_id="private-source-world-id",
+            local_owner_id="private-owner-id",
+        )
+        second = adapter.snapshot(
+            source_world_id="private-source-world-id",
+            local_owner_id="private-owner-id",
+        )
+
+    reserved = next(
+        role
+        for role in first.world.roles
+        if role.ref == NO_SPECIFIC_ROLE_PORTABLE_REF
+    )
+    assert reserved.name == "역할 없음"
+    assert first.world_characters[0].role_ref == NO_SPECIFIC_ROLE_PORTABLE_REF
+    assert first.source_fingerprint == second.source_fingerprint
+    engine.dispose()
+
+
+def test_sqlalchemy_snapshot_allows_world_with_only_owner_controlled_character(
+    tmp_path: Path,
+) -> None:
+    engine, factory, _owner = _database_fixture(tmp_path)
+    with factory() as db:
+        autonomous = db.get(models.WorldCharacter, "autonomous-world-character-id")
+        owner_controlled = db.get(models.WorldCharacter, "owner-world-character-id")
+        role = db.scalar(
+            select(models.WorldRole).where(
+                models.WorldRole.world_id == "private-source-world-id"
+            )
+        )
+        world = db.get(models.World, "private-source-world-id")
+        assert autonomous is not None
+        assert owner_controlled is not None
+        assert role is not None
+        assert world is not None
+        db.delete(autonomous)
+        owner_controlled.role_key = None
+        db.delete(role)
+        db.flush()
+        world.contract_hash = world_contract_hash(db, world)
+        db.commit()
+
+    with factory() as db:
+        snapshot = SqlAlchemyWorldPackageSourceSnapshot(db).snapshot(
+            source_world_id="private-source-world-id",
+            local_owner_id="private-owner-id",
+        )
+
+    assert snapshot.world.roles == []
+    assert snapshot.characters == ()
+    assert snapshot.world_characters == ()
+    assert snapshot.excluded_owner_controlled_characters == 1
     engine.dispose()
 
 

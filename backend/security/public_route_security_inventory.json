@@ -497,6 +497,11 @@
       "module": "app.api.v1.routes.worlds",
       "endpoint": "update_world"
     },
+    "PATCH /api/v1/worlds/{world_id}/characters/{character_id}/role": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.worlds",
+      "endpoint": "update_world_character_role"
+    },
     "PATCH /api/v1/worlds/{world_id}/owner-character": {
       "access": "owner-only",
       "module": "app.domains.world_characters.api.routes",

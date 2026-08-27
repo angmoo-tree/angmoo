@@ -116,7 +116,16 @@ class SqliteCanonicalUpgradeCoordinator:
         if not chain:
             raise SqliteCanonicalUpgradeError("sqlite_migration_registry_gap")
         _require_staging_capacity(source_database, self._paths.canonical)
-        source_identity = _database_identity(source_database)
+        migration_mutable_tables = {
+            "world_package_exports",
+            "world_package_import_id_maps",
+            "world_package_imports",
+            "world_package_sources",
+        }
+        source_identity = _database_identity(
+            source_database,
+            excluded_tables=migration_mutable_tables,
+        )
         source_fingerprint = _database_file_fingerprint(source_database)
         final_generation = _target_generation_name(
             source_root.name,
@@ -141,12 +150,7 @@ class SqliteCanonicalUpgradeCoordinator:
             _validate_database(staging_database, latest)
             if _database_identity(
                 staging_database,
-                excluded_tables={
-                    "world_package_sources",
-                    "world_package_exports",
-                    "world_package_imports",
-                    "world_package_import_id_maps",
-                },
+                excluded_tables=migration_mutable_tables,
             ) != source_identity:
                 raise SqliteCanonicalUpgradeError(
                     "sqlite_migration_identity_changed"

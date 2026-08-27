@@ -19,7 +19,7 @@ HOST_SHA = "b" * 64
 SIDECAR_SHA = "c" * 64
 
 
-def _manifest(path: Path, *, sqlite=(1, 2, 2), ladybug=(0, 1, 1)) -> Path:
+def _manifest(path: Path, *, sqlite=(1, 3, 3), ladybug=(0, 1, 1)) -> Path:
     identity_source = "\n".join(
         (
             "0.4.0-1",
@@ -86,7 +86,7 @@ def test_installer_preflight_accepts_supported_active_generations(
     )
 
     assert result.sqlite_source_version == 1
-    assert result.sqlite_target_version == 2
+    assert result.sqlite_target_version == 3
     assert result.ladybug_source_version == 0
     assert result.ladybug_target_version == 1
 
@@ -94,7 +94,7 @@ def test_installer_preflight_accepts_supported_active_generations(
 @pytest.mark.parametrize(
     ("sqlite_version", "ladybug_version", "expected"),
     (
-        (3, 1, "installer_sqlite_data_incompatible"),
+        (4, 1, "installer_sqlite_data_incompatible"),
         (2, 2, "installer_ladybug_data_incompatible"),
     ),
 )
@@ -145,7 +145,7 @@ def test_installer_upgrade_mode_creates_current_generations_and_is_idempotent(
     assert desktop_sidecar.main() == 0
     first = json.loads(capsys.readouterr().out)
     assert first["status"] == "upgraded"
-    assert first["sqlite_source_version"] == 2
+    assert first["sqlite_source_version"] == 3
     assert first["ladybug_source_version"] == 1
     canonical_marker = (
         data_root / "canonical" / "current-generation.json"

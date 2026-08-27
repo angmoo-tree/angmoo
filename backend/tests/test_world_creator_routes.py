@@ -18,6 +18,9 @@ from app.api.v1 import deps as api_deps
 from app.api.v1.routes import worlds as world_routes
 from app.core.config import settings
 from app.core.db import Base
+from app.domains.worlds.infrastructure.sqlalchemy_reserved_roles import (
+    ensure_no_specific_role,
+)
 
 
 def _app():
@@ -136,6 +139,61 @@ def test_creator_route_lifecycle_and_stable_conflict() -> None:
     with Session(engine) as db:
         assert db.query(models.Post).count() == 0
         assert db.query(models.AgentRun).count() == 0
+
+
+def test_reserved_no_role_is_system_owned_and_survives_user_definition_sync() -> None:
+    app, engine, principal = _app()
+    owner = _user("reserved-role-owner")
+    with Session(engine, expire_on_commit=False) as db:
+        db.add(owner)
+        db.commit()
+    principal["user"] = owner
+
+    created = _request(
+        app,
+        "POST",
+        "/api/v1/worlds",
+        json=_payload(idempotency_key="reserved-role-world"),
+    )
+    assert created.status_code == 201
+    world = created.json()["world"]
+    with Session(engine) as db:
+        ensure_no_specific_role(db, world_id=world["id"])
+        db.commit()
+
+    omitted = _request(
+        app,
+        "PATCH",
+        f"/api/v1/worlds/{world['id']}",
+        json={"row_version": world["row_version"], "roles": []},
+    )
+    assert omitted.status_code == 200, omitted.text
+    with Session(engine) as db:
+        reserved = db.query(models.WorldRole).filter_by(
+            world_id=world["id"], role_key="no_specific_role"
+        ).one()
+        assert reserved.status == "enabled"
+
+    managed = _request(
+        app,
+        "PATCH",
+        f"/api/v1/worlds/{world['id']}",
+        json={
+            "row_version": omitted.json()["world"]["row_version"],
+            "roles": [
+                {
+                    "key": "no_specific_role",
+                    "name": "역할 없음",
+                    "description": "별도의 World 역할을 지정하지 않은 캐릭터",
+                    "responsibilities": [],
+                    "allowed_activity_scope": [],
+                    "autonomous_allowed": True,
+                }
+            ],
+        },
+    )
+    assert managed.status_code == 422
+    assert managed.json() == {"detail": "world_definition_incomplete"}
 
 
 def test_world_banner_round_trip_stays_inside_worlds_domain_storage(
