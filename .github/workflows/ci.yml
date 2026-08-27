@@ -58,6 +58,9 @@ jobs:
       - name: Preserve approved test nodes
         run: uv run python ../scripts/check_test_node_baseline.py --profile public
         working-directory: backend
+      - name: Verify L4 P5-P7 parity and ownership inventory
+        run: uv run python ../scripts/ci/generate_l4_pr_a_inventory.py --check
+        working-directory: backend
       - name: Run backend suite
         run: uv run python -m pytest -q tests
         working-directory: backend

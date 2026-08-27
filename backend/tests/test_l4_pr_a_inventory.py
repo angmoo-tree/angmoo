@@ -1,0 +1,91 @@
+from __future__ import annotations
+
+import importlib.util
+import json
+from pathlib import Path
+import sys
+
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+GENERATOR_PATH = REPO_ROOT / "scripts/ci/generate_l4_pr_a_inventory.py"
+SPEC = importlib.util.spec_from_file_location("angmoo_l4_pr_a_inventory", GENERATOR_PATH)
+assert SPEC is not None and SPEC.loader is not None
+generator = importlib.util.module_from_spec(SPEC)
+sys.modules[SPEC.name] = generator
+SPEC.loader.exec_module(generator)
+
+
+def test_l4_pr_a_inventory_is_deterministic_and_current() -> None:
+    first = generator.render()
+    second = generator.render()
+    payload = json.loads(first)
+
+    assert first == second
+    assert generator.DEFAULT_OUTPUT.read_text(encoding="utf-8") == first
+    assert payload["schema_version"] == 1
+    assert payload["policy_id"] == "angmoo-l4-pr-a-p5-p7-inventory-v1"
+    assert payload["baseline_commit"] == (
+        "0917bfa6bbb14c4b15a4a26d1f221817bd4e52e1"
+    )
+
+
+def test_l4_pr_a_runtime_and_installer_baselines_are_frozen() -> None:
+    payload = generator.build_inventory()
+    sqlite = payload["runtime"]["sqlite"]
+    ladybug = payload["runtime"]["ladybug"]
+
+    assert [item["contract"]["schema_version"] for item in sqlite["manifests"]] == [
+        1,
+        2,
+        3,
+    ]
+    assert [
+        item["contract"]["canonical_table_count"] for item in sqlite["manifests"]
+    ] == [83, 87, 87]
+    assert len(sqlite["steps"]) == 2
+    assert ladybug["manifests"][0]["contract"] == {
+        "minimum_ladybug_version": "0.19.1",
+        "parity_contract_version": 1,
+        "projection_schema_version": 1,
+        "schema_digest": "a028adfa2162e4cec41a4d8efd58731b696185742632c37beac3e8fb13f099f4",
+    }
+    assert payload["installer"]["required_jobs"] == [
+        "release-candidate",
+        "windows-installer-supported-upgrade",
+        "windows-installer-failure-recovery",
+        "installed-runtime-smoke",
+        "windows-installer",
+    ]
+
+
+def test_l4_pr_a_architecture_and_parity_oracles_are_exact() -> None:
+    payload = generator.build_inventory()
+    backend = payload["architecture"]["backend"]
+    frontend = payload["architecture"]["frontend"]
+    behavior = payload["behavior"]
+
+    assert backend["module_count"] == 504
+    assert backend["internal_edge_count"] == 1171
+    assert backend["external_import_count"] == 1732
+    assert backend["legacy_import_exception_count"] == 0
+    assert backend["policy_allowed_cycle_count"] == 0
+    assert backend["module_cycles"] == []
+    assert len(backend["ownership"]["legacy_horizontal"]) == 18
+    assert len(backend["ownership"]["canonical_boundaries"]) == 26
+
+    assert frontend["candidate_count"] == 12
+    assert frontend["candidate_consumer_edge_count"] == 37
+    assert frontend["planned_feature_allowlist"] == ["relationships", "social"]
+    assert len(frontend["public_surfaces"]["features"]) == 6
+    assert len(frontend["public_surfaces"]["shared"]) == 5
+
+    assert behavior["parity_test_node_count"] == 85
+    nodes = set(behavior["parity_test_nodes"])
+    assert all(item["test"] in nodes for item in behavior["counter_contracts"])
+    assert payload["forbidden_changes"] == [
+        "schema",
+        "endpoint",
+        "relationship_delta",
+        "provider_call_count",
+        "production_composition",
+    ]
