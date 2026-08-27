@@ -14,6 +14,11 @@ from sqlalchemy.orm import Session, aliased
 
 from app import models, schemas
 from app.core.search_text import normalize_search_text
+from app.domains.social.public import (
+    SocialSearchIndexPort,
+    SocialSearchState,
+    find_keyword_post_ids,
+)
 from app.services import world_character_contracts
 
 
@@ -367,6 +372,8 @@ def search_world_feed_candidates(
     keywords: tuple[str, str],
     allowed_policy_actions: Iterable[str],
     now: datetime,
+    search_index: SocialSearchIndexPort | None,
+    search_state: SocialSearchState,
 ) -> CandidateSearchResult:
     started = time.perf_counter()
     author_wc = aliased(models.WorldCharacter)
@@ -389,8 +396,16 @@ def search_world_feed_candidates(
             == profile.world_character.id,
         )
     )
+    lookup = find_keyword_post_ids(
+        search_index,
+        search_state=search_state,
+        world_id=profile.world.id,
+        keywords=keywords,
+        per_keyword_limit=PER_KEYWORD_FETCH_LIMIT,
+        merged_limit=RAW_MERGE_LIMIT,
+    )
     rows_by_post_id: dict[str, tuple[models.Post, models.WorldCharacter]] = {}
-    for keyword in keywords:
+    if lookup.post_ids:
         query = (
             select(models.Post, author_wc)
             .join(author_wc, author_wc.id == models.Post.author_world_character_id)
@@ -414,17 +429,23 @@ def search_world_feed_candidates(
                 != profile.world_character.id,
                 author_wc.status == "active",
                 author_membership.status == "active",
-                models.Post.search_document.contains(keyword, autoescape=True),
+                models.Post.id.in_(lookup.post_ids),
                 ~block_from_actor,
                 ~block_to_actor,
             )
-            .order_by(models.Post.created_at.desc(), models.Post.id.asc())
-            .limit(PER_KEYWORD_FETCH_LIMIT)
         )
-        for post, world_character in db.execute(query).all():
-            rows_by_post_id.setdefault(post.id, (post, world_character))
-            if len(rows_by_post_id) >= RAW_MERGE_LIMIT:
-                break
+        canonical_rows = {
+            post.id: (post, world_character)
+            for post, world_character in db.execute(query).all()
+        }
+        rows_by_post_id = {
+            post_id: canonical_rows[post_id]
+            for post_id in lookup.post_ids
+            if post_id in canonical_rows
+        }
+    # Preserve the pre-FTS diagnostic meaning: this is the number of unique
+    # canonical rows that remain after the query-time safety filters, not the
+    # projection's duplicate/raw hit count.
     raw_count = len(rows_by_post_id)
     observations = {
         row.post_id: row

@@ -123,7 +123,7 @@ backend/app/
 | resident and scheduler runtime | `app.domains.runtime.public` | L2 | PR A state/schema foundation active; behavior unchanged |
 | `worlds`, `world_characters`, `routines`, `routine_posts`, owner manual social | each domain's `public.py` | L3 | P1-P3 are active; PR F moves P4 continuation and atomic publication behind the routine-post public boundary; PR G moves owner manual writes and Inbox observation behind a stable public boundary |
 | `world_packages` | `app.domains.world_packages.public` | L3.5 | new Local feature later |
-| feed and `social` | `app.domains.social.public` | L4 | target only |
+| feed and `social` | `app.domains.social.public` | L4 | PR B owns the P5 keyword candidate/search boundary; later L4 PRs move writes and causal apply |
 | `relationships` graph read | `app.domains.relationships.public` | T2.5 pilot | canonical read slice active; PR C removes usage-zero aliases; write path unchanged |
 | relationships write and graph projection | domain/runtime public ports | L4 | unchanged by the read pilot |
 | `chat` and chat memory | `app.domains.chat.public` | P8-L | blocked by Local transition gates |
@@ -424,6 +424,37 @@ L4 PRs must preserve the frozen behavior oracle while moving ownership toward
 the canonical surfaces. Any intentional inventory change regenerates the
 machine-readable artifact and explains the delta in review; unexplained drift
 fails CI.
+
+### L4 PR B social search ownership
+
+`app.domains.social.public` is the canonical public boundary for the P5
+interest-discovery search lane. Its application use case accepts a narrow
+`SocialSearchIndexPort`, performs two bounded keyword queries, deduplicates the
+ranked document IDs, and never opens a filesystem path or SQLAlchemy session.
+The embedded runtime owns the concrete SQLite FTS5 index and rebuilds it
+deterministically from canonical posts before registering the search as ready.
+
+FTS5 is a candidate projection, not an authorization source. The existing P5
+service receives only candidate IDs and performs one canonical SQLite query
+that revalidates World scope, public visibility, delete/report state, active
+WorldCharacter membership, self exclusion, repost/root-post rules, and blocks
+in both directions. Observation and action eligibility checks remain
+canonical. The production P5 path has no SQL `contains`/`LIKE` or silent full
+scan fallback.
+
+Committed post changes update or remove the FTS5 document after the caller's
+transaction succeeds. A projection failure does not roll back the social
+write: the runtime publishes one of `search_rebuilding`,
+`search_schema_mismatch`, `search_digest_stale`, or `search_unavailable`, and
+the P5 interest lane records an explicit degraded no-action cycle with zero
+provider calls. The next embedded-runtime startup rebuilds from SQLite. Inbox
+and routine lanes keep their independent scheduling and are not replaced by
+FTS5.
+
+Until the later L4 social-write ownership PR moves the canonical `Post` model,
+one exact `app.runtime.search.social_projection -> app.models` adapter edge is
+recorded in the architecture policy. It is runtime-owned, has a dated removal
+condition, and must not expand into another service/model/CRUD dependency.
 
 ## Contributor workflow
 

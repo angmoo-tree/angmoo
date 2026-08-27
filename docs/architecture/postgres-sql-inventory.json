@@ -922,19 +922,19 @@
     {
       "markers": {
         "driver_or_url": [
-          163
+          168
         ],
         "row_lock": [
-          199,
-          219,
-          583,
-          776
+          204,
+          224,
+          604,
+          797
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/world_feed_search.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "93cf272a7012519802f0e871294bda573a5b3c66fb416a9bcbd2b7370284b27e",
+      "source_sha256": "b6f47240ff9d7d1a66929023035cc88817967945fadaacb20f9dd5780f9abfed",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

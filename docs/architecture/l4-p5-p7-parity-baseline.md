@@ -24,6 +24,30 @@ PR A does not change a schema, endpoint, relationship delta, provider-call
 count, or production composition. Later L4 PRs may change ownership only after
 the corresponding frozen behavior nodes continue to pass.
 
+## PR B reviewed delta
+
+PR B intentionally adds `app.domains.social` as the canonical P5 search
+boundary and moves the existing post-list UI behind
+`frontend/src/features/social/public.ts`. The runtime-owned SQLite FTS5
+projection is now the only production keyword candidate source. Candidate IDs
+are revalidated against canonical SQLite before they can enter the existing
+observation/planner path; the former SQL substring scan is not retained as a
+fallback.
+
+The frozen eight-keyword, two-keyword-per-cycle, bounded-candidate and provider
+call contracts remain unchanged. FTS5 rebuilding, schema mismatch, digest
+staleness, or unavailability produces an explicit degraded P5 result and zero
+provider calls. The generated inventory includes the new domain and focused
+projection regression. Exact frontend legacy edges created by moving the
+unchanged Feed client are separately owned in the frontend architecture policy
+and must decrease through PR C/F.
+
+The reviewed PR B inventory delta is 514 Python modules, 1,194 internal edges,
+1,746 per-module external imports, 35 selected canonical-boundary modules, 36
+frontend candidate consumer edges, seven feature public surfaces, and 89
+focused parity nodes. The PR A SHA remains the historical entry baseline; these
+current counts are intentionally regenerated with the ownership move.
+
 ## Runtime and upgrade baseline
 
 The supported SQLite chain is consecutive and copy-on-write:

@@ -1388,6 +1388,19 @@
     {
       "edges": [
         {
+          "imported": "app.models",
+          "importer": "app.runtime.search.social_projection"
+        }
+      ],
+      "id": "l4-pr-b-social-search-post-adapter",
+      "owner_stage": "L4",
+      "reason": "PR B composes the canonical social search port with the existing Post model through one runtime-owned projection adapter while social write persistence remains scheduled for the later L4 ownership PRs.",
+      "removal_condition": "Remove this exact edge when L4 moves canonical Post persistence behind the social domain repository/public boundary.",
+      "review_date": "2026-11-27"
+    },
+    {
+      "edges": [
+        {
           "imported": "app.services.graph_projection_runtime",
           "importer": "app.runtime.component_workers"
         },

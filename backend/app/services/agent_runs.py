@@ -27,6 +27,7 @@ from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
 from app.domains.routine_posts.public import routine_world_character_for_character
 from app.domains.routines.public import reconcile_all_elapsed_routines
+from app.domains.social.public import current_social_search
 from app.domains.world_characters.public import (
     is_owner_controlled_character,
     owner_controlled_character_ids,
@@ -5791,6 +5792,7 @@ async def run_community_once(
                 )
 
             try:
+                social_search = current_social_search()
                 gateway_result = await run_resident_langgraph(
                     LangGraphResidentContext(
                         db=db,
@@ -5810,6 +5812,8 @@ async def run_community_once(
                         activity_daypart=activity_daypart,
                         require_public_action=require_public_action,
                         on_rate_limit_wait=_extend_lease_for_wait,
+                        social_search_index=social_search.index,
+                        social_search_state=social_search.state,
                     )
                 )
             except DirectLlmDeferred as exc:
@@ -7112,6 +7116,7 @@ async def _run_resident_slot_once(
                 )
 
             try:
+                social_search = current_social_search()
                 gateway_result = await run_resident_langgraph(
                     LangGraphResidentContext(
                         db=db,
@@ -7131,6 +7136,8 @@ async def _run_resident_slot_once(
                         activity_daypart=activity_daypart,
                         require_public_action=require_public_action,
                         on_rate_limit_wait=_extend_lease_for_wait,
+                        social_search_index=social_search.index,
+                        social_search_state=social_search.state,
                     )
                 )
             except DirectLlmDeferred as exc:

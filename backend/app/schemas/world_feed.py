@@ -32,6 +32,10 @@ FeedNoActionReason = Literal[
     "proposal_apply_not_ready",
     "target_stale",
     "writer_invalid",
+    "search_rebuilding",
+    "search_schema_mismatch",
+    "search_digest_stale",
+    "search_unavailable",
 ]
 
 

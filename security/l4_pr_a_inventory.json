@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 1732,
-      "internal_edge_count": 1171,
+      "external_import_count": 1746,
+      "internal_edge_count": 1194,
       "legacy_import_exception_count": 0,
-      "module_count": 504,
+      "module_count": 514,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -158,6 +158,70 @@
             ],
             "module": "app.domains.relationships.public",
             "path": "backend/app/domains/relationships/public.py"
+          },
+          {
+            "imports": [],
+            "module": "app.domains.social",
+            "path": "backend/app/domains/social/__init__.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.application.keyword_feed",
+              "app.domains.social.application.search_runtime"
+            ],
+            "module": "app.domains.social.application",
+            "path": "backend/app/domains/social/application/__init__.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.domain",
+              "app.domains.social.ports"
+            ],
+            "module": "app.domains.social.application.keyword_feed",
+            "path": "backend/app/domains/social/application/keyword_feed.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.domain",
+              "app.domains.social.ports"
+            ],
+            "module": "app.domains.social.application.search_runtime",
+            "path": "backend/app/domains/social/application/search_runtime.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.domain.search_state"
+            ],
+            "module": "app.domains.social.domain",
+            "path": "backend/app/domains/social/domain/__init__.py"
+          },
+          {
+            "imports": [],
+            "module": "app.domains.social.domain.search_state",
+            "path": "backend/app/domains/social/domain/search_state.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.ports.search_index"
+            ],
+            "module": "app.domains.social.ports",
+            "path": "backend/app/domains/social/ports/__init__.py"
+          },
+          {
+            "imports": [
+              "app.domains.runtime.public"
+            ],
+            "module": "app.domains.social.ports.search_index",
+            "path": "backend/app/domains/social/ports/search_index.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.application",
+              "app.domains.social.domain",
+              "app.domains.social.ports"
+            ],
+            "module": "app.domains.social.public",
+            "path": "backend/app/domains/social/public.py"
           },
           {
             "imports": [
@@ -364,7 +428,7 @@
       "policy_allowed_cycle_count": 0
     },
     "frontend": {
-      "candidate_consumer_edge_count": 37,
+      "candidate_consumer_edge_count": 36,
       "candidate_consumers": {
         "frontend/src/app/api/community/characters/[characterId]/activity/route.ts": [],
         "frontend/src/app/api/community/posts/[postId]/comments/route.ts": [],
@@ -376,18 +440,14 @@
           "frontend/src/app/posts/[postId]/page.tsx",
           "frontend/src/composition/static-product-router.tsx"
         ],
-        "frontend/src/components/post-list-client.tsx": [
-          "frontend/src/app/feed-page.tsx",
-          "frontend/src/composition/static-product-router.tsx"
-        ],
         "frontend/src/components/relationship-graph-client.tsx": [
           "frontend/src/app/characters/[characterId]/worlds/[worldId]/relationship-graph/page.tsx",
           "frontend/src/composition/static-product-router.tsx"
         ],
+        "frontend/src/features/social/ui/post-list-client.tsx": [],
         "frontend/src/features/world-app/ui/world-manual-feed.tsx": [],
         "frontend/src/lib/community.ts": [
           "frontend/src/app/characters/[characterId]/activity/page.tsx",
-          "frontend/src/app/feed-page.tsx",
           "frontend/src/app/posts/[postId]/page.tsx",
           "frontend/src/app/profiles/characters/[characterId]/follows/page.tsx",
           "frontend/src/app/profiles/characters/[characterId]/page.tsx",
@@ -405,7 +465,6 @@
           "frontend/src/components/mentioned-text.tsx",
           "frontend/src/components/notifications-client.tsx",
           "frontend/src/components/post-detail-client.tsx",
-          "frontend/src/components/post-list-client.tsx",
           "frontend/src/components/post-media-grid.tsx",
           "frontend/src/components/profile-connections-client.tsx",
           "frontend/src/components/profile-list-row.tsx",
@@ -415,6 +474,9 @@
           "frontend/src/components/tree-post-detail-client.tsx",
           "frontend/src/components/user-profile-client.tsx",
           "frontend/src/composition/static-product-router.tsx",
+          "frontend/src/features/social/api/social-feed-client.ts",
+          "frontend/src/features/social/model/social-feed-contract.ts",
+          "frontend/src/features/social/ui/post-list-client.tsx",
           "frontend/src/lib/agents.ts"
         ],
         "frontend/src/lib/relationship-graph.ts": [
@@ -482,12 +544,10 @@
           ],
           "imports": [
             "@/components/app-shell",
-            "@/components/post-list-client",
-            "@/lib/backend",
-            "@/lib/community"
+            "@/features/social/public"
           ],
           "path": "frontend/src/app/feed-page.tsx",
-          "sha256": "199fb269abdda1ecc55666c867fa265a0c1e725b4a2de028ef1a012ad15cfe74"
+          "sha256": "abab7d80cd84a8bfa47970ead483f7ec846d41f9a1df29d143114eb238f2cd88"
         },
         {
           "exports": [
@@ -507,6 +567,20 @@
           ],
           "path": "frontend/src/components/post-detail-client.tsx",
           "sha256": "55570797daf6e6113f6e64742a43479992b5c75fadf0c890abbe8eb47ef134f9"
+        },
+        {
+          "exports": [
+            "RelationshipGraphClient"
+          ],
+          "imports": [
+            "@/components/auth-provider",
+            "@/lib/relationship-graph",
+            "@/shared/navigation/public",
+            "next/link",
+            "react"
+          ],
+          "path": "frontend/src/components/relationship-graph-client.tsx",
+          "sha256": "7f4a0ba0b470b49f75ec86219011e3ec3c7a3a37d03487ee93ba065e096ea8f1"
         },
         {
           "exports": [
@@ -530,22 +604,8 @@
             "react",
             "react-dom"
           ],
-          "path": "frontend/src/components/post-list-client.tsx",
+          "path": "frontend/src/features/social/ui/post-list-client.tsx",
           "sha256": "6021fc12c53504708c734b535e53d2da7696139ef2867c756a4ab0164d28dbc7"
-        },
-        {
-          "exports": [
-            "RelationshipGraphClient"
-          ],
-          "imports": [
-            "@/components/auth-provider",
-            "@/lib/relationship-graph",
-            "@/shared/navigation/public",
-            "next/link",
-            "react"
-          ],
-          "path": "frontend/src/components/relationship-graph-client.tsx",
-          "sha256": "7f4a0ba0b470b49f75ec86219011e3ec3c7a3a37d03487ee93ba065e096ea8f1"
         },
         {
           "exports": [
@@ -656,6 +716,7 @@
           "frontend/src/features/device-home/public.ts",
           "frontend/src/features/pwa-shell/public.ts",
           "frontend/src/features/runtime-status/public.ts",
+          "frontend/src/features/social/public.ts",
           "frontend/src/features/world-app/public.ts",
           "frontend/src/features/world-packages/public.ts"
         ],
@@ -672,6 +733,11 @@
   "baseline_commit": "0917bfa6bbb14c4b15a4a26d1f221817bd4e52e1",
   "behavior": {
     "counter_contracts": [
+      {
+        "counter": "degraded_search_provider_calls",
+        "expected": 0,
+        "test": "backend/tests/test_feed_reaction_intent.py::test_unavailable_search_is_explicit_and_uses_zero_provider_calls"
+      },
       {
         "counter": "provider_calls",
         "expected": 0,
@@ -724,7 +790,7 @@
       },
       {
         "path": "backend/tests/test_feed_reaction_intent.py",
-        "sha256": "6c29edcb2af051b02d354a92334b6fb83aee7fd5fac48dcec6ee0d43ff85a272"
+        "sha256": "f01fbf7d75813dd3caeeabf823629aa69db90dc55faf72c9f9fbe8a6ce3fcb99"
       },
       {
         "path": "backend/tests/test_graph_projection_replay.py",
@@ -751,6 +817,10 @@
         "sha256": "26efe77a687dced44618c3c27b1679f24c30260bbb81edc1a49d7143cee5ae0d"
       },
       {
+        "path": "backend/tests/test_l4_social_search_projection.py",
+        "sha256": "a5f01b3473c7b05806df1661c98c104b6632fe58dc59bb06716b056dc0bc1b19"
+      },
+      {
         "path": "backend/tests/test_relationship_graph_api.py",
         "sha256": "5c8c07b464577cc1896a88206d12b18ace048d4ed3b3c815a3d9c09d15be7022"
       },
@@ -772,10 +842,10 @@
       },
       {
         "path": "backend/tests/test_world_feed_search.py",
-        "sha256": "303f02fee886e9b40a63ce2253b3886182c5507551dfc0738bbd61583df32411"
+        "sha256": "7ae830d9ecd1ae54ac8026ba2eae5904420d4d718148237eec63b2ddeb6e66ed"
       }
     ],
-    "parity_test_node_count": 85,
+    "parity_test_node_count": 89,
     "parity_test_nodes": [
       "backend/tests/test_embedded_data_migration.py::test_each_consecutive_step_rejects_undeclared_identity_changes",
       "backend/tests/test_embedded_data_migration.py::test_failed_sqlite_step_keeps_v1_active_and_removes_staging",
@@ -795,6 +865,7 @@
       "backend/tests/test_feed_reaction_intent.py::test_reaction_contract_rejects_public_ignore_and_invalid_action_shape",
       "backend/tests/test_feed_reaction_intent.py::test_same_minute_cycle_is_reused_without_second_provider_call",
       "backend/tests/test_feed_reaction_intent.py::test_server_rejects_action_not_present_in_candidate_affordances",
+      "backend/tests/test_feed_reaction_intent.py::test_unavailable_search_is_explicit_and_uses_zero_provider_calls",
       "backend/tests/test_graph_projection_replay.py::test_event_reprocess_does_not_clear_world",
       "backend/tests/test_graph_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
       "backend/tests/test_graph_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
@@ -828,6 +899,9 @@
       "backend/tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets",
       "backend/tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_social_migration_refuses_history_losing_downgrade",
       "backend/tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped",
+      "backend/tests/test_l4_social_search_projection.py::test_embedded_projection_rebuilds_and_tracks_committed_post_changes",
+      "backend/tests/test_l4_social_search_projection.py::test_production_p5_has_no_canonical_contains_fallback",
+      "backend/tests/test_l4_social_search_projection.py::test_rebuild_failure_is_explicitly_unavailable_and_keeps_backend_alive",
       "backend/tests/test_relationship_graph_api.py::test_failed_world_rebuild_falls_back_to_canonical_as_unavailable",
       "backend/tests/test_relationship_graph_api.py::test_in_process_projector_connection_is_shared_with_graph_and_p6_reads",
       "backend/tests/test_relationship_graph_api.py::test_ladybug_reads_projection_and_recovers_from_lock",

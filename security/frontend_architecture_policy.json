@@ -5,10 +5,90 @@
     "device-home",
     "pwa-shell",
     "runtime-status",
+    "social",
     "world-app",
     "world-packages"
   ],
-  "legacy_import_exceptions": [],
+  "legacy_import_exceptions": [
+    {
+      "importer": "frontend/src/features/social/api/social-feed-client.ts",
+      "target": "@/lib/backend",
+      "owner_stage": "L4 PR B social read-boundary bridge",
+      "removal_condition": "Move the common backend transport into shared infrastructure without changing Feed behavior"
+    },
+    {
+      "importer": "frontend/src/features/social/api/social-feed-client.ts",
+      "target": "@/lib/community",
+      "owner_stage": "L4 PR B social read-boundary bridge",
+      "removal_condition": "PR C moves the owned Feed DTO and write client behind features/social"
+    },
+    {
+      "importer": "frontend/src/features/social/model/social-feed-contract.ts",
+      "target": "@/lib/community",
+      "owner_stage": "L4 PR B social read-boundary bridge",
+      "removal_condition": "PR C moves the owned Feed DTO behind features/social/model"
+    },
+    {
+      "importer": "frontend/src/features/social/ui/post-list-client.tsx",
+      "target": "@/components/active-agent-card",
+      "owner_stage": "L4 PR B social UI progressive move",
+      "removal_condition": "PR F removes remaining L4-owned legacy UI edges"
+    },
+    {
+      "importer": "frontend/src/features/social/ui/post-list-client.tsx",
+      "target": "@/components/expandable-post-text",
+      "owner_stage": "L4 PR B social UI progressive move",
+      "removal_condition": "PR F removes remaining L4-owned legacy UI edges"
+    },
+    {
+      "importer": "frontend/src/features/social/ui/post-list-client.tsx",
+      "target": "@/components/mentioned-text",
+      "owner_stage": "L4 PR B social UI progressive move",
+      "removal_condition": "PR F removes remaining L4-owned legacy UI edges"
+    },
+    {
+      "importer": "frontend/src/features/social/ui/post-list-client.tsx",
+      "target": "@/components/post-media-grid",
+      "owner_stage": "L4 PR B social UI progressive move",
+      "removal_condition": "PR F removes remaining L4-owned legacy UI edges"
+    },
+    {
+      "importer": "frontend/src/features/social/ui/post-list-client.tsx",
+      "target": "@/components/profile-avatar",
+      "owner_stage": "L4 PR B social UI progressive move",
+      "removal_condition": "PR F removes remaining L4-owned legacy UI edges"
+    },
+    {
+      "importer": "frontend/src/features/social/ui/post-list-client.tsx",
+      "target": "@/lib/agents",
+      "owner_stage": "L4 PR B social UI progressive move",
+      "removal_condition": "PR F removes remaining L4-owned legacy data edges"
+    },
+    {
+      "importer": "frontend/src/features/social/ui/post-list-client.tsx",
+      "target": "@/lib/community",
+      "owner_stage": "L4 PR B social UI progressive move",
+      "removal_condition": "PR C moves owned Feed writes and DTOs behind features/social"
+    },
+    {
+      "importer": "frontend/src/features/social/ui/post-list-client.tsx",
+      "target": "@/lib/post-card-navigation",
+      "owner_stage": "L4 PR B social UI progressive move",
+      "removal_condition": "PR F removes remaining L4-owned legacy navigation edges"
+    },
+    {
+      "importer": "frontend/src/features/social/ui/post-list-client.tsx",
+      "target": "@/lib/profile",
+      "owner_stage": "L4 PR B social UI progressive move",
+      "removal_condition": "PR F removes remaining L4-owned legacy presentation edges"
+    },
+    {
+      "importer": "frontend/src/features/social/ui/post-list-client.tsx",
+      "target": "@/lib/use-mobile-pull-to-refresh",
+      "owner_stage": "L4 PR B social UI progressive move",
+      "removal_condition": "Move the reusable interaction primitive into shared UI before PR F closeout"
+    }
+  ],
   "legacy_import_prefixes": [
     "@/components",
     "@/lib"
@@ -67,6 +147,7 @@
     "frontend/src/features/pwa-shell/public.ts",
     "frontend/src/features/pwa-shell/ui/pwa-service-worker-lifecycle.tsx",
     "frontend/src/features/runtime-status/public.ts",
+    "frontend/src/features/social/public.ts",
     "frontend/src/features/world-app/api/world-app-client.ts",
     "frontend/src/features/world-app/model/world-app-contract.ts",
     "frontend/src/features/world-app/public.ts",

@@ -10,6 +10,9 @@ from sqlalchemy.pool import StaticPool
 from app import models
 from app.core.db import Base
 from app.core.search_text import build_post_search_document, normalize_search_text
+from app.domains.runtime.public import SearchIndexHit
+from app.domains.social.public import SocialSearchState
+from app.runtime.search import CallbackSearchIndexAdapter
 from app.services import world_character_contracts, world_character_setup
 from app.services.world_feed_search import (
     WorldFeedReadinessError,
@@ -228,6 +231,35 @@ def _post(
     return post
 
 
+def _search_index(db: Session) -> CallbackSearchIndexAdapter:
+    def search(world_id: str, query: str, limit: int) -> tuple[SearchIndexHit, ...]:
+        normalized_query = normalize_search_text(query, max_chars=40)
+        posts = db.scalars(
+            select(models.Post)
+            .where(models.Post.world_id == world_id)
+            .order_by(models.Post.created_at.desc(), models.Post.id.asc())
+        ).all()
+        return tuple(
+            SearchIndexHit(
+                document_id=post.id,
+                score=1.0,
+                world_id=post.world_id,
+                kind="world_post",
+            )
+            for post in posts
+            if normalized_query in normalize_search_text(
+                post.search_document,
+                max_chars=5_000,
+            )
+        )[:limit]
+
+    return CallbackSearchIndexAdapter(
+        upsert=lambda _document: None,
+        remove=lambda _document_id: None,
+        search=search,
+    )
+
+
 def _seed_actor(db: Session):
     owner = _user("world-owner")
     db.add(owner)
@@ -396,6 +428,8 @@ def test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows() 
             keywords=("alchemy", "library"),
             allowed_policy_actions=("reply", "like", "repost", "follow"),
             now=now,
+            search_index=_search_index(db),
+            search_state=SocialSearchState.READY,
         )
 
         assert [candidate.post_id for candidate in result.candidates] == [
@@ -445,6 +479,8 @@ def test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once() -> 
             keywords=first.keywords,
             allowed_policy_actions=("reply", "like"),
             now=now,
+            search_index=_search_index(db),
+            search_state=SocialSearchState.READY,
         )
         claimed = claim_feed_observations(
             db,
@@ -542,6 +578,8 @@ def test_blocked_author_is_not_a_candidate() -> None:
             keywords=("alchemy", "library"),
             allowed_policy_actions=("reply", "like"),
             now=now,
+            search_index=_search_index(db),
+            search_state=SocialSearchState.READY,
         )
         assert result.candidates == ()
 
@@ -577,6 +615,8 @@ def test_character_privacy_cleanup_removes_p5_runtime_state() -> None:
             keywords=keyword_claim.keywords,
             allowed_policy_actions=("comment", "like"),
             now=now,
+            search_index=_search_index(db),
+            search_state=SocialSearchState.READY,
         )
         claimed = claim_feed_observations(
             db,

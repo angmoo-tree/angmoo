@@ -238,6 +238,10 @@ def create_app(
                     process_settings_snapshot[field_name],
                 )
 
+        def recover_embedded_runtime() -> None:
+            world_package_import_committer.recover_media()
+            composition.social_search_projection.start()
+
         if runtime_lifespan is None:
             runtime_lifespan = create_lifespan(
                 extension,
@@ -251,9 +255,7 @@ def create_app(
                         session_factory=composition.session_factory,
                     )
                 ),
-                startup_recovery=(
-                    world_package_import_committer.recover_media
-                ),
+                startup_recovery=recover_embedded_runtime,
                 runtime_settings=runtime_settings,
                 runtime_disposer=dispose_runtime,
             )
