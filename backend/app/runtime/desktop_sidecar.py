@@ -178,6 +178,7 @@ def _parse_installer_args() -> argparse.Namespace:
     parser.add_argument("--legacy-data-root", type=Path, required=True)
     parser.add_argument("--runtime-root", type=Path, required=True)
     parser.add_argument("--payload-manifest", type=Path, required=True)
+    parser.add_argument("--installer-result-path", type=Path)
     return parser.parse_args()
 
 
@@ -312,14 +313,38 @@ def _watch_parent(parent_pid: int, server: Any) -> None:
         time.sleep(0.5)
 
 
-def _run_installer_mode() -> int:
-    """Run a bounded compatibility/upgrade operation without serving HTTP."""
+def _write_installer_result(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(
+        json.dumps(payload, ensure_ascii=True, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    temporary.replace(path)
 
-    args = _parse_installer_args()
-    data_root = args.data_root.resolve()
-    runtime_root = args.runtime_root.resolve()
-    if runtime_root != data_root / "runtime":
-        raise RuntimeError("runtime_root_outside_product_data_root")
+
+def _installer_result_code(exc: Exception, *, upgrade: bool) -> str:
+    message = str(exc)
+    allowed_prefixes = ("installer_", "sqlite_", "ladybug_")
+    if message.startswith(allowed_prefixes) and all(
+        character.islower() or character.isdigit() or character == "_"
+        for character in message
+    ):
+        return message
+    return (
+        "installer_embedded_data_migration_failed"
+        if upgrade
+        else "installer_embedded_data_preflight_failed"
+    )
+
+
+def _run_installer_operation(
+    args: argparse.Namespace,
+    *,
+    data_root: Path,
+    runtime_root: Path,
+    compatibility_context: dict[str, Any],
+) -> dict[str, Any]:
 
     from app.runtime.configuration import RuntimeProfile
     from app.runtime.installer_update import (
@@ -331,9 +356,11 @@ def _run_installer_mode() -> int:
         data_root=data_root,
         payload_manifest=args.payload_manifest,
     )
+    compatibility_context["before"] = before
     if args.installer_data_preflight:
-        print(json.dumps(before.public_payload(), sort_keys=True), flush=True)
-        return 0
+        payload = before.public_payload()
+        payload["status"] = "compatible"
+        return payload
 
     from app.runtime.migrations.local_app_data import LegacyLocalAppDataMigration
 
@@ -345,10 +372,11 @@ def _run_installer_mode() -> int:
     ).migrate_if_needed()
     # A legacy LocalAppData import can materialize an active generation after
     # the initial read-only check. Re-evaluate before any schema upgrade.
-    preflight_installer_embedded_data(
+    before = preflight_installer_embedded_data(
         data_root=data_root,
         payload_manifest=args.payload_manifest,
     )
+    compatibility_context["before"] = before
 
     config = _build_embedded_runtime_config(
         data_root,
@@ -371,8 +399,86 @@ def _run_installer_mode() -> int:
     ):
         raise RuntimeError("installer_embedded_data_migration_failed")
     payload = after.public_payload()
+    # Report the version observed before this installer invocation.  Without
+    # this override a real v2 -> v3 update is indistinguishable from a v3
+    # idempotent reinstall because the post-upgrade preflight sees only v3.
+    payload["sqlite_source_version"] = before.sqlite_source_version
+    payload["ladybug_source_version"] = before.ladybug_source_version
     payload["status"] = "upgraded"
-    print(json.dumps(payload, sort_keys=True), flush=True)
+    return payload
+
+
+def _run_installer_mode() -> int:
+    """Run a bounded compatibility/upgrade operation without serving HTTP."""
+
+    args = _parse_installer_args()
+    data_root = args.data_root.resolve()
+    runtime_root = args.runtime_root.resolve()
+    if runtime_root != data_root / "runtime":
+        raise RuntimeError("runtime_root_outside_product_data_root")
+    result_path = (
+        args.installer_result_path.resolve()
+        if args.installer_result_path is not None
+        else runtime_root / "installer-data-upgrade-result.json"
+    )
+    if result_path.parent != runtime_root:
+        raise RuntimeError("installer_result_path_outside_runtime_root")
+    operation = "upgrade" if args.installer_data_upgrade else "preflight"
+    compatibility_context: dict[str, Any] = {}
+    try:
+        payload = _run_installer_operation(
+            args,
+            data_root=data_root,
+            runtime_root=runtime_root,
+            compatibility_context=compatibility_context,
+        )
+    except Exception as exc:
+        failure_result: dict[str, Any] = {
+            "schema_version": 1,
+            "status": "failed",
+            "operation": operation,
+            "code": _installer_result_code(
+                exc,
+                upgrade=args.installer_data_upgrade,
+            ),
+        }
+        before = compatibility_context.get("before")
+        if before is not None:
+            failure_result.update(before.public_payload())
+            failure_result["status"] = "failed"
+            try:
+                from app.runtime.installer_update import (
+                    preflight_installer_embedded_data,
+                )
+
+                active = preflight_installer_embedded_data(
+                    data_root=data_root,
+                    payload_manifest=args.payload_manifest,
+                )
+            except Exception:
+                # A result that cannot prove the active versions remained at
+                # the source is intentionally incomplete. The installer then
+                # refuses to roll back the app and fails closed.
+                pass
+            else:
+                failure_result["sqlite_active_version"] = (
+                    active.sqlite_source_version
+                )
+                failure_result["ladybug_active_version"] = (
+                    active.ladybug_source_version
+                )
+        _write_installer_result(
+            result_path,
+            failure_result,
+        )
+        raise
+    result = {
+        "schema_version": 1,
+        "operation": operation,
+        **payload,
+    }
+    _write_installer_result(result_path, result)
+    print(json.dumps(result, sort_keys=True), flush=True)
     return 0
 
 

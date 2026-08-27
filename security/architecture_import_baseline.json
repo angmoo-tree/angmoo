@@ -1,7 +1,7 @@
 {
-  "edge_count": 1167,
-  "external_import_count": 1724,
-  "module_count": 503,
+  "edge_count": 1171,
+  "external_import_count": 1732,
+  "module_count": 504,
   "modules": [
     {
       "external_imports": [],
@@ -5134,6 +5134,7 @@
       "imports": [
         "app.domains.runtime.ports.runtime_data_path",
         "app.runtime.migrations.generation",
+        "app.runtime.migrations.sqlite_versions.contracts",
         "app.runtime.migrations.sqlite_versions.registry",
         "app.runtime.persistence.sqlite_codecs",
         "app.runtime.persistence.sqlite_database",
@@ -5272,12 +5273,26 @@
         "__future__",
         "collections.abc",
         "dataclasses",
+        "sqlalchemy",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.runtime.migrations.sqlite_versions.contracts",
+      "path": "backend/app/runtime/migrations/sqlite_versions/contracts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "dataclasses",
         "hashlib",
         "json",
         "pathlib",
         "sqlalchemy"
       ],
       "imports": [
+        "app.runtime.migrations.sqlite_versions.contracts",
         "app.runtime.migrations.sqlite_versions.v1_to_v2_world_package_registry",
         "app.runtime.migrations.sqlite_versions.v2_to_v3_no_specific_role",
         "app.runtime.persistence.sqlite_schema"
@@ -5292,6 +5307,7 @@
         "sqlalchemy"
       ],
       "imports": [
+        "app.runtime.migrations.sqlite_versions.contracts",
         "app.runtime.persistence.sqlite_schema"
       ],
       "module": "app.runtime.migrations.sqlite_versions.v1_to_v2_world_package_registry",
@@ -5301,8 +5317,11 @@
     {
       "external_imports": [
         "__future__",
+        "dataclasses",
+        "json",
         "sqlalchemy",
-        "sqlalchemy.orm"
+        "sqlalchemy.orm",
+        "typing"
       ],
       "imports": [
         "app.domains.routines.infrastructure.sqlalchemy_models",
@@ -5311,7 +5330,8 @@
         "app.domains.worlds.domain.reserved_roles",
         "app.domains.worlds.infrastructure.definition_repository",
         "app.domains.worlds.infrastructure.sqlalchemy_models",
-        "app.domains.worlds.infrastructure.sqlalchemy_reserved_roles"
+        "app.domains.worlds.infrastructure.sqlalchemy_reserved_roles",
+        "app.runtime.migrations.sqlite_versions.contracts"
       ],
       "module": "app.runtime.migrations.sqlite_versions.v2_to_v3_no_specific_role",
       "path": "backend/app/runtime/migrations/sqlite_versions/v2_to_v3_no_specific_role.py",

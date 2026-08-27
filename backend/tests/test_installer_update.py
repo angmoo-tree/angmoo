@@ -146,8 +146,13 @@ def test_installer_upgrade_mode_creates_current_generations_and_is_idempotent(
     assert desktop_sidecar.main() == 0
     first = json.loads(capsys.readouterr().out)
     assert first["status"] == "upgraded"
-    assert first["sqlite_source_version"] == 3
-    assert first["ladybug_source_version"] == 1
+    assert first["operation"] == "upgrade"
+    result_path = (
+        data_root / "runtime" / "installer-data-upgrade-result.json"
+    )
+    assert json.loads(result_path.read_text(encoding="utf-8")) == first
+    assert first["sqlite_source_version"] is None
+    assert first["ladybug_source_version"] is None
     canonical_marker = (
         data_root / "canonical" / "current-generation.json"
     ).read_bytes()
@@ -179,8 +184,112 @@ def test_installer_upgrade_mode_creates_current_generations_and_is_idempotent(
     finally:
         writer.close()
     assert second["status"] == "upgraded"
+    assert second["sqlite_source_version"] == 3
+    assert second["ladybug_source_version"] == 1
     assert (data_root / "canonical" / "current-generation.json").read_bytes() == canonical_marker
     assert (data_root / "graph" / "current-generation.json").read_bytes() == graph_marker
+
+
+def test_installer_failure_writes_one_redacted_stable_result(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    data_root = tmp_path / "Angmoo"
+    _marker(data_root / "canonical", 4)
+    _marker(data_root / "graph", 1)
+    result_path = data_root / "runtime" / "installer-result.json"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "angmoo-sidecar",
+            "--installer-data-preflight",
+            "--data-root",
+            str(data_root),
+            "--legacy-data-root",
+            str(tmp_path / "legacy"),
+            "--runtime-root",
+            str(data_root / "runtime"),
+            "--payload-manifest",
+            str(_manifest(tmp_path / "payload.json")),
+            "--installer-result-path",
+            str(result_path),
+        ],
+    )
+
+    with pytest.raises(
+        InstallerUpdateContractError,
+        match="installer_sqlite_data_incompatible",
+    ):
+        desktop_sidecar.main()
+
+    assert json.loads(result_path.read_text(encoding="utf-8")) == {
+        "schema_version": 1,
+        "status": "failed",
+        "operation": "preflight",
+        "code": "installer_sqlite_data_incompatible",
+    }
+
+
+def test_installer_upgrade_failure_reports_source_and_unchanged_active_versions(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    data_root = tmp_path / "Angmoo"
+    _marker(data_root / "canonical", 2)
+    _marker(data_root / "graph", 1)
+    result_path = data_root / "runtime" / "installer-result.json"
+    manifest = _manifest(tmp_path / "payload.json")
+    payload_generation = json.loads(manifest.read_text(encoding="utf-8"))[
+        "payload_generation"
+    ]
+    monkeypatch.setattr(
+        desktop_sidecar,
+        "_build_embedded_runtime_config",
+        lambda *args, **kwargs: (_ for _ in ()).throw(
+            RuntimeError("sqlite_migration_expected_delta_mismatch")
+        ),
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "angmoo-sidecar",
+            "--installer-data-upgrade",
+            "--data-root",
+            str(data_root),
+            "--legacy-data-root",
+            str(tmp_path / "legacy"),
+            "--runtime-root",
+            str(data_root / "runtime"),
+            "--payload-manifest",
+            str(manifest),
+            "--installer-result-path",
+            str(result_path),
+        ],
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="sqlite_migration_expected_delta_mismatch",
+    ):
+        desktop_sidecar.main()
+
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    assert result == {
+        "schema_version": 1,
+        "status": "failed",
+        "operation": "upgrade",
+        "code": "sqlite_migration_expected_delta_mismatch",
+        "build_commit": BUILD_COMMIT,
+        "payload_generation": payload_generation,
+        "sqlite_source_version": 2,
+        "sqlite_target_version": 3,
+        "sqlite_active_version": 2,
+        "ladybug_source_version": 1,
+        "ladybug_target_version": 1,
+        "ladybug_active_version": 1,
+    }
 
 
 def test_installer_mode_fatal_code_is_stable() -> None:

@@ -20,14 +20,17 @@ angmoo-desktop.exe (product display name: Angmoo)
    └─ projector component
 ```
 
-The per-user data root is `%LOCALAPPDATA%\com.angmoo.desktop` and is separate
-from installer-owned program files:
+The per-user product root is `%LOCALAPPDATA%\Angmoo`. Installer-owned files
+live under `app`, while user data has a separate lifetime:
 
 ```text
+app/angmoo-desktop.exe
+app/angmoo-sidecar.exe
 canonical/generations/<generation>/angmoo.sqlite3
 canonical/current-generation.json
 canonical/previous-generation.json
-graph/ladybug/
+graph/current-generation.json
+graph/generations/
 search/
 media/
 secrets/app-secret
@@ -131,6 +134,45 @@ fixture markers are explicitly rejected from public CI artifacts.
   `remove data`.
 - Silent NSIS uninstall and MSI uninstall always preserve local data.
 - Program removal never treats the data root as an installer-owned directory.
+
+## Supported direct-update contract
+
+An installer build is not considered safe merely because it can be produced or
+clean-installed. Every SQLite predecessor version that the candidate declares
+readable must have a deterministic synthetic fixture and must pass a real NSIS
+direct update on `windows-latest`.
+
+The current matrix covers SQLite v1 and v2 as supported predecessors and v3 as
+the target/current no-op state. Each migration step owns a semantic delta
+contract. The v2 to v3 contract permits only the exact reserved
+`no_specific_role` rows, affected autonomous `WorldCharacter` role/version
+changes, and their derived World/profile/repertoire/plan hashes. All unrelated
+table content and identities remain immutable. A conflicting reserved role
+fails closed with a stable code.
+
+The installer transaction stages and verifies the new host and sidecar before
+promotion. If data migration then fails, it restores the verified previous app
+only when the previous payload can still read the active data version. If data
+has already advanced or the backup cannot be trusted, the installer refuses to
+run either payload. Failed updates never expose the success finish page or
+`Run Angmoo now` action.
+
+The Windows Installer workflow reports these separate meanings:
+
+- `windows-installer-build`: exact-SHA NSIS/MSI artifact and payload manifest;
+- `windows-installer-clean-install`: empty LocalAppData install/start/stop;
+- `windows-installer-supported-upgrade`: real NSIS v1/v2 direct-update matrix;
+- `windows-installer-failure-recovery`: conflict injection, data immutability,
+  and verified previous-app restoration;
+- `embedded-data-migration`: version chain, semantic delta, copy-on-write, and
+  idempotency;
+- `windows-installer`: fail-closed aggregator for the complete installer
+  matrix.
+
+Adding SQLite v4 or a later version without adding the new supported
+predecessor fixture causes the matrix contract to fail instead of silently
+skipping the missing upgrade path. No fixture contains personal data or real
+credentials.
 
 ## Supply-chain evidence
 

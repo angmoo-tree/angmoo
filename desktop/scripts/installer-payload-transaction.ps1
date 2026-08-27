@@ -1,13 +1,14 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet('Prepare', 'Promote', 'Finalize', 'RecordFailure')]
+    [ValidateSet('Prepare', 'Promote', 'Finalize', 'RestoreFailure', 'RecordFailure')]
     [string]$Action,
     [Parameter(Mandatory = $true)]
     [string]$ProductRoot,
     [Parameter(Mandatory = $true)]
     [string]$VerifierPath,
-    [string]$FailureCode
+    [string]$FailureCode,
+    [string]$ResultPath
 )
 
 $ErrorActionPreference = 'Stop'
@@ -97,6 +98,157 @@ function Get-CandidateIdentity([string]$Path) {
             product_version = 'invalid'
             build_commit = 'invalid'
             payload_generation = 'invalid'
+        }
+    }
+}
+
+function Read-InstallerFailureResult([string]$Path) {
+    if ([string]::IsNullOrWhiteSpace($Path)) {
+        throw 'installer_result_missing'
+    }
+    $actual = [System.IO.Path]::GetFullPath($Path)
+    $expected = [System.IO.Path]::GetFullPath(
+        (Join-Path $script:productRoot 'runtime\installer-data-upgrade-result.json')
+    )
+    if (-not [string]::Equals(
+        $actual,
+        $expected,
+        [System.StringComparison]::OrdinalIgnoreCase
+    )) {
+        throw 'installer_result_path_invalid'
+    }
+    if (-not (Test-Path -LiteralPath $actual -PathType Leaf)) {
+        throw 'installer_result_missing'
+    }
+    try {
+        $result = Get-Content -LiteralPath $actual -Raw -Encoding UTF8 |
+            ConvertFrom-Json
+        $candidate = [string]$result.code
+        $required = @(
+            'sqlite_source_version',
+            'sqlite_target_version',
+            'sqlite_active_version',
+            'ladybug_source_version',
+            'ladybug_target_version',
+            'ladybug_active_version',
+            'build_commit',
+            'payload_generation'
+        )
+        $valid = (
+            [int]$result.schema_version -eq 1 -and
+            [string]$result.status -eq 'failed' -and
+            [string]$result.operation -eq 'upgrade' -and
+            $candidate -match '^(installer|sqlite|ladybug)_[a-z0-9_]+$' -and
+            @($required | Where-Object {
+                $_ -notin $result.PSObject.Properties.Name
+            }).Count -eq 0
+        )
+        if ($valid) {
+            return $result
+        }
+    }
+    catch {
+        # A malformed result is never trusted as app/data rollback authority.
+    }
+    throw 'installer_result_invalid'
+}
+
+function Read-ActiveDataVersion([string]$Kind) {
+    $markerPath = Join-Path $script:productRoot "$Kind\current-generation.json"
+    if (-not (Test-Path -LiteralPath $markerPath -PathType Leaf)) {
+        return $null
+    }
+    try {
+        $marker = Get-Content -LiteralPath $markerPath -Raw -Encoding UTF8 |
+            ConvertFrom-Json
+        if (
+            [int]$marker.schema_version -ne 1 -or
+            [int]$marker.data_version -lt 0
+        ) {
+            throw 'invalid'
+        }
+        return [int]$marker.data_version
+    }
+    catch {
+        throw 'installer_active_data_marker_invalid'
+    }
+}
+
+function Assert-RollbackDataCompatibility(
+    [object]$Result,
+    [string]$BackupRoot,
+    [string]$ActiveAppRoot
+) {
+    $activeIdentity = Get-CandidateIdentity $ActiveAppRoot
+    if (
+        [string]$Result.build_commit -ne $activeIdentity.build_commit -or
+        [string]$Result.payload_generation -ne $activeIdentity.payload_generation
+    ) {
+        throw 'installer_result_payload_mismatch'
+    }
+
+    $backupManifestPath = Join-Path $BackupRoot 'installer-payload.json'
+    try {
+        $backupManifest = Get-Content -LiteralPath $backupManifestPath `
+            -Raw -Encoding UTF8 | ConvertFrom-Json
+    }
+    catch {
+        throw 'installer_previous_payload_data_contract_invalid'
+    }
+    if ([int]$backupManifest.schema_version -ne 2) {
+        throw 'installer_previous_payload_data_contract_invalid'
+    }
+
+    foreach ($contract in @(
+        [ordered]@{
+            kind = 'canonical'
+            manifest = $backupManifest.embedded_data.sqlite
+            source = $Result.sqlite_source_version
+            active = $Result.sqlite_active_version
+            target = $Result.sqlite_target_version
+        },
+        [ordered]@{
+            kind = 'graph'
+            manifest = $backupManifest.embedded_data.ladybug
+            source = $Result.ladybug_source_version
+            active = $Result.ladybug_active_version
+            target = $Result.ladybug_target_version
+        }
+    )) {
+        $sourceMissing = $null -eq $contract.source
+        $activeMissing = $null -eq $contract.active
+        if ($sourceMissing -ne $activeMissing) {
+            throw 'installer_active_data_generation_changed'
+        }
+        if (-not $sourceMissing) {
+            $source = [int]$contract.source
+            $active = [int]$contract.active
+            $target = [int]$contract.target
+            if ($source -lt 0 -or $target -lt 0 -or $active -ne $source) {
+                throw 'installer_active_data_generation_changed'
+            }
+            if (
+                $source -lt [int]$contract.manifest.minimum_readable_version -or
+                $source -gt [int]$contract.manifest.maximum_readable_version
+            ) {
+                throw 'installer_previous_payload_data_incompatible'
+            }
+        }
+
+        $markerVersion = Read-ActiveDataVersion ([string]$contract.kind)
+        if ($activeMissing) {
+            if ($null -ne $markerVersion) {
+                throw 'installer_active_data_generation_changed'
+            }
+        }
+        elseif (
+            $null -eq $markerVersion -or
+            [int]$markerVersion -ne [int]$contract.active
+        ) {
+            # A failure result cannot authorize rollback when the active marker
+            # disappeared after the sidecar recorded a concrete generation.
+            # Treat marker loss exactly like an unexpected generation change.
+            throw 'installer_active_data_generation_changed'
         }
     }
 }
@@ -237,6 +389,37 @@ try {
             Write-State 'complete' 'retired'
             Write-Diagnostic 'installer_payload_transaction_pass' 'finalize' $app
             Write-Output 'installer_payload_transaction_finalized'
+        }
+        'RestoreFailure' {
+            if ($FailureCode -notmatch '^installer_[a-z0-9_]+$') {
+                throw 'installer_failure_code_invalid'
+            }
+            $failureResult = Read-InstallerFailureResult $ResultPath
+            $FailureCode = [string]$failureResult.code
+            $script:candidateRoot = $app
+            if (-not (Test-Path -LiteralPath $backup -PathType Container)) {
+                throw 'installer_verified_backup_missing'
+            }
+            if (-not (Test-VerifiedPayload $backup)) {
+                throw 'installer_verified_backup_invalid'
+            }
+            Assert-RollbackDataCompatibility $failureResult $backup $app
+
+            # Preserve evidence for the failed candidate before replacing it.
+            Write-Diagnostic $FailureCode 'data_upgrade_failed' $app
+            Remove-OwnedDirectory $app
+            [System.IO.Directory]::Move($backup, $app)
+            if (-not (Test-VerifiedPayload $app)) {
+                throw 'installer_restored_payload_digest_mismatch'
+            }
+            Remove-OwnedDirectory $staging
+            $script:candidateRoot = $app
+            Write-State 'failed_restored' $FailureCode
+            Write-Diagnostic `
+                'installer_previous_payload_restored' `
+                'restore_failure' `
+                $app
+            Write-Output "installer_payload_failure_restored:$FailureCode"
         }
         'RecordFailure' {
             if ($FailureCode -notmatch '^installer_[a-z0-9_]+$') {
