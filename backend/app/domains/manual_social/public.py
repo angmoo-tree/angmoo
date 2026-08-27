@@ -21,26 +21,10 @@ from app.compatibility.manual_social.legacy import (
     list_owner_world_feed,
 )
 from app.domains.manual_social.domain.inbox import ManualInboxInteractionCandidate
-from app.domains.social.public import (
-    SocialWriteConflictError as ManualSocialConflictError,
-)
-from app.domains.social.public import (
-    SocialWriteError as ManualSocialError,
-)
-from app.domains.social.public import (
-    SocialWriteForbiddenError as ManualSocialForbiddenError,
-)
-from app.domains.social.public import (
-    SocialWriteNotFoundError as ManualSocialNotFoundError,
-)
 
 __all__ = [
     "ManualInboxInteractionCandidate",
     "ManualInboxRuntimeError",
-    "ManualSocialConflictError",
-    "ManualSocialError",
-    "ManualSocialForbiddenError",
-    "ManualSocialNotFoundError",
     "claim_manual_inbox",
     "consume_manual_inbox_claims",
     "get_owner_world_post_thread",

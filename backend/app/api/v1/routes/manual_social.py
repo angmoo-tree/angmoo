@@ -8,6 +8,9 @@ from sqlalchemy.orm import Session
 from app.api.v1.deps import get_current_user
 from app.core import browser_session
 from app.core.db import get_db
+from app.compatibility.manual_social.write_unit_of_work import (
+    SqlAlchemySocialWriteUnitOfWork,
+)
 from app.domains.manual_social.api.schemas import (
     ManualSocialFeedRead,
     ManualSocialWriteRead,
@@ -19,6 +22,8 @@ from app.domains.manual_social.public import (
     list_owner_world_feed,
 )
 from app.domains.social.public import (
+    OwnerPostCommand,
+    OwnerReplyCommand,
     SocialWriteConflictError,
     SocialWriteError,
     SocialWriteForbiddenError,
@@ -112,11 +117,14 @@ def write_owner_post(
     browser_session.require_local_frontend_request(request, mutation=True)
     try:
         return create_owner_post(
-            db,
-            world_id=world_id,
-            current_user=current_user,
-            idempotency_key=idempotency_key.strip(),
-            data=data,
+            SqlAlchemySocialWriteUnitOfWork(db),
+            OwnerPostCommand(
+                world_id=world_id,
+                current_user_id=str(current_user.id),
+                idempotency_key=idempotency_key.strip(),
+                title=data.title,
+                body=data.body,
+            ),
         )
     except (SocialWriteError, OwnerControlledIdentityError) as exc:
         _raise_error(exc)
@@ -140,12 +148,14 @@ def write_owner_reply(
     browser_session.require_local_frontend_request(request, mutation=True)
     try:
         return create_owner_reply(
-            db,
-            world_id=world_id,
-            target_post_id=post_id,
-            current_user=current_user,
-            idempotency_key=idempotency_key.strip(),
-            data=data,
+            SqlAlchemySocialWriteUnitOfWork(db),
+            OwnerReplyCommand(
+                world_id=world_id,
+                target_post_id=post_id,
+                current_user_id=str(current_user.id),
+                idempotency_key=idempotency_key.strip(),
+                body=data.body,
+            ),
         )
     except (SocialWriteError, OwnerControlledIdentityError) as exc:
         _raise_error(exc)

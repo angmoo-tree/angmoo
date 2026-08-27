@@ -18,8 +18,10 @@ from sqlalchemy.pool import StaticPool
 from app import models, schemas
 from app.core.db import Base
 from app.cruds import agents as agent_crud
-from app.domains.manual_social.api.schemas import OwnerManualReplyWrite
-from app.domains.social.public import create_owner_reply
+from app.compatibility.manual_social.write_unit_of_work import (
+    SqlAlchemySocialWriteUnitOfWork,
+)
+from app.domains.social.public import OwnerReplyCommand, create_owner_reply
 from app.providers.gemini import build_generate_content_config
 from app.services import (
     activity_state_contracts,
@@ -948,12 +950,12 @@ def test_owner_manual_reply_is_observed_once_on_next_allowed_beat() -> None:
         db.commit()
 
         manual_reply = create_owner_reply(
-            db,
-            world_id=fixture.world.id,
-            target_post_id=target_post_id,
-            current_user=fixture.user,
-            idempotency_key="owner-manual-inbox-reply",
-            data=OwnerManualReplyWrite(
+            SqlAlchemySocialWriteUnitOfWork(db),
+            OwnerReplyCommand(
+                world_id=fixture.world.id,
+                target_post_id=target_post_id,
+                current_user_id=fixture.user.id,
+                idempotency_key="owner-manual-inbox-reply",
                 body="다음 실험에서는 온도를 조금 낮춰 보는 건 어때?"
             ),
         )

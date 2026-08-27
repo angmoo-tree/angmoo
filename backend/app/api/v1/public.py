@@ -9,6 +9,7 @@ from app.api.v1.routes import bot
 from app.api.v1.routes import character_lore
 from app.api.v1.routes import community
 from app.api.v1.routes import messages
+from app.api.v1.routes.manual_social import router as manual_social_router
 from app.api.v1.routes import runtime_status
 from app.api.v1.routes import tree
 from app.api.v1.routes import worlds
@@ -16,7 +17,6 @@ from app.api.v1.routes import world_character_setup
 from app.api.v1.routes import world_activity_runtime
 from app.domains.device_home.public import router as device_home_router
 from app.domains.identity.api.local_routes import router as local_identity_router
-from app.domains.manual_social.api.routes import router as manual_social_router
 from app.domains.world_characters.api.routes import router as world_character_router
 from app.domains.world_packages.api.routes import router as world_package_router
 

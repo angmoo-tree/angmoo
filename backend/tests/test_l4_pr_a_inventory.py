@@ -75,13 +75,13 @@ def test_l4_pr_a_architecture_and_parity_oracles_are_exact() -> None:
     behavior = payload["behavior"]
 
     assert backend["module_count"] == 518
-    assert backend["internal_edge_count"] == 1208
-    assert backend["external_import_count"] == 1760
+    assert backend["internal_edge_count"] == 1207
+    assert backend["external_import_count"] == 1758
     assert backend["legacy_import_exception_count"] == 0
     assert backend["policy_allowed_cycle_count"] == 0
     assert backend["module_cycles"] == []
-    assert len(backend["ownership"]["legacy_horizontal"]) == 18
-    assert len(backend["ownership"]["canonical_boundaries"]) == 39
+    assert len(backend["ownership"]["legacy_horizontal"]) == 19
+    assert len(backend["ownership"]["canonical_boundaries"]) == 37
 
     assert frontend["candidate_count"] == 12
     assert frontend["candidate_consumer_edge_count"] == 33

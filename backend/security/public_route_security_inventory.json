@@ -424,12 +424,12 @@
     },
     "GET /api/v1/worlds/{world_id}/manual-social/feed": {
       "access": "owner-only",
-      "module": "app.domains.manual_social.api.routes",
+      "module": "app.api.v1.routes.manual_social",
       "endpoint": "read_manual_social_feed"
     },
     "GET /api/v1/worlds/{world_id}/manual-social/posts/{post_id}": {
       "access": "owner-only",
-      "module": "app.domains.manual_social.api.routes",
+      "module": "app.api.v1.routes.manual_social",
       "endpoint": "read_manual_social_post_thread"
     },
     "GET /api/v1/worlds/{world_id}/owner-character": {
@@ -789,12 +789,12 @@
     },
     "POST /api/v1/worlds/{world_id}/manual-social/posts": {
       "access": "owner-only",
-      "module": "app.domains.manual_social.api.routes",
+      "module": "app.api.v1.routes.manual_social",
       "endpoint": "write_owner_post"
     },
     "POST /api/v1/worlds/{world_id}/manual-social/posts/{post_id}/replies": {
       "access": "owner-only",
-      "module": "app.domains.manual_social.api.routes",
+      "module": "app.api.v1.routes.manual_social",
       "endpoint": "write_owner_reply"
     },
     "POST /api/v1/worlds/{world_id}/owner-character": {

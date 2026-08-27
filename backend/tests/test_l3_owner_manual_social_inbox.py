@@ -15,7 +15,7 @@ from sqlalchemy.pool import StaticPool
 from app import models
 from app.api.v1.deps import get_current_user
 from app.core.db import Base, get_db
-from app.domains.manual_social.api.routes import router as manual_social_router
+from app.api.v1.routes.manual_social import router as manual_social_router
 from app.domains.world_characters.api.routes import router as owner_identity_router
 from app.services import world_character_contracts
 

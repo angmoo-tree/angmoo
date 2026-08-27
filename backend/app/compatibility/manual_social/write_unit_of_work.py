@@ -1,4 +1,10 @@
-"""SQLite implementation of the canonical social source-write UoW."""
+"""Transitional SQLite adapter for the canonical social source-write UoW.
+
+The social domain owns commands, application use cases, and the UoW port.  This
+adapter remains in the compatibility layer while the canonical ``Post`` ORM and
+community persistence service still live in pre-L4 modules.  API/runtime
+composition may depend on this adapter; ``app.domains.social`` must not.
+"""
 
 from __future__ import annotations
 

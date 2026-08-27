@@ -460,9 +460,13 @@ condition, and must not expand into another service/model/CRUD dependency.
 
 `app.domains.social.public` now owns the owner manual post/reply application
 boundary and the apply boundary for an already validated autonomous post or
-reply result. Both paths enter the same SQLite adapter and acquire the single
-writer with `BEGIN IMMEDIATE`; no provider or LLM call is allowed inside that
-transaction.
+reply result. The domain exposes storage-neutral commands, application use
+cases, and a caller-owned UoW port only. `app.api.v1.routes.manual_social`
+composes those contracts with the transitional
+`app.compatibility.manual_social.write_unit_of_work` SQLite adapter; the domain
+does not import that adapter, legacy ORM/services, or runtime modules. Both
+owner and validated-autonomous paths acquire the single writer with
+`BEGIN IMMEDIATE`; no provider or LLM call is allowed inside that transaction.
 
 One caller-owned transaction contains the source `Post`, its audit-only
 `SocialEvent`, one `SocialEventEvidence` row, the idempotency ledger and, for an
@@ -478,8 +482,10 @@ delta and outbox evidence after the target actor actually observes the source.
 
 `app.compatibility.manual_social.legacy` has consequently become a read-only
 feed/thread facade. Its former write implementation and commits were removed;
-the manual Inbox runtime remains as an explicitly owned compatibility surface
-until PR D moves observation ownership.
+the write adapter has a bounded exact-edge exception only while the canonical
+`Post` ORM and community persistence service remain pre-L4 modules. The manual
+Inbox runtime remains as an explicitly owned compatibility surface until PR D
+moves observation ownership.
 
 ## Contributor workflow
 

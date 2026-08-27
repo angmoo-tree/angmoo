@@ -22,7 +22,7 @@ from app.domains.social.domain import (
     SocialWriteRetryableError,
     ValidatedAutonomousWriteCommand,
 )
-from app.domains.social.infrastructure.sqlalchemy_write_unit_of_work import (
+from app.compatibility.manual_social.write_unit_of_work import (
     SqlAlchemySocialWriteUnitOfWork,
 )
 from app.runtime.persistence.sqlite_concurrency import SqliteRetryPolicy
