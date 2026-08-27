@@ -19,7 +19,9 @@ from app.services import (
     activity_state_contracts,
     agent_activity_policy,
     joint_activity_runtime,
-    social_event_runtime,
+)
+from app.runtime.relationships import (
+    sqlalchemy_social_event as social_event_runtime,
 )
 from app.services import community as community_service
 from app.services.llm_context import neutralize_context_text

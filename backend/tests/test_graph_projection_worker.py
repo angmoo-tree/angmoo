@@ -11,7 +11,7 @@ from app import models
 from app.domains.relationships.ports.projection import (
     RelationshipProjectionBackendError,
 )
-from app.services.graph_projection_worker import GraphProjectionWorker
+from app.runtime.graph_projection.worker import GraphProjectionWorker
 from p7_graph_support import seed_projection_fixture, sqlite_engine
 
 

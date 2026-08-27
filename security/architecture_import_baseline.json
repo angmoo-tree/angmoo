@@ -1,7 +1,7 @@
 {
-  "edge_count": 1220,
-  "external_import_count": 1768,
-  "module_count": 522,
+  "edge_count": 1219,
+  "external_import_count": 1769,
+  "module_count": 524,
   "modules": [
     {
       "external_imports": [],
@@ -1212,9 +1212,9 @@
         "app.domains.relationships.public",
         "app.domains.routines.public",
         "app.models",
-        "app.schemas",
-        "app.services.relationship_graph_read",
-        "app.services.social_memory_read"
+        "app.runtime.graph_projection.relationship_graph_read",
+        "app.runtime.graph_projection.social_memory_read",
+        "app.schemas"
       ],
       "module": "app.api.v1.routes.world_activity_runtime",
       "path": "backend/app/api/v1/routes/world_activity_runtime.py",
@@ -1371,6 +1371,7 @@
         "app.compatibility.routine_posts.canonical_interactions",
         "app.cruds.agent_runs",
         "app.models",
+        "app.runtime.relationships.sqlalchemy_social_event",
         "app.schemas.community",
         "app.services.activity_runtime",
         "app.services.activity_state_contracts",
@@ -1378,8 +1379,7 @@
         "app.services.community",
         "app.services.joint_activity_runtime",
         "app.services.llm_context",
-        "app.services.resident_contracts",
-        "app.services.social_event_runtime"
+        "app.services.resident_contracts"
       ],
       "module": "app.compatibility.routine_posts.legacy",
       "path": "backend/app/compatibility/routine_posts/legacy.py",
@@ -1709,34 +1709,6 @@
       ],
       "module": "app.cruds.community",
       "path": "backend/app/cruds/community.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "dataclasses",
-        "datetime",
-        "sqlalchemy",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.models"
-      ],
-      "module": "app.cruds.graph_projection",
-      "path": "backend/app/cruds/graph_projection.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "sqlalchemy",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.models"
-      ],
-      "module": "app.cruds.social_memory",
-      "path": "backend/app/cruds/social_memory.py",
       "wildcard_imports": []
     },
     {
@@ -2365,6 +2337,43 @@
       ],
       "module": "app.domains.relationships.graph_read.use_case",
       "path": "backend/app/domains/relationships/graph_read/use_case.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.relationships.infrastructure",
+      "path": "backend/app/domains/relationships/infrastructure/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.domains.relationships.infrastructure.sqlalchemy_models",
+      "path": "backend/app/domains/relationships/infrastructure/sqlalchemy_models.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.dialects.postgresql",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.domains.relationships.infrastructure.sqlalchemy_social_models",
+      "path": "backend/app/domains/relationships/infrastructure/sqlalchemy_social_models.py",
       "wildcard_imports": []
     },
     {
@@ -4726,6 +4735,8 @@
       "imports": [
         "app.domains.identity.infrastructure",
         "app.domains.manual_social.infrastructure.sqlalchemy_models",
+        "app.domains.relationships.infrastructure.sqlalchemy_models",
+        "app.domains.relationships.infrastructure.sqlalchemy_social_models",
         "app.domains.runtime.infrastructure",
         "app.domains.world_packages.infrastructure.sqlalchemy_models",
         "app.models.admin_ops",
@@ -4737,11 +4748,9 @@
         "app.models.character_lore",
         "app.models.characters",
         "app.models.community",
-        "app.models.graph_projection",
         "app.models.local_bot_quotas",
         "app.models.messages",
         "app.models.profile_images",
-        "app.models.social_memory",
         "app.models.tree",
         "app.models.world_activity_runtime",
         "app.models.world_character_setup",
@@ -4896,20 +4905,6 @@
     },
     {
       "external_imports": [
-        "__future__",
-        "datetime",
-        "sqlalchemy",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.core.db"
-      ],
-      "module": "app.models.graph_projection",
-      "path": "backend/app/models/graph_projection.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
         "datetime",
         "sqlalchemy",
         "sqlalchemy.orm"
@@ -4947,22 +4942,6 @@
       ],
       "module": "app.models.profile_images",
       "path": "backend/app/models/profile_images.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "datetime",
-        "sqlalchemy",
-        "sqlalchemy.orm",
-        "typing"
-      ],
-      "imports": [
-        "app.core.db",
-        "app.models.worlds"
-      ],
-      "module": "app.models.social_memory",
-      "path": "backend/app/models/social_memory.py",
       "wildcard_imports": []
     },
     {
@@ -5170,8 +5149,8 @@
         "app.core.config",
         "app.core.db",
         "app.domains.relationships.ports.projection",
-        "app.services.graph_projection_runtime",
-        "app.services.graph_projection_worker",
+        "app.runtime.graph_projection.process_client",
+        "app.runtime.graph_projection.worker",
         "app.services.resident_tick_scheduler"
       ],
       "module": "app.runtime.component_workers",
@@ -5265,6 +5244,117 @@
     {
       "external_imports": [
         "__future__",
+        "dataclasses",
+        "threading",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.runtime.graph_projection.metrics",
+      "path": "backend/app/runtime/graph_projection/metrics.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "threading",
+        "typing"
+      ],
+      "imports": [
+        "app.core.config",
+        "app.domains.relationships.ports.projection",
+        "app.integrations.ladybug_projection"
+      ],
+      "module": "app.runtime.graph_projection.process_client",
+      "path": "backend/app/runtime/graph_projection/process_client.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.config",
+        "app.domains.relationships.graph_read.errors",
+        "app.domains.relationships.graph_read.repository",
+        "app.domains.relationships.graph_read.schemas",
+        "app.domains.relationships.graph_read.use_case",
+        "app.domains.relationships.ports.projection",
+        "app.domains.relationships.public",
+        "app.integrations.ladybug_projection",
+        "app.integrations.relationship_graph_read",
+        "app.models",
+        "app.runtime.graph_projection.metrics",
+        "app.runtime.graph_projection.process_client",
+        "app.runtime.graph_projection.sqlalchemy_state"
+      ],
+      "module": "app.runtime.graph_projection.relationship_graph_read",
+      "path": "backend/app/runtime/graph_projection/relationship_graph_read.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "time",
+        "typing"
+      ],
+      "imports": [
+        "app.core.ids",
+        "app.domains.relationships.projection.digest",
+        "app.models",
+        "app.runtime.graph_projection.metrics",
+        "app.runtime.graph_projection.sqlalchemy_commands",
+        "app.runtime.graph_projection.worker"
+      ],
+      "module": "app.runtime.graph_projection.replay",
+      "path": "backend/app/runtime/graph_projection/replay.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.config",
+        "app.domains.relationships.public",
+        "app.models",
+        "app.runtime.graph_projection.relationship_graph_read",
+        "app.runtime.graph_projection.sqlalchemy_state",
+        "app.runtime.relationships.sqlalchemy_social_read_repository",
+        "app.schemas"
+      ],
+      "module": "app.runtime.graph_projection.social_memory_read",
+      "path": "backend/app/runtime/graph_projection/social_memory_read.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "hashlib",
+        "json",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.relationships.projection.commands",
+        "app.models"
+      ],
+      "module": "app.runtime.graph_projection.sqlalchemy_commands",
+      "path": "backend/app/runtime/graph_projection/sqlalchemy_commands.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "collections.abc",
         "datetime",
         "sqlalchemy",
@@ -5272,15 +5362,52 @@
         "typing"
       ],
       "imports": [
-        "app.cruds.graph_projection",
         "app.domains.relationships.ports.outbox",
         "app.domains.relationships.projection.commands",
         "app.models",
-        "app.runtime.persistence.sqlite_concurrency",
-        "app.services.graph_projection_commands"
+        "app.runtime.graph_projection.sqlalchemy_commands",
+        "app.runtime.graph_projection.sqlalchemy_state",
+        "app.runtime.persistence.sqlite_concurrency"
       ],
       "module": "app.runtime.graph_projection.sqlalchemy_outbox",
       "path": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.models"
+      ],
+      "module": "app.runtime.graph_projection.sqlalchemy_state",
+      "path": "backend/app/runtime/graph_projection/sqlalchemy_state.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "concurrent.futures",
+        "dataclasses",
+        "datetime",
+        "logging",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.relationships.ports.outbox",
+        "app.domains.relationships.ports.projection",
+        "app.domains.relationships.projection.commands",
+        "app.runtime.graph_projection.metrics",
+        "app.runtime.graph_projection.sqlalchemy_outbox"
+      ],
+      "module": "app.runtime.graph_projection.worker",
+      "path": "backend/app/runtime/graph_projection/worker.py",
       "wildcard_imports": []
     },
     {
@@ -5684,6 +5811,47 @@
       "imports": [],
       "module": "app.runtime.persistence.sqlite_unit_of_work",
       "path": "backend/app/runtime/persistence/sqlite_unit_of_work.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.runtime.relationships",
+      "path": "backend/app/runtime/relationships/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "json",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing",
+        "zoneinfo"
+      ],
+      "imports": [
+        "app.core.ids",
+        "app.domains.relationships.infrastructure.sqlalchemy_social_models",
+        "app.models"
+      ],
+      "module": "app.runtime.relationships.sqlalchemy_social_event",
+      "path": "backend/app/runtime/relationships/sqlalchemy_social_event.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.models"
+      ],
+      "module": "app.runtime.relationships.sqlalchemy_social_read_repository",
+      "path": "backend/app/runtime/relationships/sqlalchemy_social_read_repository.py",
       "wildcard_imports": []
     },
     {
@@ -6367,12 +6535,12 @@
         "app.cruds.agents",
         "app.cruds.community",
         "app.models",
+        "app.runtime.relationships.sqlalchemy_social_event",
         "app.schemas",
         "app.services.agent_activity_policy",
         "app.services.agent_briefs",
         "app.services.community_abuse_quota",
-        "app.services.llm_context",
-        "app.services.social_event_runtime"
+        "app.services.llm_context"
       ],
       "module": "app.services.community",
       "path": "backend/app/services/community.py",
@@ -6472,94 +6640,6 @@
     {
       "external_imports": [
         "__future__",
-        "datetime",
-        "hashlib",
-        "json",
-        "sqlalchemy",
-        "sqlalchemy.orm",
-        "typing"
-      ],
-      "imports": [
-        "app.domains.relationships.projection.commands",
-        "app.models"
-      ],
-      "module": "app.services.graph_projection_commands",
-      "path": "backend/app/services/graph_projection_commands.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "dataclasses",
-        "threading",
-        "typing"
-      ],
-      "imports": [],
-      "module": "app.services.graph_projection_metrics",
-      "path": "backend/app/services/graph_projection_metrics.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "datetime",
-        "sqlalchemy",
-        "sqlalchemy.orm",
-        "time",
-        "typing"
-      ],
-      "imports": [
-        "app.core.ids",
-        "app.domains.relationships.projection.digest",
-        "app.models",
-        "app.services.graph_projection_commands",
-        "app.services.graph_projection_metrics",
-        "app.services.graph_projection_worker"
-      ],
-      "module": "app.services.graph_projection_replay",
-      "path": "backend/app/services/graph_projection_replay.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "threading",
-        "typing"
-      ],
-      "imports": [
-        "app.core.config",
-        "app.domains.relationships.ports.projection",
-        "app.integrations.ladybug_projection"
-      ],
-      "module": "app.services.graph_projection_runtime",
-      "path": "backend/app/services/graph_projection_runtime.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "concurrent.futures",
-        "dataclasses",
-        "datetime",
-        "logging",
-        "threading",
-        "time",
-        "typing"
-      ],
-      "imports": [
-        "app.domains.relationships.ports.outbox",
-        "app.domains.relationships.ports.projection",
-        "app.domains.relationships.projection.commands",
-        "app.runtime.graph_projection.sqlalchemy_outbox",
-        "app.services.graph_projection_metrics"
-      ],
-      "module": "app.services.graph_projection_worker",
-      "path": "backend/app/services/graph_projection_worker.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
         "typing"
       ],
       "imports": [],
@@ -6605,7 +6685,7 @@
       "imports": [
         "app.core.ids",
         "app.models",
-        "app.services.social_event_runtime"
+        "app.runtime.relationships.sqlalchemy_social_event"
       ],
       "module": "app.services.joint_activity_runtime",
       "path": "backend/app/services/joint_activity_runtime.py",
@@ -6686,8 +6766,8 @@
       ],
       "imports": [
         "app.models",
-        "app.services.activity_proposal_runtime",
-        "app.services.social_event_runtime"
+        "app.runtime.relationships.sqlalchemy_social_event",
+        "app.services.activity_proposal_runtime"
       ],
       "module": "app.services.langgraph_social_apply",
       "path": "backend/app/services/langgraph_social_apply.py",
@@ -6969,31 +7049,6 @@
     {
       "external_imports": [
         "__future__",
-        "sqlalchemy",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.core.config",
-        "app.cruds.graph_projection",
-        "app.domains.relationships.graph_read.errors",
-        "app.domains.relationships.graph_read.repository",
-        "app.domains.relationships.graph_read.schemas",
-        "app.domains.relationships.graph_read.use_case",
-        "app.domains.relationships.ports.projection",
-        "app.domains.relationships.public",
-        "app.integrations.ladybug_projection",
-        "app.integrations.relationship_graph_read",
-        "app.models",
-        "app.services.graph_projection_metrics",
-        "app.services.graph_projection_runtime"
-      ],
-      "module": "app.services.relationship_graph_read",
-      "path": "backend/app/services/relationship_graph_read.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
         "asyncio",
         "dataclasses",
         "ipaddress",
@@ -7115,47 +7170,6 @@
       ],
       "module": "app.services.service_image_key",
       "path": "backend/app/services/service_image_key.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "dataclasses",
-        "datetime",
-        "hashlib",
-        "json",
-        "sqlalchemy",
-        "sqlalchemy.orm",
-        "typing",
-        "zoneinfo"
-      ],
-      "imports": [
-        "app.core.ids",
-        "app.models",
-        "app.models.social_memory"
-      ],
-      "module": "app.services.social_event_runtime",
-      "path": "backend/app/services/social_event_runtime.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "datetime",
-        "sqlalchemy",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.core.config",
-        "app.cruds.graph_projection",
-        "app.cruds.social_memory",
-        "app.domains.relationships.public",
-        "app.models",
-        "app.schemas",
-        "app.services.relationship_graph_read"
-      ],
-      "module": "app.services.social_memory_read",
-      "path": "backend/app/services/social_memory_read.py",
       "wildcard_imports": []
     },
     {
@@ -7311,9 +7325,9 @@
       ],
       "imports": [
         "app.models",
+        "app.runtime.relationships.sqlalchemy_social_event",
         "app.schemas",
         "app.services.activity_proposal_runtime",
-        "app.services.social_event_runtime",
         "app.services.world_feed_search"
       ],
       "module": "app.services.world_feed_social_apply",

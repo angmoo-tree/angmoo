@@ -10,8 +10,8 @@ from app.api.v1.deps import get_current_user, get_db
 from app.core.config import settings
 from app.domains.relationships import public as relationships
 from app.domains.routines import public as routines
-from app.services import social_memory_read
-from app.services.relationship_graph_read import (
+from app.runtime.graph_projection import social_memory_read
+from app.runtime.graph_projection.relationship_graph_read import (
     SqlAlchemyRelationshipGraphReadGateway,
 )
 

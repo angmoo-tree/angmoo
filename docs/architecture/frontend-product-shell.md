@@ -14,6 +14,7 @@ moves one surface at a time.
 | `features/world-app/public.ts` | One explicit `world_id` runtime surface | phone-like `DeviceFrame` |
 | `features/runtime-status/public.ts` | Secret-free aggregate status presentation | shared status badge |
 | `features/social/public.ts` | Feed read composition, social DTO entry and shared post-list UI | Next route and static/Tauri router |
+| `features/relationships/public.ts` | Relationship graph API, typed projection state and shared graph UI | Next route and Tauri wide window |
 
 `shared/ui` contains presentation primitives only. It must not decide World
 visibility, owner authorization, runtime health, or feature availability.
@@ -106,6 +107,15 @@ and observed follow-up success. The existing autonomy setup surface consumes
 that public contract and does not guess private feelings from a source post or
 relationship delta. A failed follow-up is presented as a preserved observation
 plus an absent public action, not as a failed or rolled-back observation.
+
+L4 PR E moves the relationship graph transport contract, typed presentation model and client UI
+under `features/relationships`. The Next relationship route and static/Tauri
+router import only `features/relationships/public.ts`, so Phone navigation and
+the Graph wide window render the same component. The model distinguishes
+loading, empty, rebuilding, degraded canonical fallback, failed and ready
+states; the UI does not collapse a projector replay into an empty graph or a
+query failure into a healthy fallback. The old component and `lib` client paths
+are deleted rather than re-exported.
 
 The optional PWA shell is implemented as a standards-based manifest plus a
 cache-free service worker lifecycle. It only changes the browser chrome:

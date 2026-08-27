@@ -32,7 +32,7 @@ from app.runtime.single_backend_components import (
     SingleBackendRuntimeComponents,
     SingleBackendRuntimeStartupError,
 )
-from app.services.graph_projection_runtime import borrow_process_graph_client
+from app.runtime.graph_projection.process_client import borrow_process_graph_client
 
 
 ROOT = Path(__file__).resolve().parents[2]

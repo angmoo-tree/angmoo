@@ -9,8 +9,10 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import models
-from app.services import social_event_runtime
-from app.services.graph_projection_commands import (
+from app.runtime.relationships import (
+    sqlalchemy_social_event as social_event_runtime,
+)
+from app.runtime.graph_projection.sqlalchemy_commands import (
     ProjectionCommandError,
     RelationshipStateProjectionCommand,
     SourceExclusionProjectionCommand,

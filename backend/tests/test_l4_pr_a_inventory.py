@@ -78,19 +78,19 @@ def test_l4_pr_a_architecture_and_parity_oracles_are_exact() -> None:
     frontend = payload["architecture"]["frontend"]
     behavior = payload["behavior"]
 
-    assert backend["module_count"] == 522
-    assert backend["internal_edge_count"] == 1220
-    assert backend["external_import_count"] == 1768
+    assert backend["module_count"] == 524
+    assert backend["internal_edge_count"] == 1219
+    assert backend["external_import_count"] == 1769
     assert backend["legacy_import_exception_count"] == 0
     assert backend["policy_allowed_cycle_count"] == 0
     assert backend["module_cycles"] == []
-    assert len(backend["ownership"]["legacy_horizontal"]) == 20
-    assert len(backend["ownership"]["canonical_boundaries"]) == 40
+    assert len(backend["ownership"]["legacy_horizontal"]) == 13
+    assert len(backend["ownership"]["canonical_boundaries"]) == 51
 
-    assert frontend["candidate_count"] == 12
-    assert frontend["candidate_consumer_edge_count"] == 33
+    assert frontend["candidate_count"] == 14
+    assert frontend["candidate_consumer_edge_count"] == 35
     assert frontend["planned_feature_allowlist"] == ["relationships", "social"]
-    assert len(frontend["public_surfaces"]["features"]) == 7
+    assert len(frontend["public_surfaces"]["features"]) == 8
     assert len(frontend["public_surfaces"]["shared"]) == 5
 
     assert behavior["parity_test_node_count"] == 92

@@ -8,7 +8,7 @@ import { AppShell } from "@/components/app-shell";
 import { LocalOwnerClient } from "@/components/local-owner-client";
 import { PostDetailClient } from "@/components/post-detail-client";
 import { PostListClient } from "@/features/social/public";
-import { RelationshipGraphClient } from "@/components/relationship-graph-client";
+import { RelationshipGraphClient } from "@/features/relationships/public";
 import { SettingsClient } from "@/components/settings-client";
 import { WorldCharacterAutonomySetupClient } from "@/components/world-character-autonomy-setup-client";
 import { WorldCreatorClient } from "@/components/world-creator-client";

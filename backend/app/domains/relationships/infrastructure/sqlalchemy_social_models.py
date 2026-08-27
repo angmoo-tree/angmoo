@@ -1,3 +1,5 @@
+"""SQLAlchemy persistence models owned by the relationships domain."""
+
 from __future__ import annotations
 
 from datetime import date, datetime
@@ -12,15 +14,19 @@ from sqlalchemy import (
     ForeignKeyConstraint,
     Index,
     Integer,
+    JSON,
     SmallInteger,
     String,
     UniqueConstraint,
     func,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
-from app.models.worlds import JSON_DOCUMENT
+
+
+JSON_DOCUMENT = JSON().with_variant(JSONB(), "postgresql")
 
 
 SOCIAL_EVENT_TYPES = (

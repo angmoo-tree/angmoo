@@ -1,3 +1,5 @@
+"""Runtime SQLAlchemy adapter for canonical social-event and relationship writes."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -12,7 +14,9 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.core.ids import uuid7_string
-from app.models.social_memory import SOCIAL_EVENT_TYPES
+from app.domains.relationships.infrastructure.sqlalchemy_social_models import (
+    SOCIAL_EVENT_TYPES,
+)
 
 
 SOCIAL_EVENT_SCHEMA_VERSION = "social-event-v1"

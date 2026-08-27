@@ -10,7 +10,9 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.core.ids import uuid7_string
-from app.services import social_event_runtime
+from app.runtime.relationships import (
+    sqlalchemy_social_event as social_event_runtime,
+)
 
 
 DAYPARTS = ("dawn", "morning", "afternoon", "evening")

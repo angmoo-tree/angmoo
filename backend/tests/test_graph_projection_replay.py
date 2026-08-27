@@ -5,14 +5,16 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy.orm import Session
 
 from app import models
-from app.cruds import graph_projection as graph_projection_crud
-from app.services import social_event_runtime
-from app.services.graph_projection_commands import (
+from app.runtime.graph_projection import sqlalchemy_state as graph_projection_crud
+from app.runtime.relationships import (
+    sqlalchemy_social_event as social_event_runtime,
+)
+from app.runtime.graph_projection.sqlalchemy_commands import (
     RelationshipStateProjectionCommand,
     SourceExclusionProjectionCommand,
 )
 
-from app.services.graph_projection_replay import (
+from app.runtime.graph_projection.replay import (
     GraphProjectionReplayService,
     GraphReplayError,
     create_replay_run,

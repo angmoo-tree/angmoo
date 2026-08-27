@@ -10,7 +10,7 @@ from sqlalchemy import Engine, exists, or_, select, update
 from sqlalchemy.orm import Session
 
 from app import models
-from app.cruds import graph_projection as graph_projection_crud
+from app.runtime.graph_projection import sqlalchemy_state as graph_projection_crud
 from app.domains.relationships.ports.outbox import (
     OutboxFinalizeStatus,
     ProjectionWorkItem,
@@ -20,7 +20,9 @@ from app.runtime.persistence.sqlite_concurrency import (
     SqliteRetryPolicy,
     run_sqlite_immediate,
 )
-from app.services.graph_projection_commands import build_projection_command
+from app.runtime.graph_projection.sqlalchemy_commands import (
+    build_projection_command,
+)
 
 
 SessionFactory = Callable[[], Session]

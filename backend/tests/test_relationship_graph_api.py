@@ -6,18 +6,20 @@ import pytest
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings
+from app.domains.relationships import public as relationships
+from app.runtime.graph_projection.relationship_graph_read import (
+    get_owner_relationship_graph,
+)
+from app.runtime.graph_projection.sqlalchemy_commands import (
+    build_projection_command,
+)
 from app.integrations.ladybug_projection import LadybugRelationshipProjection
-from app.services import social_memory_read
-from app.services.graph_projection_commands import build_projection_command
-from app.services.graph_projection_replay import create_replay_run
-from app.services.graph_projection_runtime import (
+from app.runtime.graph_projection.process_client import (
     register_process_graph_client,
     unregister_process_graph_client,
 )
-from app.services.relationship_graph_read import (
-    RelationshipGraphForbiddenError,
-    get_owner_relationship_graph,
-)
+from app.runtime.graph_projection.replay import create_replay_run
+from app.runtime.graph_projection import social_memory_read
 from p7_graph_support import seed_projection_fixture, sqlite_engine
 
 
@@ -45,7 +47,7 @@ def test_other_owner_cannot_read_character_graph() -> None:
     engine = sqlite_engine()
     with Session(engine, expire_on_commit=False) as db:
         fixture = seed_projection_fixture(db, suffix="forbidden")
-        with pytest.raises(RelationshipGraphForbiddenError):
+        with pytest.raises(relationships.RelationshipGraphForbiddenError):
             get_owner_relationship_graph(
                 db,
                 character_id=fixture.actor.id,

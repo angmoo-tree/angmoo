@@ -4,12 +4,19 @@
     "creator-studio",
     "device-home",
     "pwa-shell",
+    "relationships",
     "runtime-status",
     "social",
     "world-app",
     "world-packages"
   ],
   "legacy_import_exceptions": [
+    {
+      "importer": "frontend/src/features/relationships/ui/relationship-graph-client.tsx",
+      "target": "@/components/auth-provider",
+      "owner_stage": "L4 PR E relationship UI progressive move",
+      "removal_condition": "Move the shared auth context behind a product-neutral shared public boundary before L4 closeout"
+    },
     {
       "importer": "frontend/src/features/social/api/social-feed-client.ts",
       "target": "@/lib/backend",
@@ -128,6 +135,10 @@
     "frontend/src/features/device-home/public.ts",
     "frontend/src/features/pwa-shell/public.ts",
     "frontend/src/features/pwa-shell/ui/pwa-service-worker-lifecycle.tsx",
+    "frontend/src/features/relationships/api/relationship-graph.ts",
+    "frontend/src/features/relationships/model/relationship-graph.ts",
+    "frontend/src/features/relationships/public.ts",
+    "frontend/src/features/relationships/ui/relationship-graph-client.tsx",
     "frontend/src/features/runtime-status/public.ts",
     "frontend/src/features/social/api/social-write-client.ts",
     "frontend/src/features/social/model/social-write-contract.ts",

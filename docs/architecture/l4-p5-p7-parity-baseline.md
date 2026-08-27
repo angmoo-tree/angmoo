@@ -103,6 +103,30 @@ selected canonical-boundary modules, 33 frontend consumer edges, seven feature
 public surfaces, five shared public surfaces and 92 focused parity nodes. There
 are no architecture-policy legacy exceptions and no package cycles.
 
+## PR E reviewed ownership delta
+
+PR E completes the active relationship/projection ownership move without
+changing the frozen P7 deltas or query result contract. Relationship-owned ORM
+definitions live under `app.domains.relationships.infrastructure`; concrete
+aggregate SQLAlchemy social-event writes and social-memory reads are composed
+under `app.runtime.relationships`. Projection command building, worker, replay,
+metrics, process client, graph-read composition and diagnostics live under
+`app.runtime.graph_projection`. The former horizontal graph and social-memory
+service/CRUD/model modules are absent, and an architecture test keeps them
+absent. Domain infrastructure imports no legacy horizontal registry.
+
+LadybugDB remains the only graph adapter and SQLite remains canonical. The six
+typed query digest, World replay, stale-version rejection, outage write,
+backlog recovery and limited canonical-fallback regressions remain the behavior
+oracle. A focused bootstrap-schema regression keeps `WorldCharacter` as the
+actor identity and forbids a `Human` node table without changing the immutable
+LadybugDB v2 manifest.
+
+The frontend relationship API, typed model and client UI live behind
+`features/relationships/public.ts`. Next and static/Tauri composition both use
+that public component and distinguish loading, empty, rebuilding, degraded,
+failed and ready states.
+
 ## Runtime and upgrade baseline
 
 The supported SQLite chain is consecutive and copy-on-write:

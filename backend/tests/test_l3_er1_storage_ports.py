@@ -29,10 +29,10 @@ from app.runtime.graph_projection.sqlalchemy_outbox import SqlAlchemyProjectionO
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
 from app.runtime.persistence.sqlalchemy_unit_of_work import SqlAlchemyUnitOfWork
 from app.runtime.search.callback_index import CallbackSearchIndexAdapter
-from app.services.graph_projection_commands import (
+from app.runtime.graph_projection.sqlalchemy_commands import (
     NoGraphMutationCommand as LegacyNoGraphMutationCommand,
 )
-from app.services.graph_projection_worker import GraphProjectionWorker
+from app.runtime.graph_projection.worker import GraphProjectionWorker
 
 
 def test_current_adapters_satisfy_er1_runtime_ports() -> None:
@@ -189,7 +189,7 @@ def test_port_modules_and_projection_worker_preserve_dependency_direction() -> N
             ), path
 
     worker_source = (
-        app_root / "services" / "graph_projection_worker.py"
+        app_root / "runtime" / "graph_projection" / "worker.py"
     ).read_text(encoding="utf-8")
     assert "from sqlalchemy" not in worker_source
     assert "from app import models" not in worker_source

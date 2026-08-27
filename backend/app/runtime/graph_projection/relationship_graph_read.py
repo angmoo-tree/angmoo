@@ -1,4 +1,4 @@
-"""L4-owned adapter from SQLAlchemy/runtime to graph-read domain.
+"""Runtime composition from SQLAlchemy/LadybugDB to graph-read domain.
 
 Current consumers are the relationship-graph API route and social-memory
 diagnostics. SQLite supplies canonical fallback facts and LadybugDB supplies
@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.core.config import Settings, settings
-from app.cruds import graph_projection as graph_projection_crud
+from app.runtime.graph_projection import sqlalchemy_state as graph_projection_crud
 from app.domains.relationships import public as relationships
 from app.domains.relationships.graph_read import schemas
 from app.domains.relationships.graph_read.errors import GraphReadBackendError
@@ -34,8 +34,8 @@ from app.domains.relationships.ports.projection import (
     RelationshipProjectionBackendError,
 )
 from app.integrations.relationship_graph_read import RelationshipGraphRepository
-from app.services.graph_projection_metrics import graph_metrics
-from app.services.graph_projection_runtime import (
+from app.runtime.graph_projection.metrics import graph_metrics
+from app.runtime.graph_projection.process_client import (
     borrow_process_graph_client,
 )
 
@@ -72,7 +72,7 @@ class _BackendErrorMappingRepository:
 
 
 class SqlAlchemyRelationshipGraphReadGateway:
-    """Legacy persistence/runtime adapter for the canonical read use case."""
+    """SQLAlchemy/runtime adapter for the canonical read use case."""
 
     def __init__(
         self,
@@ -505,7 +505,7 @@ def get_owner_relationship_graph(
     repository: RelationshipGraphQueryPort | None = None,
     graph_provider: relationships.GraphProvider = "ladybug",
 ) -> relationships.RelationshipGraphRead:
-    """Preserve the legacy call signature while delegating to the domain."""
+    """Compose the SQLAlchemy adapter with the domain-owned read use case."""
 
     gateway = SqlAlchemyRelationshipGraphReadGateway(
         db,
@@ -532,7 +532,7 @@ def get_owner_relationship_graph(
     )
 
 
-# Legacy public names intentionally remain narrow aliases until L4.
+# Infrastructure consumers use the exact domain-owned contract types.
 GraphStatus = relationships.GraphStatus
 GraphView = relationships.GraphView
 RelationshipGraphForbiddenError = relationships.RelationshipGraphForbiddenError

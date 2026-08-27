@@ -11,14 +11,16 @@ from sqlalchemy.pool import StaticPool
 from app import models, schemas
 from app.compatibility.manual_social.observations import observe_source
 from app.core.db import Base
+from app.runtime.relationships import (
+    sqlalchemy_social_event as social_event_runtime,
+)
 from app.domains.social.public import SocialObservationError
 from app.services import (
     activity_proposal_runtime,
     langgraph_social_apply,
-    social_event_runtime,
     world_character_contracts,
 )
-from app.services.graph_projection_commands import (
+from app.runtime.graph_projection.sqlalchemy_commands import (
     RelationshipStateProjectionCommand,
     build_projection_command,
 )
@@ -889,7 +891,8 @@ def test_self_target_and_cross_world_target_are_rejected() -> None:
 
 
 def test_source_deletion_retains_audit_rows_and_emits_one_exclusion() -> None:
-    from app.services import community, social_memory_read, social_routine_interactions
+    from app.runtime.graph_projection import social_memory_read
+    from app.services import community, social_routine_interactions
 
     engine = _engine()
     occurred_at = datetime(2026, 8, 11, 5, 0, tzinfo=UTC)
@@ -1015,7 +1018,8 @@ def test_source_deletion_retains_audit_rows_and_emits_one_exclusion() -> None:
 
 
 def test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals() -> None:
-    from app.services import social_memory_read, social_routine_interactions
+    from app.runtime.graph_projection import social_memory_read
+    from app.services import social_routine_interactions
 
     engine = _engine()
     occurred_at = datetime(2026, 8, 11, 5, 30, tzinfo=UTC)
@@ -1224,7 +1228,7 @@ def test_same_character_pair_is_isolated_across_world_events_relationships_and_p
 
 
 def test_read_revalidates_membership_and_block_before_exposing_evidence() -> None:
-    from app.services import social_memory_read
+    from app.runtime.graph_projection import social_memory_read
 
     engine = _engine()
     with Session(engine, expire_on_commit=False) as db:

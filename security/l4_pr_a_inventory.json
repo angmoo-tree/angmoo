@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 1768,
-      "internal_edge_count": 1220,
+      "external_import_count": 1769,
+      "internal_edge_count": 1219,
       "legacy_import_exception_count": 0,
-      "module_count": 522,
+      "module_count": 524,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -77,6 +77,25 @@
             ],
             "module": "app.domains.relationships.graph_read.use_case",
             "path": "backend/app/domains/relationships/graph_read/use_case.py"
+          },
+          {
+            "imports": [],
+            "module": "app.domains.relationships.infrastructure",
+            "path": "backend/app/domains/relationships/infrastructure/__init__.py"
+          },
+          {
+            "imports": [
+              "app.core.db"
+            ],
+            "module": "app.domains.relationships.infrastructure.sqlalchemy_models",
+            "path": "backend/app/domains/relationships/infrastructure/sqlalchemy_models.py"
+          },
+          {
+            "imports": [
+              "app.core.db"
+            ],
+            "module": "app.domains.relationships.infrastructure.sqlalchemy_social_models",
+            "path": "backend/app/domains/relationships/infrastructure/sqlalchemy_social_models.py"
           },
           {
             "imports": [
@@ -281,16 +300,100 @@
             "path": "backend/app/runtime/graph_projection/__init__.py"
           },
           {
+            "imports": [],
+            "module": "app.runtime.graph_projection.metrics",
+            "path": "backend/app/runtime/graph_projection/metrics.py"
+          },
+          {
             "imports": [
-              "app.cruds.graph_projection",
+              "app.core.config",
+              "app.domains.relationships.ports.projection",
+              "app.integrations.ladybug_projection"
+            ],
+            "module": "app.runtime.graph_projection.process_client",
+            "path": "backend/app/runtime/graph_projection/process_client.py"
+          },
+          {
+            "imports": [
+              "app.core.config",
+              "app.domains.relationships.graph_read.errors",
+              "app.domains.relationships.graph_read.repository",
+              "app.domains.relationships.graph_read.schemas",
+              "app.domains.relationships.graph_read.use_case",
+              "app.domains.relationships.ports.projection",
+              "app.domains.relationships.public",
+              "app.integrations.ladybug_projection",
+              "app.integrations.relationship_graph_read",
+              "app.models",
+              "app.runtime.graph_projection.metrics",
+              "app.runtime.graph_projection.process_client",
+              "app.runtime.graph_projection.sqlalchemy_state"
+            ],
+            "module": "app.runtime.graph_projection.relationship_graph_read",
+            "path": "backend/app/runtime/graph_projection/relationship_graph_read.py"
+          },
+          {
+            "imports": [
+              "app.core.ids",
+              "app.domains.relationships.projection.digest",
+              "app.models",
+              "app.runtime.graph_projection.metrics",
+              "app.runtime.graph_projection.sqlalchemy_commands",
+              "app.runtime.graph_projection.worker"
+            ],
+            "module": "app.runtime.graph_projection.replay",
+            "path": "backend/app/runtime/graph_projection/replay.py"
+          },
+          {
+            "imports": [
+              "app.core.config",
+              "app.domains.relationships.public",
+              "app.models",
+              "app.runtime.graph_projection.relationship_graph_read",
+              "app.runtime.graph_projection.sqlalchemy_state",
+              "app.runtime.relationships.sqlalchemy_social_read_repository",
+              "app.schemas"
+            ],
+            "module": "app.runtime.graph_projection.social_memory_read",
+            "path": "backend/app/runtime/graph_projection/social_memory_read.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.projection.commands",
+              "app.models"
+            ],
+            "module": "app.runtime.graph_projection.sqlalchemy_commands",
+            "path": "backend/app/runtime/graph_projection/sqlalchemy_commands.py"
+          },
+          {
+            "imports": [
               "app.domains.relationships.ports.outbox",
               "app.domains.relationships.projection.commands",
               "app.models",
-              "app.runtime.persistence.sqlite_concurrency",
-              "app.services.graph_projection_commands"
+              "app.runtime.graph_projection.sqlalchemy_commands",
+              "app.runtime.graph_projection.sqlalchemy_state",
+              "app.runtime.persistence.sqlite_concurrency"
             ],
             "module": "app.runtime.graph_projection.sqlalchemy_outbox",
             "path": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py"
+          },
+          {
+            "imports": [
+              "app.models"
+            ],
+            "module": "app.runtime.graph_projection.sqlalchemy_state",
+            "path": "backend/app/runtime/graph_projection/sqlalchemy_state.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.ports.outbox",
+              "app.domains.relationships.ports.projection",
+              "app.domains.relationships.projection.commands",
+              "app.runtime.graph_projection.metrics",
+              "app.runtime.graph_projection.sqlalchemy_outbox"
+            ],
+            "module": "app.runtime.graph_projection.worker",
+            "path": "backend/app/runtime/graph_projection/worker.py"
           }
         ],
         "legacy_horizontal": [
@@ -359,39 +462,10 @@
           },
           {
             "imports": [
-              "app.models"
-            ],
-            "module": "app.cruds.graph_projection",
-            "path": "backend/app/cruds/graph_projection.py"
-          },
-          {
-            "imports": [
-              "app.models"
-            ],
-            "module": "app.cruds.social_memory",
-            "path": "backend/app/cruds/social_memory.py"
-          },
-          {
-            "imports": [
               "app.core.db"
             ],
             "module": "app.models.community",
             "path": "backend/app/models/community.py"
-          },
-          {
-            "imports": [
-              "app.core.db"
-            ],
-            "module": "app.models.graph_projection",
-            "path": "backend/app/models/graph_projection.py"
-          },
-          {
-            "imports": [
-              "app.core.db",
-              "app.models.worlds"
-            ],
-            "module": "app.models.social_memory",
-            "path": "backend/app/models/social_memory.py"
           },
           {
             "imports": [
@@ -431,47 +505,6 @@
           },
           {
             "imports": [
-              "app.core.config",
-              "app.cruds.graph_projection",
-              "app.domains.relationships.graph_read.errors",
-              "app.domains.relationships.graph_read.repository",
-              "app.domains.relationships.graph_read.schemas",
-              "app.domains.relationships.graph_read.use_case",
-              "app.domains.relationships.ports.projection",
-              "app.domains.relationships.public",
-              "app.integrations.ladybug_projection",
-              "app.integrations.relationship_graph_read",
-              "app.models",
-              "app.services.graph_projection_metrics",
-              "app.services.graph_projection_runtime"
-            ],
-            "module": "app.services.relationship_graph_read",
-            "path": "backend/app/services/relationship_graph_read.py"
-          },
-          {
-            "imports": [
-              "app.core.ids",
-              "app.models",
-              "app.models.social_memory"
-            ],
-            "module": "app.services.social_event_runtime",
-            "path": "backend/app/services/social_event_runtime.py"
-          },
-          {
-            "imports": [
-              "app.core.config",
-              "app.cruds.graph_projection",
-              "app.cruds.social_memory",
-              "app.domains.relationships.public",
-              "app.models",
-              "app.schemas",
-              "app.services.relationship_graph_read"
-            ],
-            "module": "app.services.social_memory_read",
-            "path": "backend/app/services/social_memory_read.py"
-          },
-          {
-            "imports": [
               "app.compatibility.routine_posts.canonical_interactions"
             ],
             "module": "app.services.social_routine_interactions",
@@ -482,7 +515,7 @@
       "policy_allowed_cycle_count": 0
     },
     "frontend": {
-      "candidate_consumer_edge_count": 33,
+      "candidate_consumer_edge_count": 35,
       "candidate_consumers": {
         "frontend/src/app/api/community/characters/[characterId]/activity/route.ts": [],
         "frontend/src/app/api/community/posts/[postId]/comments/route.ts": [],
@@ -494,10 +527,18 @@
           "frontend/src/app/posts/[postId]/page.tsx",
           "frontend/src/composition/static-product-router.tsx"
         ],
-        "frontend/src/components/relationship-graph-client.tsx": [
+        "frontend/src/features/relationships/api/relationship-graph.ts": [
+          "frontend/src/features/relationships/ui/relationship-graph-client.tsx"
+        ],
+        "frontend/src/features/relationships/model/relationship-graph.ts": [
+          "frontend/src/features/relationships/api/relationship-graph.ts",
+          "frontend/src/features/relationships/ui/relationship-graph-client.tsx"
+        ],
+        "frontend/src/features/relationships/public.ts": [
           "frontend/src/app/characters/[characterId]/worlds/[worldId]/relationship-graph/page.tsx",
           "frontend/src/composition/static-product-router.tsx"
         ],
+        "frontend/src/features/relationships/ui/relationship-graph-client.tsx": [],
         "frontend/src/features/social/ui/post-list-client.tsx": [],
         "frontend/src/features/social/ui/world-social-feed.tsx": [],
         "frontend/src/lib/community.ts": [
@@ -529,12 +570,9 @@
           "frontend/src/components/user-profile-client.tsx",
           "frontend/src/composition/static-product-router.tsx",
           "frontend/src/lib/agents.ts"
-        ],
-        "frontend/src/lib/relationship-graph.ts": [
-          "frontend/src/components/relationship-graph-client.tsx"
         ]
       },
-      "candidate_count": 12,
+      "candidate_count": 14,
       "current_candidates": [
         {
           "exports": [
@@ -582,12 +620,12 @@
           ],
           "imports": [
             "@/components/app-shell",
-            "@/components/relationship-graph-client",
+            "@/features/relationships/public",
             "@/lib/seo",
             "next"
           ],
           "path": "frontend/src/app/characters/[characterId]/worlds/[worldId]/relationship-graph/page.tsx",
-          "sha256": "f6f08dddf712f75aecaab10c6481c2c53129fcbc1d061cb254fa2827e613506f"
+          "sha256": "3e2c2666f10e5fa376ae112a7d7e7ec42fe6689091f9b2ddc6a1a7052d6ffb5d"
         },
         {
           "exports": [
@@ -621,17 +659,54 @@
         },
         {
           "exports": [
+            "RelationshipGraphApiError",
+            "getRelationshipGraph"
+          ],
+          "imports": [
+            "@/features/relationships/model/relationship-graph",
+            "@/shared/runtime/public"
+          ],
+          "path": "frontend/src/features/relationships/api/relationship-graph.ts",
+          "sha256": "0e31cbb24f9b7fb677ce79b8b1e99f15335d40a09e561c65ba575fe973c5bd61"
+        },
+        {
+          "exports": [
+            "RelationshipGraphEdge",
+            "RelationshipGraphEvidence",
+            "RelationshipGraphNode",
+            "RelationshipGraphPresentationState",
+            "RelationshipGraphRead",
+            "RelationshipGraphStatus",
+            "relationshipGraphPresentationState"
+          ],
+          "imports": [],
+          "path": "frontend/src/features/relationships/model/relationship-graph.ts",
+          "sha256": "dd93bf0d1772014381cabc3d33466f2eafecb2a127567a2f138d33111da0d7a7"
+        },
+        {
+          "exports": [],
+          "imports": [
+            "./api/relationship-graph",
+            "./model/relationship-graph",
+            "./ui/relationship-graph-client"
+          ],
+          "path": "frontend/src/features/relationships/public.ts",
+          "sha256": "9a3a95dce428b5dd477a6dee03b27e7301a5805452246fc229b34e3a6a582ce8"
+        },
+        {
+          "exports": [
             "RelationshipGraphClient"
           ],
           "imports": [
             "@/components/auth-provider",
-            "@/lib/relationship-graph",
+            "@/features/relationships/api/relationship-graph",
+            "@/features/relationships/model/relationship-graph",
             "@/shared/navigation/public",
             "next/link",
             "react"
           ],
-          "path": "frontend/src/components/relationship-graph-client.tsx",
-          "sha256": "7f4a0ba0b470b49f75ec86219011e3ec3c7a3a37d03487ee93ba065e096ea8f1"
+          "path": "frontend/src/features/relationships/ui/relationship-graph-client.tsx",
+          "sha256": "829f8974bd6a6a92e6d581952e6ae75d73c655eb01975776bcb399b3ca7a0867"
         },
         {
           "exports": [
@@ -741,22 +816,6 @@
           ],
           "path": "frontend/src/lib/community.ts",
           "sha256": "419eca7e905b4ca43d113c4e382fd6b0b6863b0821feb6cd710fadd2718b0cd1"
-        },
-        {
-          "exports": [
-            "RelationshipGraphApiError",
-            "RelationshipGraphEdge",
-            "RelationshipGraphEvidence",
-            "RelationshipGraphNode",
-            "RelationshipGraphRead",
-            "RelationshipGraphStatus",
-            "getRelationshipGraph"
-          ],
-          "imports": [
-            "@/shared/runtime/public"
-          ],
-          "path": "frontend/src/lib/relationship-graph.ts",
-          "sha256": "f531366098147a9982e290b3c62ace7ade701521ff2252afa385e12a2ad3c4e2"
         }
       ],
       "planned_feature_allowlist": [
@@ -768,6 +827,7 @@
           "frontend/src/features/creator-studio/public.ts",
           "frontend/src/features/device-home/public.ts",
           "frontend/src/features/pwa-shell/public.ts",
+          "frontend/src/features/relationships/public.ts",
           "frontend/src/features/runtime-status/public.ts",
           "frontend/src/features/social/public.ts",
           "frontend/src/features/world-app/public.ts",
@@ -843,15 +903,15 @@
       },
       {
         "path": "backend/tests/test_feed_reaction_intent.py",
-        "sha256": "eefe9d12f402012b895079c4b36e5c2c46c1b1fdd67ce7509acfb6b9a8741c9c"
+        "sha256": "d9d11f1bf12c949289619c447a3d207bc000f38c207dca3643c824bc22ffdccf"
       },
       {
         "path": "backend/tests/test_graph_projection_replay.py",
-        "sha256": "d5d09a7ba65816384cad5139ea0db91c05bc229545c1f24510d48ebed679b3d2"
+        "sha256": "835ff5129cb768719810578dc0111356810e05bc7b7678cbedbd610f47c13df2"
       },
       {
         "path": "backend/tests/test_graph_projection_worker.py",
-        "sha256": "9805dceb95460ef914a58925637ecfff0aa3a0e33e65cb234377a611b6477029"
+        "sha256": "9ff41ffff689b6b060236e08844b2dc42e33dce16abc15eb4cd66d1862f82a2d"
       },
       {
         "path": "backend/tests/test_l2_5_frontend_architecture_boundaries.py",
@@ -863,7 +923,7 @@
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",
-        "sha256": "59741c020fd468fba2ca70e61a5dd6c909e49406bd6de438e90813c0b7156f30"
+        "sha256": "233f899f369dfe35660fb9c7b8c26a5db80f8e871dc10b4feafd826286ac6f0d"
       },
       {
         "path": "backend/tests/test_l3_owner_manual_social_inbox.py",
@@ -875,7 +935,7 @@
       },
       {
         "path": "backend/tests/test_relationship_graph_api.py",
-        "sha256": "5c8c07b464577cc1896a88206d12b18ace048d4ed3b3c815a3d9c09d15be7022"
+        "sha256": "fa0d1506946c515625f3da904fa5ccb80c3ead9ecef84a5985f68464185c3af6"
       },
       {
         "path": "backend/tests/test_relationship_graph_repository.py",
@@ -883,7 +943,7 @@
       },
       {
         "path": "backend/tests/test_social_event_runtime.py",
-        "sha256": "dff2c3b770ce37aab8ec8acddb0caf2f79c79b59aed2f168551a9067871c059a"
+        "sha256": "cf71295d0d4d0fef6563e48c2878ecaffb7ad96c3d040fa0ba2fd62b881d5647"
       },
       {
         "path": "backend/tests/test_t2_architecture_inventory.py",

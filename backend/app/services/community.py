@@ -1751,7 +1751,9 @@ def delete_post(db: Session, user: models.User, post_id: str) -> None:
             )
         index += 1
 
-    from app.services import social_event_runtime
+    from app.runtime.relationships import (
+        sqlalchemy_social_event as social_event_runtime,
+    )
 
     social_event_runtime.exclude_events_for_posts(
         db,

@@ -1,3 +1,5 @@
+"""SQLAlchemy models owned by relationships and graph projection."""
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -83,3 +85,6 @@ class GraphProjectionReplayRun(Base):
     )
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+__all__ = ["GraphProjectionReplayRun"]
