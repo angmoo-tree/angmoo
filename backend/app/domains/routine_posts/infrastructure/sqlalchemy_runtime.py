@@ -9,6 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.compatibility.manual_social.observations import observe_source
 from app.compatibility.routine_posts import legacy
 from app.core import unit_of_work
 from app.domains.routine_posts.infrastructure.direct_llm_provider import (
@@ -27,10 +28,12 @@ from app.domains.routines.public import reconcile_all_elapsed_routines
 from app.domains.manual_social.public import (
     ManualInboxRuntimeError,
     claim_manual_inbox,
+    claimed_observation_post_id,
     consume_manual_inbox_claims,
     is_manual_inbox_source,
     release_manual_inbox_claims,
 )
+from app.domains.social.public import SocialObservationError
 from app.integrations.direct_llm import (
     DirectLlmDeferred,
     DirectLlmError,
@@ -343,6 +346,61 @@ async def run_routine_post_runtime(
             tracker=tracker,
             status="failed",
             failure_class=type(exc).__name__,
+        )
+
+    try:
+        for source in context.source_events:
+            manual_source_post_id = (
+                claimed_observation_post_id(
+                    db,
+                    source_event_id=source.source_event_id,
+                    world_id=context.world.id,
+                    consumer_world_character_id=world_character.id,
+                    target_activity_beat_id=beat.id,
+                    claim_run_id=resident_context.run_id,
+                )
+                if is_manual_inbox_source(source.source_event_id)
+                else None
+            )
+            observe_source(
+                db,
+                world_id=context.world.id,
+                observer_world_character_id=world_character.id,
+                source_social_event_id=(
+                    None
+                    if is_manual_inbox_source(source.source_event_id)
+                    else source.source_event_id
+                ),
+                source_post_id=manual_source_post_id,
+                lane="routine",
+                observed_at=resident_context.run_started_at,
+            )
+        # Source claims and observations are durable before provider work. A
+        # later generation/publication failure cannot undo actual observation.
+        db.commit()
+    except (ManualInboxRuntimeError, SocialObservationError) as exc:
+        db.rollback()
+        _finish_failed_beat(
+            db,
+            beat=beat,
+            claim_run_id=resident_context.run_id,
+            reason_code=(
+                exc.reason_code
+                if isinstance(exc, SocialObservationError)
+                else str(exc)
+            ),
+            retryable=False,
+            manual_source_event_ids=claimed_manual_source_ids,
+        )
+        return _safe_result(
+            outcome="SOURCE_OBSERVATION_FAILED",
+            tracker=tracker,
+            status="failed",
+            failure_class=(
+                exc.reason_code
+                if isinstance(exc, SocialObservationError)
+                else type(exc).__name__
+            ),
         )
 
     execution_signature = _execution_signature(

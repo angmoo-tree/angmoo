@@ -249,14 +249,14 @@
       "markers": {
         "row_lock": [
           212,
-          259,
-          284
+          290,
+          315
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/compatibility/manual_social/inbox.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "f67c47c6faa2063236b47e6cc42b53744591aab6ddf434c4cdf793489d6f5b1d",
+      "source_sha256": "ec405dbb726a57cc10bce8615c133a4c9028976752f45598a78565feb8ed6c2a",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -908,15 +908,15 @@
     {
       "markers": {
         "row_lock": [
-          198,
-          316,
-          531
+          207,
+          325,
+          790
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/social_event_runtime.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "e5f3281b7ad8d012d16d4ac852e84c6cefa8c34bda4bcad00d5717fd721d671d",
+      "source_sha256": "1f09eb8927a2e188c503eca10f3cf15c248db252e2bb095522820f9025a33350",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

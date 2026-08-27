@@ -1,7 +1,7 @@
 {
-  "edge_count": 1207,
-  "external_import_count": 1758,
-  "module_count": 518,
+  "edge_count": 1221,
+  "external_import_count": 1770,
+  "module_count": 523,
   "modules": [
     {
       "external_imports": [],
@@ -1303,6 +1303,33 @@
     {
       "external_imports": [
         "__future__",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.social.domain.observations",
+        "app.services.social_event_runtime"
+      ],
+      "module": "app.compatibility.manual_social.observation_unit_of_work",
+      "path": "backend/app/compatibility/manual_social/observation_unit_of_work.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.compatibility.manual_social.observation_unit_of_work",
+        "app.domains.social.public"
+      ],
+      "module": "app.compatibility.manual_social.observations",
+      "path": "backend/app/compatibility/manual_social/observations.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "collections.abc",
         "datetime",
         "hashlib",
@@ -2559,12 +2586,14 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.compatibility.manual_social.observations",
         "app.compatibility.routine_posts.legacy",
         "app.core.unit_of_work",
         "app.domains.manual_social.public",
         "app.domains.routine_posts.infrastructure.direct_llm_provider",
         "app.domains.routine_posts.infrastructure.sqlalchemy_context",
         "app.domains.routines.public",
+        "app.domains.social.public",
         "app.integrations.direct_llm"
       ],
       "module": "app.domains.routine_posts.infrastructure.sqlalchemy_runtime",
@@ -3142,6 +3171,7 @@
       "external_imports": [],
       "imports": [
         "app.domains.social.application.keyword_feed",
+        "app.domains.social.application.observations",
         "app.domains.social.application.search_runtime",
         "app.domains.social.application.writes"
       ],
@@ -3160,6 +3190,18 @@
       ],
       "module": "app.domains.social.application.keyword_feed",
       "path": "backend/app/domains/social/application/keyword_feed.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__"
+      ],
+      "imports": [
+        "app.domains.social.domain.observations",
+        "app.domains.social.ports.observation_unit_of_work"
+      ],
+      "module": "app.domains.social.application.observations",
+      "path": "backend/app/domains/social/application/observations.py",
       "wildcard_imports": []
     },
     {
@@ -3191,11 +3233,24 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.social.domain.observations",
         "app.domains.social.domain.search_state",
         "app.domains.social.domain.writes"
       ],
       "module": "app.domains.social.domain",
       "path": "backend/app/domains/social/domain/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.social.domain.observations",
+      "path": "backend/app/domains/social/domain/observations.py",
       "wildcard_imports": []
     },
     {
@@ -3223,11 +3278,24 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.social.ports.observation_unit_of_work",
         "app.domains.social.ports.search_index",
         "app.domains.social.ports.write_unit_of_work"
       ],
       "module": "app.domains.social.ports",
       "path": "backend/app/domains/social/ports/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.social.domain.observations"
+      ],
+      "module": "app.domains.social.ports.observation_unit_of_work",
+      "path": "backend/app/domains/social/ports/observation_unit_of_work.py",
       "wildcard_imports": []
     },
     {
@@ -6593,6 +6661,7 @@
         "unicodedata"
       ],
       "imports": [
+        "app.compatibility.manual_social.observations",
         "app.core.config",
         "app.core.redaction",
         "app.core.unit_of_work",
@@ -7200,6 +7269,7 @@
         "typing"
       ],
       "imports": [
+        "app.compatibility.manual_social.observations",
         "app.core.unit_of_work",
         "app.cruds.agent_runs",
         "app.domains.social.public",

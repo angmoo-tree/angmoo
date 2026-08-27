@@ -16,8 +16,12 @@ from app.core.search_text import build_post_search_document
 from app.domains.runtime.public import SearchIndexHit
 from app.domains.social.public import SocialSearchState
 from app.runtime.search import CallbackSearchIndexAdapter
-from app.services import agent_activity_policy, world_character_contracts
-from app.services.direct_llm import RunLlmTracker
+from app.services import (
+    agent_activity_policy,
+    social_event_runtime,
+    world_character_contracts,
+)
+from app.services.direct_llm import DirectLlmError, RunLlmTracker
 from app.services.feed_reaction_planner import validate_reaction_decision
 from app.services.resident_contracts import LangGraphResidentContext
 from app.services.world_feed_runtime import run_world_keyword_feed
@@ -36,8 +40,14 @@ KEYWORDS = [
 
 
 class FakeFeedProvider:
-    def __init__(self, decision: schemas.FeedReactionDecision) -> None:
+    def __init__(
+        self,
+        decision: schemas.FeedReactionDecision,
+        *,
+        fail_writer: bool = False,
+    ) -> None:
         self.decision = decision
+        self.fail_writer = fail_writer
         self.plan_calls = 0
         self.writer_calls = 0
 
@@ -53,6 +63,8 @@ class FakeFeedProvider:
         **_kwargs,
     ) -> schemas.FeedCommentDraft:
         self.writer_calls += 1
+        if self.fail_writer:
+            raise DirectLlmError("deterministic writer failure")
         return schemas.FeedCommentDraft(
             text="그 기록 흥미롭다. 다음 실험에서는 어떤 향이 났는지 궁금해!",
             source_post_id=candidate.post_id,
@@ -279,6 +291,26 @@ def _seed(db: Session, *, with_candidate: bool):
             created_at=now - timedelta(days=2),
         )
         db.add(target_post)
+        db.flush()
+        social_event_runtime.record_successful_social_event(
+            db,
+            world_id=world.id,
+            actor_world_character_id=author_wc.id,
+            target_world_character_id=None,
+            event_type="post_published",
+            occurred_at=target_post.created_at,
+            idempotency_key="fixture-feed-source-event",
+            evidence=social_event_runtime.EvidenceInput(
+                evidence_kind="post",
+                source_object_type="post",
+                source_object_id=target_post.id,
+                root_post_id=target_post.id,
+                source_post_id=target_post.id,
+                source_text=target_post.body,
+                source_visibility_at_event="public",
+                source_author_id_at_event=author_wc.id,
+            ),
+        )
     db.commit()
     policy = agent_activity_policy.ActivityPolicy(
         within_active_hours=True,
@@ -500,12 +532,26 @@ def test_ordinary_comment_is_world_scoped_and_execution_keeps_intent_evidence() 
         )
         assert state is not None
         assert (state.familiarity, state.affinity, state.trust, state.tension) == (
-            2,
+            3,
             0,
             0,
             0,
         )
-        assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 1
+        changes = list(
+            db.scalars(
+                select(models.RelationshipStateChange).where(
+                    models.RelationshipStateChange.relationship_state_id == state.id
+                )
+            )
+        )
+        assert sorted(change.delta_familiarity for change in changes) == [1, 2]
+        outbox_rows = list(db.scalars(select(models.GraphProjectionOutbox)))
+        assert len(outbox_rows) == 3
+        assert sorted(row.payload_version for row in outbox_rows) == [
+            "relationship-observation-v1",
+            "relationship-v1",
+            "relationship-v1",
+        ]
 
 
 def test_same_minute_cycle_is_reused_without_second_provider_call() -> None:
@@ -525,6 +571,64 @@ def test_same_minute_cycle_is_reused_without_second_provider_call() -> None:
         first = asyncio.run(run_world_keyword_feed(context, provider=provider))
         second = asyncio.run(run_world_keyword_feed(context, provider=provider))
         assert first["feed_outcome"] == "model_abstained"
+        assert first["feed_cycle_summary"]["observation_receipt_count"] == 1
         assert second["feed_outcome"] == "duplicate_cycle"
         assert provider.plan_calls == 1
         assert provider.writer_calls == 0
+        state = db.scalar(
+            select(models.RelationshipState).where(
+                models.RelationshipState.actor_world_character_id
+                == "world-character-actor",
+                models.RelationshipState.target_world_character_id
+                == "world-character-author",
+            )
+        )
+        assert state is not None
+        assert (state.familiarity, state.affinity, state.trust, state.tension) == (
+            1,
+            0,
+            0,
+            0,
+        )
+        assert db.scalar(select(func.count(models.RelationshipStateChange.id))) == 1
+
+
+def test_writer_failure_does_not_erase_committed_feed_observation() -> None:
+    engine = _engine()
+    with Session(engine) as db:
+        context, _target = _seed(db, with_candidate=True)
+        provider = FakeFeedProvider(
+            schemas.FeedReactionDecision(
+                selected_candidate_index=0,
+                selected_action="comment",
+                interaction_intent="ordinary_comment",
+                comment_purpose="question",
+                reason_code=None,
+                brief="Ask a question, then fail deterministically.",
+            ),
+            fail_writer=True,
+        )
+
+        result = asyncio.run(run_world_keyword_feed(context, provider=provider))
+
+        assert result["feed_outcome"] == "writer_failed"
+        assert result["feed_cycle_summary"] == {
+            "outcome": "FOLLOW_UP_FAILED",
+            "reason_code": "writer_failed",
+            "observation_receipt_count": 1,
+        }
+        assert provider.plan_calls == provider.writer_calls == 1
+        state = db.scalar(
+            select(models.RelationshipState).where(
+                models.RelationshipState.actor_world_character_id
+                == "world-character-actor",
+                models.RelationshipState.target_world_character_id
+                == "world-character-author",
+            )
+        )
+        assert state is not None
+        assert state.familiarity == 1
+        assert state.affinity == state.trust == state.tension == 0
+        assert db.scalar(select(func.count(models.RelationshipStateChange.id))) == 1
+        assert db.scalar(select(func.count(models.Post.id))) == 1
+        assert db.scalar(select(func.count(models.SocialEvent.id))) == 1

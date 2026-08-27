@@ -49,7 +49,7 @@ function Write-Payload([string]$Root, [byte]$Generation, [int]$SchemaVersion = 2
             $hostDigest,
             $sidecarDigest,
             'sqlite:1-2->2',
-            'ladybug:0-1->1'
+            'ladybug:0-2->2'
         ) -join "`n"
         $hasher = [System.Security.Cryptography.SHA256]::Create()
         try {
@@ -73,8 +73,8 @@ function Write-Payload([string]$Root, [byte]$Generation, [int]$SchemaVersion = 2
                 }
                 ladybug = [ordered]@{
                     minimum_readable_version = 0
-                    maximum_readable_version = 1
-                    target_version = 1
+                    maximum_readable_version = 2
+                    target_version = 2
                 }
             }
             files = [ordered]@{
@@ -192,7 +192,7 @@ try {
         sqlite_target_version = 3
         sqlite_active_version = 2
         ladybug_source_version = 1
-        ladybug_target_version = 1
+        ladybug_target_version = 2
         ladybug_active_version = 1
     }
     [System.IO.File]::WriteAllText(

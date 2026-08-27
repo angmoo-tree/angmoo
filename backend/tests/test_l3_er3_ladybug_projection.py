@@ -52,6 +52,10 @@ def _relationship(
     return RelationshipStateProjectionCommand(
         event=source,
         relationship_state_id=f"relationship-{source.world_id}",
+        actor_world_character_id=source.actor_world_character_id,
+        actor_character_id=source.actor_character_id,
+        target_world_character_id=source.target_world_character_id or "",
+        target_character_id=source.target_character_id or "",
         familiarity=12 + version,
         affinity=7 + version,
         trust=5 + version,

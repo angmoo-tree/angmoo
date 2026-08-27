@@ -33,8 +33,8 @@ try {
             }
             ladybug = [ordered]@{
                 minimum_readable_version = 0
-                maximum_readable_version = 1
-                target_version = 1
+                maximum_readable_version = 2
+                target_version = 2
             }
         }
         files = [ordered]@{
@@ -52,7 +52,7 @@ try {
         $payload.files.'angmoo-desktop.exe',
         $payload.files.'angmoo-sidecar.exe',
         'sqlite:1-2->2',
-        'ladybug:0-1->1'
+        'ladybug:0-2->2'
     ) -join "`n"
     $identityHasher = [System.Security.Cryptography.SHA256]::Create()
     try {

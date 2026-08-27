@@ -762,17 +762,49 @@ def test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_on
                 provider=provider,
             )
         )
+        target_post_id = first["publish_result"]["post_id"]
+        source_reply = models.Post(
+            id="post-reply-1",
+            author_character_id=friend_character.id,
+            world_id=fixture.world.id,
+            author_world_character_id=friend_world_character.id,
+            reply_to_post_id=target_post_id,
+            post_type="reply",
+            visibility="public",
+            author_name=friend_character.name,
+            title="Re: routine",
+            body="Try lowering the potion heat on the next pass.",
+            search_document="Try lowering the potion heat on the next pass.",
+            created_at=_utc(datetime(2026, 8, 10, 10, 30)),
+        )
+        db.add(source_reply)
+        db.flush()
+        source_event = models.SocialEvent(
+            id="event-reply-1",
+            world_id=fixture.world.id,
+            actor_world_character_id=friend_world_character.id,
+            target_world_character_id=fixture.world_character.id,
+            event_type="comment_created",
+            result="succeeded",
+            occurred_at=_utc(datetime(2026, 8, 10, 10, 30)),
+            idempotency_key="fixture:event-reply-1",
+            schema_version="social-event-v1",
+        )
+        db.add(source_event)
+        db.flush()
         db.add(
-            models.SocialEvent(
-                id="event-reply-1",
-                world_id=fixture.world.id,
-                actor_world_character_id=friend_world_character.id,
-                target_world_character_id=fixture.world_character.id,
-                event_type="comment_created",
-                result="succeeded",
-                occurred_at=_utc(datetime(2026, 8, 10, 10, 30)),
-                idempotency_key="fixture:event-reply-1",
-                schema_version="social-event-v1",
+            models.SocialEventEvidence(
+                id="evidence-reply-1",
+                social_event_id=source_event.id,
+                evidence_kind="reply_post",
+                source_object_type="post",
+                source_object_id=source_reply.id,
+                root_post_id=target_post_id,
+                source_post_id=source_reply.id,
+                target_post_id=target_post_id,
+                source_visibility_at_event="public",
+                source_author_id_at_event=friend_world_character.id,
+                occurred_at=source_event.occurred_at,
             )
         )
         db.commit()
@@ -821,15 +853,21 @@ def test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_on
         assert first["llm_usage_summary"]["provider_call_count"] == 2
         assert second["llm_usage_summary"]["provider_call_count"] == 2
         assert provider.calls == 2
-        assert len(posts) == 2
+        assert len(posts) == 3
         assert len(beats) == 2
         assert [beat.sequence_no for beat in beats] == [1, 2]
         assert all(post.world_id == fixture.world.id for post in posts)
+        routine_posts = [
+            post
+            for post in posts
+            if post.author_world_character_id == fixture.world_character.id
+        ]
+        assert len(routine_posts) == 2
         assert all(
             post.author_world_character_id == fixture.world_character.id
-            for post in posts
+            for post in routine_posts
         )
-        assert beats[0].source_post_id == posts[0].id
+        assert beats[0].source_post_id == routine_posts[0].id
         assert beats[1].previous_successful_beat_id == beats[0].id
         assert len(post_events) == 2
         assert all(event.world_id == fixture.world.id for event in post_events)
@@ -838,9 +876,9 @@ def test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_on
             and event.target_world_character_id is None
             for event in post_events
         )
-        assert db.scalar(select(func.count(models.SocialEventEvidence.id))) == 2
-        assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 2
-        assert beats[1].source_post_id == posts[1].id
+        assert db.scalar(select(func.count(models.SocialEventEvidence.id))) == 3
+        assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 3
+        assert beats[1].source_post_id == routine_posts[1].id
         assert beats[1].result_snapshot["used_source_event_ids"] == ["event-reply-1"]
         assert consumption is not None
         assert consumption.status == "applied"
@@ -863,7 +901,7 @@ def test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_on
         )
         assert no_due["routine_outcome"] == "BEAT_NOT_DUE"
         assert no_due_provider.calls == 0
-        assert db.scalar(select(func.count(models.Post.id))) == 2
+        assert db.scalar(select(func.count(models.Post.id))) == 3
 
 
 def test_owner_manual_reply_is_observed_once_on_next_allowed_beat() -> None:
@@ -1001,8 +1039,9 @@ def test_owner_manual_reply_is_observed_once_on_next_allowed_beat() -> None:
         assert candidate.target_activity_beat_id == beats[1].id
         assert candidate.consumed_at is not None
         assert db.scalar(select(func.count(models.ActivityEventConsumption.id))) == 0
-        assert db.scalar(select(func.count(models.RelationshipState.id))) == 0
-        assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 2
+        assert db.scalar(select(func.count(models.RelationshipState.id))) == 1
+        assert db.scalar(select(func.count(models.RelationshipStateChange.id))) == 1
+        assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 3
         assert len(posts) == 3
         assert sum(post.reply_to_post_id is not None for post in posts) == 1
         assert all(

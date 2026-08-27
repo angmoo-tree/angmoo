@@ -128,21 +128,36 @@ def _verify_seed_identity(connection: sqlite3.Connection, fixture: dict[str, Any
         _fail("supported_upgrade_worlds_changed")
 
 
-def _verify_graph(data_root: Path, fixture: dict[str, Any]) -> None:
+def _verify_graph(
+    data_root: Path,
+    fixture: dict[str, Any],
+    *,
+    expected_version: int,
+    expect_rebuild: bool,
+) -> None:
     graph_root = data_root / "graph"
     marker = _json(graph_root / "current-generation.json")
-    expected_version = int(fixture.get("ladybug_source_data_version", 0))
-    expected_relative = str(fixture.get("graph_relative_path") or "")
-    if (
-        int(marker.get("data_version", 0)) != expected_version
-        or marker.get("relative_path") != expected_relative
+    source_version = int(fixture.get("ladybug_source_data_version", 0))
+    source_relative = str(fixture.get("graph_relative_path") or "")
+    if int(marker.get("data_version", 0)) != expected_version:
+        _fail("supported_upgrade_graph_generation_changed")
+    if expect_rebuild:
+        if marker.get("relative_path") == source_relative:
+            _fail("supported_upgrade_graph_rebuild_missing")
+        previous = _json(graph_root / "previous-generation.json")
+        if (
+            int(previous.get("data_version", 0)) != source_version
+            or previous.get("relative_path") != source_relative
+        ):
+            _fail("supported_upgrade_graph_previous_version_mismatch")
+    elif (
+        marker.get("relative_path") != source_relative
+        or (graph_root / "previous-generation.json").exists()
     ):
         _fail("supported_upgrade_graph_generation_changed")
     generation = _owned_generation(graph_root, marker)
     if not (generation / "relationships.lbdb").is_file():
         _fail("supported_upgrade_graph_artifact_missing")
-    if (graph_root / "previous-generation.json").exists():
-        _fail("supported_upgrade_graph_previous_marker_unexpected")
 
 
 def _verify_database(data_root: Path, fixture: dict[str, Any]) -> None:
@@ -314,13 +329,18 @@ def verify_upgraded(
         != expected_source_version
         or int(result.get("sqlite_target_version", 0)) != 3
         or int(result.get("ladybug_source_version", 0)) != 1
-        or int(result.get("ladybug_target_version", 0)) != 1
+        or int(result.get("ladybug_target_version", 0)) != 2
         or result.get("build_commit") != payload.get("build_commit")
         or result.get("payload_generation") != payload.get("payload_generation")
     ):
         _fail("supported_upgrade_result_invalid")
     _verify_database(data_root, fixture)
-    _verify_graph(data_root, fixture)
+    _verify_graph(
+        data_root,
+        fixture,
+        expected_version=2,
+        expect_rebuild=True,
+    )
     _verify_external_data(data_root, fixture)
     print("windows_installer_supported_upgrade_pass")
 
@@ -350,7 +370,12 @@ def verify_restored(data_root: Path, fixture: dict[str, Any]) -> None:
         _fail("supported_upgrade_previous_payload_not_restored")
     if _sha256(source) != fixture.get("database_sha256"):
         _fail("supported_upgrade_failure_changed_source")
-    _verify_graph(data_root, fixture)
+    _verify_graph(
+        data_root,
+        fixture,
+        expected_version=1,
+        expect_rebuild=False,
+    )
     _verify_external_data(data_root, fixture)
     for path in (
         data_root / "app.__install_staging__",
@@ -372,7 +397,7 @@ def verify_restored(data_root: Path, fixture: dict[str, Any]) -> None:
         or int(result.get("sqlite_target_version", 0)) != 3
         or int(result.get("ladybug_source_version", 0)) != 1
         or int(result.get("ladybug_active_version", 0)) != 1
-        or int(result.get("ladybug_target_version", 0)) != 1
+        or int(result.get("ladybug_target_version", 0)) != 2
         or result.get("build_commit") == payload.get("build_commit")
         or len(str(result.get("build_commit") or "")) != 40
         or len(str(result.get("payload_generation") or "")) != 64

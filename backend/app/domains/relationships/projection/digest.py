@@ -48,8 +48,8 @@ def projection_digest(
         if isinstance(command, RelationshipStateProjectionCommand):
             relationships[command.relationship_state_id] = (
                 command.relationship_state_id,
-                event.actor_world_character_id,
-                event.target_world_character_id,
+                command.actor_world_character_id,
+                command.target_world_character_id,
                 command.relationship_version,
                 command.familiarity,
                 command.affinity,
@@ -60,8 +60,8 @@ def projection_digest(
             evidence.add(
                 (
                     command.relationship_state_id,
-                    event.actor_world_character_id,
-                    event.target_world_character_id,
+                    command.actor_world_character_id,
+                    command.target_world_character_id,
                     event.event_id,
                     command.relationship_version,
                 )

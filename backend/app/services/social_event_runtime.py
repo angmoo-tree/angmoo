@@ -17,6 +17,7 @@ from app.models.social_memory import SOCIAL_EVENT_TYPES
 
 SOCIAL_EVENT_SCHEMA_VERSION = "social-event-v1"
 GRAPH_PAYLOAD_VERSION = "relationship-v1"
+OBSERVATION_GRAPH_PAYLOAD_VERSION = "relationship-observation-v1"
 SOURCE_EXCLUSION_PAYLOAD_VERSION = "source-exclusion-v1"
 
 
@@ -67,6 +68,14 @@ class EventApplyResult:
     event: models.SocialEvent
     relationship_state: models.RelationshipState | None
     relationship_change: models.RelationshipStateChange | None
+    reused: bool
+
+
+@dataclass(frozen=True)
+class ObservationApplyResult:
+    source_event: models.SocialEvent
+    relationship_state: models.RelationshipState
+    relationship_change: models.RelationshipStateChange
     reused: bool
 
 
@@ -447,6 +456,256 @@ def _enqueue_outbox(
     )
     db.add(row)
     return row
+
+
+def _enqueue_observation_outbox(
+    db: Session,
+    *,
+    source_event: models.SocialEvent,
+    relationship_state: models.RelationshipState,
+) -> models.GraphProjectionOutbox:
+    """Project the observer's direction without rewriting source-event direction."""
+
+    payload: dict[str, object] = {
+        "world_id": source_event.world_id,
+        "source_event_id": source_event.id,
+        "actor_world_character_id": relationship_state.actor_world_character_id,
+        "target_world_character_id": relationship_state.target_world_character_id,
+        "relationship_state_id": relationship_state.id,
+    }
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    signature = sha256(canonical.encode("utf-8")).hexdigest()
+    dedupe_key = sha256(
+        (
+            f"relationship_state|{source_event.id}|"
+            f"{OBSERVATION_GRAPH_PAYLOAD_VERSION}|{relationship_state.id}"
+        ).encode("utf-8")
+    ).hexdigest()
+    existing = db.scalar(
+        select(models.GraphProjectionOutbox).where(
+            models.GraphProjectionOutbox.dedupe_key == dedupe_key
+        )
+    )
+    if existing is not None:
+        return existing
+    row = models.GraphProjectionOutbox(
+        id=uuid7_string(),
+        world_id=source_event.world_id,
+        source_event_id=source_event.id,
+        projection_type="relationship_state",
+        payload_version=OBSERVATION_GRAPH_PAYLOAD_VERSION,
+        payload=payload,
+        source_signature=signature,
+        dedupe_key=dedupe_key,
+        status="pending",
+        attempt_count=0,
+    )
+    db.add(row)
+    return row
+
+
+def _source_event_for_post(
+    db: Session,
+    *,
+    world_id: str,
+    source_post_id: str,
+) -> models.SocialEvent:
+    post = db.get(models.Post, source_post_id)
+    _validate_live_public_post(post, world_id=world_id)
+    assert post is not None
+    if post.author_world_character_id is None:
+        raise SocialEventRuntimeError("source_world_character_missing")
+    event = db.scalar(
+        select(models.SocialEvent)
+        .join(
+            models.SocialEventEvidence,
+            models.SocialEventEvidence.social_event_id == models.SocialEvent.id,
+        )
+        .where(
+            models.SocialEvent.world_id == world_id,
+            models.SocialEvent.actor_world_character_id
+            == post.author_world_character_id,
+            models.SocialEvent.result == "succeeded",
+            models.SocialEventEvidence.source_post_id == post.id,
+        )
+        .order_by(models.SocialEvent.occurred_at.desc(), models.SocialEvent.id.desc())
+        .limit(1)
+    )
+    if event is None:
+        raise SocialEventRuntimeError("source_social_event_missing")
+    return event
+
+
+def _source_post_for_event(
+    db: Session,
+    *,
+    world_id: str,
+    source_event: models.SocialEvent,
+) -> models.Post:
+    evidence = db.scalar(
+        select(models.SocialEventEvidence)
+        .where(models.SocialEventEvidence.social_event_id == source_event.id)
+        .order_by(models.SocialEventEvidence.created_at, models.SocialEventEvidence.id)
+        .limit(1)
+    )
+    if evidence is None:
+        raise SocialEventRuntimeError("source_evidence_missing")
+    candidates = (
+        evidence.source_post_id,
+        evidence.target_post_id,
+        evidence.root_post_id,
+        (
+            evidence.source_object_id
+            if evidence.source_object_type == "post"
+            else None
+        ),
+    )
+    for post_id in candidates:
+        if post_id is None:
+            continue
+        post = db.get(models.Post, post_id)
+        try:
+            _validate_live_public_post(post, world_id=world_id)
+        except SocialEventRuntimeError:
+            continue
+        assert post is not None
+        return post
+    raise SocialEventRuntimeError("source_post_missing")
+
+
+def record_social_event_observation(
+    db: Session,
+    *,
+    world_id: str,
+    observer_world_character_id: str,
+    source_social_event_id: str | None,
+    source_post_id: str | None,
+    observed_at: datetime,
+) -> ObservationApplyResult:
+    """Record one actual observation and one neutral directional delta.
+
+    The source event remains immutable. The relationship-change row is the
+    natural idempotency receipt: one observer direction can apply a given
+    source event at most once, regardless of lane, restart, or retry.
+    """
+
+    observer = _validate_world_character(
+        db,
+        world_id=world_id,
+        world_character_id=observer_world_character_id,
+        lock=True,
+    )
+    source_event = (
+        db.get(models.SocialEvent, source_social_event_id)
+        if source_social_event_id is not None
+        else None
+    )
+    if source_event is None and source_post_id is None:
+        raise SocialEventRuntimeError("source_reference_missing")
+    if source_event is None:
+        assert source_post_id is not None
+        source_event = _source_event_for_post(
+            db,
+            world_id=world_id,
+            source_post_id=source_post_id,
+        )
+    if (
+        source_event.world_id != world_id
+        or source_event.result != "succeeded"
+        or source_event.retrieval_status == "excluded"
+    ):
+        raise SocialEventRuntimeError("source_social_event_ineligible")
+    if source_event.actor_world_character_id == observer.id:
+        raise SocialEventRuntimeError("self_observation_forbidden")
+    source_post = (
+        _source_post_for_event(db, world_id=world_id, source_event=source_event)
+        if source_post_id is None
+        else db.get(models.Post, source_post_id)
+    )
+    _validate_live_public_post(source_post, world_id=world_id)
+    assert source_post is not None
+    source_post_id = source_post.id
+    evidence_matches = db.scalar(
+        select(models.SocialEventEvidence.id).where(
+            models.SocialEventEvidence.social_event_id == source_event.id,
+            or_(
+                models.SocialEventEvidence.source_post_id == source_post_id,
+                models.SocialEventEvidence.target_post_id == source_post_id,
+                models.SocialEventEvidence.root_post_id == source_post_id,
+                (
+                    (models.SocialEventEvidence.source_object_type == "post")
+                    & (models.SocialEventEvidence.source_object_id == source_post_id)
+                ),
+            ),
+        )
+    )
+    if evidence_matches is None:
+        raise SocialEventRuntimeError("source_evidence_mismatch")
+    target = _validate_world_character(
+        db,
+        world_id=world_id,
+        world_character_id=source_event.actor_world_character_id,
+    )
+    if _pair_blocked(
+        db,
+        world_id=world_id,
+        first_world_character_id=observer.id,
+        second_world_character_id=target.id,
+    ):
+        raise SocialEventRuntimeError("world_character_blocked")
+    state = _relationship_state(
+        db,
+        world_id=world_id,
+        actor_world_character_id=observer.id,
+        target_world_character_id=target.id,
+    )
+    existing = db.scalar(
+        select(models.RelationshipStateChange).where(
+            models.RelationshipStateChange.relationship_state_id == state.id,
+            models.RelationshipStateChange.social_event_id == source_event.id,
+        )
+    )
+    if existing is not None:
+        _enqueue_observation_outbox(
+            db,
+            source_event=source_event,
+            relationship_state=state,
+        )
+        db.flush()
+        return ObservationApplyResult(source_event, state, existing, True)
+
+    before = _snapshot(state)
+    state.familiarity = _clamp(state.familiarity + 1, 0, 100)
+    state.interaction_count += 1
+    state.last_event_id = source_event.id
+    state.last_event_at = _aware_utc(observed_at)
+    state.version += 1
+    change = models.RelationshipStateChange(
+        id=uuid7_string(),
+        relationship_state_id=state.id,
+        social_event_id=source_event.id,
+        world_id=world_id,
+        actor_world_character_id=observer.id,
+        target_world_character_id=target.id,
+        valence="neutral",
+        intensity="low",
+        delta_familiarity=1,
+        delta_affinity=0,
+        delta_trust=0,
+        delta_tension=0,
+        before_snapshot=before,
+        after_snapshot=_snapshot(state),
+        applied=True,
+        not_applied_reason=None,
+    )
+    db.add(change)
+    _enqueue_observation_outbox(
+        db,
+        source_event=source_event,
+        relationship_state=state,
+    )
+    db.flush()
+    return ObservationApplyResult(source_event, state, change, False)
 
 
 def _enqueue_source_exclusion_outbox(

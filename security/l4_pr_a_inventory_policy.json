@@ -125,7 +125,8 @@
   ],
   "migration_contracts": {
     "ladybug_manifests": [
-      "backend/app/runtime/migrations/ladybug_versions/manifests/v1.json"
+      "backend/app/runtime/migrations/ladybug_versions/manifests/v1.json",
+      "backend/app/runtime/migrations/ladybug_versions/manifests/v2.json"
     ],
     "ladybug_registry": "backend/app/runtime/migrations/ladybug_versions/registry.py",
     "sqlite_manifests": [

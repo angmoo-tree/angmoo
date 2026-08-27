@@ -487,6 +487,36 @@ the write adapter has a bounded exact-edge exception only while the canonical
 Inbox runtime remains as an explicitly owned compatibility surface until PR D
 moves observation ownership.
 
+### L4 PR D source observation and follow-up causality
+
+`app.domains.social.public` also owns the storage-neutral observation command,
+result and UnitOfWork port. Runtime lanes enter that one application contract
+through the temporary `app.compatibility.manual_social.observations` adapter;
+Routine, Inbox and Feed do not write `RelationshipState`, change rows or graph
+outbox rows themselves.
+
+The adapter revalidates the canonical source event, evidence, live public Post,
+World scope, active WorldCharacter identities and block state. The
+`RelationshipStateChange` unique key over relationship direction and source
+event is the observation receipt: retry, restart and overlap between lanes can
+reuse the receipt but cannot apply another delta. The relationship direction is
+observer to source actor. Observation adds one familiarity and one interaction
+count only; affinity, trust and tension remain unchanged because source
+exposure cannot establish a user's or character's private emotion.
+
+The source event remains immutable and keeps its original actor-to-target
+direction. A separate `relationship-observation-v1` outbox payload projects the
+observer-to-source relationship snapshot into LadybugDB. Projection command
+construction validates both directions explicitly: event nodes preserve source
+evidence while `RELATES_TO` uses the observed relationship direction.
+
+Each lane commits observation before provider work. Planner `NO_ACTION`,
+planner failure, writer failure and a rolled-back follow-up cannot erase the
+receipt. A public follow-up remains a new canonical social write with its own
+idempotency key, event, evidence and outbox transaction; it is never folded
+into the observation transaction. This is the T1 source, T2 observation and T3
+optional follow-up causal boundary.
+
 ## Contributor workflow
 
 Before adding a backend feature:
@@ -565,7 +595,11 @@ are deterministic and idempotent.
 
 LadybugDB is derived data only. SQLite outbox state remains canonical when the
 graph is unavailable, so a graph failure leaves a retryable row instead of
-rolling back an already committed social write. LadybugDB v1 is selected by
-the installed and contributor embedded profiles; typed six-query parity,
-World replay and outage recovery are required regression contracts. Neo4j is
-retained only as static fixture evidence.
+rolling back an already committed social write. LadybugDB projection schema
+v2 is selected by the installed and contributor embedded profiles. It adds the
+explicit observer-to-source relationship direction to the projection command
+without changing the immutable source-event direction. The v1 manifest remains
+a supported predecessor and is rebuilt from SQLite canonical evidence into a
+staging v2 generation before promotion. Typed six-query parity, World replay
+and outage recovery are required regression contracts. Neo4j is retained only
+as static fixture evidence.

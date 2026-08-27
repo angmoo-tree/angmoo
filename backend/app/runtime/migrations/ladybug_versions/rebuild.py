@@ -1,4 +1,4 @@
-"""Rebuild the v1 LadybugDB projection only from SQLite canonical outbox."""
+"""Rebuild versioned LadybugDB projections from SQLite canonical outbox."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ class LadybugRebuildError(RuntimeError):
     """Stable projection rebuild failure."""
 
 
-def rebuild_projection_v1(
+def _rebuild_projection(
     *,
     database_root: Path,
     replay_source: ProjectionReplaySource,
@@ -33,4 +33,30 @@ def rebuild_projection_v1(
     return expected_by_world
 
 
-__all__ = ["LadybugRebuildError", "rebuild_projection_v1"]
+def rebuild_projection_v1(
+    *,
+    database_root: Path,
+    replay_source: ProjectionReplaySource,
+) -> dict[str, dict[str, list[str]]]:
+    return _rebuild_projection(
+        database_root=database_root,
+        replay_source=replay_source,
+    )
+
+
+def rebuild_projection_v2(
+    *,
+    database_root: Path,
+    replay_source: ProjectionReplaySource,
+) -> dict[str, dict[str, list[str]]]:
+    return _rebuild_projection(
+        database_root=database_root,
+        replay_source=replay_source,
+    )
+
+
+__all__ = [
+    "LadybugRebuildError",
+    "rebuild_projection_v1",
+    "rebuild_projection_v2",
+]

@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 1758,
-      "internal_edge_count": 1207,
+      "external_import_count": 1770,
+      "internal_edge_count": 1221,
       "legacy_import_exception_count": 0,
-      "module_count": 518,
+      "module_count": 523,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -155,6 +155,7 @@
           {
             "imports": [
               "app.domains.social.application.keyword_feed",
+              "app.domains.social.application.observations",
               "app.domains.social.application.search_runtime",
               "app.domains.social.application.writes"
             ],
@@ -168,6 +169,14 @@
             ],
             "module": "app.domains.social.application.keyword_feed",
             "path": "backend/app/domains/social/application/keyword_feed.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.domain.observations",
+              "app.domains.social.ports.observation_unit_of_work"
+            ],
+            "module": "app.domains.social.application.observations",
+            "path": "backend/app/domains/social/application/observations.py"
           },
           {
             "imports": [
@@ -187,11 +196,17 @@
           },
           {
             "imports": [
+              "app.domains.social.domain.observations",
               "app.domains.social.domain.search_state",
               "app.domains.social.domain.writes"
             ],
             "module": "app.domains.social.domain",
             "path": "backend/app/domains/social/domain/__init__.py"
+          },
+          {
+            "imports": [],
+            "module": "app.domains.social.domain.observations",
+            "path": "backend/app/domains/social/domain/observations.py"
           },
           {
             "imports": [],
@@ -205,11 +220,19 @@
           },
           {
             "imports": [
+              "app.domains.social.ports.observation_unit_of_work",
               "app.domains.social.ports.search_index",
               "app.domains.social.ports.write_unit_of_work"
             ],
             "module": "app.domains.social.ports",
             "path": "backend/app/domains/social/ports/__init__.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.domain.observations"
+            ],
+            "module": "app.domains.social.ports.observation_unit_of_work",
+            "path": "backend/app/domains/social/ports/observation_unit_of_work.py"
           },
           {
             "imports": [
@@ -294,6 +317,22 @@
             ],
             "module": "app.compatibility.manual_social.legacy",
             "path": "backend/app/compatibility/manual_social/legacy.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.domain.observations",
+              "app.services.social_event_runtime"
+            ],
+            "module": "app.compatibility.manual_social.observation_unit_of_work",
+            "path": "backend/app/compatibility/manual_social/observation_unit_of_work.py"
+          },
+          {
+            "imports": [
+              "app.compatibility.manual_social.observation_unit_of_work",
+              "app.domains.social.public"
+            ],
+            "module": "app.compatibility.manual_social.observations",
+            "path": "backend/app/compatibility/manual_social/observations.py"
           },
           {
             "imports": [
@@ -807,11 +846,11 @@
     "parity_test_files": [
       {
         "path": "backend/tests/test_embedded_data_migration.py",
-        "sha256": "a43cf2c03e46263a3742f98be34815722ab064a94e8909ba2d2dde3a9d1fb9e8"
+        "sha256": "c2df438e92dfdb6d4cdb02e14e9c443298e560178f88125cb4a73e8a63ff4a55"
       },
       {
         "path": "backend/tests/test_feed_reaction_intent.py",
-        "sha256": "f01fbf7d75813dd3caeeabf823629aa69db90dc55faf72c9f9fbe8a6ce3fcb99"
+        "sha256": "eefe9d12f402012b895079c4b36e5c2c46c1b1fdd67ce7509acfb6b9a8741c9c"
       },
       {
         "path": "backend/tests/test_graph_projection_replay.py",
@@ -831,7 +870,7 @@
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",
-        "sha256": "65be6b34c24b645483b815b620d0b3a62cbad5c2373b49d5859806846c053e43"
+        "sha256": "59741c020fd468fba2ca70e61a5dd6c909e49406bd6de438e90813c0b7156f30"
       },
       {
         "path": "backend/tests/test_l3_owner_manual_social_inbox.py",
@@ -851,7 +890,7 @@
       },
       {
         "path": "backend/tests/test_social_event_runtime.py",
-        "sha256": "ee82c44433c0b71f3f035f0beb4fd3e1ba90b5a4cedb3da32b6814f168509e83"
+        "sha256": "b286e16a1d53cece25a3f22047978b1b87f019ab9352725add2011b3acb0d331"
       },
       {
         "path": "backend/tests/test_t2_architecture_inventory.py",
@@ -866,7 +905,7 @@
         "sha256": "7ae830d9ecd1ae54ac8026ba2eae5904420d4d718148237eec63b2ddeb6e66ed"
       }
     ],
-    "parity_test_node_count": 89,
+    "parity_test_node_count": 92,
     "parity_test_nodes": [
       "backend/tests/test_embedded_data_migration.py::test_each_consecutive_step_rejects_undeclared_identity_changes",
       "backend/tests/test_embedded_data_migration.py::test_failed_sqlite_step_keeps_v1_active_and_removes_staging",
@@ -887,6 +926,7 @@
       "backend/tests/test_feed_reaction_intent.py::test_same_minute_cycle_is_reused_without_second_provider_call",
       "backend/tests/test_feed_reaction_intent.py::test_server_rejects_action_not_present_in_candidate_affordances",
       "backend/tests/test_feed_reaction_intent.py::test_unavailable_search_is_explicit_and_uses_zero_provider_calls",
+      "backend/tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation",
       "backend/tests/test_graph_projection_replay.py::test_event_reprocess_does_not_clear_world",
       "backend/tests/test_graph_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
       "backend/tests/test_graph_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
@@ -935,6 +975,8 @@
       "backend/tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
       "backend/tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship",
       "backend/tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+      "backend/tests/test_social_event_runtime.py::test_observation_is_directional_idempotent_and_independent_from_follow_up",
+      "backend/tests/test_social_event_runtime.py::test_observation_revalidates_hidden_source_before_any_relationship_write",
       "backend/tests/test_social_event_runtime.py::test_read_revalidates_membership_and_block_before_exposing_evidence",
       "backend/tests/test_social_event_runtime.py::test_reverse_reply_creates_separate_directional_relationship",
       "backend/tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
@@ -991,11 +1033,21 @@
           },
           "path": "backend/app/runtime/migrations/ladybug_versions/manifests/v1.json",
           "sha256": "488ae62032da8d9ecb91deede824d85bcbdeb7106fd2c8d77dea17ca23e6a888"
+        },
+        {
+          "contract": {
+            "minimum_ladybug_version": "0.19.1",
+            "parity_contract_version": 1,
+            "projection_schema_version": 2,
+            "schema_digest": "a028adfa2162e4cec41a4d8efd58731b696185742632c37beac3e8fb13f099f4"
+          },
+          "path": "backend/app/runtime/migrations/ladybug_versions/manifests/v2.json",
+          "sha256": "8f86e0ffda429bf9926722d29454751b61fdc74e15740560255da257289025f0"
         }
       ],
       "registry": {
         "path": "backend/app/runtime/migrations/ladybug_versions/registry.py",
-        "sha256": "6466844aec3a8369dfa46e8cba675244d8e5b951b3b2d4c0d877ba24f86ebb33"
+        "sha256": "baf197cfd4d49cf65f05e6a88582ed7967629d09012b93a648244100eb3c37f3"
       }
     },
     "sqlite": {

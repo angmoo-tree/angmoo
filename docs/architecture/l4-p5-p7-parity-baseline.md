@@ -71,6 +71,38 @@ On the frontend the World Feed composer and thread move from `world-app` to
 removed. The generated inventory and exact consumer-edge count are regenerated
 with this reviewed ownership reduction.
 
+## PR D reviewed behavior delta
+
+PR D separates the immutable source write from the later fact that a specific
+WorldCharacter actually observed that source. Routine, Inbox and Feed enter one
+`app.domains.social.public` observation contract. The observation adapter
+revalidates the source event, evidence, live public Post, World membership and
+block state before changing any relationship row. One directional
+`RelationshipStateChange` is the idempotent receipt for one observer and one
+source event; retries and lane overlap reuse it instead of applying a second
+delta.
+
+The observation transaction changes only deterministic counters: familiarity
+and interaction count increase by one, while affinity, trust and tension remain
+unchanged. This records exposure, not a private emotion. It enqueues the
+separate `relationship-observation-v1` graph command in the observer-to-source
+direction while retaining the source event's original actor-to-target evidence
+direction. Source success alone still produces no observer-side relationship
+delta.
+
+Observation commits before provider planning. `NO_ACTION`, planner failure,
+writer failure and a later follow-up rollback therefore preserve the source
+evidence and observation receipt while creating no partial follow-up event.
+The frontend social model maps pending, observation failure, observed
+`NO_ACTION`, follow-up failure and follow-up success into explicit product copy
+without inferring a character's private feelings.
+
+The reviewed PR D inventory delta is 523 Python modules, 1,221 internal edges,
+1,770 per-module external imports, 21 selected legacy-horizontal modules, 40
+selected canonical-boundary modules, 33 frontend consumer edges, seven feature
+public surfaces, five shared public surfaces and 92 focused parity nodes. There
+are no architecture-policy legacy exceptions and no package cycles.
+
 ## Runtime and upgrade baseline
 
 The supported SQLite chain is consecutive and copy-on-write:
@@ -82,9 +114,12 @@ The supported SQLite chain is consecutive and copy-on-write:
 
 The v2-to-v3 step must preserve custom roles and create at most one canonical
 reserved no-role row for each affected World. A missing non-null custom role
-reference is not silently rewritten. LadybugDB v1 remains derived data and is
-replayed from SQLite canonical evidence when its manifest changes or recovery
-is required.
+reference is not silently rewritten. LadybugDB remains derived data. PR D
+freezes projection schema v2 because the relationship command now carries the
+observer-to-source direction independently from the immutable source event
+direction. The immutable v1 manifest remains a supported predecessor and is
+replayed from SQLite canonical evidence into a staging v2 generation before
+atomic promotion.
 
 The Windows installer context remains a required five-part Gate:
 
@@ -149,7 +184,7 @@ contracts:
   thread reads
 - P7 typed LadybugDB queries, direct/reverse/evidence behavior, bounded query
   caps, World replay digest and outage recovery
-- SQLite v1-to-v2-to-v3 and LadybugDB v1 generation/replay lifecycle
+- SQLite v1-to-v2-to-v3 and LadybugDB v1-to-v2 generation/replay lifecycle
 - direct-created World and imported World registration/replay
 - frontend boundary, route and static product-shell evidence
 

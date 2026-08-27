@@ -20,7 +20,7 @@ HOST_SHA = "b" * 64
 SIDECAR_SHA = "c" * 64
 
 
-def _manifest(path: Path, *, sqlite=(1, 3, 3), ladybug=(0, 1, 1)) -> Path:
+def _manifest(path: Path, *, sqlite=(1, 3, 3), ladybug=(0, 2, 2)) -> Path:
     identity_source = "\n".join(
         (
             "0.4.0-1",
@@ -89,14 +89,14 @@ def test_installer_preflight_accepts_supported_active_generations(
     assert result.sqlite_source_version == 1
     assert result.sqlite_target_version == 3
     assert result.ladybug_source_version == 0
-    assert result.ladybug_target_version == 1
+    assert result.ladybug_target_version == 2
 
 
 @pytest.mark.parametrize(
     ("sqlite_version", "ladybug_version", "expected"),
     (
         (4, 1, "installer_sqlite_data_incompatible"),
-        (2, 2, "installer_ladybug_data_incompatible"),
+        (2, 3, "installer_ladybug_data_incompatible"),
     ),
 )
 def test_installer_preflight_blocks_incompatible_downgrade_without_mutation(
@@ -185,7 +185,7 @@ def test_installer_upgrade_mode_creates_current_generations_and_is_idempotent(
         writer.close()
     assert second["status"] == "upgraded"
     assert second["sqlite_source_version"] == 3
-    assert second["ladybug_source_version"] == 1
+    assert second["ladybug_source_version"] == 2
     assert (data_root / "canonical" / "current-generation.json").read_bytes() == canonical_marker
     assert (data_root / "graph" / "current-generation.json").read_bytes() == graph_marker
 
@@ -287,7 +287,7 @@ def test_installer_upgrade_failure_reports_source_and_unchanged_active_versions(
         "sqlite_target_version": 3,
         "sqlite_active_version": 2,
         "ladybug_source_version": 1,
-        "ladybug_target_version": 1,
+        "ladybug_target_version": 2,
         "ladybug_active_version": 1,
     }
 

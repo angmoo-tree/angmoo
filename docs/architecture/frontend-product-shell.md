@@ -99,6 +99,14 @@ be duplicated; editing the payload creates a new logical request. The typed
 being saved and that the same request can be retried. Browser, static/Tauri and
 Windows Host Tauri dev all use this one feature implementation.
 
+L4 PR D adds one pure `features/social/model` presentation contract for the
+causal state returned by autonomous activity. It distinguishes observation
+pending, observation failure, observed `NO_ACTION`, observed follow-up failure
+and observed follow-up success. The existing autonomy setup surface consumes
+that public contract and does not guess private feelings from a source post or
+relationship delta. A failed follow-up is presented as a preserved observation
+plus an absent public action, not as a failed or rolled-back observation.
+
 The optional PWA shell is implemented as a standards-based manifest plus a
 cache-free service worker lifecycle. It only changes the browser chrome:
 

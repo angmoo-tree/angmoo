@@ -20,6 +20,7 @@ from app.domains.relationships.projection.commands import (
 
 
 RELATIONSHIP_PAYLOAD_VERSION = "relationship-v1"
+OBSERVATION_RELATIONSHIP_PAYLOAD_VERSION = "relationship-observation-v1"
 SOURCE_EXCLUSION_PAYLOAD_VERSION = "source-exclusion-v1"
 _IDENTIFIER_LIMIT = 128
 
@@ -38,11 +39,23 @@ def _validate_identifier(value: object, *, nullable: bool = False) -> str | None
 
 def _strict_payload(
     row: models.GraphProjectionOutbox,
-) -> tuple[str, str, str, str | None, str | None]:
+) -> tuple[
+    str,
+    str,
+    str,
+    str | None,
+    str | None,
+    bool,
+    str | None,
+    str | None,
+]:
     payload = row.payload
     if not isinstance(payload, dict):
         raise ProjectionCommandError("payload_invalid")
-    if row.projection_type == "source_exclusion" and row.payload_version == SOURCE_EXCLUSION_PAYLOAD_VERSION:
+    if (
+        row.projection_type == "source_exclusion"
+        and row.payload_version == SOURCE_EXCLUSION_PAYLOAD_VERSION
+    ):
         allowed = {"world_id", "source_event_id", "reason"}
         if set(payload) != allowed:
             raise ProjectionCommandError("payload_invalid")
@@ -50,7 +63,11 @@ def _strict_payload(
         if reason not in {"source_deleted", "source_hidden"}:
             raise ProjectionCommandError("payload_invalid")
         relationship_state_id = None
-    elif row.payload_version == RELATIONSHIP_PAYLOAD_VERSION:
+        observation_relationship = False
+    elif row.payload_version in {
+        RELATIONSHIP_PAYLOAD_VERSION,
+        OBSERVATION_RELATIONSHIP_PAYLOAD_VERSION,
+    }:
         allowed = {
             "world_id",
             "source_event_id",
@@ -66,6 +83,9 @@ def _strict_payload(
             payload.get("relationship_state_id"),
             nullable=row.projection_type != "relationship_state",
         )
+        observation_relationship = (
+            row.payload_version == OBSERVATION_RELATIONSHIP_PAYLOAD_VERSION
+        )
     else:
         raise ProjectionCommandError("payload_version_unsupported")
 
@@ -76,7 +96,22 @@ def _strict_payload(
     source_event_id = _validate_identifier(payload.get("source_event_id"))
     if world_id != row.world_id or source_event_id != row.source_event_id:
         raise ProjectionCommandError("world_mismatch")
-    return world_id, source_event_id, row.projection_type, relationship_state_id, reason
+    actor_id = _validate_identifier(
+        payload.get("actor_world_character_id"), nullable=True
+    )
+    target_id = _validate_identifier(
+        payload.get("target_world_character_id"), nullable=True
+    )
+    return (
+        world_id,
+        source_event_id,
+        row.projection_type,
+        relationship_state_id,
+        reason,
+        observation_relationship,
+        actor_id,
+        target_id,
+    )
 
 
 def _world_character(
@@ -165,9 +200,16 @@ def build_projection_command(
     row = db.get(models.GraphProjectionOutbox, outbox_id)
     if row is None:
         raise ProjectionCommandError("source_missing", cancelled=True)
-    world_id, event_id, projection_type, relationship_state_id, explicit_reason = (
-        _strict_payload(row)
-    )
+    (
+        world_id,
+        event_id,
+        projection_type,
+        relationship_state_id,
+        explicit_reason,
+        observation_relationship,
+        payload_actor_id,
+        payload_target_id,
+    ) = _strict_payload(row)
     event = db.get(models.SocialEvent, event_id)
     if event is None:
         raise ProjectionCommandError("source_missing", cancelled=True)
@@ -187,7 +229,7 @@ def build_projection_command(
         return SourceExclusionProjectionCommand(world_id, event_id, reason)
 
     reason = _source_exclusion_reason(db, event=event)
-    if event.retrieval_status == "audit_only":
+    if event.retrieval_status == "audit_only" and not observation_relationship:
         return NoGraphMutationCommand(world_id, event_id, "event_audit_only")
     preserve_relationship = (
         replay_relationship_snapshot
@@ -212,15 +254,35 @@ def build_projection_command(
     relationship = db.get(models.RelationshipState, relationship_state_id)
     if relationship is None:
         raise ProjectionCommandError("source_missing", cancelled=True)
+    expected_actor_id = (
+        payload_actor_id if observation_relationship else event.actor_world_character_id
+    )
+    expected_target_id = (
+        payload_target_id if observation_relationship else event.target_world_character_id
+    )
     if (
         relationship.world_id != world_id
-        or relationship.actor_world_character_id != event.actor_world_character_id
-        or relationship.target_world_character_id != event.target_world_character_id
+        or relationship.actor_world_character_id != expected_actor_id
+        or relationship.target_world_character_id != expected_target_id
     ):
         raise ProjectionCommandError("relationship_direction_mismatch")
+    relationship_actor = _world_character(
+        db,
+        world_id=world_id,
+        world_character_id=relationship.actor_world_character_id,
+    )
+    relationship_target = _world_character(
+        db,
+        world_id=world_id,
+        world_character_id=relationship.target_world_character_id,
+    )
     return RelationshipStateProjectionCommand(
         event=event_command,
         relationship_state_id=relationship.id,
+        actor_world_character_id=relationship_actor.id,
+        actor_character_id=relationship_actor.character_id,
+        target_world_character_id=relationship_target.id,
+        target_character_id=relationship_target.character_id,
         familiarity=relationship.familiarity,
         affinity=relationship.affinity,
         trust=relationship.trust,
