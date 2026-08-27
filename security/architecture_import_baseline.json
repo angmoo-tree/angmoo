@@ -1,7 +1,7 @@
 {
-  "edge_count": 1171,
-  "external_import_count": 1732,
-  "module_count": 504,
+  "edge_count": 1194,
+  "external_import_count": 1746,
+  "module_count": 514,
   "modules": [
     {
       "external_imports": [],
@@ -3115,6 +3115,101 @@
     {
       "external_imports": [],
       "imports": [],
+      "module": "app.domains.social",
+      "path": "backend/app/domains/social/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.social.application.keyword_feed",
+        "app.domains.social.application.search_runtime"
+      ],
+      "module": "app.domains.social.application",
+      "path": "backend/app/domains/social/application/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses"
+      ],
+      "imports": [
+        "app.domains.social.domain",
+        "app.domains.social.ports"
+      ],
+      "module": "app.domains.social.application.keyword_feed",
+      "path": "backend/app/domains/social/application/keyword_feed.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "threading"
+      ],
+      "imports": [
+        "app.domains.social.domain",
+        "app.domains.social.ports"
+      ],
+      "module": "app.domains.social.application.search_runtime",
+      "path": "backend/app/domains/social/application/search_runtime.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.social.domain.search_state"
+      ],
+      "module": "app.domains.social.domain",
+      "path": "backend/app/domains/social/domain/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "enum"
+      ],
+      "imports": [],
+      "module": "app.domains.social.domain.search_state",
+      "path": "backend/app/domains/social/domain/search_state.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.social.ports.search_index"
+      ],
+      "module": "app.domains.social.ports",
+      "path": "backend/app/domains/social/ports/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.runtime.public"
+      ],
+      "module": "app.domains.social.ports.search_index",
+      "path": "backend/app/domains/social/ports/search_index.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.social.application",
+        "app.domains.social.domain",
+        "app.domains.social.ports"
+      ],
+      "module": "app.domains.social.public",
+      "path": "backend/app/domains/social/public.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
       "module": "app.domains.world_characters",
       "path": "backend/app/domains/world_characters/__init__.py",
       "wildcard_imports": []
@@ -4982,7 +5077,8 @@
         "app.domains.identity.application.local_owner",
         "app.domains.identity.infrastructure.sqlalchemy_identity_repository",
         "app.domains.runtime.ports.runtime_data_path",
-        "app.runtime.persistence.runtime_data_path"
+        "app.runtime.persistence.runtime_data_path",
+        "app.runtime.search"
       ],
       "module": "app.runtime.configuration",
       "path": "backend/app/runtime/configuration.py",
@@ -5477,6 +5573,7 @@
       "external_imports": [],
       "imports": [
         "app.runtime.search.callback_index",
+        "app.runtime.search.social_projection",
         "app.runtime.search.sqlite_fts5"
       ],
       "module": "app.runtime.search",
@@ -5493,6 +5590,25 @@
       ],
       "module": "app.runtime.search.callback_index",
       "path": "backend/app/runtime/search/callback_index.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "logging",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.search_text",
+        "app.domains.runtime.public",
+        "app.domains.social.public",
+        "app.models",
+        "app.runtime.search.sqlite_fts5"
+      ],
+      "module": "app.runtime.search.social_projection",
+      "path": "backend/app/runtime/search/social_projection.py",
       "wildcard_imports": []
     },
     {
@@ -5930,6 +6046,7 @@
         "app.cruds.community",
         "app.domains.routine_posts.public",
         "app.domains.routines.public",
+        "app.domains.social.public",
         "app.domains.world_characters.public",
         "app.models",
         "app.schemas",
@@ -6789,6 +6906,7 @@
         "typing"
       ],
       "imports": [
+        "app.domains.social.public",
         "app.models",
         "app.services.agent_activity_policy"
       ],
@@ -7023,6 +7141,7 @@
       "imports": [
         "app.core.unit_of_work",
         "app.cruds.agent_runs",
+        "app.domains.social.public",
         "app.models",
         "app.schemas",
         "app.services.activity_proposal_runtime",
@@ -7053,6 +7172,7 @@
       ],
       "imports": [
         "app.core.search_text",
+        "app.domains.social.public",
         "app.models",
         "app.schemas",
         "app.services.world_character_contracts"

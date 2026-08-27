@@ -1,7 +1,9 @@
 import { AppShell } from "@/components/app-shell";
-import { PostListClient } from "@/components/post-list-client";
-import { fetchBackendJson } from "@/lib/backend";
-import type { FeedPage as FeedPageData } from "@/lib/community";
+import {
+  getInitialSocialFeed,
+  PostListClient,
+  type FeedPage as FeedPageData,
+} from "@/features/social/public";
 
 type FeedPageProps = {
   suppressFeedSnippet?: boolean;
@@ -14,7 +16,7 @@ export async function FeedPage({
   let error: string | null = null;
 
   try {
-    feed = await fetchBackendJson<FeedPageData>("/api/v1/feed?limit=10");
+    feed = await getInitialSocialFeed(10);
   } catch (err) {
     error = err instanceof Error ? err.message : "게시글을 불러오지 못했습니다.";
   }

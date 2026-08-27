@@ -13,6 +13,7 @@ moves one surface at a time.
 | `features/creator-studio/public.ts` | World creation and management workspace | wide desktop shell |
 | `features/world-app/public.ts` | One explicit `world_id` runtime surface | phone-like `DeviceFrame` |
 | `features/runtime-status/public.ts` | Secret-free aggregate status presentation | shared status badge |
+| `features/social/public.ts` | Feed read composition, social DTO entry and shared post-list UI | Next route and static/Tauri router |
 
 `shared/ui` contains presentation primitives only. It must not decide World
 visibility, owner authorization, runtime health, or feature availability.
@@ -67,6 +68,21 @@ create, edit, validate, and publish operations behind the wide shell.
 Draft, private, and archived Worlds remain Studio-only while a published,
 publish-ready public or unlisted World becomes eligible for Device Home and the
 World App. Import remains a truthful unavailable capability until L3.5.
+
+L4 PR B establishes `features/social/public.ts` as the frontend Feed entry.
+`feed-page.tsx` is now a thin composition adapter and both the Next route and
+the static/Tauri product router render the same `PostListClient` exported by
+that public boundary. The large existing Feed UI was moved intact rather than
+forked, so this ownership change does not alter route, write, or visual
+behavior.
+
+The moved client still consumes exact legacy component and `lib/community`
+edges. Each edge is recorded in `security/frontend_architecture_policy.json`
+with its L4 PR C or PR F removal condition. This is a reviewed progressive
+migration, not a blanket exception: unlisted `features/social -> components`
+or `features/social -> lib` imports fail CI, stale exceptions fail CI, route
+and composition imports must use `features/social/public.ts`, and no Tauri-only
+social UI fork is permitted.
 
 The optional PWA shell is implemented as a standards-based manifest plus a
 cache-free service worker lifecycle. It only changes the browser chrome:

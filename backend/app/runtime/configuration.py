@@ -18,6 +18,10 @@ from app.core.config import Settings
 from app.core.db import create_database_engine, create_session_factory
 from app.domains.runtime.ports.runtime_data_path import RuntimeDataPaths
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
+from app.runtime.search import (
+    EmbeddedSocialSearchProjection,
+    SqliteFts5SearchIndex,
+)
 
 
 class RuntimeConfigurationError(RuntimeError):
@@ -189,8 +193,10 @@ class RuntimeComposition:
     settings: Settings
     engine: Engine
     session_factory: sessionmaker[Session]
+    social_search_projection: EmbeddedSocialSearchProjection
 
     def dispose(self) -> None:
+        self.social_search_projection.stop()
         self.engine.dispose()
 
 
@@ -201,11 +207,18 @@ def compose_runtime(
 ) -> RuntimeComposition:
     runtime_settings = settings_from_runtime_config(config, base=base_settings)
     engine = create_database_engine(runtime_settings.database_url)
+    session_factory = create_session_factory(engine)
     return RuntimeComposition(
         config=config,
         settings=runtime_settings,
         engine=engine,
-        session_factory=create_session_factory(engine),
+        session_factory=session_factory,
+        social_search_projection=EmbeddedSocialSearchProjection(
+            index=SqliteFts5SearchIndex(
+                StaticRuntimeDataPath(config.data_paths.root)
+            ),
+            session_factory=session_factory,
+        ),
     )
 
 

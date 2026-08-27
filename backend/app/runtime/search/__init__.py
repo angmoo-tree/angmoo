@@ -7,9 +7,11 @@ from app.runtime.search.sqlite_fts5 import (
     SqliteFts5SearchIndex,
     SqliteFts5Settings,
 )
+from app.runtime.search.social_projection import EmbeddedSocialSearchProjection
 
 __all__ = [
     "CallbackSearchIndexAdapter",
+    "EmbeddedSocialSearchProjection",
     "SqliteFts5Error",
     "SqliteFts5SchemaError",
     "SqliteFts5SearchIndex",

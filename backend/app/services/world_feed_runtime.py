@@ -11,6 +11,7 @@ from pydantic import ValidationError
 from app import models, schemas
 from app.core import unit_of_work
 from app.cruds import agent_runs as agent_run_crud
+from app.domains.social.public import SocialSearchUnavailable
 from app.services import (
     activity_proposal_runtime,
     community as community_service,
@@ -282,13 +283,57 @@ async def run_world_keyword_feed(
             summary=claim.previous_summary,
         )
 
-    search = search_world_feed_candidates(
-        ctx.db,
-        profile=profile,
-        keywords=claim.keywords,
-        allowed_policy_actions=ctx.activity_policy.allowed_actions,
-        now=ctx.run_started_at,
-    )
+    try:
+        search = search_world_feed_candidates(
+            ctx.db,
+            profile=profile,
+            keywords=claim.keywords,
+            allowed_policy_actions=ctx.activity_policy.allowed_actions,
+            now=ctx.run_started_at,
+            search_index=ctx.social_search_index,
+            search_state=ctx.social_search_state,
+        )
+    except SocialSearchUnavailable as exc:
+        reason: schemas.FeedNoActionReason = exc.state.value
+        cycle_summary = _summary(
+            ctx=ctx,
+            profile=profile,
+            claim=claim,
+            raw_candidate_count=0,
+            filtered_candidate_count=0,
+            claimed_candidate_count=0,
+            selected_action=None,
+            interaction_intent=None,
+            outcome="DEGRADED",
+            reason_code=reason,
+            query_latency_ms=0,
+            planner_latency_ms=0,
+            writer_latency_ms=None,
+            tracker=tracker,
+        )
+        finalize_feed_cycle(
+            ctx.db,
+            profile=profile,
+            claim=claim,
+            observations=(),
+            selected_index=None,
+            selected_action=None,
+            interaction_intent=None,
+            comment_purpose=None,
+            reason_code=reason,
+            public_action_execution_id=None,
+            summary=cycle_summary,
+            now=ctx.run_started_at,
+        )
+        ctx.db.commit()
+        return _safe_result(
+            outcome=reason,
+            tracker=tracker,
+            world_id=profile.world.id,
+            world_character_id=profile.world_character.id,
+            status="degraded",
+            summary=cycle_summary,
+        )
     claims = claim_feed_observations(
         ctx.db,
         profile=profile,

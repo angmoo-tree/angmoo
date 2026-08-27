@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 
 import pytest
@@ -12,6 +13,9 @@ from sqlalchemy.pool import StaticPool
 from app import models, schemas
 from app.core.db import Base
 from app.core.search_text import build_post_search_document
+from app.domains.runtime.public import SearchIndexHit
+from app.domains.social.public import SocialSearchState
+from app.runtime.search import CallbackSearchIndexAdapter
 from app.services import agent_activity_policy, world_character_contracts
 from app.services.direct_llm import RunLlmTracker
 from app.services.feed_reaction_planner import validate_reaction_decision
@@ -283,6 +287,25 @@ def _seed(db: Session, *, with_candidate: bool):
         next_tick_at=now + timedelta(hours=1),
         summary="fixture",
     )
+    def search_index(
+        world_id: str,
+        query: str,
+        limit: int,
+    ) -> tuple[SearchIndexHit, ...]:
+        posts = db.scalars(
+            select(models.Post).where(models.Post.world_id == world_id)
+        ).all()
+        return tuple(
+            SearchIndexHit(
+                document_id=post.id,
+                score=1.0,
+                world_id=post.world_id,
+                kind="world_post",
+            )
+            for post in posts
+            if query.casefold() in post.search_document.casefold()
+        )[:limit]
+
     context = LangGraphResidentContext(
         db=db,
         run_id="run-feed",
@@ -296,6 +319,12 @@ def _seed(db: Session, *, with_candidate: bool):
         selected_post_id=None,
         run_started_at=now,
         run_mode="scheduled",
+        social_search_index=CallbackSearchIndexAdapter(
+            upsert=lambda _document: None,
+            remove=lambda _document_id: None,
+            search=search_index,
+        ),
+        social_search_state=SocialSearchState.READY,
     )
     return context, target_post
 
@@ -374,6 +403,35 @@ def test_no_candidate_uses_zero_provider_calls() -> None:
         assert result["feed_outcome"] == "no_candidate"
         assert provider.plan_calls == 0
         assert provider.writer_calls == 0
+        assert result["llm_usage_summary"]["provider_call_count"] == 0
+
+
+def test_unavailable_search_is_explicit_and_uses_zero_provider_calls() -> None:
+    engine = _engine()
+    with Session(engine) as db:
+        context, _target = _seed(db, with_candidate=True)
+        context = replace(
+            context,
+            social_search_index=None,
+            social_search_state=SocialSearchState.DIGEST_STALE,
+        )
+        provider = FakeFeedProvider(
+            schemas.FeedReactionDecision(
+                selected_candidate_index=None,
+                selected_action=None,
+                interaction_intent=None,
+                comment_purpose=None,
+                reason_code="model_abstained",
+                brief=None,
+            )
+        )
+
+        result = asyncio.run(run_world_keyword_feed(context, provider=provider))
+
+        assert result["status"] == "degraded"
+        assert result["feed_outcome"] == "search_digest_stale"
+        assert result["feed_cycle_summary"]["reason_code"] == "search_digest_stale"
+        assert provider.plan_calls == provider.writer_calls == 0
         assert result["llm_usage_summary"]["provider_call_count"] == 0
 
 
