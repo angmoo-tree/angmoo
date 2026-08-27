@@ -471,7 +471,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "e4224c21510ee3dc14a49266fda9313c7a2057e609c57287d52a606aee20a29a",
+      "source_sha256": "a07c9967c495fa5ad9480fe46135d337ecd808de849536b401c75926be597756",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
