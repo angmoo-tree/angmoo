@@ -22,5 +22,10 @@ export type {
   ManualSocialWriteRead,
   SocialOwnerActor,
 } from "./model/social-write-contract";
+export {
+  presentSocialCausality,
+  type SocialCausalityPhase,
+  type SocialCausalityPresentation,
+} from "./model/causality-presentation";
 export { PostListClient } from "./ui/post-list-client";
 export { WorldSocialFeed } from "./ui/world-social-feed";

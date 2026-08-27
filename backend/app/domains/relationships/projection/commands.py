@@ -38,6 +38,10 @@ class SocialEventProjectionCommand:
 class RelationshipStateProjectionCommand:
     event: SocialEventProjectionCommand
     relationship_state_id: str
+    actor_world_character_id: str
+    actor_character_id: str
+    target_world_character_id: str
+    target_character_id: str
     familiarity: int
     affinity: int
     trust: int

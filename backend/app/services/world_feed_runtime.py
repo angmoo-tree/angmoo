@@ -9,9 +9,10 @@ from typing import Any
 from pydantic import ValidationError
 
 from app import models, schemas
+from app.compatibility.manual_social.observations import observe_source
 from app.core import unit_of_work
 from app.cruds import agent_runs as agent_run_crud
-from app.domains.social.public import SocialSearchUnavailable
+from app.domains.social.public import SocialObservationError, SocialSearchUnavailable
 from app.services import (
     activity_proposal_runtime,
     community as community_service,
@@ -136,6 +137,7 @@ def _summary(
     tracker: RunLlmTracker,
     public_action_execution_id: int | None = None,
     claim_conflict_count: int = 0,
+    observation_receipt_count: int = 0,
 ) -> dict[str, object]:
     return {
         "runtime_version": WORLD_FEED_RUNTIME_VERSION,
@@ -150,6 +152,7 @@ def _summary(
         "filtered_candidate_count": filtered_candidate_count,
         "claimed_candidate_count": claimed_candidate_count,
         "claim_conflict_count": claim_conflict_count,
+        "observation_receipt_count": observation_receipt_count,
         "selected_action": selected_action,
         "interaction_intent": interaction_intent,
         "outcome": outcome,
@@ -389,6 +392,49 @@ async def run_world_keyword_feed(
             summary=cycle_summary,
         )
 
+    observation_receipts = []
+    try:
+        for candidate in claims.candidates:
+            observation_receipts.append(
+                observe_source(
+                    ctx.db,
+                    world_id=profile.world.id,
+                    observer_world_character_id=profile.world_character.id,
+                    source_social_event_id=None,
+                    source_post_id=candidate.post_id,
+                    lane="feed",
+                    observed_at=ctx.run_started_at,
+                )
+            )
+        # Observation is durable before planning. A later NO_ACTION or failed
+        # follow-up must never erase the fact that the source entered context.
+        ctx.db.commit()
+    except SocialObservationError as exc:
+        ctx.db.rollback()
+        mark_claims_retryable(
+            ctx.db, observations=claims.observations, now=ctx.run_started_at
+        )
+        ctx.db.commit()
+        logger.warning(
+            "world_feed_observation_failed run_id=%s world_id=%s reason_code=%s",
+            ctx.run_id,
+            profile.world.id,
+            exc.reason_code,
+        )
+        return _safe_result(
+            outcome="observation_failed",
+            tracker=tracker,
+            world_id=profile.world.id,
+            world_character_id=profile.world_character.id,
+            status="failed",
+            failure_class=exc.reason_code,
+            summary={
+                "outcome": "OBSERVATION_FAILED",
+                "reason_code": exc.reason_code,
+                "observation_receipt_count": 0,
+            },
+        )
+
     proposal_eligible_indices = frozenset(
         candidate.candidate_index
         for candidate in claims.candidates
@@ -437,6 +483,11 @@ async def run_world_keyword_feed(
             world_character_id=profile.world_character.id,
             status="failed",
             failure_class=type(exc).__name__,
+            summary={
+                "outcome": "FOLLOW_UP_PLANNING_FAILED",
+                "reason_code": "planner_failed",
+                "observation_receipt_count": len(observation_receipts),
+            },
         )
     planner_latency_ms = int((perf_counter() - planner_started) * 1000)
 
@@ -458,6 +509,7 @@ async def run_world_keyword_feed(
             writer_latency_ms=None,
             tracker=tracker,
             claim_conflict_count=claims.claim_conflict_count,
+            observation_receipt_count=len(observation_receipts),
         )
         finalize_feed_cycle(
             ctx.db,
@@ -536,6 +588,7 @@ async def run_world_keyword_feed(
                 writer_latency_ms=writer_latency_ms,
                 tracker=tracker,
                 claim_conflict_count=claims.claim_conflict_count,
+                observation_receipt_count=len(observation_receipts),
             )
             finalize_feed_cycle(
                 ctx.db,
@@ -571,6 +624,11 @@ async def run_world_keyword_feed(
                 world_character_id=profile.world_character.id,
                 status="failed",
                 failure_class=type(exc).__name__,
+                summary={
+                    "outcome": "FOLLOW_UP_FAILED",
+                    "reason_code": "writer_failed",
+                    "observation_receipt_count": len(observation_receipts),
+                },
             )
         writer_latency_ms = int((perf_counter() - writer_started) * 1000)
 
@@ -598,6 +656,7 @@ async def run_world_keyword_feed(
             writer_latency_ms=writer_latency_ms,
             tracker=tracker,
             claim_conflict_count=claims.claim_conflict_count,
+            observation_receipt_count=len(observation_receipts),
         )
         finalize_feed_cycle(
             ctx.db,
@@ -652,6 +711,7 @@ async def run_world_keyword_feed(
             tracker=tracker,
             public_action_execution_id=execution.id,
             claim_conflict_count=claims.claim_conflict_count,
+            observation_receipt_count=len(observation_receipts),
         )
         finalize_feed_cycle(
             ctx.db,
@@ -751,6 +811,7 @@ async def run_world_keyword_feed(
                     tracker=tracker,
                     public_action_execution_id=execution.id,
                     claim_conflict_count=claims.claim_conflict_count,
+                    observation_receipt_count=len(observation_receipts),
                 )
                 finalize_feed_cycle(
                     ctx.db,

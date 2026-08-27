@@ -5,17 +5,22 @@ from __future__ import annotations
 from app.domains.social.application import (
     KeywordPostLookup,
     SocialSearchBinding,
-    current_social_search,
-    find_keyword_post_ids,
-    register_social_search,
-    unregister_social_search,
     apply_validated_autonomous_result,
     create_owner_post,
     create_owner_reply,
+    current_social_search,
+    find_keyword_post_ids,
+    observe_social_source,
+    register_social_search,
+    unregister_social_search,
 )
 from app.domains.social.domain import (
+    ObservationLane,
     OwnerPostCommand,
     OwnerReplyCommand,
+    SocialObservationCommand,
+    SocialObservationError,
+    SocialObservationResult,
     SocialSearchState,
     SocialSearchUnavailable,
     SocialWriteConflictError,
@@ -26,15 +31,24 @@ from app.domains.social.domain import (
     SocialWriteRetryableError,
     ValidatedAutonomousWriteCommand,
 )
-from app.domains.social.ports import SocialSearchIndexPort, SocialWriteUnitOfWorkPort
+from app.domains.social.ports import (
+    SocialObservationUnitOfWorkPort,
+    SocialSearchIndexPort,
+    SocialWriteUnitOfWorkPort,
+)
 
 apply_validated_autonomous_social_result = apply_validated_autonomous_result
 
 
 __all__ = [
     "KeywordPostLookup",
+    "ObservationLane",
     "OwnerPostCommand",
     "OwnerReplyCommand",
+    "SocialObservationCommand",
+    "SocialObservationError",
+    "SocialObservationResult",
+    "SocialObservationUnitOfWorkPort",
     "SocialSearchBinding",
     "SocialSearchIndexPort",
     "SocialSearchState",
@@ -52,6 +66,7 @@ __all__ = [
     "create_owner_reply",
     "current_social_search",
     "find_keyword_post_ids",
+    "observe_social_source",
     "register_social_search",
     "unregister_social_search",
 ]

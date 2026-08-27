@@ -13,11 +13,17 @@ from app.integrations.ladybug_projection import (
     LADYBUG_PROJECTION_SCHEMA_VERSION,
     ladybug_projection_contract,
 )
-from app.runtime.migrations.ladybug_versions.rebuild import rebuild_projection_v1
+from app.runtime.migrations.ladybug_versions.rebuild import (
+    rebuild_projection_v1,
+    rebuild_projection_v2,
+)
 
 
 GraphRebuild = Callable[..., dict[str, dict[str, list[str]]]]
-GRAPH_REBUILDS: dict[int, GraphRebuild] = {1: rebuild_projection_v1}
+GRAPH_REBUILDS: dict[int, GraphRebuild] = {
+    1: rebuild_projection_v1,
+    2: rebuild_projection_v2,
+}
 _MANIFEST_ROOT = Path(__file__).with_name("manifests")
 
 

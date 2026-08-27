@@ -35,7 +35,7 @@ from app.domains.relationships.projection.commands import (
 )
 
 
-LADYBUG_PROJECTION_SCHEMA_VERSION = 1
+LADYBUG_PROJECTION_SCHEMA_VERSION = 2
 
 _QUERY_RESULT_CONTRACT = {
     "direct_relationship": ("actor_id", "target_id", "relationship"),
@@ -860,6 +860,14 @@ class LadybugRelationshipProjection:
             event = command.event
             self._merge_event(event)
             parameters = _event_parameters(event)
+            parameters.update(
+                {
+                    "actor_world_character_id": command.actor_world_character_id,
+                    "actor_character_id": command.actor_character_id,
+                    "target_world_character_id": command.target_world_character_id,
+                    "target_character_id": command.target_character_id,
+                }
+            )
             existing_rows = self._execute(
                 """
                 MATCH (actor:WorldCharacter {

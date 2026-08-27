@@ -9,12 +9,18 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 from app import models, schemas
+from app.compatibility.manual_social.observations import observe_source
 from app.core.db import Base
+from app.domains.social.public import SocialObservationError
 from app.services import (
     activity_proposal_runtime,
     langgraph_social_apply,
     social_event_runtime,
     world_character_contracts,
+)
+from app.services.graph_projection_commands import (
+    RelationshipStateProjectionCommand,
+    build_projection_command,
 )
 
 
@@ -209,6 +215,218 @@ def _record_post_event(
             source_author_id_at_event=actor_world_character_id,
         ),
     )
+
+
+def test_observation_is_directional_idempotent_and_independent_from_follow_up() -> None:
+    engine = _engine()
+    occurred_at = datetime(2026, 8, 11, 1, 0, tzinfo=UTC)
+    with Session(engine, expire_on_commit=False) as db:
+        fixture = _seed(db)
+        root = _post(
+            db,
+            post_id="post-observation-root",
+            author=fixture.target,
+            author_world_character=fixture.target_world_character,
+            body="What did you notice in class?",
+        )
+        reply = _post(
+            db,
+            post_id="post-observation-source",
+            author=fixture.actor,
+            author_world_character=fixture.actor_world_character,
+            body="The rune changed color after sunset.",
+            reply_to_post_id=root.id,
+        )
+        source_event = models.SocialEvent(
+            id="event-observation-source",
+            world_id=fixture.world.id,
+            actor_world_character_id=fixture.actor_world_character.id,
+            target_world_character_id=fixture.target_world_character.id,
+            event_type="comment_created",
+            result="succeeded",
+            occurred_at=occurred_at,
+            idempotency_key="event-observation-source",
+            schema_version="social-event-v1",
+            retrieval_status="audit_only",
+        )
+        db.add(source_event)
+        db.flush()
+        db.add(
+            models.SocialEventEvidence(
+                id="evidence-observation-source",
+                social_event_id=source_event.id,
+                evidence_kind="reply_post",
+                source_object_type="post",
+                source_object_id=reply.id,
+                root_post_id=root.id,
+                source_post_id=reply.id,
+                target_post_id=root.id,
+                source_visibility_at_event="public",
+                source_author_id_at_event=fixture.actor_world_character.id,
+                occurred_at=occurred_at,
+            )
+        )
+        db.commit()
+
+        # Source success alone is audit evidence, not an inferred relationship.
+        assert db.scalar(select(func.count(models.RelationshipState.id))) == 0
+        assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 0
+
+        observed = observe_source(
+            db,
+            world_id=fixture.world.id,
+            observer_world_character_id=fixture.target_world_character.id,
+            source_social_event_id=source_event.id,
+            source_post_id=reply.id,
+            lane="routine",
+            observed_at=occurred_at + timedelta(minutes=1),
+        )
+        db.commit()
+
+        relationship_state = db.get(
+            models.RelationshipState, observed.relationship_state_id
+        )
+        relationship_change = db.get(
+            models.RelationshipStateChange, observed.receipt_id
+        )
+        assert relationship_state is not None
+        assert relationship_change is not None
+        assert observed.replayed is False
+        assert relationship_state.actor_world_character_id == (
+            fixture.target_world_character.id
+        )
+        assert relationship_state.target_world_character_id == (
+            fixture.actor_world_character.id
+        )
+        assert relationship_state.familiarity == 1
+        assert relationship_state.affinity == 0
+        assert relationship_state.trust == 0
+        assert relationship_state.tension == 0
+        assert relationship_change.delta_familiarity == 1
+
+        # Routine, Inbox, and Feed all enter the same production application
+        # contract and converge on the already committed canonical receipt.
+        lane_replays = [
+            observe_source(
+                db,
+                world_id=fixture.world.id,
+                observer_world_character_id=fixture.target_world_character.id,
+                source_social_event_id=None,
+                source_post_id=reply.id,
+                lane=lane,
+                observed_at=occurred_at + timedelta(minutes=index + 2),
+            )
+            for index, lane in enumerate(("routine", "inbox", "feed"))
+        ]
+        db.commit()
+        assert [replay.lane for replay in lane_replays] == [
+            "routine",
+            "inbox",
+            "feed",
+        ]
+        assert all(replay.replayed for replay in lane_replays)
+        assert {replay.receipt_id for replay in lane_replays} == {
+            observed.receipt_id
+        }
+        assert db.scalar(select(func.count(models.RelationshipStateChange.id))) == 1
+        assert db.scalar(select(func.count(models.SocialEvent.id))) == 1
+
+        outbox = db.scalar(select(models.GraphProjectionOutbox))
+        assert outbox is not None
+        assert outbox.payload_version == "relationship-observation-v1"
+        command = build_projection_command(db, outbox_id=outbox.id)
+        assert isinstance(command, RelationshipStateProjectionCommand)
+        assert command.event.actor_world_character_id == fixture.actor_world_character.id
+        assert command.actor_world_character_id == fixture.target_world_character.id
+        assert command.target_world_character_id == fixture.actor_world_character.id
+
+        # A later follow-up failure is a separate transaction and cannot erase
+        # the committed observation or create a partial follow-up event.
+        with pytest.raises(RuntimeError, match="follow-up failure"):
+            try:
+                db.add(
+                    models.SocialEvent(
+                        id="event-failed-follow-up",
+                        world_id=fixture.world.id,
+                        actor_world_character_id=fixture.target_world_character.id,
+                        target_world_character_id=fixture.actor_world_character.id,
+                        event_type="comment_created",
+                        result="succeeded",
+                        occurred_at=occurred_at + timedelta(minutes=3),
+                        idempotency_key="event-failed-follow-up",
+                        schema_version="social-event-v1",
+                    )
+                )
+                db.flush()
+                raise RuntimeError("follow-up failure")
+            except RuntimeError:
+                db.rollback()
+                raise
+        assert db.get(models.RelationshipStateChange, observed.receipt_id)
+        assert db.scalar(select(func.count(models.SocialEvent.id))) == 1
+
+
+def test_observation_revalidates_hidden_source_before_any_relationship_write() -> None:
+    engine = _engine()
+    occurred_at = datetime(2026, 8, 11, 1, 20, tzinfo=UTC)
+    with Session(engine, expire_on_commit=False) as db:
+        fixture = _seed(db)
+        source = _post(
+            db,
+            post_id="post-observation-hidden",
+            author=fixture.actor,
+            author_world_character=fixture.actor_world_character,
+            body="This post becomes hidden before the observer can read it.",
+        )
+        source_event = models.SocialEvent(
+            id="event-observation-hidden",
+            world_id=fixture.world.id,
+            actor_world_character_id=fixture.actor_world_character.id,
+            target_world_character_id=None,
+            event_type="post_published",
+            result="succeeded",
+            occurred_at=occurred_at,
+            idempotency_key="event-observation-hidden",
+            schema_version="social-event-v1",
+            retrieval_status="eligible",
+        )
+        db.add(source_event)
+        db.flush()
+        db.add(
+            models.SocialEventEvidence(
+                id="evidence-observation-hidden",
+                social_event_id=source_event.id,
+                evidence_kind="post",
+                source_object_type="post",
+                source_object_id=source.id,
+                root_post_id=source.id,
+                source_post_id=source.id,
+                source_visibility_at_event="public",
+                source_author_id_at_event=fixture.actor_world_character.id,
+                occurred_at=occurred_at,
+            )
+        )
+        db.commit()
+
+        source.visibility = "private"
+        db.commit()
+
+        with pytest.raises(SocialObservationError) as exc_info:
+            observe_source(
+                db,
+                world_id=fixture.world.id,
+                observer_world_character_id=fixture.target_world_character.id,
+                source_social_event_id=source_event.id,
+                source_post_id=source.id,
+                lane="inbox",
+                observed_at=occurred_at + timedelta(minutes=1),
+            )
+        db.rollback()
+
+        assert exc_info.value.reason_code == "evidence_source_hidden"
+        assert db.scalar(select(func.count(models.RelationshipState.id))) == 0
+        assert db.scalar(select(func.count(models.RelationshipStateChange.id))) == 0
+        assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 0
 
 
 def test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once() -> None:

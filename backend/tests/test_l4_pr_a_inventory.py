@@ -53,10 +53,14 @@ def test_l4_pr_a_runtime_and_installer_baselines_are_frozen() -> None:
         item["contract"]["canonical_table_count"] for item in sqlite["manifests"]
     ] == [83, 87, 87]
     assert len(sqlite["steps"]) == 2
-    assert ladybug["manifests"][0]["contract"] == {
+    assert [
+        item["contract"]["projection_schema_version"]
+        for item in ladybug["manifests"]
+    ] == [1, 2]
+    assert ladybug["manifests"][1]["contract"] == {
         "minimum_ladybug_version": "0.19.1",
         "parity_contract_version": 1,
-        "projection_schema_version": 1,
+        "projection_schema_version": 2,
         "schema_digest": "a028adfa2162e4cec41a4d8efd58731b696185742632c37beac3e8fb13f099f4",
     }
     assert payload["installer"]["required_jobs"] == [
@@ -74,14 +78,14 @@ def test_l4_pr_a_architecture_and_parity_oracles_are_exact() -> None:
     frontend = payload["architecture"]["frontend"]
     behavior = payload["behavior"]
 
-    assert backend["module_count"] == 518
-    assert backend["internal_edge_count"] == 1207
-    assert backend["external_import_count"] == 1758
+    assert backend["module_count"] == 522
+    assert backend["internal_edge_count"] == 1220
+    assert backend["external_import_count"] == 1768
     assert backend["legacy_import_exception_count"] == 0
     assert backend["policy_allowed_cycle_count"] == 0
     assert backend["module_cycles"] == []
-    assert len(backend["ownership"]["legacy_horizontal"]) == 19
-    assert len(backend["ownership"]["canonical_boundaries"]) == 37
+    assert len(backend["ownership"]["legacy_horizontal"]) == 20
+    assert len(backend["ownership"]["canonical_boundaries"]) == 40
 
     assert frontend["candidate_count"] == 12
     assert frontend["candidate_consumer_edge_count"] == 33
@@ -89,7 +93,7 @@ def test_l4_pr_a_architecture_and_parity_oracles_are_exact() -> None:
     assert len(frontend["public_surfaces"]["features"]) == 7
     assert len(frontend["public_surfaces"]["shared"]) == 5
 
-    assert behavior["parity_test_node_count"] == 89
+    assert behavior["parity_test_node_count"] == 92
     nodes = set(behavior["parity_test_nodes"])
     assert all(item["test"] in nodes for item in behavior["counter_contracts"])
     assert payload["forbidden_changes"] == [

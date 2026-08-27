@@ -70,7 +70,7 @@ def test_sqlite_manifests_match_frozen_v1_and_latest_model_contract(
 def test_ladybug_manifest_matches_adapter_command_and_query_contract() -> None:
     manifest = validate_latest_ladybug_contract()
 
-    assert manifest.projection_schema_version == 1
+    assert manifest.projection_schema_version == 2
     assert manifest.projection_schema_version in GRAPH_REBUILDS
 
 
@@ -120,10 +120,10 @@ def test_missing_sqlite_expected_delta_contract_is_rejected(
 def test_missing_ladybug_rebuild_target_is_rejected(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.delitem(GRAPH_REBUILDS, 1)
+    monkeypatch.delitem(GRAPH_REBUILDS, 2)
 
     with pytest.raises(
         LadybugVersionContractError,
-        match="ladybug_rebuild_target_missing:v1",
+        match="ladybug_rebuild_target_missing:v2",
     ):
         validate_latest_ladybug_contract()

@@ -5,6 +5,7 @@ import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useAuth } from "@/components/auth-provider";
+import { presentSocialCausality } from "@/features/social/public";
 import { worldPostDetailRoute } from "@/shared/navigation/public";
 import { getAgent, type AgentDetailRead } from "@/lib/agents";
 import {
@@ -173,6 +174,9 @@ export function WorldCharacterAutonomySetupClient({
   const [feedStatusError, setFeedStatusError] = useState<string | null>(null);
   const [socialMemory, setSocialMemory] = useState<SocialMemoryDiagnosticsRead | null>(null);
   const [socialMemoryError, setSocialMemoryError] = useState<string | null>(null);
+  const socialCausality = presentSocialCausality(
+    feedStatus?.last_cycle_summary ?? null,
+  );
 
   useEffect(() => {
     if (authStatus === "unauthenticated") {
@@ -1016,6 +1020,11 @@ export function WorldCharacterAutonomySetupClient({
                         <p className="mt-1 text-sm">
                           관련 글 {summaryNumber(feedStatus.last_cycle_summary, "filtered_candidate_count") ?? 0}개 · {feedOutcomeLabel(feedStatus)}
                         </p>
+                        {socialCausality ? (
+                          <p className="mt-2 text-sm" data-causality-phase={socialCausality.phase}>
+                            {socialCausality.label}
+                          </p>
+                        ) : null}
                         {process.env.NODE_ENV === "development" && summaryText(feedStatus.last_cycle_summary, "reason_code") ? (
                           <p className="mt-2 font-mono text-xs">
                             reason={summaryText(feedStatus.last_cycle_summary, "reason_code")}

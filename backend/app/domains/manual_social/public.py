@@ -10,6 +10,7 @@ from app.compatibility.manual_social.inbox import (
 from app.compatibility.manual_social.inbox import (
     claim as claim_manual_inbox,
 )
+from app.compatibility.manual_social.inbox import claimed_observation_post_id
 from app.compatibility.manual_social.inbox import (
     consume_claims as consume_manual_inbox_claims,
 )
@@ -26,6 +27,7 @@ __all__ = [
     "ManualInboxInteractionCandidate",
     "ManualInboxRuntimeError",
     "claim_manual_inbox",
+    "claimed_observation_post_id",
     "consume_manual_inbox_claims",
     "get_owner_world_post_thread",
     "is_manual_inbox_source",

@@ -240,6 +240,37 @@ def claim(
     return row
 
 
+def claimed_observation_post_id(
+    db: Session,
+    *,
+    source_event_id: str,
+    world_id: str,
+    consumer_world_character_id: str,
+    target_activity_beat_id: str,
+    claim_run_id: str,
+) -> str:
+    """Resolve the canonical reply post behind one fenced manual claim."""
+
+    row_id = candidate_id(source_event_id)
+    if row_id is None:
+        raise ManualInboxRuntimeError("manual_inbox_source_invalid")
+    row = db.get(OwnerManualInboxCandidate, row_id)
+    if (
+        row is None
+        or row.world_id != world_id
+        or row.target_world_character_id != consumer_world_character_id
+        or row.target_activity_beat_id != target_activity_beat_id
+        or row.claim_run_id != claim_run_id
+        or row.status != "claimed"
+    ):
+        raise ManualInboxRuntimeError("manual_inbox_claim_mismatch")
+    valid = _valid_candidate(db, row=row)
+    if valid is None:
+        raise ManualInboxRuntimeError("manual_inbox_source_context_invalid")
+    reply, _target_post = valid
+    return reply.id
+
+
 def release_claims(
     db: Session,
     *,
@@ -305,6 +336,7 @@ __all__ = [
     "ManualInboxRuntimeError",
     "candidate_id",
     "candidates",
+    "claimed_observation_post_id",
     "claim",
     "consume_claims",
     "is_manual_inbox_source",

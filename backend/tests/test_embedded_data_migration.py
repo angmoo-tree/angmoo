@@ -11,6 +11,7 @@ from sqlalchemy import URL, create_engine, select
 from sqlalchemy.orm import Session
 
 from app import models
+from app.compatibility.manual_social.observations import observe_source
 from app.domains.worlds.domain.reserved_roles import (
     NO_SPECIFIC_ROLE_DESCRIPTION,
     NO_SPECIFIC_ROLE_NAME,
@@ -809,7 +810,7 @@ def test_graph_version_change_replays_to_staging_and_preserves_previous(
     current = json.loads(
         (root / "graph" / "current-generation.json").read_text(encoding="utf-8")
     )
-    assert current["relative_path"].startswith("generations/ladybug-v1")
+    assert current["relative_path"].startswith("generations/ladybug-v2")
     previous = json.loads(
         (root / "graph" / "previous-generation.json").read_text(
             encoding="utf-8"
@@ -838,7 +839,7 @@ def test_graph_rebuild_failure_degrades_without_replacing_previous(
             "ladybug_rebuild_injected"
         )
 
-    monkeypatch.setitem(graph_registry.GRAPH_REBUILDS, 1, fail_rebuild)
+    monkeypatch.setitem(graph_registry.GRAPH_REBUILDS, 2, fail_rebuild)
     result = EmbeddedDataUpgradeCoordinator(
         StaticRuntimeDataPath(root),
         fallback_generation=GENERATION,
@@ -866,10 +867,21 @@ def test_graph_rebuild_replays_direction_evidence_and_world_scope(
     )
     with Session(engine, expire_on_commit=False) as db:
         fixture = seed_projection_fixture(db, suffix="embedded-upgrade")
+        observed = observe_source(
+            db,
+            world_id=fixture.world.id,
+            observer_world_character_id=fixture.target_world_character.id,
+            source_social_event_id=fixture.event.id,
+            source_post_id=fixture.reply_post.id,
+            lane="routine",
+            observed_at=datetime(2026, 8, 12, 1, 5, tzinfo=UTC),
+        )
+        db.commit()
         world_id = fixture.world.id
         actor_id = fixture.actor_world_character.id
         target_id = fixture.target_world_character.id
         event_id = fixture.event.id
+        observation_relationship_id = observed.relationship_state_id
     previous_graph = initial.graph.database_root / "relationships.lbdb"
     previous_sha = _sha256(previous_graph)
     monkeypatch.setattr(
@@ -905,6 +917,11 @@ def test_graph_rebuild_replays_direction_evidence_and_world_scope(
             source_world_character_id=actor_id,
             target_world_character_id=target_id,
         )
+        reverse_evidence = repository.list_relationship_evidence(
+            world_id=world_id,
+            source_world_character_id=target_id,
+            target_world_character_id=actor_id,
+        )
         cross_world = repository.get_direct_relationship(
             world_id="another-world",
             source_world_character_id=actor_id,
@@ -912,6 +929,8 @@ def test_graph_rebuild_replays_direction_evidence_and_world_scope(
         )
     engine.dispose()
     assert len(direct) == 1
-    assert reverse == []
+    assert len(reverse) == 1
+    assert reverse[0].relationship_state_id == observation_relationship_id
     assert [row.event_id for row in evidence] == [event_id]
+    assert [row.event_id for row in reverse_evidence] == [event_id]
     assert cross_world == []

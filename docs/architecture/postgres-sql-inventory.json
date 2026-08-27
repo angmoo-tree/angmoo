@@ -249,14 +249,27 @@
       "markers": {
         "row_lock": [
           212,
-          259,
-          284
+          290,
+          315
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/compatibility/manual_social/inbox.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "f67c47c6faa2063236b47e6cc42b53744591aab6ddf434c4cdf793489d6f5b1d",
+      "source_sha256": "ec405dbb726a57cc10bce8615c133a4c9028976752f45598a78565feb8ed6c2a",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          556,
+          664
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/compatibility/manual_social/write_unit_of_work.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "c569e97abc57d9513dbfe2816665d073e02d96b8be4bb3b1290d4a55bc821f3c",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1005,13 +1018,13 @@
       "transition_pr": "ER7 PR P"
     }
   ],
-  "entry_count": 64,
+  "entry_count": 65,
   "marker_counts": {
     "advisory_lock": 8,
     "driver_or_url": 41,
     "jsonb": 8,
     "pgvector": 4,
-    "row_lock": 23,
+    "row_lock": 24,
     "skip_locked": 7
   },
   "purpose": "Residual PostgreSQL markers retained only as historical schema evidence, serialized compatibility values, and negative reintroduction guards",

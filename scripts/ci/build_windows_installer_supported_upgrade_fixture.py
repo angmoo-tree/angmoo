@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 from datetime import UTC, datetime
+import gc
 import hashlib
 import json
 from pathlib import Path
@@ -11,6 +12,7 @@ import shutil
 import sqlite3
 import sys
 
+import ladybug as lb
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
 
@@ -29,6 +31,9 @@ from app.domains.worlds.domain.reserved_roles import (
 from app.runtime.migrations.generation import EmbeddedGenerationController
 from app.runtime.migrations.ladybug_projection import (
     LadybugProjectionUpgradeCoordinator,
+)
+from app.runtime.migrations.ladybug_versions.registry import (
+    load_ladybug_manifest,
 )
 from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
@@ -432,8 +437,44 @@ def _seed_supported_predecessor(
         StaticRuntimeDataPath(root),
         session_factory=database.session_factory,
     ).upgrade()
-    if graph.degraded or graph.target_version != 1:
+    if graph.degraded or graph.target_version != 2:
         raise RuntimeError("supported_upgrade_fixture_graph_invalid")
+    # The fixture represents the last supported installed predecessor. Build
+    # with the current adapter, then freeze the empty graph at the immutable v1
+    # contract so the candidate installer must prove the real v1 -> v2 replay.
+    graph_database = lb.Database(str(graph.database_root / "relationships.lbdb"))
+    graph_connection = lb.Connection(graph_database)
+    graph_connection.execute(
+        "MATCH (meta:ProjectionMeta {id: $id}) "
+        "SET meta.schema_version = $schema_version",
+        parameters={
+            "id": "relationship_projection",
+            "schema_version": 1,
+        },
+    )
+    del graph_connection
+    del graph_database
+    gc.collect()
+    graph_manifest = load_ladybug_manifest(1)
+    _write_json(
+        graph.database_root / "projection-manifest.json",
+        graph_manifest.as_dict(),
+    )
+    graph_controller = EmbeddedGenerationController(
+        root / "graph",
+        artifact_relative_path="relationships.lbdb",
+    )
+    _write_json(
+        graph_controller.current_marker,
+        {
+            "schema_version": 1,
+            "relative_path": graph.database_root.relative_to(
+                root / "graph"
+            ).as_posix(),
+            "manifest_sha256": graph_manifest.manifest_sha256,
+            "data_version": 1,
+        },
+    )
     database_path = database.database_path
     database.close()
 

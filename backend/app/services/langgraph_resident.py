@@ -18,6 +18,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app import models, schemas
+from app.compatibility.manual_social.observations import observe_source
 from app.core import unit_of_work
 from app.core.config import settings
 from app.core.redaction import redact_secret_text
@@ -6818,6 +6819,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
                 character_id=ctx.character.id,
                 notification_id=notification.id,
             )
+            observation_receipt = None
             if inbox_lane_only:
                 source_post = (
                     community_crud.get_post(ctx.db, source_post_id)
@@ -6843,6 +6845,18 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
                 ):
                     blocked_notification_ids.append(notification.id)
                     continue
+                observation_receipt = observe_source(
+                    ctx.db,
+                    world_id=active_inbox_world_character.world_id,
+                    observer_world_character_id=active_inbox_world_character.id,
+                    source_social_event_id=raw_notification.source_social_event_id,
+                    source_post_id=source_post.id,
+                    lane="inbox",
+                    observed_at=ctx.run_started_at,
+                )
+                # The InboxObserver is the actual context boundary. Persist it
+                # before the planner can choose NO_ACTION or a follow-up can fail.
+                ctx.db.commit()
             observed_notification_ids.append(notification.id)
             affordance = (
                 community_service.resident_inbox_action_affordance(
@@ -6891,6 +6905,18 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
                 ),
                 **affordance,
             }
+            if observation_receipt is not None:
+                compact["observation"] = {
+                    "schema_version": observation_receipt.schema_version,
+                    "source_social_event_id": (
+                        observation_receipt.source_social_event_id
+                    ),
+                    "receipt_id": observation_receipt.receipt_id,
+                    "relationship_state_id": (
+                        observation_receipt.relationship_state_id
+                    ),
+                    "replayed": observation_receipt.replayed,
+                }
             if source_post_id:
                 proposal = langgraph_social_apply.proposal_for_notification(
                     ctx.db,
