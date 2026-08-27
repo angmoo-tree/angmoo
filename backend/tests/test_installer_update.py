@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import hashlib
 import json
-from pathlib import Path
+import sqlite3
 import sys
+from pathlib import Path
 
 import pytest
 
@@ -152,8 +153,31 @@ def test_installer_upgrade_mode_creates_current_generations_and_is_idempotent(
     ).read_bytes()
     graph_marker = (data_root / "graph" / "current-generation.json").read_bytes()
 
-    assert desktop_sidecar.main() == 0
-    second = json.loads(capsys.readouterr().out)
+    marker_payload = json.loads(canonical_marker)
+    database_path = (
+        data_root
+        / "canonical"
+        / str(marker_payload["relative_path"])
+        / "angmoo.sqlite3"
+    )
+    writer = sqlite3.connect(database_path)
+    try:
+        writer.execute("PRAGMA journal_mode = WAL")
+        writer.execute("PRAGMA wal_autocheckpoint = 0")
+        writer.execute(
+            "UPDATE angmoo_schema_version SET created_at = ? "
+            "WHERE singleton_key = 1",
+            ("2026-08-27T00:00:00.000000Z",),
+        )
+        writer.commit()
+        wal_path = database_path.with_name(database_path.name + "-wal")
+        assert wal_path.is_file() and wal_path.stat().st_size > 0
+
+        assert desktop_sidecar.main() == 0
+        second = json.loads(capsys.readouterr().out)
+        assert not wal_path.exists() or wal_path.stat().st_size == 0
+    finally:
+        writer.close()
     assert second["status"] == "upgraded"
     assert (data_root / "canonical" / "current-generation.json").read_bytes() == canonical_marker
     assert (data_root / "graph" / "current-generation.json").read_bytes() == graph_marker

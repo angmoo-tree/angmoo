@@ -181,6 +181,30 @@ def preflight_installer_embedded_data(
     )
 
 
+def checkpoint_installer_sqlite(database_path: Path) -> None:
+    """Quiesce a stopped installed runtime before byte-level attestation.
+
+    A headless or interrupted host can leave committed pages in SQLite's WAL.
+    Folding those pages into the main database changes its file hash without
+    changing logical data.  The installer owns an offline window, so it can
+    finish that checkpoint explicitly before reporting a successful upgrade.
+    """
+
+    try:
+        connection = sqlite3.connect(database_path.resolve(), timeout=5.0)
+        try:
+            connection.execute("PRAGMA busy_timeout = 5000")
+            row = connection.execute("PRAGMA wal_checkpoint(TRUNCATE)").fetchone()
+        finally:
+            connection.close()
+    except sqlite3.Error as exc:
+        raise InstallerUpdateContractError(
+            "installer_sqlite_checkpoint_failed"
+        ) from exc
+    if row is None or int(row[0]) != 0:
+        raise InstallerUpdateContractError("installer_sqlite_checkpoint_failed")
+
+
 def _require_compatible(
     current: int | None,
     allowed: DataVersionRange,
@@ -261,6 +285,7 @@ def _generation_marker(root: Path) -> int | None:
 
 
 __all__ = [
+    "checkpoint_installer_sqlite",
     "DataVersionRange",
     "InstallerCompatibilityResult",
     "InstallerPayloadContract",
