@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 1770,
-      "internal_edge_count": 1221,
+      "external_import_count": 1768,
+      "internal_edge_count": 1220,
       "legacy_import_exception_count": 0,
-      "module_count": 523,
+      "module_count": 522,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -320,15 +320,7 @@
           },
           {
             "imports": [
-              "app.domains.social.domain.observations",
-              "app.services.social_event_runtime"
-            ],
-            "module": "app.compatibility.manual_social.observation_unit_of_work",
-            "path": "backend/app/compatibility/manual_social/observation_unit_of_work.py"
-          },
-          {
-            "imports": [
-              "app.compatibility.manual_social.observation_unit_of_work",
+              "app.compatibility.manual_social.write_unit_of_work",
               "app.domains.social.public"
             ],
             "module": "app.compatibility.manual_social.observations",
@@ -339,6 +331,7 @@
               "app.core.ids",
               "app.core.unit_of_work",
               "app.domains.manual_social.infrastructure.sqlalchemy_models",
+              "app.domains.social.domain.observations",
               "app.domains.social.domain.writes",
               "app.domains.world_characters.public",
               "app.models",
@@ -846,7 +839,7 @@
     "parity_test_files": [
       {
         "path": "backend/tests/test_embedded_data_migration.py",
-        "sha256": "c2df438e92dfdb6d4cdb02e14e9c443298e560178f88125cb4a73e8a63ff4a55"
+        "sha256": "177ca516ddc80beda0621193730d294acc5c51c8de115867bc9e2bc1dbc3a6d8"
       },
       {
         "path": "backend/tests/test_feed_reaction_intent.py",
@@ -890,7 +883,7 @@
       },
       {
         "path": "backend/tests/test_social_event_runtime.py",
-        "sha256": "b286e16a1d53cece25a3f22047978b1b87f019ab9352725add2011b3acb0d331"
+        "sha256": "dff2c3b770ce37aab8ec8acddb0caf2f79c79b59aed2f168551a9067871c059a"
       },
       {
         "path": "backend/tests/test_t2_architecture_inventory.py",

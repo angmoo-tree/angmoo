@@ -23,6 +23,11 @@ from app.domains.manual_social.infrastructure.sqlalchemy_models import (
     OwnerManualInboxCandidate,
     OwnerManualSocialWrite,
 )
+from app.domains.social.domain.observations import (
+    SocialObservationCommand,
+    SocialObservationError,
+    SocialObservationResult,
+)
 from app.domains.social.domain.writes import (
     OwnerPostCommand,
     OwnerReplyCommand,
@@ -47,6 +52,7 @@ from app.schemas.community import PostCreate, TimelineReplyCreate
 from app.services import community as community_service
 
 FailureInjector = Callable[[str], None]
+OBSERVATION_GRAPH_PAYLOAD_VERSION = "relationship-observation-v1"
 
 
 class SqlAlchemySocialWriteUnitOfWork:
@@ -360,6 +366,382 @@ class SqlAlchemySocialWriteUnitOfWork:
     def _fail(self, stage: str) -> None:
         if self._failure_injector is not None:
             self._failure_injector(stage)
+
+
+class SqlAlchemySocialObservationUnitOfWork:
+    """Persist one observed source without depending on legacy service code.
+
+    This adapter deliberately shares the already-allowlisted transitional ORM
+    boundary with source writes.  The social domain and its application use
+    case remain storage-neutral, while the legacy ``app.services`` package is
+    no longer part of the observation dependency path.
+    """
+
+    def __init__(self, session: Session) -> None:
+        self._session = session
+
+    def observe(self, command: SocialObservationCommand) -> SocialObservationResult:
+        db = self._session
+        observer = _observation_world_character(
+            db,
+            world_id=command.world_id,
+            world_character_id=command.observer_world_character_id,
+            lock=True,
+        )
+        source_event = (
+            db.get(models.SocialEvent, command.source_social_event_id)
+            if command.source_social_event_id is not None
+            else None
+        )
+        if source_event is None and command.source_post_id is None:
+            raise SocialObservationError("source_reference_missing")
+        if source_event is None:
+            assert command.source_post_id is not None
+            source_event = _observation_source_event_for_post(
+                db,
+                world_id=command.world_id,
+                source_post_id=command.source_post_id,
+            )
+        if (
+            source_event.world_id != command.world_id
+            or source_event.result != "succeeded"
+            or source_event.retrieval_status == "excluded"
+        ):
+            raise SocialObservationError("source_social_event_ineligible")
+        if source_event.actor_world_character_id == observer.id:
+            raise SocialObservationError("self_observation_forbidden")
+
+        source_post = (
+            _observation_source_post_for_event(
+                db,
+                world_id=command.world_id,
+                source_event=source_event,
+            )
+            if command.source_post_id is None
+            else db.get(models.Post, command.source_post_id)
+        )
+        _validate_observation_source_post(source_post, world_id=command.world_id)
+        assert source_post is not None
+        evidence_matches = db.scalar(
+            select(models.SocialEventEvidence.id).where(
+                models.SocialEventEvidence.social_event_id == source_event.id,
+                or_(
+                    models.SocialEventEvidence.source_post_id == source_post.id,
+                    models.SocialEventEvidence.target_post_id == source_post.id,
+                    models.SocialEventEvidence.root_post_id == source_post.id,
+                    (
+                        (models.SocialEventEvidence.source_object_type == "post")
+                        & (
+                            models.SocialEventEvidence.source_object_id
+                            == source_post.id
+                        )
+                    ),
+                ),
+            )
+        )
+        if evidence_matches is None:
+            raise SocialObservationError("source_evidence_mismatch")
+
+        target = _observation_world_character(
+            db,
+            world_id=command.world_id,
+            world_character_id=source_event.actor_world_character_id,
+        )
+        if _blocked(
+            db,
+            world_id=command.world_id,
+            actor_id=observer.id,
+            target_id=target.id,
+        ):
+            raise SocialObservationError("world_character_blocked")
+        state = _observation_relationship_state(
+            db,
+            world_id=command.world_id,
+            actor_world_character_id=observer.id,
+            target_world_character_id=target.id,
+        )
+        existing = db.scalar(
+            select(models.RelationshipStateChange).where(
+                models.RelationshipStateChange.relationship_state_id == state.id,
+                models.RelationshipStateChange.social_event_id == source_event.id,
+            )
+        )
+        if existing is not None:
+            _enqueue_observation_outbox(
+                db,
+                source_event=source_event,
+                relationship_state=state,
+            )
+            db.flush()
+            return _observation_result(
+                command,
+                source_event=source_event,
+                state=state,
+                receipt=existing,
+                replayed=True,
+            )
+
+        before = _relationship_snapshot(state)
+        state.familiarity = _clamp_relationship(state.familiarity + 1, 0, 100)
+        state.interaction_count += 1
+        state.last_event_id = source_event.id
+        state.last_event_at = _aware_utc(command.observed_at)
+        state.version += 1
+        receipt = models.RelationshipStateChange(
+            id=uuid7_string(),
+            relationship_state_id=state.id,
+            social_event_id=source_event.id,
+            world_id=command.world_id,
+            actor_world_character_id=observer.id,
+            target_world_character_id=target.id,
+            valence="neutral",
+            intensity="low",
+            delta_familiarity=1,
+            delta_affinity=0,
+            delta_trust=0,
+            delta_tension=0,
+            before_snapshot=before,
+            after_snapshot=_relationship_snapshot(state),
+            applied=True,
+            not_applied_reason=None,
+        )
+        db.add(receipt)
+        _enqueue_observation_outbox(
+            db,
+            source_event=source_event,
+            relationship_state=state,
+        )
+        db.flush()
+        return _observation_result(
+            command,
+            source_event=source_event,
+            state=state,
+            receipt=receipt,
+            replayed=False,
+        )
+
+
+def _aware_utc(value: datetime) -> datetime:
+    if value.tzinfo is None:
+        return value.replace(tzinfo=UTC)
+    return value.astimezone(UTC)
+
+
+def _relationship_snapshot(state: models.RelationshipState) -> dict[str, int]:
+    return {
+        "familiarity": state.familiarity,
+        "affinity": state.affinity,
+        "trust": state.trust,
+        "tension": state.tension,
+        "interaction_count": state.interaction_count,
+        "version": state.version,
+    }
+
+
+def _clamp_relationship(value: int, minimum: int, maximum: int) -> int:
+    return max(minimum, min(maximum, value))
+
+
+def _observation_world_character(
+    db: Session,
+    *,
+    world_id: str,
+    world_character_id: str,
+    lock: bool = False,
+) -> models.WorldCharacter:
+    statement = select(models.WorldCharacter).where(
+        models.WorldCharacter.id == world_character_id
+    )
+    if lock:
+        statement = statement.with_for_update()
+    row = db.scalar(statement)
+    if row is None or row.world_id != world_id:
+        raise SocialObservationError("cross_world_reference")
+    if row.status != "active":
+        raise SocialObservationError("world_character_inactive")
+    membership = db.get(models.WorldMembership, row.membership_id)
+    if (
+        membership is None
+        or membership.world_id != world_id
+        or membership.status != "active"
+    ):
+        raise SocialObservationError("world_membership_inactive")
+    return row
+
+
+def _validate_observation_source_post(
+    post: models.Post | None, *, world_id: str
+) -> None:
+    if post is None or post.world_id != world_id:
+        raise SocialObservationError("evidence_post_world_mismatch")
+    if post.deleted_at is not None:
+        raise SocialObservationError("evidence_source_deleted")
+    if post.report_hidden_at is not None or post.visibility != "public":
+        raise SocialObservationError("evidence_source_hidden")
+
+
+def _observation_source_event_for_post(
+    db: Session,
+    *,
+    world_id: str,
+    source_post_id: str,
+) -> models.SocialEvent:
+    post = db.get(models.Post, source_post_id)
+    _validate_observation_source_post(post, world_id=world_id)
+    assert post is not None
+    if post.author_world_character_id is None:
+        raise SocialObservationError("source_world_character_missing")
+    event = db.scalar(
+        select(models.SocialEvent)
+        .join(
+            models.SocialEventEvidence,
+            models.SocialEventEvidence.social_event_id == models.SocialEvent.id,
+        )
+        .where(
+            models.SocialEvent.world_id == world_id,
+            models.SocialEvent.actor_world_character_id
+            == post.author_world_character_id,
+            models.SocialEvent.result == "succeeded",
+            models.SocialEventEvidence.source_post_id == post.id,
+        )
+        .order_by(models.SocialEvent.occurred_at.desc(), models.SocialEvent.id.desc())
+        .limit(1)
+    )
+    if event is None:
+        raise SocialObservationError("source_social_event_missing")
+    return event
+
+
+def _observation_source_post_for_event(
+    db: Session,
+    *,
+    world_id: str,
+    source_event: models.SocialEvent,
+) -> models.Post:
+    evidence = db.scalar(
+        select(models.SocialEventEvidence)
+        .where(models.SocialEventEvidence.social_event_id == source_event.id)
+        .order_by(models.SocialEventEvidence.created_at, models.SocialEventEvidence.id)
+        .limit(1)
+    )
+    if evidence is None:
+        raise SocialObservationError("source_evidence_missing")
+    candidates = (
+        evidence.source_post_id,
+        evidence.target_post_id,
+        evidence.root_post_id,
+        evidence.source_object_id if evidence.source_object_type == "post" else None,
+    )
+    for post_id in candidates:
+        if post_id is None:
+            continue
+        post = db.get(models.Post, post_id)
+        try:
+            _validate_observation_source_post(post, world_id=world_id)
+        except SocialObservationError:
+            continue
+        assert post is not None
+        return post
+    raise SocialObservationError("source_post_missing")
+
+
+def _observation_relationship_state(
+    db: Session,
+    *,
+    world_id: str,
+    actor_world_character_id: str,
+    target_world_character_id: str,
+) -> models.RelationshipState:
+    state = db.scalar(
+        select(models.RelationshipState)
+        .where(
+            models.RelationshipState.world_id == world_id,
+            models.RelationshipState.actor_world_character_id
+            == actor_world_character_id,
+            models.RelationshipState.target_world_character_id
+            == target_world_character_id,
+        )
+        .with_for_update()
+    )
+    if state is None:
+        state = models.RelationshipState(
+            id=uuid7_string(),
+            world_id=world_id,
+            actor_world_character_id=actor_world_character_id,
+            target_world_character_id=target_world_character_id,
+            familiarity=0,
+            affinity=0,
+            trust=0,
+            tension=0,
+            interaction_count=0,
+            version=1,
+        )
+        db.add(state)
+        db.flush()
+    return state
+
+
+def _enqueue_observation_outbox(
+    db: Session,
+    *,
+    source_event: models.SocialEvent,
+    relationship_state: models.RelationshipState,
+) -> models.GraphProjectionOutbox:
+    """Project observer direction while preserving source-event direction."""
+
+    payload: dict[str, object] = {
+        "world_id": source_event.world_id,
+        "source_event_id": source_event.id,
+        "actor_world_character_id": relationship_state.actor_world_character_id,
+        "target_world_character_id": relationship_state.target_world_character_id,
+        "relationship_state_id": relationship_state.id,
+    }
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    signature = sha256(canonical.encode("utf-8")).hexdigest()
+    dedupe_key = sha256(
+        (
+            f"relationship_state|{source_event.id}|"
+            f"{OBSERVATION_GRAPH_PAYLOAD_VERSION}|{relationship_state.id}"
+        ).encode("utf-8")
+    ).hexdigest()
+    existing = db.scalar(
+        select(models.GraphProjectionOutbox).where(
+            models.GraphProjectionOutbox.dedupe_key == dedupe_key
+        )
+    )
+    if existing is not None:
+        return existing
+    row = models.GraphProjectionOutbox(
+        id=uuid7_string(),
+        world_id=source_event.world_id,
+        source_event_id=source_event.id,
+        projection_type="relationship_state",
+        payload_version=OBSERVATION_GRAPH_PAYLOAD_VERSION,
+        payload=payload,
+        source_signature=signature,
+        dedupe_key=dedupe_key,
+        status="pending",
+        attempt_count=0,
+    )
+    db.add(row)
+    return row
+
+
+def _observation_result(
+    command: SocialObservationCommand,
+    *,
+    source_event: models.SocialEvent,
+    state: models.RelationshipState,
+    receipt: models.RelationshipStateChange,
+    replayed: bool,
+) -> SocialObservationResult:
+    return SocialObservationResult(
+        source_social_event_id=source_event.id,
+        receipt_id=receipt.id,
+        relationship_state_id=state.id,
+        replayed=replayed,
+        lane=command.lane,
+    )
 
 
 def _owner_actor(
@@ -682,4 +1064,7 @@ def _result(
     )
 
 
-__all__ = ["SqlAlchemySocialWriteUnitOfWork"]
+__all__ = [
+    "SqlAlchemySocialObservationUnitOfWork",
+    "SqlAlchemySocialWriteUnitOfWork",
+]

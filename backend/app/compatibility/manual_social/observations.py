@@ -11,7 +11,7 @@ from datetime import datetime
 
 from sqlalchemy.orm import Session
 
-from app.compatibility.manual_social.observation_unit_of_work import (
+from app.compatibility.manual_social.write_unit_of_work import (
     SqlAlchemySocialObservationUnitOfWork,
 )
 from app.domains.social.public import (

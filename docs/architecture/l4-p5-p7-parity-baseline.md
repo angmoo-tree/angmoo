@@ -97,8 +97,8 @@ The frontend social model maps pending, observation failure, observed
 `NO_ACTION`, follow-up failure and follow-up success into explicit product copy
 without inferring a character's private feelings.
 
-The reviewed PR D inventory delta is 523 Python modules, 1,221 internal edges,
-1,770 per-module external imports, 21 selected legacy-horizontal modules, 40
+The reviewed PR D inventory delta is 522 Python modules, 1,220 internal edges,
+1,768 per-module external imports, 20 selected legacy-horizontal modules, 40
 selected canonical-boundary modules, 33 frontend consumer edges, seven feature
 public surfaces, five shared public surfaces and 92 focused parity nodes. There
 are no architecture-policy legacy exceptions and no package cycles.

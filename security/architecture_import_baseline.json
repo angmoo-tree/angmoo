@@ -1,7 +1,7 @@
 {
-  "edge_count": 1221,
-  "external_import_count": 1770,
-  "module_count": 523,
+  "edge_count": 1220,
+  "external_import_count": 1768,
+  "module_count": 522,
   "modules": [
     {
       "external_imports": [],
@@ -1303,24 +1303,11 @@
     {
       "external_imports": [
         "__future__",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.domains.social.domain.observations",
-        "app.services.social_event_runtime"
-      ],
-      "module": "app.compatibility.manual_social.observation_unit_of_work",
-      "path": "backend/app/compatibility/manual_social/observation_unit_of_work.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
         "datetime",
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.compatibility.manual_social.observation_unit_of_work",
+        "app.compatibility.manual_social.write_unit_of_work",
         "app.domains.social.public"
       ],
       "module": "app.compatibility.manual_social.observations",
@@ -1341,6 +1328,7 @@
         "app.core.ids",
         "app.core.unit_of_work",
         "app.domains.manual_social.infrastructure.sqlalchemy_models",
+        "app.domains.social.domain.observations",
         "app.domains.social.domain.writes",
         "app.domains.world_characters.public",
         "app.models",

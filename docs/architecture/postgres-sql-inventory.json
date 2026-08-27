@@ -261,6 +261,19 @@
     },
     {
       "markers": {
+        "row_lock": [
+          556,
+          664
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/compatibility/manual_social/write_unit_of_work.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "c569e97abc57d9513dbfe2816665d073e02d96b8be4bb3b1290d4a55bc821f3c",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
         "driver_or_url": [
           42
         ]
@@ -908,15 +921,15 @@
     {
       "markers": {
         "row_lock": [
-          207,
-          325,
-          790
+          198,
+          316,
+          531
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/social_event_runtime.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "1f09eb8927a2e188c503eca10f3cf15c248db252e2bb095522820f9025a33350",
+      "source_sha256": "e5f3281b7ad8d012d16d4ac852e84c6cefa8c34bda4bcad00d5717fd721d671d",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1005,13 +1018,13 @@
       "transition_pr": "ER7 PR P"
     }
   ],
-  "entry_count": 64,
+  "entry_count": 65,
   "marker_counts": {
     "advisory_lock": 8,
     "driver_or_url": 41,
     "jsonb": 8,
     "pgvector": 4,
-    "row_lock": 23,
+    "row_lock": 24,
     "skip_locked": 7
   },
   "purpose": "Residual PostgreSQL markers retained only as historical schema evidence, serialized compatibility values, and negative reintroduction guards",

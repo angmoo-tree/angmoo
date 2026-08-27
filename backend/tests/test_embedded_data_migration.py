@@ -11,6 +11,7 @@ from sqlalchemy import URL, create_engine, select
 from sqlalchemy.orm import Session
 
 from app import models
+from app.compatibility.manual_social.observations import observe_source
 from app.domains.worlds.domain.reserved_roles import (
     NO_SPECIFIC_ROLE_DESCRIPTION,
     NO_SPECIFIC_ROLE_NAME,
@@ -38,7 +39,6 @@ from app.runtime.persistence.sqlite_schema import (
     create_schema_version_table,
     sqlite_schema_digest,
 )
-from app.services import social_event_runtime
 from p7_graph_support import seed_projection_fixture
 
 
@@ -867,12 +867,13 @@ def test_graph_rebuild_replays_direction_evidence_and_world_scope(
     )
     with Session(engine, expire_on_commit=False) as db:
         fixture = seed_projection_fixture(db, suffix="embedded-upgrade")
-        observed = social_event_runtime.record_social_event_observation(
+        observed = observe_source(
             db,
             world_id=fixture.world.id,
             observer_world_character_id=fixture.target_world_character.id,
             source_social_event_id=fixture.event.id,
             source_post_id=fixture.reply_post.id,
+            lane="routine",
             observed_at=datetime(2026, 8, 12, 1, 5, tzinfo=UTC),
         )
         db.commit()
@@ -880,7 +881,7 @@ def test_graph_rebuild_replays_direction_evidence_and_world_scope(
         actor_id = fixture.actor_world_character.id
         target_id = fixture.target_world_character.id
         event_id = fixture.event.id
-        observation_relationship_id = observed.relationship_state.id
+        observation_relationship_id = observed.relationship_state_id
     previous_graph = initial.graph.database_root / "relationships.lbdb"
     previous_sha = _sha256(previous_graph)
     monkeypatch.setattr(

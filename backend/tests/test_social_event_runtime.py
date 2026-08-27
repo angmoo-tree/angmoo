@@ -272,28 +272,37 @@ def test_observation_is_directional_idempotent_and_independent_from_follow_up() 
         assert db.scalar(select(func.count(models.RelationshipState.id))) == 0
         assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 0
 
-        observed = social_event_runtime.record_social_event_observation(
+        observed = observe_source(
             db,
             world_id=fixture.world.id,
             observer_world_character_id=fixture.target_world_character.id,
             source_social_event_id=source_event.id,
             source_post_id=reply.id,
+            lane="routine",
             observed_at=occurred_at + timedelta(minutes=1),
         )
         db.commit()
 
-        assert observed.reused is False
-        assert observed.relationship_state.actor_world_character_id == (
+        relationship_state = db.get(
+            models.RelationshipState, observed.relationship_state_id
+        )
+        relationship_change = db.get(
+            models.RelationshipStateChange, observed.receipt_id
+        )
+        assert relationship_state is not None
+        assert relationship_change is not None
+        assert observed.replayed is False
+        assert relationship_state.actor_world_character_id == (
             fixture.target_world_character.id
         )
-        assert observed.relationship_state.target_world_character_id == (
+        assert relationship_state.target_world_character_id == (
             fixture.actor_world_character.id
         )
-        assert observed.relationship_state.familiarity == 1
-        assert observed.relationship_state.affinity == 0
-        assert observed.relationship_state.trust == 0
-        assert observed.relationship_state.tension == 0
-        assert observed.relationship_change.delta_familiarity == 1
+        assert relationship_state.familiarity == 1
+        assert relationship_state.affinity == 0
+        assert relationship_state.trust == 0
+        assert relationship_state.tension == 0
+        assert relationship_change.delta_familiarity == 1
 
         # Routine, Inbox, and Feed all enter the same production application
         # contract and converge on the already committed canonical receipt.
@@ -317,7 +326,7 @@ def test_observation_is_directional_idempotent_and_independent_from_follow_up() 
         ]
         assert all(replay.replayed for replay in lane_replays)
         assert {replay.receipt_id for replay in lane_replays} == {
-            observed.relationship_change.id
+            observed.receipt_id
         }
         assert db.scalar(select(func.count(models.RelationshipStateChange.id))) == 1
         assert db.scalar(select(func.count(models.SocialEvent.id))) == 1
@@ -353,7 +362,7 @@ def test_observation_is_directional_idempotent_and_independent_from_follow_up() 
             except RuntimeError:
                 db.rollback()
                 raise
-        assert db.get(models.RelationshipStateChange, observed.relationship_change.id)
+        assert db.get(models.RelationshipStateChange, observed.receipt_id)
         assert db.scalar(select(func.count(models.SocialEvent.id))) == 1
 
 
