@@ -1,8 +1,5 @@
 import type { WorldSurfaceItem } from "@/features/device-home/public";
-import {
-  RuntimeFetchError,
-  runtimeFetch,
-} from "@/shared/runtime/public";
+import { runtimeFetch } from "@/shared/runtime/public";
 
 
 export type LocalWorldAppRead = {
@@ -28,39 +25,6 @@ export type OwnerControlledActorRead = {
     preferred_address: string;
     interests: string[];
     background: string;
-  };
-};
-
-export type ManualSocialPostRead = {
-  id: string;
-  world_id: string;
-  author_world_character_id: string;
-  author_name: string;
-  title: string;
-  body: string;
-  post_type: string;
-  reply_to_post_id: string | null;
-  created_at: string;
-  can_owner_reply: boolean;
-};
-
-export type ManualSocialFeedRead = {
-  schema_version: "owner-manual-social-v1";
-  world_id: string;
-  owner_world_character_id: string;
-  items: ManualSocialPostRead[];
-};
-
-export type ManualSocialWriteRead = {
-  schema_version: "owner-manual-social-v1";
-  operation: "post" | "reply";
-  replayed: boolean;
-  post: ManualSocialPostRead;
-  delivery: {
-    provider_call_count: 0;
-    inbox_candidate_id: string | null;
-    inbox_status: "not_applicable" | "pending";
-    public_reaction_required: false;
   };
 };
 
@@ -158,121 +122,4 @@ export async function getOwnerControlledActor(
     throw new WorldAppApiError(502, "owner_actor_schema_mismatch");
   }
   return payload as OwnerControlledActorRead;
-}
-
-function detailFromPayload(payload: unknown, status: number): string {
-  return typeof payload === "object" &&
-    payload !== null &&
-    "detail" in payload &&
-    typeof payload.detail === "string"
-    ? payload.detail
-    : `http_${status}`;
-}
-
-async function manualSocialRequest<T>(
-  path: string,
-  options: RequestInit = {},
-): Promise<T> {
-  let response: Response;
-  try {
-    response = await runtimeFetch(path, {
-      cache: "no-store",
-      credentials: "same-origin",
-      ...options,
-      headers: {
-        Accept: "application/json",
-        ...options.headers,
-      },
-    });
-  } catch (reason) {
-    if (reason instanceof RuntimeFetchError) {
-      throw new WorldAppApiError(503, reason.code);
-    }
-    throw reason;
-  }
-  const payload = (await response.json().catch(() => null)) as unknown;
-  if (!response.ok) {
-    const detail = detailFromPayload(payload, response.status);
-    throw new WorldAppApiError(
-      response.status,
-      detail === "desktop_token_invalid" ? "launcher_token_invalid" : detail,
-    );
-  }
-  if (
-    typeof payload !== "object" ||
-    payload === null ||
-    !("schema_version" in payload) ||
-    payload.schema_version !== "owner-manual-social-v1"
-  ) {
-    throw new WorldAppApiError(502, "manual_social_schema_mismatch");
-  }
-  return payload as T;
-}
-
-export function getManualSocialFeed(
-  worldId: string,
-  options: { signal?: AbortSignal } = {},
-): Promise<ManualSocialFeedRead> {
-  return manualSocialRequest<ManualSocialFeedRead>(
-    `/api/backend/worlds/${encodeURIComponent(worldId)}/manual-social/feed`,
-    { signal: options.signal },
-  );
-}
-
-export async function getManualSocialPostThread(
-  worldId: string,
-  postId: string,
-  options: { signal?: AbortSignal } = {},
-): Promise<ManualSocialFeedRead> {
-  const result = await manualSocialRequest<ManualSocialFeedRead>(
-    `/api/backend/worlds/${encodeURIComponent(worldId)}/manual-social/posts/${encodeURIComponent(postId)}`,
-    { signal: options.signal },
-  );
-  if (
-    result.world_id !== worldId ||
-    result.items.length === 0 ||
-    result.items[0]?.id !== postId ||
-    result.items[0]?.reply_to_post_id !== null ||
-    result.items.some((item) => item.world_id !== worldId)
-  ) {
-    throw new WorldAppApiError(502, "manual_social_thread_scope_mismatch");
-  }
-  return result;
-}
-
-export function createOwnerManualPost(
-  worldId: string,
-  data: { title: string; body: string },
-  idempotencyKey: string,
-): Promise<ManualSocialWriteRead> {
-  return manualSocialRequest<ManualSocialWriteRead>(
-    `/api/backend/worlds/${encodeURIComponent(worldId)}/manual-social/posts`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Idempotency-Key": idempotencyKey,
-      },
-      body: JSON.stringify(data),
-    },
-  );
-}
-
-export function createOwnerManualReply(
-  worldId: string,
-  postId: string,
-  body: string,
-  idempotencyKey: string,
-): Promise<ManualSocialWriteRead> {
-  return manualSocialRequest<ManualSocialWriteRead>(
-    `/api/backend/worlds/${encodeURIComponent(worldId)}/manual-social/posts/${encodeURIComponent(postId)}/replies`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Idempotency-Key": idempotencyKey,
-      },
-      body: JSON.stringify({ body }),
-    },
-  );
 }

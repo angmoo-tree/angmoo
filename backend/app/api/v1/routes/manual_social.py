@@ -8,6 +8,9 @@ from sqlalchemy.orm import Session
 from app.api.v1.deps import get_current_user
 from app.core import browser_session
 from app.core.db import get_db
+from app.compatibility.manual_social.write_unit_of_work import (
+    SqlAlchemySocialWriteUnitOfWork,
+)
 from app.domains.manual_social.api.schemas import (
     ManualSocialFeedRead,
     ManualSocialWriteRead,
@@ -15,32 +18,40 @@ from app.domains.manual_social.api.schemas import (
     OwnerManualReplyWrite,
 )
 from app.domains.manual_social.public import (
-    ManualSocialConflictError,
-    ManualSocialError,
-    ManualSocialForbiddenError,
-    ManualSocialNotFoundError,
-    create_owner_post,
-    create_owner_reply,
     get_owner_world_post_thread,
     list_owner_world_feed,
+)
+from app.domains.social.public import (
+    OwnerPostCommand,
+    OwnerReplyCommand,
+    SocialWriteConflictError,
+    SocialWriteError,
+    SocialWriteForbiddenError,
+    SocialWriteNotFoundError,
+    SocialWriteRetryableError,
+    create_owner_post,
+    create_owner_reply,
 )
 from app.domains.world_characters.public import (
     OwnerControlledIdentityError,
 )
 
-
 router = APIRouter(prefix="/worlds", tags=["manual-social"])
-IdempotencyKey = Annotated[str, Header(alias="Idempotency-Key", min_length=8, max_length=128)]
+IdempotencyKey = Annotated[
+    str, Header(alias="Idempotency-Key", min_length=8, max_length=128)
+]
 
 
 def _raise_error(exc: Exception) -> None:
     reason = getattr(exc, "reason_code", "manual_social_error")
-    if isinstance(exc, ManualSocialNotFoundError):
+    if isinstance(exc, SocialWriteNotFoundError):
         code = status.HTTP_404_NOT_FOUND
-    elif isinstance(exc, (ManualSocialForbiddenError, OwnerControlledIdentityError)):
+    elif isinstance(exc, (SocialWriteForbiddenError, OwnerControlledIdentityError)):
         code = status.HTTP_403_FORBIDDEN
-    elif isinstance(exc, ManualSocialConflictError):
+    elif isinstance(exc, SocialWriteConflictError):
         code = status.HTTP_409_CONFLICT
+    elif isinstance(exc, SocialWriteRetryableError):
+        code = status.HTTP_503_SERVICE_UNAVAILABLE
     else:
         code = status.HTTP_400_BAD_REQUEST
     raise HTTPException(status_code=code, detail=reason) from exc
@@ -61,7 +72,7 @@ def read_manual_social_feed(
         return list_owner_world_feed(
             db, world_id=world_id, current_user_id=current_user.id
         )
-    except (ManualSocialError, OwnerControlledIdentityError) as exc:
+    except (SocialWriteError, OwnerControlledIdentityError) as exc:
         _raise_error(exc)
         raise AssertionError("unreachable")
 
@@ -85,7 +96,7 @@ def read_manual_social_post_thread(
             post_id=post_id,
             current_user_id=current_user.id,
         )
-    except (ManualSocialError, OwnerControlledIdentityError) as exc:
+    except (SocialWriteError, OwnerControlledIdentityError) as exc:
         _raise_error(exc)
         raise AssertionError("unreachable")
 
@@ -106,13 +117,16 @@ def write_owner_post(
     browser_session.require_local_frontend_request(request, mutation=True)
     try:
         return create_owner_post(
-            db,
-            world_id=world_id,
-            current_user=current_user,
-            idempotency_key=idempotency_key.strip(),
-            data=data,
+            SqlAlchemySocialWriteUnitOfWork(db),
+            OwnerPostCommand(
+                world_id=world_id,
+                current_user_id=str(current_user.id),
+                idempotency_key=idempotency_key.strip(),
+                title=data.title,
+                body=data.body,
+            ),
         )
-    except (ManualSocialError, OwnerControlledIdentityError) as exc:
+    except (SocialWriteError, OwnerControlledIdentityError) as exc:
         _raise_error(exc)
         raise AssertionError("unreachable")
 
@@ -134,14 +148,16 @@ def write_owner_reply(
     browser_session.require_local_frontend_request(request, mutation=True)
     try:
         return create_owner_reply(
-            db,
-            world_id=world_id,
-            target_post_id=post_id,
-            current_user=current_user,
-            idempotency_key=idempotency_key.strip(),
-            data=data,
+            SqlAlchemySocialWriteUnitOfWork(db),
+            OwnerReplyCommand(
+                world_id=world_id,
+                target_post_id=post_id,
+                current_user_id=str(current_user.id),
+                idempotency_key=idempotency_key.strip(),
+                body=data.body,
+            ),
         )
-    except (ManualSocialError, OwnerControlledIdentityError) as exc:
+    except (SocialWriteError, OwnerControlledIdentityError) as exc:
         _raise_error(exc)
         raise AssertionError("unreachable")
 

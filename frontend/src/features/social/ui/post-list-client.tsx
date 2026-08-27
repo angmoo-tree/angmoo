@@ -45,18 +45,20 @@ import {
   type UserRead,
 } from "@/lib/agents";
 import {
-  deletePost,
-  formatDate,
-  listCharacterFollowingFeed,
-  listFeed,
-  listFollowingFeed,
-  reportPost,
-  type FeedContentFilter,
-  type FeedPage,
-  type PostReference,
-  type PostReportReason,
-  type PostSummary,
-} from "@/lib/community";
+  deleteSocialPost,
+  formatSocialDate,
+  listCharacterFollowingSocialFeed,
+  listFollowingSocialFeed,
+  listSocialFeed,
+  reportSocialPost,
+} from "../api/social-feed-client";
+import type {
+  FeedContentFilter,
+  FeedPage,
+  PostReference,
+  PostReportReason,
+  PostSummary,
+} from "../model/social-feed-contract";
 import {
   shouldOpenPostFromCardClick,
   shouldOpenPostFromCardKeyDown,
@@ -200,7 +202,7 @@ export function PostListClient({
     ) => {
       if (mode === "character-following") {
         return selectedAgentId
-          ? listCharacterFollowingFeed(selectedAgentId, {
+          ? listCharacterFollowingSocialFeed(selectedAgentId, {
               limit: 10,
               cursor,
               content,
@@ -208,9 +210,9 @@ export function PostListClient({
           : { items: [], next_cursor: null };
       }
       if (mode === "user-following") {
-        return listFollowingFeed({ limit: 10, cursor, content });
+        return listFollowingSocialFeed({ limit: 10, cursor, content });
       }
-      return listFeed({ limit: 10, cursor, content });
+      return listSocialFeed({ limit: 10, cursor, content });
     },
     [feedContentFilter, selectedAgentId],
   );
@@ -366,7 +368,7 @@ export function PostListClient({
     setReportPending(true);
     setReportError(null);
     try {
-      const result = await reportPost(reportTarget.id, {
+      const result = await reportSocialPost(reportTarget.id, {
         reason: reportReason,
         details: reportDetails.trim() || undefined,
       });
@@ -389,7 +391,7 @@ export function PostListClient({
     setDeletePending(true);
     setDeleteError(null);
     try {
-      await deletePost(deleteTarget.id);
+      await deleteSocialPost(deleteTarget.id);
       setPosts((current) => current.filter((post) => post.id !== deleteTarget.id));
       setDeleteTarget(null);
     } catch (err) {
@@ -580,7 +582,7 @@ export function PostListClient({
                         </span>
                       ) : null}
                       <span className="font-medium text-[#667085]">·</span>
-                      <span className="font-medium text-[#667085]">{formatDate(post.created_at)}</span>
+                      <span className="font-medium text-[#667085]">{formatSocialDate(post.created_at)}</span>
                     </div>
                   </Link>
 
@@ -1256,7 +1258,7 @@ function PostReferenceCard({
         <span className="text-[#101828]">{post.author_name}</span>
         {post.author_handle ? <span>{formatHandle(post.author_handle)}</span> : null}
         <span>·</span>
-        <span>{formatDate(post.created_at)}</span>
+        <span>{formatSocialDate(post.created_at)}</span>
       </div>
       <p className="line-clamp-3 break-words text-[15px] leading-6 text-[#475467]">
         <span className="font-extrabold text-[#101828]">

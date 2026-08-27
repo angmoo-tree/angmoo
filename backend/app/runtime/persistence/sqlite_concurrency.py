@@ -2,17 +2,17 @@
 
 from __future__ import annotations
 
+import sqlite3
+import time
 from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass
-import sqlite3
 from threading import BoundedSemaphore
-import time
 from typing import TypeVar
 
 from sqlalchemy import Connection, Engine
 from sqlalchemy.exc import OperationalError
-
+from sqlalchemy.orm import Session
 
 T = TypeVar("T")
 
@@ -96,10 +96,98 @@ def run_sqlite_immediate(
         if sleep_for <= 0:
             break
         sleep(sleep_for)
-        delay = min(max(delay * 2, policy.initial_delay_seconds), policy.maximum_delay_seconds)
+        delay = min(
+            max(delay * 2, policy.initial_delay_seconds), policy.maximum_delay_seconds
+        )
     raise SqliteBusyRetryExhausted(
         f"SQLite writer remained busy after {policy.max_attempts} bounded attempts"
     ) from last_error
+
+
+def run_sqlite_session_immediate(
+    session: Session,
+    operation: Callable[[], T],
+    *,
+    retry_policy: SqliteRetryPolicy | None = None,
+    sleep: Callable[[float], None] = time.sleep,
+    monotonic: Callable[[], float] = time.monotonic,
+) -> T:
+    """Run a caller-owned ``Session`` as one bounded SQLite writer UoW.
+
+    FastAPI owns the session lifetime, while the social application owns the
+    commit boundary.  Any dependency reads are closed before ``BEGIN
+    IMMEDIATE`` so validation, source rows, evidence, Inbox delivery and the
+    idempotency ledger all observe one writer snapshot and commit together.
+
+    The connection-wide busy timeout is temporarily bounded per attempt and
+    restored before the connection returns to the pool.  This prevents the
+    default five-second SQLite timeout from hiding the typed retry contract.
+    """
+
+    bind = session.get_bind()
+    if bind.dialect.name != "sqlite":
+        raise SqliteConcurrencyError("SQLite writer received a non-SQLite session")
+    policy = retry_policy or SqliteRetryPolicy()
+    started = monotonic()
+    delay = policy.initial_delay_seconds
+    last_error: BaseException | None = None
+    timeout_ms = max(1, int(policy.maximum_elapsed_seconds * 1000))
+
+    for attempt in range(1, policy.max_attempts + 1):
+        session.rollback()
+        connection = session.connection()
+        driver_connection = connection.connection.driver_connection
+        cursor = driver_connection.cursor()
+        try:
+            cursor.execute("PRAGMA busy_timeout")
+            previous_timeout_ms = int(cursor.fetchone()[0])
+            cursor.execute(f"PRAGMA busy_timeout = {timeout_ms}")
+        finally:
+            cursor.close()
+        try:
+            connection.exec_driver_sql("BEGIN IMMEDIATE")
+            result = operation()
+            session.commit()
+            return result
+        except OperationalError as exc:
+            session.rollback()
+            if not _is_busy_error(exc):
+                raise
+            last_error = exc
+        except sqlite3.OperationalError as exc:
+            session.rollback()
+            if not _is_busy_error(exc):
+                raise
+            last_error = exc
+        except BaseException:
+            session.rollback()
+            raise
+        finally:
+            _set_busy_timeout(driver_connection, previous_timeout_ms)
+
+        elapsed = monotonic() - started
+        if attempt >= policy.max_attempts or elapsed >= policy.maximum_elapsed_seconds:
+            break
+        remaining = policy.maximum_elapsed_seconds - elapsed
+        sleep_for = min(delay, max(0.0, remaining))
+        if sleep_for <= 0:
+            break
+        sleep(sleep_for)
+        delay = min(
+            max(delay * 2, policy.initial_delay_seconds), policy.maximum_delay_seconds
+        )
+
+    raise SqliteBusyRetryExhausted(
+        f"SQLite session writer remained busy after {policy.max_attempts} bounded attempts"
+    ) from last_error
+
+
+def _set_busy_timeout(driver_connection: object, timeout_ms: int) -> None:
+    cursor = driver_connection.cursor()
+    try:
+        cursor.execute(f"PRAGMA busy_timeout = {max(0, timeout_ms)}")
+    finally:
+        cursor.close()
 
 
 class SqliteBoundedTaskQueue:
@@ -164,4 +252,5 @@ __all__ = [
     "SqliteRetryPolicy",
     "SqliteTaskQueueFull",
     "run_sqlite_immediate",
+    "run_sqlite_session_immediate",
 ]

@@ -1,7 +1,7 @@
 {
-  "edge_count": 1194,
-  "external_import_count": 1746,
-  "module_count": 514,
+  "edge_count": 1207,
+  "external_import_count": 1758,
+  "module_count": 518,
   "modules": [
     {
       "external_imports": [],
@@ -1002,6 +1002,7 @@
         "app.api.v1.routes.bot",
         "app.api.v1.routes.character_lore",
         "app.api.v1.routes.community",
+        "app.api.v1.routes.manual_social",
         "app.api.v1.routes.messages",
         "app.api.v1.routes.runtime_status",
         "app.api.v1.routes.tree",
@@ -1010,7 +1011,6 @@
         "app.api.v1.routes.worlds",
         "app.domains.device_home.public",
         "app.domains.identity.api.local_routes",
-        "app.domains.manual_social.api.routes",
         "app.domains.world_characters.api.routes",
         "app.domains.world_packages.api.routes"
       ],
@@ -1128,6 +1128,27 @@
       ],
       "module": "app.api.v1.routes.community",
       "path": "backend/app/api/v1/routes/community.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "fastapi",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.api.v1.deps",
+        "app.compatibility.manual_social.write_unit_of_work",
+        "app.core.browser_session",
+        "app.core.db",
+        "app.domains.manual_social.api.schemas",
+        "app.domains.manual_social.public",
+        "app.domains.social.public",
+        "app.domains.world_characters.public"
+      ],
+      "module": "app.api.v1.routes.manual_social",
+      "path": "backend/app/api/v1/routes/manual_social.py",
       "wildcard_imports": []
     },
     {
@@ -1266,25 +1287,42 @@
     {
       "external_imports": [
         "__future__",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.manual_social.api.schemas",
+        "app.domains.social.domain",
+        "app.domains.world_characters.public",
+        "app.models"
+      ],
+      "module": "app.compatibility.manual_social.legacy",
+      "path": "backend/app/compatibility/manual_social/legacy.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
         "datetime",
         "hashlib",
         "json",
         "sqlalchemy",
-        "sqlalchemy.exc",
         "sqlalchemy.orm"
       ],
       "imports": [
         "app.core.ids",
         "app.core.unit_of_work",
-        "app.domains.manual_social.api.schemas",
         "app.domains.manual_social.infrastructure.sqlalchemy_models",
+        "app.domains.social.domain.writes",
         "app.domains.world_characters.public",
         "app.models",
+        "app.runtime.persistence.sqlite_concurrency",
         "app.schemas.community",
         "app.services.community"
       ],
-      "module": "app.compatibility.manual_social.legacy",
-      "path": "backend/app/compatibility/manual_social/legacy.py",
+      "module": "app.compatibility.manual_social.write_unit_of_work",
+      "path": "backend/app/compatibility/manual_social/write_unit_of_work.py",
       "wildcard_imports": []
     },
     {
@@ -2198,25 +2236,6 @@
     {
       "external_imports": [
         "__future__",
-        "fastapi",
-        "sqlalchemy.orm",
-        "typing"
-      ],
-      "imports": [
-        "app.api.v1.deps",
-        "app.core.browser_session",
-        "app.core.db",
-        "app.domains.manual_social.api.schemas",
-        "app.domains.manual_social.public",
-        "app.domains.world_characters.public"
-      ],
-      "module": "app.domains.manual_social.api.routes",
-      "path": "backend/app/domains/manual_social/api/routes.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
         "datetime",
         "pydantic",
         "typing"
@@ -3123,7 +3142,8 @@
       "external_imports": [],
       "imports": [
         "app.domains.social.application.keyword_feed",
-        "app.domains.social.application.search_runtime"
+        "app.domains.social.application.search_runtime",
+        "app.domains.social.application.writes"
       ],
       "module": "app.domains.social.application",
       "path": "backend/app/domains/social/application/__init__.py",
@@ -3157,9 +3177,22 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__"
+      ],
+      "imports": [
+        "app.domains.social.domain.writes",
+        "app.domains.social.ports.write_unit_of_work"
+      ],
+      "module": "app.domains.social.application.writes",
+      "path": "backend/app/domains/social/application/writes.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
-        "app.domains.social.domain.search_state"
+        "app.domains.social.domain.search_state",
+        "app.domains.social.domain.writes"
       ],
       "module": "app.domains.social.domain",
       "path": "backend/app/domains/social/domain/__init__.py",
@@ -3176,9 +3209,22 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.social.domain.writes",
+      "path": "backend/app/domains/social/domain/writes.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
-        "app.domains.social.ports.search_index"
+        "app.domains.social.ports.search_index",
+        "app.domains.social.ports.write_unit_of_work"
       ],
       "module": "app.domains.social.ports",
       "path": "backend/app/domains/social/ports/__init__.py",
@@ -3197,7 +3243,21 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [],
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.social.domain.writes"
+      ],
+      "module": "app.domains.social.ports.write_unit_of_work",
+      "path": "backend/app/domains/social/ports/write_unit_of_work.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__"
+      ],
       "imports": [
         "app.domains.social.application",
         "app.domains.social.domain",
@@ -5493,6 +5553,7 @@
         "dataclasses",
         "sqlalchemy",
         "sqlalchemy.exc",
+        "sqlalchemy.orm",
         "sqlite3",
         "threading",
         "time",

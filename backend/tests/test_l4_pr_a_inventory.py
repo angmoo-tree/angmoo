@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import importlib.util
 import json
-from pathlib import Path
 import sys
-
+from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 GENERATOR_PATH = REPO_ROOT / "scripts/ci/generate_l4_pr_a_inventory.py"
-SPEC = importlib.util.spec_from_file_location("angmoo_l4_pr_a_inventory", GENERATOR_PATH)
+SPEC = importlib.util.spec_from_file_location(
+    "angmoo_l4_pr_a_inventory", GENERATOR_PATH
+)
 assert SPEC is not None and SPEC.loader is not None
 generator = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = generator
@@ -24,9 +25,7 @@ def test_l4_pr_a_inventory_is_deterministic_and_current() -> None:
     assert generator.DEFAULT_OUTPUT.read_text(encoding="utf-8") == first
     assert payload["schema_version"] == 1
     assert payload["policy_id"] == "angmoo-l4-pr-a-p5-p7-inventory-v1"
-    assert payload["baseline_commit"] == (
-        "0917bfa6bbb14c4b15a4a26d1f221817bd4e52e1"
-    )
+    assert payload["baseline_commit"] == ("0917bfa6bbb14c4b15a4a26d1f221817bd4e52e1")
 
 
 def test_l4_pr_a_text_hash_is_stable_across_checkout_line_endings(
@@ -75,17 +74,17 @@ def test_l4_pr_a_architecture_and_parity_oracles_are_exact() -> None:
     frontend = payload["architecture"]["frontend"]
     behavior = payload["behavior"]
 
-    assert backend["module_count"] == 514
-    assert backend["internal_edge_count"] == 1194
-    assert backend["external_import_count"] == 1746
+    assert backend["module_count"] == 518
+    assert backend["internal_edge_count"] == 1207
+    assert backend["external_import_count"] == 1758
     assert backend["legacy_import_exception_count"] == 0
     assert backend["policy_allowed_cycle_count"] == 0
     assert backend["module_cycles"] == []
-    assert len(backend["ownership"]["legacy_horizontal"]) == 18
-    assert len(backend["ownership"]["canonical_boundaries"]) == 35
+    assert len(backend["ownership"]["legacy_horizontal"]) == 19
+    assert len(backend["ownership"]["canonical_boundaries"]) == 37
 
     assert frontend["candidate_count"] == 12
-    assert frontend["candidate_consumer_edge_count"] == 36
+    assert frontend["candidate_consumer_edge_count"] == 33
     assert frontend["planned_feature_allowlist"] == ["relationships", "social"]
     assert len(frontend["public_surfaces"]["features"]) == 7
     assert len(frontend["public_surfaces"]["shared"]) == 5

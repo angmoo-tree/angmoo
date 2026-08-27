@@ -8,19 +8,12 @@ export type {
   WorldAppSectionId,
 } from "./model/world-app-contract";
 export {
-  createOwnerManualPost,
-  createOwnerManualReply,
-  getManualSocialFeed,
-  getManualSocialPostThread,
   getOwnerControlledActor,
   getLocalWorldApp,
   WorldAppApiError,
 } from "./api/world-app-client";
 export type {
   LocalWorldAppRead,
-  ManualSocialFeedRead,
-  ManualSocialPostRead,
-  ManualSocialWriteRead,
   OwnerControlledActorRead,
 } from "./api/world-app-client";
 export { WorldApp } from "./ui/world-app";

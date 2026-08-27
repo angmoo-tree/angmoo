@@ -1371,18 +1371,22 @@
           "importer": "app.compatibility.manual_social.legacy"
         },
         {
+          "imported": "app.models",
+          "importer": "app.compatibility.manual_social.write_unit_of_work"
+        },
+        {
           "imported": "app.schemas.community",
-          "importer": "app.compatibility.manual_social.legacy"
+          "importer": "app.compatibility.manual_social.write_unit_of_work"
         },
         {
           "imported": "app.services.community",
-          "importer": "app.compatibility.manual_social.legacy"
+          "importer": "app.compatibility.manual_social.write_unit_of_work"
         }
       ],
       "id": "l3-owner-manual-social-persistence-bridge",
       "owner_stage": "L4",
-      "reason": "PR G adds owner-controlled manual social writes and once-only Inbox observation while canonical Post and Comment persistence remain owned by the later L4 social migration.",
-      "removal_condition": "Remove these exact edges when L4 exposes canonical social Post, Comment, block, and visibility persistence ports.",
+      "reason": "L4 PR C moves source-write commands and UoW ownership into app.domains.social while one explicit compatibility adapter still bridges the pre-L4 Post ORM and community persistence service. The legacy facade is read-only.",
+      "removal_condition": "Remove the read edges with the remaining feed migration and remove write_unit_of_work edges when canonical social Post persistence no longer depends on pre-L4 models and community service.",
       "review_date": "2026-11-19"
     },
     {

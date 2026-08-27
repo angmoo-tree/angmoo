@@ -23,14 +23,14 @@ def test_world_app_routes_compose_only_the_public_feature_entry() -> None:
     assert "notFound()" in section_page
 
 
-def test_world_app_navigation_keeps_world_scope_and_marks_missing_capabilities() -> None:
+def test_world_app_navigation_keeps_world_scope_and_marks_missing_capabilities() -> (
+    None
+):
     contract = _read("features/world-app/model/world-app-contract.ts")
     world_app = _read("features/world-app/ui/world-app.tsx")
     client = _read("features/world-app/api/world-app-client.ts")
 
-    assert "encodeURIComponent(worldId)" in _read(
-        "shared/navigation/product-routes.ts"
-    )
+    assert "encodeURIComponent(worldId)" in _read("shared/navigation/product-routes.ts")
     for segment in ("feed", "chat", "characters", "relationships"):
         assert f'segment: "{segment}"' in contract
     assert contract.count('availability: "unavailable"') == 2
@@ -40,7 +40,8 @@ def test_world_app_navigation_keeps_world_scope_and_marks_missing_capabilities()
     assert "worldAppSectionRoute(worldId, section)" in world_app
     assert "relationshipGraphRoute(ownerActor.character_id, worldId)" in world_app
     assert "다른 World로 자동 이동하지 않습니다" in world_app
-    assert "WorldManualFeed" in world_app
+    assert "WorldSocialFeed" in world_app
+    assert 'from "@/features/social/public"' in world_app
     assert "/api/backend/worlds/mine/${encodeURIComponent(worldId)}" in client
 
 
