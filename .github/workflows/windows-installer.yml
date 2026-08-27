@@ -96,7 +96,7 @@ jobs:
         shell: pwsh
         run: |
           $root = '.codex-temp\windows-installer-supported-upgrade'
-          $host = 'desktop\src-tauri\target\release\angmoo-desktop.exe'
+          $hostExecutable = 'desktop\src-tauri\target\release\angmoo-desktop.exe'
           $sidecar = 'desktop\src-tauri\binaries\angmoo-sidecar-x86_64-pc-windows-msvc.exe'
           $supportedV1 = Join-Path $root 'supported-v1'
           $supportedV2 = Join-Path $root 'supported-v2'
@@ -106,19 +106,19 @@ jobs:
           backend\.venv\Scripts\python.exe `
             scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
             --output-root $supportedV1 `
-            --host $host `
+            --host $hostExecutable `
             --sidecar $sidecar `
             --source-version 1
           backend\.venv\Scripts\python.exe `
             scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
             --output-root $supportedV2 `
-            --host $host `
+            --host $hostExecutable `
             --sidecar $sidecar `
             --source-version 2
           backend\.venv\Scripts\python.exe `
             scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
             --output-root $conflict `
-            --host $host `
+            --host $hostExecutable `
             --sidecar $sidecar `
             --source-version 2 `
             --conflict
