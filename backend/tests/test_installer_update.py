@@ -1,0 +1,168 @@
+from __future__ import annotations
+
+import hashlib
+import json
+from pathlib import Path
+import sys
+
+import pytest
+
+from app.runtime import desktop_sidecar
+from app.runtime.installer_update import (
+    InstallerUpdateContractError,
+    preflight_installer_embedded_data,
+)
+
+
+BUILD_COMMIT = "a" * 40
+HOST_SHA = "b" * 64
+SIDECAR_SHA = "c" * 64
+
+
+def _manifest(path: Path, *, sqlite=(1, 2, 2), ladybug=(0, 1, 1)) -> Path:
+    identity_source = "\n".join(
+        (
+            "0.4.0-1",
+            BUILD_COMMIT,
+            HOST_SHA,
+            SIDECAR_SHA,
+            f"sqlite:{sqlite[0]}-{sqlite[1]}->{sqlite[2]}",
+            f"ladybug:{ladybug[0]}-{ladybug[1]}->{ladybug[2]}",
+        )
+    )
+    payload = {
+        "schema_version": 2,
+        "product_version": "0.4.0-1",
+        "build_commit": BUILD_COMMIT,
+        "payload_generation": hashlib.sha256(
+            identity_source.encode("utf-8")
+        ).hexdigest(),
+        "embedded_data": {
+            "sqlite": {
+                "minimum_readable_version": sqlite[0],
+                "maximum_readable_version": sqlite[1],
+                "target_version": sqlite[2],
+            },
+            "ladybug": {
+                "minimum_readable_version": ladybug[0],
+                "maximum_readable_version": ladybug[1],
+                "target_version": ladybug[2],
+            },
+        },
+        "files": {
+            "angmoo-desktop.exe": HOST_SHA,
+            "angmoo-sidecar.exe": SIDECAR_SHA,
+        },
+    }
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    return path
+
+
+def _marker(root: Path, version: int) -> None:
+    root.mkdir(parents=True, exist_ok=True)
+    (root / "current-generation.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "relative_path": "generations/fixture",
+                "manifest_sha256": "d" * 64,
+                "data_version": version,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
+def test_installer_preflight_accepts_supported_active_generations(
+    tmp_path: Path,
+) -> None:
+    data_root = tmp_path / "Angmoo"
+    _marker(data_root / "canonical", 1)
+    _marker(data_root / "graph", 0)
+
+    result = preflight_installer_embedded_data(
+        data_root=data_root,
+        payload_manifest=_manifest(tmp_path / "payload.json"),
+    )
+
+    assert result.sqlite_source_version == 1
+    assert result.sqlite_target_version == 2
+    assert result.ladybug_source_version == 0
+    assert result.ladybug_target_version == 1
+
+
+@pytest.mark.parametrize(
+    ("sqlite_version", "ladybug_version", "expected"),
+    (
+        (3, 1, "installer_sqlite_data_incompatible"),
+        (2, 2, "installer_ladybug_data_incompatible"),
+    ),
+)
+def test_installer_preflight_blocks_incompatible_downgrade_without_mutation(
+    tmp_path: Path,
+    sqlite_version: int,
+    ladybug_version: int,
+    expected: str,
+) -> None:
+    data_root = tmp_path / "Angmoo"
+    _marker(data_root / "canonical", sqlite_version)
+    _marker(data_root / "graph", ladybug_version)
+    before = {
+        path: path.read_bytes()
+        for path in data_root.rglob("current-generation.json")
+    }
+
+    with pytest.raises(InstallerUpdateContractError, match=expected):
+        preflight_installer_embedded_data(
+            data_root=data_root,
+            payload_manifest=_manifest(tmp_path / "payload.json"),
+        )
+
+    assert {path: path.read_bytes() for path in before} == before
+
+
+def test_installer_upgrade_mode_creates_current_generations_and_is_idempotent(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    data_root = tmp_path / "Angmoo"
+    manifest = _manifest(tmp_path / "payload.json")
+    argv = [
+        "angmoo-sidecar",
+        "--installer-data-upgrade",
+        "--data-root",
+        str(data_root),
+        "--legacy-data-root",
+        str(tmp_path / "legacy"),
+        "--runtime-root",
+        str(data_root / "runtime"),
+        "--payload-manifest",
+        str(manifest),
+    ]
+    monkeypatch.setattr(sys, "argv", argv)
+
+    assert desktop_sidecar.main() == 0
+    first = json.loads(capsys.readouterr().out)
+    assert first["status"] == "upgraded"
+    assert first["sqlite_source_version"] == 2
+    assert first["ladybug_source_version"] == 1
+    canonical_marker = (
+        data_root / "canonical" / "current-generation.json"
+    ).read_bytes()
+    graph_marker = (data_root / "graph" / "current-generation.json").read_bytes()
+
+    assert desktop_sidecar.main() == 0
+    second = json.loads(capsys.readouterr().out)
+    assert second["status"] == "upgraded"
+    assert (data_root / "canonical" / "current-generation.json").read_bytes() == canonical_marker
+    assert (data_root / "graph" / "current-generation.json").read_bytes() == graph_marker
+
+
+def test_installer_mode_fatal_code_is_stable() -> None:
+    assert (
+        desktop_sidecar._stable_fatal_code(
+            InstallerUpdateContractError("installer_sqlite_data_incompatible")
+        )
+        == "installer_sqlite_data_incompatible"
+    )

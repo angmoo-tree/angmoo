@@ -132,6 +132,32 @@ def test_preview_data_migrates_once_with_hash_and_schema_evidence(
     assert second.status == "already_migrated"
 
 
+def test_completed_legacy_marker_still_rejects_tampered_source_generation(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "com.angmoo.desktop"
+    target = tmp_path / "Angmoo"
+    _preview_fixture(source)
+
+    migration = _migration(source, target)
+    first = migration.migrate_if_needed()
+    assert first.generation is not None
+    database = (
+        target
+        / "canonical"
+        / "generations"
+        / first.generation
+        / "angmoo.sqlite3"
+    )
+    database.write_bytes(b"not-sqlite")
+
+    with pytest.raises(
+        LocalAppDataMigrationIntegrityError,
+        match="legacy_migration_canonical_invalid",
+    ):
+        migration.migrate_if_needed()
+
+
 def test_migration_fails_closed_when_both_roots_have_data(tmp_path: Path) -> None:
     source = tmp_path / "com.angmoo.desktop"
     target = tmp_path / "Angmoo"

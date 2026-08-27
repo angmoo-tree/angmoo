@@ -225,7 +225,20 @@ class LegacyLocalAppDataMigration:
             raise LocalAppDataMigrationIntegrityError(
                 "legacy_migration_marker_root_mismatch"
             )
-        doctor = _validate_staged_canonical(self.target_root)
+        # This marker attests the immutable generation copied from the ER6
+        # preview root.  It is historical migration evidence, not the active
+        # SQLite schema contract.  A later embedded-data upgrade legitimately
+        # moves ``current-generation.json`` to a newer generation, so validate
+        # the original copied generation explicitly instead of requiring the
+        # active generation to remain frozen forever.
+        if report.generation is None:
+            raise LocalAppDataMigrationIntegrityError(
+                "legacy_migration_marker_invalid"
+            )
+        doctor = _validate_canonical_generation(
+            self.target_root,
+            report.generation,
+        )
         if (
             doctor["generation"] != report.generation
             or doctor["schema_version"] != report.schema_version
@@ -449,8 +462,22 @@ def _validate_staged_canonical(staging: Path) -> dict[str, Any]:
         # first-run requirement. Its sidecar deterministically selected this
         # generation name, so it is the only markerless layout we accept.
         generation = "er6-preview-v1"
+    return _validate_canonical_generation(staging, generation)
+
+
+def _validate_canonical_generation(
+    root: Path,
+    generation: str,
+) -> dict[str, Any]:
+    allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-"
+    if not generation or any(
+        character not in allowed for character in generation
+    ):
+        raise LocalAppDataMigrationIntegrityError(
+            "legacy_migration_generation_marker_invalid"
+        )
     database_path = (
-        staging / "canonical" / "generations" / generation / "angmoo.sqlite3"
+        root / "canonical" / "generations" / generation / "angmoo.sqlite3"
     )
     if not database_path.is_file():
         raise LocalAppDataMigrationIntegrityError(

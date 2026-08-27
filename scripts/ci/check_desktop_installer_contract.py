@@ -66,9 +66,13 @@ def main() -> int:
         'Rename "$LOCALAPPDATA\\angmoo" "$LOCALAPPDATA\\Angmoo.__casefix__"',
         'Rename "$LOCALAPPDATA\\Angmoo.__casefix__" "$LOCALAPPDATA\\Angmoo"',
         "installer-preflight.ps1",
-        "$LOCALAPPDATA\\Angmoo\\app.__install_backup__",
+        "$LOCALAPPDATA\\Angmoo\\app.__install_staging__",
         "verify-installed-payload.ps1",
-        "The previous app was preserved",
+        "installer-payload-transaction.ps1",
+        "--installer-data-preflight",
+        "--installer-data-upgrade",
+        "installer_staging_digest_mismatch",
+        "installer_embedded_data_migration_failed",
     ):
         _require(required in hooks, f"uninstall safety contract missing: {required}")
     for required in (
@@ -251,6 +255,8 @@ def main() -> int:
         "installer-preflight.ps1",
         "verify-installed-payload.ps1",
         "test-installer-payload-verifier.ps1",
+        "installer-payload-transaction.ps1",
+        "test-installer-payload-transaction.ps1",
     ):
         _require(
             (ROOT / "desktop" / "scripts" / script_name).is_file(),

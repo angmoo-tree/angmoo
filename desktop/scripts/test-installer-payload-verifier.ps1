@@ -22,7 +22,21 @@ try {
         [byte[]](0x4d, 0x5a, 0x02)
     )
     $payload = [ordered]@{
-        schema_version = 1
+        schema_version = 2
+        product_version = '0.4.0-1'
+        build_commit = ('a' * 40 -join '')
+        embedded_data = [ordered]@{
+            sqlite = [ordered]@{
+                minimum_readable_version = 1
+                maximum_readable_version = 2
+                target_version = 2
+            }
+            ladybug = [ordered]@{
+                minimum_readable_version = 0
+                maximum_readable_version = 1
+                target_version = 1
+            }
+        }
         files = [ordered]@{
             'angmoo-desktop.exe' = (
                 Get-FileHash -LiteralPath (Join-Path $appRoot 'angmoo-desktop.exe') -Algorithm SHA256
@@ -31,6 +45,25 @@ try {
                 Get-FileHash -LiteralPath (Join-Path $appRoot 'angmoo-sidecar.exe') -Algorithm SHA256
             ).Hash.ToLowerInvariant()
         }
+    }
+    $identitySource = @(
+        $payload.product_version,
+        $payload.build_commit,
+        $payload.files.'angmoo-desktop.exe',
+        $payload.files.'angmoo-sidecar.exe',
+        'sqlite:1-2->2',
+        'ladybug:0-1->1'
+    ) -join "`n"
+    $identityHasher = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        $payload.payload_generation = [System.BitConverter]::ToString(
+            $identityHasher.ComputeHash(
+                [System.Text.Encoding]::UTF8.GetBytes($identitySource)
+            )
+        ).Replace('-', '').ToLowerInvariant()
+    }
+    finally {
+        $identityHasher.Dispose()
     }
     [System.IO.File]::WriteAllText(
         (Join-Path $appRoot 'installer-payload.json'),

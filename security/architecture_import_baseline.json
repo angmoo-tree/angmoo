@@ -1,7 +1,7 @@
 {
-  "edge_count": 1150,
-  "external_import_count": 1708,
-  "module_count": 498,
+  "edge_count": 1153,
+  "external_import_count": 1716,
+  "module_count": 499,
   "modules": [
     {
       "external_imports": [],
@@ -4997,6 +4997,7 @@
         "app.core.desktop_loopback",
         "app.public_main",
         "app.runtime.configuration",
+        "app.runtime.installer_update",
         "app.runtime.migrations.embedded_data",
         "app.runtime.migrations.local_app_data",
         "app.runtime.persistence.runtime_data_path"
@@ -5033,6 +5034,25 @@
       ],
       "module": "app.runtime.graph_projection.sqlalchemy_outbox",
       "path": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "hashlib",
+        "json",
+        "pathlib",
+        "re",
+        "sqlite3",
+        "typing"
+      ],
+      "imports": [
+        "app.integrations.ladybug_projection",
+        "app.runtime.persistence.sqlite_schema"
+      ],
+      "module": "app.runtime.installer_update",
+      "path": "backend/app/runtime/installer_update.py",
       "wildcard_imports": []
     },
     {

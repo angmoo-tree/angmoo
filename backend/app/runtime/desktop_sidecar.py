@@ -167,6 +167,27 @@ def _parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _parse_installer_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Angmoo installer embedded-data compatibility helper"
+    )
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--installer-data-preflight", action="store_true")
+    mode.add_argument("--installer-data-upgrade", action="store_true")
+    parser.add_argument("--data-root", type=Path, required=True)
+    parser.add_argument("--legacy-data-root", type=Path, required=True)
+    parser.add_argument("--runtime-root", type=Path, required=True)
+    parser.add_argument("--payload-manifest", type=Path, required=True)
+    return parser.parse_args()
+
+
+def _is_installer_mode() -> bool:
+    return any(
+        argument in {"--installer-data-preflight", "--installer-data-upgrade"}
+        for argument in sys.argv[1:]
+    )
+
+
 def _required_environment(name: str) -> str:
     value = os.environ.get(name, "").strip()
     if not value:
@@ -291,7 +312,69 @@ def _watch_parent(parent_pid: int, server: Any) -> None:
         time.sleep(0.5)
 
 
+def _run_installer_mode() -> int:
+    """Run a bounded compatibility/upgrade operation without serving HTTP."""
+
+    args = _parse_installer_args()
+    data_root = args.data_root.resolve()
+    runtime_root = args.runtime_root.resolve()
+    if runtime_root != data_root / "runtime":
+        raise RuntimeError("runtime_root_outside_product_data_root")
+
+    from app.runtime.configuration import RuntimeProfile
+    from app.runtime.installer_update import preflight_installer_embedded_data
+
+    before = preflight_installer_embedded_data(
+        data_root=data_root,
+        payload_manifest=args.payload_manifest,
+    )
+    if args.installer_data_preflight:
+        print(json.dumps(before.public_payload(), sort_keys=True), flush=True)
+        return 0
+
+    from app.runtime.migrations.local_app_data import LegacyLocalAppDataMigration
+
+    LegacyLocalAppDataMigration(
+        source_root=args.legacy_data_root.resolve(),
+        target_root=data_root,
+        runtime_root=runtime_root,
+        process_alive=_process_alive,
+    ).migrate_if_needed()
+    # A legacy LocalAppData import can materialize an active generation after
+    # the initial read-only check. Re-evaluate before any schema upgrade.
+    preflight_installer_embedded_data(
+        data_root=data_root,
+        payload_manifest=args.payload_manifest,
+    )
+
+    config = _build_embedded_runtime_config(
+        data_root,
+        runtime_root,
+        profile=RuntimeProfile.LOCAL_EMBEDDED,
+        desktop_launch_token="installer-compatibility-token-0000000000000000",
+        desktop_allowed_origin="tauri://localhost",
+    )
+    if not config.graph_projection_enabled:
+        raise RuntimeError("installer_embedded_data_migration_failed")
+
+    after = preflight_installer_embedded_data(
+        data_root=data_root,
+        payload_manifest=args.payload_manifest,
+    )
+    if (
+        after.sqlite_source_version != after.sqlite_target_version
+        or after.ladybug_source_version != after.ladybug_target_version
+    ):
+        raise RuntimeError("installer_embedded_data_migration_failed")
+    payload = after.public_payload()
+    payload["status"] = "upgraded"
+    print(json.dumps(payload, sort_keys=True), flush=True)
+    return 0
+
+
 def main() -> int:
+    if _is_installer_mode():
+        return _run_installer_mode()
     args = _parse_args()
     from app.runtime.configuration import RuntimeProfile
 
@@ -389,6 +472,8 @@ def main() -> int:
 
 def _stable_fatal_code(exc: Exception) -> str:
     message = str(exc)
+    if message.startswith("installer_"):
+        return message
     if message.startswith("unsupported SQLite schema version:"):
         return "desktop_sidecar_schema_unsupported"
     if message == "desktop_sidecar_already_owned":
