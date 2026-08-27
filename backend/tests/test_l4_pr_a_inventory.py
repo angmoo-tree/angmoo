@@ -29,6 +29,17 @@ def test_l4_pr_a_inventory_is_deterministic_and_current() -> None:
     )
 
 
+def test_l4_pr_a_text_hash_is_stable_across_checkout_line_endings(
+    tmp_path: Path,
+) -> None:
+    lf_path = tmp_path / "lf.txt"
+    crlf_path = tmp_path / "crlf.txt"
+    lf_path.write_bytes(b"first\nsecond\n")
+    crlf_path.write_bytes(b"first\r\nsecond\r\n")
+
+    assert generator._sha256(lf_path) == generator._sha256(crlf_path)
+
+
 def test_l4_pr_a_runtime_and_installer_baselines_are_frozen() -> None:
     payload = generator.build_inventory()
     sqlite = payload["runtime"]["sqlite"]

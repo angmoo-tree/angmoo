@@ -37,7 +37,11 @@ def _load_json(path: Path) -> dict[str, Any]:
 
 
 def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    # Every inventoried artifact is repository text.  Hash its canonical Git
+    # representation so Windows CRLF checkouts and Linux CI checkouts produce
+    # the same frozen inventory.
+    content = path.read_bytes().replace(b"\r\n", b"\n")
+    return hashlib.sha256(content).hexdigest()
 
 
 def _path_record(relative: str, *, root: Path) -> dict[str, Any]:

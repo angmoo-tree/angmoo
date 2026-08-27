@@ -431,7 +431,7 @@
             "@/lib/backend"
           ],
           "path": "frontend/src/app/api/community/characters/[characterId]/activity/route.ts",
-          "sha256": "c22829e90244ada699bdd63d7dc102d7094ef51bfde11e83c9a60c7e22db45cb"
+          "sha256": "cb306cd45817876668dc7f6ff063b31d4a91ad7e9c71bc0eded847f2c1a6df27"
         },
         {
           "exports": [
@@ -439,7 +439,7 @@
           ],
           "imports": [],
           "path": "frontend/src/app/api/community/posts/[postId]/comments/route.ts",
-          "sha256": "3bf03838fe35c64581c25243e316d553d2a21fbdd494b7e261623a5430595c0a"
+          "sha256": "e18fb3140d060bd582198c5e9203884e4c9cfc1c35fb471e60d3e0a1c7033940"
         },
         {
           "exports": [
@@ -449,7 +449,7 @@
             "@/lib/backend"
           ],
           "path": "frontend/src/app/api/community/posts/[postId]/route.ts",
-          "sha256": "0471fde0beae62c8b8142770540e11d8c802034905ea501ccad50e8e8bbc767b"
+          "sha256": "4276bdb772aafb9b9508d0013bc52467307b1140784e3d1b47e50671ce92e19f"
         },
         {
           "exports": [
@@ -459,7 +459,7 @@
             "@/lib/backend"
           ],
           "path": "frontend/src/app/api/community/posts/route.ts",
-          "sha256": "5a7ed981cd6c766f1770273f4d85f7379961eaebdd65e1326abd4df09a20feae"
+          "sha256": "d28dec941f0e2fd78e165f8603802c0f10011815c3f2152c90cea2fb0a29181a"
         },
         {
           "exports": [
@@ -474,7 +474,7 @@
             "next"
           ],
           "path": "frontend/src/app/characters/[characterId]/worlds/[worldId]/relationship-graph/page.tsx",
-          "sha256": "ca5b5d1dbaef7c301fea80582d0f8dfe4e9b05d187d5e53df7dd85dd6dd53825"
+          "sha256": "f6f08dddf712f75aecaab10c6481c2c53129fcbc1d061cb254fa2827e613506f"
         },
         {
           "exports": [
@@ -487,7 +487,7 @@
             "@/lib/community"
           ],
           "path": "frontend/src/app/feed-page.tsx",
-          "sha256": "92a5f7c566597cc534c3de5f911cdcf9dab31a1f4bb6469b77a6e8888ee70009"
+          "sha256": "199fb269abdda1ecc55666c867fa265a0c1e725b4a2de028ef1a012ad15cfe74"
         },
         {
           "exports": [
@@ -506,7 +506,7 @@
             "react"
           ],
           "path": "frontend/src/components/post-detail-client.tsx",
-          "sha256": "42ff2acfe4c5da094e15cb25a6238b8131e851794c6ffd3b247421f9bcd4bed3"
+          "sha256": "55570797daf6e6113f6e64742a43479992b5c75fadf0c890abbe8eb47ef134f9"
         },
         {
           "exports": [
@@ -531,7 +531,7 @@
             "react-dom"
           ],
           "path": "frontend/src/components/post-list-client.tsx",
-          "sha256": "6bdeec4bd01a0e9a5046a030adfd4e771c6438a4104343c07f5703099dbde8aa"
+          "sha256": "6021fc12c53504708c734b535e53d2da7696139ef2867c756a4ab0164d28dbc7"
         },
         {
           "exports": [
@@ -545,7 +545,7 @@
             "react"
           ],
           "path": "frontend/src/components/relationship-graph-client.tsx",
-          "sha256": "7232aab1722a17b4d39abe936a9658e477fa9d2cdc1c32253fd130c6d208ecb4"
+          "sha256": "7f4a0ba0b470b49f75ec86219011e3ec3c7a3a37d03487ee93ba065e096ea8f1"
         },
         {
           "exports": [
@@ -559,7 +559,7 @@
             "react"
           ],
           "path": "frontend/src/features/world-app/ui/world-manual-feed.tsx",
-          "sha256": "b60b30c7bf73def59d20670e2f0e6ca47607c248e519ce51fac6dd3330188b2e"
+          "sha256": "c46e43b393eb718f23d058222d8848ede80edaf3fba4c97c23793d285bbbe800"
         },
         {
           "exports": [
@@ -627,7 +627,7 @@
             "@/shared/runtime/public"
           ],
           "path": "frontend/src/lib/community.ts",
-          "sha256": "be8674bad08103661de4acecaa9b2c9a9fb00bbb05b00ef0ffdeb2a710e8fdee"
+          "sha256": "419eca7e905b4ca43d113c4e382fd6b0b6863b0821feb6cd710fadd2718b0cd1"
         },
         {
           "exports": [
@@ -643,7 +643,7 @@
             "@/shared/runtime/public"
           ],
           "path": "frontend/src/lib/relationship-graph.ts",
-          "sha256": "6527f2830f4b733daa26b0d99d35f1b2065ac7d2c85f1477112f407027172945"
+          "sha256": "f531366098147a9982e290b3c62ace7ade701521ff2252afa385e12a2ad3c4e2"
         }
       ],
       "planned_feature_allowlist": [
@@ -706,11 +706,11 @@
     "oracle_artifacts": [
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "db24d96fcffd11ac930937e9ae6f3cd79569e1e75d755cd138314b50ae6c9a8b"
+        "sha256": "b314a2f4f6601b8ea9186fb421e64fc2b5f00daf1ae847669b9dae368b055f60"
       },
       {
         "path": "docs/architecture/l3-er-postgres-neo4j-parity-oracle.json",
-        "sha256": "00c605044bedfa0d6394b064557a06a1469dc12f6c6a68f3559bb7aa125ecf59"
+        "sha256": "b8e8cba77aac3bd276cd46483f031c2bb46234260ea2acd0f9e5c53ceb3bf59e"
       },
       {
         "path": "docs/architecture/neo4j-query-corpus.json",
@@ -720,59 +720,59 @@
     "parity_test_files": [
       {
         "path": "backend/tests/test_embedded_data_migration.py",
-        "sha256": "75bf9871064f68b46c5b6ebf4049119bdd47efb64de5885b4376215103eb202b"
+        "sha256": "a43cf2c03e46263a3742f98be34815722ab064a94e8909ba2d2dde3a9d1fb9e8"
       },
       {
         "path": "backend/tests/test_feed_reaction_intent.py",
-        "sha256": "9747965d2f7c52df5a11c70a47327f6452237c29f146b8e3e0e811bec793b28f"
+        "sha256": "6c29edcb2af051b02d354a92334b6fb83aee7fd5fac48dcec6ee0d43ff85a272"
       },
       {
         "path": "backend/tests/test_graph_projection_replay.py",
-        "sha256": "365b1858953262faaede30162ca68b477608860d74888c1382c6efc94aa6a765"
+        "sha256": "d5d09a7ba65816384cad5139ea0db91c05bc229545c1f24510d48ebed679b3d2"
       },
       {
         "path": "backend/tests/test_graph_projection_worker.py",
-        "sha256": "d331b743e0337a405adc9c9a867a3fe8c1c185259426c8e9c78746997fb8d432"
+        "sha256": "9805dceb95460ef914a58925637ecfff0aa3a0e33e65cb234377a611b6477029"
       },
       {
         "path": "backend/tests/test_l2_5_frontend_architecture_boundaries.py",
-        "sha256": "78370c0d89651004eeea50f61344e6740d6aa04d226d4b2b7344693aee49a4e5"
+        "sha256": "3ed2b66bd3cdfd8d6de9f5fb204cf1a294de125dff0b555f1286de22c36d332c"
       },
       {
         "path": "backend/tests/test_l3_5_world_package_import_commit.py",
-        "sha256": "90b7a95aa24ce9d4deb0ae22846b0899c586314ec95fb66b9298fd3d8c30f284"
+        "sha256": "b9d17e4a6af9eea821568206d317418cf164d7f4cc69f914da0ca983bcaa09cb"
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",
-        "sha256": "437627c59dfbe34831ae2b61df5d813b82ec3f393a2ab95b8af3fd5caeaaa8c9"
+        "sha256": "65be6b34c24b645483b815b620d0b3a62cbad5c2373b49d5859806846c053e43"
       },
       {
         "path": "backend/tests/test_l3_owner_manual_social_inbox.py",
-        "sha256": "828e6b3e2c842d07f46692783673ef07a08889f47c9e34aca55f398de03b8951"
+        "sha256": "26efe77a687dced44618c3c27b1679f24c30260bbb81edc1a49d7143cee5ae0d"
       },
       {
         "path": "backend/tests/test_relationship_graph_api.py",
-        "sha256": "72d1174097ce2ea38de761ad331c23e4a7b2b67b588c5b796cb949e97c044efa"
+        "sha256": "5c8c07b464577cc1896a88206d12b18ace048d4ed3b3c815a3d9c09d15be7022"
       },
       {
         "path": "backend/tests/test_relationship_graph_repository.py",
-        "sha256": "877f582490eb0753e3c0b498002f29fa9dbd0bbe626675b260cfebbcf30cbf90"
+        "sha256": "dada8caf7becaed5d16bff6193e67ebbd5d24e4f7c7a4c79366a5400acdbe946"
       },
       {
         "path": "backend/tests/test_social_event_runtime.py",
-        "sha256": "9af1248e2b6012632a417c2fb2138da3928be030c7c62dadcc61eb6fd1863ac5"
+        "sha256": "ee82c44433c0b71f3f035f0beb4fd3e1ba90b5a4cedb3da32b6814f168509e83"
       },
       {
         "path": "backend/tests/test_t2_architecture_inventory.py",
-        "sha256": "5e61e329ebfa8c452d09173830a31405cff4c71b7ea59ac86d2b4e270853730a"
+        "sha256": "e3d3903d08fab8797a8566dc4122a983121e5b73a2b8d9165d0c08a9b5b32cf4"
       },
       {
         "path": "backend/tests/test_world_definition_contract.py",
-        "sha256": "dd302e207f67bf47f59e0518aa2e7f310d7ec4af3f65bbf66233d68a915431e0"
+        "sha256": "913f028b71935a33a83a041598ae91f767140781a985509ea8fd93597f55890b"
       },
       {
         "path": "backend/tests/test_world_feed_search.py",
-        "sha256": "353dd9881f2b4c775891c9cb160e8e38440f5b29c257b5ecee0d52a8fac21052"
+        "sha256": "303f02fee886e9b40a63ce2253b3886182c5507551dfc0738bbd61583df32411"
       }
     ],
     "parity_test_node_count": 85,
@@ -881,7 +881,7 @@
       "windows-installer"
     ],
     "workflow": ".github/workflows/windows-installer.yml",
-    "workflow_sha256": "ac166c3ef06a2191c9241a4ed620b1c049fb6833eecad7c8792e8cd863ffbac8"
+    "workflow_sha256": "df0cee4a345a1d246d9294cf92619a1822475c7f8ba0e4f8b40bac8e44a0bdc5"
   },
   "policy_id": "angmoo-l4-pr-a-p5-p7-inventory-v1",
   "runtime": {
@@ -895,12 +895,12 @@
             "schema_digest": "a028adfa2162e4cec41a4d8efd58731b696185742632c37beac3e8fb13f099f4"
           },
           "path": "backend/app/runtime/migrations/ladybug_versions/manifests/v1.json",
-          "sha256": "c01c1450a968145ddcbad500e9ce857a3e3594b655084434931f29d096e86dd5"
+          "sha256": "488ae62032da8d9ecb91deede824d85bcbdeb7106fd2c8d77dea17ca23e6a888"
         }
       ],
       "registry": {
         "path": "backend/app/runtime/migrations/ladybug_versions/registry.py",
-        "sha256": "31eb5e22203cd9145a93c2bfd3433593320fc1aa9e62153b26fcb5e57b490671"
+        "sha256": "6466844aec3a8369dfa46e8cba675244d8e5b951b3b2d4c0d877ba24f86ebb33"
       }
     },
     "sqlite": {
@@ -914,7 +914,7 @@
             "source_revision": "20260819_0082"
           },
           "path": "backend/app/runtime/migrations/sqlite_versions/manifests/v1.json",
-          "sha256": "b4e3b5cdf2629056610c88ef425e623fcd6b2a54cec7702c2e6970cb6993a8b7"
+          "sha256": "1bac2e4305607c4086a0a5df64d5e3cb9324c98b65d22ee0809af859e8a3e73c"
         },
         {
           "contract": {
@@ -925,7 +925,7 @@
             "source_revision": "20260825_0083"
           },
           "path": "backend/app/runtime/migrations/sqlite_versions/manifests/v2.json",
-          "sha256": "236235f5640e86863bf44ac01348d82bd34c03c794ed876c6737dbfdfea0b903"
+          "sha256": "9532ba6f6f2991218fc927bf61f74224c50f46a0960b2ad228894630bb668877"
         },
         {
           "contract": {
@@ -936,21 +936,21 @@
             "source_revision": "20260825_0083"
           },
           "path": "backend/app/runtime/migrations/sqlite_versions/manifests/v3.json",
-          "sha256": "55f5f2b3f5a18d1fa501e10b12acdfb79efb4d26d9b2f40378e9600990a8aad8"
+          "sha256": "df50e0bbd5d3ce7091434c5dec8ea69616863deb11a97ab9e81ddfaca4d4cb15"
         }
       ],
       "registry": {
         "path": "backend/app/runtime/migrations/sqlite_versions/registry.py",
-        "sha256": "3a070006128342d8f25f22b3f90944d0b5ec6bcc2494a45c2af838ff7ce0870b"
+        "sha256": "b649a9bd0d3df5e1a95d4d9134d4b968931bca4703a37c56f028228a37b8bebf"
       },
       "steps": [
         {
           "path": "backend/app/runtime/migrations/sqlite_versions/v1_to_v2_world_package_registry.py",
-          "sha256": "bd7bb7a5221c8244fde7d2c365a312ee45a554b83ff50da07b5eeb2c4efddee2"
+          "sha256": "5032fcceb2e12c02f96f4b1a0c5ffbf3694f73d5e62490759ef6ca2eed371cf2"
         },
         {
           "path": "backend/app/runtime/migrations/sqlite_versions/v2_to_v3_no_specific_role.py",
-          "sha256": "8fcf48ced1097ddb2e06c02ba9aece4715c562bf7872c88abbbc185254ac1f9f"
+          "sha256": "7f4a3ef9f3860718f60a2bad3095393e493eb90ae627be9195929d0a2cc1b3a4"
         }
       ]
     }
