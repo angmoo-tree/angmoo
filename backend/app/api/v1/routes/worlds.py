@@ -69,6 +69,30 @@ def enter_world_with_character(
         raise AssertionError("unreachable")
 
 
+@router.patch(
+    "/{world_id}/characters/{character_id}/role",
+    response_model=schemas.WorldCharacterEntryRead,
+)
+def update_world_character_role(
+    world_id: str,
+    character_id: str,
+    data: schemas.WorldCharacterRoleUpdate,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user),
+) -> schemas.WorldCharacterEntryRead:
+    try:
+        return world_character_setup.update_world_character_role(
+            db,
+            world_id=world_id,
+            character_id=character_id,
+            user=user,
+            data=data,
+        )
+    except world_character_setup.WorldCharacterSetupError as exc:
+        _raise_world_character_error(exc)
+        raise AssertionError("unreachable")
+
+
 def _raise_world_error(exc: Exception) -> None:
     if isinstance(exc, world_service.WorldNotFoundError):
         raise HTTPException(

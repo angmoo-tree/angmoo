@@ -10,7 +10,7 @@ class AutonomousWorldCharacterSeedData:
     world_id: str
     character_id: str
     membership_id: str
-    role_key: str | None
+    role_key: str
     role_description: str
     background: str
     access_scope: tuple[str, ...]

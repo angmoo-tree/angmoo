@@ -461,16 +461,17 @@
     {
       "markers": {
         "row_lock": [
-          271,
-          314,
-          797,
-          809
+          292,
+          379,
+          422,
+          907,
+          919
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "7fac3c6187d1384e70beb5b8a6934c0c93fc761218c264505b0a9c328c489560",
+      "source_sha256": "a07c9967c495fa5ad9480fe46135d337ecd808de849536b401c75926be597756",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -525,13 +526,25 @@
     {
       "markers": {
         "row_lock": [
-          89
+          29
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/worlds/infrastructure/sqlalchemy_reserved_roles.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "886edaa7bae3ab951626e323d02f4c8298d806d6d81335076bcf299f086d03a4",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          90
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "54e68de128e7ced693bdb7c3aed31b03540f80ee49aa2ccf4294d9bec06f972f",
+      "source_sha256": "2ce372b1fd7284a8b1dd8112cfd0fe9e61175069902d59be01a0e4b7461b084c",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -634,7 +647,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/persistence/sqlite_schema.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "8749bd65614c7296d89b3e9641389034215e9164607bdd479f43bae530f158d9",
+      "source_sha256": "04292c12425dcac5ae74696d8a3b4b6a9a87ce5cb17b3693e1fee5847d4cb404",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -992,13 +1005,13 @@
       "transition_pr": "ER7 PR P"
     }
   ],
-  "entry_count": 63,
+  "entry_count": 64,
   "marker_counts": {
     "advisory_lock": 8,
     "driver_or_url": 41,
     "jsonb": 8,
     "pgvector": 4,
-    "row_lock": 22,
+    "row_lock": 23,
     "skip_locked": 7
   },
   "purpose": "Residual PostgreSQL markers retained only as historical schema evidence, serialized compatibility values, and negative reintroduction guards",

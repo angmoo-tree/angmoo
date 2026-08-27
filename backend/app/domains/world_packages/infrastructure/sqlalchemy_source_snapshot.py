@@ -31,10 +31,12 @@ from app.domains.world_packages.domain.errors import (
 from app.domains.world_packages.domain.export import WorldPackageMediaCandidate
 from app.domains.world_packages.domain.seed import WorldPackageSourceSnapshot
 from app.domains.worlds.public import (
+    NO_SPECIFIC_ROLE_KEY,
     WorldMembershipRequiredError,
     WorldNotFoundError,
     WorldOwnerRoleRequiredError,
     get_generation_context,
+    is_canonical_no_specific_role,
     require_owner_access,
     world_contract_hash,
 )
@@ -121,6 +123,14 @@ class SqlAlchemyWorldPackageSourceSnapshot:
             world_id=source_world_id,
             user=user,
         )
+        if any(
+            role.key == NO_SPECIFIC_ROLE_KEY
+            and not is_canonical_no_specific_role(role)
+            for role in context.roles
+        ):
+            raise WorldPackageContractError(
+                WorldPackageReasonCode.REFERENCE_INVALID
+            )
         role_refs = _portable_map(
             [item.key for item in context.roles], label="roles"
         )

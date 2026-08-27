@@ -40,7 +40,19 @@ from app.domains.worlds.infrastructure.generation_context import (
 )
 from app.domains.worlds.infrastructure.definition_repository import (
     WORLD_CONTRACT_VERSION,
+    refresh_world_contract,
     world_contract_hash,
+)
+from app.domains.worlds.domain.reserved_roles import (
+    NO_SPECIFIC_ROLE_DESCRIPTION,
+    NO_SPECIFIC_ROLE_KEY,
+    NO_SPECIFIC_ROLE_NAME,
+    NO_SPECIFIC_ROLE_PORTABLE_REF,
+    is_canonical_no_specific_role,
+)
+from app.domains.worlds.infrastructure.sqlalchemy_reserved_roles import (
+    ReservedWorldRoleConflictError,
+    ensure_no_specific_role,
 )
 from app.domains.worlds.api.schemas import (
     WorldDaypartProfileInput,
@@ -60,6 +72,11 @@ from app.domains.worlds.infrastructure.sqlalchemy_models import (
 
 __all__ = [
     "JSON_DOCUMENT",
+    "NO_SPECIFIC_ROLE_DESCRIPTION",
+    "NO_SPECIFIC_ROLE_KEY",
+    "NO_SPECIFIC_ROLE_NAME",
+    "NO_SPECIFIC_ROLE_PORTABLE_REF",
+    "ReservedWorldRoleConflictError",
     "WorldArchivedError",
     "WorldBannerValidationError",
     "WorldCreatorRoleRequiredError",
@@ -91,8 +108,11 @@ __all__ = [
     "is_enabled_world_role",
     "get_world",
     "get_world_read",
+    "ensure_no_specific_role",
+    "is_canonical_no_specific_role",
     "publish_world",
     "remove_world_banner",
+    "refresh_world_contract",
     "seed_world",
     "require_creator_access",
     "require_owner_access",

@@ -322,7 +322,10 @@ def _run_installer_mode() -> int:
         raise RuntimeError("runtime_root_outside_product_data_root")
 
     from app.runtime.configuration import RuntimeProfile
-    from app.runtime.installer_update import preflight_installer_embedded_data
+    from app.runtime.installer_update import (
+        checkpoint_installer_sqlite,
+        preflight_installer_embedded_data,
+    )
 
     before = preflight_installer_embedded_data(
         data_root=data_root,
@@ -356,6 +359,7 @@ def _run_installer_mode() -> int:
     )
     if not config.graph_projection_enabled:
         raise RuntimeError("installer_embedded_data_migration_failed")
+    checkpoint_installer_sqlite(config.database_path)
 
     after = preflight_installer_embedded_data(
         data_root=data_root,

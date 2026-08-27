@@ -149,8 +149,23 @@ def test_windows_installer_exercises_direct_in_place_upgrade() -> None:
 
     assert direct_upgrade < explicit_uninstall
     assert "-ArgumentList '/S', '/UPDATE'" in workflow
-    assert "Assert-InstallFileManifest $installManifest 'direct_in_place_upgrade'" in workflow
-    assert "Direct in-place installer update changed the canonical SQLite database" in workflow
+    quiesce = workflow.index("Installed data quiesce timed out after 60 seconds")
+    database_baseline = workflow.index(
+        "$databaseHashAfterFirstRun = Get-StableFileHash"
+    )
+    assert quiesce < database_baseline < direct_upgrade
+    assert (
+        "Assert-InstallFileManifest $installManifest 'direct_in_place_upgrade'"
+        in workflow
+    )
+    assert (
+        "Direct in-place installer update changed the canonical SQLite database"
+        in workflow
+    )
+    assert (
+        "Direct in-place installer update changed the canonical generation marker"
+        in workflow
+    )
     assert "Direct in-place installer update changed APP_SECRET" in workflow
     assert "direct_in_place_upgrade_replaced_app = $true" in workflow
     assert "direct_in_place_upgrade_preserved_data = $true" in workflow

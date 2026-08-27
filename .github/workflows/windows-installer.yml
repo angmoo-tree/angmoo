@@ -537,7 +537,39 @@ jobs:
             (Join-Path $dataRoot 'webview') `
             $webViewBefore `
             'first_runtime_shutdown'
+          # The headless runner can force-stop the packaged sidecar above, so
+          # SQLite may still have committed pages in its WAL. The next
+          # installer-owned read can checkpoint those pages into the main
+          # database without changing any logical data, which makes a raw
+          # pre-checkpoint file hash a false corruption signal. Run the exact
+          # installed data-upgrade helper once while the runtime is offline to
+          # quiesce/checkpoint the generation, then use that stable state as
+          # the byte-preservation baseline for the same-version direct update.
+          $quiesceArgs = @(
+            '--installer-data-upgrade',
+            '--data-root', $dataRoot,
+            '--legacy-data-root', $legacyRoot,
+            '--runtime-root', (Join-Path $dataRoot 'runtime'),
+            '--payload-manifest', (Join-Path $installRoot 'installer-payload.json')
+          )
+          $quiesce = Start-Process $sidecarFile.FullName `
+            -ArgumentList $quiesceArgs `
+            -PassThru
+          if (-not $quiesce.WaitForExit(60000)) {
+            Stop-Process -Id $quiesce.Id -Force -ErrorAction SilentlyContinue
+            throw 'Installed data quiesce timed out after 60 seconds'
+          }
+          if ($quiesce.ExitCode -ne 0) {
+            throw "Installed data quiesce failed: $($quiesce.ExitCode)"
+          }
+          $canonicalGenerationMarker =
+            Join-Path $dataRoot 'canonical\current-generation.json'
+          if (-not (Test-Path -LiteralPath $canonicalGenerationMarker)) {
+            throw 'Installed data quiesce did not preserve the canonical generation marker'
+          }
           $databaseHashAfterFirstRun = Get-StableFileHash $database 'first_runtime_shutdown'
+          $canonicalGenerationMarkerHashAfterFirstRun =
+            Get-StableFileHash $canonicalGenerationMarker 'first_runtime_shutdown'
           $secretPath = Join-Path $dataRoot 'secrets\app-secret'
           $secretHashAfterFirstRun = Get-StableFileHash $secretPath 'first_runtime_shutdown'
           $mediaProof = Join-Path $dataRoot 'media\world-er6\banner.txt'
@@ -585,6 +617,10 @@ jobs:
           }
           if ((Get-StableFileHash $database 'direct_in_place_upgrade') -ne $databaseHashAfterFirstRun) {
             throw 'Direct in-place installer update changed the canonical SQLite database'
+          }
+          if ((Get-StableFileHash $canonicalGenerationMarker 'direct_in_place_upgrade') -ne
+              $canonicalGenerationMarkerHashAfterFirstRun) {
+            throw 'Direct in-place installer update changed the canonical generation marker'
           }
           if ((Get-StableFileHash $secretPath 'direct_in_place_upgrade') -ne $secretHashAfterFirstRun) {
             throw 'Direct in-place installer update changed APP_SECRET'

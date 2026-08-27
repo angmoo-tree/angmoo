@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import hashlib
 import json
-from pathlib import Path
+import sqlite3
 import sys
+from pathlib import Path
 
 import pytest
 
@@ -19,7 +20,7 @@ HOST_SHA = "b" * 64
 SIDECAR_SHA = "c" * 64
 
 
-def _manifest(path: Path, *, sqlite=(1, 2, 2), ladybug=(0, 1, 1)) -> Path:
+def _manifest(path: Path, *, sqlite=(1, 3, 3), ladybug=(0, 1, 1)) -> Path:
     identity_source = "\n".join(
         (
             "0.4.0-1",
@@ -86,7 +87,7 @@ def test_installer_preflight_accepts_supported_active_generations(
     )
 
     assert result.sqlite_source_version == 1
-    assert result.sqlite_target_version == 2
+    assert result.sqlite_target_version == 3
     assert result.ladybug_source_version == 0
     assert result.ladybug_target_version == 1
 
@@ -94,7 +95,7 @@ def test_installer_preflight_accepts_supported_active_generations(
 @pytest.mark.parametrize(
     ("sqlite_version", "ladybug_version", "expected"),
     (
-        (3, 1, "installer_sqlite_data_incompatible"),
+        (4, 1, "installer_sqlite_data_incompatible"),
         (2, 2, "installer_ladybug_data_incompatible"),
     ),
 )
@@ -145,15 +146,38 @@ def test_installer_upgrade_mode_creates_current_generations_and_is_idempotent(
     assert desktop_sidecar.main() == 0
     first = json.loads(capsys.readouterr().out)
     assert first["status"] == "upgraded"
-    assert first["sqlite_source_version"] == 2
+    assert first["sqlite_source_version"] == 3
     assert first["ladybug_source_version"] == 1
     canonical_marker = (
         data_root / "canonical" / "current-generation.json"
     ).read_bytes()
     graph_marker = (data_root / "graph" / "current-generation.json").read_bytes()
 
-    assert desktop_sidecar.main() == 0
-    second = json.loads(capsys.readouterr().out)
+    marker_payload = json.loads(canonical_marker)
+    database_path = (
+        data_root
+        / "canonical"
+        / str(marker_payload["relative_path"])
+        / "angmoo.sqlite3"
+    )
+    writer = sqlite3.connect(database_path)
+    try:
+        writer.execute("PRAGMA journal_mode = WAL")
+        writer.execute("PRAGMA wal_autocheckpoint = 0")
+        writer.execute(
+            "UPDATE angmoo_schema_version SET created_at = ? "
+            "WHERE singleton_key = 1",
+            ("2026-08-27T00:00:00.000000Z",),
+        )
+        writer.commit()
+        wal_path = database_path.with_name(database_path.name + "-wal")
+        assert wal_path.is_file() and wal_path.stat().st_size > 0
+
+        assert desktop_sidecar.main() == 0
+        second = json.loads(capsys.readouterr().out)
+        assert not wal_path.exists() or wal_path.stat().st_size == 0
+    finally:
+        writer.close()
     assert second["status"] == "upgraded"
     assert (data_root / "canonical" / "current-generation.json").read_bytes() == canonical_marker
     assert (data_root / "graph" / "current-generation.json").read_bytes() == graph_marker

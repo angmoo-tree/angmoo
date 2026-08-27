@@ -200,6 +200,7 @@ from app.schemas.worlds import (
 from app.schemas.world_character_setup import (
     WorldCharacterEntryCreate,
     WorldCharacterEntryRead,
+    WorldCharacterRoleUpdate,
     WORLD_COMMUNITY_ACTION_KEYS,
     WorldActivityCandidatePayload,
     WorldActivityCandidateRead,
@@ -460,6 +461,7 @@ __all__ = [
     "WorldActivitySocialMode",
     "WorldCharacterEntryCreate",
     "WorldCharacterEntryRead",
+    "WorldCharacterRoleUpdate",
     "WorldCharacterSetupApproveCreate",
     "WorldCharacterSetupGenerateCreate",
     "WorldCharacterSetupPreflightRead",

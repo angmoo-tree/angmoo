@@ -68,10 +68,24 @@ def _fixture(relative: str) -> dict:
     return json.loads((FIXTURE_ROOT / relative).read_text(encoding="utf-8"))
 
 
-def _archive(*, with_image: bool = False) -> bytes:
-    world = PortableWorldDefinition.model_validate(
-        _fixture("content/world.json")
-    )
+def _archive(*, with_image: bool = False, no_specific_role: bool = False) -> bytes:
+    world_payload = _fixture("content/world.json")
+    world_characters_payload = _fixture("content/world-characters.json")
+    if no_specific_role:
+        world_payload["roles"].append(
+            {
+                "allowed_activity_scope": [],
+                "autonomous_allowed": True,
+                "description": "별도의 World 역할을 지정하지 않은 캐릭터",
+                "name": "역할 없음",
+                "ref": "roles/no-specific-role",
+                "responsibilities": [],
+            }
+        )
+        world_characters_payload["characters"][0]["role_ref"] = (
+            "roles/no-specific-role"
+        )
+    world = PortableWorldDefinition.model_validate(world_payload)
     world = world.model_copy(
         update={
             "setting_description": (
@@ -91,7 +105,7 @@ def _archive(*, with_image: bool = False) -> bytes:
         _fixture("content/characters.json")
     )
     world_characters = WorldCharactersDocument.model_validate(
-        _fixture("content/world-characters.json")
+        world_characters_payload
     )
     assets = AssetIndexDocument(schema_version="assets-index-v1", assets=[])
     resolved = WorldPackageResolvedAssets(assets=())
@@ -366,6 +380,37 @@ def test_commit_is_atomic_registers_one_home_world_and_replays_without_writes(
         assert _count(db, models.World) == 1
         assert _count(db, models.WorldPackageImport) == 1
         assert _count(db, models.WorldPackageImportIdMap) == 4
+
+
+def test_commit_maps_portable_no_role_to_canonical_reserved_role(
+    import_runtime,
+) -> None:
+    prepared = _stage(
+        import_runtime.client,
+        _archive(no_specific_role=True),
+    )
+    committed = _commit(
+        import_runtime.client,
+        prepared,
+        idempotency_key="package-import-no-specific-role",
+    )
+    assert committed.status_code == 201, committed.text
+
+    with import_runtime.factory() as db:
+        world_character = db.scalar(select(models.WorldCharacter))
+        reserved = db.scalar(
+            select(models.WorldRole).where(
+                models.WorldRole.role_key == "no_specific_role"
+            )
+        )
+        assert world_character is not None
+        assert world_character.role_key == "no_specific_role"
+        assert reserved is not None
+        assert reserved.name == "역할 없음"
+        assert reserved.description == "별도의 World 역할을 지정하지 않은 캐릭터"
+        assert reserved.responsibilities == []
+        assert reserved.allowed_activity_scope == []
+        assert reserved.autonomous_allowed is True
 
 
 def test_media_promotion_failure_rolls_back_all_rows_and_is_retryable(

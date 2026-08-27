@@ -13,6 +13,9 @@ from sqlalchemy import Connection
 from app.runtime.migrations.sqlite_versions.v1_to_v2_world_package_registry import (
     upgrade_v1_to_v2,
 )
+from app.runtime.migrations.sqlite_versions.v2_to_v3_no_specific_role import (
+    upgrade_v2_to_v3,
+)
 from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION
 
 
@@ -54,6 +57,7 @@ class SqliteVersionManifest:
 
 MIGRATIONS: dict[int, SqliteMigration] = {
     1: upgrade_v1_to_v2,
+    2: upgrade_v2_to_v3,
 }
 
 
