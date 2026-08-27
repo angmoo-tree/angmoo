@@ -6,10 +6,10 @@ not claim that every legacy module has already moved.
 
 > **ER7 runtime note (2026-08-24):** the official installed and contributor
 > runtimes are SQLite/FTS5 + LadybugDB with scheduler and projector owned by one
-> FastAPI process. PostgreSQL is a frozen read-only offline migration source,
-> and Neo4j is static parity evidence only. The historical trees and counts
-> below explain earlier refactor stages; they are not a supported server-runtime
-> topology.
+> FastAPI process. PostgreSQL is neither a supported runtime nor a migration
+> input, and no PostgreSQL importer ships in the product. Neo4j is static parity
+> evidence only. Historical trees and counts below are explicitly labelled;
+> they are not a supported server-runtime topology.
 
 The T2.5 umbrella proposal is
 [`#32`](https://github.com/angmoo-tree/angmoo/issues/32). The architecture
@@ -200,7 +200,7 @@ Post, reply, block and visibility persistence until the social domain moves in
 L4. The resulting inventory contains 391 modules, 827 internal edges, 1,277
 per-module external import records and 344 exact legacy exceptions.
 
-## L3-ER1 storage and graph port extraction
+## Historical L3-ER1 storage and graph port extraction
 
 ER1 PR B begins from Issue
 [`#99`](https://github.com/angmoo-tree/angmoo/issues/99). It is a structural
@@ -211,8 +211,9 @@ unchanged.
 
 This section records the historical ER1 boundary. The PostgreSQL migration
 source port and adapter were removed before the first public SQLite-only
-release; current runtime ports begin at `RuntimeDataPathPort` and the SQLite
-generation lifecycle.
+release. PostgreSQL is not a legacy runtime or an accepted offline input.
+Current runtime ports begin at `RuntimeDataPathPort`, the SQLite generation
+lifecycle and replayable LadybugDB projection contracts.
 
 The storage-neutral contracts are now explicit:
 
@@ -223,14 +224,12 @@ domain application
 ├─ OutboxPort
 ├─ RelationshipProjectionPort / RelationshipQueryPort
 ├─ SearchIndexPort
-├─ MigrationSourcePort
 └─ RuntimeDataPathPort
         ↓
 current runtime adapters
-├─ SQLAlchemy unit of work and projection outbox
-├─ Alembic migration source
-├─ Neo4j projection and relationship-query adapters
-├─ callback-compatible current search adapter
+├─ SQLAlchemy unit of work over SQLite canonical generations
+├─ SQLite projection outbox and FTS5 search
+├─ LadybugDB projection and relationship-query adapter
 └─ deterministic local data-path resolver
 ```
 
@@ -242,9 +241,10 @@ command value types live in the relationships domain and the legacy service is
 only a compatibility facade. CI rejects a port importing runtime,
 infrastructure, integrations, or any legacy horizontal layer.
 
-No SQLite schema, LadybugDB database file, Tauri shell, data migration, runtime
-switch or feature flag is introduced by this PR. Those remain independently
-reviewed ER1 PR C and ER2+ gates.
+At the time, ER1 introduced no SQLite schema, LadybugDB database file, Tauri
+shell, data migration, runtime switch or feature flag. Those later gates are
+now complete; this paragraph is retained only to explain the original PR
+boundary.
 
 ## T2.5 relationship graph read pilot
 
@@ -255,27 +255,30 @@ world_activity_runtime route
 → app.domains.relationships.public
 → graph_read/use_case.py
 → graph_read/repository.py ports and result types
-→ app.integrations.relationship_graph_read Neo4j adapter
+→ app.services.relationship_graph_read composition
+→ app.integrations.ladybug_projection
+   with bounded SQLite canonical fallback when projection is unavailable
 ```
 
 The L4-owned `app.services.relationship_graph_read` module composes the
-existing SQLAlchemy models, PostgreSQL fallback queries, projection metrics,
-and graph client factory into the domain gateway. It is not a second use-case
-implementation. Current runtime consumers are the API route and social-memory
-diagnostics; compatibility tests also cover its legacy facade. L4 removes this
-adapter only after relationship persistence and graph runtime have canonical
-ports.
+existing SQLAlchemy models over SQLite, canonical fallback queries, projection
+metrics and the shared in-process LadybugDB runtime into the domain gateway. It
+is not a second use-case implementation. Current runtime consumers are the API
+route and social-memory diagnostics; compatibility tests also cover its legacy
+facade. L4 moves this composition only after relationship persistence and graph
+runtime have canonical ports.
 
 PR C's `rg` and AST inventory found zero importers for
 `app.schemas.relationship_graph` and `app.repositories.relationship_graph`.
 Those aliases were therefore deleted instead of being retained until L4.
-Schema consumers import the canonical domain schema, and Neo4j adapter tests
-import `app.integrations.relationship_graph_read`. The active L4 service adapter
-is intentionally retained because its runtime consumer count is not zero.
+Schema consumers import the canonical domain schema. The active L4 service
+adapter is intentionally retained because its runtime consumer count is not
+zero. Neo4j query documents remain immutable parity fixtures; no Neo4j driver
+or server is composed.
 
-The pilot does not modify `SocialEvent`, `RelationshipState` writes,
-`GraphProjectionOutbox`, projector leases or retries, replay commands, Neo4j
-bootstrap, migrations, provider behavior, or transaction ownership.
+The historical pilot did not modify `SocialEvent`, `RelationshipState` writes,
+`GraphProjectionOutbox`, projector leases or retries, replay commands,
+migrations, provider behavior, or transaction ownership.
 
 ## L0 core audit
 
@@ -397,29 +400,30 @@ when a more precise responsibility exists.
 
 ## Transaction and provider boundary
 
-Structural PRs do not move commit, rollback, lock, lease, idempotency, or retry
-ownership. Event and Outbox writes remain in the same PostgreSQL transaction as
-their canonical state. Repositories do not commit behind a caller's back.
+Structural PRs do not move commit, rollback, lock, lease, idempotency or retry
+ownership. Event and Outbox writes remain in the same caller-owned SQLite
+transaction as their canonical state. Repositories do not commit behind a
+caller's back.
 
-The T2.5 pilot is read-only. It adds no migration, DB write, provider call,
-prompt, model, token setting, or SocialEvent/Outbox/projector change. Tests use
-synthetic PostgreSQL/Neo4j data and fake providers; real provider calls must
-remain zero.
+The T2.5 pilot was read-only. It added no migration, DB write, provider call,
+prompt, model, token setting or SocialEvent/Outbox/projector change. Current
+tests use isolated SQLite/LadybugDB generations, static parity fixtures and fake
+providers; real provider calls remain zero unless a test explicitly owns one.
 
-## Exact legacy disposition
+## Exact L4 disposition
 
-The policy contains two reviewed edge groups and one exact module cycle:
+At exact L4 baseline `0917bfa6bbb14c4b15a4a26d1f221817bd4e52e1`, the
+repository-wide architecture inventory contains 504 modules, 1,171 internal
+edges and zero module cycles. The active architecture policy has zero legacy
+import exceptions and zero allowed cycles. L4 PR A additionally records 18
+selected social/relationship legacy-horizontal modules and 26 existing
+canonical domain/runtime modules in `security/l4_pr_a_inventory.json`.
 
-| Entry | Count | Owner | Removal condition |
-|---|---:|---:|---|
-| pre-T2.5 horizontal imports | 385 edges | L6 fallback owner | remove each edge at its owning domain/runtime stage; none remain after L6 |
-| Neo4j write-runtime command bridge | 2 edges | L4 | move projection commands and metrics behind runtime/integration public ports |
-| routine/social interaction module cycle | 2 modules | L4 | split routine context and social interaction input behind public contracts |
-
-Every exception records exact importer and imported module, a reason, owner
-stage, removal condition, and review date. Wildcard prefixes are invalid. A
-removed edge makes its policy entry stale and therefore fails CI until the
-exception is deleted too.
+These counts are an exact baseline, not a permanent architecture target. Later
+L4 PRs must preserve the frozen behavior oracle while moving ownership toward
+the canonical surfaces. Any intentional inventory change regenerates the
+machine-readable artifact and explains the delta in review; unexplained drift
+fails CI.
 
 ## Contributor workflow
 
@@ -453,17 +457,17 @@ structure-only PR.
 
 ## Embedded canonical persistence
 
-ER2 introduces SQLite only as a runtime-owned infrastructure adapter. Domain
-and application packages continue to depend on repository and UnitOfWork
-ports; they do not import SQLite, filesystem paths, PRAGMAs, or connection
-lifecycle code. Existing SQLAlchemy repositories can receive either the
-current PostgreSQL session or the future SQLite session when their documented
-contract is portable.
+SQLite is the sole canonical relational persistence for installed, Docker and
+contributor runtimes. Domain and application packages continue to depend on
+repository and UnitOfWork ports; they do not import SQLite filesystem paths,
+PRAGMAs or connection lifecycle code. SQLAlchemy repositories receive the
+caller-owned SQLite session selected by the typed runtime composition.
 
-The initial schema and connection contract is documented in
-`docs/architecture/l3-er2-sqlite-canonical-adapter.md`. Production remains on
-PostgreSQL until the later ER2 concurrency, FTS, migration, and explicit
-cutover gates pass.
+The schema and connection contract is documented in
+`docs/architecture/l3-er2-sqlite-canonical-adapter.md`. The cutover, migration,
+FTS5, direct-update and supported-predecessor gates are complete. SQLite v3 is
+the L4 baseline and v1-to-v2-to-v3 remains a consecutive copy-on-write upgrade
+chain.
 
 ## Embedded canonical concurrency
 
@@ -475,16 +479,16 @@ import API routes or product use cases, and domain packages do not import
 SQLite connection details.
 
 The executable translation and failure boundaries are documented in
-`docs/architecture/l3-er2-sqlite-concurrency.md`. Production composition still
-uses PostgreSQL; selection of the SQLite adapters remains OFF until later ER2
-migration and cutover gates pass.
+`docs/architecture/l3-er2-sqlite-concurrency.md`. SQLite adapters are selected
+for `LOCAL_EMBEDDED` and `CONTRIBUTOR_EMBEDDED`; `TEST` must select an isolated
+SQLite generation or an explicit fake.
 
 ## Embedded relationship projection
 
-ER3 PR H adds `app.integrations.ladybug_projection` as a second implementation
-of the relationships domain `RelationshipProjectionPort`. It consumes the same
-validated, database-neutral projection commands as the Neo4j adapter. The
-projector worker now handles the domain-owned
+ER3 PR H introduced `app.integrations.ladybug_projection`; it is now the sole
+official implementation of the relationships domain
+`RelationshipProjectionPort`. It consumes validated, database-neutral
+projection commands. The projector worker handles the domain-owned
 `RelationshipProjectionBackendError`; it does not import either graph
 provider's exception type.
 
@@ -499,7 +503,7 @@ are deterministic and idempotent.
 
 LadybugDB is derived data only. SQLite outbox state remains canonical when the
 graph is unavailable, so a graph failure leaves a retryable row instead of
-rolling back an already committed social write. PR H does not select this
-adapter in production; PostgreSQL and Neo4j remain the composed defaults.
-Typed read-query parity and the provider switch remain separate ER3 and ER7
-gates.
+rolling back an already committed social write. LadybugDB v1 is selected by
+the installed and contributor embedded profiles; typed six-query parity,
+World replay and outage recovery are required regression contracts. Neo4j is
+retained only as static fixture evidence.
