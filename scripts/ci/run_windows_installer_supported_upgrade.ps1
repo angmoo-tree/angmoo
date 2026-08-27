@@ -122,7 +122,8 @@ function Invoke-Installer([int]$ExpectedExit) {
 function Invoke-Verifier(
     [string]$Manifest,
     [string]$Status,
-    [int]$ExpectedSourceVersion = 0
+    [int]$ExpectedSourceVersion = 0,
+    [int]$ExpectedLadybugSourceVersion = 0
 ) {
     $arguments = @(
         $Verifier,
@@ -131,7 +132,11 @@ function Invoke-Verifier(
         '--expected-status', $Status
     )
     if ($Status -eq 'upgraded') {
-        $arguments += @('--expected-source-version', "$ExpectedSourceVersion")
+        $arguments += @(
+            '--expected-source-version', "$ExpectedSourceVersion",
+            '--expected-ladybug-source-version',
+            "$ExpectedLadybugSourceVersion"
+        )
     }
     & $Python @arguments
     if ($LASTEXITCODE -ne 0) {
@@ -146,16 +151,73 @@ if (Test-Path -LiteralPath $legacyRoot) {
 try {
     if ($Mode -in @('All', 'Upgrade')) {
         $supportedManifest = Restore-IsolatedFixture $SupportedV1FixtureArchive
+        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+            ConvertFrom-Json
         Invoke-Installer 0
-        Invoke-Verifier $supportedManifest 'upgraded' 1
+        Invoke-Verifier `
+            $supportedManifest `
+            'upgraded' `
+            ([int]$supportedContract.source_data_version) `
+            ([int]$supportedContract.ladybug_source_data_version)
 
         $supportedManifest = Restore-IsolatedFixture $SupportedV2FixtureArchive
+        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+            ConvertFrom-Json
         Invoke-Installer 0
-        Invoke-Verifier $supportedManifest 'upgraded' 2
+        Invoke-Verifier `
+            $supportedManifest `
+            'upgraded' `
+            ([int]$supportedContract.source_data_version) `
+            ([int]$supportedContract.ladybug_source_data_version)
 
         # The exact installer must be idempotent after the first v2 -> v3 update.
+        $idempotentPaths = @(
+            (Join-Path $productRoot 'canonical\current-generation.json'),
+            (Join-Path $productRoot 'canonical\previous-generation.json'),
+            (Join-Path $productRoot 'graph\current-generation.json'),
+            (Join-Path $productRoot 'graph\previous-generation.json')
+        )
+        $idempotentHashes = @{}
+        foreach ($path in $idempotentPaths) {
+            $idempotentHashes[$path] = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash
+        }
+        $canonicalGenerations = @(
+            Get-ChildItem -LiteralPath (Join-Path $productRoot 'canonical\generations') `
+                -Directory -Force | Sort-Object Name | Select-Object -ExpandProperty Name
+        ) -join "`n"
+        $graphGenerations = @(
+            Get-ChildItem -LiteralPath (Join-Path $productRoot 'graph\generations') `
+                -Directory -Force | Sort-Object Name | Select-Object -ExpandProperty Name
+        ) -join "`n"
+        $candidatePayload = Get-Content `
+            -LiteralPath (Join-Path $productRoot 'app\installer-payload.json') `
+            -Raw | ConvertFrom-Json
         Invoke-Installer 0
-        Invoke-Verifier $supportedManifest 'upgraded' 3
+        Invoke-Verifier `
+            $supportedManifest `
+            'upgraded' `
+            ([int]$candidatePayload.embedded_data.sqlite.target_version) `
+            ([int]$candidatePayload.embedded_data.ladybug.target_version)
+        foreach ($path in $idempotentPaths) {
+            $actualHash = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash
+            if ($actualHash -cne $idempotentHashes[$path]) {
+                throw "windows_installer_idempotent_marker_changed:$path"
+            }
+        }
+        $actualCanonicalGenerations = @(
+            Get-ChildItem -LiteralPath (Join-Path $productRoot 'canonical\generations') `
+                -Directory -Force | Sort-Object Name | Select-Object -ExpandProperty Name
+        ) -join "`n"
+        $actualGraphGenerations = @(
+            Get-ChildItem -LiteralPath (Join-Path $productRoot 'graph\generations') `
+                -Directory -Force | Sort-Object Name | Select-Object -ExpandProperty Name
+        ) -join "`n"
+        if ($actualCanonicalGenerations -cne $canonicalGenerations) {
+            throw 'windows_installer_idempotent_sqlite_generation_created'
+        }
+        if ($actualGraphGenerations -cne $graphGenerations) {
+            throw 'windows_installer_idempotent_ladybug_generation_created'
+        }
         Write-Output 'windows_installer_supported_upgrade_matrix_pass'
     }
 

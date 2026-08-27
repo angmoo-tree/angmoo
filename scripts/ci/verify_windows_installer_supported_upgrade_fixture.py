@@ -132,6 +132,7 @@ def _verify_graph(
     data_root: Path,
     fixture: dict[str, Any],
     *,
+    expected_source_version: int,
     expected_version: int,
     expect_rebuild: bool,
 ) -> None:
@@ -142,6 +143,8 @@ def _verify_graph(
     if int(marker.get("data_version", 0)) != expected_version:
         _fail("supported_upgrade_graph_generation_changed")
     if expect_rebuild:
+        if expected_source_version not in {source_version, expected_version}:
+            _fail("supported_upgrade_graph_source_version_invalid")
         if marker.get("relative_path") == source_relative:
             _fail("supported_upgrade_graph_rebuild_missing")
         previous = _json(graph_root / "previous-generation.json")
@@ -151,7 +154,8 @@ def _verify_graph(
         ):
             _fail("supported_upgrade_graph_previous_version_mismatch")
     elif (
-        marker.get("relative_path") != source_relative
+        expected_source_version != source_version
+        or marker.get("relative_path") != source_relative
         or (graph_root / "previous-generation.json").exists()
     ):
         _fail("supported_upgrade_graph_generation_changed")
@@ -301,6 +305,7 @@ def verify_upgraded(
     fixture: dict[str, Any],
     *,
     expected_source_version: int,
+    expected_ladybug_source_version: int,
 ) -> None:
     _source_database(data_root, fixture)
     payload = _verify_payload(data_root / "app")
@@ -328,7 +333,8 @@ def verify_upgraded(
         or int(result.get("sqlite_source_version", 0))
         != expected_source_version
         or int(result.get("sqlite_target_version", 0)) != 3
-        or int(result.get("ladybug_source_version", 0)) != 1
+        or int(result.get("ladybug_source_version", 0))
+        != expected_ladybug_source_version
         or int(result.get("ladybug_target_version", 0)) != 2
         or result.get("build_commit") != payload.get("build_commit")
         or result.get("payload_generation") != payload.get("payload_generation")
@@ -338,6 +344,7 @@ def verify_upgraded(
     _verify_graph(
         data_root,
         fixture,
+        expected_source_version=expected_ladybug_source_version,
         expected_version=2,
         expect_rebuild=True,
     )
@@ -373,6 +380,7 @@ def verify_restored(data_root: Path, fixture: dict[str, Any]) -> None:
     _verify_graph(
         data_root,
         fixture,
+        expected_source_version=1,
         expected_version=1,
         expect_rebuild=False,
     )
@@ -418,6 +426,7 @@ def main() -> int:
         required=True,
     )
     parser.add_argument("--expected-source-version", type=int)
+    parser.add_argument("--expected-ladybug-source-version", type=int)
     args = parser.parse_args()
     root = args.data_root.resolve()
     fixture = _json(args.fixture_manifest.resolve())
@@ -426,12 +435,18 @@ def main() -> int:
     ):
         _fail("supported_upgrade_fixture_refused")
     if args.expected_status == "upgraded":
-        if args.expected_source_version is None:
+        if (
+            args.expected_source_version is None
+            or args.expected_ladybug_source_version is None
+        ):
             _fail("supported_upgrade_expected_source_missing")
         verify_upgraded(
             root,
             fixture,
             expected_source_version=args.expected_source_version,
+            expected_ladybug_source_version=(
+                args.expected_ladybug_source_version
+            ),
         )
     else:
         verify_restored(root, fixture)
