@@ -1,15 +1,84 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.api.v1.deps import get_current_user, get_db, get_optional_current_user
+from app.core import browser_session
 from app.domains.world_characters import public as world_character_setup
 from app.domains.worlds import public as world_service
 
 
 router = APIRouter(prefix="/worlds", tags=["worlds"])
+
+
+class _WorldCharacterLeaveRuntimeGuard:
+    """Bridge frozen scheduler persistence into the canonical leave command.
+
+    ``app.api.v1.routes.worlds`` already owns the reviewed compatibility import
+    of ``app.models``. Keeping the bridge here avoids introducing a new domain
+    dependency on pre-L6 agent-run and slot persistence.
+    """
+
+    def __init__(self, db: Session) -> None:
+        self.db = db
+
+    def require_idle(
+        self,
+        *,
+        owner_user_id: str,
+        character_id: str,
+        world_character_id: str,
+        selected_active_world: bool,
+    ) -> None:
+        setup_running = self.db.scalar(
+            select(models.WorldCharacterSetupAttempt.id)
+            .where(
+                models.WorldCharacterSetupAttempt.world_character_id
+                == world_character_id,
+                models.WorldCharacterSetupAttempt.status == "running",
+            )
+            .limit(1)
+        )
+        if setup_running is not None:
+            raise world_character_setup.StudioWorldCharacterBusyError(
+                "world_character_setup_in_progress"
+            )
+        if not selected_active_world:
+            return
+
+        active_run = self.db.scalar(
+            select(models.AgentRun.id)
+            .where(
+                models.AgentRun.user_id == owner_user_id,
+                models.AgentRun.character_id == character_id,
+                models.AgentRun.status == "running",
+            )
+            .limit(1)
+        )
+        if active_run is not None:
+            raise world_character_setup.StudioWorldCharacterBusyError(
+                "world_character_run_in_progress"
+            )
+        assigned_slot = self.db.scalar(
+            select(models.AgentSlot.agent_id)
+            .where(
+                models.AgentSlot.assigned_user_id == owner_user_id,
+                models.AgentSlot.assigned_character_id == character_id,
+            )
+            .limit(1)
+        )
+        if assigned_slot is not None:
+            raise world_character_setup.StudioWorldCharacterBusyError(
+                "scheduler_assignment_active"
+            )
+        setting = self.db.get(models.AgentActivitySetting, character_id)
+        if setting is not None and setting.auto_enabled:
+            raise world_character_setup.StudioWorldCharacterConflictError(
+                "world_character_autonomy_enabled"
+            )
 
 
 def _raise_world_character_error(exc: world_character_setup.WorldCharacterSetupError) -> None:
@@ -21,6 +90,26 @@ def _raise_world_character_error(exc: world_character_setup.WorldCharacterSetupE
         status_code = status.HTTP_409_CONFLICT
     else:
         status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+    raise HTTPException(status_code=status_code, detail=exc.reason_code) from exc
+
+
+def _raise_world_character_lifecycle_error(
+    exc: world_character_setup.StudioWorldCharacterLifecycleError,
+) -> None:
+    if isinstance(exc, world_character_setup.StudioWorldCharacterNotFoundError):
+        status_code = status.HTTP_404_NOT_FOUND
+    elif isinstance(exc, world_character_setup.StudioWorldCharacterForbiddenError):
+        status_code = status.HTTP_403_FORBIDDEN
+    elif isinstance(
+        exc,
+        (
+            world_character_setup.StudioWorldCharacterBusyError,
+            world_character_setup.StudioWorldCharacterConflictError,
+        ),
+    ):
+        status_code = status.HTTP_409_CONFLICT
+    else:
+        status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
     raise HTTPException(status_code=status_code, detail=exc.reason_code) from exc
 
 
@@ -91,6 +180,42 @@ def update_world_character_role(
     except world_character_setup.WorldCharacterSetupError as exc:
         _raise_world_character_error(exc)
         raise AssertionError("unreachable")
+
+
+@router.post(
+    "/{world_id}/characters/{character_id}/leave",
+    response_model=schemas.WorldCharacterLeaveRead,
+)
+def leave_world_with_character(
+    world_id: str,
+    character_id: str,
+    data: schemas.WorldCharacterLeaveCreate,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user),
+) -> schemas.WorldCharacterLeaveRead:
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        result = world_character_setup.leave_studio_world_character(
+            world_character_setup.SqlAlchemyStudioWorldCharacterLifecycle(
+                db,
+                runtime_guard=_WorldCharacterLeaveRuntimeGuard(db),
+            ),
+            world_id=world_id,
+            character_id=character_id,
+            current_user_id=user.id,
+            world_character_id=data.world_character_id,
+            expected_version=data.version,
+            confirmation_name=data.confirmation_name,
+            idempotency_key=data.idempotency_key,
+        )
+    except world_character_setup.StudioWorldCharacterLifecycleError as exc:
+        _raise_world_character_lifecycle_error(exc)
+        raise AssertionError("unreachable")
+    except world_service.WorldServiceError as exc:
+        _raise_world_error(exc)
+        raise AssertionError("unreachable")
+    return schemas.WorldCharacterLeaveRead.model_validate(result)
 
 
 def _raise_world_error(exc: Exception) -> None:

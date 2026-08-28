@@ -461,17 +461,17 @@
     {
       "markers": {
         "row_lock": [
-          292,
-          379,
-          422,
-          907,
-          919
+          296,
+          383,
+          426,
+          911,
+          923
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "a07c9967c495fa5ad9480fe46135d337ecd808de849536b401c75926be597756",
+      "source_sha256": "d20c7b3f31f430c5aa5f4afd8830cb40bf38e934931300747ac47cfe2bec54d4",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -504,6 +504,18 @@
       "path": "backend/app/domains/world_characters/infrastructure/sqlalchemy_setup_models.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "ddbc5ce7a06510ce8480a363d3b91ce2aebe6a54fc789c28b05c17b5870af2d5",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          126
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "8c86cfe24401f90d876e9085355e333849afaf884d56f09550229a432db6fb53",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1035,13 +1047,13 @@
       "transition_pr": "ER7 PR P"
     }
   ],
-  "entry_count": 66,
+  "entry_count": 67,
   "marker_counts": {
     "advisory_lock": 8,
     "driver_or_url": 42,
     "jsonb": 9,
     "pgvector": 4,
-    "row_lock": 24,
+    "row_lock": 25,
     "skip_locked": 7
   },
   "purpose": "Residual PostgreSQL markers retained only as historical schema evidence, serialized compatibility values, and negative reintroduction guards",

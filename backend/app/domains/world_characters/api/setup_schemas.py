@@ -228,6 +228,34 @@ class WorldCharacterRoleUpdate(WorldCharacterSetupSchema):
         return normalize_bounded_text(value)
 
 
+class WorldCharacterLeaveCreate(WorldCharacterSetupSchema):
+    world_character_id: str = Field(min_length=1, max_length=64)
+    version: int = Field(ge=1)
+    confirmation_name: str = Field(min_length=1, max_length=80)
+    idempotency_key: str = Field(min_length=8, max_length=128)
+
+    @field_validator(
+        "world_character_id",
+        "confirmation_name",
+        "idempotency_key",
+    )
+    @classmethod
+    def _leave_text(cls, value: str) -> str:
+        return normalize_bounded_text(value)
+
+
+class WorldCharacterLeaveRead(WorldCharacterSetupSchema):
+    world_character_id: str
+    world_id: str
+    character_id: str
+    status: Literal["left"]
+    autonomous_enabled: Literal[False]
+    version: int
+    scheduler_assignment_released: bool
+    history_preserved: Literal[True]
+    replayed: bool = False
+
+
 class WorldCommunityProfileRead(WorldCommunityProfilePayload):
     id: str
     world_character_id: str

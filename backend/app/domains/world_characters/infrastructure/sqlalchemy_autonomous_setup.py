@@ -182,6 +182,10 @@ def enter_world(
         )
     )
     if existing is not None:
+        if existing.status == "left":
+            raise WorldCharacterSetupValidationError(
+                "world_character_left_restore_unsupported"
+            )
         if existing.membership_id != membership.id or existing.status not in {
             "pending",
             "inactive",

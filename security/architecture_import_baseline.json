@@ -1,7 +1,7 @@
 {
-  "edge_count": 1217,
-  "external_import_count": 1769,
-  "module_count": 523,
+  "edge_count": 1232,
+  "external_import_count": 1780,
+  "module_count": 527,
   "modules": [
     {
       "external_imports": [],
@@ -1241,10 +1241,12 @@
       "external_imports": [
         "__future__",
         "fastapi",
+        "sqlalchemy",
         "sqlalchemy.orm"
       ],
       "imports": [
         "app.api.v1.deps",
+        "app.core.browser_session",
         "app.domains.world_characters.public",
         "app.domains.worlds.public",
         "app.models",
@@ -3255,9 +3257,11 @@
         "app.core.db",
         "app.domains.world_characters.api.schemas",
         "app.domains.world_characters.application.owner_controlled_identity",
+        "app.domains.world_characters.application.studio_lifecycle",
         "app.domains.world_characters.application.studio_surface",
         "app.domains.world_characters.domain.owner_controlled_identity",
         "app.domains.world_characters.infrastructure.sqlalchemy_owner_controlled_identity",
+        "app.domains.world_characters.infrastructure.sqlalchemy_studio_lifecycle",
         "app.domains.world_characters.infrastructure.sqlalchemy_studio_surface",
         "app.domains.worlds.public"
       ],
@@ -3275,6 +3279,7 @@
       ],
       "imports": [
         "app.domains.world_characters.domain.owner_controlled_identity",
+        "app.domains.world_characters.domain.studio_lifecycle",
         "app.domains.world_characters.domain.studio_surface"
       ],
       "module": "app.domains.world_characters.api.schemas",
@@ -3320,6 +3325,18 @@
         "__future__"
       ],
       "imports": [
+        "app.domains.world_characters.domain.studio_lifecycle",
+        "app.domains.world_characters.ports.studio_lifecycle"
+      ],
+      "module": "app.domains.world_characters.application.studio_lifecycle",
+      "path": "backend/app/domains/world_characters/application/studio_lifecycle.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__"
+      ],
+      "imports": [
         "app.domains.world_characters.domain.studio_surface",
         "app.domains.world_characters.ports.studio_surface"
       ],
@@ -3352,6 +3369,17 @@
       "imports": [],
       "module": "app.domains.world_characters.domain.seed",
       "path": "backend/app/domains/world_characters/domain/seed.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.world_characters.domain.studio_lifecycle",
+      "path": "backend/app/domains/world_characters/domain/studio_lifecycle.py",
       "wildcard_imports": []
     },
     {
@@ -3520,6 +3548,24 @@
     {
       "external_imports": [
         "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.characters.public",
+        "app.domains.world_characters.domain.studio_lifecycle",
+        "app.domains.world_characters.infrastructure.sqlalchemy_models",
+        "app.domains.world_characters.ports.studio_lifecycle",
+        "app.domains.worlds.public"
+      ],
+      "module": "app.domains.world_characters.infrastructure.sqlalchemy_studio_lifecycle",
+      "path": "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "sqlalchemy",
         "sqlalchemy.orm"
       ],
@@ -3559,6 +3605,18 @@
         "typing"
       ],
       "imports": [
+        "app.domains.world_characters.domain.studio_lifecycle"
+      ],
+      "module": "app.domains.world_characters.ports.studio_lifecycle",
+      "path": "backend/app/domains/world_characters/ports/studio_lifecycle.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [
         "app.domains.world_characters.domain.studio_surface"
       ],
       "module": "app.domains.world_characters.ports.studio_surface",
@@ -3568,14 +3626,17 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.world_characters.application.studio_lifecycle",
         "app.domains.world_characters.domain.owner_controlled_identity",
         "app.domains.world_characters.domain.seed",
+        "app.domains.world_characters.domain.studio_lifecycle",
         "app.domains.world_characters.infrastructure.autonomous_setup_contracts",
         "app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup",
         "app.domains.world_characters.infrastructure.sqlalchemy_models",
         "app.domains.world_characters.infrastructure.sqlalchemy_owner_controlled_identity",
         "app.domains.world_characters.infrastructure.sqlalchemy_seed",
-        "app.domains.world_characters.infrastructure.sqlalchemy_setup_models"
+        "app.domains.world_characters.infrastructure.sqlalchemy_setup_models",
+        "app.domains.world_characters.infrastructure.sqlalchemy_studio_lifecycle"
       ],
       "module": "app.domains.world_characters.public",
       "path": "backend/app/domains/world_characters/public.py",

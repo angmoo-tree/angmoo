@@ -87,6 +87,23 @@ and composition imports use `features/social/public.ts`. CI rejects any new
 `features/social -> components` or `features/social -> lib` edge and any
 Tauri-only social UI fork.
 
+L4 PR G turns Creator Studio's WorldCharacter card from a read-only checkpoint
+into a bounded verification-fixture surface. `features/creator-studio` owns the
+typed candidate, entry and leave clients plus the UI orchestration; it does not
+import legacy `components` or `lib` modules. The same feature renders in Next
+browser, static/Tauri, Host Tauri dev and installer paths.
+
+`새 캐릭터 만들기` reuses `/agents/new` with a validated current-World return
+context. In that context Character creation uses the existing direct create
+contract and deliberately skips credential probe, tendency analysis, public
+write and onboarding provider calls. Creator Studio then selects an enabled
+autonomous World role (including canonical `no_specific_role`) and invokes the
+existing idempotent World entry command. Removal is separately labelled
+`이 World에서 제거`, requires the canonical Character confirmation name, stops
+the selected autonomy first, and calls the versioned leave command. The copy
+states that historical activity and relationship evidence remains and sends
+global Character deletion to the existing `내 앵무 관리` surface instead.
+
 L4 PR C moves the World Feed composer/thread UI, its owner-write DTOs and its
 typed write client under `features/social`. `features/world-app` now composes
 that feature only through `features/social/public.ts`; it no longer owns a

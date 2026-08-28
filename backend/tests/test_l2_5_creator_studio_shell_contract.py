@@ -67,7 +67,7 @@ def test_studio_shell_is_wide_and_preserves_small_viewport_accessibility() -> No
     assert 'href={PRODUCT_ROUTES.deviceHome}' in frame
 
 
-def test_studio_world_character_surface_is_read_only_and_links_existing_setup() -> None:
+def test_studio_world_character_surface_owns_fixture_lifecycle_orchestration() -> None:
     creator = _read("components/world-creator-client.tsx")
     surface = _read(
         "features/creator-studio/ui/studio-world-character-list.tsx"
@@ -81,8 +81,13 @@ def test_studio_world_character_surface_is_read_only_and_links_existing_setup() 
     assert "활동 준비·상태 보기" in surface
     assert "/autonomy-setup`" in surface
     assert 'import Link from "next/link"' in surface
-    assert "useRuntimeRouter" not in surface
-    assert "생성·삭제는 P10-L에서 제공합니다." in surface
+    assert "useRuntimeRouter" in surface
+    assert "새 캐릭터 만들기" in surface
+    assert "기존 캐릭터 연결" in surface
+    assert "이 World에서 제거" in surface
+    assert "생성·삭제는 P10-L에서 제공합니다." not in surface
     assert "?surface=studio" in client
+    assert "/character-candidates" in client
+    assert "/leave`" in client
     assert 'method: "POST"' not in surface
     assert 'method: "DELETE"' not in surface

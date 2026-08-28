@@ -37,6 +37,21 @@ from app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup imp
     set_active_world_character_autonomy,
     update_world_character_role,
 )
+from app.domains.world_characters.application.studio_lifecycle import (
+    leave_studio_world_character,
+    list_studio_character_candidates,
+)
+from app.domains.world_characters.domain.studio_lifecycle import (
+    StudioWorldCharacterBusyError,
+    StudioWorldCharacterConflictError,
+    StudioWorldCharacterForbiddenError,
+    StudioWorldCharacterLifecycleError,
+    StudioWorldCharacterNotFoundError,
+    StudioWorldCharacterValidationError,
+)
+from app.domains.world_characters.infrastructure.sqlalchemy_studio_lifecycle import (
+    SqlAlchemyStudioWorldCharacterLifecycle,
+)
 from app.domains.world_characters.infrastructure.sqlalchemy_seed import (
     seed_autonomous_world_character,
 )
@@ -65,6 +80,13 @@ __all__ = [
     "WorldCharacterSetupForbiddenError",
     "WorldCharacterSetupNotFoundError",
     "WorldCharacterSetupValidationError",
+    "StudioWorldCharacterBusyError",
+    "StudioWorldCharacterConflictError",
+    "StudioWorldCharacterForbiddenError",
+    "StudioWorldCharacterLifecycleError",
+    "StudioWorldCharacterNotFoundError",
+    "StudioWorldCharacterValidationError",
+    "SqlAlchemyStudioWorldCharacterLifecycle",
     "WorldActivityCandidate",
     "WorldActivityRepertoire",
     "WorldCharacter",
@@ -77,6 +99,8 @@ __all__ = [
     "get_setup",
     "get_world_entry",
     "is_owner_controlled_character",
+    "leave_studio_world_character",
+    "list_studio_character_candidates",
     "owner_controlled_character_ids",
     "preflight_setup",
     "reject_setup",

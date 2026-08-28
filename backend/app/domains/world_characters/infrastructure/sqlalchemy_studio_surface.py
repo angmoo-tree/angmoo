@@ -5,7 +5,10 @@ from sqlalchemy.orm import Session
 
 from app.domains.characters.public import Character
 from app.domains.world_characters.domain.studio_surface import StudioWorldCharacter
-from app.domains.world_characters.infrastructure.sqlalchemy_models import WorldCharacter
+from app.domains.world_characters.infrastructure.sqlalchemy_models import (
+    CharacterActiveWorld,
+    WorldCharacter,
+)
 from app.domains.world_characters.infrastructure.sqlalchemy_setup_models import (
     WorldActivityRepertoire,
     WorldCommunityProfile,
@@ -44,13 +47,29 @@ class SqlAlchemyStudioWorldCharacterReader:
         ).all()
         ids = [world_character.id for world_character, _character in rows]
         setup_status = self._setup_status(ids)
+        selected_ids = self._selected_world_character_ids(ids)
         return tuple(
             self._snapshot(
                 world_character,
                 character,
                 setup_status.get(world_character.id, (None, None)),
+                selected_active_world=world_character.id in selected_ids,
             )
             for world_character, character in rows
+        )
+
+    def _selected_world_character_ids(
+        self,
+        world_character_ids: list[str],
+    ) -> set[str]:
+        if not world_character_ids:
+            return set()
+        return set(
+            self.db.scalars(
+                select(CharacterActiveWorld.world_character_id).where(
+                    CharacterActiveWorld.world_character_id.in_(world_character_ids)
+                )
+            ).all()
         )
 
     def _setup_status(
@@ -96,6 +115,8 @@ class SqlAlchemyStudioWorldCharacterReader:
         world_character: WorldCharacter,
         character: Character,
         statuses: tuple[str | None, str | None],
+        *,
+        selected_active_world: bool,
     ) -> StudioWorldCharacter:
         if world_character.control_mode == "owner_controlled":
             setup_state = "unavailable_for_owner_controlled"
@@ -110,6 +131,7 @@ class SqlAlchemyStudioWorldCharacterReader:
             world_character_id=world_character.id,
             character_id=character.id,
             display_name=str(local_profile.get("display_name") or character.name),
+            confirmation_name=character.name,
             avatar_url=str(local_profile.get("avatar_url") or character.avatar_url)
             if (local_profile.get("avatar_url") or character.avatar_url)
             else None,
@@ -118,6 +140,7 @@ class SqlAlchemyStudioWorldCharacterReader:
             control_mode=world_character.control_mode,
             status=world_character.status,
             autonomous_enabled=world_character.autonomous_enabled,
+            selected_active_world=selected_active_world,
             version=world_character.version,
             activity_setup_state=setup_state,
         )
