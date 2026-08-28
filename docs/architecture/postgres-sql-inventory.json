@@ -294,12 +294,12 @@
       "markers": {
         "advisory_lock": [
           376,
-          1278
+          1266
         ],
         "driver_or_url": [
           373,
           493,
-          1268
+          1256
         ],
         "row_lock": [
           494
@@ -311,7 +311,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/cruds/community.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "fafaca3d91a8043549e2b4f223493b6fa3968945fceb68b70eb4809f1381a2cc",
+      "source_sha256": "9508dffad905bd5863c8c5e6ca77cd1b76569ae1b3993cbdde9d3dfdbf8972e6",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -771,35 +771,33 @@
     {
       "markers": {
         "advisory_lock": [
-          1431
+          1424
         ],
         "driver_or_url": [
-          1428
+          1421
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/agent_creation_drafts.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "69b44031ddcf00c7b280a267f20c23f1d40b7ae0033cac30bb3f07850d553533",
+      "source_sha256": "18e7c651eeab739496ab0b9a60193d321d821cccdd7aca9709a7fb3fdd7f99b5",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
         "advisory_lock": [
-          586,
-          595,
-          3036
+          534,
+          2975
         ],
         "driver_or_url": [
-          576,
-          592,
-          3027
+          531,
+          2966
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/agents.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "635c3de51b647d5ea6bce5f8d0e2b4d2cf39f8c5dbcb4a3775c5bc380ca94c8c",
+      "source_sha256": "c0032fc2b6baf14446d45414d39dc5bb595da55cd75bca1ceb5a9ac18596149d",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

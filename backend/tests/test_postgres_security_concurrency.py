@@ -1446,7 +1446,7 @@ def test_lore_parser_global_capacity_is_atomic_across_postgres_sessions() -> Non
     )
 
 
-def test_agent_creation_quota_is_atomic_across_postgres_sessions() -> None:
+def test_agent_creation_allows_concurrent_local_characters_without_a_saved_count_cap() -> None:
     engine = _engine()
     suffix = uuid4().hex
     user_id = f"user-agent-quota-{suffix}"
@@ -1468,25 +1468,20 @@ def test_agent_creation_quota_is_atomic_across_postgres_sessions() -> None:
             user = db.get(models.User, user_id)
             assert user is not None
             barrier.wait()
-            try:
-                agent_service.create_agent(
-                    db,
-                    user,
-                    schemas.AgentCreate(
-                        execution_mode="local",
-                        name=f"local-{index}",
-                        handle=f"local_{suffix[:12]}_{index}",
-                    ),
-                )
-            except agent_service.AgentLimitError:
-                db.rollback()
-                return "limited"
+            agent_service.create_agent(
+                db,
+                user,
+                schemas.AgentCreate(
+                    execution_mode="local",
+                    name=f"local-{index}",
+                    handle=f"local_{suffix[:12]}_{index}",
+                ),
+            )
             return "created"
 
     with ThreadPoolExecutor(max_workers=12) as executor:
         results = list(executor.map(attempt, range(12)))
-    assert results.count("created") == agent_service.MAX_LOCAL_AGENTS_PER_USER
-    assert results.count("limited") == 12 - agent_service.MAX_LOCAL_AGENTS_PER_USER
+    assert results == ["created"] * 12
 
 
 def test_first_greeting_claim_is_single_flight_across_postgres_sessions() -> None:

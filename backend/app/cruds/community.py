@@ -996,18 +996,6 @@ def count_user_characters(db: Session, user_id: str) -> int:
     ) or 0
 
 
-def count_user_characters_by_execution_mode(
-    db: Session, user_id: str, execution_mode: str
-) -> int:
-    return db.scalar(
-        select(func.count(models.Character.id)).where(
-            models.Character.owner_id == user_id,
-            models.Character.execution_mode == execution_mode,
-            models.Character.deleted_at.is_(None),
-        )
-    ) or 0
-
-
 def list_characters_for_user(db: Session, user_id: str) -> list[models.Character]:
     return list(
         db.scalars(

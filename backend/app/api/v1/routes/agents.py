@@ -39,8 +39,6 @@ def create_agent(
 ) -> schemas.AgentDetailRead:
     try:
         return agent_service.create_agent(db, user, data)
-    except agent_service.AgentLimitError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except agent_service.AgentHandleConflictError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except agent_service.AgentHandleInvalidError as exc:
@@ -63,8 +61,6 @@ async def create_agent_draft(
 ) -> schemas.AgentCreationDraftRead:
     try:
         return await draft_service.create_draft(db, user, data)
-    except agent_service.AgentLimitError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except agent_service.CredentialSyncError as exc:
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
     except agent_run_service.AgentSlotUnavailableError as exc:
@@ -322,8 +318,6 @@ def complete_agent_draft(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Draft not found") from exc
     except draft_service.AgentCreationDraftValidationError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
-    except agent_service.AgentLimitError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except agent_service.AgentHandleConflictError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except agent_service.AgentHandleInvalidError as exc:

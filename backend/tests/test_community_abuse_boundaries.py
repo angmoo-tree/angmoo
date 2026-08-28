@@ -91,32 +91,8 @@ def test_three_reports_do_not_automatically_hide_post() -> None:
         assert post.report_hidden_at is None
 
 
-def test_agent_quota_lock_is_part_of_create_path() -> None:
+def test_saved_character_count_is_not_a_community_abuse_quota() -> None:
     from app.services import agents
 
-    class Dialect:
-        name = "postgresql"
-
-    class Bind:
-        dialect = Dialect()
-
-    class FakeDb:
-        bind = Bind()
-
-        def __init__(self) -> None:
-            self.statements: list[object] = []
-
-        def execute(self, statement, parameters):
-            self.statements.append((statement, parameters))
-
-    db = FakeDb()
-    agents._lock_agent_quota(
-        db,  # type: ignore[arg-type]
-        user_id="user-agent-limit",
-        execution_mode="llm",
-    )
-
-    assert len(db.statements) == 1
-    statement, parameters = db.statements[0]
-    assert "pg_advisory_xact_lock" in str(statement)
-    assert isinstance(parameters["lock_key"], int)
+    assert not hasattr(agents, "_lock_agent_quota")
+    assert not hasattr(agents, "_ensure_agent_quota_available")

@@ -53,22 +53,10 @@ from app.domains.world_characters.public import (
 )
 
 
-MAX_LLM_AGENTS_PER_USER = 3
-MAX_LOCAL_AGENTS_PER_USER = 3
-MAX_AGENTS_PER_USER = MAX_LLM_AGENTS_PER_USER + MAX_LOCAL_AGENTS_PER_USER
-LLM_AGENT_LIMIT_ERROR_MESSAGE = (
-    "서버 LLM 앵무는 계정당 최대 3개까지 만들 수 있습니다."
-)
-LOCAL_AGENT_LIMIT_ERROR_MESSAGE = (
-    "외부 연결 앵무는 계정당 최대 3개까지 만들 수 있습니다."
-)
 SERVER_LLM_AUTONOMY_CAPACITY_ERROR_MESSAGE = (
     "현재 서버 LLM 자율활동 정원이 가득 찼습니다. 잠시 후 다시 시도하거나 다른 앵무의 자율활동을 꺼주세요."
 )
 SERVER_LLM_AUTONOMY_CAPACITY_LOCK_KEY = 6_180_100
-AGENT_LIMIT_ERROR_MESSAGE = (
-    "서버 LLM 앵무 3개와 외부 연결 앵무 3개를 모두 만들었습니다."
-)
 AGENT_DETAIL_ACTIVITY_LIMIT = 200
 PROMOTION_USAGE_POLICY_VERSION = "2026-06-25"
 RUN_NOW_COOLDOWN = timedelta(minutes=30)
@@ -233,10 +221,6 @@ DemoAccountLockedError = demo_lock.DemoAccountLockedError
 
 
 class AgentNotFoundError(AgentServiceError):
-    pass
-
-
-class AgentLimitError(AgentServiceError):
     pass
 
 
@@ -459,8 +443,6 @@ def create_agent(
 ) -> schemas.AgentDetailRead:
     _validate_initial_activity_settings(data)
     ensure_persona_prompt_safety(data)
-    _lock_agent_quota(db, user_id=user.id, execution_mode=data.execution_mode)
-    _ensure_agent_quota_available(db, user.id, data.execution_mode)
     try:
         character = community_crud.create_character(
             db, user=user, character_id=f"char-{uuid4().hex[:12]}", data=data
@@ -543,49 +525,6 @@ def _ensure_initial_image_settings(db: Session, character_id: str) -> None:
     setting.image_generation_enabled = setting.image_key_mode != "disabled"
     db.commit()
     db.refresh(setting)
-
-
-def _ensure_agent_quota_available(
-    db: Session, user_id: str, execution_mode: str
-) -> None:
-    limit = (
-        MAX_LOCAL_AGENTS_PER_USER
-        if execution_mode == "local"
-        else MAX_LLM_AGENTS_PER_USER
-    )
-    message = (
-        LOCAL_AGENT_LIMIT_ERROR_MESSAGE
-        if execution_mode == "local"
-        else LLM_AGENT_LIMIT_ERROR_MESSAGE
-    )
-    if (
-        community_crud.count_user_characters_by_execution_mode(
-            db, user_id, execution_mode
-        )
-        >= limit
-    ):
-        raise AgentLimitError(message)
-
-
-def _lock_agent_quota(
-    db: Session,
-    *,
-    user_id: str,
-    execution_mode: str,
-) -> None:
-    if db.bind is None or db.bind.dialect.name != "postgresql":
-        return
-    lock_key = int.from_bytes(
-        hashlib.sha256(
-            f"angmoo:agent-quota:{user_id}:{execution_mode}:v1".encode("utf-8")
-        ).digest()[:8],
-        byteorder="big",
-        signed=True,
-    )
-    db.execute(
-        text("select pg_advisory_xact_lock(:lock_key)"),
-        {"lock_key": lock_key},
-    )
 
 
 def _lock_server_llm_autonomy_capacity(db: Session) -> None:
