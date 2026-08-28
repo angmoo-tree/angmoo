@@ -106,3 +106,33 @@ def test_studio_world_character_surface_owns_fixture_lifecycle_orchestration() -
         'created.character.id)}`' in create_client
     )
     assert "<AgentCreateClient />" in browser_create_page
+
+
+def test_local_character_creation_ui_has_no_hosted_saved_count_gate() -> None:
+    create_client = _read("components/agent-create-client.tsx")
+    dashboard = _read("components/agents-dashboard-client.tsx")
+    agents_lib = _read("lib/agents.ts")
+    combined = "\n".join((create_client, dashboard, agents_lib))
+
+    for forbidden in (
+        "MAX_LLM_AGENTS_PER_USER",
+        "MAX_LOCAL_AGENTS_PER_USER",
+        "MAX_AGENTS_PER_USER",
+        "AgentQuotaCounts",
+        "getAgentQuotaCounts",
+        "AGENT_LIMIT_MESSAGE",
+        "LLM_AGENT_LIMIT_MESSAGE",
+        "LOCAL_AGENT_LIMIT_MESSAGE",
+        "앵무 생성 제한",
+        "한도 도달",
+        "3/3",
+    ):
+        assert forbidden not in combined
+
+    assert "setInitialAgentCount(agents.length)" in create_client
+    assert "if (initialAgentCount === 0)" in create_client
+    assert "<CreationModeSelector" in create_client
+    assert "counts=" not in create_client
+    assert "getAgentTypeCounts(agents)" in dashboard
+    assert "서버 LLM ${agentTypeCounts.llm}개" in dashboard
+    assert 'href="/agents/new"' in dashboard

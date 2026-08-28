@@ -13,6 +13,7 @@ const ROUTES = [
   "/worlds/world-static-probe/posts/post-static-probe",
   "/characters/character-static-probe/worlds/world-static-probe/autonomy-setup",
   "/characters/character-static-probe/worlds/world-static-probe/relationship-graph?provider=ladybug",
+  "/agents/new",
   "/agents/character-static-probe",
   "/posts",
   "/posts/post-static-probe",
@@ -69,6 +70,55 @@ for (const route of ROUTES) {
     await expect(page.locator("body")).not.toBeEmpty();
   });
 }
+
+test("static local creation stays available beyond the former hosted count cap", async ({
+  page,
+}) => {
+  const pageErrors: string[] = [];
+  page.on("pageerror", (error) => pageErrors.push(error.stack ?? error.message));
+  await page.route("http://127.0.0.1:8080/api/v1/agents", async (route) => {
+    expect(route.request().method()).toBe("GET");
+    await route.fulfill({
+      contentType: "application/json",
+      json: [
+        ...Array.from({ length: 3 }, (_, index) => ({
+          character: {
+            id: `llm-static-${index}`,
+            execution_mode: "llm",
+            name: `LLM Static ${index}`,
+          },
+          settings: { auto_enabled: false },
+          assigned_slot: null,
+        })),
+        ...Array.from({ length: 3 }, (_, index) => ({
+          character: {
+            id: `local-static-${index}`,
+            execution_mode: "local",
+            name: `Local Static ${index}`,
+          },
+          settings: { auto_enabled: false },
+          assigned_slot: null,
+        })),
+      ],
+      status: 200,
+    });
+  });
+
+  await page.goto("/agents/new");
+
+  await expect(page.getByRole("heading", { name: "앵무 만들기" })).toBeVisible();
+  await expect(page.getByText("앵무 생성 제한")).toHaveCount(0);
+  await expect(page.getByText("한도 도달")).toHaveCount(0);
+  await expect(page.getByText("3/3")).toHaveCount(0);
+
+  const llmMode = page.getByRole("button", { name: /서버 LLM 앵무/ });
+  const localMode = page.getByRole("button", { name: /외부 연결 앵무/ });
+  await expect(llmMode).toBeEnabled();
+  await expect(localMode).toBeEnabled();
+  await localMode.click();
+  await expect(page.getByRole("heading", { name: "외부 연결 앵무 만들기" })).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});
 
 test("static P4 evidence opens the exact World-scoped post thread", async ({
   page,

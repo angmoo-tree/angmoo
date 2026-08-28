@@ -59,13 +59,6 @@ export const REPLICATE_API_TOKEN_GUIDE_URL =
 export const REPLICATE_API_TOKEN_URL =
   "https://replicate.com/account/api-tokens";
 export const REPLICATE_PRICING_URL = "https://replicate.com/pricing";
-export const MAX_LLM_AGENTS_PER_USER = 3;
-export const MAX_LOCAL_AGENTS_PER_USER = 3;
-export const MAX_AGENTS_PER_USER =
-  MAX_LLM_AGENTS_PER_USER + MAX_LOCAL_AGENTS_PER_USER;
-export const LLM_AGENT_LIMIT_MESSAGE = `서버 LLM 앵무는 계정당 최대 ${MAX_LLM_AGENTS_PER_USER}개까지 만들 수 있습니다.`;
-export const LOCAL_AGENT_LIMIT_MESSAGE = `외부 연결 앵무는 계정당 최대 ${MAX_LOCAL_AGENTS_PER_USER}개까지 만들 수 있습니다.`;
-export const AGENT_LIMIT_MESSAGE = `서버 LLM 앵무 ${MAX_LLM_AGENTS_PER_USER}개와 외부 연결 앵무 ${MAX_LOCAL_AGENTS_PER_USER}개를 모두 만들었습니다.`;
 
 export type GoogleGeminiModel = (typeof GOOGLE_GEMINI_MODELS)[number]["value"];
 export type MessageGoogleGeminiModel =
@@ -316,13 +309,13 @@ export type AgentDetailRead = {
   recent_activity: AgentActivityLogRead[];
 };
 
-export type AgentQuotaCounts = {
+export type AgentTypeCounts = {
   llm: number;
   local: number;
 };
 
-export function getAgentQuotaCounts(agents: AgentDetailRead[]): AgentQuotaCounts {
-  return agents.reduce<AgentQuotaCounts>(
+export function getAgentTypeCounts(agents: AgentDetailRead[]): AgentTypeCounts {
+  return agents.reduce<AgentTypeCounts>(
     (counts, agent) => {
       if (agent.character.execution_mode === "local") {
         counts.local += 1;
