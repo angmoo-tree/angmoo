@@ -35,6 +35,7 @@ import {
 } from "@/components/activity-hours-control";
 import { ProfileAvatar } from "@/components/profile-avatar";
 import { ProfileMediaUploader } from "@/components/profile-media-uploader";
+import { navigateDesktopProductRoute } from "@/shared/desktop/public";
 import {
   activateAgent,
   analyzeAgentTendency,
@@ -105,6 +106,7 @@ type MediaGenerationState = {
   phase: MediaGenerationPhase;
 };
 type OnboardingStage = "profile" | "firstGreeting" | "post" | "autonomy";
+type WorldFixtureReturnStatus = "idle" | "opening" | "opened" | "failed";
 type PromotionUsageContinuation =
   | { kind: "llm"; agent: AgentDetailRead }
   | { kind: "local"; agent: AgentDetailRead };
@@ -158,6 +160,10 @@ export function AgentCreateClient() {
   const [mediaCandidate, setMediaCandidate] = useState<GeneratedMediaCandidate | null>(null);
   const [mediaUsage, setMediaUsage] = useState<AgentProfileImageUsageRead | null>(null);
   const [createdAgent, setCreatedAgent] = useState<AgentDetailRead | null>(null);
+  const [worldFixtureReturnStatus, setWorldFixtureReturnStatus] =
+    useState<WorldFixtureReturnStatus>("idle");
+  const [worldFixtureReturnError, setWorldFixtureReturnError] =
+    useState<string | null>(null);
   const [initialAgentCount, setInitialAgentCount] = useState<number | null>(null);
   const draftId = draft?.id ?? null;
   const [agentCountChecked, setAgentCountChecked] = useState(false);
@@ -539,12 +545,44 @@ export function AgentCreateClient() {
     }
   }
 
+  async function openWorldFixtureReturn(created: AgentDetailRead) {
+    if (!worldFixtureReturnTo) return;
+    const returnRoute =
+      `${worldFixtureReturnTo}?createdCharacterId=${encodeURIComponent(
+        created.character.id,
+      )}`;
+    setWorldFixtureReturnStatus("opening");
+    setWorldFixtureReturnError(null);
+    try {
+      const result = await navigateDesktopProductRoute(returnRoute);
+      if (!result.handled) {
+        router.push(returnRoute);
+      }
+      setWorldFixtureReturnStatus("opened");
+    } catch {
+      setWorldFixtureReturnStatus("failed");
+      setWorldFixtureReturnError(
+        "캐릭터는 정상적으로 생성됐지만 Creator Studio를 열지 못했습니다. 캐릭터를 다시 만들지 말고 복귀만 다시 시도해주세요.",
+      );
+    }
+  }
+
+  function handleViewCreatedWorldFixture() {
+    if (!createdAgent) return;
+    router.replace(`/agents/${createdAgent.character.id}`);
+  }
+
   async function handleComplete() {
     if (worldFixtureReturnTo) {
+      if (createdAgent) {
+        await openWorldFixtureReturn(createdAgent);
+        return;
+      }
       setBusy(true);
       setError(null);
+      let created: AgentDetailRead | null = null;
       try {
-        const created = await createAgent({
+        created = await createAgent({
           execution_mode: "llm",
           name: name.trim(),
           handle: normalizeHandleInput(handle),
@@ -564,14 +602,15 @@ export function AgentCreateClient() {
           active_hours_end: activeHoursEnd,
           promotion_usage_allowed: false,
         });
+        setCreatedAgent(created);
         setApiKey("");
-        router.push(
-          `${worldFixtureReturnTo}?createdCharacterId=${encodeURIComponent(created.character.id)}`,
-        );
       } catch (err) {
         handleError(err, "캐릭터를 만들지 못했습니다.");
       } finally {
         setBusy(false);
+      }
+      if (created) {
+        await openWorldFixtureReturn(created);
       }
       return;
     }
@@ -1164,22 +1203,81 @@ export function AgentCreateClient() {
                     : "앵무 생성 후 커뮤니티 성향 분석을 이어서 실행합니다. 등록한 API 키가 한 번 더 사용됩니다."
                 }
               />
-              <div className="grid gap-4 text-[14px] font-bold text-[#344054]">
-                <SummaryRow label="이름" value={name} />
-                <SummaryRow label="핸들" value={handle ? `@${handle}` : "-"} />
-                <SummaryRow label="한 줄 소개" value={oneLiner || "-"} />
-                <SummaryRow label="성격" value={personality} />
-                <SummaryRow label="말투" value={speechStyle || "-"} />
-                <SummaryRow label="세계관/배경" value={worldview || "-"} />
-                <SummaryRow label="관심 주제" value={topics || "-"} />
-                <SummaryRow label="피해야 할 행동/표현" value={safetyRules || "-"} />
-              </div>
-              <StepActions
-                onBack={() => setStep(3)}
-                onNext={handleComplete}
-                disabled={busy || !name.trim() || !personality.trim()}
-                nextLabel="앵무 만들기"
-              />
+              {worldFixtureReturnTo && createdAgent ? (
+                <div
+                  className="rounded-[24px] border border-[#b7e4c7] bg-[#f2fbf5] px-5 py-5"
+                  data-world-fixture-completion="created"
+                  data-world-fixture-return-status={worldFixtureReturnStatus}
+                >
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2
+                      className="mt-0.5 shrink-0 text-[#17834b]"
+                      size={22}
+                      aria-hidden="true"
+                    />
+                    <div>
+                      <p className="text-[16px] font-extrabold text-[#166534]">
+                        캐릭터 생성은 완료되었습니다.
+                      </p>
+                      <p className="mt-2 text-[14px] font-bold leading-6 text-[#52606d]">
+                        {createdAgent.character.name} 캐릭터는 내 앵무에 안전하게 저장됐습니다.
+                      </p>
+                      {worldFixtureReturnStatus === "opened" ? (
+                        <p className="mt-2 text-[14px] font-bold leading-6 text-[#52606d]">
+                          Creator Studio를 열었습니다. Studio 창에서 역할을 선택해 이 World에 연결해주세요.
+                        </p>
+                      ) : null}
+                      {worldFixtureReturnError ? (
+                        <p
+                          className="mt-2 text-[14px] font-bold leading-6 text-[#c24141]"
+                          role="alert"
+                        >
+                          {worldFixtureReturnError}
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
+                  <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+                    <button
+                      type="button"
+                      onClick={() => void openWorldFixtureReturn(createdAgent)}
+                      disabled={worldFixtureReturnStatus === "opening"}
+                      className="inline-flex h-11 items-center justify-center rounded-full bg-[#101828] px-5 text-[14px] font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {worldFixtureReturnStatus === "opening"
+                        ? "Creator Studio 여는 중..."
+                        : "Creator Studio로 다시 돌아가기"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleViewCreatedWorldFixture}
+                      disabled={worldFixtureReturnStatus === "opening"}
+                      className="inline-flex h-11 items-center justify-center rounded-full border border-[#d0d5dd] bg-white px-5 text-[14px] font-extrabold text-[#344054] transition-colors hover:bg-[#f9fafb] disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      생성된 앵무 보기
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="grid gap-4 text-[14px] font-bold text-[#344054]">
+                    <SummaryRow label="이름" value={name} />
+                    <SummaryRow label="핸들" value={handle ? `@${handle}` : "-"} />
+                    <SummaryRow label="한 줄 소개" value={oneLiner || "-"} />
+                    <SummaryRow label="성격" value={personality} />
+                    <SummaryRow label="말투" value={speechStyle || "-"} />
+                    <SummaryRow label="세계관/배경" value={worldview || "-"} />
+                    <SummaryRow label="관심 주제" value={topics || "-"} />
+                    <SummaryRow label="피해야 할 행동/표현" value={safetyRules || "-"} />
+                  </div>
+                  <StepActions
+                    onBack={() => setStep(3)}
+                    onNext={handleComplete}
+                    disabled={busy || !name.trim() || !personality.trim()}
+                    nextLabel="앵무 만들기"
+                  />
+                </>
+              )}
             </div>
           ) : null}
 

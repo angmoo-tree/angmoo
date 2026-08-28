@@ -101,10 +101,17 @@ def test_studio_world_character_surface_owns_fixture_lifecycle_orchestration() -
     assert 'searchParams.get("worldId")' in create_client
     assert 'searchParams.get("returnTo")' in create_client
     assert "requestedReturnTo === expectedWorldReturnTo" in create_client
-    assert (
-        '`${worldFixtureReturnTo}?createdCharacterId=${encodeURIComponent('
-        'created.character.id)}`' in create_client
-    )
+    assert "navigateDesktopProductRoute" in create_client
+    assert "async function openWorldFixtureReturn" in create_client
+    assert "created.character.id," in create_client
+    assert "await navigateDesktopProductRoute(returnRoute)" in create_client
+    assert "if (!result.handled)" in create_client
+    assert "if (createdAgent)" in create_client
+    assert "await openWorldFixtureReturn(createdAgent)" in create_client
+    assert 'data-world-fixture-completion="created"' in create_client
+    assert 'data-world-fixture-return-status={worldFixtureReturnStatus}' in create_client
+    assert "Creator Studio로 다시 돌아가기" in create_client
+    assert "생성된 앵무 보기" in create_client
     assert "<AgentCreateClient />" in browser_create_page
 
 

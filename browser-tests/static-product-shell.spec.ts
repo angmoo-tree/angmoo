@@ -120,6 +120,382 @@ test("static local creation stays available beyond the former hosted count cap",
   expect(pageErrors).toEqual([]);
 });
 
+test("Tauri Phone retries Creator Studio return without creating a duplicate Character", async ({
+  page,
+}) => {
+  const fixtureRoute =
+    "/agents/new?worldId=world-static-probe&returnTo=%2Fstudio%2Fworlds%2Fworld-static-probe";
+  await page.addInitScript((route) => {
+    const desktop = window as unknown as {
+      __ANGMOO_DESKTOP_INVOCATIONS__: Array<{
+        command: string;
+        args?: Record<string, unknown>;
+      }>;
+      __ANGMOO_DESKTOP_WINDOW__: { kind: "phone"; route: string };
+      __TAURI__: {
+        core: {
+          invoke: (command: string, args?: Record<string, unknown>) => Promise<unknown>;
+        };
+      };
+    };
+    desktop.__ANGMOO_DESKTOP_INVOCATIONS__ = [];
+    desktop.__ANGMOO_DESKTOP_WINDOW__ = { kind: "phone", route };
+    desktop.__TAURI__ = {
+      core: {
+        invoke: async (command, args) => {
+          if (command === "desktop_runtime_status") {
+            return {
+              phase: "ready",
+              apiBaseUrl: "http://127.0.0.1:8080",
+              graphProvider: "ladybug",
+              launchToken: "static-route-probe-token-000000000000",
+            };
+          }
+          desktop.__ANGMOO_DESKTOP_INVOCATIONS__.push({ command, args });
+          const studioOpenCount = desktop.__ANGMOO_DESKTOP_INVOCATIONS__.filter(
+            (invocation) => invocation.command === "open_product_window",
+          ).length;
+          if (command === "open_product_window" && studioOpenCount === 1) {
+            throw new Error("static_studio_open_probe");
+          }
+          return undefined;
+        },
+      },
+    };
+  }, fixtureRoute);
+
+  let createRequestCount = 0;
+  const agentRequests: string[] = [];
+  await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname.startsWith("/api/v1/agents")) {
+      agentRequests.push(url.pathname);
+    }
+    if (url.pathname === "/api/v1/agents" && route.request().method() === "GET") {
+      await route.fulfill({
+        contentType: "application/json",
+        json: [],
+        status: 200,
+      });
+      return;
+    }
+    if (url.pathname === "/api/v1/agents" && route.request().method() === "POST") {
+      createRequestCount += 1;
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          character: {
+            id: "char-new-1",
+            name: "미도리야 이즈쿠",
+            handle: "midoriya_izuku",
+            execution_mode: "llm",
+            status: "inactive",
+          },
+        },
+        status: 201,
+      });
+      return;
+    }
+    await route.fallback();
+  });
+
+  await page.goto(fixtureRoute);
+  await page.getByLabel("API key").fill("static-fixture-api-key");
+  await page.getByRole("button", { name: "입력 계속하기" }).click();
+  await page.getByLabel("이름", { exact: true }).fill("미도리야 이즈쿠");
+  await page.getByRole("textbox", { name: /^핸들 / }).fill("midoriya_izuku");
+  await page
+    .getByPlaceholder("조금 소심하지만, 먼저 움직이고 싶은 히어로 지망생입니다!")
+    .fill("계승한 힘을 바르게 쓰려는 히어로 지망생");
+  await page.getByRole("button", { name: "다음" }).click();
+  await page.getByLabel("성격").fill("관찰력이 뛰어나고 책임감이 강하다.");
+  await page.getByRole("button", { name: "다음" }).click();
+  await page.getByRole("button", { name: "최종 확인" }).click();
+  await page.getByRole("button", { name: "앵무 만들기" }).click();
+
+  await expect(
+    page.locator('[data-world-fixture-return-status="failed"]'),
+  ).toBeVisible();
+  await expect(page.getByText("캐릭터 생성은 완료되었습니다.")).toBeVisible();
+  await expect(
+    page.getByText(/캐릭터는 정상적으로 생성됐지만 Creator Studio를 열지 못했습니다/),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "제품 창 경로를 열지 못했습니다." }),
+  ).toHaveCount(0);
+  expect(createRequestCount).toBe(1);
+  expect(agentRequests).not.toContain("/api/v1/agents/new");
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const desktop = window as unknown as {
+          __ANGMOO_DESKTOP_WINDOW__: { kind: string; route: string };
+        };
+        return desktop.__ANGMOO_DESKTOP_WINDOW__;
+      }),
+    )
+    .toEqual({ kind: "phone", route: fixtureRoute });
+
+  await page.getByRole("button", { name: "Creator Studio로 다시 돌아가기" }).click();
+
+  await expect(
+    page.locator('[data-world-fixture-return-status="opened"]'),
+  ).toBeVisible();
+  expect(createRequestCount).toBe(1);
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const desktop = window as unknown as {
+          __ANGMOO_DESKTOP_INVOCATIONS__: unknown[];
+        };
+        return desktop.__ANGMOO_DESKTOP_INVOCATIONS__;
+      }),
+    )
+    .toEqual([
+      {
+        command: "open_product_window",
+        args: {
+          kind: "studio",
+          route:
+            "/studio/worlds/world-static-probe?createdCharacterId=char-new-1",
+        },
+      },
+      {
+        command: "open_product_window",
+        args: {
+          kind: "studio",
+          route:
+            "/studio/worlds/world-static-probe?createdCharacterId=char-new-1",
+        },
+      },
+    ]);
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const desktop = window as unknown as {
+          __ANGMOO_DESKTOP_WINDOW__: { kind: string; route: string };
+        };
+        return desktop.__ANGMOO_DESKTOP_WINDOW__;
+      }),
+    )
+    .toEqual({ kind: "phone", route: fixtureRoute });
+
+  await page.getByRole("button", { name: "생성된 앵무 보기" }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const desktop = window as unknown as {
+          __ANGMOO_DESKTOP_WINDOW__: { kind: string; route: string };
+        };
+        return desktop.__ANGMOO_DESKTOP_WINDOW__;
+      }),
+    )
+    .toEqual({ kind: "phone", route: "/agents/char-new-1" });
+  await expect(page).toHaveURL(/\/agents\/char-new-1$/);
+  expect(createRequestCount).toBe(1);
+});
+
+test("returned Studio preselects the created Character and clears the query after entry", async ({
+  page,
+}) => {
+  const studioRoute =
+    "/studio/worlds/world-static-probe?createdCharacterId=char-new-1";
+  await page.addInitScript((route) => {
+    const desktop = window as unknown as {
+      __ANGMOO_DESKTOP_WINDOW__: { kind: "studio"; route: string };
+      __TAURI__: {
+        core: {
+          invoke: (command: string) => Promise<unknown>;
+        };
+      };
+    };
+    desktop.__ANGMOO_DESKTOP_WINDOW__ = { kind: "studio", route };
+    desktop.__TAURI__ = {
+      core: {
+        invoke: async (command) =>
+          command === "desktop_runtime_status"
+            ? {
+                phase: "ready",
+                apiBaseUrl: "http://127.0.0.1:8080",
+                graphProvider: "ladybug",
+                launchToken: "static-route-probe-token-000000000000",
+              }
+            : undefined,
+      },
+    };
+  }, studioRoute);
+
+  let entryRequestCount = 0;
+  let entryBody: Record<string, unknown> | null = null;
+  await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+    const url = new URL(route.request().url());
+    if (
+      url.pathname === "/api/v1/worlds/world-static-probe/creator-context" &&
+      route.request().method() === "GET"
+    ) {
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          membership_role: "owner",
+          world: {
+            id: "world-static-probe",
+            slug: "static-world",
+            name: "히어로 학교",
+            tagline: "영웅을 꿈꾸는 학생들의 학교",
+            setting_description: "충분히 긴 세계관 설명",
+            daily_life_description: "충분히 긴 일상 설명",
+            genre_tags: ["히어로"],
+            tone_tags: ["성장"],
+            timezone: "Asia/Seoul",
+            language: "ko",
+            visibility: "private",
+            join_policy: "approval_required",
+            additional_generation_guidance: "",
+            places: [],
+            roles: [
+              {
+                key: "student",
+                name: "학생",
+                description: "히어로 지망생",
+                responsibilities: [],
+                allowed_activity_scope: [],
+                autonomous_allowed: true,
+              },
+            ],
+            daypart_profiles: [],
+            rules: [],
+            glossary: [],
+            banner_media_id: null,
+            banner_alt_text: "",
+            status: "published",
+            definition_version: 1,
+            row_version: 1,
+            contract_version: "world-v1",
+            contract_hash: "static-world-contract",
+            readiness_status: "publish_ready",
+            created_at: "2026-08-29T00:00:00Z",
+            updated_at: "2026-08-29T00:00:00Z",
+            archived_at: null,
+          },
+          readiness: {
+            world_id: "world-static-probe",
+            definition_version: 1,
+            row_version: 1,
+            contract_version: "world-v1",
+            contract_hash: "static-world-contract",
+            required_fields: {},
+            optional_setting_count: 1,
+            quality_tier: "CORE",
+            issues: [],
+            ready_for_publish: true,
+            evaluated_at: "2026-08-29T00:00:00Z",
+          },
+        },
+        status: 200,
+      });
+      return;
+    }
+    if (
+      url.pathname === "/api/v1/worlds/world-static-probe/characters" &&
+      route.request().method() === "GET"
+    ) {
+      expect(url.searchParams.get("surface")).toBe("studio");
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          schema_version: "studio-world-character-list-v1",
+          world_id: "world-static-probe",
+          items: [],
+        },
+        status: 200,
+      });
+      return;
+    }
+    if (
+      url.pathname === "/api/v1/worlds/world-static-probe/character-candidates"
+    ) {
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          schema_version: "studio-character-candidates-v1",
+          world_id: "world-static-probe",
+          items: [
+            {
+              character_id: "char-existing",
+              display_name: "올마이트",
+              handle: "allmight",
+              avatar_url: null,
+              current_world_status: null,
+              eligible: true,
+              reason_code: null,
+            },
+            {
+              character_id: "char-new-1",
+              display_name: "미도리야 이즈쿠",
+              handle: "midoriya_izuku",
+              avatar_url: null,
+              current_world_status: null,
+              eligible: true,
+              reason_code: null,
+            },
+          ],
+        },
+        status: 200,
+      });
+      return;
+    }
+    if (
+      url.pathname === "/api/v1/worlds/world-static-probe/characters" &&
+      route.request().method() === "POST"
+    ) {
+      entryRequestCount += 1;
+      entryBody = route.request().postDataJSON() as Record<string, unknown>;
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          id: "wc-char-new-1",
+          world_id: "world-static-probe",
+          character_id: "char-new-1",
+          membership_id: "membership-static-owner",
+          role_key: "student",
+          status: "active",
+          autonomous_enabled: false,
+          version: 1,
+          reused: false,
+        },
+        status: 200,
+      });
+      return;
+    }
+    await route.fallback();
+  });
+
+  await page.goto(studioRoute);
+  await expect(page.getByText("캐릭터 생성은 완료되었습니다.")).toBeVisible();
+  await expect(page.getByLabel("내 캐릭터")).toHaveValue("char-new-1");
+  await page.getByLabel("World 역할").first().selectOption("student");
+  await page.getByRole("button", { name: "이 World에 연결" }).click();
+
+  await expect(
+    page.getByText("현재 World에 연결했습니다. 이제 P2 활동 준비·승인을 진행해 주세요."),
+  ).toBeVisible();
+  expect(entryRequestCount).toBe(1);
+  expect(entryBody).toMatchObject({
+    character_id: "char-new-1",
+    role_key: "student",
+  });
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const desktop = window as unknown as {
+          __ANGMOO_DESKTOP_WINDOW__: { kind: string; route: string };
+        };
+        return desktop.__ANGMOO_DESKTOP_WINDOW__;
+      }),
+    )
+    .toEqual({ kind: "studio", route: "/studio/worlds/world-static-probe" });
+});
+
 test("static P4 evidence opens the exact World-scoped post thread", async ({
   page,
 }) => {
