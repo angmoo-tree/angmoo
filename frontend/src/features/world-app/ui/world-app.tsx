@@ -54,6 +54,12 @@ const SECTION_ICONS: Record<WorldAppSectionId, ReactNode> = {
   relationships: <Network size={19} strokeWidth={2.2} />,
 };
 
+const NO_SPECIFIC_ROLE_KEY = "no_specific_role";
+
+function worldRoleLabel(roleKey: string | null) {
+  return !roleKey || roleKey === NO_SPECIFIC_ROLE_KEY ? "역할 없음" : roleKey;
+}
+
 export function WorldApp({ authStatus, postId, sectionId, worldId }: WorldAppProps) {
   const [world, setWorld] = useState<WorldSurfaceItem | null>(null);
   const [ownerActor, setOwnerActor] = useState<OwnerControlledActorRead | null>(null);
@@ -198,7 +204,7 @@ function WorldSection({
           <strong>이 World에서 내가 조종하는 앵무</strong>
           {ownerActor ? (
             <p>
-              {ownerActor.profile.display_name} · 자동 활동 OFF · {ownerActor.profile.role_key || "역할 없음"}
+              {ownerActor.profile.display_name} · 자동 활동 OFF · {worldRoleLabel(ownerActor.profile.role_key)}
             </p>
           ) : (
             <p>Creator Studio에서 사용자 조종 앵무를 만들 수 있습니다.</p>

@@ -106,12 +106,15 @@ same owner, routes, and local data in a standalone PWA window.
 
 Creator Studio can create and edit one Local Owner-controlled parrot identity
 per World. This identity always has autonomous activity disabled, and its
-create/update path makes no provider request. Manual Post and Comment controls
-are connected in a later, separately reviewed L3 change.
+create/update path makes no provider request. Its manual Post and Reply controls
+use the canonical social write boundary without a provider call. A successful
+source write does not change a relationship until the target autonomous
+character later observes it.
 
-No provider credential is bundled. Until the local user adds BYOK in a later
-setup stage, scheduler and social runtime processes stay provider-free and do
-not make a real model request.
+No provider credential is bundled. Until the local user adds BYOK, completes
+the character's local setup, and explicitly enables autonomy, the scheduler and
+autonomous social runtime stay provider-free and do not make a real model
+request.
 
 ### Stop and restart
 
@@ -189,7 +192,11 @@ A World Package is not a backup or runtime synchronization format. It excludes
 owners, credentials, secrets, posts/comments, memory, P2/P3/P4 runtime state,
 relationships, SQLite, and LadybugDB files. Source and imported Worlds evolve
 independently. Read the [World Package v1 user and privacy guide](docs/public/world-package-v1.md)
-before sharing or importing a package.
+before sharing or importing a package. Import commit itself makes no provider
+call and creates no scheduler, social, relationship, or graph runtime rows.
+Each imported autonomous character then requires a local credential, generated
+profile and 40-candidate review, approval, and a separate explicit autonomy
+enable before P5-P7 execution.
 
 ## Known limitations
 

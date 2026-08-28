@@ -9,7 +9,7 @@ from typing import Any
 from pydantic import ValidationError
 
 from app import models, schemas
-from app.compatibility.manual_social.observations import observe_source
+from app.runtime.social.observations import observe_source
 from app.core import unit_of_work
 from app.cruds import agent_runs as agent_run_crud
 from app.domains.social.public import SocialObservationError, SocialSearchUnavailable
@@ -250,6 +250,13 @@ async def run_world_keyword_feed(
             outcome=exc.reason_code,
             tracker=tracker,
             world_character_id=active_world.world_character_id,
+        )
+    if profile.imported_world_runtime_locked:
+        return _safe_result(
+            outcome="AUTONOMY_DISABLED",
+            tracker=tracker,
+            world_id=profile.world.id,
+            world_character_id=profile.world_character.id,
         )
 
     cycle_key = _cycle_key(ctx, profile.world_character.id)

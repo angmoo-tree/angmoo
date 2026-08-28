@@ -1,4 +1,5 @@
-import { fetchBackendJson } from "@/lib/backend";
+import { fetchBackendJson } from "@/shared/api/public";
+import { clearStoredUser, notifyAuthChanged } from "@/shared/auth/public";
 import { runtimeFetch } from "@/shared/runtime/public";
 
 import type {
@@ -14,19 +15,44 @@ type FeedListOptions = {
   content?: FeedContentFilter;
 };
 
-type RequestOptions = Omit<RequestInit, "body"> & { body?: unknown };
+type RequestOptions = Omit<RequestInit, "body" | "credentials"> & {
+  body?: unknown;
+  anonymous?: boolean;
+  clearAuthOnUnauthorized?: boolean;
+};
 
-async function socialRequest<T>(path: string, options: RequestOptions = {}) {
-  const { body, headers, ...rest } = options;
+export async function requestSocialApi<T>(
+  path: string,
+  options: RequestOptions = {},
+) {
+  const {
+    anonymous = false,
+    body,
+    clearAuthOnUnauthorized = false,
+    headers,
+    ...rest
+  } = options;
   const response = await runtimeFetch(`/api/backend${path}`, {
     ...rest,
     body: body === undefined ? undefined : JSON.stringify(body),
     cache: "no-store",
-    credentials: "same-origin",
+    credentials: anonymous ? "omit" : "same-origin",
     headers: { "Content-Type": "application/json", ...(headers ?? {}) },
   });
-  const payload = (await response.json().catch(() => null)) as unknown;
+  const text = await response.text();
+  let payload: unknown = null;
+  try {
+    payload = text ? JSON.parse(text) : null;
+  } catch (error) {
+    // A successful endpoint must not silently turn a malformed response into a
+    // typed null. Error responses still fall through to the stable HTTP reason.
+    if (response.ok) throw error;
+  }
   if (!response.ok) {
+    if (response.status === 401 && !anonymous && clearAuthOnUnauthorized) {
+      clearStoredUser();
+      notifyAuthChanged();
+    }
     const detail =
       typeof payload === "object" &&
       payload !== null &&
@@ -51,18 +77,18 @@ export async function getInitialSocialFeed(limit = 10): Promise<FeedPage> {
 }
 
 export function listSocialFeed(options: FeedListOptions = {}) {
-  return socialRequest<FeedPage>(feedPath("/feed", options));
+  return requestSocialApi<FeedPage>(feedPath("/feed", options));
 }
 
 export function listFollowingSocialFeed(options: FeedListOptions = {}) {
-  return socialRequest<FeedPage>(feedPath("/feed/following", options));
+  return requestSocialApi<FeedPage>(feedPath("/feed/following", options));
 }
 
 export function listCharacterFollowingSocialFeed(
   characterId: string,
   options: FeedListOptions = {},
 ) {
-  return socialRequest<FeedPage>(
+  return requestSocialApi<FeedPage>(
     feedPath(
       `/feed/following/characters/${encodeURIComponent(characterId)}`,
       options,
@@ -71,7 +97,7 @@ export function listCharacterFollowingSocialFeed(
 }
 
 export function deleteSocialPost(postId: string) {
-  return socialRequest<void>(`/posts/${encodeURIComponent(postId)}`, {
+  return requestSocialApi<void>(`/posts/${encodeURIComponent(postId)}`, {
     method: "DELETE",
   });
 }
@@ -80,7 +106,7 @@ export function reportSocialPost(
   postId: string,
   data: { reason: PostReportReason; details?: string },
 ) {
-  return socialRequest<PostReportRead>(
+  return requestSocialApi<PostReportRead>(
     `/posts/${encodeURIComponent(postId)}/reports`,
     { method: "POST", body: data },
   );

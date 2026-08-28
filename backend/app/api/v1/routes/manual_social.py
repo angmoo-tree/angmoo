@@ -8,18 +8,18 @@ from sqlalchemy.orm import Session
 from app.api.v1.deps import get_current_user
 from app.core import browser_session
 from app.core.db import get_db
-from app.compatibility.manual_social.write_unit_of_work import (
-    SqlAlchemySocialWriteUnitOfWork,
-)
-from app.domains.manual_social.api.schemas import (
+from app.domains.social.api.schemas import (
     ManualSocialFeedRead,
     ManualSocialWriteRead,
     OwnerManualPostWrite,
     OwnerManualReplyWrite,
 )
-from app.domains.manual_social.public import (
+from app.runtime.social.sqlalchemy_read_repository import (
     get_owner_world_post_thread,
     list_owner_world_feed,
+)
+from app.runtime.social.sqlalchemy_unit_of_work import (
+    SqlAlchemySocialWriteUnitOfWork,
 )
 from app.domains.social.public import (
     OwnerPostCommand,

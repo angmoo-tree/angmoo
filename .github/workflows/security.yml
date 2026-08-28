@@ -155,4 +155,5 @@ jobs:
             tests/test_l3_5_world_package_v1_contract.py \
             tests/test_l3_5_world_package_preview.py \
             tests/test_l3_5_world_package_closeout.py \
-            tests/test_l3_5_world_package_closeout_contract.py
+            tests/test_l3_5_world_package_closeout_contract.py \
+            tests/test_l4_pr_f_closeout_contract.py

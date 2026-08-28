@@ -19,6 +19,12 @@ on:
       - "backend/app/runtime/contributor_backend.py"
       - "backend/tests/test_embedded_data_migration.py"
       - "backend/tests/test_embedded_data_migration_contract.py"
+      - "backend/app/core/sqlite_concurrency.py"
+      - "backend/app/domains/social/**"
+      - "backend/app/runtime/social/**"
+      - "backend/app/runtime/routine_posts/**"
+      - "backend/tests/test_l3_5_world_package_import_commit.py"
+      - "backend/tests/test_l4_pr_f_closeout_contract.py"
       - ".github/CODEOWNERS"
       - ".github/workflows/windows-host-tauri-dev.yml"
       - "README.md"
@@ -43,6 +49,12 @@ on:
       - "backend/app/runtime/contributor_backend.py"
       - "backend/tests/test_embedded_data_migration.py"
       - "backend/tests/test_embedded_data_migration_contract.py"
+      - "backend/app/core/sqlite_concurrency.py"
+      - "backend/app/domains/social/**"
+      - "backend/app/runtime/social/**"
+      - "backend/app/runtime/routine_posts/**"
+      - "backend/tests/test_l3_5_world_package_import_commit.py"
+      - "backend/tests/test_l4_pr_f_closeout_contract.py"
       - ".github/CODEOWNERS"
       - ".github/workflows/windows-host-tauri-dev.yml"
       - "README.md"
@@ -55,6 +67,10 @@ on:
 
 permissions:
   contents: read
+
+env:
+  SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  SOURCE_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
 
 concurrency:
   group: windows-host-tauri-dev-${{ github.workflow }}-${{ github.ref }}
@@ -69,6 +85,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          repository: ${{ env.SOURCE_REPOSITORY }}
+          ref: ${{ env.SOURCE_SHA }}
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "22"
@@ -101,8 +119,10 @@ jobs:
           .\.venv\Scripts\python.exe -m pytest -q `
             tests\test_embedded_data_migration_contract.py `
             tests\test_embedded_data_migration.py `
+            tests\test_l3_5_world_package_import_commit.py `
             tests\test_l3_5_world_package_ui_contract.py `
-            tests\test_l3_5_world_package_closeout_contract.py
+            tests\test_l3_5_world_package_closeout_contract.py `
+            tests\test_l4_pr_f_closeout_contract.py
           Pop-Location
       - name: Verify installed and Docker-bridge Rust modes
         shell: pwsh

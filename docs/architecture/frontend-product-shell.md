@@ -68,7 +68,8 @@ create, edit, validate, and publish operations behind the wide shell.
 `/worlds/new` and `/worlds/{world_id}/creator` routes only redirect to them.
 Draft, private, and archived Worlds remain Studio-only while a published,
 publish-ready public or unlisted World becomes eligible for Device Home and the
-World App. Import remains a truthful unavailable capability until L3.5.
+World App. L3.5 later added the canonical World Package import surface without
+forking the Device Home, browser, static/Tauri, or installed product source.
 
 L4 PR B establishes `features/social/public.ts` as the frontend Feed entry.
 `feed-page.tsx` is now a thin composition adapter and both the Next route and
@@ -77,13 +78,14 @@ that public boundary. The large existing Feed UI was moved intact rather than
 forked, so this ownership change does not alter route, write, or visual
 behavior.
 
-The moved client still consumes exact legacy component and `lib/community`
-edges. Each edge is recorded in `security/frontend_architecture_policy.json`
-with its L4 PR C or PR F removal condition. This is a reviewed progressive
-migration, not a blanket exception: unlisted `features/social -> components`
-or `features/social -> lib` imports fail CI, stale exceptions fail CI, route
-and composition imports must use `features/social/public.ts`, and no Tauri-only
-social UI fork is permitted.
+L4 PR F closes the remaining Social-owned presentation and transport edges.
+`features/social` now consumes only its own public surface and canonical
+`shared` API, auth, interaction, and UI boundaries; its exact legacy exception
+list is empty. The old component and `lib` paths used by unrelated screens are
+thin compatibility facades or retain their pre-L4 client contract, while route
+and composition imports use `features/social/public.ts`. CI rejects any new
+`features/social -> components` or `features/social -> lib` edge and any
+Tauri-only social UI fork.
 
 L4 PR C moves the World Feed composer/thread UI, its owner-write DTOs and its
 typed write client under `features/social`. `features/world-app` now composes
@@ -145,9 +147,10 @@ not start BYOK setup, enable autonomy, or create a social write.
 
 The World App reads the same identity and presents it as the current manual
 actor with `automatic activity OFF`. A missing identity is an explicit Studio
-setup state, not a fallback to another World or autonomous Character. Manual
-Post and Comment controls remain unavailable until the separately reviewed L3
-PR G author-guard contract is implemented.
+setup state, not a fallback to another World or autonomous Character. Its
+manual Post and Reply controls use `features/social/public.ts` and the canonical
+owner-scoped social write API. They neither invoke a provider nor enable
+autonomy; the route still revalidates actor ownership and World scope.
 
 ## Visual contract
 

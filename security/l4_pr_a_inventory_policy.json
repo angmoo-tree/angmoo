@@ -1,15 +1,15 @@
 {
   "backend_ownership": {
     "canonical_boundaries": [
-      "app.domains.manual_social",
       "app.domains.relationships",
       "app.domains.social",
       "app.integrations.ladybug_projection",
       "app.integrations.relationship_graph_read",
-      "app.runtime.graph_projection"
+      "app.runtime.graph_projection",
+      "app.runtime.routine_posts",
+      "app.runtime.social"
     ],
     "legacy_horizontal": [
-      "app.compatibility.manual_social",
       "app.cruds.community",
       "app.models.community",
       "app.models.world_feed",

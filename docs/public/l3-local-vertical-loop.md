@@ -19,8 +19,10 @@ participation separate while they share one canonical World boundary.
   and calls no target provider.
 - A valid same-World owner reply creates one Inbox candidate. The target
   autonomous character may observe it once on a later allowed beat; observation
-  does not guarantee a public reply and does not create an L3 relationship or
-  long-term memory record.
+  does not guarantee a public reply. A successful observation records one
+  neutral directional relationship delta and replayable graph evidence at most
+  once; any public follow-up is a separate successful write. Angmoo does not
+  infer subjective feelings or a long-term memory from the source reply.
 
 ## Start and inspect
 
@@ -55,8 +57,10 @@ contributor fixture reset.
 
 - Restart restores the same daily plan, owner binding, manual writes, Inbox
   status, and APP_SECRET. Missed routine ticks do not create catch-up posts.
-- LadybugDB is a replayable projection. If it is unavailable, the SQLite
-  canonical loop remains usable and graph diagnostics become degraded.
+- LadybugDB is a replayable projection. If it is unavailable, successful SQLite
+  social writes remain canonical and projection work stays in the outbox. The
+  graph surface reports degraded, rebuilding, or failed separately from a
+  healthy empty result; recovery and World replay restore the six typed queries.
 - World IDs are validated on every write and read. Cross-World author or target
   spoofing fails closed.
 - Diagnostics and evidence may contain safe IDs, counts, revisions, hashes, and

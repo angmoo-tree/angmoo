@@ -47,7 +47,7 @@ def test_frontend_uses_allowlisted_return_and_profile_media_helpers() -> None:
     login_client = (root / "components" / "login-client.tsx").read_text(
         encoding="utf-8"
     )
-    avatar = (root / "components" / "profile-avatar.tsx").read_text(
+    avatar = (root / "shared" / "ui" / "profile-avatar.tsx").read_text(
         encoding="utf-8"
     )
 

@@ -1,8 +1,7 @@
 """Runtime composition helper for canonical social observations.
 
-The three current orchestration lanes still live outside ``app.domains.social``.
-They enter the canonical application contract through this temporary adapter;
-none of them writes relationship rows directly.
+Orchestration lanes enter the canonical application contract through this
+runtime-owned adapter; none of them writes relationship rows directly.
 """
 
 from __future__ import annotations
@@ -11,7 +10,7 @@ from datetime import datetime
 
 from sqlalchemy.orm import Session
 
-from app.compatibility.manual_social.write_unit_of_work import (
+from app.runtime.social.sqlalchemy_unit_of_work import (
     SqlAlchemySocialObservationUnitOfWork,
 )
 from app.domains.social.public import (

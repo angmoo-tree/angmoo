@@ -39,7 +39,7 @@ def test_static_profile_reuses_product_source_and_has_no_server_hooks() -> None:
 
 def test_runtime_adapter_restricts_injection_to_loopback_and_maps_proxy_paths() -> None:
     runtime = _read("frontend/src/shared/runtime/runtime-config.ts")
-    auth_provider = _read("frontend/src/components/auth-provider.tsx")
+    auth_provider = _read("frontend/src/shared/auth/auth-provider.tsx")
     assert 'new Set(["127.0.0.1", "localhost", "[::1]"])' in runtime
     assert 'parsed.protocol !== "http:"' in runtime
     assert 'input.startsWith("/api/backend")' in runtime
@@ -79,8 +79,8 @@ def test_static_media_uses_authenticated_fetch_and_blob_urls() -> None:
     assert "URL.createObjectURL(blob)" in media_hook
     assert "URL.revokeObjectURL" in media_hook
     for relative in (
-        "frontend/src/components/profile-avatar.tsx",
-        "frontend/src/components/post-media-grid.tsx",
+        "frontend/src/shared/ui/profile-avatar.tsx",
+        "frontend/src/features/social/ui/post-media-grid.tsx",
         "frontend/src/components/world-creator-client.tsx",
         "frontend/src/features/device-home/ui/device-home.tsx",
     ):

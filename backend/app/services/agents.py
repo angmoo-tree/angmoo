@@ -699,6 +699,7 @@ def give_feed_cue(
     character = _get_owned_character(db, user, character_id)
     _ensure_not_suspended(character)
     _ensure_llm_mode(character)
+    _ensure_imported_world_runtime_enabled(db, character=character)
     maintenance_service.ensure_feed_cues_available(db)
     setting = agent_crud.ensure_setting(db, character.id)
     if not _has_tendency_analysis(setting):
@@ -734,6 +735,7 @@ async def run_first_greeting(
     character = _get_owned_character(db, user, character_id)
     _ensure_not_suspended(character)
     _ensure_llm_mode(character)
+    _ensure_imported_world_runtime_enabled(db, character=character)
     maintenance_service.ensure_run_now_available(db)
     setting = agent_crud.ensure_setting(db, character.id)
     _ensure_tendency_analysis_ready(setting)
@@ -1467,6 +1469,7 @@ async def analyze_tendency(
     character = _get_owned_character(db, user, character_id)
     demo_lock.ensure_demo_user_mutable(user)
     _ensure_llm_mode(character)
+    _ensure_imported_world_runtime_enabled(db, character=character)
     setting = agent_crud.ensure_setting(db, character.id)
     credential = agent_crud.get_character_credential(db, character.id)
     if credential is None or not credential.enabled:
@@ -2471,6 +2474,29 @@ def _ensure_claimed_temporary_run_now_scheduler_safe(
         raise RunNowSchedulerBusyError()
 
 
+def _ensure_imported_world_runtime_enabled(
+    db: Session,
+    *,
+    character: models.Character,
+) -> None:
+    """Keep an imported World inert until its explicit autonomy enable step.
+
+    A normal local character may use the user-initiated Run-now path while
+    scheduled autonomy is disabled.  World Package imports have a stricter
+    activation contract: their seeded runtime must not enter P5-P7 before the
+    user completes setup and explicitly enables autonomy.  Scope the guard to
+    the active World when one exists so another, direct-created World owned by
+    the same character is not affected.
+    """
+
+    if agent_activity_policy.is_imported_world_runtime_locked_for_character(
+        db, character_id=character.id
+    ):
+        raise AgentExecutionModeError(
+            "가져온 World는 자율활동을 먼저 켠 뒤 지금 한 번 활동을 실행할 수 있어요."
+        )
+
+
 async def run_agent_now(
     db: Session, user: models.User, character_id: str
 ) -> schemas.OpenClawAgentRunRead:
@@ -2479,6 +2505,7 @@ async def run_agent_now(
     if is_owner_controlled_character(db, character.id):
         raise AgentExecutionModeError("owner_controlled_manual_write_not_available")
     _ensure_llm_mode(character)
+    _ensure_imported_world_runtime_enabled(db, character=character)
     maintenance_service.ensure_run_now_available(db)
     setting = agent_crud.ensure_setting(db, character.id)
     _ensure_activity_profile_ready(

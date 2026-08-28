@@ -9,7 +9,6 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.compatibility.manual_social.observations import observe_source
 from app.compatibility.routine_posts import legacy
 from app.core import unit_of_work
 from app.domains.routine_posts.infrastructure.direct_llm_provider import (
@@ -25,14 +24,19 @@ from app.domains.routine_posts.infrastructure.sqlalchemy_context import (
     assemble_routine_post_context,
 )
 from app.domains.routines.public import reconcile_all_elapsed_routines
-from app.domains.manual_social.public import (
+from app.runtime.social.sqlalchemy_inbox import (
     ManualInboxRuntimeError,
-    claim_manual_inbox,
     claimed_observation_post_id,
-    consume_manual_inbox_claims,
     is_manual_inbox_source,
-    release_manual_inbox_claims,
 )
+from app.runtime.social.sqlalchemy_inbox import claim as claim_manual_inbox
+from app.runtime.social.sqlalchemy_inbox import (
+    consume_claims as consume_manual_inbox_claims,
+)
+from app.runtime.social.sqlalchemy_inbox import (
+    release_claims as release_manual_inbox_claims,
+)
+from app.runtime.social.observations import observe_source
 from app.domains.social.public import SocialObservationError
 from app.integrations.direct_llm import (
     DirectLlmDeferred,
@@ -205,7 +209,10 @@ async def run_routine_post_runtime(
     manual = agent_activity_policy.is_manual_policy_session(
         resident_context.session_key
     )
-    if not world_character.autonomous_enabled and not manual:
+    imported_locked = agent_activity_policy.is_imported_world_runtime_locked(
+        db, world_character
+    )
+    if not world_character.autonomous_enabled and (not manual or imported_locked):
         return _safe_result(outcome="AUTONOMY_DISABLED", tracker=tracker)
     if "post" not in set(resident_context.activity_policy.allowed_actions):
         return _safe_result(outcome="POST_NOT_ALLOWED", tracker=tracker)

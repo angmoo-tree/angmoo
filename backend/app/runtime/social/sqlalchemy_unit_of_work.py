@@ -1,9 +1,8 @@
-"""Transitional SQLite adapter for the canonical social source-write UoW.
+"""Runtime SQLAlchemy adapters for canonical social source and observation UoWs.
 
-The social domain owns commands, application use cases, and the UoW port.  This
-adapter remains in the compatibility layer while the canonical ``Post`` ORM and
-community persistence service still live in pre-L4 modules.  API/runtime
-composition may depend on this adapter; ``app.domains.social`` must not.
+The social domain owns commands, application use cases, and UoW ports. This
+runtime module composes those ports with canonical SQLAlchemy persistence;
+domain code never imports this adapter.
 """
 
 from __future__ import annotations
@@ -19,7 +18,7 @@ from sqlalchemy.orm import Session
 from app import models
 from app.core import unit_of_work
 from app.core.ids import uuid7_string
-from app.domains.manual_social.infrastructure.sqlalchemy_models import (
+from app.domains.social.infrastructure.sqlalchemy_models import (
     OwnerManualInboxCandidate,
     OwnerManualSocialWrite,
 )
@@ -43,7 +42,7 @@ from app.domains.social.domain.writes import (
 from app.domains.world_characters.public import (
     SqlAlchemyOwnerControlledIdentityRepository,
 )
-from app.runtime.persistence.sqlite_concurrency import (
+from app.core.sqlite_concurrency import (
     SqliteBusyRetryExhausted,
     SqliteRetryPolicy,
     run_sqlite_session_immediate,

@@ -11,8 +11,8 @@ final merge after required checks pass.
 |---|---|---|---|
 | Local identity and agents | `backend/app/api`, `backend/app/services` | `frontend/src/app/agents` | ownership, sessions, limits |
 | World and Studio | World routes/services/models | `features/device-home`, `features/creator-studio`, `features/world-app` public entries plus legacy World routes | schema, migration, package boundary |
-| Routine runtime | routine planners/runtime | agent activity surfaces | deterministic tick, duplicate write |
-| SNS and Inbox | community/social services | posts, notifications | event ordering, relationship direction |
+| Routine runtime | `app.domains.routine_posts.public` contracts + `app.runtime.routine_posts` SQLAlchemy orchestration | agent activity surfaces | deterministic tick, duplicate write |
+| SNS and Inbox | `app.domains.social.public` contracts + `app.runtime.social` SQLAlchemy read/write/Inbox adapters | `features/social/public.ts` | event ordering, observation receipt, relationship direction |
 | Relationship graph | `app.domains.relationships.public` + domain-owned ORM definitions + `app.runtime.relationships` SQLAlchemy composition + `app.runtime.graph_projection`; LadybugDB remains the replayable adapter | `features/relationships/public.ts` | read parity, replay, outage, World isolation |
 | Providers and credentials | `backend/app/providers`, `backend/app/credentials` | settings/model forms | BYOK redaction, fake provider |
 | Local Bot | bot route/schema | `frontend/src/app/angmoo-api` | quota and response contracts |
@@ -42,10 +42,12 @@ they name an owner, current consumer, removal stage, and usage-zero deletion
 gate. They re-export canonical types or compose adapters; they do not duplicate
 use-case logic. T2.5 PR C removed the unused relationship schema and repository
 aliases after both `rg` and the AST inventory reported zero importers. L4 PR E
-removes the horizontal relationship graph/event/model/CRUD bridges. Runtime
-consumers now enter through the relationships public boundary, the isolated
-runtime SQLAlchemy composition and graph-projection runtime boundary. Do not
-combine a move with unrelated behavior changes.
+removes the horizontal relationship graph/event/model/CRUD bridges. L4 PR F
+removes the temporary manual-social facades and the domain-internal routine
+SQLAlchemy runtime after their consumer count reaches zero. Runtime consumers
+now enter through the social or relationships public boundary and the isolated
+runtime SQLAlchemy composition, routine-post, and graph-projection boundaries.
+Do not combine a move with unrelated behavior changes.
 
 ## Validation map
 
@@ -56,9 +58,12 @@ All PRs run these required checks: `backend`, `frontend`,
 
 The required `local-core-smoke` check also builds the release Docker targets,
 checks non-root and secret-layer boundaries, scans fixable high/critical
-vulnerabilities, emits an SPDX JSON SBOM, and runs the clean-clone full-stack
-lifecycle. The tag-only release workflow publishes to GHCR after the same Gate;
-it is not an additional pull-request check.
+vulnerabilities, emits an SPDX JSON SBOM, and runs both the production Browser
+and contributor-development container lifecycles from a fresh clone detached at
+the exact source SHA. These are Hosted TECH checks built from PR source. The
+documented default Browser command remains a USER Gate for the separately
+approved matching published image. The tag-only release workflow publishes to
+GHCR after that release approval; it is not an additional pull-request check.
 
 `windows-local-smoke` and `codeql` remain advisory checks. They are triaged
 rather than silently ignored and are promoted only after their deterministic

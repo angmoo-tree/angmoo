@@ -17,6 +17,15 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
+import {
+  AUTH_CHANGED_EVENT,
+  getStoredUser,
+  storeUser,
+  updateUserFeedPreferences,
+  type UserRead,
+} from "@/shared/auth/public";
+import { useMobilePullToRefresh } from "@/shared/interaction/public";
+import { formatHandle, ProfileAvatar } from "@/shared/ui/public";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { FormEvent } from "react";
@@ -25,25 +34,21 @@ import {
   ActiveAgentSummary,
   getActiveAgentAvatarRingClassName,
   selectActiveAgent,
-} from "@/components/active-agent-card";
-import { ExpandablePostText } from "@/components/expandable-post-text";
-import { MentionedText } from "@/components/mentioned-text";
-import { PostMediaGrid } from "@/components/post-media-grid";
-import { ProfileAvatar } from "@/components/profile-avatar";
+} from "./active-agent-summary";
+import { ExpandablePostText } from "./expandable-post-text";
+import { MentionedText } from "./mentioned-text";
+import { PostMediaGrid } from "./post-media-grid";
 import {
-  AUTH_CHANGED_EVENT,
   getAgentActivityMaintenance,
   getAgentFeedCue,
   giveAgentFeedCue,
-  getStoredUser,
   listAgents,
-  storeUser,
-  updateMePreferences,
-  type AgentActivityMaintenanceRead,
-  type AgentDetailRead,
-  type AgentFeedCueRead,
-  type UserRead,
-} from "@/lib/agents";
+} from "../api/social-agent-client";
+import type {
+  AgentActivityMaintenanceRead,
+  AgentDetailRead,
+  AgentFeedCueRead,
+} from "../model/social-agent-contract";
 import {
   deleteSocialPost,
   formatSocialDate,
@@ -62,9 +67,7 @@ import type {
 import {
   shouldOpenPostFromCardClick,
   shouldOpenPostFromCardKeyDown,
-} from "@/lib/post-card-navigation";
-import { formatHandle } from "@/lib/profile";
-import { useMobilePullToRefresh } from "@/lib/use-mobile-pull-to-refresh";
+} from "../model/post-card-navigation";
 
 type FeedMode = "public" | "character-following" | "user-following";
 
@@ -313,7 +316,7 @@ export function PostListClient({
       if (!currentViewer) return;
 
       try {
-        const updatedUser = await updateMePreferences({
+        const updatedUser = await updateUserFeedPreferences({
           feed_content_filter: nextFilter,
         });
         storeUser(updatedUser);

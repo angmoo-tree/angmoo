@@ -25,7 +25,7 @@ from app.credentials import (
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
-from app.domains.routine_posts.public import routine_world_character_for_character
+from app.runtime.routine_posts import routine_world_character_for_character
 from app.domains.routines.public import reconcile_all_elapsed_routines
 from app.domains.social.public import current_social_search
 from app.domains.world_characters.public import (

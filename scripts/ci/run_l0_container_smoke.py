@@ -38,8 +38,11 @@ def _free_port() -> int:
 
 
 class ComposeHarness:
-    def __init__(self, *, project: str, tag: str, port: int) -> None:
+    def __init__(
+        self, *, project: str, tag: str, port: int, development: bool
+    ) -> None:
         self.project = project
+        self.development = development
         self.environment = os.environ.copy()
         self.environment.update(
             {
@@ -48,16 +51,19 @@ class ComposeHarness:
                 "COMPOSE_PROJECT_NAME": project,
             }
         )
+        compose_files = (
+            ["compose.yml", "compose.dev.yml"]
+            if development
+            else ["compose.yml", "compose.ci.yml"]
+        )
         self.prefix = [
             "docker",
             "compose",
             "--project-name",
             project,
-            "-f",
-            "compose.yml",
-            "-f",
-            "compose.ci.yml",
         ]
+        for compose_file in compose_files:
+            self.prefix.extend(["-f", compose_file])
 
     def run(self, *arguments: str, check: bool = True) -> subprocess.CompletedProcess[str]:
         completed = subprocess.run(
@@ -170,11 +176,20 @@ def _delete_sqlite_marker(harness: ComposeHarness, marker: str) -> None:
     harness.run("exec", "-T", "backend", "python", "-c", command)
 
 
-def run_smoke(*, tag: str, project: str, port: int) -> None:
-    harness = ComposeHarness(project=project, tag=tag, port=port)
+def run_smoke(*, tag: str, project: str, port: int, development: bool) -> None:
+    harness = ComposeHarness(
+        project=project,
+        tag=tag,
+        port=port,
+        development=development,
+    )
     harness.cleanup(volumes=True)
     try:
-        harness.run("up", "-d", "--wait", "--wait-timeout", "300")
+        up_arguments = ["up", "-d"]
+        if development:
+            up_arguments.append("--build")
+        up_arguments.extend(["--wait", "--wait-timeout", "300"])
+        harness.run(*up_arguments)
         if _service_names(harness) != EXPECTED_SERVICES:
             raise RuntimeError("runtime_state_stale: two-service topology mismatch")
         _runtime_health(harness)
@@ -198,8 +213,9 @@ def run_smoke(*, tag: str, project: str, port: int) -> None:
         digest_after = _secret_digest(harness)
         if digest_after != digest_before:
             raise RuntimeError("secret_mismatch: APP_SECRET changed after restart")
+        mode = "contributor-development" if development else "browser-production"
         print(
-            "Embedded container smoke passed: "
+            f"Embedded container smoke passed: mode={mode} "
             f"services=2 volume={EMBEDDED_VOLUME} sqlite_write_stable=true "
             "ladybug_ready=true scheduler_ready=true projector_ready=true "
             "provider_calls=0 restart_secret_stable=true"
@@ -220,12 +236,14 @@ def main() -> int:
     parser.add_argument("--tag", required=True)
     parser.add_argument("--project", required=True)
     parser.add_argument("--port", type=int, default=0)
+    parser.add_argument("--development", action="store_true")
     args = parser.parse_args()
     try:
         run_smoke(
             tag=args.tag,
             project=args.project,
             port=args.port or _free_port(),
+            development=args.development,
         )
     except (AssertionError, json.JSONDecodeError, OSError, RuntimeError) as exc:
         print(f"container smoke failed: {exc}", file=sys.stderr)

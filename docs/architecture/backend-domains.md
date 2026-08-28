@@ -122,9 +122,9 @@ backend/app/
 | `core` | small primitives only | L0 | existing core is audited, not moved in PR A |
 | `identity` | `app.domains.identity.public` | L1 | PR A foundation active; runtime behavior unchanged |
 | resident and scheduler runtime | `app.domains.runtime.public` | L2 | PR A state/schema foundation active; behavior unchanged |
-| `worlds`, `world_characters`, `routines`, `routine_posts`, owner manual social | each domain's `public.py` | L3 | P1-P3 are active; PR F moves P4 continuation and atomic publication behind the routine-post public boundary; PR G moves owner manual writes and Inbox observation behind a stable public boundary |
-| `world_packages` | `app.domains.world_packages.public` | L3.5 | new Local feature later |
-| feed and `social` | `app.domains.social.public` | L4 | PR B owns the P5 keyword candidate/search boundary; later L4 PRs move writes and causal apply |
+| `worlds`, `world_characters`, `routines`, `routine_posts`, owner manual social | domain `public.py` contracts plus runtime composition | L3/L4 | P1-P4 are active; routine SQLAlchemy orchestration is under `app.runtime.routine_posts`, and owner writes/Inbox adapters are under `app.runtime.social` |
+| `world_packages` | `app.domains.world_packages.public` | L3.5 | Local export/import active; imported runtime remains inert until local setup and explicit autonomy enable |
+| feed and `social` | `app.domains.social.public` | L4 | P5 search, canonical source writes, observation and causal apply are active; concrete SQLite adapters are under `app.runtime.social` |
 | `relationships` graph read | `app.domains.relationships.public` | T2.5/L4 | canonical read slice active; PR E owns its runtime composition under `app.runtime.graph_projection` |
 | relationships write and graph projection | domain/runtime public ports | L4 | PR E removes horizontal service/CRUD/model bridges; runtime SQLAlchemy composition is isolated under `app.runtime.relationships` and graph lifecycle under `app.runtime.graph_projection` |
 | `chat` and chat memory | `app.domains.chat.public` | P8-L | blocked by Local transition gates |
@@ -173,14 +173,14 @@ activity-state paths remain thin compatibility facades. API and scheduler
 consumers no longer import the legacy daily-plan service, and restart recovery
 closes elapsed state without creating catch-up public actions.
 
-L3 PR F makes `app.domains.routine_posts.public` the production entry for
-autonomous routine selection, evidence-bounded continuation, two-call writing,
-and atomic publication. Resident and scheduler consumers no longer import the
-legacy runtime. The context, validated schemas, direct-LLM provider and
-SQLAlchemy orchestration live under the domain; the old routine-post modules
-are compatibility aliases. An exact L4-owned compatibility bridge isolates
-agent-run, social-write, joint-activity and successful-event persistence that
-has not yet moved to canonical social/runtime ports. The move preserves the
+L3 PR F introduced `app.domains.routine_posts.public` for autonomous routine
+selection, evidence-bounded continuation, two-call writing, and atomic
+publication. L4 PR F keeps the validated context and provider contracts under
+that domain while moving SQLAlchemy execution composition to
+`app.runtime.routine_posts`; resident and scheduler consumers no longer import
+a domain-internal persistence module. The bounded routine compatibility bridge
+still isolates agent-run and joint-activity persistence scheduled for L6. The
+move preserves the
 normal two-call and repair-inclusive three-call cap, successful-beat reuse with
 zero provider calls, same-episode continuation, once-only event consumption,
 and all-or-nothing post/beat/episode/state/outbox commit. The character
@@ -188,7 +188,7 @@ scheduler lifecycle and selected autonomous WorldCharacter are kept in sync:
 activation, deactivation, character replacement and credential removal update
 the WorldCharacter autonomy flag without enabling owner-controlled identities.
 
-L3 PR G makes `app.domains.manual_social.public` the stable entry for Local
+L3 PR G originally made `app.domains.manual_social.public` the stable entry for Local
 Owner-authored World posts, replies and once-only autonomous Inbox observation.
 The HTTP body never selects an author: the Local Owner session, active
 owner-controlled WorldCharacter and same-World target are revalidated on every
@@ -199,7 +199,10 @@ zero provider calls and L3 writes no relationship delta, graph edge or
 long-term memory. Four exact L4-owned compatibility edges isolate the existing
 Post, reply, block and visibility persistence until the social domain moves in
 L4. The resulting inventory contains 391 modules, 827 internal edges, 1,277
-per-module external import records and 344 exact legacy exceptions.
+per-module external import records and 344 exact legacy exceptions. L4 PR F
+removes that temporary namespace: commands, ports and use cases now belong to
+`app.domains.social`, while SQLAlchemy read/write/Inbox adapters are composed
+under `app.runtime.social`.
 
 ## Historical L3-ER1 storage and graph port extraction
 
@@ -466,9 +469,9 @@ condition, and must not expand into another service/model/CRUD dependency.
 boundary and the apply boundary for an already validated autonomous post or
 reply result. The domain exposes storage-neutral commands, application use
 cases, and a caller-owned UoW port only. `app.api.v1.routes.manual_social`
-composes those contracts with the transitional
-`app.compatibility.manual_social.write_unit_of_work` SQLite adapter; the domain
-does not import that adapter, legacy ORM/services, or runtime modules. Both
+composes those contracts with the runtime-owned
+`app.runtime.social.sqlalchemy_unit_of_work` SQLite adapter; the domain does
+not import that adapter, legacy ORM/services, or runtime modules. Both
 owner and validated-autonomous paths acquire the single writer with
 `BEGIN IMMEDIATE`; no provider or LLM call is allowed inside that transaction.
 
@@ -484,18 +487,17 @@ This is source transaction T1 only. A successful post/reply does not update
 later observation transaction that may create a directional relationship
 delta and outbox evidence after the target actor actually observes the source.
 
-`app.compatibility.manual_social.legacy` has consequently become a read-only
-feed/thread facade. Its former write implementation and commits were removed;
-the write adapter has a bounded exact-edge exception only while the canonical
-`Post` ORM and community persistence service remain pre-L4 modules. The manual
-Inbox runtime remains as an explicitly owned compatibility surface until PR D
-moves observation ownership.
+L4 PR F removes the former `app.compatibility.manual_social` and
+`app.domains.manual_social` facades completely. Feed/thread reads, source-write
+UoW, observation UoW and Inbox persistence are runtime-owned adapters under
+`app.runtime.social`. Their bounded exact-edge exception remains only while the
+canonical `Post` ORM and community persistence service are pre-L6 modules.
 
 ### L4 PR D source observation and follow-up causality
 
 `app.domains.social.public` also owns the storage-neutral observation command,
 result and UnitOfWork port. Runtime lanes enter that one application contract
-through the temporary `app.compatibility.manual_social.observations` adapter;
+through the runtime-owned `app.runtime.social.observations` adapter;
 Routine, Inbox and Feed do not write `RelationshipState`, change rows or graph
 outbox rows themselves.
 

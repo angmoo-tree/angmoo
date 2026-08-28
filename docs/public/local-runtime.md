@@ -124,6 +124,13 @@ Runtime state uses `stopped`, `starting`, `healthy`, `degraded`, `blocked`,
 `stale_state`, and `stopping`. Human and JSON diagnostics use stable reason
 codes without secrets or stack traces.
 
+LadybugDB is a replayable projection, not the canonical write store. During a
+graph outage, successful SQLite social and relationship writes remain committed
+while the projection outbox stays available for recovery. Diagnostics and the
+relationship UI distinguish degraded, rebuilding, and failed from a healthy
+empty graph and expose only safe pending, processing, and dead-letter counts.
+After recovery, World replay restores the six typed graph queries.
+
 `APP_SECRET`, provider credentials, local content, and media never enter image
 build arguments, image layers, tracked environment files, frontend containers,
 or logs. Status and doctor may report only safe metadata.

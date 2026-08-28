@@ -184,6 +184,47 @@ def test_committed_idempotency_replays_without_duplicate_rows(tmp_path: Path) ->
     engine.dispose()
 
 
+def test_replay_resolves_when_registry_becomes_visible_after_world_lookup(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Cover SQLite's deferred-BEGIN visibility window deterministically."""
+
+    engine, factory = _session_factory(tmp_path)
+    with factory() as db:
+        first = SqlAlchemyWorldPackageDestinationSeed(db).seed(_request())
+        db.commit()
+
+    with factory() as db:
+        adapter = SqlAlchemyWorldPackageDestinationSeed(db)
+        find_import = adapter._registry.find_import
+        lookup_count = 0
+
+        def stale_once(*, local_owner_id: str, idempotency_key: str):
+            nonlocal lookup_count
+            lookup_count += 1
+            if lookup_count == 1:
+                return None
+            return find_import(
+                local_owner_id=local_owner_id,
+                idempotency_key=idempotency_key,
+            )
+
+        monkeypatch.setattr(adapter._registry, "find_import", stale_once)
+        replay = adapter.seed(_request())
+
+        assert lookup_count == 2
+        assert replay.replayed is True
+        assert replay.import_id == first.import_id
+        assert replay.imported_world_id == first.imported_world_id
+        db.rollback()
+
+    with factory() as db:
+        assert _count(db, models.World) == 1
+        assert _count(db, models.WorldPackageImport) == 1
+    engine.dispose()
+
+
 def test_idempotency_key_cannot_replay_different_package_content(
     tmp_path: Path,
 ) -> None:

@@ -1,3 +1,5 @@
+"""Runtime SQLAlchemy inbox adapter for owner social observations."""
+
 from __future__ import annotations
 
 from datetime import UTC, datetime
@@ -6,10 +8,10 @@ from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app import models
-from app.domains.manual_social.domain.inbox import (
+from app.domains.social.domain.inbox import (
     ManualInboxInteractionCandidate,
 )
-from app.domains.manual_social.infrastructure.sqlalchemy_models import (
+from app.domains.social.infrastructure.sqlalchemy_models import (
     OwnerManualInboxCandidate,
 )
 

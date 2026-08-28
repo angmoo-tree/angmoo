@@ -152,6 +152,19 @@ class SqlAlchemyWorldPackageDestinationSeed:
             allow_system_roles=True,
         )
         if world_outcome.replayed:
+            # SQLite's deferred BEGIN can let the registry lookup run before a
+            # concurrent import commits and the immediately following World
+            # lookup run after that same atomic commit. Resolve the now-visible
+            # registry row instead of misclassifying this narrow replay race as
+            # a corrupt partial seed.
+            concurrent_replay = self._registry.find_import(
+                local_owner_id=request.local_owner_id,
+                idempotency_key=request.idempotency_key,
+            )
+            if concurrent_replay is not None:
+                return resolve_world_package_import_replay(
+                    request, concurrent_replay
+                )
             raise RuntimeError("world_package_registry_missing_for_existing_seed")
 
         mappings: list[WorldPackageImportIdMapping] = [

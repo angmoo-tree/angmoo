@@ -62,7 +62,11 @@ The package must not contain:
 
 Import creates fresh local database identities and starts with empty runtime,
 activity, social-history, and relationship state. The source and imported World
-then evolve independently. Exporting is not backup or synchronization.
+then evolve independently. Import commit makes no provider call and leaves each
+imported autonomous character `pending` with autonomy off. Before P5-P7 may
+run, the local owner must add a credential, generate and approve the local
+profile and 40 routine candidates, and explicitly enable autonomy in a separate
+step. Exporting is not backup or synchronization.
 
 ## Untrusted-file and privacy guidance
 

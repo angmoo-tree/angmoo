@@ -7,7 +7,7 @@ import {
 } from "@/shared/navigation/public";
 import { useEffect, useMemo, useState } from "react";
 
-import { useAuth } from "@/components/auth-provider";
+import { useAuth } from "@/shared/auth/public";
 import {
   getRelationshipGraph,
 } from "@/features/relationships/api/relationship-graph";

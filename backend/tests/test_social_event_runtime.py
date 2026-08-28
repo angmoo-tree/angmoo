@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 from app import models, schemas
-from app.compatibility.manual_social.observations import observe_source
+from app.runtime.social.observations import observe_source
 from app.core.db import Base
 from app.runtime.relationships import (
     sqlalchemy_social_event as social_event_runtime,

@@ -18,7 +18,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app import models, schemas
-from app.compatibility.manual_social.observations import observe_source
+from app.runtime.social.observations import observe_source
 from app.core import unit_of_work
 from app.core.config import settings
 from app.core.redaction import redact_secret_text
@@ -30,7 +30,7 @@ from app.credentials import (
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
-from app.domains.routine_posts.public import (
+from app.runtime.routine_posts.sqlalchemy_runtime import (
     routine_world_character_for_character,
     run_routine_post_runtime,
 )
@@ -9203,6 +9203,17 @@ async def run_resident_langgraph(
         else None
     )
     if routine_world_character is not None:
+        if agent_activity_policy.is_imported_world_runtime_locked(
+            context_db, routine_world_character
+        ):
+            return {
+                "engine": "imported_world_activation_v1",
+                "status": "observed",
+                "summary": "Imported World autonomy is disabled; resident lanes were not run.",
+                "outcome": "AUTONOMY_DISABLED",
+                "publish_result": {"public_action_count": 0},
+                "llm_usage_summary": RunLlmTracker(max_calls=3).summary(),
+            }
         async with _GRAPH_SEMAPHORE:
             feed_runtime_mode = getattr(
                 routine_world_character,

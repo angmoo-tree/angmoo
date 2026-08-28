@@ -61,6 +61,7 @@ class ReadySearchProfile:
     keywords: tuple[str, ...]
     avoid_topics: tuple[str, ...]
     action_profile: dict[str, object]
+    imported_world_runtime_locked: bool
 
 
 @dataclass(frozen=True)
@@ -176,6 +177,18 @@ def load_ready_search_profile(
         for topic in validated.avoid_topics
         if normalize_search_text(topic, max_chars=40)
     )
+    imported_world_runtime_locked = bool(
+        not world_character.autonomous_enabled
+        and db.scalar(
+            select(models.WorldPackageImport.import_id)
+            .where(
+                models.WorldPackageImport.imported_world_id
+                == world_character.world_id
+            )
+            .limit(1)
+        )
+        is not None
+    )
     return ReadySearchProfile(
         world=world,
         world_character=world_character,
@@ -185,6 +198,7 @@ def load_ready_search_profile(
         keywords=keywords,
         avoid_topics=avoid_topics,
         action_profile=validated.action_profile.model_dump(mode="json"),
+        imported_world_runtime_locked=imported_world_runtime_locked,
     )
 
 
