@@ -218,6 +218,8 @@ def test_static_and_next_profiles_share_the_same_window_bridge() -> None:
     assert "<DesktopWindowBridge />" in static_layout
     assert "currentDesktopRoute" in router
     assert "subscribeDesktopRoute" in router
+    assert 'return `${route.pathname}\\n${route.search}`;' in router
+    assert 'const route = `${location.pathname}${location.search}`;' in router
     assert config["build"]["devUrl"] == "http://127.0.0.1:3000"
     assert config["build"]["frontendDist"] == "../../frontend/out"
 

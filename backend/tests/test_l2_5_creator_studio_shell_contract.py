@@ -72,6 +72,8 @@ def test_studio_world_character_surface_owns_fixture_lifecycle_orchestration() -
     surface = _read(
         "features/creator-studio/ui/studio-world-character-list.tsx"
     )
+    create_client = _read("components/agent-create-client.tsx")
+    browser_create_page = _read("app/agents/new/page.tsx")
     client = _read(
         "features/creator-studio/api/studio-world-character-client.ts"
     )
@@ -83,6 +85,10 @@ def test_studio_world_character_surface_owns_fixture_lifecycle_orchestration() -
     assert 'import Link from "next/link"' in surface
     assert "useRuntimeRouter" in surface
     assert "새 캐릭터 만들기" in surface
+    assert (
+        'const createHref = `/agents/new?worldId=${encodeURIComponent(worldId)}'
+        '&returnTo=${encodeURIComponent(returnTo)}`;' in surface
+    )
     assert "기존 캐릭터 연결" in surface
     assert "이 World에서 제거" in surface
     assert "생성·삭제는 P10-L에서 제공합니다." not in surface
@@ -91,3 +97,12 @@ def test_studio_world_character_surface_owns_fixture_lifecycle_orchestration() -
     assert "/leave`" in client
     assert 'method: "POST"' not in surface
     assert 'method: "DELETE"' not in surface
+    assert "useRuntimeSearchParams as useSearchParams" in create_client
+    assert 'searchParams.get("worldId")' in create_client
+    assert 'searchParams.get("returnTo")' in create_client
+    assert "requestedReturnTo === expectedWorldReturnTo" in create_client
+    assert (
+        '`${worldFixtureReturnTo}?createdCharacterId=${encodeURIComponent('
+        'created.character.id)}`' in create_client
+    )
+    assert "<AgentCreateClient />" in browser_create_page
