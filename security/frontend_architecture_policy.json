@@ -10,74 +10,7 @@
     "world-app",
     "world-packages"
   ],
-  "legacy_import_exceptions": [
-    {
-      "importer": "frontend/src/features/relationships/ui/relationship-graph-client.tsx",
-      "target": "@/components/auth-provider",
-      "owner_stage": "L4 PR E relationship UI progressive move",
-      "removal_condition": "Move the shared auth context behind a product-neutral shared public boundary before L4 closeout"
-    },
-    {
-      "importer": "frontend/src/features/social/api/social-feed-client.ts",
-      "target": "@/lib/backend",
-      "owner_stage": "L4 PR B social read-boundary bridge",
-      "removal_condition": "Move the common backend transport into shared infrastructure without changing Feed behavior"
-    },
-    {
-      "importer": "frontend/src/features/social/ui/post-list-client.tsx",
-      "target": "@/components/active-agent-card",
-      "owner_stage": "L4 PR B social UI progressive move",
-      "removal_condition": "PR F removes remaining L4-owned legacy UI edges"
-    },
-    {
-      "importer": "frontend/src/features/social/ui/post-list-client.tsx",
-      "target": "@/components/expandable-post-text",
-      "owner_stage": "L4 PR B social UI progressive move",
-      "removal_condition": "PR F removes remaining L4-owned legacy UI edges"
-    },
-    {
-      "importer": "frontend/src/features/social/ui/post-list-client.tsx",
-      "target": "@/components/mentioned-text",
-      "owner_stage": "L4 PR B social UI progressive move",
-      "removal_condition": "PR F removes remaining L4-owned legacy UI edges"
-    },
-    {
-      "importer": "frontend/src/features/social/ui/post-list-client.tsx",
-      "target": "@/components/post-media-grid",
-      "owner_stage": "L4 PR B social UI progressive move",
-      "removal_condition": "PR F removes remaining L4-owned legacy UI edges"
-    },
-    {
-      "importer": "frontend/src/features/social/ui/post-list-client.tsx",
-      "target": "@/components/profile-avatar",
-      "owner_stage": "L4 PR B social UI progressive move",
-      "removal_condition": "PR F removes remaining L4-owned legacy UI edges"
-    },
-    {
-      "importer": "frontend/src/features/social/ui/post-list-client.tsx",
-      "target": "@/lib/agents",
-      "owner_stage": "L4 PR B social UI progressive move",
-      "removal_condition": "PR F removes remaining L4-owned legacy data edges"
-    },
-    {
-      "importer": "frontend/src/features/social/ui/post-list-client.tsx",
-      "target": "@/lib/post-card-navigation",
-      "owner_stage": "L4 PR B social UI progressive move",
-      "removal_condition": "PR F removes remaining L4-owned legacy navigation edges"
-    },
-    {
-      "importer": "frontend/src/features/social/ui/post-list-client.tsx",
-      "target": "@/lib/profile",
-      "owner_stage": "L4 PR B social UI progressive move",
-      "removal_condition": "PR F removes remaining L4-owned legacy presentation edges"
-    },
-    {
-      "importer": "frontend/src/features/social/ui/post-list-client.tsx",
-      "target": "@/lib/use-mobile-pull-to-refresh",
-      "owner_stage": "L4 PR B social UI progressive move",
-      "removal_condition": "Move the reusable interaction primitive into shared UI before PR F closeout"
-    }
-  ],
+  "legacy_import_exceptions": [],
   "legacy_import_prefixes": [
     "@/components",
     "@/lib"
@@ -121,6 +54,11 @@
       "segment: \"feed\"",
       "worldAppSectionRoute"
     ],
+    "frontend/src/features/world-app/ui/world-app.tsx": [
+      "const NO_SPECIFIC_ROLE_KEY = \"no_specific_role\";",
+      "return !roleKey || roleKey === NO_SPECIFIC_ROLE_KEY ? \"역할 없음\" : roleKey;",
+      "worldRoleLabel(ownerActor.profile.role_key)"
+    ],
     "frontend/src/shared/ui/device-frame.module.css": [
       "--device-bezel-width: 3px",
       "--device-corner-radius: 34px"
@@ -140,18 +78,37 @@
     "frontend/src/features/relationships/public.ts",
     "frontend/src/features/relationships/ui/relationship-graph-client.tsx",
     "frontend/src/features/runtime-status/public.ts",
+    "frontend/src/features/social/api/social-agent-client.ts",
+    "frontend/src/features/social/api/social-feed-client.ts",
     "frontend/src/features/social/api/social-write-client.ts",
+    "frontend/src/features/social/model/post-card-navigation.ts",
+    "frontend/src/features/social/model/social-agent-contract.ts",
+    "frontend/src/features/social/model/social-feed-contract.ts",
     "frontend/src/features/social/model/social-write-contract.ts",
     "frontend/src/features/social/public.ts",
+    "frontend/src/features/social/ui/active-agent-summary.tsx",
+    "frontend/src/features/social/ui/expandable-post-text.tsx",
+    "frontend/src/features/social/ui/mentioned-text.tsx",
+    "frontend/src/features/social/ui/post-list-client.tsx",
+    "frontend/src/features/social/ui/post-media-grid.tsx",
     "frontend/src/features/social/ui/world-social-feed.tsx",
     "frontend/src/features/world-app/api/world-app-client.ts",
     "frontend/src/features/world-app/model/world-app-contract.ts",
     "frontend/src/features/world-app/public.ts",
     "frontend/src/features/world-app/ui/world-app.tsx",
     "frontend/src/features/world-packages/public.ts",
+    "frontend/src/shared/api/backend-server.ts",
+    "frontend/src/shared/api/public.ts",
+    "frontend/src/shared/auth/auth-provider.tsx",
+    "frontend/src/shared/auth/auth-session.ts",
+    "frontend/src/shared/auth/public.ts",
+    "frontend/src/shared/interaction/public.ts",
+    "frontend/src/shared/interaction/use-mobile-pull-to-refresh.ts",
     "frontend/src/shared/navigation/public.ts",
     "frontend/src/shared/ui/app-icon.tsx",
     "frontend/src/shared/ui/device-frame.tsx",
+    "frontend/src/shared/ui/profile-avatar.tsx",
+    "frontend/src/shared/ui/profile-presentation.ts",
     "frontend/src/shared/ui/public.ts",
     "frontend/src/shared/ui/status-badge.tsx"
   ],

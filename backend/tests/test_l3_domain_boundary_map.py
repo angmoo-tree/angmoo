@@ -79,9 +79,8 @@ def test_l3_current_entrypoints_track_completed_and_pending_migrations() -> None
             "reconcile_all_elapsed_routines",
         },
         APP_ROOT
-        / "domains"
+        / "runtime"
         / "routine_posts"
-        / "infrastructure"
         / "sqlalchemy_runtime.py": {
             "run_routine_post_runtime",
         },
@@ -121,9 +120,9 @@ def test_activity_plan_route_and_scheduler_use_routines_public_boundary() -> Non
     assert "app.domains.routines" in _imports(route)
     assert "app.services.daily_activity_plans" not in _imports(route)
     assert "app.domains.routines.public" in _imports(agent_runs)
-    assert "app.domains.routine_posts.public" in _imports(agent_runs)
+    assert "app.runtime.routine_posts" in _imports(agent_runs)
     assert "app.services.routine_post_runtime" not in _imports(agent_runs)
-    assert "app.domains.routine_posts.public" in _imports(resident)
+    assert "app.runtime.routine_posts.sqlalchemy_runtime" in _imports(resident)
     assert "app.services.routine_post_runtime" not in _imports(resident)
 
 

@@ -12,12 +12,46 @@ param(
     [string]$Python,
     [Parameter(Mandatory = $true)]
     [string]$Verifier,
+    [Parameter(Mandatory = $true)]
+    [string]$RunSentinel,
     [ValidateSet('All', 'Upgrade', 'Recovery')]
     [string]$Mode = 'All'
 )
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+
+if (
+    $env:GITHUB_ACTIONS -cne 'true' -or
+    $env:RUNNER_ENVIRONMENT -cne 'github-hosted'
+) {
+    throw 'windows_installer_hosted_runner_only'
+}
+if (
+    [string]::IsNullOrWhiteSpace($env:RUNNER_TEMP) -or
+    [string]::IsNullOrWhiteSpace($env:GITHUB_RUN_ID) -or
+    [string]::IsNullOrWhiteSpace($env:SOURCE_SHA) -or
+    $env:SOURCE_SHA -notmatch '^[0-9a-f]{40}$'
+) {
+    throw 'windows_installer_hosted_identity_missing'
+}
+$runnerTemp = [System.IO.Path]::GetFullPath($env:RUNNER_TEMP).TrimEnd('\')
+$sentinelPath = [System.IO.Path]::GetFullPath($RunSentinel)
+$sentinelParent = [System.IO.Path]::GetDirectoryName($sentinelPath).TrimEnd('\')
+if (-not [string]::Equals(
+    $sentinelParent,
+    $runnerTemp,
+    [System.StringComparison]::OrdinalIgnoreCase
+)) {
+    throw 'windows_installer_hosted_sentinel_outside_runner_temp'
+}
+$expectedSentinel = "angmoo-installer-fixture:$($env:GITHUB_RUN_ID):$($env:SOURCE_SHA)"
+if (
+    -not (Test-Path -LiteralPath $sentinelPath -PathType Leaf) -or
+    (Get-Content -LiteralPath $sentinelPath -Raw) -cne $expectedSentinel
+) {
+    throw 'windows_installer_hosted_sentinel_invalid'
+}
 
 foreach ($required in @(
     $Installer,
@@ -94,7 +128,37 @@ function Remove-IsolatedFixture {
     }
 }
 
+function Assert-SyntheticFixtureArchive([string]$Archive) {
+    $inspectionRoot = Join-Path `
+        $runnerTemp `
+        ("angmoo-installer-fixture-inspection-" + [System.Guid]::NewGuid().ToString('N'))
+    New-Item -ItemType Directory -Path $inspectionRoot | Out-Null
+    Expand-Archive -LiteralPath $Archive -DestinationPath $inspectionRoot
+    $manifest = Join-Path $inspectionRoot 'fixture-manifest.json'
+    if (-not (Test-Path -LiteralPath $manifest -PathType Leaf)) {
+        throw 'windows_installer_supported_upgrade_fixture_manifest_missing'
+    }
+    $contract = Get-Content -LiteralPath $manifest -Raw | ConvertFrom-Json
+    if (
+        $contract.synthetic_fixture -ne $true -or
+        $contract.contains_real_credentials -ne $false
+    ) {
+        throw 'windows_installer_supported_upgrade_fixture_not_synthetic'
+    }
+    $reparse = Get-ChildItem -LiteralPath $inspectionRoot -Force -Recurse |
+        Where-Object {
+            ($_.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0
+        } |
+        Select-Object -First 1
+    if ($null -ne $reparse) {
+        throw 'windows_installer_supported_upgrade_fixture_reparse_refused'
+    }
+}
+
 function Restore-IsolatedFixture([string]$Archive) {
+    # Validate the archive in the ephemeral runner tree before touching the
+    # canonical product root. Invalid or non-synthetic input cannot delete data.
+    Assert-SyntheticFixtureArchive $Archive
     Remove-IsolatedFixture
     New-Item -ItemType Directory -Force -Path $productRoot | Out-Null
     Expand-Archive -LiteralPath $Archive -DestinationPath $productRoot

@@ -16,6 +16,8 @@ concurrency:
 
 env:
   PYTHONUTF8: "1"
+  SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  SOURCE_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
 
 jobs:
   local-core-smoke:
@@ -25,6 +27,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          repository: ${{ env.SOURCE_REPOSITORY }}
+          ref: ${{ env.SOURCE_SHA }}
       - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
           version: "0.12.5"
@@ -89,8 +93,22 @@ jobs:
       - name: Run required container supply-chain and clean-clone Gate
         shell: bash
         env:
-          ANGMOO_CI_PROJECT: angmoo-pr-${{ github.run_id }}
-        run: bash scripts/ci/run_container_gate.sh
+          ANGMOO_CI_PROJECT: angmoo-pr-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          clean_clone="$RUNNER_TEMP/angmoo-clean-clone-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          test ! -e "$clean_clone"
+          git clone --filter=blob:none --no-checkout \
+            "$GITHUB_SERVER_URL/$SOURCE_REPOSITORY.git" "$clean_clone"
+          git -C "$clean_clone" checkout --detach "$SOURCE_SHA"
+          test "$(git -C "$clean_clone" rev-parse HEAD)" = "$SOURCE_SHA"
+          test -z "$(git -C "$clean_clone" status --porcelain --untracked-files=all)"
+          (
+            cd "$clean_clone"
+            ANGMOO_SOURCE_SHA="$SOURCE_SHA" \
+              ANGMOO_CI_PROJECT="$ANGMOO_CI_PROJECT" \
+              bash scripts/ci/run_container_gate.sh
+          )
 
   local-autonomy-smoke:
     runs-on: ubuntu-latest
@@ -109,6 +127,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          repository: ${{ env.SOURCE_REPOSITORY }}
+          ref: ${{ env.SOURCE_SHA }}
       - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
           version: "0.12.5"
@@ -138,6 +158,7 @@ jobs:
             tests/test_l3_5_world_package_ui_contract.py \
             tests/test_l3_5_world_package_closeout.py \
             tests/test_l3_5_world_package_closeout_contract.py \
+            tests/test_l4_pr_f_closeout_contract.py \
             tests/test_feed_reaction_intent.py \
             tests/test_world_feed_search.py \
             tests/test_social_event_runtime.py \
@@ -158,6 +179,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          repository: ${{ env.SOURCE_REPOSITORY }}
+          ref: ${{ env.SOURCE_SHA }}
       - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
           version: "0.12.5"

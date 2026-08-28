@@ -93,7 +93,7 @@ from app.domains.relationships.infrastructure.sqlalchemy_social_models import (
     SocialEvent,
     SocialEventEvidence,
 )
-from app.domains.manual_social.infrastructure.sqlalchemy_models import (
+from app.domains.social.infrastructure.sqlalchemy_models import (
     OwnerManualInboxCandidate,
     OwnerManualSocialWrite,
 )

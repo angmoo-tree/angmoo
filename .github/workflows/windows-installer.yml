@@ -16,6 +16,8 @@ concurrency:
 
 env:
   PYTHONUTF8: "1"
+  SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  SOURCE_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
 
 jobs:
   release-candidate:
@@ -30,6 +32,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          repository: ${{ env.SOURCE_REPOSITORY }}
+          ref: ${{ env.SOURCE_SHA }}
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "22"
@@ -66,8 +70,10 @@ jobs:
             tests\test_l3_er3_ladybug_projection.py `
             tests\test_l3_er3_graph_query_parity.py `
             tests\test_l3_er4_single_backend_runtime.py `
+            tests\test_l3_5_world_package_import_commit.py `
             tests\test_l3_5_world_package_ui_contract.py `
-            tests\test_l3_5_world_package_closeout_contract.py
+            tests\test_l3_5_world_package_closeout_contract.py `
+            tests\test_l4_pr_f_closeout_contract.py
           Pop-Location
           backend\.venv\Scripts\python.exe scripts\ci\check_desktop_installer_contract.py
           .\desktop\scripts\test-installer-payload-verifier.ps1
@@ -177,11 +183,11 @@ jobs:
             --bundle-root desktop\src-tauri\target\release\bundle `
             --output-root .codex-temp\er6-release-metadata `
             --version 0.4.0-1 `
-            --commit $env:GITHUB_SHA
+            --commit $env:SOURCE_SHA
       - name: Upload release-candidate evidence
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: angmoo-windows-installer-${{ github.sha }}
+          name: angmoo-windows-installer-${{ env.SOURCE_SHA }}
           if-no-files-found: error
           retention-days: 14
           path: |
@@ -215,9 +221,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          repository: ${{ env.SOURCE_REPOSITORY }}
+          ref: ${{ env.SOURCE_SHA }}
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: angmoo-windows-installer-${{ github.sha }}
+          name: angmoo-windows-installer-${{ env.SOURCE_SHA }}
           path: ${{ runner.temp }}/angmoo-installer
       - name: Run real NSIS supported-predecessor direct update
         shell: pwsh
@@ -234,6 +242,9 @@ jobs:
           if (-not $installer -or -not $supportedV1 -or -not $supportedV2 -or -not $conflict) {
             throw 'Windows installer supported-upgrade inputs are missing'
           }
+          $sentinel = Join-Path $env:RUNNER_TEMP "angmoo-installer-fixture-$($env:GITHUB_RUN_ID)-$($env:SOURCE_SHA)"
+          "angmoo-installer-fixture:$($env:GITHUB_RUN_ID):$($env:SOURCE_SHA)" |
+            Set-Content -LiteralPath $sentinel -Encoding ascii -NoNewline
           .\scripts\ci\run_windows_installer_supported_upgrade.ps1 `
             -Installer $installer.FullName `
             -SupportedV1FixtureArchive $supportedV1.FullName `
@@ -241,6 +252,7 @@ jobs:
             -ConflictFixtureArchive $conflict.FullName `
             -Python (Get-Command python).Source `
             -Verifier scripts\ci\verify_windows_installer_supported_upgrade_fixture.py `
+            -RunSentinel $sentinel `
             -Mode Upgrade
 
   windows-installer-failure-recovery:
@@ -252,9 +264,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          repository: ${{ env.SOURCE_REPOSITORY }}
+          ref: ${{ env.SOURCE_SHA }}
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: angmoo-windows-installer-${{ github.sha }}
+          name: angmoo-windows-installer-${{ env.SOURCE_SHA }}
           path: ${{ runner.temp }}/angmoo-installer
       - name: Run real NSIS migration-failure rollback
         shell: pwsh
@@ -271,6 +285,9 @@ jobs:
           if (-not $installer -or -not $supportedV1 -or -not $supportedV2 -or -not $conflict) {
             throw 'Windows installer failure-recovery inputs are missing'
           }
+          $sentinel = Join-Path $env:RUNNER_TEMP "angmoo-installer-fixture-$($env:GITHUB_RUN_ID)-$($env:SOURCE_SHA)"
+          "angmoo-installer-fixture:$($env:GITHUB_RUN_ID):$($env:SOURCE_SHA)" |
+            Set-Content -LiteralPath $sentinel -Encoding ascii -NoNewline
           .\scripts\ci\run_windows_installer_supported_upgrade.ps1 `
             -Installer $installer.FullName `
             -SupportedV1FixtureArchive $supportedV1.FullName `
@@ -278,6 +295,7 @@ jobs:
             -ConflictFixtureArchive $conflict.FullName `
             -Python (Get-Command python).Source `
             -Verifier scripts\ci\verify_windows_installer_supported_upgrade_fixture.py `
+            -RunSentinel $sentinel `
             -Mode Recovery
 
   installed-runtime-smoke:
@@ -288,7 +306,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: angmoo-windows-installer-${{ github.sha }}
+          name: angmoo-windows-installer-${{ env.SOURCE_SHA }}
           path: ${{ runner.temp }}/angmoo-installer
       - name: Verify installer digests
         shell: pwsh
@@ -509,7 +527,7 @@ jobs:
           if ($payloadIdentity.schema_version -ne 2) {
             throw 'Installed payload manifest did not use build identity schema 2'
           }
-          if ($payloadIdentity.build_commit -ne $env:GITHUB_SHA) {
+          if ($payloadIdentity.build_commit -ne $env:SOURCE_SHA) {
             throw "Installed payload build commit mismatch: $($payloadIdentity.build_commit)"
           }
           if ([string]$payloadIdentity.payload_generation -notmatch '^[0-9a-f]{64}$') {
@@ -962,7 +980,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: angmoo-windows-defender-evidence-${{ github.sha }}
+          name: angmoo-windows-defender-evidence-${{ env.SOURCE_SHA }}
           if-no-files-found: error
           retention-days: 14
           path: ${{ runner.temp }}/angmoo-defender-evidence

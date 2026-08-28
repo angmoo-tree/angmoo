@@ -36,12 +36,14 @@ from app.domains.social.ports import (
     SocialSearchIndexPort,
     SocialWriteUnitOfWorkPort,
 )
+from app.domains.social.domain.inbox import ManualInboxInteractionCandidate
 
 apply_validated_autonomous_social_result = apply_validated_autonomous_result
 
 
 __all__ = [
     "KeywordPostLookup",
+    "ManualInboxInteractionCandidate",
     "ObservationLane",
     "OwnerPostCommand",
     "OwnerReplyCommand",

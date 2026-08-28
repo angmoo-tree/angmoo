@@ -28,7 +28,7 @@ def test_next_proxy_forwards_idempotency_key_for_safe_mutation_replay() -> None:
 
 
 def test_backend_proxy_preserves_allowlisted_set_cookie_on_all_statuses() -> None:
-    proxy = _read("lib/backend.ts")
+    proxy = _read("shared/api/backend-server.ts")
 
     assert "getSetCookie" in proxy
     assert "forwardedResponseHeaders" in proxy
@@ -39,22 +39,24 @@ def test_backend_proxy_preserves_allowlisted_set_cookie_on_all_statuses() -> Non
 
 
 def test_browser_auth_storage_contains_no_session_or_pending_token() -> None:
-    agents = _read("lib/agents.ts")
+    auth_session = _read("shared/auth/auth-session.ts")
 
-    assert "angmoo.authToken" not in agents
-    assert "pending_token" not in agents
-    assert "getStoredToken" not in agents
-    assert "hasStoredAuth" not in agents
-    assert "Authorization: `Bearer" not in agents
-    assert 'credentials: "same-origin"' in agents
+    assert "angmoo.authToken" not in auth_session
+    assert "pending_token" not in auth_session
+    assert "getStoredToken" not in auth_session
+    assert "hasStoredAuth" not in auth_session
+    assert "Authorization: `Bearer" not in auth_session
+    assert 'credentials: anonymous ? "omit" : "same-origin"' in auth_session
 
 
 def test_browser_auth_provider_bootstraps_from_auth_me() -> None:
-    provider = _read("components/auth-provider.tsx")
+    provider = _read("shared/auth/auth-provider.tsx")
+    session = _read("shared/auth/auth-session.ts")
     layout = _read("app/layout.tsx")
 
     assert 'type AuthStatus = "checking" | "authenticated" | "unauthenticated"' in provider
-    assert "getMe" in provider
+    assert "getCurrentUser" in provider
+    assert 'authRequest<UserRead>("/auth/me", options)' in session
     assert "useAuth" in provider
     assert "<AuthProvider>" in layout
 

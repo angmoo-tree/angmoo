@@ -11,7 +11,7 @@ from sqlalchemy import URL, create_engine, select
 from sqlalchemy.orm import Session
 
 from app import models
-from app.compatibility.manual_social.observations import observe_source
+from app.runtime.social.observations import observe_source
 from app.domains.worlds.domain.reserved_roles import (
     NO_SPECIFIC_ROLE_DESCRIPTION,
     NO_SPECIFIC_ROLE_NAME,

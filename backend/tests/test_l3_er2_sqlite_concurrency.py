@@ -21,7 +21,7 @@ from app.domains.runtime.domain.scheduler_lease import (
 )
 from app.runtime.graph_projection import SqliteProjectionOutbox
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
-from app.runtime.persistence.sqlite_concurrency import (
+from app.core.sqlite_concurrency import (
     SqliteBoundedTaskQueue,
     SqliteBusyRetryExhausted,
     SqliteRetryPolicy,

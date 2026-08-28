@@ -23,7 +23,7 @@ from app.domains.runtime.domain.scheduler_lease import (
 from app.domains.runtime.infrastructure.sqlalchemy_scheduler_lease import (
     RuntimeSchedulerLease,
 )
-from app.runtime.persistence.sqlite_concurrency import (
+from app.core.sqlite_concurrency import (
     SqliteRetryPolicy,
     run_sqlite_immediate,
 )

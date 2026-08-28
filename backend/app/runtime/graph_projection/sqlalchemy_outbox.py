@@ -16,7 +16,7 @@ from app.domains.relationships.ports.outbox import (
     ProjectionWorkItem,
 )
 from app.domains.relationships.projection.commands import ProjectionCommand
-from app.runtime.persistence.sqlite_concurrency import (
+from app.core.sqlite_concurrency import (
     SqliteRetryPolicy,
     run_sqlite_immediate,
 )

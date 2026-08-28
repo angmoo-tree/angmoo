@@ -1,3 +1,5 @@
+"""HTTP presentation schemas for World-scoped social activity."""
+
 from __future__ import annotations
 
 from datetime import datetime

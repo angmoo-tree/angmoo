@@ -169,35 +169,38 @@ The deterministic backend inventory at the exact baseline contains:
 | Selected L4 legacy-horizontal modules | 18 |
 | Existing canonical social/relationship/runtime modules | 26 |
 
-The current L4 move candidates remain primarily under `app.services`,
-`app.models`, `app.cruds`, and `app.compatibility.manual_social`. Existing
-canonical surfaces under `app.domains.manual_social`,
-`app.domains.relationships`, `app.runtime.graph_projection`, and the LadybugDB
-integration are preserved. The exact module paths and imports are recorded in
-the generated JSON rather than duplicated here.
+After L4 PR F, the remaining later-stage move candidates are primarily under
+`app.services`, `app.models`, and `app.cruds`. The temporary
+`app.compatibility.manual_social` and `app.domains.manual_social` namespaces no
+longer exist. Canonical contracts are under `app.domains.social` and
+`app.domains.relationships`; concrete composition is under
+`app.runtime.social`, `app.runtime.routine_posts`,
+`app.runtime.graph_projection`, and the LadybugDB integration. The exact module
+paths and imports are recorded in the generated JSON rather than duplicated
+here.
 
 ## Frontend feature-first baseline
 
-The current inventory contains 12 L4 route/component/API/type candidates and
-37 exact consumer edges. It records:
+The current post-PR-F inventory contains 14 L4 route/component/API/type
+candidates and 32 exact consumer edges. It records:
 
 - Feed composition and post-list/post-thread clients
 - owner-controlled World post/reply UI
 - community transport and DTO surface
 - Relationship Graph route, UI, typed API and degraded/rebuilding states
 - four current community route adapters
-- six existing feature public surfaces and five shared public surfaces
+- eight feature public surfaces and eight shared public surfaces
 
-`features/social` and `features/relationships` are the only new L4 feature
-names in the allowlist. PR A does not create them or move source. Subsequent
-PRs must make the recorded legacy consumer count decrease or stay equal; it
-must never increase. Route roots compose feature `public.ts` surfaces, shared
-code remains product-neutral, and social/relationships cannot deep-import one
-another.
+`features/social` and `features/relationships` are the L4 feature owners in the
+allowlist. The PR-F reviewed delta contains 523 backend modules, 1,217 internal
+edges, 1,769 external imports, eight legacy-horizontal modules, 56 canonical
+boundary modules, and zero module cycles or unowned frontend legacy exceptions.
+Route roots compose feature `public.ts` surfaces, shared code remains
+product-neutral, and social/relationships cannot deep-import one another.
 
 ## Frozen behavior oracle
 
-The generated baseline records 85 focused test nodes across the following
+The generated baseline records 93 focused test nodes across the following
 contracts:
 
 - P5 deterministic keyword normalization, eight-keyword profile, World-scoped

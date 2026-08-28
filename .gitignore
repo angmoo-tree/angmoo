@@ -31,3 +31,4 @@ desktop/src-tauri/installer-payload.json
 # Local build, verification, and release-candidate artifacts
 .codex-temp/
 .angmoo-dev/
+backend/.ci/

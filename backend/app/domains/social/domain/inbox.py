@@ -1,3 +1,5 @@
+"""Canonical owner-reply inbox candidate contract."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

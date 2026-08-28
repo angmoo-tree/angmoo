@@ -1,3 +1,5 @@
+"""Canonical social source-write and inbox persistence models."""
+
 from __future__ import annotations
 
 from datetime import datetime

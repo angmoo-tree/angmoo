@@ -18,7 +18,7 @@ from sqlalchemy.pool import StaticPool
 from app import models, schemas
 from app.core.db import Base
 from app.cruds import agents as agent_crud
-from app.compatibility.manual_social.write_unit_of_work import (
+from app.runtime.social.sqlalchemy_unit_of_work import (
     SqlAlchemySocialWriteUnitOfWork,
 )
 from app.domains.social.public import OwnerReplyCommand, create_owner_reply
@@ -1270,6 +1270,11 @@ def test_langgraph_routes_routine_mode_without_building_legacy_graph(
         "routine_world_character_for_character",
         lambda *_args, **_kwargs: SimpleNamespace(id="world-character-routine"),
     )
+    monkeypatch.setattr(
+        langgraph_resident.agent_activity_policy,
+        "is_imported_world_runtime_locked",
+        lambda *_args, **_kwargs: False,
+    )
 
     async def fake_routine(_context):
         return {"engine": "routine_resident_v1", "status": "completed"}
@@ -1298,6 +1303,11 @@ def test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode(
             id="world-character-keyword-feed",
             feed_runtime_mode="keyword_search_v1",
         ),
+    )
+    monkeypatch.setattr(
+        langgraph_resident.agent_activity_policy,
+        "is_imported_world_runtime_locked",
+        lambda *_args, **_kwargs: False,
     )
 
     call_order: list[str] = []

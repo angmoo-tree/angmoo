@@ -1,7 +1,7 @@
 """Current and OFF-by-default embedded canonical persistence adapters."""
 
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
-from app.runtime.persistence.sqlite_concurrency import (
+from app.core.sqlite_concurrency import (
     SqliteBoundedTaskQueue,
     SqliteBusyRetryExhausted,
     SqliteConcurrencyError,

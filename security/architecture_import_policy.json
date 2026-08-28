@@ -1239,38 +1239,38 @@
         }
       ],
       "id": "l3-routine-post-legacy-persistence-bridge",
-      "owner_stage": "L4",
-      "reason": "PR F owns routine continuation while social writes, joint activity, agent-run persistence, and canonical event storage remain later-stage legacy modules.",
-      "removal_condition": "Remove each edge as PR G and L4 move its social or runtime dependency behind a canonical public port.",
+      "owner_stage": "L6",
+      "reason": "L4 PR F moves routine orchestration into app.runtime.routine_posts while this narrow compatibility adapter still delegates agent-run, joint-activity, and community persistence owned by pre-domain services.",
+      "removal_condition": "Remove each exact edge when L6 moves the remaining agent-run, joint-activity, and community persistence operations behind canonical public ports.",
       "review_date": "2026-11-19"
     },
     {
       "edges": [
         {
           "imported": "app.models",
-          "importer": "app.compatibility.manual_social.inbox"
+          "importer": "app.runtime.social.sqlalchemy_inbox"
         },
         {
           "imported": "app.models",
-          "importer": "app.compatibility.manual_social.legacy"
+          "importer": "app.runtime.social.sqlalchemy_read_repository"
         },
         {
           "imported": "app.models",
-          "importer": "app.compatibility.manual_social.write_unit_of_work"
+          "importer": "app.runtime.social.sqlalchemy_unit_of_work"
         },
         {
           "imported": "app.schemas.community",
-          "importer": "app.compatibility.manual_social.write_unit_of_work"
+          "importer": "app.runtime.social.sqlalchemy_unit_of_work"
         },
         {
           "imported": "app.services.community",
-          "importer": "app.compatibility.manual_social.write_unit_of_work"
+          "importer": "app.runtime.social.sqlalchemy_unit_of_work"
         }
       ],
-      "id": "l3-owner-manual-social-persistence-bridge",
-      "owner_stage": "L4",
-      "reason": "L4 PR C moves source-write commands and UoW ownership into app.domains.social while one explicit compatibility adapter still bridges the pre-L4 Post ORM and community persistence service. The legacy facade is read-only.",
-      "removal_condition": "Remove the read edges with the remaining feed migration and remove write_unit_of_work edges when canonical social Post persistence no longer depends on pre-L4 models and community service.",
+      "id": "l4-social-persistence-model-bridge",
+      "owner_stage": "L6",
+      "reason": "L4 PR F removes the manual-social compatibility namespace and makes app.domains.social the canonical contract owner. Runtime-owned SQLAlchemy adapters still map the frozen pre-domain Post ORM and community persistence service until the L6 service closeout moves those shared persistence definitions.",
+      "removal_condition": "Move the Post ORM and remaining community persistence operations behind canonical social repository ports, then remove these exact runtime edges.",
       "review_date": "2026-11-19"
     },
     {
@@ -1281,9 +1281,9 @@
         }
       ],
       "id": "l4-pr-b-social-search-post-adapter",
-      "owner_stage": "L4",
-      "reason": "PR B composes the canonical social search port with the existing Post model through one runtime-owned projection adapter while social write persistence remains scheduled for the later L4 ownership PRs.",
-      "removal_condition": "Remove this exact edge when L4 moves canonical Post persistence behind the social domain repository/public boundary.",
+      "owner_stage": "L6",
+      "reason": "L4 keeps one runtime-owned FTS5 projection adapter over the frozen pre-domain Post ORM while the social domain owns the search port and query contract.",
+      "removal_condition": "Remove this exact edge when L6 moves canonical Post persistence behind a repository port shared by social writes and search projection.",
       "review_date": "2026-11-27"
     },
     {

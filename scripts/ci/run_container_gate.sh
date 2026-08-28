@@ -4,7 +4,16 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$repo_root"
 
-revision="${GITHUB_SHA:-$(git rev-parse HEAD)}"
+revision="${ANGMOO_SOURCE_SHA:-${GITHUB_SHA:-$(git rev-parse HEAD)}}"
+actual_revision="$(git rev-parse HEAD)"
+if [[ "$actual_revision" != "$revision" ]]; then
+  echo "Container Gate source mismatch: expected=${revision} actual=${actual_revision}" >&2
+  exit 1
+fi
+if [[ -n "$(git status --porcelain --untracked-files=all)" ]]; then
+  echo "Container Gate requires a clean exact-source checkout." >&2
+  exit 1
+fi
 short_revision="${revision:0:12}"
 version="${ANGMOO_IMAGE_VERSION:-sha-${short_revision}}"
 tag="${ANGMOO_CI_IMAGE_TAG:-${short_revision}}"
@@ -132,4 +141,12 @@ ANGMOO_CI_IMAGE_TAG="$tag" python scripts/ci/run_l0_container_smoke.py \
   --tag "$tag" \
   --project "$project"
 
-echo "Container Gate passed: revision=${revision} version=${version}"
+ANGMOO_CI_IMAGE_TAG="$tag" \
+ANGMOO_VCS_REF="$revision" \
+ANGMOO_VERSION="$version" \
+  python scripts/ci/run_l0_container_smoke.py \
+    --tag "$tag" \
+    --project "${project}-dev" \
+    --development
+
+echo "Container Gate passed: revision=${revision} version=${version} production=true contributor_dev=true"

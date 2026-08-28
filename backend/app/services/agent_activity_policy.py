@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from datetime import UTC, date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
-from sqlalchemy import func, select
+from sqlalchemy import func, inspect, select
 from sqlalchemy.orm import Session
 
 from app import models
@@ -114,6 +114,79 @@ def is_policy_enforced_session(session_key: str) -> bool:
 
 def is_manual_policy_session(session_key: str) -> bool:
     return MANUAL_POLICY_SESSION_MARKER in session_key
+
+
+def is_imported_world_runtime_locked(
+    db: Session,
+    world_character: models.WorldCharacter,
+) -> bool:
+    """Return whether package lineage still requires explicit autonomy enable.
+
+    Direct-created characters retain the user-initiated manual-run contract.
+    Imported Worlds are stricter: P4-P7 must remain inert while their active
+    WorldCharacter is autonomy-disabled, even in a resident-manual session.
+    """
+
+    if world_character.autonomous_enabled:
+        return False
+    bind = db.get_bind()
+    if not inspect(bind).has_table(models.WorldPackageImport.__tablename__):
+        # Focused service fixtures may intentionally omit the v1 package
+        # registry. Migrated production runtimes always have this table.
+        return False
+    return (
+        db.scalar(
+            select(models.WorldPackageImport.import_id)
+            .where(
+                models.WorldPackageImport.imported_world_id
+                == world_character.world_id
+            )
+            .limit(1)
+        )
+        is not None
+    )
+
+
+def is_imported_world_runtime_locked_for_character(
+    db: Session,
+    *,
+    character_id: str,
+) -> bool:
+    """Apply the import activation gate before an active World exists, too."""
+
+    bind = db.get_bind()
+    if not inspect(bind).has_table(models.WorldPackageImport.__tablename__):
+        return False
+    active_world = db.get(models.CharacterActiveWorld, character_id)
+    if active_world is not None:
+        world_character = db.get(
+            models.WorldCharacter, active_world.world_character_id
+        )
+    else:
+        world_character = db.scalar(
+            select(models.WorldCharacter)
+            .join(
+                models.WorldPackageImport,
+                models.WorldPackageImport.imported_world_id
+                == models.WorldCharacter.world_id,
+            )
+            .where(models.WorldCharacter.character_id == character_id)
+            .order_by(models.WorldCharacter.created_at.desc())
+            .limit(1)
+        )
+    return bool(
+        world_character is not None
+        and not world_character.autonomous_enabled
+        and db.scalar(
+            select(models.WorldPackageImport.import_id)
+            .where(
+                models.WorldPackageImport.imported_world_id
+                == world_character.world_id
+            )
+            .limit(1)
+        )
+        is not None
+    )
 
 
 def _format_tendency_prompt(

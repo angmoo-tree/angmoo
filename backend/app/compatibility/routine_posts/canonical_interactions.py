@@ -6,8 +6,8 @@ from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app import models
-from app.domains.manual_social.public import manual_inbox_candidates
 from app.domains.routine_posts.domain.interaction import RoutineInteractionInput
+from app.runtime.social.sqlalchemy_inbox import candidates as manual_inbox_candidates
 
 
 def _relationship_band(state: models.RelationshipState | None) -> str:

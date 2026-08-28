@@ -1,9 +1,4 @@
-"""Read-only compatibility facade for the pre-L4 manual-social boundary.
-
-Canonical post and reply writes moved to :mod:`app.domains.social.public` in
-L4 PR C. This module intentionally keeps only the owner feed/thread reads
-until their remaining callers can move without widening the PR.
-"""
+"""Runtime SQLAlchemy owner feed and thread reads for social activity."""
 
 from __future__ import annotations
 
@@ -11,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import models
-from app.domains.manual_social.api.schemas import (
+from app.domains.social.api.schemas import (
     ManualSocialFeedRead,
     ManualSocialPostRead,
 )

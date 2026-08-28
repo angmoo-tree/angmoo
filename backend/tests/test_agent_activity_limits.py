@@ -1117,6 +1117,99 @@ def test_run_now_uses_temporary_slot_without_enabling_autonomy(
         assert list(db.scalars(select(models.AgentRun))) == []
 
 
+def test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(settings, "AGENT_ACTIVITY_ENGINE", "langgraph")
+    engine = create_engine("sqlite:///:memory:")
+    _create_autonomy_capacity_tables(engine)
+    models.WorldPackageImport.__table__.create(engine)
+    called = {"temporary": False}
+
+    monkeypatch.setattr(
+        agent_service,
+        "_activity_profile_readiness",
+        lambda *_args, **_kwargs: schemas.AgentActivityProfileReadinessRead(
+            ready=True,
+            source="world_community_profile",
+            world_id="world-routine",
+            world_character_id="world-character-direct-run-now",
+        ),
+    )
+
+    async def _assigned(*_args, **_kwargs):
+        raise AssertionError("an autonomy-off direct World must use a temporary slot")
+
+    async def _temporary(db, **kwargs):
+        called["temporary"] = True
+        slot = db.get(models.AgentSlot, kwargs["agent_id"])
+        assert slot is not None
+        assert slot.status == "running"
+        assert slot.assigned_character_id == "char-direct-world-run-now"
+        return schemas.OpenClawAgentRunRead(
+            run_id="run-direct-world-temporary",
+            status="completed",
+            summary="ok",
+            agent_id=slot.agent_id,
+            session_key=(
+                f"agent:{slot.agent_id}:resident-manual:"
+                "user-1:char-direct-world-run-now:run-direct-world-temporary"
+            ),
+            character_id="char-direct-world-run-now",
+            post_id="post-direct-world-temporary",
+            gateway_result={"status": "completed"},
+        )
+
+    monkeypatch.setattr(
+        agent_service.agent_run_service,
+        "run_assigned_resident_slot_once",
+        _assigned,
+    )
+    monkeypatch.setattr(
+        agent_service.agent_run_service,
+        "run_claimed_temporary_resident_slot_once",
+        _temporary,
+    )
+
+    with Session(engine) as db:
+        user = _add_capacity_user(db)
+        character = _add_capacity_agent(
+            db,
+            user_id=user.id,
+            character_id="char-direct-world-run-now",
+        )
+        world_character = _add_active_routine_world_character(
+            db,
+            character_id=character.id,
+            world_character_id="world-character-direct-run-now",
+        )
+        db.add(
+            models.WorldPackageImport(
+                import_id="import-unrelated-world",
+                local_owner_id=user.id,
+                package_id="package-unrelated-world",
+                package_version=1,
+                content_digest="0" * 64,
+                imported_world_id="world-imported-unrelated",
+                import_mode="new_world",
+                trust_state="checksum_verified_unsigned",
+                license_expression="CC0-1.0",
+                idempotency_key="import-unrelated-world",
+            )
+        )
+        db.commit()
+
+        result = asyncio.run(agent_service.run_agent_now(db, user, character.id))
+
+        setting = agent_crud.get_setting(db, character.id)
+        db.refresh(world_character)
+        assert result.status == "completed"
+        assert called == {"temporary": True}
+        assert setting is not None and setting.auto_enabled is False
+        assert world_character.autonomous_enabled is False
+        assert agent_crud.get_assigned_slot(db, character.id) is None
+
+
 def test_run_now_rejects_without_assigned_slot_and_does_not_fallback(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

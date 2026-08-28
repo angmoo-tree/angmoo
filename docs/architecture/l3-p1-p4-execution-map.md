@@ -144,10 +144,10 @@ created.
 ```text
 resident execution
 -> app.services.langgraph_resident
--> app.domains.routine_posts.public.run_routine_post_runtime
+-> app.runtime.routine_posts.run_routine_post_runtime
 -> app.domains.routine_posts.infrastructure.sqlalchemy_context
 -> app.domains.routine_posts.infrastructure.direct_llm_provider
--> app.domains.routine_posts.infrastructure.sqlalchemy_runtime
+-> app.runtime.routine_posts.sqlalchemy_runtime
 -> RoutineBeatPlanner + PostWriter provider calls
 -> app.compatibility.routine_posts legacy persistence bridge
 -> app.services.community.create_agent_tool_post
@@ -155,11 +155,13 @@ resident execution
 ```
 
 The normal provider budget is two physical text calls and the repair-inclusive
-maximum is three. PR F makes `app.domains.routine_posts.public` the production
-entry point without adding an independent-topic fallback. The compatibility
-bridge is exact-allowlisted and owns only persistence still scheduled for PR G
-or L4; legacy `app.services.routine_post_*` and `app.schemas.routine_post` paths
-are compatibility aliases to the canonical domain modules.
+maximum is three. L3 PR F introduced the domain contract without adding an
+independent-topic fallback; L4 PR F moves concrete runtime composition to
+`app.runtime.routine_posts`. The compatibility
+bridge is exact-allowlisted and owns only agent-run, joint-activity, and
+community persistence that remains scheduled for L6. Legacy
+`app.services.routine_post_*` and `app.schemas.routine_post` paths are
+compatibility aliases to the canonical domain modules.
 
 The character-level activate/deactivate lifecycle also synchronizes the selected
 autonomous `WorldCharacter.autonomous_enabled` flag in the same unit of work.
@@ -168,21 +170,22 @@ WorldCharacter as well. Owner-controlled identities never inherit this switch.
 This prevents scheduler ticks from diverging from the UI lifecycle state while
 preserving manual Run-now and owner-controlled fail-closed behavior.
 
-### Existing manual Post and Comment author path
+### Current Local Owner manual Post and Reply path
 
 ```text
-HTTP /api/v1/posts and /api/v1/posts/{post_id}/replies
--> app.api.v1.routes.community
--> app.services.community.create_post / create_reply
--> author Character ownership + World scope checks
--> app.cruds.community
--> Post rows + notifications/events in PostgreSQL
+HTTP /api/v1/worlds/{world_id}/manual-social/posts or .../replies
+-> app.api.v1.routes.manual_social
+-> app.domains.social.public owner-write use case and port
+-> app.runtime.social.sqlalchemy_unit_of_work
+-> Local Owner + owner-controlled WorldCharacter + same-World revalidation
+-> SQLite Post + SocialEvent + Evidence + reply Inbox candidate
+-> one idempotent caller-owned atomic commit
 ```
 
-The legacy `/comments` mutation remains separately guarded and is not the new
-L3 owner-controlled reply path. PR G reuses the Post/reply path and adds exact
-Local Owner, `control_mode=owner_controlled`, same-World, idempotency, and Inbox
-candidate validation.
+The older global community/PostgreSQL path is historical baseline only and is
+not the Local World owner-write entry. The legacy `/comments` mutation remains
+separately guarded. A source write does not update a relationship immediately;
+that delta can occur only after a later once-only autonomous observation.
 
 ## Dependency and transaction invariants
 

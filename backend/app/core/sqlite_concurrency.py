@@ -1,4 +1,4 @@
-"""SQLite-native bounded writer coordination for the canonical runtime."""
+"""SQLite-native bounded writer coordination shared by canonical adapters."""
 
 from __future__ import annotations
 

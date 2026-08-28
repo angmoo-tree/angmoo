@@ -222,6 +222,104 @@ test("static installed relationship route always requests the Ladybug provider",
   expect(requestedProviders).toEqual(["ladybug"]);
 });
 
+test("installed relationship graph distinguishes outage, replay, and recovery", async ({
+  page,
+}) => {
+  let phase: "degraded" | "failed" | "rebuilding" | "healthy" = "degraded";
+  await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+    const url = new URL(route.request().url());
+    if (!url.pathname.endsWith("/relationship-graph")) {
+      await route.fallback();
+      return;
+    }
+    expect(url.searchParams.get("provider")).toBe("ladybug");
+    if (phase === "failed") {
+      await route.fulfill({
+        contentType: "application/json",
+        json: { detail: "graph_provider_unavailable" },
+        status: 503,
+      });
+      return;
+    }
+    await route.fulfill({
+      contentType: "application/json",
+      json: {
+        world_id: "world-static-probe",
+        center_world_character_id: "wc-static-owner",
+        nodes: [
+          {
+            world_character_id: "wc-static-owner",
+            character_id: "character-static-owner",
+            display_name: "Static Owner Parrot",
+            is_center: true,
+          },
+          {
+            world_character_id: "wc-static-peer",
+            character_id: "character-static-peer",
+            display_name: "Static Peer Parrot",
+            is_center: false,
+          },
+        ],
+        edges: [
+          {
+            relationship_state_id: "relationship-static-probe",
+            actor_world_character_id: "wc-static-owner",
+            target_world_character_id: "wc-static-peer",
+            familiarity: 1,
+            affinity: 0,
+            trust: 0,
+            tension: 0,
+            interaction_count: 1,
+            relationship_version: 1,
+            last_event_id: "event-static-probe",
+            last_event_at: "2026-08-28T00:00:00Z",
+          },
+        ],
+        evidence: [],
+        meta: {
+          template: "neighborhood",
+          source: phase === "healthy" ? "ladybug" : "canonical_fallback",
+          graph_status:
+            phase === "rebuilding"
+              ? "rebuilding"
+              : phase === "degraded"
+                ? "unavailable"
+                : "healthy",
+          truncated: false,
+          projection_lag_seconds: phase === "healthy" ? 0 : null,
+          revalidated_node_count: 2,
+          revalidated_edge_count: 1,
+          fallback_reason: phase === "healthy" ? null : "graph_provider_unavailable",
+        },
+      },
+      status: 200,
+    });
+  });
+
+  const graphRoute =
+    "/characters/character-static-owner/worlds/world-static-probe/relationship-graph";
+  await page.goto(graphRoute);
+  await expect(page.locator('[data-relationship-graph-state="degraded"]')).toBeVisible();
+  await expect(page.locator('[data-relationship-graph-state="empty"]')).toHaveCount(0);
+
+  phase = "failed";
+  await page.reload();
+  await expect(page.locator('[data-relationship-graph-state="failed"]')).toBeVisible();
+  await expect(page.locator('[data-relationship-graph-state="empty"]')).toHaveCount(0);
+
+  phase = "rebuilding";
+  await page.reload();
+  await expect(page.locator('[data-relationship-graph-state="rebuilding"]')).toBeVisible();
+  await expect(page.locator('[data-relationship-graph-state="empty"]')).toHaveCount(0);
+
+  phase = "healthy";
+  await page.reload();
+  await expect(page.getByText("관계망 최신 상태")).toBeVisible();
+  for (const state of ["failed", "rebuilding", "degraded", "empty"]) {
+    await expect(page.locator(`[data-relationship-graph-state="${state}"]`)).toHaveCount(0);
+  }
+});
+
 test("installed wide-window bootstrap restores the exact relationship route", async ({
   page,
 }) => {

@@ -5,6 +5,20 @@ import type {
   PostDetail,
   ProfileRef,
 } from "@/lib/community";
+import {
+  AUTH_CHANGED_EVENT as SHARED_AUTH_CHANGED_EVENT,
+  cacheUser as cacheSharedUser,
+  clearLegacyAuthStorage as clearSharedLegacyAuthStorage,
+  clearStoredUser as clearSharedStoredUser,
+  getCurrentUser,
+  getStoredUser as getSharedStoredUser,
+  isAuthError as isSharedAuthError,
+  issueLocalSession as issueSharedLocalSession,
+  notifyAuthChanged as notifySharedAuthChanged,
+  storeUser as storeSharedUser,
+  updateUserFeedPreferences,
+  type UserRead as SharedUserRead,
+} from "@/shared/auth/public";
 import { runtimeFetch } from "@/shared/runtime/public";
 
 export const GOOGLE_GEMINI_MODELS = [
@@ -67,16 +81,7 @@ export function getGoogleGeminiModelNote(model: GoogleGeminiModel) {
 export type WritingRepetitionLevel = "off" | "light" | "normal" | "strong";
 export type AgentExecutionMode = "llm" | "local";
 
-export type UserRead = {
-  id: string;
-  email: string | null;
-  display_name: string;
-  display_name_updated_at: string | null;
-  display_name_change_available_at: string | null;
-  profile_setup_completed: boolean;
-  feed_content_filter: FeedContentFilter;
-  is_admin: boolean;
-};
+export type UserRead = SharedUserRead;
 
 export type AuthRead = {
   user: UserRead;
@@ -530,7 +535,7 @@ const LEGACY_TOKEN_KEY = ["angmoo", "authToken"].join(".");
 const USER_KEY = "angmoo.user";
 const PENDING_GOOGLE_SIGNUP_KEY = "angmoo.pendingGoogleSignup";
 const FIRST_AGENT_WELCOME_PROMPT_KEY = "angmoo.firstAgentWelcomePromptPending";
-export const AUTH_CHANGED_EVENT = "angmoo:auth-changed";
+export const AUTH_CHANGED_EVENT = SHARED_AUTH_CHANGED_EVENT;
 export const AGENTS_CHANGED_EVENT = "angmoo:agents-changed";
 export const AGENT_AUTONOMY_MUTATION_EVENT = "angmoo:agent-autonomy-mutation";
 
@@ -601,48 +606,7 @@ function getValidationMessage(detail: unknown[]) {
 }
 
 export function getStoredUser() {
-  if (typeof window === "undefined") return null;
-  const raw = window.sessionStorage.getItem(USER_KEY);
-  if (!raw) return null;
-  try {
-    return normalizeStoredUser(JSON.parse(raw));
-  } catch {
-    return null;
-  }
-}
-
-function normalizeStoredUser(value: unknown): UserRead | null {
-  if (!value || typeof value !== "object") return null;
-  const user = value as Partial<UserRead>;
-  if (typeof user.id !== "string" || typeof user.display_name !== "string") {
-    return null;
-  }
-  return {
-    id: user.id,
-    email: typeof user.email === "string" ? user.email : null,
-    display_name: user.display_name,
-    display_name_updated_at:
-      typeof user.display_name_updated_at === "string"
-        ? user.display_name_updated_at
-        : null,
-    display_name_change_available_at:
-      typeof user.display_name_change_available_at === "string"
-        ? user.display_name_change_available_at
-        : null,
-    profile_setup_completed:
-      typeof user.profile_setup_completed === "boolean"
-        ? user.profile_setup_completed
-        : true,
-    feed_content_filter: normalizeFeedContentFilter(user.feed_content_filter),
-    is_admin: user.is_admin === true,
-  };
-}
-
-function normalizeFeedContentFilter(value: unknown): FeedContentFilter {
-  if (value === "posts" || value === "reposts" || value === "all") {
-    return value;
-  }
-  return "all";
+  return getSharedStoredUser();
 }
 
 export function getPendingGoogleSignup(): PendingGoogleSignup | null {
@@ -671,8 +635,7 @@ export function hasPendingGoogleSignup() {
 }
 
 export function notifyAuthChanged() {
-  if (typeof window === "undefined") return;
-  window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
+  notifySharedAuthChanged();
 }
 
 export function storePendingGoogleSignup(auth: GoogleLoginRead) {
@@ -707,16 +670,11 @@ export function storeAuth(auth: AuthRead) {
 }
 
 export function storeUser(user: UserRead) {
-  cacheUser(user);
-  notifyAuthChanged();
+  storeSharedUser(user);
 }
 
 export function cacheUser(user: UserRead) {
-  window.sessionStorage.setItem(USER_KEY, JSON.stringify(user));
-  if (user.profile_setup_completed) {
-    window.sessionStorage.removeItem(PENDING_GOOGLE_SIGNUP_KEY);
-  }
-  window.localStorage.removeItem(USER_KEY);
+  cacheSharedUser(user);
 }
 
 export function clearAuth() {
@@ -728,18 +686,11 @@ export function clearAuth() {
 }
 
 export function clearStoredUser() {
-  if (typeof window === "undefined") return;
-  window.sessionStorage.removeItem(USER_KEY);
-  window.localStorage.removeItem(USER_KEY);
+  clearSharedStoredUser();
 }
 
 export function clearLegacyAuthStorage() {
-  if (typeof window === "undefined") return;
-  removeLegacyAuthTokens();
-  const pending = window.sessionStorage.getItem(PENDING_GOOGLE_SIGNUP_KEY);
-  if (pending?.includes(["pending", "token"].join("_"))) {
-    window.sessionStorage.removeItem(PENDING_GOOGLE_SIGNUP_KEY);
-  }
+  clearSharedLegacyAuthStorage();
 }
 
 function removeLegacyAuthTokens() {
@@ -840,18 +791,7 @@ export function clearAgentAutonomyMutationState(characterId: string) {
 }
 
 export function isAuthError(err: unknown) {
-  if (!(err instanceof Error)) return false;
-  const message = err.message.trim();
-  return (
-    message === "Authorization required" ||
-    message === "Invalid token" ||
-    message === "Bearer token required" ||
-    message === "Invalid or expired token" ||
-    message === "Invalid or expired signup token" ||
-    message === "Not authenticated" ||
-    message === "401" ||
-    message.includes("401")
-  );
+  return isSharedAuthError(err);
 }
 
 async function apiRequest<T>(path: string, options: RequestOptions = {}) {
@@ -968,9 +908,7 @@ export function claimLocalOwner(data: {
 }
 
 export function issueLocalSession() {
-  return apiRequest<AuthRead>("/auth/local/session", {
-    method: "POST",
-  });
+  return issueSharedLocalSession();
 }
 
 export function login(data: { email: string; password: string }) {
@@ -1014,7 +952,7 @@ export function linkGoogleAccount(data: { credential: string }) {
 }
 
 export function getMe(options: { suppressAuthFailureEvent?: boolean } = {}) {
-  return apiRequest<UserRead>("/auth/me", options);
+  return getCurrentUser(options);
 }
 
 export function getAgentActivityMaintenance() {
@@ -1035,10 +973,7 @@ export function updateMe(data: {
 }
 
 export function updateMePreferences(data: { feed_content_filter: FeedContentFilter }) {
-  return apiRequest<UserRead>("/auth/me/preferences", {
-    method: "PATCH",
-    body: data,
-  });
+  return updateUserFeedPreferences(data);
 }
 
 export function deleteCurrentAccount(data: { confirmation: string }) {
