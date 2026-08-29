@@ -2,7 +2,7 @@
   "architecture": {
     "backend": {
       "external_import_count": 1786,
-      "internal_edge_count": 1236,
+      "internal_edge_count": 1238,
       "legacy_import_exception_count": 0,
       "module_count": 528,
       "module_cycles": [],
@@ -929,7 +929,7 @@
       },
       {
         "path": "backend/tests/test_l3_5_world_package_import_commit.py",
-        "sha256": "e55b642afd42bcf86aea4b0137554d2fe50aaa4a41230be062f69f90a5548a98"
+        "sha256": "3c5bb67f92a0789ba3d6d610e96ac31da566c39483cb8f44b7fe04774a139e72"
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",

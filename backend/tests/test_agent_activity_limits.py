@@ -2,6 +2,7 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
 import inspect
+from pathlib import Path
 from threading import Barrier
 from types import SimpleNamespace
 from zoneinfo import ZoneInfo
@@ -9,7 +10,7 @@ from zoneinfo import ZoneInfo
 import pytest
 from pydantic import SecretStr, ValidationError
 from sqlalchemy import create_engine, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from app import models, schemas
 from app.core import active_hours, agent_activity_schedule
@@ -837,6 +838,229 @@ def test_api_agent_instants_normalize_sqlite_naive_values_to_utc() -> None:
     assert summary.next_activity_at is not None
     assert summary.next_activity_at.isoformat() == "2026-08-29T02:48:00+00:00"
     assert '"next_tick_at":"2026-08-29T02:48:00Z"' in slot.model_dump_json()
+
+
+@pytest.mark.parametrize(
+    ("next_tick_at", "expected"),
+    [
+        (None, False),
+        (datetime(2026, 8, 29, 4, 59, 59), True),
+        (datetime(2026, 8, 29, 5, 0), True),
+        (datetime(2026, 8, 29, 5, 0, 1), False),
+        (datetime(2026, 8, 29, 4, 59, 59, tzinfo=UTC), True),
+        (
+            datetime(2026, 8, 29, 14, 0, 1, tzinfo=ZoneInfo("Asia/Seoul")),
+            False,
+        ),
+    ],
+)
+def test_resident_slot_due_comparison_normalizes_utc_instants(
+    next_tick_at: datetime | None,
+    expected: bool,
+) -> None:
+    slot = SimpleNamespace(next_tick_at=next_tick_at)
+
+    assert agent_run_service._resident_slot_is_due(
+        slot,
+        now=datetime(2026, 8, 29, 5, 0, tzinfo=UTC),
+    ) is expected
+
+
+def test_file_backed_sqlite_tick_claims_two_naive_due_slots(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    engine = create_engine(
+        f"sqlite:///{(tmp_path / 'resident-tick.sqlite3').as_posix()}",
+        connect_args={"check_same_thread": False},
+    )
+    _create_autonomy_capacity_tables(engine)
+    factory = sessionmaker(bind=engine, expire_on_commit=False)
+    observed_at = datetime.now(UTC)
+    due_at = observed_at - timedelta(minutes=1)
+    starts: list[tuple[str, int]] = []
+
+    with factory() as db:
+        user = _add_capacity_user(db)
+        _add_capacity_world(db, owner_user_id=user.id)
+        for index in (1, 2):
+            character_id = f"char-sqlite-tick-{index}"
+            _add_capacity_agent(
+                db,
+                user_id=user.id,
+                character_id=character_id,
+                auto_enabled=True,
+                slot_id=f"angmoo-{index}",
+            )
+            _add_active_routine_world_character(
+                db,
+                character_id=character_id,
+                autonomous_enabled=True,
+            )
+        db.flush()
+        for index in (1, 2):
+            slot = db.get(models.AgentSlot, f"angmoo-{index}")
+            assert slot is not None
+            slot.next_tick_at = due_at
+        db.commit()
+
+    with factory() as db:
+        persisted = db.get(models.AgentSlot, "angmoo-1")
+        assert persisted is not None and persisted.next_tick_at is not None
+        assert persisted.next_tick_at.tzinfo is None
+
+    async def _complete_without_provider(
+        agent_id: str,
+        *,
+        post_id: str | None,
+        timeout_seconds: int,
+        message: str | None,
+        start_delay_seconds: int = 0,
+    ) -> schemas.OpenClawAgentRunRead:
+        del post_id, timeout_seconds, message
+        starts.append((agent_id, start_delay_seconds))
+        with factory() as run_db:
+            slot = run_db.get(models.AgentSlot, agent_id)
+            assert slot is not None
+            assert slot.status == agent_run_crud.SLOT_STATUS_RUNNING
+            assert slot.assigned_user_id is not None
+            assert slot.assigned_character_id is not None
+            run_id = f"run-{agent_id}"
+            run_db.add(
+                models.AgentRun(
+                    id=run_id,
+                    user_id=slot.assigned_user_id,
+                    character_id=slot.assigned_character_id,
+                    credential_id=slot.assigned_credential_id,
+                    agent_id=agent_id,
+                    session_key=f"session-{agent_id}",
+                    status="completed",
+                    gateway_result={"status": "completed", "provider": "fake"},
+                    completed_at=datetime.now(UTC),
+                )
+            )
+            slot.locked_by_run_id = run_id
+            run_db.commit()
+            agent_run_crud.complete_resident_slot_run(
+                run_db,
+                agent_id=agent_id,
+                run_id=run_id,
+                heartbeat_interval_seconds=3_600,
+                next_tick_at=datetime.now(UTC) + timedelta(hours=1),
+            )
+            character_id = slot.assigned_character_id
+        return schemas.OpenClawAgentRunRead(
+            run_id=run_id,
+            status="completed",
+            summary="fake provider boundary completed",
+            agent_id=agent_id,
+            session_key=f"session-{agent_id}",
+            character_id=character_id,
+            post_id=None,
+            gateway_result={"status": "completed", "provider": "fake"},
+        )
+
+    monkeypatch.setattr(
+        resident_tick_scheduler.agent_runs,
+        "reconcile_all_elapsed_routines",
+        lambda _db: SimpleNamespace(completed=0, skipped=0),
+    )
+    monkeypatch.setattr(
+        agent_run_service,
+        "_run_claimed_resident_slot_once",
+        _complete_without_provider,
+    )
+    monkeypatch.setattr(
+        agent_run_service.maintenance_service,
+        "agent_activity_blocks_auto_ticks",
+        lambda _db: False,
+    )
+    monkeypatch.setattr(settings, "RESIDENT_TICK_MAX_RUNS", 2)
+    monkeypatch.setattr(settings, "RESIDENT_TICK_BATCH_START_SPACING_SECONDS", 10)
+
+    result = asyncio.run(
+        resident_tick_scheduler._tick_once(
+            config=settings,
+            session_factory=factory,
+        )
+    )
+
+    assert result.due_count == 2
+    assert result.started_count == 2
+    assert starts == [("angmoo-1", 0), ("angmoo-2", 10)]
+    with factory() as db:
+        runs = list(db.scalars(select(models.AgentRun).order_by(models.AgentRun.id)))
+        slots = list(db.scalars(select(models.AgentSlot).order_by(models.AgentSlot.agent_id)))
+        assert [run.id for run in runs] == ["run-angmoo-1", "run-angmoo-2"]
+        assert all(run.status == "completed" for run in runs)
+        assert all(slot.status == agent_run_crud.SLOT_STATUS_ASSIGNED_IDLE for slot in slots)
+        assert all(slot.last_run_at is not None for slot in slots)
+        assert all(
+            slot.next_tick_at is not None
+            and agent_activity_schedule.aware_utc(slot.next_tick_at) > observed_at
+            for slot in slots
+        )
+    engine.dispose()
+
+
+def test_maintenance_blocked_tick_counts_sqlite_naive_due_slot(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    engine = create_engine(
+        f"sqlite:///{(tmp_path / 'maintenance-tick.sqlite3').as_posix()}"
+    )
+    _create_autonomy_capacity_tables(engine)
+    factory = sessionmaker(bind=engine, expire_on_commit=False)
+    due_at = datetime.now(UTC) - timedelta(minutes=1)
+
+    with factory() as db:
+        user = _add_capacity_user(db)
+        _add_capacity_agent(
+            db,
+            user_id=user.id,
+            character_id="char-maintenance-due",
+            auto_enabled=True,
+            slot_id="angmoo-1",
+        )
+        db.flush()
+        slot = db.get(models.AgentSlot, "angmoo-1")
+        assert slot is not None
+        slot.next_tick_at = due_at
+        db.commit()
+
+    monkeypatch.setattr(
+        agent_run_service.maintenance_service,
+        "agent_activity_blocks_auto_ticks",
+        lambda _db: True,
+    )
+    monkeypatch.setattr(
+        agent_run_service.maintenance_service,
+        "agent_activity_auto_tick_allowed_character_ids",
+        lambda: set(),
+    )
+
+    with factory() as db:
+        persisted = db.get(models.AgentSlot, "angmoo-1")
+        assert persisted is not None and persisted.next_tick_at is not None
+        assert persisted.next_tick_at.tzinfo is None
+
+        result = asyncio.run(
+            agent_run_service.tick_resident_slots(
+                db,
+                schemas.ResidentSlotTickCreate(max_runs=1, timeout_seconds=30),
+            )
+        )
+
+        db.refresh(persisted)
+        assert result.due_count == 1
+        assert result.started_count == 0
+        assert result.results == []
+        assert persisted.status == agent_run_crud.SLOT_STATUS_ASSIGNED_IDLE
+        assert persisted.locked_by_run_id is None
+        assert persisted.next_tick_at is not None
+        assert agent_activity_schedule.aware_utc(persisted.next_tick_at) == due_at
+    engine.dispose()
 
 
 def test_tick_resident_slots_staggers_claimed_runs(
@@ -2106,6 +2330,71 @@ def test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy() -> 
         assert slot.assigned_credential_id is None
         assert slot.locked_by_run_id is None
         assert slot.lease_expires_at is None
+
+
+def test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick(
+    tmp_path: Path,
+) -> None:
+    engine = create_engine(
+        f"sqlite:///{(tmp_path / 'expired-slot.sqlite3').as_posix()}"
+    )
+    _create_autonomy_capacity_tables(engine)
+    factory = sessionmaker(bind=engine, expire_on_commit=False)
+    now = datetime.now(UTC)
+
+    with factory() as db:
+        user = _add_capacity_user(db)
+        character = _add_capacity_agent(
+            db,
+            user_id=user.id,
+            character_id="char-expired-autonomous",
+            auto_enabled=True,
+            slot_id="angmoo-1",
+        )
+        db.flush()
+        slot = db.get(models.AgentSlot, "angmoo-1")
+        assert slot is not None
+        run = models.AgentRun(
+            id="run-expired-autonomous",
+            user_id=user.id,
+            character_id=character.id,
+            credential_id=f"cred-{character.id}",
+            agent_id=slot.agent_id,
+            session_key="agent:angmoo-1:resident:auto",
+            status="running",
+        )
+        db.add(run)
+        slot.status = agent_run_crud.SLOT_STATUS_RUNNING
+        slot.locked_by_run_id = run.id
+        slot.lease_expires_at = now - timedelta(minutes=2)
+        slot.next_tick_at = now - timedelta(minutes=1)
+        db.commit()
+
+    with factory() as db:
+        persisted = db.get(models.AgentSlot, "angmoo-1")
+        assert persisted is not None and persisted.next_tick_at is not None
+        assert persisted.next_tick_at.tzinfo is None
+
+        recovered_count = agent_run_crud.recover_expired_resident_slot_runs(
+            db,
+            now=now,
+            next_tick_at_factory=lambda _slot, recovered_at: (
+                recovered_at + timedelta(minutes=10)
+            ),
+        )
+
+        db.refresh(persisted)
+        db.refresh(run := db.get(models.AgentRun, "run-expired-autonomous"))
+        assert recovered_count == 1
+        assert run is not None and run.status == "failed"
+        assert persisted.status == agent_run_crud.SLOT_STATUS_ASSIGNED_IDLE
+        assert persisted.locked_by_run_id is None
+        assert persisted.lease_expires_at is None
+        assert persisted.next_tick_at is not None
+        assert agent_activity_schedule.aware_utc(persisted.next_tick_at) == (
+            now + timedelta(minutes=10)
+        )
+    engine.dispose()
 
 
 def test_run_now_rejects_character_owned_by_another_user() -> None:

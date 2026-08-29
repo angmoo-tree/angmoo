@@ -196,7 +196,6 @@ class SqlAlchemySchedulerLeaseRepository:
             row.lease_expires_at = now + timedelta(seconds=ttl_seconds)
             row.last_observed_at = now
             row.state = SchedulerLeaseState.ACTIVE.value
-            row.last_error_code = None
             db.commit()
             db.refresh(row)
             return _snapshot(row)

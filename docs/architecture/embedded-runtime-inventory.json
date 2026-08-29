@@ -249,7 +249,7 @@
       "owner": "ER4",
       "path": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "f5e7e7781295ef0a30480fe7a4bbc090f16ce4db3488b67c651a65dba057db5f",
+      "source_sha256": "0705f88e673cee4c3d3c726e39e72b209866d76898a4832e24e18c8ef7235e5e",
       "transition_pr": "ER4 PR J"
     },
     {

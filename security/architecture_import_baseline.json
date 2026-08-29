@@ -1,5 +1,5 @@
 {
-  "edge_count": 1236,
+  "edge_count": 1238,
   "external_import_count": 1786,
   "module_count": 528,
   "modules": [
@@ -1619,6 +1619,7 @@
         "typing"
       ],
       "imports": [
+        "app.core.agent_activity_schedule",
         "app.core.unit_of_work",
         "app.models"
       ],
@@ -6391,6 +6392,7 @@
         "zoneinfo"
       ],
       "imports": [
+        "app.core.agent_activity_schedule",
         "app.core.config",
         "app.core.db",
         "app.core.redaction",

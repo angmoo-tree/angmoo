@@ -14,6 +14,7 @@ from sqlalchemy import delete, or_, select
 from sqlalchemy.orm import Session
 
 from app import models, schemas
+from app.core import agent_activity_schedule
 from app.core.config import settings
 from app.core.redaction import redact_secret_text, redact_secrets
 from app.core.db import SessionLocal
@@ -8093,8 +8094,7 @@ async def tick_resident_slots(
             due_before = [
                 slot
                 for slot in agent_run_crud.list_agent_slots(db)
-                if slot.next_tick_at is not None
-                and slot.next_tick_at <= now
+                if _resident_slot_is_due(slot, now=now)
                 and slot.status in agent_run_crud.DUE_SLOT_STATUSES
             ]
             return schemas.ResidentSlotTickRead(
@@ -8114,8 +8114,7 @@ async def tick_resident_slots(
     due_before = [
         slot
         for slot in agent_run_crud.list_agent_slots(db)
-        if slot.next_tick_at is not None
-        and slot.next_tick_at <= now
+        if _resident_slot_is_due(slot, now=now)
         and slot.status in agent_run_crud.DUE_SLOT_STATUSES
         and slot.assigned_character_id not in owner_controlled_ids
         and (
@@ -8158,6 +8157,14 @@ async def tick_resident_slots(
         results=list(results),
         slots=list_resident_slots(db),
     )
+
+
+def _resident_slot_is_due(slot: models.AgentSlot, *, now: datetime) -> bool:
+    if slot.next_tick_at is None:
+        return False
+    return agent_activity_schedule.aware_utc(
+        slot.next_tick_at
+    ) <= agent_activity_schedule.aware_utc(now)
 
 
 async def _run_claimed_resident_slot_once(

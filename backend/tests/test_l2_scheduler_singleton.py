@@ -78,6 +78,45 @@ def test_scheduler_lease_rejects_duplicate_and_fences_stale_owner() -> None:
             db.commit()
 
 
+def test_scheduler_heartbeat_preserves_failure_until_next_tick() -> None:
+    repository, factory = _repository()
+    lease = repository.acquire(owner_id="owner-error", ttl_seconds=30)
+
+    failed = repository.finish_tick(
+        owner_id="owner-error",
+        fencing_epoch=lease.fencing_epoch,
+        result=SchedulerTickResult.FAILED,
+        error_code="TypeError",
+    )
+    heartbeat = repository.heartbeat(
+        owner_id="owner-error",
+        fencing_epoch=lease.fencing_epoch,
+        ttl_seconds=30,
+    )
+
+    assert failed.last_error_code == "TypeError"
+    assert heartbeat.last_error_code == "TypeError"
+
+    permit = repository.begin_tick(
+        owner_id="owner-error",
+        fencing_epoch=lease.fencing_epoch,
+        ttl_seconds=30,
+        interval_seconds=60,
+    )
+    assert permit.should_run is True
+    with factory() as db:
+        row = db.get(models.RuntimeSchedulerLease, "resident-tick-scheduler")
+        assert row is not None
+        assert row.last_error_code is None
+
+    completed = repository.finish_tick(
+        owner_id="owner-error",
+        fencing_epoch=lease.fencing_epoch,
+        result=SchedulerTickResult.SUCCESS,
+    )
+    assert completed.last_error_code is None
+
+
 def test_tick_window_skips_forward_catchup_and_backward_duplicates() -> None:
     previous = datetime(2026, 8, 16, 1, 0, tzinfo=UTC)
     forward = decide_tick_window(

@@ -1095,6 +1095,19 @@ def test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime(
         assert world_character.autonomous_enabled is True
         assert world_character.role_key == "no_specific_role"
 
+        # This test proves the imported actor enters the shared runtime after
+        # explicit enable. Keep the run-now step deterministic instead of
+        # depending on whether activation jitter lands inside the imminent
+        # scheduler guard window.
+        assigned_slot = db.scalar(
+            select(models.AgentSlot).where(
+                models.AgentSlot.assigned_character_id == character.id
+            )
+        )
+        assert assigned_slot is not None
+        assigned_slot.next_tick_at = datetime.now(UTC) - timedelta(seconds=1)
+        db.commit()
+
         runner_allowed = True
         monkeypatch.setattr(
             agent_service.agent_run_service,

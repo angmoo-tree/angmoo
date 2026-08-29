@@ -261,33 +261,33 @@
       "markers": {
         "row_lock": [
           561,
-          622,
-          708,
-          726,
-          739,
-          756,
-          810,
-          819,
-          835,
-          881,
-          935,
-          981,
-          1034
+          623,
+          712,
+          730,
+          743,
+          760,
+          814,
+          823,
+          839,
+          885,
+          939,
+          985,
+          1038
         ],
         "skip_locked": [
           561,
-          622,
-          739,
-          835,
-          935,
-          981,
-          1034
+          623,
+          743,
+          839,
+          939,
+          985,
+          1038
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/cruds/agent_runs.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "7c094d8b789416ce9a75d6fbef4a6d492480b5f04a797421ad15ad65c04d6217",
+      "source_sha256": "9d5be5c19586fec84e8c868f96b18d68d8c919446cd55d1e8bd331ebfdac8b3c",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -440,22 +440,22 @@
     {
       "markers": {
         "advisory_lock": [
-          335
+          334
         ],
         "driver_or_url": [
-          333
+          332
         ],
         "row_lock": [
           138,
           146,
-          266,
-          298
+          265,
+          297
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "f5e7e7781295ef0a30480fe7a4bbc090f16ce4db3488b67c651a65dba057db5f",
+      "source_sha256": "0705f88e673cee4c3d3c726e39e72b209866d76898a4832e24e18c8ef7235e5e",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -672,7 +672,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/persistence/sqlite_scheduler_lease.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "ccfd12607bf7e8e3272066638509fd4e0a773f25fae7b6f2a44cba6b2d7283ee",
+      "source_sha256": "2ab63358f059bad3e0aa95fdbbb7866a4516b0457ad717be1a07bc5522fea9ce",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

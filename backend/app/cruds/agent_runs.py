@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app import models
-from app.core import unit_of_work
+from app.core import agent_activity_schedule, unit_of_work
 
 
 ACTIVE_RUN_STATUSES = {"running"}
@@ -603,6 +603,7 @@ def recover_expired_resident_slot_runs(
     now: datetime,
     next_tick_at_factory: Callable[[models.AgentSlot, datetime], datetime] | None = None,
 ) -> int:
+    now = agent_activity_schedule.aware_utc(now)
     slots = list(
         db.scalars(
             select(models.AgentSlot)
@@ -655,7 +656,10 @@ def recover_expired_resident_slot_runs(
         slot.status = SLOT_STATUS_ASSIGNED_IDLE
         slot.locked_by_run_id = None
         slot.lease_expires_at = None
-        if slot.next_tick_at is None or slot.next_tick_at <= now:
+        if (
+            slot.next_tick_at is None
+            or agent_activity_schedule.aware_utc(slot.next_tick_at) <= now
+        ):
             slot.next_tick_at = (
                 next_tick_at_factory(slot, now)
                 if next_tick_at_factory is not None

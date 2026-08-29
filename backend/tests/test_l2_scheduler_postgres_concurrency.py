@@ -1,11 +1,22 @@
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 import os
+from types import SimpleNamespace
 
 import pytest
-from sqlalchemy import create_engine, delete
+from sqlalchemy import (
+    Column,
+    DateTime,
+    MetaData,
+    String,
+    Table,
+    create_engine,
+    delete,
+    insert,
+    select,
+)
 from sqlalchemy.orm import Session, sessionmaker
 
 from app import models
@@ -13,6 +24,7 @@ from app.domains.runtime.public import (
     SchedulerLeaseHeldError,
     SqlAlchemySchedulerLeaseRepository,
 )
+from app.services import agent_runs as agent_run_service
 
 
 DATABASE_URL = os.getenv("L2_SCHEDULER_POSTGRES_DATABASE_URL")
@@ -57,4 +69,56 @@ def test_two_scheduler_claims_have_exactly_one_active_owner() -> None:
         with Session(engine) as db:
             db.execute(delete(models.RuntimeSchedulerLease))
             db.commit()
+        engine.dispose()
+
+
+def test_postgres_scheduler_due_comparison_preserves_aware_utc() -> None:
+    assert DATABASE_URL is not None
+    engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+    now = datetime.now(UTC)
+    metadata = MetaData()
+    due_instants = Table(
+        "l4_1075_scheduler_due_instants",
+        metadata,
+        Column("id", String(64), primary_key=True),
+        Column("next_tick_at", DateTime(timezone=True), nullable=False),
+    )
+    try:
+        metadata.create_all(engine)
+        with engine.begin() as connection:
+            connection.execute(
+                insert(due_instants).values(
+                    id="angmoo-postgres-aware-due",
+                    next_tick_at=now - timedelta(seconds=1),
+                )
+            )
+
+        with engine.connect() as connection:
+            next_tick_at = connection.execute(
+                select(due_instants.c.next_tick_at).where(
+                    due_instants.c.id == "angmoo-postgres-aware-due"
+                )
+            ).scalar_one()
+            assert next_tick_at.tzinfo is not None
+            slot = SimpleNamespace(next_tick_at=next_tick_at)
+            assert agent_run_service._resident_slot_is_due(slot, now=now) is True
+
+        with engine.begin() as connection:
+            connection.execute(
+                due_instants.update()
+                .where(due_instants.c.id == "angmoo-postgres-aware-due")
+                .values(next_tick_at=now + timedelta(seconds=1))
+            )
+
+        with engine.connect() as connection:
+            next_tick_at = connection.execute(
+                select(due_instants.c.next_tick_at).where(
+                    due_instants.c.id == "angmoo-postgres-aware-due"
+                )
+            ).scalar_one()
+            assert next_tick_at.tzinfo is not None
+            slot = SimpleNamespace(next_tick_at=next_tick_at)
+            assert agent_run_service._resident_slot_is_due(slot, now=now) is False
+    finally:
+        due_instants.drop(engine, checkfirst=True)
         engine.dispose()
