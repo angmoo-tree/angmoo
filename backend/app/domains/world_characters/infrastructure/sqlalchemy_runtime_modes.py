@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter
-from collections.abc import Callable
+from collections.abc import Callable, Collection
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
@@ -22,11 +22,6 @@ from app.domains.world_characters.infrastructure import (
     autonomous_setup_contracts as world_character_contracts,
     autonomous_setup_models as models,
 )
-from app.domains.world_packages.infrastructure.sqlalchemy_models import (
-    WorldPackageImport,
-)
-
-
 @dataclass(frozen=True, slots=True)
 class AutonomousRuntimeModeRepairResult:
     scanned_count: int
@@ -36,18 +31,25 @@ class AutonomousRuntimeModeRepairResult:
 
 def reconcile_local_autonomous_runtime_modes(
     session_factory: Callable[[], Session],
+    *,
+    excluded_world_ids: Collection[str] = (),
 ) -> AutonomousRuntimeModeRepairResult:
     """Repair only proven PR G local rows before embedded workers start."""
 
     with session_factory() as db:
         return run_sqlite_session_immediate(
             db,
-            lambda: repair_affected_local_autonomous_runtime_modes(db),
+            lambda: repair_affected_local_autonomous_runtime_modes(
+                db,
+                excluded_world_ids=excluded_world_ids,
+            ),
         )
 
 
 def repair_affected_local_autonomous_runtime_modes(
     db: Session,
+    *,
+    excluded_world_ids: Collection[str] = (),
 ) -> AutonomousRuntimeModeRepairResult:
     """Apply one caller-owned, idempotent semantic repair transaction."""
 
@@ -69,11 +71,13 @@ def repair_affected_local_autonomous_runtime_modes(
     skipped: Counter[str] = Counter()
     repaired_count = 0
     repaired_at = datetime.now(UTC)
+    excluded_world_id_set = frozenset(excluded_world_ids)
     for world_character in candidates:
         outcome = repair_local_autonomous_runtime_mode(
             db,
             world_character=world_character,
             repaired_at=repaired_at,
+            excluded_world_ids=excluded_world_id_set,
         )
         if outcome != "repaired":
             skipped[outcome] += 1
@@ -93,12 +97,17 @@ def repair_local_autonomous_runtime_mode(
     *,
     world_character: models.WorldCharacter,
     repaired_at: datetime | None = None,
+    excluded_world_ids: Collection[str] = (),
 ) -> str:
     """Repair one exact PR G row and return a privacy-safe outcome code."""
 
     if world_character.feed_runtime_mode == AUTONOMOUS_FEED_RUNTIME_MODE:
         return "already_ready"
-    reason = _repair_ineligibility_reason(db, world_character)
+    reason = _repair_ineligibility_reason(
+        db,
+        world_character,
+        excluded_world_ids=excluded_world_ids,
+    )
     if reason is not None:
         return reason
     world_character.feed_runtime_mode = AUTONOMOUS_FEED_RUNTIME_MODE
@@ -111,6 +120,8 @@ def repair_local_autonomous_runtime_mode(
 def _repair_ineligibility_reason(
     db: Session,
     world_character: models.WorldCharacter,
+    *,
+    excluded_world_ids: Collection[str],
 ) -> str | None:
     if not is_affected_local_entry_runtime_pair(
         control_mode=world_character.control_mode,
@@ -142,11 +153,7 @@ def _repair_ineligibility_reason(
         or world.readiness_status != "publish_ready"
     ):
         return "world_ineligible"
-    if db.scalar(
-        select(WorldPackageImport.import_id)
-        .where(WorldPackageImport.imported_world_id == world_character.world_id)
-        .limit(1)
-    ) is not None:
+    if world_character.world_id in excluded_world_ids:
         return "imported_world"
     role = db.scalar(
         select(models.WorldRole).where(

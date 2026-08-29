@@ -468,17 +468,17 @@
           112
         ],
         "row_lock": [
-          383,
-          470,
-          513,
-          998,
-          1010
+          393,
+          480,
+          523,
+          1008,
+          1020
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "deea780c6ac679d21514b9b615e1d4ce71e0ef444264071d705eed2292e0059a",
+      "source_sha256": "33ad3bfea4d8d0051c2b282790108c757d76723617409e3f74b9c5c332fe798c",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -976,16 +976,16 @@
           172
         ],
         "row_lock": [
-          221,
-          241,
-          621,
-          814
+          213,
+          233,
+          613,
+          806
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/world_feed_search.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "d14dd5bddfcf574fe7f54f19c6885753ad920d32948aa4f1a77622fdf4369954",
+      "source_sha256": "b1270123e50077ddc06d7428e3538cf42b2b54733610a5f395661452196cf22d",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

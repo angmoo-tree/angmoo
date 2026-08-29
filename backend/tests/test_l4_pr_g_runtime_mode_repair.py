@@ -505,8 +505,14 @@ def test_file_backed_repair_is_bounded_idempotent_and_preserves_evidence(
         assert replayed_row.feed_runtime_mode == "keyword_search_v1"
         assert replayed_row.version == 8
 
-    first = reconcile_local_autonomous_runtime_modes(session_factory)
-    second = reconcile_local_autonomous_runtime_modes(session_factory)
+    first = reconcile_local_autonomous_runtime_modes(
+        session_factory,
+        excluded_world_ids={"world-imported"},
+    )
+    second = reconcile_local_autonomous_runtime_modes(
+        session_factory,
+        excluded_world_ids={"world-imported"},
+    )
 
     assert first.scanned_count == 5
     assert first.repaired_count == 1

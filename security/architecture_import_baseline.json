@@ -1,5 +1,5 @@
 {
-  "edge_count": 1252,
+  "edge_count": 1250,
   "external_import_count": 1798,
   "module_count": 530,
   "modules": [
@@ -3561,8 +3561,7 @@
         "app.core.sqlite_concurrency",
         "app.domains.world_characters.domain.runtime_modes",
         "app.domains.world_characters.infrastructure.autonomous_setup_contracts",
-        "app.domains.world_characters.infrastructure.autonomous_setup_models",
-        "app.domains.world_packages.infrastructure.sqlalchemy_models"
+        "app.domains.world_characters.infrastructure.autonomous_setup_models"
       ],
       "module": "app.domains.world_characters.infrastructure.sqlalchemy_runtime_modes",
       "path": "backend/app/domains/world_characters/infrastructure/sqlalchemy_runtime_modes.py",
@@ -7423,7 +7422,6 @@
         "app.domains.world_characters.domain.runtime_modes",
         "app.models",
         "app.schemas",
-        "app.services.agent_activity_policy",
         "app.services.world_character_contracts"
       ],
       "module": "app.services.world_feed_search",

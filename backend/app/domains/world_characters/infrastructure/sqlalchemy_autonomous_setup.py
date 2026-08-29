@@ -265,6 +265,11 @@ def enter_world(
             outcome = repair_local_autonomous_runtime_mode(
                 db,
                 world_character=existing,
+                excluded_world_ids=(
+                    {existing.world_id}
+                    if membership.reason == "world_package_import"
+                    else ()
+                ),
             )
             if outcome == "repaired":
                 db.commit()
@@ -305,6 +310,11 @@ def enter_world(
                 outcome = repair_local_autonomous_runtime_mode(
                     db,
                     world_character=replay,
+                    excluded_world_ids=(
+                        {replay.world_id}
+                        if membership.reason == "world_package_import"
+                        else ()
+                    ),
                 )
                 if outcome == "repaired":
                     db.commit()

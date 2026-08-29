@@ -248,7 +248,10 @@ def create_app(
         def recover_embedded_runtime() -> None:
             world_package_import_committer.recover_media()
             repair_result = reconcile_local_autonomous_runtime_modes(
-                composition.session_factory
+                composition.session_factory,
+                excluded_world_ids=(
+                    world_package_import_committer.list_imported_world_ids()
+                ),
             )
             logger.info(
                 "autonomous_runtime_mode_reconciliation_completed "

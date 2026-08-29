@@ -22,7 +22,7 @@ from app.domains.social.public import (
 from app.domains.world_characters.domain.runtime_modes import (
     AUTONOMOUS_FEED_RUNTIME_MODE,
 )
-from app.services import agent_activity_policy, world_character_contracts
+from app.services import world_character_contracts
 
 
 KEYWORDS_PER_CYCLE = 2
@@ -180,17 +180,9 @@ def load_ready_search_profile(
         for topic in validated.avoid_topics
         if normalize_search_text(topic, max_chars=40)
     )
-    imported_world_runtime_locked = bool(
-        not world_character.autonomous_enabled
-        and db.scalar(
-            select(models.WorldPackageImport.import_id)
-            .where(
-                models.WorldPackageImport.imported_world_id
-                == world_character.world_id
-            )
-            .limit(1)
-        )
-        is not None
+    imported_world_runtime_locked = _is_imported_world_runtime_locked(
+        db,
+        world_character=world_character,
     )
     return ReadySearchProfile(
         world=world,
@@ -936,9 +928,7 @@ def _feed_runtime_state(
     world_character: models.WorldCharacter,
     cursor: models.WorldCharacterFeedCursor | None,
 ) -> str:
-    if agent_activity_policy.is_imported_world_runtime_locked(
-        db, world_character
-    ):
+    if _is_imported_world_runtime_locked(db, world_character=world_character):
         return "imported_locked"
     if world_character.feed_runtime_mode != AUTONOMOUS_FEED_RUNTIME_MODE:
         return "routine_only_legacy_feed"
@@ -954,6 +944,27 @@ def _feed_runtime_state(
     }:
         return "feed_search_degraded"
     return "three_lane_ready"
+
+
+def _is_imported_world_runtime_locked(
+    db: Session,
+    *,
+    world_character: models.WorldCharacter,
+) -> bool:
+    """Read package lineage without coupling this service to another service."""
+
+    return bool(
+        not world_character.autonomous_enabled
+        and db.scalar(
+            select(models.WorldPackageImport.import_id)
+            .where(
+                models.WorldPackageImport.imported_world_id
+                == world_character.world_id
+            )
+            .limit(1)
+        )
+        is not None
+    )
 
 
 def owner_world_feed_cycle_status(
