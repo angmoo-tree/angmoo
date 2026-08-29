@@ -9,6 +9,13 @@ from app.domains.world_characters.domain.owner_controlled_identity import (
 from app.domains.world_characters.domain.seed import (
     AutonomousWorldCharacterSeedData,
 )
+from app.domains.world_characters.domain.runtime_modes import (
+    AUTONOMOUS_ACTIVITY_RUNTIME_MODE,
+    AUTONOMOUS_FEED_RUNTIME_MODE,
+    AUTONOMOUS_RUNTIME_MODE_PAIR,
+    AutonomousRuntimeModePair,
+    is_expected_autonomous_runtime_pair,
+)
 from app.domains.world_characters.infrastructure.autonomous_setup_contracts import (
     character_contract_hash,
 )
@@ -58,6 +65,10 @@ from app.domains.world_characters.infrastructure.sqlalchemy_studio_lifecycle imp
 from app.domains.world_characters.infrastructure.sqlalchemy_seed import (
     seed_autonomous_world_character,
 )
+from app.domains.world_characters.infrastructure.sqlalchemy_runtime_modes import (
+    AutonomousRuntimeModeRepairResult,
+    reconcile_local_autonomous_runtime_modes,
+)
 
 
 def is_owner_controlled_character(db, character_id: str) -> bool:
@@ -76,6 +87,11 @@ def owner_controlled_character_ids(
 __all__ = [
     "OWNER_REGENERATION_LIMIT_24H",
     "AutonomousWorldCharacterSeedData",
+    "AUTONOMOUS_ACTIVITY_RUNTIME_MODE",
+    "AUTONOMOUS_FEED_RUNTIME_MODE",
+    "AUTONOMOUS_RUNTIME_MODE_PAIR",
+    "AutonomousRuntimeModePair",
+    "AutonomousRuntimeModeRepairResult",
     "OwnerControlledIdentityError",
     "PROFILE_REGENERATION_LIMIT_24H",
     "WorldCharacterSetupConflictError",
@@ -103,11 +119,13 @@ __all__ = [
     "get_setup",
     "get_world_entry",
     "is_owner_controlled_character",
+    "is_expected_autonomous_runtime_pair",
     "leave_studio_world_character",
     "list_studio_character_candidates",
     "lock_world_autonomy_capacity",
     "owner_controlled_character_ids",
     "preflight_setup",
+    "reconcile_local_autonomous_runtime_modes",
     "reject_setup",
     "retry_setup",
     "selected_autonomous_world_character",

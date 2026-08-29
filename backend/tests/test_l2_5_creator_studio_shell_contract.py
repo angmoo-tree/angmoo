@@ -167,3 +167,22 @@ def test_local_multi_autonomy_dashboard_uses_shared_utc_instant_contract() -> No
     assert 'hourCycle: "h23"' in presentation
     for exported in ("apiInstantTimestamp", "formatDate", "parseApiInstant"):
         assert exported in shared_public
+
+
+def test_world_character_setup_distinguishes_routine_and_feed_lane_states() -> None:
+    setup = _read("components/world-character-autonomy-setup-client.tsx")
+    contract = _read("lib/world-character-setup.ts")
+
+    assert 'data-feed-runtime-state={feedStatus.runtime_state}' in setup
+    assert 'data-feed-lane-state="routine-only"' in setup
+    assert "P5 결합 피드가 비활성화되어 현재는 Routine 일과 게시글만 실행됩니다." in setup
+    assert "Inbox 직접 반응과 관심 키워드 검색은 실행되지 않습니다." in setup
+    assert "현재는 기존 최신 피드 호환 모드입니다." not in setup
+    for runtime_state in (
+        "routine_only_legacy_feed",
+        "three_lane_ready",
+        "imported_locked",
+        "autonomy_disabled",
+        "feed_search_degraded",
+    ):
+        assert runtime_state in contract

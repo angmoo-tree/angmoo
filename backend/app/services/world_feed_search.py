@@ -19,7 +19,10 @@ from app.domains.social.public import (
     SocialSearchState,
     find_keyword_post_ids,
 )
-from app.services import world_character_contracts
+from app.domains.world_characters.domain.runtime_modes import (
+    AUTONOMOUS_FEED_RUNTIME_MODE,
+)
+from app.services import agent_activity_policy, world_character_contracts
 
 
 KEYWORDS_PER_CYCLE = 2
@@ -109,7 +112,7 @@ def load_ready_search_profile(
     world_character = db.get(models.WorldCharacter, world_character_id)
     if world_character is None or world_character.status != "active":
         raise WorldFeedReadinessError("world_character_not_ready")
-    if world_character.feed_runtime_mode != "keyword_search_v1":
+    if world_character.feed_runtime_mode != AUTONOMOUS_FEED_RUNTIME_MODE:
         raise WorldFeedReadinessError("feed_runtime_mode_not_enabled")
     character = db.get(models.Character, world_character.character_id)
     membership = db.get(models.WorldMembership, world_character.membership_id)
@@ -887,6 +890,11 @@ def world_feed_cycle_status(
         world_id=world_character.world_id,
         world_character_id=world_character.id,
         feed_runtime_mode=world_character.feed_runtime_mode,
+        runtime_state=_feed_runtime_state(
+            db,
+            world_character=world_character,
+            cursor=cursor,
+        ),
         profile_keyword_count=len(keywords),
         profile_keywords_ready=keyword_contract_ready,
         next_keywords=next_keywords,
@@ -920,6 +928,32 @@ def world_feed_cycle_status(
             for row in rows
         ],
     )
+
+
+def _feed_runtime_state(
+    db: Session,
+    *,
+    world_character: models.WorldCharacter,
+    cursor: models.WorldCharacterFeedCursor | None,
+) -> str:
+    if agent_activity_policy.is_imported_world_runtime_locked(
+        db, world_character
+    ):
+        return "imported_locked"
+    if world_character.feed_runtime_mode != AUTONOMOUS_FEED_RUNTIME_MODE:
+        return "routine_only_legacy_feed"
+    if not world_character.autonomous_enabled:
+        return "autonomy_disabled"
+    summary = cursor.last_cycle_summary if cursor is not None else None
+    reason_code = summary.get("reason_code") if isinstance(summary, dict) else None
+    if reason_code in {
+        "search_rebuilding",
+        "search_schema_mismatch",
+        "search_digest_stale",
+        "search_unavailable",
+    }:
+        return "feed_search_degraded"
+    return "three_lane_ready"
 
 
 def owner_world_feed_cycle_status(

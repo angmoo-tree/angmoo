@@ -30,6 +30,11 @@ from app.credentials import (
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
+from app.domains.world_characters.domain.runtime_modes import (
+    AUTONOMOUS_ACTIVITY_RUNTIME_MODE,
+    AUTONOMOUS_FEED_RUNTIME_MODE,
+    LEGACY_FEED_RUNTIME_MODE,
+)
 from app.runtime.routine_posts.sqlalchemy_runtime import (
     routine_world_character_for_character,
     run_routine_post_runtime,
@@ -9218,9 +9223,9 @@ async def run_resident_langgraph(
             feed_runtime_mode = getattr(
                 routine_world_character,
                 "feed_runtime_mode",
-                "legacy_latest_v1",
+                LEGACY_FEED_RUNTIME_MODE,
             )
-            if feed_runtime_mode != "keyword_search_v1":
+            if feed_runtime_mode != AUTONOMOUS_FEED_RUNTIME_MODE:
                 return await run_routine_post_runtime(ctx)
             inbox_result = await _run_combined_inbox_lane(ctx)
             routine_result = await run_routine_post_runtime(ctx)
@@ -9256,7 +9261,10 @@ async def run_resident_langgraph(
                 else "observed"
             )
             return {
-                "engine": "routine_resident_v1+keyword_search_v1",
+                "engine": (
+                    f"{AUTONOMOUS_ACTIVITY_RUNTIME_MODE}"
+                    f"+{AUTONOMOUS_FEED_RUNTIME_MODE}"
+                ),
                 "status": status,
                 "summary": (
                     "Inbox, routine continuous post, and World keyword feed cycle completed."

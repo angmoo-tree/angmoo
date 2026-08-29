@@ -255,6 +255,8 @@ def _seed(db: Session) -> tuple[models.User, models.WorldCharacter]:
         role_key="student",
         status="pending",
         autonomous_enabled=False,
+        activity_runtime_mode="routine_resident_v1",
+        feed_runtime_mode="keyword_search_v1",
         local_profile={"background": "second-year alchemy student"},
     )
     credential = models.LlmCredential(
@@ -665,6 +667,8 @@ def test_routes_expose_preflight_generate_and_approve_without_enabling_autonomy(
     assert restored.json()["autonomous_enabled"] is False
     assert feed_status.status_code == 200
     assert feed_status.json()["world_character_id"] == "world-character-a"
+    assert feed_status.json()["feed_runtime_mode"] == "keyword_search_v1"
+    assert feed_status.json()["runtime_state"] == "autonomy_disabled"
     assert feed_status.json()["profile_keyword_count"] == 8
     assert feed_status.json()["profile_keywords_ready"] is True
     assert feed_status.json()["recent_observations"] == []
@@ -717,6 +721,60 @@ def test_routes_hide_missing_and_foreign_world_characters() -> None:
     assert feed_forbidden.json() == {"detail": "world_character_forbidden"}
     assert feed_missing.status_code == 404
     assert feed_missing.json() == {"detail": "world_character_not_found"}
+
+
+def test_feed_status_distinguishes_runtime_lane_states() -> None:
+    engine = _engine()
+    with Session(engine, expire_on_commit=False) as db:
+        owner, world_character = _seed(db)
+        world_character.status = "active"
+        db.commit()
+    principal: dict[str, models.User | None] = {"user": owner}
+    app = _app(engine, principal)
+
+    def status_payload() -> dict:
+        response = _request(
+            app,
+            "GET",
+            "/api/v1/world-characters/world-character-a/feed-status",
+        )
+        assert response.status_code == 200
+        return response.json()
+
+    assert status_payload()["runtime_state"] == "autonomy_disabled"
+
+    with Session(engine) as db:
+        stored = db.get(models.WorldCharacter, world_character.id)
+        assert stored is not None
+        stored.feed_runtime_mode = "legacy_latest_v1"
+        db.commit()
+    assert status_payload()["runtime_state"] == "routine_only_legacy_feed"
+
+    with Session(engine) as db:
+        stored = db.get(models.WorldCharacter, world_character.id)
+        assert stored is not None
+        stored.feed_runtime_mode = "keyword_search_v1"
+        stored.autonomous_enabled = True
+        db.add(
+            models.WorldCharacterFeedCursor(
+                world_character_id=stored.id,
+                world_id=stored.world_id,
+                next_keyword_offset=0,
+                last_cycle_key="cycle-degraded",
+                last_run_id="run-degraded",
+                last_cycle_summary={"reason_code": "search_unavailable"},
+                version=1,
+            )
+        )
+        db.commit()
+    assert status_payload()["runtime_state"] == "feed_search_degraded"
+
+    with Session(engine) as db:
+        cursor = db.get(models.WorldCharacterFeedCursor, world_character.id)
+        assert cursor is not None
+        cursor.last_cycle_summary = {"reason_code": "no_candidate"}
+        db.commit()
+    assert status_payload()["runtime_state"] == "three_lane_ready"
 
 
 def test_world_entry_creates_pending_world_character_without_provider_or_autonomy() -> None:
@@ -782,7 +840,22 @@ def test_world_entry_creates_pending_world_character_without_provider_or_autonom
     assert replayed.json()["id"] == entered.json()["id"]
     assert replayed.json()["reused"] is True
     with Session(engine) as db:
+        stored = db.get(models.WorldCharacter, entered.json()["id"])
+        assert stored is not None
+        assert stored.control_mode == "autonomous"
+        assert stored.owner_user_id is None
+        assert stored.activity_runtime_mode == "routine_resident_v1"
+        assert stored.feed_runtime_mode == "keyword_search_v1"
+        assert stored.local_profile == {
+            "entry_idempotency_key": "enter-character-b-world-a",
+            "background": "A first-day exchange student",
+        }
         assert db.scalar(select(models.WorldCharacterSetupAttempt)) is None
+        assert db.scalar(select(func.count(models.AgentRun.id))) == 0
+        assert db.scalar(select(func.count(models.Post.id))) == 0
+        assert db.scalar(select(func.count(models.SocialEvent.id))) == 0
+        assert db.scalar(select(func.count(models.RelationshipStateChange.id))) == 0
+        assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 0
 
 
 def test_world_entry_requires_explicit_no_specific_role_selection() -> None:
@@ -844,12 +917,16 @@ def test_world_entry_requires_explicit_no_specific_role_selection() -> None:
     assert entered.json()["status"] == "pending"
     assert entered.json()["autonomous_enabled"] is False
     with Session(engine) as db:
+        stored = db.get(models.WorldCharacter, entered.json()["id"])
         reserved = db.scalar(
             select(models.WorldRole).where(
                 models.WorldRole.world_id == "world-a",
                 models.WorldRole.role_key == NO_SPECIFIC_ROLE_KEY,
             )
         )
+        assert stored is not None
+        assert stored.activity_runtime_mode == "routine_resident_v1"
+        assert stored.feed_runtime_mode == "keyword_search_v1"
         assert reserved is not None
         assert reserved.name == NO_SPECIFIC_ROLE_NAME
         assert reserved.description == NO_SPECIFIC_ROLE_DESCRIPTION

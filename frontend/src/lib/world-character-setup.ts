@@ -146,6 +146,12 @@ export type WorldFeedCycleStatusRead = {
   world_id: string;
   world_character_id: string;
   feed_runtime_mode: "legacy_latest_v1" | "keyword_search_v1";
+  runtime_state:
+    | "routine_only_legacy_feed"
+    | "three_lane_ready"
+    | "imported_locked"
+    | "autonomy_disabled"
+    | "feed_search_degraded";
   profile_keyword_count: number;
   profile_keywords_ready: boolean;
   next_keywords: string[];

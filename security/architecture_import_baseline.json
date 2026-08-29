@@ -1,7 +1,7 @@
 {
-  "edge_count": 1238,
-  "external_import_count": 1786,
-  "module_count": 528,
+  "edge_count": 1252,
+  "external_import_count": 1798,
+  "module_count": 530,
   "modules": [
     {
       "external_imports": [],
@@ -3382,6 +3382,17 @@
     {
       "external_imports": [
         "__future__",
+        "dataclasses",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.world_characters.domain.runtime_modes",
+      "path": "backend/app/domains/world_characters/domain/runtime_modes.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "dataclasses"
       ],
       "imports": [],
@@ -3486,9 +3497,11 @@
         "app.core.ids",
         "app.domains.identity.public",
         "app.domains.world_characters.api.setup_schemas",
+        "app.domains.world_characters.domain.runtime_modes",
         "app.domains.world_characters.infrastructure.autonomous_setup_contracts",
         "app.domains.world_characters.infrastructure.autonomous_setup_models",
         "app.domains.world_characters.infrastructure.direct_llm_setup_provider",
+        "app.domains.world_characters.infrastructure.sqlalchemy_runtime_modes",
         "app.domains.worlds.public",
         "app.integrations.direct_llm",
         "app.providers.registry"
@@ -3536,10 +3549,33 @@
     {
       "external_imports": [
         "__future__",
+        "collections",
+        "collections.abc",
+        "dataclasses",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.core.sqlite_concurrency",
+        "app.domains.world_characters.domain.runtime_modes",
+        "app.domains.world_characters.infrastructure.autonomous_setup_contracts",
+        "app.domains.world_characters.infrastructure.autonomous_setup_models",
+        "app.domains.world_packages.infrastructure.sqlalchemy_models"
+      ],
+      "module": "app.domains.world_characters.infrastructure.sqlalchemy_runtime_modes",
+      "path": "backend/app/domains/world_characters/infrastructure/sqlalchemy_runtime_modes.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "sqlalchemy.orm"
       ],
       "imports": [
         "app.core.ids",
+        "app.domains.world_characters.domain.runtime_modes",
         "app.domains.world_characters.domain.seed",
         "app.domains.world_characters.infrastructure.sqlalchemy_models"
       ],
@@ -3646,12 +3682,14 @@
       "imports": [
         "app.domains.world_characters.application.studio_lifecycle",
         "app.domains.world_characters.domain.owner_controlled_identity",
+        "app.domains.world_characters.domain.runtime_modes",
         "app.domains.world_characters.domain.seed",
         "app.domains.world_characters.domain.studio_lifecycle",
         "app.domains.world_characters.infrastructure.autonomous_setup_contracts",
         "app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup",
         "app.domains.world_characters.infrastructure.sqlalchemy_models",
         "app.domains.world_characters.infrastructure.sqlalchemy_owner_controlled_identity",
+        "app.domains.world_characters.infrastructure.sqlalchemy_runtime_modes",
         "app.domains.world_characters.infrastructure.sqlalchemy_seed",
         "app.domains.world_characters.infrastructure.sqlalchemy_setup_models",
         "app.domains.world_characters.infrastructure.sqlalchemy_studio_lifecycle"
@@ -5075,6 +5113,7 @@
         "contextlib",
         "dataclasses",
         "fastapi",
+        "logging",
         "sqlalchemy",
         "typing",
         "uvicorn"
@@ -5088,6 +5127,7 @@
         "app.core.startup_security",
         "app.cruds.community",
         "app.domains.runtime.public",
+        "app.domains.world_characters.public",
         "app.domains.world_packages.infrastructure.filesystem_import_media",
         "app.domains.world_packages.infrastructure.sqlalchemy_import_commit",
         "app.runtime.component_workers",
@@ -6809,6 +6849,7 @@
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.world_characters.domain.runtime_modes",
         "app.models",
         "app.runtime.routine_posts.sqlalchemy_runtime",
         "app.runtime.social.observations",
@@ -7379,8 +7420,10 @@
       "imports": [
         "app.core.search_text",
         "app.domains.social.public",
+        "app.domains.world_characters.domain.runtime_modes",
         "app.models",
         "app.schemas",
+        "app.services.agent_activity_policy",
         "app.services.world_character_contracts"
       ],
       "module": "app.services.world_feed_search",

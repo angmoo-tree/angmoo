@@ -150,6 +150,13 @@ class WorldFeedCycleStatusRead(WorldFeedSchema):
     world_id: str
     world_character_id: str
     feed_runtime_mode: Literal["legacy_latest_v1", "keyword_search_v1"]
+    runtime_state: Literal[
+        "routine_only_legacy_feed",
+        "three_lane_ready",
+        "imported_locked",
+        "autonomy_disabled",
+        "feed_search_degraded",
+    ]
     profile_keyword_count: int = Field(ge=0, le=64)
     profile_keywords_ready: bool
     next_keywords: list[str] = Field(max_length=2)

@@ -28,6 +28,10 @@ from app.domains.runtime.public import (
     runtime_status_read,
 )
 from app.main import create_app, create_lifespan
+from app.public_main import (
+    create_app as create_embedded_app,
+    create_lifespan as create_embedded_lifespan,
+)
 from app.runtime.single_backend_components import (
     SingleBackendRuntimeComponents,
     SingleBackendRuntimeStartupError,
@@ -261,7 +265,9 @@ def test_external_mode_does_not_overlay_process_local_state() -> None:
     assert result is baseline
 
 
-def test_fastapi_lifespan_owns_component_start_and_stop(monkeypatch) -> None:
+def test_fastapi_lifespan_repairs_before_component_start_and_owns_stop(
+    monkeypatch,
+) -> None:
     calls: list[str] = []
     from app.core.config import settings
 
@@ -274,20 +280,21 @@ def test_fastapi_lifespan_owns_component_start_and_stop(monkeypatch) -> None:
         async def stop(self) -> None:
             calls.append("stop")
 
-    lifespan = create_lifespan(
+    lifespan = create_embedded_lifespan(
         security_validator=lambda: None,
         session_factory=lambda: pytest.fail("seed must remain disabled"),
         component_manager_factory=lambda: FakeComponents(),  # type: ignore[arg-type]
+        startup_recovery=lambda: calls.append("recovery"),
     )
-    app = create_app(lifespan_handler=lifespan)
+    app = create_embedded_app(lifespan_handler=lifespan)
 
     async def scenario() -> None:
         async with app.router.lifespan_context(app):
-            assert calls == ["start"]
+            assert calls == ["recovery", "start"]
 
     asyncio.run(scenario())
 
-    assert calls == ["start", "stop"]
+    assert calls == ["recovery", "start", "stop"]
 
 
 def test_projector_publishes_process_graph_client_for_its_exact_lifetime(

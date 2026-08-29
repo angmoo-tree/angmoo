@@ -16,10 +16,17 @@ from app.domains.identity.public import (
     CredentialResolver,
 )
 from app.domains.world_characters.api import setup_schemas as schemas
+from app.domains.world_characters.domain.runtime_modes import (
+    AUTONOMOUS_ACTIVITY_RUNTIME_MODE,
+    AUTONOMOUS_FEED_RUNTIME_MODE,
+)
 from app.domains.world_characters.infrastructure import (
     autonomous_setup_contracts as world_character_contracts,
     autonomous_setup_models as models,
     direct_llm_setup_provider as world_character_provider,
+)
+from app.domains.world_characters.infrastructure.sqlalchemy_runtime_modes import (
+    repair_local_autonomous_runtime_mode,
 )
 from app.domains.worlds.public import (
     NO_SPECIFIC_ROLE_KEY,
@@ -254,6 +261,13 @@ def enter_world(
             "active",
         }:
             raise WorldCharacterSetupValidationError("world_character_ineligible")
+        if existing.feed_runtime_mode != AUTONOMOUS_FEED_RUNTIME_MODE:
+            outcome = repair_local_autonomous_runtime_mode(
+                db,
+                world_character=existing,
+            )
+            if outcome == "repaired":
+                db.commit()
         return _entry_read(existing, reused=True)
 
     local_profile: dict[str, str] = {
@@ -268,7 +282,11 @@ def enter_world(
         membership_id=membership.id,
         role_key=role.role_key,
         status="pending",
+        control_mode="autonomous",
+        owner_user_id=None,
         autonomous_enabled=False,
+        activity_runtime_mode=AUTONOMOUS_ACTIVITY_RUNTIME_MODE,
+        feed_runtime_mode=AUTONOMOUS_FEED_RUNTIME_MODE,
         local_profile=local_profile,
     )
     db.add(world_character)
@@ -283,6 +301,13 @@ def enter_world(
             )
         )
         if replay is not None:
+            if replay.feed_runtime_mode != AUTONOMOUS_FEED_RUNTIME_MODE:
+                outcome = repair_local_autonomous_runtime_mode(
+                    db,
+                    world_character=replay,
+                )
+                if outcome == "repaired":
+                    db.commit()
             return _entry_read(replay, reused=True)
         raise WorldCharacterSetupConflictError("idempotency_replay") from exc
     return _entry_read(world_character, reused=False)
