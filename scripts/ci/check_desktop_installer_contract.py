@@ -77,6 +77,18 @@ def main() -> int:
         "installer_embedded_data_migration_failed",
     ):
         _require(required in hooks, f"uninstall safety contract missing: {required}")
+    _require(
+        "ExecWait '\"$INSTDIR\\angmoo-sidecar.exe\" --installer-data-preflight" in hooks,
+        "installer preflight must synchronously wait on the GUI-subsystem sidecar",
+    )
+    _require(
+        "ExecWait '\"$INSTDIR\\angmoo-sidecar.exe\" --installer-data-upgrade" in hooks,
+        "installer upgrade must synchronously wait on the GUI-subsystem sidecar",
+    )
+    _require(
+        "nsExec::ExecToStack '\"$INSTDIR\\angmoo-sidecar.exe\"" not in hooks,
+        "GUI-subsystem sidecar must not use the command-output nsExec boundary",
+    )
     for required in (
         "$LOCALAPPDATA\\Angmoo\\canonical",
         "$LOCALAPPDATA\\Angmoo\\graph",

@@ -230,9 +230,10 @@ angmoo_staging_verify_abort:
 
   ; The staged new sidecar, not NSIS and not the old installed executable,
   ; decides whether the active SQLite/Ladybug generations are readable.
-  nsExec::ExecToStack '"$INSTDIR\angmoo-sidecar.exe" --installer-data-preflight --data-root "$LOCALAPPDATA\Angmoo" --legacy-data-root "$LOCALAPPDATA\com.angmoo.desktop" --runtime-root "$LOCALAPPDATA\Angmoo\runtime" --payload-manifest "$INSTDIR\installer-payload.json" --installer-result-path "$LOCALAPPDATA\Angmoo\runtime\installer-data-upgrade-result.json"'
-  Pop $R7
-  Pop $R6
+  ; The packaged sidecar is a GUI-subsystem (--noconsole) executable. ExecWait
+  ; is the native synchronous NSIS boundary for that payload: it waits for the
+  ; real process exit code without attaching command-line output pipes.
+  ExecWait '"$INSTDIR\angmoo-sidecar.exe" --installer-data-preflight --data-root "$LOCALAPPDATA\Angmoo" --legacy-data-root "$LOCALAPPDATA\com.angmoo.desktop" --runtime-root "$LOCALAPPDATA\Angmoo\runtime" --payload-manifest "$INSTDIR\installer-payload.json" --installer-result-path "$LOCALAPPDATA\Angmoo\runtime\installer-data-upgrade-result.json"' $R7
   ${If} $R7 <> 0
     nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "$PLUGINSDIR\angmoo-installer-payload-transaction.ps1" -Action RecordFailure -FailureCode installer_embedded_data_incompatible -ProductRoot "$LOCALAPPDATA\Angmoo" -VerifierPath "$PLUGINSDIR\angmoo-verify-installed-payload.ps1"'
     IfSilent angmoo_data_preflight_silent angmoo_data_preflight_interactive
@@ -302,9 +303,7 @@ angmoo_promote_abort:
 
   ; Only the verified, promoted sidecar may invoke the existing copy-on-write
   ; SQLite generation upgrade and Ladybug canonical replay/rebuild.
-  nsExec::ExecToStack '"$INSTDIR\angmoo-sidecar.exe" --installer-data-upgrade --data-root "$LOCALAPPDATA\Angmoo" --legacy-data-root "$LOCALAPPDATA\com.angmoo.desktop" --runtime-root "$LOCALAPPDATA\Angmoo\runtime" --payload-manifest "$INSTDIR\installer-payload.json" --installer-result-path "$LOCALAPPDATA\Angmoo\runtime\installer-data-upgrade-result.json"'
-  Pop $R7
-  Pop $R6
+  ExecWait '"$INSTDIR\angmoo-sidecar.exe" --installer-data-upgrade --data-root "$LOCALAPPDATA\Angmoo" --legacy-data-root "$LOCALAPPDATA\com.angmoo.desktop" --runtime-root "$LOCALAPPDATA\Angmoo\runtime" --payload-manifest "$INSTDIR\installer-payload.json" --installer-result-path "$LOCALAPPDATA\Angmoo\runtime\installer-data-upgrade-result.json"' $R7
   ${If} $R7 <> 0
     ; The new app is verified but its data migration failed. Restore the exact
     ; verified predecessor before restoring registration and reporting failure;
