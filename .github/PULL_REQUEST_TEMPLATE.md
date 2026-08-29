@@ -26,6 +26,16 @@ List the exact checks and user scenarios run.
 - [ ] Every human commit includes a DCO 1.1 `Signed-off-by` trailer (`git commit -s`)
 - [ ] I understand accepted contributions are provided under `GPL-3.0-only` unless explicitly stated otherwise
 
+## Frontend design contract (when applicable)
+
+- Impacted Phone or wide product surface:
+- Hosted adoption classification (`DIRECT` / `ADAPTED` / `LOCAL` / `REJECTED`):
+- Shared component reused, or new primitive rationale:
+- Capability-backed actions, counts, states, and unsupported items:
+- Route parity and visual evidence (Next / static / Tauri, fixed viewport, accessibility):
+- Raw-color baseline result and intentional visual diff:
+- Source, asset, icon, and font provenance or notice impact:
+
 ## Cleanup and follow-up
 
 - Legacy paths removed or intentionally retained:

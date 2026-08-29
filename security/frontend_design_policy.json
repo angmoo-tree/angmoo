@@ -1,0 +1,434 @@
+{
+  "adoption_inventory": [
+    {
+      "classification": "DIRECT",
+      "hosted_blob_oid": "553c4ba9869610908b1667006062c38bad891406",
+      "hosted_source": "frontend/src/components/post-list-client.tsx",
+      "local_target": "frontend/src/features/social/ui/post-list-client.tsx",
+      "scope": "feed header, flat post row, text, media, and action rhythm"
+    },
+    {
+      "classification": "DIRECT",
+      "hosted_blob_oid": "7ac352381a2df2e1251d1ce24fb64f925e82a0bf",
+      "hosted_source": "frontend/src/components/post-detail-client.tsx",
+      "local_target": "frontend/src/components/post-detail-client.tsx",
+      "scope": "original post, reply hierarchy, and back header"
+    },
+    {
+      "classification": "ADAPTED",
+      "hosted_blob_oid": "1300ab04f863ec94c08f873ce5cd129b89feb96b",
+      "hosted_source": "frontend/src/components/character-profile-client.tsx",
+      "local_target": "frontend/src/components/character-profile-client.tsx",
+      "scope": "profile banner, avatar, metadata, tabs, and stream anatomy"
+    },
+    {
+      "classification": "DIRECT",
+      "hosted_blob_oid": "e9fc13cd00d15e9503bfe70fa1d42ebe4f7250e8",
+      "hosted_source": "frontend/src/components/profile-avatar.tsx",
+      "local_target": "frontend/src/shared/ui/profile-avatar.tsx",
+      "scope": "round avatar and deterministic initial fallback anatomy"
+    },
+    {
+      "classification": "DIRECT",
+      "hosted_blob_oid": "158ad82895a9746f55696916745c68cadbf93516",
+      "hosted_source": "frontend/src/components/expandable-post-text.tsx",
+      "local_target": "frontend/src/features/social/ui/expandable-post-text.tsx",
+      "scope": "line clamp and explicit expansion"
+    },
+    {
+      "classification": "DIRECT",
+      "hosted_blob_oid": "788c4c1e30dc6732d9df811e640ce1ab4ca22131",
+      "hosted_source": "frontend/src/components/mentioned-text.tsx",
+      "local_target": "frontend/src/features/social/ui/mentioned-text.tsx",
+      "scope": "mention presentation"
+    },
+    {
+      "classification": "DIRECT",
+      "hosted_blob_oid": "0cd5c683bab6e8a822e2a5ba5922583fad1b6927",
+      "hosted_source": "frontend/src/components/post-media-grid.tsx",
+      "local_target": "frontend/src/features/social/ui/post-media-grid.tsx",
+      "scope": "post media frame and grid"
+    },
+    {
+      "classification": "DIRECT",
+      "hosted_blob_oid": "eb5bc224d1b9d9da56eeb9e0951dd2386a1a06f2",
+      "hosted_source": "frontend/src/lib/post-card-navigation.ts",
+      "local_target": "frontend/src/features/social/model/post-card-navigation.ts",
+      "scope": "accessible row navigation behavior"
+    },
+    {
+      "classification": "DIRECT",
+      "hosted_blob_oid": "28b84827af6dab3f3bd99c62ffa96870bb0875a1",
+      "hosted_source": "frontend/src/lib/use-mobile-pull-to-refresh.ts",
+      "local_target": "frontend/src/shared/interaction/use-mobile-pull-to-refresh.ts",
+      "scope": "touch refresh interaction"
+    },
+    {
+      "classification": "ADAPTED",
+      "hosted_blob_oid": "77559dc0bb72f49e470e03b05989ed16552fd92c",
+      "hosted_source": "frontend/src/components/app-shell.tsx",
+      "local_target": "frontend/src/components/app-shell.tsx",
+      "scope": "visual chrome only; Local route and product-window matrix stays authoritative"
+    },
+    {
+      "classification": "ADAPTED",
+      "hosted_blob_oid": "ebeaf887706f73fe3b126feac46d87e55fe12faf",
+      "hosted_source": "frontend/src/components/agents-dashboard-client.tsx",
+      "local_target": "frontend/src/components/agents-dashboard-client.tsx",
+      "scope": "row hierarchy adapted to multi-autonomy, World capacity, and scheduler state"
+    },
+    {
+      "classification": "ADAPTED",
+      "hosted_blob_oid": "553c4ba9869610908b1667006062c38bad891406",
+      "hosted_source": "frontend/src/components/post-list-client.tsx",
+      "local_target": "frontend/src/features/social/ui/world-social-feed.tsx",
+      "scope": "composer and feed tabs adapted to owner-controlled World writes and real Local capabilities"
+    },
+    {
+      "classification": "LOCAL",
+      "hosted_blob_oid": null,
+      "hosted_source": null,
+      "local_target": "frontend/src/features/device-home/ui/device-home.tsx",
+      "scope": "Device launcher and Local runtime entry"
+    },
+    {
+      "classification": "LOCAL",
+      "hosted_blob_oid": null,
+      "hosted_source": null,
+      "local_target": "frontend/src/features/world-app/ui/world-app.tsx",
+      "scope": "World-scoped Phone application shell"
+    },
+    {
+      "classification": "LOCAL",
+      "hosted_blob_oid": null,
+      "hosted_source": null,
+      "local_target": "frontend/src/features/creator-studio/ui/creator-studio-frame.tsx",
+      "scope": "wide Creator Studio workspace"
+    },
+    {
+      "classification": "LOCAL",
+      "hosted_blob_oid": null,
+      "hosted_source": null,
+      "local_target": "frontend/src/features/relationships/ui/relationship-graph-client.tsx",
+      "scope": "wide World relationship graph workspace"
+    },
+    {
+      "classification": "REJECTED",
+      "hosted_blob_oid": "568e354ed2bfdf8e4927a1a85e08c7efdfa26916",
+      "hosted_source": "frontend/src/components/login-client.tsx",
+      "local_target": null,
+      "scope": "Google login, hosted session, invite, server-cost, and hosted account semantics"
+    },
+    {
+      "classification": "REJECTED",
+      "hosted_blob_oid": "47f66f0f47a2042f0ebbdd3fd13b15e299463cd7",
+      "hosted_source": "frontend/src/components/turnstile-widget.tsx",
+      "local_target": null,
+      "scope": "hosted Turnstile challenge and remote authentication dependency"
+    },
+    {
+      "classification": "REJECTED",
+      "hosted_blob_oid": "ebeaf887706f73fe3b126feac46d87e55fe12faf",
+      "hosted_source": "frontend/src/components/agents-dashboard-client.tsx",
+      "local_target": null,
+      "scope": "single-active Character state and hosted 3+3 Character count cap"
+    },
+    {
+      "classification": "REJECTED",
+      "hosted_blob_oid": "77559dc0bb72f49e470e03b05989ed16552fd92c",
+      "hosted_source": "frontend/src/components/app-shell.tsx",
+      "local_target": null,
+      "scope": "hosted global three-column rail and account-wide navigation as the Local Phone default"
+    },
+    {
+      "classification": "REJECTED",
+      "hosted_blob_oid": "553c4ba9869610908b1667006062c38bad891406",
+      "hosted_source": "frontend/src/components/post-list-client.tsx",
+      "local_target": null,
+      "scope": "unsupported like, repost, report, follow, global Feed tabs, and fabricated zero counts"
+    },
+    {
+      "classification": "REJECTED",
+      "hosted_blob_oid": null,
+      "hosted_source": null,
+      "local_target": null,
+      "scope": "remote font, unreviewed hosted asset, and sibling-repository runtime dependency"
+    }
+  ],
+  "browser_harness": {
+    "configs": [
+      "browser-tests/playwright.config.ts",
+      "browser-tests/playwright.static.config.ts"
+    ],
+    "lockfile": "browser-tests/pnpm-lock.yaml",
+    "package": "browser-tests/package.json",
+    "playwright_version": "1.62.1",
+    "specs": [
+      "browser-tests/product-shell.spec.ts",
+      "browser-tests/static-product-shell.spec.ts"
+    ],
+    "visual_command_owner": "browser-tests/package.json",
+    "visual_command_status": "reserved_for_ui_b_when_first_reviewed_screenshot_exists",
+    "visual_script_name": "test:visual"
+  },
+  "design_contract": "frontend/DESIGN.md",
+  "documentation": "docs/architecture/frontend-design-reference.md",
+  "known_route_gaps": [
+    {
+      "gap_id": "rust-phone-allowlist-agents-index",
+      "owner_stage": "L4.5 UI-C",
+      "summary": "The React static router handles /agents, but the Rust Phone path allowlist does not."
+    },
+    {
+      "gap_id": "rust-phone-allowlist-world-post",
+      "owner_stage": "L4.5 UI-C",
+      "summary": "The React static router handles /worlds/{worldId}/posts/{postId}, but the Rust Phone path allowlist does not."
+    },
+    {
+      "gap_id": "static-direct-open-coverage",
+      "owner_stage": "L4.5 UI-C",
+      "summary": "Static direct-open ROUTES does not cover /studio/import or /agents even though the React static router handles both."
+    },
+    {
+      "gap_id": "static-shell-next-only-navigation",
+      "owner_stage": "L4.5 UI-C",
+      "summary": "The shared AppShell exposes Next-only destinations in the Tauri static profile and needs capability-driven navigation."
+    },
+    {
+      "gap_id": "browser-redirect-alias-divergence",
+      "owner_stage": "L4.5 UI-C",
+      "summary": "Browser redirect aliases /worlds/new and /worlds/{worldId}/creator do not have the same meaning in the static route resolver and must not be canonical navigation targets."
+    }
+  ],
+  "local_base_commit": "e5e62aed69cb89b16b5870eb0854dd07752dc519",
+  "policy_id": "angmoo-l4-5-frontend-design-contract-v1",
+  "portable_contract_paths": [
+    ".github/PULL_REQUEST_TEMPLATE.md",
+    ".github/workflows/security.yml",
+    "CONTRIBUTING.md",
+    "docs/architecture/frontend-design-baseline.json",
+    "docs/architecture/frontend-design-reference.md",
+    "docs/architecture/frontend-product-shell.md",
+    "docs/public/changing-frontend.md",
+    "docs/public/frontend.md",
+    "frontend/AGENTS.md",
+    "frontend/DESIGN.md",
+    "security/frontend_design_policy.json"
+  ],
+  "provenance": {
+    "hosted_reference": {
+      "commit": "7f967abd6117381be5c081ed284addb889b06fec",
+      "history_relation": "shared_first_party_history_through_637426d8f2245311d6c5cb4ca52bcfc8103cca25_then_reference_only",
+      "license": "Apache-2.0",
+      "license_blob_oid": "8d968b6cb081a9917169ffda16e60e0f56e453f3",
+      "repository": "https://github.com/jingujeon/angmoo",
+      "shared_history_commit": "637426d8f2245311d6c5cb4ca52bcfc8103cca25",
+      "ui_a_material_use": "reference_only_no_code_asset_or_font_copy"
+    },
+    "legacy_reference": {
+      "design_blob_oid": "a31db8b2f83755cc0c71a5318ff2df1adb09e0ef",
+      "design_revision": "887ea5ff673f827851e8623a186541f10d0126e6",
+      "distribution": "not_distributed",
+      "license": "not_asserted_reference_only",
+      "reference_label": "internal historical DESIGN snapshot",
+      "ui_a_material_use": "reference_only_no_code_asset_or_font_copy"
+    },
+    "local_repository": {
+      "base_commit": "e5e62aed69cb89b16b5870eb0854dd07752dc519",
+      "gpl_transition_commit": "b95ffe2c59e02d97f2047791c4959c1494b9ee35",
+      "license": "GPL-3.0-only",
+      "repository": "https://github.com/angmoo-tree/angmoo"
+    },
+    "notice_decision": "The audited visual files come from first-party history already shared by hosted and Local before the Local GPL transition. UI-A copies no post-common hosted code, asset, icon, or font, so it adds no bundled Apache notice. Any later post-common hosted-only transplant requires a separate license-policy and notice decision before copying."
+  },
+  "raw_color_scan": {
+    "baseline_files": 59,
+    "baseline_occurrences": 1938,
+    "extensions": [
+      ".css",
+      ".ts",
+      ".tsx"
+    ],
+    "pattern": "#[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{5}|[0-9A-Fa-f]{3}|[0-9A-Fa-f])?\\b",
+    "report": "docs/architecture/frontend-design-baseline.json",
+    "source_root": "frontend/src"
+  },
+  "required_markers": {
+    ".github/PULL_REQUEST_TEMPLATE.md": [
+      "Frontend design contract (when applicable)",
+      "Hosted adoption classification",
+      "Route parity and visual evidence"
+    ],
+    "docs/architecture/frontend-design-reference.md": [
+      "DIRECT / ADAPTED / LOCAL / REJECTED",
+      "Raw-color baseline",
+      "Route and surface inventory",
+      "Visual harness extension"
+    ],
+    "docs/public/changing-frontend.md": [
+      "frontend/DESIGN.md",
+      "check_frontend_design_contract.py"
+    ],
+    "frontend/AGENTS.md": [
+      "BEGIN:angmoo-frontend-design-contract",
+      "frontend/DESIGN.md",
+      "END:angmoo-frontend-design-contract"
+    ],
+    "frontend/DESIGN.md": [
+      "UI-A DESIGN CONTRACT CLOSEOUT",
+      "check_frontend_design_contract.py",
+      "frontend-design-reference.md"
+    ]
+  },
+  "route_surface_inventory": [
+    {
+      "next_route_file": "frontend/src/app/page.tsx",
+      "product_surface": "device-home",
+      "route_family": "/",
+      "shell": "phone",
+      "static_support": "declared_and_direct_open_tested",
+      "window_kind": "phone"
+    },
+    {
+      "next_route_file": "frontend/src/app/studio/page.tsx",
+      "product_surface": "creator-studio",
+      "route_family": "/studio",
+      "shell": "wide",
+      "static_support": "declared_and_direct_open_tested",
+      "window_kind": "studio"
+    },
+    {
+      "next_route_file": "frontend/src/app/studio/import/page.tsx",
+      "product_surface": "creator-studio-import",
+      "route_family": "/studio/import",
+      "shell": "wide",
+      "static_support": "declared_not_direct_open_tested",
+      "window_kind": "studio"
+    },
+    {
+      "next_route_file": "frontend/src/app/studio/worlds/[worldId]/page.tsx",
+      "product_surface": "creator-studio-world",
+      "route_family": "/studio/worlds/{worldId}",
+      "shell": "wide",
+      "static_support": "declared_and_direct_open_tested",
+      "window_kind": "studio"
+    },
+    {
+      "next_route_file": "frontend/src/app/studio/worlds/new/page.tsx",
+      "product_surface": "creator-studio-world-create",
+      "route_family": "/studio/worlds/new",
+      "shell": "wide",
+      "static_support": "declared_and_direct_open_tested",
+      "window_kind": "studio"
+    },
+    {
+      "next_route_file": "frontend/src/app/worlds/[worldId]/page.tsx",
+      "product_surface": "world-app",
+      "route_family": "/worlds/{worldId}",
+      "shell": "phone",
+      "static_support": "declared_and_direct_open_tested",
+      "window_kind": "phone"
+    },
+    {
+      "next_route_file": "frontend/src/app/worlds/[worldId]/[section]/page.tsx",
+      "product_surface": "world-app-section",
+      "route_family": "/worlds/{worldId}/{section}",
+      "shell": "phone",
+      "static_support": "declared_and_direct_open_tested",
+      "window_kind": "phone"
+    },
+    {
+      "next_route_file": "frontend/src/app/worlds/[worldId]/posts/[postId]/page.tsx",
+      "product_surface": "world-post-thread",
+      "route_family": "/worlds/{worldId}/posts/{postId}",
+      "shell": "phone",
+      "static_support": "react_declared_rust_phone_allowlist_gap",
+      "window_kind": "phone"
+    },
+    {
+      "next_route_file": "frontend/src/app/agents/page.tsx",
+      "product_surface": "agents-dashboard",
+      "route_family": "/agents",
+      "shell": "phone",
+      "static_support": "react_declared_rust_phone_allowlist_and_direct_open_test_gap",
+      "window_kind": "phone"
+    },
+    {
+      "next_route_file": "frontend/src/app/agents/new/page.tsx",
+      "product_surface": "agent-create",
+      "route_family": "/agents/new",
+      "shell": "phone",
+      "static_support": "declared_and_direct_open_tested",
+      "window_kind": "phone"
+    },
+    {
+      "next_route_file": "frontend/src/app/agents/[characterId]/page.tsx",
+      "product_surface": "agent-detail",
+      "route_family": "/agents/{characterId}",
+      "shell": "phone",
+      "static_support": "declared_and_direct_open_tested",
+      "window_kind": "phone"
+    },
+    {
+      "next_route_file": "frontend/src/app/characters/[characterId]/worlds/[worldId]/autonomy-setup/page.tsx",
+      "product_surface": "autonomy-setup",
+      "route_family": "/characters/{characterId}/worlds/{worldId}/autonomy-setup",
+      "shell": "phone",
+      "static_support": "declared_and_direct_open_tested",
+      "window_kind": "phone"
+    },
+    {
+      "next_route_file": "frontend/src/app/characters/[characterId]/worlds/[worldId]/relationship-graph/page.tsx",
+      "product_surface": "relationship-graph",
+      "route_family": "/characters/{characterId}/worlds/{worldId}/relationship-graph",
+      "shell": "wide",
+      "static_support": "declared_and_direct_open_tested",
+      "window_kind": "relationship-graph"
+    },
+    {
+      "next_route_file": "frontend/src/app/posts/page.tsx",
+      "product_surface": "global-feed-compatibility",
+      "route_family": "/posts",
+      "shell": "phone",
+      "static_support": "declared_and_direct_open_tested",
+      "window_kind": "phone"
+    },
+    {
+      "next_route_file": "frontend/src/app/posts/[postId]/page.tsx",
+      "product_surface": "global-post-thread-compatibility",
+      "route_family": "/posts/{postId}",
+      "shell": "phone",
+      "static_support": "declared_and_direct_open_tested",
+      "window_kind": "phone"
+    },
+    {
+      "next_route_file": "frontend/src/app/settings/page.tsx",
+      "product_surface": "settings-current-scope",
+      "route_family": "/settings",
+      "shell": "phone",
+      "static_support": "declared_and_direct_open_tested",
+      "window_kind": "phone"
+    },
+    {
+      "next_route_file": "frontend/src/app/login/page.tsx",
+      "product_surface": "local-owner-gate",
+      "route_family": "/login",
+      "shell": "phone",
+      "static_support": "declared_and_direct_open_tested",
+      "window_kind": "phone"
+    }
+  ],
+  "schema_version": 1,
+  "screenshot_inventory": {
+    "baseline_call_count": 0,
+    "committed_baseline_count": 0,
+    "current_status": "UI-A records targets only; reviewed screenshots begin in UI-B and visual corpus closes in UI-F.",
+    "target_viewports": [
+      "360x800",
+      "390x844",
+      "436x880",
+      "1440x1000",
+      "1440x900"
+    ]
+  }
+}

@@ -128,6 +128,15 @@
       "owner_phases": [
         "L0-L4 product URL, privacy UX, provider referer"
       ],
+      "path": "frontend/DESIGN.md"
+    },
+    {
+      "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
       "path": "frontend/public/openapi.json"
     },
     {

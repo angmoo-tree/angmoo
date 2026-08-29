@@ -191,6 +191,24 @@ features only through `@/features/<feature>/public`; features do not deep-import
 one another, and product-neutral `shared` primitives do not import features or
 legacy data clients.
 
+User-visible frontend work must also read `frontend/DESIGN.md` and
+`docs/architecture/frontend-design-reference.md`. Record whether hosted visual
+anatomy is `DIRECT`, `ADAPTED`, `LOCAL`, or `REJECTED`, keep Next and
+static/Tauri wrappers on the same feature component, and do not invent actions,
+counts, routes, or state absent from the Local capability contract. Run the
+design inventory alongside the architecture boundary:
+
+```powershell
+uv run --project backend python scripts/ci/check_frontend_design_contract.py --check
+```
+
+An intentional raw-color reduction updates
+`security/frontend_design_policy.json` and regenerates
+`docs/architecture/frontend-design-baseline.json` with `--write`. Increasing
+the baseline or adding an asset, font, hosted-only source file, or screenshot
+requires explicit rationale and provenance; regenerating a report alone is not
+approval.
+
 The import inventory records facts, while `security/architecture_import_policy.json`
 records target rules and exact reviewed legacy exceptions. Existing exceptions
 may shrink but must not grow merely to make CI pass. Run:
