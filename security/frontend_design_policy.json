@@ -158,17 +158,20 @@
   "browser_harness": {
     "configs": [
       "browser-tests/playwright.config.ts",
-      "browser-tests/playwright.static.config.ts"
+      "browser-tests/playwright.static.config.ts",
+      "browser-tests/playwright.visual.config.ts"
     ],
     "lockfile": "browser-tests/pnpm-lock.yaml",
     "package": "browser-tests/package.json",
     "playwright_version": "1.62.1",
     "specs": [
       "browser-tests/product-shell.spec.ts",
+      "browser-tests/semantic-foundation.visual.spec.ts",
       "browser-tests/static-product-shell.spec.ts"
     ],
     "visual_command_owner": "browser-tests/package.json",
-    "visual_command_status": "reserved_for_ui_b_when_first_reviewed_screenshot_exists",
+    "visual_command_status": "active_ui_b_semantic_foundation",
+    "visual_script_command": "playwright test --config=playwright.visual.config.ts",
     "visual_script_name": "test:visual"
   },
   "design_contract": "frontend/DESIGN.md",
@@ -206,6 +209,9 @@
     ".github/PULL_REQUEST_TEMPLATE.md",
     ".github/workflows/security.yml",
     "CONTRIBUTING.md",
+    "browser-tests/package.json",
+    "browser-tests/playwright.visual.config.ts",
+    "browser-tests/semantic-foundation.visual.spec.ts",
     "docs/architecture/frontend-design-baseline.json",
     "docs/architecture/frontend-design-reference.md",
     "docs/architecture/frontend-product-shell.md",
@@ -213,6 +219,15 @@
     "docs/public/frontend.md",
     "frontend/AGENTS.md",
     "frontend/DESIGN.md",
+    "frontend/scripts/serve-production.mjs",
+    "frontend/src/app/icon.svg",
+    "frontend/src/app/ui-foundation/page.tsx",
+    "frontend/src/features/ui-foundation/public.ts",
+    "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
+    "frontend/src/shared/ui/profile-avatar.tsx",
+    "frontend/src/shared/ui/public.ts",
+    "frontend/src/shared/ui/semantic-tokens.css",
+    "frontend/src/shared/ui/status-badge.tsx",
     "security/frontend_design_policy.json"
   ],
   "provenance": {
@@ -242,8 +257,9 @@
     "notice_decision": "The audited visual files come from first-party history already shared by hosted and Local before the Local GPL transition. UI-A copies no post-common hosted code, asset, icon, or font, so it adds no bundled Apache notice. Any later post-common hosted-only transplant requires a separate license-policy and notice decision before copying."
   },
   "raw_color_scan": {
-    "baseline_files": 59,
-    "baseline_occurrences": 1938,
+    "baseline_files": 56,
+    "baseline_occurrences": 1894,
+    "baseline_status": "reviewed_ui_b",
     "extensions": [
       ".css",
       ".ts",
@@ -254,6 +270,11 @@
     "source_root": "frontend/src"
   },
   "required_markers": {
+    ".github/workflows/ci.yml": [
+      "--mount \"type=bind,source=${GITHUB_WORKSPACE},target=/work\"",
+      "mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e",
+      "node ./node_modules/@playwright/test/cli.js test"
+    ],
     ".github/PULL_REQUEST_TEMPLATE.md": [
       "Frontend design contract (when applicable)",
       "Hosted adoption classification",
@@ -263,6 +284,7 @@
       "DIRECT / ADAPTED / LOCAL / REJECTED",
       "Raw-color baseline",
       "Route and surface inventory",
+      "UI-B semantic foundation",
       "Visual harness extension"
     ],
     "docs/public/changing-frontend.md": [
@@ -274,10 +296,102 @@
       "frontend/DESIGN.md",
       "END:angmoo-frontend-design-contract"
     ],
+    "frontend/src/app/globals.css": [
+      "@import \"../shared/ui/semantic-tokens.css\";"
+    ],
+    "frontend/src/app/ui-foundation/page.tsx": [
+      "follow: false",
+      "index: false",
+      "SemanticFoundationFixture"
+    ],
+    "frontend/src/composition/static-product-router.tsx": [
+      "pathname === \"/ui-foundation\"",
+      "SemanticFoundationFixture"
+    ],
+    "frontend/src/features/ui-foundation/public.ts": [
+      "SemanticFoundationFixture"
+    ],
+    "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx": [
+      "data-fixture-schema=\"ui-b-semantic-primitives-v1\"",
+      "data-ui-foundation-fixture",
+      "from \"@/shared/ui/public\"",
+      "onSelect={setActiveNavigation}",
+      "src=\"/icon.svg\""
+    ],
+    "frontend/src/features/world-packages/world-package-export-panel.tsx": [
+      "Button, Card, InlineError, Input, Select",
+      "from \"@/shared/ui/public\""
+    ],
+    "frontend/src/features/world-packages/world-package-import-client.tsx": [
+      "Button, Card, InlineError, Select",
+      "from \"@/shared/ui/public\""
+    ],
+    "frontend/src/shared/ui/public.ts": [
+      "export { Avatar } from \"./avatar\";",
+      "export { Badge, StatusChip } from \"./status\";",
+      "export { BottomNavigation, PageHeader, Tabs } from \"./navigation\";",
+      "export { Button, IconButton } from \"./button\";",
+      "export { Card, ListRow } from \"./surfaces\";",
+      "export { DegradedPanel, EmptyState, InlineError, Toast } from \"./feedback\";",
+      "export { Dialog } from \"./dialog\";",
+      "export { Field, Input, Select, Textarea } from \"./form-controls\";"
+    ],
+    "frontend/src/shared/ui/profile-avatar.tsx": [
+      "<Avatar",
+      "export function ProfileAvatar",
+      "import { Avatar } from \"./avatar\";"
+    ],
+    "frontend/src/shared/ui/semantic-tokens.css": [
+      "--color-action-primary:",
+      "--color-brand-accent:",
+      "--color-canvas:",
+      "--color-state-degraded:",
+      "--color-surface:",
+      "--color-text-strong:",
+      "--font-sans:",
+      "--motion-standard:",
+      "--radius-dialog:",
+      "--shadow-dialog:",
+      "--spacing-phone:",
+      "--text-feed-body:"
+    ],
+    "frontend/src/shared/ui/status-badge.tsx": [
+      "<StatusChip",
+      "export function StatusBadge",
+      "import { StatusChip, type StatusChipTone } from \"./status\";"
+    ],
+    "frontend/scripts/serve-production.mjs": [
+      "const standaloneRoot = join(frontendRoot, \".next\", \"standalone\");",
+      "cpSync(join(frontendRoot, \"src\", \"app\", \"icon.svg\"), join(targetPublic, \"icon.svg\"));",
+      "cpSync(sourcePublic, targetPublic, { recursive: true });",
+      "cpSync(sourceStatic, targetStatic, { recursive: true });",
+      "isWindows ? [nextCli, \"start\"",
+      "isWindows ? frontendRoot : standaloneRoot"
+    ],
     "frontend/DESIGN.md": [
       "UI-A DESIGN CONTRACT CLOSEOUT",
       "check_frontend_design_contract.py",
       "frontend-design-reference.md"
+    ],
+    "browser-tests/package.json": [
+      "\"test:visual\": \"playwright test --config=playwright.visual.config.ts\""
+    ],
+    "browser-tests/playwright.visual.config.ts": [
+      "maxDiffPixels: 25",
+      "name: \"next-production\"",
+      "name: \"static-export\"",
+      "node ../frontend/scripts/serve-production.mjs --port 3300",
+      "snapshotPathTemplate: \"{testDir}/snapshots/ui-b/{arg}{ext}\"",
+      "threshold: 0.1",
+      "viewport: { width: 436, height: 880 }"
+    ],
+    "browser-tests/semantic-foundation.visual.spec.ts": [
+      "FIXTURE_SCHEMA = \"ui-b-semantic-primitives-v1\"",
+      "FOUNDATION_ROUTE = \"/ui-foundation\"",
+      "image.complete && image.naturalWidth > 0",
+      "img[src=\"/icon.svg\"]",
+      "semantic-foundation-phone.png",
+      "toHaveScreenshot("
     ]
   },
   "route_surface_inventory": [
@@ -419,10 +533,76 @@
     }
   ],
   "schema_version": 1,
+  "semantic_foundation": {
+    "base_commit": "7c96d4bd6f3789036593c1e89ca8974fae620252",
+    "classification": "LOCAL",
+    "compatibility_bridges": [
+      {
+        "adapter": "frontend/src/shared/ui/profile-avatar.tsx",
+        "composes": "Avatar",
+        "existing_public_export": "ProfileAvatar",
+        "impact": "transitional_existing_product_consumers"
+      },
+      {
+        "adapter": "frontend/src/shared/ui/status-badge.tsx",
+        "composes": "StatusChip",
+        "existing_public_export": "StatusBadge",
+        "impact": "transitional_existing_product_consumers"
+      }
+    ],
+    "consumer_adoption": "limited_direct_world_package_adoption_plus_compatibility_bridges",
+    "fixture": {
+      "allowed_frontend_route_literal_paths": [
+        "frontend/src/composition/static-product-router.tsx"
+      ],
+      "bottom_navigation_mode": "button_only_state_fixture",
+      "component": "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
+      "exposure": "unlinked_noindex_test_harness",
+      "feature_public_export": "frontend/src/features/ui-foundation/public.ts",
+      "next_wrapper": "frontend/src/app/ui-foundation/page.tsx",
+      "owner_stage": "L4.5 UI-B",
+      "route": "/ui-foundation",
+      "route_href_wiring_owner": "L4.5 UI-C",
+      "static_wrapper": "frontend/src/composition/static-product-router.tsx",
+      "ui_c_product_route": false
+    },
+    "global_legacy_alias_remap": {
+      "import_marker": "@import \"../shared/ui/semantic-tokens.css\";",
+      "import_path": "frontend/src/app/globals.css",
+      "required_smoke": [
+        "pnpm --dir browser-tests exec playwright test --config=playwright.static.config.ts",
+        "pnpm --dir browser-tests test",
+        "pnpm --dir browser-tests test:visual",
+        "pnpm --dir frontend build",
+        "pnpm --dir frontend build:static"
+      ],
+      "requires_existing_product_shell_smoke": true,
+      "scope": "global_alias_remap_only_not_full_consumer_conformance"
+    },
+    "primitive_sources": [
+      "frontend/src/shared/ui/avatar.tsx",
+      "frontend/src/shared/ui/button.tsx",
+      "frontend/src/shared/ui/class-names.ts",
+      "frontend/src/shared/ui/dialog.tsx",
+      "frontend/src/shared/ui/feedback.tsx",
+      "frontend/src/shared/ui/form-controls.tsx",
+      "frontend/src/shared/ui/navigation.tsx",
+      "frontend/src/shared/ui/semantic-foundation.module.css",
+      "frontend/src/shared/ui/status.tsx",
+      "frontend/src/shared/ui/surfaces.tsx"
+    ],
+    "public_export": "frontend/src/shared/ui/public.ts",
+    "direct_product_consumers": [
+      "frontend/src/features/world-packages/world-package-export-panel.tsx",
+      "frontend/src/features/world-packages/world-package-import-client.tsx"
+    ],
+    "schema": "ui-b-semantic-primitives-v1",
+    "token_source": "frontend/src/shared/ui/semantic-tokens.css"
+  },
   "screenshot_inventory": {
-    "baseline_call_count": 0,
-    "committed_baseline_count": 0,
-    "current_status": "UI-A records targets only; reviewed screenshots begin in UI-B and visual corpus closes in UI-F.",
+    "baseline_call_count": 1,
+    "committed_baseline_count": 1,
+    "current_status": "UI-B local technical closeout includes one reviewed semantic-foundation baseline; the full product visual corpus remains owned by UI-F.",
     "target_viewports": [
       "360x800",
       "390x844",
@@ -430,5 +610,40 @@
       "1440x1000",
       "1440x900"
     ]
+  },
+  "visual_manifest": {
+    "canonical_environment": {
+      "browser": "chromium",
+      "browser_revision": "1234",
+      "browser_version": "151.0.7922.34",
+      "container_image": "mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e",
+      "operating_system": "ubuntu-24.04",
+      "playwright_version": "1.62.1"
+    },
+    "config": "browser-tests/playwright.visual.config.ts",
+    "diff_policy": {
+      "max_diff_pixels": 25,
+      "threshold": 0.1
+    },
+    "expected_screenshot_call_count": 1,
+    "expected_snapshots": [
+      "browser-tests/snapshots/ui-b/semantic-foundation-phone.png"
+    ],
+    "first_party_fixture_asset": {
+      "served_path": "/icon.svg",
+      "source": "frontend/src/app/icon.svg"
+    },
+    "fixture": "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
+    "projects": [
+      "next-production",
+      "static-export"
+    ],
+    "reviewed_viewport": {
+      "height": 880,
+      "width": 436
+    },
+    "production_preview_script": "frontend/scripts/serve-production.mjs",
+    "schema": "ui-b-semantic-primitives-v1",
+    "spec": "browser-tests/semantic-foundation.visual.spec.ts"
   }
 }

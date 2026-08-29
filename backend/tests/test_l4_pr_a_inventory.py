@@ -90,7 +90,7 @@ def test_l4_pr_a_architecture_and_parity_oracles_are_exact() -> None:
     assert frontend["candidate_count"] == 14
     assert frontend["candidate_consumer_edge_count"] == 32
     assert frontend["planned_feature_allowlist"] == ["relationships", "social"]
-    assert len(frontend["public_surfaces"]["features"]) == 8
+    assert len(frontend["public_surfaces"]["features"]) == 9
     assert len(frontend["public_surfaces"]["shared"]) == 8
 
     assert behavior["parity_test_node_count"] == 93

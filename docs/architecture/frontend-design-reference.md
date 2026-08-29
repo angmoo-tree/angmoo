@@ -2,18 +2,24 @@
 
 This document is the public, clean-clone companion to
 [`frontend/DESIGN.md`](../../frontend/DESIGN.md). It records the evidence used
-by **L4.5 UI-A — Design contract, reference, and provenance closeout** without
-making a sibling checkout, a private source tree, or the hosted service a
-runtime or build dependency.
+by **L4.5 UI-A — Design contract, reference, and provenance closeout** and the
+machine-readable foundation introduced by **L4.5 UI-B — Semantic token and
+primitive foundation** without making a sibling checkout, a private source
+tree, or the hosted service a runtime or build dependency.
 
 UI-A establishes the contract and inventory. It does not restyle pages, change
 an API, or claim that the current UI already conforms to the design contract.
+UI-B adds a Local-owned semantic source, shared primitives, limited real
+consumer adoption, and one deterministic test fixture. UI-C through UI-F still
+own product-shell convergence, social and Local-only surface adoption, and the
+full visual/cross-runtime closeout.
 
 ## Exact baseline
 
 | Boundary | Exact value | Meaning |
 | --- | --- | --- |
 | Local `main` base | `e5e62aed69cb89b16b5870eb0854dd07752dc519` | L4 PR G merge and UI-A branch base |
+| UI-B stacked base | `7c96d4bd6f3789036593c1e89ca8974fae620252` | Signed-off UI-A local technical commit; UI-B remains a separately reviewable diff |
 | Hosted visual reference | `jingujeon/angmoo@7f967abd6117381be5c081ed284addb889b06fec` | Immutable social-UI audit snapshot |
 | Latest shared first-party history | `637426d8f2245311d6c5cb4ca52bcfc8103cca25` | Hosted and Local already share the audited frontend ancestry through this commit |
 | Local GPL transition | `b95ffe2c59e02d97f2047791c4959c1494b9ee35` | Current application license boundary |
@@ -103,11 +109,83 @@ shared/ui
   -> never imports a feature, app route, legacy component, or data client
 ```
 
-The current eight public feature boundaries and zero exact legacy exceptions
-are enforced by `scripts/ci/check_frontend_architecture_boundaries.py`. UI-A
-does not refactor page components or the static composition adapter. The
-remaining top-level `components`, `lib`, and manual static-router debt is
-inventoried for incremental migration; UI-C owns shell and route convergence.
+The current nine public feature boundaries and zero exact legacy exceptions
+are enforced by `scripts/ci/check_frontend_architecture_boundaries.py`. The
+ninth boundary is the UI-B-only `features/ui-foundation/public.ts` test
+fixture. It is not a new product surface. The remaining top-level `components`,
+`lib`, and manual static-router debt is inventoried for incremental migration;
+UI-C owns shell and route convergence.
+
+## UI-B semantic foundation
+
+The machine-readable contract is the `semantic_foundation` object in
+[`security/frontend_design_policy.json`](../../security/frontend_design_policy.json).
+Its canonical implementation paths are:
+
+| Role | Repository-owned path |
+| --- | --- |
+| semantic token source | `frontend/src/shared/ui/semantic-tokens.css` |
+| global Tailwind/CSS entry | `frontend/src/app/globals.css` |
+| shared public export | `frontend/src/shared/ui/public.ts` |
+| deterministic fixture | `frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx` |
+| fixture feature boundary | `frontend/src/features/ui-foundation/public.ts` |
+| noindex Next wrapper | `frontend/src/app/ui-foundation/page.tsx` |
+| static fixture composition | `frontend/src/composition/static-product-router.tsx` |
+
+The token source owns the canonical color, type, spacing, radius, elevation,
+focus, and motion values. Shared consumers import `Avatar`, `Button`, form,
+surface, status, navigation, dialog, and feedback primitives through
+`@/shared/ui/public`; they do not deep-import implementation files. Required
+token and export markers are checked from the policy so deleting or bypassing
+the source of truth fails the deterministic contract.
+
+UI-B directly adopts the new component API in two existing product consumers:
+
+- `frontend/src/features/world-packages/world-package-export-panel.tsx`;
+- `frontend/src/features/world-packages/world-package-import-client.tsx`.
+
+Two compatibility bridges also compose new primitives behind existing public
+exports and therefore affect a broader, pre-existing consumer graph:
+
+| Compatibility adapter | New primitive | Existing public contract | Impact |
+| --- | --- | --- | --- |
+| `frontend/src/shared/ui/profile-avatar.tsx` | `Avatar` | `ProfileAvatar` | Existing profile/avatar call sites receive the new primitive transitively |
+| `frontend/src/shared/ui/status-badge.tsx` | `StatusChip` | `StatusBadge` | Existing runtime/status call sites receive the new primitive transitively |
+
+These adapters are tracked and hashed separately from the two direct World
+Package consumers. They preserve their existing public names and product
+semantics; they do not make every downstream surface a direct UI-B adoption.
+
+The fixture is evidence, not a third direct product consumer. Its schema is
+`ui-b-semantic-primitives-v1`. `/ui-foundation` is an unlinked, noindex test
+harness rendered by the same feature component in Next production and the
+static export. It is excluded from the product route/surface inventory and
+must not appear in Device navigation. This route does not close any UI-C route
+gap or authorize another product route.
+
+The fixture's `BottomNavigation` items are button-only state controls. They
+exercise selection, horizontal visibility, touch, and `aria-current` without
+claiming that any `href` is a supported product destination. Actual route href
+wiring and capability-driven navigation remain owned by UI-C.
+
+`globals.css` imports the semantic source globally. Transitional aliases remap
+existing legacy utilities, and the two compatibility bridges propagate
+`Avatar` and `StatusChip` into existing call sites, even though only the two
+World Package consumers directly adopt the new component API in UI-B. The
+existing Next/static product-shell behavior smoke therefore covers both global
+alias and compatibility-bridge impact in addition to the fixture tests. This
+transitional reach is not evidence that untouched pages conform to the design
+contract. UI-C, UI-D, UI-E, and UI-F remain pending.
+
+The machine-readable required smoke set is:
+
+```bash
+pnpm --dir frontend build
+pnpm --dir frontend build:static
+pnpm --dir browser-tests test
+pnpm --dir browser-tests exec playwright test --config=playwright.static.config.ts
+pnpm --dir browser-tests test:visual
+```
 
 ## Route and surface inventory
 
@@ -179,6 +257,14 @@ raw color occurrences = 1,938
 files with raw color  = 59
 ```
 
+Those two numbers remain explicit UI-A placeholder values while the UI-B tree
+and first PNG are being finalized. The policy records
+`baseline_status=pending_ui_b_final_scan_ui_a_values_are_placeholders`, and the
+checker deliberately refuses a local technical PASS in that state. After all
+UI-B frontend files settle, generate the report, copy its exact
+`raw_colors.occurrences` and `raw_colors.files` values into the policy, change
+the status to `reviewed_ui_b`, regenerate once more, and run `--check`.
+
 The per-extension, per-file, and per-value result is tracked in
 [`frontend-design-baseline.json`](frontend-design-baseline.json). Regenerate or
 check it from a clean clone with:
@@ -201,31 +287,65 @@ lower the tracked baseline when debt is removed.
 - `playwright.static.config.ts` plus `static-product-shell.spec.ts` for static
   direct-open, Tauri-like route, window, and interaction behavior.
 
-At UI-A closeout the repository intentionally has:
+UI-B activates the reserved `test:visual` command in the existing
+`browser-tests/package.json`; it does not add Playwright under `frontend`.
+The canonical manifest is:
 
 ```text
-toHaveScreenshot/page.screenshot calls = 0
-committed visual snapshot images        = 0
+fixture schema       ui-b-semantic-primitives-v1
+canonical OS         ubuntu-24.04
+container            mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e
+Playwright           1.62.1
+Chromium revision    1234
+Chromium version     151.0.7922.34
+reviewed viewport    436x880
+projects             next-production / static-export
+threshold            0.1
+maxDiffPixels        25
+screenshot calls     1
+reviewed PNG         browser-tests/snapshots/ui-b/semantic-foundation-phone.png
 ```
 
-UI-B creates the first reviewed screenshot only when a real semantic primitive
-consumer exists. At that time the same `browser-tests/package.json` adds the
-reserved `test:visual` command, a visual config, deterministic fixtures, and a
-baseline manifest. It must not add Playwright under `frontend`.
+`browser-tests/playwright.visual.config.ts` owns the browser environment and
+diff policy. Core CI executes it inside the digest-pinned Playwright 1.62.1
+Noble container recorded above, so host-runner font and image-package drift
+cannot silently redefine the pixel baseline. `browser-tests/semantic-foundation.visual.spec.ts`
+owns the fixture schema, interaction/accessibility checks, `/icon.svg` load
+assertion in both projects, and the single screenshot call.
 
-The visual configuration must freeze locale, timezone, light color scheme,
-reduced motion, device scale, caret and animation behavior, browser revision,
-fixture schema, viewport, and diff policy. Remote requests fail closed; real
-credentials, user data, provider calls, remote fonts, and network images are
-forbidden. Ubuntu with the locked CI Chromium owns the pixel baseline. Windows
-100%, 125%, and 150% display scale remains a separate Tauri user-smoke Gate.
+The `next-production` project starts the built standalone Next preview through
+`frontend/scripts/serve-production.mjs`. On canonical Ubuntu the helper copies
+`.next/static`, the existing first-party `public` tree, and
+`frontend/src/app/icon.svg` as `public/icon.svg` into `.next/standalone`, then
+starts the traced `server.js`. Windows developer runs retain a launcher-only
+`next start` fallback because POSIX standalone symlinks cannot always be
+dereferenced from a Windows checkout. Both paths require an existing production
+build; neither rebuilds in the visual test.
 
-Planned viewport families are `360x800`, `390x844`, `436x880`, centered Phone
-at `1440x1000`, and the two wide workspaces at `1440x900`.
+The generated frontend design baseline records canonical-LF SHA-256 values for
+the visual config, spec, fixture, production-preview helper, and source SVG,
+plus a binary SHA-256 for the PNG when it exists. Until that exact PNG is
+generated on the canonical environment, reviewed, committed, and the generated
+report is refreshed, the visual Gate intentionally remains incomplete.
+
+The visual configuration must freeze container digest, locale, timezone, light
+color scheme, reduced motion, device scale, caret and animation behavior,
+browser revision, fixture schema, viewport, and diff policy. Remote requests
+fail closed; real credentials, user data, provider calls, remote fonts, and
+network images are forbidden. The pinned Noble container with the locked CI
+Chromium owns the pixel baseline. Windows 100%, 125%, and 150% display scale
+remains a separate Tauri user-smoke Gate.
+
+UI-B reviews only the `436x880` semantic-foundation fixture. Planned viewport
+families remain `360x800`, `390x844`, `436x880`, centered Phone at `1440x1000`,
+and the two wide workspaces at `1440x900`; completing those route/state/runtime
+matrices belongs to UI-F.
 
 ## Asset and font provenance
 
-UI-A adds no asset, font, dependency, or copied icon.
+UI-A adds no asset, font, dependency, or copied icon. UI-B likewise adds no
+remote or bundled font and no copied hosted asset. Its fixture uses existing
+Local PWA artwork and the already-licensed Lucide dependency.
 
 - The application icon and favicon already descend from first-party shared
   history and remain covered by the current application and brand policy.
@@ -257,10 +377,12 @@ Before changing user-visible frontend code:
    evidence in the pull request;
 7. run both frontend architecture and design-contract checkers.
 
-UI-A permits this exact status only:
+Until the final raw-color values, reviewed PNG, generated manifest, and local
+commands are all closed, this branch permits this status only:
 
 ```text
 UI-A DESIGN CONTRACT / REFERENCE / PROVENANCE CLOSEOUT = PASS
-UI-B through UI-F                                      = NOT STARTED
+UI-B SEMANTIC TOKEN / PRIMITIVE FOUNDATION             = IN PROGRESS
+UI-C through UI-F                                      = NOT STARTED
 ANGMOO LOCAL DESIGN FOUNDATION PASS                    = NOT YET
 ```

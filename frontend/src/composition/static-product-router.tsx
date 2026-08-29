@@ -19,6 +19,7 @@ import { StudioImportRouteClient } from "@/app/studio/import/studio-import-route
 import { StudioRouteClient } from "@/app/studio/studio-route-client";
 import { WorldAppRouteClient } from "@/app/world-app-route-client";
 import { CreatorStudioFrame } from "@/features/creator-studio/public";
+import { SemanticFoundationFixture } from "@/features/ui-foundation/public";
 import {
   currentDesktopRoute,
   desktopWindowKindForRoute,
@@ -124,6 +125,7 @@ function StaticWindowRouteMismatch({
 
 function renderStaticRoute(location: BrowserLocation) {
   const { pathname, search } = location;
+  if (pathname === "/ui-foundation") return <SemanticFoundationFixture />;
   if (pathname === "/") return <DeviceHomeRouteClient />;
   if (pathname === "/studio") {
     return (

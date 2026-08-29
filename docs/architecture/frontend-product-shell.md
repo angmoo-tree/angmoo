@@ -24,6 +24,7 @@ meaning.
 | `features/runtime-status/public.ts` | Secret-free aggregate status presentation | shared status badge |
 | `features/social/public.ts` | Feed read composition, social DTO entry and shared post-list UI | Next route and static/Tauri router |
 | `features/relationships/public.ts` | Relationship graph API, typed projection state and shared graph UI | Next route and Tauri wide window |
+| `features/ui-foundation/public.ts` | UI-B deterministic semantic-token and primitive fixture only | unlinked noindex Next wrapper and static test composition; not product navigation |
 
 `shared/ui` contains presentation primitives only. It must not decide World
 visibility, owner authorization, runtime health, or feature availability.
@@ -69,6 +70,48 @@ new exception.
 The existing `browser-tests` package remains the sole Playwright graph. UI-B
 adds the first reviewed screenshot consumer there; UI-A records a truthful
 zero-screenshot baseline and does not create a second harness.
+
+## L4.5 UI-B semantic foundation boundary
+
+UI-B establishes `frontend/src/shared/ui/semantic-tokens.css` as the Local-owned
+semantic source and `frontend/src/shared/ui/public.ts` as the only public
+primitive export. The primitives remain product-neutral: they render actions,
+fields, surfaces, identity presentation, state, navigation chrome, dialogs,
+and feedback, but they do not choose a World, authorize an owner, infer runtime
+health, or decide whether a product capability exists.
+
+Direct UI-B product adoption is intentionally limited to the existing World
+Package export and import panels. Separately, the existing `ProfileAvatar`
+adapter now composes `Avatar`, and the existing `StatusBadge` adapter composes
+`StatusChip`. Those compatibility bridges retain their old public contracts
+while propagating the new primitive into a broader existing consumer graph;
+they are tracked separately and do not turn every downstream call site into a
+direct UI-B consumer. The deterministic fixture does not count as a product
+consumer.
+
+`globals.css` imports the token source globally and remaps legacy Tailwind
+aliases. Untouched surfaces may therefore receive either a global alias change
+or a transitive compatibility-bridge change without directly adopting the new
+component API. Existing product-shell Browser and static smoke covers both
+transitional effects, but neither is whole-frontend design conformance.
+
+The `/ui-foundation` wrapper exists only to render the same
+`SemanticFoundationFixture` in Next production and static export. The Next
+wrapper declares `robots.index=false` and `robots.follow=false`; no product
+navigation links to it. The path is deliberately absent from the product
+route/surface inventory. Its static composition entry is test infrastructure,
+not an added Device capability, a UI-C route-parity fix, or permission to add
+the route to a Rust Phone allowlist.
+
+The fixture's `BottomNavigation` is deliberately button-only. It proves local
+selected state, overflow visibility, touch behavior, and `aria-current` without
+attaching product-route `href` values. UI-C still owns actual destination
+capability, static/Next route parity, and route href wiring.
+
+UI-C still owns Device shell, navigation, route capability, and direct-open
+parity. UI-D owns social presentation adoption, UI-E owns Character/autonomy
+and Local-only surface adoption, and UI-F owns the full viewport,
+cross-runtime, and accessibility closeout.
 
 ## Incremental behavior boundary
 
@@ -207,6 +250,10 @@ The values are a product contract snapshot, not a Samsung asset or runtime
 dependency. App entries use a consistent squircle grid; Creator Studio leaves
 the device frame and uses a wide workspace.
 
+UI-B's `436x880` fixture is not a replacement Device shell. It verifies the
+shared semantic vocabulary in a bounded Phone canvas while UI-C retains
+ownership of the real Phone frame, safe area, navigation, and scroll model.
+
 ## Browser regression Gate
 
 Core CI runs the isolated Playwright Chromium suite in `browser-tests`. It protects the
@@ -217,3 +264,23 @@ standalone cache-free PWA contract. Backend requests are fulfilled with
 synthetic owner-scoped fixtures; any browser write or provider-shaped request
 fails the audit. These tests complement the backend authorization contract and
 do not replace the Windows clean-clone or final user visual Gate.
+
+UI-B adds `test:visual` to the same dependency graph. Its canonical pixel
+manifest is the digest-pinned Playwright 1.62.1 Noble container on Ubuntu
+24.04, Chromium revision 1234 (`151.0.7922.34`), a `436x880` viewport, and
+projects `next-production` and `static-export`. Core CI runs the pixel Gate in
+that container rather than inheriting mutable host-runner font packages. The
+one expected baseline is
+`browser-tests/snapshots/ui-b/semantic-foundation-phone.png` with threshold
+`0.1` and `maxDiffPixels=25`. This bounded fixture baseline does not close the
+UI-F route, viewport, Windows display-scale, Tauri, installer, or exact-SHA
+user Gates.
+
+The `next-production` visual project launches the already-built standalone
+output through `frontend/scripts/serve-production.mjs`. On canonical Ubuntu the
+helper assembles the traced runtime by copying `.next/static`, the first-party
+`public` directory, and `frontend/src/app/icon.svg` as `/icon.svg` before
+starting `.next/standalone/server.js`. The static-export project serves the
+existing static build. The fixture requires `/icon.svg` to load successfully in
+both projects, so the visual Gate covers the same first-party asset contract
+without a remote image or a second frontend implementation.

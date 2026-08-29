@@ -837,6 +837,7 @@
           "frontend/src/features/relationships/public.ts",
           "frontend/src/features/runtime-status/public.ts",
           "frontend/src/features/social/public.ts",
+          "frontend/src/features/ui-foundation/public.ts",
           "frontend/src/features/world-app/public.ts",
           "frontend/src/features/world-packages/public.ts"
         ],

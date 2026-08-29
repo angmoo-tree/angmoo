@@ -7,6 +7,7 @@
     "relationships",
     "runtime-status",
     "social",
+    "ui-foundation",
     "world-app",
     "world-packages"
   ],
@@ -26,6 +27,11 @@
       "display: \"standalone\"",
       "scope: \"/\"",
       "start_url: \"/\""
+    ],
+    "frontend/src/app/ui-foundation/page.tsx": [
+      "SemanticFoundationFixture",
+      "follow: false",
+      "index: false"
     ],
     "frontend/src/features/creator-studio/ui/creator-studio-dashboard.tsx": [
       "getLocalWorldSurface(\"creator_studio\"",
@@ -48,6 +54,16 @@
       "registration.update()",
       "updateViaCache: \"none\""
     ],
+    "frontend/src/features/ui-foundation/public.ts": [
+      "SemanticFoundationFixture"
+    ],
+    "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx": [
+      "data-fixture-schema=\"ui-b-semantic-primitives-v1\"",
+      "data-ui-foundation-fixture",
+      "from \"@/shared/ui/public\"",
+      "onSelect={setActiveNavigation}",
+      "src=\"/icon.svg\""
+    ],
     "frontend/src/features/world-app/model/world-app-contract.ts": [
       "availability: \"unavailable\"",
       "id: \"relationships\"",
@@ -62,11 +78,22 @@
     "frontend/src/shared/ui/device-frame.module.css": [
       "--device-bezel-width: 3px",
       "--device-corner-radius: 34px"
+    ],
+    "frontend/src/shared/ui/profile-avatar.tsx": [
+      "<Avatar",
+      "export function ProfileAvatar",
+      "import { Avatar } from \"./avatar\";"
+    ],
+    "frontend/src/shared/ui/status-badge.tsx": [
+      "<StatusChip",
+      "export function StatusBadge",
+      "import { StatusChip, type StatusChipTone } from \"./status\";"
     ]
   },
   "required_paths": [
     "frontend/public/sw.js",
     "frontend/src/app/manifest.ts",
+    "frontend/src/app/ui-foundation/page.tsx",
     "frontend/src/features/creator-studio/public.ts",
     "frontend/src/features/creator-studio/ui/creator-studio-dashboard.tsx",
     "frontend/src/features/creator-studio/ui/creator-studio-frame.tsx",
@@ -92,6 +119,9 @@
     "frontend/src/features/social/ui/post-list-client.tsx",
     "frontend/src/features/social/ui/post-media-grid.tsx",
     "frontend/src/features/social/ui/world-social-feed.tsx",
+    "frontend/src/features/ui-foundation/public.ts",
+    "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.module.css",
+    "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
     "frontend/src/features/world-app/api/world-app-client.ts",
     "frontend/src/features/world-app/model/world-app-contract.ts",
     "frontend/src/features/world-app/public.ts",
@@ -106,11 +136,22 @@
     "frontend/src/shared/interaction/use-mobile-pull-to-refresh.ts",
     "frontend/src/shared/navigation/public.ts",
     "frontend/src/shared/ui/app-icon.tsx",
+    "frontend/src/shared/ui/avatar.tsx",
+    "frontend/src/shared/ui/button.tsx",
+    "frontend/src/shared/ui/class-names.ts",
     "frontend/src/shared/ui/device-frame.tsx",
+    "frontend/src/shared/ui/dialog.tsx",
+    "frontend/src/shared/ui/feedback.tsx",
+    "frontend/src/shared/ui/form-controls.tsx",
+    "frontend/src/shared/ui/navigation.tsx",
     "frontend/src/shared/ui/profile-avatar.tsx",
     "frontend/src/shared/ui/profile-presentation.ts",
     "frontend/src/shared/ui/public.ts",
-    "frontend/src/shared/ui/status-badge.tsx"
+    "frontend/src/shared/ui/semantic-foundation.module.css",
+    "frontend/src/shared/ui/semantic-tokens.css",
+    "frontend/src/shared/ui/status-badge.tsx",
+    "frontend/src/shared/ui/status.tsx",
+    "frontend/src/shared/ui/surfaces.tsx"
   ],
   "schema_version": 1
 }

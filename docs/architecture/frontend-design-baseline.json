@@ -110,7 +110,7 @@
         "DIRECT"
       ],
       "path": "frontend/src/shared/ui/profile-avatar.tsx",
-      "sha256": "8a892932d85992308a8e517d434de948a5d0af3ad1437f1b760c324fee8f35e1"
+      "sha256": "b672a8290f161befc065fcb4ea5bd47ce2b6d13c0a6ac74348c3acec9e59f655"
     }
   ],
   "browser_harness": {
@@ -122,6 +122,10 @@
       {
         "path": "browser-tests/playwright.static.config.ts",
         "sha256": "b1dcc5b46884c5fcdc2d1e7bf30d8337e83b2c4d5f3648474758d6d0b17612d4"
+      },
+      {
+        "path": "browser-tests/playwright.visual.config.ts",
+        "sha256": "8feff29c9b818499ff67d6743341ffeb2f09a9627cfc39a2c4fc5ad8ea82e2b8"
       }
     ],
     "lockfile_sha256": "63eec1e3d5bac29965e850bf751269c7a8b317929b570205a1e223544f80a470",
@@ -131,6 +135,10 @@
       {
         "path": "browser-tests/product-shell.spec.ts",
         "sha256": "2ccfe8e736c2b7da5a6cd2f9165cea299586231a2eea8a7b32997ee4076585a5"
+      },
+      {
+        "path": "browser-tests/semantic-foundation.visual.spec.ts",
+        "sha256": "2ef9a60351670baf5c999e1dd9382e3cdddff672a5eaa90864bc939e7823426c"
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
@@ -156,7 +164,11 @@
       "/posts/post-static-probe",
       "/settings",
       "/login?returnTo=%2F"
-    ]
+    ],
+    "visual_script": {
+      "command": "playwright test --config=playwright.visual.config.ts",
+      "name": "test:visual"
+    }
   },
   "local_base_commit": "e5e62aed69cb89b16b5870eb0854dd07752dc519",
   "policy_id": "angmoo-l4-5-frontend-design-contract-v1",
@@ -165,6 +177,9 @@
       ".github/PULL_REQUEST_TEMPLATE.md",
       ".github/workflows/security.yml",
       "CONTRIBUTING.md",
+      "browser-tests/package.json",
+      "browser-tests/playwright.visual.config.ts",
+      "browser-tests/semantic-foundation.visual.spec.ts",
       "docs/architecture/frontend-design-baseline.json",
       "docs/architecture/frontend-design-reference.md",
       "docs/architecture/frontend-product-shell.md",
@@ -172,26 +187,35 @@
       "docs/public/frontend.md",
       "frontend/AGENTS.md",
       "frontend/DESIGN.md",
+      "frontend/scripts/serve-production.mjs",
+      "frontend/src/app/icon.svg",
+      "frontend/src/app/ui-foundation/page.tsx",
+      "frontend/src/features/ui-foundation/public.ts",
+      "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
+      "frontend/src/shared/ui/profile-avatar.tsx",
+      "frontend/src/shared/ui/public.ts",
+      "frontend/src/shared/ui/semantic-tokens.css",
+      "frontend/src/shared/ui/status-badge.tsx",
       "security/frontend_design_policy.json"
     ],
     "forbidden_matches": []
   },
   "raw_colors": {
-    "files": 59,
-    "occurrences": 1938,
+    "files": 56,
+    "occurrences": 1894,
     "pattern": "#[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{5}|[0-9A-Fa-f]{3}|[0-9A-Fa-f])?\\b",
     "per_extension": {
       ".css": {
-        "files": 13,
-        "occurrences": 170
+        "files": 12,
+        "occurrences": 152
       },
       ".ts": {
-        "files": 2,
-        "occurrences": 10
+        "files": 1,
+        "occurrences": 2
       },
       ".tsx": {
-        "files": 44,
-        "occurrences": 1758
+        "files": 43,
+        "occurrences": 1740
       }
     },
     "per_file": [
@@ -212,49 +236,6 @@
           "#ffe1e1": 1,
           "#fff0ef": 1,
           "#fff8e8": 1
-        }
-      },
-      {
-        "occurrences": 46,
-        "path": "frontend/src/app/globals.css",
-        "values": {
-          "#1a1d00": 1,
-          "#1f1c00": 1,
-          "#251818": 2,
-          "#3b2d2c": 1,
-          "#410006": 1,
-          "#444b00": 1,
-          "#474000": 1,
-          "#4f4800": 1,
-          "#584140": 1,
-          "#5b6300": 1,
-          "#606806": 1,
-          "#695f00": 1,
-          "#6d0010": 1,
-          "#8c1520": 1,
-          "#8c706f": 1,
-          "#93000a": 1,
-          "#ae2f34": 2,
-          "#ba1a1a": 1,
-          "#bdad00": 1,
-          "#c4ce67": 1,
-          "#dbc900": 1,
-          "#dde77d": 1,
-          "#e0bfbd": 1,
-          "#e0ea80": 1,
-          "#ecd5d3": 1,
-          "#f5dddb": 1,
-          "#f9e51a": 1,
-          "#fbe3e1": 1,
-          "#ff6b6b": 1,
-          "#ffb3b0": 2,
-          "#ffdad6": 1,
-          "#ffdad8": 1,
-          "#ffe9e7": 1,
-          "#ffedeb": 1,
-          "#fff0ef": 1,
-          "#fff8f7": 3,
-          "#ffffff": 5
         }
       },
       {
@@ -1152,30 +1133,25 @@
         }
       },
       {
-        "occurrences": 31,
+        "occurrences": 19,
         "path": "frontend/src/features/world-packages/world-package-export-panel.tsx",
         "values": {
           "#027a48": 1,
-          "#101828": 4,
-          "#344054": 7,
+          "#101828": 2,
+          "#344054": 5,
           "#475467": 2,
           "#667085": 2,
           "#98a2b3": 1,
-          "#b42318": 1,
           "#b54708": 1,
-          "#d0d5dd": 3,
-          "#e1e5eb": 1,
+          "#d0d5dd": 1,
           "#ecfdf3": 1,
           "#f2f4f7": 1,
           "#f7f8fa": 1,
-          "#f9fafb": 1,
-          "#ff6b6b": 2,
-          "#ffe2e2": 1,
-          "#fff1f0": 1
+          "#ff6b6b": 1
         }
       },
       {
-        "occurrences": 53,
+        "occurrences": 48,
         "path": "frontend/src/features/world-packages/world-package-import-client.tsx",
         "values": {
           "#027a48": 2,
@@ -1189,16 +1165,16 @@
           "#98a2b3": 1,
           "#abefc6": 1,
           "#ae2f34": 1,
-          "#b42318": 2,
+          "#b42318": 1,
           "#d0d5dd": 2,
-          "#e1e5eb": 5,
+          "#e1e5eb": 3,
           "#ecfdf3": 2,
           "#f7f8fa": 2,
           "#f9fafb": 2,
-          "#fdb022": 2,
+          "#fdb022": 1,
           "#ff6b6b": 4,
           "#ff9b9b": 1,
-          "#fff1f0": 2,
+          "#fff1f0": 1,
           "#fffaeb": 2
         }
       },
@@ -1243,37 +1219,42 @@
         }
       },
       {
-        "occurrences": 1,
-        "path": "frontend/src/shared/ui/profile-avatar.tsx",
+        "occurrences": 38,
+        "path": "frontend/src/shared/ui/semantic-tokens.css",
         "values": {
-          "#f3f4f6": 1
-        }
-      },
-      {
-        "occurrences": 8,
-        "path": "frontend/src/shared/ui/profile-presentation.ts",
-        "values": {
-          "#0ea5e9": 1,
           "#101828": 2,
-          "#173b8f": 1,
-          "#1e7a6d": 1,
-          "#7c3aed": 1,
-          "#f59e0b": 1,
-          "#ff6b6b": 1
-        }
-      },
-      {
-        "occurrences": 10,
-        "path": "frontend/src/shared/ui/status-badge.module.css",
-        "values": {
-          "#166534": 1,
-          "#475467": 2,
-          "#7a4d00": 1,
-          "#991b1b": 1,
-          "#dcfce7": 1,
-          "#eef1f5": 2,
-          "#fee2e2": 1,
-          "#fff3cd": 1
+          "#147a45": 1,
+          "#175cd3": 1,
+          "#475467": 1,
+          "#667085": 2,
+          "#6941c6": 1,
+          "#8c1520": 1,
+          "#98a2b3": 2,
+          "#ae2f34": 1,
+          "#b2ddff": 1,
+          "#b54708": 1,
+          "#c24141": 1,
+          "#d9d6fe": 1,
+          "#d9f2e5": 1,
+          "#e1e5eb": 2,
+          "#eaedf2": 1,
+          "#eef1f5": 1,
+          "#eff8ff": 1,
+          "#f0fbf5": 1,
+          "#f2f4f7": 2,
+          "#f4f3ff": 1,
+          "#f6f7f9": 1,
+          "#f9fafb": 1,
+          "#fedf89": 1,
+          "#ff5252": 1,
+          "#ff6b6b": 1,
+          "#ffb5b5": 1,
+          "#ffd7d7": 1,
+          "#fff0ef": 1,
+          "#fff5f5": 1,
+          "#fff8f7": 1,
+          "#fffaeb": 1,
+          "#ffffff": 1
         }
       }
     ],
@@ -1282,21 +1263,17 @@
       "#027a48": 6,
       "#039855": 1,
       "#05603a": 1,
-      "#0ea5e9": 1,
-      "#101828": 246,
+      "#101828": 244,
       "#12b76a": 1,
-      "#147a45": 2,
+      "#147a45": 3,
       "#15803d": 2,
-      "#166534": 2,
-      "#173b8f": 1,
+      "#166534": 1,
+      "#175cd3": 1,
       "#17834b": 1,
-      "#1a1d00": 1,
       "#1d2939": 3,
-      "#1e7a6d": 1,
-      "#1f1c00": 1,
       "#1f2330": 1,
       "#1f2937": 5,
-      "#251818": 7,
+      "#251818": 5,
       "#252124": 2,
       "#257a38": 1,
       "#28613a": 1,
@@ -1304,29 +1281,21 @@
       "#2e9d5b": 1,
       "#302829": 1,
       "#30343b": 2,
-      "#344054": 118,
+      "#344054": 116,
       "#3538cd": 1,
-      "#3b2d2c": 1,
       "#3b82f6": 1,
       "#3e2d2b": 1,
-      "#410006": 1,
       "#412e2d": 1,
-      "#444b00": 1,
-      "#474000": 1,
-      "#475467": 50,
-      "#4f4800": 1,
+      "#475467": 49,
       "#52606d": 2,
       "#52610f": 1,
       "#554a4c": 1,
-      "#584140": 2,
-      "#5b6300": 1,
-      "#606806": 1,
+      "#584140": 1,
       "#615655": 1,
       "#62595a": 1,
       "#655655": 1,
-      "#667085": 256,
-      "#695f00": 1,
-      "#6d0010": 1,
+      "#667085": 258,
+      "#6941c6": 1,
       "#6d6465": 2,
       "#716464": 1,
       "#75403d": 1,
@@ -1337,21 +1306,17 @@
       "#787f8b": 1,
       "#7a2e0e": 2,
       "#7a4b00": 1,
-      "#7a4d00": 1,
       "#7a808b": 1,
-      "#7c3aed": 1,
       "#7e4744": 2,
       "#81322f": 1,
       "#8a5a00": 2,
       "#8a6f6d": 1,
       "#8c1520": 1,
-      "#8c706f": 3,
+      "#8c706f": 2,
       "#8f3f3b": 2,
       "#8f4f4c": 1,
       "#8f8281": 1,
-      "#93000a": 1,
-      "#98a2b3": 58,
-      "#991b1b": 1,
+      "#98a2b3": 60,
       "#9a3412": 1,
       "#9a5b13": 1,
       "#9c6d68": 2,
@@ -1362,45 +1327,40 @@
       "#a93636": 2,
       "#aa453c": 1,
       "#abefc6": 1,
-      "#ae2f34": 6,
+      "#ae2f34": 5,
       "#b22f2f": 1,
-      "#b42318": 14,
+      "#b2ddff": 1,
+      "#b42318": 12,
       "#b45309": 3,
-      "#b54708": 3,
+      "#b54708": 4,
       "#b7bfca": 1,
       "#b7e4c7": 1,
       "#b7ebcd": 1,
       "#b8837f": 1,
       "#b96f69": 1,
-      "#ba1a1a": 1,
-      "#bdad00": 1,
       "#c0c6d0": 1,
-      "#c24141": 45,
-      "#c4ce67": 1,
+      "#c24141": 46,
       "#c7933d": 2,
       "#c7d7fe": 1,
       "#c9ced6": 3,
       "#cdd3dc": 1,
-      "#d0d5dd": 37,
+      "#d0d5dd": 35,
       "#d7bd16": 1,
       "#d8a640": 1,
       "#d92d20": 9,
       "#d9bf19": 1,
+      "#d9d6fe": 1,
       "#d9dee8": 1,
       "#d9e0ea": 4,
-      "#d9f2e5": 2,
-      "#dbc900": 1,
+      "#d9f2e5": 3,
       "#dc6803": 1,
       "#dce7f5": 1,
       "#dce8df": 1,
-      "#dcfce7": 1,
       "#ddd1cf": 1,
-      "#dde77d": 1,
       "#ded7f4": 1,
       "#dfe3e8": 2,
-      "#e0bfbd": 2,
-      "#e0ea80": 1,
-      "#e1e5eb": 92,
+      "#e0bfbd": 1,
+      "#e1e5eb": 91,
       "#e3d6d3": 1,
       "#e4a0a0": 2,
       "#e4e7ec": 5,
@@ -1415,37 +1375,36 @@
       "#e8f7e8": 2,
       "#eadedc": 2,
       "#eaecf0": 2,
-      "#eaedf2": 79,
-      "#ecd5d3": 1,
+      "#eaedf2": 80,
       "#ecfdf3": 5,
       "#edf0f4": 1,
       "#edf0f5": 1,
       "#edf8f0": 1,
-      "#eef1f5": 68,
+      "#eef1f5": 67,
       "#eef2ff": 1,
       "#ef9a74": 1,
       "#efc8c4": 1,
       "#efd7d2": 1,
-      "#f0fbf5": 2,
+      "#eff8ff": 1,
+      "#f0fbf5": 3,
       "#f0fdf4": 2,
       "#f0fff6": 1,
-      "#f2f4f7": 41,
+      "#f2f4f7": 43,
       "#f2f8df": 1,
       "#f2fbf5": 1,
-      "#f3f4f6": 6,
+      "#f3f4f6": 5,
       "#f4b8b8": 1,
       "#f4ddad": 1,
       "#f4df28": 1,
+      "#f4f3ff": 1,
       "#f4f5f7": 3,
       "#f4f7fb": 1,
-      "#f59e0b": 1,
-      "#f5dddb": 1,
       "#f5f1f1": 1,
       "#f5f8fc": 1,
       "#f5f8ff": 1,
       "#f5fbf6": 1,
       "#f6e9e7": 1,
-      "#f6f7f9": 45,
+      "#f6f7f9": 46,
       "#f79009": 3,
       "#f7d6d5": 1,
       "#f7ead8": 1,
@@ -1455,52 +1414,44 @@
       "#f8dfdc": 2,
       "#f8fafc": 2,
       "#f9df9b": 1,
-      "#f9e51a": 1,
       "#f9fafb": 85,
       "#face": 1,
-      "#fbe3e1": 1,
       "#fbfcfd": 4,
       "#fcfcfd": 1,
       "#fda29b": 2,
-      "#fdb022": 2,
-      "#fee2e2": 1,
+      "#fdb022": 1,
+      "#fedf89": 1,
       "#ff4d4f": 3,
-      "#ff5252": 16,
+      "#ff5252": 17,
       "#ff5a32": 2,
-      "#ff6b6b": 177,
+      "#ff6b6b": 175,
       "#ff7a7a": 3,
       "#ff8a8a": 5,
       "#ff8f8f": 1,
       "#ff9b9b": 1,
-      "#ffb3b0": 2,
       "#ffb4b4": 3,
-      "#ffb5b5": 11,
+      "#ffb5b5": 12,
       "#ffcccc": 1,
       "#ffd2d2": 1,
       "#ffd3d3": 1,
-      "#ffd7d7": 42,
-      "#ffdad6": 1,
-      "#ffdad8": 1,
+      "#ffd7d7": 43,
       "#ffe1a6": 1,
       "#ffe1e1": 1,
-      "#ffe2e2": 15,
+      "#ffe2e2": 14,
       "#ffe4bf": 1,
       "#ffe4e4": 2,
       "#ffe5c2": 1,
-      "#ffe9e7": 1,
-      "#ffedeb": 1,
       "#fff": 8,
       "#fff0ef": 27,
       "#fff0f0": 1,
-      "#fff1f0": 5,
+      "#fff1f0": 3,
       "#fff1f1": 2,
       "#fff260": 1,
-      "#fff3cd": 1,
       "#fff45c": 1,
       "#fff4ef": 1,
       "#fff4f0": 1,
       "#fff5da": 1,
-      "#fff5f5": 43,
+      "#fff5f5": 44,
       "#fff6f6": 1,
       "#fff7e6": 1,
       "#fff7ed": 1,
@@ -1508,23 +1459,165 @@
       "#fff8e8": 2,
       "#fff8ec": 2,
       "#fff8ed": 2,
-      "#fff8f7": 8,
+      "#fff8f7": 6,
       "#fff8f8": 1,
-      "#fffaeb": 2,
+      "#fffaeb": 3,
       "#fffaf0": 1,
       "#fffaf9": 1,
       "#fffafa": 10,
-      "#ffffff": 11
+      "#ffffff": 7
     }
   },
   "route_inventory": {
     "known_gap_count": 5,
     "next_static_inventory": "docs/architecture/next-static-compatibility.json",
-    "next_static_inventory_route_count": 39,
-    "next_static_inventory_sha256": "557c677bbedcf284535ce513140ab363ab65048350e82b74e0dd23bc0b690722",
+    "next_static_inventory_route_count": 40,
+    "next_static_inventory_sha256": "70654ec2869a6c5db03e21898624db5eabb991d88044f6a121507516f03dfb86",
     "reviewed_surface_count": 17
   },
   "schema_version": 1,
+  "semantic_foundation": {
+    "base_commit": "7c96d4bd6f3789036593c1e89ca8974fae620252",
+    "classification": "LOCAL",
+    "compatibility_bridges": [
+      {
+        "adapter": "frontend/src/shared/ui/profile-avatar.tsx",
+        "composes": "Avatar",
+        "existing_public_export": "ProfileAvatar",
+        "impact": "transitional_existing_product_consumers"
+      },
+      {
+        "adapter": "frontend/src/shared/ui/status-badge.tsx",
+        "composes": "StatusChip",
+        "existing_public_export": "StatusBadge",
+        "impact": "transitional_existing_product_consumers"
+      }
+    ],
+    "consumer_adoption": "limited_direct_world_package_adoption_plus_compatibility_bridges",
+    "files": [
+      {
+        "path": "frontend/src/app/globals.css",
+        "present": true,
+        "sha256": "7f1d3bb3751957194511b9a3bdcd4f79a8eb978e726a62c19d156062eb338d7d"
+      },
+      {
+        "path": "frontend/src/app/ui-foundation/page.tsx",
+        "present": true,
+        "sha256": "c8055c910553d7fb51a8a07fa3aa86e5f2c61c06740d589fbbf22dc460ff887f"
+      },
+      {
+        "path": "frontend/src/composition/static-product-router.tsx",
+        "present": true,
+        "sha256": "d7478f9753166d8c154b74ba84b9a390aba449772f822c2c7f043abf85f8ffb0"
+      },
+      {
+        "path": "frontend/src/features/ui-foundation/public.ts",
+        "present": true,
+        "sha256": "8468b51c2279f1038d06ca98874aa8afa605655c91236b035662588443a2f601"
+      },
+      {
+        "path": "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
+        "present": true,
+        "sha256": "2e811cb214b85a366f62b26c4ae449883f6dcd104f4db0211a3bd07afc2faf1f"
+      },
+      {
+        "path": "frontend/src/features/world-packages/world-package-export-panel.tsx",
+        "present": true,
+        "sha256": "fe69c59d7dc9b2857c3f426e3859a43c411fa7ec05f0e56044839b58007a7e80"
+      },
+      {
+        "path": "frontend/src/features/world-packages/world-package-import-client.tsx",
+        "present": true,
+        "sha256": "57fc99019e89f9fa9e54d432afa0a2efb998ae5c87bb646ab889534be1f14795"
+      },
+      {
+        "path": "frontend/src/shared/ui/avatar.tsx",
+        "present": true,
+        "sha256": "4cdfbf8dd2a2681f360f44caf161a9ecec36fa7b4f540161a2c1a4775717faf4"
+      },
+      {
+        "path": "frontend/src/shared/ui/button.tsx",
+        "present": true,
+        "sha256": "5173240e5e97451cf1bd716c466cdc7fc7d8a411d11a418b08284b8e0868f3f4"
+      },
+      {
+        "path": "frontend/src/shared/ui/class-names.ts",
+        "present": true,
+        "sha256": "1ace811987495757099ccbcb0cff314b271b54ea2fadce50db999a165d47f1c9"
+      },
+      {
+        "path": "frontend/src/shared/ui/dialog.tsx",
+        "present": true,
+        "sha256": "4b5f54816272435ae02c140d8b179e770bca3552027d0599ecafaf1a08a734f7"
+      },
+      {
+        "path": "frontend/src/shared/ui/feedback.tsx",
+        "present": true,
+        "sha256": "0e5c35afef6c4c58d61b1042798030fbecf8ea7e0d8b977be90c0b754bf43bba"
+      },
+      {
+        "path": "frontend/src/shared/ui/form-controls.tsx",
+        "present": true,
+        "sha256": "13299e1ed7762100b3cfb54927a429220453b0b0533bdf74cf56623b734c52ff"
+      },
+      {
+        "path": "frontend/src/shared/ui/navigation.tsx",
+        "present": true,
+        "sha256": "89703adaa9581997d41a8a4b7cd0dcddd0e3d8d07905436fceec5fc2da0f48a2"
+      },
+      {
+        "path": "frontend/src/shared/ui/profile-avatar.tsx",
+        "present": true,
+        "sha256": "b672a8290f161befc065fcb4ea5bd47ce2b6d13c0a6ac74348c3acec9e59f655"
+      },
+      {
+        "path": "frontend/src/shared/ui/public.ts",
+        "present": true,
+        "sha256": "fc162b6a3427eb2d1eb5d94d7ccabde45487386ffbd0ef0dbdb147b9f141e368"
+      },
+      {
+        "path": "frontend/src/shared/ui/semantic-foundation.module.css",
+        "present": true,
+        "sha256": "13e012e900a1c254a2499e255d6a206b832a747b2939ffef78f362ae76dfac75"
+      },
+      {
+        "path": "frontend/src/shared/ui/semantic-tokens.css",
+        "present": true,
+        "sha256": "ded3166deab9270de9195760fa747b833b43c58840ce47f16bfdc3734d03f733"
+      },
+      {
+        "path": "frontend/src/shared/ui/status-badge.tsx",
+        "present": true,
+        "sha256": "7274d1c9af0dfaa54d3a5fca94423a519a354680f5724974efec3134be6aa07e"
+      },
+      {
+        "path": "frontend/src/shared/ui/status.tsx",
+        "present": true,
+        "sha256": "8b5a39b8bf237fa3b5bdaf39f75c44dc61de85bb93c66066373def69e6111b4c"
+      },
+      {
+        "path": "frontend/src/shared/ui/surfaces.tsx",
+        "present": true,
+        "sha256": "84ecc081bdcbb71af2353034e35c4df09eca279055d45e6170aea17b95aba291"
+      }
+    ],
+    "fixture_exposure": "unlinked_noindex_test_harness",
+    "fixture_route": "/ui-foundation",
+    "global_legacy_alias_remap": {
+      "import_marker": "@import \"../shared/ui/semantic-tokens.css\";",
+      "import_path": "frontend/src/app/globals.css",
+      "required_smoke": [
+        "pnpm --dir browser-tests exec playwright test --config=playwright.static.config.ts",
+        "pnpm --dir browser-tests test",
+        "pnpm --dir browser-tests test:visual",
+        "pnpm --dir frontend build",
+        "pnpm --dir frontend build:static"
+      ],
+      "requires_existing_product_shell_smoke": true,
+      "scope": "global_alias_remap_only_not_full_consumer_conformance"
+    },
+    "schema": "ui-b-semantic-primitives-v1"
+  },
   "source_dependency_audit": {
     "bundled_font_files": [],
     "licensed_frontend_assets": [
@@ -1573,12 +1666,74 @@
     ],
     "remote_font_markers": [],
     "sibling_runtime_dependency": false,
-    "ui_a_external_asset_or_font_additions": 0
+    "ui_a_external_asset_or_font_additions": 0,
+    "ui_b_external_asset_or_font_additions": 0
   },
   "visual_inventory": {
-    "committed_snapshot_images": [],
-    "screenshot_call_count": 0,
-    "status": "UI-A records targets only; reviewed screenshots begin in UI-B and visual corpus closes in UI-F.",
+    "committed_snapshot_images": [
+      "browser-tests/snapshots/ui-b/semantic-foundation-phone.png"
+    ],
+    "manifest": {
+      "canonical_environment": {
+        "browser": "chromium",
+        "browser_revision": "1234",
+        "browser_version": "151.0.7922.34",
+        "container_image": "mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e",
+        "operating_system": "ubuntu-24.04",
+        "playwright_version": "1.62.1"
+      },
+      "config": {
+        "path": "browser-tests/playwright.visual.config.ts",
+        "present": true,
+        "sha256": "8feff29c9b818499ff67d6743341ffeb2f09a9627cfc39a2c4fc5ad8ea82e2b8"
+      },
+      "diff_policy": {
+        "max_diff_pixels": 25,
+        "threshold": 0.1
+      },
+      "expected_screenshot_call_count": 1,
+      "first_party_fixture_asset": {
+        "served_path": "/icon.svg",
+        "source": {
+          "path": "frontend/src/app/icon.svg",
+          "present": true,
+          "sha256": "ec8143b994f25f023422c55e3898ef46ed686db919625ba7e4ba28a133a57593"
+        }
+      },
+      "fixture": {
+        "path": "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
+        "present": true,
+        "sha256": "2e811cb214b85a366f62b26c4ae449883f6dcd104f4db0211a3bd07afc2faf1f"
+      },
+      "production_preview_script": {
+        "path": "frontend/scripts/serve-production.mjs",
+        "present": true,
+        "sha256": "74bb47df74feb8293a36e026f4de47ade6b21ee7d87c48d9f573a48de5bc21b2"
+      },
+      "projects": [
+        "next-production",
+        "static-export"
+      ],
+      "reviewed_viewport": {
+        "height": 880,
+        "width": 436
+      },
+      "schema": "ui-b-semantic-primitives-v1",
+      "snapshots": [
+        {
+          "path": "browser-tests/snapshots/ui-b/semantic-foundation-phone.png",
+          "present": true,
+          "sha256": "744d29d9034fda93639e6c47766ba211c01613cf781cc3ddb0ea439a4dd103aa"
+        }
+      ],
+      "spec": {
+        "path": "browser-tests/semantic-foundation.visual.spec.ts",
+        "present": true,
+        "sha256": "2ef9a60351670baf5c999e1dd9382e3cdddff672a5eaa90864bc939e7823426c"
+      }
+    },
+    "screenshot_call_count": 1,
+    "status": "UI-B local technical closeout includes one reviewed semantic-foundation baseline; the full product visual corpus remains owned by UI-F.",
     "target_viewports": [
       "360x800",
       "390x844",
