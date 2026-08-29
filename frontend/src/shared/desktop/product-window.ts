@@ -27,6 +27,11 @@ export type AngmooDesktopRuntimeStatus = {
   diagnosticCode?: string;
 };
 
+export type DesktopProductNavigationResult =
+  | { handled: false; mode: "browser" }
+  | { handled: true; mode: "same-window" }
+  | { handled: true; mode: "cross-window" };
+
 type TauriInvoke = <T>(
   command: string,
   args?: Record<string, unknown>,
@@ -148,11 +153,35 @@ export function navigateCurrentDesktopRoute(route: string, replace = false) {
   const state = getDesktopWindowState();
   if (!state) return false;
   const normalized = normalizeInternalRoute(route);
+  if (desktopWindowKindForRoute(normalized) !== state.kind) return false;
   window.__ANGMOO_DESKTOP_WINDOW__ = { ...state, route: normalized };
   if (replace) window.history.replaceState(null, "", normalized);
   else window.history.pushState(null, "", normalized);
   window.dispatchEvent(new Event(DESKTOP_ROUTE_EVENT));
   return true;
+}
+
+export async function navigateDesktopProductRoute(
+  route: string,
+  replace = false,
+): Promise<DesktopProductNavigationResult> {
+  if (!isTauriDesktopRuntime()) {
+    return { handled: false, mode: "browser" };
+  }
+  const state = getDesktopWindowState();
+  if (!state) throw new Error("desktop_window_state_unavailable");
+  const normalized = normalizeInternalRoute(route);
+  const targetKind = desktopWindowKindForRoute(normalized);
+  if (targetKind === state.kind) {
+    if (!navigateCurrentDesktopRoute(normalized, replace)) {
+      throw new Error("desktop_same_window_navigation_failed");
+    }
+    return { handled: true, mode: "same-window" };
+  }
+  if (!(await openDesktopProductWindow(targetKind, normalized))) {
+    throw new Error("desktop_cross_window_navigation_failed");
+  }
+  return { handled: true, mode: "cross-window" };
 }
 
 export async function openDesktopProductWindow(

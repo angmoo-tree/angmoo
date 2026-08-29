@@ -17,12 +17,14 @@ class StudioWorldCharacter:
     world_character_id: str
     character_id: str
     display_name: str
+    confirmation_name: str
     avatar_url: str | None
     intro: str
     role_key: str | None
     control_mode: Literal["autonomous", "owner_controlled"]
     status: str
     autonomous_enabled: bool
+    selected_active_world: bool
     version: int
     activity_setup_state: ActivitySetupState
 

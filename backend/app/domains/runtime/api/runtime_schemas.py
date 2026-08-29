@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from datetime import datetime
-from typing import Literal
+from datetime import UTC, datetime
+from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.domains.runtime.domain.diagnostic_codes import RuntimeDiagnosticCode
 from app.domains.runtime.domain.installation_state import (
@@ -17,6 +17,23 @@ from app.domains.runtime.domain.installation_state import (
 
 class RuntimeStatusSchema(BaseModel):
     model_config = ConfigDict(extra="forbid")
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_utc_instants(cls, value: Any) -> Any:
+        if not isinstance(value, dict):
+            return value
+        return {
+            key: (
+                item.replace(tzinfo=UTC)
+                if isinstance(item, datetime)
+                and (item.tzinfo is None or item.utcoffset() is None)
+                else item.astimezone(UTC)
+                if isinstance(item, datetime)
+                else item
+            )
+            for key, item in value.items()
+        }
 
 
 class RuntimeDependencyRead(RuntimeStatusSchema):

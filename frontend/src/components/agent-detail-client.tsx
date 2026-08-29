@@ -117,6 +117,7 @@ import {
   type GeneratedMediaCandidate,
 } from "@/lib/generated-media";
 import {
+  apiInstantTimestamp,
   formatDate,
   getCharacterProfile,
   getCharacterProfileFeed,
@@ -542,10 +543,10 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
     const availableAt = agent?.activity_summary.manual_run_available_at;
     const nextActivityAt = agent?.activity_summary.next_activity_at;
     const hasFutureManualRunCooldown = Boolean(
-      availableAt && Date.parse(availableAt) > nowMs,
+      availableAt && apiInstantTimestamp(availableAt) > nowMs,
     );
     const hasFutureNextActivity = Boolean(
-      nextActivityAt && Date.parse(nextActivityAt) > nowMs,
+      nextActivityAt && apiInstantTimestamp(nextActivityAt) > nowMs,
     );
     if (!hasFutureManualRunCooldown && !hasFutureNextActivity) return;
     const intervalId = window.setInterval(() => setNowMs(Date.now()), 15_000);
@@ -1118,12 +1119,14 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
   const isLocalAgent = agent?.character.execution_mode === "local";
   const manualRunAvailableAt = agent?.activity_summary.manual_run_available_at ?? null;
   const manualRunAvailableAtMs = manualRunAvailableAt
-    ? Date.parse(manualRunAvailableAt)
+    ? apiInstantTimestamp(manualRunAvailableAt)
     : Number.NaN;
   const runNowCooldownActive =
     Number.isFinite(manualRunAvailableAtMs) && manualRunAvailableAtMs > nowMs;
   const nextActivityAt = agent?.activity_summary.next_activity_at ?? null;
-  const nextActivityAtMs = nextActivityAt ? Date.parse(nextActivityAt) : Number.NaN;
+  const nextActivityAtMs = nextActivityAt
+    ? apiInstantTimestamp(nextActivityAt)
+    : Number.NaN;
   const runNowBlockedBySoonScheduled =
     Boolean(agent?.settings.auto_enabled) &&
     Number.isFinite(nextActivityAtMs) &&
@@ -1139,7 +1142,10 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
     : runNowBlockedByMaintenance
       ? "점검 중"
     : runNowCooldownActive && manualRunAvailableAt
-      ? `${formatClockTime(manualRunAvailableAt)}에 사용 가능`
+      ? `${formatClockTime(
+          manualRunAvailableAt,
+          agent?.activity_summary.timezone,
+        )}에 사용 가능`
     : runNowBlockedBySoonScheduled
       ? "곧 자율활동 예정"
       : "지금 한 번 활동";
@@ -4005,18 +4011,24 @@ function currentStateText(agent: AgentDetailRead) {
 
 function nextActivityText(agent: AgentDetailRead) {
   if (agent.settings.auto_enabled && !agent.activity_summary.within_active_hours) {
-    return "쉬는 중";
+    return agent.activity_summary.next_activity_at
+      ? `쉬는 중 · ${formatDate(
+          agent.activity_summary.next_activity_at,
+          agent.activity_summary.timezone,
+        )}`
+      : "쉬는 중";
   }
   return agent.activity_summary.next_activity_at
-    ? formatDate(agent.activity_summary.next_activity_at)
+    ? formatDate(
+        agent.activity_summary.next_activity_at,
+        agent.activity_summary.timezone,
+      )
     : "-";
 }
 
-function formatClockTime(value: string) {
-  const date = new Date(value);
-  const hour = String(date.getHours()).padStart(2, "0");
-  const minute = String(date.getMinutes()).padStart(2, "0");
-  return `${hour}:${minute}`;
+function formatClockTime(value: string, timeZone = "Asia/Seoul") {
+  const formatted = formatDate(value, timeZone);
+  return formatted === "-" ? "-" : formatted.slice(-5);
 }
 
 function mediaGenerationLabel(
@@ -4047,15 +4059,8 @@ function usageLimitMessage(
 }
 
 function formatNextAvailableAt(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat("ko-KR", {
-    timeZone: "Asia/Seoul",
-    month: "numeric",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
+  const formatted = formatDate(value);
+  return formatted === "-" ? value : formatted;
 }
 
 function formatActiveHours(agent: AgentDetailRead) {

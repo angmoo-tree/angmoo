@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import AbstractAsyncContextManager, asynccontextmanager
 from dataclasses import dataclass
+import logging
 from typing import Any
 
 import uvicorn
@@ -16,6 +17,9 @@ from app.core.request_limits import RequestBodyLimitMiddleware
 from app.core.public_media import mount_public_media
 from app.core.startup_security import validate_startup_security
 from app.cruds.community import seed_demo_data
+from app.domains.world_characters.public import (
+    reconcile_local_autonomous_runtime_modes,
+)
 from app.services.hosted_configuration import (
     HostedConfigurationRegistrationError,
     HostedPromptProvider,
@@ -32,6 +36,9 @@ from app.runtime.configuration import (
     RuntimeConfig,
     compose_runtime,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 class PublicRuntimeConfigurationError(RuntimeError):
@@ -240,6 +247,19 @@ def create_app(
 
         def recover_embedded_runtime() -> None:
             world_package_import_committer.recover_media()
+            repair_result = reconcile_local_autonomous_runtime_modes(
+                composition.session_factory,
+                excluded_world_ids=(
+                    world_package_import_committer.list_imported_world_ids()
+                ),
+            )
+            logger.info(
+                "autonomous_runtime_mode_reconciliation_completed "
+                "scanned_count=%s repaired_count=%s skipped_count=%s",
+                repair_result.scanned_count,
+                repair_result.repaired_count,
+                sum(count for _reason, count in repair_result.skipped_reasons),
+            )
             composition.social_search_projection.start()
 
         if runtime_lifespan is None:

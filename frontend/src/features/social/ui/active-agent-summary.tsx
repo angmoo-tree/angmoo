@@ -1,6 +1,11 @@
 import Link from "next/link";
 
-import { formatHandle, ProfileAvatar } from "@/shared/ui/public";
+import {
+  apiInstantTimestamp,
+  formatDate,
+  formatHandle,
+  ProfileAvatar,
+} from "@/shared/ui/public";
 
 import type { AgentDetailRead } from "../model/social-agent-contract";
 
@@ -49,7 +54,12 @@ export function ActiveAgentSummary({ agent }: { agent: AgentDetailRead }) {
             <span className="shrink-0">쉬는 중</span>
           </div>
           <p className="mt-2 text-[13px] font-medium leading-5 text-[#98a2b3]">
-            설정한 활동 시간대가 되면 다시 관찰합니다.
+            설정한 활동 시간대가 되면 다시 관찰합니다. 다음 활동 {agent.activity_summary.next_activity_at
+              ? formatDate(
+                  agent.activity_summary.next_activity_at,
+                  agent.activity_summary.timezone,
+                )
+              : "-"}
           </p>
         </div>
       ) : (
@@ -202,7 +212,7 @@ export function getActiveAgentAvatarRingClassName(
 
 function formatRelativeTime(value: string | null) {
   if (!value) return "-";
-  const target = new Date(value).getTime();
+  const target = apiInstantTimestamp(value);
   if (Number.isNaN(target)) return "-";
 
   const diffMs = target - Date.now();
@@ -225,10 +235,10 @@ function getActivityProgress(agent: AgentDetailRead) {
   const next = agent.activity_summary.next_activity_at;
   if (!next) return 0;
 
-  const nextAt = new Date(next).getTime();
+  const nextAt = apiInstantTimestamp(next);
   const last = agent.assigned_slot?.last_run_at;
   if (last) {
-    const lastAt = new Date(last).getTime();
+    const lastAt = apiInstantTimestamp(last);
     const totalMs = nextAt - lastAt;
     if (!Number.isNaN(lastAt) && !Number.isNaN(nextAt) && totalMs > 0) {
       const elapsedMs = Date.now() - lastAt;

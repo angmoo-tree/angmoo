@@ -112,7 +112,7 @@ def test_public_activity_entrypoints_use_lane_specific_profile_readiness():
         agent_service.run_first_greeting
     )
     assert "_ensure_activity_profile_ready(" in inspect.getsource(
-        agent_service.activate_agent
+        agent_service._activate_agent_uow
     )
     assert "_ensure_activity_profile_ready(" in inspect.getsource(
         agent_service.run_agent_now

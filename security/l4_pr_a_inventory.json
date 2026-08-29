@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 1769,
-      "internal_edge_count": 1217,
+      "external_import_count": 1798,
+      "internal_edge_count": 1250,
       "legacy_import_exception_count": 0,
-      "module_count": 523,
+      "module_count": 530,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -792,7 +792,6 @@
             "createReply",
             "deletePost",
             "followProfile",
-            "formatDate",
             "getCharacterActivity",
             "getCharacterProfile",
             "getCharacterProfileConnections",
@@ -819,10 +818,11 @@
             "unfollowProfile"
           ],
           "imports": [
-            "@/shared/runtime/public"
+            "@/shared/runtime/public",
+            "@/shared/ui/public"
           ],
           "path": "frontend/src/lib/community.ts",
-          "sha256": "419eca7e905b4ca43d113c4e382fd6b0b6863b0821feb6cd710fadd2718b0cd1"
+          "sha256": "ae697e51545686aef9999886a86d4897c32d13d1badb385ac23428eb770de8cb"
         }
       ],
       "planned_feature_allowlist": [
@@ -895,7 +895,7 @@
     "oracle_artifacts": [
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "204c9752be864ccb5d21e89efe2977fa1e7cca93a544544d4af77c591edca1e4"
+        "sha256": "da04aebe187666409beff16e2d02c2e40bb1ae270f9759bf2a3dd2abbf614813"
       },
       {
         "path": "docs/architecture/l3-er-postgres-neo4j-parity-oracle.json",
@@ -929,7 +929,7 @@
       },
       {
         "path": "backend/tests/test_l3_5_world_package_import_commit.py",
-        "sha256": "e55b642afd42bcf86aea4b0137554d2fe50aaa4a41230be062f69f90a5548a98"
+        "sha256": "3c5bb67f92a0789ba3d6d610e96ac31da566c39483cb8f44b7fe04774a139e72"
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",

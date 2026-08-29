@@ -18,6 +18,7 @@ from app.domains.identity.public import LOCAL_INSTALLATION_KEY
 from app.domains.runtime.domain.scheduler_lease import (
     SchedulerLeaseHeldError,
     SchedulerLeaseLostError,
+    SchedulerTickResult,
 )
 from app.runtime.graph_projection import SqliteProjectionOutbox
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
@@ -256,6 +257,54 @@ def test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed(
             fencing_epoch=winner_epoch,
             ttl_seconds=30,
         )
+    database.close()
+
+
+def test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick(
+    tmp_path: Path,
+) -> None:
+    database = _database(tmp_path)
+    _seed_installation(database)
+    clock = MutableClock(NOW)
+    repository = SqliteSchedulerLeaseRepository(database.engine, clock=clock)
+    lease = repository.acquire(owner_id="scheduler-error", ttl_seconds=30)
+
+    failed = repository.finish_tick(
+        owner_id="scheduler-error",
+        fencing_epoch=lease.fencing_epoch,
+        result=SchedulerTickResult.FAILED,
+        error_code="TypeError",
+    )
+    clock.advance(seconds=5)
+    heartbeat = repository.heartbeat(
+        owner_id="scheduler-error",
+        fencing_epoch=lease.fencing_epoch,
+        ttl_seconds=30,
+    )
+
+    assert failed.last_error_code == "TypeError"
+    assert heartbeat.last_error_code == "TypeError"
+
+    permit = repository.begin_tick(
+        owner_id="scheduler-error",
+        fencing_epoch=lease.fencing_epoch,
+        ttl_seconds=30,
+        interval_seconds=60,
+    )
+    assert permit.should_run is True
+    after_begin = repository.heartbeat(
+        owner_id="scheduler-error",
+        fencing_epoch=lease.fencing_epoch,
+        ttl_seconds=30,
+    )
+    assert after_begin.last_error_code is None
+
+    completed = repository.finish_tick(
+        owner_id="scheduler-error",
+        fencing_epoch=lease.fencing_epoch,
+        result=SchedulerTickResult.SUCCESS,
+    )
+    assert completed.last_error_code is None
     database.close()
 
 

@@ -959,8 +959,11 @@ export function WorldCharacterAutonomySetupClient({
                     </p>
                   </div>
                   {feedStatus ? (
-                    <span className="rounded-full bg-surface-container px-3 py-2 text-xs font-bold">
-                      {feedStatus.feed_runtime_mode}
+                    <span
+                      className="rounded-full bg-surface-container px-3 py-2 text-xs font-bold"
+                      data-feed-runtime-state={feedStatus.runtime_state}
+                    >
+                      {feedStatus.feed_runtime_mode} · {feedStatus.runtime_state}
                     </span>
                   ) : null}
                 </div>
@@ -1007,9 +1010,24 @@ export function WorldCharacterAutonomySetupClient({
                     </div>
 
                     {feedStatus.feed_runtime_mode === "legacy_latest_v1" ? (
+                      <p
+                        className="mt-5 rounded-2xl bg-error-container p-4 text-sm text-on-error-container"
+                        data-feed-lane-state="routine-only"
+                      >
+                        P5 결합 피드가 비활성화되어 현재는 Routine 일과 게시글만 실행됩니다.
+                        Inbox 직접 반응과 관심 키워드 검색은 실행되지 않습니다.
+                      </p>
+                    ) : feedStatus.runtime_state === "imported_locked" ? (
                       <p className="mt-5 rounded-2xl bg-surface-container-low p-4 text-sm text-on-surface-variant">
-                        현재는 기존 최신 피드 호환 모드입니다. P5 keyword mode 전환은 local fixture와
-                        후속 배포 Gate에서만 명시적으로 수행합니다.
+                        가져온 World의 명시적 자율활동 승인을 기다리고 있어 세 lane을 실행하지 않습니다.
+                      </p>
+                    ) : feedStatus.runtime_state === "autonomy_disabled" ? (
+                      <p className="mt-5 rounded-2xl bg-surface-container-low p-4 text-sm text-on-surface-variant">
+                        Inbox·Routine·Keyword Feed 준비는 완료됐지만 자율활동이 꺼져 있어 실행하지 않습니다.
+                      </p>
+                    ) : feedStatus.runtime_state === "feed_search_degraded" ? (
+                      <p className="mt-5 rounded-2xl bg-error-container p-4 text-sm text-on-error-container">
+                        Inbox와 Routine은 계속 실행되지만 관심 키워드 검색은 현재 복구가 필요합니다.
                       </p>
                     ) : (
                       <div className="mt-5 rounded-2xl border border-secondary/40 bg-secondary-container p-5 text-on-secondary-container">

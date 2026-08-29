@@ -79,6 +79,12 @@ class SqlAlchemyWorldPackageImportCommitter:
                 )
             return self._result_from_record(db, record, replayed=True)
 
+    def list_imported_world_ids(self) -> tuple[str, ...]:
+        """Return package lineage markers for composition-owned recovery."""
+
+        with self._session_factory() as db:
+            return SqlAlchemyWorldPackageRegistry(db).list_imported_world_ids()
+
     def execute(
         self, request: WorldPackageImportCommitRequest
     ) -> WorldPackageImportCommitResult:

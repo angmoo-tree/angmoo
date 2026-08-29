@@ -477,7 +477,10 @@ export function WorldCreatorClient({ worldId }: { worldId?: string }) {
 
             {context ? (
               <>
-                <StudioWorldCharacterList worldId={context.world.id} />
+                <StudioWorldCharacterList
+                  worldId={context.world.id}
+                  roles={definition.roles}
+                />
                 <WorldPackageExportPanel worldId={context.world.id} />
                 <div id="owner-controlled-identity" className="scroll-mt-6">
                   <OwnerControlledIdentityPanel

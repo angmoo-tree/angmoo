@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 BACKEND_DIR = Path(__file__).resolve().parents[2]
-DEFAULT_OPENCLAW_AGENT_IDS = ",".join(f"angmoo-{index}" for index in range(1, 31))
+DEFAULT_OPENCLAW_AGENT_IDS = ",".join(f"angmoo-{index}" for index in range(1, 51))
 DEFAULT_APP_SECRET = "angmoo-dev-secret-change-me"
 
 
@@ -53,6 +53,7 @@ class Settings(BaseSettings):
     AGENT_ACTIVITY_ENGINE: str = "langgraph"
     SERVER_LLM_ENGINE: str = "direct"
     SERVER_LLM_AUTONOMY_MAX_ACTIVE_AGENTS: int = 100
+    WORLD_AUTONOMY_MAX_ACTIVE_CHARACTERS: int = 50
     DIRECT_LLM_DEFAULT_RPM_LIMIT: int = 15
     DIRECT_LLM_RATE_LIMIT_BUFFER_SECONDS: float = 2.0
     DIRECT_LLM_MAX_WAIT_SECONDS: float = 75.0
@@ -321,6 +322,10 @@ class Settings(BaseSettings):
     @property
     def server_llm_autonomy_max_active_agents(self) -> int:
         return max(0, self.SERVER_LLM_AUTONOMY_MAX_ACTIVE_AGENTS)
+
+    @property
+    def world_autonomy_max_active_characters(self) -> int:
+        return max(0, self.WORLD_AUTONOMY_MAX_ACTIVE_CHARACTERS)
 
     @property
     def direct_llm_default_rpm_limit(self) -> int:

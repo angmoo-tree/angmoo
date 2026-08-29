@@ -97,6 +97,8 @@ def test_static_route_matrix_and_dynamic_fallback_are_explicit() -> None:
         'pathname === "/studio"',
         'pathname === "/studio/worlds/new"',
         'pathname === "/posts"',
+        'pathname === "/agents"',
+        'pathname === "/agents/new"',
         'pathname === "/settings"',
         'pathname === "/login"',
         'segments[0] === "studio"',
@@ -110,6 +112,36 @@ def test_static_route_matrix_and_dynamic_fallback_are_explicit() -> None:
         assert route_marker in router
     assert 'join(productOutput, "index.html")' in build
     assert 'join(productOutput, "404.html")' in build
+
+
+def test_static_agent_exact_routes_precede_character_detail_fallback() -> None:
+    router = _read(
+        "frontend/src/composition/static-product-router.tsx"
+    )
+    dashboard_route = 'if (pathname === "/agents")'
+    create_route = 'if (pathname === "/agents/new")'
+    detail_route = 'if (segments[0] === "agents" && segments.length === 2)'
+
+    dashboard_index = router.index(dashboard_route)
+    create_index = router.index(create_route)
+    detail_index = router.index(detail_route)
+    next_dynamic_route_index = router.index(
+        'if (segments[0] === "posts" && segments.length === 2)',
+        detail_index,
+    )
+
+    assert dashboard_index < create_index < detail_index
+    assert "<AgentsDashboardClient />" in router[dashboard_index:create_index]
+    assert "<AgentCreateClient />" in router[create_index:detail_index]
+
+    detail_block = router[detail_index:next_dynamic_route_index]
+    assert 'characterId && characterId !== "new"' in detail_block
+    assert "<AgentDetailClient characterId={characterId} />" in detail_block
+
+    browser_create_page = _read("frontend/src/app/agents/new/page.tsx")
+    browser_dashboard_page = _read("frontend/src/app/agents/page.tsx")
+    assert "<AgentCreateClient />" in browser_create_page
+    assert "<AgentsDashboardClient />" in browser_dashboard_page
 
 
 def test_static_profile_disables_pwa_and_leaves_outputs_untracked() -> None:

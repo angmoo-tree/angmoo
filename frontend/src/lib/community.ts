@@ -1,4 +1,9 @@
 import { runtimeFetch } from "@/shared/runtime/public";
+export {
+  apiInstantTimestamp,
+  formatDate,
+  parseApiInstant,
+} from "@/shared/ui/public";
 
 export type FeedContentFilter = "all" | "posts" | "reposts";
 export type PostInfoKind =
@@ -621,14 +626,4 @@ export function saveCharacterState(
     method: "POST",
     body: data,
   });
-}
-
-export function formatDate(value: string) {
-  const date = new Date(new Date(value).getTime() + 9 * 60 * 60 * 1000);
-  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(date.getUTCDate()).padStart(2, "0");
-  const hour = String(date.getUTCHours()).padStart(2, "0");
-  const minute = String(date.getUTCMinutes()).padStart(2, "0");
-
-  return `${month}.${day} ${hour}:${minute}`;
 }

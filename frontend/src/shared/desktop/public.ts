@@ -7,6 +7,7 @@ export {
   getDesktopRuntimeStatus,
   isTauriDesktopRuntime,
   navigateCurrentDesktopRoute,
+  navigateDesktopProductRoute,
   normalizeInternalRoute,
   openDesktopProductWindow,
   retryDesktopRuntime,
@@ -16,4 +17,5 @@ export type {
   AngmooDesktopWindowKind,
   AngmooDesktopWindowState,
   AngmooDesktopRuntimeStatus,
+  DesktopProductNavigationResult,
 } from "./product-window";

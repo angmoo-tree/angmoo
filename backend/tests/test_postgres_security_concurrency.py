@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import NullPool
 
 from app import models, schemas
+from app.core.config import settings
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import community as community_crud
 from app.services import agents as agent_service
@@ -1446,7 +1447,7 @@ def test_lore_parser_global_capacity_is_atomic_across_postgres_sessions() -> Non
     )
 
 
-def test_agent_creation_quota_is_atomic_across_postgres_sessions() -> None:
+def test_agent_creation_allows_concurrent_local_characters_without_a_saved_count_cap() -> None:
     engine = _engine()
     suffix = uuid4().hex
     user_id = f"user-agent-quota-{suffix}"
@@ -1468,25 +1469,20 @@ def test_agent_creation_quota_is_atomic_across_postgres_sessions() -> None:
             user = db.get(models.User, user_id)
             assert user is not None
             barrier.wait()
-            try:
-                agent_service.create_agent(
-                    db,
-                    user,
-                    schemas.AgentCreate(
-                        execution_mode="local",
-                        name=f"local-{index}",
-                        handle=f"local_{suffix[:12]}_{index}",
-                    ),
-                )
-            except agent_service.AgentLimitError:
-                db.rollback()
-                return "limited"
+            agent_service.create_agent(
+                db,
+                user,
+                schemas.AgentCreate(
+                    execution_mode="local",
+                    name=f"local-{index}",
+                    handle=f"local_{suffix[:12]}_{index}",
+                ),
+            )
             return "created"
 
     with ThreadPoolExecutor(max_workers=12) as executor:
         results = list(executor.map(attempt, range(12)))
-    assert results.count("created") == agent_service.MAX_LOCAL_AGENTS_PER_USER
-    assert results.count("limited") == 12 - agent_service.MAX_LOCAL_AGENTS_PER_USER
+    assert results == ["created"] * 12
 
 
 def test_first_greeting_claim_is_single_flight_across_postgres_sessions() -> None:
@@ -1721,4 +1717,250 @@ def test_message_thread_quota_is_atomic_across_postgres_sessions() -> None:
             )
             db.execute(delete(models.Character).where(models.Character.id.in_(character_ids)))
             db.execute(delete(models.User).where(models.User.id.in_([requester_id, owner_id])))
+            db.commit()
+
+
+def test_world_autonomy_capacity_is_atomic_across_postgres_sessions(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    engine = _engine()
+    suffix = uuid4().hex
+    user_id = f"user-autonomy-{suffix}"
+    world_id = f"world-autonomy-{suffix}"
+    membership_id = f"membership-autonomy-{suffix}"
+    character_ids = [
+        f"char-autonomy-{suffix}-a",
+        f"char-autonomy-{suffix}-b",
+    ]
+    world_character_ids = [
+        f"wc-autonomy-{suffix}-a",
+        f"wc-autonomy-{suffix}-b",
+    ]
+    credential_ids = [
+        f"cred-autonomy-{suffix}-a",
+        f"cred-autonomy-{suffix}-b",
+    ]
+    agent_ids = [f"angmoo-{suffix[:12]}-a", f"angmoo-{suffix[:12]}-b"]
+    barrier = Barrier(2)
+    monkeypatch.setattr(settings, "WORLD_AUTONOMY_MAX_ACTIVE_CHARACTERS", 1)
+    monkeypatch.setattr(settings, "SERVER_LLM_AUTONOMY_MAX_ACTIVE_AGENTS", 10000)
+    monkeypatch.setattr(settings, "OPENCLAW_AGENT_IDS", ",".join(agent_ids))
+    monkeypatch.setattr(settings, "AGENT_ACTIVITY_ENGINE", "langgraph")
+
+    def _readiness(db, *, character, setting):
+        del setting
+        selected = db.get(models.CharacterActiveWorld, character.id)
+        assert selected is not None
+        world_character = db.get(models.WorldCharacter, selected.world_character_id)
+        assert world_character is not None
+        return schemas.AgentActivityProfileReadinessRead(
+            ready=True,
+            source="world_community_profile",
+            world_id=world_character.world_id,
+            world_character_id=world_character.id,
+        )
+
+    monkeypatch.setattr(agent_service, "_activity_profile_readiness", _readiness)
+
+    with Session(engine) as db:
+        db.add(
+            models.User(
+                id=user_id,
+                email=f"{suffix}@example.invalid",
+                display_name=user_id,
+                display_name_normalized=user_id,
+                profile_setup_completed=True,
+            )
+        )
+        db.flush()
+        db.add(
+            models.World(
+                id=world_id,
+                slug=world_id,
+                owner_user_id=user_id,
+                name=world_id,
+                tagline="",
+                setting_description="postgres autonomy fixture",
+                daily_life_description="postgres autonomy fixture",
+                genre_tags=[],
+                tone_tags=[],
+                timezone="Asia/Seoul",
+                language="ko",
+                visibility="private",
+                join_policy="private",
+                status="published",
+                definition_version=1,
+                row_version=1,
+                contract_version="test-v1",
+                contract_hash="0" * 64,
+                readiness_status="publish_ready",
+                additional_generation_guidance="",
+                create_idempotency_key=f"create-{suffix}",
+            )
+        )
+        db.flush()
+        db.add(
+            models.WorldMembership(
+                id=membership_id,
+                world_id=world_id,
+                user_id=user_id,
+                role="owner",
+                status="active",
+                joined_at=datetime.now(UTC),
+            )
+        )
+        db.flush()
+        for index, character_id in enumerate(character_ids):
+            db.add(
+                models.Character(
+                    id=character_id,
+                    owner_id=user_id,
+                    name=character_id,
+                    handle=f"auto_{suffix[:24]}_{index}",
+                    persona_summary="postgres autonomy fixture",
+                    execution_mode="llm",
+                )
+            )
+            db.flush()
+            db.add(
+                models.AgentActivitySetting(
+                    character_id=character_id,
+                    auto_enabled=False,
+                    tendency_summary="ready",
+                    tendency_action_ranges={
+                        "observe": {
+                            "min": 1,
+                            "max": 1,
+                            "label": "observe",
+                            "note": "fixture",
+                        }
+                    },
+                    planner_tendency_profile={
+                        "feed_seed_interest_criteria": "fixture"
+                    },
+                    tendency_updated_at=datetime.now(UTC),
+                )
+            )
+            db.add(
+                models.LlmCredential(
+                    id=credential_ids[index],
+                    owner_id=user_id,
+                    character_id=character_id,
+                    provider="google",
+                    purpose="agent",
+                    model="gemini-3.1-flash-lite",
+                    auth_profile_id=f"google:{character_id}",
+                    label=character_id[-40:],
+                    encrypted_api_key="fixture",
+                    key_fingerprint=suffix[:16],
+                    enabled=True,
+                )
+            )
+            db.add(
+                models.WorldCharacter(
+                    id=world_character_ids[index],
+                    world_id=world_id,
+                    character_id=character_id,
+                    membership_id=membership_id,
+                    status="active",
+                    control_mode="autonomous",
+                    autonomous_enabled=False,
+                    activity_runtime_mode="routine_resident_v1",
+                )
+            )
+            db.flush()
+            db.add(
+                models.CharacterActiveWorld(
+                    character_id=character_id,
+                    world_character_id=world_character_ids[index],
+                    selected_at=datetime.now(UTC),
+                    idempotency_key=f"select-{suffix}-{index}",
+                )
+            )
+        db.commit()
+
+    def _activate(character_id: str) -> str:
+        with Session(engine) as db:
+            user = db.get(models.User, user_id)
+            assert user is not None
+            barrier.wait(timeout=10)
+            try:
+                agent_service.activate_agent(db, user, character_id)
+            except agent_service.AgentAutonomyCapacityError as exc:
+                return exc.reason_code
+            return "activated"
+
+    try:
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            results = list(executor.map(_activate, character_ids))
+        assert sorted(results) == ["activated", "world_autonomy_capacity_full"]
+        with Session(engine) as db:
+            assert (
+                db.scalar(
+                    select(func.count(models.AgentActivitySetting.character_id)).where(
+                        models.AgentActivitySetting.character_id.in_(character_ids),
+                        models.AgentActivitySetting.auto_enabled.is_(True),
+                    )
+                )
+                == 1
+            )
+            assert (
+                db.scalar(
+                    select(func.count(models.WorldCharacter.id)).where(
+                        models.WorldCharacter.id.in_(world_character_ids),
+                        models.WorldCharacter.autonomous_enabled.is_(True),
+                    )
+                )
+                == 1
+            )
+            assert (
+                db.scalar(
+                    select(func.count(models.AgentSlot.agent_id)).where(
+                        models.AgentSlot.agent_id.in_(agent_ids),
+                        models.AgentSlot.assigned_character_id.is_not(None),
+                    )
+                )
+                == 1
+            )
+    finally:
+        with Session(engine) as db:
+            db.execute(
+                delete(models.AgentActivityLog).where(
+                    models.AgentActivityLog.character_id.in_(character_ids)
+                )
+            )
+            db.execute(delete(models.AgentSlot).where(models.AgentSlot.agent_id.in_(agent_ids)))
+            db.execute(
+                delete(models.CharacterActiveWorld).where(
+                    models.CharacterActiveWorld.character_id.in_(character_ids)
+                )
+            )
+            db.execute(
+                delete(models.WorldCharacter).where(
+                    models.WorldCharacter.id.in_(world_character_ids)
+                )
+            )
+            db.execute(
+                delete(models.AgentActivitySetting).where(
+                    models.AgentActivitySetting.character_id.in_(character_ids)
+                )
+            )
+            db.execute(
+                delete(models.AgentImageGenerationSetting).where(
+                    models.AgentImageGenerationSetting.character_id.in_(character_ids)
+                )
+            )
+            db.execute(
+                delete(models.LlmCredential).where(
+                    models.LlmCredential.id.in_(credential_ids)
+                )
+            )
+            db.execute(delete(models.Character).where(models.Character.id.in_(character_ids)))
+            db.execute(
+                delete(models.WorldMembership).where(
+                    models.WorldMembership.id == membership_id
+                )
+            )
+            db.execute(delete(models.World).where(models.World.id == world_id))
+            db.execute(delete(models.User).where(models.User.id == user_id))
             db.commit()

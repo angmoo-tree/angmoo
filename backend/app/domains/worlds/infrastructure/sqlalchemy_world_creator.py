@@ -1,16 +1,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 import re
 import unicodedata
 from typing import Any, Callable, Protocol, TypeVar
+from zoneinfo import ZoneInfo
 
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.ids import uuid7_string
+from app.core import agent_activity_schedule
 from app.domains.worlds.api import schemas
 from app.domains.worlds.domain import reserved_roles
 from app.domains.worlds.infrastructure import definition_repository as world_definitions
@@ -33,6 +35,13 @@ class WorldSeedOutcome:
     world: models.World
     membership: models.WorldMembership
     replayed: bool
+
+
+@dataclass(frozen=True, slots=True)
+class _WorldAutonomyScheduleSetting:
+    activity_interval_minutes: int
+    active_hours_start: str
+    active_hours_end: str
 
 
 class WorldServiceError(Exception):
@@ -604,9 +613,96 @@ def update_world(
     world.readiness_status = (
         "publish_ready" if readiness.ready_for_publish else "not_ready"
     )
+    if "timezone" in data.model_fields_set:
+        reschedule_world_autonomy_slots(
+            db,
+            world_id=world.id,
+            timezone_name=world.timezone,
+        )
     db.commit()
     db.refresh(world)
     return _creator_context(db, world=world, membership=membership)
+
+
+def reschedule_world_autonomy_slots(
+    db: Session,
+    *,
+    world_id: str,
+    timezone_name: str,
+    now: datetime | None = None,
+) -> int:
+    """Recompute enabled idle slots after the owning World's timezone changes."""
+
+    try:
+        activity_timezone = ZoneInfo(timezone_name)
+    except (KeyError, ValueError):
+        activity_timezone = agent_activity_schedule.APP_TIMEZONE
+    current = agent_activity_schedule.aware_utc(now or datetime.now(UTC))
+    lock_suffix = " FOR UPDATE" if db.get_bind().dialect.name == "postgresql" else ""
+    rows = db.execute(
+        text(
+            """
+            SELECT activity.character_id,
+                   activity.activity_interval_minutes,
+                   activity.active_hours_start,
+                   activity.active_hours_end,
+                   slot.agent_id
+              FROM agent_activity_settings AS activity
+              JOIN world_characters AS resident
+                ON resident.character_id = activity.character_id
+              JOIN agent_slots AS slot
+                ON slot.assigned_character_id = activity.character_id
+             WHERE resident.world_id = :world_id
+               AND resident.control_mode = 'autonomous'
+               AND resident.status = 'active'
+               AND resident.autonomous_enabled = true
+               AND activity.auto_enabled = true
+               AND slot.status = 'assigned_idle'
+            """
+            + lock_suffix
+        ),
+        {"world_id": world_id},
+    ).mappings()
+    changed = 0
+    for row in rows:
+        setting = _WorldAutonomyScheduleSetting(
+            activity_interval_minutes=int(row["activity_interval_minutes"]),
+            active_hours_start=str(row["active_hours_start"]),
+            active_hours_end=str(row["active_hours_end"]),
+        )
+        within_active_hours = agent_activity_schedule.is_within_active_hours(
+            setting,
+            current,
+            timezone=activity_timezone,
+        )
+        schedule = agent_activity_schedule.next_tick_schedule(
+            setting,
+            character_id=str(row["character_id"]),
+            now=current,
+            within_active_hours=within_active_hours,
+            timezone=activity_timezone,
+        )
+        db.execute(
+            text(
+                """
+                UPDATE agent_slots
+                   SET next_tick_at = :next_tick_at,
+                       heartbeat_interval_seconds = :heartbeat_interval_seconds,
+                       updated_at = :updated_at
+                 WHERE agent_id = :agent_id
+                """
+            ),
+            {
+                "agent_id": row["agent_id"],
+                "next_tick_at": schedule.next_tick_at,
+                "heartbeat_interval_seconds": (
+                    agent_activity_schedule.tick_interval_seconds(setting)
+                ),
+                "updated_at": current,
+            },
+        )
+        changed += 1
+    return changed
 
 
 def validate_world_definition(

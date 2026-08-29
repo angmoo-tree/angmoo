@@ -1,18 +1,23 @@
 import asyncio
+from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
 import inspect
+from pathlib import Path
+from threading import Barrier
 from types import SimpleNamespace
+from zoneinfo import ZoneInfo
 
 import pytest
 from pydantic import SecretStr, ValidationError
 from sqlalchemy import create_engine, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from app import models, schemas
-from app.core import active_hours
+from app.core import active_hours, agent_activity_schedule
 from app.core.config import settings
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
+from app.domains.worlds import public as world_service
 from app.services import (
     agent_creation_drafts as draft_service,
     agent_activity_policy,
@@ -26,6 +31,8 @@ def _create_autonomy_capacity_tables(engine) -> None:
     for table in (
         models.User.__table__,
         models.Character.__table__,
+        models.World.__table__,
+        models.WorldMembership.__table__,
         models.WorldCharacter.__table__,
         models.CharacterActiveWorld.__table__,
         models.CharacterState.__table__,
@@ -49,6 +56,40 @@ def _add_capacity_user(db: Session, user_id: str = "user-1") -> models.User:
     user = models.User(id=user_id, display_name=user_id)
     db.add(user)
     return user
+
+
+def _add_capacity_world(
+    db: Session,
+    *,
+    owner_user_id: str,
+    world_id: str = "world-routine",
+    timezone: str = "Asia/Seoul",
+) -> models.World:
+    world = models.World(
+        id=world_id,
+        slug=world_id,
+        owner_user_id=owner_user_id,
+        name=world_id,
+        tagline="",
+        setting_description="test",
+        daily_life_description="test",
+        genre_tags=[],
+        tone_tags=[],
+        timezone=timezone,
+        language="ko",
+        visibility="private",
+        join_policy="private",
+        status="published",
+        definition_version=1,
+        row_version=1,
+        contract_version="test-v1",
+        contract_hash="0" * 64,
+        readiness_status="publish_ready",
+        additional_generation_guidance="",
+        create_idempotency_key=f"create-{world_id}",
+    )
+    db.add(world)
+    return world
 
 
 def _add_capacity_agent(
@@ -123,16 +164,19 @@ def _add_active_routine_world_character(
     *,
     character_id: str,
     world_character_id: str | None = None,
+    world_id: str = "world-routine",
+    autonomous_enabled: bool = False,
+    status: str = "active",
 ) -> models.WorldCharacter:
     identifier = world_character_id or f"world-character-{character_id}"
     world_character = models.WorldCharacter(
         id=identifier,
-        world_id="world-routine",
+        world_id=world_id,
         character_id=character_id,
         membership_id=f"membership-{character_id}",
-        status="active",
+        status=status,
         control_mode="autonomous",
-        autonomous_enabled=False,
+        autonomous_enabled=autonomous_enabled,
         activity_runtime_mode="routine_resident_v1",
     )
     db.add_all(
@@ -147,6 +191,25 @@ def _add_active_routine_world_character(
         ]
     )
     return world_character
+
+
+def _selected_world_readiness(
+    db: Session,
+    *,
+    character: models.Character,
+    setting: models.AgentActivitySetting,
+) -> schemas.AgentActivityProfileReadinessRead:
+    del setting
+    selected = db.get(models.CharacterActiveWorld, character.id)
+    assert selected is not None
+    world_character = db.get(models.WorldCharacter, selected.world_character_id)
+    assert world_character is not None
+    return schemas.AgentActivityProfileReadinessRead(
+        ready=True,
+        source="world_community_profile",
+        world_id=world_character.world_id,
+        world_character_id=world_character.id,
+    )
 
 
 def test_agent_activity_setting_update_daily_limit_bounds() -> None:
@@ -637,6 +700,369 @@ def test_initial_retry_and_recovery_schedules_spread_without_running_early(
     assert now <= recovery.next_tick_at <= now + timedelta(minutes=5)
 
 
+def test_initial_schedule_uses_world_timezone_across_dst_boundary(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(settings, "RESIDENT_TICK_ACTIVE_START_SPREAD_SECONDS", 1800)
+    timezone = ZoneInfo("America/New_York")
+    setting = models.AgentActivitySetting(
+        character_id="char-dst",
+        activity_interval_minutes=60,
+        active_hours_start="10:00",
+        active_hours_end="20:00",
+    )
+    now = datetime.fromisoformat("2026-03-08T06:30:00+00:00")
+
+    schedule = agent_activity_policy.initial_tick_schedule(
+        setting,
+        character_id="char-dst",
+        now=now,
+        timezone=timezone,
+    )
+
+    local_tick = schedule.next_tick_at.astimezone(timezone)
+    assert local_tick.date().isoformat() == "2026-03-08"
+    assert local_tick.utcoffset() == timedelta(hours=-4)
+    assert (local_tick.hour, local_tick.minute) >= (10, 0)
+    assert (local_tick.hour, local_tick.minute) < (10, 30)
+
+
+def test_activity_timezone_comes_from_selected_world() -> None:
+    engine = create_engine("sqlite:///:memory:")
+    _create_autonomy_capacity_tables(engine)
+
+    with Session(engine) as db:
+        user = _add_capacity_user(db)
+        _add_capacity_world(
+            db,
+            owner_user_id=user.id,
+            timezone="America/New_York",
+        )
+        character = _add_capacity_agent(
+            db,
+            user_id=user.id,
+            character_id="char-world-timezone",
+        )
+        _add_active_routine_world_character(db, character_id=character.id)
+        db.commit()
+
+        assert (
+            agent_activity_policy.activity_timezone_name(
+                db, character_id=character.id
+            )
+            == "America/New_York"
+        )
+
+
+def test_world_timezone_change_reschedules_enabled_idle_slots(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    expected = datetime.fromisoformat("2026-08-29T14:15:00+00:00")
+    engine = create_engine("sqlite:///:memory:")
+    _create_autonomy_capacity_tables(engine)
+
+    with Session(engine) as db:
+        user = _add_capacity_user(db)
+        world = _add_capacity_world(
+            db,
+            owner_user_id=user.id,
+            timezone="Asia/Seoul",
+        )
+        character = _add_capacity_agent(
+            db,
+            user_id=user.id,
+            character_id="char-world-timezone-reschedule",
+            auto_enabled=True,
+            slot_id="angmoo-1",
+        )
+        _add_active_routine_world_character(
+            db,
+            character_id=character.id,
+            autonomous_enabled=True,
+        )
+        db.commit()
+        world.timezone = "America/New_York"
+        db.commit()
+
+        def _schedule(
+            setting,
+            *,
+            character_id: str,
+            now: datetime,
+            within_active_hours: bool,
+            timezone: ZoneInfo,
+        ):
+            assert character_id == character.id
+            assert timezone.key == "America/New_York"
+            return SimpleNamespace(next_tick_at=expected)
+
+        monkeypatch.setattr(agent_activity_schedule, "next_tick_schedule", _schedule)
+
+        changed = world_service.reschedule_world_autonomy_slots(
+            db,
+            world_id=world.id,
+            timezone_name=world.timezone,
+        )
+        db.commit()
+
+        slot = agent_crud.get_assigned_slot(db, character.id)
+        assert changed == 1
+        assert slot is not None and slot.next_tick_at is not None
+        assert slot.next_tick_at.replace(tzinfo=UTC) == expected
+
+
+def test_api_agent_instants_normalize_sqlite_naive_values_to_utc() -> None:
+    naive = datetime(2026, 8, 29, 2, 48)
+    slot = schemas.AgentSlotRead(
+        agent_id="angmoo-1",
+        status="assigned_idle",
+        next_tick_at=naive,
+        updated_at=naive,
+    )
+    summary = schemas.AgentActivitySummaryRead(
+        within_active_hours=True,
+        timezone="Asia/Seoul",
+        allowed_actions=[],
+        blocked_reasons={},
+        next_activity_at=naive,
+        today_comment_count=0,
+        max_comments_per_day=30,
+        today_post_count=0,
+        max_posts_per_day=10,
+        today_like_count=0,
+    )
+
+    assert slot.next_tick_at is not None
+    assert slot.next_tick_at.isoformat() == "2026-08-29T02:48:00+00:00"
+    assert slot.updated_at.isoformat() == "2026-08-29T02:48:00+00:00"
+    assert summary.next_activity_at is not None
+    assert summary.next_activity_at.isoformat() == "2026-08-29T02:48:00+00:00"
+    assert '"next_tick_at":"2026-08-29T02:48:00Z"' in slot.model_dump_json()
+
+
+@pytest.mark.parametrize(
+    ("next_tick_at", "expected"),
+    [
+        (None, False),
+        (datetime(2026, 8, 29, 4, 59, 59), True),
+        (datetime(2026, 8, 29, 5, 0), True),
+        (datetime(2026, 8, 29, 5, 0, 1), False),
+        (datetime(2026, 8, 29, 4, 59, 59, tzinfo=UTC), True),
+        (
+            datetime(2026, 8, 29, 14, 0, 1, tzinfo=ZoneInfo("Asia/Seoul")),
+            False,
+        ),
+    ],
+)
+def test_resident_slot_due_comparison_normalizes_utc_instants(
+    next_tick_at: datetime | None,
+    expected: bool,
+) -> None:
+    slot = SimpleNamespace(next_tick_at=next_tick_at)
+
+    assert agent_run_service._resident_slot_is_due(
+        slot,
+        now=datetime(2026, 8, 29, 5, 0, tzinfo=UTC),
+    ) is expected
+
+
+def test_file_backed_sqlite_tick_claims_two_naive_due_slots(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    engine = create_engine(
+        f"sqlite:///{(tmp_path / 'resident-tick.sqlite3').as_posix()}",
+        connect_args={"check_same_thread": False},
+    )
+    _create_autonomy_capacity_tables(engine)
+    factory = sessionmaker(bind=engine, expire_on_commit=False)
+    observed_at = datetime.now(UTC)
+    due_at = observed_at - timedelta(minutes=1)
+    starts: list[tuple[str, int]] = []
+
+    with factory() as db:
+        user = _add_capacity_user(db)
+        _add_capacity_world(db, owner_user_id=user.id)
+        for index in (1, 2):
+            character_id = f"char-sqlite-tick-{index}"
+            _add_capacity_agent(
+                db,
+                user_id=user.id,
+                character_id=character_id,
+                auto_enabled=True,
+                slot_id=f"angmoo-{index}",
+            )
+            _add_active_routine_world_character(
+                db,
+                character_id=character_id,
+                autonomous_enabled=True,
+            )
+        db.flush()
+        for index in (1, 2):
+            slot = db.get(models.AgentSlot, f"angmoo-{index}")
+            assert slot is not None
+            slot.next_tick_at = due_at
+        db.commit()
+
+    with factory() as db:
+        persisted = db.get(models.AgentSlot, "angmoo-1")
+        assert persisted is not None and persisted.next_tick_at is not None
+        assert persisted.next_tick_at.tzinfo is None
+
+    async def _complete_without_provider(
+        agent_id: str,
+        *,
+        post_id: str | None,
+        timeout_seconds: int,
+        message: str | None,
+        start_delay_seconds: int = 0,
+    ) -> schemas.OpenClawAgentRunRead:
+        del post_id, timeout_seconds, message
+        starts.append((agent_id, start_delay_seconds))
+        with factory() as run_db:
+            slot = run_db.get(models.AgentSlot, agent_id)
+            assert slot is not None
+            assert slot.status == agent_run_crud.SLOT_STATUS_RUNNING
+            assert slot.assigned_user_id is not None
+            assert slot.assigned_character_id is not None
+            run_id = f"run-{agent_id}"
+            run_db.add(
+                models.AgentRun(
+                    id=run_id,
+                    user_id=slot.assigned_user_id,
+                    character_id=slot.assigned_character_id,
+                    credential_id=slot.assigned_credential_id,
+                    agent_id=agent_id,
+                    session_key=f"session-{agent_id}",
+                    status="completed",
+                    gateway_result={"status": "completed", "provider": "fake"},
+                    completed_at=datetime.now(UTC),
+                )
+            )
+            slot.locked_by_run_id = run_id
+            run_db.commit()
+            agent_run_crud.complete_resident_slot_run(
+                run_db,
+                agent_id=agent_id,
+                run_id=run_id,
+                heartbeat_interval_seconds=3_600,
+                next_tick_at=datetime.now(UTC) + timedelta(hours=1),
+            )
+            character_id = slot.assigned_character_id
+        return schemas.OpenClawAgentRunRead(
+            run_id=run_id,
+            status="completed",
+            summary="fake provider boundary completed",
+            agent_id=agent_id,
+            session_key=f"session-{agent_id}",
+            character_id=character_id,
+            post_id=None,
+            gateway_result={"status": "completed", "provider": "fake"},
+        )
+
+    monkeypatch.setattr(
+        resident_tick_scheduler.agent_runs,
+        "reconcile_all_elapsed_routines",
+        lambda _db: SimpleNamespace(completed=0, skipped=0),
+    )
+    monkeypatch.setattr(
+        agent_run_service,
+        "_run_claimed_resident_slot_once",
+        _complete_without_provider,
+    )
+    monkeypatch.setattr(
+        agent_run_service.maintenance_service,
+        "agent_activity_blocks_auto_ticks",
+        lambda _db: False,
+    )
+    monkeypatch.setattr(settings, "RESIDENT_TICK_MAX_RUNS", 2)
+    monkeypatch.setattr(settings, "RESIDENT_TICK_BATCH_START_SPACING_SECONDS", 10)
+
+    result = asyncio.run(
+        resident_tick_scheduler._tick_once(
+            config=settings,
+            session_factory=factory,
+        )
+    )
+
+    assert result.due_count == 2
+    assert result.started_count == 2
+    assert starts == [("angmoo-1", 0), ("angmoo-2", 10)]
+    with factory() as db:
+        runs = list(db.scalars(select(models.AgentRun).order_by(models.AgentRun.id)))
+        slots = list(db.scalars(select(models.AgentSlot).order_by(models.AgentSlot.agent_id)))
+        assert [run.id for run in runs] == ["run-angmoo-1", "run-angmoo-2"]
+        assert all(run.status == "completed" for run in runs)
+        assert all(slot.status == agent_run_crud.SLOT_STATUS_ASSIGNED_IDLE for slot in slots)
+        assert all(slot.last_run_at is not None for slot in slots)
+        assert all(
+            slot.next_tick_at is not None
+            and agent_activity_schedule.aware_utc(slot.next_tick_at) > observed_at
+            for slot in slots
+        )
+    engine.dispose()
+
+
+def test_maintenance_blocked_tick_counts_sqlite_naive_due_slot(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    engine = create_engine(
+        f"sqlite:///{(tmp_path / 'maintenance-tick.sqlite3').as_posix()}"
+    )
+    _create_autonomy_capacity_tables(engine)
+    factory = sessionmaker(bind=engine, expire_on_commit=False)
+    due_at = datetime.now(UTC) - timedelta(minutes=1)
+
+    with factory() as db:
+        user = _add_capacity_user(db)
+        _add_capacity_agent(
+            db,
+            user_id=user.id,
+            character_id="char-maintenance-due",
+            auto_enabled=True,
+            slot_id="angmoo-1",
+        )
+        db.flush()
+        slot = db.get(models.AgentSlot, "angmoo-1")
+        assert slot is not None
+        slot.next_tick_at = due_at
+        db.commit()
+
+    monkeypatch.setattr(
+        agent_run_service.maintenance_service,
+        "agent_activity_blocks_auto_ticks",
+        lambda _db: True,
+    )
+    monkeypatch.setattr(
+        agent_run_service.maintenance_service,
+        "agent_activity_auto_tick_allowed_character_ids",
+        lambda: set(),
+    )
+
+    with factory() as db:
+        persisted = db.get(models.AgentSlot, "angmoo-1")
+        assert persisted is not None and persisted.next_tick_at is not None
+        assert persisted.next_tick_at.tzinfo is None
+
+        result = asyncio.run(
+            agent_run_service.tick_resident_slots(
+                db,
+                schemas.ResidentSlotTickCreate(max_runs=1, timeout_seconds=30),
+            )
+        )
+
+        db.refresh(persisted)
+        assert result.due_count == 1
+        assert result.started_count == 0
+        assert result.results == []
+        assert persisted.status == agent_run_crud.SLOT_STATUS_ASSIGNED_IDLE
+        assert persisted.locked_by_run_id is None
+        assert persisted.next_tick_at is not None
+        assert agent_activity_schedule.aware_utc(persisted.next_tick_at) == due_at
+    engine.dispose()
+
+
 def test_tick_resident_slots_staggers_claimed_runs(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -970,15 +1396,22 @@ def test_activate_agent_rejects_when_server_llm_autonomy_capacity_is_full(
 
         logs = list(db.scalars(select(models.AgentActivityLog)))
         assert logs[-1].action_type == "autonomy_activation_rejected"
-        assert logs[-1].reason == "server_llm_autonomy_capacity_full"
+        assert logs[-1].reason == "global_autonomy_capacity_full"
         assert "active_count=1" in logs[-1].result
 
 
 def test_activate_agent_allows_same_user_replacement_at_capacity(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(settings, "SERVER_LLM_AUTONOMY_MAX_ACTIVE_AGENTS", 1)
+    """Keep the frozen M3 node name while enforcing the local multi-ON contract."""
+
+    monkeypatch.setattr(settings, "SERVER_LLM_AUTONOMY_MAX_ACTIVE_AGENTS", 2)
     monkeypatch.setattr(settings, "AGENT_ACTIVITY_ENGINE", "langgraph")
+    monkeypatch.setattr(
+        agent_service,
+        "_activity_profile_readiness",
+        _selected_world_readiness,
+    )
     engine = create_engine("sqlite:///:memory:")
     _create_autonomy_capacity_tables(engine)
 
@@ -994,6 +1427,15 @@ def test_activate_agent_allows_same_user_replacement_at_capacity(
         new_character = _add_capacity_agent(
             db, user_id=user.id, character_id="char-new"
         )
+        old_world_character = _add_active_routine_world_character(
+            db,
+            character_id=old_character.id,
+            autonomous_enabled=True,
+        )
+        new_world_character = _add_active_routine_world_character(
+            db,
+            character_id=new_character.id,
+        )
         db.commit()
 
         detail = agent_service.activate_agent(db, user, new_character.id)
@@ -1001,11 +1443,411 @@ def test_activate_agent_allows_same_user_replacement_at_capacity(
         old_setting = agent_crud.get_setting(db, old_character.id)
         new_setting = agent_crud.get_setting(db, new_character.id)
         assert detail.character.id == new_character.id
-        assert old_setting is not None and old_setting.auto_enabled is False
+        assert old_setting is not None and old_setting.auto_enabled is True
         assert new_setting is not None and new_setting.auto_enabled is True
-        assert agent_crud.get_assigned_slot(db, old_character.id) is None
-        assert agent_crud.get_assigned_slot(db, new_character.id) is not None
-        assert agent_crud.count_effective_active_server_llm_autonomy_agents(db) == 1
+        old_slot = agent_crud.get_assigned_slot(db, old_character.id)
+        new_slot = agent_crud.get_assigned_slot(db, new_character.id)
+        assert old_slot is not None
+        assert new_slot is not None
+        assert old_slot.agent_id != new_slot.agent_id
+        db.refresh(old_world_character)
+        db.refresh(new_world_character)
+        assert old_world_character.autonomous_enabled is True
+        assert new_world_character.autonomous_enabled is True
+        assert agent_crud.count_effective_active_server_llm_autonomy_agents(db) == 2
+
+        deactivated = agent_service.deactivate_agent(db, user, new_character.id)
+
+        db.refresh(old_world_character)
+        db.refresh(new_world_character)
+        assert deactivated.settings.auto_enabled is False
+        assert old_setting.auto_enabled is True
+        assert old_world_character.autonomous_enabled is True
+        assert new_world_character.autonomous_enabled is False
+        assert agent_crud.get_assigned_slot(db, old_character.id) is not None
+        assert agent_crud.get_assigned_slot(db, new_character.id) is None
+
+
+def test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomically(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(settings, "WORLD_AUTONOMY_MAX_ACTIVE_CHARACTERS", 50)
+    monkeypatch.setattr(settings, "SERVER_LLM_AUTONOMY_MAX_ACTIVE_AGENTS", 100)
+    monkeypatch.setattr(
+        settings,
+        "OPENCLAW_AGENT_IDS",
+        ",".join(f"angmoo-{index}" for index in range(1, 51)),
+    )
+    monkeypatch.setattr(settings, "AGENT_ACTIVITY_ENGINE", "langgraph")
+    monkeypatch.setattr(
+        agent_service,
+        "_activity_profile_readiness",
+        _selected_world_readiness,
+    )
+    engine = create_engine("sqlite:///:memory:")
+    _create_autonomy_capacity_tables(engine)
+
+    with Session(engine, expire_on_commit=False) as db:
+        user = _add_capacity_user(db)
+        for index in range(1, 50):
+            character = _add_capacity_agent(
+                db,
+                user_id=user.id,
+                character_id=f"char-active-{index}",
+                auto_enabled=True,
+                slot_id=f"angmoo-{index}",
+            )
+            _add_active_routine_world_character(
+                db,
+                character_id=character.id,
+                autonomous_enabled=True,
+            )
+        fiftieth = _add_capacity_agent(
+            db,
+            user_id=user.id,
+            character_id="char-fiftieth",
+        )
+        fiftieth_world_character = _add_active_routine_world_character(
+            db,
+            character_id=fiftieth.id,
+        )
+        db.commit()
+
+        agent_service.activate_agent(db, user, fiftieth.id)
+
+        assert (
+            agent_service.count_enabled_autonomous_world_characters(
+                db, world_id="world-routine"
+            )
+            == 50
+        )
+        assert agent_crud.get_assigned_slot(db, fiftieth.id) is not None
+        db.refresh(fiftieth_world_character)
+        assert fiftieth_world_character.autonomous_enabled is True
+
+        fifty_first = _add_capacity_agent(
+            db,
+            user_id=user.id,
+            character_id="char-fifty-first",
+        )
+        fifty_first_world_character = _add_active_routine_world_character(
+            db,
+            character_id=fifty_first.id,
+        )
+        db.commit()
+
+        with pytest.raises(
+            agent_service.AgentAutonomyCapacityError,
+            match="world_autonomy_capacity_full",
+        ) as caught:
+            agent_service.activate_agent(db, user, fifty_first.id)
+
+        assert caught.value.reason_code == "world_autonomy_capacity_full"
+        rejected_setting = agent_crud.get_setting(db, fifty_first.id)
+        assert rejected_setting is not None and rejected_setting.auto_enabled is False
+        assert agent_crud.get_assigned_slot(db, fifty_first.id) is None
+        db.refresh(fifty_first_world_character)
+        assert fifty_first_world_character.autonomous_enabled is False
+        assert (
+            agent_service.count_enabled_autonomous_world_characters(
+                db, world_id="world-routine"
+            )
+            == 50
+        )
+
+
+def test_world_autonomy_capacity_excludes_owner_controlled_left_and_inactive_rows() -> None:
+    engine = create_engine("sqlite:///:memory:")
+    _create_autonomy_capacity_tables(engine)
+
+    with Session(engine) as db:
+        user = _add_capacity_user(db)
+        active = _add_capacity_agent(
+            db,
+            user_id=user.id,
+            character_id="char-counted",
+        )
+        left = _add_capacity_agent(
+            db,
+            user_id=user.id,
+            character_id="char-left",
+        )
+        inactive = _add_capacity_agent(
+            db,
+            user_id=user.id,
+            character_id="char-inactive",
+        )
+        owner = _add_capacity_agent(
+            db,
+            user_id=user.id,
+            character_id="char-owner",
+        )
+        _add_active_routine_world_character(
+            db,
+            character_id=active.id,
+            autonomous_enabled=True,
+        )
+        _add_active_routine_world_character(
+            db,
+            character_id=left.id,
+            autonomous_enabled=True,
+            status="left",
+        )
+        _add_active_routine_world_character(
+            db,
+            character_id=inactive.id,
+            autonomous_enabled=False,
+        )
+        db.add(
+            models.WorldCharacter(
+                id="world-character-owner",
+                world_id="world-routine",
+                character_id=owner.id,
+                membership_id="membership-owner",
+                status="active",
+                control_mode="owner_controlled",
+                owner_user_id=user.id,
+                autonomous_enabled=False,
+                activity_runtime_mode="routine_resident_v1",
+            )
+        )
+        db.commit()
+
+        assert (
+            agent_service.count_enabled_autonomous_world_characters(
+                db, world_id="world-routine"
+            )
+            == 1
+        )
+
+
+def test_global_autonomy_capacity_rejects_one_hundred_first_without_side_effects(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(settings, "SERVER_LLM_AUTONOMY_MAX_ACTIVE_AGENTS", 100)
+    monkeypatch.setattr(
+        settings,
+        "OPENCLAW_AGENT_IDS",
+        ",".join(f"angmoo-{index}" for index in range(1, 102)),
+    )
+    monkeypatch.setattr(settings, "AGENT_ACTIVITY_ENGINE", "langgraph")
+    engine = create_engine("sqlite:///:memory:")
+    _create_autonomy_capacity_tables(engine)
+
+    with Session(engine) as db:
+        user = _add_capacity_user(db)
+        for index in range(1, 101):
+            _add_capacity_agent(
+                db,
+                user_id=user.id,
+                character_id=f"char-global-{index}",
+                auto_enabled=True,
+                slot_id=f"angmoo-{index}",
+            )
+        target = _add_capacity_agent(
+            db,
+            user_id=user.id,
+            character_id="char-global-101",
+        )
+        db.commit()
+
+        with pytest.raises(
+            agent_service.AgentAutonomyCapacityError,
+            match="global_autonomy_capacity_full",
+        ) as caught:
+            agent_service.activate_agent(db, user, target.id)
+
+        assert caught.value.reason_code == "global_autonomy_capacity_full"
+        target_setting = agent_crud.get_setting(db, target.id)
+        assert target_setting is not None and target_setting.auto_enabled is False
+        assert agent_crud.get_assigned_slot(db, target.id) is None
+        assert agent_crud.count_effective_active_server_llm_autonomy_agents(db) == 100
+
+
+def test_physical_slot_capacity_does_not_disable_existing_agents(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(settings, "SERVER_LLM_AUTONOMY_MAX_ACTIVE_AGENTS", 100)
+    monkeypatch.setattr(settings, "OPENCLAW_AGENT_IDS", "angmoo-1,angmoo-2")
+    monkeypatch.setattr(settings, "AGENT_ACTIVITY_ENGINE", "langgraph")
+    engine = create_engine("sqlite:///:memory:")
+    _create_autonomy_capacity_tables(engine)
+
+    with Session(engine) as db:
+        user = _add_capacity_user(db)
+        first = _add_capacity_agent(
+            db,
+            user_id=user.id,
+            character_id="char-slot-first",
+            auto_enabled=True,
+            slot_id="angmoo-1",
+        )
+        second = _add_capacity_agent(
+            db,
+            user_id=user.id,
+            character_id="char-slot-second",
+            auto_enabled=True,
+            slot_id="angmoo-2",
+        )
+        target = _add_capacity_agent(
+            db,
+            user_id=user.id,
+            character_id="char-slot-target",
+        )
+        db.commit()
+
+        with pytest.raises(
+            agent_run_service.AgentSlotUnavailableError,
+            match="resident_slot_unavailable",
+        ):
+            agent_service.activate_agent(db, user, target.id)
+
+        assert agent_crud.get_setting(db, first.id).auto_enabled is True
+        assert agent_crud.get_setting(db, second.id).auto_enabled is True
+        assert agent_crud.get_setting(db, target.id).auto_enabled is False
+        assert agent_crud.get_assigned_slot(db, first.id) is not None
+        assert agent_crud.get_assigned_slot(db, second.id) is not None
+        assert agent_crud.get_assigned_slot(db, target.id) is None
+
+
+def test_default_slot_bootstrap_preserves_first_thirty_and_adds_thirty_one_to_fifty(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    expected_ids = [f"angmoo-{index}" for index in range(1, 51)]
+    monkeypatch.setattr(settings, "OPENCLAW_AGENT_IDS", ",".join(expected_ids))
+    engine = create_engine("sqlite:///:memory:")
+    models.AgentSlot.__table__.create(engine)
+
+    with Session(engine) as db:
+        original = [
+            models.AgentSlot(agent_id=agent_id, status="empty")
+            for agent_id in expected_ids[:30]
+        ]
+        db.add_all(original)
+        db.commit()
+        original_updated_at = {slot.agent_id: slot.updated_at for slot in original}
+
+        agent_run_crud.ensure_agent_slots(db, settings.openclaw_agent_ids)
+
+        slots = list(db.scalars(select(models.AgentSlot).order_by(models.AgentSlot.agent_id)))
+        assert {slot.agent_id for slot in slots} == set(expected_ids)
+        assert len(slots) == 50
+        assert {
+            slot.agent_id: slot.updated_at
+            for slot in slots
+            if slot.agent_id in original_updated_at
+        } == original_updated_at
+
+
+def test_sqlite_concurrent_world_activation_serializes_capacity_at_one(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    monkeypatch.setattr(settings, "WORLD_AUTONOMY_MAX_ACTIVE_CHARACTERS", 1)
+    monkeypatch.setattr(settings, "SERVER_LLM_AUTONOMY_MAX_ACTIVE_AGENTS", 100)
+    monkeypatch.setattr(settings, "OPENCLAW_AGENT_IDS", "angmoo-1,angmoo-2")
+    monkeypatch.setattr(settings, "AGENT_ACTIVITY_ENGINE", "langgraph")
+    monkeypatch.setattr(
+        agent_service,
+        "_activity_profile_readiness",
+        _selected_world_readiness,
+    )
+    database_path = tmp_path / "autonomy-capacity.db"
+    engine = create_engine(
+        f"sqlite:///{database_path}",
+        connect_args={"check_same_thread": False, "timeout": 0.01},
+    )
+    _create_autonomy_capacity_tables(engine)
+
+    with Session(engine) as db:
+        user = _add_capacity_user(db)
+        for character_id in ("char-concurrent-a", "char-concurrent-b"):
+            character = _add_capacity_agent(
+                db,
+                user_id=user.id,
+                character_id=character_id,
+            )
+            _add_active_routine_world_character(
+                db,
+                character_id=character.id,
+            )
+        db.commit()
+
+    barrier = Barrier(2)
+
+    def _activate(character_id: str) -> str:
+        with Session(engine) as db:
+            user = db.get(models.User, "user-1")
+            assert user is not None
+            barrier.wait(timeout=5)
+            try:
+                agent_service.activate_agent(db, user, character_id)
+            except agent_service.AgentAutonomyCapacityError as exc:
+                return exc.reason_code
+            return "activated"
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        results = list(
+            executor.map(_activate, ("char-concurrent-a", "char-concurrent-b"))
+        )
+
+    assert sorted(results) == ["activated", "world_autonomy_capacity_full"]
+    with Session(engine) as db:
+        settings_rows = list(
+            db.scalars(
+                select(models.AgentActivitySetting).where(
+                    models.AgentActivitySetting.auto_enabled.is_(True)
+                )
+            )
+        )
+        enabled_world_characters = list(
+            db.scalars(
+                select(models.WorldCharacter).where(
+                    models.WorldCharacter.autonomous_enabled.is_(True)
+                )
+            )
+        )
+        assigned_slots = list(
+            db.scalars(
+                select(models.AgentSlot).where(
+                    models.AgentSlot.assigned_character_id.is_not(None)
+                )
+            )
+        )
+        assert len(settings_rows) == 1
+        assert len(enabled_world_characters) == 1
+        assert len(assigned_slots) == 1
+        assert settings_rows[0].character_id == enabled_world_characters[0].character_id
+        assert settings_rows[0].character_id == assigned_slots[0].assigned_character_id
+
+
+def test_sqlite_busy_exhaustion_is_exposed_as_retryable_activation_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    engine = create_engine("sqlite:///:memory:")
+    _create_autonomy_capacity_tables(engine)
+
+    with Session(engine) as db:
+        user = _add_capacity_user(db)
+        character = _add_capacity_agent(
+            db,
+            user_id=user.id,
+            character_id="char-busy",
+        )
+        db.commit()
+        monkeypatch.setattr(
+            agent_service,
+            "run_sqlite_session_immediate",
+            lambda *_args, **_kwargs: (_ for _ in ()).throw(
+                agent_service.SqliteBusyRetryExhausted("busy")
+            ),
+        )
+
+        with pytest.raises(
+            agent_service.AgentAutonomyRetryableError,
+            match="autonomy_activation_retryable",
+        ):
+            agent_service.activate_agent(db, user, character.id)
 
 
 def test_activate_and_deactivate_sync_selected_routine_world_character(
@@ -1050,6 +1892,142 @@ def test_activate_and_deactivate_sync_selected_routine_world_character(
         assert deactivated.settings.auto_enabled is False
         assert world_character.autonomous_enabled is False
         assert world_character.version == 3
+
+
+def test_activation_uses_canonical_initial_schedule(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(settings, "AGENT_ACTIVITY_ENGINE", "langgraph")
+    expected = datetime.fromisoformat("2026-08-29T02:48:00+00:00")
+    observed: dict[str, object] = {}
+
+    def _initial_schedule(
+        setting,
+        *,
+        character_id: str,
+        now: datetime,
+        timezone: ZoneInfo,
+    ) -> agent_activity_policy.TickSchedule:
+        observed.update(
+            character_id=character_id,
+            now=now,
+            timezone=timezone.key,
+        )
+        return agent_activity_policy.TickSchedule(
+            next_tick_at=expected,
+            target_interval_seconds=3600,
+            schedule_spread_seconds=0,
+            schedule_spread_reason="test_initial_schedule",
+        )
+
+    monkeypatch.setattr(
+        agent_activity_policy,
+        "initial_tick_schedule",
+        _initial_schedule,
+    )
+    engine = create_engine("sqlite:///:memory:")
+    _create_autonomy_capacity_tables(engine)
+
+    with Session(engine) as db:
+        user = _add_capacity_user(db)
+        character = _add_capacity_agent(
+            db,
+            user_id=user.id,
+            character_id="char-initial-schedule",
+        )
+        db.commit()
+
+        agent_service.activate_agent(db, user, character.id)
+
+        slot = agent_crud.get_assigned_slot(db, character.id)
+        assert slot is not None and slot.next_tick_at is not None
+        assert slot.next_tick_at.replace(tzinfo=UTC) == expected
+        assert observed["character_id"] == character.id
+        assert observed["timezone"] == "Asia/Seoul"
+
+
+def test_enabled_idle_slot_reschedules_immediately_after_activity_window_change(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    expected = datetime.fromisoformat("2026-08-29T01:15:00+00:00")
+    engine = create_engine("sqlite:///:memory:")
+    _create_autonomy_capacity_tables(engine)
+
+    with Session(engine) as db:
+        user = _add_capacity_user(db)
+        character = _add_capacity_agent(
+            db,
+            user_id=user.id,
+            character_id="char-reschedule",
+            auto_enabled=True,
+            slot_id="angmoo-1",
+        )
+        db.commit()
+        monkeypatch.setattr(
+            agent_activity_policy,
+            "build_activity_policy",
+            lambda *_args, **_kwargs: SimpleNamespace(next_tick_at=expected),
+        )
+
+        agent_service.update_settings(
+            db,
+            user,
+            character.id,
+            schemas.AgentActivitySettingUpdate(
+                active_hours_start="10:00",
+                active_hours_end="20:00",
+                activity_interval_minutes=90,
+            ),
+        )
+
+        slot = agent_crud.get_assigned_slot(db, character.id)
+        assert slot is not None and slot.next_tick_at is not None
+        assert slot.next_tick_at.replace(tzinfo=UTC) == expected
+        assert slot.heartbeat_interval_seconds == 90 * 60
+
+
+def test_running_slot_keeps_current_schedule_until_run_completion(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    existing = datetime.fromisoformat("2026-08-29T02:48:00+00:00")
+    engine = create_engine("sqlite:///:memory:")
+    _create_autonomy_capacity_tables(engine)
+
+    with Session(engine) as db:
+        user = _add_capacity_user(db)
+        character = _add_capacity_agent(
+            db,
+            user_id=user.id,
+            character_id="char-running-reschedule",
+            auto_enabled=True,
+            slot_id="angmoo-1",
+        )
+        db.commit()
+        slot = agent_crud.get_assigned_slot(db, character.id)
+        assert slot is not None
+        slot.status = "running"
+        slot.next_tick_at = existing
+        db.commit()
+
+        def _unexpected_policy(*_args, **_kwargs):
+            raise AssertionError("running slots must not be rescheduled mid-run")
+
+        monkeypatch.setattr(
+            agent_activity_policy,
+            "build_activity_policy",
+            _unexpected_policy,
+        )
+
+        agent_service.update_settings(
+            db,
+            user,
+            character.id,
+            schemas.AgentActivitySettingUpdate(active_hours_start="10:00"),
+        )
+
+        slot = agent_crud.get_assigned_slot(db, character.id)
+        assert slot is not None and slot.next_tick_at is not None
+        assert slot.next_tick_at.replace(tzinfo=UTC) == existing
 
 
 def test_run_now_uses_temporary_slot_without_enabling_autonomy(
@@ -1352,6 +2330,71 @@ def test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy() -> 
         assert slot.assigned_credential_id is None
         assert slot.locked_by_run_id is None
         assert slot.lease_expires_at is None
+
+
+def test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick(
+    tmp_path: Path,
+) -> None:
+    engine = create_engine(
+        f"sqlite:///{(tmp_path / 'expired-slot.sqlite3').as_posix()}"
+    )
+    _create_autonomy_capacity_tables(engine)
+    factory = sessionmaker(bind=engine, expire_on_commit=False)
+    now = datetime.now(UTC)
+
+    with factory() as db:
+        user = _add_capacity_user(db)
+        character = _add_capacity_agent(
+            db,
+            user_id=user.id,
+            character_id="char-expired-autonomous",
+            auto_enabled=True,
+            slot_id="angmoo-1",
+        )
+        db.flush()
+        slot = db.get(models.AgentSlot, "angmoo-1")
+        assert slot is not None
+        run = models.AgentRun(
+            id="run-expired-autonomous",
+            user_id=user.id,
+            character_id=character.id,
+            credential_id=f"cred-{character.id}",
+            agent_id=slot.agent_id,
+            session_key="agent:angmoo-1:resident:auto",
+            status="running",
+        )
+        db.add(run)
+        slot.status = agent_run_crud.SLOT_STATUS_RUNNING
+        slot.locked_by_run_id = run.id
+        slot.lease_expires_at = now - timedelta(minutes=2)
+        slot.next_tick_at = now - timedelta(minutes=1)
+        db.commit()
+
+    with factory() as db:
+        persisted = db.get(models.AgentSlot, "angmoo-1")
+        assert persisted is not None and persisted.next_tick_at is not None
+        assert persisted.next_tick_at.tzinfo is None
+
+        recovered_count = agent_run_crud.recover_expired_resident_slot_runs(
+            db,
+            now=now,
+            next_tick_at_factory=lambda _slot, recovered_at: (
+                recovered_at + timedelta(minutes=10)
+            ),
+        )
+
+        db.refresh(persisted)
+        db.refresh(run := db.get(models.AgentRun, "run-expired-autonomous"))
+        assert recovered_count == 1
+        assert run is not None and run.status == "failed"
+        assert persisted.status == agent_run_crud.SLOT_STATUS_ASSIGNED_IDLE
+        assert persisted.locked_by_run_id is None
+        assert persisted.lease_expires_at is None
+        assert persisted.next_tick_at is not None
+        assert agent_activity_schedule.aware_utc(persisted.next_tick_at) == (
+            now + timedelta(minutes=10)
+        )
+    engine.dispose()
 
 
 def test_run_now_rejects_character_owned_by_another_user() -> None:

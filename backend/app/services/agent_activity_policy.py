@@ -1,18 +1,24 @@
-import hashlib
 from dataclasses import dataclass
-from datetime import UTC, date, datetime, time, timedelta
+from datetime import UTC, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
 from sqlalchemy import func, inspect, select
 from sqlalchemy.orm import Session
 
 from app import models
-from app.core import active_hours
-from app.core.config import settings
+from app.core import agent_activity_schedule
 from app.cruds import agents as agent_crud
 
 
-APP_TIMEZONE = ZoneInfo("Asia/Seoul")
+APP_TIMEZONE = agent_activity_schedule.APP_TIMEZONE
+TickSchedule = agent_activity_schedule.TickSchedule
+tick_interval_seconds = agent_activity_schedule.tick_interval_seconds
+next_tick_schedule = agent_activity_schedule.next_tick_schedule
+initial_tick_schedule = agent_activity_schedule.initial_tick_schedule
+retry_tick_schedule = agent_activity_schedule.retry_tick_schedule
+recovery_tick_schedule = agent_activity_schedule.recovery_tick_schedule
+_is_within_active_hours = agent_activity_schedule.is_within_active_hours
+_aware_utc = agent_activity_schedule.aware_utc
 PUBLIC_ACTION_TYPES = {
     "comment": ("commented", "replied"),
     "reply": ("commented", "replied"),
@@ -97,12 +103,33 @@ class ActivityPolicy:
         }
 
 
-@dataclass(frozen=True)
-class TickSchedule:
-    next_tick_at: datetime
-    target_interval_seconds: int
-    schedule_spread_seconds: int
-    schedule_spread_reason: str
+def activity_timezone(db: Session, *, character_id: str) -> ZoneInfo:
+    """Resolve the selected World's IANA timezone, falling back to KST."""
+
+    inspector = inspect(db.get_bind())
+    if not inspector.has_table(models.CharacterActiveWorld.__tablename__):
+        return APP_TIMEZONE
+    active_world = db.get(models.CharacterActiveWorld, character_id)
+    if active_world is None:
+        return APP_TIMEZONE
+    if not inspector.has_table(models.WorldCharacter.__tablename__):
+        return APP_TIMEZONE
+    world_character = db.get(models.WorldCharacter, active_world.world_character_id)
+    if world_character is None or world_character.character_id != character_id:
+        return APP_TIMEZONE
+    if not inspector.has_table(models.World.__tablename__):
+        return APP_TIMEZONE
+    world = db.get(models.World, world_character.world_id)
+    if world is None:
+        return APP_TIMEZONE
+    try:
+        return ZoneInfo(world.timezone)
+    except (KeyError, ValueError):
+        return APP_TIMEZONE
+
+
+def activity_timezone_name(db: Session, *, character_id: str) -> str:
+    return activity_timezone(db, character_id=character_id).key
 
 
 def is_policy_enforced_session(session_key: str) -> bool:
@@ -206,170 +233,6 @@ def _format_tendency_prompt(
     return "\n".join(lines) if lines else "  - none saved yet"
 
 
-def tick_interval_seconds(setting: models.AgentActivitySetting) -> int:
-    return max(30 * 60, min(setting.activity_interval_minutes, 1440) * 60)
-
-
-def next_tick_schedule(
-    setting: models.AgentActivitySetting,
-    *,
-    character_id: str,
-    now: datetime,
-    within_active_hours: bool,
-) -> TickSchedule:
-    current = _aware_utc(now)
-    target_interval = tick_interval_seconds(setting)
-    if not within_active_hours:
-        return _active_start_schedule(
-            setting,
-            character_id=character_id,
-            now=current,
-            reason="active_start_spread",
-            target_interval_seconds=target_interval,
-        )
-
-    base = current + timedelta(seconds=target_interval)
-    current_window = _active_window_containing(setting, current)
-    if current_window is not None and base >= current_window[1]:
-        return _active_start_schedule(
-            setting,
-            character_id=character_id,
-            now=current_window[1],
-            reason="next_window",
-            target_interval_seconds=target_interval,
-        )
-
-    max_spread = settings.resident_tick_interval_jitter_max_seconds
-    spread = _deterministic_spread_seconds(
-        character_id,
-        "interval_jitter",
-        f"{base.astimezone(APP_TIMEZONE).isoformat()}:{target_interval}",
-        max_spread,
-    )
-    candidate = base + timedelta(seconds=spread)
-    if current_window is not None and candidate >= current_window[1]:
-        return _active_start_schedule(
-            setting,
-            character_id=character_id,
-            now=current_window[1],
-            reason="next_window",
-            target_interval_seconds=target_interval,
-        )
-    return TickSchedule(
-        next_tick_at=candidate,
-        target_interval_seconds=target_interval,
-        schedule_spread_seconds=spread,
-        schedule_spread_reason="interval_jitter",
-    )
-
-
-def initial_tick_schedule(
-    setting: models.AgentActivitySetting,
-    *,
-    character_id: str,
-    now: datetime,
-) -> TickSchedule:
-    current = _aware_utc(now)
-    target_interval = tick_interval_seconds(setting)
-    if not _is_within_active_hours(setting, current):
-        return _active_start_schedule(
-            setting,
-            character_id=character_id,
-            now=current,
-            reason="active_start_spread",
-            target_interval_seconds=target_interval,
-        )
-
-    max_spread = settings.resident_tick_initial_spread_seconds
-    spread = _deterministic_spread_seconds(
-        character_id,
-        "initial_spread",
-        current.astimezone(APP_TIMEZONE).strftime("%Y-%m-%dT%H:%M"),
-        max_spread,
-    )
-    candidate = current + timedelta(seconds=spread)
-    current_window = _active_window_containing(setting, current)
-    if current_window is not None and candidate >= current_window[1]:
-        return _active_start_schedule(
-            setting,
-            character_id=character_id,
-            now=current_window[1],
-            reason="next_window",
-            target_interval_seconds=target_interval,
-        )
-    return TickSchedule(
-        next_tick_at=candidate,
-        target_interval_seconds=target_interval,
-        schedule_spread_seconds=spread,
-        schedule_spread_reason="initial_spread",
-    )
-
-
-def retry_tick_schedule(
-    setting: models.AgentActivitySetting,
-    *,
-    character_id: str,
-    retry_at: datetime,
-) -> TickSchedule:
-    base = _aware_utc(retry_at)
-    target_interval = tick_interval_seconds(setting)
-    if not _is_within_active_hours(setting, base):
-        return _active_start_schedule(
-            setting,
-            character_id=character_id,
-            now=base,
-            reason="retry_spread",
-            target_interval_seconds=target_interval,
-        )
-
-    max_spread = settings.resident_tick_retry_spread_seconds
-    spread = _deterministic_spread_seconds(
-        character_id,
-        "retry_spread",
-        base.astimezone(APP_TIMEZONE).strftime("%Y-%m-%dT%H:%M"),
-        max_spread,
-    )
-    candidate = base + timedelta(seconds=spread)
-    current_window = _active_window_containing(setting, base)
-    if current_window is not None and candidate >= current_window[1]:
-        return _active_start_schedule(
-            setting,
-            character_id=character_id,
-            now=current_window[1],
-            reason="retry_spread",
-            target_interval_seconds=target_interval,
-        )
-    return TickSchedule(
-        next_tick_at=candidate,
-        target_interval_seconds=target_interval,
-        schedule_spread_seconds=spread,
-        schedule_spread_reason="retry_spread",
-    )
-
-
-def recovery_tick_schedule(
-    setting: models.AgentActivitySetting,
-    *,
-    character_id: str,
-    now: datetime,
-) -> TickSchedule:
-    current = _aware_utc(now)
-    target_interval = tick_interval_seconds(setting)
-    max_spread = settings.resident_tick_retry_spread_seconds
-    spread = _deterministic_spread_seconds(
-        character_id,
-        "recovery_spread",
-        current.astimezone(APP_TIMEZONE).strftime("%Y-%m-%dT%H:%M"),
-        max_spread,
-    )
-    return TickSchedule(
-        next_tick_at=current + timedelta(seconds=spread),
-        target_interval_seconds=target_interval,
-        schedule_spread_seconds=spread,
-        schedule_spread_reason="recovery_spread",
-    )
-
-
 def build_activity_policy(
     db: Session,
     *,
@@ -379,13 +242,17 @@ def build_activity_policy(
 ) -> ActivityPolicy:
     setting = agent_crud.ensure_setting(db, character_id)
     current = _aware_utc(now or datetime.now(UTC))
-    actual_within_active_hours = _is_within_active_hours(setting, current)
+    timezone = activity_timezone(db, character_id=character_id)
+    actual_within_active_hours = _is_within_active_hours(
+        setting, current, timezone=timezone
+    )
     within_active_hours = True if ignore_active_hours else actual_within_active_hours
     schedule = next_tick_schedule(
         setting,
         character_id=character_id,
         now=current,
         within_active_hours=actual_within_active_hours,
+        timezone=timezone,
     )
     blocked: dict[str, str] = {}
 
@@ -419,6 +286,7 @@ def build_activity_policy(
             now=current,
             allowed=allowed,
             blocked=blocked,
+            timezone=timezone,
         )
     else:
         blocked["reply"] = "reply writing is disabled"
@@ -434,6 +302,7 @@ def build_activity_policy(
             now=current,
             allowed=allowed,
             blocked=blocked,
+            timezone=timezone,
         )
     else:
         blocked["post"] = "new post writing is disabled"
@@ -518,6 +387,7 @@ def count_action_today(
         character_id,
         action_type,
         _aware_utc(now or datetime.now(UTC)),
+        timezone=activity_timezone(db, character_id=character_id),
     )
 
 
@@ -532,12 +402,15 @@ def _evaluate_counted_actions(
     now: datetime,
     allowed: list[str],
     blocked: dict[str, str],
+    timezone: ZoneInfo,
 ) -> None:
     action_label = "/".join(actions)
     if max_per_day <= 0:
         _block_actions(blocked, actions, "daily limit is 0")
         return
-    today_count = _count_action_today(db, character_id, action_types, now)
+    today_count = _count_action_today(
+        db, character_id, action_types, now, timezone=timezone
+    )
     if today_count >= max_per_day:
         _block_actions(
             blocked,
@@ -559,10 +432,15 @@ def _evaluate_counted_actions(
 
 
 def _count_action_today(
-    db: Session, character_id: str, action_types: str | tuple[str, ...], now: datetime
+    db: Session,
+    character_id: str,
+    action_types: str | tuple[str, ...],
+    now: datetime,
+    *,
+    timezone: ZoneInfo = APP_TIMEZONE,
 ) -> int:
-    local_now = now.astimezone(APP_TIMEZONE)
-    day_start = datetime.combine(local_now.date(), time.min, tzinfo=APP_TIMEZONE)
+    local_now = now.astimezone(timezone)
+    day_start = datetime.combine(local_now.date(), time.min, tzinfo=timezone)
     action_type_values = _normalize_action_types(action_types)
     return (
         db.scalar(
@@ -612,183 +490,3 @@ def _public_action_log_types() -> tuple[str, ...]:
             for action_type in action_types
         )
     )
-
-
-def _next_tick_at(
-    setting: models.AgentActivitySetting, now: datetime, within_active_hours: bool
-) -> datetime:
-    if within_active_hours:
-        return now + timedelta(seconds=tick_interval_seconds(setting))
-    return _next_active_start(setting, now)
-
-
-def _is_within_active_hours(setting: models.AgentActivitySetting, now: datetime) -> bool:
-    try:
-        start, end = active_hours.active_hours_minutes(
-            setting.active_hours_start,
-            setting.active_hours_end,
-        )
-    except ValueError:
-        return False
-    if active_hours.active_hours_duration_from_minutes(start, end) <= 0:
-        return False
-    local_now = now.astimezone(APP_TIMEZONE)
-    minute = local_now.hour * 60 + local_now.minute
-    if start < end:
-        return start <= minute < end
-    return minute >= start or minute < end
-
-
-def _next_active_start(setting: models.AgentActivitySetting, now: datetime) -> datetime:
-    window = _next_active_window(setting, now)
-    if window is not None:
-        return window[0]
-    try:
-        start = active_hours.parse_active_hour(
-            setting.active_hours_start,
-            allow_end_of_day=False,
-        )
-    except ValueError:
-        start = active_hours.parse_active_hour(
-            active_hours.DEFAULT_ACTIVE_HOURS_START,
-            allow_end_of_day=False,
-        )
-    local_now = now.astimezone(APP_TIMEZONE)
-    minute = local_now.hour * 60 + local_now.minute
-    candidate_date = local_now.date()
-    if minute >= start:
-        candidate_date = candidate_date + timedelta(days=1)
-    start_hour = min(start // 60, 23)
-    start_minute = 0 if start >= 24 * 60 else start % 60
-    if start >= 24 * 60:
-        candidate_date = candidate_date + timedelta(days=1)
-    return datetime.combine(
-        candidate_date, time(start_hour, start_minute), tzinfo=APP_TIMEZONE
-    ).astimezone(UTC)
-
-
-def _active_start_schedule(
-    setting: models.AgentActivitySetting,
-    *,
-    character_id: str,
-    now: datetime,
-    reason: str,
-    target_interval_seconds: int,
-) -> TickSchedule:
-    window = _next_active_window(setting, now)
-    if window is None:
-        next_tick_at = _next_active_start(setting, now)
-        return TickSchedule(
-            next_tick_at=next_tick_at,
-            target_interval_seconds=target_interval_seconds,
-            schedule_spread_seconds=0,
-            schedule_spread_reason=reason,
-        )
-
-    start_at, end_at = window
-    max_spread = _active_start_spread_limit_seconds(setting, start_at, end_at)
-    spread = _deterministic_spread_seconds(
-        character_id,
-        reason,
-        start_at.astimezone(APP_TIMEZONE).isoformat(),
-        max_spread,
-    )
-    return TickSchedule(
-        next_tick_at=start_at + timedelta(seconds=spread),
-        target_interval_seconds=target_interval_seconds,
-        schedule_spread_seconds=spread,
-        schedule_spread_reason=reason,
-    )
-
-
-def _active_start_spread_limit_seconds(
-    setting: models.AgentActivitySetting,
-    start_at: datetime,
-    end_at: datetime,
-) -> int:
-    configured = settings.resident_tick_active_start_spread_seconds
-    window_seconds = max(0, int((end_at - start_at).total_seconds()) - 1)
-    boundary_seconds = (30 * 60) - 1
-    return max(0, min(configured, boundary_seconds, window_seconds))
-
-
-def _active_window_containing(
-    setting: models.AgentActivitySetting, now: datetime
-) -> tuple[datetime, datetime] | None:
-    local_now = _aware_utc(now).astimezone(APP_TIMEZONE)
-    start, end, duration = _active_hours_parts(setting)
-    if duration <= 0:
-        return None
-    for day_offset in (-1, 0, 1):
-        start_at = _local_datetime_for_minute(
-            local_now.date() + timedelta(days=day_offset),
-            start,
-        )
-        end_at = start_at + timedelta(minutes=duration)
-        if start_at <= local_now < end_at:
-            return start_at.astimezone(UTC), end_at.astimezone(UTC)
-    return None
-
-
-def _next_active_window(
-    setting: models.AgentActivitySetting, now: datetime
-) -> tuple[datetime, datetime] | None:
-    local_now = _aware_utc(now).astimezone(APP_TIMEZONE)
-    start, end, duration = _active_hours_parts(setting)
-    if duration <= 0:
-        return None
-    for day_offset in (-1, 0, 1, 2, 3):
-        start_at = _local_datetime_for_minute(
-            local_now.date() + timedelta(days=day_offset),
-            start,
-        )
-        end_at = start_at + timedelta(minutes=duration)
-        if end_at <= local_now:
-            continue
-        if start_at >= local_now or start_at <= local_now < end_at:
-            return start_at.astimezone(UTC), end_at.astimezone(UTC)
-    return None
-
-
-def _active_hours_parts(setting: models.AgentActivitySetting) -> tuple[int, int, int]:
-    try:
-        start, end = active_hours.active_hours_minutes(
-            setting.active_hours_start,
-            setting.active_hours_end,
-        )
-    except ValueError:
-        start, end = active_hours.active_hours_minutes(
-            active_hours.DEFAULT_ACTIVE_HOURS_START,
-            active_hours.DEFAULT_ACTIVE_HOURS_END,
-        )
-    duration = active_hours.active_hours_duration_from_minutes(start, end)
-    return start, end, duration
-
-
-def _local_datetime_for_minute(base_date: date, minute: int) -> datetime:
-    day_offset, minute_of_day = divmod(minute, 24 * 60)
-    hour, local_minute = divmod(minute_of_day, 60)
-    return datetime.combine(
-        base_date + timedelta(days=day_offset),
-        time(hour, local_minute),
-        tzinfo=APP_TIMEZONE,
-    )
-
-
-def _deterministic_spread_seconds(
-    character_id: str,
-    reason: str,
-    bucket: str,
-    max_seconds: int,
-) -> int:
-    if max_seconds <= 0:
-        return 0
-    payload = f"{character_id}:{reason}:{bucket}".encode("utf-8")
-    digest = hashlib.sha256(payload).digest()
-    return int.from_bytes(digest[:8], "big") % (max_seconds + 1)
-
-
-def _aware_utc(value: datetime) -> datetime:
-    if value.tzinfo is None:
-        return value.replace(tzinfo=UTC)
-    return value.astimezone(UTC)

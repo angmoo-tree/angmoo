@@ -15,7 +15,11 @@ import {
   Wand2,
 } from "lucide-react";
 import Link from "next/link";
-import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
+import {
+  studioWorldRoute,
+  useRuntimeRouter as useRouter,
+  useRuntimeSearchParams as useSearchParams,
+} from "@/shared/navigation/public";
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 
@@ -31,9 +35,9 @@ import {
 } from "@/components/activity-hours-control";
 import { ProfileAvatar } from "@/components/profile-avatar";
 import { ProfileMediaUploader } from "@/components/profile-media-uploader";
+import { navigateDesktopProductRoute } from "@/shared/desktop/public";
 import {
   activateAgent,
-  AGENT_LIMIT_MESSAGE,
   analyzeAgentTendency,
   clearAuth,
   completeAgentDraft,
@@ -48,20 +52,14 @@ import {
   getAgentActivityMaintenance,
   getAgentDraft,
   getAgentDraftMediaUsage,
-  getAgentQuotaCounts,
   getGoogleGeminiModelNote,
   GOOGLE_GEMINI_MODELS,
   isAuthError,
   listAgents,
-  LLM_AGENT_LIMIT_MESSAGE,
-  LOCAL_AGENT_LIMIT_MESSAGE,
-  MAX_LLM_AGENTS_PER_USER,
-  MAX_LOCAL_AGENTS_PER_USER,
   runAgentFirstGreeting,
   updateAgentPromotionUsage,
   updateAgentDraft,
   uploadAgentDraftMedia,
-  type AgentQuotaCounts,
   type AgentCreationDraftImageStyle,
   type AgentActivityMaintenanceRead,
   type AgentCreationDraftRead,
@@ -108,13 +106,24 @@ type MediaGenerationState = {
   phase: MediaGenerationPhase;
 };
 type OnboardingStage = "profile" | "firstGreeting" | "post" | "autonomy";
+type WorldFixtureReturnStatus = "idle" | "opening" | "opened" | "failed";
 type PromotionUsageContinuation =
   | { kind: "llm"; agent: AgentDetailRead }
   | { kind: "local"; agent: AgentDetailRead };
 
 export function AgentCreateClient() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { status } = useAuth();
+  const requestedWorldId = searchParams.get("worldId") ?? "";
+  const requestedReturnTo = searchParams.get("returnTo") ?? "";
+  const expectedWorldReturnTo = requestedWorldId
+    ? studioWorldRoute(requestedWorldId)
+    : "";
+  const worldFixtureReturnTo =
+    requestedWorldId && requestedReturnTo === expectedWorldReturnTo
+      ? expectedWorldReturnTo
+      : null;
   const [step, setStep] = useState<StepIndex>(0);
   const [creationMode, setCreationMode] = useState<CreationMode>("llm");
   const [draft, setDraft] = useState<AgentCreationDraftRead | null>(null);
@@ -151,8 +160,11 @@ export function AgentCreateClient() {
   const [mediaCandidate, setMediaCandidate] = useState<GeneratedMediaCandidate | null>(null);
   const [mediaUsage, setMediaUsage] = useState<AgentProfileImageUsageRead | null>(null);
   const [createdAgent, setCreatedAgent] = useState<AgentDetailRead | null>(null);
-  const [initialAgentQuotaCounts, setInitialAgentQuotaCounts] =
-    useState<AgentQuotaCounts | null>(null);
+  const [worldFixtureReturnStatus, setWorldFixtureReturnStatus] =
+    useState<WorldFixtureReturnStatus>("idle");
+  const [worldFixtureReturnError, setWorldFixtureReturnError] =
+    useState<string | null>(null);
+  const [initialAgentCount, setInitialAgentCount] = useState<number | null>(null);
   const draftId = draft?.id ?? null;
   const [agentCountChecked, setAgentCountChecked] = useState(false);
   const [onboardingStage, setOnboardingStage] = useState<OnboardingStage | null>(null);
@@ -178,23 +190,7 @@ export function AgentCreateClient() {
       .catch(() => setMaintenance(null));
     listAgents()
       .then((agents) => {
-        const counts = getAgentQuotaCounts(agents);
-        setInitialAgentQuotaCounts(counts);
-        setCreationMode((current) => {
-          if (
-            counts.llm >= MAX_LLM_AGENTS_PER_USER &&
-            counts.local < MAX_LOCAL_AGENTS_PER_USER
-          ) {
-            return "local";
-          }
-          if (
-            counts.local >= MAX_LOCAL_AGENTS_PER_USER &&
-            counts.llm < MAX_LLM_AGENTS_PER_USER
-          ) {
-            return "llm";
-          }
-          return current;
-        });
+        setInitialAgentCount(agents.length);
       })
       .catch((err) => {
         if (isAuthError(err)) {
@@ -202,11 +198,12 @@ export function AgentCreateClient() {
           router.replace("/login");
           return;
         }
-        setInitialAgentQuotaCounts(null);
+        setInitialAgentCount(null);
       })
       .finally(() => {
         setAgentCountChecked(true);
       });
+    if (worldFixtureReturnTo) return;
     const storedDraftId = sessionStorage.getItem(DRAFT_STORAGE_KEY);
     if (!storedDraftId) return;
     getAgentDraft(storedDraftId)
@@ -222,7 +219,7 @@ export function AgentCreateClient() {
         }
         sessionStorage.removeItem(DRAFT_STORAGE_KEY);
       });
-  }, [router, status]);
+  }, [router, status, worldFixtureReturnTo]);
 
   useEffect(() => {
     return () => revokeGeneratedMediaCandidate(mediaCandidate);
@@ -306,10 +303,6 @@ export function AgentCreateClient() {
 
   async function handleCreateDraft(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (llmAgentLimitReached) {
-      setError(LLM_AGENT_LIMIT_MESSAGE);
-      return;
-    }
     const activeHoursValidation = getActiveHoursValidation(activeHoursStart, activeHoursEnd);
     if (
       activityIntervalMinutes < 30 ||
@@ -326,6 +319,10 @@ export function AgentCreateClient() {
     setBusy(true);
     setError(null);
     try {
+      if (worldFixtureReturnTo) {
+        setStep(1);
+        return;
+      }
       const nextDraft = await createAgentDraft({
         provider,
         model,
@@ -344,10 +341,7 @@ export function AgentCreateClient() {
 
   async function handleCreateLocalAgent(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (localAgentLimitReached || !name.trim()) {
-      if (localAgentLimitReached) setError(LOCAL_AGENT_LIMIT_MESSAGE);
-      return;
-    }
+    if (!name.trim()) return;
     setBusy(true);
     setError(null);
     try {
@@ -503,8 +497,6 @@ export function AgentCreateClient() {
 
   function showAnalyzedAgent(analyzed: AgentDetailRead) {
     setCreatedAgent(analyzed);
-    const initialAgentCount =
-      (initialAgentQuotaCounts?.llm ?? 0) + (initialAgentQuotaCounts?.local ?? 0);
     if (initialAgentCount === 0) {
       setOnboardingAgent(analyzed);
       setOnboardingStage("profile");
@@ -553,7 +545,75 @@ export function AgentCreateClient() {
     }
   }
 
+  async function openWorldFixtureReturn(created: AgentDetailRead) {
+    if (!worldFixtureReturnTo) return;
+    const returnRoute =
+      `${worldFixtureReturnTo}?createdCharacterId=${encodeURIComponent(
+        created.character.id,
+      )}`;
+    setWorldFixtureReturnStatus("opening");
+    setWorldFixtureReturnError(null);
+    try {
+      const result = await navigateDesktopProductRoute(returnRoute);
+      if (!result.handled) {
+        router.push(returnRoute);
+      }
+      setWorldFixtureReturnStatus("opened");
+    } catch {
+      setWorldFixtureReturnStatus("failed");
+      setWorldFixtureReturnError(
+        "캐릭터는 정상적으로 생성됐지만 Creator Studio를 열지 못했습니다. 캐릭터를 다시 만들지 말고 복귀만 다시 시도해주세요.",
+      );
+    }
+  }
+
+  function handleViewCreatedWorldFixture() {
+    if (!createdAgent) return;
+    router.replace(`/agents/${createdAgent.character.id}`);
+  }
+
   async function handleComplete() {
+    if (worldFixtureReturnTo) {
+      if (createdAgent) {
+        await openWorldFixtureReturn(createdAgent);
+        return;
+      }
+      setBusy(true);
+      setError(null);
+      let created: AgentDetailRead | null = null;
+      try {
+        created = await createAgent({
+          execution_mode: "llm",
+          name: name.trim(),
+          handle: normalizeHandleInput(handle),
+          avatar_url: avatarUrl.trim() || undefined,
+          banner_url: bannerUrl.trim() || undefined,
+          one_liner: oneLiner.trim(),
+          personality: personality.trim(),
+          speech_style: speechStyle.trim(),
+          worldview: worldview.trim(),
+          topic_preferences: topics.trim(),
+          safety_rules: safetyRules.trim(),
+          provider,
+          model,
+          api_key: apiKey,
+          activity_interval_minutes: activityIntervalMinutes,
+          active_hours_start: activeHoursStart,
+          active_hours_end: activeHoursEnd,
+          promotion_usage_allowed: false,
+        });
+        setCreatedAgent(created);
+        setApiKey("");
+      } catch (err) {
+        handleError(err, "캐릭터를 만들지 못했습니다.");
+      } finally {
+        setBusy(false);
+      }
+      if (created) {
+        await openWorldFixtureReturn(created);
+      }
+      return;
+    }
     if (!draft) return;
     setBusy(true);
     setError(null);
@@ -679,12 +739,7 @@ export function AgentCreateClient() {
       return;
     }
     const message = err instanceof Error ? err.message : fallback;
-    const limitMessage = [
-      AGENT_LIMIT_MESSAGE,
-      LLM_AGENT_LIMIT_MESSAGE,
-      LOCAL_AGENT_LIMIT_MESSAGE,
-    ].find((candidate) => message.includes(candidate));
-    setError(limitMessage ?? message);
+    setError(message);
   }
 
   const mediaGenerationLabelText = mediaGeneration
@@ -700,13 +755,6 @@ export function AgentCreateClient() {
   const isTutorialStep = Boolean(onboardingStage && onboardingAgent);
   const visibleSteps = isTutorialStep ? [...STEPS, "튜토리얼"] : STEPS;
   const activeStepIndex = isTutorialStep ? STEPS.length : step;
-  const llmAgentLimitReached =
-    initialAgentQuotaCounts !== null &&
-    initialAgentQuotaCounts.llm >= MAX_LLM_AGENTS_PER_USER;
-  const localAgentLimitReached =
-    initialAgentQuotaCounts !== null &&
-    initialAgentQuotaCounts.local >= MAX_LOCAL_AGENTS_PER_USER;
-  const agentLimitReached = llmAgentLimitReached && localAgentLimitReached;
   const activeHoursValidation = getActiveHoursValidation(activeHoursStart, activeHoursEnd);
   const initialActivitySettingsValid =
     activityIntervalMinutes >= 30 &&
@@ -730,34 +778,6 @@ export function AgentCreateClient() {
     );
   }
 
-  if (agentLimitReached && !createdAgent) {
-    return (
-      <section className="min-h-screen bg-white">
-        <div className="sticky top-0 z-10 flex h-[72px] items-center border-b border-[#eaedf2] bg-white/95 px-5 backdrop-blur-sm md:h-[88px] md:px-9">
-          <h1 className="text-[28px] font-extrabold text-[#101828] md:text-[30px]">
-            앵무 만들기
-          </h1>
-        </div>
-        <div className="px-5 py-7 md:px-9">
-          <div className="rounded-[24px] border border-[#e1e5eb] bg-[#f9fafb] p-6">
-            <h2 className="text-[20px] font-extrabold text-[#101828]">
-              앵무 생성 제한
-            </h2>
-            <p className="mt-3 text-[15px] font-bold leading-6 text-[#667085]">
-              {AGENT_LIMIT_MESSAGE}
-            </p>
-            <Link
-              href="/agents"
-              className="mt-5 inline-flex h-11 items-center justify-center rounded-full bg-[#101828] px-5 text-[14px] font-extrabold text-white transition-colors hover:bg-[#344054]"
-            >
-              내 앵무로 돌아가기
-            </Link>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
   return (
     <section className="min-h-screen bg-white">
       <div className="sticky top-0 z-10 flex h-[72px] items-center border-b border-[#eaedf2] bg-white/95 px-5 backdrop-blur-sm md:h-[88px] md:px-9">
@@ -767,6 +787,16 @@ export function AgentCreateClient() {
       </div>
 
       <div className="px-5 py-7 md:px-9">
+        {worldFixtureReturnTo ? (
+          <div className="mb-5 rounded-[24px] border border-[#ffd7d7] bg-[#fff8f8] px-5 py-4">
+            <p className="text-[15px] font-extrabold text-[#101828]">
+              현재 World에 연결할 자율 캐릭터를 만듭니다.
+            </p>
+            <p className="mt-1 text-[13px] font-bold leading-5 text-[#667085]">
+              생성 단계에서는 provider를 호출하거나 글·관계 활동을 시작하지 않습니다. 생성 후 Creator Studio로 돌아가 역할을 선택하고, P2 활동 준비에서 첫 provider 호출을 확인합니다.
+            </p>
+          </div>
+        ) : null}
         <div className="mb-5 flex flex-wrap gap-2">
           {visibleSteps.map((label, index) => (
             <div
@@ -793,17 +823,22 @@ export function AgentCreateClient() {
         <div className="rounded-[32px] border border-[#eef1f5] bg-white p-7 shadow-[0_18px_40px_rgba(16,24,40,0.06)]">
           {step === 0 ? (
             <div className="space-y-6">
-              <CreationModeSelector
-                value={creationMode}
-                onChange={setCreationMode}
-                counts={initialAgentQuotaCounts}
-              />
+              {!worldFixtureReturnTo ? (
+                <CreationModeSelector
+                  value={creationMode}
+                  onChange={setCreationMode}
+                />
+              ) : null}
               {creationMode === "llm" ? (
                 <form onSubmit={handleCreateDraft} className="space-y-6">
               <StepHeader
                 icon={<KeyRound size={20} aria-hidden="true" />}
-                title="API 키 확인"
-                description="API 키를 먼저 확인합니다. 입력한 API 키가 실제로 동작하는지 확인하기 위해 짧은 호출 1회를 시도합니다."
+                title={worldFixtureReturnTo ? "API 키 등록" : "API 키 확인"}
+                description={
+                  worldFixtureReturnTo
+                    ? "P2 활동 준비에 사용할 API 키를 안전하게 등록합니다. 이 생성 단계에서는 provider 확인 호출을 하지 않습니다."
+                    : "API 키를 먼저 확인합니다. 입력한 API 키가 실제로 동작하는지 확인하기 위해 짧은 호출 1회를 시도합니다."
+                }
               />
               <div className="grid gap-5 sm:grid-cols-2">
                 <label className="block">
@@ -874,7 +909,9 @@ export function AgentCreateClient() {
               />
               {busy ? (
                 <p className="rounded-[16px] bg-[#f6f7f9] px-4 py-3 text-[13px] font-extrabold leading-5 text-[#667085]">
-                  확인 중에는 잠시 기다려주세요.
+                  {worldFixtureReturnTo
+                    ? "입력 내용을 준비하는 중입니다."
+                    : "확인 중에는 잠시 기다려주세요."}
                 </p>
               ) : null}
               <PrimaryButton
@@ -882,14 +919,19 @@ export function AgentCreateClient() {
                 disabled={
                   busy ||
                   !apiKey.trim() ||
-                  llmAgentLimitReached ||
                   !initialActivitySettingsValid
                 }
               >
                 {busy ? (
                   <Loader2 size={18} aria-hidden="true" className="animate-spin" />
                 ) : null}
-                {busy ? "확인 중..." : "API 키 확인"}
+                {busy
+                  ? worldFixtureReturnTo
+                    ? "준비 중..."
+                    : "확인 중..."
+                  : worldFixtureReturnTo
+                    ? "입력 계속하기"
+                    : "API 키 확인"}
               </PrimaryButton>
                 </form>
               ) : (
@@ -921,7 +963,7 @@ export function AgentCreateClient() {
                   </InfoMessage>
                   <PrimaryButton
                     type="submit"
-                    disabled={busy || !name.trim() || localAgentLimitReached}
+                    disabled={busy || !name.trim()}
                   >
                     {busy ? (
                       <Loader2 size={18} aria-hidden="true" className="animate-spin" />
@@ -966,7 +1008,11 @@ export function AgentCreateClient() {
               <StepHeader
                 icon={<Wand2 size={20} aria-hidden="true" />}
                 title="페르소나"
-                description="간단히 적어도 괜찮습니다. 보강 버튼을 누르면 등록한 API 키를 사용해 캐릭터 설정을 다듬습니다."
+                description={
+                  worldFixtureReturnTo
+                    ? "자율활동 검증에 사용할 성격과 말투를 직접 적어주세요. 생성 단계에서는 AI 보강 호출을 실행하지 않습니다."
+                    : "간단히 적어도 괜찮습니다. 보강 버튼을 누르면 등록한 API 키를 사용해 캐릭터 설정을 다듬습니다."
+                }
               />
               {personaEnhancing ? (
                 <div className="rounded-[24px] border border-[#ffd7d7] bg-[#fff5f5] p-5 shadow-[0_12px_30px_rgba(255,104,104,0.12)]">
@@ -995,15 +1041,17 @@ export function AgentCreateClient() {
               <TextArea label="세계관/배경" value={worldview} onChange={setWorldview} disabled={personaEnhancing} />
               <TextArea label="관심 주제" value={topics} onChange={setTopics} disabled={personaEnhancing} />
               <TextArea label="피해야 할 행동/표현" value={safetyRules} onChange={setSafetyRules} disabled={personaEnhancing} />
-              <button
-                type="button"
-                onClick={handleEnhancePersona}
-                disabled={busy || !draft}
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-[#ffd7d7] px-5 text-[14px] font-extrabold text-[#ff6b6b] transition-colors hover:bg-[#fff5f5] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <Wand2 size={17} aria-hidden="true" />
-                페르소나 보강
-              </button>
+              {!worldFixtureReturnTo ? (
+                <button
+                  type="button"
+                  onClick={handleEnhancePersona}
+                  disabled={busy || !draft}
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-[#ffd7d7] px-5 text-[14px] font-extrabold text-[#ff6b6b] transition-colors hover:bg-[#fff5f5] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <Wand2 size={17} aria-hidden="true" />
+                  페르소나 보강
+                </button>
+              ) : null}
               <StepActions onBack={() => setStep(1)} onNext={handleNext} disabled={busy || !canGoNext} />
             </div>
           ) : null}
@@ -1014,7 +1062,9 @@ export function AgentCreateClient() {
                 icon={<ImageIcon size={20} aria-hidden="true" />}
                 title="프로필과 배너"
                 description={
-                  EXPERIMENTAL_IMAGE_ENABLED
+                  worldFixtureReturnTo
+                    ? "이번 최소 검증 흐름에서는 캐릭터를 만든 뒤 내 앵무 관리에서 이미지를 추가할 수 있습니다."
+                    : EXPERIMENTAL_IMAGE_ENABLED
                     ? "이미지 생성은 외부 이미지 생성 서비스를 사용합니다. 서비스 상태나 제한에 따라 실패할 수 있습니다."
                     : "직접 업로드한 프로필과 배너를 설정할 수 있습니다."
                 }
@@ -1023,7 +1073,7 @@ export function AgentCreateClient() {
                 name={name || "새 앵무"}
                 avatarUrl={avatarUrl}
                 bannerUrl={bannerUrl}
-                disabled={busy}
+                disabled={busy || Boolean(worldFixtureReturnTo)}
                 generationOverlay={
                   mediaGeneration
                     ? {
@@ -1034,7 +1084,12 @@ export function AgentCreateClient() {
                 }
                 onUpload={handleMediaUpload}
               />
-              {EXPERIMENTAL_IMAGE_ENABLED ? (
+              {worldFixtureReturnTo ? (
+                <InfoMessage>
+                  Character 생성과 World 연결을 provider 호출 없이 분리하기 위해 이 단계의 이미지 업로드·생성은 잠겨 있습니다. 생성 후 내 앵무 관리에서 추가해 주세요.
+                </InfoMessage>
+              ) : null}
+              {EXPERIMENTAL_IMAGE_ENABLED && !worldFixtureReturnTo ? (
                 <div className="rounded-[24px] bg-[#f6f7f9] p-5">
                 <div className="grid gap-4 sm:grid-cols-[180px_1fr]">
                   <label className="block">
@@ -1142,24 +1197,87 @@ export function AgentCreateClient() {
               <StepHeader
                 icon={<Save size={20} aria-hidden="true" />}
                 title="최종 확인"
-                description="앵무 생성 후 커뮤니티 성향 분석을 이어서 실행합니다. 등록한 API 키가 한 번 더 사용됩니다."
+                description={
+                  worldFixtureReturnTo
+                    ? "캐릭터만 생성한 뒤 Creator Studio로 돌아갑니다. 아직 자율활동·게시글·관계 변화는 시작하지 않습니다."
+                    : "앵무 생성 후 커뮤니티 성향 분석을 이어서 실행합니다. 등록한 API 키가 한 번 더 사용됩니다."
+                }
               />
-              <div className="grid gap-4 text-[14px] font-bold text-[#344054]">
-                <SummaryRow label="이름" value={name} />
-                <SummaryRow label="핸들" value={handle ? `@${handle}` : "-"} />
-                <SummaryRow label="한 줄 소개" value={oneLiner || "-"} />
-                <SummaryRow label="성격" value={personality} />
-                <SummaryRow label="말투" value={speechStyle || "-"} />
-                <SummaryRow label="세계관/배경" value={worldview || "-"} />
-                <SummaryRow label="관심 주제" value={topics || "-"} />
-                <SummaryRow label="피해야 할 행동/표현" value={safetyRules || "-"} />
-              </div>
-              <StepActions
-                onBack={() => setStep(3)}
-                onNext={handleComplete}
-                disabled={busy || !name.trim() || !personality.trim()}
-                nextLabel="앵무 만들기"
-              />
+              {worldFixtureReturnTo && createdAgent ? (
+                <div
+                  className="rounded-[24px] border border-[#b7e4c7] bg-[#f2fbf5] px-5 py-5"
+                  data-world-fixture-completion="created"
+                  data-world-fixture-return-status={worldFixtureReturnStatus}
+                >
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2
+                      className="mt-0.5 shrink-0 text-[#17834b]"
+                      size={22}
+                      aria-hidden="true"
+                    />
+                    <div>
+                      <p className="text-[16px] font-extrabold text-[#166534]">
+                        캐릭터 생성은 완료되었습니다.
+                      </p>
+                      <p className="mt-2 text-[14px] font-bold leading-6 text-[#52606d]">
+                        {createdAgent.character.name} 캐릭터는 내 앵무에 안전하게 저장됐습니다.
+                      </p>
+                      {worldFixtureReturnStatus === "opened" ? (
+                        <p className="mt-2 text-[14px] font-bold leading-6 text-[#52606d]">
+                          Creator Studio를 열었습니다. Studio 창에서 역할을 선택해 이 World에 연결해주세요.
+                        </p>
+                      ) : null}
+                      {worldFixtureReturnError ? (
+                        <p
+                          className="mt-2 text-[14px] font-bold leading-6 text-[#c24141]"
+                          role="alert"
+                        >
+                          {worldFixtureReturnError}
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
+                  <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+                    <button
+                      type="button"
+                      onClick={() => void openWorldFixtureReturn(createdAgent)}
+                      disabled={worldFixtureReturnStatus === "opening"}
+                      className="inline-flex h-11 items-center justify-center rounded-full bg-[#101828] px-5 text-[14px] font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {worldFixtureReturnStatus === "opening"
+                        ? "Creator Studio 여는 중..."
+                        : "Creator Studio로 다시 돌아가기"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleViewCreatedWorldFixture}
+                      disabled={worldFixtureReturnStatus === "opening"}
+                      className="inline-flex h-11 items-center justify-center rounded-full border border-[#d0d5dd] bg-white px-5 text-[14px] font-extrabold text-[#344054] transition-colors hover:bg-[#f9fafb] disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      생성된 앵무 보기
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="grid gap-4 text-[14px] font-bold text-[#344054]">
+                    <SummaryRow label="이름" value={name} />
+                    <SummaryRow label="핸들" value={handle ? `@${handle}` : "-"} />
+                    <SummaryRow label="한 줄 소개" value={oneLiner || "-"} />
+                    <SummaryRow label="성격" value={personality} />
+                    <SummaryRow label="말투" value={speechStyle || "-"} />
+                    <SummaryRow label="세계관/배경" value={worldview || "-"} />
+                    <SummaryRow label="관심 주제" value={topics || "-"} />
+                    <SummaryRow label="피해야 할 행동/표현" value={safetyRules || "-"} />
+                  </div>
+                  <StepActions
+                    onBack={() => setStep(3)}
+                    onNext={handleComplete}
+                    disabled={busy || !name.trim() || !personality.trim()}
+                    nextLabel="앵무 만들기"
+                  />
+                </>
+              )}
             </div>
           ) : null}
 
@@ -1719,32 +1837,22 @@ function StepHeader({
 function CreationModeSelector({
   value,
   onChange,
-  counts,
 }: {
   value: CreationMode;
   onChange: (value: CreationMode) => void;
-  counts: AgentQuotaCounts | null;
 }) {
-  const llmCount = counts?.llm ?? 0;
-  const localCount = counts?.local ?? 0;
-  const llmDisabled = llmCount >= MAX_LLM_AGENTS_PER_USER;
-  const localDisabled = localCount >= MAX_LOCAL_AGENTS_PER_USER;
   return (
     <div className="grid gap-3 md:grid-cols-2">
       <CreationModeCard
         active={value === "llm"}
         title="서버 LLM 앵무"
         description="Angmoo 서버가 저장된 LLM API key를 사용해 자율 활동을 실행합니다."
-        quotaLabel={`${llmCount}/${MAX_LLM_AGENTS_PER_USER}`}
-        disabled={llmDisabled}
         onClick={() => onChange("llm")}
       />
       <CreationModeCard
         active={value === "local"}
         title="외부 연결 앵무"
         description="내 컴퓨터, OpenClaw, 별도 서버가 앵무 API key로 접속해 직접 활동합니다."
-        quotaLabel={`${localCount}/${MAX_LOCAL_AGENTS_PER_USER}`}
-        disabled={localDisabled}
         onClick={() => onChange("local")}
       />
     </div>
@@ -1755,43 +1863,31 @@ function CreationModeCard({
   active,
   title,
   description,
-  quotaLabel,
-  disabled,
   onClick,
 }: {
   active: boolean;
   title: string;
   description: string;
-  quotaLabel: string;
-  disabled: boolean;
   onClick: () => void;
 }) {
   return (
     <button
       type="button"
-      disabled={disabled}
       onClick={onClick}
-      className={`min-h-[128px] rounded-[24px] border px-5 py-4 text-left transition-colors disabled:cursor-not-allowed ${
-        disabled
-          ? "border-[#e1e5eb] bg-[#f2f4f7] opacity-70"
-          : active
+      className={`min-h-[128px] rounded-[24px] border px-5 py-4 text-left transition-colors ${
+        active
           ? "border-[#ffb4b4] bg-[#fff5f5] shadow-[0_12px_26px_rgba(255,104,104,0.12)]"
           : "border-[#e1e5eb] bg-[#fbfcfd] hover:border-[#ffcccc]"
       }`}
     >
       <span
         className={`inline-flex rounded-full px-3 py-1 text-[12px] font-extrabold ${
-          disabled
-            ? "bg-white text-[#98a2b3]"
-            : active
-              ? "bg-[#ff6b6b] text-white"
-              : "bg-[#eef1f5] text-[#667085]"
+          active
+            ? "bg-[#ff6b6b] text-white"
+            : "bg-[#eef1f5] text-[#667085]"
         }`}
       >
-        {disabled ? "한도 도달" : active ? "선택됨" : "선택"}
-      </span>
-      <span className="ml-2 inline-flex rounded-full bg-white px-3 py-1 text-[12px] font-extrabold text-[#667085]">
-        {quotaLabel}
+        {active ? "선택됨" : "선택"}
       </span>
       <span className="mt-3 block text-[17px] font-extrabold text-[#101828]">
         {title}

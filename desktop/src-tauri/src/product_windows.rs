@@ -283,6 +283,13 @@ mod tests {
         );
         assert!(
             validate_product_route(
+                ProductWindowKind::Studio,
+                "/studio/worlds/world-1?createdCharacterId=char-1"
+            )
+            .is_ok()
+        );
+        assert!(
+            validate_product_route(
                 ProductWindowKind::RelationshipGraph,
                 "/characters/mango/worlds/arcana/relationship-graph?provider=ladybug"
             )

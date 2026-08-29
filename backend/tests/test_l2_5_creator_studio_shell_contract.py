@@ -67,11 +67,13 @@ def test_studio_shell_is_wide_and_preserves_small_viewport_accessibility() -> No
     assert 'href={PRODUCT_ROUTES.deviceHome}' in frame
 
 
-def test_studio_world_character_surface_is_read_only_and_links_existing_setup() -> None:
+def test_studio_world_character_surface_owns_fixture_lifecycle_orchestration() -> None:
     creator = _read("components/world-creator-client.tsx")
     surface = _read(
         "features/creator-studio/ui/studio-world-character-list.tsx"
     )
+    create_client = _read("components/agent-create-client.tsx")
+    browser_create_page = _read("app/agents/new/page.tsx")
     client = _read(
         "features/creator-studio/api/studio-world-character-client.ts"
     )
@@ -81,8 +83,106 @@ def test_studio_world_character_surface_is_read_only_and_links_existing_setup() 
     assert "활동 준비·상태 보기" in surface
     assert "/autonomy-setup`" in surface
     assert 'import Link from "next/link"' in surface
-    assert "useRuntimeRouter" not in surface
-    assert "생성·삭제는 P10-L에서 제공합니다." in surface
+    assert "useRuntimeRouter" in surface
+    assert "새 캐릭터 만들기" in surface
+    assert (
+        'const createHref = `/agents/new?worldId=${encodeURIComponent(worldId)}'
+        '&returnTo=${encodeURIComponent(returnTo)}`;' in surface
+    )
+    assert "기존 캐릭터 연결" in surface
+    assert "이 World에서 제거" in surface
+    assert "생성·삭제는 P10-L에서 제공합니다." not in surface
     assert "?surface=studio" in client
+    assert "/character-candidates" in client
+    assert "/leave`" in client
     assert 'method: "POST"' not in surface
     assert 'method: "DELETE"' not in surface
+    assert "useRuntimeSearchParams as useSearchParams" in create_client
+    assert 'searchParams.get("worldId")' in create_client
+    assert 'searchParams.get("returnTo")' in create_client
+    assert "requestedReturnTo === expectedWorldReturnTo" in create_client
+    assert "navigateDesktopProductRoute" in create_client
+    assert "async function openWorldFixtureReturn" in create_client
+    assert "created.character.id," in create_client
+    assert "await navigateDesktopProductRoute(returnRoute)" in create_client
+    assert "if (!result.handled)" in create_client
+    assert "if (createdAgent)" in create_client
+    assert "await openWorldFixtureReturn(createdAgent)" in create_client
+    assert 'data-world-fixture-completion="created"' in create_client
+    assert 'data-world-fixture-return-status={worldFixtureReturnStatus}' in create_client
+    assert "Creator Studio로 다시 돌아가기" in create_client
+    assert "생성된 앵무 보기" in create_client
+    assert "<AgentCreateClient />" in browser_create_page
+
+
+def test_local_character_creation_ui_has_no_hosted_saved_count_gate() -> None:
+    create_client = _read("components/agent-create-client.tsx")
+    dashboard = _read("components/agents-dashboard-client.tsx")
+    agents_lib = _read("lib/agents.ts")
+    combined = "\n".join((create_client, dashboard, agents_lib))
+
+    for forbidden in (
+        "MAX_LLM_AGENTS_PER_USER",
+        "MAX_LOCAL_AGENTS_PER_USER",
+        "MAX_AGENTS_PER_USER",
+        "AgentQuotaCounts",
+        "getAgentQuotaCounts",
+        "AGENT_LIMIT_MESSAGE",
+        "LLM_AGENT_LIMIT_MESSAGE",
+        "LOCAL_AGENT_LIMIT_MESSAGE",
+        "앵무 생성 제한",
+        "한도 도달",
+        "3/3",
+    ):
+        assert forbidden not in combined
+
+    assert "setInitialAgentCount(agents.length)" in create_client
+    assert "if (initialAgentCount === 0)" in create_client
+    assert "<CreationModeSelector" in create_client
+    assert "counts=" not in create_client
+    assert "getAgentTypeCounts(agents)" in dashboard
+    assert "서버 LLM ${agentTypeCounts.llm}개" in dashboard
+    assert 'href="/agents/new"' in dashboard
+
+
+def test_local_multi_autonomy_dashboard_uses_shared_utc_instant_contract() -> None:
+    dashboard = _read("components/agents-dashboard-client.tsx")
+    detail = _read("components/agent-detail-client.tsx")
+    social_summary = _read("features/social/ui/active-agent-summary.tsx")
+    presentation = _read("shared/ui/profile-presentation.ts")
+    shared_public = _read("shared/ui/public.ts")
+
+    assert "item.character.id === next.character.id ? next : item" in dashboard
+    assert "next.settings.auto_enabled" not in dashboard
+    assert "agent.activity_summary.next_activity_at" in dashboard
+    assert "agent.assigned_slot?.next_tick_at" not in dashboard
+    assert "agent.activity_summary.timezone" in dashboard
+    assert "쉬는 중 ·" in dashboard
+    assert "쉬는 중 ·" in detail
+    assert "apiInstantTimestamp" in detail
+    assert 'from "@/shared/ui/public"' in social_summary
+    assert "API_TIMEZONE_OFFSET_PATTERN" in presentation
+    assert "`${value}Z`" in presentation
+    assert 'timeZone,' in presentation
+    assert 'hourCycle: "h23"' in presentation
+    for exported in ("apiInstantTimestamp", "formatDate", "parseApiInstant"):
+        assert exported in shared_public
+
+
+def test_world_character_setup_distinguishes_routine_and_feed_lane_states() -> None:
+    setup = _read("components/world-character-autonomy-setup-client.tsx")
+    contract = _read("lib/world-character-setup.ts")
+
+    assert 'data-feed-runtime-state={feedStatus.runtime_state}' in setup
+    assert 'data-feed-lane-state="routine-only"' in setup
+    assert "P5 결합 피드가 비활성화되어 현재는 Routine 일과 게시글만 실행됩니다." in setup
+    assert "Inbox 직접 반응과 관심 키워드 검색은 실행되지 않습니다." in setup
+    assert "현재는 기존 최신 피드 호환 모드입니다." not in setup
+    for runtime_state in (
+        "routine_only_legacy_feed",
+        "three_lane_ready",
+        "imported_locked",
+        "autonomy_disabled",
+        "feed_search_degraded",
+    ):
+        assert runtime_state in contract

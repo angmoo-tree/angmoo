@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, select, text, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -16,10 +16,17 @@ from app.domains.identity.public import (
     CredentialResolver,
 )
 from app.domains.world_characters.api import setup_schemas as schemas
+from app.domains.world_characters.domain.runtime_modes import (
+    AUTONOMOUS_ACTIVITY_RUNTIME_MODE,
+    AUTONOMOUS_FEED_RUNTIME_MODE,
+)
 from app.domains.world_characters.infrastructure import (
     autonomous_setup_contracts as world_character_contracts,
     autonomous_setup_models as models,
     direct_llm_setup_provider as world_character_provider,
+)
+from app.domains.world_characters.infrastructure.sqlalchemy_runtime_modes import (
+    repair_local_autonomous_runtime_mode,
 )
 from app.domains.worlds.public import (
     NO_SPECIFIC_ROLE_KEY,
@@ -73,6 +80,74 @@ class SetupScope:
     character: models.Character
 
 
+def selected_autonomous_world_character(
+    db: Session,
+    *,
+    character_id: str,
+) -> models.WorldCharacter | None:
+    """Return the scheduler-selected autonomous WorldCharacter, if any."""
+
+    active_world = db.get(models.CharacterActiveWorld, character_id)
+    if active_world is None:
+        return None
+    world_character = db.get(models.WorldCharacter, active_world.world_character_id)
+    if (
+        world_character is None
+        or world_character.character_id != character_id
+        or world_character.control_mode != "autonomous"
+        or world_character.status != "active"
+    ):
+        return None
+    return world_character
+
+
+def lock_world_autonomy_capacity(db: Session, *, world_id: str) -> None:
+    """Serialize PostgreSQL capacity decisions for one World.
+
+    SQLite callers reserve the single writer with ``BEGIN IMMEDIATE`` before
+    entering this domain operation, so no extra SQLite lock is needed here.
+    """
+
+    bind = db.get_bind()
+    if bind.dialect.name != "postgresql":
+        return
+    db.execute(
+        text("select pg_advisory_xact_lock(hashtext(:lock_key))"),
+        {"lock_key": f"world-autonomy-capacity:{world_id}"},
+    )
+
+
+def count_enabled_autonomous_world_characters(
+    db: Session,
+    *,
+    world_id: str,
+    exclude_character_ids: set[str] | None = None,
+) -> int:
+    """Count runnable autonomous identities for the canonical World limit."""
+
+    excluded = exclude_character_ids or set()
+    statement = (
+        select(func.count(models.WorldCharacter.id))
+        .join(
+            models.Character,
+            models.Character.id == models.WorldCharacter.character_id,
+        )
+        .where(
+            models.WorldCharacter.world_id == world_id,
+            models.WorldCharacter.control_mode == "autonomous",
+            models.WorldCharacter.status == "active",
+            models.WorldCharacter.autonomous_enabled.is_(True),
+            models.Character.deleted_at.is_(None),
+            models.Character.moderation_status != "suspended",
+        )
+    )
+    if excluded:
+        statement = statement.where(
+            models.WorldCharacter.character_id.not_in(excluded)
+        )
+    return int(db.scalar(statement) or 0)
+
+
 def set_active_world_character_autonomy(
     db: Session,
     *,
@@ -86,16 +161,10 @@ def set_active_world_character_autonomy(
     the lifecycle switch; owner-controlled identities remain fail-closed.
     """
 
-    active_world = db.get(models.CharacterActiveWorld, character_id)
-    if active_world is None:
-        return False
-    world_character = db.get(models.WorldCharacter, active_world.world_character_id)
-    if (
-        world_character is None
-        or world_character.character_id != character_id
-        or world_character.control_mode != "autonomous"
-        or world_character.status != "active"
-    ):
+    world_character = selected_autonomous_world_character(
+        db, character_id=character_id
+    )
+    if world_character is None:
         return False
     if world_character.autonomous_enabled == enabled:
         return False
@@ -182,12 +251,28 @@ def enter_world(
         )
     )
     if existing is not None:
+        if existing.status == "left":
+            raise WorldCharacterSetupValidationError(
+                "world_character_left_restore_unsupported"
+            )
         if existing.membership_id != membership.id or existing.status not in {
             "pending",
             "inactive",
             "active",
         }:
             raise WorldCharacterSetupValidationError("world_character_ineligible")
+        if existing.feed_runtime_mode != AUTONOMOUS_FEED_RUNTIME_MODE:
+            outcome = repair_local_autonomous_runtime_mode(
+                db,
+                world_character=existing,
+                excluded_world_ids=(
+                    {existing.world_id}
+                    if membership.reason == "world_package_import"
+                    else ()
+                ),
+            )
+            if outcome == "repaired":
+                db.commit()
         return _entry_read(existing, reused=True)
 
     local_profile: dict[str, str] = {
@@ -202,7 +287,11 @@ def enter_world(
         membership_id=membership.id,
         role_key=role.role_key,
         status="pending",
+        control_mode="autonomous",
+        owner_user_id=None,
         autonomous_enabled=False,
+        activity_runtime_mode=AUTONOMOUS_ACTIVITY_RUNTIME_MODE,
+        feed_runtime_mode=AUTONOMOUS_FEED_RUNTIME_MODE,
         local_profile=local_profile,
     )
     db.add(world_character)
@@ -217,6 +306,18 @@ def enter_world(
             )
         )
         if replay is not None:
+            if replay.feed_runtime_mode != AUTONOMOUS_FEED_RUNTIME_MODE:
+                outcome = repair_local_autonomous_runtime_mode(
+                    db,
+                    world_character=replay,
+                    excluded_world_ids=(
+                        {replay.world_id}
+                        if membership.reason == "world_package_import"
+                        else ()
+                    ),
+                )
+                if outcome == "repaired":
+                    db.commit()
             return _entry_read(replay, reused=True)
         raise WorldCharacterSetupConflictError("idempotency_replay") from exc
     return _entry_read(world_character, reused=False)

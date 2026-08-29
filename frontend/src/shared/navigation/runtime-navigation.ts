@@ -9,12 +9,16 @@ import { useMemo } from "react";
 
 import {
   currentDesktopRoute,
-  navigateCurrentDesktopRoute,
+  isTauriDesktopRuntime,
+  navigateDesktopProductRoute,
 } from "@/shared/desktop/public";
 import { isStaticFrontendProfile } from "@/shared/runtime/public";
 
 function staticNavigate(href: string, replace: boolean) {
-  if (navigateCurrentDesktopRoute(href, replace)) return;
+  if (isTauriDesktopRuntime()) {
+    void navigateDesktopProductRoute(href, replace).catch(() => undefined);
+    return;
+  }
   if (replace) window.location.replace(href);
   else window.location.assign(href);
 }

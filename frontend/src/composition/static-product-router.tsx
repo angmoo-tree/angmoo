@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
+import { AgentCreateClient } from "@/components/agent-create-client";
 import { AgentDetailClient } from "@/components/agent-detail-client";
+import { AgentsDashboardClient } from "@/components/agents-dashboard-client";
 import { AppShell } from "@/components/app-shell";
 import { LocalOwnerClient } from "@/components/local-owner-client";
 import { PostDetailClient } from "@/components/post-detail-client";
@@ -145,6 +147,20 @@ function renderStaticRoute(location: BrowserLocation) {
     );
   }
   if (pathname === "/posts") return <StaticFeedRoute />;
+  if (pathname === "/agents") {
+    return (
+      <AppShell>
+        <AgentsDashboardClient />
+      </AppShell>
+    );
+  }
+  if (pathname === "/agents/new") {
+    return (
+      <AppShell>
+        <AgentCreateClient />
+      </AppShell>
+    );
+  }
   if (pathname === "/settings") {
     return (
       <AppShell>
@@ -195,7 +211,7 @@ function renderStaticRoute(location: BrowserLocation) {
   }
   if (segments[0] === "agents" && segments.length === 2) {
     const characterId = decodedSegment(segments[1]);
-    if (characterId) {
+    if (characterId && characterId !== "new") {
       return (
         <AppShell>
           <AgentDetailClient characterId={characterId} />

@@ -142,13 +142,6 @@ async def create_draft(
     db: Session, user: models.User, data: schemas.AgentCreationDraftCreate
 ) -> schemas.AgentCreationDraftRead:
     _cleanup_expired_drafts(db)
-    if (
-        community_crud.count_user_characters_by_execution_mode(db, user.id, "llm")
-        >= agent_service.MAX_LLM_AGENTS_PER_USER
-    ):
-        raise agent_service.AgentLimitError(
-            agent_service.LLM_AGENT_LIMIT_ERROR_MESSAGE
-        )
     draft_id = f"draft-{uuid4().hex[:12]}"
     await _run_draft_llm(
         db=db,

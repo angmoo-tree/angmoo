@@ -47,7 +47,12 @@ def get_setting(db: Session, character_id: str) -> models.AgentActivitySetting |
     return db.get(models.AgentActivitySetting, character_id)
 
 
-def ensure_setting(db: Session, character_id: str) -> models.AgentActivitySetting:
+def ensure_setting(
+    db: Session,
+    character_id: str,
+    *,
+    commit: bool = True,
+) -> models.AgentActivitySetting:
     setting = get_setting(db, character_id)
     if setting is not None:
         return setting
@@ -80,8 +85,11 @@ def ensure_setting(db: Session, character_id: str) -> models.AgentActivitySettin
         writing_repetition_level="light",
     )
     db.add(setting)
-    db.commit()
-    db.refresh(setting)
+    if commit:
+        db.commit()
+        db.refresh(setting)
+    else:
+        db.flush()
     return setting
 
 

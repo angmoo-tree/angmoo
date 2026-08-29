@@ -208,6 +208,28 @@ def test_wide_windows_use_explicit_route_boundaries_and_single_labels() -> None:
     assert "export function relationshipGraphRoute" in product_routes
 
 
+def test_programmatic_navigation_respects_product_window_boundaries() -> None:
+    desktop_runtime = _read("frontend/src/shared/desktop/product-window.ts")
+    runtime_navigation = _read(
+        "frontend/src/shared/navigation/runtime-navigation.ts"
+    )
+
+    assert "export async function navigateDesktopProductRoute" in desktop_runtime
+    assert "const targetKind = desktopWindowKindForRoute(normalized)" in desktop_runtime
+    assert "if (targetKind === state.kind)" in desktop_runtime
+    assert "await openDesktopProductWindow(targetKind, normalized)" in desktop_runtime
+    assert (
+        "desktopWindowKindForRoute(normalized) !== state.kind"
+        in desktop_runtime
+    )
+    assert "if (isTauriDesktopRuntime())" in runtime_navigation
+    assert "navigateDesktopProductRoute(href, replace)" in runtime_navigation
+    tauri_branch = runtime_navigation.split(
+        "if (isTauriDesktopRuntime())", maxsplit=1
+    )[1].split("if (replace)", maxsplit=1)[0]
+    assert "window.location" not in tauri_branch
+
+
 def test_static_and_next_profiles_share_the_same_window_bridge() -> None:
     next_layout = _read("frontend/src/app/layout.tsx")
     static_layout = _read("frontend/static-shell/app/layout.tsx")
@@ -218,6 +240,8 @@ def test_static_and_next_profiles_share_the_same_window_bridge() -> None:
     assert "<DesktopWindowBridge />" in static_layout
     assert "currentDesktopRoute" in router
     assert "subscribeDesktopRoute" in router
+    assert 'return `${route.pathname}\\n${route.search}`;' in router
+    assert 'const route = `${location.pathname}${location.search}`;' in router
     assert config["build"]["devUrl"] == "http://127.0.0.1:3000"
     assert config["build"]["frontendDist"] == "../../frontend/out"
 

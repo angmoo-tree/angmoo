@@ -6,7 +6,11 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from app.core.agent_activity_limits import MAX_COMMENTS_PER_DAY, MAX_POSTS_PER_DAY
 from app.core.image_generation import IMAGE_MODEL_OPTIONS, MAX_IMAGES_PER_DAY
 from app.providers.registry import AGENT_GOOGLE_MODELS
-from app.schemas.agent_runs import AgentActivityLogRead, AgentSlotRead
+from app.schemas.agent_runs import (
+    AgentActivityLogRead,
+    AgentSlotRead,
+    UtcInstantResponseModel,
+)
 from app.schemas.characters import CharacterRead, CharacterStateRead
 from app.schemas.community import PostDetail
 from app.schemas.media_security import validate_profile_media_reference
@@ -139,7 +143,7 @@ class AgentProfileMediaGenerateCreate(BaseModel):
     delivery: AgentDraftMediaDelivery = "server"
 
 
-class AgentProfileImageUsageStatusRead(BaseModel):
+class AgentProfileImageUsageStatusRead(UtcInstantResponseModel):
     bucket: AgentProfileImageBucket
     scope: Literal["create", "profile"]
     media_type: AgentDraftMediaKind
@@ -175,7 +179,7 @@ class AgentProfileMediaGenerationRead(BaseModel):
     results: list[AgentCreationDraftMediaResult]
 
 
-class AgentCreationDraftRead(BaseModel):
+class AgentCreationDraftRead(UtcInstantResponseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: str
@@ -205,7 +209,7 @@ class AgentFirstGreetingCreate(BaseModel):
     topic: str = Field(min_length=2, max_length=500)
 
 
-class AgentFirstGreetingRead(BaseModel):
+class AgentFirstGreetingRead(UtcInstantResponseModel):
     run_id: str
     status: str
     summary: str | None = None
@@ -217,7 +221,7 @@ class AgentFirstGreetingRead(BaseModel):
     gateway_result: dict
 
 
-class CredentialRead(BaseModel):
+class CredentialRead(UtcInstantResponseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: str
@@ -234,7 +238,7 @@ class CredentialRead(BaseModel):
     cooldown_until: datetime | None = None
 
 
-class AgentLocalConnectionRead(BaseModel):
+class AgentLocalConnectionRead(UtcInstantResponseModel):
     character_id: str
     execution_mode: AgentExecutionMode
     has_active_key: bool
@@ -273,7 +277,7 @@ class AgentActionRangeRead(BaseModel):
     note: str = ""
 
 
-class AgentActivitySettingRead(BaseModel):
+class AgentActivitySettingRead(UtcInstantResponseModel):
     model_config = ConfigDict(from_attributes=True)
 
     character_id: str
@@ -333,7 +337,7 @@ class AgentFeedCueCreate(BaseModel):
     manual_run: bool = False
 
 
-class AgentFeedCueRead(BaseModel):
+class AgentFeedCueRead(UtcInstantResponseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -364,7 +368,7 @@ class AgentPromotionUsageUpdate(BaseModel):
     promotion_usage_allowed: bool
 
 
-class AgentPromotionUsageRead(BaseModel):
+class AgentPromotionUsageRead(UtcInstantResponseModel):
     promotion_usage_allowed: bool
     promotion_usage_agreed_at: datetime | None = None
     promotion_usage_revoked_at: datetime | None = None
@@ -392,7 +396,7 @@ class AgentImageSeedUpload(BaseModel):
     data_base64: str = Field(min_length=1, max_length=8_000_000)
 
 
-class AgentImageGenerationSettingRead(BaseModel):
+class AgentImageGenerationSettingRead(UtcInstantResponseModel):
     model_config = ConfigDict(from_attributes=True)
 
     character_id: str
@@ -443,8 +447,9 @@ class AgentImageGenerationSettingUpdate(BaseModel):
         return self
 
 
-class AgentActivitySummaryRead(BaseModel):
+class AgentActivitySummaryRead(UtcInstantResponseModel):
     within_active_hours: bool
+    timezone: str = "Asia/Seoul"
     allowed_actions: list[str]
     blocked_reasons: dict[str, str]
     last_activity_at: datetime | None = None
@@ -456,7 +461,6 @@ class AgentActivitySummaryRead(BaseModel):
     today_post_count: int
     max_posts_per_day: int
     today_like_count: int
-
 
 class AgentActivityProfileReadinessRead(BaseModel):
     ready: bool

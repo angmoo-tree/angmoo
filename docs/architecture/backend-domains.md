@@ -493,6 +493,33 @@ UoW, observation UoW and Inbox persistence are runtime-owned adapters under
 `app.runtime.social`. Their bounded exact-edge exception remains only while the
 canonical `Post` ORM and community persistence service are pre-L6 modules.
 
+### L4 PR G verification-fixture lifecycle
+
+The bounded L4 follow-up keeps Character identity creation on the existing
+agent surface and adds only current-World fixture lifecycle policy to
+`app.domains.world_characters`. Creator Studio reads an owner-scoped candidate
+contract, reuses the existing idempotent World entry command, and performs a
+versioned `leave` command. A left WorldCharacter is not hard-deleted, cannot be
+silently recreated behind the `(world_id, character_id)` unique key, and
+returns the typed `world_character_left_restore_unsupported` state until a
+later explicit restore contract exists.
+
+The leave application boundary verifies creator access, Character ownership,
+autonomous control mode, exact confirmation name, row version and idempotency.
+It clears the selected `CharacterActiveWorld`, marks the WorldCharacter
+`left`, forces World-local autonomy off and preserves Character, setup,
+content, SocialEvent, relationship and graph evidence rows. No SQLite or
+LadybugDB schema change is introduced.
+
+Scheduler slot and legacy AgentRun persistence remain pre-L6. The already
+allowlisted `app.api.v1.routes.worlds -> app.models` composition boundary owns
+a narrow runtime-idle guard so the WorldCharacter domain does not gain a new
+legacy dependency. For the selected active World, the UI first calls the
+existing deactivation command; the leave transaction then rejects an enabled
+activity setting, assigned slot, running AgentRun or running P2 setup attempt.
+An inactive participation in a different World can therefore be removed
+without stopping the Character selected in another World.
+
 ### L4 PR D source observation and follow-up causality
 
 `app.domains.social.public` also owns the storage-neutral observation command,

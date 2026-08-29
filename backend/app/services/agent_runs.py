@@ -14,6 +14,7 @@ from sqlalchemy import delete, or_, select
 from sqlalchemy.orm import Session
 
 from app import models, schemas
+from app.core import agent_activity_schedule
 from app.core.config import settings
 from app.core.redaction import redact_secret_text, redact_secrets
 from app.core.db import SessionLocal
@@ -5510,11 +5511,14 @@ def assign_resident_slot(
         credential_id=credential_id,
     )
     candidate_agent_ids = settings.openclaw_agent_ids
-    setting = agent_crud.ensure_setting(db, character_id)
+    setting = agent_crud.ensure_setting(db, character_id, commit=commit)
     scheduled_tick_at = next_tick_at or agent_activity_policy.initial_tick_schedule(
         setting,
         character_id=character_id,
         now=datetime.now(UTC),
+        timezone=agent_activity_policy.activity_timezone(
+            db, character_id=character_id
+        ),
     ).next_tick_at
     slot = agent_run_crud.assign_resident_slot(
         db,
@@ -5528,7 +5532,8 @@ def assign_resident_slot(
     )
     if slot is None:
         raise AgentSlotUnavailableError(
-            f"No resident OpenClaw slot is available for {', '.join(candidate_agent_ids)}"
+            "resident_slot_unavailable: No resident slot is available for "
+            f"{character_id}; configured_pool={len(candidate_agent_ids)}"
         )
     return schemas.AgentSlotRead.model_validate(slot)
 
@@ -5599,6 +5604,9 @@ def _scheduled_retry_next_tick_at(
         effective_setting,
         character_id=character_id,
         retry_at=retry_at,
+        timezone=agent_activity_policy.activity_timezone(
+            db, character_id=character_id
+        ),
     ).next_tick_at
 
 
@@ -8062,6 +8070,9 @@ async def tick_resident_slots(
             setting,
             character_id=slot.assigned_character_id,
             now=recovered_at,
+            timezone=agent_activity_policy.activity_timezone(
+                db, character_id=slot.assigned_character_id
+            ),
         ).next_tick_at
 
     recovered_count = agent_run_crud.recover_expired_resident_slot_runs(
@@ -8083,8 +8094,7 @@ async def tick_resident_slots(
             due_before = [
                 slot
                 for slot in agent_run_crud.list_agent_slots(db)
-                if slot.next_tick_at is not None
-                and slot.next_tick_at <= now
+                if _resident_slot_is_due(slot, now=now)
                 and slot.status in agent_run_crud.DUE_SLOT_STATUSES
             ]
             return schemas.ResidentSlotTickRead(
@@ -8104,8 +8114,7 @@ async def tick_resident_slots(
     due_before = [
         slot
         for slot in agent_run_crud.list_agent_slots(db)
-        if slot.next_tick_at is not None
-        and slot.next_tick_at <= now
+        if _resident_slot_is_due(slot, now=now)
         and slot.status in agent_run_crud.DUE_SLOT_STATUSES
         and slot.assigned_character_id not in owner_controlled_ids
         and (
@@ -8148,6 +8157,14 @@ async def tick_resident_slots(
         results=list(results),
         slots=list_resident_slots(db),
     )
+
+
+def _resident_slot_is_due(slot: models.AgentSlot, *, now: datetime) -> bool:
+    if slot.next_tick_at is None:
+        return False
+    return agent_activity_schedule.aware_utc(
+        slot.next_tick_at
+    ) <= agent_activity_schedule.aware_utc(now)
 
 
 async def _run_claimed_resident_slot_once(

@@ -5,6 +5,10 @@ from __future__ import annotations
 from sqlalchemy.orm import Session
 
 from app.core.ids import uuid7_string
+from app.domains.world_characters.domain.runtime_modes import (
+    AUTONOMOUS_ACTIVITY_RUNTIME_MODE,
+    AUTONOMOUS_FEED_RUNTIME_MODE,
+)
 from app.domains.world_characters.domain.seed import (
     AutonomousWorldCharacterSeedData,
 )
@@ -24,8 +28,8 @@ def seed_autonomous_world_character(
         control_mode="autonomous",
         owner_user_id=None,
         autonomous_enabled=False,
-        activity_runtime_mode="routine_resident_v1",
-        feed_runtime_mode="keyword_search_v1",
+        activity_runtime_mode=AUTONOMOUS_ACTIVITY_RUNTIME_MODE,
+        feed_runtime_mode=AUTONOMOUS_FEED_RUNTIME_MODE,
         local_profile={
             "role_description": data.role_description,
             "background": data.background,

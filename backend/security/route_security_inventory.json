@@ -397,6 +397,11 @@
       "module": "app.api.v1.routes.worlds",
       "endpoint": "get_world"
     },
+    "GET /api/v1/worlds/{world_id}/character-candidates": {
+      "access": "owner-only",
+      "module": "app.domains.world_characters.api.routes",
+      "endpoint": "read_studio_character_candidates"
+    },
     "GET /api/v1/worlds/{world_id}/characters": {
       "access": "owner-only",
       "module": "app.domains.world_characters.api.routes",
@@ -811,6 +816,11 @@
       "access": "owner-only",
       "module": "app.api.v1.routes.worlds",
       "endpoint": "enter_world_with_character"
+    },
+    "POST /api/v1/worlds/{world_id}/characters/{character_id}/leave": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.worlds",
+      "endpoint": "leave_world_with_character"
     },
     "POST /api/v1/worlds/{world_id}/manual-social/posts": {
       "access": "owner-only",

@@ -11,6 +11,9 @@ from app.domains.world_characters.domain.owner_controlled_identity import (
     OwnerControlledProfile,
 )
 from app.domains.world_characters.domain.studio_surface import StudioWorldCharacter
+from app.domains.world_characters.domain.studio_lifecycle import (
+    StudioCharacterCandidate,
+)
 
 
 def _clean(value: str) -> str:
@@ -105,12 +108,14 @@ class StudioWorldCharacterRead(BaseModel):
     world_character_id: str
     character_id: str
     display_name: str
+    confirmation_name: str
     avatar_url: str | None
     intro: str
     role_key: str | None
     control_mode: Literal["autonomous", "owner_controlled"]
     status: str
     autonomous_enabled: bool
+    selected_active_world: bool
     version: int
     activity_setup_state: Literal[
         "not_started",
@@ -130,6 +135,31 @@ class StudioWorldCharacterListRead(BaseModel):
     )
     world_id: str
     items: list[StudioWorldCharacterRead]
+
+
+class StudioCharacterCandidateRead(BaseModel):
+    character_id: str
+    display_name: str
+    handle: str | None
+    avatar_url: str | None
+    current_world_status: str | None
+    eligible: bool
+    reason_code: str | None
+
+    @classmethod
+    def from_snapshot(
+        cls,
+        snapshot: StudioCharacterCandidate,
+    ) -> "StudioCharacterCandidateRead":
+        return cls(**asdict(snapshot))
+
+
+class StudioCharacterCandidateListRead(BaseModel):
+    schema_version: Literal["studio-character-candidates-v1"] = (
+        "studio-character-candidates-v1"
+    )
+    world_id: str
+    items: list[StudioCharacterCandidateRead]
 
 
 def identity_read(
@@ -158,6 +188,8 @@ def identity_read(
 __all__ = [
     "OwnerControlledIdentityRead",
     "OwnerControlledProfileWrite",
+    "StudioCharacterCandidateListRead",
+    "StudioCharacterCandidateRead",
     "StudioWorldCharacterListRead",
     "StudioWorldCharacterRead",
     "identity_read",

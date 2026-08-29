@@ -160,7 +160,6 @@ class SqliteSchedulerLeaseRepository:
                     "last_observed_at": now,
                     "last_sleep_gap_seconds": gap,
                     "state": SchedulerLeaseState.ACTIVE.value,
-                    "last_error_code": None,
                     "updated_at": now,
                 },
             )

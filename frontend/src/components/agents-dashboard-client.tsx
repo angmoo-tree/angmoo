@@ -10,27 +10,24 @@ import { useAuth } from "@/components/auth-provider";
 import {
   AGENTS_CHANGED_EVENT,
   AGENT_AUTONOMY_MUTATION_EVENT,
-  AGENT_LIMIT_MESSAGE,
   activateAgent,
   clearAgentAutonomyMutationState,
   clearAuth,
   clearFirstAgentWelcomePromptPending,
   deactivateAgent,
-  getAgentQuotaCounts,
   getAgentAutonomyMutationStates,
+  getAgentTypeCounts,
   hasFirstAgentWelcomePromptPending,
   getStoredUser,
   isAuthError,
   listAgents,
-  MAX_LLM_AGENTS_PER_USER,
-  MAX_LOCAL_AGENTS_PER_USER,
   setAgentAutonomyMutationState,
   type AgentAutonomyMutationEventDetail,
   type AgentAutonomyMutationState,
   type AgentDetailRead,
   type UserRead,
 } from "@/lib/agents";
-import { formatDate } from "@/lib/community";
+import { apiInstantTimestamp, formatDate } from "@/lib/community";
 import { formatHandle } from "@/lib/profile";
 
 export function AgentsDashboardClient() {
@@ -128,16 +125,7 @@ export function AgentsDashboardClient() {
       setAgents((current) =>
         sortAgentsForDashboard(
           current.map((item) =>
-            item.character.id === next.character.id
-              ? next
-              : next.settings.auto_enabled
-                ? {
-                    ...item,
-                    character: { ...item.character, status: "inactive" },
-                    settings: { ...item.settings, auto_enabled: false },
-                    assigned_slot: null,
-                  }
-                : item,
+            item.character.id === next.character.id ? next : item,
           ),
         ),
       );
@@ -179,13 +167,8 @@ export function AgentsDashboardClient() {
     router.push("/agents/new");
   }
 
-  const agentQuotaCounts = getAgentQuotaCounts(agents);
-  const llmAgentLimitReached =
-    agentQuotaCounts.llm >= MAX_LLM_AGENTS_PER_USER;
-  const localAgentLimitReached =
-    agentQuotaCounts.local >= MAX_LOCAL_AGENTS_PER_USER;
-  const agentLimitReached = llmAgentLimitReached && localAgentLimitReached;
-  const agentQuotaSummary = `서버 LLM ${agentQuotaCounts.llm}/${MAX_LLM_AGENTS_PER_USER} · 외부 연결 ${agentQuotaCounts.local}/${MAX_LOCAL_AGENTS_PER_USER}`;
+  const agentTypeCounts = getAgentTypeCounts(agents);
+  const agentTypeSummary = `서버 LLM ${agentTypeCounts.llm}개 · 외부 연결 ${agentTypeCounts.local}개`;
 
   return (
     <section className="min-h-screen bg-white">
@@ -208,31 +191,19 @@ export function AgentsDashboardClient() {
           >
             <RefreshCw size={20} aria-hidden="true" />
           </button>
-          {agentLimitReached ? (
-            <button
-              type="button"
-              disabled
-              className="inline-flex h-11 items-center gap-2 rounded-full bg-[#c9ced6] px-5 text-[15px] font-extrabold text-white disabled:cursor-not-allowed"
-              title={AGENT_LIMIT_MESSAGE}
-            >
-              <Plus size={16} aria-hidden="true" />
-              만들기
-            </button>
-          ) : (
-            <Link
-              href="/agents/new"
-              className="inline-flex h-11 items-center gap-2 rounded-full bg-[#ff6b6b] px-5 text-[15px] font-extrabold text-white shadow-[0_10px_18px_rgba(255,104,104,0.22)] transition-colors hover:bg-[#ff5252]"
-            >
-              <Plus size={16} aria-hidden="true" />
-              만들기
-            </Link>
-          )}
+          <Link
+            href="/agents/new"
+            className="inline-flex h-11 items-center gap-2 rounded-full bg-[#ff6b6b] px-5 text-[15px] font-extrabold text-white shadow-[0_10px_18px_rgba(255,104,104,0.22)] transition-colors hover:bg-[#ff5252]"
+          >
+            <Plus size={16} aria-hidden="true" />
+            만들기
+          </Link>
         </div>
       </div>
 
       {!loading ? (
         <div className="mx-5 mt-6 rounded-[18px] border border-[#e1e5eb] bg-[#f9fafb] px-5 py-4 text-[15px] font-bold text-[#667085] md:mx-9">
-          {agentLimitReached ? AGENT_LIMIT_MESSAGE : agentQuotaSummary}
+          {agentTypeSummary}
         </div>
       ) : null}
 
@@ -381,9 +352,17 @@ export function AgentsDashboardClient() {
                         label="다음 활동 예정"
                         value={
                           agent.settings.auto_enabled && !agent.activity_summary.within_active_hours
-                            ? "쉬는 중"
-                            : agent.assigned_slot?.next_tick_at
-                            ? formatDate(agent.assigned_slot.next_tick_at)
+                            ? agent.activity_summary.next_activity_at
+                              ? `쉬는 중 · ${formatDate(
+                                  agent.activity_summary.next_activity_at,
+                                  agent.activity_summary.timezone,
+                                )}`
+                              : "쉬는 중"
+                            : agent.activity_summary.next_activity_at
+                            ? formatDate(
+                                agent.activity_summary.next_activity_at,
+                                agent.activity_summary.timezone,
+                              )
                             : "-"
                         }
                       />
@@ -505,6 +484,6 @@ function latestAgentTimestamp(agent: AgentDetailRead) {
 
 function toTimestamp(value: string | null) {
   if (!value) return 0;
-  const timestamp = new Date(value).getTime();
+  const timestamp = apiInstantTimestamp(value);
   return Number.isFinite(timestamp) ? timestamp : 0;
 }

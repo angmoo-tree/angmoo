@@ -11,6 +11,8 @@ from app.core.db import get_db
 from app.domains.world_characters.api.schemas import (
     OwnerControlledIdentityRead,
     OwnerControlledProfileWrite,
+    StudioCharacterCandidateListRead,
+    StudioCharacterCandidateRead,
     StudioWorldCharacterListRead,
     StudioWorldCharacterRead,
     identity_read,
@@ -22,6 +24,9 @@ from app.domains.world_characters.application.owner_controlled_identity import (
 )
 from app.domains.world_characters.application.studio_surface import (
     list_studio_world_characters,
+)
+from app.domains.world_characters.application.studio_lifecycle import (
+    list_studio_character_candidates,
 )
 from app.domains.world_characters.domain.owner_controlled_identity import (
     LocalOwnerRequiredError,
@@ -36,6 +41,9 @@ from app.domains.world_characters.infrastructure.sqlalchemy_owner_controlled_ide
 )
 from app.domains.world_characters.infrastructure.sqlalchemy_studio_surface import (
     SqlAlchemyStudioWorldCharacterReader,
+)
+from app.domains.world_characters.infrastructure.sqlalchemy_studio_lifecycle import (
+    SqlAlchemyStudioWorldCharacterLifecycle,
 )
 from app.domains.worlds import public as world_service
 
@@ -86,6 +94,32 @@ def read_studio_world_characters(
     return StudioWorldCharacterListRead(
         world_id=world_id,
         items=[StudioWorldCharacterRead.from_snapshot(item) for item in items],
+    )
+
+
+@router.get(
+    "/{world_id}/character-candidates",
+    response_model=StudioCharacterCandidateListRead,
+)
+def read_studio_character_candidates(
+    world_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+) -> StudioCharacterCandidateListRead:
+    browser_session.require_local_frontend_request(request, mutation=False)
+    try:
+        items = list_studio_character_candidates(
+            SqlAlchemyStudioWorldCharacterLifecycle(db),
+            world_id=world_id,
+            current_user_id=current_user.id,
+        )
+    except world_service.WorldServiceError as exc:
+        _raise_studio_surface_error(exc)
+        raise AssertionError("unreachable")
+    return StudioCharacterCandidateListRead(
+        world_id=world_id,
+        items=[StudioCharacterCandidateRead.from_snapshot(item) for item in items],
     )
 
 
