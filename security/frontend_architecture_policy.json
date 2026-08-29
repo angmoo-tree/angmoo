@@ -3,6 +3,7 @@
   "feature_names": [
     "creator-studio",
     "device-home",
+    "device-shell",
     "pwa-shell",
     "relationships",
     "runtime-status",
@@ -49,10 +50,41 @@
       "DEVICE_HOME_FIXED_APPS",
       "DeviceHomeShell"
     ],
+    "frontend/src/features/device-shell/model/device-navigation.ts": [
+      "LOCAL_DEVICE_NAVIGATION",
+      "LOCAL_PRODUCT_ROUTE_CAPABILITIES",
+      "isStaticLocalProductRouteSupported",
+      "static: \"unsupported\""
+    ],
+    "frontend/src/features/device-shell/public.ts": [
+      "DeviceShell",
+      "LOCAL_PRODUCT_ROUTE_CAPABILITIES",
+      "LocalDeviceNavigation",
+      "LocalProductLink"
+    ],
+    "frontend/src/features/device-shell/ui/device-shell.tsx": [
+      "DeviceFrame",
+      "data-device-shell=\"phone\"",
+      "navigation?: ReactNode"
+    ],
+    "frontend/src/features/device-shell/ui/local-product-link.module.css": [
+      "--color-state-disabled",
+      "cursor: not-allowed"
+    ],
+    "frontend/src/features/device-shell/ui/local-product-link.tsx": [
+      "aria-disabled=\"true\"",
+      "data-product-route-unavailable=\"true\"",
+      "isStaticFrontendProfile",
+      "isStaticLocalProductRouteSupported"
+    ],
     "frontend/src/features/pwa-shell/ui/pwa-service-worker-lifecycle.tsx": [
       "registration.unregister()",
       "registration.update()",
       "updateViaCache: \"none\""
+    ],
+    "frontend/src/features/relationships/ui/relationship-graph-frame.tsx": [
+      "RelationshipGraphFrame",
+      "data-product-shell=\"relationship-graph\""
     ],
     "frontend/src/features/ui-foundation/public.ts": [
       "SemanticFoundationFixture"
@@ -77,7 +109,12 @@
     ],
     "frontend/src/shared/ui/device-frame.module.css": [
       "--device-bezel-width: 3px",
-      "--device-corner-radius: 34px"
+      "--device-corner-radius: 34px",
+      "max(44px, env(safe-area-inset-top))"
+    ],
+    "frontend/src/shared/ui/device-frame.tsx": [
+      "data-device-scroll-owner=\"true\"",
+      "data-device-titlebar-inset=\"true\""
     ],
     "frontend/src/shared/ui/profile-avatar.tsx": [
       "<Avatar",
@@ -98,12 +135,21 @@
     "frontend/src/features/creator-studio/ui/creator-studio-dashboard.tsx",
     "frontend/src/features/creator-studio/ui/creator-studio-frame.tsx",
     "frontend/src/features/device-home/public.ts",
+    "frontend/src/features/device-shell/model/device-navigation.ts",
+    "frontend/src/features/device-shell/public.ts",
+    "frontend/src/features/device-shell/ui/device-shell.module.css",
+    "frontend/src/features/device-shell/ui/device-shell.tsx",
+    "frontend/src/features/device-shell/ui/local-device-navigation.tsx",
+    "frontend/src/features/device-shell/ui/local-product-link.module.css",
+    "frontend/src/features/device-shell/ui/local-product-link.tsx",
     "frontend/src/features/pwa-shell/public.ts",
     "frontend/src/features/pwa-shell/ui/pwa-service-worker-lifecycle.tsx",
     "frontend/src/features/relationships/api/relationship-graph.ts",
     "frontend/src/features/relationships/model/relationship-graph.ts",
     "frontend/src/features/relationships/public.ts",
     "frontend/src/features/relationships/ui/relationship-graph-client.tsx",
+    "frontend/src/features/relationships/ui/relationship-graph-frame.module.css",
+    "frontend/src/features/relationships/ui/relationship-graph-frame.tsx",
     "frontend/src/features/runtime-status/public.ts",
     "frontend/src/features/social/api/social-agent-client.ts",
     "frontend/src/features/social/api/social-feed-client.ts",
@@ -133,6 +179,7 @@
     "frontend/src/shared/auth/auth-session.ts",
     "frontend/src/shared/auth/public.ts",
     "frontend/src/shared/interaction/public.ts",
+    "frontend/src/shared/interaction/scroll-viewport.ts",
     "frontend/src/shared/interaction/use-mobile-pull-to-refresh.ts",
     "frontend/src/shared/navigation/public.ts",
     "frontend/src/shared/ui/app-icon.tsx",

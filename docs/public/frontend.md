@@ -18,6 +18,20 @@ Next and the static/Tauri router must render the same feature component. A
 hosted visual reference must be classified as `DIRECT`, `ADAPTED`, `LOCAL`, or
 `REJECTED`; the label does not authorize an unreviewed source or asset copy.
 
+For ordinary Local user routes, keep the UI-C shell boundary intact:
+`shared/ui/DeviceFrame` is a neutral frame primitive,
+`features/device-shell/DeviceShell` owns Phone chrome and the reviewed Local
+route matrix, and the legacy `components/AppShell` only adapts existing route
+wrappers to that feature. Do not add a second Browser/Tauri shell, reintroduce
+desktop rails, or put Next-only destinations into Phone navigation. Creator
+Studio and Relationship Graph remain dedicated wide surfaces.
+
+Phone pages keep ownership of their own meaningful header; the compatibility
+shell must not inject a duplicate generic title. Use `LocalProductLink` where
+a hosted Next destination may be unsupported in static/Tauri, and bind
+pagination or pull-to-refresh to the single Device scroll owner rather than
+assuming document/window scrolling.
+
 `ANGMOO_API_BASE_URL` points server-side proxy routes at the local FastAPI
 process. `NEXT_PUBLIC_EXPERIMENTAL_IMAGE_ENABLED` is `false` by default.
 Turning it on exposes the experimental image controls but does not enable the

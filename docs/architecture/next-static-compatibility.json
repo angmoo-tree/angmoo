@@ -80,7 +80,7 @@
       "path": "frontend/src/app/angmoo-api/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/angmoo-api",
-      "source_sha256": "eff54d5a15a9923327bded3dc8b7edbe62a1e60a395df3ee32fe4a496b90facd",
+      "source_sha256": "ee201f727a617dcce713e7cc9edb4b8da9cf03d4c2746da8a8d0a2313cb89115",
       "transition_pr": "ER5 PR K"
     },
     {
@@ -160,7 +160,7 @@
       "path": "frontend/src/app/characters/[characterId]/worlds/[worldId]/relationship-graph/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/characters/[characterId]/worlds/[worldId]/relationship-graph",
-      "source_sha256": "3e2c2666f10e5fa376ae112a7d7e7ec42fe6689091f9b2ddc6a1a7052d6ffb5d",
+      "source_sha256": "89a95c18d474a7277044eec84be0a27aa983c6a323fa28a1cfc6b3e6782f4df0",
       "transition_pr": "ER5 PR K"
     },
     {
@@ -170,7 +170,7 @@
       "path": "frontend/src/app/licenses/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/licenses",
-      "source_sha256": "7da0ef2e94d5150d0816c79adbd6fe81929ed73e2165f64348676e67ac020ca8",
+      "source_sha256": "f4ceea6cd48125ea09654a69b72c47a71e76e895ef0fc3be26abf27a39656b66",
       "transition_pr": "ER5 PR K"
     },
     {
@@ -402,7 +402,7 @@
       "path": "frontend/src/app/worlds/[worldId]/creator/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/worlds/[worldId]/creator",
-      "source_sha256": "49849a9f5a0308d012acea2a114d17b12a2b5f986979fbdd8d0ec64190f7493c",
+      "source_sha256": "e16c0b277f09702fe5fda19d287170a8b79c894411ee9a7ba6494353ba655c00",
       "transition_pr": "ER5 PR K"
     },
     {
@@ -434,7 +434,7 @@
       "path": "frontend/src/app/worlds/new/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/worlds/new",
-      "source_sha256": "a564de75b434ec8918cf04a363a0a9e7fcd616dc037e1dcda013bd9bfc7de5e9",
+      "source_sha256": "2b1b546ecb4354e163e418ede604318e1398297009b1bc67bdae51854764ff9e",
       "transition_pr": "ER5 PR K"
     }
   ],

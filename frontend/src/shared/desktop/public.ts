@@ -1,6 +1,7 @@
 export { DesktopWindowBridge } from "./desktop-window-bridge";
 export {
   consumeDesktopWindowBootstrapRoute,
+  canonicalProductRoute,
   currentDesktopRoute,
   desktopWindowKindForRoute,
   getDesktopWindowState,

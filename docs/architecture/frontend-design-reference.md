@@ -10,16 +10,18 @@ tree, or the hosted service a runtime or build dependency.
 UI-A establishes the contract and inventory. It does not restyle pages, change
 an API, or claim that the current UI already conforms to the design contract.
 UI-B adds a Local-owned semantic source, shared primitives, limited real
-consumer adoption, and one deterministic test fixture. UI-C through UI-F still
-own product-shell convergence, social and Local-only surface adoption, and the
-full visual/cross-runtime closeout.
+consumer adoption, and one deterministic test fixture. UI-C adds the
+feature-owned Phone shell, capability-driven navigation, and route/window
+parity contract. UI-D through UI-F still own social and Local-only surface
+adoption and the full visual/cross-runtime closeout.
 
 ## Exact baseline
 
 | Boundary | Exact value | Meaning |
 | --- | --- | --- |
-| Local `main` base | `e5e62aed69cb89b16b5870eb0854dd07752dc519` | L4 PR G merge and UI-A branch base |
-| UI-B stacked base | `7c96d4bd6f3789036593c1e89ca8974fae620252` | Signed-off UI-A local technical commit; UI-B remains a separately reviewable diff |
+| UI-A audited Local base | `e5e62aed69cb89b16b5870eb0854dd07752dc519` | L4 PR G merge and immutable UI-A provenance base |
+| UI-A local technical commit | `7c96d4bd6f3789036593c1e89ca8974fae620252` | Signed-off UI-A contract closeout |
+| UI-C branch base | `fd0bb0f4df07cb3e121387e4b6628f8a4b471488` | merged UI-B result used as the shell-convergence base |
 | Hosted visual reference | `jingujeon/angmoo@7f967abd6117381be5c081ed284addb889b06fec` | Immutable social-UI audit snapshot |
 | Latest shared first-party history | `637426d8f2245311d6c5cb4ca52bcfc8103cca25` | Hosted and Local already share the audited frontend ancestry through this commit |
 | Local GPL transition | `b95ffe2c59e02d97f2047791c4959c1494b9ee35` | Current application license boundary |
@@ -109,12 +111,12 @@ shared/ui
   -> never imports a feature, app route, legacy component, or data client
 ```
 
-The current nine public feature boundaries and zero exact legacy exceptions
-are enforced by `scripts/ci/check_frontend_architecture_boundaries.py`. The
-ninth boundary is the UI-B-only `features/ui-foundation/public.ts` test
-fixture. It is not a new product surface. The remaining top-level `components`,
-`lib`, and manual static-router debt is inventoried for incremental migration;
-UI-C owns shell and route convergence.
+The current ten public feature boundaries and zero exact legacy exceptions are
+enforced by `scripts/ci/check_frontend_architecture_boundaries.py`. The ninth
+boundary is the UI-B-only `features/ui-foundation/public.ts` test fixture. It
+is not a product surface. The tenth is the UI-C product boundary
+`features/device-shell/public.ts`; it owns Phone chrome and product route
+capabilities without moving those decisions into neutral `shared/ui`.
 
 ## UI-B semantic foundation
 
@@ -161,12 +163,13 @@ The fixture is evidence, not a third direct product consumer. Its schema is
 harness rendered by the same feature component in Next production and the
 static export. It is excluded from the product route/surface inventory and
 must not appear in Device navigation. This route does not close any UI-C route
-gap or authorize another product route.
+gap by itself or authorize another product route.
 
 The fixture's `BottomNavigation` items are button-only state controls. They
 exercise selection, horizontal visibility, touch, and `aria-current` without
 claiming that any `href` is a supported product destination. Actual route href
-wiring and capability-driven navigation remain owned by UI-C.
+wiring and capability-driven navigation are implemented by UI-C's
+`features/device-shell` boundary.
 
 `globals.css` imports the semantic source globally. Transitional aliases remap
 existing legacy utilities, and the two compatibility bridges propagate
@@ -175,7 +178,7 @@ World Package consumers directly adopt the new component API in UI-B. The
 existing Next/static product-shell behavior smoke therefore covers both global
 alias and compatibility-bridge impact in addition to the fixture tests. This
 transitional reach is not evidence that untouched pages conform to the design
-contract. UI-C, UI-D, UI-E, and UI-F remain pending.
+contract. UI-D, UI-E, and UI-F remain pending after the UI-C shell slice.
 
 The machine-readable required smoke set is:
 
@@ -199,33 +202,39 @@ Current canonical surface families:
 
 | Surface | Current product shell | Expected window | Adoption |
 | --- | --- | --- | --- |
-| Device Home | `DeviceFrame` Phone | `phone` | `LOCAL` |
-| World Home, Feed, Chat, Characters, Relationships | `DeviceFrame` Phone | `phone` | `LOCAL` plus adapted social presentation |
-| Feed and Post detail compatibility routes | current `AppShell` | `phone` | `DIRECT`/`ADAPTED`; shell debt remains |
-| Agent list, create, detail, autonomy, settings, owner gate | current `AppShell` | `phone` | `ADAPTED`/`LOCAL`; shell debt remains |
+| Device Home | `DeviceShell` composed from `DeviceFrame` | `phone` | `LOCAL` |
+| World Home, Feed, Chat, Characters, Relationships | `DeviceShell` composed from `DeviceFrame` | `phone` | `LOCAL` plus adapted social presentation |
+| Feed and Post detail compatibility routes | `AppShell` compatibility facade delegating to `DeviceShell` | `phone` | `DIRECT`/`ADAPTED`; presentation adoption remains UI-D |
+| Agent list, create, detail, autonomy, settings, owner gate | `AppShell` compatibility facade delegating to `DeviceShell` | `phone` | `ADAPTED`/`LOCAL`; screen adoption remains UI-E |
 | Creator Studio | dedicated wide shell | `studio` | `LOCAL` |
-| Relationship Graph | wide product surface | `relationship-graph` | `LOCAL`; dedicated shell convergence remains |
+| Relationship Graph | dedicated `RelationshipGraphFrame` | `relationship-graph` | `LOCAL` |
 
-### Reviewed route gaps assigned to UI-C
+### UI-C route-gap closeout
 
-UI-A records these gaps instead of claiming route parity:
+UI-A recorded five route gaps. UI-C closes them in code and functional
+contract coverage:
 
-1. The React static router handles `/agents`, but the Rust Phone path allowlist
-   does not.
-2. The React static router handles
-   `/worlds/{worldId}/posts/{postId}`, but the Rust Phone path allowlist does
-   not.
-3. The static direct-open route list omits `/studio/import` and `/agents` even
-   though the React static router handles both.
-4. The shared `AppShell` exposes clickable Next-only search, notifications,
-   messages, profile, tree, licenses, and API-guide destinations in the static
-   profile.
-5. `/worlds/new` and `/worlds/{worldId}/creator` are Browser redirect aliases;
-   canonical navigation must use their Studio destinations instead of letting
-   the static router reinterpret them.
+1. The Rust Phone allowlist accepts `/agents`.
+2. It also accepts `/worlds/{worldId}/posts/{postId}`, while `safe_world_id`
+   prevents the reserved `new` segment from becoming a dynamic World ID.
+3. The static direct-open list covers `/studio/import` and `/agents`.
+4. `AppShell` exposes only the capability-driven Local bottom destinations;
+   Next-only search, notifications, messages, profiles, tree, licenses, and
+   API-guide routes remain explicitly hidden. `LocalProductLink` also turns
+   any such destination inside shared Feed or Character presentation into an
+   inert static/Tauri label instead of a clickable not-found route.
+5. `/worlds/new` and `/worlds/{worldId}/creator` canonicalize to their Studio
+   destinations before product-window classification, preserving single,
+   repeated, and empty query values in both Next and static runtimes.
 
-These are current debts, not UI-A regressions. UI-C must choose one explicit
-capability for every destination:
+The Phone content region is the sole scroll owner. Feed and Character-profile
+pagination plus pull-to-refresh resolve it first, while shell-less compatibility
+routes retain the previous `window` fallback. Static Feed waits for its initial
+sidecar read before mounting the stateful Feed client so the first page and its
+cursor cannot be discarded during hydration.
+
+`features/device-shell/model/device-navigation.ts` chooses one explicit
+capability for every reviewed destination:
 
 ```text
 A. Next and static both implemented
@@ -234,8 +243,10 @@ C. explicit disabled or unavailable entry
 D. validated external Browser destination
 ```
 
-Until UI-C closes them, the repository may claim that the route inventory was
-reviewed, but not `ROUTE PARITY PASS` or `clickable broken static route = 0`.
+The machine-readable `known_route_gaps` list is therefore empty and the three
+previously under-tested route families now read
+`declared_and_direct_open_tested`. This shell-level closeout does not replace
+UI-F's full route/state/runtime visual matrix or Windows installer user Gate.
 
 ## Raw-color baseline
 
@@ -250,20 +261,32 @@ Scope: sorted `frontend/src` files with the `.css`, `.ts`, or `.tsx`
 extension. The word boundary intentionally excludes SVG fragment references
 such as `url(#beak)`.
 
-UI-A baseline:
+UI-A audit baseline:
 
 ```text
 raw color occurrences = 1,938
 files with raw color  = 59
 ```
 
-Those two numbers remain explicit UI-A placeholder values while the UI-B tree
-and first PNG are being finalized. The policy records
-`baseline_status=pending_ui_b_final_scan_ui_a_values_are_placeholders`, and the
-checker deliberately refuses a local technical PASS in that state. After all
-UI-B frontend files settle, generate the report, copy its exact
-`raw_colors.occurrences` and `raw_colors.files` values into the policy, change
-the status to `reviewed_ui_b`, regenerate once more, and run `--check`.
+UI-B reviewed baseline:
+
+```text
+raw color occurrences = 1,894
+files with raw color  = 56
+baseline status       = reviewed_ui_b
+```
+
+UI-C's shell migration was then measured with the same checker:
+
+```text
+raw color occurrences = 1,860
+files with raw color  = 53
+```
+
+Those lower values are the current tracked policy baseline. Regenerate the
+report after the final UI-C source settles, and change them again only to the
+checker-measured result. Never guess the count or update it merely to hide
+growth.
 
 The per-extension, per-file, and per-value result is tracked in
 [`frontend-design-baseline.json`](frontend-design-baseline.json). Regenerate or
@@ -324,9 +347,9 @@ build; neither rebuilds in the visual test.
 
 The generated frontend design baseline records canonical-LF SHA-256 values for
 the visual config, spec, fixture, production-preview helper, and source SVG,
-plus a binary SHA-256 for the PNG when it exists. Until that exact PNG is
-generated on the canonical environment, reviewed, committed, and the generated
-report is refreshed, the visual Gate intentionally remains incomplete.
+plus a binary SHA-256 for the reviewed, committed UI-B PNG. UI-C deliberately
+keeps the screenshot call and PNG count at one; its additional shell evidence
+is functional route, viewport, overflow, navigation, and window-kind coverage.
 
 The visual configuration must freeze container digest, locale, timezone, light
 color scheme, reduced motion, device scale, caret and animation behavior,
@@ -336,10 +359,12 @@ network images are forbidden. The pinned Noble container with the locked CI
 Chromium owns the pixel baseline. Windows 100%, 125%, and 150% display scale
 remains a separate Tauri user-smoke Gate.
 
-UI-B reviews only the `436x880` semantic-foundation fixture. Planned viewport
-families remain `360x800`, `390x844`, `436x880`, centered Phone at `1440x1000`,
-and the two wide workspaces at `1440x900`; completing those route/state/runtime
-matrices belongs to UI-F.
+UI-B reviews only the `436x880` semantic-foundation fixture. UI-C adds
+functional shell assertions at `360`, `390`, `436`, and desktop Browser widths
+plus static inner-scroll pagination and unsupported-route assertions without
+promoting them into an early screenshot corpus. Completing the full
+route/state/runtime matrix, including the two wide workspaces at `1440x900`,
+belongs to UI-F.
 
 ## Asset and font provenance
 
@@ -382,7 +407,8 @@ commands are all closed, this branch permits this status only:
 
 ```text
 UI-A DESIGN CONTRACT / REFERENCE / PROVENANCE CLOSEOUT = PASS
-UI-B SEMANTIC TOKEN / PRIMITIVE FOUNDATION             = IN PROGRESS
-UI-C through UI-F                                      = NOT STARTED
+UI-B SEMANTIC TOKEN / PRIMITIVE FOUNDATION             = PASS
+UI-C PHONE SHELL / NAVIGATION / ROUTE PARITY            = IMPLEMENTED; LOCAL TECH AND EXTERNAL GATES PENDING
+UI-D through UI-F                                      = NOT STARTED
 ANGMOO LOCAL DESIGN FOUNDATION PASS                    = NOT YET
 ```

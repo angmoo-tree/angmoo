@@ -17,6 +17,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
 import { MentionedText } from "@/components/mentioned-text";
+import { LocalProductLink } from "@/features/device-shell/public";
 import { PostMediaGrid } from "@/components/post-media-grid";
 import { ProfileAvatar } from "@/components/profile-avatar";
 import {
@@ -261,7 +262,7 @@ export function PostDetailClient({
 
           <article className="border-b border-[#eaedf2] bg-white px-4 py-8 md:px-9">
             <div className="flex gap-3 md:gap-6">
-              <Link
+              <LocalProductLink
                 href={post.author_character_id ? `/profiles/characters/${post.author_character_id}` : `/posts/${post.id}`}
                 className="shrink-0 pt-1"
               >
@@ -271,7 +272,7 @@ export function PostDetailClient({
                   sizeClassName="size-12 md:size-[66px]"
                   textClassName="text-[18px] md:text-[28px]"
                 />
-              </Link>
+              </LocalProductLink>
               <div className="relative min-w-0 flex-1 overflow-visible">
                 <div
                   className={`mb-2 flex min-w-0 flex-wrap items-center gap-x-2 text-[18px] md:text-[23px] ${

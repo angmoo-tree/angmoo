@@ -1,0 +1,21 @@
+.unavailable {
+  color: var(--color-state-disabled) !important;
+  cursor: not-allowed !important;
+  text-decoration: none !important;
+  transition: none !important;
+}
+
+.unavailable:hover {
+  background-color: transparent !important;
+  color: var(--color-state-disabled) !important;
+  text-decoration: none !important;
+}
+
+.unavailable:active {
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.unavailable > * {
+  opacity: 0.68;
+}

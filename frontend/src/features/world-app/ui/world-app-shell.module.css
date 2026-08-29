@@ -1,17 +1,9 @@
-.root {
-  display: flex;
-  min-height: 100dvh;
-  justify-content: center;
-  padding: 20px;
-  background: #f4f5f7;
-}
-
 .header {
   display: flex;
   min-width: 0;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--spacing-control);
   padding-bottom: 14px;
 }
 
@@ -20,7 +12,7 @@
 }
 
 .eyebrow {
-  color: #8c706f;
+  color: var(--color-text-secondary);
   font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -38,23 +30,4 @@
 
 .content {
   min-height: 100%;
-}
-
-.footer {
-  padding-top: 10px;
-}
-
-:global(body[data-angmoo-desktop-window="phone"]) .root {
-  width: 100vw;
-  height: 100dvh;
-  min-height: 0;
-  align-items: stretch;
-  padding: 0;
-  background: transparent;
-}
-
-@media (max-width: 479px) {
-  .root {
-    padding: 0;
-  }
 }

@@ -12,7 +12,7 @@
         "ADAPTED"
       ],
       "path": "frontend/src/components/app-shell.tsx",
-      "sha256": "33df693c7d3821aaf051728f081a6ef45dbf2cb2a65d61caa382ce4faebfc18e"
+      "sha256": "3b7bc14f7e93c986fc6d3cd0216125b8cea1809971e510c8327b5cfee2a377bc"
     },
     {
       "classifications": [
@@ -26,7 +26,7 @@
         "DIRECT"
       ],
       "path": "frontend/src/components/post-detail-client.tsx",
-      "sha256": "55570797daf6e6113f6e64742a43479992b5c75fadf0c890abbe8eb47ef134f9"
+      "sha256": "a30a1f1f13ec5c0a355b84b3cd53911febbe8857141d442187c61927abdef3f2"
     },
     {
       "classifications": [
@@ -46,8 +46,15 @@
       "classifications": [
         "LOCAL"
       ],
+      "path": "frontend/src/features/device-shell/ui/device-shell.tsx",
+      "sha256": "bb87a2e7795012caea77982ed758c06af579b4b16713114ac70b1af4611b83d0"
+    },
+    {
+      "classifications": [
+        "LOCAL"
+      ],
       "path": "frontend/src/features/relationships/ui/relationship-graph-client.tsx",
-      "sha256": "b6f7c262cae4c681090d59a8d32de3929be801eef5b7b182877ea5893a724ebf"
+      "sha256": "ca31514a532e7bbbb8225040985058a5287475d22689b78e29627a8eb0053594"
     },
     {
       "classifications": [
@@ -68,14 +75,14 @@
         "DIRECT"
       ],
       "path": "frontend/src/features/social/ui/mentioned-text.tsx",
-      "sha256": "2f6054cbc0d11d05014b035b37dbc74b6ffd70acce6fe26961a6a9ea5a897602"
+      "sha256": "f02064771cbfb9f2ac4942b15724c1b818fd6989904f72ecb21fc7ee4779c1d4"
     },
     {
       "classifications": [
         "DIRECT"
       ],
       "path": "frontend/src/features/social/ui/post-list-client.tsx",
-      "sha256": "f08839094689bfead6c72378cc740a662363b9dde21b7edb4527003aa18b2dd8"
+      "sha256": "7c58e97b95a51bf1e6927af1a2e588cc78646dcd7399079dba30d82884aabd85"
     },
     {
       "classifications": [
@@ -96,14 +103,14 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/world-app/ui/world-app.tsx",
-      "sha256": "eb4aa3cd225f8170f46397e692186d5d41b5db74d478a336451ac9b6eb9e0f87"
+      "sha256": "e3560d5f341699266f04a20a12c59529bb2148d532e98713c933f3641bcb753e"
     },
     {
       "classifications": [
         "DIRECT"
       ],
       "path": "frontend/src/shared/interaction/use-mobile-pull-to-refresh.ts",
-      "sha256": "b7773c744e5c569a6890e9845553bd1116ce44140fc79829e03045a9619a7c96"
+      "sha256": "756ad51b664285892de9d6cca1f589a0d55850a6cf7d8775dfc4d87ad92950ba"
     },
     {
       "classifications": [
@@ -134,7 +141,7 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "2ccfe8e736c2b7da5a6cd2f9165cea299586231a2eea8a7b32997ee4076585a5"
+        "sha256": "ce709d7a7749bf59c2783e3f68d524b06b430ade1fd3143eea4dc63743c72abf"
       },
       {
         "path": "browser-tests/semantic-foundation.visual.spec.ts",
@@ -142,12 +149,13 @@
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "da04aebe187666409beff16e2d02c2e40bb1ae270f9759bf2a3dd2abbf614813"
+        "sha256": "bc6fcf170d123334c9dd0e7372d31b8cafe5a2908191139488aa633c92fc99fe"
       }
     ],
     "static_direct_open_routes": [
       "/",
       "/studio",
+      "/studio/import",
       "/studio/worlds/new",
       "/studio/worlds/world-static-probe",
       "/worlds/world-static-probe",
@@ -159,6 +167,7 @@
       "/characters/character-static-probe/worlds/world-static-probe/autonomy-setup",
       "/characters/character-static-probe/worlds/world-static-probe/relationship-graph?provider=ladybug",
       "/agents/new",
+      "/agents",
       "/agents/character-static-probe",
       "/posts",
       "/posts/post-static-probe",
@@ -180,6 +189,8 @@
       "browser-tests/package.json",
       "browser-tests/playwright.visual.config.ts",
       "browser-tests/semantic-foundation.visual.spec.ts",
+      "browser-tests/static-product-shell.spec.ts",
+      "desktop/src-tauri/src/product_windows.rs",
       "docs/architecture/frontend-design-baseline.json",
       "docs/architecture/frontend-design-reference.md",
       "docs/architecture/frontend-product-shell.md",
@@ -190,8 +201,20 @@
       "frontend/scripts/serve-production.mjs",
       "frontend/src/app/icon.svg",
       "frontend/src/app/ui-foundation/page.tsx",
+      "frontend/src/components/app-shell.tsx",
+      "frontend/src/composition/static-product-router.tsx",
+      "frontend/src/features/device-shell/model/device-navigation.ts",
+      "frontend/src/features/device-shell/public.ts",
+      "frontend/src/features/device-shell/ui/device-shell.module.css",
+      "frontend/src/features/device-shell/ui/device-shell.tsx",
+      "frontend/src/features/device-shell/ui/local-device-navigation.tsx",
+      "frontend/src/features/device-shell/ui/local-product-link.module.css",
+      "frontend/src/features/device-shell/ui/local-product-link.tsx",
+      "frontend/src/features/relationships/ui/relationship-graph-frame.tsx",
       "frontend/src/features/ui-foundation/public.ts",
       "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
+      "frontend/src/shared/desktop/product-window.ts",
+      "frontend/src/shared/interaction/scroll-viewport.ts",
       "frontend/src/shared/ui/profile-avatar.tsx",
       "frontend/src/shared/ui/public.ts",
       "frontend/src/shared/ui/semantic-tokens.css",
@@ -201,21 +224,21 @@
     "forbidden_matches": []
   },
   "raw_colors": {
-    "files": 56,
-    "occurrences": 1894,
+    "files": 53,
+    "occurrences": 1860,
     "pattern": "#[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{5}|[0-9A-Fa-f]{3}|[0-9A-Fa-f])?\\b",
     "per_extension": {
       ".css": {
-        "files": 12,
-        "occurrences": 152
+        "files": 10,
+        "occurrences": 145
       },
       ".ts": {
         "files": 1,
         "occurrences": 2
       },
       ".tsx": {
-        "files": 43,
-        "occurrences": 1740
+        "files": 42,
+        "occurrences": 1713
       }
     },
     "per_file": [
@@ -434,25 +457,6 @@
           "#ffd7d7": 1,
           "#fff0ef": 3,
           "#fff5f5": 1
-        }
-      },
-      {
-        "occurrences": 27,
-        "path": "frontend/src/components/app-shell.tsx",
-        "values": {
-          "#101828": 1,
-          "#1f2937": 3,
-          "#667085": 5,
-          "#98a2b3": 1,
-          "#b7bfca": 1,
-          "#c0c6d0": 1,
-          "#e1e5eb": 1,
-          "#e8f7e8": 1,
-          "#eaedf2": 3,
-          "#f6f7f9": 4,
-          "#f9fafb": 1,
-          "#ff6b6b": 3,
-          "#fff0ef": 2
         }
       },
       {
@@ -956,15 +960,6 @@
         }
       },
       {
-        "occurrences": 3,
-        "path": "frontend/src/features/device-home/ui/device-home-shell.module.css",
-        "values": {
-          "#251818": 1,
-          "#8c706f": 1,
-          "#f4f5f7": 1
-        }
-      },
-      {
         "occurrences": 7,
         "path": "frontend/src/features/device-home/ui/device-home.module.css",
         "values": {
@@ -1097,14 +1092,6 @@
         }
       },
       {
-        "occurrences": 2,
-        "path": "frontend/src/features/world-app/ui/world-app-shell.module.css",
-        "values": {
-          "#8c706f": 1,
-          "#f4f5f7": 1
-        }
-      },
-      {
         "occurrences": 27,
         "path": "frontend/src/features/world-app/ui/world-app.module.css",
         "values": {
@@ -1211,11 +1198,10 @@
         }
       },
       {
-        "occurrences": 3,
+        "occurrences": 1,
         "path": "frontend/src/shared/ui/device-frame.module.css",
         "values": {
-          "#30343b": 2,
-          "#fff8f7": 1
+          "#30343b": 1
         }
       },
       {
@@ -1263,7 +1249,7 @@
       "#027a48": 6,
       "#039855": 1,
       "#05603a": 1,
-      "#101828": 244,
+      "#101828": 243,
       "#12b76a": 1,
       "#147a45": 3,
       "#15803d": 2,
@@ -1272,15 +1258,15 @@
       "#17834b": 1,
       "#1d2939": 3,
       "#1f2330": 1,
-      "#1f2937": 5,
-      "#251818": 5,
+      "#1f2937": 2,
+      "#251818": 4,
       "#252124": 2,
       "#257a38": 1,
       "#28613a": 1,
       "#292326": 3,
       "#2e9d5b": 1,
       "#302829": 1,
-      "#30343b": 2,
+      "#30343b": 1,
       "#344054": 116,
       "#3538cd": 1,
       "#3b82f6": 1,
@@ -1294,7 +1280,7 @@
       "#615655": 1,
       "#62595a": 1,
       "#655655": 1,
-      "#667085": 258,
+      "#667085": 253,
       "#6941c6": 1,
       "#6d6465": 2,
       "#716464": 1,
@@ -1312,11 +1298,10 @@
       "#8a5a00": 2,
       "#8a6f6d": 1,
       "#8c1520": 1,
-      "#8c706f": 2,
       "#8f3f3b": 2,
       "#8f4f4c": 1,
       "#8f8281": 1,
-      "#98a2b3": 60,
+      "#98a2b3": 59,
       "#9a3412": 1,
       "#9a5b13": 1,
       "#9c6d68": 2,
@@ -1333,12 +1318,10 @@
       "#b42318": 12,
       "#b45309": 3,
       "#b54708": 4,
-      "#b7bfca": 1,
       "#b7e4c7": 1,
       "#b7ebcd": 1,
       "#b8837f": 1,
       "#b96f69": 1,
-      "#c0c6d0": 1,
       "#c24141": 46,
       "#c7933d": 2,
       "#c7d7fe": 1,
@@ -1360,7 +1343,7 @@
       "#ded7f4": 1,
       "#dfe3e8": 2,
       "#e0bfbd": 1,
-      "#e1e5eb": 91,
+      "#e1e5eb": 90,
       "#e3d6d3": 1,
       "#e4a0a0": 2,
       "#e4e7ec": 5,
@@ -1372,10 +1355,10 @@
       "#e7bd54": 1,
       "#e8b6b0": 1,
       "#e8ecf2": 2,
-      "#e8f7e8": 2,
+      "#e8f7e8": 1,
       "#eadedc": 2,
       "#eaecf0": 2,
-      "#eaedf2": 80,
+      "#eaedf2": 77,
       "#ecfdf3": 5,
       "#edf0f4": 1,
       "#edf0f5": 1,
@@ -1397,14 +1380,14 @@
       "#f4ddad": 1,
       "#f4df28": 1,
       "#f4f3ff": 1,
-      "#f4f5f7": 3,
+      "#f4f5f7": 1,
       "#f4f7fb": 1,
       "#f5f1f1": 1,
       "#f5f8fc": 1,
       "#f5f8ff": 1,
       "#f5fbf6": 1,
       "#f6e9e7": 1,
-      "#f6f7f9": 46,
+      "#f6f7f9": 42,
       "#f79009": 3,
       "#f7d6d5": 1,
       "#f7ead8": 1,
@@ -1414,7 +1397,7 @@
       "#f8dfdc": 2,
       "#f8fafc": 2,
       "#f9df9b": 1,
-      "#f9fafb": 85,
+      "#f9fafb": 84,
       "#face": 1,
       "#fbfcfd": 4,
       "#fcfcfd": 1,
@@ -1424,7 +1407,7 @@
       "#ff4d4f": 3,
       "#ff5252": 17,
       "#ff5a32": 2,
-      "#ff6b6b": 175,
+      "#ff6b6b": 172,
       "#ff7a7a": 3,
       "#ff8a8a": 5,
       "#ff8f8f": 1,
@@ -1442,7 +1425,7 @@
       "#ffe4e4": 2,
       "#ffe5c2": 1,
       "#fff": 8,
-      "#fff0ef": 27,
+      "#fff0ef": 25,
       "#fff0f0": 1,
       "#fff1f0": 3,
       "#fff1f1": 2,
@@ -1459,7 +1442,7 @@
       "#fff8e8": 2,
       "#fff8ec": 2,
       "#fff8ed": 2,
-      "#fff8f7": 6,
+      "#fff8f7": 5,
       "#fff8f8": 1,
       "#fffaeb": 3,
       "#fffaf0": 1,
@@ -1469,10 +1452,10 @@
     }
   },
   "route_inventory": {
-    "known_gap_count": 5,
+    "known_gap_count": 0,
     "next_static_inventory": "docs/architecture/next-static-compatibility.json",
     "next_static_inventory_route_count": 40,
-    "next_static_inventory_sha256": "70654ec2869a6c5db03e21898624db5eabb991d88044f6a121507516f03dfb86",
+    "next_static_inventory_sha256": "5056ef763b238358117254f589ad0716cf4fce56ceca42cfb7b67a464157cc27",
     "reviewed_surface_count": 17
   },
   "schema_version": 1,
@@ -1498,7 +1481,7 @@
       {
         "path": "frontend/src/app/globals.css",
         "present": true,
-        "sha256": "7f1d3bb3751957194511b9a3bdcd4f79a8eb978e726a62c19d156062eb338d7d"
+        "sha256": "d7c98d3551dde61100ad5feb7413474f5038b315636d84c24d7947362c62a0af"
       },
       {
         "path": "frontend/src/app/ui-foundation/page.tsx",
@@ -1508,7 +1491,7 @@
       {
         "path": "frontend/src/composition/static-product-router.tsx",
         "present": true,
-        "sha256": "d7478f9753166d8c154b74ba84b9a390aba449772f822c2c7f043abf85f8ffb0"
+        "sha256": "64b0e47374bccd4931e96947f5e49aa56e1c1cbc046b17489938a0acf36066d3"
       },
       {
         "path": "frontend/src/features/ui-foundation/public.ts",
@@ -1563,7 +1546,7 @@
       {
         "path": "frontend/src/shared/ui/navigation.tsx",
         "present": true,
-        "sha256": "89703adaa9581997d41a8a4b7cd0dcddd0e3d8d07905436fceec5fc2da0f48a2"
+        "sha256": "db9cf4377c757f0f19201aad188d9066ea923f3cdf07be84c85bd7a4bf970aa4"
       },
       {
         "path": "frontend/src/shared/ui/profile-avatar.tsx",
@@ -1733,7 +1716,7 @@
       }
     },
     "screenshot_call_count": 1,
-    "status": "UI-B local technical closeout includes one reviewed semantic-foundation baseline; the full product visual corpus remains owned by UI-F.",
+    "status": "UI-C retains the single reviewed UI-B semantic-foundation baseline and adds behavior and fixed-viewport shell assertions without expanding the screenshot corpus; the full product visual corpus remains owned by UI-F.",
     "target_viewports": [
       "360x800",
       "390x844",

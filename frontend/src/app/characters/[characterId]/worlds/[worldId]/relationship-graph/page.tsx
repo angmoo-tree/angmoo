@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 
-import { AppShell } from "@/components/app-shell";
-import { RelationshipGraphClient } from "@/features/relationships/public";
+import {
+  RelationshipGraphClient,
+  RelationshipGraphFrame,
+} from "@/features/relationships/public";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 
 type PageProps = {
@@ -18,12 +20,12 @@ export const metadata: Metadata = {
 export default async function RelationshipGraphPage({ params }: PageProps) {
   const { characterId, worldId } = await params;
   return (
-    <AppShell>
+    <RelationshipGraphFrame>
       <RelationshipGraphClient
         characterId={characterId}
         worldId={worldId}
         provider="ladybug"
       />
-    </AppShell>
+    </RelationshipGraphFrame>
   );
 }

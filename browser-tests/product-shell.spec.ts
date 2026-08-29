@@ -165,6 +165,85 @@ test("canonical Home keeps the phone shell at 390px and handles zero World", asy
   expect(audit.writes).toEqual([]);
   expect(audit.providerCalls).toEqual([]);
 });
+
+test("Next nested product pages keep one shell-owned main landmark", async ({ page }) => {
+  await installBackendFixture(page, {
+    deviceWorlds: [WORLD_ALPHA],
+    studioWorlds: [WORLD_ALPHA],
+    worldReads: { [WORLD_ALPHA.world_id]: WORLD_ALPHA },
+  });
+
+  for (const route of [
+    "/angmoo-api",
+    "/licenses",
+    "/characters/character-probe/worlds/world-alpha/autonomy-setup",
+    "/characters/character-probe/worlds/world-alpha/relationship-graph",
+    "/studio/worlds/new",
+  ]) {
+    await page.goto(route);
+    await expect(page.locator("main")).toHaveCount(1);
+    await expect(page.locator("main main")).toHaveCount(0);
+  }
+});
+
+test("Next Phone routes share one centered frame, one scroll owner, and local navigation", async ({
+  page,
+}) => {
+  const audit = await installBackendFixture(page);
+
+  for (const viewport of [
+    { width: 360, height: 800 },
+    { width: 390, height: 844 },
+    { width: 436, height: 880 },
+    { width: 1440, height: 900 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto("/agents");
+
+    const frame = page.locator('[data-product-shell="device"]');
+    await expect(frame).toHaveCount(1);
+    await expect(page.locator('[data-device-shell="phone"]')).toHaveCount(1);
+    await expect(page.locator('[data-device-scroll-owner="true"]')).toHaveCount(1);
+    await expect(page.locator(".angmoo-left-rail, .angmoo-right-rail")).toHaveCount(0);
+
+    const navigation = page.getByRole("navigation", { name: "모바일 주요 메뉴" });
+    await expect(navigation.locator("a")).toHaveCount(4);
+    expect(
+      await navigation
+        .locator("a")
+        .evaluateAll((anchors) => anchors.map((anchor) => anchor.getAttribute("href"))),
+    ).toEqual(["/", "/posts", "/agents", "/settings"]);
+    await expect(navigation.locator('[aria-current="page"]')).toHaveCount(1);
+    await expect(navigation.locator('a[href="/agents"]')).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+
+    const geometry = await frame.evaluate((node) => {
+      const rect = node.getBoundingClientRect();
+      return {
+        documentOverflow:
+          document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        documentWidth: document.documentElement.clientWidth,
+        left: rect.left,
+        width: rect.width,
+      };
+    });
+    expect(geometry.documentOverflow).toBe(0);
+    expect(geometry.width).toBeLessThanOrEqual(436);
+    if (viewport.width <= 436) {
+      expect(Math.abs(geometry.width - geometry.documentWidth)).toBeLessThanOrEqual(1);
+    } else {
+      expect(
+        Math.abs(geometry.left - (geometry.documentWidth - geometry.width) / 2),
+      ).toBeLessThanOrEqual(1);
+    }
+  }
+
+  expect(audit.writes).toEqual([]);
+  expect(audit.providerCalls).toEqual([]);
+});
+
 test("wide browser keeps one phone device and exposes multiple launchable Worlds", async ({ page }) => {
   const audit = await installBackendFixture(page, {
     deviceWorlds: [WORLD_ALPHA, WORLD_BETA],
@@ -178,10 +257,32 @@ test("wide browser keeps one phone device and exposes multiple launchable Worlds
   expect(frame).not.toBeNull();
   expect(frame!.width).toBeLessThanOrEqual(436);
 
-  await page.keyboard.press("Tab");
+  await page.getByRole("link", { name: "설정 열기" }).focus();
   await expect(page.getByRole("link", { name: "설정 열기" })).toBeFocused();
   await page.keyboard.press("Tab");
   await expect(page.getByRole("link", { name: "Creator Studio 열기" })).toBeFocused();
+  expect(audit.writes).toEqual([]);
+  expect(audit.providerCalls).toEqual([]);
+});
+
+test("Next canonicalizes legacy Creator aliases without losing repeated query values", async ({
+  page,
+}) => {
+  const audit = await installBackendFixture(page);
+
+  await page.goto("/worlds/new?template=hero&tag=a&tag=b&empty=");
+  await expect(page).toHaveURL(
+    /\/studio\/worlds\/new\?template=hero&tag=a&tag=b&empty=$/,
+  );
+  await expect(page.locator('[data-product-shell="creator-studio"]')).toBeVisible();
+
+  await page.goto(
+    "/worlds/world-alpha/creator?tab=characters&focus=first&focus=second&empty=",
+  );
+  await expect(page).toHaveURL(
+    /\/studio\/worlds\/world-alpha\?tab=characters&focus=first&focus=second&empty=$/,
+  );
+  await expect(page.locator('[data-product-shell="creator-studio"]')).toBeVisible();
   expect(audit.writes).toEqual([]);
   expect(audit.providerCalls).toEqual([]);
 });
@@ -231,7 +332,11 @@ test("World App keeps the requested World boundary and never falls back", async 
   await page.goto("/worlds/world-foreign");
   await expect(page.getByRole("heading", { name: "이 World 앱을 열 수 없어요" })).toBeVisible();
   await expect(page.getByText(WORLD_ALPHA.name, { exact: true })).toHaveCount(0);
-  await expect(page.locator('main[data-product-surface="world-app"]')).toHaveCount(0);
+  await expect(page.locator('main[data-product-surface="world-app"]')).toHaveCount(1);
+  await expect(page.locator('[data-device-shell="phone"]')).toHaveCount(1);
+  await expect(page.locator('[data-device-scroll-owner="true"]')).toHaveCount(1);
+  await expect(page.getByRole("navigation", { name: "World 앱 기능" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Device Home", exact: true })).toBeVisible();
   expect(audit.writes).toEqual([]);
   expect(audit.providerCalls).toEqual([]);
 });

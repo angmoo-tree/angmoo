@@ -17,7 +17,11 @@ import {
   PRODUCT_ROUTES,
   relationshipGraphRoute,
 } from "@/shared/navigation/public";
-import { StatusBadge } from "@/shared/ui/public";
+import {
+  BottomNavigation,
+  StatusBadge,
+  type BottomNavigationItem,
+} from "@/shared/ui/public";
 import {
   getLocalWorldApp,
   getOwnerControlledActor,
@@ -88,8 +92,18 @@ export function WorldApp({ authStatus, postId, sectionId, worldId }: WorldAppPro
     return () => controller.abort();
   }, [authStatus, worldId]);
 
+  const activeSection =
+    WORLD_APP_SECTIONS.find((section) => section.id === sectionId) ?? WORLD_APP_SECTIONS[0];
+
   if (authStatus === "checking" || (authStatus === "authenticated" && loading)) {
-    return <WorldGate title="World 앱을 확인하는 중" description="owner 권한과 World 상태를 안전하게 확인하고 있어요." />;
+    return (
+      <WorldGate
+        activeSection={activeSection}
+        title="World 앱을 확인하는 중"
+        description="owner 권한과 World 상태를 안전하게 확인하고 있어요."
+        worldId={worldId}
+      />
+    );
   }
   if (authStatus === "unauthenticated") {
     const returnTo = worldAppSectionRoute(
@@ -98,10 +112,12 @@ export function WorldApp({ authStatus, postId, sectionId, worldId }: WorldAppPro
     );
     return (
       <WorldGate
+        activeSection={activeSection}
         title="로컬 owner 연결이 필요해요"
         description="owner session을 확인한 뒤 이 World 앱을 다시 엽니다."
         href={`/login?returnTo=${encodeURIComponent(returnTo)}`}
         linkLabel="owner 연결"
+        worldId={worldId}
       />
     );
   }
@@ -109,6 +125,7 @@ export function WorldApp({ authStatus, postId, sectionId, worldId }: WorldAppPro
     const unavailable = error instanceof WorldAppApiError && [403, 404].includes(error.status);
     return (
       <WorldGate
+        activeSection={activeSection}
         title={unavailable ? "이 World 앱을 열 수 없어요" : "World 앱을 불러오지 못했어요"}
         description={
           unavailable
@@ -117,21 +134,16 @@ export function WorldApp({ authStatus, postId, sectionId, worldId }: WorldAppPro
         }
         href={unavailable ? PRODUCT_ROUTES.deviceHome : PRODUCT_ROUTES.settings}
         linkLabel={unavailable ? "Device Home으로 돌아가기" : "설정 열기"}
+        worldId={worldId}
       />
     );
   }
-
-  const activeSection =
-    WORLD_APP_SECTIONS.find((section) => section.id === sectionId) ?? WORLD_APP_SECTIONS[0];
 
   return (
     <WorldAppShell
       navigation={<WorldNavigation activeSection={activeSection} worldId={worldId} />}
       status={
-        <Link className={styles.homeReturn} href={PRODUCT_ROUTES.deviceHome}>
-          <ArrowLeft size={16} aria-hidden="true" />
-          Device Home
-        </Link>
+        <WorldHomeReturn />
       }
       worldId={world.world_id}
       worldName={world.name}
@@ -154,23 +166,27 @@ function WorldNavigation({
   activeSection: WorldAppSection;
   worldId: string;
 }) {
+  const items: BottomNavigationItem[] = WORLD_APP_SECTIONS.map((section) => ({
+    href: worldAppSectionRoute(worldId, section),
+    icon: SECTION_ICONS[section.id],
+    id: section.id,
+    label: section.label,
+  }));
   return (
-    <nav className={styles.navigation} aria-label="World 앱 기능">
-      {WORLD_APP_SECTIONS.map((section) => (
-        <Link
-          aria-current={section.id === activeSection.id ? "page" : undefined}
-          className={`${styles.navItem} ${
-            section.id === activeSection.id ? styles.navItemActive : ""
-          }`}
-          href={worldAppSectionRoute(worldId, section)}
-          key={section.id}
-          title={section.description}
-        >
-          {SECTION_ICONS[section.id]}
-          <span>{section.label}</span>
-        </Link>
-      ))}
-    </nav>
+    <BottomNavigation
+      activeId={activeSection.id}
+      ariaLabel="World 앱 기능"
+      items={items}
+    />
+  );
+}
+
+function WorldHomeReturn() {
+  return (
+    <Link className={styles.homeReturn} href={PRODUCT_ROUTES.deviceHome}>
+      <ArrowLeft size={16} aria-hidden="true" />
+      Device Home
+    </Link>
   );
 }
 
@@ -255,23 +271,34 @@ function WorldSection({
 }
 
 function WorldGate({
+  activeSection,
   description,
   href,
   linkLabel,
   title,
+  worldId,
 }: {
+  activeSection: WorldAppSection;
   description: string;
   href?: string;
   linkLabel?: string;
   title: string;
+  worldId: string;
 }) {
   return (
-    <main className={styles.gate}>
-      <section role="status">
-        <h1>{title}</h1>
-        <p>{description}</p>
-        {href && linkLabel ? <Link href={href}>{linkLabel}</Link> : null}
+    <WorldAppShell
+      navigation={<WorldNavigation activeSection={activeSection} worldId={worldId} />}
+      status={<WorldHomeReturn />}
+      worldId={worldId}
+      worldName="World 앱"
+    >
+      <section className={styles.gate} role="status">
+        <div className={styles.gateCard}>
+          <h1>{title}</h1>
+          <p>{description}</p>
+          {href && linkLabel ? <Link href={href}>{linkLabel}</Link> : null}
+        </div>
       </section>
-    </main>
+    </WorldAppShell>
   );
 }

@@ -88,6 +88,13 @@
       "classification": "LOCAL",
       "hosted_blob_oid": null,
       "hosted_source": null,
+      "local_target": "frontend/src/features/device-shell/ui/device-shell.tsx",
+      "scope": "feature-owned Phone shell, one scroll owner, safe-area navigation, Browser centering, and Tauri frame suppression"
+    },
+    {
+      "classification": "LOCAL",
+      "hosted_blob_oid": null,
+      "hosted_source": null,
       "local_target": "frontend/src/features/device-home/ui/device-home.tsx",
       "scope": "Device launcher and Local runtime entry"
     },
@@ -176,33 +183,7 @@
   },
   "design_contract": "frontend/DESIGN.md",
   "documentation": "docs/architecture/frontend-design-reference.md",
-  "known_route_gaps": [
-    {
-      "gap_id": "rust-phone-allowlist-agents-index",
-      "owner_stage": "L4.5 UI-C",
-      "summary": "The React static router handles /agents, but the Rust Phone path allowlist does not."
-    },
-    {
-      "gap_id": "rust-phone-allowlist-world-post",
-      "owner_stage": "L4.5 UI-C",
-      "summary": "The React static router handles /worlds/{worldId}/posts/{postId}, but the Rust Phone path allowlist does not."
-    },
-    {
-      "gap_id": "static-direct-open-coverage",
-      "owner_stage": "L4.5 UI-C",
-      "summary": "Static direct-open ROUTES does not cover /studio/import or /agents even though the React static router handles both."
-    },
-    {
-      "gap_id": "static-shell-next-only-navigation",
-      "owner_stage": "L4.5 UI-C",
-      "summary": "The shared AppShell exposes Next-only destinations in the Tauri static profile and needs capability-driven navigation."
-    },
-    {
-      "gap_id": "browser-redirect-alias-divergence",
-      "owner_stage": "L4.5 UI-C",
-      "summary": "Browser redirect aliases /worlds/new and /worlds/{worldId}/creator do not have the same meaning in the static route resolver and must not be canonical navigation targets."
-    }
-  ],
+  "known_route_gaps": [],
   "local_base_commit": "e5e62aed69cb89b16b5870eb0854dd07752dc519",
   "policy_id": "angmoo-l4-5-frontend-design-contract-v1",
   "portable_contract_paths": [
@@ -212,6 +193,8 @@
     "browser-tests/package.json",
     "browser-tests/playwright.visual.config.ts",
     "browser-tests/semantic-foundation.visual.spec.ts",
+    "browser-tests/static-product-shell.spec.ts",
+    "desktop/src-tauri/src/product_windows.rs",
     "docs/architecture/frontend-design-baseline.json",
     "docs/architecture/frontend-design-reference.md",
     "docs/architecture/frontend-product-shell.md",
@@ -222,8 +205,20 @@
     "frontend/scripts/serve-production.mjs",
     "frontend/src/app/icon.svg",
     "frontend/src/app/ui-foundation/page.tsx",
+    "frontend/src/components/app-shell.tsx",
+    "frontend/src/composition/static-product-router.tsx",
+    "frontend/src/features/device-shell/model/device-navigation.ts",
+    "frontend/src/features/device-shell/public.ts",
+    "frontend/src/features/device-shell/ui/device-shell.module.css",
+    "frontend/src/features/device-shell/ui/device-shell.tsx",
+    "frontend/src/features/device-shell/ui/local-device-navigation.tsx",
+    "frontend/src/features/device-shell/ui/local-product-link.module.css",
+    "frontend/src/features/device-shell/ui/local-product-link.tsx",
+    "frontend/src/features/relationships/ui/relationship-graph-frame.tsx",
     "frontend/src/features/ui-foundation/public.ts",
     "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
+    "frontend/src/shared/desktop/product-window.ts",
+    "frontend/src/shared/interaction/scroll-viewport.ts",
     "frontend/src/shared/ui/profile-avatar.tsx",
     "frontend/src/shared/ui/public.ts",
     "frontend/src/shared/ui/semantic-tokens.css",
@@ -257,8 +252,8 @@
     "notice_decision": "The audited visual files come from first-party history already shared by hosted and Local before the Local GPL transition. UI-A copies no post-common hosted code, asset, icon, or font, so it adds no bundled Apache notice. Any later post-common hosted-only transplant requires a separate license-policy and notice decision before copying."
   },
   "raw_color_scan": {
-    "baseline_files": 56,
-    "baseline_occurrences": 1894,
+    "baseline_files": 53,
+    "baseline_occurrences": 1860,
     "baseline_status": "reviewed_ui_b",
     "extensions": [
       ".css",
@@ -268,6 +263,42 @@
     "pattern": "#[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{5}|[0-9A-Fa-f]{3}|[0-9A-Fa-f])?\\b",
     "report": "docs/architecture/frontend-design-baseline.json",
     "source_root": "frontend/src"
+  },
+  "device_shell": {
+    "bottom_navigation": {
+      "capability_source": "frontend/src/features/device-shell/model/device-navigation.ts",
+      "destinations": [
+        "/",
+        "/posts",
+        "/agents",
+        "/settings"
+      ],
+      "unsupported_next_only_destinations": [
+        "/angmoo-api",
+        "/licenses",
+        "/messages",
+        "/notifications",
+        "/profiles",
+        "/search",
+        "/tree"
+      ]
+    },
+    "compatibility_facade": "frontend/src/components/app-shell.tsx",
+    "feature_public_export": "frontend/src/features/device-shell/public.ts",
+    "owner_stage": "L4.5 UI-C",
+    "product_shell": "frontend/src/features/device-shell/ui/device-shell.tsx",
+    "shared_neutral_primitive": "frontend/src/shared/ui/device-frame.tsx",
+    "single_scroll_owner_marker": "data-device-scroll-owner=\"true\"",
+    "tauri_titlebar_exclusion": {
+      "marker": "data-device-titlebar-inset=\"true\"",
+      "minimum_css_px": 44,
+      "owner": "frontend/src/shared/ui/device-frame.tsx",
+      "regression": "browser-tests/static-product-shell.spec.ts"
+    },
+    "wide_shell_exceptions": [
+      "creator-studio",
+      "relationship-graph"
+    ]
   },
   "required_markers": {
     ".github/workflows/ci.yml": [
@@ -304,9 +335,42 @@
       "index: false",
       "SemanticFoundationFixture"
     ],
+    "frontend/src/components/app-shell.tsx": [
+      "Compatibility facade for legacy route wrappers",
+      "from \"@/features/device-shell/public\"",
+      "surface=\"local-phone\""
+    ],
     "frontend/src/composition/static-product-router.tsx": [
+      "StaticCanonicalRouteRedirect",
       "pathname === \"/ui-foundation\"",
       "SemanticFoundationFixture"
+    ],
+    "frontend/src/features/device-shell/model/device-navigation.ts": [
+      "LOCAL_DEVICE_NAVIGATION",
+      "LOCAL_PRODUCT_ROUTE_CAPABILITIES",
+      "exposure: \"hidden\"",
+      "isStaticLocalProductRouteSupported"
+    ],
+    "frontend/src/features/device-shell/public.ts": [
+      "DeviceShell",
+      "LOCAL_PRODUCT_ROUTE_CAPABILITIES",
+      "LocalDeviceNavigation",
+      "LocalProductLink"
+    ],
+    "frontend/src/features/device-shell/ui/device-shell.tsx": [
+      "DeviceFrame",
+      "data-device-shell=\"phone\"",
+      "navigation?: ReactNode"
+    ],
+    "frontend/src/features/device-shell/ui/local-product-link.module.css": [
+      "--color-state-disabled",
+      "cursor: not-allowed"
+    ],
+    "frontend/src/features/device-shell/ui/local-product-link.tsx": [
+      "aria-disabled=\"true\"",
+      "data-product-route-unavailable=\"true\"",
+      "isStaticFrontendProfile",
+      "isStaticLocalProductRouteSupported"
     ],
     "frontend/src/features/ui-foundation/public.ts": [
       "SemanticFoundationFixture"
@@ -360,6 +424,11 @@
       "export function StatusBadge",
       "import { StatusChip, type StatusChipTone } from \"./status\";"
     ],
+    "frontend/src/shared/desktop/product-window.ts": [
+      "canonicalProductRoute",
+      "pathname === \"/worlds/new\"",
+      "pathname.match(/^\\/worlds\\/([^/]+)\\/creator$/)"
+    ],
     "frontend/scripts/serve-production.mjs": [
       "const standaloneRoot = join(frontendRoot, \".next\", \"standalone\");",
       "cpSync(join(frontendRoot, \"src\", \"app\", \"icon.svg\"), join(targetPublic, \"icon.svg\"));",
@@ -392,6 +461,16 @@
       "img[src=\"/icon.svg\"]",
       "semantic-foundation-phone.png",
       "toHaveScreenshot("
+    ],
+    "browser-tests/static-product-shell.spec.ts": [
+      "\"/agents\"",
+      "\"/studio/import\"",
+      "static Browser canonicalizes legacy World creator aliases"
+    ],
+    "desktop/src-tauri/src/product_windows.rs": [
+      "[\"posts\", id] | [\"agents\", id]",
+      "[\"settings\"] | [\"login\"] | [\"posts\"] | [\"agents\"]",
+      "[\"worlds\", world_id, \"posts\", post_id]"
     ]
   },
   "route_surface_inventory": [
@@ -416,7 +495,7 @@
       "product_surface": "creator-studio-import",
       "route_family": "/studio/import",
       "shell": "wide",
-      "static_support": "declared_not_direct_open_tested",
+      "static_support": "declared_and_direct_open_tested",
       "window_kind": "studio"
     },
     {
@@ -456,7 +535,7 @@
       "product_surface": "world-post-thread",
       "route_family": "/worlds/{worldId}/posts/{postId}",
       "shell": "phone",
-      "static_support": "react_declared_rust_phone_allowlist_gap",
+      "static_support": "declared_and_direct_open_tested",
       "window_kind": "phone"
     },
     {
@@ -464,7 +543,7 @@
       "product_surface": "agents-dashboard",
       "route_family": "/agents",
       "shell": "phone",
-      "static_support": "react_declared_rust_phone_allowlist_and_direct_open_test_gap",
+      "static_support": "declared_and_direct_open_tested",
       "window_kind": "phone"
     },
     {
@@ -602,7 +681,7 @@
   "screenshot_inventory": {
     "baseline_call_count": 1,
     "committed_baseline_count": 1,
-    "current_status": "UI-B local technical closeout includes one reviewed semantic-foundation baseline; the full product visual corpus remains owned by UI-F.",
+    "current_status": "UI-C retains the single reviewed UI-B semantic-foundation baseline and adds behavior and fixed-viewport shell assertions without expanding the screenshot corpus; the full product visual corpus remains owned by UI-F.",
     "target_viewports": [
       "360x800",
       "390x844",

@@ -6,6 +6,33 @@ export const PRODUCT_ROUTES = {
   studioNewWorld: "/studio/worlds/new",
 } as const;
 
+export type ProductRouteSearchParams = Readonly<
+  Record<string, string | string[] | undefined>
+>;
+
+export function productRouteWithSearchParams(
+  pathname: string,
+  searchParams: ProductRouteSearchParams,
+): string {
+  const query = new URLSearchParams();
+
+  for (const [key, value] of Object.entries(searchParams)) {
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        query.append(key, item);
+      }
+      continue;
+    }
+
+    if (value !== undefined) {
+      query.append(key, value);
+    }
+  }
+
+  const serialized = query.toString();
+  return serialized ? `${pathname}?${serialized}` : pathname;
+}
+
 export function worldAppRoute(worldId: string): string {
   return `/worlds/${encodeURIComponent(worldId)}`;
 }

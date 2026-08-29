@@ -379,7 +379,10 @@ export function WorldCreatorClient({ worldId }: { worldId?: string }) {
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f8fa] px-4 py-8 md:px-8">
+    <div
+      className="min-h-screen bg-[#f7f8fa] px-4 py-8 md:px-8"
+      data-product-content="creator-studio-world"
+    >
       <div className="mx-auto max-w-6xl space-y-6">
         <header className="overflow-hidden rounded-[28px] border border-[#e1e5eb] bg-white shadow-sm">
           {worldBannerUrl ? (
@@ -532,7 +535,7 @@ export function WorldCreatorClient({ worldId }: { worldId?: string }) {
           </aside>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
 

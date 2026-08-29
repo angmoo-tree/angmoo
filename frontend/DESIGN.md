@@ -3,9 +3,9 @@ name: Angmoo Local
 document: Frontend Design Contract
 version: 1.2
 date: 2026-08-29
-status: CANONICAL DESIGN CONTRACT · UI-A/UI-B LOCAL TECH CLOSEOUT COMPLETE · CURRENT UI CONFORMANCE INCOMPLETE
+status: CANONICAL DESIGN CONTRACT · UI-A/UI-B PASS · UI-C IMPLEMENTED WITH GATES PENDING · CURRENT UI CONFORMANCE INCOMPLETE
 scope: Device Phone · World App · Creator Studio · Relationship Graph · current L4 surfaces
-implementation_phase: L4.5 UI-A and UI-B local tech complete · UI-C through UI-F not started
+implementation_phase: L4.5 UI-A and UI-B merged · UI-C Phone shell and route contract implemented with local/external Gates pending · UI-D through UI-F not started
 hosted_reference_commit: 7f967abd6117381be5c081ed284addb889b06fec
 local_reference_commit: e5e62aed69cb89b16b5870eb0854dd07752dc519
 legacy_reference: audited-internal-snapshot
@@ -24,8 +24,9 @@ legacy_reference_dependency: none
 DESIGN CONTRACT: CANONICAL
 CURRENT IMPLEMENTATION CONFORMANCE: INCOMPLETE
 L4.5 UI-A DESIGN CONTRACT CLOSEOUT: COMPLETE
-L4.5 UI-B SEMANTIC TOKEN·PRIMITIVE FOUNDATION: LOCAL TECH COMPLETE
-L4.5 UI-C~UI-F PRODUCT CONVERGENCE: NOT STARTED
+L4.5 UI-B SEMANTIC TOKEN·PRIMITIVE FOUNDATION: COMPLETE
+L4.5 UI-C PHONE SHELL·NAVIGATION·ROUTE PARITY: IMPLEMENTED · GATES PENDING
+L4.5 UI-D~UI-F PRODUCT CONVERGENCE: NOT STARTED
 ```
 
 ---
@@ -222,11 +223,11 @@ backend payload와 현재 제품 계약에 있는 기능만 interactive하게 �
 
 | Surface | Product kind | Shell | 기본 layout | 현재 Tauri window kind |
 |---|---|---|---|---|
-| Device Home | Device | `DeviceFrame` | Phone | `phone` |
-| World Home·Feed·Chat·Characters | World App | `WorldAppShell` + `DeviceFrame` | Phone | `phone` |
-| 내 앵무·Character·Settings·compatibility routes | Device | 공통 Device shell로 수렴 | Phone | `phone` |
+| Device Home | Device | `DeviceShell` → `DeviceFrame` | Phone | `phone` |
+| World Home·Feed·Chat·Characters | World App | `DeviceShell` → `DeviceFrame` | Phone | `phone` |
+| 내 앵무·Character·Settings·compatibility routes | Device | `AppShell` compatibility facade → `DeviceShell` | Phone | `phone` |
 | Creator Studio | Workspace | `CreatorStudioFrame` | Wide | `studio` |
-| Relationship Graph | Workspace | graph workspace로 수렴 | Wide | `relationship-graph` |
+| Relationship Graph | Workspace | `RelationshipGraphFrame` | Wide | `relationship-graph` |
 
 Memory·Diagnostics·Backup은 미래 wide 후보일 뿐 현재 Tauri window kind가 구현된 것으로 기록하지 않는다. 해당 단계가 실제 route·window 계약을 만들 때 이 matrix를 갱신한다.
 
@@ -270,6 +271,26 @@ Browser desktop에서만 product를 이해시키기 위한 얇은 Device frame�
 ```
 
 viewport media query만으로 Device를 desktop multi-column로 전환하지 않는다. `data-angmoo-desktop-window="phone"`, `data-product-shell="device"`, `data-product-surface`가 우선한다.
+
+### 4.5 UI-C shell ownership
+
+UI-C는 shell을 다음 세 층으로 고정한다.
+
+```text
+shared/ui/DeviceFrame
+  = product-neutral frame + one scroll owner
+
+features/device-shell/DeviceShell
+  = Local Phone product chrome + Browser/Tauri layout + navigation slot
+
+components/AppShell
+  = 기존 route wrapper를 위한 compatibility facade
+  = 자체 rail·route matrix를 소유하지 않음
+```
+
+Creator Studio와 Relationship Graph는 각각 wide workspace를 유지하며
+`DeviceShell` 안에 중첩하지 않는다. 일반 Phone route만 이 공통 shell을
+사용한다.
 
 ---
 
@@ -456,6 +477,11 @@ Phone behavior
 - 항목이 많으면 가로 overflow를 허용하되 현재 route를 보이게 함
 - route 목록은 hosted를 복사하지 않고 Local product navigation에서 결정
 - static router가 처리하지 않는 link를 조용히 노출하지 않음
+
+UI-C 현재 제품 destination은 `홈 /`, `피드 /posts`, `내 앵무 /agents`,
+`설정 /settings` 네 개다. 이 목록은
+`features/device-shell/model/device-navigation.ts`가 소유하며 현재 route에
+정확히 하나의 `aria-current`를 제공한다.
 
 ### 8.3 Button and IconButton
 
@@ -727,6 +753,17 @@ D. 안전한 외부 Browser destination
 
 static router가 처리하지 않는 route를 visual parity 때문에 그대로 노출하지 않는다. broken route가 있으면 shell Gate는 FAIL이다.
 
+UI-C의 현재 판정:
+
+- bottom navigation 네 route는 Next와 static에서 모두 지원한다.
+- World App과 World Post detail은 Phone direct route다.
+- Creator Studio와 Relationship Graph는 각각 `studio`와
+  `relationship-graph` wide window다.
+- search·notifications·messages·profiles·tree·licenses·API guide는
+  Next-only이므로 Local Phone navigation에서 숨긴다.
+- `/worlds/new`와 `/worlds/{worldId}/creator`는 canonical Studio route로
+  먼저 정규화하며, `new`를 동적 World ID로 해석하지 않는다.
+
 ### 12.4 Cross-window navigation
 
 - Phone→Studio: `studio` window
@@ -903,16 +940,18 @@ hosted 구현을 이식할 때 PR에 다음을 기록한다.
 
 ## 18. 현재 conformance와 목표 판정
 
-UI-B local technical closeout 시점의 현재 구현:
+UI-C 구현 snapshot 시점의 현재 상태:
 
 - hosted 계열 전체 Feed·Post detail·Profile·내 앵무 component가 Local에 상당 부분 존재한다.
 - Local `WorldSocialFeed`는 L4 검증용 form/card 중심 최소 UI라 hosted mature Feed와 시각 anatomy가 다르다.
 - `shared/ui/semantic-tokens.css`가 palette·text·border·action·state·type·spacing·radius·elevation·motion의 semantic source of truth를 제공하며 `globals.css`의 기존 Tailwind alias도 같은 역할로 연결한다.
 - `shared/ui/public.ts`를 통해 Button·form control·surface·Avatar·Badge·StatusChip·Tabs·PageHeader·BottomNavigation·Dialog·feedback state primitive를 공개한다.
 - World Package export/import가 실제 shared primitive 소비자로 전환됐고 기존 `ProfileAvatar`·`StatusBadge`는 compatibility bridge로 새 primitive를 사용한다.
-- Device Home·World App·Creator Studio·Relationship Graph와 hosted 계열 social presentation 전체의 semantic token·shared component 적용은 아직 불완전하며 UI-C~UI-E가 소유한다.
-- raw style 기준선은 UI-A placeholder 59 files·1,938 occurrences에서 reviewed UI-B baseline 56 files·1,894 occurrences로 감소했지만, 이 수치는 남은 migration inventory이지 전역 conformance PASS가 아니다.
-- Next App Router와 Tauri static router가 같은 feature source를 일부 공유하지만 route matrix를 완전히 닫아야 한다.
+- Device Home·World App·일반 compatibility route는 하나의 feature-owned `DeviceShell`로 수렴했고 Creator Studio와 Relationship Graph는 dedicated wide shell을 유지한다.
+- hosted 계열 social presentation과 Character/autonomy·Local-only 개별 화면의 semantic token·shared component 적용은 아직 불완전하며 UI-D와 UI-E가 소유한다.
+- raw style 기준선은 UI-A placeholder 59 files·1,938 occurrences에서 UI-B 56 files·1,894 occurrences를 거쳐 UI-C checker 측정 53 files·1,860 occurrences로 감소했지만, 이 수치는 남은 migration inventory이지 전역 conformance PASS가 아니다.
+- `features/device-shell/model/device-navigation.ts`가 Local Phone route capability를 소유하고 Next-only destination을 fail-closed로 숨긴다.
+- `/agents`, `/studio/import`, World Post detail direct-open과 두 legacy Studio alias의 static/window parity가 코드와 functional contract에 반영됐다.
 
 ### 18.1 UI-B local technical evidence
 
@@ -921,17 +960,33 @@ UI-B local technical closeout 시점의 현재 구현:
 - canonical visual baseline은 digest-pinned `mcr.microsoft.com/playwright:v1.62.1-noble` Ubuntu 24.04 container·Playwright 1.62.1 Chromium에서 436×880, DPR 1, `ko-KR`, `Asia/Seoul`, light color scheme, reduced motion으로 고정한다. Core CI host의 font package 차이가 baseline을 바꾸지 않도록 container digest까지 contract로 검사한다.
 - Next production과 static export는 `browser-tests/snapshots/ui-b/semantic-foundation-phone.png` 한 장을 공유하며 pixel parity와 keyboard·focus·contrast·dialog·reduced-motion behavior를 함께 검증한다.
 - fixture asset은 first-party `/icon.svg`만 사용하고 remote font·image·runtime network dependency를 만들지 않는다.
-- UI-B는 backend·API·schema·migration·scheduler 의미, 제품 shell·route destination, social presentation, Local-only 전체 화면을 변경하지 않는다.
-- 사용자 design review·Issue·push·Draft PR·Hosted CI·merge와 UI-C~UI-F는 별도 Gate로 남는다.
+- UI-B는 backend·API·schema·migration·scheduler 의미, 제품 shell·route destination, social presentation, Local-only 전체 화면을 변경하지 않았다.
+- UI-A와 UI-B는 merge 및 post-merge Gate를 통과했다.
+
+### 18.2 UI-C implementation evidence and remaining Gates
+
+- neutral `DeviceFrame`은 frame과 단일 scroll owner만 제공하고 product route를 선택하지 않는다.
+- `features/device-shell`이 page-owned optional header slot, safe-area bottom navigation, Browser 중앙 Phone, 모바일·Tauri full-viewport Phone을 소유하며 compatibility shell이 페이지 위에 generic header를 중복 주입하지 않는다.
+- Tauri Phone은 page-owned header 유무와 관계없이 native 창 이동·최소화·닫기 controls 아래에 최소 44 CSS px의 titlebar exclusion 영역을 예약한다. 핵심 CTA·상태 badge·텍스트는 이 영역과 겹치면 안 된다.
+- Phone·Creator Studio·Relationship Graph 제품 shell은 각각 `main` landmark를 하나만 소유하고, 내부 page/client는 `section` 또는 `div` content container를 사용한다.
+- static/Tauri에서 지원하지 않는 Next-only 목적지는 클릭 가능한 모양을 유지하지 않는다. `aria-disabled`·unavailable 안내·비활성 cursor/color를 함께 제공하고 상위 clickable row로 event가 전파되지 않게 한다.
+- 기존 `AppShell`은 `DeviceShell`에 위임하는 compatibility facade이며 hosted three-column rail을 더 이상 렌더링하지 않는다.
+- `LocalProductLink`는 Next-only profile·message·hosted 문서 destination을 static/Tauri에서 inert presentation으로 축소해 clickable not-found route를 노출하지 않는다.
+- Feed·Character profile pagination과 pull-to-refresh는 단일 Device scroll owner를 우선 사용하며 shell 없는 compatibility 화면에서만 `window` fallback을 사용한다.
+- Rust Phone allowlist가 `/agents`와 `/worlds/{worldId}/posts/{postId}`를 수용하고 reserved World ID `new`를 거부한다.
+- Relationship Graph는 `RelationshipGraphFrame`을 통해 wide window를 유지하고 Phone frame을 중첩하지 않는다.
+- static direct-open·반복·빈 query를 보존하는 alias canonicalization·Phone fixed-width·overflow·navigation·inner-scroll pagination·unsupported-link assertions을 기존 Playwright graph에 추가하되 UI-B screenshot은 한 장으로 유지한다.
+- 이 snapshot은 구현 계약을 기록한다. UI-C local full technical Gate, Issue·Draft PR·Hosted CI, 사용자 Gate와 merge는 실제 결과가 기록될 때까지 pending이다.
 
 따라서 현재 허용되는 판정:
 
 ```text
 ANGMOO LOCAL DESIGN CONTRACT ESTABLISHED
 UI-A DESIGN CONTRACT CLOSEOUT PASS
-UI-B SEMANTIC TOKEN·PRIMITIVE FOUNDATION LOCAL TECH PASS
-UI-C~UI-F PRODUCT CONVERGENCE NOT STARTED
-USER DESIGN REVIEW / EXTERNAL LIFECYCLE PENDING
+UI-B SEMANTIC TOKEN·PRIMITIVE FOUNDATION PASS
+UI-C PHONE SHELL·NAVIGATION·ROUTE PARITY IMPLEMENTED / GATES PENDING
+UI-D~UI-F PRODUCT CONVERGENCE NOT STARTED
+UI-C USER DESIGN REVIEW / EXTERNAL LIFECYCLE PENDING
 ```
 
 token·shell·social core·Local-only surface·visual/runtime Gate와 사용자 승인을 모두 통과한 뒤에만 허용되는 판정:
