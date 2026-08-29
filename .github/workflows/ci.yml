@@ -162,17 +162,8 @@ jobs:
         run: pnpm exec playwright test --config playwright.static.config.ts
         working-directory: browser-tests
       - name: Verify UI-B production and static visual parity
-        id: ui_b_visual
         run: pnpm test:visual
         working-directory: browser-tests
-      - name: Upload UI-B visual failure artifacts
-        if: ${{ failure() && steps.ui_b_visual.outcome == 'failure' }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: ui-b-visual-${{ github.run_id }}-${{ github.run_attempt }}
-          path: browser-tests/test-results/visual
-          if-no-files-found: ignore
-          retention-days: 7
       - name: Reject remote build-time dependencies
         shell: bash
         run: |
