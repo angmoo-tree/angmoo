@@ -1,0 +1,170 @@
+@theme {
+  /* UI-B canonical semantic palette. Raw values live here once; consumers use roles. */
+  --color-canvas: #f6f7f9;
+  --color-surface: #ffffff;
+  --color-surface-subtle: #f9fafb;
+  --color-surface-muted: #f2f4f7;
+  --color-surface-warm: #fff8f7;
+
+  --color-text-strong: #101828;
+  --color-text-default: #475467;
+  --color-text-secondary: #667085;
+  --color-text-muted: #98a2b3;
+
+  --color-border-default: #eaedf2;
+  --color-border-control: #e1e5eb;
+  --color-border-subtle: #eef1f5;
+  --color-border-interactive: #667085;
+
+  --color-brand-accent: #ff6b6b;
+  --color-brand-accent-hover: #ff5252;
+  --color-brand-soft: #fff0ef;
+  --color-brand-soft-border: #ffb5b5;
+  --color-action-primary: #ae2f34;
+  --color-action-primary-hover: #8c1520;
+  --color-action-dark: #101828;
+  --color-action-dark-hover: color-mix(in srgb, var(--color-action-dark) 88%, white);
+  --color-indicator-active: var(--color-action-primary);
+
+  --color-state-success: #147a45;
+  --color-state-success-surface: #f0fbf5;
+  --color-state-success-border: #d9f2e5;
+  --color-state-running: #175cd3;
+  --color-state-running-surface: #eff8ff;
+  --color-state-running-border: #b2ddff;
+  --color-state-warning: #b54708;
+  --color-state-warning-surface: #fffaeb;
+  --color-state-warning-border: #fedf89;
+  --color-state-degraded: #6941c6;
+  --color-state-degraded-surface: #f4f3ff;
+  --color-state-degraded-border: #d9d6fe;
+  --color-state-danger: #c24141;
+  --color-state-danger-hover: color-mix(in srgb, var(--color-state-danger) 86%, black);
+  --color-state-danger-surface: #fff5f5;
+  --color-state-danger-border: #ffd7d7;
+  --color-state-disabled: #98a2b3;
+  --color-state-disabled-surface: #f2f4f7;
+  --color-state-disabled-border: #e1e5eb;
+
+  /* Transitional aliases keep pre-UI-B pages buildable while UI-C-E adopt roles. */
+  --color-background: var(--color-canvas);
+  --color-on-background: var(--color-text-strong);
+  --color-surface-dim: var(--color-border-default);
+  --color-surface-bright: var(--color-surface);
+  --color-surface-container-lowest: var(--color-surface);
+  --color-surface-container-low: var(--color-surface-subtle);
+  --color-surface-container: var(--color-surface-muted);
+  --color-surface-container-high: var(--color-brand-soft);
+  --color-surface-container-highest: var(--color-brand-soft-border);
+  --color-on-surface: var(--color-text-strong);
+  --color-on-surface-variant: var(--color-text-secondary);
+  --color-inverse-surface: var(--color-action-dark);
+  --color-inverse-on-surface: var(--color-surface);
+  --color-outline: var(--color-text-muted);
+  --color-outline-variant: var(--color-border-default);
+  --color-surface-tint: var(--color-action-primary);
+  --color-primary: var(--color-action-primary);
+  --color-on-primary: var(--color-surface);
+  --color-primary-container: var(--color-brand-accent);
+  --color-on-primary-container: var(--color-text-strong);
+  --color-inverse-primary: var(--color-brand-soft-border);
+  --color-secondary: var(--color-state-warning);
+  --color-on-secondary: var(--color-surface);
+  --color-secondary-container: var(--color-state-warning-surface);
+  --color-on-secondary-container: var(--color-state-warning);
+  --color-tertiary: var(--color-state-running);
+  --color-on-tertiary: var(--color-surface);
+  --color-tertiary-container: var(--color-state-running-surface);
+  --color-on-tertiary-container: var(--color-state-running);
+  --color-error: var(--color-state-danger);
+  --color-on-error: var(--color-surface);
+  --color-error-container: var(--color-state-danger-surface);
+  --color-on-error-container: var(--color-state-danger);
+  --color-primary-fixed: var(--color-brand-soft);
+  --color-primary-fixed-dim: var(--color-brand-soft-border);
+  --color-on-primary-fixed: var(--color-text-strong);
+  --color-on-primary-fixed-variant: var(--color-action-primary);
+  --color-secondary-fixed: var(--color-state-warning-surface);
+  --color-secondary-fixed-dim: var(--color-state-warning-border);
+  --color-on-secondary-fixed: var(--color-text-strong);
+  --color-on-secondary-fixed-variant: var(--color-state-warning);
+  --color-tertiary-fixed: var(--color-state-running-surface);
+  --color-tertiary-fixed-dim: var(--color-state-running-border);
+  --color-on-tertiary-fixed: var(--color-text-strong);
+  --color-on-tertiary-fixed-variant: var(--color-state-running);
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+
+  --text-display: 2.25rem;
+  --text-display--line-height: 2.75rem;
+  --text-display--font-weight: 800;
+  --text-page-title: 1.75rem;
+  --text-page-title--line-height: 2.25rem;
+  --text-page-title--font-weight: 800;
+  --text-section-title: 1.5rem;
+  --text-section-title--line-height: 2rem;
+  --text-section-title--font-weight: 800;
+  --text-card-title: 1.25rem;
+  --text-card-title--line-height: 1.75rem;
+  --text-card-title--font-weight: 800;
+  --text-feed-author: 1.125rem;
+  --text-feed-author--line-height: 1.5rem;
+  --text-feed-author--font-weight: 800;
+  --text-feed-body: 1.125rem;
+  --text-feed-body--line-height: 1.75rem;
+  --text-body: 1rem;
+  --text-body--line-height: 1.5rem;
+  --text-body-small: 0.9375rem;
+  --text-body-small--line-height: 1.5rem;
+  --text-meta: 0.875rem;
+  --text-meta--line-height: 1.25rem;
+  --text-label: 0.8125rem;
+  --text-label--line-height: 1.125rem;
+  --text-label--font-weight: 750;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1rem;
+
+  --spacing-micro: 4px;
+  --spacing-compact: 8px;
+  --spacing-control: 12px;
+  --spacing-phone: 16px;
+  --spacing-dense: 20px;
+  --spacing-section: 24px;
+  --spacing-stream: 28px;
+  --spacing-major: 32px;
+  --spacing-hero: 48px;
+  --spacing-xs: var(--spacing-micro);
+  --spacing-base: var(--spacing-compact);
+  --spacing-sm: var(--spacing-control);
+  --spacing-md: var(--spacing-section);
+  --spacing-lg: var(--spacing-hero);
+  --spacing-gutter: var(--spacing-phone);
+
+  --radius-control: 8px;
+  --radius-field: 18px;
+  --radius-reference-card: 20px;
+  --radius-card: 24px;
+  --radius-dialog: 28px;
+  --radius-feature: 32px;
+  --radius-pill: 9999px;
+  --radius-sm: var(--radius-control);
+  --radius-md: var(--radius-card);
+  --radius-lg: var(--radius-feature);
+  --radius-xl: var(--radius-feature);
+  --radius-full: var(--radius-pill);
+
+  --shadow-summary: 0 10px 28px rgb(16 24 40 / 8%);
+  --shadow-dialog: 0 24px 64px rgb(16 24 40 / 22%);
+  --shadow-action: 0 8px 20px rgb(196 50 59 / 20%);
+  --shadow-device: 0 28px 80px rgb(16 24 40 / 18%);
+}
+
+:root {
+  --focus-ring-color: var(--color-state-running);
+  --focus-ring: 0 0 0 3px var(--focus-ring-color);
+  --motion-fast: 140ms;
+  --motion-standard: 180ms;
+  --sticky-surface: color-mix(in srgb, var(--color-surface) 90%, transparent);
+  --dialog-overlay: rgb(16 24 40 / 46%);
+}

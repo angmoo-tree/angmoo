@@ -4,6 +4,7 @@ import { AlertTriangle, CheckCircle2, FileArchive, Loader2, RotateCcw, ShieldChe
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
+import { Button, Card, InlineError, Select } from "@/shared/ui/public";
 import {
   commitWorldPackageImport,
   discardWorldPackageImport,
@@ -121,7 +122,7 @@ export function WorldPackageImportClient({
       </header>
 
       {!result ? (
-        <section className="rounded-[28px] border border-[#e1e5eb] bg-white p-6 shadow-sm md:p-8">
+        <Card as="section" elevated>
           <label className="flex cursor-pointer flex-col items-center rounded-[24px] border-2 border-dashed border-[#d0d5dd] bg-[#f9fafb] px-6 py-10 text-center hover:border-[#ff9b9b]">
             {pending === "stage" ? <Loader2 className="size-9 animate-spin text-[#ff6b6b]" /> : <FileArchive className="size-9 text-[#ff6b6b]" />}
             <strong className="mt-4 text-lg text-[#101828]">.angmoo-world 파일 선택</strong>
@@ -135,7 +136,7 @@ export function WorldPackageImportClient({
               type="file"
             />
           </label>
-        </section>
+        </Card>
       ) : null}
 
       {prepared ? (
@@ -152,7 +153,7 @@ export function WorldPackageImportClient({
       ) : null}
 
       {result ? <ImportSuccess result={result} /> : null}
-      {error ? <p className="rounded-[20px] bg-[#fff1f0] p-5 text-sm font-bold leading-6 text-[#b42318]" role="alert">{error}</p> : null}
+      {error ? <InlineError>{error}</InlineError> : null}
     </div>
   );
 }
@@ -171,7 +172,7 @@ function ImportPreview({ prepared, approved, duplicateStrategy, pending, onAppro
   const blocked = preview.blocking_issues.length > 0;
   const alreadyImported = preview.collision_plan.duplicate_state === "already_imported";
   return (
-    <section className="rounded-[28px] border border-[#e1e5eb] bg-white p-6 shadow-sm md:p-8">
+    <Card as="section" elevated>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.14em] text-[#ff6b6b]">VALIDATED PREVIEW</p>
@@ -207,10 +208,10 @@ function ImportPreview({ prepared, approved, duplicateStrategy, pending, onAppro
       {alreadyImported ? (
         <label className="mt-5 block rounded-[20px] border border-[#fdb022] bg-[#fffaeb] p-4 text-sm font-bold text-[#7a2e0e]">
           이미 가져온 같은 content입니다. 원본을 덮어쓰지 않고 독립 복사본으로만 가져올 수 있습니다.
-          <select className="mt-3 h-11 w-full rounded-[14px] border border-[#fdb022] bg-white px-3" value={duplicateStrategy} onChange={(event) => onDuplicateStrategy(event.target.value as "reject" | "independent_copy")}>
+          <Select className="mt-3" value={duplicateStrategy} onChange={(event) => onDuplicateStrategy(event.target.value as "reject" | "independent_copy")}>
             <option value="independent_copy">독립 복사본으로 가져오기</option>
             <option value="reject">가져오지 않기</option>
-          </select>
+          </Select>
         </label>
       ) : null}
 
@@ -223,14 +224,14 @@ function ImportPreview({ prepared, approved, duplicateStrategy, pending, onAppro
       </label>
 
       <div className="mt-6 flex flex-wrap gap-3">
-        <button className={primaryButtonClass} disabled={!approved || blocked || pending !== null || duplicateStrategy === "reject" && alreadyImported} onClick={onCommit} type="button">
-          {pending === "commit" ? <Loader2 className="size-4 animate-spin" /> : <ShieldCheck className="size-4" />} World 가져오기
-        </button>
-        <button className={secondaryButtonClass} disabled={pending !== null} onClick={onDiscard} type="button">
-          {pending === "discard" ? <Loader2 className="size-4 animate-spin" /> : <RotateCcw className="size-4" />} 미리보기 폐기
-        </button>
+        <Button variant="strong" loading={pending === "commit"} loadingLabel="World 가져오는 중" disabled={!approved || blocked || pending !== null || duplicateStrategy === "reject" && alreadyImported} onClick={onCommit}>
+          <ShieldCheck className="size-4" /> World 가져오기
+        </Button>
+        <Button variant="secondary" loading={pending === "discard"} loadingLabel="미리보기 폐기 중" disabled={pending !== null} onClick={onDiscard}>
+          <RotateCcw className="size-4" /> 미리보기 폐기
+        </Button>
       </div>
-    </section>
+    </Card>
   );
 }
 

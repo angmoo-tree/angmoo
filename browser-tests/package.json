@@ -5,7 +5,8 @@
   "packageManager": "pnpm@11.22.0",
   "license": "GPL-3.0-only",
   "scripts": {
-    "test": "playwright test"
+    "test": "playwright test",
+    "test:visual": "playwright test --config=playwright.visual.config.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.62.1"

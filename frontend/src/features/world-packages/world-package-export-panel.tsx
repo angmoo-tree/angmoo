@@ -1,7 +1,9 @@
 "use client";
 
-import { CheckCircle2, Download, Loader2, PackageOpen, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Download, PackageOpen, ShieldCheck } from "lucide-react";
 import { useMemo, useState } from "react";
+
+import { Button, Card, InlineError, Input, Select } from "@/shared/ui/public";
 
 import {
   acknowledgeNativeWorldPackageDelivery,
@@ -176,7 +178,7 @@ export function WorldPackageExportPanel({ worldId }: { worldId: string }) {
   }
 
   return (
-    <section className="rounded-[28px] border border-[#e1e5eb] bg-white p-6 shadow-sm md:p-8">
+    <Card as="section" elevated>
       <div className="flex items-start gap-3">
         <PackageOpen className="mt-1 size-6 shrink-0 text-[#ff6b6b]" />
         <div>
@@ -191,8 +193,8 @@ export function WorldPackageExportPanel({ worldId }: { worldId: string }) {
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         <label className="text-sm font-extrabold text-[#344054]">
           라이선스
-          <select
-            className={inputClass}
+          <Select
+            className="mt-2"
             value={licenseExpression}
             onChange={(event) => {
               setLicenseExpression(event.target.value);
@@ -201,12 +203,12 @@ export function WorldPackageExportPanel({ worldId }: { worldId: string }) {
           >
             <option value="CC-BY-4.0">CC BY 4.0</option>
             <option value="CC0-1.0">CC0 1.0</option>
-          </select>
+          </Select>
         </label>
         <label className="text-sm font-extrabold text-[#344054]">
           저작자 표시
-          <input
-            className={inputClass}
+          <Input
+            className="mt-2"
             maxLength={1000}
             value={attribution}
             onChange={(event) => {
@@ -219,8 +221,8 @@ export function WorldPackageExportPanel({ worldId }: { worldId: string }) {
       </div>
       <label className="mt-4 block text-sm font-extrabold text-[#344054]">
         원본 안내 URL (선택)
-        <input
-          className={inputClass}
+        <Input
+          className="mt-2"
           maxLength={2048}
           type="url"
           value={sourceUrl}
@@ -252,17 +254,21 @@ export function WorldPackageExportPanel({ worldId }: { worldId: string }) {
       </fieldset>
 
       <div className="mt-5 flex flex-wrap gap-3">
-        <button
-          className={secondaryButtonClass}
+        <Button
+          variant="secondary"
+          loading={pending === "preview"}
+          loadingLabel="포함 내용 확인 중"
           disabled={!allConfirmed || pending !== null}
           onClick={() => void handlePreview()}
           type="button"
         >
-          {pending === "preview" ? <Loader2 className="size-4 animate-spin" /> : <ShieldCheck className="size-4" />}
+          <ShieldCheck className="size-4" />
           포함 내용 확인
-        </button>
-        <button
-          className={primaryButtonClass}
+        </Button>
+        <Button
+          variant="strong"
+          loading={pending === "delivery"}
+          loadingLabel="Package 준비 중"
           disabled={
             !preview ||
             pending !== null ||
@@ -272,37 +278,42 @@ export function WorldPackageExportPanel({ worldId }: { worldId: string }) {
           onClick={() => void handleDelivery()}
           type="button"
         >
-          {pending === "delivery" ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+          <Download className="size-4" />
           {supportsNativeWorldPackageSaveAs() ? "다른 이름으로 저장" : "Package 다운로드"}
-        </button>
+        </Button>
       </div>
 
       {preview ? <ExportPreviewCard preview={preview} /> : null}
       {pendingAcknowledgement ? (
-        <button
-          className={`${secondaryButtonClass} mt-4`}
+        <Button
+          className="mt-4"
+          variant="secondary"
+          loading={pending === "ack"}
+          loadingLabel="전달 확인 중"
           disabled={pending !== null}
           onClick={() => void retryAcknowledgement()}
           type="button"
         >
-          {pending === "ack" ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
+          <CheckCircle2 className="size-4" />
           전달 확인 다시 시도
-        </button>
+        </Button>
       ) : null}
       {pendingCleanup ? (
-        <button
-          className={secondaryButtonClass}
+        <Button
+          variant="secondary"
+          loading={pending === "cleanup"}
+          loadingLabel="실패 작업 정리 중"
           disabled={pending !== null}
           onClick={() => void retryCleanup()}
           type="button"
         >
-          {pending === "cleanup" ? <Loader2 className="size-4 animate-spin" /> : <ShieldCheck className="size-4" />}
+          <ShieldCheck className="size-4" />
           실패 작업 정리 후 다시 시도
-        </button>
+        </Button>
       ) : null}
-      {error ? <p className="mt-4 rounded-[18px] bg-[#fff1f0] p-4 text-sm font-bold text-[#b42318]" role="alert">{error}</p> : null}
+      {error ? <InlineError className="mt-4">{error}</InlineError> : null}
       {message ? <p className="mt-4 rounded-[18px] bg-[#ecfdf3] p-4 text-sm font-bold text-[#027a48]" role="status">{message}</p> : null}
-    </section>
+    </Card>
   );
 }
 
@@ -342,7 +353,3 @@ function formatBytes(value: number) {
   if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KiB`;
   return `${(value / (1024 * 1024)).toFixed(1)} MiB`;
 }
-
-const inputClass = "mt-2 h-12 w-full rounded-[16px] border border-[#d0d5dd] bg-white px-4 text-sm font-semibold text-[#101828] outline-none focus:border-[#ff6b6b] focus:ring-2 focus:ring-[#ffe2e2]";
-const secondaryButtonClass = "inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[#d0d5dd] bg-white px-5 text-sm font-extrabold text-[#344054] hover:bg-[#f9fafb] disabled:cursor-not-allowed disabled:opacity-50";
-const primaryButtonClass = "inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#101828] px-5 text-sm font-extrabold text-white hover:bg-[#344054] disabled:cursor-not-allowed disabled:opacity-50";

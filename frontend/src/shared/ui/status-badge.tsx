@@ -1,4 +1,4 @@
-import styles from "./status-badge.module.css";
+import { StatusChip, type StatusChipTone } from "./status";
 
 export type StatusBadgeTone = "blocked" | "degraded" | "healthy" | "neutral";
 
@@ -8,10 +8,7 @@ type StatusBadgeProps = {
 };
 
 export function StatusBadge({ label, tone = "neutral" }: StatusBadgeProps) {
-  return (
-    <span className={`${styles.badge} ${styles[tone]}`}>
-      <span className={styles.dot} aria-hidden="true" />
-      {label}
-    </span>
-  );
+  const mappedTone: StatusChipTone =
+    tone === "blocked" ? "danger" : tone === "healthy" ? "healthy" : tone;
+  return <StatusChip label={label} tone={mappedTone} />;
 }

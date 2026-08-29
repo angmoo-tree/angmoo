@@ -1,11 +1,11 @@
 ---
 name: Angmoo Local
 document: Frontend Design Contract
-version: 1.1
+version: 1.2
 date: 2026-08-29
-status: CANONICAL DESIGN CONTRACT · UI-A DESIGN CONTRACT CLOSEOUT COMPLETE · CURRENT UI CONFORMANCE INCOMPLETE
+status: CANONICAL DESIGN CONTRACT · UI-A/UI-B LOCAL TECH CLOSEOUT COMPLETE · CURRENT UI CONFORMANCE INCOMPLETE
 scope: Device Phone · World App · Creator Studio · Relationship Graph · current L4 surfaces
-implementation_phase: L4.5 UI-A complete · UI-B through UI-F not started
+implementation_phase: L4.5 UI-A and UI-B local tech complete · UI-C through UI-F not started
 hosted_reference_commit: 7f967abd6117381be5c081ed284addb889b06fec
 local_reference_commit: e5e62aed69cb89b16b5870eb0854dd07752dc519
 legacy_reference: audited-internal-snapshot
@@ -24,7 +24,8 @@ legacy_reference_dependency: none
 DESIGN CONTRACT: CANONICAL
 CURRENT IMPLEMENTATION CONFORMANCE: INCOMPLETE
 L4.5 UI-A DESIGN CONTRACT CLOSEOUT: COMPLETE
-L4.5 UI-B~UI-F VISUAL IMPLEMENTATION: NOT STARTED
+L4.5 UI-B SEMANTIC TOKEN·PRIMITIVE FOUNDATION: LOCAL TECH COMPLETE
+L4.5 UI-C~UI-F PRODUCT CONVERGENCE: NOT STARTED
 ```
 
 ---
@@ -844,7 +845,7 @@ Visual screenshot는 deterministic fixture를 사용한다. intentional baseline
 7. Next Browser와 Tauri static route에서 같은 component를 검증한다.
 8. visual diff와 behavior non-regression을 함께 남긴다.
 
-UI-A의 reference·provenance·inventory baseline은 다음 명령으로 검증한다.
+UI-A의 reference·provenance·inventory와 UI-B의 token·primitive·fixture·visual baseline은 다음 명령으로 검증한다.
 
 ```bash
 uv run --project backend python scripts/ci/check_frontend_design_contract.py --check
@@ -902,20 +903,35 @@ hosted 구현을 이식할 때 PR에 다음을 기록한다.
 
 ## 18. 현재 conformance와 목표 판정
 
-문서 작성 시점의 현재 구현:
+UI-B local technical closeout 시점의 현재 구현:
 
 - hosted 계열 전체 Feed·Post detail·Profile·내 앵무 component가 Local에 상당 부분 존재한다.
 - Local `WorldSocialFeed`는 L4 검증용 form/card 중심 최소 UI라 hosted mature Feed와 시각 anatomy가 다르다.
-- Device Home·World App·Creator Studio·Relationship Graph는 Local 전용 UI가 존재하지만 semantic token·shared component 적용이 불완전하다.
-- `globals.css`에 token seed가 있으나 많은 raw color와 viewport 기반 desktop breakpoint가 남아 있다.
+- `shared/ui/semantic-tokens.css`가 palette·text·border·action·state·type·spacing·radius·elevation·motion의 semantic source of truth를 제공하며 `globals.css`의 기존 Tailwind alias도 같은 역할로 연결한다.
+- `shared/ui/public.ts`를 통해 Button·form control·surface·Avatar·Badge·StatusChip·Tabs·PageHeader·BottomNavigation·Dialog·feedback state primitive를 공개한다.
+- World Package export/import가 실제 shared primitive 소비자로 전환됐고 기존 `ProfileAvatar`·`StatusBadge`는 compatibility bridge로 새 primitive를 사용한다.
+- Device Home·World App·Creator Studio·Relationship Graph와 hosted 계열 social presentation 전체의 semantic token·shared component 적용은 아직 불완전하며 UI-C~UI-E가 소유한다.
+- raw style 기준선은 UI-A placeholder 59 files·1,938 occurrences에서 reviewed UI-B baseline 56 files·1,894 occurrences로 감소했지만, 이 수치는 남은 migration inventory이지 전역 conformance PASS가 아니다.
 - Next App Router와 Tauri static router가 같은 feature source를 일부 공유하지만 route matrix를 완전히 닫아야 한다.
+
+### 18.1 UI-B local technical evidence
+
+- feature-first deterministic fixture는 `features/ui-foundation`이 소유하며 Next와 static exact route `/ui-foundation`이 같은 component를 렌더링한다. 이 route는 `noindex`·unlinked test fixture이고 제품 navigation destination이 아니다.
+- BottomNavigation fixture는 button-only local state·touch·overflow·단일 `aria-current`만 검증한다. 실제 product `href`·capability·route parity는 UI-C 소유다.
+- canonical visual baseline은 Ubuntu 24.04·Playwright 1.62.1 Chromium에서 436×880, DPR 1, `ko-KR`, `Asia/Seoul`, light color scheme, reduced motion으로 고정한다.
+- Next production과 static export는 `browser-tests/snapshots/ui-b/semantic-foundation-phone.png` 한 장을 공유하며 pixel parity와 keyboard·focus·contrast·dialog·reduced-motion behavior를 함께 검증한다.
+- fixture asset은 first-party `/icon.svg`만 사용하고 remote font·image·runtime network dependency를 만들지 않는다.
+- UI-B는 backend·API·schema·migration·scheduler 의미, 제품 shell·route destination, social presentation, Local-only 전체 화면을 변경하지 않는다.
+- 사용자 design review·Issue·push·Draft PR·Hosted CI·merge와 UI-C~UI-F는 별도 Gate로 남는다.
 
 따라서 현재 허용되는 판정:
 
 ```text
 ANGMOO LOCAL DESIGN CONTRACT ESTABLISHED
 UI-A DESIGN CONTRACT CLOSEOUT PASS
-UI-B~UI-F VISUAL IMPLEMENTATION NOT STARTED
+UI-B SEMANTIC TOKEN·PRIMITIVE FOUNDATION LOCAL TECH PASS
+UI-C~UI-F PRODUCT CONVERGENCE NOT STARTED
+USER DESIGN REVIEW / EXTERNAL LIFECYCLE PENDING
 ```
 
 token·shell·social core·Local-only surface·visual/runtime Gate와 사용자 승인을 모두 통과한 뒤에만 허용되는 판정:
