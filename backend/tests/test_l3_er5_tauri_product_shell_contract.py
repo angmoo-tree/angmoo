@@ -208,6 +208,53 @@ def test_wide_windows_use_explicit_route_boundaries_and_single_labels() -> None:
     assert "export function relationshipGraphRoute" in product_routes
 
 
+def test_phone_product_window_allowlist_matches_local_route_capabilities() -> None:
+    windows = _read("desktop/src-tauri/src/product_windows.rs")
+
+    # These routes are rendered by the shared static product router and must be
+    # accepted by the native Phone boundary as direct-open and navigation targets.
+    assert '["settings"] | ["login"] | ["posts"] | ["agents"]' in windows
+    assert '["worlds", world_id, "posts", post_id]' in windows
+
+    # `/worlds/new` is a Browser compatibility alias for Creator Studio, not a
+    # valid dynamic Phone World.  The native boundary must therefore fail closed.
+    assert "fn safe_world_id" in windows
+    assert 'value != "new" && safe_segment(value)' in windows
+
+
+def test_static_phone_hides_unsupported_links_and_uses_its_scroll_owner() -> None:
+    capability = _read(
+        "frontend/src/features/device-shell/model/device-navigation.ts"
+    )
+    product_link = _read(
+        "frontend/src/features/device-shell/ui/local-product-link.tsx"
+    )
+    feed = _read("frontend/src/features/social/ui/post-list-client.tsx")
+    agent = _read("frontend/src/components/agent-detail-client.tsx")
+    pull_to_refresh = _read(
+        "frontend/src/shared/interaction/use-mobile-pull-to-refresh.ts"
+    )
+    scroll_viewport = _read(
+        "frontend/src/shared/interaction/scroll-viewport.ts"
+    )
+    static_router = _read("frontend/src/composition/static-product-router.tsx")
+
+    assert "isStaticLocalProductRouteSupported" in capability
+    assert 'data-product-route-unavailable="true"' in product_link
+    assert 'aria-disabled="true"' in product_link
+    assert 'role="link"' in product_link
+    assert "event.stopPropagation()" in product_link
+    assert "local-product-link.module.css" in product_link
+    assert "LocalProductLink" in feed
+    assert "const canStartMessage = !isLocalAgent && !isStaticFrontendProfile()" in agent
+    assert "getRuntimeConfig()?.apiBaseUrl ?? window.location.origin" in agent
+    assert "resolveScrollEventTarget" in feed
+    assert "resolveScrollEventTarget" in agent
+    assert "resolveScrollEventTarget" in pull_to_refresh
+    assert "export function isScrollNearBottom" in scroll_viewport
+    assert "const [ready, setReady] = useState(false)" in static_router
+
+
 def test_programmatic_navigation_respects_product_window_boundaries() -> None:
     desktop_runtime = _read("frontend/src/shared/desktop/product-window.ts")
     runtime_navigation = _read(

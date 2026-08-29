@@ -10,7 +10,10 @@ import { AppShell } from "@/components/app-shell";
 import { LocalOwnerClient } from "@/components/local-owner-client";
 import { PostDetailClient } from "@/components/post-detail-client";
 import { PostListClient } from "@/features/social/public";
-import { RelationshipGraphClient } from "@/features/relationships/public";
+import {
+  RelationshipGraphClient,
+  RelationshipGraphFrame,
+} from "@/features/relationships/public";
 import { SettingsClient } from "@/components/settings-client";
 import { WorldCharacterAutonomySetupClient } from "@/components/world-character-autonomy-setup-client";
 import { WorldCreatorClient } from "@/components/world-creator-client";
@@ -21,11 +24,13 @@ import { WorldAppRouteClient } from "@/app/world-app-route-client";
 import { CreatorStudioFrame } from "@/features/creator-studio/public";
 import { SemanticFoundationFixture } from "@/features/ui-foundation/public";
 import {
+  canonicalProductRoute,
   currentDesktopRoute,
   desktopWindowKindForRoute,
   getDesktopWindowState,
   subscribeDesktopRoute,
 } from "@/shared/desktop/public";
+import { useRuntimeRouter } from "@/shared/navigation/public";
 import {
   worldAppSectionFromSegment,
   type WorldAppSectionId,
@@ -54,6 +59,11 @@ function decodedSegment(value: string) {
   } catch {
     return null;
   }
+}
+
+function decodedWorldId(value: string) {
+  const worldId = decodedSegment(value);
+  return worldId && worldId !== "new" ? worldId : null;
 }
 
 export function StaticProductRouter() {
@@ -181,8 +191,18 @@ function renderStaticRoute(location: BrowserLocation) {
       </AppShell>
     );
   }
+  if (pathname === "/worlds/new") {
+    return <StaticCanonicalRouteRedirect route={canonicalProductRoute(`${pathname}${search}`)} />;
+  }
 
   const segments = pathname.split("/").filter(Boolean);
+  if (
+    segments[0] === "worlds" &&
+    segments[2] === "creator" &&
+    segments.length === 3
+  ) {
+    return <StaticCanonicalRouteRedirect route={canonicalProductRoute(`${pathname}${search}`)} />;
+  }
   if (segments[0] === "studio" && segments[1] === "worlds" && segments.length === 3) {
     const worldId = decodedSegment(segments[2]);
     if (worldId) {
@@ -198,14 +218,14 @@ function renderStaticRoute(location: BrowserLocation) {
     segments[2] === "posts" &&
     segments.length === 4
   ) {
-    const worldId = decodedSegment(segments[1]);
+    const worldId = decodedWorldId(segments[1]);
     const postId = decodedSegment(segments[3]);
     if (worldId && postId) {
       return <WorldAppRouteClient postId={postId} sectionId="feed" worldId={worldId} />;
     }
   }
   if (segments[0] === "worlds" && segments.length >= 2 && segments.length <= 3) {
-    const worldId = decodedSegment(segments[1]);
+    const worldId = decodedWorldId(segments[1]);
     const section = staticWorldSection(segments[2]);
     if (worldId && section) {
       return <WorldAppRouteClient sectionId={section} worldId={worldId} />;
@@ -231,7 +251,7 @@ function renderStaticRoute(location: BrowserLocation) {
     segments.length === 5
   ) {
     const characterId = decodedSegment(segments[1]);
-    const worldId = decodedSegment(segments[3]);
+    const worldId = decodedWorldId(segments[3]);
     if (characterId && worldId && segments[4] === "autonomy-setup") {
       return (
         <AppShell>
@@ -245,17 +265,29 @@ function renderStaticRoute(location: BrowserLocation) {
     if (characterId && worldId && segments[4] === "relationship-graph") {
       const provider = getRuntimeConfig()?.graphProvider ?? "ladybug";
       return (
-        <AppShell>
+        <RelationshipGraphFrame>
           <RelationshipGraphClient
             characterId={characterId}
             provider={provider}
             worldId={worldId}
           />
-        </AppShell>
+        </RelationshipGraphFrame>
       );
     }
   }
   return <StaticNotFound pathname={pathname} />;
+}
+
+function StaticCanonicalRouteRedirect({ route }: { route: string }) {
+  const router = useRuntimeRouter();
+  useEffect(() => {
+    router.replace(route);
+  }, [route, router]);
+  return (
+    <main className="min-h-screen bg-transparent" aria-live="polite">
+      <span className="sr-only">Canonical Angmoo 제품 경로로 이동합니다.</span>
+    </main>
+  );
 }
 
 function staticWorldSection(segment: string | undefined): WorldAppSectionId | null {
@@ -266,6 +298,7 @@ function staticWorldSection(segment: string | undefined): WorldAppSectionId | nu
 function StaticFeedRoute() {
   const [feed, setFeed] = useState<FeedPage>(EMPTY_FEED);
   const [error, setError] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -277,11 +310,24 @@ function StaticFeedRoute() {
         if (active) {
           setError(reason instanceof Error ? reason.message : "게시글을 불러오지 못했습니다.");
         }
+      })
+      .finally(() => {
+        if (active) setReady(true);
       });
     return () => {
       active = false;
     };
   }, []);
+
+  if (!ready) {
+    return (
+      <AppShell>
+        <section className="px-5 py-8 text-sm font-bold text-on-surface-variant" aria-live="polite">
+          피드를 불러오는 중
+        </section>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>

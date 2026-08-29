@@ -103,7 +103,10 @@ export function RelationshipGraphClient({
   });
 
   return (
-    <main className="mx-auto w-full max-w-5xl space-y-6 px-4 py-8 sm:px-6">
+    <div
+      className="mx-auto w-full max-w-5xl space-y-6 px-4 py-8 sm:px-6"
+      data-product-content="relationship-graph"
+    >
       <header className="rounded-[28px] bg-surface-container-lowest p-6 shadow-sm">
         <p className="text-sm font-bold text-primary">P7 · RELATIONSHIP GRAPH</p>
         <h1 className="mt-2 text-3xl font-black">World 관계망</h1>
@@ -267,6 +270,6 @@ export function RelationshipGraphClient({
           ) : null}
         </>
       ) : null}
-    </main>
+    </div>
   );
 }

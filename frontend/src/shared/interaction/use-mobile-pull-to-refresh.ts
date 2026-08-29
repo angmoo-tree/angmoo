@@ -2,9 +2,12 @@
 
 import { useEffect, useRef } from "react";
 
+import { getScrollTop, resolveScrollEventTarget } from "./scroll-viewport";
+
 const PULL_THRESHOLD_PX = 70;
 const INTERACTIVE_SELECTOR =
   'a, button, input, textarea, select, [role="button"], [contenteditable="true"]';
+const DEVICE_SCROLL_OWNER_SELECTOR = '[data-device-scroll-owner="true"]';
 
 type MobilePullToRefreshOptions = {
   enabled?: boolean;
@@ -37,13 +40,17 @@ export function useMobilePullToRefresh({
     let triggered = false;
     let startX = 0;
     let startY = 0;
+    const scrollTarget = resolveScrollEventTarget(
+      document.querySelector<HTMLElement>(DEVICE_SCROLL_OWNER_SELECTOR),
+    );
 
-    function handleTouchStart(event: TouchEvent) {
+    function handleTouchStart(rawEvent: Event) {
+      const event = rawEvent as TouchEvent;
       const touch = event.touches[0];
       if (
         !touch ||
         refreshingRef.current ||
-        getScrollTop() > 0 ||
+        getScrollTop(scrollTarget) > 0 ||
         isInteractive(event.target)
       ) {
         tracking = false;
@@ -56,11 +63,12 @@ export function useMobilePullToRefresh({
       startY = touch.clientY;
     }
 
-    function handleTouchMove(event: TouchEvent) {
+    function handleTouchMove(rawEvent: Event) {
+      const event = rawEvent as TouchEvent;
       if (!tracking || triggered || refreshingRef.current) return;
 
       const touch = event.touches[0];
-      if (!touch || getScrollTop() > 0) {
+      if (!touch || getScrollTop(scrollTarget) > 0) {
         tracking = false;
         return;
       }
@@ -84,22 +92,22 @@ export function useMobilePullToRefresh({
       tracking = false;
     }
 
-    window.addEventListener("touchstart", handleTouchStart, { passive: true });
-    window.addEventListener("touchmove", handleTouchMove, { passive: false });
-    window.addEventListener("touchend", handleTouchEnd, { passive: true });
-    window.addEventListener("touchcancel", handleTouchEnd, { passive: true });
+    scrollTarget.addEventListener("touchstart", handleTouchStart, {
+      passive: true,
+    });
+    scrollTarget.addEventListener("touchmove", handleTouchMove, {
+      passive: false,
+    });
+    scrollTarget.addEventListener("touchend", handleTouchEnd, { passive: true });
+    scrollTarget.addEventListener("touchcancel", handleTouchEnd, { passive: true });
 
     return () => {
-      window.removeEventListener("touchstart", handleTouchStart);
-      window.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("touchend", handleTouchEnd);
-      window.removeEventListener("touchcancel", handleTouchEnd);
+      scrollTarget.removeEventListener("touchstart", handleTouchStart);
+      scrollTarget.removeEventListener("touchmove", handleTouchMove);
+      scrollTarget.removeEventListener("touchend", handleTouchEnd);
+      scrollTarget.removeEventListener("touchcancel", handleTouchEnd);
     };
   }, [enabled]);
-}
-
-function getScrollTop() {
-  return window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
 }
 
 function isInteractive(target: EventTarget | null) {

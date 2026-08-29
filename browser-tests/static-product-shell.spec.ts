@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 const ROUTES = [
   "/",
   "/studio",
+  "/studio/import",
   "/studio/worlds/new",
   "/studio/worlds/world-static-probe",
   "/worlds/world-static-probe",
@@ -14,6 +15,7 @@ const ROUTES = [
   "/characters/character-static-probe/worlds/world-static-probe/autonomy-setup",
   "/characters/character-static-probe/worlds/world-static-probe/relationship-graph?provider=ladybug",
   "/agents/new",
+  "/agents",
   "/agents/character-static-probe",
   "/posts",
   "/posts/post-static-probe",
@@ -62,14 +64,539 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
+function staticProfilePost(id: string, title: string) {
+  return {
+    id,
+    author_name: "Profile Scroll Parrot",
+    author_handle: "profile_scroll",
+    author_avatar_url: null,
+    title,
+    body: `${title} body`,
+    info_kind: null,
+    source_name: null,
+    source_url: null,
+    observed_at: null,
+    location_label: null,
+    created_at: "2026-08-30T00:00:00Z",
+    post_type: "post",
+    author_user_id: null,
+    author_character_id: "character-profile-scroll",
+    mentioned_characters: [],
+    reply_to_post_id: null,
+    quote_post_id: null,
+    repost_of_post_id: null,
+    comment_count: 0,
+    like_count: 0,
+    reply_count: 0,
+    repost_count: 0,
+    quote_count: 0,
+    quoted_post: null,
+    reposted_post: null,
+    report_hidden: false,
+    media: [],
+  };
+}
+
+function staticAgentDetail(characterId: string) {
+  return {
+    character: {
+      id: characterId,
+      owner_id: "owner-static-probe",
+      name: "Profile Scroll Parrot",
+      handle: "profile_scroll",
+      avatar_url: null,
+      banner_url: null,
+      one_liner: "Device owner pagination probe",
+      personality: "calm",
+      speech_style: "brief",
+      worldview: "local",
+      topic_preferences: "testing",
+      safety_rules: "safe",
+      status: "active",
+      execution_mode: "local",
+      persona_summary: "Device owner pagination probe",
+    },
+    state: null,
+    credential: null,
+    settings: {
+      character_id: characterId,
+      auto_enabled: false,
+      activity_level: "normal",
+      activity_interval_minutes: 60,
+      comment_cooldown_minutes: 30,
+      max_comments_per_day: 10,
+      post_cooldown_hours: 2,
+      max_posts_per_day: 10,
+      allow_post: true,
+      allow_reply: true,
+      allow_like: true,
+      allow_repost: false,
+      allow_follow: false,
+      allow_unfollow: false,
+      allow_observe: true,
+      tendency_summary: "",
+      tendency_action_ranges: {},
+      tendency_analysis_ready: true,
+      tendency_updated_at: null,
+      tendency_error: null,
+      active_hours_start: "10:00",
+      active_hours_end: "20:00",
+      writing_temperature: 0.7,
+      writing_repetition_level: "normal",
+      updated_at: "2026-08-30T00:00:00Z",
+    },
+    image_settings: {
+      character_id: characterId,
+      image_generation_enabled: false,
+      image_key_mode: "disabled",
+      max_images_per_day: 0,
+      pollinations_image_model: "replicate-zimage-turbo-lora",
+      seed_image_url: null,
+      key_fingerprint: null,
+      has_pollinations_api_key: false,
+      replicate_key_fingerprint: null,
+      has_replicate_api_key: false,
+      service_image_available: false,
+      service_image_model: "",
+      service_image_model_label: "",
+      service_free_quota_limit: 0,
+      service_free_quota_used: 0,
+      service_free_quota_remaining: 0,
+      service_free_quota_date: null,
+      visual_identity_prompt_available: false,
+      visual_identity_prompt: null,
+      visual_identity_mode: "none",
+      visual_identity_source_hash: null,
+      updated_at: "2026-08-30T00:00:00Z",
+    },
+    promotion_usage: {
+      promotion_usage_allowed: false,
+      promotion_usage_agreed_at: null,
+      promotion_usage_revoked_at: null,
+      promotion_usage_policy_version: null,
+    },
+    assigned_slot: null,
+    activity_profile_readiness: {
+      ready: true,
+      source: "legacy_tendency",
+      reason_code: null,
+      world_id: null,
+      world_character_id: null,
+    },
+    activity_summary: {
+      within_active_hours: true,
+      timezone: "Asia/Seoul",
+      allowed_actions: [],
+      blocked_reasons: {},
+      last_activity_at: null,
+      next_activity_at: null,
+      manual_run_available_at: null,
+      first_greeting_available_at: null,
+      today_comment_count: 0,
+      max_comments_per_day: 10,
+      today_post_count: 0,
+      max_posts_per_day: 10,
+      today_like_count: 0,
+    },
+    recent_activity: [],
+  };
+}
+
 for (const route of ROUTES) {
   test(`direct-open static route ${route}`, async ({ page }) => {
     await page.goto(route);
     await expect(page.getByText("제품 화면을 준비하고 있습니다...")).toHaveCount(0);
     await expect(page.getByText("지원하지 않는 Angmoo 경로입니다.")).toHaveCount(0);
     await expect(page.locator("body")).not.toBeEmpty();
+    await expect(page.locator("main")).toHaveCount(1);
+    await expect(page.locator("main main")).toHaveCount(0);
   });
 }
+
+test("static Phone routes share one frame, one scroll owner, and supported navigation", async ({
+  page,
+}) => {
+  for (const viewport of [
+    { width: 360, height: 800 },
+    { width: 390, height: 844 },
+    { width: 436, height: 880 },
+    { width: 1440, height: 900 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto("/agents");
+
+    const frame = page.locator('[data-product-shell="device"]');
+    await expect(frame).toHaveCount(1);
+    await expect(page.locator('[data-device-shell="phone"]')).toHaveCount(1);
+    await expect(page.locator('[data-device-scroll-owner="true"]')).toHaveCount(1);
+    await expect(page.locator(".angmoo-left-rail, .angmoo-right-rail")).toHaveCount(0);
+
+    const navigation = page.getByRole("navigation", { name: "모바일 주요 메뉴" });
+    await expect(navigation.locator('[aria-current="page"]')).toHaveCount(1);
+    await expect(navigation.locator("a")).toHaveCount(4);
+    expect(
+      await navigation
+        .locator("a")
+        .evaluateAll((anchors) => anchors.map((anchor) => anchor.getAttribute("href"))),
+    ).toEqual(["/", "/posts", "/agents", "/settings"]);
+    await expect(navigation.locator('a[href="/agents"]')).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+
+    const geometry = await frame.evaluate((node) => {
+      const rect = node.getBoundingClientRect();
+      return {
+        documentOverflow:
+          document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        left: rect.left,
+        viewportWidth: window.innerWidth,
+        width: rect.width,
+      };
+    });
+    expect(geometry.documentOverflow).toBe(0);
+    expect(geometry.width).toBeLessThanOrEqual(436);
+    if (viewport.width <= 436) {
+      expect(Math.abs(geometry.width - viewport.width)).toBeLessThanOrEqual(1);
+    } else {
+      expect(Math.abs(geometry.left - (viewport.width - geometry.width) / 2)).toBeLessThanOrEqual(1);
+    }
+  }
+});
+
+test("Tauri Phone reserves titlebar controls above page-owned header actions", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const desktop = window as unknown as {
+      __ANGMOO_DESKTOP_WINDOW__: { kind: "phone"; route: string };
+      __TAURI__: {
+        core: {
+          invoke: (command: string) => Promise<unknown>;
+        };
+      };
+    };
+    desktop.__ANGMOO_DESKTOP_WINDOW__ = { kind: "phone", route: "/agents" };
+    desktop.__TAURI__ = {
+      core: {
+        invoke: async (command) => {
+          if (command === "desktop_runtime_status") {
+            return {
+              phase: "ready",
+              apiBaseUrl: "http://127.0.0.1:8080",
+              graphProvider: "ladybug",
+              launchToken: "static-route-probe-token-000000000000",
+            };
+          }
+          return undefined;
+        },
+      },
+    };
+  });
+
+  for (const viewport of [
+    { width: 360, height: 800 },
+    { width: 390, height: 844 },
+    { width: 433, height: 848 },
+    { width: 436, height: 880 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto("/");
+
+    const controls = page.locator('[data-window-route="/agents"]');
+    const createAction = page.getByRole("link", { name: "만들기", exact: true });
+    const inset = page.locator('[data-device-titlebar-inset="true"]');
+    await expect(controls).toBeVisible();
+    await expect(createAction).toBeVisible();
+    await expect(inset).toBeVisible();
+
+    const [controlsBox, createBox, insetBox] = await Promise.all([
+      controls.boundingBox(),
+      createAction.boundingBox(),
+      inset.boundingBox(),
+    ]);
+    expect(controlsBox).not.toBeNull();
+    expect(createBox).not.toBeNull();
+    expect(insetBox).not.toBeNull();
+    expect(createBox!.y).toBeGreaterThanOrEqual(controlsBox!.y + controlsBox!.height);
+    expect(insetBox!.height).toBeGreaterThanOrEqual(controlsBox!.y + controlsBox!.height);
+  }
+
+  const navigation = page.getByRole("navigation", { name: "모바일 주요 메뉴" });
+  await navigation.getByRole("link", { name: "피드" }).click();
+  await expect(page).toHaveURL(/\/posts$/);
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const desktop = window as unknown as {
+          __ANGMOO_DESKTOP_WINDOW__: { kind: string; route: string };
+        };
+        return desktop.__ANGMOO_DESKTOP_WINDOW__;
+      }),
+    )
+    .toEqual({ kind: "phone", route: "/posts" });
+  await expect(navigation.locator('a[href="/posts"]')).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
+});
+
+test("static Browser canonicalizes legacy World creator aliases", async ({ page }) => {
+  await page.goto("/worlds/new?source=legacy&tag=a&tag=b&empty=");
+  await expect(page).toHaveURL(
+    /\/studio\/worlds\/new\?source=legacy&tag=a&tag=b&empty=$/,
+  );
+  await expect(page.locator('[data-product-shell="creator-studio"]')).toBeVisible();
+
+  await page.goto(
+    "/worlds/world-static-probe/creator?source=legacy&focus=a&focus=b&empty=",
+  );
+  await expect(page).toHaveURL(
+    /\/studio\/worlds\/world-static-probe\?source=legacy&focus=a&focus=b&empty=$/,
+  );
+  await expect(page.locator('[data-product-shell="creator-studio"]')).toBeVisible();
+});
+
+test("static feed paginates on the Device scroll owner and keeps hosted-only routes inert", async ({
+  page,
+}) => {
+  const feedRequests: string[] = [];
+  await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname !== "/api/v1/feed") {
+      await route.fallback();
+      return;
+    }
+    const cursor = url.searchParams.get("cursor");
+    feedRequests.push(`${url.pathname}${url.search}`);
+    await route.fulfill({
+      contentType: "application/json",
+      json: {
+        items: [
+          {
+            id: cursor ? "post-static-second" : "post-static-first",
+            author_name: cursor ? "두 번째 앵무" : "첫 번째 앵무",
+            author_handle: cursor ? "second_bird" : "first_bird",
+            author_avatar_url: null,
+            title: cursor ? "두 번째 페이지" : "첫 번째 페이지",
+            body: cursor ? "Device scroll owner가 다음 글을 불렀어요." : "@friend 안녕!",
+            info_kind: null,
+            source_name: null,
+            source_url: null,
+            observed_at: null,
+            location_label: null,
+            created_at: "2026-08-30T00:00:00Z",
+            post_type: "post",
+            author_user_id: null,
+            author_character_id: cursor ? "character-second" : "character-first",
+            mentioned_characters: cursor
+              ? []
+              : [
+                  {
+                    handle: "friend",
+                    character_id: "character-friend",
+                    name: "친구 앵무",
+                  },
+                ],
+            reply_to_post_id: null,
+            quote_post_id: null,
+            repost_of_post_id: null,
+            comment_count: 0,
+            like_count: 0,
+            reply_count: 0,
+            repost_count: 0,
+            quote_count: 0,
+            quoted_post: null,
+            reposted_post: null,
+            report_hidden: false,
+            media: [],
+          },
+        ],
+        next_cursor: cursor ? null : "page-two",
+      },
+      status: 200,
+    });
+  });
+
+  await page.goto("/posts");
+  await expect(page.getByText("첫 번째 페이지", { exact: true })).toBeVisible();
+  await expect(page.locator('a[href^="/profiles/"]')).toHaveCount(0);
+  const unavailableRoutes = page.locator('[data-product-route-unavailable="true"]');
+  await expect(unavailableRoutes).toHaveCount(2);
+  await expect(unavailableRoutes.first()).toHaveAttribute("aria-disabled", "true");
+  await expect(unavailableRoutes.first()).toHaveAttribute("role", "link");
+  await expect(unavailableRoutes.first()).toHaveAttribute(
+    "title",
+    "현재 앱에서는 열 수 없는 화면입니다.",
+  );
+
+  const unavailableMention = unavailableRoutes.filter({ hasText: "@friend" });
+  await unavailableMention.hover();
+  await expect(unavailableMention).toHaveCSS("cursor", "not-allowed");
+  await expect(unavailableMention).toHaveCSS("text-decoration-line", "none");
+  const feedUrl = page.url();
+  await unavailableMention.click({ force: true });
+  expect(page.url()).toBe(feedUrl);
+  await expect(page.locator('a[href^="/posts/post-static-first"]')).not.toHaveCount(0);
+
+  const scrollSurface = page.locator('[data-device-scroll-owner="true"]');
+  await scrollSurface.evaluate((node) => {
+    node.scrollTop = node.scrollHeight;
+    node.dispatchEvent(new Event("scroll"));
+  });
+
+  await expect(page.getByText("두 번째 페이지", { exact: true })).toBeVisible();
+  expect(feedRequests.some((request) => request.includes("cursor=page-two"))).toBe(true);
+});
+
+test("static feed pull-to-refresh follows a touch sequence on the Device scroll owner", async ({
+  page,
+}) => {
+  let feedReadCount = 0;
+  await page.addInitScript(() => {
+    if (!("ontouchstart" in window)) {
+      Object.defineProperty(window, "ontouchstart", {
+        configurable: true,
+        value: null,
+      });
+    }
+  });
+  await page.route("http://127.0.0.1:8080/api/v1/feed**", async (route) => {
+    feedReadCount += 1;
+    await route.fulfill({
+      contentType: "application/json",
+      json: {
+        items: [staticProfilePost("post-touch-refresh", "Touch refresh probe")],
+        next_cursor: null,
+      },
+      status: 200,
+    });
+  });
+
+  await page.goto("/posts");
+  await expect(page.getByText("Touch refresh probe", { exact: true })).toBeVisible();
+  expect(feedReadCount).toBe(1);
+
+  const scrollSurface = page.locator('[data-device-scroll-owner="true"]');
+  await scrollSurface.evaluate((node) => {
+    const touchAt = (clientY: number) => {
+      const init = {
+        identifier: 1,
+        target: node,
+        clientX: 120,
+        clientY,
+        screenX: 120,
+        screenY: clientY,
+        pageX: 120,
+        pageY: clientY,
+        radiusX: 1,
+        radiusY: 1,
+        rotationAngle: 0,
+        force: 1,
+      };
+      return typeof Touch === "function" ? new Touch(init) : (init as unknown as Touch);
+    };
+    const dispatch = (type: string, touches: Touch[]) => {
+      node.dispatchEvent(
+        new TouchEvent(type, {
+          bubbles: true,
+          cancelable: true,
+          touches,
+        }),
+      );
+    };
+
+    node.scrollTop = 0;
+    dispatch("touchstart", [touchAt(100)]);
+    dispatch("touchmove", [touchAt(180)]);
+    dispatch("touchend", []);
+  });
+
+  await expect.poll(() => feedReadCount).toBe(2);
+});
+
+test("static Agent profile feed paginates on the Device scroll owner", async ({
+  page,
+}) => {
+  const profileFeedRequests: string[] = [];
+  await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+    const url = new URL(route.request().url());
+    const characterId = "character-profile-scroll";
+    if (url.pathname === `/api/v1/agents/${characterId}`) {
+      await route.fulfill({
+        contentType: "application/json",
+        json: staticAgentDetail(characterId),
+        status: 200,
+      });
+      return;
+    }
+    if (url.pathname === `/api/v1/profiles/characters/${characterId}`) {
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          profile: {
+            profile_type: "character",
+            id: characterId,
+            display_name: "Profile Scroll Parrot",
+            handle: "profile_scroll",
+            avatar_url: null,
+            banner_url: null,
+          },
+          execution_mode: "local",
+          post_count: 2,
+          reply_count: 0,
+          liked_post_count: 0,
+          received_like_count: 0,
+          follower_count: 0,
+          user_follower_count: 0,
+          character_follower_count: 0,
+          following_count: 0,
+          one_liner: "Device owner pagination probe",
+        },
+        status: 200,
+      });
+      return;
+    }
+    if (url.pathname === `/api/v1/profiles/characters/${characterId}/feed`) {
+      const cursor = url.searchParams.get("cursor");
+      profileFeedRequests.push(`${url.pathname}${url.search}`);
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          items: [
+            staticProfilePost(
+              cursor ? "profile-post-second" : "profile-post-first",
+              cursor ? "Profile second page" : "Profile first page",
+            ),
+          ],
+          next_cursor: cursor ? null : "profile-page-two",
+        },
+        status: 200,
+      });
+      return;
+    }
+    await route.fallback();
+  });
+
+  await page.goto("/agents/character-profile-scroll");
+  await expect(page.getByText("Profile first page", { exact: true })).toBeVisible();
+
+  const scrollSurface = page.locator('[data-device-scroll-owner="true"]');
+  await expect
+    .poll(async () => {
+      await scrollSurface.evaluate((node) => {
+        node.scrollTop = node.scrollHeight;
+        node.dispatchEvent(new Event("scroll"));
+      });
+      return profileFeedRequests.filter((request) => request.includes("cursor=")).length;
+    })
+    .toBe(1);
+
+  await expect(page.getByText("Profile second page", { exact: true })).toBeVisible();
+  expect(
+    profileFeedRequests.some((request) => request.includes("cursor=profile-page-two")),
+  ).toBe(true);
+});
 
 test("static local creation stays available beyond the former hosted count cap", async ({
   page,
@@ -599,7 +1126,7 @@ test("static P4 evidence opens the exact World-scoped post thread", async ({
   expect(requestedPaths).not.toContain("/api/v1/posts/post-static-probe");
 });
 
-test("static installed relationship route always requests the Ladybug provider", async ({
+test("static installed relationship route ignores provider overrides and requests Ladybug", async ({
   page,
 }) => {
   const requestedProviders: Array<string | null> = [];
@@ -641,10 +1168,12 @@ test("static installed relationship route always requests the Ladybug provider",
   });
 
   await page.goto(
-    "/characters/character-static-owner/worlds/world-static-probe/relationship-graph",
+    "/characters/character-static-owner/worlds/world-static-probe/relationship-graph?provider=neo4j",
   );
   await expect(page.getByText("설치형 Angmoo의 canonical 관계망 provider는 LadybugDB입니다.")).toBeVisible();
   await expect(page.getByText("관계망 최신 상태")).toBeVisible();
+  await expect(page.locator('[data-product-shell="relationship-graph"]')).toBeVisible();
+  await expect(page.locator('[data-product-shell="device"]')).toHaveCount(0);
   expect(requestedProviders).toEqual(["ladybug"]);
 });
 
@@ -1043,7 +1572,7 @@ test("Tauri Phone keeps the local owner bootstrap form scrollable above navigati
   await page.goto("/login?returnTo=%2F");
   await expect(page.getByRole("heading", { name: "이 장치의 owner 준비" })).toBeVisible();
 
-  const scrollSurface = page.locator(".angmoo-main");
+  const scrollSurface = page.locator('[data-device-scroll-owner="true"]');
   await expect(scrollSurface).toHaveCSS("overflow-y", "auto");
   const initialGeometry = await scrollSurface.evaluate((node) => ({
     clientHeight: node.clientHeight,

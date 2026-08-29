@@ -524,7 +524,7 @@
       "policy_allowed_cycle_count": 0
     },
     "frontend": {
-      "candidate_consumer_edge_count": 32,
+      "candidate_consumer_edge_count": 31,
       "candidate_consumers": {
         "frontend/src/app/api/community/characters/[characterId]/activity/route.ts": [],
         "frontend/src/app/api/community/posts/[postId]/comments/route.ts": [],
@@ -562,7 +562,6 @@
           "frontend/src/components/agent-create-client.tsx",
           "frontend/src/components/agent-detail-client.tsx",
           "frontend/src/components/agents-dashboard-client.tsx",
-          "frontend/src/components/app-shell.tsx",
           "frontend/src/components/character-activity-client.tsx",
           "frontend/src/components/character-profile-client.tsx",
           "frontend/src/components/notifications-client.tsx",
@@ -625,13 +624,12 @@
             "metadata"
           ],
           "imports": [
-            "@/components/app-shell",
             "@/features/relationships/public",
             "@/lib/seo",
             "next"
           ],
           "path": "frontend/src/app/characters/[characterId]/worlds/[worldId]/relationship-graph/page.tsx",
-          "sha256": "3e2c2666f10e5fa376ae112a7d7e7ec42fe6689091f9b2ddc6a1a7052d6ffb5d"
+          "sha256": "89a95c18d474a7277044eec84be0a27aa983c6a323fa28a1cfc6b3e6782f4df0"
         },
         {
           "exports": [
@@ -652,6 +650,7 @@
             "@/components/mentioned-text",
             "@/components/post-media-grid",
             "@/components/profile-avatar",
+            "@/features/device-shell/public",
             "@/lib/agents",
             "@/lib/community",
             "@/lib/profile",
@@ -661,7 +660,7 @@
             "react"
           ],
           "path": "frontend/src/components/post-detail-client.tsx",
-          "sha256": "55570797daf6e6113f6e64742a43479992b5c75fadf0c890abbe8eb47ef134f9"
+          "sha256": "a30a1f1f13ec5c0a355b84b3cd53911febbe8857141d442187c61927abdef3f2"
         },
         {
           "exports": [
@@ -694,10 +693,11 @@
           "imports": [
             "./api/relationship-graph",
             "./model/relationship-graph",
-            "./ui/relationship-graph-client"
+            "./ui/relationship-graph-client",
+            "./ui/relationship-graph-frame"
           ],
           "path": "frontend/src/features/relationships/public.ts",
-          "sha256": "9a3a95dce428b5dd477a6dee03b27e7301a5805452246fc229b34e3a6a582ce8"
+          "sha256": "43cc1ef83b1a09738d5ff5958e04573c4fc87721f5a27e19e1844d5d444cc1a9"
         },
         {
           "exports": [
@@ -712,7 +712,7 @@
             "react"
           ],
           "path": "frontend/src/features/relationships/ui/relationship-graph-client.tsx",
-          "sha256": "b6f7c262cae4c681090d59a8d32de3929be801eef5b7b182877ea5893a724ebf"
+          "sha256": "ca31514a532e7bbbb8225040985058a5287475d22689b78e29627a8eb0053594"
         },
         {
           "exports": [
@@ -728,6 +728,7 @@
             "./expandable-post-text",
             "./mentioned-text",
             "./post-media-grid",
+            "@/features/device-shell/public",
             "@/shared/auth/public",
             "@/shared/interaction/public",
             "@/shared/navigation/public",
@@ -739,7 +740,7 @@
             "react-dom"
           ],
           "path": "frontend/src/features/social/ui/post-list-client.tsx",
-          "sha256": "f08839094689bfead6c72378cc740a662363b9dde21b7edb4527003aa18b2dd8"
+          "sha256": "7c58e97b95a51bf1e6927af1a2e588cc78646dcd7399079dba30d82884aabd85"
         },
         {
           "exports": [
@@ -833,6 +834,7 @@
         "features": [
           "frontend/src/features/creator-studio/public.ts",
           "frontend/src/features/device-home/public.ts",
+          "frontend/src/features/device-shell/public.ts",
           "frontend/src/features/pwa-shell/public.ts",
           "frontend/src/features/relationships/public.ts",
           "frontend/src/features/runtime-status/public.ts",
@@ -896,7 +898,7 @@
     "oracle_artifacts": [
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "da04aebe187666409beff16e2d02c2e40bb1ae270f9759bf2a3dd2abbf614813"
+        "sha256": "bc6fcf170d123334c9dd0e7372d31b8cafe5a2908191139488aa633c92fc99fe"
       },
       {
         "path": "docs/architecture/l3-er-postgres-neo4j-parity-oracle.json",

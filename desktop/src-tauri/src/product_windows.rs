@@ -74,7 +74,7 @@ pub fn validate_product_route(kind: ProductWindowKind, route: &str) -> Result<St
     }
     if kind == ProductWindowKind::RelationshipGraph {
         for (key, value) in parsed.query_pairs() {
-            if key != "provider" || !matches!(value.as_ref(), "neo4j" | "ladybug") {
+            if key != "provider" || value != "ladybug" {
                 return Err("invalid_relationship_graph_query".to_owned());
             }
         }
@@ -85,20 +85,21 @@ pub fn validate_product_route(kind: ProductWindowKind, route: &str) -> Result<St
 fn phone_path_matches(segments: &[&str]) -> bool {
     match segments {
         [] => true,
-        ["settings"] | ["login"] | ["posts"] => true,
+        ["settings"] | ["login"] | ["posts"] | ["agents"] => true,
         ["posts", id] | ["agents", id] => safe_segment(id),
-        ["worlds", world_id] => safe_segment(world_id),
+        ["worlds", world_id] => safe_world_id(world_id),
         ["worlds", world_id, section] => {
-            safe_segment(world_id)
+            safe_world_id(world_id)
                 && matches!(*section, "feed" | "chat" | "characters" | "relationships")
         }
+        ["worlds", world_id, "posts", post_id] => safe_world_id(world_id) && safe_segment(post_id),
         [
             "characters",
             character_id,
             "worlds",
             world_id,
             "autonomy-setup",
-        ] => safe_segment(character_id) && safe_segment(world_id),
+        ] => safe_segment(character_id) && safe_world_id(world_id),
         _ => false,
     }
 }
@@ -106,7 +107,7 @@ fn phone_path_matches(segments: &[&str]) -> bool {
 fn studio_path_matches(segments: &[&str]) -> bool {
     match segments {
         ["studio"] | ["studio", "import"] | ["studio", "worlds", "new"] => true,
-        ["studio", "worlds", world_id] => safe_segment(world_id),
+        ["studio", "worlds", world_id] => safe_world_id(world_id),
         _ => false,
     }
 }
@@ -115,8 +116,12 @@ fn relationship_path_matches(segments: &[&str]) -> bool {
     matches!(
         segments,
         ["characters", character_id, "worlds", world_id, "relationship-graph"]
-            if safe_segment(character_id) && safe_segment(world_id)
+            if safe_segment(character_id) && safe_world_id(world_id)
     )
+}
+
+fn safe_world_id(value: &str) -> bool {
+    value != "new" && safe_segment(value)
 }
 
 fn safe_segment(value: &str) -> bool {
@@ -277,7 +282,15 @@ mod tests {
     #[test]
     fn product_routes_stay_inside_their_window_boundaries() {
         assert!(validate_product_route(ProductWindowKind::Phone, "/").is_ok());
+        assert!(validate_product_route(ProductWindowKind::Phone, "/agents").is_ok());
         assert!(validate_product_route(ProductWindowKind::Phone, "/worlds/world-1/feed").is_ok());
+        assert!(
+            validate_product_route(
+                ProductWindowKind::Phone,
+                "/worlds/world-1/posts/post-1?returnTo=%2Fworlds%2Fworld-1%2Ffeed"
+            )
+            .is_ok()
+        );
         assert!(
             validate_product_route(ProductWindowKind::Studio, "/studio/worlds/world-1").is_ok()
         );
@@ -299,11 +312,62 @@ mod tests {
         assert!(validate_product_route(ProductWindowKind::Studio, "/worlds/world-1").is_err());
         assert!(
             validate_product_route(
+                ProductWindowKind::Phone,
+                "/characters/mango/worlds/arcana/relationship-graph?provider=ladybug"
+            )
+            .is_err()
+        );
+        assert!(
+            validate_product_route(
                 ProductWindowKind::RelationshipGraph,
                 "/characters/mango/worlds/arcana/relationship-graph?provider=remote"
             )
             .is_err()
         );
+    }
+
+    #[test]
+    fn world_creation_alias_never_becomes_a_phone_world_id() {
+        for route in [
+            "/worlds/new",
+            "/worlds/new/feed",
+            "/worlds/new/posts/post-1",
+            "/characters/mango/worlds/new/autonomy-setup",
+        ] {
+            assert!(validate_product_route(ProductWindowKind::Phone, route).is_err());
+        }
+
+        assert!(validate_product_route(ProductWindowKind::Studio, "/studio/worlds/new").is_ok());
+        assert!(
+            validate_product_route(
+                ProductWindowKind::RelationshipGraph,
+                "/characters/mango/worlds/new/relationship-graph?provider=ladybug"
+            )
+            .is_err()
+        );
+    }
+
+    #[test]
+    fn relationship_graph_provider_is_ladybug_only() {
+        let route = "/characters/mango/worlds/arcana/relationship-graph";
+        assert!(validate_product_route(ProductWindowKind::RelationshipGraph, route).is_ok());
+        assert!(
+            validate_product_route(
+                ProductWindowKind::RelationshipGraph,
+                &format!("{route}?provider=ladybug")
+            )
+            .is_ok()
+        );
+
+        for provider in ["neo4j", "remote"] {
+            assert_eq!(
+                validate_product_route(
+                    ProductWindowKind::RelationshipGraph,
+                    &format!("{route}?provider={provider}")
+                ),
+                Err("invalid_relationship_graph_query".to_owned())
+            );
+        }
     }
 
     #[test]

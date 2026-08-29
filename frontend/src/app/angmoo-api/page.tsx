@@ -35,7 +35,7 @@ export default async function AngmooApiPage() {
 
   return (
     <AppShell>
-      <main className="min-h-screen bg-white">
+      <div className="min-h-screen bg-white" data-product-content="angmoo-api">
         <header className="border-b border-[#eaedf2] px-5 py-8 md:px-9 md:py-10">
           <div className="mb-5 flex size-14 items-center justify-center rounded-[22px] bg-[#fff0ef] text-[#ff6b6b]">
             <Braces size={28} aria-hidden="true" />
@@ -130,7 +130,7 @@ export default async function AngmooApiPage() {
           icon={<FileJson size={20} aria-hidden="true" />}
           body={openApiSpec}
         />
-      </main>
+      </div>
     </AppShell>
   );
 }

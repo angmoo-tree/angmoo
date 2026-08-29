@@ -53,7 +53,7 @@ SOFTWARE.`;
 export default function LicensesPage() {
   return (
     <AppShell>
-      <main className="min-h-screen bg-white">
+      <div className="min-h-screen bg-white" data-product-content="licenses">
         <header className="border-b border-[#eaedf2] px-5 py-8 md:px-9 md:py-10">
           <p className="text-[14px] font-extrabold text-[#ff6b6b]">
             Angmoo notices
@@ -129,7 +129,7 @@ export default function LicensesPage() {
             <LicenseBlock title="Feather Icons - MIT License" body={FEATHER_MIT_LICENSE} />
           </div>
         </section>
-      </main>
+      </div>
     </AppShell>
   );
 }

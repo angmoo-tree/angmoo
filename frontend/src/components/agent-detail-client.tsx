@@ -28,12 +28,17 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
+import {
+  isScrollNearBottom,
+  resolveScrollEventTarget,
+} from "@/shared/interaction/public";
 import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 
 import { AgentActivityList } from "@/components/agent-activity-list";
 import { useAuth } from "@/components/auth-provider";
+import { LocalProductLink } from "@/features/device-shell/public";
 import {
   ACTIVE_HOURS_LIMIT_MESSAGE,
   ActiveHoursControl,
@@ -139,9 +144,14 @@ import {
 import { formatHandle } from "@/lib/profile";
 import { safeSameOriginMediaUrl } from "@/lib/safe-media-url";
 import { useRuntimeMediaUrl } from "@/shared/media/public";
+import {
+  getRuntimeConfig,
+  isStaticFrontendProfile,
+} from "@/shared/runtime/public";
 
 type AgentDetailTab = "profile" | "status" | "settings";
 
+const DEVICE_SCROLL_OWNER_SELECTOR = '[data-device-scroll-owner="true"]';
 const RUN_NOW_SCHEDULER_GUARD_MS = 10 * 60 * 1000;
 
 const AGENT_TABS: Array<{
@@ -264,6 +274,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
   const [profile, setProfile] = useState<ProfileRead | null>(null);
   const [profileFeed, setProfileFeed] = useState<FeedPage | null>(null);
   const [loadingProfileFeedMore, setLoadingProfileFeedMore] = useState(false);
+  const profileFeedCursorRef = useRef<string | null>(null);
   const [activeTab, setActiveTab] = useState<AgentDetailTab>(
     getInitialAgentDetailTab,
   );
@@ -350,6 +361,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
 
   const loadProfileFeed = useCallback(
     async (tab: ProfileFeedTab, cursor?: string | null) => {
+      if (!cursor) profileFeedCursorRef.current = null;
       try {
         const next = await getCharacterProfileFeed(characterId, tab, {
           limit: 5,
@@ -363,18 +375,31 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
               }
             : next,
         );
+        return true;
       } catch {
         if (!cursor) setProfileFeed(null);
+        return false;
       }
     },
     [characterId],
   );
 
   const loadMoreProfileFeed = useCallback(async () => {
-    if (!profileFeed?.next_cursor || loadingProfileFeedMore) return;
+    const cursor = profileFeed?.next_cursor;
+    if (
+      !cursor ||
+      loadingProfileFeedMore ||
+      profileFeedCursorRef.current === cursor
+    ) {
+      return;
+    }
+    profileFeedCursorRef.current = cursor;
     setLoadingProfileFeedMore(true);
     try {
-      await loadProfileFeed(profileFeedTab, profileFeed.next_cursor);
+      const loaded = await loadProfileFeed(profileFeedTab, cursor);
+      if (!loaded && profileFeedCursorRef.current === cursor) {
+        profileFeedCursorRef.current = null;
+      }
     } finally {
       setLoadingProfileFeedMore(false);
     }
@@ -527,16 +552,18 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
       return;
     }
 
+    const scrollTarget = resolveScrollEventTarget(
+      document.querySelector<HTMLElement>(DEVICE_SCROLL_OWNER_SELECTOR),
+    );
+
     function handleScroll() {
-      const element = document.documentElement;
-      const nearBottom = window.innerHeight + window.scrollY >= element.scrollHeight - 420;
-      if (!nearBottom) return;
+      if (!isScrollNearBottom(scrollTarget, 420)) return;
       void loadMoreProfileFeed();
     }
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    scrollTarget.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => scrollTarget.removeEventListener("scroll", handleScroll);
   }, [activeTab, loadMoreProfileFeed, loadingProfileFeedMore, profileFeed?.next_cursor]);
 
   useEffect(() => {
@@ -1481,6 +1508,7 @@ function ProfileTab({
     PROFILE_FEED_TABS.find((tab) => tab.key === activeFeedTab) ?? PROFILE_FEED_TABS[0];
   const posts = feed?.items ?? [];
   const isLocalAgent = agent.character.execution_mode === "local";
+  const canStartMessage = !isLocalAgent && !isStaticFrontendProfile();
 
   return (
     <div className="bg-white">
@@ -1498,7 +1526,7 @@ function ProfileTab({
               />
             </div>
             <div className="mt-5 flex shrink-0 items-center gap-2">
-              {!isLocalAgent ? (
+              {canStartMessage ? (
                 <button
                   type="button"
                   onClick={onStartMessage}
@@ -2299,7 +2327,9 @@ function LocalConnectionSettings({
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const baseUrl =
-    typeof window === "undefined" ? "https://angmoo.com" : window.location.origin;
+    typeof window === "undefined"
+      ? "https://angmoo.com"
+      : (getRuntimeConfig()?.apiBaseUrl ?? window.location.origin);
   const hasActiveKey = Boolean(connection?.has_active_key);
   const connectionStatus = !hasActiveKey
     ? "연결 key 없음"
@@ -2442,7 +2472,7 @@ function LocalConnectionSettings({
           그 이후에만 재시도하세요.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <Link
+          <LocalProductLink
             href="/angmoo-api"
             target="_blank"
             rel="noopener noreferrer"
@@ -2450,8 +2480,8 @@ function LocalConnectionSettings({
           >
             앵무 API
             <ExternalLink size={14} aria-hidden="true" />
-          </Link>
-          <a
+          </LocalProductLink>
+          <LocalProductLink
             href="/openapi.json"
             target="_blank"
             rel="noopener noreferrer"
@@ -2459,7 +2489,7 @@ function LocalConnectionSettings({
           >
             OpenAPI.json
             <ExternalLink size={14} aria-hidden="true" />
-          </a>
+          </LocalProductLink>
         </div>
         <div className="mt-5 space-y-4">
           <CodeSnippet
@@ -3587,9 +3617,12 @@ function ProfileStats({
 
 function ProfileStatLink({ href, label }: { href: string; label: string }) {
   return (
-    <Link href={href} className="transition-colors hover:text-[#101828] hover:underline">
+    <LocalProductLink
+      href={href}
+      className="transition-colors hover:text-[#101828] hover:underline"
+    >
       {label}
-    </Link>
+    </LocalProductLink>
   );
 }
 

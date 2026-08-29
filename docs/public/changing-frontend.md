@@ -12,6 +12,18 @@ preserve distinct loading, empty, forbidden, not-found, degraded, retry, and
 error states, and test at the fixed viewports required by the current L4.5
 stage. Do not create separate Browser and Tauri feature implementations.
 
+For a Phone route, reuse `features/device-shell/public.ts`. Add a clickable
+bottom destination only after recording that both Next and static/Tauri
+compositions support it; otherwise keep it hidden or explicitly unavailable.
+Preserve the single `DeviceFrame` scroll owner and verify that a wide Browser
+centers one Phone while Tauri/mobile render one full-viewport Phone. Studio and
+Relationship Graph navigation must keep their validated wide window kinds and
+legacy World creator aliases must resolve to canonical Studio routes.
+Use `LocalProductLink` for a destination that may be Next-only; do not expose a
+clickable static/Tauri link that resolves only to the static not-found screen.
+Pagination and pull-to-refresh inside a Phone must observe the Device scroll
+owner, with `window` fallback reserved for shell-less compatibility routes.
+
 Run the deterministic contract checks before lint and builds:
 
 ```bash

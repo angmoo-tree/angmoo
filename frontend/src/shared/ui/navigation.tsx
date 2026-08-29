@@ -117,11 +117,11 @@ export type BottomNavigationItem = {
 };
 
 export type BottomNavigationProps = {
-  activeId: string;
+  activeId: string | null;
   ariaLabel?: string;
   className?: string;
   items: BottomNavigationItem[];
-  onSelect: (id: string) => void;
+  onSelect?: (id: string) => void;
 };
 
 export function BottomNavigation({
@@ -175,7 +175,7 @@ export function BottomNavigation({
                 styles.bottomNavigationItem,
                 active && styles.bottomNavigationItemActive,
               )}
-              onClick={() => onSelect(item.id)}
+              onClick={() => onSelect?.(item.id)}
             >
               {content}
             </a>
@@ -199,7 +199,7 @@ export function BottomNavigation({
               styles.bottomNavigationItem,
               active && styles.bottomNavigationItemActive,
             )}
-            onClick={() => onSelect(item.id)}
+            onClick={() => onSelect?.(item.id)}
           >
             {content}
           </button>

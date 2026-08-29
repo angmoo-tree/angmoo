@@ -500,7 +500,10 @@ export function WorldCharacterAutonomySetupClient({
   }
 
   return (
-    <main className="min-h-screen bg-surface px-4 py-8 md:px-8">
+    <div
+      className="min-h-screen bg-surface px-4 py-8 md:px-8"
+      data-product-content="autonomy-setup"
+    >
       <div className="mx-auto max-w-5xl space-y-6">
         <header className="rounded-[28px] border border-outline-variant bg-surface-container-lowest p-6 shadow-sm md:p-8">
           <p className="text-sm font-bold text-primary">WORLD CHARACTER SETUP</p>
@@ -1204,6 +1207,6 @@ export function WorldCharacterAutonomySetupClient({
                 ) : null}
               </section>
             ) : null}
-    </main>
+    </div>
   );
 }

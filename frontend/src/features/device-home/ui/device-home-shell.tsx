@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 
-import { DeviceFrame } from "@/shared/ui/public";
+import {
+  DeviceShell,
+  LocalDeviceNavigation,
+} from "@/features/device-shell/public";
 
 import styles from "./device-home-shell.module.css";
 
@@ -16,24 +19,27 @@ export function DeviceHomeShell({
   title = "Angmoo",
 }: DeviceHomeShellProps) {
   const header = (
-    <div className={styles.header}>
+    <header className={styles.header}>
       <div>
         <div className={styles.eyebrow}>Local Device</div>
         <h1 className={styles.title}>{title}</h1>
       </div>
       {status}
-    </div>
+    </header>
   );
 
   return (
-    <main className={styles.root} data-product-surface="device-home">
-      <DeviceFrame ariaLabel={`${title} Device Home`} header={header}>
-        <div className={styles.content}>
-          <div className={styles.grid} role="list">
-            {children}
-          </div>
+    <DeviceShell
+      ariaLabel={`${title} Device Home`}
+      header={header}
+      navigation={<LocalDeviceNavigation />}
+      surface="device-home"
+    >
+      <div className={styles.content}>
+        <div className={styles.grid} role="list">
+          {children}
         </div>
-      </DeviceFrame>
-    </main>
+      </div>
+    </DeviceShell>
   );
 }

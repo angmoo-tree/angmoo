@@ -19,6 +19,7 @@ meaning.
 | Public feature | Responsibility | Shell |
 | --- | --- | --- |
 | `features/device-home/public.ts` | Local device entry and app grid | phone-like `DeviceFrame` |
+| `features/device-shell/public.ts` | Local Phone chrome, capability-driven bottom navigation, safe-area and scroll ownership | one product-owned `DeviceShell` composed from neutral `DeviceFrame` |
 | `features/creator-studio/public.ts` | World creation and management workspace | wide desktop shell |
 | `features/world-app/public.ts` | One explicit `world_id` runtime surface | phone-like `DeviceFrame` |
 | `features/runtime-status/public.ts` | Secret-free aggregate status presentation | shared status badge |
@@ -47,8 +48,9 @@ choosing a World.
    `LOCAL`, or `REJECTED`; that classification never creates a sibling
    repository dependency or bypasses source, asset, font, and license review.
 7. Next and static/Tauri route wrappers render the same feature component.
-   Current route allowlist and clickable-navigation gaps are inventory debt
-   owned by L4.5 UI-C, not permission to add another feature implementation.
+   UI-C's explicit Local route matrix is the only source for Phone bottom
+   navigation; a Next-only route stays hidden instead of becoming a broken
+   installed-product link.
 
 Run the boundary locally with:
 
@@ -63,9 +65,9 @@ UI-A tracks `frontend/DESIGN.md`, the file-level hosted/Local adoption matrix,
 shared-history and license evidence, the current route/surface and screenshot
 inventory, and one deterministic raw-color report. It intentionally changes no
 page visuals or backend contract. The static composition adapter still has
-legacy component imports and current Phone route gaps; those facts are frozen
-in `security/frontend_design_policy.json` for UI-C rather than hidden behind a
-new exception.
+legacy component imports; UI-A froze the then-current Phone route gaps in
+`security/frontend_design_policy.json` rather than hiding them behind a new
+exception. UI-C later closes those five recorded gaps explicitly.
 
 The existing `browser-tests` package remains the sole Playwright graph. UI-B
 adds the first reviewed screenshot consumer there; UI-A records a truthful
@@ -108,10 +110,71 @@ selected state, overflow visibility, touch behavior, and `aria-current` without
 attaching product-route `href` values. UI-C still owns actual destination
 capability, static/Next route parity, and route href wiring.
 
-UI-C still owns Device shell, navigation, route capability, and direct-open
-parity. UI-D owns social presentation adoption, UI-E owns Character/autonomy
-and Local-only surface adoption, and UI-F owns the full viewport,
-cross-runtime, and accessibility closeout.
+UI-C owns Device shell, navigation, route capability, and direct-open parity.
+UI-D owns social presentation adoption, UI-E owns Character/autonomy and
+Local-only surface adoption, and UI-F owns the full viewport, cross-runtime,
+and accessibility closeout.
+
+## L4.5 UI-C Phone shell boundary
+
+UI-C establishes three deliberately different layers:
+
+1. `shared/ui/device-frame.tsx` is a product-neutral frame primitive. It owns
+   the bounded canvas and the single `data-device-scroll-owner="true"` content
+   region, but it does not choose routes or product capabilities. In a Tauri
+   Phone window it also reserves the `data-device-titlebar-inset="true"`
+   region above page-owned content so native drag, minimize, and close controls
+   cannot cover a header action.
+2. `features/device-shell/ui/device-shell.tsx` is the Local product shell. It
+   decides Browser centering versus full-viewport Phone rendering and composes
+   the page-owned optional header with safe-area bottom navigation. It does
+   not inject a second generic title above an existing page header.
+3. `components/app-shell.tsx` is a compatibility facade for route wrappers that
+   have not yet migrated. It delegates chrome to `DeviceShell`; it is no
+   longer a second three-column or Tauri-specific shell.
+
+The product navigation matrix is owned by
+`features/device-shell/model/device-navigation.ts`. Home, Feed, 내 앵무, and
+Settings are the only current bottom destinations because both Next and the
+static composition support them. Search, notifications, messages, profiles,
+tree, licenses, and the API guide remain explicit Next-only capabilities and
+are hidden from the Local Phone instead of being rendered as dead links.
+`LocalProductLink` enforces the same fail-closed rule inside shared social and
+Character presentation: Next keeps the hosted destination, while static/Tauri
+renders an inert label with `role="link"`, `aria-disabled="true"`, unavailable
+copy, and non-interactive presentation when its router has no matching product
+route.
+
+The `DeviceFrame` content region is the only Phone scroll owner. Feed and
+Character-profile pagination plus pull-to-refresh resolve that element first
+and retain `window` only as a compatibility fallback for routes without the
+Phone shell. Static Feed waits for its initial sidecar read before mounting the
+stateful Feed client, so the first successful page and cursor are not lost.
+
+UI-C also closes the reviewed route gaps without changing backend contracts:
+
+- Rust accepts `/agents` and `/worlds/{worldId}/posts/{postId}` only in the
+  Phone window, with `new` rejected as a dynamic World ID;
+- the static direct-open matrix covers `/studio/import` and `/agents`;
+- `/worlds/new` and `/worlds/{worldId}/creator` canonicalize to their Studio
+  routes before window classification, preserving single, repeated, and empty
+  query values in both Next and static/Tauri;
+- Creator Studio and Relationship Graph keep their dedicated wide shells.
+- Phone, Creator Studio, and Relationship Graph shells each own exactly one
+  `main` landmark; their nested clients render content containers rather than
+  a second `main`.
+- the native Relationship Graph allowlist accepts the Local canonical
+  `ladybug` provider only; legacy `neo4j` query input fails closed.
+
+The Tauri Phone geometry regression measures the native controls and the
+`/agents` page-owned `만들기` action at 360, 390, 433, and 436 CSS-pixel widths.
+It also clicks the bottom navigation and verifies URL, in-memory product route,
+and `aria-current` move together inside the same Phone window.
+
+These are shell and navigation guarantees, not a claim that UI-D social rows,
+UI-E Character/Local-only screens, or UI-F's complete visual and accessibility
+corpus is finished. UI-C adds functional fixed-viewport assertions and retains
+UI-B's single reviewed screenshot rather than creating an early second corpus.
 
 ## Incremental behavior boundary
 
@@ -244,15 +307,17 @@ autonomy; the route still revalidates actor ownership and World scope.
 
 ## Visual contract
 
-Device Home and World App share a thin, uniform, flat frame. The initial tokens
+All ordinary Local user routes share the feature-owned `DeviceShell`, which
+composes a thin, uniform, flat `DeviceFrame`. The initial tokens
 are a 436 px maximum device width, 3 px bezel, and 34 px outer corner radius.
 The values are a product contract snapshot, not a Samsung asset or runtime
 dependency. App entries use a consistent squircle grid; Creator Studio leaves
 the device frame and uses a wide workspace.
 
 UI-B's `436x880` fixture is not a replacement Device shell. It verifies the
-shared semantic vocabulary in a bounded Phone canvas while UI-C retains
-ownership of the real Phone frame, safe area, navigation, and scroll model.
+shared semantic vocabulary in a bounded Phone canvas. UI-C's real product
+shell separately owns the optional page-header slot, safe area, actual route
+links, and one scroll model.
 
 ## Browser regression Gate
 
@@ -275,6 +340,15 @@ one expected baseline is
 `0.1` and `maxDiffPixels=25`. This bounded fixture baseline does not close the
 UI-F route, viewport, Windows display-scale, Tauri, installer, or exact-SHA
 user Gates.
+
+UI-C keeps that screenshot count at one. Its shell Gate is behavior-driven:
+Next and static suites check one Phone frame and one scroll owner, current-route
+bottom navigation, no hosted desktop rails, zero horizontal overflow at the
+reviewed Phone widths, centered Phone behavior on a wide Browser, wide
+Relationship Graph separation, static direct-open coverage, and legacy Studio
+alias canonicalization. Static behavior also proves inner-owner Feed
+pagination and that hosted-only profile links are not clickable. UI-F still
+owns the expanded product screenshot and state corpus.
 
 The `next-production` visual project launches the already-built standalone
 output through `frontend/scripts/serve-production.mjs`. On canonical Ubuntu the

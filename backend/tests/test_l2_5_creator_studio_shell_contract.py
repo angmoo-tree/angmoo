@@ -46,8 +46,15 @@ def test_legacy_creator_routes_redirect_to_canonical_studio_routes() -> None:
     legacy_edit = _read("app/worlds/[worldId]/creator/page.tsx")
     creator = _read("components/world-creator-client.tsx")
 
-    assert "redirect(PRODUCT_ROUTES.studioNewWorld)" in legacy_new
-    assert "redirect(studioWorldRoute(worldId))" in legacy_edit
+    for source in (legacy_new, legacy_edit):
+        assert "productRouteWithSearchParams" in source
+        assert "searchParams: Promise" in source
+    assert "await searchParams" in legacy_new
+    assert "await Promise.all([" in legacy_edit
+    assert "params," in legacy_edit
+    assert "searchParams," in legacy_edit
+    assert "PRODUCT_ROUTES.studioNewWorld" in legacy_new
+    assert "studioWorldRoute(worldId)" in legacy_edit
     assert "router.replace(studioWorldRoute(saved.world.id))" in creator
     assert '"/worlds/new"' not in creator
     assert "`/worlds/${worldId}/creator`" not in creator

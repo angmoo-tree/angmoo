@@ -25,7 +25,12 @@ export function CreatorStudioShell({
         </div>
         {navigation}
       </aside>
-      <main className={styles.workspace}>{children}</main>
+      <main
+        className={styles.workspace}
+        data-main-landmark-owner="creator-studio"
+      >
+        {children}
+      </main>
     </div>
   );
 }

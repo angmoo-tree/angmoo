@@ -9,3 +9,4 @@ export {
   type RelationshipGraphStatus,
 } from "./model/relationship-graph";
 export { RelationshipGraphClient } from "./ui/relationship-graph-client";
+export { RelationshipGraphFrame } from "./ui/relationship-graph-frame";

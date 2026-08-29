@@ -58,21 +58,6 @@ body[data-angmoo-desktop-window="phone"] {
   overflow: hidden;
 }
 
-body[data-angmoo-desktop-window="phone"] .angmoo-app-shell,
-body[data-angmoo-desktop-window="phone"] .angmoo-shell {
-  height: 100dvh;
-  min-height: 0;
-  overflow: hidden;
-}
-
-body[data-angmoo-desktop-window="phone"] .angmoo-main {
-  height: 100%;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior-y: contain;
-  scrollbar-gutter: stable;
-}
-
 button,
 input,
 textarea,
@@ -87,89 +72,5 @@ select {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-  }
-}
-
-.angmoo-shell {
-  display: grid;
-  min-height: 100vh;
-  width: 100%;
-  max-width: 100%;
-  grid-template-columns: 1fr;
-  margin-inline: auto;
-}
-
-@media (min-width: 768px) {
-  .angmoo-shell {
-    max-width: 768px;
-    grid-template-columns: 88px minmax(0, 680px);
-  }
-}
-
-@media (max-width: 767px) {
-  .angmoo-main {
-    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
-  }
-}
-
-@media (min-width: 1120px) {
-  .angmoo-shell {
-    max-width: 1108px;
-    grid-template-columns: 80px minmax(0, 604px) 424px;
-  }
-
-  .angmoo-right-rail {
-    display: flex;
-  }
-}
-
-@media (min-width: 1280px) {
-  .angmoo-shell {
-    max-width: 1360px;
-    grid-template-columns: 260px minmax(0, 1fr) 440px;
-  }
-
-  .angmoo-left-rail {
-    align-items: stretch;
-    border-right: 0;
-    padding-inline: 1rem;
-  }
-
-  .angmoo-logo-link {
-    justify-content: flex-start;
-    padding-inline: 1rem;
-  }
-
-  .angmoo-logo-text {
-    display: flex;
-  }
-
-  .angmoo-nav {
-    align-items: stretch;
-  }
-
-  .angmoo-nav-link {
-    width: 100%;
-    height: 3.5rem;
-    justify-content: flex-start;
-    gap: 1.25rem;
-    padding-inline: 1.25rem;
-    font-size: 22px;
-    font-weight: 800;
-  }
-
-  .angmoo-nav-label {
-    display: inline;
-  }
-
-  .angmoo-right-rail {
-    padding-inline: 1rem;
-  }
-}
-
-@media (min-width: 1680px) {
-  .angmoo-shell {
-    max-width: 1440px;
-    grid-template-columns: 280px minmax(0, 680px) 480px;
   }
 }

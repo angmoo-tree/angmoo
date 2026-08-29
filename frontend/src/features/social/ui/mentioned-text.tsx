@@ -1,5 +1,6 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
+
+import { LocalProductLink } from "@/features/device-shell/public";
 
 import type { MentionedCharacterRef } from "../model/social-feed-contract";
 
@@ -33,13 +34,13 @@ export function MentionedText({
     }
     const label = match[0];
     parts.push(
-      <Link
+      <LocalProductLink
         key={`${character.character_id}:${index}`}
         href={`/profiles/characters/${character.character_id}`}
         className="font-extrabold text-[#ff6b6b] underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6b6b]/30"
       >
         {label}
-      </Link>,
+      </LocalProductLink>,
     );
     cursor = index + label.length;
   }

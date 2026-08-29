@@ -169,13 +169,13 @@
 
 .gate {
   display: grid;
-  min-height: 100dvh;
+  min-height: 100%;
   place-items: center;
   background: #f4f5f7;
   padding: 24px;
 }
 
-.gate section {
+.gateCard {
   width: min(100%, 430px);
   border: 1px solid #e6dbd8;
   border-radius: 28px;
@@ -184,13 +184,13 @@
   padding: 28px;
 }
 
-.gate h1 {
+.gateCard h1 {
   margin: 0;
   color: #292326;
   font-size: 1.35rem;
 }
 
-.gate p {
+.gateCard p {
   margin: 10px 0 0;
   color: #6d6465;
   line-height: 1.6;

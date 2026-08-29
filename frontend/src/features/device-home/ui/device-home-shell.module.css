@@ -1,24 +1,13 @@
-.root {
-  display: flex;
-  min-height: 100dvh;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 20px;
-  background:
-    radial-gradient(circle at 50% 4%, rgb(255 218 216 / 68%), transparent 38%),
-    #f4f5f7;
-}
-
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding-bottom: 16px;
+  gap: var(--spacing-control);
+  padding-bottom: var(--spacing-phone);
 }
 
 .eyebrow {
-  color: #8c706f;
+  color: var(--color-text-secondary);
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -27,32 +16,17 @@
 
 .title {
   margin: 2px 0 0;
-  color: var(--color-on-surface, #251818);
+  color: var(--color-text-strong);
   font-size: 1.35rem;
   font-weight: 900;
 }
 
 .content {
-  padding: 20px;
+  padding: var(--spacing-dense);
 }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 22px 12px;
-}
-
-:global(body[data-angmoo-desktop-window="phone"]) .root {
-  width: 100vw;
-  height: 100dvh;
-  min-height: 0;
-  align-items: stretch;
-  padding: 0;
-  background: transparent;
-}
-
-@media (max-width: 479px) {
-  .root {
-    padding: 0;
-  }
+  gap: 22px var(--spacing-control);
 }

@@ -1,10 +1,28 @@
 import { redirect } from "next/navigation";
 
-import { studioWorldRoute } from "@/shared/navigation/public";
+import {
+  productRouteWithSearchParams,
+  studioWorldRoute,
+  type ProductRouteSearchParams,
+} from "@/shared/navigation/public";
 
-type PageProps = { params: Promise<{ worldId: string }> };
+type PageProps = {
+  params: Promise<{ worldId: string }>;
+  searchParams: Promise<ProductRouteSearchParams>;
+};
 
-export default async function WorldCreatorPage({ params }: PageProps) {
-  const { worldId } = await params;
-  redirect(studioWorldRoute(worldId));
+export default async function WorldCreatorPage({
+  params,
+  searchParams,
+}: PageProps) {
+  const [{ worldId }, resolvedSearchParams] = await Promise.all([
+    params,
+    searchParams,
+  ]);
+  redirect(
+    productRouteWithSearchParams(
+      studioWorldRoute(worldId),
+      resolvedSearchParams,
+    ),
+  );
 }

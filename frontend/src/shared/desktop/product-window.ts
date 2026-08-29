@@ -67,7 +67,10 @@ export function isTauriDesktopRuntime() {
 export function getDesktopWindowState(): AngmooDesktopWindowState | null {
   if (typeof window === "undefined") return null;
   if (window.__ANGMOO_DESKTOP_WINDOW__) {
-    return window.__ANGMOO_DESKTOP_WINDOW__;
+    return {
+      ...window.__ANGMOO_DESKTOP_WINDOW__,
+      route: canonicalProductRoute(window.__ANGMOO_DESKTOP_WINDOW__.route),
+    };
   }
   const bootstrap = desktopWindowStateFromBootstrapQuery();
   if (bootstrap) return bootstrap;
@@ -93,7 +96,7 @@ function desktopWindowStateFromBootstrapQuery(): AngmooDesktopWindowState | null
   try {
     return {
       kind: kind as AngmooDesktopWindowKind,
-      route: normalizeInternalRoute(route),
+      route: canonicalProductRoute(route),
     };
   } catch {
     return null;
@@ -117,7 +120,7 @@ export function consumeDesktopWindowBootstrapRoute(
 export function desktopWindowKindForRoute(
   route: string,
 ): AngmooDesktopWindowKind {
-  const pathname = routePathname(route);
+  const pathname = routePathname(canonicalProductRoute(route));
   if (pathname === "/studio" || pathname.startsWith("/studio/")) {
     return "studio";
   }
@@ -152,7 +155,7 @@ export function navigateCurrentDesktopRoute(route: string, replace = false) {
   if (!isTauriDesktopRuntime()) return false;
   const state = getDesktopWindowState();
   if (!state) return false;
-  const normalized = normalizeInternalRoute(route);
+  const normalized = canonicalProductRoute(route);
   if (desktopWindowKindForRoute(normalized) !== state.kind) return false;
   window.__ANGMOO_DESKTOP_WINDOW__ = { ...state, route: normalized };
   if (replace) window.history.replaceState(null, "", normalized);
@@ -170,7 +173,7 @@ export async function navigateDesktopProductRoute(
   }
   const state = getDesktopWindowState();
   if (!state) throw new Error("desktop_window_state_unavailable");
-  const normalized = normalizeInternalRoute(route);
+  const normalized = canonicalProductRoute(route);
   const targetKind = desktopWindowKindForRoute(normalized);
   if (targetKind === state.kind) {
     if (!navigateCurrentDesktopRoute(normalized, replace)) {
@@ -192,7 +195,7 @@ export async function openDesktopProductWindow(
   if (!invoke) return false;
   await invoke("open_product_window", {
     kind,
-    route: normalizeInternalRoute(route),
+    route: canonicalProductRoute(route),
   });
   return true;
 }
@@ -244,6 +247,19 @@ export function normalizeInternalRoute(route: string) {
     return "/";
   }
   const pathname = parsed.pathname.replace(/\/+$/, "") || "/";
+  return `${pathname}${parsed.search}${parsed.hash}`;
+}
+
+export function canonicalProductRoute(route: string) {
+  const normalized = normalizeInternalRoute(route);
+  const parsed = new URL(normalized, "http://angmoo.local");
+  let pathname = parsed.pathname;
+  if (pathname === "/worlds/new") {
+    pathname = "/studio/worlds/new";
+  } else {
+    const creatorAlias = pathname.match(/^\/worlds\/([^/]+)\/creator$/);
+    if (creatorAlias) pathname = `/studio/worlds/${creatorAlias[1]}`;
+  }
   return `${pathname}${parsed.search}${parsed.hash}`;
 }
 

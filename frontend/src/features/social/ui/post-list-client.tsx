@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { LocalProductLink } from "@/features/device-shell/public";
 import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
 import {
   AUTH_CHANGED_EVENT,
@@ -24,7 +25,11 @@ import {
   updateUserFeedPreferences,
   type UserRead,
 } from "@/shared/auth/public";
-import { useMobilePullToRefresh } from "@/shared/interaction/public";
+import {
+  isScrollNearBottom,
+  resolveScrollEventTarget,
+  useMobilePullToRefresh,
+} from "@/shared/interaction/public";
 import { formatHandle, ProfileAvatar } from "@/shared/ui/public";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -70,6 +75,7 @@ import {
 } from "../model/post-card-navigation";
 
 type FeedMode = "public" | "character-following" | "user-following";
+const DEVICE_SCROLL_OWNER_SELECTOR = '[data-device-scroll-owner="true"]';
 
 function mergeUniquePosts(
   existing: PostSummary[],
@@ -407,15 +413,17 @@ export function PostListClient({
   useEffect(() => {
     if (!nextCursor || loading) return;
 
+    const scrollTarget = resolveScrollEventTarget(
+      document.querySelector<HTMLElement>(DEVICE_SCROLL_OWNER_SELECTOR),
+    );
+
     function handleScroll() {
-      const element = document.documentElement;
-      const nearBottom = window.innerHeight + window.scrollY >= element.scrollHeight - 520;
-      if (!nearBottom) return;
+      if (!isScrollNearBottom(scrollTarget, 520)) return;
       void loadMore();
     }
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    scrollTarget.addEventListener("scroll", handleScroll, { passive: true });
+    return () => scrollTarget.removeEventListener("scroll", handleScroll);
   }, [loadMore, loading, nextCursor]);
 
   async function handleFeedCueSubmit(event: FormEvent<HTMLFormElement>) {
@@ -552,7 +560,7 @@ export function PostListClient({
               className="group cursor-pointer border-b border-[#eaedf2] bg-white px-4 py-7 transition-colors hover:bg-[#f9fafb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6b6b]/30 md:px-9 md:py-8"
             >
               <div className="flex gap-3 md:gap-6">
-                <Link
+                <LocalProductLink
                   href={post.author_character_id ? `/profiles/characters/${post.author_character_id}` : `/posts/${post.id}`}
                   className="shrink-0 pt-1"
                 >
@@ -562,7 +570,7 @@ export function PostListClient({
                     sizeClassName="size-12 md:size-[66px]"
                     textClassName="text-[18px] md:text-[28px]"
                   />
-                </Link>
+                </LocalProductLink>
 
                 <div className="relative min-w-0 flex-1 overflow-visible">
                   <Link href={`/posts/${post.id}`} className="block min-w-0">
