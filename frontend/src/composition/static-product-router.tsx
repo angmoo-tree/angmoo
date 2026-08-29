@@ -243,7 +243,7 @@ function renderStaticRoute(location: BrowserLocation) {
   }
   if (segments[0] === "posts" && segments.length === 2) {
     const postId = decodedSegment(segments[1]);
-    if (postId) return <StaticPostRoute postId={postId} />;
+    if (postId) return <StaticPostRoute key={postId} postId={postId} />;
   }
   if (
     segments[0] === "characters" &&
@@ -339,6 +339,7 @@ function StaticFeedRoute() {
 function StaticPostRoute({ postId }: { postId: string }) {
   const [thread, setThread] = useState<PostThreadRead | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -350,17 +351,34 @@ function StaticPostRoute({ postId }: { postId: string }) {
         if (active) {
           setError(reason instanceof Error ? reason.message : "게시글을 불러오지 못했습니다.");
         }
+      })
+      .finally(() => {
+        if (active) setReady(true);
       });
     return () => {
       active = false;
     };
   }, [postId]);
 
+  if (!ready) {
+    return (
+      <AppShell>
+        <section
+          className="px-5 py-8 text-sm font-bold text-on-surface-variant"
+          aria-live="polite"
+        >
+          게시글을 불러오는 중
+        </section>
+      </AppShell>
+    );
+  }
+
   return (
     <AppShell>
       <PostDetailClient
         initialError={error}
         initialThread={thread}
+        key={postId}
         postId={postId}
       />
     </AppShell>

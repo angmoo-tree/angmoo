@@ -61,7 +61,7 @@
         "DIRECT"
       ],
       "path": "frontend/src/features/social/model/post-card-navigation.ts",
-      "sha256": "2c0cb1cb1d910eb3985b8d57aeea806261c2d59dcea475ebe0822dec83f6f3b0"
+      "sha256": "326fd7efcca17ea9ac5db55909dc242a5441ac3be8bd32bc56fb9210ba5837f2"
     },
     {
       "classifications": [
@@ -149,7 +149,7 @@
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "bc6fcf170d123334c9dd0e7372d31b8cafe5a2908191139488aa633c92fc99fe"
+        "sha256": "dfe46eda3aa41288ecf44187efc8e972c33f81337f1f0bb8e8217aaa41c68863"
       }
     ],
     "static_direct_open_routes": [
@@ -1491,7 +1491,7 @@
       {
         "path": "frontend/src/composition/static-product-router.tsx",
         "present": true,
-        "sha256": "64b0e47374bccd4931e96947f5e49aa56e1c1cbc046b17489938a0acf36066d3"
+        "sha256": "383d19fac890f80aeac7b5b81c4e2e1223d1f66ac316bc91fef91c0c518c9225"
       },
       {
         "path": "frontend/src/features/ui-foundation/public.ts",
