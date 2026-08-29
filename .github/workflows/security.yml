@@ -145,6 +145,7 @@ jobs:
           uv run --project backend python scripts/ci/generate_architecture_inventory.py --check
           uv run --project backend python scripts/ci/check_architecture_boundaries.py
           uv run --project backend python scripts/ci/check_frontend_architecture_boundaries.py
+          uv run --project backend python scripts/ci/check_frontend_design_contract.py --check
           uv run --directory backend python -m pytest -q \
             tests/test_oss_architecture_boundaries.py \
             tests/test_t2_architecture_inventory.py \

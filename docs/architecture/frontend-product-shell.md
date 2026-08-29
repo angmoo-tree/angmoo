@@ -7,6 +7,15 @@ moves one surface at a time.
 
 ## Product surfaces
 
+The canonical visual and interaction vocabulary is
+[`frontend/DESIGN.md`](../../frontend/DESIGN.md). Its portable UI-A evidence,
+adoption matrix, provenance, raw-color baseline, route gaps, and visual-harness
+plan are recorded in
+[`frontend-design-reference.md`](frontend-design-reference.md). This document
+continues to own dependency direction and product-shell boundaries; the design
+contract cannot override World, authorization, capability, or Tauri window
+meaning.
+
 | Public feature | Responsibility | Shell |
 | --- | --- | --- |
 | `features/device-home/public.ts` | Local device entry and app grid | phone-like `DeviceFrame` |
@@ -33,12 +42,33 @@ choosing a World.
    `security/frontend_architecture_policy.json`.
 5. Legacy route files that have not migrated remain allowed. The policy does
    not pretend the whole frontend is already domain-first.
+6. A visual reference is classified per adopted scope as `DIRECT`, `ADAPTED`,
+   `LOCAL`, or `REJECTED`; that classification never creates a sibling
+   repository dependency or bypasses source, asset, font, and license review.
+7. Next and static/Tauri route wrappers render the same feature component.
+   Current route allowlist and clickable-navigation gaps are inventory debt
+   owned by L4.5 UI-C, not permission to add another feature implementation.
 
 Run the boundary locally with:
 
 ```bash
 uv run --project backend python scripts/ci/check_frontend_architecture_boundaries.py
+uv run --project backend python scripts/ci/check_frontend_design_contract.py --check
 ```
+
+## L4.5 UI-A design boundary
+
+UI-A tracks `frontend/DESIGN.md`, the file-level hosted/Local adoption matrix,
+shared-history and license evidence, the current route/surface and screenshot
+inventory, and one deterministic raw-color report. It intentionally changes no
+page visuals or backend contract. The static composition adapter still has
+legacy component imports and current Phone route gaps; those facts are frozen
+in `security/frontend_design_policy.json` for UI-C rather than hidden behind a
+new exception.
+
+The existing `browser-tests` package remains the sole Playwright graph. UI-B
+adds the first reviewed screenshot consumer there; UI-A records a truthful
+zero-screenshot baseline and does not create a second harness.
 
 ## Incremental behavior boundary
 
