@@ -294,6 +294,7 @@ The canonical manifest is:
 ```text
 fixture schema       ui-b-semantic-primitives-v1
 canonical OS         ubuntu-24.04
+container            mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e
 Playwright           1.62.1
 Chromium revision    1234
 Chromium version     151.0.7922.34
@@ -305,10 +306,12 @@ screenshot calls     1
 reviewed PNG         browser-tests/snapshots/ui-b/semantic-foundation-phone.png
 ```
 
-`browser-tests/playwright.visual.config.ts` owns the environment and diff
-policy. `browser-tests/semantic-foundation.visual.spec.ts` owns the fixture
-schema, interaction/accessibility checks, `/icon.svg` load assertion in both
-projects, and the single screenshot call.
+`browser-tests/playwright.visual.config.ts` owns the browser environment and
+diff policy. Core CI executes it inside the digest-pinned Playwright 1.62.1
+Noble container recorded above, so host-runner font and image-package drift
+cannot silently redefine the pixel baseline. `browser-tests/semantic-foundation.visual.spec.ts`
+owns the fixture schema, interaction/accessibility checks, `/icon.svg` load
+assertion in both projects, and the single screenshot call.
 
 The `next-production` project starts the built standalone Next preview through
 `frontend/scripts/serve-production.mjs`. On canonical Ubuntu the helper copies
@@ -325,12 +328,13 @@ plus a binary SHA-256 for the PNG when it exists. Until that exact PNG is
 generated on the canonical environment, reviewed, committed, and the generated
 report is refreshed, the visual Gate intentionally remains incomplete.
 
-The visual configuration must freeze locale, timezone, light color scheme,
-reduced motion, device scale, caret and animation behavior, browser revision,
-fixture schema, viewport, and diff policy. Remote requests fail closed; real
-credentials, user data, provider calls, remote fonts, and network images are
-forbidden. Ubuntu with the locked CI Chromium owns the pixel baseline. Windows
-100%, 125%, and 150% display scale remains a separate Tauri user-smoke Gate.
+The visual configuration must freeze container digest, locale, timezone, light
+color scheme, reduced motion, device scale, caret and animation behavior,
+browser revision, fixture schema, viewport, and diff policy. Remote requests
+fail closed; real credentials, user data, provider calls, remote fonts, and
+network images are forbidden. The pinned Noble container with the locked CI
+Chromium owns the pixel baseline. Windows 100%, 125%, and 150% display scale
+remains a separate Tauri user-smoke Gate.
 
 UI-B reviews only the `436x880` semantic-foundation fixture. Planned viewport
 families remain `360x800`, `390x844`, `436x880`, centered Phone at `1440x1000`,

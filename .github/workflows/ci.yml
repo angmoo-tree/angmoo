@@ -162,8 +162,15 @@ jobs:
         run: pnpm exec playwright test --config playwright.static.config.ts
         working-directory: browser-tests
       - name: Verify UI-B production and static visual parity
-        run: pnpm test:visual
-        working-directory: browser-tests
+        shell: bash
+        run: |
+          docker run --rm --ipc=host \
+            --mount "type=bind,source=${GITHUB_WORKSPACE},target=/work" \
+            --workdir /work/browser-tests \
+            --env CI=true \
+            mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e \
+            node ./node_modules/@playwright/test/cli.js test \
+              --config=playwright.visual.config.ts
       - name: Reject remote build-time dependencies
         shell: bash
         run: |

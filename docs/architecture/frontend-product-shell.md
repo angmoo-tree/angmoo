@@ -266,9 +266,11 @@ fails the audit. These tests complement the backend authorization contract and
 do not replace the Windows clean-clone or final user visual Gate.
 
 UI-B adds `test:visual` to the same dependency graph. Its canonical pixel
-manifest is Ubuntu 24.04, Playwright 1.62.1, Chromium revision 1234
-(`151.0.7922.34`), a `436x880` viewport, and projects `next-production` and
-`static-export`. The one expected baseline is
+manifest is the digest-pinned Playwright 1.62.1 Noble container on Ubuntu
+24.04, Chromium revision 1234 (`151.0.7922.34`), a `436x880` viewport, and
+projects `next-production` and `static-export`. Core CI runs the pixel Gate in
+that container rather than inheriting mutable host-runner font packages. The
+one expected baseline is
 `browser-tests/snapshots/ui-b/semantic-foundation-phone.png` with threshold
 `0.1` and `maxDiffPixels=25`. This bounded fixture baseline does not close the
 UI-F route, viewport, Windows display-scale, Tauri, installer, or exact-SHA

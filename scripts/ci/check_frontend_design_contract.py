@@ -27,6 +27,10 @@ UI_B_CANONICAL_VISUAL_ENVIRONMENT = {
     "browser": "chromium",
     "browser_revision": "1234",
     "browser_version": "151.0.7922.34",
+    "container_image": (
+        "mcr.microsoft.com/playwright:v1.62.1-noble@sha256:"
+        "dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e"
+    ),
     "operating_system": "ubuntu-24.04",
     "playwright_version": "1.62.1",
 }
@@ -407,8 +411,8 @@ def _validate_policy(policy: dict[str, Any]) -> list[str]:
             errors.append(f"policy.visual_manifest.schema must be {UI_B_SCHEMA}")
         if visual_manifest.get("canonical_environment") != UI_B_CANONICAL_VISUAL_ENVIRONMENT:
             errors.append(
-                "policy.visual_manifest.canonical_environment must pin ubuntu-24.04, "
-                "Playwright 1.62.1, and Chromium 1234/151.0.7922.34"
+                "policy.visual_manifest.canonical_environment must pin the Playwright "
+                "1.62.1 Noble container digest and Chromium 1234/151.0.7922.34"
             )
         if visual_manifest.get("projects") != UI_B_VISUAL_PROJECTS:
             errors.append(

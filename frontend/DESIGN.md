@@ -918,7 +918,7 @@ UI-B local technical closeout 시점의 현재 구현:
 
 - feature-first deterministic fixture는 `features/ui-foundation`이 소유하며 Next와 static exact route `/ui-foundation`이 같은 component를 렌더링한다. 이 route는 `noindex`·unlinked test fixture이고 제품 navigation destination이 아니다.
 - BottomNavigation fixture는 button-only local state·touch·overflow·단일 `aria-current`만 검증한다. 실제 product `href`·capability·route parity는 UI-C 소유다.
-- canonical visual baseline은 Ubuntu 24.04·Playwright 1.62.1 Chromium에서 436×880, DPR 1, `ko-KR`, `Asia/Seoul`, light color scheme, reduced motion으로 고정한다.
+- canonical visual baseline은 digest-pinned `mcr.microsoft.com/playwright:v1.62.1-noble` Ubuntu 24.04 container·Playwright 1.62.1 Chromium에서 436×880, DPR 1, `ko-KR`, `Asia/Seoul`, light color scheme, reduced motion으로 고정한다. Core CI host의 font package 차이가 baseline을 바꾸지 않도록 container digest까지 contract로 검사한다.
 - Next production과 static export는 `browser-tests/snapshots/ui-b/semantic-foundation-phone.png` 한 장을 공유하며 pixel parity와 keyboard·focus·contrast·dialog·reduced-motion behavior를 함께 검증한다.
 - fixture asset은 first-party `/icon.svg`만 사용하고 remote font·image·runtime network dependency를 만들지 않는다.
 - UI-B는 backend·API·schema·migration·scheduler 의미, 제품 shell·route destination, social presentation, Local-only 전체 화면을 변경하지 않는다.

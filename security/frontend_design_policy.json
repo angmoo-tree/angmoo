@@ -270,6 +270,11 @@
     "source_root": "frontend/src"
   },
   "required_markers": {
+    ".github/workflows/ci.yml": [
+      "--mount \"type=bind,source=${GITHUB_WORKSPACE},target=/work\"",
+      "mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e",
+      "node ./node_modules/@playwright/test/cli.js test"
+    ],
     ".github/PULL_REQUEST_TEMPLATE.md": [
       "Frontend design contract (when applicable)",
       "Hosted adoption classification",
@@ -611,6 +616,7 @@
       "browser": "chromium",
       "browser_revision": "1234",
       "browser_version": "151.0.7922.34",
+      "container_image": "mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e",
       "operating_system": "ubuntu-24.04",
       "playwright_version": "1.62.1"
     },
