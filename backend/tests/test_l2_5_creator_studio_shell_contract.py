@@ -143,3 +143,27 @@ def test_local_character_creation_ui_has_no_hosted_saved_count_gate() -> None:
     assert "getAgentTypeCounts(agents)" in dashboard
     assert "서버 LLM ${agentTypeCounts.llm}개" in dashboard
     assert 'href="/agents/new"' in dashboard
+
+
+def test_local_multi_autonomy_dashboard_uses_shared_utc_instant_contract() -> None:
+    dashboard = _read("components/agents-dashboard-client.tsx")
+    detail = _read("components/agent-detail-client.tsx")
+    social_summary = _read("features/social/ui/active-agent-summary.tsx")
+    presentation = _read("shared/ui/profile-presentation.ts")
+    shared_public = _read("shared/ui/public.ts")
+
+    assert "item.character.id === next.character.id ? next : item" in dashboard
+    assert "next.settings.auto_enabled" not in dashboard
+    assert "agent.activity_summary.next_activity_at" in dashboard
+    assert "agent.assigned_slot?.next_tick_at" not in dashboard
+    assert "agent.activity_summary.timezone" in dashboard
+    assert "쉬는 중 ·" in dashboard
+    assert "쉬는 중 ·" in detail
+    assert "apiInstantTimestamp" in detail
+    assert 'from "@/shared/ui/public"' in social_summary
+    assert "API_TIMEZONE_OFFSET_PATTERN" in presentation
+    assert "`${value}Z`" in presentation
+    assert 'timeZone,' in presentation
+    assert 'hourCycle: "h23"' in presentation
+    for exported in ("apiInstantTimestamp", "formatDate", "parseApiInstant"):
+        assert exported in shared_public

@@ -1,7 +1,7 @@
 {
-  "edge_count": 1232,
-  "external_import_count": 1780,
-  "module_count": 527,
+  "edge_count": 1236,
+  "external_import_count": 1786,
+  "module_count": 528,
   "modules": [
     {
       "external_imports": [],
@@ -1357,6 +1357,23 @@
       "imports": [],
       "module": "app.core.agent_activity_limits",
       "path": "backend/app/core/agent_activity_limits.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "typing",
+        "zoneinfo"
+      ],
+      "imports": [
+        "app.core.active_hours",
+        "app.core.config"
+      ],
+      "module": "app.core.agent_activity_schedule",
+      "path": "backend/app/core/agent_activity_schedule.py",
       "wildcard_imports": []
     },
     {
@@ -4541,9 +4558,11 @@
         "sqlalchemy.exc",
         "sqlalchemy.orm",
         "typing",
-        "unicodedata"
+        "unicodedata",
+        "zoneinfo"
       ],
       "imports": [
+        "app.core.agent_activity_schedule",
         "app.core.ids",
         "app.domains.worlds.api.schemas",
         "app.domains.worlds.domain.reserved_roles",
@@ -6283,14 +6302,12 @@
       "external_imports": [
         "dataclasses",
         "datetime",
-        "hashlib",
         "sqlalchemy",
         "sqlalchemy.orm",
         "zoneinfo"
       ],
       "imports": [
-        "app.core.active_hours",
-        "app.core.config",
+        "app.core.agent_activity_schedule",
         "app.cruds.agents",
         "app.models"
       ],
@@ -6449,6 +6466,8 @@
         "app.core.image_generation",
         "app.core.redaction",
         "app.core.security",
+        "app.core.sqlite_concurrency",
+        "app.core.unit_of_work",
         "app.credentials",
         "app.cruds.agent_runs",
         "app.cruds.agents",

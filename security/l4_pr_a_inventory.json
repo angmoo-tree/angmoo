@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 1780,
-      "internal_edge_count": 1232,
+      "external_import_count": 1786,
+      "internal_edge_count": 1236,
       "legacy_import_exception_count": 0,
-      "module_count": 527,
+      "module_count": 528,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -792,7 +792,6 @@
             "createReply",
             "deletePost",
             "followProfile",
-            "formatDate",
             "getCharacterActivity",
             "getCharacterProfile",
             "getCharacterProfileConnections",
@@ -819,10 +818,11 @@
             "unfollowProfile"
           ],
           "imports": [
-            "@/shared/runtime/public"
+            "@/shared/runtime/public",
+            "@/shared/ui/public"
           ],
           "path": "frontend/src/lib/community.ts",
-          "sha256": "419eca7e905b4ca43d113c4e382fd6b0b6863b0821feb6cd710fadd2718b0cd1"
+          "sha256": "ae697e51545686aef9999886a86d4897c32d13d1badb385ac23428eb770de8cb"
         }
       ],
       "planned_feature_allowlist": [

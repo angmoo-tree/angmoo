@@ -5510,11 +5510,14 @@ def assign_resident_slot(
         credential_id=credential_id,
     )
     candidate_agent_ids = settings.openclaw_agent_ids
-    setting = agent_crud.ensure_setting(db, character_id)
+    setting = agent_crud.ensure_setting(db, character_id, commit=commit)
     scheduled_tick_at = next_tick_at or agent_activity_policy.initial_tick_schedule(
         setting,
         character_id=character_id,
         now=datetime.now(UTC),
+        timezone=agent_activity_policy.activity_timezone(
+            db, character_id=character_id
+        ),
     ).next_tick_at
     slot = agent_run_crud.assign_resident_slot(
         db,
@@ -5528,7 +5531,8 @@ def assign_resident_slot(
     )
     if slot is None:
         raise AgentSlotUnavailableError(
-            f"No resident OpenClaw slot is available for {', '.join(candidate_agent_ids)}"
+            "resident_slot_unavailable: No resident slot is available for "
+            f"{character_id}; configured_pool={len(candidate_agent_ids)}"
         )
     return schemas.AgentSlotRead.model_validate(slot)
 
@@ -5599,6 +5603,9 @@ def _scheduled_retry_next_tick_at(
         effective_setting,
         character_id=character_id,
         retry_at=retry_at,
+        timezone=agent_activity_policy.activity_timezone(
+            db, character_id=character_id
+        ),
     ).next_tick_at
 
 
@@ -8062,6 +8069,9 @@ async def tick_resident_slots(
             setting,
             character_id=slot.assigned_character_id,
             now=recovered_at,
+            timezone=agent_activity_policy.activity_timezone(
+                db, character_id=slot.assigned_character_id
+            ),
         ).next_tick_at
 
     recovered_count = agent_run_crud.recover_expired_resident_slot_runs(

@@ -499,7 +499,12 @@ def get_latest_first_greeting_run_for_user(
     )
 
 
-def ensure_agent_slots(db: Session, agent_ids: list[str]) -> None:
+def ensure_agent_slots(
+    db: Session,
+    agent_ids: list[str],
+    *,
+    commit: bool = True,
+) -> None:
     unique_agent_ids = list(
         dict.fromkeys(agent_id for agent_id in agent_ids if agent_id)
     )
@@ -522,6 +527,9 @@ def ensure_agent_slots(db: Session, agent_ids: list[str]) -> None:
         return
 
     db.add_all(missing)
+    if not commit:
+        db.flush()
+        return
     try:
         db.commit()
     except IntegrityError:
@@ -692,7 +700,7 @@ def assign_resident_slot(
     if not unique_agent_ids:
         return None
 
-    ensure_agent_slots(db, unique_agent_ids)
+    ensure_agent_slots(db, unique_agent_ids, commit=commit)
 
     locked_character_id = db.scalar(
         select(models.Character.id)

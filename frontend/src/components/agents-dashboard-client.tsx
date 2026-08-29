@@ -27,7 +27,7 @@ import {
   type AgentDetailRead,
   type UserRead,
 } from "@/lib/agents";
-import { formatDate } from "@/lib/community";
+import { apiInstantTimestamp, formatDate } from "@/lib/community";
 import { formatHandle } from "@/lib/profile";
 
 export function AgentsDashboardClient() {
@@ -125,16 +125,7 @@ export function AgentsDashboardClient() {
       setAgents((current) =>
         sortAgentsForDashboard(
           current.map((item) =>
-            item.character.id === next.character.id
-              ? next
-              : next.settings.auto_enabled
-                ? {
-                    ...item,
-                    character: { ...item.character, status: "inactive" },
-                    settings: { ...item.settings, auto_enabled: false },
-                    assigned_slot: null,
-                  }
-                : item,
+            item.character.id === next.character.id ? next : item,
           ),
         ),
       );
@@ -361,9 +352,17 @@ export function AgentsDashboardClient() {
                         label="다음 활동 예정"
                         value={
                           agent.settings.auto_enabled && !agent.activity_summary.within_active_hours
-                            ? "쉬는 중"
-                            : agent.assigned_slot?.next_tick_at
-                            ? formatDate(agent.assigned_slot.next_tick_at)
+                            ? agent.activity_summary.next_activity_at
+                              ? `쉬는 중 · ${formatDate(
+                                  agent.activity_summary.next_activity_at,
+                                  agent.activity_summary.timezone,
+                                )}`
+                              : "쉬는 중"
+                            : agent.activity_summary.next_activity_at
+                            ? formatDate(
+                                agent.activity_summary.next_activity_at,
+                                agent.activity_summary.timezone,
+                              )
                             : "-"
                         }
                       />
@@ -485,6 +484,6 @@ function latestAgentTimestamp(agent: AgentDetailRead) {
 
 function toTimestamp(value: string | null) {
   if (!value) return 0;
-  const timestamp = new Date(value).getTime();
+  const timestamp = apiInstantTimestamp(value);
   return Number.isFinite(timestamp) ? timestamp : 0;
 }

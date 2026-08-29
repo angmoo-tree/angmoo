@@ -239,6 +239,7 @@ export type AgentFeedCueRead = {
 
 export type AgentActivitySummaryRead = {
   within_active_hours: boolean;
+  timezone: string;
   allowed_actions: string[];
   blocked_reasons: Record<string, string>;
   last_activity_at: string | null;

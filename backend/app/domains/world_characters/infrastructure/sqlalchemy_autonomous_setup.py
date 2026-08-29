@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, select, text, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -73,6 +73,74 @@ class SetupScope:
     character: models.Character
 
 
+def selected_autonomous_world_character(
+    db: Session,
+    *,
+    character_id: str,
+) -> models.WorldCharacter | None:
+    """Return the scheduler-selected autonomous WorldCharacter, if any."""
+
+    active_world = db.get(models.CharacterActiveWorld, character_id)
+    if active_world is None:
+        return None
+    world_character = db.get(models.WorldCharacter, active_world.world_character_id)
+    if (
+        world_character is None
+        or world_character.character_id != character_id
+        or world_character.control_mode != "autonomous"
+        or world_character.status != "active"
+    ):
+        return None
+    return world_character
+
+
+def lock_world_autonomy_capacity(db: Session, *, world_id: str) -> None:
+    """Serialize PostgreSQL capacity decisions for one World.
+
+    SQLite callers reserve the single writer with ``BEGIN IMMEDIATE`` before
+    entering this domain operation, so no extra SQLite lock is needed here.
+    """
+
+    bind = db.get_bind()
+    if bind.dialect.name != "postgresql":
+        return
+    db.execute(
+        text("select pg_advisory_xact_lock(hashtext(:lock_key))"),
+        {"lock_key": f"world-autonomy-capacity:{world_id}"},
+    )
+
+
+def count_enabled_autonomous_world_characters(
+    db: Session,
+    *,
+    world_id: str,
+    exclude_character_ids: set[str] | None = None,
+) -> int:
+    """Count runnable autonomous identities for the canonical World limit."""
+
+    excluded = exclude_character_ids or set()
+    statement = (
+        select(func.count(models.WorldCharacter.id))
+        .join(
+            models.Character,
+            models.Character.id == models.WorldCharacter.character_id,
+        )
+        .where(
+            models.WorldCharacter.world_id == world_id,
+            models.WorldCharacter.control_mode == "autonomous",
+            models.WorldCharacter.status == "active",
+            models.WorldCharacter.autonomous_enabled.is_(True),
+            models.Character.deleted_at.is_(None),
+            models.Character.moderation_status != "suspended",
+        )
+    )
+    if excluded:
+        statement = statement.where(
+            models.WorldCharacter.character_id.not_in(excluded)
+        )
+    return int(db.scalar(statement) or 0)
+
+
 def set_active_world_character_autonomy(
     db: Session,
     *,
@@ -86,16 +154,10 @@ def set_active_world_character_autonomy(
     the lifecycle switch; owner-controlled identities remain fail-closed.
     """
 
-    active_world = db.get(models.CharacterActiveWorld, character_id)
-    if active_world is None:
-        return False
-    world_character = db.get(models.WorldCharacter, active_world.world_character_id)
-    if (
-        world_character is None
-        or world_character.character_id != character_id
-        or world_character.control_mode != "autonomous"
-        or world_character.status != "active"
-    ):
+    world_character = selected_autonomous_world_character(
+        db, character_id=character_id
+    )
+    if world_character is None:
         return False
     if world_character.autonomous_enabled == enabled:
         return False

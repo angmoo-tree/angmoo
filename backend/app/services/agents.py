@@ -10,10 +10,14 @@ from sqlalchemy import delete, or_, select, text, update
 from sqlalchemy.orm import Session
 
 from app import models, schemas
-from app.core import active_hours, security
+from app.core import active_hours, security, unit_of_work
 from app.core.config import settings
 from app.core.image_generation import USER_IMAGE_MODEL_OPTIONS
 from app.core.redaction import redact_secret_text
+from app.core.sqlite_concurrency import (
+    SqliteBusyRetryExhausted,
+    run_sqlite_session_immediate,
+)
 from app.credentials import (
     CredentialPurpose,
     CredentialResolutionError,
@@ -48,13 +52,21 @@ from app.services.runtime_boundary import (
     openclaw_auth_profiles,
 )
 from app.domains.world_characters.public import (
+    count_enabled_autonomous_world_characters,
     is_owner_controlled_character,
+    lock_world_autonomy_capacity,
+    selected_autonomous_world_character,
     set_active_world_character_autonomy,
 )
 
 
 SERVER_LLM_AUTONOMY_CAPACITY_ERROR_MESSAGE = (
-    "현재 서버 LLM 자율활동 정원이 가득 찼습니다. 잠시 후 다시 시도하거나 다른 앵무의 자율활동을 꺼주세요."
+    "global_autonomy_capacity_full: 로컬 runtime 전체 자율활동 정원이 가득 찼습니다. "
+    "다른 앵무의 자율활동을 끄거나 runtime 설정을 확인해주세요."
+)
+WORLD_AUTONOMY_CAPACITY_ERROR_MESSAGE = (
+    "world_autonomy_capacity_full: 이 World에서 동시에 자율활동할 수 있는 "
+    "앵무 50개의 상한에 도달했습니다."
 )
 SERVER_LLM_AUTONOMY_CAPACITY_LOCK_KEY = 6_180_100
 AGENT_DETAIL_ACTIVITY_LIMIT = 200
@@ -225,7 +237,22 @@ class AgentNotFoundError(AgentServiceError):
 
 
 class AgentAutonomyCapacityError(AgentServiceError):
-    pass
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason_code: str = "autonomy_capacity_full",
+        active_count: int | None = None,
+        max_active: int | None = None,
+    ) -> None:
+        self.reason_code = reason_code
+        self.active_count = active_count
+        self.max_active = max_active
+        super().__init__(message)
+
+
+class AgentAutonomyRetryableError(AgentServiceError):
+    reason_code = "autonomy_activation_retryable"
 
 
 class AgentHandleConflictError(AgentServiceError):
@@ -545,12 +572,37 @@ def _effective_server_llm_autonomy_count(
 
 
 def _reject_server_llm_autonomy_capacity(
+    *,
+    active_count: int,
+    max_active: int,
+) -> None:
+    raise AgentAutonomyCapacityError(
+        SERVER_LLM_AUTONOMY_CAPACITY_ERROR_MESSAGE,
+        reason_code="global_autonomy_capacity_full",
+        active_count=active_count,
+        max_active=max_active,
+    )
+
+
+def _reject_world_autonomy_capacity(
+    *,
+    active_count: int,
+    max_active: int,
+) -> None:
+    raise AgentAutonomyCapacityError(
+        WORLD_AUTONOMY_CAPACITY_ERROR_MESSAGE,
+        reason_code="world_autonomy_capacity_full",
+        active_count=active_count,
+        max_active=max_active,
+    )
+
+
+def _log_autonomy_activation_rejection(
     db: Session,
     *,
     user_id: str,
     character_id: str,
-    active_count: int,
-    max_active: int,
+    error: AgentAutonomyCapacityError,
 ) -> None:
     agent_crud.log_activity(
         db,
@@ -558,10 +610,11 @@ def _reject_server_llm_autonomy_capacity(
         character_id=character_id,
         action_type="autonomy_activation_rejected",
         target_post_id=None,
-        reason="server_llm_autonomy_capacity_full",
-        result=f"active_count={active_count}; max_active={max_active}",
+        reason=error.reason_code,
+        result=(
+            f"active_count={error.active_count}; max_active={error.max_active}"
+        ),
     )
-    raise AgentAutonomyCapacityError(SERVER_LLM_AUTONOMY_CAPACITY_ERROR_MESSAGE)
 
 
 def get_agent(db: Session, user: models.User, character_id: str) -> schemas.AgentDetailRead:
@@ -1389,16 +1442,31 @@ def update_settings(
         raise AgentActiveHoursInvalidError(str(exc)) from exc
     if data.allow_observe is not None:
         data = data.model_copy(update={"allow_observe": True})
-    setting = agent_crud.update_setting(
-        db, setting, data
-    )
+    schedule_fields = {
+        "activity_interval_minutes",
+        "active_hours_start",
+        "active_hours_end",
+    }
+    schedule_changed = bool(data.model_fields_set & schedule_fields)
+    setting = agent_crud.update_setting(db, setting, data, commit=False)
     slot = agent_crud.get_assigned_slot(db, character.id)
     if slot is not None:
         slot.heartbeat_interval_seconds = agent_activity_policy.tick_interval_seconds(
             setting
         )
-        db.commit()
-        db.refresh(setting)
+        if (
+            setting.auto_enabled
+            and schedule_changed
+            and slot.status == agent_run_crud.SLOT_STATUS_ASSIGNED_IDLE
+        ):
+            policy = agent_activity_policy.build_activity_policy(
+                db,
+                character_id=character.id,
+                now=datetime.now(UTC),
+            )
+            slot.next_tick_at = policy.next_tick_at
+    db.commit()
+    db.refresh(setting)
     return schemas.AgentActivitySettingRead.model_validate(setting)
 
 
@@ -1604,12 +1672,62 @@ async def analyze_tendency(
 def activate_agent(
     db: Session, user: models.User, character_id: str
 ) -> schemas.AgentDetailRead:
+    user_id = user.id
+    try:
+        if db.get_bind().dialect.name == "sqlite":
+            with unit_of_work.deferred_commits():
+                activated_character_id = run_sqlite_session_immediate(
+                    db,
+                    lambda: _activate_agent_uow(
+                        db,
+                        user_id=user_id,
+                        character_id=character_id,
+                        commit=False,
+                    ),
+                )
+        else:
+            activated_character_id = _activate_agent_uow(
+                db,
+                user_id=user_id,
+                character_id=character_id,
+                commit=True,
+            )
+        activated_character = db.get(models.Character, activated_character_id)
+        if activated_character is None:
+            raise AgentNotFoundError(activated_character_id)
+        return _build_agent_detail(db, activated_character)
+    except AgentAutonomyCapacityError as exc:
+        db.rollback()
+        _log_autonomy_activation_rejection(
+            db,
+            user_id=user_id,
+            character_id=character_id,
+            error=exc,
+        )
+        raise
+    except SqliteBusyRetryExhausted as exc:
+        raise AgentAutonomyRetryableError(
+            "autonomy_activation_retryable: 자율활동 상태를 동시에 변경하고 있어요. "
+            "잠시 후 다시 시도해주세요."
+        ) from exc
+
+
+def _activate_agent_uow(
+    db: Session,
+    *,
+    user_id: str,
+    character_id: str,
+    commit: bool,
+) -> str:
+    user = db.get(models.User, user_id)
+    if user is None:
+        raise AgentNotFoundError(character_id)
     character = _get_owned_character(db, user, character_id)
     _ensure_not_suspended(character)
     _ensure_llm_mode(character)
     maintenance_service.ensure_auto_ticks_available(db)
-    current_setting = agent_crud.ensure_setting(db, character.id)
-    _ensure_activity_profile_ready(
+    current_setting = agent_crud.ensure_setting(db, character.id, commit=commit)
+    readiness = _ensure_activity_profile_ready(
         db,
         character=character,
         setting=current_setting,
@@ -1619,76 +1737,50 @@ def activate_agent(
         raise CredentialRequiredError("Agent credential is required before activation")
 
     current_assigned_slot = agent_crud.get_assigned_slot(db, character.id)
-    other_active_settings = agent_crud.list_other_active_settings(
-        db, user_id=user.id, keep_character_id=character.id
+    selected_world_character = selected_autonomous_world_character(
+        db, character_id=character.id
     )
     if (
         current_setting.auto_enabled
         and current_assigned_slot is not None
-        and not other_active_settings
+        and (
+            selected_world_character is None
+            or selected_world_character.autonomous_enabled
+        )
     ):
-        return _build_agent_detail(db, character)
+        return character.id
 
-    for other_setting in other_active_settings:
-        assigned_slot = agent_crud.get_assigned_slot(db, other_setting.character_id)
-        if (
-            assigned_slot is not None
-            and assigned_slot.status == agent_run_crud.SLOT_STATUS_RUNNING
-        ):
-            raise ActiveSlotBusyError(
-                f"agent {other_setting.character_id}가 지금 실행 중이라 전환할 수 없습니다. 잠시 뒤 다시 시도해주세요."
-            )
-
+    # Fixed lock order: global first, then exact World. SQLite callers already
+    # hold the single writer through BEGIN IMMEDIATE.
     _lock_server_llm_autonomy_capacity(db)
-    max_active = settings.server_llm_autonomy_max_active_agents
-    replaced_character_ids = {character.id}
-    replaced_character_ids.update(setting.character_id for setting in other_active_settings)
-    active_count_without_replacements = _effective_server_llm_autonomy_count(
-        db, exclude_character_ids=replaced_character_ids
-    )
-    if active_count_without_replacements >= max_active:
-        _reject_server_llm_autonomy_capacity(
+    if selected_world_character is not None:
+        lock_world_autonomy_capacity(
+            db, world_id=selected_world_character.world_id
+        )
+        max_world_active = settings.world_autonomy_max_active_characters
+        world_active_count = count_enabled_autonomous_world_characters(
             db,
-            user_id=user.id,
-            character_id=character.id,
-            active_count=active_count_without_replacements,
+            world_id=selected_world_character.world_id,
+            exclude_character_ids={character.id},
+        )
+        if world_active_count >= max_world_active:
+            _reject_world_autonomy_capacity(
+                active_count=world_active_count,
+                max_active=max_world_active,
+            )
+    else:
+        world_active_count = 0
+        max_world_active = settings.world_autonomy_max_active_characters
+
+    max_active = settings.server_llm_autonomy_max_active_agents
+    active_count_without_target = _effective_server_llm_autonomy_count(
+        db, exclude_character_ids={character.id}
+    )
+    if active_count_without_target >= max_active:
+        _reject_server_llm_autonomy_capacity(
+            active_count=active_count_without_target,
             max_active=max_active,
         )
-
-    for other_setting in other_active_settings:
-        assigned_slot = agent_crud.get_assigned_slot(db, other_setting.character_id)
-        other_credential = agent_crud.get_character_credential(db, other_setting.character_id)
-        if (
-            assigned_slot is not None
-            and other_credential is not None
-            and _resident_openclaw_sync_enabled()
-        ):
-            _release_slot_auth_profile(
-                assigned_slot,
-                user_id=user.id,
-                character_id=other_setting.character_id,
-                credential=other_credential,
-            )
-            _reload_openclaw_secrets_sync()
-        agent_run_crud.release_resident_slot_assignment(
-            db,
-            user_id=user.id,
-            character_id=other_setting.character_id,
-            commit=False,
-        )
-
-    disabled_settings = agent_crud.disable_other_active_settings(
-        db, user_id=user.id, keep_character_id=character.id, commit=False
-    )
-    for disabled_setting in disabled_settings:
-        set_active_world_character_autonomy(
-            db,
-            character_id=disabled_setting.character_id,
-            enabled=False,
-        )
-        other = community_crud.get_character(db, disabled_setting.character_id)
-        if other is not None:
-            other.status = "inactive"
 
     heartbeat_interval_seconds = agent_activity_policy.tick_interval_seconds(current_setting)
     slot = agent_run_service.assign_resident_slot(
@@ -1697,8 +1789,6 @@ def activate_agent(
         character_id=character.id,
         credential_id=credential.id,
         heartbeat_interval_seconds=heartbeat_interval_seconds,
-        next_tick_at=datetime.now(UTC)
-        + timedelta(seconds=heartbeat_interval_seconds),
         commit=False,
     )
     if _resident_openclaw_sync_enabled():
@@ -1725,8 +1815,16 @@ def activate_agent(
                 commit=False,
             )
             current_setting.auto_enabled = False
+            set_active_world_character_autonomy(
+                db,
+                character_id=character.id,
+                enabled=False,
+            )
             character.status = "inactive"
-            db.commit()
+            if commit:
+                db.commit()
+            else:
+                db.flush()
             raise
     current_setting.auto_enabled = True
     set_active_world_character_autonomy(
@@ -1736,7 +1834,18 @@ def activate_agent(
     )
     character.status = "active"
     active_count = _effective_server_llm_autonomy_count(db)
-    db.commit()
+    world_active_count = (
+        count_enabled_autonomous_world_characters(
+            db,
+            world_id=selected_world_character.world_id,
+        )
+        if selected_world_character is not None
+        else 0
+    )
+    if commit:
+        db.commit()
+    else:
+        db.flush()
     agent_crud.log_activity(
         db,
         user_id=user.id,
@@ -1745,12 +1854,14 @@ def activate_agent(
         target_post_id=None,
         reason="user_enabled_autonomy",
         result=(
-            f"Assigned OpenClaw slot {slot.agent_id} with credential {credential.id}. "
-            f"active_count={active_count}; max_active={max_active}"
+            f"Assigned resident slot {slot.agent_id} with credential {credential.id}. "
+            f"active_count={active_count}; max_active={max_active}; "
+            f"world_id={readiness.world_id}; world_active_count={world_active_count}; "
+            f"max_world_active={max_world_active}"
         ),
     )
     db.refresh(character)
-    return _build_agent_detail(db, character)
+    return character.id
 
 
 def deactivate_agent(
@@ -2239,14 +2350,14 @@ def _ensure_activity_profile_ready(
     *,
     character: models.Character,
     setting: models.AgentActivitySetting,
-) -> None:
+) -> schemas.AgentActivityProfileReadinessRead:
     readiness = _activity_profile_readiness(
         db,
         character=character,
         setting=setting,
     )
     if readiness.ready:
-        return
+        return readiness
     if readiness.source == "world_community_profile":
         raise ActivityProfileRequiredError(
             "이 World의 활동 준비를 완료해주세요."
@@ -3042,6 +3153,9 @@ def _build_agent_detail(
         ),
         activity_summary=schemas.AgentActivitySummaryRead(
             within_active_hours=policy.within_active_hours,
+            timezone=agent_activity_policy.activity_timezone_name(
+                db, character_id=character.id
+            ),
             allowed_actions=_visible_activity_actions(policy.allowed_actions),
             blocked_reasons=policy.blocked_reasons,
             last_activity_at=last_activity_at,

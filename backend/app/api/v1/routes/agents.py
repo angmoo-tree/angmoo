@@ -874,6 +874,8 @@ def update_settings(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except agent_service.AgentAutonomyCapacityError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except agent_service.AgentAutonomyRetryableError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
 
 
 @router.post("/{character_id}/tendency/analyze", response_model=schemas.AgentDetailRead)
@@ -952,6 +954,8 @@ def activate_agent(
     except agent_service.AgentExecutionModeError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except agent_service.AgentAutonomyCapacityError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except agent_service.AgentAutonomyRetryableError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except (
         agent_service.TendencyAnalysisRequiredError,

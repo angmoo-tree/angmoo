@@ -18,6 +18,7 @@ export type AgentSlotRead = {
 
 export type AgentActivitySummaryRead = {
   within_active_hours: boolean;
+  timezone: string;
   next_activity_at: string | null;
   today_comment_count: number;
   today_post_count: number;

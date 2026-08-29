@@ -1,10 +1,27 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
-class AgentActivityLogRead(BaseModel):
+def normalize_utc_instant(value: Any) -> Any:
+    """Restore the canonical UTC offset SQLite cannot persist."""
+
+    if not isinstance(value, datetime):
+        return value
+    if value.tzinfo is None or value.utcoffset() is None:
+        return value.replace(tzinfo=UTC)
+    return value.astimezone(UTC)
+
+
+class UtcInstantResponseModel(BaseModel):
+    @field_validator("*", mode="before", check_fields=False)
+    @classmethod
+    def normalize_datetime_fields(cls, value: Any) -> Any:
+        return normalize_utc_instant(value)
+
+
+class AgentActivityLogRead(UtcInstantResponseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -20,7 +37,6 @@ class AgentActivityLogRead(BaseModel):
     reason: str
     result: str
     created_at: datetime
-
 
 class OpenClawCommunityRunCreate(BaseModel):
     user_id: str | None = None
@@ -45,7 +61,7 @@ class OpenClawAgentRunRead(BaseModel):
     gateway_result: dict[str, Any]
 
 
-class AgentSlotRead(BaseModel):
+class AgentSlotRead(UtcInstantResponseModel):
     model_config = ConfigDict(from_attributes=True)
 
     agent_id: str
@@ -61,8 +77,7 @@ class AgentSlotRead(BaseModel):
     last_error: str | None = None
     updated_at: datetime
 
-
-class AgentSlotPublicRead(BaseModel):
+class AgentSlotPublicRead(UtcInstantResponseModel):
     model_config = ConfigDict(from_attributes=True)
 
     agent_id: str
@@ -74,7 +89,6 @@ class AgentSlotPublicRead(BaseModel):
     last_error: str | None = None
     updated_at: datetime
 
-
 class ResidentSlotTickCreate(BaseModel):
     post_id: str | None = None
     max_runs: int = Field(default=1, ge=1, le=10)
@@ -82,7 +96,7 @@ class ResidentSlotTickCreate(BaseModel):
     message: str | None = Field(default=None, max_length=2000)
 
 
-class ResidentSlotTickRead(BaseModel):
+class ResidentSlotTickRead(UtcInstantResponseModel):
     due_count: int
     started_count: int
     results: list[OpenClawAgentRunRead]
