@@ -12,8 +12,10 @@ an API, or claim that the current UI already conforms to the design contract.
 UI-B adds a Local-owned semantic source, shared primitives, limited real
 consumer adoption, and one deterministic test fixture. UI-C adds the
 feature-owned Phone shell, capability-driven navigation, and route/window
-parity contract. UI-D through UI-F still own social and Local-only surface
-adoption and the full visual/cross-runtime closeout.
+parity contract. UI-D0 closes static global Post-detail handoff, and UI-D adds
+one feature-owned social presentation across global and World-scoped adapters.
+UI-E and UI-F still own Local-only surface adoption and the final
+visual/cross-runtime closeout.
 
 ## Exact baseline
 
@@ -22,6 +24,8 @@ adoption and the full visual/cross-runtime closeout.
 | UI-A audited Local base | `e5e62aed69cb89b16b5870eb0854dd07752dc519` | L4 PR G merge and immutable UI-A provenance base |
 | UI-A local technical commit | `7c96d4bd6f3789036593c1e89ca8974fae620252` | Signed-off UI-A contract closeout |
 | UI-C branch base | `fd0bb0f4df07cb3e121387e4b6628f8a4b471488` | merged UI-B result used as the shell-convergence base |
+| UI-C merge | `e7c6d5816d2a911a555f461cfba8c9b32b7172d3` | merged Phone shell, navigation, and route-parity result |
+| UI-D0 merge and UI-D base | `09026c84fa468824b746508ae1c7754dbb4c918a` | merged static global Post-detail handoff and immutable UI-D implementation base |
 | Hosted visual reference | `jingujeon/angmoo@7f967abd6117381be5c081ed284addb889b06fec` | Immutable social-UI audit snapshot |
 | Latest shared first-party history | `637426d8f2245311d6c5cb4ca52bcfc8103cca25` | Hosted and Local already share the audited frontend ancestry through this commit |
 | Local GPL transition | `b95ffe2c59e02d97f2047791c4959c1494b9ee35` | Current application license boundary |
@@ -57,11 +61,11 @@ entire mixed-purpose source file.
 | Hosted source at the reference commit | Local-owned target | Adopted scope |
 | --- | --- | --- |
 | `frontend/src/components/post-list-client.tsx` | `frontend/src/features/social/ui/post-list-client.tsx` | flat post row, type hierarchy, media, action rhythm |
+| `frontend/src/components/post-list-client.tsx` | `frontend/src/features/social/ui/social-post-row.tsx` and `social-presentation.module.css` | shared flat row, author hierarchy, explicit action rhythm, and accessible row navigation |
 | `frontend/src/components/post-detail-client.tsx` | `frontend/src/components/post-detail-client.tsx` | original post, reply hierarchy, back header |
 | `frontend/src/components/profile-avatar.tsx` | `frontend/src/shared/ui/profile-avatar.tsx` | round avatar and deterministic fallback |
 | `frontend/src/components/expandable-post-text.tsx` | `frontend/src/features/social/ui/expandable-post-text.tsx` | clamp and explicit expansion |
 | `frontend/src/components/mentioned-text.tsx` | `frontend/src/features/social/ui/mentioned-text.tsx` | mention presentation |
-| `frontend/src/components/post-media-grid.tsx` | `frontend/src/features/social/ui/post-media-grid.tsx` | media frame and grid |
 | `frontend/src/lib/post-card-navigation.ts` | `frontend/src/features/social/model/post-card-navigation.ts` | accessible row navigation |
 | `frontend/src/lib/use-mobile-pull-to-refresh.ts` | `frontend/src/shared/interaction/use-mobile-pull-to-refresh.ts` | touch refresh interaction |
 
@@ -73,12 +77,14 @@ entire mixed-purpose source file.
 | `frontend/src/components/agents-dashboard-client.tsx` | Local Character dashboard | remove quota and single-active assumptions; show World and scheduler truth |
 | `frontend/src/components/character-profile-client.tsx` | Local profile | expose only real Local chat, World, activity, graph, or management capabilities |
 | `frontend/src/components/post-list-client.tsx` composer and tabs | `frontend/src/features/social/ui/world-social-feed.tsx` | preserve owner-controlled World write and real World scopes |
+| `frontend/src/components/post-media-grid.tsx` | `frontend/src/features/social/ui/post-media-grid.tsx` | preserve hosted frame anatomy while using authenticated Local media URLs and payload-backed 0/1/2/3/4+ layout without remote fallback |
 
 ### LOCAL product surfaces
 
 - Device Home and its runtime entry state
 - World App and World-scoped navigation
 - owner-controlled World social write adapters
+- payload-backed optional social presentation and capability contracts
 - Creator Studio, Character create/link/leave, and World Package surfaces
 - autonomy schedule, next-run, provider, and scheduler state
 - Relationship Graph World meaning and dedicated wide window
@@ -178,7 +184,8 @@ World Package consumers directly adopt the new component API in UI-B. The
 existing Next/static product-shell behavior smoke therefore covers both global
 alias and compatibility-bridge impact in addition to the fixture tests. This
 transitional reach is not evidence that untouched pages conform to the design
-contract. UI-D, UI-E, and UI-F remain pending after the UI-C shell slice.
+contract. UI-D now owns the shared social row and endpoint-isolated adapters;
+UI-E and UI-F remain pending after that bounded adoption.
 
 The machine-readable required smoke set is:
 
@@ -189,6 +196,61 @@ pnpm --dir browser-tests test
 pnpm --dir browser-tests exec playwright test --config=playwright.static.config.ts
 pnpm --dir browser-tests test:visual
 ```
+
+## UI-D PR #207 follow-up: bright-coral and social read contract
+
+`frontend/DESIGN.md` version 1.6 makes `#ff6b6b` the single Angmoo Local core
+brand color. `#ff5252`, `#fff0ef`, and `#ffb5b5` are interaction/support
+derivatives, not competing brand colors. Positive primary actions use the
+bright coral surface with a white label, neutral strong actions use
+`#101828` with white, destructive actions keep the existing danger state,
+and non-action avatar, score, status, and graph presentation stays on its
+accessible text/container/state roles. Raw `#ae2f34` and `#8c1520` are
+forbidden in new source and existing consumers are removed by semantic role,
+never by blind replacement.
+
+Three closed visual exceptions are user-approved and intentionally recorded
+as **NOT WCAG AA PASS**:
+
+1. `EXCEPTION-A`: approved bright social text, autonomy kickers, and positive
+   aggregate heart/count on white;
+2. `EXCEPTION-B`: white label/icon on the bright-coral positive CTA;
+3. `EXCEPTION-C`: bright-coral selected navigation/filter/approved keyword
+   content on the soft-coral surface.
+
+The exceptions do not relax focus-visible, keyboard order, accessible names,
+44px targets, disabled distinction, or contrast for ordinary text, metadata,
+generic links, avatar initials, graph labels/nodes, status, danger, or error
+presentation. The soft coral border is only a supporting halo and never the
+sole focus indicator.
+
+The hosted composer contributes visual anatomy only. Global Feed remains a
+Feed Cue that influences a later autonomous activity. World Feed retains the
+Local owner-controlled direct-write endpoint and its `{ title, body }`, exact
+World, idempotency, and provider-call-zero contract. When an owner actor exists
+on a World Feed list route, the compact avatar/name/title/body composer is
+always mounted above the stream; the header write toggle and duplicate empty
+action are absent. World post detail keeps only its reply composer.
+
+The social action strip also distinguishes interaction types explicitly:
+
+```text
+reply -> authoritative reply_count, link only where a real detail route exists
+like  -> authoritative like_count, read-only non-focusable metric
+```
+
+The heart is neutral and unfilled at zero, then filled bright coral when the
+aggregate is positive. It is not viewer-liked state and does not create a like
+mutation endpoint. Global adapters use their existing payload. World adapters
+use the additive `ManualSocialPostRead.reply_count` and `like_count` read
+projection, calculated by two exact-target batch aggregates. The POST response,
+write payload and endpoint, database schema, SocialEvent, relationship, outbox,
+provider, and scheduler behavior remain unchanged.
+
+The pre-hotfix PR #207 head and its 22 successful checks remain historical
+evidence only. Any follow-up commit changes the exact head and requires a new
+local technical run and a new Hosted CI rollup; Ready, merge, and post-merge
+checks remain separate user Gates.
 
 ## Route and surface inventory
 
@@ -203,8 +265,8 @@ Current canonical surface families:
 | Surface | Current product shell | Expected window | Adoption |
 | --- | --- | --- | --- |
 | Device Home | `DeviceShell` composed from `DeviceFrame` | `phone` | `LOCAL` |
-| World Home, Feed, Chat, Characters, Relationships | `DeviceShell` composed from `DeviceFrame` | `phone` | `LOCAL` plus adapted social presentation |
-| Feed and Post detail compatibility routes | `AppShell` compatibility facade delegating to `DeviceShell` | `phone` | `DIRECT`/`ADAPTED`; presentation adoption remains UI-D |
+| World Home, Feed, Chat, Characters, Relationships | `DeviceShell` composed from `DeviceFrame` | `phone` | `LOCAL` adapter plus shared UI-D social presentation |
+| Feed and Post detail compatibility routes | `AppShell` compatibility facade delegating to `DeviceShell` | `phone` | `DIRECT`/`ADAPTED`; UI-D social presentation adopted |
 | Agent list, create, detail, autonomy, settings, owner gate | `AppShell` compatibility facade delegating to `DeviceShell` | `phone` | `ADAPTED`/`LOCAL`; screen adoption remains UI-E |
 | Creator Studio | dedicated wide shell | `studio` | `LOCAL` |
 | Relationship Graph | dedicated `RelationshipGraphFrame` | `relationship-graph` | `LOCAL` |
@@ -283,10 +345,19 @@ raw color occurrences = 1,860
 files with raw color  = 53
 ```
 
-Those lower values are the current tracked policy baseline. Regenerate the
-report after the final UI-C source settles, and change them again only to the
-checker-measured result. Never guess the count or update it merely to hide
-growth.
+UI-D's bounded Social-core migration was measured with that same checker:
+
+```text
+raw color occurrences = 1,796
+files with raw color  = 50
+```
+
+`baseline_status = reviewed_ui_b` remains the machine-contract lineage marker
+for the stage that introduced this deterministic scan; it is not a claim that
+the numeric baseline stopped at UI-B. The tracked occurrence and file values
+above are the current UI-D measurement. Regenerate the report only after the
+source settles, and change the values only to the checker-measured result.
+Never guess the count or update it merely to hide growth.
 
 The per-extension, per-file, and per-value result is tracked in
 [`frontend-design-baseline.json`](frontend-design-baseline.json). Regenerate or
@@ -347,9 +418,12 @@ build; neither rebuilds in the visual test.
 
 The generated frontend design baseline records canonical-LF SHA-256 values for
 the visual config, spec, fixture, production-preview helper, and source SVG,
-plus a binary SHA-256 for the reviewed, committed UI-B PNG. UI-C deliberately
-keeps the screenshot call and PNG count at one; its additional shell evidence
-is functional route, viewport, overflow, navigation, and window-kind coverage.
+plus a binary SHA-256 for the reviewed, committed semantic-foundation PNG.
+UI-C deliberately kept the screenshot call and PNG count at one. UI-D PR #207
+follow-up intentionally refreshes that same single baseline for the bright-
+coral CTA and selected-navigation contract rather than creating a second early
+corpus. Its additional social evidence remains functional route, viewport,
+overflow, navigation, composer, aggregate, and interaction-type coverage.
 
 The visual configuration must freeze container digest, locale, timezone, light
 color scheme, reduced motion, device scale, caret and animation behavior,
@@ -359,12 +433,13 @@ network images are forbidden. The pinned Noble container with the locked CI
 Chromium owns the pixel baseline. Windows 100%, 125%, and 150% display scale
 remains a separate Tauri user-smoke Gate.
 
-UI-B reviews only the `436x880` semantic-foundation fixture. UI-C adds
-functional shell assertions at `360`, `390`, `436`, and desktop Browser widths
-plus static inner-scroll pagination and unsupported-route assertions without
-promoting them into an early screenshot corpus. Completing the full
-route/state/runtime matrix, including the two wide workspaces at `1440x900`,
-belongs to UI-F.
+The single baseline remains the `436x880` semantic-foundation fixture. UI-C
+added functional shell assertions at `360`, `390`, `436`, and desktop Browser
+widths plus static inner-scroll pagination and unsupported-route assertions.
+UI-D follow-up adds exact bright-coral exception checks and paired Next/static
+social behavior without promoting them into a full product screenshot corpus.
+Completing the full route/state/runtime matrix, including the two wide
+workspaces at `1440x900`, belongs to UI-F.
 
 ## Asset and font provenance
 
@@ -408,7 +483,9 @@ commands are all closed, this branch permits this status only:
 ```text
 UI-A DESIGN CONTRACT / REFERENCE / PROVENANCE CLOSEOUT = PASS
 UI-B SEMANTIC TOKEN / PRIMITIVE FOUNDATION             = PASS
-UI-C PHONE SHELL / NAVIGATION / ROUTE PARITY            = IMPLEMENTED; LOCAL TECH AND EXTERNAL GATES PENDING
-UI-D through UI-F                                      = NOT STARTED
+UI-C PHONE SHELL / NAVIGATION / ROUTE PARITY            = PASS; MERGED; POST-MERGE PASS
+UI-D0 STATIC POST DETAIL ASYNC HANDOFF                   = FULL PASS; MERGED; POST-MERGE PASS
+UI-D SOCIAL CORE HOSTED PARITY                           = LOCAL TECH PASS; PUBLIC LIFECYCLE PENDING
+UI-E through UI-F                                      = NOT STARTED
 ANGMOO LOCAL DESIGN FOUNDATION PASS                    = NOT YET
 ```

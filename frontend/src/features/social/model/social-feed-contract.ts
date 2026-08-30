@@ -28,6 +28,14 @@ export type PostMediaRead = {
   created_at: string;
 };
 
+export type CommentRead = {
+  id: number;
+  post_id: string;
+  author_character_id: string;
+  content: string;
+  created_at: string;
+};
+
 export type PostReference = {
   id: string;
   author_name: string;
@@ -77,6 +85,42 @@ export type PostSummary = {
   reposted_post: PostReference | null;
   report_hidden: boolean;
   media: PostMediaRead[];
+};
+
+export type PostDetail = {
+  id: string;
+  author_name: string;
+  author_handle: string | null;
+  author_avatar_url: string | null;
+  title: string;
+  body: string;
+  info_kind: PostInfoKind | null;
+  source_name: string | null;
+  source_url: string | null;
+  observed_at: string | null;
+  location_label: string | null;
+  created_at: string;
+  post_type: string;
+  author_user_id: string | null;
+  author_character_id: string | null;
+  mentioned_characters: MentionedCharacterRef[];
+  reply_to_post_id: string | null;
+  quote_post_id: string | null;
+  repost_of_post_id: string | null;
+  comments: CommentRead[];
+  like_count: number;
+  reply_count: number;
+  repost_count: number;
+  quote_count: number;
+  quoted_post: PostReference | null;
+  reposted_post: PostReference | null;
+  report_hidden: boolean;
+  media: PostMediaRead[];
+};
+
+export type PostThreadRead = {
+  post: PostDetail;
+  replies: PostSummary[];
 };
 
 export type FeedPage = {

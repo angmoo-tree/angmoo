@@ -1,4 +1,4 @@
-import { expect, test, type Page, type TestInfo } from "@playwright/test";
+import { expect, test, type Locator, type Page, type TestInfo } from "@playwright/test";
 
 const FOUNDATION_ROUTE = "/ui-foundation";
 const FIXTURE_SELECTOR = "[data-ui-foundation-fixture]";
@@ -25,6 +25,17 @@ type CssState = {
   transform: string;
 };
 
+type Rgba = [number, number, number, number];
+
+type ContrastMeasurement = {
+  background: Rgba;
+  foreground: Rgba;
+  ratio: number;
+};
+
+const WCAG_AA_TEXT_CONTRAST = 4.5;
+const WCAG_AA_NON_TEXT_CONTRAST = 3;
+
 async function cssState(page: Page, selector: string): Promise<CssState> {
   return page.locator(selector).evaluate((node) => {
     const style = getComputedStyle(node);
@@ -36,6 +47,77 @@ async function cssState(page: Page, selector: string): Promise<CssState> {
       transform: style.transform,
     };
   });
+}
+
+async function textContrastMeasurements(locator: Locator): Promise<ContrastMeasurement[]> {
+  return locator.evaluateAll((nodes) => {
+    type BrowserRgba = [number, number, number, number];
+    const rgba = (value: string): BrowserRgba => {
+      const channels = value.match(/[\d.]+/g)?.map(Number);
+      if (!channels || channels.length < 3) throw new Error(`rgb required: ${value}`);
+      return [channels[0], channels[1], channels[2], channels[3] ?? 1];
+    };
+    const composite = (foreground: BrowserRgba, background: BrowserRgba): BrowserRgba => {
+      const alpha = foreground[3] + background[3] * (1 - foreground[3]);
+      if (alpha === 0) return [0, 0, 0, 0];
+      return [
+        (foreground[0] * foreground[3] +
+          background[0] * background[3] * (1 - foreground[3])) /
+          alpha,
+        (foreground[1] * foreground[3] +
+          background[1] * background[3] * (1 - foreground[3])) /
+          alpha,
+        (foreground[2] * foreground[3] +
+          background[2] * background[3] * (1 - foreground[3])) /
+          alpha,
+        alpha,
+      ];
+    };
+    const effectiveBackground = (node: Element): BrowserRgba => {
+      const layers: BrowserRgba[] = [];
+      for (let current: Element | null = node; current; current = current.parentElement) {
+        layers.push(rgba(getComputedStyle(current).backgroundColor));
+      }
+      return layers.reverse().reduce(
+        (background, layer) => composite(layer, background),
+        [255, 255, 255, 1] as BrowserRgba,
+      );
+    };
+    const luminance = ([red, green, blue]: BrowserRgba): number => {
+      const linear = [red, green, blue].map((channel) => {
+        const value = channel / 255;
+        return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+    };
+    const ratio = (foreground: BrowserRgba, background: BrowserRgba): number => {
+      const first = luminance(foreground);
+      const second = luminance(background);
+      return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05);
+    };
+
+    return nodes.map((node) => {
+      const background = effectiveBackground(node);
+      const foreground = composite(rgba(getComputedStyle(node).color), background);
+      return { background, foreground, ratio: ratio(foreground, background) };
+    });
+  });
+}
+
+function expectApprovedTextContrastException(
+  measurement: ContrastMeasurement,
+  expected: {
+    background: [number, number, number];
+    foreground: [number, number, number];
+    maximumRatio: number;
+    minimumRatio: number;
+  },
+): void {
+  expect(measurement.background.slice(0, 3)).toEqual(expected.background);
+  expect(measurement.foreground.slice(0, 3)).toEqual(expected.foreground);
+  expect(measurement.ratio).toBeGreaterThanOrEqual(expected.minimumRatio);
+  expect(measurement.ratio).toBeLessThanOrEqual(expected.maximumRatio);
+  expect(measurement.ratio).toBeLessThan(WCAG_AA_TEXT_CONTRAST);
 }
 
 async function openFoundation(page: Page, testInfo: TestInfo): Promise<void> {
@@ -224,65 +306,77 @@ test("Tabs and BottomNavigation expose one current destination", async ({ page }
   expect(activeVisibility).toBe(true);
 });
 
-test("semantic text samples preserve WCAG AA contrast", async ({ page }) => {
+test("semantic text samples outside approved exceptions preserve WCAG AA contrast", async ({
+  page,
+}) => {
   const samples = page.locator(
     '[data-ui-test="contrast-sample"], [data-ui-primitive="badge"], [data-ui-primitive="status-chip"], [data-ui-primitive="field"] p',
   );
   expect(await samples.count()).toBeGreaterThan(0);
-  const ratios = await samples.evaluateAll((nodes) => {
-    type Rgba = [number, number, number, number];
-    const rgba = (value: string): Rgba => {
-      const channels = value.match(/[\d.]+/g)?.map(Number);
-      if (!channels || channels.length < 3) throw new Error(`rgb required: ${value}`);
-      return [channels[0], channels[1], channels[2], channels[3] ?? 1];
-    };
-    const composite = (foreground: Rgba, background: Rgba): Rgba => {
-      const alpha = foreground[3] + background[3] * (1 - foreground[3]);
-      if (alpha === 0) return [0, 0, 0, 0];
-      return [
-        (foreground[0] * foreground[3] +
-          background[0] * background[3] * (1 - foreground[3])) /
-          alpha,
-        (foreground[1] * foreground[3] +
-          background[1] * background[3] * (1 - foreground[3])) /
-          alpha,
-        (foreground[2] * foreground[3] +
-          background[2] * background[3] * (1 - foreground[3])) /
-          alpha,
-        alpha,
-      ];
-    };
-    const effectiveBackground = (node: Element): Rgba => {
-      const layers: Rgba[] = [];
-      for (let current: Element | null = node; current; current = current.parentElement) {
-        layers.push(rgba(getComputedStyle(current).backgroundColor));
-      }
-      return layers.reverse().reduce(
-        (background, layer) => composite(layer, background),
-        [255, 255, 255, 1] as Rgba,
-      );
-    };
-    const luminance = ([red, green, blue]: Rgba): number => {
-      const linear = [red, green, blue].map((channel) => {
-        const value = channel / 255;
-        return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
-      });
-      return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
-    };
-    return nodes.map((node) => {
-      const style = getComputedStyle(node);
-      const backgroundColor = effectiveBackground(node);
-      const foregroundColor = composite(rgba(style.color), backgroundColor);
-      const foreground = luminance(foregroundColor);
-      const background = luminance(backgroundColor);
-      return (Math.max(foreground, background) + 0.05) /
-        (Math.min(foreground, background) + 0.05);
-    });
-  });
-  for (const ratio of ratios) expect(ratio).toBeGreaterThanOrEqual(4.5);
+  const measurements = await textContrastMeasurements(samples);
+  for (const measurement of measurements) {
+    expect(measurement.ratio).toBeGreaterThanOrEqual(WCAG_AA_TEXT_CONTRAST);
+  }
 });
 
-test("control boundaries and selected indicators preserve non-text contrast", async ({
+test.describe("user-approved contrast exceptions are not WCAG AA PASS", () => {
+  test("EXCEPTION-A keeps the hosted bright social foreground bounded", async ({ page }) => {
+    const [measurement] = await textContrastMeasurements(
+      page.getByText("Angmoo Local · UI-B", { exact: true }),
+    );
+
+    expectApprovedTextContrastException(measurement, {
+      background: [255, 255, 255],
+      foreground: [255, 107, 107],
+      minimumRatio: 2.7,
+      maximumRatio: 2.9,
+    });
+  });
+
+  test("EXCEPTION-B keeps bright primary CTA labels bounded in default and hover states", async ({
+    page,
+  }) => {
+    const primaryButton = page.locator('[data-ui-test="hover-target"]');
+    const [defaultMeasurement] = await textContrastMeasurements(primaryButton);
+    expectApprovedTextContrastException(defaultMeasurement, {
+      background: [255, 107, 107],
+      foreground: [255, 255, 255],
+      minimumRatio: 2.7,
+      maximumRatio: 2.9,
+    });
+
+    await primaryButton.hover();
+    await expect
+      .poll(async () => (await textContrastMeasurements(primaryButton))[0].background.slice(0, 3))
+      .toEqual([255, 82, 82]);
+    const [hoverMeasurement] = await textContrastMeasurements(primaryButton);
+    expectApprovedTextContrastException(hoverMeasurement, {
+      background: [255, 82, 82],
+      foreground: [255, 255, 255],
+      minimumRatio: 3.1,
+      maximumRatio: 3.3,
+    });
+  });
+
+  test("EXCEPTION-C keeps selected navigation label and icon contrast bounded", async ({
+    page,
+  }) => {
+    const selectedNavigation = page.locator(
+      '[data-ui-test="bottom-navigation"] [aria-current="page"]',
+    );
+    await expect(selectedNavigation).toHaveCount(1);
+    const [measurement] = await textContrastMeasurements(selectedNavigation);
+
+    expectApprovedTextContrastException(measurement, {
+      background: [255, 240, 239],
+      foreground: [255, 107, 107],
+      minimumRatio: 2.4,
+      maximumRatio: 2.6,
+    });
+  });
+});
+
+test("control boundaries keep non-text contrast outside the approved active-indicator exception", async ({
   page,
 }) => {
   const ratios = await page.evaluate(() => {
@@ -349,8 +443,10 @@ test("control boundaries and selected indicators preserve non-text contrast", as
     };
   });
 
-  expect(ratios.control).toBeGreaterThanOrEqual(3);
-  expect(ratios.indicator).toBeGreaterThanOrEqual(3);
+  expect(ratios.control).toBeGreaterThanOrEqual(WCAG_AA_NON_TEXT_CONTRAST);
+  expect(ratios.indicator).toBeGreaterThanOrEqual(2.7);
+  expect(ratios.indicator).toBeLessThanOrEqual(2.9);
+  expect(ratios.indicator).toBeLessThan(WCAG_AA_NON_TEXT_CONTRAST);
 });
 
 test("Dialog contains focus, closes with Escape, and returns focus", async ({ page }) => {

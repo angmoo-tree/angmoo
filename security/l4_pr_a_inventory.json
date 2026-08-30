@@ -524,7 +524,7 @@
       "policy_allowed_cycle_count": 0
     },
     "frontend": {
-      "candidate_consumer_edge_count": 31,
+      "candidate_consumer_edge_count": 29,
       "candidate_consumers": {
         "frontend/src/app/api/community/characters/[characterId]/activity/route.ts": [],
         "frontend/src/app/api/community/posts/[postId]/comments/route.ts": [],
@@ -552,7 +552,6 @@
         "frontend/src/features/social/ui/world-social-feed.tsx": [],
         "frontend/src/lib/community.ts": [
           "frontend/src/app/characters/[characterId]/activity/page.tsx",
-          "frontend/src/app/posts/[postId]/page.tsx",
           "frontend/src/app/profiles/characters/[characterId]/follows/page.tsx",
           "frontend/src/app/profiles/characters/[characterId]/page.tsx",
           "frontend/src/app/profiles/users/[userId]/follows/page.tsx",
@@ -565,7 +564,6 @@
           "frontend/src/components/character-activity-client.tsx",
           "frontend/src/components/character-profile-client.tsx",
           "frontend/src/components/notifications-client.tsx",
-          "frontend/src/components/post-detail-client.tsx",
           "frontend/src/components/profile-connections-client.tsx",
           "frontend/src/components/profile-list-row.tsx",
           "frontend/src/components/right-rail-insights.tsx",
@@ -647,20 +645,16 @@
             "PostDetailClient"
           ],
           "imports": [
-            "@/components/mentioned-text",
-            "@/components/post-media-grid",
-            "@/components/profile-avatar",
-            "@/features/device-shell/public",
-            "@/lib/agents",
-            "@/lib/community",
-            "@/lib/profile",
+            "@/features/social/public",
+            "@/shared/auth/public",
             "@/shared/navigation/public",
+            "@/shared/ui/public",
             "lucide-react",
             "next/link",
             "react"
           ],
           "path": "frontend/src/components/post-detail-client.tsx",
-          "sha256": "a30a1f1f13ec5c0a355b84b3cd53911febbe8857141d442187c61927abdef3f2"
+          "sha256": "0cf68577fc0b6c5347feff1eee1e12abba679889fb22df15516b9ae3a60a4c92"
         },
         {
           "exports": [
@@ -712,7 +706,7 @@
             "react"
           ],
           "path": "frontend/src/features/relationships/ui/relationship-graph-client.tsx",
-          "sha256": "ca31514a532e7bbbb8225040985058a5287475d22689b78e29627a8eb0053594"
+          "sha256": "055cc656aa55eafdb0816770383eaefb49800a8ec4c3903a569adebb693fea80"
         },
         {
           "exports": [
@@ -721,17 +715,14 @@
           "imports": [
             "../api/social-agent-client",
             "../api/social-feed-client",
-            "../model/post-card-navigation",
             "../model/social-agent-contract",
             "../model/social-feed-contract",
             "./active-agent-summary",
-            "./expandable-post-text",
             "./mentioned-text",
             "./post-media-grid",
-            "@/features/device-shell/public",
+            "./social-post-row",
             "@/shared/auth/public",
             "@/shared/interaction/public",
-            "@/shared/navigation/public",
             "@/shared/ui/public",
             "lucide-react",
             "next/image",
@@ -740,7 +731,7 @@
             "react-dom"
           ],
           "path": "frontend/src/features/social/ui/post-list-client.tsx",
-          "sha256": "7c58e97b95a51bf1e6927af1a2e588cc78646dcd7399079dba30d82884aabd85"
+          "sha256": "53798a02038ad48894920f027d4135ff436f69d49af71b6c2de7fad3a026c6ed"
         },
         {
           "exports": [
@@ -748,14 +739,19 @@
           ],
           "imports": [
             "../api/social-write-client",
+            "../model/social-presentation-contract",
             "../model/social-write-contract",
+            "./social-post-row",
             "./world-social-feed.module.css",
+            "@/shared/interaction/public",
             "@/shared/navigation/public",
+            "@/shared/ui/public",
+            "lucide-react",
             "next/link",
             "react"
           ],
           "path": "frontend/src/features/social/ui/world-social-feed.tsx",
-          "sha256": "61eef90e66647d17afa9b50d2d63681748364b4d8aabfee13282cb8f77a4d0af"
+          "sha256": "fb8c6440138d116d924fede989ef9da6ba8e6a4cd30c56804b705074359bdd10"
         },
         {
           "exports": [
@@ -898,7 +894,7 @@
     "oracle_artifacts": [
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "dfe46eda3aa41288ecf44187efc8e972c33f81337f1f0bb8e8217aaa41c68863"
+        "sha256": "320b3fb3d2207af178fbf5209d048c7c932c39cb591136105c01e4515373283c"
       },
       {
         "path": "docs/architecture/l3-er-postgres-neo4j-parity-oracle.json",
@@ -940,7 +936,7 @@
       },
       {
         "path": "backend/tests/test_l3_owner_manual_social_inbox.py",
-        "sha256": "a831c21233ddc02bd7ac0b40e2991307bbb029ef9b00a98bb1943d8268f30d71"
+        "sha256": "c67a8abc619157156d3f7480a734e3c2c7a0ed459be0bb5ff65d2cb78e9a417f"
       },
       {
         "path": "backend/tests/test_l4_social_search_projection.py",
@@ -971,7 +967,7 @@
         "sha256": "7ae830d9ecd1ae54ac8026ba2eae5904420d4d718148237eec63b2ddeb6e66ed"
       }
     ],
-    "parity_test_node_count": 93,
+    "parity_test_node_count": 95,
     "parity_test_nodes": [
       "backend/tests/test_embedded_data_migration.py::test_each_consecutive_step_rejects_undeclared_identity_changes",
       "backend/tests/test_embedded_data_migration.py::test_failed_sqlite_step_keeps_v1_active_and_removes_staging",
@@ -1023,6 +1019,8 @@
       "backend/tests/test_l3_er3_graph_query_parity.py::test_ladybug_outage_backlog_recovers_to_zero_lag",
       "backend/tests/test_l3_er3_graph_query_parity.py::test_ladybug_typed_query_workload_and_world_isolation",
       "backend/tests/test_l3_er3_graph_query_parity.py::test_ladybug_world_replay_restores_digest_and_sqlite_source",
+      "backend/tests/test_l3_owner_manual_social_inbox.py::test_manual_social_count_projection_is_exact_world_visible_and_batched",
+      "backend/tests/test_l3_owner_manual_social_inbox.py::test_manual_social_read_counts_are_required_and_non_negative",
       "backend/tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
       "backend/tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets",
       "backend/tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_social_migration_refuses_history_losing_downgrade",

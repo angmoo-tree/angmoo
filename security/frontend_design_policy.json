@@ -9,6 +9,27 @@
     },
     {
       "classification": "DIRECT",
+      "hosted_blob_oid": "553c4ba9869610908b1667006062c38bad891406",
+      "hosted_source": "frontend/src/components/post-list-client.tsx",
+      "local_target": "frontend/src/features/social/ui/social-post-row.tsx",
+      "scope": "feature-owned flat post row, explicit action strip, keyboard navigation, and social typography"
+    },
+    {
+      "classification": "DIRECT",
+      "hosted_blob_oid": "553c4ba9869610908b1667006062c38bad891406",
+      "hosted_source": "frontend/src/components/post-list-client.tsx",
+      "local_target": "frontend/src/features/social/ui/social-presentation.module.css",
+      "scope": "flat white social stream, semantic divider, author hierarchy, and action rhythm"
+    },
+    {
+      "classification": "LOCAL",
+      "hosted_blob_oid": null,
+      "hosted_source": null,
+      "local_target": "frontend/src/features/social/model/social-presentation-contract.ts",
+      "scope": "payload-backed link, button, and read-only metric presentation without fabricated counts"
+    },
+    {
+      "classification": "DIRECT",
       "hosted_blob_oid": "7ac352381a2df2e1251d1ce24fb64f925e82a0bf",
       "hosted_source": "frontend/src/components/post-detail-client.tsx",
       "local_target": "frontend/src/components/post-detail-client.tsx",
@@ -43,11 +64,11 @@
       "scope": "mention presentation"
     },
     {
-      "classification": "DIRECT",
+      "classification": "ADAPTED",
       "hosted_blob_oid": "0cd5c683bab6e8a822e2a5ba5922583fad1b6927",
       "hosted_source": "frontend/src/components/post-media-grid.tsx",
       "local_target": "frontend/src/features/social/ui/post-media-grid.tsx",
-      "scope": "post media frame and grid"
+      "scope": "runtime-safe payload-backed 0, 1, 2, 3, and 4-plus image layout without remote fallback"
     },
     {
       "classification": "DIRECT",
@@ -82,7 +103,7 @@
       "hosted_blob_oid": "553c4ba9869610908b1667006062c38bad891406",
       "hosted_source": "frontend/src/components/post-list-client.tsx",
       "local_target": "frontend/src/features/social/ui/world-social-feed.tsx",
-      "scope": "composer and feed tabs adapted to owner-controlled World writes and real Local capabilities"
+      "scope": "always-visible compact composer and aggregate reaction strip adapted to owner-controlled World writes and real Local capabilities"
     },
     {
       "classification": "LOCAL",
@@ -152,7 +173,7 @@
       "hosted_blob_oid": "553c4ba9869610908b1667006062c38bad891406",
       "hosted_source": "frontend/src/components/post-list-client.tsx",
       "local_target": null,
-      "scope": "unsupported like, repost, report, follow, global Feed tabs, and fabricated zero counts"
+      "scope": "unsupported like mutation, repost, report, follow, global Feed tabs, and counts absent from their authoritative payload"
     },
     {
       "classification": "REJECTED",
@@ -190,6 +211,9 @@
     ".github/PULL_REQUEST_TEMPLATE.md",
     ".github/workflows/security.yml",
     "CONTRIBUTING.md",
+    "backend/app/domains/social/api/schemas.py",
+    "backend/app/runtime/social/sqlalchemy_read_repository.py",
+    "backend/tests/test_l3_owner_manual_social_inbox.py",
     "browser-tests/package.json",
     "browser-tests/playwright.visual.config.ts",
     "browser-tests/semantic-foundation.visual.spec.ts",
@@ -206,6 +230,7 @@
     "frontend/src/app/icon.svg",
     "frontend/src/app/ui-foundation/page.tsx",
     "frontend/src/components/app-shell.tsx",
+    "frontend/src/components/post-detail-client.tsx",
     "frontend/src/composition/static-product-router.tsx",
     "frontend/src/features/device-shell/model/device-navigation.ts",
     "frontend/src/features/device-shell/public.ts",
@@ -215,6 +240,18 @@
     "frontend/src/features/device-shell/ui/local-product-link.module.css",
     "frontend/src/features/device-shell/ui/local-product-link.tsx",
     "frontend/src/features/relationships/ui/relationship-graph-frame.tsx",
+    "frontend/src/features/social/api/social-feed-client.ts",
+    "frontend/src/features/social/api/social-write-client.ts",
+    "frontend/src/features/social/model/social-feed-contract.ts",
+    "frontend/src/features/social/model/social-presentation-contract.ts",
+    "frontend/src/features/social/public.ts",
+    "frontend/src/features/social/ui/expandable-post-text.tsx",
+    "frontend/src/features/social/ui/post-list-client.tsx",
+    "frontend/src/features/social/ui/post-media-grid.tsx",
+    "frontend/src/features/social/ui/social-post-row.tsx",
+    "frontend/src/features/social/ui/social-presentation.module.css",
+    "frontend/src/features/social/ui/world-social-feed.module.css",
+    "frontend/src/features/social/ui/world-social-feed.tsx",
     "frontend/src/features/ui-foundation/public.ts",
     "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
     "frontend/src/shared/desktop/product-window.ts",
@@ -252,8 +289,8 @@
     "notice_decision": "The audited visual files come from first-party history already shared by hosted and Local before the Local GPL transition. UI-A copies no post-common hosted code, asset, icon, or font, so it adds no bundled Apache notice. Any later post-common hosted-only transplant requires a separate license-policy and notice decision before copying."
   },
   "raw_color_scan": {
-    "baseline_files": 53,
-    "baseline_occurrences": 1860,
+    "baseline_files": 50,
+    "baseline_occurrences": 1794,
     "baseline_status": "reviewed_ui_b",
     "extensions": [
       ".css",
@@ -316,6 +353,9 @@
       "Raw-color baseline",
       "Route and surface inventory",
       "UI-B semantic foundation",
+      "UI-D PR #207 follow-up",
+      "NOT WCAG AA PASS",
+      "ManualSocialPostRead.reply_count",
       "Visual harness extension"
     ],
     "docs/public/changing-frontend.md": [
@@ -372,6 +412,43 @@
       "isStaticFrontendProfile",
       "isStaticLocalProductRouteSupported"
     ],
+    "frontend/src/features/social/model/social-presentation-contract.ts": [
+      "SocialPostActionPresentation",
+      "interaction: \"link\"",
+      "interaction: \"button\"",
+      "interaction: \"metric\""
+    ],
+    "frontend/src/features/social/public.ts": [
+      "SocialPostPresentation",
+      "SocialPostRow"
+    ],
+    "frontend/src/features/social/ui/social-post-row.tsx": [
+      "ProfileAvatar",
+      "action.interaction === \"metric\"",
+      "fill={positiveLike ? \"currentColor\" : \"none\"}",
+      "shouldOpenPostFromCardClick",
+      "shouldOpenPostFromCardKeyDown",
+      "useRuntimeRouter"
+    ],
+    "frontend/src/features/social/ui/social-presentation.module.css": [
+      "--color-border-default",
+      "--color-brand-accent",
+      "--color-surface",
+      ".metric",
+      "min-height: 44px"
+    ],
+    "frontend/src/features/social/model/social-write-contract.ts": [
+      "avatar_url: string;",
+      "reply_count: number;",
+      "like_count: number;",
+      "ManualSocialWritePostRead"
+    ],
+    "frontend/src/features/social/ui/world-social-feed.tsx": [
+      "id=\"world-owner-composer\"",
+      "오늘 이 World에 남길 이야기의 제목을 적어주세요",
+      "내가 조종하는 앵무의 말로 이야기를 적어보세요",
+      "interaction: \"metric\""
+    ],
     "frontend/src/features/ui-foundation/public.ts": [
       "SemanticFoundationFixture"
     ],
@@ -406,8 +483,15 @@
       "import { Avatar } from \"./avatar\";"
     ],
     "frontend/src/shared/ui/semantic-tokens.css": [
-      "--color-action-primary:",
-      "--color-brand-accent:",
+      "--color-brand-accent: #ff6b6b;",
+      "--color-brand-accent-hover: #ff5252;",
+      "--color-brand-soft: #fff0ef;",
+      "--color-brand-soft-border: #ffb5b5;",
+      "--color-action-primary: var(--color-brand-accent);",
+      "--color-action-primary-hover: var(--color-brand-accent-hover);",
+      "--color-on-action-primary: #ffffff;",
+      "--color-action-dark: #101828;",
+      "--color-on-action-dark: #ffffff;",
       "--color-canvas:",
       "--color-state-degraded:",
       "--color-surface:",
@@ -438,9 +522,19 @@
       "isWindows ? frontendRoot : standaloneRoot"
     ],
     "frontend/DESIGN.md": [
+      "version: 1.6",
+      "EXCEPTION-A",
+      "EXCEPTION-B",
+      "EXCEPTION-C",
+      "WCAG AA PASS가 아니다",
       "UI-A DESIGN CONTRACT CLOSEOUT",
       "check_frontend_design_contract.py",
       "frontend-design-reference.md"
+    ],
+    "scripts/ci/check_frontend_design_contract.py": [
+      "UI_D_COLOR_CONTRACT",
+      "[legacy_dark_red_source]",
+      "policy.semantic_color_contract"
     ],
     "browser-tests/package.json": [
       "\"test:visual\": \"playwright test --config=playwright.visual.config.ts\""
@@ -612,6 +706,38 @@
     }
   ],
   "schema_version": 1,
+  "semantic_color_contract": {
+    "brand_core": "#ff6b6b",
+    "brand_derivatives": {
+      "hover_pressed": "#ff5252",
+      "soft_border": "#ffb5b5",
+      "soft_surface": "#fff0ef"
+    },
+    "contrast_exceptions": [
+      "EXCEPTION-A",
+      "EXCEPTION-B",
+      "EXCEPTION-C"
+    ],
+    "contrast_status": "USER-APPROVED CONTRAST EXCEPTION - NOT WCAG AA PASS",
+    "legacy_dark_red": {
+      "new_use": "forbidden",
+      "source_forbidden_literals": [
+        "#8c1520",
+        "#ae2f34",
+        "rgb(174 47 52",
+        "rgb(196 50 59"
+      ],
+      "values": [
+        "#8c1520",
+        "#ae2f34"
+      ]
+    },
+    "reaction_contract": {
+      "like": "read_only_authoritative_metric",
+      "reply": "authoritative_count_link_when_route_exists"
+    },
+    "world_composer": "always_visible_compact_direct_write_when_owner_actor_and_feed_route"
+  },
   "semantic_foundation": {
     "base_commit": "7c96d4bd6f3789036593c1e89ca8974fae620252",
     "classification": "LOCAL",
@@ -681,7 +807,7 @@
   "screenshot_inventory": {
     "baseline_call_count": 1,
     "committed_baseline_count": 1,
-    "current_status": "UI-C retains the single reviewed UI-B semantic-foundation baseline and adds behavior and fixed-viewport shell assertions without expanding the screenshot corpus; the full product visual corpus remains owned by UI-F.",
+    "current_status": "UI-D PR #207 follow-up intentionally refreshes the single reviewed semantic-foundation baseline for the bright-coral CTA and selected-navigation contract without expanding the screenshot corpus; the full product visual corpus remains owned by UI-F.",
     "target_viewports": [
       "360x800",
       "390x844",

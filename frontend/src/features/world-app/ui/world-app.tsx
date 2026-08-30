@@ -231,7 +231,14 @@ function WorldSection({
   }
 
   if (activeSection.id === "feed") {
-    return <WorldSocialFeed ownerActor={ownerActor} postId={postId} worldId={worldId} />;
+    return (
+      <WorldSocialFeed
+        key={`${worldId}:${postId ?? "feed"}`}
+        ownerActor={ownerActor}
+        postId={postId}
+        worldId={worldId}
+      />
+    );
   }
 
   if (activeSection.id === "relationships") {

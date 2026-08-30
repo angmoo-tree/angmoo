@@ -3,43 +3,59 @@
 import {
   ArrowLeft,
   Flag,
-  Heart,
-  MessageCircle,
   MoreHorizontal,
   RefreshCw,
-  Share,
-  Repeat2,
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
 import { useEffect, useMemo, useState } from "react";
-import type { ReactNode } from "react";
 
-import { MentionedText } from "@/components/mentioned-text";
-import { LocalProductLink } from "@/features/device-shell/public";
-import { PostMediaGrid } from "@/components/post-media-grid";
-import { ProfileAvatar } from "@/components/profile-avatar";
 import {
-  deletePost,
-  formatDate,
-  getPostThread,
-  reportPost,
+  deleteSocialPost,
+  getSocialPostThread,
+  listAgents,
+  MentionedText,
+  PostMediaGrid,
+  reportSocialPost,
+  SocialPostRow,
+  type SocialPostActionPresentation,
   type PostDetail,
   type PostReportReason,
   type PostReference,
   type PostSummary,
   type PostThreadRead,
-} from "@/lib/community";
+} from "@/features/social/public";
 import {
   AUTH_CHANGED_EVENT,
   getStoredUser,
-  listAgents,
   type UserRead,
-} from "@/lib/agents";
-import { formatHandle } from "@/lib/profile";
+} from "@/shared/auth/public";
+import { formatDate, formatHandle } from "@/shared/ui/public";
 
 const EMPTY_REPLIES: PostSummary[] = [];
+
+function aggregatePostActions(
+  postId: string,
+  replyCount: number,
+  likeCount: number,
+): SocialPostActionPresentation[] {
+  return [
+    {
+      kind: "reply",
+      interaction: "link",
+      label: "대꾸",
+      count: replyCount,
+      href: `/posts/${postId}`,
+    },
+    {
+      kind: "like",
+      interaction: "metric",
+      label: "좋아요",
+      count: likeCount,
+    },
+  ];
+}
 
 type DeleteTarget = {
   post: PostDetail | PostSummary;
@@ -90,7 +106,7 @@ export function PostDetailClient({
     setError(null);
 
     try {
-      setThread(await getPostThread(postId));
+      setThread(await getSocialPostThread(postId));
     } catch (err) {
       setError(err instanceof Error ? err.message : "게시글을 불러오지 못했습니다.");
     } finally {
@@ -155,7 +171,7 @@ export function PostDetailClient({
     setDeletePending(true);
     setDeleteError(null);
     try {
-      await deletePost(deleteTarget.post.id);
+      await deleteSocialPost(deleteTarget.post.id);
       if (deleteTarget.root) {
         router.push("/posts");
         return;
@@ -174,7 +190,7 @@ export function PostDetailClient({
     setReportPending(true);
     setReportError(null);
     try {
-      const result = await reportPost(reportTarget.post.id, {
+      const result = await reportSocialPost(reportTarget.post.id, {
         reason: reportReason,
         details: reportDetails.trim() || undefined,
       });
@@ -260,82 +276,68 @@ export function PostDetailClient({
             </div>
           ) : null}
 
-          <article className="border-b border-[#eaedf2] bg-white px-4 py-8 md:px-9">
-            <div className="flex gap-3 md:gap-6">
-              <LocalProductLink
-                href={post.author_character_id ? `/profiles/characters/${post.author_character_id}` : `/posts/${post.id}`}
-                className="shrink-0 pt-1"
-              >
-                <ProfileAvatar
-                  name={post.author_name}
-                  avatarUrl={post.author_avatar_url}
-                  sizeClassName="size-12 md:size-[66px]"
-                  textClassName="text-[18px] md:text-[28px]"
+          <SocialPostRow
+            actions={aggregatePostActions(post.id, post.reply_count, post.like_count)}
+            authorHref={
+              post.author_character_id
+                ? `/profiles/characters/${post.author_character_id}`
+                : undefined
+            }
+            menu={
+              canDeletePost(post) || canReportPost(post) ? (
+                <PostOptionsMenu
+                  open={openPostMenuId === post.id}
+                  onToggle={() =>
+                    setOpenPostMenuId((current) =>
+                      current === post.id ? null : post.id,
+                    )
+                  }
+                  onDelete={
+                    canDeletePost(post)
+                      ? () => requestDeletePost(post, true)
+                      : undefined
+                  }
+                  onReport={
+                    canReportPost(post)
+                      ? () => requestReportPost(post, true)
+                      : undefined
+                  }
                 />
-              </LocalProductLink>
-              <div className="relative min-w-0 flex-1 overflow-visible">
-                <div
-                  className={`mb-2 flex min-w-0 flex-wrap items-center gap-x-2 text-[18px] md:text-[23px] ${
-                    canDeletePost(post) || canReportPost(post) ? "pr-11" : ""
-                  }`}
-                >
-                  <span className="font-extrabold text-[#101828]">{post.author_name}</span>
-                  {post.author_handle ? (
-                    <span className="font-medium text-[#667085]">
-                      {formatHandle(post.author_handle)}
-                    </span>
-                  ) : null}
-                  <span className="font-medium text-[#667085]">·</span>
-                  <span className="font-medium text-[#667085]">{formatDate(post.created_at)}</span>
-                </div>
-                {canDeletePost(post) || canReportPost(post) ? (
-                  <div className="absolute right-0 top-0 z-10">
-                    <PostOptionsMenu
-                      open={openPostMenuId === post.id}
-                      onToggle={() =>
-                        setOpenPostMenuId((current) => current === post.id ? null : post.id)
-                      }
-                      onDelete={canDeletePost(post) ? () => requestDeletePost(post, true) : undefined}
-                      onReport={canReportPost(post) ? () => requestReportPost(post, true) : undefined}
-                    />
-                  </div>
-                ) : null}
-                {post.post_type === "repost" && post.reposted_post ? null : (
-                  <div>
-                    <p className="whitespace-pre-wrap break-all text-[18px] leading-[1.55] text-[#101828] md:break-words md:text-[23px] md:leading-[1.5]">
-                      <span className="font-bold">
-                        <MentionedText text={post.title} mentionedCharacters={post.mentioned_characters} />
-                      </span>{" "}
-                      <MentionedText text={post.body} mentionedCharacters={post.mentioned_characters} />
-                    </p>
-                    <PostMediaGrid media={post.media} />
-                  </div>
-                )}
+              ) : null
+            }
+            post={{
+              id: post.id,
+              authorName: post.author_name,
+              authorHandle: post.author_handle,
+              authorAvatarUrl: post.author_avatar_url,
+              createdAt: post.created_at,
+              timeLabel: formatDate(post.created_at),
+              title:
+                post.post_type === "repost" && post.reposted_post
+                  ? ""
+                  : post.title,
+              body:
+                post.post_type === "repost" && post.reposted_post
+                  ? ""
+                  : post.body,
+              mentionedCharacters: post.mentioned_characters,
+              media:
+                post.post_type === "repost" && post.reposted_post
+                  ? []
+                  : post.media,
+            }}
+            reference={
+              <>
                 {post.quoted_post ? (
                   <PostReferenceCard label="인용한 글" post={post.quoted_post} />
                 ) : null}
                 {post.reposted_post ? (
                   <PostReferenceCard label="리포스트한 글" post={post.reposted_post} />
                 ) : null}
-                <div className="mt-7 flex max-w-[560px] items-center justify-between text-[#667085]">
-                  <Action icon={<MessageCircle className="size-[22px] md:size-[27px]" strokeWidth={1.6} />} value={post.reply_count} />
-                  <Action icon={<Repeat2 className="size-[22px] md:size-[27px]" strokeWidth={1.6} />} value={post.repost_count} />
-                  <Action
-                    icon={
-                      <Heart
-                        className="size-[22px] md:size-[27px]"
-                        strokeWidth={1.6}
-                        fill={post.like_count > 0 ? "currentColor" : "none"}
-                      />
-                    }
-                    value={post.like_count}
-                    accent={post.like_count > 0}
-                  />
-                  <Action icon={<Share className="size-[22px] md:size-[27px]" strokeWidth={1.6} />} value={post.quote_count} />
-                </div>
-              </div>
-            </div>
-          </article>
+              </>
+            }
+            variant="detail"
+          />
 
           <section className="bg-white">
             <h2 className="border-b border-[#eaedf2] px-5 py-5 text-[24px] font-extrabold text-[#101828] md:px-9">
@@ -433,90 +435,52 @@ function ReplyNodeRow({
   const hasMenu = canDeletePost(reply) || canReportPost(reply);
 
   return (
-    <div className={isTopLevelReply ? "relative border-b border-[#eaedf2]" : "relative mt-3"}>
-      <Link
+    <div
+      className={
+        isTopLevelReply
+          ? "relative"
+          : "relative ml-4 border-l border-[var(--color-border-control)] md:ml-8"
+      }
+    >
+      <SocialPostRow
+        actions={aggregatePostActions(
+          reply.id,
+          reply.reply_count,
+          reply.like_count,
+        )}
+        authorHref={
+          reply.author_character_id
+            ? `/profiles/characters/${reply.author_character_id}`
+            : undefined
+        }
+        context={parent ? `${parent.author_name}에게 대꾸` : undefined}
         href={`/posts/${reply.id}`}
-        className={`block transition-colors hover:bg-[#f9fafb] ${
-          isTopLevelReply
-            ? "px-4 py-5 md:px-9 md:py-6"
-            : "rounded-[18px] px-3 py-3 md:px-4 md:py-4"
-        }`}
-      >
-        <article className="flex gap-3 md:gap-5">
-          <div className="shrink-0 pt-1">
-            <ProfileAvatar
-              name={reply.author_name}
-              avatarUrl={reply.author_avatar_url}
-              sizeClassName={isTopLevelReply ? "size-11 md:size-[48px]" : "size-8 md:size-[40px]"}
-              textClassName={isTopLevelReply ? "text-[17px] md:text-[20px]" : "text-[13px] md:text-[17px]"}
+        menu={
+          hasMenu ? (
+            <PostOptionsMenu
+              open={openPostMenuId === reply.id}
+              onToggle={() => onToggleMenu(reply.id)}
+              onDelete={canDeletePost(reply) ? () => onDeletePost(reply) : undefined}
+              onReport={canReportPost(reply) ? () => onReportPost(reply) : undefined}
             />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className={`mb-2 flex min-w-0 flex-wrap items-center gap-2 text-[15px] ${hasMenu ? "pr-11" : ""}`}>
-              <span className="max-w-full break-words rounded-full bg-[#fff0ef] px-3 py-1 font-extrabold text-[#ff6b6b]">
-                {reply.author_name}
-              </span>
-              {reply.author_handle ? (
-                <span className="min-w-0 break-words font-medium text-[#667085]">
-                  {formatHandle(reply.author_handle)}
-                </span>
-              ) : null}
-              <span className="shrink-0 font-medium text-[#667085]">{formatDate(reply.created_at)}</span>
-            </div>
-            {parent ? (
-              <div className="mb-1 text-[13px] font-bold text-[#98a2b3]">
-                {parent.author_name}에게 대꾸
-              </div>
-            ) : null}
-            <p className="min-w-0 whitespace-pre-wrap break-words text-[17px] leading-7 text-[#475467]">
-              {reply.post_type !== "reply" && reply.title ? (
-                <span className="font-bold text-[#101828]">
-                  <MentionedText text={reply.title} mentionedCharacters={reply.mentioned_characters} />{" "}
-                </span>
-              ) : null}
-              <MentionedText text={reply.body} mentionedCharacters={reply.mentioned_characters} />
-            </p>
-            <div className="mt-4 flex w-full max-w-[360px] items-center justify-between text-[#667085]">
-              <ReplyAction
-                icon={<MessageCircle size={18} strokeWidth={1.7} aria-hidden="true" />}
-                value={reply.reply_count}
-              />
-              <ReplyAction
-                icon={<Repeat2 size={18} strokeWidth={1.7} aria-hidden="true" />}
-                value={reply.repost_count}
-              />
-              <ReplyAction
-                icon={
-                  <Heart
-                    size={18}
-                    strokeWidth={1.7}
-                    fill={reply.like_count > 0 ? "currentColor" : "none"}
-                    aria-hidden="true"
-                  />
-                }
-                value={reply.like_count}
-                accent={reply.like_count > 0}
-              />
-              <ReplyAction
-                icon={<Share size={18} strokeWidth={1.7} aria-hidden="true" />}
-                value={reply.quote_count}
-              />
-            </div>
-          </div>
-        </article>
-      </Link>
-      {hasMenu ? (
-        <div className={isTopLevelReply ? "absolute right-4 top-5 z-10 md:right-9 md:top-6" : "absolute right-2 top-2 z-10"}>
-          <PostOptionsMenu
-            open={openPostMenuId === reply.id}
-            onToggle={() => onToggleMenu(reply.id)}
-            onDelete={canDeletePost(reply) ? () => onDeletePost(reply) : undefined}
-            onReport={canReportPost(reply) ? () => onReportPost(reply) : undefined}
-          />
-        </div>
-      ) : null}
+          ) : null
+        }
+        post={{
+          id: reply.id,
+          authorName: reply.author_name,
+          authorHandle: reply.author_handle,
+          authorAvatarUrl: reply.author_avatar_url,
+          createdAt: reply.created_at,
+          timeLabel: formatDate(reply.created_at),
+          title: reply.post_type === "reply" ? "" : reply.title,
+          body: reply.body,
+          mentionedCharacters: reply.mentioned_characters,
+          media: reply.media,
+        }}
+        variant="reply"
+      />
       {node.children.length > 0 ? (
-        <div className={isTopLevelReply ? "mx-4 border-l border-[#d9dee8] pb-5 pl-3 md:mx-9 md:pl-5" : "pb-1"}>
+        <div>
           {node.children.map((child) => (
             <ReplyNodeRow
               key={child.reply.id}
@@ -554,7 +518,7 @@ function PostOptionsMenu({
       <button
         type="button"
         onClick={onToggle}
-        className="inline-flex size-9 items-center justify-center rounded-full bg-white/80 text-[#667085] transition-colors hover:bg-[#eef1f5] hover:text-[#101828]"
+        className="inline-flex size-11 items-center justify-center rounded-full bg-white/80 text-[#667085] transition-colors hover:bg-[#eef1f5] hover:text-[#101828]"
         title="게시글 메뉴"
         aria-label="게시글 메뉴"
         aria-haspopup="menu"
@@ -564,14 +528,14 @@ function PostOptionsMenu({
       </button>
       {open ? (
         <div
-          className="absolute right-0 top-10 z-20 w-32 overflow-hidden rounded-md border border-[#e1e5eb] bg-white py-1 shadow-[0_12px_28px_rgba(16,24,40,0.16)]"
+          className="absolute right-0 top-12 z-20 w-32 overflow-hidden rounded-md border border-[#e1e5eb] bg-white py-1 shadow-[0_12px_28px_rgba(16,24,40,0.16)]"
           role="menu"
         >
           {onDelete ? (
             <button
               type="button"
               onClick={onDelete}
-              className="flex w-full items-center gap-2 px-3 py-2 text-left text-[14px] font-bold text-[#c24141] transition-colors hover:bg-[#fff5f5]"
+              className="flex min-h-11 w-full items-center gap-2 px-3 py-2 text-left text-[14px] font-bold text-[#c24141] transition-colors hover:bg-[#fff5f5]"
               role="menuitem"
             >
               <Trash2 size={15} aria-hidden="true" />
@@ -582,7 +546,7 @@ function PostOptionsMenu({
             <button
               type="button"
               onClick={onReport}
-              className="flex w-full items-center gap-2 px-3 py-2 text-left text-[14px] font-bold text-[#475467] transition-colors hover:bg-[#f9fafb]"
+              className="flex min-h-11 w-full items-center gap-2 px-3 py-2 text-left text-[14px] font-bold text-[#475467] transition-colors hover:bg-[#f9fafb]"
               role="menuitem"
             >
               <Flag size={15} aria-hidden="true" />
@@ -726,27 +690,6 @@ function DeletePostDialog({
   );
 }
 
-function ReplyAction({
-  icon,
-  value,
-  accent = false,
-}: {
-  icon: ReactNode;
-  value: number;
-  accent?: boolean;
-}) {
-  return (
-    <span
-      className={`inline-flex min-w-10 items-center gap-2 text-[14px] font-medium ${
-        accent ? "text-[#ff6b6b]" : "text-[#667085]"
-      }`}
-    >
-      {icon}
-      {value}
-    </span>
-  );
-}
-
 function mapRepliesById(replies: PostSummary[]) {
   return new Map(replies.map((reply) => [reply.id, reply]));
 }
@@ -773,27 +716,6 @@ function buildReplyTree(replies: PostSummary[], rootPostId: string): ReplyNode[]
   }
 
   return roots;
-}
-
-function Action({
-  icon,
-  value,
-  accent = false,
-}: {
-  icon: ReactNode;
-  value?: number;
-  accent?: boolean;
-}) {
-  return (
-    <span className={`flex items-center gap-2 ${accent ? "text-[#ff6b6b]" : ""}`}>
-      <span className="rounded-full p-1.5">
-        {icon}
-      </span>
-      {typeof value === "number" ? (
-        <span className="text-[16px] font-medium md:text-[20px]">{value}</span>
-      ) : null}
-    </span>
-  );
 }
 
 function PostReferenceCard({

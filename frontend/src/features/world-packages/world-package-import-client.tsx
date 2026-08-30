@@ -196,7 +196,7 @@ function ImportPreview({ prepared, approved, duplicateStrategy, pending, onAppro
           <h3 className="font-black text-[#101828]">라이선스·출처</h3>
           <p className="mt-3 text-sm font-bold text-[#475467]">{preview.license.expression}</p>
           <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[#667085]">{preview.license.attribution || "저작자 표시 없음"}</p>
-          {preview.license.source_url ? <a className="mt-3 block break-all text-sm font-bold text-[#ae2f34] underline" href={preview.license.source_url} rel="noreferrer" target="_blank">원본 안내 열기</a> : null}
+          {preview.license.source_url ? <a className="mt-3 block break-all text-sm font-bold text-state-running underline" href={preview.license.source_url} rel="noreferrer" target="_blank">원본 안내 열기</a> : null}
         </div>
         <div className="rounded-[20px] border border-[#e1e5eb] p-5">
           <h3 className="font-black text-[#101828]">충돌 계획</h3>

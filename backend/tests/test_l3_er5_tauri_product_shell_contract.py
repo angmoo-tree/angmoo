@@ -230,6 +230,9 @@ def test_static_phone_hides_unsupported_links_and_uses_its_scroll_owner() -> Non
         "frontend/src/features/device-shell/ui/local-product-link.tsx"
     )
     feed = _read("frontend/src/features/social/ui/post-list-client.tsx")
+    social_post_row = _read(
+        "frontend/src/features/social/ui/social-post-row.tsx"
+    )
     agent = _read("frontend/src/components/agent-detail-client.tsx")
     pull_to_refresh = _read(
         "frontend/src/shared/interaction/use-mobile-pull-to-refresh.ts"
@@ -245,7 +248,8 @@ def test_static_phone_hides_unsupported_links_and_uses_its_scroll_owner() -> Non
     assert 'role="link"' in product_link
     assert "event.stopPropagation()" in product_link
     assert "local-product-link.module.css" in product_link
-    assert "LocalProductLink" in feed
+    assert "SocialPostRow" in feed
+    assert "LocalProductLink" in social_post_row
     assert "const canStartMessage = !isLocalAgent && !isStaticFrontendProfile()" in agent
     assert "getRuntimeConfig()?.apiBaseUrl ?? window.location.origin" in agent
     assert "resolveScrollEventTarget" in feed

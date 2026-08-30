@@ -17,7 +17,7 @@
 }
 
 .entryInteractive:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--color-primary, #ae2f34) 55%, transparent);
+  outline: 3px solid var(--focus-ring-color);
   outline-offset: 5px;
   border-radius: 22px;
 }

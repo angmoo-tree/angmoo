@@ -1,23 +1,17 @@
 "use client";
 
 import {
-  Heart,
   Flag,
-  MessageCircle,
   MoreHorizontal,
   PauseCircle,
   Radio,
   RefreshCw,
-  Repeat2,
-  Share,
   Trash2,
   Wheat,
   X,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { LocalProductLink } from "@/features/device-shell/public";
-import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
 import {
   AUTH_CHANGED_EVENT,
   getStoredUser,
@@ -40,9 +34,9 @@ import {
   getActiveAgentAvatarRingClassName,
   selectActiveAgent,
 } from "./active-agent-summary";
-import { ExpandablePostText } from "./expandable-post-text";
 import { MentionedText } from "./mentioned-text";
 import { PostMediaGrid } from "./post-media-grid";
+import { SocialPostRow } from "./social-post-row";
 import {
   getAgentActivityMaintenance,
   getAgentFeedCue,
@@ -69,10 +63,6 @@ import type {
   PostReportReason,
   PostSummary,
 } from "../model/social-feed-contract";
-import {
-  shouldOpenPostFromCardClick,
-  shouldOpenPostFromCardKeyDown,
-} from "../model/post-card-navigation";
 
 type FeedMode = "public" | "character-following" | "user-following";
 const DEVICE_SCROLL_OWNER_SELECTOR = '[data-device-scroll-owner="true"]';
@@ -100,7 +90,6 @@ export function PostListClient({
   initialError: string | null;
   suppressFeedSnippet?: boolean;
 }) {
-  const router = useRouter();
   const [posts, setPosts] = useState(() => mergeUniquePosts([], initialFeed.items));
   const [nextCursor, setNextCursor] = useState(initialFeed.next_cursor);
   const [selectedAgentId, setSelectedAgentId] = useState("");
@@ -541,151 +530,77 @@ export function PostListClient({
           className="flex flex-col"
           data-nosnippet={suppressFeedSnippet ? "true" : undefined}
         >
-          {posts.map((post) => (
-            <article
-              key={post.id}
-              role="link"
-              tabIndex={0}
-              aria-label={`${post.author_name} 게시글 자세히 보기`}
-              onClick={(event) => {
-                if (shouldOpenPostFromCardClick(event)) {
-                  router.push(`/posts/${post.id}`);
+          {posts.map((post) => {
+            const detailHref = `/posts/${post.id}`;
+            const isReferenceOnly =
+              post.post_type === "repost" && Boolean(post.reposted_post);
+            return (
+              <SocialPostRow
+                actions={[
+                  {
+                    kind: "reply",
+                    interaction: "link",
+                    label: "대꾸",
+                    count: post.reply_count,
+                    href: detailHref,
+                  },
+                  {
+                    kind: "like",
+                    interaction: "metric",
+                    label: "좋아요",
+                    count: post.like_count,
+                  },
+                ]}
+                authorHref={
+                  post.author_character_id
+                    ? `/profiles/characters/${post.author_character_id}`
+                    : undefined
                 }
-              }}
-              onKeyDown={(event) => {
-                if (shouldOpenPostFromCardKeyDown(event)) {
-                  router.push(`/posts/${post.id}`);
+                href={detailHref}
+                key={post.id}
+                menu={
+                  canDeletePost(post) || canReportPost(post) ? (
+                    <PostOptionsMenu
+                      open={openPostMenuId === post.id}
+                      onToggle={() =>
+                        setOpenPostMenuId((current) =>
+                          current === post.id ? null : post.id,
+                        )
+                      }
+                      onDelete={
+                        canDeletePost(post) ? () => requestDeletePost(post) : undefined
+                      }
+                      onReport={
+                        canReportPost(post) ? () => requestReportPost(post) : undefined
+                      }
+                    />
+                  ) : null
                 }
-              }}
-              className="group cursor-pointer border-b border-[#eaedf2] bg-white px-4 py-7 transition-colors hover:bg-[#f9fafb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6b6b]/30 md:px-9 md:py-8"
-            >
-              <div className="flex gap-3 md:gap-6">
-                <LocalProductLink
-                  href={post.author_character_id ? `/profiles/characters/${post.author_character_id}` : `/posts/${post.id}`}
-                  className="shrink-0 pt-1"
-                >
-                  <ProfileAvatar
-                    name={post.author_name}
-                    avatarUrl={post.author_avatar_url}
-                    sizeClassName="size-12 md:size-[66px]"
-                    textClassName="text-[18px] md:text-[28px]"
-                  />
-                </LocalProductLink>
-
-                <div className="relative min-w-0 flex-1 overflow-visible">
-                  <Link href={`/posts/${post.id}`} className="block min-w-0">
-                    {post.post_type === "quote" ? (
-                      <PostTypeLabel label="인용" />
+                post={{
+                  id: post.id,
+                  authorName: post.author_name,
+                  authorHandle: post.author_handle,
+                  authorAvatarUrl: post.author_avatar_url,
+                  createdAt: post.created_at,
+                  timeLabel: formatSocialDate(post.created_at),
+                  title: isReferenceOnly ? "" : post.title,
+                  body: isReferenceOnly ? "" : post.body,
+                  mentionedCharacters: post.mentioned_characters,
+                  media: isReferenceOnly ? [] : post.media,
+                }}
+                reference={
+                  <>
+                    {post.quoted_post ? (
+                      <PostReferenceCard label="인용한 글" post={post.quoted_post} />
                     ) : null}
-                    {post.post_type === "repost" ? (
-                      <PostTypeLabel label="리포스트" />
+                    {post.reposted_post ? (
+                      <PostReferenceCard label="리포스트한 글" post={post.reposted_post} />
                     ) : null}
-
-                    <div
-                      className={`mb-1 flex min-w-0 flex-wrap items-center gap-x-2 text-[18px] md:text-[23px] ${
-                        canDeletePost(post) || canReportPost(post) ? "pr-11" : ""
-                      }`}
-                    >
-                      <span className="font-extrabold text-[#101828]">{post.author_name}</span>
-                      {post.author_handle ? (
-                        <span className="font-medium text-[#667085]">
-                          {formatHandle(post.author_handle)}
-                        </span>
-                      ) : null}
-                      <span className="font-medium text-[#667085]">·</span>
-                      <span className="font-medium text-[#667085]">{formatSocialDate(post.created_at)}</span>
-                    </div>
-                  </Link>
-
-                  {post.post_type === "repost" && post.reposted_post ? null : (
-                    <div className="mb-7">
-                      <ExpandablePostText
-                        title={post.title}
-                        body={post.body}
-                        mentionedCharacters={post.mentioned_characters}
-                        clampClassName="line-clamp-6 md:line-clamp-8"
-                        textClassName="whitespace-pre-wrap break-all text-[18px] leading-[1.55] text-[#101828] md:break-words md:text-[23px] md:leading-[1.5]"
-                      />
-                      <Link href={`/posts/${post.id}`} className="block">
-                        <PostMediaGrid media={post.media} />
-                      </Link>
-                    </div>
-                  )}
-                  {canDeletePost(post) || canReportPost(post) ? (
-                    <div className="absolute right-0 top-0 z-10">
-                      <PostOptionsMenu
-                        open={openPostMenuId === post.id}
-                        onToggle={() =>
-                          setOpenPostMenuId((current) => current === post.id ? null : post.id)
-                        }
-                        onDelete={canDeletePost(post) ? () => requestDeletePost(post) : undefined}
-                        onReport={canReportPost(post) ? () => requestReportPost(post) : undefined}
-                      />
-                    </div>
-                  ) : null}
-
-                  {post.quoted_post ? (
-                    <PostReferenceCard label="인용한 글" post={post.quoted_post} />
-                  ) : null}
-                  {post.reposted_post ? (
-                    <PostReferenceCard label="리포스트한 글" post={post.reposted_post} />
-                  ) : null}
-
-                  <div className="flex w-full max-w-[560px] items-center justify-between text-[#667085]">
-                    <Link
-                      href={`/posts/${post.id}`}
-                      className="flex items-center gap-2 transition-colors hover:text-[#ff6b6b]"
-                      title="대꾸"
-                    >
-                      <span className="rounded-full p-1.5 transition-colors hover:bg-[#ff6b6b]/10">
-                        <MessageCircle className="size-[22px] md:size-[27px]" strokeWidth={1.6} />
-                      </span>
-                      <span className="text-[16px] font-medium md:text-[20px]">
-                        {post.reply_count}
-                      </span>
-                    </Link>
-
-                    <span
-                      className="flex items-center gap-2"
-                      title="리포스트"
-                    >
-                      <span className="rounded-full p-1.5">
-                        <Repeat2 className="size-[22px] md:size-[27px]" strokeWidth={1.6} />
-                      </span>
-                      <span className="text-[16px] font-medium md:text-[20px]">{post.repost_count}</span>
-                    </span>
-
-                    <span
-                      className={`flex items-center gap-2 ${
-                        post.like_count > 0 ? "text-[#ff6b6b]" : "text-[#667085]"
-                      }`}
-                      title="좋아요"
-                    >
-                      <span className="rounded-full p-1.5">
-                        <Heart
-                          className="size-[22px] md:size-[27px]"
-                          strokeWidth={1.6}
-                          fill={post.like_count > 0 ? "currentColor" : "none"}
-                        />
-                      </span>
-                      <span className="text-[16px] font-medium md:text-[20px]">{post.like_count}</span>
-                    </span>
-
-                    <Link
-                      href={`/posts/${post.id}`}
-                      className="flex items-center gap-2 transition-colors hover:text-blue-500"
-                      title="인용"
-                    >
-                      <span className="rounded-full p-1.5 transition-colors hover:bg-blue-500/10">
-                        <Share className="size-[22px] md:size-[27px]" strokeWidth={1.6} />
-                      </span>
-                      <span className="text-[16px] font-medium md:text-[20px]">{post.quote_count}</span>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </article>
-          ))}
+                  </>
+                }
+              />
+            );
+          })}
         </div>
       </div>
 
@@ -737,7 +652,7 @@ function PostOptionsMenu({
       <button
         type="button"
         onClick={onToggle}
-        className="inline-flex size-9 items-center justify-center rounded-full text-[#667085] transition-colors hover:bg-[#eef1f5] hover:text-[#101828]"
+        className="inline-flex size-11 items-center justify-center rounded-full text-[#667085] transition-colors hover:bg-[#eef1f5] hover:text-[#101828]"
         title="게시글 메뉴"
         aria-label="게시글 메뉴"
         aria-haspopup="menu"
@@ -747,14 +662,14 @@ function PostOptionsMenu({
       </button>
       {open ? (
         <div
-          className="absolute right-0 top-10 z-20 w-32 overflow-hidden rounded-md border border-[#e1e5eb] bg-white py-1 shadow-[0_12px_28px_rgba(16,24,40,0.16)]"
+          className="absolute right-0 top-12 z-20 w-32 overflow-hidden rounded-md border border-[#e1e5eb] bg-white py-1 shadow-[0_12px_28px_rgba(16,24,40,0.16)]"
           role="menu"
         >
           {onDelete ? (
             <button
               type="button"
               onClick={onDelete}
-              className="flex w-full items-center gap-2 px-3 py-2 text-left text-[14px] font-bold text-[#c24141] transition-colors hover:bg-[#fff5f5]"
+              className="flex min-h-11 w-full items-center gap-2 px-3 py-2 text-left text-[14px] font-bold text-[#c24141] transition-colors hover:bg-[#fff5f5]"
               role="menuitem"
             >
               <Trash2 size={15} aria-hidden="true" />
@@ -765,7 +680,7 @@ function PostOptionsMenu({
             <button
               type="button"
               onClick={onReport}
-              className="flex w-full items-center gap-2 px-3 py-2 text-left text-[14px] font-bold text-[#475467] transition-colors hover:bg-[#f9fafb]"
+              className="flex min-h-11 w-full items-center gap-2 px-3 py-2 text-left text-[14px] font-bold text-[#475467] transition-colors hover:bg-[#f9fafb]"
               role="menuitem"
             >
               <Flag size={15} aria-hidden="true" />
@@ -1240,14 +1155,6 @@ function feedContentFilterEmptyText(value: FeedContentFilter) {
   if (value === "posts") return "표시할 지저귐이 없습니다.";
   if (value === "reposts") return "표시할 리포스트가 없습니다.";
   return "아직 올라온 지저귐이 없습니다.";
-}
-
-function PostTypeLabel({ label }: { label: string }) {
-  return (
-    <div className="mb-2 text-[14px] font-extrabold text-[#667085]">
-      {label}
-    </div>
-  );
 }
 
 function PostReferenceCard({

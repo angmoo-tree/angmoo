@@ -13,17 +13,17 @@ export function isOfficialOperatorName(name?: string | null) {
 }
 
 const PROFILE_COLORS = [
-  "bg-action-primary text-surface",
-  "bg-state-running text-surface",
-  "bg-state-success text-surface",
-  "bg-state-degraded text-surface",
+  "bg-brand-soft text-text-strong",
+  "bg-state-running-surface text-state-running",
+  "bg-state-success-surface text-state-success",
+  "bg-state-degraded-surface text-state-degraded",
   "bg-state-warning-surface text-state-warning",
-  "bg-action-dark text-surface",
+  "bg-surface-muted text-text-strong",
 ];
 
 export function getProfileColor(name: string) {
   if (isOfficialOperatorName(name)) {
-    return "bg-action-primary text-surface";
+    return "bg-brand-soft text-text-strong";
   }
 
   const seed = Array.from(name).reduce(

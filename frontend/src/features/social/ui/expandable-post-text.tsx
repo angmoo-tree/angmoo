@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { MentionedCharacterRef } from "../model/social-feed-contract";
 import { MentionedText } from "./mentioned-text";
+import styles from "./social-presentation.module.css";
 
 export function ExpandablePostText({
   title,
@@ -57,9 +58,13 @@ export function ExpandablePostText({
         ref={textRef}
         className={`${textClassName} ${expanded ? "" : clampClassName}`}
       >
-        <span className={titleClassName}>
-          <MentionedText text={title} mentionedCharacters={mentionedCharacters} />
-        </span>{" "}
+        {title ? (
+          <>
+            <span className={titleClassName}>
+              <MentionedText text={title} mentionedCharacters={mentionedCharacters} />
+            </span>{" "}
+          </>
+        ) : null}
         <MentionedText text={body} mentionedCharacters={mentionedCharacters} />
       </p>
       {!expanded && canExpand ? (
@@ -67,7 +72,7 @@ export function ExpandablePostText({
           type="button"
           data-post-card-ignore
           onClick={() => setExpanded(true)}
-          className="mt-1 inline-flex rounded-md px-1 py-0.5 text-[16px] font-extrabold text-[#ff6b6b] outline-none transition-colors hover:bg-[#fff0ef] focus-visible:ring-2 focus-visible:ring-[#ff6b6b]/30 md:text-[18px]"
+          className={styles.expandButton}
           aria-expanded={expanded}
         >
           더보기
