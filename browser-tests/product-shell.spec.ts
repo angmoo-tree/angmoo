@@ -1,5 +1,8 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
 
+import type { CharacterDashboardItem } from "../frontend/src/features/characters/model/character-dashboard-contract";
+import { presentCharacterRecentActivity } from "../frontend/src/features/characters/model/character-recent-activity-presentation";
+
 type WorldFixture = {
   world_id: string;
   name: string;
@@ -77,8 +80,30 @@ const WORLD_DRAFT: WorldFixture = {
   launch_block_reason: "world_not_published",
 };
 
+const WORLD_NOT_READY: WorldFixture = {
+  ...WORLD_ALPHA,
+  world_id: "world-not-ready",
+  name: "준비 중인 광장",
+  tagline: "공개 준비를 마치는 중인 World",
+  readiness_status: "not_ready",
+  launchable: false,
+  launch_block_reason: "world_not_ready",
+};
+
+const WORLD_ARCHIVED: WorldFixture = {
+  ...WORLD_ALPHA,
+  world_id: "world-archived",
+  name: "보관된 도서관",
+  tagline: "보관된 World",
+  status: "archived",
+  launchable: false,
+  launch_block_reason: "world_archived",
+};
+
 type BackendFixture = {
+  agents?: unknown[];
   deviceWorlds?: WorldFixture[];
+  deviceWorldFailuresBeforeSuccess?: number;
   studioWorlds?: WorldFixture[];
   worldReads?: Record<string, WorldFixture>;
   runtimeStatus?: number;
@@ -90,6 +115,7 @@ async function installBackendFixture(
   fixture: BackendFixture = {},
 ): Promise<{ reads: string[]; writes: string[]; providerCalls: string[] }> {
   const audit = { reads: [] as string[], writes: [] as string[], providerCalls: [] as string[] };
+  let deviceWorldAttempts = 0;
   await page.route("**/api/backend/**", async (route: Route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -112,8 +138,20 @@ async function installBackendFixture(
         installation_state: fixture.runtimeState ?? "ready",
       });
     }
+    if (url.pathname === "/api/backend/agents" && method === "GET") {
+      return json(route, fixture.agents ?? []);
+    }
     if (url.pathname === "/api/backend/worlds/mine") {
       const surface = url.searchParams.get("surface");
+      if (surface === "device_home") {
+        deviceWorldAttempts += 1;
+        if (
+          deviceWorldAttempts <=
+          (fixture.deviceWorldFailuresBeforeSuccess ?? 0)
+        ) {
+          return json(route, { detail: "device_home_unavailable" }, 503);
+        }
+      }
       const items =
         surface === "creator_studio"
           ? (fixture.studioWorlds ?? fixture.deviceWorlds ?? [])
@@ -147,6 +185,58 @@ async function json(route: Route, body: unknown, status = 200): Promise<void> {
     contentType: "application/json",
     status,
   });
+}
+
+function uiERecentActivityCharacter(): CharacterDashboardItem {
+  const characterId = "character-ui-e-recent-result";
+  return {
+    character: {
+      id: characterId,
+      name: "최근 결과 앵무",
+      handle: "recent_result_bird",
+      avatar_url: null,
+      one_liner: "사용자에게 이해하기 쉬운 활동 결과를 보여줘요.",
+      execution_mode: "llm",
+    },
+    settings: {
+      auto_enabled: true,
+      activity_interval_minutes: 60,
+      max_comments_per_day: 30,
+      max_posts_per_day: 20,
+      active_hours_start: "08:00",
+      active_hours_end: "22:00",
+    },
+    assigned_slot: {
+      agent_id: "runtime-ui-e-recent-result",
+      status: "idle",
+      last_run_at: "2026-08-29T23:15:00Z",
+      last_error: null,
+    },
+    activity_summary: {
+      within_active_hours: true,
+      timezone: "America/New_York",
+      last_activity_at: "2026-08-29T23:15:00Z",
+      next_activity_at: "2026-08-30T00:30:00Z",
+    },
+    recent_activity: [
+      {
+        id: 1,
+        action_type: "post_created",
+        target_post_id: "post-character-ui-e-authoritative",
+        reason: "scheduled_activity",
+        result: JSON.stringify({
+          message: "Created post post-json-decoy.",
+          created_post_id: "post-json-decoy",
+          topic_signature: "내부 topic signature",
+          novelty_basis: "내부 novelty metadata",
+          lore_chunk_ids: ["lore-internal-1"],
+          retrieval_mode: "hybrid",
+          internal_blob: "x".repeat(4_000),
+        }),
+        created_at: "2026-08-29T23:15:00Z",
+      },
+    ],
+  };
 }
 
 const UI_D_WORLD_ID = "world-ui-d-next";
@@ -871,6 +961,373 @@ test("runtime outage is presented as degraded without blocking Device Home", asy
 
   await expect(page.getByText("일부 기능 제한", { exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "마법학교 World 열기" })).toBeVisible();
+  expect(audit.writes).toEqual([]);
+  expect(audit.providerCalls).toEqual([]);
+});
+
+test("Next Character dashboard presents production activity JSON as a compact safe summary", async ({
+  page,
+}) => {
+  const audit = await installBackendFixture(page, {
+    agents: [uiERecentActivityCharacter()],
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/agents");
+
+  const character = page.locator(
+    '[data-character-id="character-ui-e-recent-result"]',
+  );
+  const metrics = character.locator("[data-character-metrics]");
+  const recent = character.locator("[data-character-recent-activity]");
+  const resultLink = recent.getByRole("link", {
+    name: "게시글 보기",
+    exact: true,
+  });
+
+  await expect(recent).toHaveAttribute(
+    "data-character-recent-activity",
+    "recorded",
+  );
+  await expect(recent).toContainText("게시글 작성");
+  await expect(recent).toContainText("지저귐을 남겼어요.");
+  await expect(recent.locator("time")).toHaveAttribute(
+    "datetime",
+    "2026-08-29T23:15:00Z",
+  );
+  await expect(recent).toContainText("08.29 19:15");
+  await expect(resultLink).toHaveAttribute(
+    "href",
+    "/posts/post-character-ui-e-authoritative",
+  );
+  await expect(resultLink).not.toHaveAttribute("aria-disabled", "true");
+  await expect(
+    recent.locator('[data-product-route-unavailable="true"]'),
+  ).toHaveCount(0);
+
+  const visibleText = await recent.innerText();
+  for (const forbidden of [
+    "{",
+    '"message"',
+    '"created_post_id"',
+    '"topic_signature"',
+    '"novelty_basis"',
+    '"lore_chunk_ids"',
+    '"retrieval_mode"',
+    "post-character-ui-e-authoritative",
+    "post-json-decoy",
+  ]) {
+    expect(visibleText).not.toContain(forbidden);
+  }
+
+  for (const viewport of [
+    { width: 360, height: 800 },
+    { width: 390, height: 844 },
+    { width: 436, height: 880 },
+  ]) {
+    await page.setViewportSize(viewport);
+    const [metricsBox, recentBox] = await Promise.all([
+      metrics.boundingBox(),
+      recent.boundingBox(),
+    ]);
+    expect(metricsBox).not.toBeNull();
+    expect(recentBox).not.toBeNull();
+    expect(Math.abs(recentBox!.x - metricsBox!.x)).toBeLessThanOrEqual(1);
+    expect(
+      Math.abs(
+        recentBox!.x +
+          recentBox!.width -
+          (metricsBox!.x + metricsBox!.width),
+      ),
+    ).toBeLessThanOrEqual(1);
+    const geometry = await recent.evaluate((node) => ({
+      documentOverflow:
+        document.documentElement.scrollWidth -
+        document.documentElement.clientWidth,
+      height: node.getBoundingClientRect().height,
+      overflow: node.scrollWidth - node.clientWidth,
+    }));
+    expect(geometry.documentOverflow).toBe(0);
+    expect(geometry.overflow).toBe(0);
+    expect(geometry.height).toBeLessThanOrEqual(220);
+  }
+
+  await character
+    .getByRole("button", { name: "최근 결과 앵무 자율활동 끄기" })
+    .focus();
+  await page.keyboard.press("Tab");
+  await expect(resultLink).toBeFocused();
+  expect(
+    await resultLink.evaluate((node) => node.matches(":focus-visible")),
+  ).toBe(true);
+
+  expect(audit.writes).toEqual([]);
+  expect(audit.providerCalls).toEqual([]);
+});
+
+test("Character recent activity presenter keeps every supported action and prototype-like unknown value fail-closed", () => {
+  const mappedActions = [
+    {
+      actions: ["activated"],
+      actionLabel: "자율활동 켜짐",
+      headline: "자율활동이 켜졌어요.",
+    },
+    {
+      actions: ["comment", "commented", "reply", "replied"],
+      actionLabel: "대꾸 작성",
+      headline: "대꾸를 남겼어요.",
+      targetLabel: "대꾸한 글 보기",
+    },
+    {
+      actions: ["complete_tick_rejected"],
+      actionLabel: "활동 재검토",
+      headline: "활동을 다시 고르고 있어요.",
+    },
+    {
+      actions: ["created"],
+      actionLabel: "앵무 생성",
+      headline: "앵무가 만들어졌어요.",
+    },
+    {
+      actions: ["credential_saved"],
+      actionLabel: "연결 정보 저장",
+      headline: "연결 정보를 안전하게 저장했어요.",
+    },
+    {
+      actions: ["deactivated"],
+      actionLabel: "자율활동 꺼짐",
+      headline: "자율활동이 꺼졌어요.",
+    },
+    {
+      actions: ["follow", "followed"],
+      actionLabel: "팔로우",
+      headline: "프로필을 팔로우했어요.",
+    },
+    {
+      actions: ["like", "liked"],
+      actionLabel: "좋아요",
+      headline: "글에 좋아요를 눌렀어요.",
+      targetLabel: "좋아요한 글 보기",
+    },
+    {
+      actions: ["local_bot_rate_limited"],
+      actionLabel: "외부 실행 제한",
+      headline: "요청이 잠시 제한됐어요.",
+    },
+    {
+      actions: ["local_key_issued"],
+      actionLabel: "연결 키 발급",
+      headline: "앵무 API key가 발급됐어요.",
+    },
+    {
+      actions: ["local_key_revoked"],
+      actionLabel: "연결 키 폐기",
+      headline: "앵무 API key가 폐기됐어요.",
+    },
+    {
+      actions: ["memory_note_refine_failed"],
+      actionLabel: "기억 정리 보류",
+      headline: "처음 저장한 기억을 유지했어요.",
+    },
+    {
+      actions: ["observe", "observed"],
+      actionLabel: "둘러보기",
+      headline: "커뮤니티 흐름을 살펴봤어요.",
+      targetLabel: "살펴본 글 보기",
+    },
+    {
+      actions: ["persona_updated"],
+      actionLabel: "페르소나 수정",
+      headline: "페르소나 설정을 업데이트했어요.",
+    },
+    {
+      actions: ["post", "post_created"],
+      actionLabel: "게시글 작성",
+      headline: "지저귐을 남겼어요.",
+      targetLabel: "게시글 보기",
+    },
+    {
+      actions: ["profile_updated"],
+      actionLabel: "프로필 수정",
+      headline: "프로필 정보를 업데이트했어요.",
+    },
+    {
+      actions: ["quote", "quoted"],
+      actionLabel: "인용",
+      headline: "글을 인용했어요.",
+      targetLabel: "인용한 글 보기",
+    },
+    {
+      actions: ["repost", "reposted"],
+      actionLabel: "리포스트",
+      headline: "글을 리포스트했어요.",
+      targetLabel: "리포스트한 글 보기",
+    },
+    {
+      actions: ["skipped"],
+      actionLabel: "쉬어감",
+      headline: "이번 활동은 쉬어갔어요.",
+    },
+    {
+      actions: ["state_saved"],
+      actionLabel: "상태 저장",
+      headline: "기분과 기억을 업데이트했어요.",
+      targetLabel: "관련 글 보기",
+    },
+    {
+      actions: ["tendency_analyzed"],
+      actionLabel: "활동 성향 분석",
+      headline: "활동 성향을 분석했어요.",
+    },
+    {
+      actions: ["thread_viewed"],
+      actionLabel: "대화 확인",
+      headline: "대화 흐름을 확인했어요.",
+      targetLabel: "확인한 글 보기",
+    },
+    {
+      actions: ["tick_completed"],
+      actionLabel: "활동 완료",
+      headline: "이번 활동을 마무리했어요.",
+      targetLabel: "관련 글 보기",
+    },
+    {
+      actions: ["unfollow", "unfollowed"],
+      actionLabel: "언팔로우",
+      headline: "프로필 팔로우를 해제했어요.",
+    },
+  ] as const;
+  const occurredAt = "2026-08-29T23:15:00Z";
+  const targetPostId = "post/with?reserved";
+
+  for (const expected of mappedActions) {
+    for (const action of expected.actions) {
+      const item = uiERecentActivityCharacter();
+      item.recent_activity[0] = {
+        ...item.recent_activity[0]!,
+        action_type: action,
+        created_at: occurredAt,
+        result: "{broken",
+        target_post_id: targetPostId,
+      };
+
+      const targetLabel = "targetLabel" in expected ? expected.targetLabel : null;
+      expect(presentCharacterRecentActivity(item)).toEqual({
+        actionLabel: expected.actionLabel,
+        headline: expected.headline,
+        occurredAt,
+        state: "recorded",
+        targetHref: targetLabel ? "/posts/post%2Fwith%3Freserved" : null,
+        targetLabel,
+      });
+    }
+  }
+
+  for (const action of [
+    "future_action_v2",
+    "constructor",
+    "toString",
+    "valueOf",
+    "__proto__",
+  ]) {
+    const item = uiERecentActivityCharacter();
+    item.recent_activity[0] = {
+      ...item.recent_activity[0]!,
+      action_type: action,
+      result: "raw result must stay hidden",
+      target_post_id: targetPostId,
+    };
+
+    expect(presentCharacterRecentActivity(item)).toEqual({
+      actionLabel: "활동",
+      headline: "활동 기록이 업데이트됐어요.",
+      occurredAt,
+      state: "recorded",
+      targetHref: null,
+      targetLabel: null,
+    });
+  }
+});
+
+test("UI-E Device Home separates runtime state, World launchability, and retry", async ({ page }) => {
+  const fixture: BackendFixture = {
+    deviceWorlds: [
+      WORLD_ALPHA,
+      WORLD_PRIVATE,
+      WORLD_DRAFT,
+      WORLD_NOT_READY,
+      WORLD_ARCHIVED,
+    ],
+    deviceWorldFailuresBeforeSuccess: 1,
+    runtimeState: "starting",
+  };
+  const audit = await installBackendFixture(page, fixture);
+  await page.goto("/");
+
+  await expect(page.locator('[data-runtime-state="starting"]')).toContainText("시작 중");
+  await expect(page.locator('section[role="alert"]')).toContainText(
+    "Device Home을 열지 못했어요",
+  );
+  await page.getByRole("button", { name: "World 목록 다시 시도" }).click();
+
+  await expect(
+    page.getByRole("link", { name: /마법학교 World 열기\. 실행 가능\./ }),
+  ).toBeVisible();
+  await expect(page.locator('[data-world-launchability="launchable"]')).toContainText(
+    "실행 가능",
+  );
+
+  const unavailableWorlds = [
+    {
+      badge: "비공개",
+      description: "비공개 작업실 World는 비공개 상태라 Device Home에서 열 수 없습니다.",
+      state: "world_private",
+    },
+    {
+      badge: "공개 전",
+      description: "초안 마을 World는 아직 공개되지 않아 Device Home에서 열 수 없습니다.",
+      state: "world_not_published",
+    },
+    {
+      badge: "준비 필요",
+      description: "준비 중인 광장 World는 공개 준비가 완료되지 않아 Device Home에서 열 수 없습니다.",
+      state: "world_not_ready",
+    },
+    {
+      badge: "보관됨",
+      description: "보관된 도서관 World는 보관되어 Device Home에서 열 수 없습니다.",
+      state: "world_archived",
+    },
+  ] as const;
+
+  for (const world of unavailableWorlds) {
+    const item = page.getByRole("listitem", { name: world.description });
+    await expect(item).toBeVisible();
+    await expect(item.locator("a")).toHaveCount(0);
+    await expect(
+      page.locator(`[data-world-launchability="${world.state}"]`),
+    ).toContainText(world.badge);
+  }
+
+  const runtimeCases = [
+    ["ready", "healthy", "준비됨"],
+    ["degraded", "degraded", "일부 기능 제한"],
+    ["failed", "failed", "실행 실패"],
+    ["recovery_required", "recovery_required", "복구 필요"],
+  ] as const;
+  for (const [backendState, productState, label] of runtimeCases) {
+    fixture.runtimeState = backendState;
+    await page.reload();
+    await expect(page.locator(`[data-runtime-state="${productState}"]`)).toContainText(
+      label,
+    );
+    await expect(
+      page.getByRole("link", { name: /마법학교 World 열기\. 실행 가능\./ }),
+    ).toBeVisible();
+  }
+
+  expect(
+    audit.reads.filter((read) => read === "GET /api/backend/worlds/mine?surface=device_home"),
+  ).toHaveLength(6);
   expect(audit.writes).toEqual([]);
   expect(audit.providerCalls).toEqual([]);
 });

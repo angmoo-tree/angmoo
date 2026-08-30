@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { AgentsDashboardClient } from "@/components/agents-dashboard-client";
+import { AgentsDashboardClient } from "@/features/characters/public";
 import { AppShell } from "@/components/app-shell";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 

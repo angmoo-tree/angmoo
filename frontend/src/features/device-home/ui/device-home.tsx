@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { BrainCircuit, Cog, Globe2, Hammer, Plus } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import {
   getProductRuntimeState,
@@ -14,11 +14,12 @@ import {
   useRuntimeMediaUrl,
 } from "@/shared/media/public";
 import { PRODUCT_ROUTES, worldAppRoute } from "@/shared/navigation/public";
-import { AppIcon } from "@/shared/ui/public";
+import { AppIcon, Button } from "@/shared/ui/public";
 
 import { getLocalWorldSurface } from "../api/device-home-client";
 import {
   DEVICE_HOME_FIXED_APPS,
+  presentWorldLaunchability,
   type WorldSurfaceItem,
 } from "../model/device-home-contract";
 import { DeviceHomeShell } from "./device-home-shell";
@@ -42,46 +43,82 @@ const FIXED_VISUALS = {
 } as const;
 
 const FIXED_BACKGROUNDS = {
-  settings: "linear-gradient(145deg, #f7d6d5, #fff4ef)",
-  studio: "linear-gradient(145deg, #ffe1a6, #fff5da)",
-  "world-import": "linear-gradient(145deg, #dce7f5, #f5f8fc)",
-  "memory-explorer": "linear-gradient(145deg, #ded7f4, #f7f2ff)",
+  settings: "var(--color-brand-soft)",
+  studio: "var(--color-state-warning-surface)",
+  "world-import": "var(--color-state-running-surface)",
+  "memory-explorer": "var(--color-state-degraded-surface)",
+} as const;
+
+const WORLD_BACKGROUNDS = [
+  "var(--color-brand-soft)",
+  "var(--color-state-running-surface)",
+  "var(--color-state-warning-surface)",
+  "var(--color-state-degraded-surface)",
+] as const;
+
+const WORLD_LAUNCH_TONE_CLASSES = {
+  disabled: styles.worldLaunchBadgeDisabled,
+  healthy: styles.worldLaunchBadgeHealthy,
+  waiting: styles.worldLaunchBadgeWaiting,
 } as const;
 
 export function DeviceHome({ authStatus }: DeviceHomeProps) {
-  const [worlds, setWorlds] = useState<WorldSurfaceItem[]>([]);
   const [runtimeState, setRuntimeState] =
     useState<ProductRuntimeState>("stale_state");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [worldRequestRevision, setWorldRequestRevision] = useState(0);
+  const [worldRead, setWorldRead] = useState<{
+    error: string | null;
+    items: WorldSurfaceItem[];
+    revision: number;
+  }>({ error: null, items: [], revision: -1 });
+  const worldLoading = worldRead.revision !== worldRequestRevision;
+  const worldError = worldLoading ? null : worldRead.error;
+  const worlds = worldLoading ? [] : worldRead.items;
 
   useEffect(() => {
     if (authStatus !== "authenticated") {
       return;
     }
     const controller = new AbortController();
-    Promise.all([
-      getLocalWorldSurface("device_home", { signal: controller.signal }),
-      getProductRuntimeState({ signal: controller.signal }),
-    ])
-      .then(([surface, runtime]) => {
-        setWorlds(surface.items);
-        setRuntimeState(runtime);
+    getLocalWorldSurface("device_home", { signal: controller.signal })
+      .then((surface) => {
+        setWorldRead({
+          error: null,
+          items: surface.items,
+          revision: worldRequestRevision,
+        });
       })
       .catch((reason: unknown) => {
         if (reason instanceof DOMException && reason.name === "AbortError") return;
-        setError(reason instanceof Error ? reason.message : "device_home_unavailable");
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
+        setWorldRead({
+          error:
+            reason instanceof Error
+              ? reason.message
+              : "device_home_unavailable",
+          items: [],
+          revision: worldRequestRevision,
+        });
+      });
+    return () => controller.abort();
+  }, [authStatus, worldRequestRevision]);
+
+  useEffect(() => {
+    if (authStatus !== "authenticated") {
+      return;
+    }
+    const controller = new AbortController();
+    getProductRuntimeState({ signal: controller.signal })
+      .then(setRuntimeState)
+      .catch((reason: unknown) => {
+        if (reason instanceof DOMException && reason.name === "AbortError") return;
+        setRuntimeState("stale_state");
       });
     return () => controller.abort();
   }, [authStatus]);
 
-  const worldEntries = useMemo(
-    () => worlds.map((world) => <WorldAppIcon key={world.world_id} world={world} />),
-    [worlds],
-  );
+  const worldEntries = worlds.map((world) => (
+    <WorldAppIcon key={world.world_id} world={world} />
+  ));
 
   return (
     <DeviceHomeShell status={<RuntimeStatusSummary state={runtimeState} />}>
@@ -108,17 +145,25 @@ export function DeviceHome({ authStatus }: DeviceHomeProps) {
           href={`/login?returnTo=${encodeURIComponent(PRODUCT_ROUTES.deviceHome)}`}
           linkLabel="owner 연결"
         />
-      ) : loading ? (
+      ) : worldLoading ? (
         <HomeMessage
           title="World 앱을 불러오는 중"
           description="SQLite의 owner 범위 World 목록만 읽고 있어요."
         />
-      ) : error ? (
+      ) : worldError ? (
         <HomeMessage
           title="Device Home을 열지 못했어요"
-          description="설정에서 runtime 상태를 확인한 뒤 다시 시도해주세요."
-          href={PRODUCT_ROUTES.settings}
-          linkLabel="설정 열기"
+          description="World 목록을 읽지 못했습니다. 다시 시도해도 runtime 상태와 World 실행 가능성은 각각 따로 확인합니다."
+          role="alert"
+          action={
+            <Button
+              compact
+              onClick={() => setWorldRequestRevision((revision) => revision + 1)}
+              variant="secondary"
+            >
+              World 목록 다시 시도
+            </Button>
+          }
         />
       ) : worlds.length === 0 ? (
         <HomeMessage
@@ -133,20 +178,25 @@ export function DeviceHome({ authStatus }: DeviceHomeProps) {
 }
 
 function WorldAppIcon({ world }: { world: WorldSurfaceItem }) {
-  const routeReady = world.launchable;
+  const launch = presentWorldLaunchability(world);
   return (
     <AppIcon
-      disabled={!routeReady}
-      href={routeReady ? worldAppRoute(world.world_id) : undefined}
+      disabled={!world.launchable}
+      href={world.launchable ? worldAppRoute(world.world_id) : undefined}
       label={world.name}
-      description={
-        routeReady
-          ? `${world.name} World 열기`
-          : `${world.name} World 앱은 다음 단계에서 연결됩니다`
+      description={launch.description}
+      visual={
+        <>
+          <WorldVisual world={world} />
+          <span
+            className={`${styles.worldLaunchBadge} ${WORLD_LAUNCH_TONE_CLASSES[launch.tone]}`}
+            data-world-launchability={launch.state}
+          >
+            {launch.badgeLabel}
+          </span>
+        </>
       }
-      visual={<WorldVisual world={world} />}
       visualBackground={worldBackground(world.world_id)}
-      badge={<span className={styles.readyBadge}>✓</span>}
     />
   );
 }
@@ -177,17 +227,22 @@ function HomeMessage({
   description,
   href,
   linkLabel,
+  action,
+  role = "status",
 }: {
   title: string;
   description: string;
   href?: string;
   linkLabel?: string;
+  action?: ReactNode;
+  role?: "alert" | "status";
 }) {
   return (
-    <section className={styles.message} role="status">
+    <section className={styles.message} role={role}>
       <strong>{title}</strong>
       <p>{description}</p>
       {href && linkLabel ? <Link href={href}>{linkLabel}</Link> : null}
+      {action}
     </section>
   );
 }
@@ -197,6 +252,5 @@ function worldBackground(worldId: string): string {
   for (const character of worldId) {
     hash = (hash * 31 + character.charCodeAt(0)) >>> 0;
   }
-  const hue = hash % 360;
-  return `linear-gradient(145deg, hsl(${hue} 72% 78%), hsl(${(hue + 32) % 360} 68% 92%))`;
+  return WORLD_BACKGROUNDS[hash % WORLD_BACKGROUNDS.length];
 }

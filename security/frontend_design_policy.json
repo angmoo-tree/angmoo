@@ -95,8 +95,15 @@
       "classification": "ADAPTED",
       "hosted_blob_oid": "ebeaf887706f73fe3b126feac46d87e55fe12faf",
       "hosted_source": "frontend/src/components/agents-dashboard-client.tsx",
-      "local_target": "frontend/src/components/agents-dashboard-client.tsx",
-      "scope": "row hierarchy adapted to multi-autonomy, World capacity, and scheduler state"
+      "local_target": "frontend/src/features/characters/ui/agents-dashboard-client.tsx",
+      "scope": "row hierarchy adapted to multi-autonomy, World capacity, scheduler state, and fail-closed recent-result presentation"
+    },
+    {
+      "classification": "LOCAL",
+      "hosted_blob_oid": null,
+      "hosted_source": null,
+      "local_target": "frontend/src/features/characters/model/character-recent-activity-presentation.ts",
+      "scope": "feature-owned action summary and authoritative target link that never exposes raw activity result payloads"
     },
     {
       "classification": "ADAPTED",
@@ -187,6 +194,7 @@
     "configs": [
       "browser-tests/playwright.config.ts",
       "browser-tests/playwright.static.config.ts",
+      "browser-tests/playwright.ui-e-local-settings.config.ts",
       "browser-tests/playwright.visual.config.ts"
     ],
     "lockfile": "browser-tests/pnpm-lock.yaml",
@@ -194,8 +202,10 @@
     "playwright_version": "1.62.1",
     "specs": [
       "browser-tests/product-shell.spec.ts",
+      "browser-tests/relationship-graph/product-shell.spec.ts",
       "browser-tests/semantic-foundation.visual.spec.ts",
-      "browser-tests/static-product-shell.spec.ts"
+      "browser-tests/static-product-shell.spec.ts",
+      "browser-tests/ui-e-local-settings/local-settings.spec.ts"
     ],
     "visual_command_owner": "browser-tests/package.json",
     "visual_command_status": "active_ui_b_semantic_foundation",
@@ -215,9 +225,12 @@
     "backend/app/runtime/social/sqlalchemy_read_repository.py",
     "backend/tests/test_l3_owner_manual_social_inbox.py",
     "browser-tests/package.json",
+    "browser-tests/playwright.ui-e-local-settings.config.ts",
     "browser-tests/playwright.visual.config.ts",
+    "browser-tests/relationship-graph/product-shell.spec.ts",
     "browser-tests/semantic-foundation.visual.spec.ts",
     "browser-tests/static-product-shell.spec.ts",
+    "browser-tests/ui-e-local-settings/local-settings.spec.ts",
     "desktop/src-tauri/src/product_windows.rs",
     "docs/architecture/frontend-design-baseline.json",
     "docs/architecture/frontend-design-reference.md",
@@ -232,6 +245,7 @@
     "frontend/src/components/app-shell.tsx",
     "frontend/src/components/post-detail-client.tsx",
     "frontend/src/composition/static-product-router.tsx",
+    "frontend/src/features/characters/model/character-recent-activity-presentation.ts",
     "frontend/src/features/device-shell/model/device-navigation.ts",
     "frontend/src/features/device-shell/public.ts",
     "frontend/src/features/device-shell/ui/device-shell.module.css",
@@ -289,8 +303,8 @@
     "notice_decision": "The audited visual files come from first-party history already shared by hosted and Local before the Local GPL transition. UI-A copies no post-common hosted code, asset, icon, or font, so it adds no bundled Apache notice. Any later post-common hosted-only transplant requires a separate license-policy and notice decision before copying."
   },
   "raw_color_scan": {
-    "baseline_files": 50,
-    "baseline_occurrences": 1794,
+    "baseline_files": 42,
+    "baseline_occurrences": 1496,
     "baseline_status": "reviewed_ui_b",
     "extensions": [
       ".css",
@@ -384,6 +398,16 @@
       "StaticCanonicalRouteRedirect",
       "pathname === \"/ui-foundation\"",
       "SemanticFoundationFixture"
+    ],
+    "frontend/src/features/characters/model/character-recent-activity-presentation.ts": [
+      "presentCharacterRecentActivity",
+      "result payload intentionally stays outside",
+      "target_post_id"
+    ],
+    "frontend/src/features/characters/ui/agents-dashboard-client.tsx": [
+      "data-character-recent-activity",
+      "LocalProductLink",
+      "RecentActivityMetric"
     ],
     "frontend/src/features/device-shell/model/device-navigation.ts": [
       "LOCAL_DEVICE_NAVIGATION",
@@ -539,6 +563,11 @@
     "browser-tests/package.json": [
       "\"test:visual\": \"playwright test --config=playwright.visual.config.ts\""
     ],
+    "browser-tests/product-shell.spec.ts": [
+      "Next Character dashboard presents production activity JSON as a compact safe summary",
+      "post-character-ui-e-authoritative",
+      "post-json-decoy"
+    ],
     "browser-tests/playwright.visual.config.ts": [
       "maxDiffPixels: 25",
       "name: \"next-production\"",
@@ -559,6 +588,7 @@
     "browser-tests/static-product-shell.spec.ts": [
       "\"/agents\"",
       "\"/studio/import\"",
+      "post-json-decoy",
       "static Browser canonicalizes legacy World creator aliases"
     ],
     "desktop/src-tauri/src/product_windows.rs": [
@@ -777,6 +807,7 @@
       "required_smoke": [
         "pnpm --dir browser-tests exec playwright test --config=playwright.static.config.ts",
         "pnpm --dir browser-tests test",
+        "pnpm --dir browser-tests test:ui-e-local-settings",
         "pnpm --dir browser-tests test:visual",
         "pnpm --dir frontend build",
         "pnpm --dir frontend build:static"

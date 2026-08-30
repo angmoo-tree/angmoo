@@ -70,7 +70,7 @@
       "path": "frontend/src/app/agents/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/agents",
-      "source_sha256": "345d3bb3d1f9df4f6d79ed21f425ffdd59b6606c94e86948cf30aa7691b1c94a",
+      "source_sha256": "cadd394a631f8e2c7edfda6ed3c9be196f1a184e4c16ce54a7e44f4a58806580",
       "transition_pr": "ER5 PR K"
     },
     {

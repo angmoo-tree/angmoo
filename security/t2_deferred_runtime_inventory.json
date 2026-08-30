@@ -49,6 +49,17 @@
     },
     {
       "markers": [
+        "privacy-contact",
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 local privacy contact UX",
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "backend/tests/test_l2_5_creator_studio_shell_contract.py"
+    },
+    {
+      "markers": [
         "hosted-extension-type"
       ],
       "owner_phases": [
@@ -150,25 +161,12 @@
     },
     {
       "markers": [
-        "privacy-contact",
         "product-host"
       ],
       "owner_phases": [
-        "L0-L4 local privacy contact UX",
         "L0-L4 product URL, privacy UX, provider referer"
       ],
       "path": "frontend/src/components/agent-detail-client.tsx"
-    },
-    {
-      "markers": [
-        "privacy-contact",
-        "product-host"
-      ],
-      "owner_phases": [
-        "L0-L4 local privacy contact UX",
-        "L0-L4 product URL, privacy UX, provider referer"
-      ],
-      "path": "frontend/src/components/settings-client.tsx"
     },
     {
       "markers": [

@@ -50,4 +50,8 @@ def test_legacy_posts_route_remains_the_global_feed() -> None:
     device_home = _read("features/device-home/ui/device-home.tsx")
 
     assert "<FeedPage />" in posts_page
-    assert "const routeReady = world.launchable" in device_home
+    assert "disabled={!world.launchable}" in device_home
+    assert (
+        "href={world.launchable ? worldAppRoute(world.world_id) : undefined}"
+        in device_home
+    )

@@ -29,7 +29,7 @@ import { MentionedText } from "@/components/mentioned-text";
 import {
   ActiveHoursControl,
   DEFAULT_ACTIVITY_INTERVAL_MINUTES,
-  defaultActiveHoursForCurrentKst,
+  defaultActiveHours,
   getActiveHoursValidation,
   isValidActiveHours,
 } from "@/components/activity-hours-control";
@@ -130,12 +130,12 @@ export function AgentCreateClient() {
   const [provider] = useState("google");
   const [model, setModel] = useState<GoogleGeminiModel>(DEFAULT_GOOGLE_GEMINI_MODEL);
   const [apiKey, setApiKey] = useState("");
-  const [defaultActiveHours] = useState(defaultActiveHoursForCurrentKst);
+  const [initialActiveHours] = useState(defaultActiveHours);
   const [activityIntervalMinutes, setActivityIntervalMinutes] = useState(
     DEFAULT_ACTIVITY_INTERVAL_MINUTES,
   );
-  const [activeHoursStart, setActiveHoursStart] = useState(defaultActiveHours.start);
-  const [activeHoursEnd, setActiveHoursEnd] = useState(defaultActiveHours.end);
+  const [activeHoursStart, setActiveHoursStart] = useState(initialActiveHours.start);
+  const [activeHoursEnd, setActiveHoursEnd] = useState(initialActiveHours.end);
   const [name, setName] = useState("");
   const [handle, setHandle] = useState("");
   const [oneLiner, setOneLiner] = useState("");

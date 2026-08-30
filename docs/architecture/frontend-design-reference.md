@@ -14,8 +14,11 @@ consumer adoption, and one deterministic test fixture. UI-C adds the
 feature-owned Phone shell, capability-driven navigation, and route/window
 parity contract. UI-D0 closes static global Post-detail handoff, and UI-D adds
 one feature-owned social presentation across global and World-scoped adapters.
-UI-E and UI-F still own Local-only surface adoption and the final
-visual/cross-runtime closeout.
+UI-E implements the Character, autonomy, Device Home, Studio, Relationship
+Graph, Settings, and local-owner surface adoption. Its recent-result follow-up
+is also implemented and has passed local technical verification. The same
+Draft PR still requires new exact-head Hosted CI and the user Ready Gate;
+UI-F still owns the final visual/cross-runtime closeout.
 
 ## Exact baseline
 
@@ -74,7 +77,7 @@ entire mixed-purpose source file.
 | Hosted source | Local-owned target | Required adaptation |
 | --- | --- | --- |
 | `frontend/src/components/app-shell.tsx` | current shell, then shared Device shell | keep visual chrome; remove hosted global/account routing assumptions |
-| `frontend/src/components/agents-dashboard-client.tsx` | Local Character dashboard | remove quota and single-active assumptions; show World and scheduler truth |
+| `frontend/src/components/agents-dashboard-client.tsx` | `frontend/src/features/characters/ui/agents-dashboard-client.tsx` | remove quota and single-active assumptions; show World, independent multi-autonomy, timezone, scheduler truth, and a fail-closed recent-result summary |
 | `frontend/src/components/character-profile-client.tsx` | Local profile | expose only real Local chat, World, activity, graph, or management capabilities |
 | `frontend/src/components/post-list-client.tsx` composer and tabs | `frontend/src/features/social/ui/world-social-feed.tsx` | preserve owner-controlled World write and real World scopes |
 | `frontend/src/components/post-media-grid.tsx` | `frontend/src/features/social/ui/post-media-grid.tsx` | preserve hosted frame anatomy while using authenticated Local media URLs and payload-backed 0/1/2/3/4+ layout without remote fallback |
@@ -87,6 +90,7 @@ entire mixed-purpose source file.
 - payload-backed optional social presentation and capability contracts
 - Creator Studio, Character create/link/leave, and World Package surfaces
 - autonomy schedule, next-run, provider, and scheduler state
+- feature-owned compact recent-activity presenter with World-local time and authoritative result links
 - Relationship Graph World meaning and dedicated wide window
 - static product router and Tauri product-window boundaries
 
@@ -117,12 +121,19 @@ shared/ui
   -> never imports a feature, app route, legacy component, or data client
 ```
 
-The current ten public feature boundaries and zero exact legacy exceptions are
+The current eleven public feature boundaries and zero exact legacy exceptions are
 enforced by `scripts/ci/check_frontend_architecture_boundaries.py`. The ninth
 boundary is the UI-B-only `features/ui-foundation/public.ts` test fixture. It
 is not a product surface. The tenth is the UI-C product boundary
 `features/device-shell/public.ts`; it owns Phone chrome and product route
-capabilities without moving those decisions into neutral `shared/ui`.
+capabilities without moving those decisions into neutral `shared/ui`. The
+eleventh is the UI-E `features/characters/public.ts` boundary; it owns the
+Next/static Character dashboard without moving Character policy into neutral
+presentation or legacy compatibility modules.
+The Character model also owns the pure recent-activity presenter. It consumes
+no `@/lib/activity` compatibility helper, never parses raw result JSON, and
+gives the shared Next/static dashboard only a user-facing action summary,
+World-local timestamp, and optional authoritative post destination.
 
 ## UI-B semantic foundation
 
@@ -185,7 +196,10 @@ existing Next/static product-shell behavior smoke therefore covers both global
 alias and compatibility-bridge impact in addition to the fixture tests. This
 transitional reach is not evidence that untouched pages conform to the design
 contract. UI-D now owns the shared social row and endpoint-isolated adapters;
-UI-E and UI-F remain pending after that bounded adoption.
+UI-E now owns the Character dashboard and the bounded Local-only surface
+adoption described above. The recent-result follow-up is implemented and
+locally verified; new exact-head Hosted CI and the user Ready Gate remain
+pending, and UI-F still owns final exact-SHA visual/cross-runtime closeout.
 
 The machine-readable required smoke set is:
 
@@ -193,6 +207,7 @@ The machine-readable required smoke set is:
 pnpm --dir frontend build
 pnpm --dir frontend build:static
 pnpm --dir browser-tests test
+pnpm --dir browser-tests test:ui-e-local-settings
 pnpm --dir browser-tests exec playwright test --config=playwright.static.config.ts
 pnpm --dir browser-tests test:visual
 ```
@@ -267,7 +282,7 @@ Current canonical surface families:
 | Device Home | `DeviceShell` composed from `DeviceFrame` | `phone` | `LOCAL` |
 | World Home, Feed, Chat, Characters, Relationships | `DeviceShell` composed from `DeviceFrame` | `phone` | `LOCAL` adapter plus shared UI-D social presentation |
 | Feed and Post detail compatibility routes | `AppShell` compatibility facade delegating to `DeviceShell` | `phone` | `DIRECT`/`ADAPTED`; UI-D social presentation adopted |
-| Agent list, create, detail, autonomy, settings, owner gate | `AppShell` compatibility facade delegating to `DeviceShell` | `phone` | `ADAPTED`/`LOCAL`; screen adoption remains UI-E |
+| Agent list, create, detail, autonomy, settings, owner gate | `AppShell` compatibility facade delegating to `DeviceShell` | `phone` | `ADAPTED`/`LOCAL`; UI-E screen adoption implemented, public lifecycle pending |
 | Creator Studio | dedicated wide shell | `studio` | `LOCAL` |
 | Relationship Graph | dedicated `RelationshipGraphFrame` | `relationship-graph` | `LOCAL` |
 
@@ -348,14 +363,22 @@ files with raw color  = 53
 UI-D's bounded Social-core migration was measured with that same checker:
 
 ```text
-raw color occurrences = 1,796
+raw color occurrences = 1,794
 files with raw color  = 50
+```
+
+UI-E's Character and Local-only migration was then measured with the same
+checker:
+
+```text
+raw color occurrences = 1,496
+files with raw color  = 42
 ```
 
 `baseline_status = reviewed_ui_b` remains the machine-contract lineage marker
 for the stage that introduced this deterministic scan; it is not a claim that
 the numeric baseline stopped at UI-B. The tracked occurrence and file values
-above are the current UI-D measurement. Regenerate the report only after the
+above are the current UI-E measurement. Regenerate the report only after the
 source settles, and change the values only to the checker-measured result.
 Never guess the count or update it merely to hide growth.
 
@@ -485,7 +508,8 @@ UI-A DESIGN CONTRACT / REFERENCE / PROVENANCE CLOSEOUT = PASS
 UI-B SEMANTIC TOKEN / PRIMITIVE FOUNDATION             = PASS
 UI-C PHONE SHELL / NAVIGATION / ROUTE PARITY            = PASS; MERGED; POST-MERGE PASS
 UI-D0 STATIC POST DETAIL ASYNC HANDOFF                   = FULL PASS; MERGED; POST-MERGE PASS
-UI-D SOCIAL CORE HOSTED PARITY                           = LOCAL TECH PASS; PUBLIC LIFECYCLE PENDING
-UI-E through UI-F                                      = NOT STARTED
+UI-D SOCIAL CORE HOSTED PARITY                           = FULL PASS; MERGED; POST-MERGE PASS
+UI-E CHARACTER / AUTONOMY / LOCAL-ONLY SURFACES          = FOLLOW-UP IMPLEMENTED; LOCAL TECH PASS; EXACT-HEAD HOSTED CI PENDING; USER READY BLOCKED
+UI-F VISUAL / CROSS-RUNTIME CLOSEOUT                     = NOT STARTED
 ANGMOO LOCAL DESIGN FOUNDATION PASS                    = NOT YET
 ```

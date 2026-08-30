@@ -4,11 +4,11 @@
   gap: 7px;
   min-height: 132px;
   align-content: center;
-  border: 1px solid rgb(122 81 78 / 14%);
+  border: 1px solid var(--color-border-subtle);
   border-radius: 24px;
   padding: 20px;
-  background: rgb(255 255 255 / 72%);
-  color: #412e2d;
+  background: var(--color-surface);
+  color: var(--color-text-strong);
   text-align: left;
 }
 
@@ -18,21 +18,27 @@
 
 .message p {
   margin: 0;
-  color: #76615f;
+  color: var(--color-text-secondary);
   font-size: 0.82rem;
   line-height: 1.5;
 }
 
 .message a {
   width: fit-content;
-  color: #9f2f35;
+  color: var(--color-state-running);
   font-size: 0.8rem;
   font-weight: 800;
   text-decoration: none;
 }
 
+.message a:focus-visible {
+  border-radius: var(--radius-control);
+  outline: 3px solid var(--focus-ring-color);
+  outline-offset: 3px;
+}
+
 .worldInitial {
-  color: #3e2d2b;
+  color: var(--color-text-strong);
   font-size: 1.75rem;
   font-weight: 900;
 }
@@ -43,15 +49,34 @@
   object-fit: cover;
 }
 
-.readyBadge {
-  display: grid;
-  width: 19px;
-  height: 19px;
-  place-items: center;
-  border: 2px solid #fff;
-  border-radius: 999px;
-  background: #2e9d5b;
-  color: #fff;
-  font-size: 0.68rem;
-  font-weight: 900;
+.worldLaunchBadge {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  z-index: 1;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  padding: 2px 5px;
+  font-size: 0.55rem;
+  font-weight: 850;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.worldLaunchBadgeHealthy {
+  border-color: var(--color-state-success-border);
+  background: var(--color-state-success-surface);
+  color: var(--color-state-success);
+}
+
+.worldLaunchBadgeWaiting {
+  border-color: var(--color-state-warning-border);
+  background: var(--color-state-warning-surface);
+  color: var(--color-state-warning);
+}
+
+.worldLaunchBadgeDisabled {
+  border-color: var(--color-state-disabled-border);
+  background: var(--color-state-disabled-surface);
+  color: var(--color-text-secondary);
 }

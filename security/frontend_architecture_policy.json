@@ -1,6 +1,7 @@
 {
   "documentation": "docs/architecture/frontend-product-shell.md",
   "feature_names": [
+    "characters",
     "creator-studio",
     "device-home",
     "device-shell",
@@ -33,6 +34,23 @@
       "SemanticFoundationFixture",
       "follow: false",
       "index: false"
+    ],
+    "frontend/src/features/characters/model/character-dashboard-contract.ts": [
+      "\"external\"",
+      "\"failed\"",
+      "\"resting\"",
+      "\"scheduled\"",
+      "presentCharacterAutonomy"
+    ],
+    "frontend/src/features/characters/model/character-recent-activity-presentation.ts": [
+      "CharacterRecentActivityPresentation",
+      "presentCharacterRecentActivity",
+      "target_post_id"
+    ],
+    "frontend/src/features/characters/public.ts": [
+      "AgentsDashboardClient",
+      "presentCharacterAutonomy",
+      "presentCharacterRecentActivity"
     ],
     "frontend/src/features/creator-studio/ui/creator-studio-dashboard.tsx": [
       "getLocalWorldSurface(\"creator_studio\"",
@@ -140,6 +158,13 @@
     "frontend/public/sw.js",
     "frontend/src/app/manifest.ts",
     "frontend/src/app/ui-foundation/page.tsx",
+    "frontend/src/features/characters/api/character-dashboard-client.ts",
+    "frontend/src/features/characters/model/character-dashboard-contract.ts",
+    "frontend/src/features/characters/model/character-dashboard-session.ts",
+    "frontend/src/features/characters/model/character-recent-activity-presentation.ts",
+    "frontend/src/features/characters/public.ts",
+    "frontend/src/features/characters/ui/agents-dashboard-client.tsx",
+    "frontend/src/features/characters/ui/characters-dashboard.module.css",
     "frontend/src/features/creator-studio/public.ts",
     "frontend/src/features/creator-studio/ui/creator-studio-dashboard.tsx",
     "frontend/src/features/creator-studio/ui/creator-studio-frame.tsx",

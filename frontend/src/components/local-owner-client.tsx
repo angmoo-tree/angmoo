@@ -1,9 +1,20 @@
 "use client";
 
 import { Bird, Database, LockKeyhole } from "lucide-react";
-import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
-import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 
+import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
+import {
+  Button,
+  Card,
+  DegradedPanel,
+  Field,
+  InlineError,
+  Input,
+  PageHeader,
+  StatusChip,
+  Toast,
+} from "@/shared/ui/public";
 import {
   claimLocalOwner,
   createLocalBootstrapChallenge,
@@ -12,6 +23,8 @@ import {
   storeAuth,
   type LocalBootstrapRead,
 } from "@/lib/agents";
+
+import styles from "./local-owner-client.module.css";
 
 type LocalOwnerClientProps = {
   logoutLocallyOnly?: boolean;
@@ -30,6 +43,7 @@ export function LocalOwnerClient({
   const [privacyAcknowledged, setPrivacyAcknowledged] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadRevision, setLoadRevision] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -44,22 +58,24 @@ export function LocalOwnerClient({
           return;
         }
         setBootstrap(status);
+        setLocalLabel(status.local_label ?? "");
         const suggested = status.candidates.find((candidate) => candidate.suggested);
-        if (suggested) setSelectedOwnerId(suggested.user_id);
+        setSelectedOwnerId(suggested?.user_id ?? "");
       })
       .catch((reason) => {
         if (!cancelled) {
+          setBootstrap(null);
           setError(
             reason instanceof Error
               ? reason.message
-              : "로컬 owner 준비 상태를 확인하지 못했습니다.",
+              : "이 설치의 owner 준비 상태를 확인하지 못했습니다.",
           );
         }
       });
     return () => {
       cancelled = true;
     };
-  }, [returnTo, router]);
+  }, [loadRevision, returnTo, router]);
 
   const selectedCandidate = useMemo(
     () =>
@@ -88,7 +104,7 @@ export function LocalOwnerClient({
       setError(
         reason instanceof Error
           ? reason.message
-          : "로컬 owner를 준비하지 못했습니다.",
+          : "이 설치의 local owner를 준비하지 못했습니다.",
       );
       try {
         setBootstrap(await getLocalBootstrapStatus());
@@ -100,93 +116,140 @@ export function LocalOwnerClient({
     }
   }
 
+  function retryBootstrap() {
+    setError(null);
+    setLoadRevision((value) => value + 1);
+  }
+
   if (!bootstrap && !error) {
-    return <StatusCard message="이 장치의 Angmoo owner를 확인하고 있습니다..." />;
+    return (
+      <LocalOwnerStateSurface>
+        <StatusChip label="설치 확인 중" tone="waiting" />
+        <p>이 설치에 연결된 Angmoo owner와 로컬 세션을 확인하고 있습니다.</p>
+      </LocalOwnerStateSurface>
+    );
   }
 
   if (bootstrap?.state === "recovery_required") {
     return (
-      <StatusCard message="기존 owner principal을 찾을 수 없습니다. 데이터는 변경하지 않았으며 복구가 필요합니다." />
+      <LocalOwnerStateSurface>
+        <DegradedPanel
+          title="owner 복구가 필요합니다"
+          description="기존 owner principal을 찾을 수 없습니다. 데이터는 변경하지 않았으며 새 owner를 만들지 않습니다."
+          action={
+            <Button variant="secondary" onClick={retryBootstrap}>
+              다시 확인
+            </Button>
+          }
+        />
+      </LocalOwnerStateSurface>
+    );
+  }
+
+  if (!bootstrap) {
+    return (
+      <LocalOwnerStateSurface>
+        <InlineError>
+          <div className={styles.feedbackStack}>
+            <span>{localErrorMessage(error ?? "owner_state_unavailable")}</span>
+            <Button variant="secondary" onClick={retryBootstrap}>
+              다시 확인
+            </Button>
+          </div>
+        </InlineError>
+      </LocalOwnerStateSurface>
     );
   }
 
   return (
-    <section className="min-h-screen bg-[#f6f7f9] px-5 py-10 md:px-9">
-      <div className="mx-auto w-full max-w-[720px] rounded-[36px] border border-[#e8ecf2] bg-white p-7 shadow-[0_22px_60px_rgba(16,24,40,0.08)] md:p-10">
-        <div className="flex items-start gap-4">
-          <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-[#e8f7e8] text-[#257a38]">
-            <Bird size={30} aria-hidden="true" />
+    <section className={styles.page} data-local-owner-state={bootstrap.state}>
+      <PageHeader title="이 장치의 owner 준비" subtitle="Local Angmoo · 한 설치 · 한 owner" />
+
+      <div className={styles.content}>
+        <Card as="section" className={styles.introCard}>
+          <div className={styles.introHeading}>
+            <span className={styles.brandIcon} aria-hidden="true">
+              <Bird />
+            </span>
+            <div>
+              <h2>이 설치의 데이터 owner를 연결합니다</h2>
+              <p>
+                외부 계정 가입 없이 이 PC의 한 사용자를 Angmoo 데이터 owner로 연결합니다.
+                owner는 한 번만 정해지며 다른 설치의 사용자와 자동으로 합쳐지지 않습니다.
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="text-[13px] font-extrabold uppercase tracking-[0.16em] text-[#667085]">
-              Local Angmoo
-            </p>
-            <h1 className="mt-1 text-[30px] font-extrabold text-[#101828]">
-              이 장치의 owner 준비
-            </h1>
-            <p className="mt-3 text-[15px] font-medium leading-6 text-[#667085]">
-              외부 계정 가입 없이 이 PC의 한 사용자를 Angmoo 데이터 owner로 연결합니다.
-              owner는 한 번만 정해지며 다른 기존 사용자를 자동으로 합치지 않습니다.
-            </p>
-          </div>
-        </div>
+          <dl className={styles.installationSummary}>
+            <div>
+              <dt>설치 식별자</dt>
+              <dd>{bootstrap.installation_id ?? "준비 중"}</dd>
+            </div>
+            <div>
+              <dt>설치 이름</dt>
+              <dd>{bootstrap.local_label?.trim() || "아직 정하지 않음"}</dd>
+            </div>
+          </dl>
+        </Card>
 
         {logoutLocallyOnly ? (
-          <Notice>브라우저 cookie는 정리됐습니다. 새 local session을 준비합니다.</Notice>
+          <Toast>
+            이전 로컬 세션은 이 설치에서 정리됐습니다. owner 데이터는 그대로이며 새
+            local session을 준비합니다.
+          </Toast>
         ) : null}
-        {error ? <ErrorNotice>{localErrorMessage(error)}</ErrorNotice> : null}
+        {error ? <InlineError>{localErrorMessage(error)}</InlineError> : null}
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-7">
-          {bootstrap?.candidates.length ? (
-            <fieldset>
-              <legend className="text-[16px] font-extrabold text-[#344054]">
-                기존 데이터 owner 선택
-              </legend>
-              <p className="mt-2 text-[13px] font-medium leading-5 text-[#667085]">
-                Character·World·credential이 이미 연결된 사용자를 확인하고 직접 선택하세요.
+        <form onSubmit={handleSubmit} className={styles.form}>
+          {bootstrap.candidates.length ? (
+            <fieldset className={styles.ownerFieldset}>
+              <legend>기존 데이터 owner 선택</legend>
+              <p>
+                Character·World·credential이 이미 연결된 사용자를 확인하고 직접
+                선택하세요. 선택하지 않으면 새 owner를 만듭니다.
               </p>
-              <div className="mt-4 space-y-3">
-                {bootstrap.candidates.map((candidate) => (
-                  <label
-                    key={candidate.user_id}
-                    className={`block cursor-pointer rounded-[24px] border p-4 transition-colors ${
-                      selectedOwnerId === candidate.user_id
-                        ? "border-[#ff7a7a] bg-[#fff6f6]"
-                        : "border-[#e4e7ec] bg-white hover:bg-[#f9fafb]"
-                    }`}
-                  >
-                    <span className="flex items-start gap-3">
+              <div className={styles.ownerChoices}>
+                {bootstrap.candidates.map((candidate) => {
+                  const selected = selectedOwnerId === candidate.user_id;
+                  return (
+                    <label
+                      key={candidate.user_id}
+                      className={styles.ownerChoice}
+                      data-selected={selected || undefined}
+                    >
                       <input
                         type="radio"
                         name="owner"
                         value={candidate.user_id}
-                        checked={selectedOwnerId === candidate.user_id}
+                        checked={selected}
                         onChange={() => setSelectedOwnerId(candidate.user_id)}
-                        className="mt-1"
                       />
                       <span>
-                        <span className="font-extrabold text-[#101828]">
+                        <strong>
                           {candidate.display_name}
                           {candidate.suggested ? " · 기존 데이터 후보" : ""}
-                        </span>
-                        <span className="mt-1 block text-[13px] font-medium text-[#667085]">
-                          앵무 {candidate.character_count} · World {candidate.world_count} · 자격 정보 {candidate.credential_count}
-                        </span>
+                        </strong>
+                        <small>
+                          앵무 {candidate.character_count} · World {candidate.world_count} ·
+                          credential {candidate.credential_count}
+                        </small>
                       </span>
-                    </span>
-                  </label>
-                ))}
-                <label className="block cursor-pointer rounded-[24px] border border-[#e4e7ec] p-4 hover:bg-[#f9fafb]">
-                  <span className="flex items-start gap-3">
-                    <input
-                      type="radio"
-                      name="owner"
-                      value=""
-                      checked={!selectedOwnerId}
-                      onChange={() => setSelectedOwnerId("")}
-                      className="mt-1"
-                    />
-                    <span className="font-extrabold text-[#101828]">새 local owner 만들기</span>
+                    </label>
+                  );
+                })}
+                <label
+                  className={styles.ownerChoice}
+                  data-selected={!selectedOwnerId || undefined}
+                >
+                  <input
+                    type="radio"
+                    name="owner"
+                    value=""
+                    checked={!selectedOwnerId}
+                    onChange={() => setSelectedOwnerId("")}
+                  />
+                  <span>
+                    <strong>새 local owner 만들기</strong>
+                    <small>기존 후보와 합치지 않고 이 설치에 새 owner를 만듭니다.</small>
                   </span>
                 </label>
               </div>
@@ -194,86 +257,87 @@ export function LocalOwnerClient({
           ) : null}
 
           {!selectedCandidate ? (
-            <Field label="owner 표시 이름">
-              <input
-                value={displayName}
-                onChange={(event) => setDisplayName(event.target.value)}
-                maxLength={80}
-                required
-                className="h-14 w-full rounded-full border border-[#d0d5dd] px-5 text-[17px] font-semibold outline-none focus:border-[#ff7a7a] focus:ring-2 focus:ring-[#ffe4e4]"
-                placeholder="예: 내 Angmoo"
-              />
+            <Field id="local-owner-display-name" label="owner 표시 이름" required>
+              {(controlProps) => (
+                <Input
+                  {...controlProps}
+                  value={displayName}
+                  onChange={(event) => setDisplayName(event.target.value)}
+                  maxLength={80}
+                  autoComplete="name"
+                  placeholder="예: 내 Angmoo"
+                />
+              )}
             </Field>
           ) : null}
 
-          <Field label="이 설치의 이름 (선택)">
-            <input
-              value={localLabel}
-              onChange={(event) => setLocalLabel(event.target.value)}
-              maxLength={80}
-              className="h-14 w-full rounded-full border border-[#d0d5dd] px-5 text-[17px] font-semibold outline-none focus:border-[#ff7a7a] focus:ring-2 focus:ring-[#ffe4e4]"
-              placeholder="예: 작업실 PC"
-            />
+          <Field
+            id="local-installation-label"
+            label="이 설치의 이름"
+            helperText="선택 사항이며 다른 설치를 구분하기 위한 로컬 표시 이름입니다."
+          >
+            {(controlProps) => (
+              <Input
+                {...controlProps}
+                value={localLabel}
+                onChange={(event) => setLocalLabel(event.target.value)}
+                maxLength={80}
+                placeholder="예: 작업실 PC"
+              />
+            )}
           </Field>
 
-          <label className="flex gap-3 rounded-[24px] border border-[#dce8df] bg-[#f5fbf6] p-4">
+          <label className={styles.privacyChoice}>
             <input
               type="checkbox"
               checked={privacyAcknowledged}
               onChange={(event) => setPrivacyAcknowledged(event.target.checked)}
-              className="mt-1"
             />
-            <span className="text-[14px] font-semibold leading-6 text-[#344054]">
-              SQLite 데이터와 local secret은 이 장치에 보존되고, owner claim은 한 번만 가능하다는 점을 확인했습니다.
+            <span>
+              SQLite 데이터와 local secret은 이 장치에 보존되고, owner claim은 한 번만
+              가능하다는 점을 확인했습니다.
             </span>
           </label>
 
-          <div className="grid gap-3 rounded-[24px] bg-[#f9fafb] p-4 text-[13px] font-semibold text-[#667085] md:grid-cols-2">
-            <span className="flex items-center gap-2"><Database size={17} />기존 row·FK 보존</span>
-            <span className="flex items-center gap-2"><LockKeyhole size={17} />opaque local session</span>
+          <div className={styles.localFacts} aria-label="로컬 저장 계약">
+            <span>
+              <Database aria-hidden="true" />
+              기존 row·FK 보존
+            </span>
+            <span>
+              <LockKeyhole aria-hidden="true" />
+              opaque local session
+            </span>
           </div>
 
-          <button
+          <Button
             type="submit"
+            fullWidth
+            loading={saving}
+            loadingLabel="owner를 연결하는 중"
             disabled={
-              saving ||
               !privacyAcknowledged ||
               (!selectedOwnerId && !displayName.trim())
             }
-            className="h-14 w-full rounded-full bg-[#ff6b6b] px-6 text-[17px] font-extrabold text-white shadow-[0_12px_24px_rgba(255,104,104,0.24)] hover:bg-[#ff5252] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {saving ? "owner를 연결하는 중..." : "이 owner로 Angmoo 시작"}
-          </button>
+            이 owner로 Angmoo 시작
+          </Button>
         </form>
       </div>
     </section>
   );
 }
 
-function StatusCard({ message }: { message: string }) {
+function LocalOwnerStateSurface({ children }: { children: React.ReactNode }) {
   return (
-    <section className="min-h-screen bg-[#f6f7f9] px-5 py-10">
-      <div className="mx-auto max-w-[680px] rounded-[32px] border border-[#e8ecf2] bg-white p-8 text-center text-[16px] font-bold text-[#475467] shadow-sm">
-        {message}
+    <section className={styles.page} data-local-owner-state="checking">
+      <PageHeader title="이 장치의 owner 준비" subtitle="Local Angmoo" />
+      <div className={styles.stateContent}>
+        <Card as="section" className={styles.stateCard}>
+          {children}
+        </Card>
       </div>
     </section>
-  );
-}
-
-function Notice({ children }: { children: ReactNode }) {
-  return <div className="mt-6 rounded-[22px] bg-[#fff8e8] p-4 text-[14px] font-semibold text-[#8a5a00]">{children}</div>;
-}
-
-function ErrorNotice({ children }: { children: ReactNode }) {
-  return <div className="mt-6 rounded-[22px] border border-[#ffd7d7] bg-[#fff5f5] p-4 text-[14px] font-semibold text-[#c24141]">{children}</div>;
-}
-
-function Field({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <label className="block">
-      <span className="mb-2 block text-[15px] font-extrabold text-[#344054]">{label}</span>
-      {children}
-    </label>
   );
 }
 
