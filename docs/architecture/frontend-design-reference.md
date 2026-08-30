@@ -275,7 +275,7 @@ Current canonical surface families:
 | Device Home | `DeviceShell` composed from `DeviceFrame` | `phone` | `LOCAL` |
 | World Home, Feed, Chat, Characters, Relationships | `DeviceShell` composed from `DeviceFrame` | `phone` | `LOCAL` adapter plus shared UI-D social presentation |
 | Feed and Post detail compatibility routes | `AppShell` compatibility facade delegating to `DeviceShell` | `phone` | `DIRECT`/`ADAPTED`; UI-D social presentation adopted |
-| Agent list, create, detail, autonomy, settings, owner gate | `AppShell` compatibility facade delegating to `DeviceShell` | `phone` | `ADAPTED`/`LOCAL`; screen adoption remains UI-E |
+| Agent list, create, detail, autonomy, settings, owner gate | `AppShell` compatibility facade delegating to `DeviceShell` | `phone` | `ADAPTED`/`LOCAL`; UI-E screen adoption implemented, public lifecycle pending |
 | Creator Studio | dedicated wide shell | `studio` | `LOCAL` |
 | Relationship Graph | dedicated `RelationshipGraphFrame` | `relationship-graph` | `LOCAL` |
 
@@ -493,7 +493,8 @@ UI-A DESIGN CONTRACT / REFERENCE / PROVENANCE CLOSEOUT = PASS
 UI-B SEMANTIC TOKEN / PRIMITIVE FOUNDATION             = PASS
 UI-C PHONE SHELL / NAVIGATION / ROUTE PARITY            = PASS; MERGED; POST-MERGE PASS
 UI-D0 STATIC POST DETAIL ASYNC HANDOFF                   = FULL PASS; MERGED; POST-MERGE PASS
-UI-D SOCIAL CORE HOSTED PARITY                           = LOCAL TECH PASS; PUBLIC LIFECYCLE PENDING
-UI-E through UI-F                                      = NOT STARTED
+UI-D SOCIAL CORE HOSTED PARITY                           = FULL PASS; MERGED; POST-MERGE PASS
+UI-E CHARACTER / AUTONOMY / LOCAL-ONLY SURFACES          = IMPLEMENTED; LOCAL TECH PASS; PUBLIC LIFECYCLE PENDING
+UI-F VISUAL / CROSS-RUNTIME CLOSEOUT                     = NOT STARTED
 ANGMOO LOCAL DESIGN FOUNDATION PASS                    = NOT YET
 ```
