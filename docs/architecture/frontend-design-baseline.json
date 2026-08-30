@@ -26,7 +26,7 @@
         "DIRECT"
       ],
       "path": "frontend/src/components/post-detail-client.tsx",
-      "sha256": "741edabc4c5b026c17f1025c2a028e05c95b50cd9cdcc45a9030dfccdbdadd9f"
+      "sha256": "0cf68577fc0b6c5347feff1eee1e12abba679889fb22df15516b9ae3a60a4c92"
     },
     {
       "classifications": [
@@ -54,7 +54,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/relationships/ui/relationship-graph-client.tsx",
-      "sha256": "ca31514a532e7bbbb8225040985058a5287475d22689b78e29627a8eb0053594"
+      "sha256": "055cc656aa55eafdb0816770383eaefb49800a8ec4c3903a569adebb693fea80"
     },
     {
       "classifications": [
@@ -68,7 +68,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/social/model/social-presentation-contract.ts",
-      "sha256": "ab970942a7e9bbbdfb37b147caa700d0df3e861dee48978335b76ee0bce793cc"
+      "sha256": "bae6144684e40838fc7b7733882bf3685901476a4d74fcebb2827fe67fdd96f7"
     },
     {
       "classifications": [
@@ -89,7 +89,7 @@
         "DIRECT"
       ],
       "path": "frontend/src/features/social/ui/post-list-client.tsx",
-      "sha256": "8872e158517582f861f66de0910aeb97af95b4d856c183fcbd4f2d7a28b8a1a7"
+      "sha256": "53798a02038ad48894920f027d4135ff436f69d49af71b6c2de7fad3a026c6ed"
     },
     {
       "classifications": [
@@ -103,21 +103,21 @@
         "DIRECT"
       ],
       "path": "frontend/src/features/social/ui/social-post-row.tsx",
-      "sha256": "381ece8076e6fffa0be594ad14ccc0d9a38b21c291c6dc8504daf419396d8384"
+      "sha256": "bc57dfc9553939fecb6a1f5b24cb45271088e835d748c6908e35ab3118ead739"
     },
     {
       "classifications": [
         "DIRECT"
       ],
       "path": "frontend/src/features/social/ui/social-presentation.module.css",
-      "sha256": "329d8b18b3863bcd1dd372050e2b2ac4bdf9ef8c917309f404ed72f0a17fe42c"
+      "sha256": "1de62db29b989a9d66f80332dfa28a03d163446f3dbd404ce9db4da5b0cc78de"
     },
     {
       "classifications": [
         "ADAPTED"
       ],
       "path": "frontend/src/features/social/ui/world-social-feed.tsx",
-      "sha256": "ec1c65aa678fea13f78ece5b37559062339f54e9c914c205683ae931a3774cbc"
+      "sha256": "fb8c6440138d116d924fede989ef9da6ba8e6a4cd30c56804b705074359bdd10"
     },
     {
       "classifications": [
@@ -162,15 +162,15 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "2f1484109c4fe44de49dd60a5a242a2fcebc9b47920b9ffd5b247506ecbed12e"
+        "sha256": "e7e68e11328747115f43ef2d6009bd73f0104573c7a4c0c9b9e8487048783f5f"
       },
       {
         "path": "browser-tests/semantic-foundation.visual.spec.ts",
-        "sha256": "2ef9a60351670baf5c999e1dd9382e3cdddff672a5eaa90864bc939e7823426c"
+        "sha256": "4ea63a35268f8537d63e15b156fcefd5c94333c9523cbefc805a735b640dce1d"
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "c3a2e9a042e2fed5ceabca8716d82903024fb4c1f506add7a85e51670b540414"
+        "sha256": "320b3fb3d2207af178fbf5209d048c7c932c39cb591136105c01e4515373283c"
       }
     ],
     "static_direct_open_routes": [
@@ -207,6 +207,9 @@
       ".github/PULL_REQUEST_TEMPLATE.md",
       ".github/workflows/security.yml",
       "CONTRIBUTING.md",
+      "backend/app/domains/social/api/schemas.py",
+      "backend/app/runtime/social/sqlalchemy_read_repository.py",
+      "backend/tests/test_l3_owner_manual_social_inbox.py",
       "browser-tests/package.json",
       "browser-tests/playwright.visual.config.ts",
       "browser-tests/semantic-foundation.visual.spec.ts",
@@ -259,7 +262,7 @@
   },
   "raw_colors": {
     "files": 50,
-    "occurrences": 1796,
+    "occurrences": 1794,
     "pattern": "#[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{5}|[0-9A-Fa-f]{3}|[0-9A-Fa-f])?\\b",
     "per_extension": {
       ".css": {
@@ -272,7 +275,7 @@
       },
       ".tsx": {
         "files": 40,
-        "occurrences": 1673
+        "occurrences": 1671
       }
     },
     "per_file": [
@@ -913,12 +916,11 @@
         }
       },
       {
-        "occurrences": 5,
+        "occurrences": 4,
         "path": "frontend/src/composition/static-product-router.tsx",
         "values": {
           "#251818": 1,
           "#584140": 1,
-          "#ae2f34": 1,
           "#e0bfbd": 1,
           "#fff8f7": 1
         }
@@ -1127,7 +1129,7 @@
         }
       },
       {
-        "occurrences": 48,
+        "occurrences": 47,
         "path": "frontend/src/features/world-packages/world-package-import-client.tsx",
         "values": {
           "#027a48": 2,
@@ -1140,7 +1142,6 @@
           "#7a2e0e": 2,
           "#98a2b3": 1,
           "#abefc6": 1,
-          "#ae2f34": 1,
           "#b42318": 1,
           "#d0d5dd": 2,
           "#e1e5eb": 3,
@@ -1155,13 +1156,14 @@
         }
       },
       {
-        "occurrences": 6,
+        "occurrences": 7,
         "path": "frontend/src/shared/desktop/desktop-window-controls.module.css",
         "values": {
+          "#175cd3": 1,
           "#302829": 1,
           "#655655": 1,
           "#8f8281": 1,
-          "#ae2f34": 1,
+          "#c24141": 1,
           "#ffffff": 2
         }
       },
@@ -1178,11 +1180,10 @@
         }
       },
       {
-        "occurrences": 3,
+        "occurrences": 2,
         "path": "frontend/src/shared/ui/app-icon.module.css",
         "values": {
           "#251818": 1,
-          "#ae2f34": 1,
           "#ffffff": 1
         }
       },
@@ -1203,9 +1204,7 @@
           "#475467": 1,
           "#667085": 2,
           "#6941c6": 1,
-          "#8c1520": 1,
           "#98a2b3": 2,
-          "#ae2f34": 1,
           "#b2ddff": 1,
           "#b54708": 1,
           "#c24141": 1,
@@ -1229,7 +1228,7 @@
           "#fff5f5": 1,
           "#fff8f7": 1,
           "#fffaeb": 1,
-          "#ffffff": 1
+          "#ffffff": 3
         }
       }
     ],
@@ -1243,7 +1242,7 @@
       "#147a45": 3,
       "#15803d": 2,
       "#166534": 1,
-      "#175cd3": 1,
+      "#175cd3": 2,
       "#17834b": 1,
       "#1d2939": 3,
       "#1f2330": 1,
@@ -1280,7 +1279,6 @@
       "#81322f": 1,
       "#8a5a00": 2,
       "#8a6f6d": 1,
-      "#8c1520": 1,
       "#8f3f3b": 1,
       "#8f4f4c": 1,
       "#8f8281": 1,
@@ -1293,7 +1291,6 @@
       "#a93636": 2,
       "#aa453c": 1,
       "#abefc6": 1,
-      "#ae2f34": 5,
       "#b22f2f": 1,
       "#b2ddff": 1,
       "#b42318": 12,
@@ -1302,7 +1299,7 @@
       "#b7e4c7": 1,
       "#b7ebcd": 1,
       "#b8837f": 1,
-      "#c24141": 46,
+      "#c24141": 47,
       "#c7933d": 2,
       "#c7d7fe": 1,
       "#c9ced6": 3,
@@ -1420,7 +1417,7 @@
       "#fffaeb": 3,
       "#fffaf0": 1,
       "#fffafa": 10,
-      "#ffffff": 7
+      "#ffffff": 9
     }
   },
   "route_inventory": {
@@ -1463,7 +1460,7 @@
       {
         "path": "frontend/src/composition/static-product-router.tsx",
         "present": true,
-        "sha256": "c3e82ff009c8b97d33e1f303113bc18729da378707261c33daf3ff426188d658"
+        "sha256": "2c19fcdc99a87c469b5327826de48f4b9e80b7e4657b905fd69d7a4453990df9"
       },
       {
         "path": "frontend/src/features/ui-foundation/public.ts",
@@ -1483,7 +1480,7 @@
       {
         "path": "frontend/src/features/world-packages/world-package-import-client.tsx",
         "present": true,
-        "sha256": "57fc99019e89f9fa9e54d432afa0a2efb998ae5c87bb646ab889534be1f14795"
+        "sha256": "e083fbe3355cc63a915bb27f418bac2468a3c1398d8c65b720029d3117cb4db5"
       },
       {
         "path": "frontend/src/shared/ui/avatar.tsx",
@@ -1533,12 +1530,12 @@
       {
         "path": "frontend/src/shared/ui/semantic-foundation.module.css",
         "present": true,
-        "sha256": "13e012e900a1c254a2499e255d6a206b832a747b2939ffef78f362ae76dfac75"
+        "sha256": "ea62dda6824ed42011de5d4f4693de81f86decb6ae6fc1653422e9b45d2d1e23"
       },
       {
         "path": "frontend/src/shared/ui/semantic-tokens.css",
         "present": true,
-        "sha256": "ded3166deab9270de9195760fa747b833b43c58840ce47f16bfdc3734d03f733"
+        "sha256": "10a74dfaaf8646971795da5591ef24b15eceb1a9d5073091477edad2524376ed"
       },
       {
         "path": "frontend/src/shared/ui/status-badge.tsx",
@@ -1678,17 +1675,17 @@
         {
           "path": "browser-tests/snapshots/ui-b/semantic-foundation-phone.png",
           "present": true,
-          "sha256": "744d29d9034fda93639e6c47766ba211c01613cf781cc3ddb0ea439a4dd103aa"
+          "sha256": "de6c1cf3beb2db62ebf85577408cb64d2c0a8e5f7e508a4689219bba19c2e71a"
         }
       ],
       "spec": {
         "path": "browser-tests/semantic-foundation.visual.spec.ts",
         "present": true,
-        "sha256": "2ef9a60351670baf5c999e1dd9382e3cdddff672a5eaa90864bc939e7823426c"
+        "sha256": "4ea63a35268f8537d63e15b156fcefd5c94333c9523cbefc805a735b640dce1d"
       }
     },
     "screenshot_call_count": 1,
-    "status": "UI-C retains the single reviewed UI-B semantic-foundation baseline and adds behavior and fixed-viewport shell assertions without expanding the screenshot corpus; the full product visual corpus remains owned by UI-F.",
+    "status": "UI-D PR #207 follow-up intentionally refreshes the single reviewed semantic-foundation baseline for the bright-coral CTA and selected-navigation contract without expanding the screenshot corpus; the full product visual corpus remains owned by UI-F.",
     "target_viewports": [
       "360x800",
       "390x844",

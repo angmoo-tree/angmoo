@@ -6,17 +6,29 @@ import type {
 export type SocialPostActionKind = "reply" | "repost" | "like" | "share";
 
 /**
- * A visible action is always supplied by an adapter that owns the underlying
- * capability. An omitted count stays omitted; presentation code must not turn
- * missing payload data into a synthetic zero.
+ * Adapters must describe whether a slot is navigational, mutating, or a
+ * read-only metric. An omitted count stays omitted; presentation code must not
+ * turn missing payload data into a synthetic zero.
  */
-export type SocialPostActionPresentation = {
+type SocialPostActionBase = {
   kind: SocialPostActionKind;
   label: string;
   count?: number;
-  href?: string;
   accent?: boolean;
 };
+
+export type SocialPostActionPresentation =
+  | (SocialPostActionBase & {
+      interaction: "link";
+      href: string;
+    })
+  | (SocialPostActionBase & {
+      interaction: "button";
+    })
+  | (SocialPostActionBase & {
+      interaction: "metric";
+      count: number;
+    });
 
 /**
  * Product-neutral social row data shared by the global and World-scoped feed

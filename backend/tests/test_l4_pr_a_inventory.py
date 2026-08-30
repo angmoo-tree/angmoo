@@ -93,7 +93,7 @@ def test_l4_pr_a_architecture_and_parity_oracles_are_exact() -> None:
     assert len(frontend["public_surfaces"]["features"]) == 10
     assert len(frontend["public_surfaces"]["shared"]) == 8
 
-    assert behavior["parity_test_node_count"] == 93
+    assert behavior["parity_test_node_count"] == 95
     nodes = set(behavior["parity_test_nodes"])
     assert all(item["test"] in nodes for item in behavior["counter_contracts"])
     assert payload["forbidden_changes"] == [

@@ -115,6 +115,18 @@ function assertWorldScopedFeed(
   rootPostId: string | null,
   ownerWorldCharacterId?: string,
 ): ManualSocialFeedRead {
+  if (
+    !Array.isArray(result.items) ||
+    result.items.some(
+      (item) =>
+        !Number.isInteger(item.reply_count) ||
+        item.reply_count < 0 ||
+        !Number.isInteger(item.like_count) ||
+        item.like_count < 0,
+    )
+  ) {
+    throw new SocialWriteApiError(502, "manual_social_count_schema_mismatch");
+  }
   const worldScopeMismatch =
     result.world_id !== worldId ||
     result.items.some((item) => item.world_id !== worldId) ||

@@ -506,7 +506,7 @@ export function WorldCharacterAutonomySetupClient({
     >
       <div className="mx-auto max-w-5xl space-y-6">
         <header className="rounded-[28px] border border-outline-variant bg-surface-container-lowest p-6 shadow-sm md:p-8">
-          <p className="text-sm font-bold text-primary">WORLD CHARACTER SETUP</p>
+          <p className="text-sm font-bold text-brand-accent">WORLD CHARACTER SETUP</p>
           <h1 className="mt-2 text-3xl font-black text-on-surface">
             {agent.character.name} × {world.name}
           </h1>
@@ -696,7 +696,7 @@ export function WorldCharacterAutonomySetupClient({
                 <p className="mt-3 text-lg font-semibold">{setup.profile.visible_summary}</p>
                 <div className="mt-5 flex flex-wrap gap-2">
                   {setup.profile.search_keywords.map((keyword) => (
-                    <span key={keyword} className="rounded-full bg-primary-fixed px-3 py-1 text-sm text-on-primary-fixed-variant">#{keyword}</span>
+                    <span key={keyword} className="rounded-full bg-brand-soft px-3 py-1 text-sm text-brand-accent">#{keyword}</span>
                   ))}
                 </div>
                 <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -704,7 +704,7 @@ export function WorldCharacterAutonomySetupClient({
                     <div key={action} className="rounded-2xl bg-surface-container-low p-4">
                       <div className="flex items-center justify-between gap-2">
                         <span className="font-bold">{ACTION_LABELS[action] ?? action}</span>
-                        <span className="text-sm font-black text-primary">{preference.weight}</span>
+                        <span className="text-sm font-black text-text-strong">{preference.weight}</span>
                       </div>
                       <p className="mt-2 text-xs text-on-surface-variant">{preference.note || "별도 조건 없음"}</p>
                     </div>
@@ -720,7 +720,7 @@ export function WorldCharacterAutonomySetupClient({
                     <h2 className="text-xl font-black">4. 일과 후보 40개 검토</h2>
                     <p className="mt-2 text-sm text-on-surface-variant">각 시간대에 정확히 10개가 있어야 합니다.</p>
                   </div>
-                  <strong className="text-primary">총 {setup.repertoire.candidates.length}개</strong>
+                  <strong className="text-text-strong">총 {setup.repertoire.candidates.length}개</strong>
                 </div>
                 <div className="mt-5 grid grid-cols-2 gap-2 md:grid-cols-4">
                   {DAYPARTS.map((item) => {
@@ -730,7 +730,7 @@ export function WorldCharacterAutonomySetupClient({
                         key={item.key}
                         type="button"
                         onClick={() => setDaypart(item.key)}
-                        className={`rounded-2xl border px-4 py-3 text-left ${daypart === item.key ? "border-primary bg-primary-fixed" : "border-outline-variant bg-white"}`}
+                        className={`rounded-2xl border px-4 py-3 text-left ${daypart === item.key ? "border-brand-soft-border bg-brand-soft" : "border-outline-variant bg-white"}`}
                       >
                         <span className="block font-bold">{item.label} · {count}개</span>
                         <span className="text-xs text-on-surface-variant">{item.time}</span>
@@ -757,9 +757,9 @@ export function WorldCharacterAutonomySetupClient({
             ) : null}
 
             {setup.profile && setup.repertoire && !setup.autonomy_ready ? (
-              <section className="rounded-[28px] border border-primary/30 bg-primary-fixed p-6">
-                <h2 className="text-xl font-black text-on-primary-fixed">5. 최종 승인</h2>
-                <p className="mt-2 text-sm text-on-primary-fixed-variant">
+              <section className="rounded-[28px] border border-brand-soft-border bg-brand-soft p-6">
+                <h2 className="text-xl font-black text-text-strong">5. 최종 승인</h2>
+                <p className="mt-2 text-sm text-text-default">
                   승인하면 이 World에서 사용할 준비 결과가 고정됩니다. 자율활동 실행은 별도 단계입니다.
                 </p>
                 <div className="mt-5 flex flex-wrap gap-3">
@@ -794,7 +794,7 @@ export function WorldCharacterAutonomySetupClient({
               <section className="rounded-[28px] border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <p className="text-sm font-bold text-primary">P3 · DAILY ACTIVITY PLAN</p>
+                    <p className="text-sm font-bold text-brand-accent">P3 · DAILY ACTIVITY PLAN</p>
                     <h2 className="mt-1 text-xl font-black">오늘의 활동 계획</h2>
                     <p className="mt-2 max-w-3xl text-sm text-on-surface-variant">
                       P2에서 승인한 후보 40개 중 새벽·오전·오후·저녁의 중심 일과를
@@ -802,7 +802,7 @@ export function WorldCharacterAutonomySetupClient({
                     </p>
                   </div>
                   {activityPlan ? (
-                    <span className="rounded-full bg-primary-fixed px-4 py-2 text-sm font-bold text-on-primary-fixed-variant">
+                    <span className="rounded-full bg-surface-muted px-4 py-2 text-sm font-bold text-text-default">
                       {activityPlan.local_date} · {activityPlan.timezone_name}
                     </span>
                   ) : null}
@@ -838,7 +838,7 @@ export function WorldCharacterAutonomySetupClient({
                         return (
                           <article
                             key={item.id}
-                            className={`rounded-2xl border p-5 ${current ? "border-primary bg-primary-fixed/50" : "border-outline-variant bg-white"}`}
+                            className={`rounded-2xl border p-5 ${current ? "border-state-running-border bg-state-running-surface" : "border-outline-variant bg-white"}`}
                           >
                             <div className="flex flex-wrap items-center justify-between gap-2">
                               <div>
@@ -848,7 +848,7 @@ export function WorldCharacterAutonomySetupClient({
                                 <h3 className="mt-1 font-black">{item.title}</h3>
                               </div>
                               <div className="flex gap-2">
-                                {current ? <span className="rounded-full bg-primary px-2 py-1 text-xs font-bold text-on-primary">현재</span> : null}
+                                {current ? <span className="rounded-full bg-state-running-surface px-2 py-1 text-xs font-bold text-state-running">현재</span> : null}
                                 <span className="rounded-full bg-surface-container px-2 py-1 text-xs">{item.status}</span>
                               </div>
                             </div>
@@ -898,7 +898,7 @@ export function WorldCharacterAutonomySetupClient({
                     <div className="mt-5 rounded-2xl border border-outline-variant bg-white p-5">
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
-                          <p className="text-xs font-bold text-primary">P4 · ROUTINE CONTINUATION</p>
+                          <p className="text-xs font-bold text-brand-accent">P4 · ROUTINE CONTINUATION</p>
                           <h3 className="mt-1 font-black">일과 연속 전개 엔진</h3>
                           <p className="mt-2 max-w-2xl text-sm text-on-surface-variant">
                             같은 시간대의 중심 일과, 직전 성공 게시글, 현재 상태를 이어 다음 장면을 씁니다.
@@ -919,7 +919,7 @@ export function WorldCharacterAutonomySetupClient({
                           )
                         }
                         disabled={modePending}
-                        className="mt-4 rounded-full border border-primary px-5 py-2 text-sm font-bold text-primary disabled:opacity-50"
+                        className="mt-4 rounded-full border border-border-control px-5 py-2 text-sm font-bold text-text-strong hover:bg-surface-muted disabled:opacity-50"
                       >
                         {modePending
                           ? "변경 중…"
@@ -937,7 +937,7 @@ export function WorldCharacterAutonomySetupClient({
                                 성공 beat #{item.episode?.last_successful_sequence_no ?? "-"} · 댓글 근거 {item.episode?.used_event_count ?? 0}/{item.episode?.considered_event_count ?? 0} · 입력 상한 초과 {item.episode?.overflow_event_count ?? 0}
                               </p>
                               {item.episode?.last_successful_post_id ? (
-                                <Link className="mt-2 inline-block font-bold text-primary underline" href={worldPostDetailRoute(worldId, item.episode.last_successful_post_id)}>
+                                <Link className="mt-2 inline-block font-bold text-state-running underline" href={worldPostDetailRoute(worldId, item.episode.last_successful_post_id)}>
                                   마지막 성공 게시글 보기
                                 </Link>
                               ) : null}
@@ -954,7 +954,7 @@ export function WorldCharacterAutonomySetupClient({
               <section className="rounded-[28px] border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <p className="text-sm font-bold text-primary">P5 · WORLD KEYWORD FEED</p>
+                    <p className="text-sm font-bold text-brand-accent">P5 · WORLD KEYWORD FEED</p>
                     <h2 className="mt-1 text-xl font-black">관심 키워드 피드</h2>
                     <p className="mt-2 max-w-3xl text-sm text-on-surface-variant">
                       승인된 World 전용 키워드를 두 개씩 순환해 같은 World의 관련 게시글을 찾습니다.
@@ -1095,7 +1095,7 @@ export function WorldCharacterAutonomySetupClient({
               <section className="rounded-[28px] border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <p className="text-sm font-bold text-primary">P6 · SOCIAL MEMORY</p>
+                    <p className="text-sm font-bold text-brand-accent">P6 · SOCIAL MEMORY</p>
                     <h2 className="mt-1 text-xl font-black">실제 SNS 사건과 방향성 관계</h2>
                     <p className="mt-2 max-w-3xl text-sm text-on-surface-variant">
                       실제 DB 쓰기에 성공한 사건만 근거와 함께 보존합니다. 내가 상대를 보는 관계와
@@ -1194,7 +1194,7 @@ export function WorldCharacterAutonomySetupClient({
                                 }).format(new Date(event.occurred_at))}
                               </p>
                               {threadPostId && !excluded ? (
-                                <Link className="mt-2 inline-block text-sm font-bold text-primary underline" href={worldPostDetailRoute(worldId, threadPostId)}>
+                                <Link className="mt-2 inline-block text-sm font-bold text-state-running underline" href={worldPostDetailRoute(worldId, threadPostId)}>
                                   근거 게시글 보기
                                 </Link>
                               ) : null}

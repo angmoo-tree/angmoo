@@ -117,7 +117,7 @@ function StaticWindowRouteMismatch({
   return (
     <main className="flex min-h-screen items-center justify-center bg-surface p-8 text-on-surface">
       <section className="max-w-xl rounded-[32px] border border-outline-variant bg-surface-container-lowest p-8 shadow-sm">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-state-running">
           Product window boundary
         </p>
         <h1 className="mt-3 text-2xl font-black">제품 창 경로를 열지 못했습니다.</h1>
@@ -399,7 +399,7 @@ function StaticNotFound({ pathname }: { pathname: string }) {
       <div className="max-w-lg rounded-[32px] border border-[#e0bfbd] bg-white p-8">
         <h1 className="text-2xl font-extrabold text-[#251818]">지원하지 않는 Angmoo 경로입니다.</h1>
         <p className="mt-3 break-all text-sm text-[#584140]">{pathname}</p>
-        <Link className="mt-6 inline-flex rounded-full bg-[#ae2f34] px-5 py-3 font-bold text-white" href="/">
+        <Link className="mt-6 inline-flex rounded-full bg-action-primary px-5 py-3 font-bold text-on-action-primary hover:bg-action-primary-hover" href="/">
           Device Home으로 돌아가기
         </Link>
       </div>

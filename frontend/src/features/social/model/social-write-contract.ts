@@ -1,7 +1,10 @@
 export type SocialOwnerActor = {
   world_character_id: string;
   world_id: string;
-  profile: { display_name: string };
+  profile: {
+    avatar_url: string;
+    display_name: string;
+  };
 };
 
 export type ManualSocialPostRead = {
@@ -15,7 +18,14 @@ export type ManualSocialPostRead = {
   reply_to_post_id: string | null;
   created_at: string;
   can_owner_reply: boolean;
+  reply_count: number;
+  like_count: number;
 };
+
+export type ManualSocialWritePostRead = Omit<
+  ManualSocialPostRead,
+  "reply_count" | "like_count"
+>;
 
 export type ManualSocialFeedRead = {
   schema_version: "owner-manual-social-v1";
@@ -28,7 +38,7 @@ export type ManualSocialWriteRead = {
   schema_version: "owner-manual-social-v1";
   operation: "post" | "reply";
   replayed: boolean;
-  post: ManualSocialPostRead;
+  post: ManualSocialWritePostRead;
   delivery: {
     provider_call_count: 0;
     inbox_candidate_id: string | null;

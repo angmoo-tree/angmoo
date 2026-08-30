@@ -20,11 +20,13 @@
   --color-brand-accent-hover: #ff5252;
   --color-brand-soft: #fff0ef;
   --color-brand-soft-border: #ffb5b5;
-  --color-action-primary: #ae2f34;
-  --color-action-primary-hover: #8c1520;
+  --color-action-primary: var(--color-brand-accent);
+  --color-action-primary-hover: var(--color-brand-accent-hover);
+  --color-on-action-primary: #ffffff;
   --color-action-dark: #101828;
   --color-action-dark-hover: color-mix(in srgb, var(--color-action-dark) 88%, white);
-  --color-indicator-active: var(--color-action-primary);
+  --color-on-action-dark: #ffffff;
+  --color-indicator-active: var(--color-brand-accent);
 
   --color-state-success: #147a45;
   --color-state-success-surface: #f0fbf5;
@@ -62,10 +64,10 @@
   --color-inverse-on-surface: var(--color-surface);
   --color-outline: var(--color-text-muted);
   --color-outline-variant: var(--color-border-default);
-  --color-surface-tint: var(--color-action-primary);
+  --color-surface-tint: var(--color-brand-accent);
   --color-primary: var(--color-action-primary);
-  --color-on-primary: var(--color-surface);
-  --color-primary-container: var(--color-brand-accent);
+  --color-on-primary: var(--color-on-action-primary);
+  --color-primary-container: var(--color-brand-soft);
   --color-on-primary-container: var(--color-text-strong);
   --color-inverse-primary: var(--color-brand-soft-border);
   --color-secondary: var(--color-state-warning);
@@ -156,7 +158,7 @@
 
   --shadow-summary: 0 10px 28px rgb(16 24 40 / 8%);
   --shadow-dialog: 0 24px 64px rgb(16 24 40 / 22%);
-  --shadow-action: 0 8px 20px rgb(196 50 59 / 20%);
+  --shadow-action: 0 8px 20px rgb(255 107 107 / 22%);
   --shadow-device: 0 28px 80px rgb(16 24 40 / 18%);
 }
 

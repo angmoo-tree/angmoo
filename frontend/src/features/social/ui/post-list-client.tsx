@@ -539,9 +539,16 @@ export function PostListClient({
                 actions={[
                   {
                     kind: "reply",
+                    interaction: "link",
                     label: "대꾸",
                     count: post.reply_count,
                     href: detailHref,
+                  },
+                  {
+                    kind: "like",
+                    interaction: "metric",
+                    label: "좋아요",
+                    count: post.like_count,
                   },
                 ]}
                 authorHref={

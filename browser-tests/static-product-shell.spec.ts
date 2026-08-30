@@ -159,6 +159,8 @@ function staticUiDManualPost({
   body,
   canOwnerReply = true,
   id,
+  likeCount = 0,
+  replyCount = 0,
   replyToPostId = null,
   title,
   worldId = UI_D_STATIC_WORLD_ID,
@@ -167,6 +169,8 @@ function staticUiDManualPost({
   body: string;
   canOwnerReply?: boolean;
   id: string;
+  likeCount?: number;
+  replyCount?: number;
   replyToPostId?: string | null;
   title: string;
   worldId?: string;
@@ -185,6 +189,8 @@ function staticUiDManualPost({
     reply_to_post_id: replyToPostId,
     created_at: "2026-08-30T01:00:00Z",
     can_owner_reply: canOwnerReply,
+    reply_count: replyCount,
+    like_count: likeCount,
   };
 }
 
@@ -200,16 +206,32 @@ function staticUiDManualFeed(
   } as const;
 }
 
-function staticUiDManualWrite(post: ReturnType<typeof staticUiDManualPost>) {
+function staticUiDManualWrite(
+  post: ReturnType<typeof staticUiDManualPost>,
+  operation: "post" | "reply" = "reply",
+) {
+  const writePost = {
+    id: post.id,
+    world_id: post.world_id,
+    author_world_character_id: post.author_world_character_id,
+    author_name: post.author_name,
+    title: post.title,
+    body: post.body,
+    post_type: post.post_type,
+    reply_to_post_id: post.reply_to_post_id,
+    created_at: post.created_at,
+    can_owner_reply: post.can_owner_reply,
+  };
   return {
     schema_version: "owner-manual-social-v1",
-    operation: "reply",
+    operation,
     replayed: false,
-    post,
+    post: writePost,
     delivery: {
       provider_call_count: 0,
-      inbox_candidate_id: "inbox-ui-d-static-reply",
-      inbox_status: "pending",
+      inbox_candidate_id:
+        operation === "reply" ? "inbox-ui-d-static-reply" : null,
+      inbox_status: operation === "reply" ? "pending" : "not_applicable",
       public_reaction_required: false,
     },
   } as const;
@@ -373,10 +395,16 @@ test("static Phone routes share one frame, one scroll owner, and supported navig
         .locator("a")
         .evaluateAll((anchors) => anchors.map((anchor) => anchor.getAttribute("href"))),
     ).toEqual(["/", "/posts", "/agents", "/settings"]);
-    await expect(navigation.locator('a[href="/agents"]')).toHaveAttribute(
+    const selectedNavigationItem = navigation.locator('a[href="/agents"]');
+    await expect(selectedNavigationItem).toHaveAttribute(
       "aria-current",
       "page",
     );
+    await expect(selectedNavigationItem).toHaveCSS(
+      "background-color",
+      "rgb(255, 240, 239)",
+    );
+    await expect(selectedNavigationItem).toHaveCSS("color", "rgb(255, 107, 107)");
 
     const geometry = await frame.evaluate((node) => {
       const rect = node.getBoundingClientRect();
@@ -1534,6 +1562,8 @@ test("static P4 evidence opens the exact World-scoped post thread", async ({
               reply_to_post_id: null,
               created_at: "2026-08-22T00:00:00Z",
               can_owner_reply: true,
+              reply_count: 0,
+              like_count: 0,
             },
           ],
         },
@@ -1567,7 +1597,15 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
   const rootPost = staticUiDManualPost({
     body: longBody,
     id: UI_D_STATIC_ROOT_POST_ID,
+    likeCount: 1,
+    replyCount: 1,
     title: "Static UI-D World root",
+  });
+  const zeroReactionPost = staticUiDManualPost({
+    body: "답글과 좋아요가 아직 없는 static 게시글입니다.",
+    canOwnerReply: false,
+    id: "post-ui-d-static-zero-reaction",
+    title: "Static UI-D zero reactions",
   });
   const existingReply = staticUiDManualPost({
     authorName: "Static UI-D Friend",
@@ -1585,11 +1623,23 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
     replyToPostId: UI_D_STATIC_ROOT_POST_ID,
     title: "",
   });
+  const postedRoot = staticUiDManualPost({
+    authorName: "Static UI-D Owner",
+    body: "변경한 static 직접 게시글 내용",
+    canOwnerReply: false,
+    id: "post-ui-d-static-owner-new",
+    title: "공백을 정리한 static 제목",
+  });
+  let feedItems = [rootPost, zeroReactionPost, existingReply];
   let detailItems = [rootPost, existingReply];
+  const postRequestBodies: unknown[] = [];
+  const postIdempotencyKeys: Array<string | undefined> = [];
   let replyRequestBody: unknown = null;
   let replyIdempotencyKey: string | undefined;
   const requestedSocialPaths: string[] = [];
   const globalSocialPaths: string[] = [];
+  const feedCuePaths: string[] = [];
+  const likeMutationPaths: string[] = [];
 
   await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
     const request = route.request();
@@ -1597,6 +1647,15 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
     const method = request.method();
     if (/^\/api\/v1\/(feed|posts)(\/|$)/.test(url.pathname)) {
       globalSocialPaths.push(`${method} ${url.pathname}`);
+    }
+    if (url.pathname.includes("/feed-cue")) {
+      feedCuePaths.push(`${method} ${url.pathname}`);
+    }
+    if (
+      /\/likes$/.test(url.pathname) &&
+      (method === "POST" || method === "DELETE")
+    ) {
+      likeMutationPaths.push(`${method} ${url.pathname}`);
     }
     if (url.pathname === `/api/v1/worlds/mine/${UI_D_STATIC_WORLD_ID}`) {
       await route.fulfill({
@@ -1621,7 +1680,30 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
       requestedSocialPaths.push(`${method} ${url.pathname}`);
       await route.fulfill({
         contentType: "application/json",
-        json: staticUiDManualFeed([rootPost, existingReply]),
+        json: staticUiDManualFeed(feedItems),
+        status: 200,
+      });
+      return;
+    }
+    if (
+      url.pathname === `/api/v1/worlds/${UI_D_STATIC_WORLD_ID}/manual-social/posts` &&
+      method === "POST"
+    ) {
+      requestedSocialPaths.push(`${method} ${url.pathname}`);
+      postRequestBodies.push(request.postDataJSON());
+      postIdempotencyKeys.push(request.headers()["idempotency-key"]);
+      if (postRequestBodies.length <= 2) {
+        await route.fulfill({
+          contentType: "application/json",
+          json: { detail: "runtime_not_ready" },
+          status: 503,
+        });
+        return;
+      }
+      feedItems = [postedRoot, rootPost, zeroReactionPost, existingReply];
+      await route.fulfill({
+        contentType: "application/json",
+        json: staticUiDManualWrite(postedRoot, "post"),
         status: 200,
       });
       return;
@@ -1647,7 +1729,11 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
       requestedSocialPaths.push(`${method} ${url.pathname}`);
       replyRequestBody = request.postDataJSON();
       replyIdempotencyKey = request.headers()["idempotency-key"];
-      detailItems = [rootPost, existingReply, ownerReply];
+      detailItems = [
+        { ...rootPost, reply_count: 2 },
+        existingReply,
+        ownerReply,
+      ];
       await route.fulfill({
         contentType: "application/json",
         json: staticUiDManualWrite(ownerReply),
@@ -1664,24 +1750,117 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
   const feedSurface = page.locator('[data-world-social-surface="feed"]');
   await expect(feedSurface).toBeVisible();
   await expect(feedSurface.locator('[data-social-stream="world"]')).toBeVisible();
-  const composerToggle = page.getByRole("button", { name: "글 쓰기" });
-  await expect(composerToggle).toHaveAttribute("aria-expanded", "false");
-  await expect(page.locator("#world-owner-composer")).toHaveCount(0);
-  await composerToggle.click();
-  await expect(page.getByRole("button", { name: "닫기" })).toHaveAttribute(
-    "aria-expanded",
-    "true",
+  await expect(feedSurface.getByText("World Feed", { exact: true })).toHaveCSS(
+    "color",
+    "rgb(255, 107, 107)",
   );
-  await expect(page.locator("#world-owner-composer")).toBeVisible();
-  await expect(page.getByLabel("제목")).toBeFocused();
-  await page.getByRole("button", { name: "닫기" }).click();
+  await expect(page.getByRole("button", { name: "글 쓰기" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "닫기" })).toHaveCount(0);
+  const composer = page.locator("#world-owner-composer");
+  const titleInput = page.getByLabel("제목", { exact: true });
+  const bodyInput = page.getByLabel("내용", { exact: true });
+  const submitPost = page.getByRole("button", { name: "게시하기" });
+  await expect(composer).toBeVisible();
+  await expect(
+    composer.getByRole("img", { name: "Static UI-D Owner 프로필 이미지" }),
+  ).toBeVisible();
+  await expect(composer.getByText("Static UI-D Owner", { exact: true })).toBeVisible();
+  await expect(titleInput).toHaveAttribute(
+    "placeholder",
+    "오늘 이 World에 남길 이야기의 제목을 적어주세요",
+  );
+  await expect(bodyInput).toHaveAttribute(
+    "placeholder",
+    "내가 조종하는 앵무의 말로 이야기를 적어보세요",
+  );
+  await expect(submitPost).toBeDisabled();
+  expect(await titleInput.evaluate((element) => document.activeElement === element)).toBe(false);
+  expect(await bodyInput.evaluate((element) => document.activeElement === element)).toBe(false);
+  for (const input of [titleInput, bodyInput]) {
+    const inputId = await input.getAttribute("id");
+    expect(inputId).toBeTruthy();
+    const label = page.locator(`label[for="${inputId}"]`);
+    await expect(label).toHaveCount(1);
+    expect(
+      await label.evaluate((element) => {
+        const style = window.getComputedStyle(element);
+        const rect = element.getBoundingClientRect();
+        return style.position === "absolute" && rect.width <= 1 && rect.height <= 1;
+      }),
+    ).toBe(true);
+  }
+
+  await titleInput.fill("  공백을 정리한 static 제목  ");
+  await bodyInput.fill("  첫 static 직접 게시글 내용  ");
+  await expect(submitPost).toHaveCSS("background-color", "rgb(255, 107, 107)");
+  await expect(submitPost).toHaveCSS("color", "rgb(255, 255, 255)");
+  await titleInput.focus();
+  await page.keyboard.press("Tab");
+  await expect(bodyInput).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(submitPost).toBeFocused();
+
+  await submitPost.click();
+  await expect.poll(() => postRequestBodies.length).toBe(1);
+  await expect(page.getByText("로컬 엔진이 아직 준비되지 않았습니다.")).toBeVisible();
+  await expect(titleInput).toHaveValue("  공백을 정리한 static 제목  ");
+  await expect(bodyInput).toHaveValue("  첫 static 직접 게시글 내용  ");
+  await expect(submitPost).toBeEnabled();
+  await submitPost.click();
+  await expect.poll(() => postRequestBodies.length).toBe(2);
+  await expect(page.getByText("로컬 엔진이 아직 준비되지 않았습니다.")).toBeVisible();
+  await expect(submitPost).toBeEnabled();
+  await bodyInput.fill("  변경한 static 직접 게시글 내용  ");
+  await submitPost.click();
+  await expect.poll(() => postRequestBodies.length).toBe(3);
+  await expect(page.getByText("게시글을 저장했습니다.", { exact: false })).toBeVisible();
+  await expect(composer).toBeVisible();
+  await expect(titleInput).toHaveValue("");
+  await expect(bodyInput).toHaveValue("");
+  expect(postRequestBodies).toEqual([
+    { title: "공백을 정리한 static 제목", body: "첫 static 직접 게시글 내용" },
+    { title: "공백을 정리한 static 제목", body: "첫 static 직접 게시글 내용" },
+    { title: "공백을 정리한 static 제목", body: "변경한 static 직접 게시글 내용" },
+  ]);
+  expect(postIdempotencyKeys[0]).toMatch(/^owner-post-/);
+  expect(postIdempotencyKeys[1]).toBe(postIdempotencyKeys[0]);
+  expect(postIdempotencyKeys[2]).toMatch(/^owner-post-/);
+  expect(postIdempotencyKeys[2]).not.toBe(postIdempotencyKeys[0]);
 
   const row = page.locator(`[data-social-post-row="${UI_D_STATIC_ROOT_POST_ID}"]`);
+  const zeroReactionRow = page.locator(
+    '[data-social-post-row="post-ui-d-static-zero-reaction"]',
+  );
   await expect(row).toHaveAttribute("data-variant", "feed");
   await expect(row).toHaveCSS("border-bottom-width", "1px");
   await expect(row).toHaveCSS("border-radius", "0px");
+  await expect(row.getByRole("link", { name: "대꾸 1" })).toHaveAttribute(
+    "href",
+    new RegExp(
+      `/worlds/${UI_D_STATIC_WORLD_ID}/posts/${UI_D_STATIC_ROOT_POST_ID}/?$`,
+    ),
+  );
+  const positiveLike = row.getByLabel("좋아요 1", { exact: true });
+  await expect(positiveLike).toHaveCount(1);
+  await expect(positiveLike.locator("svg")).toHaveAttribute("fill", "currentColor");
+  expect(await positiveLike.evaluate((element) => element.tagName)).toBe("SPAN");
+  expect(await positiveLike.getAttribute("aria-pressed")).toBeNull();
+  expect(await positiveLike.evaluate((element) => (element as HTMLElement).tabIndex)).toBe(-1);
+  await expect(zeroReactionRow.getByRole("link", { name: "대꾸 0" })).toBeVisible();
+  const zeroLike = zeroReactionRow.getByLabel("좋아요 0", { exact: true });
+  await expect(zeroLike.locator("svg")).toHaveAttribute("fill", "none");
+  expect(await zeroLike.evaluate((element) => element.tagName)).toBe("SPAN");
+  await expect(row.getByRole("button", { name: /좋아요/ })).toHaveCount(0);
+  await expect(zeroReactionRow.getByRole("button", { name: /좋아요/ })).toHaveCount(0);
+  await expect(row.getByRole("link", { name: /좋아요/ })).toHaveCount(0);
   const expand = row.getByRole("button", { name: "더보기" });
   await expect(expand).toBeVisible();
+  await expect(expand).toHaveCSS("color", "rgb(255, 107, 107)");
+  await expect(
+    page
+      .locator('[data-social-post-row="post-ui-d-static-owner-new"]')
+      .getByText("공백을 정리한 static 제목", { exact: true }),
+  ).toBeInViewport();
 
   const feedUrl = page.url();
   await row.locator("p").evaluate((paragraph) => {
@@ -1704,11 +1883,28 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
 
   await expect(page).toHaveURL(
     new RegExp(
-      `/worlds/${UI_D_STATIC_WORLD_ID}/posts/${UI_D_STATIC_ROOT_POST_ID}$`,
+      `/worlds/${UI_D_STATIC_WORLD_ID}/posts/${UI_D_STATIC_ROOT_POST_ID}/?$`,
     ),
   );
   await expect(page.locator('[data-world-social-surface="detail"]')).toBeVisible();
   await expect(page.getByRole("heading", { name: "게시글과 답글" })).toBeVisible();
+  await expect(page.locator("#world-owner-composer")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "게시하기" })).toHaveCount(0);
+  await expect(
+    page
+      .locator(`[data-social-post-row="${UI_D_STATIC_ROOT_POST_ID}"]`)
+      .getByLabel("대꾸 1"),
+  ).toBeVisible();
+  await expect(
+    page
+      .locator(`[data-social-post-row="${UI_D_STATIC_ROOT_POST_ID}"]`)
+      .getByLabel("좋아요 1"),
+  ).toBeVisible();
+  await expect(
+    page
+      .locator('[data-social-post-row="reply-ui-d-static-existing"]')
+      .getByLabel("좋아요 0"),
+  ).toBeVisible();
   await expect(page.getByRole("heading", { name: "대꾸 1" })).toBeVisible();
   await page
     .getByLabel("Static UI-D Autonomous의 게시글에 답글")
@@ -1719,6 +1915,11 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
     page.getByText("Static UI-D Owner reply arrived.", { exact: false }),
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "대꾸 2" })).toBeVisible();
+  await expect(
+    page
+      .locator(`[data-social-post-row="${UI_D_STATIC_ROOT_POST_ID}"]`)
+      .getByLabel("대꾸 2"),
+  ).toBeVisible();
   expect(replyRequestBody).toEqual({ body: "실제 static scoped reply" });
   expect(replyIdempotencyKey).toMatch(/^owner-reply-/);
   expect(requestedSocialPaths).toContain(
@@ -1728,9 +1929,14 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
     `GET /api/v1/worlds/${UI_D_STATIC_WORLD_ID}/manual-social/posts/${UI_D_STATIC_ROOT_POST_ID}`,
   );
   expect(requestedSocialPaths).toContain(
+    `POST /api/v1/worlds/${UI_D_STATIC_WORLD_ID}/manual-social/posts`,
+  );
+  expect(requestedSocialPaths).toContain(
     `POST /api/v1/worlds/${UI_D_STATIC_WORLD_ID}/manual-social/posts/${UI_D_STATIC_ROOT_POST_ID}/replies`,
   );
   expect(globalSocialPaths).toEqual([]);
+  expect(feedCuePaths).toEqual([]);
+  expect(likeMutationPaths).toEqual([]);
 });
 
 test("UI-D static World social errors distinguish 403, 404, 503, scope mismatch, and retry recovery", async ({
@@ -1741,7 +1947,7 @@ test("UI-D static World social errors distinguish 403, 404, 503, scope mismatch,
     id: UI_D_STATIC_ROOT_POST_ID,
     title: "Recovered static UI-D feed",
   });
-  let responseMode: "403" | "404" | "503" | "scope" | "ready" = "403";
+  let responseMode: "403" | "404" | "503" | "scope" | "ready" | "empty" = "403";
   let feedRequests = 0;
   const globalSocialPaths: string[] = [];
 
@@ -1785,16 +1991,18 @@ test("UI-D static World social errors distinguish 403, 404, 503, scope mismatch,
     await route.fulfill({
       contentType: "application/json",
       json: staticUiDManualFeed(
-        [
-          responseMode === "scope"
-            ? staticUiDManualPost({
-                body: rootPost.body,
-                id: rootPost.id,
-                title: rootPost.title,
-                worldId: responseWorldId,
-              })
-            : rootPost,
-        ],
+        responseMode === "empty"
+          ? []
+          : [
+              responseMode === "scope"
+                ? staticUiDManualPost({
+                    body: rootPost.body,
+                    id: rootPost.id,
+                    title: rootPost.title,
+                    worldId: responseWorldId,
+                  })
+                : rootPost,
+            ],
         responseWorldId,
       ),
       status: 200,
@@ -1804,6 +2012,8 @@ test("UI-D static World social errors distinguish 403, 404, 503, scope mismatch,
   await page.goto(`/worlds/${UI_D_STATIC_WORLD_ID}/feed`);
   await expect(page.getByRole("heading", { name: "이 Feed를 볼 권한이 없어요" })).toBeVisible();
   await expect(page.getByRole("button", { name: "다시 시도" })).toHaveCount(0);
+  await expect(page.locator("#world-owner-composer")).toBeVisible();
+  await expect(page.getByRole("button", { name: "글 쓰기" })).toHaveCount(0);
 
   responseMode = "404";
   await page.reload();
@@ -1825,7 +2035,15 @@ test("UI-D static World social errors distinguish 403, 404, 503, scope mismatch,
   responseMode = "ready";
   await page.getByRole("button", { name: "다시 시도" }).click();
   await expect(page.getByText("Recovered static UI-D feed", { exact: true })).toBeVisible();
-  expect(feedRequests).toBe(5);
+  responseMode = "empty";
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "아직 공개된 게시글이 없어요" })).toBeVisible();
+  await expect(page.locator("#world-owner-composer")).toBeVisible();
+  await expect(page.getByRole("button", { name: "첫 글 쓰기" })).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "아직 공개된 게시글이 없어요" }),
+  ).toBeInViewport();
+  expect(feedRequests).toBe(6);
   expect(globalSocialPaths).toEqual([]);
 });
 
@@ -1922,6 +2140,8 @@ test("UI-D static global social rows render zero, one, and many authenticated me
   };
   const manyMediaPost = {
     ...staticProfilePost("post-ui-d-media-many", "Many media row"),
+    like_count: 3,
+    reply_count: 2,
     media: Array.from({ length: 5 }, (_, index) =>
       staticUiDPostMedia("post-ui-d-media-many", index + 1),
     ),
@@ -1971,6 +2191,17 @@ test("UI-D static global social rows render zero, one, and many authenticated me
   await expect(manyRow.getByLabel("추가 이미지 1개")).toBeVisible();
   await expect(manyRow).toHaveCSS("border-bottom-width", "1px");
   await expect(manyRow).toHaveCSS("border-radius", "0px");
+  await expect(zeroRow.getByRole("link", { name: "대꾸 0" })).toBeVisible();
+  await expect(zeroRow.getByLabel("좋아요 0", { exact: true }).locator("svg")).toHaveAttribute(
+    "fill",
+    "none",
+  );
+  await expect(manyRow.getByRole("link", { name: "대꾸 2" })).toBeVisible();
+  const aggregateLike = manyRow.getByLabel("좋아요 3", { exact: true });
+  await expect(aggregateLike.locator("svg")).toHaveAttribute("fill", "currentColor");
+  expect(await aggregateLike.evaluate((element) => element.tagName)).toBe("SPAN");
+  expect(await aggregateLike.evaluate((element) => (element as HTMLElement).tabIndex)).toBe(-1);
+  expect(await aggregateLike.getAttribute("aria-pressed")).toBeNull();
   for (const unsupportedAction of ["좋아요", "리포스트", "팔로우"]) {
     await expect(manyRow.getByRole("button", { name: unsupportedAction })).toHaveCount(0);
   }
@@ -1984,6 +2215,7 @@ test("UI-D static global detail preserves a nested reply hierarchy", async ({ pa
     author_name: "Nested Parent",
     body: "Top-level reply body",
     post_type: "reply",
+    reply_count: 1,
     reply_to_post_id: rootPostId,
   };
   const childReply = {
@@ -2002,7 +2234,7 @@ test("UI-D static global detail preserves a nested reply hierarchy", async ({ pa
         contentType: "application/json",
         json: {
           ...thread,
-          post: { ...thread.post, reply_count: 2 },
+          post: { ...thread.post, reply_count: 2, like_count: 1 },
           replies: [parentReply, childReply],
         },
         status: 200,
@@ -2013,9 +2245,20 @@ test("UI-D static global detail preserves a nested reply hierarchy", async ({ pa
   await page.goto(`/posts/${rootPostId}`);
 
   await expect(page.getByRole("heading", { name: "대꾸 2" })).toBeVisible();
+  const rootRow = page.locator(`[data-social-post-row="${rootPostId}"]`);
+  await expect(rootRow.getByLabel("대꾸 2")).toBeVisible();
+  await expect(rootRow.getByLabel("좋아요 1").locator("svg")).toHaveAttribute(
+    "fill",
+    "currentColor",
+  );
   const parentRow = page.locator(`[data-social-post-row="${parentReply.id}"]`);
   const childRow = page.locator(`[data-social-post-row="${childReply.id}"]`);
   await expect(parentRow).toBeVisible();
+  await expect(parentRow.getByLabel("대꾸 1")).toBeVisible();
+  await expect(parentRow.getByLabel("좋아요 0").locator("svg")).toHaveAttribute(
+    "fill",
+    "none",
+  );
   await expect(childRow).toBeVisible();
   await expect(childRow.getByText("Nested Parent에게 대꾸", { exact: true })).toBeVisible();
   await expect(childRow.locator("xpath=..")).toHaveClass(/ml-4/);

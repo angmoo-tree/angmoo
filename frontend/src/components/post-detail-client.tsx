@@ -19,6 +19,7 @@ import {
   PostMediaGrid,
   reportSocialPost,
   SocialPostRow,
+  type SocialPostActionPresentation,
   type PostDetail,
   type PostReportReason,
   type PostReference,
@@ -33,6 +34,28 @@ import {
 import { formatDate, formatHandle } from "@/shared/ui/public";
 
 const EMPTY_REPLIES: PostSummary[] = [];
+
+function aggregatePostActions(
+  postId: string,
+  replyCount: number,
+  likeCount: number,
+): SocialPostActionPresentation[] {
+  return [
+    {
+      kind: "reply",
+      interaction: "link",
+      label: "대꾸",
+      count: replyCount,
+      href: `/posts/${postId}`,
+    },
+    {
+      kind: "like",
+      interaction: "metric",
+      label: "좋아요",
+      count: likeCount,
+    },
+  ];
+}
 
 type DeleteTarget = {
   post: PostDetail | PostSummary;
@@ -254,6 +277,7 @@ export function PostDetailClient({
           ) : null}
 
           <SocialPostRow
+            actions={aggregatePostActions(post.id, post.reply_count, post.like_count)}
             authorHref={
               post.author_character_id
                 ? `/profiles/characters/${post.author_character_id}`
@@ -419,14 +443,11 @@ function ReplyNodeRow({
       }
     >
       <SocialPostRow
-        actions={[
-          {
-            kind: "reply",
-            label: "대꾸",
-            count: reply.reply_count,
-            href: `/posts/${reply.id}`,
-          },
-        ]}
+        actions={aggregatePostActions(
+          reply.id,
+          reply.reply_count,
+          reply.like_count,
+        )}
         authorHref={
           reply.author_character_id
             ? `/profiles/characters/${reply.author_character_id}`

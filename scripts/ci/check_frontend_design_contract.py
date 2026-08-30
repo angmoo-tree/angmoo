@@ -51,6 +51,31 @@ UI_B_COMPATIBILITY_BRIDGES = [
         "impact": "transitional_existing_product_consumers",
     },
 ]
+UI_D_COLOR_CONTRACT = {
+    "brand_core": "#ff6b6b",
+    "brand_derivatives": {
+        "hover_pressed": "#ff5252",
+        "soft_border": "#ffb5b5",
+        "soft_surface": "#fff0ef",
+    },
+    "contrast_exceptions": ["EXCEPTION-A", "EXCEPTION-B", "EXCEPTION-C"],
+    "contrast_status": "USER-APPROVED CONTRAST EXCEPTION - NOT WCAG AA PASS",
+    "legacy_dark_red": {
+        "new_use": "forbidden",
+        "source_forbidden_literals": [
+            "#8c1520",
+            "#ae2f34",
+            "rgb(174 47 52",
+            "rgb(196 50 59",
+        ],
+        "values": ["#8c1520", "#ae2f34"],
+    },
+    "reaction_contract": {
+        "like": "read_only_authoritative_metric",
+        "reply": "authoritative_count_link_when_route_exists",
+    },
+    "world_composer": "always_visible_compact_direct_write_when_owner_actor_and_feed_route",
+}
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -236,6 +261,28 @@ def _validate_policy(policy: dict[str, Any]) -> list[str]:
                 "policy.raw_color_scan.baseline_status must identify the pending or "
                 "reviewed UI-B baseline"
             )
+
+    color_contract = policy.get("semantic_color_contract")
+    if color_contract != UI_D_COLOR_CONTRACT:
+        errors.append(
+            "policy.semantic_color_contract must preserve the UI-D single-brand, "
+            "three-exception, legacy-removal, composer, and reaction contract"
+        )
+    else:
+        forbidden_literals = color_contract["legacy_dark_red"][
+            "source_forbidden_literals"
+        ]
+        source_root = ROOT / "frontend" / "src"
+        for path in sorted(source_root.rglob("*")):
+            if not path.is_file() or path.suffix not in {".css", ".ts", ".tsx"}:
+                continue
+            text = path.read_text(encoding="utf-8").lower()
+            for literal in forbidden_literals:
+                if literal.lower() in text:
+                    relative = path.relative_to(ROOT).as_posix()
+                    errors.append(
+                        f"[legacy_dark_red_source] {relative}: forbidden literal {literal}"
+                    )
 
     foundation = policy.get("semantic_foundation")
     if not isinstance(foundation, dict):

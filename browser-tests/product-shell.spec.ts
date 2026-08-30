@@ -188,6 +188,8 @@ function uiDManualPost({
   body,
   canOwnerReply = true,
   id,
+  likeCount = 0,
+  replyCount = 0,
   replyToPostId = null,
   title,
   worldId = UI_D_WORLD_ID,
@@ -196,6 +198,8 @@ function uiDManualPost({
   body: string;
   canOwnerReply?: boolean;
   id: string;
+  likeCount?: number;
+  replyCount?: number;
   replyToPostId?: string | null;
   title: string;
   worldId?: string;
@@ -212,6 +216,8 @@ function uiDManualPost({
     reply_to_post_id: replyToPostId,
     created_at: "2026-08-30T01:00:00Z",
     can_owner_reply: canOwnerReply,
+    reply_count: replyCount,
+    like_count: likeCount,
   };
 }
 
@@ -227,16 +233,31 @@ function uiDManualFeed(
   } as const;
 }
 
-function uiDManualWrite(post: ReturnType<typeof uiDManualPost>) {
+function uiDManualWrite(
+  post: ReturnType<typeof uiDManualPost>,
+  operation: "post" | "reply" = "reply",
+) {
+  const writePost = {
+    id: post.id,
+    world_id: post.world_id,
+    author_world_character_id: post.author_world_character_id,
+    author_name: post.author_name,
+    title: post.title,
+    body: post.body,
+    post_type: post.post_type,
+    reply_to_post_id: post.reply_to_post_id,
+    created_at: post.created_at,
+    can_owner_reply: post.can_owner_reply,
+  };
   return {
     schema_version: "owner-manual-social-v1",
-    operation: "reply",
+    operation,
     replayed: false,
-    post,
+    post: writePost,
     delivery: {
       provider_call_count: 0,
-      inbox_candidate_id: "inbox-ui-d-reply",
-      inbox_status: "pending",
+      inbox_candidate_id: operation === "reply" ? "inbox-ui-d-reply" : null,
+      inbox_status: operation === "reply" ? "pending" : "not_applicable",
       public_reaction_required: false,
     },
   } as const;
@@ -307,10 +328,16 @@ test("Next Phone routes share one centered frame, one scroll owner, and local na
         .evaluateAll((anchors) => anchors.map((anchor) => anchor.getAttribute("href"))),
     ).toEqual(["/", "/posts", "/agents", "/settings"]);
     await expect(navigation.locator('[aria-current="page"]')).toHaveCount(1);
-    await expect(navigation.locator('a[href="/agents"]')).toHaveAttribute(
+    const selectedNavigationItem = navigation.locator('a[href="/agents"]');
+    await expect(selectedNavigationItem).toHaveAttribute(
       "aria-current",
       "page",
     );
+    await expect(selectedNavigationItem).toHaveCSS(
+      "background-color",
+      "rgb(255, 240, 239)",
+    );
+    await expect(selectedNavigationItem).toHaveCSS("color", "rgb(255, 107, 107)");
 
     const geometry = await frame.evaluate((node) => {
       const rect = node.getBoundingClientRect();
@@ -448,7 +475,15 @@ test("UI-D Next World social core keeps compact composition, flat rows, exact de
   const rootPost = uiDManualPost({
     body: longBody,
     id: UI_D_ROOT_POST_ID,
+    likeCount: 1,
+    replyCount: 1,
     title: "UI-D World root",
+  });
+  const zeroReactionPost = uiDManualPost({
+    body: "답글과 좋아요가 아직 없는 게시글입니다.",
+    canOwnerReply: false,
+    id: "post-ui-d-next-zero-reaction",
+    title: "UI-D zero reactions",
   });
   const existingReply = uiDManualPost({
     authorName: "UI-D Friend",
@@ -466,11 +501,23 @@ test("UI-D Next World social core keeps compact composition, flat rows, exact de
     replyToPostId: UI_D_ROOT_POST_ID,
     title: "",
   });
+  const postedRoot = uiDManualPost({
+    authorName: "UI-D Owner",
+    body: "변경한 직접 게시글 내용",
+    canOwnerReply: false,
+    id: "post-ui-d-next-owner-new",
+    title: "공백을 정리한 제목",
+  });
+  let feedItems = [rootPost, zeroReactionPost, existingReply];
   let detailItems = [rootPost, existingReply];
+  const postRequestBodies: unknown[] = [];
+  const postIdempotencyKeys: Array<string | undefined> = [];
   let replyRequestBody: unknown = null;
   let replyIdempotencyKey: string | undefined;
   const requestedSocialPaths: string[] = [];
   const globalSocialPaths: string[] = [];
+  const feedCuePaths: string[] = [];
+  const likeMutationPaths: string[] = [];
 
   await page.route("**/api/backend/**", async (route) => {
     const request = route.request();
@@ -478,6 +525,15 @@ test("UI-D Next World social core keeps compact composition, flat rows, exact de
     const method = request.method();
     if (/^\/api\/backend\/(feed|posts)(\/|$)/.test(url.pathname)) {
       globalSocialPaths.push(`${method} ${url.pathname}`);
+    }
+    if (url.pathname.includes("/feed-cue")) {
+      feedCuePaths.push(`${method} ${url.pathname}`);
+    }
+    if (
+      /\/likes$/.test(url.pathname) &&
+      (method === "POST" || method === "DELETE")
+    ) {
+      likeMutationPaths.push(`${method} ${url.pathname}`);
     }
     if (!url.pathname.includes(`/worlds/${UI_D_WORLD_ID}/`)) {
       await route.fallback();
@@ -492,7 +548,21 @@ test("UI-D Next World social core keeps compact composition, flat rows, exact de
       url.pathname === `/api/backend/worlds/${UI_D_WORLD_ID}/manual-social/feed` &&
       method === "GET"
     ) {
-      await json(route, uiDManualFeed([rootPost, existingReply]));
+      await json(route, uiDManualFeed(feedItems));
+      return;
+    }
+    if (
+      url.pathname === `/api/backend/worlds/${UI_D_WORLD_ID}/manual-social/posts` &&
+      method === "POST"
+    ) {
+      postRequestBodies.push(request.postDataJSON());
+      postIdempotencyKeys.push(request.headers()["idempotency-key"]);
+      if (postRequestBodies.length <= 2) {
+        await json(route, { detail: "runtime_not_ready" }, 503);
+        return;
+      }
+      feedItems = [postedRoot, rootPost, zeroReactionPost, existingReply];
+      await json(route, uiDManualWrite(postedRoot, "post"));
       return;
     }
     if (
@@ -510,7 +580,11 @@ test("UI-D Next World social core keeps compact composition, flat rows, exact de
     ) {
       replyRequestBody = request.postDataJSON();
       replyIdempotencyKey = request.headers()["idempotency-key"];
-      detailItems = [rootPost, existingReply, ownerReply];
+      detailItems = [
+        { ...rootPost, reply_count: 2 },
+        existingReply,
+        ownerReply,
+      ];
       await json(route, uiDManualWrite(ownerReply));
       return;
     }
@@ -523,24 +597,113 @@ test("UI-D Next World social core keeps compact composition, flat rows, exact de
   const feedSurface = page.locator('[data-world-social-surface="feed"]');
   await expect(feedSurface).toBeVisible();
   await expect(feedSurface.locator('[data-social-stream="world"]')).toBeVisible();
-  const composerToggle = page.getByRole("button", { name: "글 쓰기" });
-  await expect(composerToggle).toHaveAttribute("aria-expanded", "false");
-  await expect(page.locator("#world-owner-composer")).toHaveCount(0);
-  await composerToggle.click();
-  await expect(page.getByRole("button", { name: "닫기" })).toHaveAttribute(
-    "aria-expanded",
-    "true",
+  await expect(feedSurface.getByText("World Feed", { exact: true })).toHaveCSS(
+    "color",
+    "rgb(255, 107, 107)",
   );
-  await expect(page.locator("#world-owner-composer")).toBeVisible();
-  await expect(page.getByLabel("제목")).toBeFocused();
-  await page.getByRole("button", { name: "닫기" }).click();
+  await expect(page.getByRole("button", { name: "글 쓰기" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "닫기" })).toHaveCount(0);
+  const composer = page.locator("#world-owner-composer");
+  const titleInput = page.getByLabel("제목", { exact: true });
+  const bodyInput = page.getByLabel("내용", { exact: true });
+  const submitPost = page.getByRole("button", { name: "게시하기" });
+  await expect(composer).toBeVisible();
+  await expect(composer.getByRole("img", { name: "UI-D Owner 프로필 이미지" })).toBeVisible();
+  await expect(composer.getByText("UI-D Owner", { exact: true })).toBeVisible();
+  await expect(titleInput).toHaveAttribute(
+    "placeholder",
+    "오늘 이 World에 남길 이야기의 제목을 적어주세요",
+  );
+  await expect(bodyInput).toHaveAttribute(
+    "placeholder",
+    "내가 조종하는 앵무의 말로 이야기를 적어보세요",
+  );
+  await expect(submitPost).toBeDisabled();
+  expect(await titleInput.evaluate((element) => document.activeElement === element)).toBe(false);
+  expect(await bodyInput.evaluate((element) => document.activeElement === element)).toBe(false);
+  for (const input of [titleInput, bodyInput]) {
+    const inputId = await input.getAttribute("id");
+    expect(inputId).toBeTruthy();
+    const label = page.locator(`label[for="${inputId}"]`);
+    await expect(label).toHaveCount(1);
+    expect(
+      await label.evaluate((element) => {
+        const style = window.getComputedStyle(element);
+        const rect = element.getBoundingClientRect();
+        return style.position === "absolute" && rect.width <= 1 && rect.height <= 1;
+      }),
+    ).toBe(true);
+  }
+
+  await titleInput.fill("  공백을 정리한 제목  ");
+  await bodyInput.fill("  첫 직접 게시글 내용  ");
+  await expect(submitPost).toHaveCSS("background-color", "rgb(255, 107, 107)");
+  await expect(submitPost).toHaveCSS("color", "rgb(255, 255, 255)");
+  await titleInput.focus();
+  await page.keyboard.press("Tab");
+  await expect(bodyInput).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(submitPost).toBeFocused();
+
+  await submitPost.click();
+  await expect.poll(() => postRequestBodies.length).toBe(1);
+  await expect(page.getByText("로컬 엔진이 아직 준비되지 않았습니다.")).toBeVisible();
+  await expect(titleInput).toHaveValue("  공백을 정리한 제목  ");
+  await expect(bodyInput).toHaveValue("  첫 직접 게시글 내용  ");
+  await expect(submitPost).toBeEnabled();
+  await submitPost.click();
+  await expect.poll(() => postRequestBodies.length).toBe(2);
+  await expect(page.getByText("로컬 엔진이 아직 준비되지 않았습니다.")).toBeVisible();
+  await expect(submitPost).toBeEnabled();
+  await bodyInput.fill("  변경한 직접 게시글 내용  ");
+  await submitPost.click();
+  await expect.poll(() => postRequestBodies.length).toBe(3);
+  await expect(page.getByText("게시글을 저장했습니다.", { exact: false })).toBeVisible();
+  await expect(composer).toBeVisible();
+  await expect(titleInput).toHaveValue("");
+  await expect(bodyInput).toHaveValue("");
+  expect(postRequestBodies).toEqual([
+    { title: "공백을 정리한 제목", body: "첫 직접 게시글 내용" },
+    { title: "공백을 정리한 제목", body: "첫 직접 게시글 내용" },
+    { title: "공백을 정리한 제목", body: "변경한 직접 게시글 내용" },
+  ]);
+  expect(postIdempotencyKeys[0]).toMatch(/^owner-post-/);
+  expect(postIdempotencyKeys[1]).toBe(postIdempotencyKeys[0]);
+  expect(postIdempotencyKeys[2]).toMatch(/^owner-post-/);
+  expect(postIdempotencyKeys[2]).not.toBe(postIdempotencyKeys[0]);
 
   const row = page.locator(`[data-social-post-row="${UI_D_ROOT_POST_ID}"]`);
+  const zeroReactionRow = page.locator(
+    '[data-social-post-row="post-ui-d-next-zero-reaction"]',
+  );
   await expect(row).toHaveAttribute("data-variant", "feed");
   await expect(row).toHaveCSS("border-bottom-width", "1px");
   await expect(row).toHaveCSS("border-radius", "0px");
+  await expect(row.getByRole("link", { name: "대꾸 1" })).toHaveAttribute(
+    "href",
+    new RegExp(`/worlds/${UI_D_WORLD_ID}/posts/${UI_D_ROOT_POST_ID}$`),
+  );
+  const positiveLike = row.getByLabel("좋아요 1", { exact: true });
+  await expect(positiveLike).toHaveCount(1);
+  await expect(positiveLike.locator("svg")).toHaveAttribute("fill", "currentColor");
+  expect(await positiveLike.evaluate((element) => element.tagName)).toBe("SPAN");
+  expect(await positiveLike.getAttribute("aria-pressed")).toBeNull();
+  expect(await positiveLike.evaluate((element) => (element as HTMLElement).tabIndex)).toBe(-1);
+  await expect(zeroReactionRow.getByRole("link", { name: "대꾸 0" })).toBeVisible();
+  const zeroLike = zeroReactionRow.getByLabel("좋아요 0", { exact: true });
+  await expect(zeroLike.locator("svg")).toHaveAttribute("fill", "none");
+  expect(await zeroLike.evaluate((element) => element.tagName)).toBe("SPAN");
+  await expect(row.getByRole("button", { name: /좋아요/ })).toHaveCount(0);
+  await expect(zeroReactionRow.getByRole("button", { name: /좋아요/ })).toHaveCount(0);
+  await expect(row.getByRole("link", { name: /좋아요/ })).toHaveCount(0);
   const expand = row.getByRole("button", { name: "더보기" });
   await expect(expand).toBeVisible();
+  await expect(expand).toHaveCSS("color", "rgb(255, 107, 107)");
+  await expect(
+    page
+      .locator('[data-social-post-row="post-ui-d-next-owner-new"]')
+      .getByText("공백을 정리한 제목", { exact: true }),
+  ).toBeInViewport();
 
   const feedUrl = page.url();
   await row.locator("p").evaluate((paragraph) => {
@@ -566,12 +729,26 @@ test("UI-D Next World social core keeps compact composition, flat rows, exact de
   );
   await expect(page.locator('[data-world-social-surface="detail"]')).toBeVisible();
   await expect(page.getByRole("heading", { name: "게시글과 답글" })).toBeVisible();
+  await expect(page.locator("#world-owner-composer")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "게시하기" })).toHaveCount(0);
+  await expect(
+    page.locator(`[data-social-post-row="${UI_D_ROOT_POST_ID}"]`).getByLabel("대꾸 1"),
+  ).toBeVisible();
+  await expect(
+    page.locator(`[data-social-post-row="${UI_D_ROOT_POST_ID}"]`).getByLabel("좋아요 1"),
+  ).toBeVisible();
+  await expect(
+    page.locator('[data-social-post-row="reply-ui-d-next-existing"]').getByLabel("좋아요 0"),
+  ).toBeVisible();
   await expect(page.getByRole("heading", { name: "대꾸 1" })).toBeVisible();
   await page.getByLabel("UI-D Autonomous의 게시글에 답글").fill("실제 scoped reply");
   await page.getByRole("button", { name: "답글 보내기" }).click();
 
   await expect(page.getByText("UI-D Owner reply arrived.", { exact: false })).toBeVisible();
   await expect(page.getByRole("heading", { name: "대꾸 2" })).toBeVisible();
+  await expect(
+    page.locator(`[data-social-post-row="${UI_D_ROOT_POST_ID}"]`).getByLabel("대꾸 2"),
+  ).toBeVisible();
   expect(replyRequestBody).toEqual({ body: "실제 scoped reply" });
   expect(replyIdempotencyKey).toMatch(/^owner-reply-/);
   expect(requestedSocialPaths).toContain(
@@ -581,9 +758,14 @@ test("UI-D Next World social core keeps compact composition, flat rows, exact de
     `GET /api/backend/worlds/${UI_D_WORLD_ID}/manual-social/posts/${UI_D_ROOT_POST_ID}`,
   );
   expect(requestedSocialPaths).toContain(
+    `POST /api/backend/worlds/${UI_D_WORLD_ID}/manual-social/posts`,
+  );
+  expect(requestedSocialPaths).toContain(
     `POST /api/backend/worlds/${UI_D_WORLD_ID}/manual-social/posts/${UI_D_ROOT_POST_ID}/replies`,
   );
   expect(globalSocialPaths).toEqual([]);
+  expect(feedCuePaths).toEqual([]);
+  expect(likeMutationPaths).toEqual([]);
   expect(audit.providerCalls).toEqual([]);
 });
 
@@ -599,7 +781,7 @@ test("UI-D Next World social errors distinguish 403, 404, 503, scope mismatch, a
     id: UI_D_ROOT_POST_ID,
     title: "Recovered UI-D feed",
   });
-  let responseMode: "403" | "404" | "503" | "scope" | "ready" = "403";
+  let responseMode: "403" | "404" | "503" | "scope" | "ready" | "empty" = "403";
   let feedRequests = 0;
   const globalSocialPaths: string[] = [];
 
@@ -625,16 +807,18 @@ test("UI-D Next World social errors distinguish 403, 404, 503, scope mismatch, a
     await json(
       route,
       uiDManualFeed(
-        [
-          responseMode === "scope"
-            ? uiDManualPost({
-                body: rootPost.body,
-                id: rootPost.id,
-                title: rootPost.title,
-                worldId: "world-foreign",
-              })
-            : rootPost,
-        ],
+        responseMode === "empty"
+          ? []
+          : [
+              responseMode === "scope"
+                ? uiDManualPost({
+                    body: rootPost.body,
+                    id: rootPost.id,
+                    title: rootPost.title,
+                    worldId: "world-foreign",
+                  })
+                : rootPost,
+            ],
         responseMode === "scope" ? "world-foreign" : UI_D_WORLD_ID,
       ),
     );
@@ -643,6 +827,8 @@ test("UI-D Next World social errors distinguish 403, 404, 503, scope mismatch, a
   await page.goto(`/worlds/${UI_D_WORLD_ID}/feed`);
   await expect(page.getByRole("heading", { name: "이 Feed를 볼 권한이 없어요" })).toBeVisible();
   await expect(page.getByRole("button", { name: "다시 시도" })).toHaveCount(0);
+  await expect(page.locator("#world-owner-composer")).toBeVisible();
+  await expect(page.getByRole("button", { name: "글 쓰기" })).toHaveCount(0);
 
   responseMode = "404";
   await page.reload();
@@ -664,7 +850,15 @@ test("UI-D Next World social errors distinguish 403, 404, 503, scope mismatch, a
   responseMode = "ready";
   await page.getByRole("button", { name: "다시 시도" }).click();
   await expect(page.getByText("Recovered UI-D feed", { exact: true })).toBeVisible();
-  expect(feedRequests).toBe(5);
+  responseMode = "empty";
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "아직 공개된 게시글이 없어요" })).toBeVisible();
+  await expect(page.locator("#world-owner-composer")).toBeVisible();
+  await expect(page.getByRole("button", { name: "첫 글 쓰기" })).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "아직 공개된 게시글이 없어요" }),
+  ).toBeInViewport();
+  expect(feedRequests).toBe(6);
   expect(globalSocialPaths).toEqual([]);
 });
 

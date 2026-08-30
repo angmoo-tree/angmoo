@@ -654,7 +654,7 @@
             "react"
           ],
           "path": "frontend/src/components/post-detail-client.tsx",
-          "sha256": "741edabc4c5b026c17f1025c2a028e05c95b50cd9cdcc45a9030dfccdbdadd9f"
+          "sha256": "0cf68577fc0b6c5347feff1eee1e12abba679889fb22df15516b9ae3a60a4c92"
         },
         {
           "exports": [
@@ -706,7 +706,7 @@
             "react"
           ],
           "path": "frontend/src/features/relationships/ui/relationship-graph-client.tsx",
-          "sha256": "ca31514a532e7bbbb8225040985058a5287475d22689b78e29627a8eb0053594"
+          "sha256": "055cc656aa55eafdb0816770383eaefb49800a8ec4c3903a569adebb693fea80"
         },
         {
           "exports": [
@@ -731,7 +731,7 @@
             "react-dom"
           ],
           "path": "frontend/src/features/social/ui/post-list-client.tsx",
-          "sha256": "8872e158517582f861f66de0910aeb97af95b4d856c183fcbd4f2d7a28b8a1a7"
+          "sha256": "53798a02038ad48894920f027d4135ff436f69d49af71b6c2de7fad3a026c6ed"
         },
         {
           "exports": [
@@ -751,7 +751,7 @@
             "react"
           ],
           "path": "frontend/src/features/social/ui/world-social-feed.tsx",
-          "sha256": "ec1c65aa678fea13f78ece5b37559062339f54e9c914c205683ae931a3774cbc"
+          "sha256": "fb8c6440138d116d924fede989ef9da6ba8e6a4cd30c56804b705074359bdd10"
         },
         {
           "exports": [
@@ -894,7 +894,7 @@
     "oracle_artifacts": [
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "c3a2e9a042e2fed5ceabca8716d82903024fb4c1f506add7a85e51670b540414"
+        "sha256": "320b3fb3d2207af178fbf5209d048c7c932c39cb591136105c01e4515373283c"
       },
       {
         "path": "docs/architecture/l3-er-postgres-neo4j-parity-oracle.json",
@@ -936,7 +936,7 @@
       },
       {
         "path": "backend/tests/test_l3_owner_manual_social_inbox.py",
-        "sha256": "a831c21233ddc02bd7ac0b40e2991307bbb029ef9b00a98bb1943d8268f30d71"
+        "sha256": "c67a8abc619157156d3f7480a734e3c2c7a0ed459be0bb5ff65d2cb78e9a417f"
       },
       {
         "path": "backend/tests/test_l4_social_search_projection.py",
@@ -967,7 +967,7 @@
         "sha256": "7ae830d9ecd1ae54ac8026ba2eae5904420d4d718148237eec63b2ddeb6e66ed"
       }
     ],
-    "parity_test_node_count": 93,
+    "parity_test_node_count": 95,
     "parity_test_nodes": [
       "backend/tests/test_embedded_data_migration.py::test_each_consecutive_step_rejects_undeclared_identity_changes",
       "backend/tests/test_embedded_data_migration.py::test_failed_sqlite_step_keeps_v1_active_and_removes_staging",
@@ -1019,6 +1019,8 @@
       "backend/tests/test_l3_er3_graph_query_parity.py::test_ladybug_outage_backlog_recovers_to_zero_lag",
       "backend/tests/test_l3_er3_graph_query_parity.py::test_ladybug_typed_query_workload_and_world_isolation",
       "backend/tests/test_l3_er3_graph_query_parity.py::test_ladybug_world_replay_restores_digest_and_sqlite_source",
+      "backend/tests/test_l3_owner_manual_social_inbox.py::test_manual_social_count_projection_is_exact_world_visible_and_batched",
+      "backend/tests/test_l3_owner_manual_social_inbox.py::test_manual_social_read_counts_are_required_and_non_negative",
       "backend/tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
       "backend/tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets",
       "backend/tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_social_migration_refuses_history_losing_downgrade",

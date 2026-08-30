@@ -47,7 +47,7 @@
 }
 
 .capabilityKicker {
-  color: var(--color-action-primary);
+  color: var(--color-brand-accent);
   font-size: var(--text-caption);
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -71,7 +71,7 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-pill);
-  color: var(--color-action-primary);
+  color: var(--color-brand-accent);
   font-size: var(--text-label);
   font-weight: var(--text-label--font-weight);
   padding-inline: var(--spacing-control);
@@ -87,13 +87,30 @@
   outline-offset: 2px;
 }
 
-.manualComposer,
-.replyComposer {
+.manualComposer {
   display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: start;
   gap: var(--spacing-control);
   border-bottom: 1px solid var(--color-border-default);
-  background: var(--color-surface-warm);
-  padding: var(--spacing-phone);
+  background: var(--color-surface);
+  padding: var(--spacing-control) var(--spacing-phone);
+}
+
+.composerAvatar {
+  width: 44px;
+  height: 44px;
+}
+
+.composerAvatarText {
+  font-size: var(--text-body-small);
+  line-height: 1;
+}
+
+.composerContent {
+  display: grid;
+  min-width: 0;
+  gap: var(--spacing-compact);
 }
 
 .composerHeading {
@@ -114,6 +131,28 @@
   white-space: nowrap;
 }
 
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.composerTitle {
+  font-size: var(--text-body-small);
+}
+
+.manualComposer .composerBody {
+  min-height: 76px;
+  font-size: var(--text-body-small);
+}
+
 .composerSubmit {
   display: flex;
   justify-content: flex-end;
@@ -127,7 +166,7 @@
 }
 
 .socialStream {
-  border-top: 1px solid var(--color-border-default);
+  min-width: 0;
 }
 
 .detailSurface {
@@ -158,7 +197,11 @@
 }
 
 .replyComposer {
+  display: grid;
+  gap: var(--spacing-control);
+  border-bottom: 1px solid var(--color-border-default);
   background: var(--color-surface-subtle);
+  padding: var(--spacing-phone);
 }
 
 .replyComposerHeading {

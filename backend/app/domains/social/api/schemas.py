@@ -35,7 +35,7 @@ class OwnerManualReplyWrite(BaseModel):
         return _clean(value)
 
 
-class ManualSocialPostRead(BaseModel):
+class ManualSocialWritePostRead(BaseModel):
     id: str
     world_id: str
     author_world_character_id: str
@@ -46,6 +46,11 @@ class ManualSocialPostRead(BaseModel):
     reply_to_post_id: str | None
     created_at: datetime
     can_owner_reply: bool = False
+
+
+class ManualSocialPostRead(ManualSocialWritePostRead):
+    reply_count: int = Field(ge=0)
+    like_count: int = Field(ge=0)
 
 
 class ManualSocialDeliveryRead(BaseModel):
@@ -59,7 +64,7 @@ class ManualSocialWriteRead(BaseModel):
     schema_version: Literal["owner-manual-social-v1"] = "owner-manual-social-v1"
     operation: Literal["post", "reply"]
     replayed: bool
-    post: ManualSocialPostRead
+    post: ManualSocialWritePostRead
     delivery: ManualSocialDeliveryRead
 
 
@@ -74,6 +79,7 @@ __all__ = [
     "ManualSocialDeliveryRead",
     "ManualSocialFeedRead",
     "ManualSocialPostRead",
+    "ManualSocialWritePostRead",
     "ManualSocialWriteRead",
     "OwnerManualPostWrite",
     "OwnerManualReplyWrite",

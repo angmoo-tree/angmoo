@@ -108,7 +108,7 @@ export function RelationshipGraphClient({
       data-product-content="relationship-graph"
     >
       <header className="rounded-[28px] bg-surface-container-lowest p-6 shadow-sm">
-        <p className="text-sm font-bold text-primary">P7 · RELATIONSHIP GRAPH</p>
+        <p className="text-sm font-bold text-state-running">P7 · RELATIONSHIP GRAPH</p>
         <h1 className="mt-2 text-3xl font-black">World 관계망</h1>
         <p className="mt-3 max-w-3xl text-sm text-on-surface-variant">
           실제 SNS 쓰기에 성공한 사건만 관계 근거로 사용합니다. 화살표는 보는 방향을 뜻하며,
@@ -133,7 +133,7 @@ export function RelationshipGraphClient({
               setError(null);
               setDepth((value) => (value === 1 ? 2 : 1));
             }}
-            className="rounded-full bg-primary px-4 py-2 text-sm font-bold text-on-primary"
+            className="rounded-full bg-action-dark px-4 py-2 text-sm font-bold text-on-action-dark"
           >
             {depth === 1 ? "2단계까지 보기" : "직접 관계만 보기"}
           </button>
@@ -191,7 +191,7 @@ export function RelationshipGraphClient({
               <svg viewBox="0 0 480 340" className="min-w-[480px]" role="img" aria-label="방향 관계 그래프">
                 <defs>
                   <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-                    <path d="M0,0 L8,4 L0,8 z" className="fill-primary" />
+                    <path d="M0,0 L8,4 L0,8 z" className="fill-state-running" />
                   </marker>
                 </defs>
                 {graph.edges.map((edge) => {
@@ -205,7 +205,7 @@ export function RelationshipGraphClient({
                       y1={start.y}
                       x2={end.x}
                       y2={end.y}
-                      className="stroke-primary"
+                      className="stroke-state-running"
                       strokeWidth="2"
                       markerEnd="url(#arrow)"
                     />
@@ -215,8 +215,8 @@ export function RelationshipGraphClient({
                   const point = positions.get(node.world_character_id)!;
                   return (
                     <g key={node.world_character_id}>
-                      <circle cx={point.x} cy={point.y} r={node.is_center ? 35 : 29} className={node.is_center ? "fill-primary" : "fill-surface-container-high"} />
-                      <text x={point.x} y={point.y + 4} textAnchor="middle" className={node.is_center ? "fill-on-primary text-[12px] font-bold" : "fill-on-surface text-[11px] font-bold"}>
+                      <circle cx={point.x} cy={point.y} r={node.is_center ? 35 : 29} className={node.is_center ? "fill-action-dark" : "fill-surface-container-high"} />
+                      <text x={point.x} y={point.y + 4} textAnchor="middle" className={node.is_center ? "fill-on-action-dark text-[12px] font-bold" : "fill-on-surface text-[11px] font-bold"}>
                         {node.display_name.slice(0, 8)}
                       </text>
                     </g>
@@ -257,7 +257,7 @@ export function RelationshipGraphClient({
                     <p className="mt-1 text-xs text-on-surface-variant">{new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(event.occurred_at))}</p>
                     {event.root_post_id || event.source_post_id ? (
                       <Link
-                        className="mt-2 inline-block text-sm font-bold text-primary underline"
+                        className="mt-2 inline-block text-sm font-bold text-state-running underline"
                         href={worldPostDetailRoute(worldId, event.root_post_id ?? event.source_post_id!)}
                       >
                         근거 게시글 보기

@@ -1,6 +1,6 @@
 "use client";
 
-import { MessageCircle, PenLine, RefreshCw } from "lucide-react";
+import { MessageCircle, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import {
   type FormEvent,
@@ -23,6 +23,7 @@ import {
   Field,
   InlineError,
   Input,
+  ProfileAvatar,
   Textarea,
   Toast,
   formatDate,
@@ -168,6 +169,29 @@ function presentManualPost(post: ManualSocialPostRead): SocialPostPresentation {
   };
 }
 
+function aggregateManualPostActions(
+  post: ManualSocialPostRead,
+  replyHref?: string,
+): SocialPostActionPresentation[] {
+  const actions: SocialPostActionPresentation[] = [];
+  if (replyHref) {
+    actions.push({
+      kind: "reply",
+      interaction: "link",
+      label: "대꾸",
+      count: post.reply_count,
+      href: replyHref,
+    });
+  }
+  actions.push({
+    kind: "like",
+    interaction: "metric",
+    label: "좋아요",
+    count: post.like_count,
+  });
+  return actions;
+}
+
 export function WorldSocialFeed({ ownerActor, postId, worldId }: Props) {
   const routeKey = `${worldId}:${postId ?? "feed"}`;
   const [loadState, setLoadState] = useState<FeedLoadState>({
@@ -177,15 +201,12 @@ export function WorldSocialFeed({ ownerActor, postId, worldId }: Props) {
   const [busy, setBusy] = useState(false);
   const [writeError, setWriteError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const [composerOpen, setComposerOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [replyBody, setReplyBody] = useState("");
   const pendingPostRef = useRef<PendingPost | null>(null);
   const pendingRepliesRef = useRef(new Map<string, PendingReply>());
   const requestGenerationRef = useRef(0);
-  const composerToggleRef = useRef<HTMLButtonElement | null>(null);
-  const postTitleRef = useRef<HTMLInputElement | null>(null);
   const replyTextareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const currentState = useMemo<FeedLoadState>(
@@ -252,11 +273,6 @@ export function WorldSocialFeed({ ownerActor, postId, worldId }: Props) {
   const detailRoot = postId ? roots[0] ?? null : null;
   const detailReplies = detailRoot ? items.slice(1) : [];
 
-  function openComposer() {
-    setComposerOpen(true);
-    window.requestAnimationFrame(() => postTitleRef.current?.focus());
-  }
-
   async function submitPost(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!ownerActor) return;
@@ -286,14 +302,12 @@ export function WorldSocialFeed({ ownerActor, postId, worldId }: Props) {
       pendingPostRef.current = null;
       setTitle("");
       setBody("");
-      setComposerOpen(false);
       setNotice(
         result.replayed
           ? "같은 요청을 안전하게 재사용했습니다. 게시글은 중복 생성되지 않았어요."
           : "게시글을 저장했습니다. 이 쓰기에는 LLM·provider를 호출하지 않았어요.",
       );
       await loadFeed();
-      window.requestAnimationFrame(() => composerToggleRef.current?.focus());
     } catch (reason) {
       setWriteError(writeErrorMessage(reason));
     } finally {
@@ -370,22 +384,7 @@ export function WorldSocialFeed({ ownerActor, postId, worldId }: Props) {
             <Link className={styles.backLink} href={`${worldAppRoute(worldId)}/feed`}>
               World Feed
             </Link>
-          ) : (
-            <Button
-              aria-controls="world-owner-composer"
-              aria-expanded={composerOpen}
-              compact
-              onClick={() => {
-                if (composerOpen) setComposerOpen(false);
-                else openComposer();
-              }}
-              ref={composerToggleRef}
-              variant="secondary"
-            >
-              <PenLine size={17} aria-hidden="true" />
-              {composerOpen ? "닫기" : "글 쓰기"}
-            </Button>
-          )}
+          ) : null}
           <Button
             aria-label="World Feed 새로고침"
             compact
@@ -398,44 +397,58 @@ export function WorldSocialFeed({ ownerActor, postId, worldId }: Props) {
         </div>
       </header>
 
-      {!postId && composerOpen ? (
+      {!postId ? (
         <form
           className={styles.manualComposer}
           id="world-owner-composer"
           onSubmit={submitPost}
         >
-          <div className={styles.composerHeading}>
-            <strong>{ownerActor.profile.display_name}</strong>
-            <span>이 World에만 저장되는 직접 작성</span>
-          </div>
-          <Field label="제목" required>
-            {(fieldProps) => (
-              <Input
-                {...fieldProps}
-                maxLength={160}
-                onChange={(event) => setTitle(event.target.value)}
-                placeholder="오늘 이 World에 남길 이야기"
-                ref={postTitleRef}
-                value={title}
-              />
-            )}
-          </Field>
-          <Field label="내용" required>
-            {(fieldProps) => (
-              <Textarea
-                {...fieldProps}
-                maxLength={4000}
-                onChange={(event) => setBody(event.target.value)}
-                placeholder="내가 조종하는 앵무의 말로 직접 적어보세요."
-                rows={4}
-                value={body}
-              />
-            )}
-          </Field>
-          <div className={styles.composerSubmit}>
-            <Button loading={busy} loadingLabel="저장 중" type="submit">
-              게시하기
-            </Button>
+          <ProfileAvatar
+            avatarUrl={ownerActor.profile.avatar_url}
+            name={ownerActor.profile.display_name}
+            sizeClassName={styles.composerAvatar}
+            textClassName={styles.composerAvatarText}
+          />
+          <div className={styles.composerContent}>
+            <div className={styles.composerHeading}>
+              <strong>{ownerActor.profile.display_name}</strong>
+              <span>이 World에만 저장되는 직접 작성</span>
+            </div>
+            <label className={styles.visuallyHidden} htmlFor="world-owner-post-title">
+              제목
+            </label>
+            <Input
+              className={styles.composerTitle}
+              id="world-owner-post-title"
+              maxLength={160}
+              onChange={(event) => setTitle(event.target.value)}
+              placeholder="오늘 이 World에 남길 이야기의 제목을 적어주세요"
+              required
+              value={title}
+            />
+            <label className={styles.visuallyHidden} htmlFor="world-owner-post-body">
+              내용
+            </label>
+            <Textarea
+              className={styles.composerBody}
+              id="world-owner-post-body"
+              maxLength={4000}
+              onChange={(event) => setBody(event.target.value)}
+              placeholder="내가 조종하는 앵무의 말로 이야기를 적어보세요"
+              required
+              rows={2}
+              value={body}
+            />
+            <div className={styles.composerSubmit}>
+              <Button
+                disabled={!title.trim() || !body.trim()}
+                loading={busy}
+                loadingLabel="저장 중"
+                type="submit"
+              >
+                게시하기
+              </Button>
+            </div>
           </div>
         </form>
       ) : null}
@@ -453,13 +466,6 @@ export function WorldSocialFeed({ ownerActor, postId, worldId }: Props) {
 
       {currentState.status === "ready" && roots.length === 0 ? (
         <EmptyState
-          action={
-            !postId ? (
-              <Button onClick={openComposer} variant="secondary">
-                첫 글 쓰기
-              </Button>
-            ) : undefined
-          }
           description={
             postId
               ? "게시글이 제거됐거나 이 World에서 더 이상 공개되지 않습니다."
@@ -473,22 +479,9 @@ export function WorldSocialFeed({ ownerActor, postId, worldId }: Props) {
         <div className={styles.socialStream} data-social-stream="world">
           {roots.map((post) => {
             const detailHref = worldPostDetailRoute(worldId, post.id);
-            const hasVisibleReplies = items.some(
-              (item) => item.reply_to_post_id === post.id,
-            );
-            const actions: SocialPostActionPresentation[] =
-              post.can_owner_reply || hasVisibleReplies
-                ? [
-                    {
-                      kind: "reply",
-                      label: post.can_owner_reply ? "대꾸하기" : "대꾸 보기",
-                      href: detailHref,
-                    },
-                  ]
-                : [];
             return (
               <SocialPostRow
-                actions={actions}
+                actions={aggregateManualPostActions(post, detailHref)}
                 href={detailHref}
                 key={post.id}
                 post={presentManualPost(post)}
@@ -500,13 +493,21 @@ export function WorldSocialFeed({ ownerActor, postId, worldId }: Props) {
 
       {currentState.status === "ready" && detailRoot ? (
         <div className={styles.detailSurface}>
-          <SocialPostRow post={presentManualPost(detailRoot)} variant="detail" />
+          <SocialPostRow
+            actions={aggregateManualPostActions(
+              detailRoot,
+              worldPostDetailRoute(worldId, detailRoot.id),
+            )}
+            post={presentManualPost(detailRoot)}
+            variant="detail"
+          />
           <section aria-labelledby="world-reply-heading" className={styles.replySection}>
-            <h3 id="world-reply-heading">대꾸 {detailReplies.length}</h3>
+            <h3 id="world-reply-heading">대꾸 {detailRoot.reply_count}</h3>
             {detailReplies.length > 0 ? (
               <div className={styles.replyList}>
                 {detailReplies.map((reply) => (
                   <SocialPostRow
+                    actions={aggregateManualPostActions(reply)}
                     key={reply.id}
                     post={presentManualPost(reply)}
                     variant="reply"

@@ -197,6 +197,61 @@ pnpm --dir browser-tests exec playwright test --config=playwright.static.config.
 pnpm --dir browser-tests test:visual
 ```
 
+## UI-D PR #207 follow-up: bright-coral and social read contract
+
+`frontend/DESIGN.md` version 1.6 makes `#ff6b6b` the single Angmoo Local core
+brand color. `#ff5252`, `#fff0ef`, and `#ffb5b5` are interaction/support
+derivatives, not competing brand colors. Positive primary actions use the
+bright coral surface with a white label, neutral strong actions use
+`#101828` with white, destructive actions keep the existing danger state,
+and non-action avatar, score, status, and graph presentation stays on its
+accessible text/container/state roles. Raw `#ae2f34` and `#8c1520` are
+forbidden in new source and existing consumers are removed by semantic role,
+never by blind replacement.
+
+Three closed visual exceptions are user-approved and intentionally recorded
+as **NOT WCAG AA PASS**:
+
+1. `EXCEPTION-A`: approved bright social text, autonomy kickers, and positive
+   aggregate heart/count on white;
+2. `EXCEPTION-B`: white label/icon on the bright-coral positive CTA;
+3. `EXCEPTION-C`: bright-coral selected navigation/filter/approved keyword
+   content on the soft-coral surface.
+
+The exceptions do not relax focus-visible, keyboard order, accessible names,
+44px targets, disabled distinction, or contrast for ordinary text, metadata,
+generic links, avatar initials, graph labels/nodes, status, danger, or error
+presentation. The soft coral border is only a supporting halo and never the
+sole focus indicator.
+
+The hosted composer contributes visual anatomy only. Global Feed remains a
+Feed Cue that influences a later autonomous activity. World Feed retains the
+Local owner-controlled direct-write endpoint and its `{ title, body }`, exact
+World, idempotency, and provider-call-zero contract. When an owner actor exists
+on a World Feed list route, the compact avatar/name/title/body composer is
+always mounted above the stream; the header write toggle and duplicate empty
+action are absent. World post detail keeps only its reply composer.
+
+The social action strip also distinguishes interaction types explicitly:
+
+```text
+reply -> authoritative reply_count, link only where a real detail route exists
+like  -> authoritative like_count, read-only non-focusable metric
+```
+
+The heart is neutral and unfilled at zero, then filled bright coral when the
+aggregate is positive. It is not viewer-liked state and does not create a like
+mutation endpoint. Global adapters use their existing payload. World adapters
+use the additive `ManualSocialPostRead.reply_count` and `like_count` read
+projection, calculated by two exact-target batch aggregates. The POST response,
+write payload and endpoint, database schema, SocialEvent, relationship, outbox,
+provider, and scheduler behavior remain unchanged.
+
+The pre-hotfix PR #207 head and its 22 successful checks remain historical
+evidence only. Any follow-up commit changes the exact head and requires a new
+local technical run and a new Hosted CI rollup; Ready, merge, and post-merge
+checks remain separate user Gates.
+
 ## Route and surface inventory
 
 The complete deterministic Next route and route-handler inventory remains
@@ -363,9 +418,12 @@ build; neither rebuilds in the visual test.
 
 The generated frontend design baseline records canonical-LF SHA-256 values for
 the visual config, spec, fixture, production-preview helper, and source SVG,
-plus a binary SHA-256 for the reviewed, committed UI-B PNG. UI-C deliberately
-keeps the screenshot call and PNG count at one; its additional shell evidence
-is functional route, viewport, overflow, navigation, and window-kind coverage.
+plus a binary SHA-256 for the reviewed, committed semantic-foundation PNG.
+UI-C deliberately kept the screenshot call and PNG count at one. UI-D PR #207
+follow-up intentionally refreshes that same single baseline for the bright-
+coral CTA and selected-navigation contract rather than creating a second early
+corpus. Its additional social evidence remains functional route, viewport,
+overflow, navigation, composer, aggregate, and interaction-type coverage.
 
 The visual configuration must freeze container digest, locale, timezone, light
 color scheme, reduced motion, device scale, caret and animation behavior,
@@ -375,12 +433,13 @@ network images are forbidden. The pinned Noble container with the locked CI
 Chromium owns the pixel baseline. Windows 100%, 125%, and 150% display scale
 remains a separate Tauri user-smoke Gate.
 
-UI-B reviews only the `436x880` semantic-foundation fixture. UI-C adds
-functional shell assertions at `360`, `390`, `436`, and desktop Browser widths
-plus static inner-scroll pagination and unsupported-route assertions without
-promoting them into an early screenshot corpus. Completing the full
-route/state/runtime matrix, including the two wide workspaces at `1440x900`,
-belongs to UI-F.
+The single baseline remains the `436x880` semantic-foundation fixture. UI-C
+added functional shell assertions at `360`, `390`, `436`, and desktop Browser
+widths plus static inner-scroll pagination and unsupported-route assertions.
+UI-D follow-up adds exact bright-coral exception checks and paired Next/static
+social behavior without promoting them into a full product screenshot corpus.
+Completing the full route/state/runtime matrix, including the two wide
+workspaces at `1440x900`, belongs to UI-F.
 
 ## Asset and font provenance
 

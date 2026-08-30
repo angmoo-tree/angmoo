@@ -80,7 +80,7 @@
 
 .primary {
   background: var(--color-action-primary);
-  color: var(--color-surface);
+  color: var(--color-on-action-primary);
   box-shadow: var(--shadow-action);
 }
 
@@ -90,7 +90,7 @@
 
 .strong {
   background: var(--color-action-dark);
-  color: var(--color-surface);
+  color: var(--color-on-action-dark);
 }
 
 .strong:hover:not(:disabled) {
@@ -516,7 +516,12 @@
 
 .bottomNavigationItemActive {
   background: var(--color-brand-soft);
-  color: var(--color-action-primary);
+  color: var(--color-brand-accent);
+}
+
+.bottomNavigationItemActive:hover:not(:disabled) {
+  background: var(--color-brand-soft);
+  color: var(--color-brand-accent-hover);
 }
 
 .bottomNavigationIcon {

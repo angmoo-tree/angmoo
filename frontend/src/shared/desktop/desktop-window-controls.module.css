@@ -52,13 +52,13 @@
 .windowButton:focus-visible {
   background: #ffffff;
   color: #302829;
-  outline: 2px solid rgb(174 47 52 / 24%);
+  outline: 2px solid var(--focus-ring-color, #175cd3);
   outline-offset: 1px;
 }
 
 .closeButton:hover,
 .closeButton:focus-visible {
-  background: #ae2f34;
+  background: var(--color-state-danger, #c24141);
   color: #ffffff;
 }
 

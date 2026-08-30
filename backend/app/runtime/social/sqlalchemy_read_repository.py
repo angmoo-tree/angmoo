@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app import models
@@ -59,7 +59,13 @@ def _owner_actor(
     return world_character, character
 
 
-def _post_read(db: Session, post: models.Post) -> ManualSocialPostRead:
+def _post_read(
+    db: Session,
+    post: models.Post,
+    *,
+    reply_count: int,
+    like_count: int,
+) -> ManualSocialPostRead:
     if post.world_id is None or post.author_world_character_id is None:
         raise ManualSocialConflictError("world_post_scope_missing")
     author = db.get(models.WorldCharacter, post.author_world_character_id)
@@ -73,6 +79,8 @@ def _post_read(db: Session, post: models.Post) -> ManualSocialPostRead:
         post_type=post.post_type,
         reply_to_post_id=post.reply_to_post_id,
         created_at=post.created_at,
+        reply_count=reply_count,
+        like_count=like_count,
         can_owner_reply=(
             post.reply_to_post_id is None
             and author is not None
@@ -81,6 +89,53 @@ def _post_read(db: Session, post: models.Post) -> ManualSocialPostRead:
             and author.activity_runtime_mode == "routine_resident_v1"
         ),
     )
+
+
+def _post_reads(
+    db: Session, *, world_id: str, posts: list[models.Post]
+) -> list[ManualSocialPostRead]:
+    post_ids = [post.id for post in posts]
+    if not post_ids:
+        return []
+
+    reply_counts = {
+        str(parent_id): int(count)
+        for parent_id, count in db.execute(
+            select(
+                models.Post.reply_to_post_id,
+                func.count(models.Post.id),
+            )
+            .where(
+                models.Post.world_id == world_id,
+                models.Post.reply_to_post_id.in_(post_ids),
+                models.Post.visibility == "public",
+                models.Post.deleted_at.is_(None),
+                models.Post.report_hidden_at.is_(None),
+            )
+            .group_by(models.Post.reply_to_post_id)
+        ).all()
+        if parent_id is not None
+    }
+    like_counts = {
+        str(post_id): int(count)
+        for post_id, count in db.execute(
+            select(
+                models.PostLike.post_id,
+                func.count(models.PostLike.id),
+            )
+            .where(models.PostLike.post_id.in_(post_ids))
+            .group_by(models.PostLike.post_id)
+        ).all()
+    }
+    return [
+        _post_read(
+            db,
+            post,
+            reply_count=reply_counts.get(post.id, 0),
+            like_count=like_counts.get(post.id, 0),
+        )
+        for post in posts
+    ]
 
 
 def list_owner_world_feed(
@@ -105,7 +160,7 @@ def list_owner_world_feed(
     return ManualSocialFeedRead(
         world_id=world_id,
         owner_world_character_id=actor.id,
-        items=[_post_read(db, post) for post in items],
+        items=_post_reads(db, world_id=world_id, posts=items),
     )
 
 
@@ -144,10 +199,11 @@ def get_owner_world_post_thread(
             .order_by(models.Post.created_at.asc(), models.Post.id.asc())
         )
     )
+    items = [root, *replies]
     return ManualSocialFeedRead(
         world_id=world_id,
         owner_world_character_id=actor.id,
-        items=[_post_read(db, root), *[_post_read(db, reply) for reply in replies]],
+        items=_post_reads(db, world_id=world_id, posts=items),
     )
 
 

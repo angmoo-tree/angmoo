@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import importlib.util
 import sys
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
 from fastapi import FastAPI, HTTPException, status
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
@@ -15,8 +16,10 @@ from sqlalchemy.pool import StaticPool
 from app import models
 from app.api.v1.deps import get_current_user
 from app.core.db import Base, get_db
+from app.domains.social.api.schemas import ManualSocialPostRead
 from app.api.v1.routes.manual_social import router as manual_social_router
 from app.domains.world_characters.api.routes import router as owner_identity_router
+from app.runtime.social.sqlalchemy_read_repository import list_owner_world_feed
 from app.services import world_character_contracts
 
 FRONTEND_HEADERS = {"Origin": "http://127.0.0.1:3000"}
@@ -202,6 +205,186 @@ def _owner_payload() -> dict[str, object]:
     }
 
 
+def _world_post(
+    *,
+    post_id: str,
+    author_character_id: str,
+    author_world_character_id: str,
+    world_id: str,
+    reply_to_post_id: str | None,
+    created_at: datetime,
+    visibility: str = "public",
+    deleted_at: datetime | None = None,
+    report_hidden_at: datetime | None = None,
+) -> models.Post:
+    return models.Post(
+        id=post_id,
+        author_user_id="owner-manual",
+        author_character_id=author_character_id,
+        world_id=world_id,
+        author_world_character_id=author_world_character_id,
+        reply_to_post_id=reply_to_post_id,
+        post_type="reply" if reply_to_post_id is not None else "post",
+        visibility=visibility,
+        author_name="Sage",
+        title="" if reply_to_post_id is not None else post_id,
+        body=post_id,
+        search_document=post_id,
+        created_at=created_at,
+        updated_at=created_at,
+        deleted_at=deleted_at,
+        report_hidden_at=report_hidden_at,
+    )
+
+
+def _seed_count_projection_rows(engine) -> None:
+    now = datetime.now(UTC)
+    with Session(engine) as db:
+        root = db.get(models.Post, "post-autonomous-target")
+        autonomous = db.get(
+            models.WorldCharacter, "world-character-autonomous-target"
+        )
+        character = db.get(models.Character, "character-autonomous-target")
+        assert root is not None and autonomous is not None and character is not None
+        root.created_at = now + timedelta(minutes=10)
+        root.updated_at = root.created_at
+
+        other_world = models.World(
+            id="world-count-other",
+            slug="world-count-other",
+            owner_user_id="owner-manual",
+            name="Other Count World",
+            tagline="fixture",
+            setting_description="fixture",
+            daily_life_description="fixture",
+            genre_tags=["fantasy"],
+            tone_tags=["warm"],
+            banner_alt_text="",
+            timezone="Asia/Seoul",
+            language="ko",
+            visibility="public",
+            join_policy="open",
+            status="published",
+            definition_version=1,
+            row_version=1,
+            contract_version="world-v1",
+            contract_hash="b" * 64,
+            readiness_status="publish_ready",
+            additional_generation_guidance="",
+            create_idempotency_key="world-count-other-create",
+        )
+        other_membership = models.WorldMembership(
+            id="membership-count-other",
+            world_id=other_world.id,
+            user_id="owner-manual",
+            role="owner",
+            status="active",
+            joined_at=now,
+        )
+        other_role = models.WorldRole(
+            id="role-count-other",
+            world_id=other_world.id,
+            role_key="student",
+            name="학생",
+            description="",
+            responsibilities=[],
+            allowed_activity_scope=[],
+            autonomous_allowed=True,
+            status="enabled",
+        )
+        db.add(other_world)
+        db.flush()
+        db.add_all([other_membership, other_role])
+        db.flush()
+        other_actor = models.WorldCharacter(
+            id="world-character-count-other",
+            world_id=other_world.id,
+            character_id=character.id,
+            membership_id=other_membership.id,
+            role_key=other_role.role_key,
+            status="active",
+            control_mode="autonomous",
+            owner_user_id=None,
+            autonomous_enabled=True,
+            activity_runtime_mode="routine_resident_v1",
+            feed_runtime_mode="keyword_search_v1",
+            local_profile={"background": "fixture"},
+            character_contract_hash=autonomous.character_contract_hash,
+            world_contract_hash=other_world.contract_hash,
+        )
+        db.add(other_actor)
+        db.flush()
+
+        visible = _world_post(
+            post_id="reply-count-visible",
+            author_character_id=character.id,
+            author_world_character_id=autonomous.id,
+            world_id="world-manual",
+            reply_to_post_id=root.id,
+            created_at=now,
+        )
+        db.add(visible)
+        db.flush()
+        db.add_all(
+            [
+                _world_post(
+                    post_id="reply-count-nested",
+                    author_character_id=character.id,
+                    author_world_character_id=autonomous.id,
+                    world_id="world-manual",
+                    reply_to_post_id=visible.id,
+                    created_at=now - timedelta(minutes=1),
+                ),
+                _world_post(
+                    post_id="reply-count-deleted",
+                    author_character_id=character.id,
+                    author_world_character_id=autonomous.id,
+                    world_id="world-manual",
+                    reply_to_post_id=root.id,
+                    created_at=now - timedelta(minutes=2),
+                    deleted_at=now,
+                ),
+                _world_post(
+                    post_id="reply-count-report-hidden",
+                    author_character_id=character.id,
+                    author_world_character_id=autonomous.id,
+                    world_id="world-manual",
+                    reply_to_post_id=root.id,
+                    created_at=now - timedelta(minutes=3),
+                    report_hidden_at=now,
+                ),
+                _world_post(
+                    post_id="reply-count-private",
+                    author_character_id=character.id,
+                    author_world_character_id=autonomous.id,
+                    world_id="world-manual",
+                    reply_to_post_id=root.id,
+                    created_at=now - timedelta(minutes=4),
+                    visibility="private",
+                ),
+                _world_post(
+                    post_id="reply-count-cross-world",
+                    author_character_id=character.id,
+                    author_world_character_id=other_actor.id,
+                    world_id=other_world.id,
+                    reply_to_post_id=root.id,
+                    created_at=now - timedelta(minutes=5),
+                ),
+                models.PostLike(
+                    post_id=root.id,
+                    user_id="owner-manual",
+                    character_id=None,
+                ),
+                models.PostLike(
+                    post_id=visible.id,
+                    user_id="owner-manual",
+                    character_id=character.id,
+                ),
+            ]
+        )
+        db.commit()
+
+
 def test_owner_manual_post_and_reply_are_idempotent_and_provider_free() -> None:
     client, engine, principal = _fixture()
     _seed(engine, principal)
@@ -273,6 +456,13 @@ def test_owner_manual_post_and_reply_are_idempotent_and_provider_free() -> None:
     assert feed.status_code == 200
     assert feed.json()["world_id"] == "world-manual"
     assert len(feed.json()["items"]) == 3
+    items_by_id = {item["id"]: item for item in feed.json()["items"]}
+    assert items_by_id["post-autonomous-target"]["reply_count"] == 1
+    assert items_by_id["post-autonomous-target"]["like_count"] == 0
+    assert items_by_id[created_payload["post"]["id"]]["reply_count"] == 0
+    assert items_by_id[created_payload["post"]["id"]]["like_count"] == 0
+    assert items_by_id[reply_payload["post"]["id"]]["reply_count"] == 0
+    assert items_by_id[reply_payload["post"]["id"]]["like_count"] == 0
 
     with Session(engine) as db:
         assert db.scalar(select(func.count(models.Post.id))) == 3
@@ -383,6 +573,92 @@ def test_owner_world_post_thread_is_exactly_world_scoped() -> None:
     )
     assert reply_as_root.status_code == 404
     assert reply_as_root.json() == {"detail": "post_not_in_world"}
+
+
+def test_manual_social_count_projection_is_exact_world_visible_and_batched() -> None:
+    client, engine, principal = _fixture()
+    owner = _seed(engine, principal)
+    identity = client.post(
+        "/api/v1/worlds/world-manual/owner-character",
+        headers=FRONTEND_HEADERS,
+        json=_owner_payload(),
+    )
+    assert identity.status_code == 201
+    _seed_count_projection_rows(engine)
+    grouped_count_queries: list[str] = []
+
+    @event.listens_for(engine, "before_cursor_execute")
+    def _capture_grouped_counts(
+        _conn, _cursor, statement, _parameters, _context, _many
+    ) -> None:
+        normalized = " ".join(statement.lower().split())
+        if "count(" in normalized and " group by " in normalized:
+            grouped_count_queries.append(normalized)
+
+    with Session(engine) as db:
+        feed = list_owner_world_feed(
+            db,
+            world_id="world-manual",
+            current_user_id=owner.id,
+            limit=1,
+        )
+
+    assert [item.id for item in feed.items] == ["post-autonomous-target"]
+    assert feed.items[0].reply_count == 1
+    assert feed.items[0].like_count == 1
+    reply_queries = [
+        statement
+        for statement in grouped_count_queries
+        if " from posts " in f" {statement} "
+    ]
+    like_queries = [
+        statement
+        for statement in grouped_count_queries
+        if " from post_likes " in f" {statement} "
+    ]
+    assert len(reply_queries) == 1
+    assert len(like_queries) == 1
+    assert "posts.world_id" in reply_queries[0]
+    assert "posts.visibility" in reply_queries[0]
+    assert "posts.deleted_at is null" in reply_queries[0]
+    assert "posts.report_hidden_at is null" in reply_queries[0]
+
+    thread = client.get(
+        "/api/v1/worlds/world-manual/manual-social/posts/post-autonomous-target",
+        headers=FRONTEND_HEADERS,
+    )
+    assert thread.status_code == 200
+    items_by_id = {item["id"]: item for item in thread.json()["items"]}
+    assert set(items_by_id) == {"post-autonomous-target", "reply-count-visible"}
+    assert items_by_id["post-autonomous-target"]["reply_count"] == 1
+    assert items_by_id["post-autonomous-target"]["like_count"] == 1
+    assert items_by_id["reply-count-visible"]["reply_count"] == 1
+    assert items_by_id["reply-count-visible"]["like_count"] == 1
+
+
+def test_manual_social_read_counts_are_required_and_non_negative() -> None:
+    payload = {
+        "id": "post-contract",
+        "world_id": "world-contract",
+        "author_world_character_id": "world-character-contract",
+        "author_name": "Contract Bird",
+        "title": "contract",
+        "body": "contract",
+        "post_type": "post",
+        "reply_to_post_id": None,
+        "created_at": datetime.now(UTC),
+        "can_owner_reply": False,
+    }
+    with pytest.raises(ValidationError):
+        ManualSocialPostRead.model_validate(payload)
+    with pytest.raises(ValidationError):
+        ManualSocialPostRead.model_validate(
+            {**payload, "reply_count": -1, "like_count": 0}
+        )
+    with pytest.raises(ValidationError):
+        ManualSocialPostRead.model_validate(
+            {**payload, "reply_count": 0, "like_count": -1}
+        )
 
 
 def test_owner_manual_social_migration_refuses_history_losing_downgrade(

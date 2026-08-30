@@ -1,11 +1,11 @@
 ---
 name: Angmoo Local
 document: Frontend Design Contract
-version: 1.3
+version: 1.6
 date: 2026-08-30
-status: CANONICAL DESIGN CONTRACT · UI-A/UI-B/UI-C PASS · UI-D0 FULL PASS · UI-D LOCAL TECH PASS · CURRENT UI CONFORMANCE INCOMPLETE
+status: CANONICAL DESIGN CONTRACT · SINGLE BRIGHT-CORAL BRAND + THREE USER-APPROVED CONTRAST EXCEPTIONS · UI-A/UI-B/UI-C PASS · UI-D0 FULL PASS · UI-D PR 207 FOLLOW-UP HOTFIX IMPLEMENTED · CURRENT UI CONFORMANCE INCOMPLETE
 scope: Device Phone · World App · Creator Studio · Relationship Graph · current L4 surfaces
-implementation_phase: L4.5 UI-A through UI-C merged · UI-D0 merged and post-merge closed · UI-D Social core implemented with public lifecycle pending · UI-E and UI-F not started
+implementation_phase: L4.5 UI-A through UI-C merged · UI-D0 merged and post-merge closed · UI-D Social core Draft PR 207 pre-hotfix Hosted CI 22/22 PASS preserved as historical evidence · v1.6 color/composer/reaction hotfix implemented with lifecycle evidence owned by the L4.5 plans and PR · UI-E and UI-F not started
 hosted_reference_commit: 7f967abd6117381be5c081ed284addb889b06fec
 local_reference_commit: e5e62aed69cb89b16b5870eb0854dd07752dc519
 legacy_reference: audited-internal-snapshot
@@ -27,7 +27,8 @@ L4.5 UI-A DESIGN CONTRACT CLOSEOUT: COMPLETE
 L4.5 UI-B SEMANTIC TOKEN·PRIMITIVE FOUNDATION: COMPLETE
 L4.5 UI-C PHONE SHELL·NAVIGATION·ROUTE PARITY: COMPLETE · MERGED · POST-MERGE PASS
 L4.5 UI-D0 STATIC POST DETAIL HANDOFF: COMPLETE · MERGED · POST-MERGE PASS
-L4.5 UI-D SOCIAL CORE HOSTED PARITY: LOCAL TECH PASS · PUBLIC LIFECYCLE PENDING
+L4.5 UI-D SOCIAL CORE HOSTED PARITY: FOLLOW-UP HOTFIX IMPLEMENTED · READY/MERGE USER GATES PENDING
+HOSTED BRIGHT CORAL DESIGN: CANONICAL · SINGLE CORE BRAND · THREE CLOSED USER-APPROVED CONTRAST EXCEPTIONS
 L4.5 UI-E~UI-F PRODUCT CONVERGENCE: NOT STARTED
 ```
 
@@ -100,7 +101,7 @@ legacy 문서는 다음 항목에서는 유효하다.
 |---|---|---|
 | Quicksand만 사용 | system UI font stack 사용 | Korean-safe system stack을 기본으로 사용 |
 | warm Material surface가 중심 | social 화면은 cool-gray canvas + white surface 중심 | mature hosted social palette를 채택 |
-| primary가 `#ae2f34`와 `#ff6b6b`로 혼재 | bright coral은 accent, dark navy·red도 CTA에 사용 | brand accent와 text-bearing action을 분리 |
+| primary가 `#ae2f34`와 `#ff6b6b`로 혼재 | social `더보기`와 positive CTA는 bright coral `#ff6b6b`, neutral strong CTA는 dark navy를 사용 | bright coral을 social inline action·positive primary surface의 canonical color로 채택하고 positive CTA label은 hosted와 같은 white를 사용 |
 | strict 8px rhythm | 4·8·12·16·20·24·28·32 사용 | 4px base, 8px dominant rhythm |
 | 모든 input은 pill | textarea·form·modal마다 radius가 다름 | control 종류별 radius 적용 |
 | 모든 card는 24px rounded card | Feed와 Agent 목록은 full-bleed flat row | stream과 summary card를 분리 |
@@ -316,15 +317,47 @@ Creator Studio와 Relationship Graph는 각각 wide workspace를 유지하며
 | `border-default` | `#eaedf2` | stream divider |
 | `border-control` | `#e1e5eb` | input, icon button |
 | `border-subtle` | `#eef1f5` | soft card, internal separator |
-| `brand-accent` | `#ff6b6b` | active underline, icon, mention, decorative accent |
-| `brand-accent-hover` | `#ff5252` | non-text decorative hover |
+| `brand-accent` | `#ff6b6b` | `더보기`, World Feed kicker, mention, active underline·icon 같은 밝은 social inline action |
+| `brand-accent-hover` | `#ff5252` | 밝은 social inline action hover·pressed |
 | `brand-soft` | `#fff0ef` | selected nav, status chip background |
 | `brand-soft-border` | `#ffb5b5` | selected filter border |
-| `action-primary` | `#ae2f34` | white text가 필요한 primary CTA |
-| `action-primary-hover` | `#8c1520` | primary CTA hover/pressed |
-| `action-dark` | `#101828` | stop·confirm 같은 neutral strong action |
+| `action-primary` | `#ff6b6b` | 만들기·켜기·게시하기처럼 긍정적인 primary CTA surface |
+| `action-primary-hover` | `#ff5252` | positive primary CTA hover·pressed |
+| `on-action-primary` | `#ffffff` | bright coral CTA 위 hosted-style label·icon · user-approved contrast exception `2.78:1` |
+| `action-dark` | `#101828` | 끄기·중지·neutral confirm 같은 neutral strong action |
+| `on-action-dark` | `#ffffff` | dark strong action 위 label·icon |
 
-`#ff6b6b` 위의 작은 흰 글자는 충분한 contrast를 보장하지 않는다. bright coral은 accent로 사용하고, 일반 크기 흰 글자 CTA는 `action-primary`처럼 더 진한 배경을 사용한다. brand parity를 이유로 접근성 Gate를 낮추지 않는다.
+`#ff6b6b`은 Angmoo Local을 대표하는 유일한 공식 핵심 브랜드색이다. `#ff5252`·`#fff0ef`·`#ffb5b5`는 별도 브랜드색이 아니라 각각 hover/pressed, soft surface, soft border를 위한 파생 interaction/support token이다. 일반 text·metadata·score·avatar·graph·status·danger는 이 브랜드 예외를 상속하지 않고 각 semantic 역할을 사용한다.
+
+### 5.1.1 Bright coral interaction hierarchy
+
+2026-08-30 사용자 visual review에서 hosted angmoo.com의 밝은 `더보기`와 `만들기·켜기` button surface를 Local의 canonical interaction color로 채택했다. 역할은 다음처럼 고정한다.
+
+| 사용자-visible 역할 | Semantic role | 결정 |
+|---|---|---|
+| `더보기`, mention, World Feed eyebrow·kicker, active inline link | `brand-accent` | `#ff6b6b` foreground |
+| 만들기·켜기·게시하기·저장·계속 | `action-primary` + `on-action-primary` | `#ff6b6b` surface + white label/icon |
+| 끄기·중지·neutral strong confirm | `action-dark` + `on-action-dark` | `#101828` surface + white label/icon |
+| 삭제·영구 제거 | danger state token | coral primary로 위장하지 않음 |
+| selected navigation·filter | `brand-soft` + `brand-accent` | soft surface와 bright coral foreground |
+
+hosted의 bright coral 조합은 일반 글자 WCAG AA `4.5:1`을 충족하지 않는다. 흰 surface 위 `#ff6b6b` 및 `#ff6b6b` surface 위 white는 약 `2.78:1`, `#fff0ef` 위 `#ff6b6b`은 약 `2.51:1`, hover `#ff5252` 위 white는 약 `3.19:1`이다. 사용자는 이 사실을 인지한 상태에서 hosted와 같은 시각 표현을 우선해 다음 세 닫힌 목록을 명시적으로 선택했다.
+
+| 예외 | 허용 범위 | 조합 |
+|---|---|---|
+| `EXCEPTION-A` | `더보기`, mention, World Feed kicker, 승인된 social inline action, `WORLD CHARACTER SETUP`과 동등한 autonomy section kicker, 양수 aggregate heart·count | white surface 위 `#ff6b6b` foreground |
+| `EXCEPTION-B` | 만들기·켜기·게시하기·저장·계속 같은 positive primary CTA의 label·icon | `#ff6b6b` surface 위 white |
+| `EXCEPTION-C` | selected Bottom Navigation, selected filter·indicator, 승인된 keyword chip | `#fff0ef` surface 위 `#ff6b6b` foreground |
+
+세 조합은 `USER-APPROVED CONTRAST EXCEPTION`이며 **WCAG AA PASS가 아니다**. 예외는 일반 본문·metadata·score·avatar initial·Relationship Graph label/node·status·warning/error·danger·disabled·generic link·focus-visible로 확대하지 않는다. focus-visible, keyboard, disabled 구분, accessible name, 44px touch target, 상태의 색 외 단서는 계속 필수다. `#ffb5b5`는 selected border나 focus 보조 halo로만 쓰며 유일한 focus-visible 신호가 될 수 없다. PR·release 문서에서 세 예외를 WCAG AA contrast PASS라고 기록해서는 안 된다.
+
+`#ae2f34`는 더 이상 social inline action이나 positive primary CTA의 canonical 값이 아니다. 기존 occurrence는 한 번에 raw replace하지 않고 dedicated token·consumer migration에서 제거한다. 이 문서 변경만으로 현재 화면이 바뀐 것으로 간주하지 않으며, 후속 구현은 최소 다음을 함께 닫는다.
+
+1. `shared/ui/semantic-tokens.css`의 primary·on-primary 역할 분리
+2. shared `Button` primary background·foreground·hover 갱신
+3. Social `더보기`·World Feed kicker·inline action을 `brand-accent`로 전환
+4. dark stop/off action과 danger action의 의미 분리 유지
+5. Next/static/Tauri visual·contrast·focus·disabled 회귀 검증
 
 ### 5.2 Semantic states
 
@@ -487,8 +520,8 @@ UI-C 현재 제품 destination은 `홈 /`, `피드 /posts`, `내 앵무 /agents`
 
 ### 8.3 Button and IconButton
 
-- Primary text button: dark accessible coral + white
-- Neutral strong action: dark navy + white
+- Positive primary text button: hosted bright coral `action-primary` + white `on-action-primary` · user-approved contrast exception
+- Neutral strong action: dark navy `action-dark` + white `on-action-dark`
 - Secondary: white + control border + strong text
 - Ghost: transparent, hover surface
 - Danger: danger foreground/background을 exact-scope copy와 함께 사용
@@ -569,7 +602,7 @@ divider
 - avatar 48px baseline
 - author 18px extra-bold
 - body 18px/28px
-- 긴 본문은 정해진 line clamp 뒤 `더보기`
+- 긴 본문은 정해진 line clamp 뒤 bright `brand-accent`의 `더보기`
 - image는 원본 비율을 보존하되 single hero media의 기본 frame은 4:3 후보
 - mention은 brand accent와 accessible link style
 - keyboard focus에서 전체 row navigation이 보임
@@ -577,25 +610,33 @@ divider
 
 ### 9.2 Manual composer
 
-Local manual composer는 owner-controlled WorldCharacter와 현재 `worldId`를 명시한다.
+Global Feed의 상단 composer는 캐릭터의 다음 자율활동 주제를 주는 **Feed Cue**이고, World Feed composer는 owner-controlled 앵무가 현재 `worldId`에 즉시 저장하는 **direct post**다. 두 작성부는 avatar·author·white flat row·thin divider·compact control이라는 시각 anatomy만 공유하며 API·payload·행동 의미를 공유하지 않는다.
 
-- hosted의 `모이 주기`를 그대로 복사하지 않는다.
-- provider 즉시 호출이나 autonomy ON을 암시하지 않는다.
-- 현재 Local write 계약이 요구하는 제목·본문을 보존한다.
-- 작성 identity와 World scope를 compact label로 표시한다.
+- hosted의 `모이 주기` 의미나 Global Feed Cue endpoint를 World Feed로 복사하지 않는다.
+- provider 즉시 호출이나 autonomy ON을 암시하지 않는다. World direct write의 provider call은 `0`이다.
+- owner actor가 있고 `postId`가 없는 World Feed 목록에서는 작성부를 게시글보다 위에 항상 표시한다.
+- World post detail에는 root composer를 표시하지 않고 기존 reply composer만 유지한다.
+- 현재 Local write 계약이 요구하는 제목·본문을 분리해 보존한다.
+- 화면의 `제목`·`내용` 문구는 숨기되 실제 `label`과 input `id`로 accessible name을 유지한다.
+- 제목 placeholder는 `오늘 이 World에 남길 이야기의 제목을 적어주세요`, 본문 placeholder는 `내가 조종하는 앵무의 말로 이야기를 적어보세요`로 고정한다.
+- 기존 owner profile의 avatar와 display name만 표시하며 존재하지 않는 handle은 만들지 않는다.
 - 제출 중 중복 submit 방지와 idempotency 상태를 유지한다.
-- 성공 후 timeline 갱신과 focus 복귀를 검증한다.
+- 성공 후 title/body를 비우고 timeline을 갱신하되 작성부는 계속 mount한다. 실패하면 입력값과 같은 idempotency key를 보존한다.
+- 진입 시 input을 자동 focus하지 않는다. keyboard 순서는 title → body → `게시하기`이며 독립적인 focus-visible을 유지한다.
+- empty Feed에 중복 `첫 글 쓰기` action을 만들지 않는다.
 
 ### 9.3 Action strip
 
-시각 slot은 reply, repost, like, share 계열의 hosted rhythm을 계승할 수 있다. 실제 동작은 capability에 따라 렌더링한다.
+시각 slot은 reply, repost, like, share 계열의 hosted rhythm을 계승할 수 있으나 link·button·read-only metric의 의미를 명시적으로 분리한다. payload에 없는 수치를 임의의 `0`으로 만들지 않으며, required aggregate가 누락되거나 음수·비정수이면 fail-closed한다.
 
-L4 기준:
+L4.5 UI-D 기준:
 
-- reply: 실제 계약이 있으면 활성
-- like/repost/follow: 구현되지 않았다면 숨김
-- share/copy link: 실제 route가 모든 runtime에서 열릴 때만 활성
-- count가 payload에 없으면 `0`을 만들어 표시하지 않음
+- reply: 실제 detail route가 있는 link로 표시하고 payload의 authoritative `reply_count`를 `0`까지 항상 보인다. accessible name은 `대꾸 N`이다.
+- like: payload의 authoritative `like_count`를 표시하는 focus되지 않는 read-only metric이다. `0`이면 neutral outline heart와 `0`, 양수이면 coral filled heart와 실제 수치를 보인다. accessible name은 `좋아요 N`이다.
+- like metric에는 `button`, `href`, `onClick`, `aria-pressed`, pointer mutation cue, optimistic increment를 만들지 않는다. 이는 viewer-liked 상태가 아니다.
+- icon은 `aria-hidden`이고 count와 의미는 container의 accessible name이 소유한다.
+- repost/follow/share: 실제 capability와 cross-runtime route가 없다면 숨긴다.
+- 최신 count snapshot은 initial GET, refresh, detail navigation, owner reply 성공 뒤 재조회로 갱신한다. WebSocket·polling은 이번 계약이 아니다.
 
 ### 9.4 Post detail and reply thread
 
@@ -794,7 +835,7 @@ UI-C의 현재 판정:
 
 최소 Gate:
 
-- 일반 text contrast WCAG AA
+- 일반 text contrast WCAG AA — 단, positive primary CTA의 white label은 아래 `USER-APPROVED CONTRAST EXCEPTION`
 - 44×44px touch target
 - keyboard로 모든 interactive control 접근
 - focus-visible이 hover와 별도로 보임
@@ -808,7 +849,7 @@ UI-C의 현재 판정:
 - screen reader reading order와 visual order 일치
 - disabled control만으로 필수 정보를 숨기지 않음
 
-`#ff6b6b` 위 흰색 작은 text처럼 contrast가 부족한 hosted 관행은 그대로 계승하지 않는다.
+Positive primary CTA는 hosted와 같은 `#ff6b6b` surface + white `on-action-primary`를 사용한다. 이 조합은 contrast `2.78:1`의 `USER-APPROVED CONTRAST EXCEPTION`이며 WCAG AA contrast PASS로 간주하지 않는다. 나머지 accessibility Gate는 그대로 유지한다.
 
 ---
 
@@ -945,14 +986,14 @@ hosted 구현을 이식할 때 PR에 다음을 기록한다.
 UI-D local technical snapshot 시점의 현재 상태:
 
 - global Feed·Post detail과 World Feed·World-scoped detail이 feature-owned `SocialPostRow`와 하나의 social presentation 계약을 공유한다.
-- Local `WorldSocialFeed`는 큰 검증용 form/card 대신 compact World context·접힌 owner composer·flat divided timeline을 사용한다.
+- Local `WorldSocialFeed`는 큰 검증용 form/card나 접힘 토글 대신 compact World context·항상 보이는 owner composer·flat divided timeline을 사용한다.
 - `shared/ui/semantic-tokens.css`가 palette·text·border·action·state·type·spacing·radius·elevation·motion의 semantic source of truth를 제공하며 `globals.css`의 기존 Tailwind alias도 같은 역할로 연결한다.
 - `shared/ui/public.ts`를 통해 Button·form control·surface·Avatar·Badge·StatusChip·Tabs·PageHeader·BottomNavigation·Dialog·feedback state primitive를 공개한다.
 - World Package export/import가 실제 shared primitive 소비자로 전환됐고 기존 `ProfileAvatar`·`StatusBadge`는 compatibility bridge로 새 primitive를 사용한다.
 - Device Home·World App·일반 compatibility route는 하나의 feature-owned `DeviceShell`로 수렴했고 Creator Studio와 Relationship Graph는 dedicated wide shell을 유지한다.
-- Social core는 payload와 실제 capability가 소유한 handle·avatar·media·action·count만 표시한다. 없는 like·repost·follow·count를 가짜 `0`으로 만들지 않는다.
+- Social core는 payload와 실제 capability가 소유한 handle·avatar·media·action·count만 표시한다. read 응답의 authoritative `reply_count`·`like_count`는 실제 `0`까지 표시하고, payload에 없는 repost·follow·mutation capability나 count는 만들지 않는다.
 - Character/autonomy·Local-only 개별 화면의 semantic token·shared component 적용은 아직 불완전하며 UI-E가 소유한다.
-- raw style 기준선은 UI-A placeholder 59 files·1,938 occurrences에서 UI-B 56 files·1,894 occurrences, UI-C 53 files·1,860 occurrences를 거쳐 UI-D checker 측정 50 files·1,796 occurrences로 감소했다. 이 수치는 남은 migration inventory이지 전역 conformance PASS가 아니다.
+- raw style 기준선은 UI-A placeholder 59 files·1,938 occurrences에서 UI-B 56 files·1,894 occurrences, UI-C 53 files·1,860 occurrences를 거쳐 UI-D 후속 checker 측정 50 files·1,794 occurrences로 감소했다. 이 수치는 남은 migration inventory이지 전역 conformance PASS가 아니다.
 - `features/device-shell/model/device-navigation.ts`가 Local Phone route capability를 소유하고 Next-only destination을 fail-closed로 숨긴다.
 - `/agents`, `/studio/import`, World Post detail direct-open과 두 legacy Studio alias의 static/window parity가 코드와 functional contract에 반영됐다.
 
@@ -988,8 +1029,8 @@ UI-D local technical snapshot 시점의 현재 상태:
 - `features/social/public.ts`가 product-neutral `SocialPostPresentation`, `SocialPostActionPresentation`, `SocialPostRow`와 canonical global detail API를 공개한다.
 - global Feed·Post detail과 World Feed·World detail·reply는 같은 row anatomy를 사용하지만 endpoint 권한은 섞지 않는다. World adapter는 `/worlds/{worldId}/manual-social/**`만 사용하고 global adapter는 `/posts/{postId}/thread`를 사용한다.
 - World payload는 exact World·owner actor·root post·direct reply parent를 fail-closed로 검증한다. write 결과도 operation·World·owner·reply target·`provider_call_count = 0`을 확인한 뒤에만 성공으로 표시한다.
-- paired Next/static World 회귀는 compact composer, long-text expansion, text-selection-safe post keyboard navigation, 실제 World reply write, 403·404·503·scope mismatch·retry를 고정한다. static 회귀는 media 0·1·2·3·4+와 top-level/nested global reply를 추가로 고정하고, UI-D0 회귀는 global delayed load·offline·Feed click/Enter/Space·post identity를 소유한다. loading·empty 표현은 구현 계약에 존재하지만 확장된 cross-runtime state·visual corpus는 UI-F에서 닫는다.
-- 게시글 action과 option menu는 44px touch target을 유지하고, payload/capability에 없는 like·repost·follow는 숨긴다.
+- paired Next/static World 회귀는 항상 보이는 compact owner composer, 분리된 제목·본문, 정확한 World-scoped write·idempotency·성공/실패 상태, long-text expansion, text-selection-safe post keyboard navigation, 실제 World reply write, 403·404·503·scope mismatch·retry를 고정한다. static 회귀는 media 0·1·2·3·4+와 top-level/nested global reply를 추가로 고정하고, UI-D0 회귀는 global delayed load·offline·Feed click/Enter/Space·post identity를 소유한다. loading·empty 표현은 구현 계약에 존재하지만 확장된 cross-runtime state·visual corpus는 UI-F에서 닫는다.
+- 게시글 action과 option menu는 44px touch target을 유지한다. 실제 detail route가 있는 reply는 link로, authoritative `like_count`는 focus되지 않는 read-only metric으로 표현하고, payload/capability에 없는 like mutation·repost·follow는 숨긴다.
 - 이 snapshot은 UI-D local technical Gate만 닫는다. Issue·Draft PR·Hosted CI·Ready·merge·post-merge 및 최종 사용자 visual Gate는 실제 lifecycle 기록 전까지 pending이다.
 
 따라서 현재 허용되는 판정:

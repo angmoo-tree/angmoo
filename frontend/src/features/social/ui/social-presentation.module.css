@@ -157,7 +157,7 @@
   border: 0;
   border-radius: var(--radius-control);
   background: transparent;
-  color: var(--color-action-primary);
+  color: var(--color-brand-accent);
   cursor: pointer;
   font: inherit;
   font-size: var(--text-body);
@@ -195,7 +195,8 @@
 }
 
 .action,
-.actionLink {
+.actionLink,
+.metric {
   display: inline-flex;
   min-width: 44px;
   min-height: 44px;
@@ -206,12 +207,16 @@
   border-radius: var(--radius-pill);
   background: transparent;
   color: var(--color-text-secondary);
-  cursor: pointer;
   font: inherit;
   font-size: var(--text-meta);
   line-height: var(--text-meta--line-height);
   padding-inline: var(--spacing-compact);
   text-decoration: none;
+}
+
+.action,
+.actionLink {
+  cursor: pointer;
   transition:
     background-color var(--motion-fast) ease,
     color var(--motion-fast) ease;
@@ -230,7 +235,11 @@
 }
 
 .accentAction {
-  color: var(--color-action-primary);
+  color: var(--color-brand-accent);
+}
+
+.metric {
+  cursor: default;
 }
 
 .actionIcon {

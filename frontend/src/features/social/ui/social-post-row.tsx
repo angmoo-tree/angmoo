@@ -177,16 +177,27 @@ export function SocialPostActionStrip({
   actions: readonly SocialPostActionPresentation[];
   onAction?: (action: SocialPostActionPresentation) => void;
 }) {
-  const visibleActions = actions.filter((action) => action.href || onAction);
+  const visibleActions = actions.filter(
+    (action) => action.interaction !== "button" || onAction,
+  );
   if (visibleActions.length === 0) return null;
 
   return (
     <div className={styles.actionStrip} aria-label="게시글 동작" role="group">
       {visibleActions.map((action) => {
         const Icon = ACTION_ICONS[action.kind];
+        const positiveLike =
+          action.kind === "like" &&
+          action.count !== undefined &&
+          action.count > 0;
+        const accent = action.kind === "like" ? positiveLike : action.accent;
         const content = (
           <>
-            <Icon className={styles.actionIcon} aria-hidden="true" />
+            <Icon
+              className={styles.actionIcon}
+              fill={positiveLike ? "currentColor" : "none"}
+              aria-hidden="true"
+            />
             {action.count !== undefined ? (
               <span className={styles.actionCount}>{action.count}</span>
             ) : null}
@@ -197,12 +208,28 @@ export function SocialPostActionStrip({
             ? action.label
             : `${action.label} ${action.count}`;
 
-        return action.href ? (
+        if (action.interaction === "metric") {
+          return (
+            <span
+              aria-label={label}
+              className={classNames(
+                styles.metric,
+                accent && styles.accentAction,
+              )}
+              data-post-card-ignore
+              key={action.kind}
+            >
+              {content}
+            </span>
+          );
+        }
+
+        return action.interaction === "link" ? (
           <Link
             aria-label={label}
             className={classNames(
               styles.actionLink,
-              action.accent && styles.accentAction,
+              accent && styles.accentAction,
             )}
             data-post-card-ignore
             href={action.href}
@@ -215,7 +242,7 @@ export function SocialPostActionStrip({
             aria-label={label}
             className={classNames(
               styles.action,
-              action.accent && styles.accentAction,
+              accent && styles.accentAction,
             )}
             data-post-card-ignore
             key={action.kind}
