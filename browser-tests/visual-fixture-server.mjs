@@ -39,6 +39,7 @@ const server = createServer((request, response) => {
     response.setHeader("vary", "Origin");
   }
   if (origin === nextProductOrigin || origin === staticProductOrigin) {
+    response.setHeader("access-control-allow-credentials", "true");
     response.setHeader("access-control-allow-headers", "content-type,x-angmoo-launcher-token");
     response.setHeader("access-control-allow-methods", "GET,HEAD,OPTIONS");
   }
