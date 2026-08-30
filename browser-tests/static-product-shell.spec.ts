@@ -108,6 +108,129 @@ function staticPostThread(id: string, title: string, body: string) {
   };
 }
 
+const UI_D_STATIC_WORLD_ID = "world-ui-d-static";
+const UI_D_STATIC_ROOT_POST_ID = "post-ui-d-static-root";
+
+function staticUiDWorld(worldId = UI_D_STATIC_WORLD_ID) {
+  return {
+    schema_version: "local-world-app-v1",
+    surface: "world_app",
+    world: {
+      world_id: worldId,
+      name: "Static UI-D World",
+      tagline: "Tauri hosted social presentation parity",
+      banner_media_id: null,
+      banner_alt_text: "",
+      status: "published",
+      visibility: "public",
+      readiness_status: "publish_ready",
+      membership_role: "owner",
+      updated_at: "2026-08-30T00:00:00Z",
+      launchable: true,
+      launch_block_reason: null,
+    },
+  } as const;
+}
+
+function staticUiDOwnerActor(worldId = UI_D_STATIC_WORLD_ID) {
+  return {
+    schema_version: "owner-controlled-world-character-v1",
+    world_character_id: "wc-ui-d-static-owner",
+    world_id: worldId,
+    character_id: "character-ui-d-static-owner",
+    control_mode: "owner_controlled",
+    status: "active",
+    autonomous_enabled: false,
+    version: 1,
+    profile: {
+      display_name: "Static UI-D Owner",
+      avatar_url: "",
+      intro: "Static social test owner",
+      role_key: null,
+      preferred_address: "Owner",
+      interests: [],
+      background: "",
+    },
+  } as const;
+}
+
+function staticUiDManualPost({
+  authorName = "Static UI-D Autonomous",
+  body,
+  canOwnerReply = true,
+  id,
+  replyToPostId = null,
+  title,
+  worldId = UI_D_STATIC_WORLD_ID,
+}: {
+  authorName?: string;
+  body: string;
+  canOwnerReply?: boolean;
+  id: string;
+  replyToPostId?: string | null;
+  title: string;
+  worldId?: string;
+}) {
+  return {
+    id,
+    world_id: worldId,
+    author_world_character_id:
+      authorName === "Static UI-D Owner"
+        ? "wc-ui-d-static-owner"
+        : "wc-ui-d-static-autonomous",
+    author_name: authorName,
+    title,
+    body,
+    post_type: replyToPostId ? "reply" : "text",
+    reply_to_post_id: replyToPostId,
+    created_at: "2026-08-30T01:00:00Z",
+    can_owner_reply: canOwnerReply,
+  };
+}
+
+function staticUiDManualFeed(
+  items: ReturnType<typeof staticUiDManualPost>[],
+  worldId = UI_D_STATIC_WORLD_ID,
+) {
+  return {
+    schema_version: "owner-manual-social-v1",
+    world_id: worldId,
+    owner_world_character_id: "wc-ui-d-static-owner",
+    items,
+  } as const;
+}
+
+function staticUiDManualWrite(post: ReturnType<typeof staticUiDManualPost>) {
+  return {
+    schema_version: "owner-manual-social-v1",
+    operation: "reply",
+    replayed: false,
+    post,
+    delivery: {
+      provider_call_count: 0,
+      inbox_candidate_id: "inbox-ui-d-static-reply",
+      inbox_status: "pending",
+      public_reaction_required: false,
+    },
+  } as const;
+}
+
+function staticUiDPostMedia(postId: string, index: number) {
+  return {
+    id: index,
+    post_id: postId,
+    media_type: "image",
+    url: `/media/ui-d-${postId}-${index}.png`,
+    alt_text: `${postId} image ${index}`,
+    model: "fixture",
+    prompt_hash: `fixture-${index}`,
+    byte_size: 68,
+    width: 1,
+    height: 1,
+    created_at: "2026-08-30T01:00:00Z",
+  };
+}
+
 function staticAgentDetail(characterId: string) {
   return {
     character: {
@@ -1424,7 +1547,7 @@ test("static P4 evidence opens the exact World-scoped post thread", async ({
   await page.goto("/worlds/world-static-probe/posts/post-static-probe");
   await expect(page.getByRole("heading", { name: "게시글과 답글" })).toBeVisible();
   await expect(page.getByText("World-scoped evidence")).toBeVisible();
-  await expect(page.getByRole("link", { name: "World Feed로 돌아가기" })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: "World Feed", exact: true })).toHaveAttribute(
     "href",
     /\/worlds\/world-static-probe\/feed\/?$/,
   );
@@ -1432,6 +1555,470 @@ test("static P4 evidence opens the exact World-scoped post thread", async ({
     "/api/v1/worlds/world-static-probe/manual-social/posts/post-static-probe",
   );
   expect(requestedPaths).not.toContain("/api/v1/posts/post-static-probe");
+});
+
+test("UI-D static World social core keeps compact composition, flat rows, exact detail navigation, and scoped replies", async ({
+  page,
+}) => {
+  const longBody = Array.from(
+    { length: 36 },
+    (_, index) => `선택 가능한 static 긴 본문 ${index + 1}번째 문장입니다.`,
+  ).join(" ");
+  const rootPost = staticUiDManualPost({
+    body: longBody,
+    id: UI_D_STATIC_ROOT_POST_ID,
+    title: "Static UI-D World root",
+  });
+  const existingReply = staticUiDManualPost({
+    authorName: "Static UI-D Friend",
+    body: "기존 static 대꾸도 같은 social row를 사용합니다.",
+    canOwnerReply: false,
+    id: "reply-ui-d-static-existing",
+    replyToPostId: UI_D_STATIC_ROOT_POST_ID,
+    title: "",
+  });
+  const ownerReply = staticUiDManualPost({
+    authorName: "Static UI-D Owner",
+    body: "Static UI-D Owner reply arrived.",
+    canOwnerReply: false,
+    id: "reply-ui-d-static-owner",
+    replyToPostId: UI_D_STATIC_ROOT_POST_ID,
+    title: "",
+  });
+  let detailItems = [rootPost, existingReply];
+  let replyRequestBody: unknown = null;
+  let replyIdempotencyKey: string | undefined;
+  const requestedSocialPaths: string[] = [];
+  const globalSocialPaths: string[] = [];
+
+  await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+    const request = route.request();
+    const url = new URL(request.url());
+    const method = request.method();
+    if (/^\/api\/v1\/(feed|posts)(\/|$)/.test(url.pathname)) {
+      globalSocialPaths.push(`${method} ${url.pathname}`);
+    }
+    if (url.pathname === `/api/v1/worlds/mine/${UI_D_STATIC_WORLD_ID}`) {
+      await route.fulfill({
+        contentType: "application/json",
+        json: staticUiDWorld(),
+        status: 200,
+      });
+      return;
+    }
+    if (url.pathname === `/api/v1/worlds/${UI_D_STATIC_WORLD_ID}/owner-character`) {
+      await route.fulfill({
+        contentType: "application/json",
+        json: staticUiDOwnerActor(),
+        status: 200,
+      });
+      return;
+    }
+    if (
+      url.pathname === `/api/v1/worlds/${UI_D_STATIC_WORLD_ID}/manual-social/feed` &&
+      method === "GET"
+    ) {
+      requestedSocialPaths.push(`${method} ${url.pathname}`);
+      await route.fulfill({
+        contentType: "application/json",
+        json: staticUiDManualFeed([rootPost, existingReply]),
+        status: 200,
+      });
+      return;
+    }
+    if (
+      url.pathname ===
+        `/api/v1/worlds/${UI_D_STATIC_WORLD_ID}/manual-social/posts/${UI_D_STATIC_ROOT_POST_ID}` &&
+      method === "GET"
+    ) {
+      requestedSocialPaths.push(`${method} ${url.pathname}`);
+      await route.fulfill({
+        contentType: "application/json",
+        json: staticUiDManualFeed(detailItems),
+        status: 200,
+      });
+      return;
+    }
+    if (
+      url.pathname ===
+        `/api/v1/worlds/${UI_D_STATIC_WORLD_ID}/manual-social/posts/${UI_D_STATIC_ROOT_POST_ID}/replies` &&
+      method === "POST"
+    ) {
+      requestedSocialPaths.push(`${method} ${url.pathname}`);
+      replyRequestBody = request.postDataJSON();
+      replyIdempotencyKey = request.headers()["idempotency-key"];
+      detailItems = [rootPost, existingReply, ownerReply];
+      await route.fulfill({
+        contentType: "application/json",
+        json: staticUiDManualWrite(ownerReply),
+        status: 200,
+      });
+      return;
+    }
+    await route.fallback();
+  });
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`/worlds/${UI_D_STATIC_WORLD_ID}/feed`);
+
+  const feedSurface = page.locator('[data-world-social-surface="feed"]');
+  await expect(feedSurface).toBeVisible();
+  await expect(feedSurface.locator('[data-social-stream="world"]')).toBeVisible();
+  const composerToggle = page.getByRole("button", { name: "글 쓰기" });
+  await expect(composerToggle).toHaveAttribute("aria-expanded", "false");
+  await expect(page.locator("#world-owner-composer")).toHaveCount(0);
+  await composerToggle.click();
+  await expect(page.getByRole("button", { name: "닫기" })).toHaveAttribute(
+    "aria-expanded",
+    "true",
+  );
+  await expect(page.locator("#world-owner-composer")).toBeVisible();
+  await expect(page.getByLabel("제목")).toBeFocused();
+  await page.getByRole("button", { name: "닫기" }).click();
+
+  const row = page.locator(`[data-social-post-row="${UI_D_STATIC_ROOT_POST_ID}"]`);
+  await expect(row).toHaveAttribute("data-variant", "feed");
+  await expect(row).toHaveCSS("border-bottom-width", "1px");
+  await expect(row).toHaveCSS("border-radius", "0px");
+  const expand = row.getByRole("button", { name: "더보기" });
+  await expect(expand).toBeVisible();
+
+  const feedUrl = page.url();
+  await row.locator("p").evaluate((paragraph) => {
+    const selection = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(paragraph);
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+  });
+  await row.dispatchEvent("click", { button: 0 });
+  expect(page.url()).toBe(feedUrl);
+  await page.evaluate(() => window.getSelection()?.removeAllRanges());
+
+  await expand.click();
+  await expect(expand).toHaveCount(0);
+  expect(page.url()).toBe(feedUrl);
+  await row.focus();
+  await expect(row).toBeFocused();
+  await page.keyboard.press("Enter");
+
+  await expect(page).toHaveURL(
+    new RegExp(
+      `/worlds/${UI_D_STATIC_WORLD_ID}/posts/${UI_D_STATIC_ROOT_POST_ID}$`,
+    ),
+  );
+  await expect(page.locator('[data-world-social-surface="detail"]')).toBeVisible();
+  await expect(page.getByRole("heading", { name: "게시글과 답글" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "대꾸 1" })).toBeVisible();
+  await page
+    .getByLabel("Static UI-D Autonomous의 게시글에 답글")
+    .fill("실제 static scoped reply");
+  await page.getByRole("button", { name: "답글 보내기" }).click();
+
+  await expect(
+    page.getByText("Static UI-D Owner reply arrived.", { exact: false }),
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "대꾸 2" })).toBeVisible();
+  expect(replyRequestBody).toEqual({ body: "실제 static scoped reply" });
+  expect(replyIdempotencyKey).toMatch(/^owner-reply-/);
+  expect(requestedSocialPaths).toContain(
+    `GET /api/v1/worlds/${UI_D_STATIC_WORLD_ID}/manual-social/feed`,
+  );
+  expect(requestedSocialPaths).toContain(
+    `GET /api/v1/worlds/${UI_D_STATIC_WORLD_ID}/manual-social/posts/${UI_D_STATIC_ROOT_POST_ID}`,
+  );
+  expect(requestedSocialPaths).toContain(
+    `POST /api/v1/worlds/${UI_D_STATIC_WORLD_ID}/manual-social/posts/${UI_D_STATIC_ROOT_POST_ID}/replies`,
+  );
+  expect(globalSocialPaths).toEqual([]);
+});
+
+test("UI-D static World social errors distinguish 403, 404, 503, scope mismatch, and retry recovery", async ({
+  page,
+}) => {
+  const rootPost = staticUiDManualPost({
+    body: "Recovered static World-scoped body",
+    id: UI_D_STATIC_ROOT_POST_ID,
+    title: "Recovered static UI-D feed",
+  });
+  let responseMode: "403" | "404" | "503" | "scope" | "ready" = "403";
+  let feedRequests = 0;
+  const globalSocialPaths: string[] = [];
+
+  await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+    const request = route.request();
+    const url = new URL(request.url());
+    if (/^\/api\/v1\/(feed|posts)(\/|$)/.test(url.pathname)) {
+      globalSocialPaths.push(`${request.method()} ${url.pathname}`);
+    }
+    if (url.pathname === `/api/v1/worlds/mine/${UI_D_STATIC_WORLD_ID}`) {
+      await route.fulfill({
+        contentType: "application/json",
+        json: staticUiDWorld(),
+        status: 200,
+      });
+      return;
+    }
+    if (url.pathname === `/api/v1/worlds/${UI_D_STATIC_WORLD_ID}/owner-character`) {
+      await route.fulfill({
+        contentType: "application/json",
+        json: staticUiDOwnerActor(),
+        status: 200,
+      });
+      return;
+    }
+    if (url.pathname !== `/api/v1/worlds/${UI_D_STATIC_WORLD_ID}/manual-social/feed`) {
+      await route.fallback();
+      return;
+    }
+    feedRequests += 1;
+    if (responseMode === "403" || responseMode === "404" || responseMode === "503") {
+      await route.fulfill({
+        contentType: "application/json",
+        json: { detail: `ui_d_static_${responseMode}` },
+        status: Number(responseMode),
+      });
+      return;
+    }
+    const responseWorldId =
+      responseMode === "scope" ? "world-ui-d-static-foreign" : UI_D_STATIC_WORLD_ID;
+    await route.fulfill({
+      contentType: "application/json",
+      json: staticUiDManualFeed(
+        [
+          responseMode === "scope"
+            ? staticUiDManualPost({
+                body: rootPost.body,
+                id: rootPost.id,
+                title: rootPost.title,
+                worldId: responseWorldId,
+              })
+            : rootPost,
+        ],
+        responseWorldId,
+      ),
+      status: 200,
+    });
+  });
+
+  await page.goto(`/worlds/${UI_D_STATIC_WORLD_ID}/feed`);
+  await expect(page.getByRole("heading", { name: "이 Feed를 볼 권한이 없어요" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "다시 시도" })).toHaveCount(0);
+
+  responseMode = "404";
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "게시글을 찾을 수 없어요" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "다시 시도" })).toHaveCount(0);
+
+  responseMode = "503";
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "로컬 runtime에 연결할 수 없어요" }),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "다시 시도" })).toBeVisible();
+
+  responseMode = "scope";
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "World 경계를 확인했어요" })).toBeVisible();
+  await expect(page.getByText("다른 World의 응답이 감지되어")).toBeVisible();
+
+  responseMode = "ready";
+  await page.getByRole("button", { name: "다시 시도" }).click();
+  await expect(page.getByText("Recovered static UI-D feed", { exact: true })).toBeVisible();
+  expect(feedRequests).toBe(5);
+  expect(globalSocialPaths).toEqual([]);
+});
+
+test("UI-D static World detail rejects an unrelated same-World reply and owner mismatch", async ({
+  page,
+}) => {
+  const rootPost = staticUiDManualPost({
+    body: "Exact thread root",
+    id: UI_D_STATIC_ROOT_POST_ID,
+    title: "Exact UI-D thread",
+  });
+  const unrelatedReply = staticUiDManualPost({
+    authorName: "Static unrelated author",
+    body: "This reply belongs to another root.",
+    canOwnerReply: false,
+    id: "reply-ui-d-static-unrelated",
+    replyToPostId: "post-ui-d-static-other-root",
+    title: "",
+  });
+  let responseMode: "owner" | "orphan" = "owner";
+
+  await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname === `/api/v1/worlds/mine/${UI_D_STATIC_WORLD_ID}`) {
+      await route.fulfill({
+        contentType: "application/json",
+        json: staticUiDWorld(),
+        status: 200,
+      });
+      return;
+    }
+    if (url.pathname === `/api/v1/worlds/${UI_D_STATIC_WORLD_ID}/owner-character`) {
+      await route.fulfill({
+        contentType: "application/json",
+        json: staticUiDOwnerActor(),
+        status: 200,
+      });
+      return;
+    }
+    if (
+      url.pathname ===
+      `/api/v1/worlds/${UI_D_STATIC_WORLD_ID}/manual-social/posts/${UI_D_STATIC_ROOT_POST_ID}`
+    ) {
+      const feed = staticUiDManualFeed(
+        responseMode === "owner" ? [rootPost] : [rootPost, unrelatedReply],
+      );
+      await route.fulfill({
+        contentType: "application/json",
+        json:
+          responseMode === "owner"
+            ? { ...feed, owner_world_character_id: "wc-ui-d-static-foreign" }
+            : feed,
+        status: 200,
+      });
+      return;
+    }
+    await route.fallback();
+  });
+
+  await page.goto(
+    `/worlds/${UI_D_STATIC_WORLD_ID}/posts/${UI_D_STATIC_ROOT_POST_ID}`,
+  );
+  await expect(page.getByRole("heading", { name: "World 경계를 확인했어요" })).toBeVisible();
+  await expect(page.getByText("Static unrelated author")).toHaveCount(0);
+
+  responseMode = "orphan";
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "World 경계를 확인했어요" })).toBeVisible();
+  await expect(page.getByText("Static unrelated author")).toHaveCount(0);
+});
+
+test("UI-D static global social rows render zero, one, and many authenticated media fixtures", async ({
+  page,
+}) => {
+  const zeroMediaPost = {
+    ...staticProfilePost("post-ui-d-media-zero", "Zero media row"),
+    media: [],
+  };
+  const oneMediaPost = {
+    ...staticProfilePost("post-ui-d-media-one", "One media row"),
+    media: [staticUiDPostMedia("post-ui-d-media-one", 1)],
+  };
+  const twoMediaPost = {
+    ...staticProfilePost("post-ui-d-media-two", "Two media row"),
+    media: Array.from({ length: 2 }, (_, index) =>
+      staticUiDPostMedia("post-ui-d-media-two", index + 1),
+    ),
+  };
+  const threeMediaPost = {
+    ...staticProfilePost("post-ui-d-media-three", "Three media row"),
+    media: Array.from({ length: 3 }, (_, index) =>
+      staticUiDPostMedia("post-ui-d-media-three", index + 1),
+    ),
+  };
+  const manyMediaPost = {
+    ...staticProfilePost("post-ui-d-media-many", "Many media row"),
+    media: Array.from({ length: 5 }, (_, index) =>
+      staticUiDPostMedia("post-ui-d-media-many", index + 1),
+    ),
+  };
+  const mediaRequests: string[] = [];
+
+  await page.route("http://127.0.0.1:8080/api/v1/feed**", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      json: {
+        items: [zeroMediaPost, oneMediaPost, twoMediaPost, threeMediaPost, manyMediaPost],
+        next_cursor: null,
+      },
+      status: 200,
+    });
+  });
+  await page.route("http://127.0.0.1:8080/media/**", async (route) => {
+    expect(route.request().headers()["x-angmoo-launcher-token"]).toBe(
+      "static-route-probe-token-000000000000",
+    );
+    mediaRequests.push(new URL(route.request().url()).pathname);
+    await route.fulfill({
+      body: Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl2lU8AAAAASUVORK5CYII=",
+        "base64",
+      ),
+      contentType: "image/png",
+      status: 200,
+    });
+  });
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/posts");
+
+  const zeroRow = page.locator('[data-social-post-row="post-ui-d-media-zero"]');
+  const oneRow = page.locator('[data-social-post-row="post-ui-d-media-one"]');
+  const twoRow = page.locator('[data-social-post-row="post-ui-d-media-two"]');
+  const threeRow = page.locator('[data-social-post-row="post-ui-d-media-three"]');
+  const manyRow = page.locator('[data-social-post-row="post-ui-d-media-many"]');
+  await expect(zeroRow).toBeVisible();
+  await expect(zeroRow.locator("img")).toHaveCount(0);
+  await expect(oneRow.locator("img")).toHaveCount(1);
+  await expect(oneRow.getByAltText("post-ui-d-media-one image 1")).toBeVisible();
+  await expect(twoRow.locator("img")).toHaveCount(2);
+  await expect(threeRow.locator("img")).toHaveCount(3);
+  await expect(manyRow.locator("img")).toHaveCount(4);
+  await expect(manyRow.getByLabel("추가 이미지 1개")).toBeVisible();
+  await expect(manyRow).toHaveCSS("border-bottom-width", "1px");
+  await expect(manyRow).toHaveCSS("border-radius", "0px");
+  for (const unsupportedAction of ["좋아요", "리포스트", "팔로우"]) {
+    await expect(manyRow.getByRole("button", { name: unsupportedAction })).toHaveCount(0);
+  }
+  expect(mediaRequests).toHaveLength(10);
+});
+
+test("UI-D static global detail preserves a nested reply hierarchy", async ({ page }) => {
+  const rootPostId = "post-ui-d-nested-root";
+  const parentReply = {
+    ...staticProfilePost("post-ui-d-nested-parent", ""),
+    author_name: "Nested Parent",
+    body: "Top-level reply body",
+    post_type: "reply",
+    reply_to_post_id: rootPostId,
+  };
+  const childReply = {
+    ...staticProfilePost("post-ui-d-nested-child", ""),
+    author_name: "Nested Child",
+    body: "Nested child reply body",
+    post_type: "reply",
+    reply_to_post_id: parentReply.id,
+  };
+
+  await page.route(
+    `http://127.0.0.1:8080/api/v1/posts/${rootPostId}/thread`,
+    async (route) => {
+      const thread = staticPostThread(rootPostId, "Nested thread root", "Root body");
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          ...thread,
+          post: { ...thread.post, reply_count: 2 },
+          replies: [parentReply, childReply],
+        },
+        status: 200,
+      });
+    },
+  );
+
+  await page.goto(`/posts/${rootPostId}`);
+
+  await expect(page.getByRole("heading", { name: "대꾸 2" })).toBeVisible();
+  const parentRow = page.locator(`[data-social-post-row="${parentReply.id}"]`);
+  const childRow = page.locator(`[data-social-post-row="${childReply.id}"]`);
+  await expect(parentRow).toBeVisible();
+  await expect(childRow).toBeVisible();
+  await expect(childRow.getByText("Nested Parent에게 대꾸", { exact: true })).toBeVisible();
+  await expect(childRow.locator("xpath=..")).toHaveClass(/ml-4/);
 });
 
 test("static installed relationship route ignores provider overrides and requests Ladybug", async ({

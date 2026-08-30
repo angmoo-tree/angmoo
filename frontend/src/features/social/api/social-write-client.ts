@@ -8,6 +8,11 @@ import type {
   ManualSocialWriteRead,
 } from "../model/social-write-contract";
 
+type ManualSocialReadOptions = {
+  ownerWorldCharacterId?: string;
+  signal?: AbortSignal;
+};
+
 export class SocialWriteApiError extends Error {
   constructor(
     readonly status: number,
@@ -72,31 +77,67 @@ async function socialWriteRequest<T>(
 
 export function getManualSocialFeed(
   worldId: string,
-  options: { signal?: AbortSignal } = {},
+  options: ManualSocialReadOptions = {},
 ): Promise<ManualSocialFeedRead> {
   return socialWriteRequest<ManualSocialFeedRead>(
     `/api/backend/worlds/${encodeURIComponent(worldId)}/manual-social/feed`,
     { signal: options.signal },
+  ).then((result) =>
+    assertWorldScopedFeed(
+      result,
+      worldId,
+      null,
+      options.ownerWorldCharacterId,
+    ),
   );
 }
 
 export async function getManualSocialPostThread(
   worldId: string,
   postId: string,
-  options: { signal?: AbortSignal } = {},
+  options: ManualSocialReadOptions = {},
 ): Promise<ManualSocialFeedRead> {
   const result = await socialWriteRequest<ManualSocialFeedRead>(
     `/api/backend/worlds/${encodeURIComponent(worldId)}/manual-social/posts/${encodeURIComponent(postId)}`,
     { signal: options.signal },
   );
-  if (
+  return assertWorldScopedFeed(
+    result,
+    worldId,
+    postId,
+    options.ownerWorldCharacterId,
+  );
+}
+
+function assertWorldScopedFeed(
+  result: ManualSocialFeedRead,
+  worldId: string,
+  rootPostId: string | null,
+  ownerWorldCharacterId?: string,
+): ManualSocialFeedRead {
+  const worldScopeMismatch =
     result.world_id !== worldId ||
-    result.items.length === 0 ||
-    result.items[0]?.id !== postId ||
-    result.items[0]?.reply_to_post_id !== null ||
-    result.items.some((item) => item.world_id !== worldId)
-  ) {
-    throw new SocialWriteApiError(502, "manual_social_thread_scope_mismatch");
+    result.items.some((item) => item.world_id !== worldId) ||
+    (ownerWorldCharacterId !== undefined &&
+      result.owner_world_character_id !== ownerWorldCharacterId);
+  const uniqueItemIds = new Set(result.items.map((item) => item.id));
+  const threadScopeMismatch =
+    rootPostId !== null &&
+    (result.items.length === 0 ||
+      result.items[0]?.id !== rootPostId ||
+      result.items[0]?.reply_to_post_id !== null ||
+      uniqueItemIds.size !== result.items.length ||
+      result.items
+        .slice(1)
+        .some((item) => item.reply_to_post_id !== rootPostId));
+
+  if (worldScopeMismatch || threadScopeMismatch) {
+    throw new SocialWriteApiError(
+      502,
+      rootPostId === null
+        ? "manual_social_feed_scope_mismatch"
+        : "manual_social_thread_scope_mismatch",
+    );
   }
   return result;
 }
@@ -105,6 +146,7 @@ export function createOwnerManualPost(
   worldId: string,
   data: { title: string; body: string },
   idempotencyKey: string,
+  ownerWorldCharacterId: string,
 ): Promise<ManualSocialWriteRead> {
   return socialWriteRequest<ManualSocialWriteRead>(
     `/api/backend/worlds/${encodeURIComponent(worldId)}/manual-social/posts`,
@@ -116,6 +158,13 @@ export function createOwnerManualPost(
       },
       body: JSON.stringify(data),
     },
+  ).then((result) =>
+    assertOwnerManualWrite(result, {
+      operation: "post",
+      ownerWorldCharacterId,
+      replyToPostId: null,
+      worldId,
+    }),
   );
 }
 
@@ -124,6 +173,7 @@ export function createOwnerManualReply(
   postId: string,
   body: string,
   idempotencyKey: string,
+  ownerWorldCharacterId: string,
 ): Promise<ManualSocialWriteRead> {
   return socialWriteRequest<ManualSocialWriteRead>(
     `/api/backend/worlds/${encodeURIComponent(worldId)}/manual-social/posts/${encodeURIComponent(postId)}/replies`,
@@ -135,5 +185,34 @@ export function createOwnerManualReply(
       },
       body: JSON.stringify({ body }),
     },
+  ).then((result) =>
+    assertOwnerManualWrite(result, {
+      operation: "reply",
+      ownerWorldCharacterId,
+      replyToPostId: postId,
+      worldId,
+    }),
   );
+}
+
+function assertOwnerManualWrite(
+  result: ManualSocialWriteRead,
+  expected: {
+    operation: "post" | "reply";
+    ownerWorldCharacterId: string;
+    replyToPostId: string | null;
+    worldId: string;
+  },
+): ManualSocialWriteRead {
+  const mismatch =
+    result.operation !== expected.operation ||
+    result.post.world_id !== expected.worldId ||
+    result.post.author_world_character_id !== expected.ownerWorldCharacterId ||
+    result.post.reply_to_post_id !== expected.replyToPostId ||
+    result.delivery.provider_call_count !== 0 ||
+    result.delivery.public_reaction_required !== false;
+  if (mismatch) {
+    throw new SocialWriteApiError(502, "manual_social_write_scope_mismatch");
+  }
+  return result;
 }

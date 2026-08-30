@@ -1,0 +1,321 @@
+.postRow {
+  position: relative;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: var(--spacing-control);
+  width: 100%;
+  border-bottom: 1px solid var(--color-border-default);
+  background: var(--color-surface);
+  color: var(--color-text-strong);
+  padding: var(--spacing-section) var(--spacing-phone);
+}
+
+.openableRow {
+  cursor: pointer;
+  transition:
+    background-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease;
+}
+
+.openableRow:hover {
+  background: var(--color-surface-subtle);
+}
+
+.openableRow:focus-visible {
+  z-index: 1;
+  outline: 2px solid var(--focus-ring-color);
+  outline-offset: -2px;
+}
+
+.detailRow {
+  padding-block: var(--spacing-major);
+}
+
+.replyRow {
+  grid-template-columns: 40px minmax(0, 1fr);
+  padding-block: var(--spacing-phone);
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+}
+
+.replyAvatar {
+  width: 40px;
+  height: 40px;
+}
+
+.avatarText {
+  font-size: var(--text-body);
+  line-height: 1;
+}
+
+.postContent {
+  min-width: 0;
+}
+
+.postHeader {
+  display: flex;
+  align-items: baseline;
+  min-width: 0;
+  gap: var(--spacing-compact);
+  padding-right: var(--spacing-major);
+}
+
+.author,
+.authorLink {
+  overflow: hidden;
+  color: var(--color-text-strong);
+  font-size: var(--text-feed-author);
+  font-weight: var(--text-feed-author--font-weight);
+  line-height: var(--text-feed-author--line-height);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.authorLink {
+  border-radius: var(--radius-control);
+  text-decoration: none;
+}
+
+.authorLink:hover {
+  text-decoration: underline;
+  text-underline-offset: var(--spacing-micro);
+}
+
+.authorLink:focus-visible {
+  outline: 2px solid var(--focus-ring-color);
+  outline-offset: 2px;
+}
+
+.meta {
+  display: inline-flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: var(--spacing-compact);
+  color: var(--color-text-secondary);
+  font-size: var(--text-meta);
+  line-height: var(--text-meta--line-height);
+}
+
+.handle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.separator {
+  flex: none;
+}
+
+.time {
+  flex: none;
+  white-space: nowrap;
+}
+
+.postText {
+  margin: var(--spacing-compact) 0 0;
+  color: var(--color-text-strong);
+  font-size: var(--text-feed-body);
+  line-height: var(--text-feed-body--line-height);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.postContext {
+  margin-top: var(--spacing-micro);
+  color: var(--color-text-muted);
+  font-size: var(--text-label);
+  font-weight: var(--text-label--font-weight);
+  line-height: var(--text-label--line-height);
+}
+
+.replyText {
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+}
+
+.clamp {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6;
+}
+
+.replyClamp {
+  -webkit-line-clamp: 4;
+}
+
+.expandButton {
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--spacing-micro);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-action-primary);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--text-body);
+  font-weight: 800;
+  padding-inline: var(--spacing-compact);
+  transition: background-color var(--motion-fast) ease;
+}
+
+.expandButton:hover {
+  background: var(--color-brand-soft);
+}
+
+.expandButton:focus-visible {
+  outline: 2px solid var(--focus-ring-color);
+  outline-offset: 2px;
+}
+
+.menu {
+  position: absolute;
+  top: var(--spacing-phone);
+  right: var(--spacing-phone);
+  z-index: 2;
+}
+
+.reference {
+  margin-top: var(--spacing-control);
+}
+
+.actionStrip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-compact);
+  margin-top: var(--spacing-phone);
+}
+
+.action,
+.actionLink {
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-compact);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--text-meta);
+  line-height: var(--text-meta--line-height);
+  padding-inline: var(--spacing-compact);
+  text-decoration: none;
+  transition:
+    background-color var(--motion-fast) ease,
+    color var(--motion-fast) ease;
+}
+
+.action:hover,
+.actionLink:hover {
+  background: var(--color-surface-muted);
+  color: var(--color-text-strong);
+}
+
+.action:focus-visible,
+.actionLink:focus-visible {
+  outline: 2px solid var(--focus-ring-color);
+  outline-offset: 2px;
+}
+
+.accentAction {
+  color: var(--color-action-primary);
+}
+
+.actionIcon {
+  width: 22px;
+  height: 22px;
+}
+
+.actionCount {
+  min-width: 1ch;
+  font-variant-numeric: tabular-nums;
+}
+
+.mediaGrid {
+  display: grid;
+  overflow: hidden;
+  margin-top: var(--spacing-phone);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-reference-card);
+  background: var(--color-surface-subtle);
+  gap: 1px;
+}
+
+.mediaGridOne {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.mediaGridMultiple {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  aspect-ratio: 4 / 3;
+}
+
+.mediaFrame {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--color-surface-muted);
+}
+
+.mediaGridOne .mediaFrame {
+  aspect-ratio: 4 / 3;
+}
+
+.mediaGridTwo .mediaFrame {
+  grid-row: 1 / -1;
+}
+
+.mediaGridThree .mediaFrame:first-child {
+  grid-row: 1 / -1;
+}
+
+.mediaImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mediaMore {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--color-action-dark) 68%, transparent);
+  color: var(--color-surface);
+  font-size: var(--text-card-title);
+  font-weight: 800;
+}
+
+@media (min-width: 768px) {
+  .postRow {
+    padding-inline: var(--spacing-major);
+  }
+
+  .menu {
+    right: var(--spacing-major);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .openableRow,
+  .expandButton,
+  .action,
+  .actionLink {
+    transition-duration: 1ms;
+  }
+}

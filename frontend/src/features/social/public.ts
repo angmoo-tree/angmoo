@@ -1,8 +1,11 @@
 export {
+  deleteSocialPost,
   getInitialSocialFeed,
+  getSocialPostThread,
   listCharacterFollowingSocialFeed,
   listFollowingSocialFeed,
   listSocialFeed,
+  reportSocialPost,
 } from "./api/social-feed-client";
 export {
   getAgentActivityMaintenance,
@@ -21,8 +24,13 @@ export type {
   FeedContentFilter,
   FeedPage,
   MentionedCharacterRef,
+  PostDetail,
   PostMediaRead,
+  PostReference,
+  PostReportRead,
+  PostReportReason,
   PostSummary,
+  PostThreadRead,
 } from "./model/social-feed-contract";
 export type {
   AgentActivityMaintenanceRead,
@@ -35,6 +43,11 @@ export type {
   ManualSocialWriteRead,
   SocialOwnerActor,
 } from "./model/social-write-contract";
+export type {
+  SocialPostActionKind,
+  SocialPostActionPresentation,
+  SocialPostPresentation,
+} from "./model/social-presentation-contract";
 export {
   presentSocialCausality,
   type SocialCausalityPhase,
@@ -54,6 +67,12 @@ export {
 export { ExpandablePostText } from "./ui/expandable-post-text";
 export { MentionedText } from "./ui/mentioned-text";
 export { PostMediaGrid } from "./ui/post-media-grid";
+export {
+  SocialPostActionStrip,
+  SocialPostRow,
+  type SocialPostRowProps,
+  type SocialPostRowVariant,
+} from "./ui/social-post-row";
 export {
   shouldOpenPostFromCardClick,
   shouldOpenPostFromCardKeyDown,

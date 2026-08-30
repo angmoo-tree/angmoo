@@ -1,10 +1,12 @@
 import { fetchBackendJson } from "@/shared/api/public";
 import { clearStoredUser, notifyAuthChanged } from "@/shared/auth/public";
 import { runtimeFetch } from "@/shared/runtime/public";
+import { formatDate } from "@/shared/ui/public";
 
 import type {
   FeedContentFilter,
   FeedPage,
+  PostThreadRead,
   PostReportRead,
   PostReportReason,
 } from "../model/social-feed-contract";
@@ -96,6 +98,12 @@ export function listCharacterFollowingSocialFeed(
   );
 }
 
+export function getSocialPostThread(postId: string) {
+  return requestSocialApi<PostThreadRead>(
+    `/posts/${encodeURIComponent(postId)}/thread`,
+  );
+}
+
 export function deleteSocialPost(postId: string) {
   return requestSocialApi<void>(`/posts/${encodeURIComponent(postId)}`, {
     method: "DELETE",
@@ -113,10 +121,5 @@ export function reportSocialPost(
 }
 
 export function formatSocialDate(value: string) {
-  const date = new Date(new Date(value).getTime() + 9 * 60 * 60 * 1000);
-  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(date.getUTCDate()).padStart(2, "0");
-  const hour = String(date.getUTCHours()).padStart(2, "0");
-  const minute = String(date.getUTCMinutes()).padStart(2, "0");
-  return `${month}.${day} ${hour}:${minute}`;
+  return formatDate(value);
 }

@@ -1,11 +1,11 @@
 ---
 name: Angmoo Local
 document: Frontend Design Contract
-version: 1.2
-date: 2026-08-29
-status: CANONICAL DESIGN CONTRACT · UI-A/UI-B PASS · UI-C IMPLEMENTED WITH GATES PENDING · CURRENT UI CONFORMANCE INCOMPLETE
+version: 1.3
+date: 2026-08-30
+status: CANONICAL DESIGN CONTRACT · UI-A/UI-B/UI-C PASS · UI-D0 FULL PASS · UI-D LOCAL TECH PASS · CURRENT UI CONFORMANCE INCOMPLETE
 scope: Device Phone · World App · Creator Studio · Relationship Graph · current L4 surfaces
-implementation_phase: L4.5 UI-A and UI-B merged · UI-C Phone shell and route contract implemented with local/external Gates pending · UI-D through UI-F not started
+implementation_phase: L4.5 UI-A through UI-C merged · UI-D0 merged and post-merge closed · UI-D Social core implemented with public lifecycle pending · UI-E and UI-F not started
 hosted_reference_commit: 7f967abd6117381be5c081ed284addb889b06fec
 local_reference_commit: e5e62aed69cb89b16b5870eb0854dd07752dc519
 legacy_reference: audited-internal-snapshot
@@ -25,8 +25,10 @@ DESIGN CONTRACT: CANONICAL
 CURRENT IMPLEMENTATION CONFORMANCE: INCOMPLETE
 L4.5 UI-A DESIGN CONTRACT CLOSEOUT: COMPLETE
 L4.5 UI-B SEMANTIC TOKEN·PRIMITIVE FOUNDATION: COMPLETE
-L4.5 UI-C PHONE SHELL·NAVIGATION·ROUTE PARITY: IMPLEMENTED · GATES PENDING
-L4.5 UI-D~UI-F PRODUCT CONVERGENCE: NOT STARTED
+L4.5 UI-C PHONE SHELL·NAVIGATION·ROUTE PARITY: COMPLETE · MERGED · POST-MERGE PASS
+L4.5 UI-D0 STATIC POST DETAIL HANDOFF: COMPLETE · MERGED · POST-MERGE PASS
+L4.5 UI-D SOCIAL CORE HOSTED PARITY: LOCAL TECH PASS · PUBLIC LIFECYCLE PENDING
+L4.5 UI-E~UI-F PRODUCT CONVERGENCE: NOT STARTED
 ```
 
 ---
@@ -940,16 +942,17 @@ hosted 구현을 이식할 때 PR에 다음을 기록한다.
 
 ## 18. 현재 conformance와 목표 판정
 
-UI-C 구현 snapshot 시점의 현재 상태:
+UI-D local technical snapshot 시점의 현재 상태:
 
-- hosted 계열 전체 Feed·Post detail·Profile·내 앵무 component가 Local에 상당 부분 존재한다.
-- Local `WorldSocialFeed`는 L4 검증용 form/card 중심 최소 UI라 hosted mature Feed와 시각 anatomy가 다르다.
+- global Feed·Post detail과 World Feed·World-scoped detail이 feature-owned `SocialPostRow`와 하나의 social presentation 계약을 공유한다.
+- Local `WorldSocialFeed`는 큰 검증용 form/card 대신 compact World context·접힌 owner composer·flat divided timeline을 사용한다.
 - `shared/ui/semantic-tokens.css`가 palette·text·border·action·state·type·spacing·radius·elevation·motion의 semantic source of truth를 제공하며 `globals.css`의 기존 Tailwind alias도 같은 역할로 연결한다.
 - `shared/ui/public.ts`를 통해 Button·form control·surface·Avatar·Badge·StatusChip·Tabs·PageHeader·BottomNavigation·Dialog·feedback state primitive를 공개한다.
 - World Package export/import가 실제 shared primitive 소비자로 전환됐고 기존 `ProfileAvatar`·`StatusBadge`는 compatibility bridge로 새 primitive를 사용한다.
 - Device Home·World App·일반 compatibility route는 하나의 feature-owned `DeviceShell`로 수렴했고 Creator Studio와 Relationship Graph는 dedicated wide shell을 유지한다.
-- hosted 계열 social presentation과 Character/autonomy·Local-only 개별 화면의 semantic token·shared component 적용은 아직 불완전하며 UI-D와 UI-E가 소유한다.
-- raw style 기준선은 UI-A placeholder 59 files·1,938 occurrences에서 UI-B 56 files·1,894 occurrences를 거쳐 UI-C checker 측정 53 files·1,860 occurrences로 감소했지만, 이 수치는 남은 migration inventory이지 전역 conformance PASS가 아니다.
+- Social core는 payload와 실제 capability가 소유한 handle·avatar·media·action·count만 표시한다. 없는 like·repost·follow·count를 가짜 `0`으로 만들지 않는다.
+- Character/autonomy·Local-only 개별 화면의 semantic token·shared component 적용은 아직 불완전하며 UI-E가 소유한다.
+- raw style 기준선은 UI-A placeholder 59 files·1,938 occurrences에서 UI-B 56 files·1,894 occurrences, UI-C 53 files·1,860 occurrences를 거쳐 UI-D checker 측정 50 files·1,796 occurrences로 감소했다. 이 수치는 남은 migration inventory이지 전역 conformance PASS가 아니다.
 - `features/device-shell/model/device-navigation.ts`가 Local Phone route capability를 소유하고 Next-only destination을 fail-closed로 숨긴다.
 - `/agents`, `/studio/import`, World Post detail direct-open과 두 legacy Studio alias의 static/window parity가 코드와 functional contract에 반영됐다.
 
@@ -963,7 +966,7 @@ UI-C 구현 snapshot 시점의 현재 상태:
 - UI-B는 backend·API·schema·migration·scheduler 의미, 제품 shell·route destination, social presentation, Local-only 전체 화면을 변경하지 않았다.
 - UI-A와 UI-B는 merge 및 post-merge Gate를 통과했다.
 
-### 18.2 UI-C implementation evidence and remaining Gates
+### 18.2 UI-C closeout and remaining Windows scale Gate
 
 - neutral `DeviceFrame`은 frame과 단일 scroll owner만 제공하고 product route를 선택하지 않는다.
 - `features/device-shell`이 page-owned optional header slot, safe-area bottom navigation, Browser 중앙 Phone, 모바일·Tauri full-viewport Phone을 소유하며 compatibility shell이 페이지 위에 generic header를 중복 주입하지 않는다.
@@ -976,7 +979,18 @@ UI-C 구현 snapshot 시점의 현재 상태:
 - Rust Phone allowlist가 `/agents`와 `/worlds/{worldId}/posts/{postId}`를 수용하고 reserved World ID `new`를 거부한다.
 - Relationship Graph는 `RelationshipGraphFrame`을 통해 wide window를 유지하고 Phone frame을 중첩하지 않는다.
 - static direct-open·반복·빈 query를 보존하는 alias canonicalization·Phone fixed-width·overflow·navigation·inner-scroll pagination·unsupported-link assertions을 기존 Playwright graph에 추가하되 UI-B screenshot은 한 장으로 유지한다.
-- 이 snapshot은 구현 계약을 기록한다. UI-C local full technical Gate, Issue·Draft PR·Hosted CI, 사용자 Gate와 merge는 실제 결과가 기록될 때까지 pending이다.
+- UI-C는 local technical·Hosted CI·사용자 merge·post-merge Gate를 통과했다. 다만 실제 Windows 100%·125%·150% WebView scale 사용자 확인은 L4.5 최종 Gate 전까지 별도 pending으로 남는다.
+
+### 18.3 UI-D0 closeout and UI-D local technical evidence
+
+- UI-D0는 static `/posts/{postId}`가 async thread/error 결과를 확정하기 전에 `PostDetailClient`를 mount하지 않는 composition-owned ready Gate를 고정했다. post identity가 바뀌면 child를 remount하고 stale response를 버린다.
+- UI-D0는 merge와 post-merge Actions까지 닫혔으며 UI-D는 그 exact merge를 base로 한다.
+- `features/social/public.ts`가 product-neutral `SocialPostPresentation`, `SocialPostActionPresentation`, `SocialPostRow`와 canonical global detail API를 공개한다.
+- global Feed·Post detail과 World Feed·World detail·reply는 같은 row anatomy를 사용하지만 endpoint 권한은 섞지 않는다. World adapter는 `/worlds/{worldId}/manual-social/**`만 사용하고 global adapter는 `/posts/{postId}/thread`를 사용한다.
+- World payload는 exact World·owner actor·root post·direct reply parent를 fail-closed로 검증한다. write 결과도 operation·World·owner·reply target·`provider_call_count = 0`을 확인한 뒤에만 성공으로 표시한다.
+- paired Next/static World 회귀는 compact composer, long-text expansion, text-selection-safe post keyboard navigation, 실제 World reply write, 403·404·503·scope mismatch·retry를 고정한다. static 회귀는 media 0·1·2·3·4+와 top-level/nested global reply를 추가로 고정하고, UI-D0 회귀는 global delayed load·offline·Feed click/Enter/Space·post identity를 소유한다. loading·empty 표현은 구현 계약에 존재하지만 확장된 cross-runtime state·visual corpus는 UI-F에서 닫는다.
+- 게시글 action과 option menu는 44px touch target을 유지하고, payload/capability에 없는 like·repost·follow는 숨긴다.
+- 이 snapshot은 UI-D local technical Gate만 닫는다. Issue·Draft PR·Hosted CI·Ready·merge·post-merge 및 최종 사용자 visual Gate는 실제 lifecycle 기록 전까지 pending이다.
 
 따라서 현재 허용되는 판정:
 
@@ -984,9 +998,11 @@ UI-C 구현 snapshot 시점의 현재 상태:
 ANGMOO LOCAL DESIGN CONTRACT ESTABLISHED
 UI-A DESIGN CONTRACT CLOSEOUT PASS
 UI-B SEMANTIC TOKEN·PRIMITIVE FOUNDATION PASS
-UI-C PHONE SHELL·NAVIGATION·ROUTE PARITY IMPLEMENTED / GATES PENDING
-UI-D~UI-F PRODUCT CONVERGENCE NOT STARTED
-UI-C USER DESIGN REVIEW / EXTERNAL LIFECYCLE PENDING
+UI-C PHONE SHELL·NAVIGATION·ROUTE PARITY PASS / MERGED / POST-MERGE PASS
+UI-D0 STATIC POST DETAIL HANDOFF FULL PASS / MERGED / POST-MERGE PASS
+UI-D SOCIAL CORE HOSTED PARITY LOCAL TECH PASS / PUBLIC LIFECYCLE PENDING
+UI-E~UI-F PRODUCT CONVERGENCE NOT STARTED
+WINDOWS 100%·125%·150% SCALE USER GATE PENDING
 ```
 
 token·shell·social core·Local-only surface·visual/runtime Gate와 사용자 승인을 모두 통과한 뒤에만 허용되는 판정:

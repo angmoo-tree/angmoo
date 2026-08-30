@@ -26,7 +26,7 @@
         "DIRECT"
       ],
       "path": "frontend/src/components/post-detail-client.tsx",
-      "sha256": "a30a1f1f13ec5c0a355b84b3cd53911febbe8857141d442187c61927abdef3f2"
+      "sha256": "741edabc4c5b026c17f1025c2a028e05c95b50cd9cdcc45a9030dfccdbdadd9f"
     },
     {
       "classifications": [
@@ -65,10 +65,17 @@
     },
     {
       "classifications": [
+        "LOCAL"
+      ],
+      "path": "frontend/src/features/social/model/social-presentation-contract.ts",
+      "sha256": "ab970942a7e9bbbdfb37b147caa700d0df3e861dee48978335b76ee0bce793cc"
+    },
+    {
+      "classifications": [
         "DIRECT"
       ],
       "path": "frontend/src/features/social/ui/expandable-post-text.tsx",
-      "sha256": "2f0855bec41b3a351e7a86a2463e8cd4701aa34fc0ccd36801db3b4948334151"
+      "sha256": "7add3d46005c10fb7b6b92421032abc89ca75759229a9e49b0635632e1711a37"
     },
     {
       "classifications": [
@@ -82,28 +89,42 @@
         "DIRECT"
       ],
       "path": "frontend/src/features/social/ui/post-list-client.tsx",
-      "sha256": "7c58e97b95a51bf1e6927af1a2e588cc78646dcd7399079dba30d82884aabd85"
+      "sha256": "8872e158517582f861f66de0910aeb97af95b4d856c183fcbd4f2d7a28b8a1a7"
+    },
+    {
+      "classifications": [
+        "ADAPTED"
+      ],
+      "path": "frontend/src/features/social/ui/post-media-grid.tsx",
+      "sha256": "c3d0419500ab77ebd048848aeea74f28337da3d74b4ab6a29ba72bb95e504e25"
     },
     {
       "classifications": [
         "DIRECT"
       ],
-      "path": "frontend/src/features/social/ui/post-media-grid.tsx",
-      "sha256": "b45d5faa9a820b21f06e744571eafe4ad99cf922295229dcb61758ef2e563a8c"
+      "path": "frontend/src/features/social/ui/social-post-row.tsx",
+      "sha256": "381ece8076e6fffa0be594ad14ccc0d9a38b21c291c6dc8504daf419396d8384"
+    },
+    {
+      "classifications": [
+        "DIRECT"
+      ],
+      "path": "frontend/src/features/social/ui/social-presentation.module.css",
+      "sha256": "329d8b18b3863bcd1dd372050e2b2ac4bdf9ef8c917309f404ed72f0a17fe42c"
     },
     {
       "classifications": [
         "ADAPTED"
       ],
       "path": "frontend/src/features/social/ui/world-social-feed.tsx",
-      "sha256": "61eef90e66647d17afa9b50d2d63681748364b4d8aabfee13282cb8f77a4d0af"
+      "sha256": "ec1c65aa678fea13f78ece5b37559062339f54e9c914c205683ae931a3774cbc"
     },
     {
       "classifications": [
         "LOCAL"
       ],
       "path": "frontend/src/features/world-app/ui/world-app.tsx",
-      "sha256": "e3560d5f341699266f04a20a12c59529bb2148d532e98713c933f3641bcb753e"
+      "sha256": "48193169d2033bb4cc2d865c6aea44b6ec4b109b0c79ed92a09693d00216169f"
     },
     {
       "classifications": [
@@ -141,7 +162,7 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "ce709d7a7749bf59c2783e3f68d524b06b430ade1fd3143eea4dc63743c72abf"
+        "sha256": "2f1484109c4fe44de49dd60a5a242a2fcebc9b47920b9ffd5b247506ecbed12e"
       },
       {
         "path": "browser-tests/semantic-foundation.visual.spec.ts",
@@ -149,7 +170,7 @@
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "dfe46eda3aa41288ecf44187efc8e972c33f81337f1f0bb8e8217aaa41c68863"
+        "sha256": "c3a2e9a042e2fed5ceabca8716d82903024fb4c1f506add7a85e51670b540414"
       }
     ],
     "static_direct_open_routes": [
@@ -202,6 +223,7 @@
       "frontend/src/app/icon.svg",
       "frontend/src/app/ui-foundation/page.tsx",
       "frontend/src/components/app-shell.tsx",
+      "frontend/src/components/post-detail-client.tsx",
       "frontend/src/composition/static-product-router.tsx",
       "frontend/src/features/device-shell/model/device-navigation.ts",
       "frontend/src/features/device-shell/public.ts",
@@ -211,6 +233,18 @@
       "frontend/src/features/device-shell/ui/local-product-link.module.css",
       "frontend/src/features/device-shell/ui/local-product-link.tsx",
       "frontend/src/features/relationships/ui/relationship-graph-frame.tsx",
+      "frontend/src/features/social/api/social-feed-client.ts",
+      "frontend/src/features/social/api/social-write-client.ts",
+      "frontend/src/features/social/model/social-feed-contract.ts",
+      "frontend/src/features/social/model/social-presentation-contract.ts",
+      "frontend/src/features/social/public.ts",
+      "frontend/src/features/social/ui/expandable-post-text.tsx",
+      "frontend/src/features/social/ui/post-list-client.tsx",
+      "frontend/src/features/social/ui/post-media-grid.tsx",
+      "frontend/src/features/social/ui/social-post-row.tsx",
+      "frontend/src/features/social/ui/social-presentation.module.css",
+      "frontend/src/features/social/ui/world-social-feed.module.css",
+      "frontend/src/features/social/ui/world-social-feed.tsx",
       "frontend/src/features/ui-foundation/public.ts",
       "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
       "frontend/src/shared/desktop/product-window.ts",
@@ -224,21 +258,21 @@
     "forbidden_matches": []
   },
   "raw_colors": {
-    "files": 53,
-    "occurrences": 1860,
+    "files": 50,
+    "occurrences": 1796,
     "pattern": "#[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{5}|[0-9A-Fa-f]{3}|[0-9A-Fa-f])?\\b",
     "per_extension": {
       ".css": {
-        "files": 10,
-        "occurrences": 145
+        "files": 9,
+        "occurrences": 121
       },
       ".ts": {
         "files": 1,
         "occurrences": 2
       },
       ".tsx": {
-        "files": 42,
-        "occurrences": 1713
+        "files": 40,
+        "occurrences": 1673
       }
     },
     "per_file": [
@@ -624,31 +658,30 @@
         }
       },
       {
-        "occurrences": 91,
+        "occurrences": 70,
         "path": "frontend/src/components/post-detail-client.tsx",
         "values": {
-          "#101828": 13,
+          "#101828": 10,
           "#147a45": 1,
           "#344054": 3,
-          "#475467": 6,
-          "#667085": 13,
-          "#98a2b3": 2,
+          "#475467": 5,
+          "#667085": 5,
+          "#98a2b3": 1,
           "#a93636": 1,
           "#c24141": 5,
           "#d0d5dd": 2,
-          "#d9dee8": 1,
           "#d9f2e5": 1,
           "#e1e5eb": 8,
           "#e4a0a0": 1,
-          "#eaedf2": 5,
+          "#eaedf2": 3,
           "#eef1f5": 2,
           "#f0fbf5": 1,
-          "#f9fafb": 7,
-          "#ff6b6b": 7,
+          "#f9fafb": 6,
+          "#ff6b6b": 4,
           "#ffb5b5": 1,
           "#ffd7d7": 3,
           "#ffe2e2": 1,
-          "#fff0ef": 2,
+          "#fff0ef": 1,
           "#fff5f5": 4,
           "#fffafa": 1
         }
@@ -1005,14 +1038,6 @@
         }
       },
       {
-        "occurrences": 3,
-        "path": "frontend/src/features/social/ui/expandable-post-text.tsx",
-        "values": {
-          "#ff6b6b": 2,
-          "#fff0ef": 1
-        }
-      },
-      {
         "occurrences": 2,
         "path": "frontend/src/features/social/ui/mentioned-text.tsx",
         "values": {
@@ -1020,16 +1045,16 @@
         }
       },
       {
-        "occurrences": 114,
+        "occurrences": 100,
         "path": "frontend/src/features/social/ui/post-list-client.tsx",
         "values": {
-          "#101828": 20,
+          "#101828": 18,
           "#147a45": 1,
           "#1d2939": 1,
           "#344054": 3,
           "#3b82f6": 1,
           "#475467": 6,
-          "#667085": 14,
+          "#667085": 8,
           "#98a2b3": 3,
           "#a93636": 1,
           "#c24141": 5,
@@ -1039,56 +1064,20 @@
           "#d9f2e5": 1,
           "#e1e5eb": 11,
           "#e4a0a0": 1,
-          "#eaedf2": 4,
+          "#eaedf2": 3,
           "#eef1f5": 2,
           "#f0fbf5": 1,
           "#f3f4f6": 2,
           "#f5f8ff": 1,
           "#f6f7f9": 1,
-          "#f9fafb": 8,
-          "#ff6b6b": 11,
+          "#f9fafb": 7,
+          "#ff6b6b": 7,
           "#ff8a8a": 1,
           "#ffb5b5": 2,
           "#ffd7d7": 3,
           "#fff0ef": 1,
           "#fff5f5": 3,
           "#fffafa": 2
-        }
-      },
-      {
-        "occurrences": 2,
-        "path": "frontend/src/features/social/ui/post-media-grid.tsx",
-        "values": {
-          "#eaedf2": 1,
-          "#f8fafc": 1
-        }
-      },
-      {
-        "occurrences": 24,
-        "path": "frontend/src/features/social/ui/world-social-feed.module.css",
-        "values": {
-          "#252124": 1,
-          "#28613a": 1,
-          "#292326": 2,
-          "#554a4c": 1,
-          "#62595a": 1,
-          "#75403d": 1,
-          "#756a6b": 1,
-          "#786d6e": 1,
-          "#7e4744": 1,
-          "#8f3f3b": 1,
-          "#9f413d": 1,
-          "#a23833": 1,
-          "#a73f3b": 1,
-          "#b96f69": 1,
-          "#ddd1cf": 1,
-          "#eadedc": 2,
-          "#edf8f0": 1,
-          "#efc8c4": 1,
-          "#f5f1f1": 1,
-          "#fff0ef": 1,
-          "#fff7f5": 1,
-          "#fffaf9": 1
         }
       },
       {
@@ -1249,7 +1238,7 @@
       "#027a48": 6,
       "#039855": 1,
       "#05603a": 1,
-      "#101828": 243,
+      "#101828": 238,
       "#12b76a": 1,
       "#147a45": 3,
       "#15803d": 2,
@@ -1260,10 +1249,9 @@
       "#1f2330": 1,
       "#1f2937": 2,
       "#251818": 4,
-      "#252124": 2,
+      "#252124": 1,
       "#257a38": 1,
-      "#28613a": 1,
-      "#292326": 3,
+      "#292326": 1,
       "#2e9d5b": 1,
       "#302829": 1,
       "#30343b": 1,
@@ -1272,43 +1260,36 @@
       "#3b82f6": 1,
       "#3e2d2b": 1,
       "#412e2d": 1,
-      "#475467": 49,
+      "#475467": 48,
       "#52606d": 2,
       "#52610f": 1,
-      "#554a4c": 1,
       "#584140": 1,
       "#615655": 1,
-      "#62595a": 1,
       "#655655": 1,
-      "#667085": 253,
+      "#667085": 239,
       "#6941c6": 1,
       "#6d6465": 2,
       "#716464": 1,
-      "#75403d": 1,
-      "#756a6b": 1,
       "#765f5c": 2,
       "#76615f": 1,
-      "#786d6e": 1,
       "#787f8b": 1,
       "#7a2e0e": 2,
       "#7a4b00": 1,
       "#7a808b": 1,
-      "#7e4744": 2,
+      "#7e4744": 1,
       "#81322f": 1,
       "#8a5a00": 2,
       "#8a6f6d": 1,
       "#8c1520": 1,
-      "#8f3f3b": 2,
+      "#8f3f3b": 1,
       "#8f4f4c": 1,
       "#8f8281": 1,
-      "#98a2b3": 59,
+      "#98a2b3": 58,
       "#9a3412": 1,
       "#9a5b13": 1,
       "#9c6d68": 2,
       "#9f2f35": 1,
-      "#9f413d": 5,
-      "#a23833": 1,
-      "#a73f3b": 1,
+      "#9f413d": 4,
       "#a93636": 2,
       "#aa453c": 1,
       "#abefc6": 1,
@@ -1321,7 +1302,6 @@
       "#b7e4c7": 1,
       "#b7ebcd": 1,
       "#b8837f": 1,
-      "#b96f69": 1,
       "#c24141": 46,
       "#c7933d": 2,
       "#c7d7fe": 1,
@@ -1333,13 +1313,11 @@
       "#d92d20": 9,
       "#d9bf19": 1,
       "#d9d6fe": 1,
-      "#d9dee8": 1,
       "#d9e0ea": 4,
       "#d9f2e5": 3,
       "#dc6803": 1,
       "#dce7f5": 1,
       "#dce8df": 1,
-      "#ddd1cf": 1,
       "#ded7f4": 1,
       "#dfe3e8": 2,
       "#e0bfbd": 1,
@@ -1356,17 +1334,14 @@
       "#e8b6b0": 1,
       "#e8ecf2": 2,
       "#e8f7e8": 1,
-      "#eadedc": 2,
       "#eaecf0": 2,
-      "#eaedf2": 77,
+      "#eaedf2": 73,
       "#ecfdf3": 5,
       "#edf0f4": 1,
       "#edf0f5": 1,
-      "#edf8f0": 1,
       "#eef1f5": 67,
       "#eef2ff": 1,
       "#ef9a74": 1,
-      "#efc8c4": 1,
       "#efd7d2": 1,
       "#eff8ff": 1,
       "#f0fbf5": 3,
@@ -1382,7 +1357,6 @@
       "#f4f3ff": 1,
       "#f4f5f7": 1,
       "#f4f7fb": 1,
-      "#f5f1f1": 1,
       "#f5f8fc": 1,
       "#f5f8ff": 1,
       "#f5fbf6": 1,
@@ -1395,9 +1369,9 @@
       "#f7f8fa": 6,
       "#f7faf6": 1,
       "#f8dfdc": 2,
-      "#f8fafc": 2,
+      "#f8fafc": 1,
       "#f9df9b": 1,
-      "#f9fafb": 84,
+      "#f9fafb": 82,
       "#face": 1,
       "#fbfcfd": 4,
       "#fcfcfd": 1,
@@ -1407,7 +1381,7 @@
       "#ff4d4f": 3,
       "#ff5252": 17,
       "#ff5a32": 2,
-      "#ff6b6b": 172,
+      "#ff6b6b": 163,
       "#ff7a7a": 3,
       "#ff8a8a": 5,
       "#ff8f8f": 1,
@@ -1425,7 +1399,7 @@
       "#ffe4e4": 2,
       "#ffe5c2": 1,
       "#fff": 8,
-      "#fff0ef": 25,
+      "#fff0ef": 22,
       "#fff0f0": 1,
       "#fff1f0": 3,
       "#fff1f1": 2,
@@ -1438,7 +1412,6 @@
       "#fff6f6": 1,
       "#fff7e6": 1,
       "#fff7ed": 1,
-      "#fff7f5": 1,
       "#fff8e8": 2,
       "#fff8ec": 2,
       "#fff8ed": 2,
@@ -1446,7 +1419,6 @@
       "#fff8f8": 1,
       "#fffaeb": 3,
       "#fffaf0": 1,
-      "#fffaf9": 1,
       "#fffafa": 10,
       "#ffffff": 7
     }
@@ -1455,7 +1427,7 @@
     "known_gap_count": 0,
     "next_static_inventory": "docs/architecture/next-static-compatibility.json",
     "next_static_inventory_route_count": 40,
-    "next_static_inventory_sha256": "5056ef763b238358117254f589ad0716cf4fce56ceca42cfb7b67a464157cc27",
+    "next_static_inventory_sha256": "c1bf1a7d1c4895895b0d80c3fa90c8ab4565c169c6dd62f2f1ed1b9bf447c9f6",
     "reviewed_surface_count": 17
   },
   "schema_version": 1,
@@ -1491,7 +1463,7 @@
       {
         "path": "frontend/src/composition/static-product-router.tsx",
         "present": true,
-        "sha256": "383d19fac890f80aeac7b5b81c4e2e1223d1f66ac316bc91fef91c0c518c9225"
+        "sha256": "c3e82ff009c8b97d33e1f303113bc18729da378707261c33daf3ff426188d658"
       },
       {
         "path": "frontend/src/features/ui-foundation/public.ts",

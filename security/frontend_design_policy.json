@@ -9,6 +9,27 @@
     },
     {
       "classification": "DIRECT",
+      "hosted_blob_oid": "553c4ba9869610908b1667006062c38bad891406",
+      "hosted_source": "frontend/src/components/post-list-client.tsx",
+      "local_target": "frontend/src/features/social/ui/social-post-row.tsx",
+      "scope": "feature-owned flat post row, explicit action strip, keyboard navigation, and social typography"
+    },
+    {
+      "classification": "DIRECT",
+      "hosted_blob_oid": "553c4ba9869610908b1667006062c38bad891406",
+      "hosted_source": "frontend/src/components/post-list-client.tsx",
+      "local_target": "frontend/src/features/social/ui/social-presentation.module.css",
+      "scope": "flat white social stream, semantic divider, author hierarchy, and action rhythm"
+    },
+    {
+      "classification": "LOCAL",
+      "hosted_blob_oid": null,
+      "hosted_source": null,
+      "local_target": "frontend/src/features/social/model/social-presentation-contract.ts",
+      "scope": "payload-backed optional presentation fields and explicit Local capability actions without fabricated counts"
+    },
+    {
+      "classification": "DIRECT",
       "hosted_blob_oid": "7ac352381a2df2e1251d1ce24fb64f925e82a0bf",
       "hosted_source": "frontend/src/components/post-detail-client.tsx",
       "local_target": "frontend/src/components/post-detail-client.tsx",
@@ -43,11 +64,11 @@
       "scope": "mention presentation"
     },
     {
-      "classification": "DIRECT",
+      "classification": "ADAPTED",
       "hosted_blob_oid": "0cd5c683bab6e8a822e2a5ba5922583fad1b6927",
       "hosted_source": "frontend/src/components/post-media-grid.tsx",
       "local_target": "frontend/src/features/social/ui/post-media-grid.tsx",
-      "scope": "post media frame and grid"
+      "scope": "runtime-safe payload-backed 0, 1, 2, 3, and 4-plus image layout without remote fallback"
     },
     {
       "classification": "DIRECT",
@@ -206,6 +227,7 @@
     "frontend/src/app/icon.svg",
     "frontend/src/app/ui-foundation/page.tsx",
     "frontend/src/components/app-shell.tsx",
+    "frontend/src/components/post-detail-client.tsx",
     "frontend/src/composition/static-product-router.tsx",
     "frontend/src/features/device-shell/model/device-navigation.ts",
     "frontend/src/features/device-shell/public.ts",
@@ -215,6 +237,18 @@
     "frontend/src/features/device-shell/ui/local-product-link.module.css",
     "frontend/src/features/device-shell/ui/local-product-link.tsx",
     "frontend/src/features/relationships/ui/relationship-graph-frame.tsx",
+    "frontend/src/features/social/api/social-feed-client.ts",
+    "frontend/src/features/social/api/social-write-client.ts",
+    "frontend/src/features/social/model/social-feed-contract.ts",
+    "frontend/src/features/social/model/social-presentation-contract.ts",
+    "frontend/src/features/social/public.ts",
+    "frontend/src/features/social/ui/expandable-post-text.tsx",
+    "frontend/src/features/social/ui/post-list-client.tsx",
+    "frontend/src/features/social/ui/post-media-grid.tsx",
+    "frontend/src/features/social/ui/social-post-row.tsx",
+    "frontend/src/features/social/ui/social-presentation.module.css",
+    "frontend/src/features/social/ui/world-social-feed.module.css",
+    "frontend/src/features/social/ui/world-social-feed.tsx",
     "frontend/src/features/ui-foundation/public.ts",
     "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
     "frontend/src/shared/desktop/product-window.ts",
@@ -252,8 +286,8 @@
     "notice_decision": "The audited visual files come from first-party history already shared by hosted and Local before the Local GPL transition. UI-A copies no post-common hosted code, asset, icon, or font, so it adds no bundled Apache notice. Any later post-common hosted-only transplant requires a separate license-policy and notice decision before copying."
   },
   "raw_color_scan": {
-    "baseline_files": 53,
-    "baseline_occurrences": 1860,
+    "baseline_files": 50,
+    "baseline_occurrences": 1796,
     "baseline_status": "reviewed_ui_b",
     "extensions": [
       ".css",
@@ -371,6 +405,26 @@
       "data-product-route-unavailable=\"true\"",
       "isStaticFrontendProfile",
       "isStaticLocalProductRouteSupported"
+    ],
+    "frontend/src/features/social/model/social-presentation-contract.ts": [
+      "SocialPostActionPresentation",
+      "count?: number",
+      "href?: string"
+    ],
+    "frontend/src/features/social/public.ts": [
+      "SocialPostPresentation",
+      "SocialPostRow"
+    ],
+    "frontend/src/features/social/ui/social-post-row.tsx": [
+      "ProfileAvatar",
+      "shouldOpenPostFromCardClick",
+      "shouldOpenPostFromCardKeyDown",
+      "useRuntimeRouter"
+    ],
+    "frontend/src/features/social/ui/social-presentation.module.css": [
+      "--color-border-default",
+      "--color-surface",
+      "min-height: 44px"
     ],
     "frontend/src/features/ui-foundation/public.ts": [
       "SemanticFoundationFixture"

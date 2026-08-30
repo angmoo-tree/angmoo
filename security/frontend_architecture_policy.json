@@ -86,6 +86,15 @@
       "RelationshipGraphFrame",
       "data-product-shell=\"relationship-graph\""
     ],
+    "frontend/src/features/social/public.ts": [
+      "SocialPostPresentation",
+      "SocialPostRow"
+    ],
+    "frontend/src/features/social/ui/social-post-row.tsx": [
+      "shouldOpenPostFromCardClick",
+      "shouldOpenPostFromCardKeyDown",
+      "useRuntimeRouter"
+    ],
     "frontend/src/features/ui-foundation/public.ts": [
       "SemanticFoundationFixture"
     ],
@@ -157,6 +166,7 @@
     "frontend/src/features/social/model/post-card-navigation.ts",
     "frontend/src/features/social/model/social-agent-contract.ts",
     "frontend/src/features/social/model/social-feed-contract.ts",
+    "frontend/src/features/social/model/social-presentation-contract.ts",
     "frontend/src/features/social/model/social-write-contract.ts",
     "frontend/src/features/social/public.ts",
     "frontend/src/features/social/ui/active-agent-summary.tsx",
@@ -164,6 +174,9 @@
     "frontend/src/features/social/ui/mentioned-text.tsx",
     "frontend/src/features/social/ui/post-list-client.tsx",
     "frontend/src/features/social/ui/post-media-grid.tsx",
+    "frontend/src/features/social/ui/social-post-row.tsx",
+    "frontend/src/features/social/ui/social-presentation.module.css",
+    "frontend/src/features/social/ui/world-social-feed.module.css",
     "frontend/src/features/social/ui/world-social-feed.tsx",
     "frontend/src/features/ui-foundation/public.ts",
     "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.module.css",

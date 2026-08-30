@@ -230,7 +230,7 @@
       "path": "frontend/src/app/posts/[postId]/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/posts/[postId]",
-      "source_sha256": "eff8b7c111a97a724dc22f41d52634e7d9b104d3abd86a494268eb60c863077b",
+      "source_sha256": "10f622ecbdf7e40e3ff0070ed2c1d1315ef6b0b4340878dce34e1df39f458aca",
       "transition_pr": "ER5 PR K"
     },
     {

@@ -158,7 +158,7 @@ def test_static_post_detail_waits_for_keyed_thread_before_mounting_client() -> N
         "StaticPostRoute must own an explicit ready gate instead of mounting "
         "PostDetailClient with null async initial props"
     )
-    request = post_route.index("getPostThread(postId)")
+    request = post_route.index("getSocialPostThread(postId)")
     assert "setReady(true)" in post_route, (
         "StaticPostRoute must close the ready gate after the thread request settles"
     )

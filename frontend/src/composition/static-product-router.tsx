@@ -9,7 +9,12 @@ import { AgentsDashboardClient } from "@/components/agents-dashboard-client";
 import { AppShell } from "@/components/app-shell";
 import { LocalOwnerClient } from "@/components/local-owner-client";
 import { PostDetailClient } from "@/components/post-detail-client";
-import { PostListClient } from "@/features/social/public";
+import {
+  getSocialPostThread,
+  PostListClient,
+  type FeedPage,
+  type PostThreadRead,
+} from "@/features/social/public";
 import {
   RelationshipGraphClient,
   RelationshipGraphFrame,
@@ -35,12 +40,7 @@ import {
   worldAppSectionFromSegment,
   type WorldAppSectionId,
 } from "@/features/world-app/public";
-import {
-  getPostThread,
-  listFeed,
-  type FeedPage,
-  type PostThreadRead,
-} from "@/lib/community";
+import { listFeed } from "@/lib/community";
 import { safeLoginReturnTo } from "@/lib/safe-navigation";
 import { DesktopRuntimeGate } from "@/shared/runtime/desktop-runtime-gate";
 import { getRuntimeConfig } from "@/shared/runtime/public";
@@ -343,7 +343,7 @@ function StaticPostRoute({ postId }: { postId: string }) {
 
   useEffect(() => {
     let active = true;
-    getPostThread(postId)
+    getSocialPostThread(postId)
       .then((result) => {
         if (active) setThread(result);
       })

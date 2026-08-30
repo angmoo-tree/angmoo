@@ -524,7 +524,7 @@
       "policy_allowed_cycle_count": 0
     },
     "frontend": {
-      "candidate_consumer_edge_count": 31,
+      "candidate_consumer_edge_count": 29,
       "candidate_consumers": {
         "frontend/src/app/api/community/characters/[characterId]/activity/route.ts": [],
         "frontend/src/app/api/community/posts/[postId]/comments/route.ts": [],
@@ -552,7 +552,6 @@
         "frontend/src/features/social/ui/world-social-feed.tsx": [],
         "frontend/src/lib/community.ts": [
           "frontend/src/app/characters/[characterId]/activity/page.tsx",
-          "frontend/src/app/posts/[postId]/page.tsx",
           "frontend/src/app/profiles/characters/[characterId]/follows/page.tsx",
           "frontend/src/app/profiles/characters/[characterId]/page.tsx",
           "frontend/src/app/profiles/users/[userId]/follows/page.tsx",
@@ -565,7 +564,6 @@
           "frontend/src/components/character-activity-client.tsx",
           "frontend/src/components/character-profile-client.tsx",
           "frontend/src/components/notifications-client.tsx",
-          "frontend/src/components/post-detail-client.tsx",
           "frontend/src/components/profile-connections-client.tsx",
           "frontend/src/components/profile-list-row.tsx",
           "frontend/src/components/right-rail-insights.tsx",
@@ -647,20 +645,16 @@
             "PostDetailClient"
           ],
           "imports": [
-            "@/components/mentioned-text",
-            "@/components/post-media-grid",
-            "@/components/profile-avatar",
-            "@/features/device-shell/public",
-            "@/lib/agents",
-            "@/lib/community",
-            "@/lib/profile",
+            "@/features/social/public",
+            "@/shared/auth/public",
             "@/shared/navigation/public",
+            "@/shared/ui/public",
             "lucide-react",
             "next/link",
             "react"
           ],
           "path": "frontend/src/components/post-detail-client.tsx",
-          "sha256": "a30a1f1f13ec5c0a355b84b3cd53911febbe8857141d442187c61927abdef3f2"
+          "sha256": "741edabc4c5b026c17f1025c2a028e05c95b50cd9cdcc45a9030dfccdbdadd9f"
         },
         {
           "exports": [
@@ -721,17 +715,14 @@
           "imports": [
             "../api/social-agent-client",
             "../api/social-feed-client",
-            "../model/post-card-navigation",
             "../model/social-agent-contract",
             "../model/social-feed-contract",
             "./active-agent-summary",
-            "./expandable-post-text",
             "./mentioned-text",
             "./post-media-grid",
-            "@/features/device-shell/public",
+            "./social-post-row",
             "@/shared/auth/public",
             "@/shared/interaction/public",
-            "@/shared/navigation/public",
             "@/shared/ui/public",
             "lucide-react",
             "next/image",
@@ -740,7 +731,7 @@
             "react-dom"
           ],
           "path": "frontend/src/features/social/ui/post-list-client.tsx",
-          "sha256": "7c58e97b95a51bf1e6927af1a2e588cc78646dcd7399079dba30d82884aabd85"
+          "sha256": "8872e158517582f861f66de0910aeb97af95b4d856c183fcbd4f2d7a28b8a1a7"
         },
         {
           "exports": [
@@ -748,14 +739,19 @@
           ],
           "imports": [
             "../api/social-write-client",
+            "../model/social-presentation-contract",
             "../model/social-write-contract",
+            "./social-post-row",
             "./world-social-feed.module.css",
+            "@/shared/interaction/public",
             "@/shared/navigation/public",
+            "@/shared/ui/public",
+            "lucide-react",
             "next/link",
             "react"
           ],
           "path": "frontend/src/features/social/ui/world-social-feed.tsx",
-          "sha256": "61eef90e66647d17afa9b50d2d63681748364b4d8aabfee13282cb8f77a4d0af"
+          "sha256": "ec1c65aa678fea13f78ece5b37559062339f54e9c914c205683ae931a3774cbc"
         },
         {
           "exports": [
@@ -898,7 +894,7 @@
     "oracle_artifacts": [
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "dfe46eda3aa41288ecf44187efc8e972c33f81337f1f0bb8e8217aaa41c68863"
+        "sha256": "c3a2e9a042e2fed5ceabca8716d82903024fb4c1f506add7a85e51670b540414"
       },
       {
         "path": "docs/architecture/l3-er-postgres-neo4j-parity-oracle.json",

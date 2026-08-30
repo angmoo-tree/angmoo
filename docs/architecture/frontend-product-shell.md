@@ -272,6 +272,28 @@ states; the UI does not collapse a projector replay into an empty graph or a
 query failure into a healthy fallback. The old component and `lib` client paths
 are deleted rather than re-exported.
 
+## L4.5 UI-D social presentation boundary
+
+`features/social/public.ts` exports the product-neutral
+`SocialPostPresentation`, `SocialPostActionPresentation`, and shared
+`SocialPostRow`. Global Feed, global Post detail, World Feed, World-scoped
+detail, and World reply presentation consume that public boundary instead of
+maintaining route-specific card anatomy.
+
+Presentation never grants capability. Adapters provide handle, avatar, media,
+action, and count only when the canonical payload and route capability own the
+value; omitted data stays omitted instead of becoming a fake zero or disabled
+hosted action. Global Feed and Post detail retain the global `/feed` and
+`/posts/{postId}/thread` endpoints. World Feed, detail, and reply use only
+`/worlds/{worldId}/manual-social/**` and verify the exact World, owner actor,
+root Post, reply parent, and provider-free write result before rendering a
+success. The shared row cannot authorize endpoint fallback or scope mixing.
+
+The UI-D0 async boundary remains composition-owned. Static
+`/posts/{postId}` waits until the final thread or error is known, rejects stale
+responses, and remounts detail state by Post identity. UI-D changes the child
+presentation without weakening that ready Gate.
+
 The optional PWA shell is implemented as a standards-based manifest plus a
 cache-free service worker lifecycle. It only changes the browser chrome:
 
@@ -349,6 +371,19 @@ Relationship Graph separation, static direct-open coverage, and legacy Studio
 alias canonicalization. Static behavior also proves inner-owner Feed
 pagination and that hosted-only profile links are not clickable. UI-F still
 owns the expanded product screenshot and state corpus.
+
+UI-D's paired Next and static/Tauri World scenarios cover compact composition,
+flat rows, keyboard and text-selection-safe post navigation, exact World detail
+routes, provider-free scoped replies, long text, forbidden, missing, service,
+scope-mismatch, and retry states. The static suite additionally covers
+authenticated media 0/1/2/3/4+, top-level and nested global replies, and hidden
+unsupported actions. UI-D0 separately retains the global delayed-response,
+offline, keyboard-open, and post-identity regressions. The implementation owns
+explicit loading and empty states, while the expanded cross-runtime state and
+visual corpus remains UI-F scope. The suites also assert zero fallback from
+World social adapters to global endpoints. These behavior tests do not replace
+UI-F's product screenshot corpus or the final Windows display-scale and
+installed exact-SHA user Gates.
 
 The `next-production` visual project launches the already-built standalone
 output through `frontend/scripts/serve-production.mjs`. On canonical Ubuntu the
