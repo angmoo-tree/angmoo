@@ -23,8 +23,8 @@ const PRODUCT_STATE: Record<
   ready: "healthy",
   degraded: "degraded",
   stopping: "stopping",
-  recovery_required: "blocked",
-  failed: "blocked",
+  recovery_required: "recovery_required",
+  failed: "failed",
 };
 
 export async function getProductRuntimeState(

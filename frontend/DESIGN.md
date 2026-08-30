@@ -3,9 +3,9 @@ name: Angmoo Local
 document: Frontend Design Contract
 version: 1.6
 date: 2026-08-30
-status: CANONICAL DESIGN CONTRACT · SINGLE BRIGHT-CORAL BRAND + THREE USER-APPROVED CONTRAST EXCEPTIONS · UI-A/UI-B/UI-C PASS · UI-D0 FULL PASS · UI-D PR 207 FOLLOW-UP HOTFIX IMPLEMENTED · CURRENT UI CONFORMANCE INCOMPLETE
+status: CANONICAL DESIGN CONTRACT · SINGLE BRIGHT-CORAL BRAND + THREE USER-APPROVED CONTRAST EXCEPTIONS · UI-A/UI-B/UI-C/UI-D PASS · UI-D0 FULL PASS · UI-E IMPLEMENTED/LOCAL TECH PASS · CURRENT UI CONFORMANCE INCOMPLETE
 scope: Device Phone · World App · Creator Studio · Relationship Graph · current L4 surfaces
-implementation_phase: L4.5 UI-A through UI-C merged · UI-D0 merged and post-merge closed · UI-D Social core Draft PR 207 pre-hotfix Hosted CI 22/22 PASS preserved as historical evidence · v1.6 color/composer/reaction hotfix implemented with lifecycle evidence owned by the L4.5 plans and PR · UI-E and UI-F not started
+implementation_phase: L4.5 UI-A through UI-D merged and post-merge closed · UI-D0 merged and post-merge closed · UI-E Character/autonomy/Local-only surfaces implemented with local technical verification · UI-E public lifecycle and user Gate pending · UI-F not started
 hosted_reference_commit: 7f967abd6117381be5c081ed284addb889b06fec
 local_reference_commit: e5e62aed69cb89b16b5870eb0854dd07752dc519
 legacy_reference: audited-internal-snapshot
@@ -27,9 +27,10 @@ L4.5 UI-A DESIGN CONTRACT CLOSEOUT: COMPLETE
 L4.5 UI-B SEMANTIC TOKEN·PRIMITIVE FOUNDATION: COMPLETE
 L4.5 UI-C PHONE SHELL·NAVIGATION·ROUTE PARITY: COMPLETE · MERGED · POST-MERGE PASS
 L4.5 UI-D0 STATIC POST DETAIL HANDOFF: COMPLETE · MERGED · POST-MERGE PASS
-L4.5 UI-D SOCIAL CORE HOSTED PARITY: FOLLOW-UP HOTFIX IMPLEMENTED · READY/MERGE USER GATES PENDING
+L4.5 UI-D SOCIAL CORE HOSTED PARITY: COMPLETE · MERGED · POST-MERGE PASS
 HOSTED BRIGHT CORAL DESIGN: CANONICAL · SINGLE CORE BRAND · THREE CLOSED USER-APPROVED CONTRAST EXCEPTIONS
-L4.5 UI-E~UI-F PRODUCT CONVERGENCE: NOT STARTED
+L4.5 UI-E CHARACTER·AUTONOMY·LOCAL-ONLY SURFACE: IMPLEMENTED · LOCAL TECH PASS · PUBLIC LIFECYCLE PENDING
+L4.5 UI-F VISUAL·CROSS-RUNTIME CLOSEOUT: NOT STARTED
 ```
 
 ---
@@ -983,7 +984,7 @@ hosted 구현을 이식할 때 PR에 다음을 기록한다.
 
 ## 18. 현재 conformance와 목표 판정
 
-UI-D local technical snapshot 시점의 현재 상태:
+UI-E local technical snapshot 시점의 현재 상태:
 
 - global Feed·Post detail과 World Feed·World-scoped detail이 feature-owned `SocialPostRow`와 하나의 social presentation 계약을 공유한다.
 - Local `WorldSocialFeed`는 큰 검증용 form/card나 접힘 토글 대신 compact World context·항상 보이는 owner composer·flat divided timeline을 사용한다.
@@ -992,8 +993,9 @@ UI-D local technical snapshot 시점의 현재 상태:
 - World Package export/import가 실제 shared primitive 소비자로 전환됐고 기존 `ProfileAvatar`·`StatusBadge`는 compatibility bridge로 새 primitive를 사용한다.
 - Device Home·World App·일반 compatibility route는 하나의 feature-owned `DeviceShell`로 수렴했고 Creator Studio와 Relationship Graph는 dedicated wide shell을 유지한다.
 - Social core는 payload와 실제 capability가 소유한 handle·avatar·media·action·count만 표시한다. read 응답의 authoritative `reply_count`·`like_count`는 실제 `0`까지 표시하고, payload에 없는 repost·follow·mutation capability나 count는 만들지 않는다.
-- Character/autonomy·Local-only 개별 화면의 semantic token·shared component 적용은 아직 불완전하며 UI-E가 소유한다.
-- raw style 기준선은 UI-A placeholder 59 files·1,938 occurrences에서 UI-B 56 files·1,894 occurrences, UI-C 53 files·1,860 occurrences를 거쳐 UI-D 후속 checker 측정 50 files·1,794 occurrences로 감소했다. 이 수치는 남은 migration inventory이지 전역 conformance PASS가 아니다.
+- `features/characters/public.ts`가 Next와 static/Tauri의 `/agents` dashboard를 함께 소유하고, 여러 Character의 독립 ON/OFF·scheduler 상태·active hours·World timezone next activity·recent result를 shared primitive로 표시한다. legacy `components/agents-dashboard-client.tsx`는 compatibility export만 유지한다.
+- Character activity control/list, Studio World-local leave, Device Home launchability, runtime state, Relationship Graph state, Settings와 local-owner surface의 UI-E 범위가 semantic token·shared component·capability-driven state로 수렴했다. public/World 작성자를 owner 전용 `/agents/{id}`로 잘못 연결하지 않는다.
+- raw style 기준선은 UI-A placeholder 59 files·1,938 occurrences에서 UI-B 56 files·1,894 occurrences, UI-C 53 files·1,860 occurrences, UI-D 후속 50 files·1,794 occurrences를 거쳐 UI-E checker 측정 42 files·1,496 occurrences로 감소했다. 이 수치는 남은 migration inventory이지 전역 conformance PASS가 아니다.
 - `features/device-shell/model/device-navigation.ts`가 Local Phone route capability를 소유하고 Next-only destination을 fail-closed로 숨긴다.
 - `/agents`, `/studio/import`, World Post detail direct-open과 두 legacy Studio alias의 static/window parity가 코드와 functional contract에 반영됐다.
 
@@ -1020,7 +1022,7 @@ UI-D local technical snapshot 시점의 현재 상태:
 - Rust Phone allowlist가 `/agents`와 `/worlds/{worldId}/posts/{postId}`를 수용하고 reserved World ID `new`를 거부한다.
 - Relationship Graph는 `RelationshipGraphFrame`을 통해 wide window를 유지하고 Phone frame을 중첩하지 않는다.
 - static direct-open·반복·빈 query를 보존하는 alias canonicalization·Phone fixed-width·overflow·navigation·inner-scroll pagination·unsupported-link assertions을 기존 Playwright graph에 추가하되 UI-B screenshot은 한 장으로 유지한다.
-- UI-C는 local technical·Hosted CI·사용자 merge·post-merge Gate를 통과했다. 다만 실제 Windows 100%·125%·150% WebView scale 사용자 확인은 L4.5 최종 Gate 전까지 별도 pending으로 남는다.
+- UI-C는 local technical·Hosted CI·사용자 merge·post-merge Gate와 Windows 100%·125%·150% WebView scale 사용자 확인을 통과했다. UI-F 최종 exact-SHA의 네 실행 경로와 Windows scale 재확인은 별도 최종 Gate다.
 
 ### 18.3 UI-D0 closeout and UI-D local technical evidence
 
@@ -1031,7 +1033,17 @@ UI-D local technical snapshot 시점의 현재 상태:
 - World payload는 exact World·owner actor·root post·direct reply parent를 fail-closed로 검증한다. write 결과도 operation·World·owner·reply target·`provider_call_count = 0`을 확인한 뒤에만 성공으로 표시한다.
 - paired Next/static World 회귀는 항상 보이는 compact owner composer, 분리된 제목·본문, 정확한 World-scoped write·idempotency·성공/실패 상태, long-text expansion, text-selection-safe post keyboard navigation, 실제 World reply write, 403·404·503·scope mismatch·retry를 고정한다. static 회귀는 media 0·1·2·3·4+와 top-level/nested global reply를 추가로 고정하고, UI-D0 회귀는 global delayed load·offline·Feed click/Enter/Space·post identity를 소유한다. loading·empty 표현은 구현 계약에 존재하지만 확장된 cross-runtime state·visual corpus는 UI-F에서 닫는다.
 - 게시글 action과 option menu는 44px touch target을 유지한다. 실제 detail route가 있는 reply는 link로, authoritative `like_count`는 focus되지 않는 read-only metric으로 표현하고, payload/capability에 없는 like mutation·repost·follow는 숨긴다.
-- 이 snapshot은 UI-D local technical Gate만 닫는다. Issue·Draft PR·Hosted CI·Ready·merge·post-merge 및 최종 사용자 visual Gate는 실제 lifecycle 기록 전까지 pending이다.
+- UI-D와 UI-D0는 각 public lifecycle·사용자 Gate·merge·post-merge Actions까지 닫혔다. exact UI-D merge는 `3152aaee56a868e50abff943d6f14cf92cd45302`이며 UI-E는 이 SHA를 base로 시작했다.
+
+### 18.4 UI-E local technical evidence
+
+- `/agents`는 feature-owned flat Character rows와 shared `PageHeader`·`ListRow`·`ProfileAvatar`·`StatusChip`·`Button`·`Dialog`·feedback primitive를 사용한다. 한 Character의 mutation은 exact Character endpoint와 pending state만 바꾸며 다른 active Character를 끄지 않는다.
+- 저장 instant는 UTC로 정규화하고 next activity·recent result는 payload의 World timezone으로 표시한다. Character 생성의 기본 active hours는 backend canonical `14:00–22:00`과 일치하며 현재 KST 시각에 따라 임의 변경하지 않는다.
+- Studio의 `이 World에서 제거`는 exact confirmation name, 자율활동 정지, 현재 version 재조회, versioned leave 순서를 지키고 Character 자체·다른 World·기존 활동/사건/관계 근거 보존 범위를 안내한다.
+- Device Home은 World launchability와 runtime health를 별도 state로 표시한다. unavailable World는 link가 아니며 runtime은 starting·ready·degraded·failed·recovery-required·stopping·stopped를 합치지 않는다.
+- Relationship Graph는 ready·empty·degraded·rebuilding·unavailable·failed를 분리하고 canonical fallback 또는 lagging projection을 healthy LadybugDB로 표시하지 않는다.
+- Settings/local owner는 installation ID·label·owner·local session을 표시한다. 공개 Local runtime에 없는 owner 전체 `DELETE /auth/me`는 노출하지 않고, Character 삭제·World-local leave·session 종료의 exact scope를 구분한다.
+- UI-E local technical 검증은 Next production build, Tauri static export, feature architecture/design checker, focused backend domain regression, Next/static Playwright와 Local Settings fail-closed regression을 포함한다. Issue·push·Draft PR·Hosted CI·사용자 Ready·merge·post-merge Actions는 별도 Gate로 남는다.
 
 따라서 현재 허용되는 판정:
 
@@ -1041,9 +1053,10 @@ UI-A DESIGN CONTRACT CLOSEOUT PASS
 UI-B SEMANTIC TOKEN·PRIMITIVE FOUNDATION PASS
 UI-C PHONE SHELL·NAVIGATION·ROUTE PARITY PASS / MERGED / POST-MERGE PASS
 UI-D0 STATIC POST DETAIL HANDOFF FULL PASS / MERGED / POST-MERGE PASS
-UI-D SOCIAL CORE HOSTED PARITY LOCAL TECH PASS / PUBLIC LIFECYCLE PENDING
-UI-E~UI-F PRODUCT CONVERGENCE NOT STARTED
-WINDOWS 100%·125%·150% SCALE USER GATE PENDING
+UI-D SOCIAL CORE HOSTED PARITY FULL PASS / MERGED / POST-MERGE PASS
+UI-E CHARACTER·AUTONOMY·LOCAL-ONLY SURFACE IMPLEMENTED / LOCAL TECH PASS / PUBLIC LIFECYCLE PENDING
+UI-F VISUAL·CROSS-RUNTIME CLOSEOUT NOT STARTED
+UI-C WINDOWS 100%·125%·150% SCALE USER GATE PASS / UI-F FINAL EXACT-SHA RECHECK PENDING
 ```
 
 token·shell·social core·Local-only surface·visual/runtime Gate와 사용자 승인을 모두 통과한 뒤에만 허용되는 판정:

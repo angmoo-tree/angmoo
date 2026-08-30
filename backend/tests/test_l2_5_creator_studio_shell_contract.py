@@ -124,7 +124,8 @@ def test_studio_world_character_surface_owns_fixture_lifecycle_orchestration() -
 
 def test_local_character_creation_ui_has_no_hosted_saved_count_gate() -> None:
     create_client = _read("components/agent-create-client.tsx")
-    dashboard = _read("components/agents-dashboard-client.tsx")
+    dashboard = _read("features/characters/ui/agents-dashboard-client.tsx")
+    dashboard_compatibility = _read("components/agents-dashboard-client.tsx")
     agents_lib = _read("lib/agents.ts")
     combined = "\n".join((create_client, dashboard, agents_lib))
 
@@ -147,24 +148,28 @@ def test_local_character_creation_ui_has_no_hosted_saved_count_gate() -> None:
     assert "if (initialAgentCount === 0)" in create_client
     assert "<CreationModeSelector" in create_client
     assert "counts=" not in create_client
-    assert "getAgentTypeCounts(agents)" in dashboard
-    assert "서버 LLM ${agentTypeCounts.llm}개" in dashboard
-    assert 'href="/agents/new"' in dashboard
+    assert "summarizeCharacterAutonomy(items)" in dashboard
+    assert "자율활동 ON {summary.enabled}" in dashboard
+    assert 'router.push("/agents/new")' in dashboard
+    assert (
+        'export { AgentsDashboardClient } from "@/features/characters/public";'
+        in dashboard_compatibility
+    )
 
 
 def test_local_multi_autonomy_dashboard_uses_shared_utc_instant_contract() -> None:
-    dashboard = _read("components/agents-dashboard-client.tsx")
+    dashboard = _read("features/characters/ui/agents-dashboard-client.tsx")
     detail = _read("components/agent-detail-client.tsx")
     social_summary = _read("features/social/ui/active-agent-summary.tsx")
     presentation = _read("shared/ui/profile-presentation.ts")
     shared_public = _read("shared/ui/public.ts")
 
-    assert "item.character.id === next.character.id ? next : item" in dashboard
-    assert "next.settings.auto_enabled" not in dashboard
-    assert "agent.activity_summary.next_activity_at" in dashboard
-    assert "agent.assigned_slot?.next_tick_at" not in dashboard
-    assert "agent.activity_summary.timezone" in dashboard
-    assert "쉬는 중 ·" in dashboard
+    assert "candidate.character.id === nextItem.character.id" in dashboard
+    assert "nextItem.settings.auto_enabled" not in dashboard
+    assert "item.activity_summary.next_activity_at" in dashboard
+    assert "item.assigned_slot?.next_tick_at" not in dashboard
+    assert "item.activity_summary.timezone" in dashboard
+    assert "휴식 ·" in dashboard
     assert "쉬는 중 ·" in detail
     assert "apiInstantTimestamp" in detail
     assert 'from "@/shared/ui/public"' in social_summary
@@ -174,6 +179,16 @@ def test_local_multi_autonomy_dashboard_uses_shared_utc_instant_contract() -> No
     assert 'hourCycle: "h23"' in presentation
     for exported in ("apiInstantTimestamp", "formatDate", "parseApiInstant"):
         assert exported in shared_public
+
+
+def test_local_character_delete_copy_keeps_exact_character_scope() -> None:
+    detail = _read("components/agent-detail-client.tsx")
+
+    assert "이 Character 하나에 연결된 private 프로필 미디어" in detail
+    assert "현재 local owner, 다른 Character, 다른 owner 데이터는 삭제하지 않습니다." in detail
+    assert "owner 전체 삭제나 한 World에서" in detail
+    assert "작성자는" in detail and "삭제한 앵무" in detail
+    assert "privacy@angmoo.com" not in detail
 
 
 def test_world_character_setup_distinguishes_routine_and_feed_lane_states() -> None:

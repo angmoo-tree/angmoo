@@ -95,7 +95,7 @@
       "classification": "ADAPTED",
       "hosted_blob_oid": "ebeaf887706f73fe3b126feac46d87e55fe12faf",
       "hosted_source": "frontend/src/components/agents-dashboard-client.tsx",
-      "local_target": "frontend/src/components/agents-dashboard-client.tsx",
+      "local_target": "frontend/src/features/characters/ui/agents-dashboard-client.tsx",
       "scope": "row hierarchy adapted to multi-autonomy, World capacity, and scheduler state"
     },
     {
@@ -187,6 +187,7 @@
     "configs": [
       "browser-tests/playwright.config.ts",
       "browser-tests/playwright.static.config.ts",
+      "browser-tests/playwright.ui-e-local-settings.config.ts",
       "browser-tests/playwright.visual.config.ts"
     ],
     "lockfile": "browser-tests/pnpm-lock.yaml",
@@ -194,8 +195,10 @@
     "playwright_version": "1.62.1",
     "specs": [
       "browser-tests/product-shell.spec.ts",
+      "browser-tests/relationship-graph/product-shell.spec.ts",
       "browser-tests/semantic-foundation.visual.spec.ts",
-      "browser-tests/static-product-shell.spec.ts"
+      "browser-tests/static-product-shell.spec.ts",
+      "browser-tests/ui-e-local-settings/local-settings.spec.ts"
     ],
     "visual_command_owner": "browser-tests/package.json",
     "visual_command_status": "active_ui_b_semantic_foundation",
@@ -215,9 +218,12 @@
     "backend/app/runtime/social/sqlalchemy_read_repository.py",
     "backend/tests/test_l3_owner_manual_social_inbox.py",
     "browser-tests/package.json",
+    "browser-tests/playwright.ui-e-local-settings.config.ts",
     "browser-tests/playwright.visual.config.ts",
+    "browser-tests/relationship-graph/product-shell.spec.ts",
     "browser-tests/semantic-foundation.visual.spec.ts",
     "browser-tests/static-product-shell.spec.ts",
+    "browser-tests/ui-e-local-settings/local-settings.spec.ts",
     "desktop/src-tauri/src/product_windows.rs",
     "docs/architecture/frontend-design-baseline.json",
     "docs/architecture/frontend-design-reference.md",
@@ -289,8 +295,8 @@
     "notice_decision": "The audited visual files come from first-party history already shared by hosted and Local before the Local GPL transition. UI-A copies no post-common hosted code, asset, icon, or font, so it adds no bundled Apache notice. Any later post-common hosted-only transplant requires a separate license-policy and notice decision before copying."
   },
   "raw_color_scan": {
-    "baseline_files": 50,
-    "baseline_occurrences": 1794,
+    "baseline_files": 42,
+    "baseline_occurrences": 1496,
     "baseline_status": "reviewed_ui_b",
     "extensions": [
       ".css",
@@ -777,6 +783,7 @@
       "required_smoke": [
         "pnpm --dir browser-tests exec playwright test --config=playwright.static.config.ts",
         "pnpm --dir browser-tests test",
+        "pnpm --dir browser-tests test:ui-e-local-settings",
         "pnpm --dir browser-tests test:visual",
         "pnpm --dir frontend build",
         "pnpm --dir frontend build:static"

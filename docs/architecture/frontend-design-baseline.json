@@ -4,13 +4,6 @@
       "classifications": [
         "ADAPTED"
       ],
-      "path": "frontend/src/components/agents-dashboard-client.tsx",
-      "sha256": "48f0c305129a37265267caa81291ef80e660bf0090c9b3c8aa6814b321f42bc4"
-    },
-    {
-      "classifications": [
-        "ADAPTED"
-      ],
       "path": "frontend/src/components/app-shell.tsx",
       "sha256": "3b7bc14f7e93c986fc6d3cd0216125b8cea1809971e510c8327b5cfee2a377bc"
     },
@@ -30,6 +23,13 @@
     },
     {
       "classifications": [
+        "ADAPTED"
+      ],
+      "path": "frontend/src/features/characters/ui/agents-dashboard-client.tsx",
+      "sha256": "3ecb33a47878d5040e72a3d8af08bec9964cb73489fbc427e1aee5614fb24ae5"
+    },
+    {
+      "classifications": [
         "LOCAL"
       ],
       "path": "frontend/src/features/creator-studio/ui/creator-studio-frame.tsx",
@@ -40,7 +40,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/device-home/ui/device-home.tsx",
-      "sha256": "6b13da2a64cb0bfdc80ad35b806b008240a223f5ba13fc3ed706f4d208e3d55b"
+      "sha256": "fd8b2536320644147594c4c53ab60a6471b2b106a6b313110b0ba4b1fad184cf"
     },
     {
       "classifications": [
@@ -54,7 +54,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/relationships/ui/relationship-graph-client.tsx",
-      "sha256": "055cc656aa55eafdb0816770383eaefb49800a8ec4c3903a569adebb693fea80"
+      "sha256": "e051333c930af9c36148473835647fe2938c0af4feb86ccb04189fe1c5251157"
     },
     {
       "classifications": [
@@ -152,6 +152,10 @@
         "sha256": "b1dcc5b46884c5fcdc2d1e7bf30d8337e83b2c4d5f3648474758d6d0b17612d4"
       },
       {
+        "path": "browser-tests/playwright.ui-e-local-settings.config.ts",
+        "sha256": "4683d5b3d17f2f64e613ffb83ba746d4a29fe914426431a3fcdb3ebadf44014d"
+      },
+      {
         "path": "browser-tests/playwright.visual.config.ts",
         "sha256": "8feff29c9b818499ff67d6743341ffeb2f09a9627cfc39a2c4fc5ad8ea82e2b8"
       }
@@ -162,7 +166,11 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "e7e68e11328747115f43ef2d6009bd73f0104573c7a4c0c9b9e8487048783f5f"
+        "sha256": "72e6c2af6b1ffa7c67ba6952e75c8a859e36418c6c828b79c1f07326b41ba939"
+      },
+      {
+        "path": "browser-tests/relationship-graph/product-shell.spec.ts",
+        "sha256": "d5fd280716ec04006c17989f9629b009aedfa3ffdbf2278ce9febe00de7382e3"
       },
       {
         "path": "browser-tests/semantic-foundation.visual.spec.ts",
@@ -170,7 +178,11 @@
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "320b3fb3d2207af178fbf5209d048c7c932c39cb591136105c01e4515373283c"
+        "sha256": "fd98c1aa756d13d053cbe48df1e0b7b98224a5ea77df2ba442df246860d1b6b1"
+      },
+      {
+        "path": "browser-tests/ui-e-local-settings/local-settings.spec.ts",
+        "sha256": "229a0d5196152ee8939809a4ac35456de6edf37a13f907b5c1b5a93c52808773"
       }
     ],
     "static_direct_open_routes": [
@@ -211,9 +223,12 @@
       "backend/app/runtime/social/sqlalchemy_read_repository.py",
       "backend/tests/test_l3_owner_manual_social_inbox.py",
       "browser-tests/package.json",
+      "browser-tests/playwright.ui-e-local-settings.config.ts",
       "browser-tests/playwright.visual.config.ts",
+      "browser-tests/relationship-graph/product-shell.spec.ts",
       "browser-tests/semantic-foundation.visual.spec.ts",
       "browser-tests/static-product-shell.spec.ts",
+      "browser-tests/ui-e-local-settings/local-settings.spec.ts",
       "desktop/src-tauri/src/product_windows.rs",
       "docs/architecture/frontend-design-baseline.json",
       "docs/architecture/frontend-design-reference.md",
@@ -261,21 +276,21 @@
     "forbidden_matches": []
   },
   "raw_colors": {
-    "files": 50,
-    "occurrences": 1794,
+    "files": 42,
+    "occurrences": 1496,
     "pattern": "#[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{5}|[0-9A-Fa-f]{3}|[0-9A-Fa-f])?\\b",
     "per_extension": {
       ".css": {
-        "files": 9,
-        "occurrences": 121
+        "files": 8,
+        "occurrences": 114
       },
       ".ts": {
         "files": 1,
         "occurrences": 2
       },
       ".tsx": {
-        "files": 40,
-        "occurrences": 1671
+        "files": 33,
+        "occurrences": 1380
       }
     },
     "per_file": [
@@ -359,39 +374,6 @@
         }
       },
       {
-        "occurrences": 19,
-        "path": "frontend/src/components/activity-hours-control.tsx",
-        "values": {
-          "#101828": 1,
-          "#344054": 2,
-          "#667085": 3,
-          "#c24141": 1,
-          "#e1e5eb": 2,
-          "#f2f4f7": 1,
-          "#f6f7f9": 1,
-          "#ff6b6b": 3,
-          "#ffb5b5": 1,
-          "#ffd7d7": 1,
-          "#ffe2e2": 1,
-          "#fff0ef": 1,
-          "#fff5f5": 1
-        }
-      },
-      {
-        "occurrences": 19,
-        "path": "frontend/src/components/agent-activity-list.tsx",
-        "values": {
-          "#101828": 1,
-          "#667085": 5,
-          "#e1e5eb": 2,
-          "#eaedf2": 2,
-          "#eef1f5": 1,
-          "#ff6b6b": 4,
-          "#ffb5b5": 2,
-          "#fff0ef": 2
-        }
-      },
-      {
         "occurrences": 163,
         "path": "frontend/src/components/agent-create-client.tsx",
         "values": {
@@ -428,24 +410,23 @@
         }
       },
       {
-        "occurrences": 355,
+        "occurrences": 344,
         "path": "frontend/src/components/agent-detail-client.tsx",
         "values": {
           "#027a48": 1,
-          "#101828": 42,
-          "#344054": 40,
+          "#101828": 41,
+          "#344054": 38,
           "#475467": 4,
           "#52610f": 1,
-          "#667085": 57,
+          "#667085": 56,
           "#98a2b3": 11,
           "#9a3412": 1,
           "#9a5b13": 1,
           "#b22f2f": 1,
-          "#b42318": 1,
           "#b45309": 2,
-          "#c24141": 9,
+          "#c24141": 8,
           "#d0d5dd": 3,
-          "#d92d20": 3,
+          "#d92d20": 2,
           "#d9e0ea": 4,
           "#e1e5eb": 19,
           "#eaedf2": 14,
@@ -457,11 +438,11 @@
           "#f9fafb": 12,
           "#fbfcfd": 2,
           "#ff5252": 5,
-          "#ff6b6b": 37,
+          "#ff6b6b": 36,
           "#ff8f8f": 1,
           "#ffb4b4": 2,
           "#ffb5b5": 3,
-          "#ffd7d7": 9,
+          "#ffd7d7": 7,
           "#ffe2e2": 3,
           "#ffe4bf": 1,
           "#fff0ef": 3,
@@ -470,30 +451,7 @@
           "#fff8ec": 2,
           "#fff8ed": 1,
           "#fff8f7": 1,
-          "#fffafa": 3
-        }
-      },
-      {
-        "occurrences": 59,
-        "path": "frontend/src/components/agents-dashboard-client.tsx",
-        "values": {
-          "#101828": 8,
-          "#344054": 4,
-          "#475467": 5,
-          "#667085": 8,
-          "#98a2b3": 1,
-          "#c24141": 1,
-          "#e1e5eb": 4,
-          "#eaedf2": 2,
-          "#eef1f5": 4,
-          "#f2f4f7": 1,
-          "#f6f7f9": 1,
-          "#f9fafb": 6,
-          "#ff5252": 3,
-          "#ff6b6b": 6,
-          "#ffd7d7": 1,
-          "#fff0ef": 3,
-          "#fff5f5": 1
+          "#fffafa": 2
         }
       },
       {
@@ -543,35 +501,6 @@
           "#eaedf2": 1,
           "#f2f4f7": 2,
           "#f9fafb": 1
-        }
-      },
-      {
-        "occurrences": 40,
-        "path": "frontend/src/components/local-owner-client.tsx",
-        "values": {
-          "#101828": 3,
-          "#257a38": 1,
-          "#344054": 3,
-          "#475467": 1,
-          "#667085": 5,
-          "#8a5a00": 1,
-          "#c24141": 1,
-          "#d0d5dd": 2,
-          "#dce8df": 1,
-          "#e4e7ec": 2,
-          "#e8ecf2": 2,
-          "#e8f7e8": 1,
-          "#f5fbf6": 1,
-          "#f6f7f9": 2,
-          "#f9fafb": 3,
-          "#ff5252": 1,
-          "#ff6b6b": 1,
-          "#ff7a7a": 3,
-          "#ffd7d7": 1,
-          "#ffe4e4": 2,
-          "#fff5f5": 1,
-          "#fff6f6": 1,
-          "#fff8e8": 1
         }
       },
       {
@@ -785,31 +714,6 @@
         }
       },
       {
-        "occurrences": 74,
-        "path": "frontend/src/components/settings-client.tsx",
-        "values": {
-          "#101828": 15,
-          "#15803d": 2,
-          "#1f2937": 1,
-          "#344054": 1,
-          "#667085": 11,
-          "#98a2b3": 2,
-          "#d0d5dd": 7,
-          "#d92d20": 3,
-          "#e5484d": 1,
-          "#eaedf2": 3,
-          "#eef1f5": 2,
-          "#f0fdf4": 2,
-          "#f4b8b8": 1,
-          "#f6f7f9": 2,
-          "#ff4d4f": 3,
-          "#ff6b6b": 8,
-          "#ffd7d7": 4,
-          "#fff5f5": 5,
-          "#fffafa": 1
-        }
-      },
-      {
         "occurrences": 50,
         "path": "frontend/src/components/tree-community-client.tsx",
         "values": {
@@ -966,58 +870,6 @@
           "#f6f7f9": 1,
           "#ff6b6b": 1,
           "#ffffff": 1
-        }
-      },
-      {
-        "occurrences": 61,
-        "path": "frontend/src/features/creator-studio/ui/studio-world-character-list.tsx",
-        "values": {
-          "#027a48": 1,
-          "#101828": 7,
-          "#344054": 7,
-          "#3538cd": 1,
-          "#475467": 4,
-          "#667085": 12,
-          "#b42318": 6,
-          "#d0d5dd": 6,
-          "#e1e5eb": 1,
-          "#e5484d": 1,
-          "#eaecf0": 1,
-          "#ecfdf3": 1,
-          "#eef2ff": 1,
-          "#f2f4f7": 5,
-          "#fcfcfd": 1,
-          "#fda29b": 1,
-          "#ff6b6b": 1,
-          "#ffd3d3": 1,
-          "#fff1f0": 2,
-          "#fffafa": 1
-        }
-      },
-      {
-        "occurrences": 7,
-        "path": "frontend/src/features/device-home/ui/device-home.module.css",
-        "values": {
-          "#2e9d5b": 1,
-          "#3e2d2b": 1,
-          "#412e2d": 1,
-          "#76615f": 1,
-          "#9f2f35": 1,
-          "#fff": 2
-        }
-      },
-      {
-        "occurrences": 8,
-        "path": "frontend/src/features/device-home/ui/device-home.tsx",
-        "values": {
-          "#dce7f5": 1,
-          "#ded7f4": 1,
-          "#f5f8fc": 1,
-          "#f7d6d5": 1,
-          "#f7f2ff": 1,
-          "#ffe1a6": 1,
-          "#fff4ef": 1,
-          "#fff5da": 1
         }
       },
       {
@@ -1234,189 +1086,159 @@
     ],
     "source_root": "frontend/src",
     "values": {
-      "#027a48": 6,
+      "#027a48": 5,
       "#039855": 1,
       "#05603a": 1,
-      "#101828": 238,
+      "#101828": 202,
       "#12b76a": 1,
       "#147a45": 3,
-      "#15803d": 2,
       "#166534": 1,
       "#175cd3": 2,
       "#17834b": 1,
       "#1d2939": 3,
       "#1f2330": 1,
-      "#1f2937": 2,
+      "#1f2937": 1,
       "#251818": 4,
       "#252124": 1,
-      "#257a38": 1,
       "#292326": 1,
-      "#2e9d5b": 1,
       "#302829": 1,
       "#30343b": 1,
-      "#344054": 116,
-      "#3538cd": 1,
+      "#344054": 97,
       "#3b82f6": 1,
-      "#3e2d2b": 1,
-      "#412e2d": 1,
-      "#475467": 48,
+      "#475467": 38,
       "#52606d": 2,
       "#52610f": 1,
       "#584140": 1,
       "#615655": 1,
       "#655655": 1,
-      "#667085": 239,
+      "#667085": 194,
       "#6941c6": 1,
       "#6d6465": 2,
       "#716464": 1,
       "#765f5c": 2,
-      "#76615f": 1,
       "#787f8b": 1,
       "#7a2e0e": 2,
       "#7a4b00": 1,
       "#7a808b": 1,
       "#7e4744": 1,
       "#81322f": 1,
-      "#8a5a00": 2,
+      "#8a5a00": 1,
       "#8a6f6d": 1,
       "#8f3f3b": 1,
       "#8f4f4c": 1,
       "#8f8281": 1,
-      "#98a2b3": 58,
+      "#98a2b3": 55,
       "#9a3412": 1,
       "#9a5b13": 1,
       "#9c6d68": 2,
-      "#9f2f35": 1,
       "#9f413d": 4,
       "#a93636": 2,
       "#aa453c": 1,
       "#abefc6": 1,
       "#b22f2f": 1,
       "#b2ddff": 1,
-      "#b42318": 12,
+      "#b42318": 5,
       "#b45309": 3,
       "#b54708": 4,
       "#b7e4c7": 1,
       "#b7ebcd": 1,
       "#b8837f": 1,
-      "#c24141": 47,
+      "#c24141": 43,
       "#c7933d": 2,
       "#c7d7fe": 1,
       "#c9ced6": 3,
       "#cdd3dc": 1,
-      "#d0d5dd": 35,
+      "#d0d5dd": 20,
       "#d7bd16": 1,
       "#d8a640": 1,
-      "#d92d20": 9,
+      "#d92d20": 5,
       "#d9bf19": 1,
       "#d9d6fe": 1,
       "#d9e0ea": 4,
       "#d9f2e5": 3,
       "#dc6803": 1,
-      "#dce7f5": 1,
-      "#dce8df": 1,
-      "#ded7f4": 1,
       "#dfe3e8": 2,
       "#e0bfbd": 1,
-      "#e1e5eb": 90,
+      "#e1e5eb": 81,
       "#e3d6d3": 1,
       "#e4a0a0": 2,
-      "#e4e7ec": 5,
+      "#e4e7ec": 3,
       "#e4e8de": 1,
-      "#e5484d": 2,
       "#e5c91e": 1,
       "#e6c91f": 1,
       "#e6dbd8": 1,
       "#e7bd54": 1,
       "#e8b6b0": 1,
-      "#e8ecf2": 2,
-      "#e8f7e8": 1,
-      "#eaecf0": 2,
-      "#eaedf2": 73,
-      "#ecfdf3": 5,
+      "#eaecf0": 1,
+      "#eaedf2": 66,
+      "#ecfdf3": 4,
       "#edf0f4": 1,
       "#edf0f5": 1,
-      "#eef1f5": 67,
-      "#eef2ff": 1,
+      "#eef1f5": 60,
       "#ef9a74": 1,
       "#efd7d2": 1,
       "#eff8ff": 1,
       "#f0fbf5": 3,
-      "#f0fdf4": 2,
       "#f0fff6": 1,
-      "#f2f4f7": 43,
+      "#f2f4f7": 36,
       "#f2f8df": 1,
       "#f2fbf5": 1,
       "#f3f4f6": 5,
-      "#f4b8b8": 1,
       "#f4ddad": 1,
       "#f4df28": 1,
       "#f4f3ff": 1,
       "#f4f5f7": 1,
       "#f4f7fb": 1,
-      "#f5f8fc": 1,
       "#f5f8ff": 1,
-      "#f5fbf6": 1,
       "#f6e9e7": 1,
-      "#f6f7f9": 42,
+      "#f6f7f9": 36,
       "#f79009": 3,
-      "#f7d6d5": 1,
       "#f7ead8": 1,
-      "#f7f2ff": 1,
       "#f7f8fa": 6,
       "#f7faf6": 1,
       "#f8dfdc": 2,
       "#f8fafc": 1,
       "#f9df9b": 1,
-      "#f9fafb": 82,
+      "#f9fafb": 73,
       "#face": 1,
       "#fbfcfd": 4,
-      "#fcfcfd": 1,
-      "#fda29b": 2,
+      "#fda29b": 1,
       "#fdb022": 1,
       "#fedf89": 1,
-      "#ff4d4f": 3,
-      "#ff5252": 17,
+      "#ff5252": 13,
       "#ff5a32": 2,
-      "#ff6b6b": 163,
-      "#ff7a7a": 3,
+      "#ff6b6b": 139,
       "#ff8a8a": 5,
       "#ff8f8f": 1,
       "#ff9b9b": 1,
       "#ffb4b4": 3,
-      "#ffb5b5": 12,
+      "#ffb5b5": 9,
       "#ffcccc": 1,
       "#ffd2d2": 1,
-      "#ffd3d3": 1,
-      "#ffd7d7": 43,
-      "#ffe1a6": 1,
+      "#ffd7d7": 34,
       "#ffe1e1": 1,
-      "#ffe2e2": 14,
+      "#ffe2e2": 13,
       "#ffe4bf": 1,
-      "#ffe4e4": 2,
       "#ffe5c2": 1,
-      "#fff": 8,
-      "#fff0ef": 22,
+      "#fff": 6,
+      "#fff0ef": 16,
       "#fff0f0": 1,
-      "#fff1f0": 3,
+      "#fff1f0": 1,
       "#fff1f1": 2,
       "#fff260": 1,
       "#fff45c": 1,
-      "#fff4ef": 1,
       "#fff4f0": 1,
-      "#fff5da": 1,
-      "#fff5f5": 44,
-      "#fff6f6": 1,
+      "#fff5f5": 36,
       "#fff7e6": 1,
       "#fff7ed": 1,
-      "#fff8e8": 2,
+      "#fff8e8": 1,
       "#fff8ec": 2,
       "#fff8ed": 2,
       "#fff8f7": 5,
       "#fff8f8": 1,
       "#fffaeb": 3,
       "#fffaf0": 1,
-      "#fffafa": 10,
+      "#fffafa": 7,
       "#ffffff": 9
     }
   },
@@ -1460,7 +1282,7 @@
       {
         "path": "frontend/src/composition/static-product-router.tsx",
         "present": true,
-        "sha256": "2c19fcdc99a87c469b5327826de48f4b9e80b7e4657b905fd69d7a4453990df9"
+        "sha256": "f28116ca2c2e74a7ba9449850bc66fe8feb068f760e425e808ff28205e02d71d"
       },
       {
         "path": "frontend/src/features/ui-foundation/public.ts",
@@ -1561,6 +1383,7 @@
       "required_smoke": [
         "pnpm --dir browser-tests exec playwright test --config=playwright.static.config.ts",
         "pnpm --dir browser-tests test",
+        "pnpm --dir browser-tests test:ui-e-local-settings",
         "pnpm --dir browser-tests test:visual",
         "pnpm --dir frontend build",
         "pnpm --dir frontend build:static"

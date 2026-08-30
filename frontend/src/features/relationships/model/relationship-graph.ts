@@ -62,7 +62,15 @@ export type RelationshipGraphPresentationState =
   | "ready"
   | "rebuilding"
   | "degraded"
+  | "unavailable"
   | "failed";
+
+const UNAVAILABLE_GRAPH_STATUSES = new Set<RelationshipGraphStatus>([
+  "disabled",
+  "unavailable",
+  "timeout",
+  "misconfigured",
+]);
 
 export function relationshipGraphPresentationState({
   graph,
@@ -78,6 +86,10 @@ export function relationshipGraphPresentationState({
   if (!graph) return "failed";
   if (graph.meta.graph_status === "rebuilding") return "rebuilding";
   if (graph.meta.source === "canonical_fallback") return "degraded";
+  if (graph.meta.graph_status === "lagging") return "degraded";
+  if (UNAVAILABLE_GRAPH_STATUSES.has(graph.meta.graph_status)) {
+    return "unavailable";
+  }
   if (graph.edges.length === 0 && graph.evidence.length === 0) return "empty";
   return "ready";
 }

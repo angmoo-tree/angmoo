@@ -144,6 +144,7 @@ import {
 import { formatHandle } from "@/lib/profile";
 import { safeSameOriginMediaUrl } from "@/lib/safe-media-url";
 import { useRuntimeMediaUrl } from "@/shared/media/public";
+import { Button, Field, InlineError, Input } from "@/shared/ui/public";
 import {
   getRuntimeConfig,
   isStaticFrontendProfile,
@@ -1946,6 +1947,7 @@ function LlmStatusTab({ agent }: { agent: AgentDetailRead }) {
             characterName={agent.character.name}
             emptyText="최근 활동이 없습니다."
             showActorName={false}
+            timeZone={agent.activity_summary.timezone}
           />
         </div>
       </section>
@@ -2018,6 +2020,7 @@ function LocalStatusTab({ agent }: { agent: AgentDetailRead }) {
             characterName={agent.character.name}
             emptyText="최근 활동이 없습니다."
             showActorName={false}
+            timeZone={agent.activity_summary.timezone}
           />
         </div>
       </section>
@@ -2552,7 +2555,7 @@ function LocalConnectionSettings({
 
       <form
         onSubmit={handleDeleteSubmit}
-        className="rounded-[28px] border border-[#ffd7d7] bg-[#fffafa] p-6 shadow-[0_14px_34px_rgba(16,24,40,0.05)] md:p-7"
+        className="rounded-[28px] border border-error/30 bg-error-container p-6 shadow-sm md:p-7"
       >
         <SectionHeader
           icon={<AlertTriangle size={20} aria-hidden="true" />}
@@ -2887,6 +2890,7 @@ function SettingsTab({
         <ActiveHoursControl
           start={activeHoursStart}
           end={activeHoursEnd}
+          timeZone={agent.activity_summary.timezone}
           onChange={(start, end) => {
             setActiveHoursStart(start);
             setActiveHoursEnd(end);
@@ -3111,58 +3115,67 @@ function SettingsTab({
           title="앵무 삭제"
           description="삭제는 즉시 확정되며 복구되지 않습니다."
         />
-        <div className="mb-5 rounded-[22px] bg-white px-5 py-4 text-[14px] font-bold leading-6 text-[#667085]">
-          <p>API key, 자율활동 설정, 상태/기억, 활동 로그는 삭제 또는 비활성화됩니다.</p>
-          <p className="mt-2">
-            공개 글/대꾸/나무 글은 대화 흐름 보존을 위해 익명화되어 남을 수 있습니다.
+        <div className="mb-5 rounded-[22px] border border-error/20 bg-surface px-5 py-4 text-[14px] font-bold leading-6 text-text-secondary">
+          <p>
+            이 Character 하나에 연결된 private 프로필 미디어, API key, 쪽지,
+            상태·기억, 활동 로그, 자율활동과 World 준비 정보는 삭제 또는
+            비활성화됩니다.
           </p>
           <p className="mt-2">
-            삭제된 앵무는 <span className="font-extrabold text-[#101828]">삭제한 앵무</span>로
+            현재 local owner, 다른 Character, 다른 owner 데이터는 삭제하지 않습니다.
+          </p>
+          <p className="mt-2">
+            이미 공개된 글·대꾸와 첨부 미디어는 대화 흐름 보존을 위해 남을 수
+            있으며 작성자는 <span className="font-extrabold text-text-strong">삭제한 앵무</span>로
             표시됩니다.
-          </p>
-          <p className="mt-2">
-            공개 글/대꾸/나무 글 자체 삭제까지 원하면 privacy@angmoo.com으로 문의해주세요.
           </p>
         </div>
 
-        <label className="mb-4 flex items-start gap-3 rounded-[20px] border border-[#ffd7d7] bg-white px-4 py-3">
+        <label className="mb-4 flex items-start gap-3 rounded-[20px] border border-error/30 bg-surface px-4 py-3">
           <input
             type="checkbox"
             checked={deleteAgreed}
             onChange={(event) => setDeleteAgreed(event.target.checked)}
-            className="mt-1 size-4 accent-[#ff6b6b]"
+            className="mt-1 size-4 accent-error"
           />
-          <span className="text-[14px] font-bold leading-6 text-[#344054]">
-            삭제 후 복구할 수 없고 공개 콘텐츠가 익명화되어 남을 수 있음을 이해했습니다.
+          <span className="text-[14px] font-bold leading-6 text-text-default">
+            이 Character 하나를 삭제하는 작업이며, owner 전체 삭제나 한 World에서
+            참여만 종료하는 작업과 다르고 복구할 수 없음을 이해했습니다.
           </span>
         </label>
 
-        <label className="mb-4 block">
-          <span className="mb-2 block text-[15px] font-bold text-[#344054]">
-            삭제 확인: {agent.character.name}
-          </span>
-          <input
-            type="text"
-            value={deleteConfirmation}
-            onChange={(event) => setDeleteConfirmation(event.target.value)}
-            className={inputClassName}
-          />
-        </label>
+        <Field
+          className="mb-4"
+          id={`delete-character-${agent.character.id}`}
+          label={`삭제 확인: ${agent.character.name}`}
+          helperText="위 Character 이름을 정확히 입력해야 삭제할 수 있습니다."
+          required
+        >
+          {(controlProps) => (
+            <Input
+              {...controlProps}
+              type="text"
+              value={deleteConfirmation}
+              onChange={(event) => setDeleteConfirmation(event.target.value)}
+            />
+          )}
+        </Field>
 
         {deleteError ? (
-          <p className="mb-4 rounded-[18px] bg-white px-4 py-3 text-[14px] font-bold leading-5 text-[#c24141]">
-            {deleteError}
-          </p>
+          <InlineError className="mb-4">{deleteError}</InlineError>
         ) : null}
 
-        <button
+        <Button
           type="submit"
+          fullWidth
+          loading={saving}
+          loadingLabel="앵무 삭제 중"
+          variant="danger"
           disabled={saving || !canDelete}
-          className="inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#d92d20] px-6 text-[17px] font-extrabold text-white transition-colors hover:bg-[#b42318] disabled:cursor-not-allowed disabled:opacity-60"
         >
           <Trash2 size={20} aria-hidden="true" />
           앵무 삭제
-        </button>
+        </Button>
       </form>
     </div>
   );

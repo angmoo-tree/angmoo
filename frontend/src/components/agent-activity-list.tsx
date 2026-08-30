@@ -14,8 +14,8 @@ import {
   UserPlus,
   Zap,
 } from "lucide-react";
-import Link from "next/link";
 
+import { LocalProductLink } from "@/features/device-shell/public";
 import {
   formatActionLabel,
   formatActivityDetail,
@@ -25,72 +25,86 @@ import {
   type AgentActivityLogView,
 } from "@/lib/activity";
 import { formatDate } from "@/lib/community";
+import { Badge, EmptyState } from "@/shared/ui/public";
 
 export function AgentActivityList({
   logs,
   characterName,
   emptyText = "아직 활동 로그가 없습니다.",
   showActorName = true,
+  timeZone = "Asia/Seoul",
 }: {
   logs: AgentActivityLogView[];
   characterName: string;
   emptyText?: string;
   showActorName?: boolean;
+  timeZone?: string;
 }) {
   if (logs.length === 0) {
     return (
-      <div className="rounded-[24px] border border-[#eef1f5] bg-white px-6 py-8 text-[16px] font-medium text-[#667085]">
-        {emptyText}
-      </div>
+      <EmptyState
+        description={emptyText}
+        title="활동 기록 없음"
+      />
     );
   }
 
   return (
-    <div className="flex flex-col border-t border-[#eaedf2]">
+    <div className="flex flex-col border-t border-border-default">
+      <p
+        className="border-b border-border-default bg-surface-subtle px-4 py-2 text-xs font-bold text-text-secondary"
+        data-activity-log-timezone={timeZone}
+      >
+        표시 시간 · {timeZone}
+      </p>
       {logs.map((log) => {
         const Icon = getActivityIcon(log.action_type);
         const detail = formatActivityDetail(log);
         const profileHref = targetProfileHref(log);
 
         return (
-          <article key={log.id} className="border-b border-[#eaedf2] bg-white py-5">
+          <article key={log.id} className="border-b border-border-default bg-surface py-5">
             <div className="flex gap-4">
-              <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#fff0ef] text-[#ff6b6b]">
+              <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-surface-muted text-text-secondary">
                 <Icon size={20} aria-hidden="true" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="mb-2 flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-[#fff0ef] px-3 py-1 text-[13px] font-extrabold text-[#ff6b6b]">
+                  <Badge>
                     {formatActionLabel(log.action_type)}
-                  </span>
-                  <span className="text-[14px] font-medium text-[#667085]">
-                    {formatDate(log.created_at)}
-                  </span>
+                  </Badge>
+                  <time
+                    dateTime={log.created_at}
+                    className="text-[14px] font-medium text-text-secondary"
+                    title={`${timeZone} 기준`}
+                  >
+                    {formatDate(log.created_at, timeZone)}
+                  </time>
                 </div>
-                <p className="break-words text-[17px] font-extrabold leading-7 text-[#101828]">
+                <p className="break-words text-[17px] font-extrabold leading-7 text-text-strong">
                   {formatActivityHeadline(log, characterName, { showActorName })}
                 </p>
                 {detail ? (
-                  <p className="mt-1 break-words text-[15px] font-medium leading-6 text-[#667085]">
+                  <p className="mt-1 break-words text-[15px] font-medium leading-6 text-text-secondary">
                     {detail}
                   </p>
                 ) : null}
                 {log.target_post_id ? (
-                  <Link
+                  <LocalProductLink
                     href={`/posts/${log.target_post_id}`}
                     title={log.target_post_id}
-                    className="mt-3 inline-flex rounded-full border border-[#e1e5eb] bg-white px-3 py-1.5 text-[13px] font-extrabold text-[#667085] transition-colors hover:border-[#ffb5b5] hover:text-[#ff6b6b]"
+                    className="mt-3 inline-flex min-h-11 items-center rounded-full border border-border-control bg-surface px-4 py-2 text-[13px] font-extrabold text-text-strong transition-colors hover:border-brand-soft-border hover:bg-surface-subtle focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
                   >
                     {formatTargetLinkLabel(log.action_type)}
-                  </Link>
+                  </LocalProductLink>
                 ) : null}
                 {!log.target_post_id && profileHref ? (
-                  <Link
+                  <LocalProductLink
                     href={profileHref}
-                    className="mt-3 inline-flex rounded-full border border-[#e1e5eb] bg-white px-3 py-1.5 text-[13px] font-extrabold text-[#667085] transition-colors hover:border-[#ffb5b5] hover:text-[#ff6b6b]"
+                    className="mt-3 inline-flex min-h-11 items-center rounded-full border border-border-control bg-surface px-4 py-2 text-[13px] font-extrabold text-text-strong transition-colors hover:border-brand-soft-border hover:bg-surface-subtle focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
                   >
                     {formatTargetLinkLabel(log.action_type)}
-                  </Link>
+                  </LocalProductLink>
                 ) : null}
               </div>
             </div>

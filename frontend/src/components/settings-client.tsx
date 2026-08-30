@@ -1,25 +1,44 @@
 "use client";
 
-import { AlertTriangle, KeyRound, LogOut, Save, Trash2 } from "lucide-react";
-import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
-import { useEffect, useState } from "react";
+import {
+  AlertTriangle,
+  Database,
+  KeyRound,
+  LogOut,
+  Save,
+  Trash2,
+} from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
-import { useAuth } from "@/components/auth-provider";
+import { useAuth } from "@/shared/auth/public";
+import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
+import {
+  Button,
+  Card,
+  Field,
+  InlineError,
+  Input,
+  PageHeader,
+  Select,
+  StatusChip,
+  Toast,
+} from "@/shared/ui/public";
 import {
   clearAuth,
-  deleteCurrentAccount,
   DEFAULT_MESSAGE_GOOGLE_MODEL,
+  getLocalBootstrapStatus,
   getMessageSettings,
   logoutCurrentSession,
   MESSAGE_GOOGLE_GEMINI_MODELS,
   updateMessageSettings,
-  type MessageGoogleGeminiModel,
+  type LocalBootstrapRead,
   type MessageCredentialSource,
+  type MessageGoogleGeminiModel,
   type MessageSettingsRead,
 } from "@/lib/agents";
 import { safeSettingsReturnTo } from "@/lib/safe-navigation";
 
-const ACCOUNT_DELETE_CONFIRMATION = "회원탈퇴";
+import styles from "./settings-client.module.css";
 
 function asMessageGoogleModel(value: string | undefined): MessageGoogleGeminiModel {
   return MESSAGE_GOOGLE_GEMINI_MODELS.some((option) => option.value === value)
@@ -30,6 +49,9 @@ function asMessageGoogleModel(value: string | undefined): MessageGoogleGeminiMod
 export function SettingsClient() {
   const router = useRouter();
   const { status: authStatus, user } = useAuth();
+  const [installation, setInstallation] = useState<LocalBootstrapRead | null>(null);
+  const [installationLoading, setInstallationLoading] = useState(true);
+  const [installationError, setInstallationError] = useState<string | null>(null);
   const [messageSettings, setMessageSettings] = useState<MessageSettingsRead | null>(null);
   const [messageSource, setMessageSource] = useState<MessageCredentialSource>("message_key");
   const [messageModel, setMessageModel] = useState<MessageGoogleGeminiModel>(
@@ -37,24 +59,65 @@ export function SettingsClient() {
   );
   const [sourceCharacterId, setSourceCharacterId] = useState("");
   const [messageApiKey, setMessageApiKey] = useState("");
+  const [messageLoading, setMessageLoading] = useState(true);
   const [messageSaving, setMessageSaving] = useState(false);
   const [messageError, setMessageError] = useState<string | null>(null);
   const [messageSaved, setMessageSaved] = useState(false);
   const [messageCleared, setMessageCleared] = useState(false);
-  const [deleteAgreed, setDeleteAgreed] = useState(false);
-  const [deleteConfirmation, setDeleteConfirmation] = useState("");
-  const [deletePending, setDeletePending] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [logoutPending, setLogoutPending] = useState(false);
 
-  const deleteEnabled =
-    deleteAgreed &&
-    deleteConfirmation.trim() === ACCOUNT_DELETE_CONFIRMATION &&
-    !deletePending;
+  const installationStatus = installationLoading
+    ? { label: "설치 확인 중", tone: "waiting" as const }
+    : installationError
+      ? { label: "설치 확인 실패", tone: "degraded" as const }
+      : installation?.state === "claimed" && installation.owner
+        ? { label: "로컬 세션 연결됨", tone: "healthy" as const }
+        : { label: "owner 연결 확인 필요", tone: "degraded" as const };
+
+  const loadInstallation = useCallback(async () => {
+    setInstallationLoading(true);
+    setInstallationError(null);
+    try {
+      setInstallation(await getLocalBootstrapStatus());
+    } catch (error) {
+      setInstallation(null);
+      setInstallationError(
+        error instanceof Error
+          ? error.message
+          : "현재 설치의 owner 연결 상태를 확인하지 못했습니다.",
+      );
+    } finally {
+      setInstallationLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (authStatus === "unauthenticated") router.replace("/login");
   }, [authStatus, router]);
+
+  useEffect(() => {
+    if (authStatus !== "authenticated") return;
+    let active = true;
+    getLocalBootstrapStatus()
+      .then((status) => {
+        if (active) setInstallation(status);
+      })
+      .catch((error) => {
+        if (!active) return;
+        setInstallation(null);
+        setInstallationError(
+          error instanceof Error
+            ? error.message
+            : "현재 설치의 owner 연결 상태를 확인하지 못했습니다.",
+        );
+      })
+      .finally(() => {
+        if (active) setInstallationLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [authStatus]);
 
   useEffect(() => {
     if (authStatus !== "authenticated") return;
@@ -67,14 +130,17 @@ export function SettingsClient() {
         setMessageModel(asMessageGoogleModel(settings.default_model));
         setSourceCharacterId(settings.source_character_id ?? "");
       })
-      .catch((err) => {
+      .catch((error) => {
         if (active) {
           setMessageError(
-            err instanceof Error
-              ? err.message
+            error instanceof Error
+              ? error.message
               : "쪽지용 API key 설정을 불러오지 못했습니다.",
           );
         }
+      })
+      .finally(() => {
+        if (active) setMessageLoading(false);
       });
     return () => {
       active = false;
@@ -92,24 +158,6 @@ export function SettingsClient() {
     } finally {
       clearAuth();
       router.replace(serverRevoked ? "/login" : "/login?logout=local-only");
-    }
-  }
-
-  async function handleDeleteAccount() {
-    if (!deleteEnabled) return;
-    setDeletePending(true);
-    setDeleteError(null);
-    try {
-      await deleteCurrentAccount({ confirmation: ACCOUNT_DELETE_CONFIRMATION });
-      clearAuth();
-      router.replace("/login");
-    } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : "회원탈퇴 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
-      setDeleteError(message);
-      setDeletePending(false);
     }
   }
 
@@ -139,10 +187,10 @@ export function SettingsClient() {
       if (params.get("messageKey") === "1" && returnTo && next.has_usable_key) {
         router.push(returnTo);
       }
-    } catch (err) {
+    } catch (error) {
       setMessageError(
-        err instanceof Error
-          ? err.message
+        error instanceof Error
+          ? error.message
           : "쪽지용 API key 설정을 저장하지 못했습니다.",
       );
     } finally {
@@ -163,10 +211,10 @@ export function SettingsClient() {
       setSourceCharacterId(next.source_character_id ?? "");
       setMessageApiKey("");
       setMessageCleared(true);
-    } catch (err) {
+    } catch (error) {
       setMessageError(
-        err instanceof Error
-          ? err.message
+        error instanceof Error
+          ? error.message
           : "쪽지용 API key를 삭제하지 못했습니다.",
       );
     } finally {
@@ -175,262 +223,265 @@ export function SettingsClient() {
   }
 
   return (
-    <section className="min-h-screen bg-white">
-      <div className="sticky top-0 z-10 flex min-h-[88px] items-center border-b border-[#eaedf2] bg-white/95 px-5 py-4 backdrop-blur-sm md:px-9">
-        <div className="min-w-0">
-          <p className="truncate text-[14px] font-bold text-[#ff6b6b]">계정</p>
-          <h1 className="text-[28px] font-extrabold text-[#101828] md:text-[30px]">
-            설정
-          </h1>
-        </div>
-      </div>
+    <section className={styles.page} data-local-settings-surface="true">
+      <PageHeader title="설정" subtitle="현재 설치 · 로컬 세션 · API key" />
 
-      <div className="px-5 py-6 md:px-9">
-        <section className="rounded-[28px] border border-[#eef1f5] bg-white p-6 shadow-[0_12px_28px_rgba(16,24,40,0.05)]">
-          <h2 className="text-[22px] font-extrabold text-[#101828]">계정</h2>
-          <p className="mt-2 text-[15px] font-medium leading-6 text-[#667085]">
-            현재 브라우저에 저장된 로그인 상태를 관리합니다.
-          </p>
-
-          <div className="mt-6 rounded-[20px] bg-[#f6f7f9] px-5 py-4">
-            <div className="text-[13px] font-bold text-[#98a2b3]">로그인 사용자</div>
-            <div className="mt-1 text-[18px] font-extrabold text-[#101828]">
-              {user?.display_name ?? "로그인 사용자"}
-            </div>
-            {user?.email ? (
-              <div className="mt-1 break-all text-[14px] font-bold text-[#667085]">
-                {user.email}
-              </div>
-            ) : null}
-          </div>
-
-          <button
-            type="button"
-            onClick={handleLogout}
-            disabled={logoutPending}
-            className="mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-full border border-[#ffd7d7] bg-white px-5 text-[15px] font-extrabold text-[#ff6b6b] transition-colors hover:bg-[#fff5f5]"
-          >
-            <LogOut size={17} aria-hidden="true" />
-            로그아웃
-          </button>
-          <p className="mt-3 text-[13px] font-medium leading-6 text-[#98a2b3]">
-            이 브라우저에서 Angmoo 로그인 상태를 해제하고 로그인 화면으로 이동합니다.
-          </p>
-        </section>
-
-        <section className="mt-6 rounded-[28px] border border-[#eef1f5] bg-white p-6 shadow-[0_12px_28px_rgba(16,24,40,0.05)]">
-          <div className="flex items-start gap-3">
-            <span className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f6f7f9] text-[#101828]">
-              <KeyRound size={20} aria-hidden="true" />
+      <div className={styles.content}>
+        <Card as="section" className={styles.sectionCard}>
+          <div className={styles.sectionHeading}>
+            <span className={styles.sectionIcon} aria-hidden="true">
+              <Database />
             </span>
-            <div className="min-w-0">
-              <h2 className="text-[22px] font-extrabold text-[#101828]">
-                쪽지용 API key
-              </h2>
-              <p className="mt-2 text-[15px] font-medium leading-6 text-[#667085]">
-                쪽지 응답 생성에는 요청한 사람의 Google API key를 사용합니다.
+            <div>
+              <h2>현재 설치와 로컬 세션</h2>
+              <p>
+                이 설치의 owner 연결과 현재 세션을 보여줍니다. 다른 PC나 외부 계정과
+                자동으로 합쳐지지 않습니다.
               </p>
             </div>
           </div>
 
-          <div className="mt-5 grid gap-4">
-            <label className="block">
-              <span className="text-[13px] font-extrabold text-[#667085]">
-                기본 모델
-              </span>
-              <select
-                value={messageModel}
-                onChange={(event) =>
-                  setMessageModel(event.target.value as MessageGoogleGeminiModel)
-                }
-                className="mt-2 h-12 w-full rounded-[16px] border border-[#d0d5dd] bg-white px-4 text-[15px] font-bold text-[#101828] outline-none focus:border-[#ff6b6b]"
-              >
-                {MESSAGE_GOOGLE_GEMINI_MODELS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+          <div className={styles.statusLine} aria-live="polite">
+            <StatusChip
+              label={installationStatus.label}
+              tone={installationStatus.tone}
+            />
+          </div>
 
-            <div className="grid gap-3 md:grid-cols-2">
-              <label className="flex items-start gap-3 rounded-[18px] border border-[#eaedf2] px-4 py-3">
-                <input
-                  type="radio"
-                  checked={messageSource === "message_key"}
-                  onChange={() => setMessageSource("message_key")}
-                  className="mt-1 h-4 w-4 accent-[#ff6b6b]"
-                />
-                <span>
-                  <span className="block text-[14px] font-extrabold text-[#101828]">
-                    직접 쪽지용 key 등록
-                  </span>
-                  <span className="mt-1 block text-[13px] font-medium leading-5 text-[#667085]">
-                    {messageSettings?.message_key_fingerprint
-                      ? `저장됨: ${messageSettings.message_key_fingerprint}`
-                      : "아직 저장된 key가 없습니다."}
-                  </span>
-                </span>
-              </label>
-              <label className="flex items-start gap-3 rounded-[18px] border border-[#eaedf2] px-4 py-3">
-                <input
-                  type="radio"
-                  checked={messageSource === "agent_key"}
-                  onChange={() => setMessageSource("agent_key")}
-                  className="mt-1 h-4 w-4 accent-[#ff6b6b]"
-                />
-                <span>
-                  <span className="block text-[14px] font-extrabold text-[#101828]">
-                    내 앵무 key를 쪽지에도 사용
-                  </span>
-                  <span className="mt-1 block text-[13px] font-medium leading-5 text-[#667085]">
-                    raw key를 복사하지 않고 기존 key를 참조합니다.
-                  </span>
-                </span>
-              </label>
+          {installationError ? (
+            <InlineError className={styles.feedback}>
+              <div className={styles.feedbackStack}>
+                <span>{installationError}</span>
+                <Button variant="secondary" compact onClick={() => void loadInstallation()}>
+                  다시 확인
+                </Button>
+              </div>
+            </InlineError>
+          ) : null}
+
+          <dl className={styles.detailGrid}>
+            <div>
+              <dt>설치 이름</dt>
+              <dd>{installation?.local_label?.trim() || "이 장치"}</dd>
             </div>
+            <div>
+              <dt>현재 owner</dt>
+              <dd>{user?.display_name ?? installation?.owner?.display_name ?? "확인 중"}</dd>
+            </div>
+            {installation?.installation_id ? (
+              <div className={styles.detailWide}>
+                <dt>설치 식별자</dt>
+                <dd className={styles.identifier}>{installation.installation_id}</dd>
+              </div>
+            ) : null}
+            {user?.email ? (
+              <div className={styles.detailWide}>
+                <dt>연결된 이메일</dt>
+                <dd className={styles.identifier}>{user.email}</dd>
+              </div>
+            ) : null}
+          </dl>
 
-            {messageSource === "message_key" ? (
-              <label className="block">
-                <span className="text-[13px] font-extrabold text-[#667085]">
-                  Google API key
-                </span>
-                <input
-                  type="password"
-                  value={messageApiKey}
-                  onChange={(event) => setMessageApiKey(event.target.value)}
-                  placeholder="새 key를 저장할 때만 입력"
-                  className="mt-2 h-12 w-full rounded-[16px] border border-[#d0d5dd] bg-white px-4 text-[15px] font-bold text-[#101828] outline-none placeholder:text-[#d0d5dd] focus:border-[#ff6b6b]"
-                />
-              </label>
-            ) : (
-              <label className="block">
-                <span className="text-[13px] font-extrabold text-[#667085]">
-                  사용할 내 앵무
-                </span>
-                <select
-                  value={sourceCharacterId}
-                  onChange={(event) => setSourceCharacterId(event.target.value)}
-                  className="mt-2 h-12 w-full rounded-[16px] border border-[#d0d5dd] bg-white px-4 text-[15px] font-bold text-[#101828] outline-none focus:border-[#ff6b6b]"
+          <div className={styles.actionBlock}>
+            <Button
+              variant="strong"
+              onClick={() => void handleLogout()}
+              loading={logoutPending}
+              loadingLabel="로컬 세션 종료 중"
+            >
+              <LogOut size={17} aria-hidden="true" />
+              로컬 세션 끝내기
+            </Button>
+            <p>
+              owner 데이터는 지우지 않습니다. 현재 세션만 끝내고 이 설치의 owner를
+              다시 확인합니다.
+            </p>
+          </div>
+        </Card>
+
+        <Card as="section" className={styles.sectionCard}>
+          <div className={styles.sectionHeading}>
+            <span className={styles.sectionIcon} aria-hidden="true">
+              <KeyRound />
+            </span>
+            <div>
+              <h2>쪽지용 API key</h2>
+              <p>
+                이 설치에서 현재 owner의 쪽지 응답을 생성할 때 사용할 Google API key를
+                선택합니다.
+              </p>
+            </div>
+          </div>
+
+          {messageLoading ? (
+            <div className={styles.statusLine} role="status">
+              <StatusChip label="API key 설정 확인 중" tone="waiting" />
+            </div>
+          ) : null}
+
+          <div className={styles.formStack}>
+            <Field id="message-default-model" label="기본 모델">
+              {(controlProps) => (
+                <Select
+                  {...controlProps}
+                  value={messageModel}
+                  disabled={messageLoading || messageSaving}
+                  onChange={(event) =>
+                    setMessageModel(event.target.value as MessageGoogleGeminiModel)
+                  }
                 >
-                  <option value="">앵무 선택</option>
-                  {(messageSettings?.owned_agents ?? []).map((agent) => (
-                    <option key={agent.id} value={agent.id}>
-                      {agent.display_name}
+                  {MESSAGE_GOOGLE_GEMINI_MODELS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
                     </option>
                   ))}
-                </select>
-              </label>
+                </Select>
+              )}
+            </Field>
+
+            <fieldset className={styles.choiceFieldset}>
+              <legend>API key 출처</legend>
+              <div className={styles.choiceGrid}>
+                <label
+                  className={styles.choiceCard}
+                  data-selected={messageSource === "message_key" || undefined}
+                >
+                  <input
+                    type="radio"
+                    name="message-credential-source"
+                    checked={messageSource === "message_key"}
+                    disabled={messageLoading || messageSaving}
+                    onChange={() => setMessageSource("message_key")}
+                  />
+                  <span>
+                    <strong>쪽지 전용 key 사용</strong>
+                    <small>
+                      {messageSettings?.message_key_fingerprint
+                        ? `저장됨: ${messageSettings.message_key_fingerprint}`
+                        : "아직 저장된 key가 없습니다."}
+                    </small>
+                  </span>
+                </label>
+                <label
+                  className={styles.choiceCard}
+                  data-selected={messageSource === "agent_key" || undefined}
+                >
+                  <input
+                    type="radio"
+                    name="message-credential-source"
+                    checked={messageSource === "agent_key"}
+                    disabled={messageLoading || messageSaving}
+                    onChange={() => setMessageSource("agent_key")}
+                  />
+                  <span>
+                    <strong>내 앵무 key 참조</strong>
+                    <small>raw key를 복제하지 않고 이 설치의 기존 credential을 참조합니다.</small>
+                  </span>
+                </label>
+              </div>
+            </fieldset>
+
+            {messageSource === "message_key" ? (
+              <Field
+                id="message-google-api-key"
+                label="Google API key"
+                helperText="새 key를 저장하거나 기존 key를 교체할 때만 입력하세요."
+              >
+                {(controlProps) => (
+                  <Input
+                    {...controlProps}
+                    type="password"
+                    autoComplete="off"
+                    value={messageApiKey}
+                    disabled={messageLoading || messageSaving}
+                    onChange={(event) => setMessageApiKey(event.target.value)}
+                    placeholder="새 key 입력"
+                  />
+                )}
+              </Field>
+            ) : (
+              <Field id="message-source-character" label="사용할 내 앵무">
+                {(controlProps) => (
+                  <Select
+                    {...controlProps}
+                    value={sourceCharacterId}
+                    disabled={messageLoading || messageSaving}
+                    onChange={(event) => setSourceCharacterId(event.target.value)}
+                  >
+                    <option value="">앵무 선택</option>
+                    {(messageSettings?.owned_agents ?? []).map((agent) => (
+                      <option key={agent.id} value={agent.id}>
+                        {agent.display_name}
+                      </option>
+                    ))}
+                  </Select>
+                )}
+              </Field>
             )}
           </div>
 
-          {messageError ? (
-            <p className="mt-4 rounded-[16px] bg-[#fff5f5] px-4 py-3 text-[14px] font-bold leading-6 text-[#d92d20]">
-              {messageError}
-            </p>
-          ) : null}
-          {messageSaved ? (
-            <p className="mt-4 rounded-[16px] bg-[#f0fdf4] px-4 py-3 text-[14px] font-bold leading-6 text-[#15803d]">
-              쪽지용 API key 설정을 저장했습니다.
-            </p>
-          ) : null}
-          {messageCleared ? (
-            <p className="mt-4 rounded-[16px] bg-[#f0fdf4] px-4 py-3 text-[14px] font-bold leading-6 text-[#15803d]">
-              저장된 쪽지용 API key를 삭제했습니다.
-            </p>
-          ) : null}
+          {messageError ? <InlineError className={styles.feedback}>{messageError}</InlineError> : null}
+          {messageSaved ? <Toast tone="success">쪽지용 API key 설정을 저장했습니다.</Toast> : null}
+          {messageCleared ? <Toast tone="success">저장된 쪽지용 API key를 삭제했습니다.</Toast> : null}
 
-          <div className="mt-5 flex flex-wrap gap-3">
-            <button
-              type="button"
+          <div className={styles.buttonRow}>
+            <Button
+              variant="primary"
               onClick={() => void handleSaveMessageSettings()}
-              disabled={messageSaving}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#101828] px-5 text-[15px] font-extrabold text-white transition-colors hover:bg-[#1f2937] disabled:cursor-not-allowed disabled:bg-[#d0d5dd]"
+              loading={messageSaving}
+              loadingLabel="저장 중"
+              disabled={
+                messageLoading ||
+                (messageSource === "agent_key" && !sourceCharacterId)
+              }
             >
               <Save size={17} aria-hidden="true" />
-              {messageSaving ? "처리 중" : "저장"}
-            </button>
+              저장
+            </Button>
             {messageSettings?.message_key_fingerprint ? (
-              <button
-                type="button"
+              <Button
+                variant="danger"
                 onClick={() => void handleClearMessageKey()}
                 disabled={messageSaving}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-[#ffd7d7] bg-white px-5 text-[15px] font-extrabold text-[#d92d20] transition-colors hover:bg-[#fff5f5] disabled:cursor-not-allowed disabled:text-[#d0d5dd]"
               >
                 <Trash2 size={17} aria-hidden="true" />
                 저장된 key 삭제
-              </button>
+              </Button>
             ) : null}
           </div>
-        </section>
+        </Card>
 
-        <section className="mt-6 rounded-[28px] border border-[#ffd7d7] bg-white p-6 shadow-[0_12px_28px_rgba(16,24,40,0.05)]">
-          <div className="flex items-start gap-3">
-            <span className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#fff5f5] text-[#ff4d4f]">
-              <AlertTriangle size={20} aria-hidden="true" />
+        <Card as="section" className={`${styles.sectionCard} ${styles.dangerCard}`}>
+          <div className={styles.sectionHeading}>
+            <span className={`${styles.sectionIcon} ${styles.dangerIcon}`} aria-hidden="true">
+              <AlertTriangle />
             </span>
-            <div className="min-w-0">
-              <h2 className="text-[22px] font-extrabold text-[#101828]">위험 구역</h2>
-              <p className="mt-2 text-[15px] font-medium leading-6 text-[#667085]">
-                회원탈퇴는 즉시 확정되며 복구되지 않습니다.
+            <div>
+              <h2>데이터 삭제 범위</h2>
+              <p>
+                삭제 작업은 대상에 따라 범위가 다릅니다. 이 Local 설정 화면은 현재
+                owner 전체 삭제 capability를 제공하지 않습니다.
               </p>
             </div>
           </div>
 
-          <div className="mt-5 space-y-2 text-[14px] font-medium leading-6 text-[#667085]">
-            <p>로그인 정보, 세션, API 키, 앵무 자율활동 정보는 삭제 또는 비활성화됩니다.</p>
-            <p>공개 글, 대꾸, 나무 글은 대화 흐름 보존을 위해 익명화되어 남을 수 있습니다.</p>
+          <StatusChip label="owner 전체 삭제 지원 안 함" tone="disabled" />
+
+          <div className={styles.scopeList}>
             <p>
-              탈퇴한 사용자가 소유했던 앵무는{" "}
-              <span className="font-extrabold text-[#101828]">삭제한 앵무</span>로
-              표시됩니다.
+              개별 앵무 삭제는 내 앵무 관리에서 해당 Character 하나만 대상으로
+              진행합니다.
             </p>
             <p>
-              공개 글, 대꾸, 나무 글 자체 삭제까지 원하면{" "}
-              <span className="font-extrabold text-[#101828]">privacy@angmoo.com</span>
-              으로 문의해주세요.
+              World에서 제거는 Creator Studio에서 해당 World 참여만 끝내며 전역
+              Character identity와 과거 기록을 삭제하지 않습니다.
+            </p>
+            <p>
+              로컬 세션 끝내기는 현재 세션만 해제하며 owner 데이터·SQLite·credential을
+              삭제하지 않습니다.
             </p>
           </div>
-
-          <label className="mt-6 flex items-start gap-3 rounded-[18px] bg-[#fffafa] px-4 py-3 text-[14px] font-bold leading-6 text-[#344054]">
-            <input
-              type="checkbox"
-              checked={deleteAgreed}
-              onChange={(event) => setDeleteAgreed(event.target.checked)}
-              className="mt-1 h-4 w-4 accent-[#ff4d4f]"
-            />
-            <span>안내 내용을 확인했으며 회원탈퇴가 즉시 확정되는 것에 동의합니다.</span>
-          </label>
-
-          <label className="mt-4 block">
-            <span className="text-[13px] font-extrabold text-[#667085]">
-              확인 문구
-            </span>
-            <input
-              type="text"
-              value={deleteConfirmation}
-              onChange={(event) => setDeleteConfirmation(event.target.value)}
-              placeholder={ACCOUNT_DELETE_CONFIRMATION}
-              className="mt-2 h-12 w-full rounded-[16px] border border-[#ffd7d7] bg-white px-4 text-[15px] font-bold text-[#101828] outline-none transition-colors placeholder:text-[#d0d5dd] focus:border-[#ff6b6b]"
-            />
-          </label>
-
-          {deleteError ? (
-            <p className="mt-4 rounded-[16px] bg-[#fff5f5] px-4 py-3 text-[14px] font-bold leading-6 text-[#d92d20]">
-              {deleteError}
-            </p>
-          ) : null}
-
-          <button
-            type="button"
-            onClick={handleDeleteAccount}
-            disabled={!deleteEnabled}
-            className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#ff4d4f] px-5 text-[15px] font-extrabold text-white transition-colors hover:bg-[#e5484d] disabled:cursor-not-allowed disabled:bg-[#f4b8b8]"
-          >
-            <Trash2 size={17} aria-hidden="true" />
-            {deletePending ? "처리 중" : "회원탈퇴"}
-          </button>
-        </section>
+        </Card>
       </div>
     </section>
   );

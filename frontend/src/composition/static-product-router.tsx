@@ -5,7 +5,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { AgentCreateClient } from "@/components/agent-create-client";
 import { AgentDetailClient } from "@/components/agent-detail-client";
-import { AgentsDashboardClient } from "@/components/agents-dashboard-client";
+import { AgentsDashboardClient } from "@/features/characters/public";
 import { AppShell } from "@/components/app-shell";
 import { LocalOwnerClient } from "@/components/local-owner-client";
 import { PostDetailClient } from "@/components/post-detail-client";

@@ -1,0 +1,260 @@
+.page {
+  min-height: 100%;
+  background: var(--color-surface);
+  color: var(--color-text-default);
+}
+
+.content {
+  display: grid;
+  gap: var(--spacing-section);
+  padding: var(--spacing-section) var(--spacing-phone) var(--spacing-major);
+}
+
+.sectionCard {
+  display: grid;
+  gap: var(--spacing-dense);
+}
+
+.sectionHeading {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: var(--spacing-control);
+}
+
+.sectionHeading h2,
+.sectionHeading p {
+  margin: 0;
+}
+
+.sectionHeading h2 {
+  color: var(--color-text-strong);
+  font-size: var(--text-card-title);
+  line-height: var(--text-card-title--line-height);
+}
+
+.sectionHeading p {
+  margin-top: var(--spacing-micro);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-small);
+  line-height: var(--text-body-small--line-height);
+  overflow-wrap: anywhere;
+}
+
+.sectionIcon {
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-muted);
+  color: var(--color-text-strong);
+}
+
+.sectionIcon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.statusLine {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-compact);
+}
+
+.feedback {
+  margin-top: 0;
+}
+
+.feedbackStack {
+  display: grid;
+  justify-items: start;
+  gap: var(--spacing-control);
+}
+
+.detailGrid {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-control);
+  margin: 0;
+}
+
+.detailGrid > div {
+  min-width: 0;
+  border-radius: var(--radius-reference-card);
+  background: var(--color-surface-subtle);
+  padding: var(--spacing-control) var(--spacing-phone);
+}
+
+.detailGrid dt,
+.detailGrid dd {
+  margin: 0;
+}
+
+.detailGrid dt {
+  color: var(--color-text-secondary);
+  font-size: var(--text-caption);
+  font-weight: 750;
+}
+
+.detailGrid dd {
+  margin-top: var(--spacing-micro);
+  color: var(--color-text-strong);
+  font-size: var(--text-body-small);
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+
+.detailWide {
+  grid-column: 1 / -1;
+}
+
+.identifier {
+  font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", monospace;
+  word-break: break-all;
+}
+
+.actionBlock {
+  display: grid;
+  justify-items: start;
+  gap: var(--spacing-compact);
+}
+
+.actionBlock p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-caption);
+  line-height: 1.5;
+}
+
+.formStack {
+  display: grid;
+  gap: var(--spacing-phone);
+}
+
+.choiceFieldset {
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.choiceFieldset legend {
+  margin-bottom: var(--spacing-compact);
+  color: var(--color-text-default);
+  font-size: var(--text-label);
+  font-weight: 700;
+}
+
+.choiceGrid {
+  display: grid;
+  gap: var(--spacing-control);
+}
+
+.choiceCard {
+  display: flex;
+  min-width: 0;
+  min-height: 44px;
+  align-items: flex-start;
+  gap: var(--spacing-control);
+  border: 1px solid var(--color-border-control);
+  border-radius: var(--radius-field);
+  background: var(--color-surface);
+  padding: var(--spacing-control) var(--spacing-phone);
+  color: var(--color-text-default);
+  cursor: pointer;
+  transition:
+    border-color var(--motion-fast) ease,
+    background-color var(--motion-fast) ease;
+}
+
+.choiceCard[data-selected="true"] {
+  border-color: var(--color-brand-soft-border);
+  background: var(--color-brand-soft);
+}
+
+.choiceCard:focus-within {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--focus-ring);
+}
+
+.choiceCard input {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  margin-top: 2px;
+  accent-color: var(--color-brand-accent);
+}
+
+.choiceCard strong,
+.choiceCard small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.choiceCard strong {
+  color: var(--color-text-strong);
+  font-size: var(--text-meta);
+}
+
+.choiceCard small {
+  margin-top: var(--spacing-micro);
+  color: var(--color-text-secondary);
+  font-size: var(--text-caption);
+  line-height: 1.45;
+}
+
+.buttonRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-control);
+}
+
+.dangerCard {
+  border-color: var(--color-state-danger-border);
+}
+
+.dangerIcon {
+  background: var(--color-state-danger-surface);
+  color: var(--color-state-danger);
+}
+
+.scopeList {
+  display: grid;
+  gap: var(--spacing-compact);
+  color: var(--color-text-default);
+  font-size: var(--text-meta);
+  line-height: 1.6;
+}
+
+.scopeList p {
+  margin: 0;
+}
+
+@media (max-width: 380px) {
+  .content {
+    padding-inline: var(--spacing-control);
+  }
+
+  .sectionCard {
+    padding: var(--spacing-dense);
+  }
+
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .detailWide {
+    grid-column: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .choiceCard {
+    transition: none;
+  }
+}

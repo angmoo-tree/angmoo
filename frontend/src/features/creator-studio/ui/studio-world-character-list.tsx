@@ -30,6 +30,15 @@ import {
   useRuntimeRouter,
   useRuntimeSearchParams,
 } from "@/shared/navigation/public";
+import {
+  Button,
+  Dialog,
+  Field,
+  IconButton,
+  InlineError,
+  Select,
+  StatusChip,
+} from "@/shared/ui/public";
 
 
 const NO_SPECIFIC_ROLE_KEY = "no_specific_role";
@@ -306,127 +315,130 @@ export function StudioWorldCharacterList({
   }
 
   return (
-    <section className="rounded-[28px] border border-[#e1e5eb] bg-white p-6 shadow-sm">
+    <section className="rounded-[28px] border border-border-control bg-surface p-6 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-lg font-black text-[#101828]">이 World의 캐릭터</p>
-          <p className="mt-1 text-sm font-medium leading-6 text-[#667085]">
+          <p className="text-lg font-black text-text-strong">이 World의 캐릭터</p>
+          <p className="mt-1 text-sm font-medium leading-6 text-text-secondary">
             자율활동 검증용 캐릭터를 만들거나 연결하고, 현재 World 참여만 안전하게 종료합니다.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Link
             href={createHref}
-            className="inline-flex items-center gap-2 rounded-full bg-[#ff6b6b] px-4 py-2 text-xs font-extrabold text-white"
+            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-action-primary px-4 py-2 text-xs font-extrabold text-on-action-primary shadow-action"
           >
             <Plus className="size-4" /> 새 캐릭터 만들기
           </Link>
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 rounded-full border border-[#d0d5dd] px-4 py-2 text-xs font-extrabold text-[#344054]"
+          <Button
+            compact
+            variant="secondary"
             onClick={() => setCandidateOpen((value) => !value)}
           >
             <Link2 className="size-4" /> 기존 캐릭터 연결
-          </button>
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 rounded-full border border-[#d0d5dd] px-4 py-2 text-xs font-extrabold text-[#344054]"
+          </Button>
+          <Button
+            compact
+            variant="secondary"
             onClick={refreshList}
-            disabled={loading}
+            loading={loading}
+            loadingLabel="새로고침 중"
           >
-            {loading ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
+            <RefreshCw className="size-4" />
             새로고침
-          </button>
+          </Button>
         </div>
       </div>
 
       {actionMessage ? (
-        <p aria-live="polite" className="mt-4 rounded-[18px] bg-[#ecfdf3] px-4 py-3 text-sm font-bold text-[#027a48]">
+        <p aria-live="polite" className="mt-4 rounded-[18px] border border-state-success-border bg-state-success-surface px-4 py-3 text-sm font-bold text-state-success">
           {actionMessage}
         </p>
       ) : null}
       {actionError ? (
-        <p aria-live="assertive" className="mt-4 rounded-[18px] bg-[#fff1f0] px-4 py-3 text-sm font-bold text-[#b42318]">
-          {actionError}
-        </p>
+        <InlineError className="mt-4">{actionError}</InlineError>
       ) : null}
 
       {candidateOpen ? (
-        <div className="mt-5 rounded-[22px] border border-[#ffd3d3] bg-[#fffafa] p-4">
+        <div className="mt-5 rounded-[22px] border border-brand-soft-border bg-surface-warm p-4">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-sm font-black text-[#101828]">현재 World에 연결</p>
-              <p className="mt-1 text-xs font-medium leading-5 text-[#667085]">
+              <p className="text-sm font-black text-text-strong">현재 World에 연결</p>
+              <p className="mt-1 text-xs font-medium leading-5 text-text-secondary">
                 연결만으로 provider 호출이나 공개 글·관계 변화는 생기지 않습니다.
               </p>
             </div>
-            <button type="button" aria-label="연결 패널 닫기" onClick={() => setCandidateOpen(false)}>
-              <X className="size-5 text-[#667085]" />
-            </button>
+            <IconButton label="연결 패널 닫기" onClick={() => setCandidateOpen(false)}>
+              <X className="size-5" />
+            </IconButton>
           </div>
           {candidateLoading ? (
-            <p className="mt-4 flex items-center gap-2 text-sm font-bold text-[#667085]">
+            <p className="mt-4 flex items-center gap-2 text-sm font-bold text-text-secondary">
               <Loader2 className="size-4 animate-spin" /> 내 캐릭터를 확인하는 중입니다.
             </p>
           ) : candidateError ? (
-            <p className="mt-4 text-sm font-bold text-[#b42318]">{candidateError}</p>
+            <InlineError className="mt-4">{candidateError}</InlineError>
           ) : (
             <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <label className="grid gap-2 text-xs font-extrabold text-[#344054]">
-                내 캐릭터
-                <select
-                  value={selectedCharacterId}
-                  onChange={(event) => setSelectedCharacterId(event.target.value)}
-                  className="rounded-2xl border border-[#d0d5dd] bg-white px-4 py-3 text-sm font-bold"
-                >
-                  <option value="">선택해 주세요</option>
-                  {eligibleCandidates.map((candidate) => (
-                    <option key={candidate.character_id} value={candidate.character_id}>
-                      {candidate.display_name}
-                      {candidate.handle ? ` (@${candidate.handle})` : ""}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="grid gap-2 text-xs font-extrabold text-[#344054]">
-                World 역할
-                <select
-                  value={roleKey}
-                  onChange={(event) => setRoleKey(event.target.value)}
-                  className="rounded-2xl border border-[#d0d5dd] bg-white px-4 py-3 text-sm font-bold"
-                >
-                  {roleOptions.map((role) => (
-                    <option key={role.key} value={role.key}>{role.name}</option>
-                  ))}
-                </select>
-              </label>
+              <Field label="내 캐릭터">
+                {(fieldProps) => (
+                  <Select
+                    {...fieldProps}
+                    value={selectedCharacterId}
+                    onChange={(event) => setSelectedCharacterId(event.target.value)}
+                  >
+                    <option value="">선택해 주세요</option>
+                    {eligibleCandidates.map((candidate) => (
+                      <option key={candidate.character_id} value={candidate.character_id}>
+                        {candidate.display_name}
+                        {candidate.handle ? ` (@${candidate.handle})` : ""}
+                      </option>
+                    ))}
+                  </Select>
+                )}
+              </Field>
+              <Field label="World 역할">
+                {(fieldProps) => (
+                  <Select
+                    {...fieldProps}
+                    value={roleKey}
+                    onChange={(event) => setRoleKey(event.target.value)}
+                  >
+                    {roleOptions.map((role) => (
+                      <option key={role.key} value={role.key}>{role.name}</option>
+                    ))}
+                  </Select>
+                )}
+              </Field>
             </div>
           )}
           {!candidateLoading && !candidateError && eligibleCandidates.length === 0 ? (
-            <p className="mt-4 rounded-2xl bg-white px-4 py-3 text-xs font-bold text-[#667085]">
+            <p className="mt-4 rounded-2xl bg-surface px-4 py-3 text-xs font-bold text-text-secondary">
               지금 연결할 수 있는 기존 캐릭터가 없습니다. 새 캐릭터를 만들어 주세요.
             </p>
           ) : null}
           {!candidateLoading && candidates.some((candidate) => !candidate.eligible) ? (
             <div className="mt-3 grid gap-1">
               {candidates.filter((candidate) => !candidate.eligible).map((candidate) => (
-                <p key={candidate.character_id} className="text-[11px] font-bold text-[#667085]">
+                <p key={candidate.character_id} className="text-[11px] font-bold text-text-secondary">
                   {candidate.display_name}: {CANDIDATE_REASON_LABELS[candidate.reason_code ?? ""] ?? "연결할 수 없습니다."}
                 </p>
               ))}
             </div>
           ) : null}
           <div className="mt-4 flex flex-wrap items-center gap-3">
-            <button
-              type="button"
+            <Button
+              compact
+              variant="strong"
               onClick={() => void handleConnect()}
               disabled={!selectedCharacterId || candidateLoading || actionBusy}
-              className="inline-flex items-center gap-2 rounded-full bg-[#101828] px-5 py-2.5 text-xs font-extrabold text-white disabled:opacity-50"
+              loading={actionBusy}
+              loadingLabel="연결 중"
             >
-              {actionBusy ? <Loader2 className="size-4 animate-spin" /> : <Link2 className="size-4" />}
+              <Link2 className="size-4" />
               이 World에 연결
-            </button>
-            <Link href={createHref} className="text-xs font-extrabold text-[#e5484d] underline underline-offset-4">
+            </Button>
+            <Link href={createHref} className="text-xs font-extrabold text-brand-accent underline underline-offset-4">
               새 캐릭터가 필요해요
             </Link>
           </div>
@@ -434,29 +446,27 @@ export function StudioWorldCharacterList({
       ) : null}
 
       {loading ? (
-        <p className="mt-5 flex items-center gap-2 text-sm font-bold text-[#667085]">
+        <p className="mt-5 flex items-center gap-2 text-sm font-bold text-text-secondary">
           <Loader2 className="size-4 animate-spin" /> 캐릭터를 확인하는 중입니다.
         </p>
       ) : error ? (
-        <p className="mt-5 rounded-[18px] bg-[#fff1f0] px-4 py-3 text-sm font-bold text-[#b42318]">
-          {error}
-        </p>
+        <InlineError className="mt-5">{error}</InlineError>
       ) : items.length === 0 ? (
-        <p className="mt-5 rounded-[18px] bg-[#f2f4f7] px-4 py-3 text-sm font-bold text-[#475467]">
+        <p className="mt-5 rounded-[18px] bg-surface-muted px-4 py-3 text-sm font-bold text-text-default">
           아직 이 World에 연결된 캐릭터가 없습니다. 새 캐릭터를 만들거나 기존 내 캐릭터를 연결해 활동 준비를 시작하세요.
         </p>
       ) : (
         <div className="mt-5 grid gap-3">
           {items.map((item) => (
-            <article key={item.world_character_id} className="rounded-[22px] border border-[#eaecf0] bg-[#fcfcfd] p-4">
+            <article key={item.world_character_id} className="rounded-[22px] border border-border-default bg-surface-subtle p-4">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="flex min-w-0 gap-3">
-                  <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-[#f2f4f7] text-[#667085]">
+                  <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-surface-muted text-text-secondary">
                     <UserRound className="size-5" />
                   </span>
                   <div className="min-w-0">
-                    <p className="truncate text-base font-black text-[#101828]">{item.display_name}</p>
-                    <p className="mt-1 line-clamp-2 text-xs font-medium leading-5 text-[#667085]">
+                    <p className="truncate text-base font-black text-text-strong">{item.display_name}</p>
+                    <p className="mt-1 line-clamp-2 text-xs font-medium leading-5 text-text-secondary">
                       {item.intro || "소개가 아직 없습니다."}
                     </p>
                   </div>
@@ -466,82 +476,98 @@ export function StudioWorldCharacterList({
                     <>
                       <Link
                         href={`/characters/${encodeURIComponent(item.character_id)}/worlds/${encodeURIComponent(worldId)}/autonomy-setup`}
-                        className="rounded-full bg-[#101828] px-4 py-2 text-xs font-extrabold text-white"
+                        className="inline-flex min-h-11 items-center rounded-full bg-action-dark px-4 py-2 text-xs font-extrabold text-on-action-dark"
                       >
                         활동 준비·상태 보기
                       </Link>
-                      <button
-                        type="button"
+                      <Button
+                        compact
+                        variant="danger"
                         onClick={() => beginRemove(item)}
-                        className="inline-flex items-center gap-1 rounded-full border border-[#fda29b] px-4 py-2 text-xs font-extrabold text-[#b42318]"
                       >
                         <Trash2 className="size-3.5" /> 이 World에서 제거
-                      </button>
+                      </Button>
                     </>
                   ) : (
-                    <button type="button" onClick={openOwnerProfile} className="rounded-full bg-[#101828] px-4 py-2 text-xs font-extrabold text-white">
+                    <Button compact variant="strong" onClick={openOwnerProfile}>
                       프로필 보기
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
               <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-extrabold">
-                <span className="rounded-full bg-[#eef2ff] px-3 py-1 text-[#3538cd]">
-                  {item.control_mode === "autonomous" ? "AUTONOMOUS" : "OWNER CONTROLLED"}
-                </span>
-                <span className="rounded-full bg-[#f2f4f7] px-3 py-1 text-[#475467]">{SETUP_LABELS[item.activity_setup_state]}</span>
-                <span className="rounded-full bg-[#f2f4f7] px-3 py-1 text-[#475467]">자율활동 {item.autonomous_enabled ? "ON" : "OFF"}</span>
-                <span className="rounded-full bg-[#f2f4f7] px-3 py-1 text-[#475467]">{item.status}</span>
+                <StatusChip
+                  label={item.control_mode === "autonomous" ? "자율 Character" : "내 조종 Character"}
+                  tone={item.control_mode === "autonomous" ? "running" : "neutral"}
+                />
+                <StatusChip label={SETUP_LABELS[item.activity_setup_state]} tone={item.activity_setup_state === "approved" ? "healthy" : "waiting"} />
+                <StatusChip label={`자율활동 ${item.autonomous_enabled ? "ON" : "OFF"}`} tone={item.autonomous_enabled ? "running" : "disabled"} />
+                <StatusChip label={worldCharacterStatusLabel(item.status)} tone={item.status === "active" ? "healthy" : "neutral"} />
               </div>
             </article>
           ))}
         </div>
       )}
 
-      <p className="mt-5 text-xs font-medium leading-5 text-[#667085]">
+      <p className="mt-5 text-xs font-medium leading-5 text-text-secondary">
         캐릭터 자체 삭제는 여러 World와 채팅·활동 데이터에 더 큰 영향을 줄 수 있습니다. 전역 삭제는{" "}
-        <Link href="/agents" className="font-extrabold text-[#344054] underline underline-offset-4">내 앵무 관리</Link>
+        <Link href="/agents" className="font-extrabold text-text-strong underline underline-offset-4">내 앵무 관리</Link>
         에서 이름을 다시 확인한 뒤 수행합니다.
       </p>
 
-      {removeTarget ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true" aria-labelledby="world-character-remove-title">
-          <div className="w-full max-w-lg rounded-[28px] bg-white p-6 shadow-2xl">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p id="world-character-remove-title" className="text-lg font-black text-[#101828]">이 World에서 제거</p>
-                <p className="mt-2 text-sm font-medium leading-6 text-[#667085]">
-                  이 World에서 새 자율활동은 중지되지만 이미 작성한 글과 확인된 사건·관계 근거는 보존됩니다. 캐릭터 자체와 다른 World의 참여는 삭제되지 않습니다.
-                </p>
-              </div>
-              <button type="button" aria-label="제거 확인 닫기" disabled={actionBusy} onClick={() => setRemoveTarget(null)}>
-                <X className="size-5 text-[#667085]" />
-              </button>
-            </div>
-            <label className="mt-5 grid gap-2 text-xs font-extrabold text-[#344054]">
-              확인을 위해 <span className="text-[#b42318]">{removeTarget.confirmation_name}</span> 입력
+      <Dialog
+        open={Boolean(removeTarget)}
+        onOpenChange={(open) => {
+          if (!open && !actionBusy) setRemoveTarget(null);
+        }}
+        title="이 World에서 제거"
+        description="이 World에서 새 자율활동은 중지되지만 이미 작성한 글과 확인된 사건·관계 근거는 보존됩니다. 캐릭터 자체와 다른 World의 참여는 삭제되지 않습니다."
+        closeButtonAttributes={{ disabled: actionBusy }}
+        actions={
+          <>
+            <Button variant="secondary" disabled={actionBusy} onClick={() => setRemoveTarget(null)}>
+              취소
+            </Button>
+            <Button
+              variant="danger"
+              disabled={!removeTarget || confirmationName !== removeTarget.confirmation_name}
+              loading={actionBusy}
+              loadingLabel="제거 중"
+              onClick={() => void handleRemove()}
+            >
+              <Trash2 className="size-4" />
+              자율활동 정지 후 제거
+            </Button>
+          </>
+        }
+      >
+        {removeTarget ? (
+          <Field
+            label={`확인을 위해 ${removeTarget.confirmation_name} 입력`}
+            required
+          >
+            {(fieldProps) => (
               <input
+                {...fieldProps}
                 value={confirmationName}
                 onChange={(event) => setConfirmationName(event.target.value)}
                 autoComplete="off"
-                className="rounded-2xl border border-[#d0d5dd] px-4 py-3 text-sm font-bold"
+                className="min-h-11 w-full rounded-field border border-border-interactive bg-surface px-4 py-3 text-sm font-bold text-text-strong focus-visible:shadow-[var(--focus-ring)] focus-visible:outline-none"
               />
-            </label>
-            <div className="mt-5 flex flex-wrap justify-end gap-2">
-              <button type="button" disabled={actionBusy} onClick={() => setRemoveTarget(null)} className="rounded-full border border-[#d0d5dd] px-5 py-2.5 text-xs font-extrabold text-[#344054]">취소</button>
-              <button
-                type="button"
-                disabled={confirmationName !== removeTarget.confirmation_name || actionBusy}
-                onClick={() => void handleRemove()}
-                className="inline-flex items-center gap-2 rounded-full bg-[#b42318] px-5 py-2.5 text-xs font-extrabold text-white disabled:opacity-50"
-              >
-                {actionBusy ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
-                자율활동 정지 후 제거
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+            )}
+          </Field>
+        ) : null}
+      </Dialog>
     </section>
   );
+}
+
+function worldCharacterStatusLabel(status: string) {
+  const labels: Record<string, string> = {
+    active: "참여 중",
+    inactive: "비활성",
+    left: "참여 종료",
+    pending: "연결 준비 중",
+  };
+  return labels[status] ?? "상태 확인 필요";
 }

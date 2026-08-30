@@ -148,6 +148,9 @@ jobs:
       - name: Run product-shell browser smoke
         run: pnpm test
         working-directory: browser-tests
+      - name: Verify UI-E Local Settings fail-closed states
+        run: pnpm test:ui-e-local-settings
+        working-directory: browser-tests
       - name: Build Local OSS profile offline
         env:
           NEXT_PUBLIC_EXPERIMENTAL_IMAGE_ENABLED: "false"

@@ -18,6 +18,7 @@ meaning.
 
 | Public feature | Responsibility | Shell |
 | --- | --- | --- |
+| `features/characters/public.ts` | Local owner Character list, autonomy presentation, mutation state and time/result summary | shared Phone route for Next and static/Tauri |
 | `features/device-home/public.ts` | Local device entry and app grid | phone-like `DeviceFrame` |
 | `features/device-shell/public.ts` | Local Phone chrome, capability-driven bottom navigation, safe-area and scroll ownership | one product-owned `DeviceShell` composed from neutral `DeviceFrame` |
 | `features/creator-studio/public.ts` | World creation and management workspace | wide desktop shell |
@@ -175,6 +176,53 @@ These are shell and navigation guarantees, not a claim that UI-D social rows,
 UI-E Character/Local-only screens, or UI-F's complete visual and accessibility
 corpus is finished. UI-C adds functional fixed-viewport assertions and retains
 UI-B's single reviewed screenshot rather than creating an early second corpus.
+
+## L4.5 UI-E Character and Local-only boundary
+
+UI-E moves the Local owner Character dashboard behind
+`features/characters/public.ts`. Both the Next `/agents` wrapper and the
+static/Tauri product router consume that one public entry. The feature owns its
+typed read/mutation client, autonomy presentation state, per-Character pending
+mutation state, and the flat Character-row UI. The former
+`components/agents-dashboard-client.tsx` path is only a compatibility export;
+new route composition must not import it.
+
+The dashboard deliberately keeps three concepts separate:
+
+- a Character's saved ON/OFF setting;
+- scheduler state such as running, scheduled, resting, or failed;
+- external-control mode, which is not presented as a Local runtime-health
+  category.
+
+Turning one Character off changes only that Character's endpoint and local
+pending state. It never disables another active Character or reintroduces an
+account-wide single-active rule. Active hours are shown with their explicit
+timezone, while stored API instants are normalized as UTC and formatted in the
+World timezone for next-activity and recent-result presentation.
+
+UI-E does not turn a public or World Feed author into an owner-management
+destination. `/agents/{characterId}` remains a Local owner surface with
+management capability; a public profile remains a separate, capability-gated
+route. The World Feed therefore must not link every author to `/agents` merely
+for visual parity.
+
+The other UI-E Local surfaces retain their existing feature ownership:
+
+- `features/device-home` distinguishes World launchability from runtime state
+  and never exposes an unavailable World as a link;
+- `features/runtime-status` preserves starting, ready, degraded, failed,
+  recovery-required, stopping, and stopped meanings instead of flattening
+  them into one badge;
+- `features/creator-studio` keeps the versioned World-local leave sequence and
+  exact confirmation copy, without deleting the global Character or preserved
+  activity/relationship evidence;
+- `features/relationships` distinguishes ready, empty, degraded, rebuilding,
+  unavailable, and failed, and never presents canonical fallback data as a
+  healthy LadybugDB projection.
+
+This boundary closes behavior and state vocabulary. UI-F still owns the final
+fixed-viewport visual corpus, cross-runtime screenshot parity, zoom, focus,
+reduced-motion, and exact-SHA user closeout.
 
 ## Incremental behavior boundary
 

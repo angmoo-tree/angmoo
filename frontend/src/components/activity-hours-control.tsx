@@ -1,7 +1,6 @@
 "use client";
 
-const inputClassName =
-  "h-14 w-full rounded-full border border-[#e1e5eb] bg-white px-5 text-[16px] font-medium text-[#101828] outline-none focus:border-[#ff6b6b] focus:ring-2 focus:ring-[#ffe2e2]";
+import { Field, InlineError, Select, StatusChip } from "@/shared/ui/public";
 
 export const DEFAULT_ACTIVE_HOURS_START = "14:00";
 export const DEFAULT_ACTIVE_HOURS_END = "22:00";
@@ -20,21 +19,11 @@ export const ACTIVE_HOUR_PRESETS = [
 const START_TIME_OPTIONS = buildTimeOptions(false);
 const END_TIME_OPTIONS = buildTimeOptions(true);
 
-export function defaultActiveHoursForCurrentKst() {
-  const currentHour = Number(
-    new Intl.DateTimeFormat("en-US", {
-      timeZone: "Asia/Seoul",
-      hour: "2-digit",
-      hour12: false,
-    }).format(new Date()),
-  );
-  if (currentHour >= 6 && currentHour < 14) {
-    return { start: "06:00", end: "14:00" };
-  }
-  if (currentHour >= 14 && currentHour < 22) {
-    return { start: "14:00", end: "22:00" };
-  }
-  return { start: "22:00", end: "06:00" };
+export function defaultActiveHours() {
+  return {
+    start: DEFAULT_ACTIVE_HOURS_START,
+    end: DEFAULT_ACTIVE_HOURS_END,
+  };
 }
 
 export function ActiveHoursControl({
@@ -42,11 +31,13 @@ export function ActiveHoursControl({
   end,
   onChange,
   className = "mb-5",
+  timeZone,
 }: {
   start: string;
   end: string;
   onChange: (start: string, end: string) => void;
   className?: string;
+  timeZone?: string | null;
 }) {
   const validation = getActiveHoursValidation(start, end);
   const selectedPreset =
@@ -58,11 +49,19 @@ export function ActiveHoursControl({
     <div className={className}>
       <input type="hidden" name="active_hours_start" value={start} />
       <input type="hidden" name="active_hours_end" value={end} />
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <h3 className="text-[15px] font-extrabold text-[#344054]">활동 시간대</h3>
-        <span className="rounded-full bg-[#f2f4f7] px-3 py-1 text-[12px] font-extrabold text-[#667085]">
-          {`${start}-${end}`}
-        </span>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 className="text-[15px] font-extrabold text-text-default">활동 시간</h3>
+          <p
+            className="mt-1 text-xs font-medium leading-5 text-text-secondary"
+            data-activity-timezone={timeZone ?? "selected-world"}
+          >
+            {timeZone
+              ? `World 시간대 ${timeZone} 기준`
+              : "선택한 World가 있으면 해당 World의 현지 시간 기준"}
+          </p>
+        </div>
+        <StatusChip icon={false} label={`${start}-${end}`} tone="neutral" />
       </div>
       <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {ACTIVE_HOUR_PRESETS.map((preset) => {
@@ -71,13 +70,14 @@ export function ActiveHoursControl({
             <button
               key={preset.key}
               type="button"
+              aria-pressed={selected}
               onClick={() => {
                 if (preset.key !== "custom") onChange(preset.start, preset.end);
               }}
-              className={`h-11 rounded-full border px-3 text-[14px] font-extrabold transition-colors ${
+              className={`min-h-11 rounded-full border px-3 text-[14px] font-extrabold transition-colors focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)] ${
                 selected
-                  ? "border-[#ff6b6b] bg-[#fff0ef] text-[#ff6b6b]"
-                  : "border-[#e1e5eb] bg-white text-[#667085] hover:border-[#ffb5b5]"
+                  ? "border-brand-soft-border bg-brand-soft text-brand-accent"
+                  : "border-border-control bg-surface text-text-secondary hover:border-brand-soft-border hover:bg-surface-subtle hover:text-text-strong"
               }`}
             >
               {preset.label}
@@ -99,16 +99,16 @@ export function ActiveHoursControl({
           onChange={(value) => onChange(start, value)}
         />
       </div>
-      <p
-        aria-live="polite"
-        className={`mt-1 rounded-[18px] px-4 py-3 text-[13px] font-bold leading-5 ${
-          validation.valid
-            ? "bg-[#f6f7f9] text-[#667085]"
-            : "border border-[#ffd7d7] bg-[#fff5f5] text-[#c24141]"
-        }`}
-      >
-        {validation.message}
-      </p>
+      {validation.valid ? (
+        <p
+          aria-live="polite"
+          className="mt-1 rounded-[18px] bg-surface-muted px-4 py-3 text-[13px] font-bold leading-5 text-text-secondary"
+        >
+          {validation.message}
+        </p>
+      ) : (
+        <InlineError className="mt-1">{validation.message}</InlineError>
+      )}
     </div>
   );
 }
@@ -125,20 +125,21 @@ function TimeSelect({
   onChange: (value: string) => void;
 }) {
   return (
-    <label className="mb-4 block">
-      <span className="mb-2 block text-[15px] font-bold text-[#344054]">{label}</span>
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className={inputClassName}
-      >
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-    </label>
+    <Field className="mb-4" label={label}>
+      {(controlProps) => (
+        <Select
+          {...controlProps}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+        >
+          {options.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </Select>
+      )}
+    </Field>
   );
 }
 

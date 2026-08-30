@@ -358,6 +358,137 @@ function staticAgentDetail(characterId: string) {
   };
 }
 
+function staticUiECharacter({
+  characterId,
+  name,
+  nextActivityAt,
+  slotStatus = "idle",
+  timezone,
+}: {
+  characterId: string;
+  name: string;
+  nextActivityAt: string;
+  slotStatus?: string;
+  timezone: string;
+}) {
+  const base = staticAgentDetail(characterId);
+  return {
+    ...base,
+    character: {
+      ...base.character,
+      id: characterId,
+      name,
+      handle: characterId,
+      one_liner: `${name}의 자율활동 상태를 확인합니다.`,
+      execution_mode: "llm",
+    },
+    settings: {
+      ...base.settings,
+      character_id: characterId,
+      auto_enabled: true,
+      active_hours_start: "08:00",
+      active_hours_end: "22:00",
+    },
+    assigned_slot: {
+      agent_id: `runtime-${characterId}`,
+      status: slotStatus,
+      assigned_user_id: "owner-static-probe",
+      assigned_character_id: characterId,
+      assigned_credential_id: null,
+      next_tick_at: "2026-08-31T12:00:00Z",
+      last_run_at: "2026-08-29T23:15:00Z",
+      heartbeat_interval_seconds: 60,
+      locked_by_run_id: null,
+      lease_expires_at: null,
+      last_error: null,
+      updated_at: "2026-08-30T00:00:00Z",
+    },
+    activity_summary: {
+      ...base.activity_summary,
+      within_active_hours: true,
+      timezone,
+      last_activity_at: "2026-08-29T23:15:00Z",
+      next_activity_at: nextActivityAt,
+    },
+    recent_activity: [
+      {
+        id: 1,
+        user_id: "owner-static-probe",
+        character_id: characterId,
+        action_type: "post",
+        target_post_id: `post-${characterId}`,
+        target_profile_type: null,
+        target_profile_id: null,
+        target_profile_name: null,
+        target_profile_handle: null,
+        target_profile_avatar_url: null,
+        reason: "scheduled_activity",
+        result: `${name} 게시글 작성 완료`,
+        created_at: "2026-08-29T23:15:00Z",
+      },
+    ],
+  };
+}
+
+function staticUiECreatorContext(worldId: string) {
+  return {
+    membership_role: "owner",
+    world: {
+      id: worldId,
+      slug: "static-ui-e-world",
+      name: "UI-E 히어로 학교",
+      tagline: "World-local leave contract probe",
+      setting_description: "UI-E World-local leave 경계를 검증하는 충분히 긴 세계관 설명",
+      daily_life_description: "UI-E World-local leave 경계를 검증하는 충분히 긴 일상 설명",
+      genre_tags: ["히어로"],
+      tone_tags: ["성장"],
+      timezone: "Asia/Seoul",
+      language: "ko",
+      visibility: "private",
+      join_policy: "approval_required",
+      additional_generation_guidance: "",
+      places: [],
+      roles: [
+        {
+          key: "student",
+          name: "학생",
+          description: "히어로 지망생",
+          responsibilities: [],
+          allowed_activity_scope: [],
+          autonomous_allowed: true,
+        },
+      ],
+      daypart_profiles: [],
+      rules: [],
+      glossary: [],
+      banner_media_id: null,
+      banner_alt_text: "",
+      status: "published",
+      definition_version: 1,
+      row_version: 1,
+      contract_version: "world-v1",
+      contract_hash: "static-ui-e-world-contract",
+      readiness_status: "publish_ready",
+      created_at: "2026-08-30T00:00:00Z",
+      updated_at: "2026-08-30T00:00:00Z",
+      archived_at: null,
+    },
+    readiness: {
+      world_id: worldId,
+      definition_version: 1,
+      row_version: 1,
+      contract_version: "world-v1",
+      contract_hash: "static-ui-e-world-contract",
+      required_fields: {},
+      optional_setting_count: 1,
+      quality_tier: "CORE",
+      issues: [],
+      ready_for_publish: true,
+      evaluated_at: "2026-08-30T00:00:00Z",
+    },
+  } as const;
+}
+
 for (const route of ROUTES) {
   test(`direct-open static route ${route}`, async ({ page }) => {
     await page.goto(route);
@@ -424,6 +555,91 @@ test("static Phone routes share one frame, one scroll owner, and supported navig
       expect(Math.abs(geometry.left - (viewport.width - geometry.width) / 2)).toBeLessThanOrEqual(1);
     }
   }
+});
+
+test("static Character dashboard keeps multiple autonomy states and World-local time independent", async ({
+  page,
+}) => {
+  let characters = [
+    staticUiECharacter({
+      characterId: "character-ui-e-alpha",
+      name: "알파 앵무",
+      nextActivityAt: "2026-08-30T00:30:00Z",
+      timezone: "America/New_York",
+    }),
+    staticUiECharacter({
+      characterId: "character-ui-e-beta",
+      name: "베타 앵무",
+      nextActivityAt: "2026-08-30T03:45:00Z",
+      slotStatus: "running",
+      timezone: "Asia/Seoul",
+    }),
+  ];
+  const autonomyRequests: string[] = [];
+
+  await page.route("http://127.0.0.1:8080/api/v1/agents**", async (route) => {
+    const request = route.request();
+    const url = new URL(request.url());
+    if (url.pathname === "/api/v1/agents" && request.method() === "GET") {
+      await route.fulfill({ contentType: "application/json", json: characters, status: 200 });
+      return;
+    }
+    if (
+      url.pathname === "/api/v1/agents/character-ui-e-alpha/deactivate" &&
+      request.method() === "POST"
+    ) {
+      autonomyRequests.push(url.pathname);
+      characters = characters.map((item) =>
+        item.character.id === "character-ui-e-alpha"
+          ? {
+              ...item,
+              settings: { ...item.settings, auto_enabled: false },
+              assigned_slot: null,
+              activity_summary: {
+                ...item.activity_summary,
+                next_activity_at: null,
+              },
+            }
+          : item,
+      );
+      await route.fulfill({
+        contentType: "application/json",
+        json: characters[0],
+        status: 200,
+      });
+      return;
+    }
+    await route.fallback();
+  });
+
+  await page.goto("/agents");
+
+  await expect(page.locator("[data-character-summary]")).toContainText(
+    "자율활동 ON 2",
+  );
+  const alpha = page.locator('[data-character-id="character-ui-e-alpha"]');
+  const beta = page.locator('[data-character-id="character-ui-e-beta"]');
+  await expect(alpha).toHaveAttribute("data-character-autonomy-state", "scheduled");
+  await expect(beta).toHaveAttribute("data-character-autonomy-state", "running");
+  await expect(alpha).toContainText("08:00–22:00 · America/New_York");
+  await expect(alpha).toContainText("08.29 20:30");
+  await expect(alpha).toContainText("알파 앵무 게시글 작성 완료 · 08.29 19:15");
+  await expect(page.getByText("서버 LLM", { exact: false })).toHaveCount(0);
+  await expect(page.getByText("외부 실행기", { exact: false })).toHaveCount(0);
+  await expect(page.getByText("3/3", { exact: false })).toHaveCount(0);
+
+  await page
+    .getByRole("button", { name: "알파 앵무 자율활동 끄기" })
+    .click();
+
+  await expect(alpha).toHaveAttribute("data-character-autonomy-state", "off");
+  await expect(beta).toHaveAttribute("data-character-autonomy-state", "running");
+  await expect(page.locator("[data-character-summary]")).toContainText(
+    "자율활동 ON 1 · OFF 1",
+  );
+  expect(autonomyRequests).toEqual([
+    "/api/v1/agents/character-ui-e-alpha/deactivate",
+  ]);
 });
 
 test("Tauri Phone reserves titlebar controls above page-owned header actions", async ({
@@ -1480,6 +1696,194 @@ test("returned Studio preselects the created Character and clears the query afte
       }),
     )
     .toEqual({ kind: "studio", route: "/studio/worlds/world-static-probe" });
+});
+
+test("Studio World-local leave stops autonomy, refreshes version, and preserves the Character", async ({
+  page,
+}) => {
+  const worldId = "world-ui-e-leave";
+  const characterId = "character-ui-e-leave";
+  const worldCharacterId = "wc-ui-e-leave";
+  const studioRoute = `/studio/worlds/${worldId}`;
+  await page.addInitScript((route) => {
+    const desktop = window as unknown as {
+      __ANGMOO_DESKTOP_WINDOW__: { kind: "studio"; route: string };
+      __TAURI__: {
+        core: {
+          invoke: (command: string) => Promise<unknown>;
+        };
+      };
+    };
+    desktop.__ANGMOO_DESKTOP_WINDOW__ = { kind: "studio", route };
+    desktop.__TAURI__ = {
+      core: {
+        invoke: async (command) =>
+          command === "desktop_runtime_status"
+            ? {
+                phase: "ready",
+                apiBaseUrl: "http://127.0.0.1:8080",
+                graphProvider: "ladybug",
+                launchToken: "static-route-probe-token-000000000000",
+              }
+            : undefined,
+      },
+    };
+  }, studioRoute);
+
+  let autonomyStopped = false;
+  let leaveCompleted = false;
+  let leaveBody: Record<string, unknown> | null = null;
+  const operationOrder: string[] = [];
+  const requests: Array<{ method: string; pathname: string }> = [];
+
+  const studioCharacter = (version: number, selectedActiveWorld: boolean) => ({
+    world_character_id: worldCharacterId,
+    character_id: characterId,
+    display_name: "빛나",
+    confirmation_name: "빛나",
+    avatar_url: null,
+    intro: "다른 World에도 참여하는 자율 Character",
+    role_key: "student",
+    control_mode: "autonomous",
+    status: "active",
+    autonomous_enabled: selectedActiveWorld,
+    selected_active_world: selectedActiveWorld,
+    version,
+    activity_setup_state: "approved",
+  });
+
+  await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+    const url = new URL(route.request().url());
+    const method = route.request().method();
+    requests.push({ method, pathname: url.pathname });
+
+    if (
+      url.pathname === `/api/v1/worlds/${worldId}/creator-context` &&
+      method === "GET"
+    ) {
+      await route.fulfill({
+        contentType: "application/json",
+        json: staticUiECreatorContext(worldId),
+        status: 200,
+      });
+      return;
+    }
+    if (
+      url.pathname === `/api/v1/worlds/${worldId}/characters` &&
+      method === "GET"
+    ) {
+      expect(url.searchParams.get("surface")).toBe("studio");
+      const items = leaveCompleted
+        ? []
+        : [studioCharacter(autonomyStopped ? 5 : 4, !autonomyStopped)];
+      if (autonomyStopped && !leaveCompleted) {
+        operationOrder.push("refresh-current-version");
+      }
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          schema_version: "studio-world-character-list-v1",
+          world_id: worldId,
+          items,
+        },
+        status: 200,
+      });
+      return;
+    }
+    if (
+      url.pathname === `/api/v1/agents/${characterId}/deactivate` &&
+      method === "POST"
+    ) {
+      operationOrder.push("deactivate-selected-character");
+      autonomyStopped = true;
+      await route.fulfill({
+        contentType: "application/json",
+        json: { status: "inactive" },
+        status: 200,
+      });
+      return;
+    }
+    if (
+      url.pathname === `/api/v1/worlds/${worldId}/characters/${characterId}/leave` &&
+      method === "POST"
+    ) {
+      operationOrder.push("leave-current-world");
+      leaveBody = route.request().postDataJSON() as Record<string, unknown>;
+      leaveCompleted = true;
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          world_character_id: worldCharacterId,
+          world_id: worldId,
+          character_id: characterId,
+          status: "left",
+          autonomous_enabled: false,
+          version: 6,
+          scheduler_assignment_released: true,
+          history_preserved: true,
+          replayed: false,
+        },
+        status: 200,
+      });
+      return;
+    }
+    await route.fallback();
+  });
+
+  await page.goto(studioRoute);
+  await expect(page.getByText("빛나", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "이 World에서 제거" }).click();
+
+  await expect(page.getByRole("dialog", { name: "이 World에서 제거" })).toBeVisible();
+  await expect(
+    page.getByText(
+      "이 World에서 새 자율활동은 중지되지만 이미 작성한 글과 확인된 사건·관계 근거는 보존됩니다. 캐릭터 자체와 다른 World의 참여는 삭제되지 않습니다.",
+      { exact: true },
+    ),
+  ).toBeVisible();
+
+  const confirmation = page.getByLabel("확인을 위해 빛나 입력");
+  const leaveButton = page.getByRole("button", { name: "자율활동 정지 후 제거" });
+  await confirmation.fill("빛");
+  await expect(leaveButton).toBeDisabled();
+  await confirmation.fill("빛나");
+  await expect(leaveButton).toBeEnabled();
+  await leaveButton.click();
+
+  await expect(
+    page.getByText(
+      "이 World에서 제거했습니다. 캐릭터 자체와 기존 활동·사건·관계 근거는 보존됩니다.",
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "이 World에서 제거" })).toHaveCount(0);
+
+  expect(operationOrder).toEqual([
+    "deactivate-selected-character",
+    "refresh-current-version",
+    "leave-current-world",
+  ]);
+  expect(leaveBody).toMatchObject({
+    world_character_id: worldCharacterId,
+    version: 5,
+    confirmation_name: "빛나",
+    idempotency_key: expect.any(String),
+  });
+  expect(
+    requests.some(
+      (request) =>
+        request.method === "DELETE" ||
+        (request.pathname.includes(`/agents/${characterId}`) &&
+          request.pathname !== `/api/v1/agents/${characterId}/deactivate`),
+    ),
+  ).toBe(false);
+  expect(
+    requests.some(
+      (request) =>
+        request.pathname.includes("/worlds/") &&
+        !request.pathname.includes(`/worlds/${worldId}/`),
+    ),
+  ).toBe(false);
 });
 
 test("static P4 evidence opens the exact World-scoped post thread", async ({

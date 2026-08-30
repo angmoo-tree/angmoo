@@ -77,8 +77,29 @@ const WORLD_DRAFT: WorldFixture = {
   launch_block_reason: "world_not_published",
 };
 
+const WORLD_NOT_READY: WorldFixture = {
+  ...WORLD_ALPHA,
+  world_id: "world-not-ready",
+  name: "준비 중인 광장",
+  tagline: "공개 준비를 마치는 중인 World",
+  readiness_status: "not_ready",
+  launchable: false,
+  launch_block_reason: "world_not_ready",
+};
+
+const WORLD_ARCHIVED: WorldFixture = {
+  ...WORLD_ALPHA,
+  world_id: "world-archived",
+  name: "보관된 도서관",
+  tagline: "보관된 World",
+  status: "archived",
+  launchable: false,
+  launch_block_reason: "world_archived",
+};
+
 type BackendFixture = {
   deviceWorlds?: WorldFixture[];
+  deviceWorldFailuresBeforeSuccess?: number;
   studioWorlds?: WorldFixture[];
   worldReads?: Record<string, WorldFixture>;
   runtimeStatus?: number;
@@ -90,6 +111,7 @@ async function installBackendFixture(
   fixture: BackendFixture = {},
 ): Promise<{ reads: string[]; writes: string[]; providerCalls: string[] }> {
   const audit = { reads: [] as string[], writes: [] as string[], providerCalls: [] as string[] };
+  let deviceWorldAttempts = 0;
   await page.route("**/api/backend/**", async (route: Route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -114,6 +136,15 @@ async function installBackendFixture(
     }
     if (url.pathname === "/api/backend/worlds/mine") {
       const surface = url.searchParams.get("surface");
+      if (surface === "device_home") {
+        deviceWorldAttempts += 1;
+        if (
+          deviceWorldAttempts <=
+          (fixture.deviceWorldFailuresBeforeSuccess ?? 0)
+        ) {
+          return json(route, { detail: "device_home_unavailable" }, 503);
+        }
+      }
       const items =
         surface === "creator_studio"
           ? (fixture.studioWorlds ?? fixture.deviceWorlds ?? [])
@@ -871,6 +902,90 @@ test("runtime outage is presented as degraded without blocking Device Home", asy
 
   await expect(page.getByText("일부 기능 제한", { exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "마법학교 World 열기" })).toBeVisible();
+  expect(audit.writes).toEqual([]);
+  expect(audit.providerCalls).toEqual([]);
+});
+
+test("UI-E Device Home separates runtime state, World launchability, and retry", async ({ page }) => {
+  const fixture: BackendFixture = {
+    deviceWorlds: [
+      WORLD_ALPHA,
+      WORLD_PRIVATE,
+      WORLD_DRAFT,
+      WORLD_NOT_READY,
+      WORLD_ARCHIVED,
+    ],
+    deviceWorldFailuresBeforeSuccess: 1,
+    runtimeState: "starting",
+  };
+  const audit = await installBackendFixture(page, fixture);
+  await page.goto("/");
+
+  await expect(page.locator('[data-runtime-state="starting"]')).toContainText("시작 중");
+  await expect(page.locator('section[role="alert"]')).toContainText(
+    "Device Home을 열지 못했어요",
+  );
+  await page.getByRole("button", { name: "World 목록 다시 시도" }).click();
+
+  await expect(
+    page.getByRole("link", { name: /마법학교 World 열기\. 실행 가능\./ }),
+  ).toBeVisible();
+  await expect(page.locator('[data-world-launchability="launchable"]')).toContainText(
+    "실행 가능",
+  );
+
+  const unavailableWorlds = [
+    {
+      badge: "비공개",
+      description: "비공개 작업실 World는 비공개 상태라 Device Home에서 열 수 없습니다.",
+      state: "world_private",
+    },
+    {
+      badge: "공개 전",
+      description: "초안 마을 World는 아직 공개되지 않아 Device Home에서 열 수 없습니다.",
+      state: "world_not_published",
+    },
+    {
+      badge: "준비 필요",
+      description: "준비 중인 광장 World는 공개 준비가 완료되지 않아 Device Home에서 열 수 없습니다.",
+      state: "world_not_ready",
+    },
+    {
+      badge: "보관됨",
+      description: "보관된 도서관 World는 보관되어 Device Home에서 열 수 없습니다.",
+      state: "world_archived",
+    },
+  ] as const;
+
+  for (const world of unavailableWorlds) {
+    const item = page.getByRole("listitem", { name: world.description });
+    await expect(item).toBeVisible();
+    await expect(item.locator("a")).toHaveCount(0);
+    await expect(
+      page.locator(`[data-world-launchability="${world.state}"]`),
+    ).toContainText(world.badge);
+  }
+
+  const runtimeCases = [
+    ["ready", "healthy", "준비됨"],
+    ["degraded", "degraded", "일부 기능 제한"],
+    ["failed", "failed", "실행 실패"],
+    ["recovery_required", "recovery_required", "복구 필요"],
+  ] as const;
+  for (const [backendState, productState, label] of runtimeCases) {
+    fixture.runtimeState = backendState;
+    await page.reload();
+    await expect(page.locator(`[data-runtime-state="${productState}"]`)).toContainText(
+      label,
+    );
+    await expect(
+      page.getByRole("link", { name: /마법학교 World 열기\. 실행 가능\./ }),
+    ).toBeVisible();
+  }
+
+  expect(
+    audit.reads.filter((read) => read === "GET /api/backend/worlds/mine?surface=device_home"),
+  ).toHaveLength(6);
   expect(audit.writes).toEqual([]);
   expect(audit.providerCalls).toEqual([]);
 });

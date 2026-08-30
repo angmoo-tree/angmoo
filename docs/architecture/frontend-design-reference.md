@@ -14,8 +14,10 @@ consumer adoption, and one deterministic test fixture. UI-C adds the
 feature-owned Phone shell, capability-driven navigation, and route/window
 parity contract. UI-D0 closes static global Post-detail handoff, and UI-D adds
 one feature-owned social presentation across global and World-scoped adapters.
-UI-E and UI-F still own Local-only surface adoption and the final
-visual/cross-runtime closeout.
+UI-E implements the Character, autonomy, Device Home, Studio, Relationship
+Graph, Settings, and local-owner surface adoption and has passed local
+technical verification. Its public lifecycle and user Gate remain pending;
+UI-F still owns the final visual/cross-runtime closeout.
 
 ## Exact baseline
 
@@ -74,7 +76,7 @@ entire mixed-purpose source file.
 | Hosted source | Local-owned target | Required adaptation |
 | --- | --- | --- |
 | `frontend/src/components/app-shell.tsx` | current shell, then shared Device shell | keep visual chrome; remove hosted global/account routing assumptions |
-| `frontend/src/components/agents-dashboard-client.tsx` | Local Character dashboard | remove quota and single-active assumptions; show World and scheduler truth |
+| `frontend/src/components/agents-dashboard-client.tsx` | `frontend/src/features/characters/ui/agents-dashboard-client.tsx` | remove quota and single-active assumptions; show World, independent multi-autonomy, timezone, and scheduler truth |
 | `frontend/src/components/character-profile-client.tsx` | Local profile | expose only real Local chat, World, activity, graph, or management capabilities |
 | `frontend/src/components/post-list-client.tsx` composer and tabs | `frontend/src/features/social/ui/world-social-feed.tsx` | preserve owner-controlled World write and real World scopes |
 | `frontend/src/components/post-media-grid.tsx` | `frontend/src/features/social/ui/post-media-grid.tsx` | preserve hosted frame anatomy while using authenticated Local media URLs and payload-backed 0/1/2/3/4+ layout without remote fallback |
@@ -117,12 +119,15 @@ shared/ui
   -> never imports a feature, app route, legacy component, or data client
 ```
 
-The current ten public feature boundaries and zero exact legacy exceptions are
+The current eleven public feature boundaries and zero exact legacy exceptions are
 enforced by `scripts/ci/check_frontend_architecture_boundaries.py`. The ninth
 boundary is the UI-B-only `features/ui-foundation/public.ts` test fixture. It
 is not a product surface. The tenth is the UI-C product boundary
 `features/device-shell/public.ts`; it owns Phone chrome and product route
-capabilities without moving those decisions into neutral `shared/ui`.
+capabilities without moving those decisions into neutral `shared/ui`. The
+eleventh is the UI-E `features/characters/public.ts` boundary; it owns the
+Next/static Character dashboard without moving Character policy into neutral
+presentation or legacy compatibility modules.
 
 ## UI-B semantic foundation
 
@@ -185,7 +190,9 @@ existing Next/static product-shell behavior smoke therefore covers both global
 alias and compatibility-bridge impact in addition to the fixture tests. This
 transitional reach is not evidence that untouched pages conform to the design
 contract. UI-D now owns the shared social row and endpoint-isolated adapters;
-UI-E and UI-F remain pending after that bounded adoption.
+UI-E now owns the Character dashboard and the bounded Local-only surface
+adoption described above. Its public lifecycle and user Gate remain pending,
+and UI-F still owns final exact-SHA visual/cross-runtime closeout.
 
 The machine-readable required smoke set is:
 
@@ -193,6 +200,7 @@ The machine-readable required smoke set is:
 pnpm --dir frontend build
 pnpm --dir frontend build:static
 pnpm --dir browser-tests test
+pnpm --dir browser-tests test:ui-e-local-settings
 pnpm --dir browser-tests exec playwright test --config=playwright.static.config.ts
 pnpm --dir browser-tests test:visual
 ```
