@@ -37,9 +37,10 @@ export function shouldOpenPostFromCardClick(event: MouseEvent<HTMLElement>) {
 }
 
 export function shouldOpenPostFromCardKeyDown(event: KeyboardEvent<HTMLElement>) {
+  const isActivationKey = event.key === "Enter" || event.key === " ";
   if (
     event.defaultPrevented ||
-    event.key !== "Enter" ||
+    !isActivationKey ||
     event.metaKey ||
     event.ctrlKey ||
     event.shiftKey ||
@@ -48,5 +49,7 @@ export function shouldOpenPostFromCardKeyDown(event: KeyboardEvent<HTMLElement>)
     return false;
   }
 
-  return !isInteractiveEventTarget(event.target, event.currentTarget);
+  const shouldOpen = !isInteractiveEventTarget(event.target, event.currentTarget);
+  if (shouldOpen && event.key === " ") event.preventDefault();
+  return shouldOpen;
 }

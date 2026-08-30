@@ -97,6 +97,17 @@ function staticProfilePost(id: string, title: string) {
   };
 }
 
+function staticPostThread(id: string, title: string, body: string) {
+  return {
+    post: {
+      ...staticProfilePost(id, title),
+      body,
+      comments: [],
+    },
+    replies: [],
+  };
+}
+
 function staticAgentDetail(characterId: string) {
   return {
     character: {
@@ -447,6 +458,303 @@ test("static feed paginates on the Device scroll owner and keeps hosted-only rou
 
   await expect(page.getByText("두 번째 페이지", { exact: true })).toBeVisible();
   expect(feedRequests.some((request) => request.includes("cursor=page-two"))).toBe(true);
+});
+
+test("UI-D0 static global post detail waits for a delayed thread before mounting its body", async ({
+  page,
+}) => {
+  let releaseThread!: () => void;
+  let markThreadRequested!: () => void;
+  const threadRequested = new Promise<void>((resolve) => {
+    markThreadRequested = resolve;
+  });
+  const threadRelease = new Promise<void>((resolve) => {
+    releaseThread = resolve;
+  });
+
+  await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+    const pathname = new URL(route.request().url()).pathname;
+    if (pathname !== "/api/v1/posts/post-delayed/thread") {
+      await route.fallback();
+      return;
+    }
+    markThreadRequested();
+    await threadRelease;
+    await route.fulfill({
+      contentType: "application/json",
+      json: staticPostThread(
+        "post-delayed",
+        "Delayed global detail",
+        "The delayed global post body is visible.",
+      ),
+      status: 200,
+    });
+  });
+
+  try {
+    await page.goto("/posts/post-delayed");
+    await threadRequested;
+    await expect(page.getByText("게시글을 불러오는 중", { exact: true })).toBeVisible();
+  } finally {
+    releaseThread();
+  }
+
+  await expect(page.getByText("Delayed global detail", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("The delayed global post body is visible.", { exact: false }),
+  ).toBeVisible();
+  await expect(page.locator("article")).toHaveCount(1);
+});
+
+for (const failure of [
+  { detail: "static_post_forbidden", kind: "403" },
+  { detail: "static_post_not_found", kind: "404" },
+  { detail: "static_post_runtime_unavailable", kind: "503" },
+] as const) {
+  test(`UI-D0 static global post detail renders the ${failure.kind} error surface`, async ({
+    page,
+  }) => {
+    await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+      const pathname = new URL(route.request().url()).pathname;
+      if (pathname !== `/api/v1/posts/post-error-${failure.kind}/thread`) {
+        await route.fallback();
+        return;
+      }
+      await route.fulfill({
+        contentType: "application/json",
+        json: { detail: failure.detail },
+        status: Number(failure.kind),
+      });
+    });
+
+    await page.goto(`/posts/post-error-${failure.kind}`);
+    await expect(page.getByText(failure.detail, { exact: true })).toBeVisible();
+    await expect(page.getByText("게시글을 불러오는 중", { exact: true })).toHaveCount(0);
+    await expect(page.locator("article")).toHaveCount(0);
+    await expect(page.getByTitle("새로고침")).toBeEnabled();
+    await expect(page.locator('[data-product-shell="device"]')).toHaveCount(1);
+  });
+}
+
+test("UI-D0 static global post detail renders an offline error surface", async ({
+  page,
+}) => {
+  await page.route(
+    "http://127.0.0.1:8080/api/v1/posts/post-offline/thread",
+    async (route) => route.abort("internetdisconnected"),
+  );
+
+  await page.goto("/posts/post-offline");
+  await expect(page.getByText("Failed to fetch", { exact: true })).toBeVisible();
+  await expect(page.getByText("게시글을 불러오는 중", { exact: true })).toHaveCount(0);
+  await expect(page.locator("article")).toHaveCount(0);
+  await expect(page.getByTitle("새로고침")).toBeEnabled();
+  await expect(page.locator('[data-product-shell="device"]')).toHaveCount(1);
+});
+
+test("UI-D0 static global post detail manually refreshes after a transient failure", async ({
+  page,
+}) => {
+  let threadRequests = 0;
+  await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+    const pathname = new URL(route.request().url()).pathname;
+    if (pathname !== "/api/v1/posts/post-recover/thread") {
+      await route.fallback();
+      return;
+    }
+    threadRequests += 1;
+    if (threadRequests === 1) {
+      await route.fulfill({
+        contentType: "application/json",
+        json: { detail: "static_post_temporarily_unavailable" },
+        status: 503,
+      });
+      return;
+    }
+    await route.fulfill({
+      contentType: "application/json",
+      json: staticPostThread(
+        "post-recover",
+        "Recovered global detail",
+        "Manual refresh recovered this post.",
+      ),
+      status: 200,
+    });
+  });
+
+  await page.goto("/posts/post-recover");
+  await expect(page.getByText("static_post_temporarily_unavailable", { exact: true })).toBeVisible();
+  expect(threadRequests).toBe(1);
+
+  await page.getByTitle("새로고침").click();
+  await expect(page.getByText("Recovered global detail", { exact: true })).toBeVisible();
+  await expect(page.getByText("Manual refresh recovered this post.", { exact: false })).toBeVisible();
+  await expect(page.locator("article")).toHaveCount(1);
+  expect(threadRequests).toBe(2);
+});
+
+for (const entry of ["click", "Enter", "Space"] as const) {
+  test(`UI-D0 static feed ${entry} opens the hydrated global post detail`, async ({
+    page,
+  }) => {
+    const postId = `post-entry-${entry}`;
+    const title = `Feed ${entry} detail`;
+    await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+      const pathname = new URL(route.request().url()).pathname;
+      if (pathname === "/api/v1/feed") {
+        await route.fulfill({
+          contentType: "application/json",
+          json: {
+            items: [staticProfilePost(postId, title)],
+            next_cursor: null,
+          },
+          status: 200,
+        });
+        return;
+      }
+      if (pathname === `/api/v1/posts/${postId}/thread`) {
+        await route.fulfill({
+          contentType: "application/json",
+          json: staticPostThread(postId, title, `Feed ${entry} body is visible.`),
+          status: 200,
+        });
+        return;
+      }
+      await route.fallback();
+    });
+
+    await page.goto("/posts");
+    const card = page.getByRole("link", {
+      name: `Profile Scroll Parrot 게시글 자세히 보기`,
+    });
+    await expect(card).toBeVisible();
+    if (entry === "click") {
+      await card.click();
+    } else {
+      await card.focus();
+      await page.keyboard.press(entry);
+    }
+
+    await expect(page).toHaveURL(new RegExp(`/posts/${postId}$`));
+    await expect(page.getByText(title, { exact: true })).toBeVisible();
+    await expect(page.getByText(`Feed ${entry} body is visible.`, { exact: false })).toBeVisible();
+    await expect(page.locator("article")).toHaveCount(1);
+  });
+}
+
+test("UI-D0 Tauri Phone keeps post B after a delayed post A response", async ({
+  page,
+}) => {
+  let releasePostA!: () => void;
+  let markPostARequested!: () => void;
+  let markPostAResponded!: () => void;
+  const postARequested = new Promise<void>((resolve) => {
+    markPostARequested = resolve;
+  });
+  const postAResponded = new Promise<void>((resolve) => {
+    markPostAResponded = resolve;
+  });
+  const postARelease = new Promise<void>((resolve) => {
+    releasePostA = resolve;
+  });
+  const threadRequests = new Map<string, number>();
+
+  await page.addInitScript(() => {
+    const desktop = window as unknown as {
+      __ANGMOO_DESKTOP_WINDOW__: { kind: "phone"; route: string };
+      __TAURI__: {
+        core: {
+          invoke: (command: string) => Promise<unknown>;
+        };
+      };
+    };
+    desktop.__ANGMOO_DESKTOP_WINDOW__ = { kind: "phone", route: "/posts" };
+    desktop.__TAURI__ = {
+      core: {
+        invoke: async (command) => {
+          if (command === "desktop_runtime_status") {
+            return {
+              phase: "ready",
+              apiBaseUrl: "http://127.0.0.1:8080",
+              graphProvider: "ladybug",
+              launchToken: "static-route-probe-token-000000000000",
+            };
+          }
+          return undefined;
+        },
+      },
+    };
+  });
+
+  await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+    const pathname = new URL(route.request().url()).pathname;
+    if (pathname === "/api/v1/feed") {
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          items: [
+            staticProfilePost("post-stale-a", "Stale post A"),
+            staticProfilePost("post-stale-b", "Current post B"),
+          ],
+          next_cursor: null,
+        },
+        status: 200,
+      });
+      return;
+    }
+    const postMatch = pathname.match(/^\/api\/v1\/posts\/(post-stale-[ab])\/thread$/);
+    if (!postMatch) {
+      await route.fallback();
+      return;
+    }
+    const postId = postMatch[1];
+    threadRequests.set(postId, (threadRequests.get(postId) ?? 0) + 1);
+    if (postId === "post-stale-a") {
+      markPostARequested();
+      await postARelease;
+    }
+    await route.fulfill({
+      contentType: "application/json",
+      json: staticPostThread(
+        postId,
+        postId === "post-stale-a" ? "Stale post A" : "Current post B",
+        postId === "post-stale-a" ? "Stale body A" : "Current body B",
+      ),
+      status: 200,
+    });
+    if (postId === "post-stale-a") markPostAResponded();
+  });
+
+  try {
+    await page.goto("/");
+    await page.getByText("Stale post A", { exact: true }).click();
+    await postARequested;
+    await expect(page.getByText("게시글을 불러오는 중", { exact: true })).toBeVisible();
+
+    const navigation = page.getByRole("navigation", { name: "모바일 주요 메뉴" });
+    await navigation.getByRole("link", { name: "피드" }).click();
+    await page.getByText("Current post B", { exact: true }).click();
+    await expect(page.getByText("Current body B", { exact: false })).toBeVisible();
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const desktop = window as unknown as {
+            __ANGMOO_DESKTOP_WINDOW__: { kind: string; route: string };
+          };
+          return desktop.__ANGMOO_DESKTOP_WINDOW__;
+        }),
+      )
+      .toEqual({ kind: "phone", route: "/posts/post-stale-b" });
+
+    releasePostA();
+    await postAResponded;
+    await expect(page.getByText("Current body B", { exact: false })).toBeVisible();
+    await expect(page.getByText("Stale body A", { exact: false })).toHaveCount(0);
+    expect(threadRequests.get("post-stale-a")).toBe(1);
+    expect(threadRequests.get("post-stale-b")).toBe(1);
+  } finally {
+    releasePostA();
+  }
 });
 
 test("static feed pull-to-refresh follows a touch sequence on the Device scroll owner", async ({

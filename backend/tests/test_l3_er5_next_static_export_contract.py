@@ -144,6 +144,55 @@ def test_static_agent_exact_routes_precede_character_detail_fallback() -> None:
     assert "<AgentsDashboardClient />" in browser_dashboard_page
 
 
+def test_static_post_detail_waits_for_keyed_thread_before_mounting_client() -> None:
+    router = _read("frontend/src/composition/static-product-router.tsx")
+    assert "return <StaticPostRoute key={postId} postId={postId} />" in router, (
+        "The static route dispatcher must synchronously remount the loader at the "
+        "postId boundary"
+    )
+    post_route = router.split("function StaticPostRoute", maxsplit=1)[1].split(
+        "function StaticLoadingScreen", maxsplit=1
+    )[0]
+
+    assert "const [ready, setReady] = useState(false)" in post_route, (
+        "StaticPostRoute must own an explicit ready gate instead of mounting "
+        "PostDetailClient with null async initial props"
+    )
+    request = post_route.index("getPostThread(postId)")
+    assert "setReady(true)" in post_route, (
+        "StaticPostRoute must close the ready gate after the thread request settles"
+    )
+    assert post_route.index("setReady(true)", request) > request
+    assert "}, [postId]);" in post_route
+    assert 'key={postId}' in post_route, (
+        "PostDetailClient must remount at the postId boundary so post A state cannot "
+        "leak into post B"
+    )
+
+    ready_gate = post_route.index("if (!ready)")
+    detail_mount = post_route.index("<PostDetailClient")
+    assert ready_gate < detail_mount, (
+        "StaticPostRoute must render its loading gate before mounting PostDetailClient"
+    )
+
+
+def test_next_post_detail_keeps_server_prefetch_initial_prop_handoff() -> None:
+    page = _read("frontend/src/app/posts/[postId]/page.tsx")
+
+    fetch = 'await fetchBackendJson<PostThreadRead>('
+    detail = "<PostDetailClient"
+    assert "export default async function PostDetailPage" in page
+    assert fetch in page
+    assert '`/api/v1/posts/${postId}/thread`' in page
+    assert page.index(fetch) < page.index(detail)
+    for initial_prop in (
+        "postId={postId}",
+        "initialThread={thread}",
+        "initialError={error}",
+    ):
+        assert initial_prop in page
+
+
 def test_static_profile_disables_pwa_and_leaves_outputs_untracked() -> None:
     lifecycle = _read(
         "frontend/src/features/pwa-shell/ui/pwa-service-worker-lifecycle.tsx"
