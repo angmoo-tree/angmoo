@@ -8,6 +8,8 @@ const fixture = JSON.parse(
   readFileSync(join(root, "fixtures", "visual-corpus.json"), "utf8"),
 );
 const port = Number(process.env.ANGMOO_VISUAL_FIXTURE_PORT ?? "3302");
+const nextProductOrigin = "http://127.0.0.1:3300";
+const staticProductOrigin = "http://127.0.0.1:3301";
 
 if (!Number.isInteger(port) || port < 1 || port > 65_535) {
   throw new Error("Visual fixture port must be between 1 and 65535.");
@@ -29,12 +31,16 @@ function worldById(worldId) {
 
 const server = createServer((request, response) => {
   const origin = request.headers.origin;
-  if (origin) {
-    response.setHeader("access-control-allow-credentials", "true");
+  if (origin === nextProductOrigin) {
+    response.setHeader("access-control-allow-origin", nextProductOrigin);
+    response.setHeader("vary", "Origin");
+  } else if (origin === staticProductOrigin) {
+    response.setHeader("access-control-allow-origin", staticProductOrigin);
+    response.setHeader("vary", "Origin");
+  }
+  if (origin === nextProductOrigin || origin === staticProductOrigin) {
     response.setHeader("access-control-allow-headers", "content-type,x-angmoo-launcher-token");
     response.setHeader("access-control-allow-methods", "GET,HEAD,OPTIONS");
-    response.setHeader("access-control-allow-origin", origin);
-    response.setHeader("vary", "Origin");
   }
   if (request.method === "OPTIONS") {
     response.writeHead(204);
