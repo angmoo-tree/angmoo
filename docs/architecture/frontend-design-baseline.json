@@ -1675,7 +1675,7 @@
         {
           "path": "browser-tests/snapshots/ui-b/semantic-foundation-phone.png",
           "present": true,
-          "sha256": "de6c1cf3beb2db62ebf85577408cb64d2c0a8e5f7e508a4689219bba19c2e71a"
+          "sha256": "5837ffe4500c5994dc6e617abf68a41412da98cf5ff409ced2a0cd4fed8e08e1"
         }
       ],
       "spec": {
