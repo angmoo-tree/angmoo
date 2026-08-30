@@ -96,7 +96,14 @@
       "hosted_blob_oid": "ebeaf887706f73fe3b126feac46d87e55fe12faf",
       "hosted_source": "frontend/src/components/agents-dashboard-client.tsx",
       "local_target": "frontend/src/features/characters/ui/agents-dashboard-client.tsx",
-      "scope": "row hierarchy adapted to multi-autonomy, World capacity, and scheduler state"
+      "scope": "row hierarchy adapted to multi-autonomy, World capacity, scheduler state, and fail-closed recent-result presentation"
+    },
+    {
+      "classification": "LOCAL",
+      "hosted_blob_oid": null,
+      "hosted_source": null,
+      "local_target": "frontend/src/features/characters/model/character-recent-activity-presentation.ts",
+      "scope": "feature-owned action summary and authoritative target link that never exposes raw activity result payloads"
     },
     {
       "classification": "ADAPTED",
@@ -238,6 +245,7 @@
     "frontend/src/components/app-shell.tsx",
     "frontend/src/components/post-detail-client.tsx",
     "frontend/src/composition/static-product-router.tsx",
+    "frontend/src/features/characters/model/character-recent-activity-presentation.ts",
     "frontend/src/features/device-shell/model/device-navigation.ts",
     "frontend/src/features/device-shell/public.ts",
     "frontend/src/features/device-shell/ui/device-shell.module.css",
@@ -390,6 +398,16 @@
       "StaticCanonicalRouteRedirect",
       "pathname === \"/ui-foundation\"",
       "SemanticFoundationFixture"
+    ],
+    "frontend/src/features/characters/model/character-recent-activity-presentation.ts": [
+      "presentCharacterRecentActivity",
+      "result payload intentionally stays outside",
+      "target_post_id"
+    ],
+    "frontend/src/features/characters/ui/agents-dashboard-client.tsx": [
+      "data-character-recent-activity",
+      "LocalProductLink",
+      "RecentActivityMetric"
     ],
     "frontend/src/features/device-shell/model/device-navigation.ts": [
       "LOCAL_DEVICE_NAVIGATION",
@@ -545,6 +563,11 @@
     "browser-tests/package.json": [
       "\"test:visual\": \"playwright test --config=playwright.visual.config.ts\""
     ],
+    "browser-tests/product-shell.spec.ts": [
+      "Next Character dashboard presents production activity JSON as a compact safe summary",
+      "post-character-ui-e-authoritative",
+      "post-json-decoy"
+    ],
     "browser-tests/playwright.visual.config.ts": [
       "maxDiffPixels: 25",
       "name: \"next-production\"",
@@ -565,6 +588,7 @@
     "browser-tests/static-product-shell.spec.ts": [
       "\"/agents\"",
       "\"/studio/import\"",
+      "post-json-decoy",
       "static Browser canonicalizes legacy World creator aliases"
     ],
     "desktop/src-tauri/src/product_windows.rs": [

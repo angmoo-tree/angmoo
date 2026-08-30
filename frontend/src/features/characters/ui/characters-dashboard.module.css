@@ -213,6 +213,109 @@
   line-height: 1.45;
 }
 
+.recentActivity {
+  display: grid;
+  min-width: 0;
+  grid-column: 1 / -1;
+  gap: var(--spacing-compact);
+  border-radius: var(--radius-field);
+  background: var(--color-surface-muted);
+  padding: var(--spacing-control);
+}
+
+.recentActivityEyebrow,
+.recentActivityLabel,
+.recentActivityHeadline,
+.recentActivityTime {
+  overflow-wrap: anywhere;
+}
+
+.recentActivityEyebrow {
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+  font-weight: 700;
+}
+
+.recentActivitySummary {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: var(--spacing-compact);
+}
+
+.recentActivityIcon {
+  flex: none;
+  color: var(--color-text-secondary);
+  margin-top: var(--spacing-micro);
+}
+
+.recentActivityCopy {
+  min-width: 0;
+}
+
+.recentActivityLabel,
+.recentActivityHeadline {
+  display: block;
+}
+
+.recentActivityLabel {
+  color: var(--color-text-secondary);
+  font-size: var(--text-caption);
+  font-weight: 750;
+}
+
+.recentActivityHeadline {
+  display: -webkit-box;
+  margin-top: var(--spacing-micro);
+  color: var(--color-text-strong);
+  font-size: var(--text-label);
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.recentActivityMeta {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-compact);
+}
+
+.recentActivityTime {
+  color: var(--color-text-secondary);
+  font-size: var(--text-caption);
+  font-weight: 650;
+}
+
+.recentActivityLink {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-micro);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-strong);
+  padding-inline: var(--spacing-control);
+  font-size: var(--text-caption);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.recentActivityLink:hover {
+  border-color: var(--color-brand-soft-border);
+  background: var(--color-brand-soft);
+}
+
+.recentActivityLink:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--focus-ring);
+}
+
 .policyLine {
   margin-top: var(--spacing-control);
   color: var(--color-text-secondary);

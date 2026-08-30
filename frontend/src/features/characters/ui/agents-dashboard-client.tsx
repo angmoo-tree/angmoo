@@ -1,9 +1,18 @@
 "use client";
 
-import { Bird, Plus, Power, PowerOff, RefreshCw } from "lucide-react";
+import {
+  Activity,
+  Bird,
+  ChevronRight,
+  Plus,
+  Power,
+  PowerOff,
+  RefreshCw,
+} from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
+import { LocalProductLink } from "@/features/device-shell/public";
 import { isAuthError, useAuth } from "@/shared/auth/public";
 import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
 import {
@@ -32,6 +41,9 @@ import {
   type CharacterAutonomyMutationState,
   type CharacterDashboardItem,
 } from "../model/character-dashboard-contract";
+import {
+  presentCharacterRecentActivity,
+} from "../model/character-recent-activity-presentation";
 import {
   CHARACTER_AUTONOMY_MUTATION_EVENT,
   CHARACTERS_CHANGED_EVENT,
@@ -362,13 +374,13 @@ function CharacterRow({
         </div>
 
         {isExternal ? (
-          <div className={styles.metrics}>
+          <div className={styles.metrics} data-character-metrics>
             <Metric label="활동 제어" value="연결된 앱에서 관리" />
             <Metric label="Angmoo 예약" value="사용하지 않음" />
           </div>
         ) : (
           <>
-            <div className={styles.metrics}>
+            <div className={styles.metrics} data-character-metrics>
               <Metric
                 label="활동 시간"
                 value={`${item.settings.active_hours_start}–${item.settings.active_hours_end} · ${timezone}`}
@@ -377,10 +389,7 @@ function CharacterRow({
                 label="다음 활동"
                 value={nextActivityLabel(item, timezone)}
               />
-              <Metric
-                label="최근 결과"
-                value={recentResultLabel(item, timezone)}
-              />
+              <RecentActivityMetric item={item} timezone={timezone} />
             </div>
             <p className={styles.policyLine}>
               목표 {item.settings.activity_interval_minutes}분 · 글{" "}
@@ -408,6 +417,61 @@ function Metric({ label, value }: { label: string; value: string }) {
   );
 }
 
+function RecentActivityMetric({
+  item,
+  timezone,
+}: {
+  item: CharacterDashboardItem;
+  timezone: string;
+}) {
+  const presentation = presentCharacterRecentActivity(item);
+
+  return (
+    <div
+      className={styles.recentActivity}
+      data-character-recent-activity={presentation.state}
+    >
+      <span className={styles.recentActivityEyebrow}>최근 결과</span>
+      <div className={styles.recentActivitySummary}>
+        <Activity
+          aria-hidden="true"
+          className={styles.recentActivityIcon}
+          size={20}
+        />
+        <div className={styles.recentActivityCopy}>
+          <span className={styles.recentActivityLabel}>
+            {presentation.actionLabel}
+          </span>
+          <strong className={styles.recentActivityHeadline}>
+            {presentation.headline}
+          </strong>
+        </div>
+      </div>
+      <div className={styles.recentActivityMeta}>
+        {presentation.occurredAt ? (
+          <time
+            className={styles.recentActivityTime}
+            dateTime={presentation.occurredAt}
+            title={`${timezone} 기준`}
+          >
+            {formatDate(presentation.occurredAt, timezone)}
+          </time>
+        ) : null}
+        {presentation.targetHref && presentation.targetLabel ? (
+          <LocalProductLink
+            ariaLabel={presentation.targetLabel}
+            className={styles.recentActivityLink}
+            href={presentation.targetHref}
+          >
+            <span>{presentation.targetLabel}</span>
+            <ChevronRight aria-hidden="true" size={16} />
+          </LocalProductLink>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 function nextActivityLabel(item: CharacterDashboardItem, timezone: string) {
   if (!item.settings.auto_enabled) return "자율활동 꺼짐";
   const next = item.activity_summary.next_activity_at;
@@ -415,18 +479,4 @@ function nextActivityLabel(item: CharacterDashboardItem, timezone: string) {
     return next ? `휴식 · ${formatDate(next, timezone)}` : "활동 시간 밖 · 예약 없음";
   }
   return next ? formatDate(next, timezone) : "예약 계산 중";
-}
-
-function recentResultLabel(item: CharacterDashboardItem, timezone: string) {
-  const recent = item.recent_activity[0];
-  if (recent) {
-    return `${recent.result} · ${formatDate(recent.created_at, timezone)}`;
-  }
-  if (item.activity_summary.last_activity_at) {
-    return `활동 기록 · ${formatDate(
-      item.activity_summary.last_activity_at,
-      timezone,
-    )}`;
-  }
-  return "아직 기록 없음";
 }

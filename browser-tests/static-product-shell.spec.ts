@@ -359,19 +359,27 @@ function staticAgentDetail(characterId: string) {
 }
 
 function staticUiECharacter({
+  activityActionType = "post_created",
+  activityResult,
   characterId,
   name,
   nextActivityAt,
   slotStatus = "idle",
+  targetPostId,
   timezone,
 }: {
+  activityActionType?: string;
+  activityResult?: string;
   characterId: string;
   name: string;
   nextActivityAt: string;
   slotStatus?: string;
+  targetPostId?: string | null;
   timezone: string;
 }) {
   const base = staticAgentDetail(characterId);
+  const authoritativeTargetPostId =
+    targetPostId === undefined ? `post-${characterId}` : targetPostId;
   return {
     ...base,
     character: {
@@ -415,15 +423,25 @@ function staticUiECharacter({
         id: 1,
         user_id: "owner-static-probe",
         character_id: characterId,
-        action_type: "post",
-        target_post_id: `post-${characterId}`,
+        action_type: activityActionType,
+        target_post_id: authoritativeTargetPostId,
         target_profile_type: null,
         target_profile_id: null,
         target_profile_name: null,
         target_profile_handle: null,
         target_profile_avatar_url: null,
         reason: "scheduled_activity",
-        result: `${name} 게시글 작성 완료`,
+        result:
+          activityResult ??
+          JSON.stringify({
+            message: "Created post post-json-decoy.",
+            created_post_id: "post-json-decoy",
+            topic_signature: "내부 topic signature",
+            novelty_basis: "내부 novelty metadata",
+            lore_chunk_ids: ["lore-internal-1"],
+            retrieval_mode: "hybrid",
+            internal_blob: "x".repeat(4_000),
+          }),
         created_at: "2026-08-29T23:15:00Z",
       },
     ],
@@ -568,14 +586,32 @@ test("static Character dashboard keeps multiple autonomy states and World-local 
       timezone: "America/New_York",
     }),
     staticUiECharacter({
+      activityActionType: "future_action_v2",
+      activityResult: `{broken${"x".repeat(4_000)}`,
       characterId: "character-ui-e-beta",
       name: "베타 앵무",
       nextActivityAt: "2026-08-30T03:45:00Z",
       slotStatus: "running",
+      targetPostId: null,
       timezone: "Asia/Seoul",
     }),
   ];
   const autonomyRequests: string[] = [];
+
+  await page.route(
+    "http://127.0.0.1:8080/api/v1/posts/post-character-ui-e-alpha/thread",
+    async (route) => {
+      await route.fulfill({
+        contentType: "application/json",
+        json: staticPostThread(
+          "post-character-ui-e-alpha",
+          "최근 결과 대상 게시글",
+          "authoritative target_post_id로 열린 본문",
+        ),
+        status: 200,
+      });
+    },
+  );
 
   await page.route("http://127.0.0.1:8080/api/v1/agents**", async (route) => {
     const request = route.request();
@@ -623,7 +659,94 @@ test("static Character dashboard keeps multiple autonomy states and World-local 
   await expect(beta).toHaveAttribute("data-character-autonomy-state", "running");
   await expect(alpha).toContainText("08:00–22:00 · America/New_York");
   await expect(alpha).toContainText("08.29 20:30");
-  await expect(alpha).toContainText("알파 앵무 게시글 작성 완료 · 08.29 19:15");
+  const alphaMetrics = alpha.locator("[data-character-metrics]");
+  const alphaRecent = alpha.locator("[data-character-recent-activity]");
+  const alphaResultLink = alphaRecent.getByRole("link", {
+    name: "게시글 보기",
+    exact: true,
+  });
+  const betaRecent = beta.locator("[data-character-recent-activity]");
+  await expect(alphaRecent).toContainText("게시글 작성");
+  await expect(alphaRecent).toContainText("지저귐을 남겼어요.");
+  await expect(alphaRecent).toContainText("08.29 19:15");
+  await expect(alphaRecent.locator("time")).toHaveAttribute(
+    "datetime",
+    "2026-08-29T23:15:00Z",
+  );
+  await expect(alphaResultLink).toHaveAttribute(
+    "href",
+    /^\/posts\/post-character-ui-e-alpha\/?$/,
+  );
+  await expect(alphaResultLink).not.toHaveAttribute("aria-disabled", "true");
+  await expect(
+    alphaRecent.locator('[data-product-route-unavailable="true"]'),
+  ).toHaveCount(0);
+  await expect(betaRecent).toContainText("활동 기록이 업데이트됐어요.");
+  await expect(betaRecent.getByRole("link")).toHaveCount(0);
+
+  for (const [surface, forbidden] of [
+    [
+      alphaRecent,
+      [
+        "{",
+        '"message"',
+        '"created_post_id"',
+        '"topic_signature"',
+        '"novelty_basis"',
+        '"lore_chunk_ids"',
+        '"retrieval_mode"',
+        "post-character-ui-e-alpha",
+        "post-json-decoy",
+      ],
+    ],
+    [betaRecent, ["{broken", "future_action_v2"]],
+  ] as const) {
+    const visibleText = await surface.innerText();
+    for (const value of forbidden) expect(visibleText).not.toContain(value);
+  }
+
+  for (const viewport of [
+    { width: 360, height: 800 },
+    { width: 390, height: 844 },
+    { width: 436, height: 880 },
+  ]) {
+    await page.setViewportSize(viewport);
+    const [metricsBox, recentBox] = await Promise.all([
+      alphaMetrics.boundingBox(),
+      alphaRecent.boundingBox(),
+    ]);
+    expect(metricsBox).not.toBeNull();
+    expect(recentBox).not.toBeNull();
+    expect(Math.abs(recentBox!.x - metricsBox!.x)).toBeLessThanOrEqual(1);
+    expect(
+      Math.abs(
+        recentBox!.x +
+          recentBox!.width -
+          (metricsBox!.x + metricsBox!.width),
+      ),
+    ).toBeLessThanOrEqual(1);
+    for (const result of [alphaRecent, betaRecent]) {
+      const geometry = await result.evaluate((node) => ({
+        documentOverflow:
+          document.documentElement.scrollWidth -
+          document.documentElement.clientWidth,
+        height: node.getBoundingClientRect().height,
+        overflow: node.scrollWidth - node.clientWidth,
+      }));
+      expect(geometry.documentOverflow).toBe(0);
+      expect(geometry.overflow).toBe(0);
+      expect(geometry.height).toBeLessThanOrEqual(220);
+    }
+  }
+
+  await page
+    .getByRole("button", { name: "알파 앵무 자율활동 끄기" })
+    .focus();
+  await page.keyboard.press("Tab");
+  await expect(alphaResultLink).toBeFocused();
+  expect(
+    await alphaResultLink.evaluate((node) => node.matches(":focus-visible")),
+  ).toBe(true);
   await expect(page.getByText("서버 LLM", { exact: false })).toHaveCount(0);
   await expect(page.getByText("외부 실행기", { exact: false })).toHaveCount(0);
   await expect(page.getByText("3/3", { exact: false })).toHaveCount(0);
@@ -640,6 +763,89 @@ test("static Character dashboard keeps multiple autonomy states and World-local 
   expect(autonomyRequests).toEqual([
     "/api/v1/agents/character-ui-e-alpha/deactivate",
   ]);
+
+  await alphaResultLink.focus();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/posts\/post-character-ui-e-alpha\/?$/);
+  await expect(
+    page.getByText("최근 결과 대상 게시글", { exact: true }),
+  ).toBeVisible();
+});
+
+test("static Character dashboard fails closed for malformed, historical, and empty recent activity", async ({
+  page,
+}) => {
+  const malformed = staticUiECharacter({
+    activityResult: "{broken",
+    characterId: "character-ui-e-malformed",
+    name: "손상 결과 앵무",
+    nextActivityAt: "2026-08-30T03:45:00Z",
+    targetPostId: null,
+    timezone: "Asia/Seoul",
+  });
+  const historicalBase = staticUiECharacter({
+    characterId: "character-ui-e-historical",
+    name: "이전 활동 앵무",
+    nextActivityAt: "2026-08-30T03:45:00Z",
+    timezone: "Asia/Seoul",
+  });
+  const historical = {
+    ...historicalBase,
+    recent_activity: [],
+  };
+  const emptyBase = staticUiECharacter({
+    characterId: "character-ui-e-empty",
+    name: "첫 활동 앵무",
+    nextActivityAt: "2026-08-30T03:45:00Z",
+    timezone: "Asia/Seoul",
+  });
+  const empty = {
+    ...emptyBase,
+    activity_summary: {
+      ...emptyBase.activity_summary,
+      last_activity_at: null,
+    },
+    recent_activity: [],
+  };
+
+  await page.route("http://127.0.0.1:8080/api/v1/agents", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      json: [malformed, historical, empty],
+      status: 200,
+    });
+  });
+  await page.goto("/agents");
+
+  const malformedResult = page
+    .locator('[data-character-id="character-ui-e-malformed"]')
+    .locator("[data-character-recent-activity]");
+  await expect(malformedResult).toContainText("게시글 작성");
+  await expect(malformedResult).toContainText("지저귐을 남겼어요.");
+  await expect(malformedResult.getByRole("link")).toHaveCount(0);
+  expect(await malformedResult.innerText()).not.toContain("{broken");
+
+  const historicalResult = page
+    .locator('[data-character-id="character-ui-e-historical"]')
+    .locator("[data-character-recent-activity]");
+  await expect(historicalResult).toHaveAttribute(
+    "data-character-recent-activity",
+    "historical",
+  );
+  await expect(historicalResult).toContainText("최근 활동 기록이 있어요.");
+  await expect(historicalResult).toContainText("08.30 08:15");
+  await expect(historicalResult.getByRole("link")).toHaveCount(0);
+
+  const emptyResult = page
+    .locator('[data-character-id="character-ui-e-empty"]')
+    .locator("[data-character-recent-activity]");
+  await expect(emptyResult).toHaveAttribute(
+    "data-character-recent-activity",
+    "empty",
+  );
+  await expect(emptyResult).toContainText("아직 활동 기록이 없어요.");
+  await expect(emptyResult.locator("time")).toHaveCount(0);
+  await expect(emptyResult.getByRole("link")).toHaveCount(0);
 });
 
 test("Tauri Phone reserves titlebar controls above page-owned header actions", async ({

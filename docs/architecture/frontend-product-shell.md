@@ -200,6 +200,18 @@ account-wide single-active rule. Active hours are shown with their explicit
 timezone, while stored API instants are normalized as UTC and formatted in the
 World timezone for next-activity and recent-result presentation.
 
+The compact recent-result presentation is owned by
+`features/characters/model/character-recent-activity-presentation.ts`. It is a
+pure allowlist over action type, timestamp, and authoritative
+`target_post_id`; it never parses or returns `AgentActivityLog.result`.
+Unknown or malformed action types fail closed to generic Korean copy. A
+malformed or long raw result is ignored, so a known action still uses its safe
+allowlisted summary; absent recent activity is distinguished from a historical timestamp. The dashboard
+renders the result as one full-span bounded row with a World-local `<time>` and
+an optional `LocalProductLink`. The same component and route source are used in
+Next and static/Tauri, so JSON metadata, internal IDs, and unsupported
+destinations cannot leak through an adapter-specific fallback.
+
 UI-E does not turn a public or World Feed author into an owner-management
 destination. `/agents/{characterId}` remains a Local owner surface with
 management capability; a public profile remains a separate, capability-gated

@@ -3,9 +3,9 @@ name: Angmoo Local
 document: Frontend Design Contract
 version: 1.6
 date: 2026-08-30
-status: CANONICAL DESIGN CONTRACT · SINGLE BRIGHT-CORAL BRAND + THREE USER-APPROVED CONTRAST EXCEPTIONS · UI-A/UI-B/UI-C/UI-D PASS · UI-D0 FULL PASS · UI-E IMPLEMENTED/LOCAL TECH PASS · CURRENT UI CONFORMANCE INCOMPLETE
+status: CANONICAL DESIGN CONTRACT · SINGLE BRIGHT-CORAL BRAND + THREE USER-APPROVED CONTRAST EXCEPTIONS · UI-A/UI-B/UI-C/UI-D PASS · UI-D0 FULL PASS · UI-E FOLLOW-UP IMPLEMENTED/LOCAL TECH PASS · CURRENT UI CONFORMANCE INCOMPLETE
 scope: Device Phone · World App · Creator Studio · Relationship Graph · current L4 surfaces
-implementation_phase: L4.5 UI-A through UI-D merged and post-merge closed · UI-D0 merged and post-merge closed · UI-E Character/autonomy/Local-only surfaces implemented with local technical verification · UI-E public lifecycle and user Gate pending · UI-F not started
+implementation_phase: L4.5 UI-A through UI-D merged and post-merge closed · UI-D0 merged and post-merge closed · UI-E Character/autonomy/Local-only surfaces and recent-result follow-up implemented with local technical verification · same Draft PR exact-head Hosted CI and user Ready Gate pending · UI-F not started
 hosted_reference_commit: 7f967abd6117381be5c081ed284addb889b06fec
 local_reference_commit: e5e62aed69cb89b16b5870eb0854dd07752dc519
 legacy_reference: audited-internal-snapshot
@@ -29,7 +29,7 @@ L4.5 UI-C PHONE SHELL·NAVIGATION·ROUTE PARITY: COMPLETE · MERGED · POST-MERG
 L4.5 UI-D0 STATIC POST DETAIL HANDOFF: COMPLETE · MERGED · POST-MERGE PASS
 L4.5 UI-D SOCIAL CORE HOSTED PARITY: COMPLETE · MERGED · POST-MERGE PASS
 HOSTED BRIGHT CORAL DESIGN: CANONICAL · SINGLE CORE BRAND · THREE CLOSED USER-APPROVED CONTRAST EXCEPTIONS
-L4.5 UI-E CHARACTER·AUTONOMY·LOCAL-ONLY SURFACE: IMPLEMENTED · LOCAL TECH PASS · PUBLIC LIFECYCLE PENDING
+L4.5 UI-E CHARACTER·AUTONOMY·LOCAL-ONLY SURFACE: FOLLOW-UP IMPLEMENTED · LOCAL TECH PASS · EXACT-HEAD HOSTED CI PENDING · USER READY BLOCKED
 L4.5 UI-F VISUAL·CROSS-RUNTIME CLOSEOUT: NOT STARTED
 ```
 
@@ -691,6 +691,16 @@ hosted Agent dashboard의 visual hierarchy를 계승하되 Local 의미로 바�
 - 여러 Character가 동시에 active일 수 있음
 - World 참여와 전역 Character identity를 구분
 
+`최근 결과` compact dashboard 표현은 다음 계약을 따른다.
+
+- `features/characters`가 소유하는 pure presenter가 action type을 짧은 사용자용 label·headline으로 바꾼다.
+- `최근 결과`는 `활동 시간`·`다음 활동` 아래에서 전체 metric 폭을 쓰며, headline은 compact한 두 줄 범위로 제한한다.
+- 시각은 저장 instant를 그대로 출력하지 않고 payload의 World timezone으로 변환한 `<time>`으로 표시한다.
+- 실제 결과 link는 API가 명시한 authoritative `target_post_id`가 있을 때만 canonical `/posts/{id}`로 만든다.
+- raw `result` JSON·영문 message·internal ID·`created_post_id`·`topic_signature`·novelty·lore·retrieval metadata를 compact dashboard의 text, accessible name, tooltip 또는 route source로 사용하지 않는다.
+- unknown·malformed action type은 raw fallback 없이 `활동 기록이 업데이트됐어요.` 같은 generic fail-closed summary로 축소한다. `result`가 malformed JSON이거나 장문이어도 presenter는 이를 parse하지 않으며, known action이면 안전한 action별 요약을 그대로 사용한다.
+- recent activity가 없으면 `last_activity_at`이 있는 historical fallback과 완전히 비어 있는 상태를 구분한다.
+
 금지:
 
 - hosted의 계정당 `3 + 3` quota 재도입
@@ -711,6 +721,7 @@ next activity: World timezone을 반영한 local display
 ```
 
 시간은 저장 instant와 표시 timezone을 구분한다. `다음 활동`은 UTC 문자열을 그대로 노출하지 않는다.
+`last activity`의 성공/failure 의미는 action·scheduler state가 소유하며 raw `result` 문자열을 해석해 추측하지 않는다. runtime `last_error`는 최근 결과와 별도의 danger panel로 유지한다.
 
 ---
 
@@ -984,7 +995,7 @@ hosted 구현을 이식할 때 PR에 다음을 기록한다.
 
 ## 18. 현재 conformance와 목표 판정
 
-UI-E local technical snapshot 시점의 현재 상태:
+UI-E recent-result follow-up local technical snapshot 시점의 현재 상태:
 
 - global Feed·Post detail과 World Feed·World-scoped detail이 feature-owned `SocialPostRow`와 하나의 social presentation 계약을 공유한다.
 - Local `WorldSocialFeed`는 큰 검증용 form/card나 접힘 토글 대신 compact World context·항상 보이는 owner composer·flat divided timeline을 사용한다.
@@ -993,7 +1004,7 @@ UI-E local technical snapshot 시점의 현재 상태:
 - World Package export/import가 실제 shared primitive 소비자로 전환됐고 기존 `ProfileAvatar`·`StatusBadge`는 compatibility bridge로 새 primitive를 사용한다.
 - Device Home·World App·일반 compatibility route는 하나의 feature-owned `DeviceShell`로 수렴했고 Creator Studio와 Relationship Graph는 dedicated wide shell을 유지한다.
 - Social core는 payload와 실제 capability가 소유한 handle·avatar·media·action·count만 표시한다. read 응답의 authoritative `reply_count`·`like_count`는 실제 `0`까지 표시하고, payload에 없는 repost·follow·mutation capability나 count는 만들지 않는다.
-- `features/characters/public.ts`가 Next와 static/Tauri의 `/agents` dashboard를 함께 소유하고, 여러 Character의 독립 ON/OFF·scheduler 상태·active hours·World timezone next activity·recent result를 shared primitive로 표시한다. legacy `components/agents-dashboard-client.tsx`는 compatibility export만 유지한다.
+- `features/characters/public.ts`가 Next와 static/Tauri의 `/agents` dashboard를 함께 소유하고, 여러 Character의 독립 ON/OFF·scheduler 상태·active hours·World timezone next activity·recent result를 shared primitive로 표시한다. feature-owned recent-activity presenter는 raw result payload를 읽지 않고 사용자용 action summary와 authoritative `target_post_id` link만 제공한다. legacy `components/agents-dashboard-client.tsx`는 compatibility export만 유지한다.
 - Character activity control/list, Studio World-local leave, Device Home launchability, runtime state, Relationship Graph state, Settings와 local-owner surface의 UI-E 범위가 semantic token·shared component·capability-driven state로 수렴했다. public/World 작성자를 owner 전용 `/agents/{id}`로 잘못 연결하지 않는다.
 - raw style 기준선은 UI-A placeholder 59 files·1,938 occurrences에서 UI-B 56 files·1,894 occurrences, UI-C 53 files·1,860 occurrences, UI-D 후속 50 files·1,794 occurrences를 거쳐 UI-E checker 측정 42 files·1,496 occurrences로 감소했다. 이 수치는 남은 migration inventory이지 전역 conformance PASS가 아니다.
 - `features/device-shell/model/device-navigation.ts`가 Local Phone route capability를 소유하고 Next-only destination을 fail-closed로 숨긴다.
@@ -1043,7 +1054,9 @@ UI-E local technical snapshot 시점의 현재 상태:
 - Device Home은 World launchability와 runtime health를 별도 state로 표시한다. unavailable World는 link가 아니며 runtime은 starting·ready·degraded·failed·recovery-required·stopping·stopped를 합치지 않는다.
 - Relationship Graph는 ready·empty·degraded·rebuilding·unavailable·failed를 분리하고 canonical fallback 또는 lagging projection을 healthy LadybugDB로 표시하지 않는다.
 - Settings/local owner는 installation ID·label·owner·local session을 표시한다. 공개 Local runtime에 없는 owner 전체 `DELETE /auth/me`는 노출하지 않고, Character 삭제·World-local leave·session 종료의 exact scope를 구분한다.
-- UI-E local technical 검증은 Next production build, Tauri static export, feature architecture/design checker, focused backend domain regression, Next/static Playwright와 Local Settings fail-closed regression을 포함한다. Issue·push·Draft PR·Hosted CI·사용자 Ready·merge·post-merge Actions는 별도 Gate로 남는다.
+- UI-E의 최초 구현은 Issue #208·branch push·Draft PR #209와 pre-Hotfix exact-head Hosted CI까지 진행했다. 후속 Hotfix local technical 검증은 Next production build, Tauri static export, feature architecture/design checker, 전체 backend 회귀, Next/static Playwright와 Local Settings fail-closed 회귀를 포함한다. 후속 signed commit·같은 branch push·새 exact-head Hosted CI와 사용자 Ready·merge·post-merge Actions는 서로 별도 Gate로 남는다.
+
+UI-E PR #209 후속 Hotfix는 사용자 visual에서 발견된 `최근 결과` raw JSON 노출만 frontend presentation 범위에서 교정한다. `CharacterRecentActivityPresentation`은 `action_type`·`created_at`·authoritative `target_post_id`만 신뢰하고 `result`를 사용자 문구나 route source로 읽지 않는다. 동일 Character component를 사용하는 Next와 static/Tauri 회귀는 production-shaped JSON·4,000자 내부 payload·malformed/unknown action·missing target·historical/empty fallback을 검증하며, visible JSON key·internal ID `0`, 360·390·436px overflow `0`, keyboard result-link route를 요구한다. backend·DB·API·scheduler·provider 의미 diff, 새 raw color·contrast exception, hosted code·asset·font 복사는 모두 `0`이다. 이 follow-up은 구현과 local technical Gate를 닫았지만, 새 exact-head Hosted CI와 사용자 recent-result visual 확인 전에는 Ready 또는 merge할 수 없다.
 
 따라서 현재 허용되는 판정:
 
@@ -1054,7 +1067,7 @@ UI-B SEMANTIC TOKEN·PRIMITIVE FOUNDATION PASS
 UI-C PHONE SHELL·NAVIGATION·ROUTE PARITY PASS / MERGED / POST-MERGE PASS
 UI-D0 STATIC POST DETAIL HANDOFF FULL PASS / MERGED / POST-MERGE PASS
 UI-D SOCIAL CORE HOSTED PARITY FULL PASS / MERGED / POST-MERGE PASS
-UI-E CHARACTER·AUTONOMY·LOCAL-ONLY SURFACE IMPLEMENTED / LOCAL TECH PASS / PUBLIC LIFECYCLE PENDING
+UI-E CHARACTER·AUTONOMY·LOCAL-ONLY SURFACE FOLLOW-UP IMPLEMENTED / LOCAL TECH PASS / EXACT-HEAD HOSTED CI PENDING / USER READY BLOCKED
 UI-F VISUAL·CROSS-RUNTIME CLOSEOUT NOT STARTED
 UI-C WINDOWS 100%·125%·150% SCALE USER GATE PASS / UI-F FINAL EXACT-SHA RECHECK PENDING
 ```

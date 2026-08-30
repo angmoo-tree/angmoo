@@ -34,9 +34,11 @@ export type CharacterDashboardItem = {
     next_activity_at: string | null;
   };
   recent_activity: Array<{
+    id: number;
     action_type: string;
     reason: string;
     result: string;
+    target_post_id: string | null;
     created_at: string;
   }>;
 };

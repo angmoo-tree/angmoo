@@ -42,9 +42,15 @@
       "\"scheduled\"",
       "presentCharacterAutonomy"
     ],
+    "frontend/src/features/characters/model/character-recent-activity-presentation.ts": [
+      "CharacterRecentActivityPresentation",
+      "presentCharacterRecentActivity",
+      "target_post_id"
+    ],
     "frontend/src/features/characters/public.ts": [
       "AgentsDashboardClient",
-      "presentCharacterAutonomy"
+      "presentCharacterAutonomy",
+      "presentCharacterRecentActivity"
     ],
     "frontend/src/features/creator-studio/ui/creator-studio-dashboard.tsx": [
       "getLocalWorldSurface(\"creator_studio\"",
@@ -155,6 +161,7 @@
     "frontend/src/features/characters/api/character-dashboard-client.ts",
     "frontend/src/features/characters/model/character-dashboard-contract.ts",
     "frontend/src/features/characters/model/character-dashboard-session.ts",
+    "frontend/src/features/characters/model/character-recent-activity-presentation.ts",
     "frontend/src/features/characters/public.ts",
     "frontend/src/features/characters/ui/agents-dashboard-client.tsx",
     "frontend/src/features/characters/ui/characters-dashboard.module.css",
