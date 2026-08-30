@@ -16,9 +16,11 @@ parity contract. UI-D0 closes static global Post-detail handoff, and UI-D adds
 one feature-owned social presentation across global and World-scoped adapters.
 UI-E implements the Character, autonomy, Device Home, Studio, Relationship
 Graph, Settings, and local-owner surface adoption. Its recent-result follow-up
-is also implemented and has passed local technical verification. The same
-Draft PR still requires new exact-head Hosted CI and the user Ready Gate;
-UI-F still owns the final visual/cross-runtime closeout.
+closed through exact-head Hosted CI, user review, merge, and post-merge Actions.
+UI-F now implements the deterministic product visual/cross-runtime corpus and
+has passed local technical verification. UI-F's Issue, push, Draft PR, Hosted
+CI, user Ready, merge, post-merge Actions, and final exact-SHA Windows user
+Gates remain separate and pending.
 
 ## Exact baseline
 
@@ -29,6 +31,7 @@ UI-F still owns the final visual/cross-runtime closeout.
 | UI-C branch base | `fd0bb0f4df07cb3e121387e4b6628f8a4b471488` | merged UI-B result used as the shell-convergence base |
 | UI-C merge | `e7c6d5816d2a911a555f461cfba8c9b32b7172d3` | merged Phone shell, navigation, and route-parity result |
 | UI-D0 merge and UI-D base | `09026c84fa468824b746508ae1c7754dbb4c918a` | merged static global Post-detail handoff and immutable UI-D implementation base |
+| UI-E merge and UI-F base | `91577c7cccd29475bba91caf3a6208f74eb7e060` | merged Character/Local-only surface result after UI-E post-merge Actions 6/6 PASS |
 | Hosted visual reference | `jingujeon/angmoo@7f967abd6117381be5c081ed284addb889b06fec` | Immutable social-UI audit snapshot |
 | Latest shared first-party history | `637426d8f2245311d6c5cb4ca52bcfc8103cca25` | Hosted and Local already share the audited frontend ancestry through this commit |
 | Local GPL transition | `b95ffe2c59e02d97f2047791c4959c1494b9ee35` | Current application license boundary |
@@ -197,9 +200,10 @@ alias and compatibility-bridge impact in addition to the fixture tests. This
 transitional reach is not evidence that untouched pages conform to the design
 contract. UI-D now owns the shared social row and endpoint-isolated adapters;
 UI-E now owns the Character dashboard and the bounded Local-only surface
-adoption described above. The recent-result follow-up is implemented and
-locally verified; new exact-head Hosted CI and the user Ready Gate remain
-pending, and UI-F still owns final exact-SHA visual/cross-runtime closeout.
+adoption described above. The recent-result follow-up is merged and its
+post-merge Actions passed. UI-F now owns and locally verifies the final product
+visual/cross-runtime corpus; the external PR lifecycle and final exact-SHA
+Windows user Gates remain pending.
 
 The machine-readable required smoke set is:
 
@@ -375,10 +379,17 @@ raw color occurrences = 1,496
 files with raw color  = 42
 ```
 
+UI-F's touched-surface semantic closeout was measured with the same checker:
+
+```text
+raw color occurrences = 1,408
+files with raw color  = 33
+```
+
 `baseline_status = reviewed_ui_b` remains the machine-contract lineage marker
 for the stage that introduced this deterministic scan; it is not a claim that
 the numeric baseline stopped at UI-B. The tracked occurrence and file values
-above are the current UI-E measurement. Regenerate the report only after the
+above are the current UI-F measurement. Regenerate the report only after the
 source settles, and change the values only to the checker-measured result.
 Never guess the count or update it merely to hide growth.
 
@@ -406,29 +417,32 @@ lower the tracked baseline when debt is removed.
 
 UI-B activates the reserved `test:visual` command in the existing
 `browser-tests/package.json`; it does not add Playwright under `frontend`.
-The canonical manifest is:
+UI-F extends that same command with a deterministic product corpus. The
+canonical manifest is:
 
 ```text
-fixture schema       ui-b-semantic-primitives-v1
+fixture schemas      ui-b-semantic-primitives-v1 / ui-f-product-visuals-v1
 canonical OS         ubuntu-24.04
 container            mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e
 Playwright           1.62.1
 Chromium revision    1234
 Chromium version     151.0.7922.34
-reviewed viewport    436x880
+reviewed viewports   360x800 / 390x844 / 436x880 / 1440x1000 / 1440x900
 projects             next-production / static-export
 threshold            0.1
 maxDiffPixels        25
-screenshot calls     1
-reviewed PNG         browser-tests/snapshots/ui-b/semantic-foundation-phone.png
+screenshot calls     11
+reviewed PNG         UI-B 1 + UI-F 10
 ```
 
 `browser-tests/playwright.visual.config.ts` owns the browser environment and
 diff policy. Core CI executes it inside the digest-pinned Playwright 1.62.1
 Noble container recorded above, so host-runner font and image-package drift
 cannot silently redefine the pixel baseline. `browser-tests/semantic-foundation.visual.spec.ts`
-owns the fixture schema, interaction/accessibility checks, `/icon.svg` load
-assertion in both projects, and the single screenshot call.
+continues to own the UI-B fixture, while `browser-tests/product-surfaces.visual.spec.ts`,
+`browser-tests/fixtures/visual-corpus.json`, and
+`browser-tests/visual-fixture-server.mjs` own the UI-F product corpus and its
+read-only fixture API.
 
 The `next-production` project starts the built standalone Next preview through
 `frontend/scripts/serve-production.mjs`. On canonical Ubuntu the helper copies
@@ -440,13 +454,11 @@ dereferenced from a Windows checkout. Both paths require an existing production
 build; neither rebuilds in the visual test.
 
 The generated frontend design baseline records canonical-LF SHA-256 values for
-the visual config, spec, fixture, production-preview helper, and source SVG,
-plus a binary SHA-256 for the reviewed, committed semantic-foundation PNG.
-UI-C deliberately kept the screenshot call and PNG count at one. UI-D PR #207
-follow-up intentionally refreshes that same single baseline for the bright-
-coral CTA and selected-navigation contract rather than creating a second early
-corpus. Its additional social evidence remains functional route, viewport,
-overflow, navigation, composer, aggregate, and interaction-type coverage.
+the visual config, both specs, both fixtures, the read-only server,
+production-preview helper, and source SVG, plus binary SHA-256 values for all
+11 reviewed PNG files. UI-C deliberately kept the screenshot count at one and
+UI-D refreshed that semantic baseline; UI-F is the first stage to promote
+actual product surfaces into the committed visual corpus.
 
 The visual configuration must freeze container digest, locale, timezone, light
 color scheme, reduced motion, device scale, caret and animation behavior,
@@ -456,13 +468,19 @@ network images are forbidden. The pinned Noble container with the locked CI
 Chromium owns the pixel baseline. Windows 100%, 125%, and 150% display scale
 remains a separate Tauri user-smoke Gate.
 
-The single baseline remains the `436x880` semantic-foundation fixture. UI-C
-added functional shell assertions at `360`, `390`, `436`, and desktop Browser
-widths plus static inner-scroll pagination and unsupported-route assertions.
-UI-D follow-up adds exact bright-coral exception checks and paired Next/static
-social behavior without promoting them into a full product screenshot corpus.
-Completing the full route/state/runtime matrix, including the two wide
-workspaces at `1440x900`, belongs to UI-F.
+The UI-B baseline remains the `436x880` semantic-foundation fixture. UI-F adds
+10 product PNGs covering Device Home compact and centered desktop, global Feed
+media, World Feed composer and long Korean copy, Character autonomy states,
+Creator Studio populated and empty states, Relationship Graph ready and
+degraded states, and runtime offline. The two projects share each expected PNG;
+separate Next/static visual forks are not accepted. The suite also verifies
+focus-visible, 200% text reflow, reduced motion, horizontal overflow `0`, first-
+party asset loading, external network `0`, write request `0`, and provider call
+`0`.
+
+UI-F's canonical pinned-Noble run passed `36/36` locally after the reviewed PNG
+refresh. Windows 100%, 125%, and 150% display scale, Host Tauri dev, installed
+artifact, Ready, merge, and post-merge checks remain separate exact-SHA Gates.
 
 ## Asset and font provenance
 
@@ -509,7 +527,7 @@ UI-B SEMANTIC TOKEN / PRIMITIVE FOUNDATION             = PASS
 UI-C PHONE SHELL / NAVIGATION / ROUTE PARITY            = PASS; MERGED; POST-MERGE PASS
 UI-D0 STATIC POST DETAIL ASYNC HANDOFF                   = FULL PASS; MERGED; POST-MERGE PASS
 UI-D SOCIAL CORE HOSTED PARITY                           = FULL PASS; MERGED; POST-MERGE PASS
-UI-E CHARACTER / AUTONOMY / LOCAL-ONLY SURFACES          = FOLLOW-UP IMPLEMENTED; LOCAL TECH PASS; EXACT-HEAD HOSTED CI PENDING; USER READY BLOCKED
-UI-F VISUAL / CROSS-RUNTIME CLOSEOUT                     = NOT STARTED
+UI-E CHARACTER / AUTONOMY / LOCAL-ONLY SURFACES          = FULL PASS; MERGED; POST-MERGE 6/6 PASS
+UI-F VISUAL / CROSS-RUNTIME CLOSEOUT                     = IMPLEMENTED; LOCAL TECH PASS; CANONICAL VISUAL 36/36 PASS; EXTERNAL LIFECYCLE PENDING
 ANGMOO LOCAL DESIGN FOUNDATION PASS                    = NOT YET
 ```

@@ -13,7 +13,7 @@
 
 .eyebrow {
   margin: 0 0 8px;
-  color: #ff6b6b;
+  color: var(--color-brand-accent);
   font-size: 0.72rem;
   font-weight: 900;
   letter-spacing: 0.14em;
@@ -21,7 +21,7 @@
 
 .title {
   margin: 0;
-  color: #101828;
+  color: var(--color-text-strong);
   font-size: clamp(2rem, 4vw, 3.3rem);
   line-height: 1.03;
   letter-spacing: -0.045em;
@@ -30,7 +30,7 @@
 .description {
   max-width: 660px;
   margin: 12px 0 0;
-  color: #667085;
+  color: var(--color-text-secondary);
   font-size: 0.94rem;
   font-weight: 600;
   line-height: 1.7;
@@ -51,30 +51,46 @@
 }
 
 .primaryAction {
-  color: #fff;
-  background: #101828;
+  color: var(--color-on-action-primary);
+  background: var(--color-action-primary);
+  box-shadow: var(--shadow-action);
 }
 
 .secondaryAction {
-  border: 1px solid #d0d5dd;
-  color: #344054;
-  background: #fff;
+  border: 1px solid var(--color-border-control);
+  color: var(--color-text-strong);
+  background: var(--color-surface);
+}
+
+.primaryAction:hover {
+  background: var(--color-action-primary-hover);
+}
+
+.secondaryAction:hover {
+  border-color: var(--color-border-interactive);
+  background: var(--color-surface-muted);
+}
+
+.primaryAction:focus-visible,
+.secondaryAction:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .notice,
 .empty {
   padding: 28px;
-  border: 1px solid #e1e5eb;
+  border: 1px solid var(--color-border-control);
   border-radius: 24px;
-  background: #fff;
-  color: #475467;
+  background: var(--color-surface);
+  color: var(--color-text-default);
   font-weight: 700;
   line-height: 1.7;
 }
 
 .empty h2,
 .notice strong {
-  color: #101828;
+  color: var(--color-text-strong);
 }
 
 .empty h2 {
@@ -101,12 +117,12 @@
 
 .groupHeader h2 {
   margin: 0;
-  color: #101828;
+  color: var(--color-text-strong);
   font-size: 1.15rem;
 }
 
 .groupHeader span {
-  color: #98a2b3;
+  color: var(--color-text-muted);
   font-size: 0.78rem;
   font-weight: 800;
 }
@@ -122,10 +138,10 @@
   gap: 18px;
   min-height: 220px;
   padding: 22px;
-  border: 1px solid #e1e5eb;
+  border: 1px solid var(--color-border-control);
   border-radius: 24px;
-  background: #fff;
-  box-shadow: 0 14px 36px rgb(16 24 40 / 5%);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-summary);
 }
 
 .worldCardHeader {
@@ -137,13 +153,13 @@
 
 .worldCard h3 {
   margin: 0;
-  color: #101828;
+  color: var(--color-text-strong);
   font-size: 1.18rem;
 }
 
 .worldCard p {
   margin: 8px 0 0;
-  color: #667085;
+  color: var(--color-text-secondary);
   font-size: 0.82rem;
   font-weight: 600;
   line-height: 1.6;
@@ -152,8 +168,8 @@
 .status {
   padding: 5px 9px;
   border-radius: 999px;
-  color: #475467;
-  background: #f2f4f7;
+  color: var(--color-text-default);
+  background: var(--color-surface-muted);
   font-size: 0.65rem;
   font-weight: 900;
   white-space: nowrap;
@@ -169,8 +185,8 @@
 .meta span {
   padding: 5px 8px;
   border-radius: 10px;
-  color: #667085;
-  background: #f7f8fa;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-subtle);
   font-size: 0.66rem;
   font-weight: 800;
 }

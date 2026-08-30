@@ -202,13 +202,14 @@
     "playwright_version": "1.62.1",
     "specs": [
       "browser-tests/product-shell.spec.ts",
+      "browser-tests/product-surfaces.visual.spec.ts",
       "browser-tests/relationship-graph/product-shell.spec.ts",
       "browser-tests/semantic-foundation.visual.spec.ts",
       "browser-tests/static-product-shell.spec.ts",
       "browser-tests/ui-e-local-settings/local-settings.spec.ts"
     ],
     "visual_command_owner": "browser-tests/package.json",
-    "visual_command_status": "active_ui_b_semantic_foundation",
+    "visual_command_status": "active_ui_f_product_corpus",
     "visual_script_command": "playwright test --config=playwright.visual.config.ts",
     "visual_script_name": "test:visual"
   },
@@ -224,9 +225,11 @@
     "backend/app/domains/social/api/schemas.py",
     "backend/app/runtime/social/sqlalchemy_read_repository.py",
     "backend/tests/test_l3_owner_manual_social_inbox.py",
+    "browser-tests/fixtures/visual-corpus.json",
     "browser-tests/package.json",
     "browser-tests/playwright.ui-e-local-settings.config.ts",
     "browser-tests/playwright.visual.config.ts",
+    "browser-tests/product-surfaces.visual.spec.ts",
     "browser-tests/relationship-graph/product-shell.spec.ts",
     "browser-tests/semantic-foundation.visual.spec.ts",
     "browser-tests/static-product-shell.spec.ts",
@@ -303,8 +306,8 @@
     "notice_decision": "The audited visual files come from first-party history already shared by hosted and Local before the Local GPL transition. UI-A copies no post-common hosted code, asset, icon, or font, so it adds no bundled Apache notice. Any later post-common hosted-only transplant requires a separate license-policy and notice decision before copying."
   },
   "raw_color_scan": {
-    "baseline_files": 42,
-    "baseline_occurrences": 1496,
+    "baseline_files": 33,
+    "baseline_occurrences": 1408,
     "baseline_status": "reviewed_ui_b",
     "extensions": [
       ".css",
@@ -546,7 +549,7 @@
       "isWindows ? frontendRoot : standaloneRoot"
     ],
     "frontend/DESIGN.md": [
-      "version: 1.6",
+      "version: 1.7",
       "EXCEPTION-A",
       "EXCEPTION-B",
       "EXCEPTION-C",
@@ -573,7 +576,7 @@
       "name: \"next-production\"",
       "name: \"static-export\"",
       "node ../frontend/scripts/serve-production.mjs --port 3300",
-      "snapshotPathTemplate: \"{testDir}/snapshots/ui-b/{arg}{ext}\"",
+      "snapshotPathTemplate: \"{testDir}/snapshots/{arg}{ext}\"",
       "threshold: 0.1",
       "viewport: { width: 436, height: 880 }"
     ],
@@ -836,9 +839,9 @@
     "token_source": "frontend/src/shared/ui/semantic-tokens.css"
   },
   "screenshot_inventory": {
-    "baseline_call_count": 1,
-    "committed_baseline_count": 1,
-    "current_status": "UI-D PR #207 follow-up intentionally refreshes the single reviewed semantic-foundation baseline for the bright-coral CTA and selected-navigation contract without expanding the screenshot corpus; the full product visual corpus remains owned by UI-F.",
+    "baseline_call_count": 11,
+    "committed_baseline_count": 11,
+    "current_status": "UI-F extends the preserved UI-B semantic-foundation baseline into the deterministic production/static product visual corpus; the manifest owns the reviewed viewport, screenshot-call, and committed snapshot contract.",
     "target_viewports": [
       "360x800",
       "390x844",
@@ -861,25 +864,57 @@
       "max_diff_pixels": 25,
       "threshold": 0.1
     },
-    "expected_screenshot_call_count": 1,
+    "expected_screenshot_call_count": 11,
     "expected_snapshots": [
-      "browser-tests/snapshots/ui-b/semantic-foundation-phone.png"
+      "browser-tests/snapshots/ui-b/semantic-foundation-phone.png",
+      "browser-tests/snapshots/ui-f/characters-autonomy-phone-436x880.png",
+      "browser-tests/snapshots/ui-f/creator-studio-empty-1440x900.png",
+      "browser-tests/snapshots/ui-f/creator-studio-populated-1440x900.png",
+      "browser-tests/snapshots/ui-f/device-home-centered-1440x1000.png",
+      "browser-tests/snapshots/ui-f/device-home-phone-360x800.png",
+      "browser-tests/snapshots/ui-f/device-home-runtime-offline-390x844.png",
+      "browser-tests/snapshots/ui-f/global-feed-media-phone-390x844.png",
+      "browser-tests/snapshots/ui-f/relationship-graph-degraded-1440x900.png",
+      "browser-tests/snapshots/ui-f/relationship-graph-ready-1440x900.png",
+      "browser-tests/snapshots/ui-f/world-feed-composer-phone-436x880.png"
     ],
     "first_party_fixture_asset": {
       "served_path": "/icon.svg",
       "source": "frontend/src/app/icon.svg"
     },
-    "fixture": "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
+    "fixture": "browser-tests/fixtures/visual-corpus.json",
+    "preserved_ui_b_fixture": "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
     "projects": [
       "next-production",
       "static-export"
     ],
-    "reviewed_viewport": {
-      "height": 880,
-      "width": 436
-    },
+    "reviewed_viewports": [
+      {
+        "height": 800,
+        "width": 360
+      },
+      {
+        "height": 844,
+        "width": 390
+      },
+      {
+        "height": 880,
+        "width": 436
+      },
+      {
+        "height": 1000,
+        "width": 1440
+      },
+      {
+        "height": 900,
+        "width": 1440
+      }
+    ],
     "production_preview_script": "frontend/scripts/serve-production.mjs",
-    "schema": "ui-b-semantic-primitives-v1",
-    "spec": "browser-tests/semantic-foundation.visual.spec.ts"
+    "schema": "ui-f-product-visuals-v1",
+    "specs": [
+      "browser-tests/product-surfaces.visual.spec.ts",
+      "browser-tests/semantic-foundation.visual.spec.ts"
+    ]
   }
 }

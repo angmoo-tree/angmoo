@@ -2,10 +2,14 @@ import { defineConfig, devices } from "@playwright/test";
 
 const nextBaseURL = "http://127.0.0.1:3300";
 const staticBaseURL = "http://127.0.0.1:3301";
+const fixtureBaseURL = "http://127.0.0.1:3302";
 
 export default defineConfig({
   testDir: ".",
-  testMatch: "semantic-foundation.visual.spec.ts",
+  testMatch: [
+    "semantic-foundation.visual.spec.ts",
+    "product-surfaces.visual.spec.ts",
+  ],
   fullyParallel: false,
   forbidOnly: Boolean(process.env.CI),
   retries: 0,
@@ -13,7 +17,7 @@ export default defineConfig({
   timeout: 45_000,
   workers: 1,
   outputDir: "test-results/visual",
-  snapshotPathTemplate: "{testDir}/snapshots/ui-b/{arg}{ext}",
+  snapshotPathTemplate: "{testDir}/snapshots/{arg}{ext}",
   expect: {
     timeout: 10_000,
     toHaveScreenshot: {
@@ -49,6 +53,7 @@ export default defineConfig({
   webServer: [
     {
       command: "node ../frontend/scripts/serve-production.mjs --port 3300",
+      env: { ANGMOO_API_BASE_URL: fixtureBaseURL },
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
       url: nextBaseURL,
@@ -58,6 +63,13 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
       timeout: 30_000,
       url: staticBaseURL,
+    },
+    {
+      command: "node visual-fixture-server.mjs",
+      env: { ANGMOO_VISUAL_FIXTURE_PORT: "3302" },
+      reuseExistingServer: false,
+      timeout: 30_000,
+      url: `${fixtureBaseURL}/health`,
     },
   ],
 });

@@ -114,7 +114,9 @@ capability, static/Next route parity, and route href wiring.
 UI-C owns Device shell, navigation, route capability, and direct-open parity.
 UI-D owns social presentation adoption, UI-E owns Character/autonomy and
 Local-only surface adoption, and UI-F owns the full viewport, cross-runtime,
-and accessibility closeout.
+and accessibility closeout. UI-F's deterministic product corpus is now
+implemented and locally verified; its external lifecycle and final exact-SHA
+Windows user checks remain pending.
 
 ## L4.5 UI-C Phone shell boundary
 
@@ -232,9 +234,10 @@ The other UI-E Local surfaces retain their existing feature ownership:
   unavailable, and failed, and never presents canonical fallback data as a
   healthy LadybugDB projection.
 
-This boundary closes behavior and state vocabulary. UI-F still owns the final
-fixed-viewport visual corpus, cross-runtime screenshot parity, zoom, focus,
-reduced-motion, and exact-SHA user closeout.
+This boundary closes behavior and state vocabulary. UI-F now implements the
+fixed-viewport product corpus, cross-runtime screenshot parity, zoom, focus,
+and reduced-motion checks. Exact-SHA Windows display-scale, Host Tauri,
+installer, user Ready, merge, and post-merge closeout remain separate Gates.
 
 ## Incremental behavior boundary
 
@@ -414,23 +417,22 @@ do not replace the Windows clean-clone or final user visual Gate.
 
 UI-B adds `test:visual` to the same dependency graph. Its canonical pixel
 manifest is the digest-pinned Playwright 1.62.1 Noble container on Ubuntu
-24.04, Chromium revision 1234 (`151.0.7922.34`), a `436x880` viewport, and
-projects `next-production` and `static-export`. Core CI runs the pixel Gate in
-that container rather than inheriting mutable host-runner font packages. The
-one expected baseline is
-`browser-tests/snapshots/ui-b/semantic-foundation-phone.png` with threshold
-`0.1` and `maxDiffPixels=25`. This bounded fixture baseline does not close the
-UI-F route, viewport, Windows display-scale, Tauri, installer, or exact-SHA
-user Gates.
+24.04, Chromium revision 1234 (`151.0.7922.34`), projects `next-production`
+and `static-export`, threshold `0.1`, and `maxDiffPixels=25`. UI-F preserves the
+UI-B `436x880` semantic fixture and expands the same manifest to five reviewed
+viewport sizes and 10 product PNGs, for exactly 11 screenshot calls and 11
+committed expected images. Core CI runs the pixel Gate in that container rather
+than inheriting mutable host-runner font packages.
 
-UI-C keeps that screenshot count at one. Its shell Gate is behavior-driven:
+UI-C kept that screenshot count at one. Its shell Gate is behavior-driven:
 Next and static suites check one Phone frame and one scroll owner, current-route
 bottom navigation, no hosted desktop rails, zero horizontal overflow at the
 reviewed Phone widths, centered Phone behavior on a wide Browser, wide
 Relationship Graph separation, static direct-open coverage, and legacy Studio
 alias canonicalization. Static behavior also proves inner-owner Feed
-pagination and that hosted-only profile links are not clickable. UI-F still
-owns the expanded product screenshot and state corpus.
+pagination and that hosted-only profile links are not clickable. UI-F now
+adds the expanded product screenshot and state corpus without creating a
+second Playwright dependency graph.
 
 UI-D's paired Next and static/Tauri World scenarios cover compact composition,
 flat rows, keyboard and text-selection-safe post navigation, exact World detail
@@ -441,9 +443,10 @@ unsupported actions. UI-D0 separately retains the global delayed-response,
 offline, keyboard-open, and post-identity regressions. The implementation owns
 explicit loading and empty states, while the expanded cross-runtime state and
 visual corpus remains UI-F scope. The suites also assert zero fallback from
-World social adapters to global endpoints. These behavior tests do not replace
-UI-F's product screenshot corpus or the final Windows display-scale and
-installed exact-SHA user Gates.
+World social adapters to global endpoints. UI-F adds nested global reply
+link/keyboard assertions and keeps unsupported like/repost/follow/share actions
+hidden; these behavior tests and product screenshots still do not replace the
+final Windows display-scale and installed exact-SHA user Gates.
 
 The `next-production` visual project launches the already-built standalone
 output through `frontend/scripts/serve-production.mjs`. On canonical Ubuntu the
@@ -453,3 +456,20 @@ starting `.next/standalone/server.js`. The static-export project serves the
 existing static build. The fixture requires `/icon.svg` to load successfully in
 both projects, so the visual Gate covers the same first-party asset contract
 without a remote image or a second frontend implementation.
+
+UI-F's `ui-f-product-visuals-v1` fixture is stored in
+`browser-tests/fixtures/visual-corpus.json` and served by the read-only
+`browser-tests/visual-fixture-server.mjs`. It fixes time, locale, timezone,
+light mode, DPR, reduced motion, owner, Worlds, long Korean Feed data,
+Character autonomy states, Studio groups, graph projection states, and runtime
+health. Any write, provider-shaped call, or external network request fails the
+test. The corpus covers `360x800`, `390x844`, `436x880`, `1440x1000`, and
+`1440x900`; Next production and static export share each expected image rather
+than maintaining runtime-specific baselines.
+
+The pinned-Noble local canonical run passed `36/36`. UI-F also reduced a static
+composition fork by routing Feed reads through `features/social/public.ts`, and
+its source inventory now records 27 legacy candidate-consumer edges instead of
+28. The implementation remains a local technical result until Issue/push/Draft
+PR/Hosted CI/user Ready/merge/post-merge and final exact-SHA Windows/installer
+Gates are complete.

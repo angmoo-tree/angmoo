@@ -1,11 +1,11 @@
 ---
 name: Angmoo Local
 document: Frontend Design Contract
-version: 1.6
-date: 2026-08-30
-status: CANONICAL DESIGN CONTRACT · SINGLE BRIGHT-CORAL BRAND + THREE USER-APPROVED CONTRAST EXCEPTIONS · UI-A/UI-B/UI-C/UI-D PASS · UI-D0 FULL PASS · UI-E FOLLOW-UP IMPLEMENTED/LOCAL TECH PASS · CURRENT UI CONFORMANCE INCOMPLETE
+version: 1.7
+date: 2026-08-31
+status: CANONICAL DESIGN CONTRACT · SINGLE BRIGHT-CORAL BRAND + THREE USER-APPROVED CONTRAST EXCEPTIONS · UI-A~UI-E FULL PASS · UI-F IMPLEMENTED/LOCAL TECH PASS · EXTERNAL LIFECYCLE PENDING · CURRENT UI CONFORMANCE INCOMPLETE
 scope: Device Phone · World App · Creator Studio · Relationship Graph · current L4 surfaces
-implementation_phase: L4.5 UI-A through UI-D merged and post-merge closed · UI-D0 merged and post-merge closed · UI-E Character/autonomy/Local-only surfaces and recent-result follow-up implemented with local technical verification · same Draft PR exact-head Hosted CI and user Ready Gate pending · UI-F not started
+implementation_phase: L4.5 UI-A through UI-E merged and post-merge closed · UI-D0 merged and post-merge closed · UI-F product visual/cross-runtime corpus implemented on exact base 91577c7cccd29475bba91caf3a6208f74eb7e060 with local technical and canonical pinned-Noble verification · Issue/push/Draft PR/Hosted CI/user Ready/merge/post-merge/final exact-SHA Windows user Gates pending
 hosted_reference_commit: 7f967abd6117381be5c081ed284addb889b06fec
 local_reference_commit: e5e62aed69cb89b16b5870eb0854dd07752dc519
 legacy_reference: audited-internal-snapshot
@@ -29,8 +29,8 @@ L4.5 UI-C PHONE SHELL·NAVIGATION·ROUTE PARITY: COMPLETE · MERGED · POST-MERG
 L4.5 UI-D0 STATIC POST DETAIL HANDOFF: COMPLETE · MERGED · POST-MERGE PASS
 L4.5 UI-D SOCIAL CORE HOSTED PARITY: COMPLETE · MERGED · POST-MERGE PASS
 HOSTED BRIGHT CORAL DESIGN: CANONICAL · SINGLE CORE BRAND · THREE CLOSED USER-APPROVED CONTRAST EXCEPTIONS
-L4.5 UI-E CHARACTER·AUTONOMY·LOCAL-ONLY SURFACE: FOLLOW-UP IMPLEMENTED · LOCAL TECH PASS · EXACT-HEAD HOSTED CI PENDING · USER READY BLOCKED
-L4.5 UI-F VISUAL·CROSS-RUNTIME CLOSEOUT: NOT STARTED
+L4.5 UI-E CHARACTER·AUTONOMY·LOCAL-ONLY SURFACE: FULL PASS · MERGED · POST-MERGE 6/6 PASS
+L4.5 UI-F VISUAL·CROSS-RUNTIME CLOSEOUT: IMPLEMENTED · LOCAL TECH PASS · CANONICAL VISUAL 36/36 PASS · EXTERNAL LIFECYCLE PENDING
 ```
 
 ---
@@ -922,6 +922,26 @@ Phone user resize
 
 Visual screenshot는 deterministic fixture를 사용한다. intentional baseline update는 PR에서 이유와 before/after를 review한다. screenshot만으로 기능 PASS를 주장하지 않고 route·API·interaction test와 함께 사용한다.
 
+### 15.4 UI-F canonical product corpus
+
+UI-F는 기존 UI-B semantic fixture 한 장을 지우거나 별도 harness를 만들지 않고 같은 `browser-tests` graph를 실제 제품 surface까지 확장한다.
+
+```text
+fixture schema       ui-f-product-visuals-v1
+fixture source       browser-tests/fixtures/visual-corpus.json
+read-only server     browser-tests/visual-fixture-server.mjs
+projects             next-production / static-export
+canonical runtime    digest-pinned Playwright 1.62.1 Noble container
+screenshot calls     11
+reviewed PNG          11 = UI-B 1 + UI-F 10
+```
+
+UI-F product PNG 10장은 Device Home compact·desktop-centered, global Feed media, World Feed compact composer와 long Korean, Character autonomy running·scheduled·failed, Creator Studio populated·empty, Relationship Graph ready·degraded, runtime offline을 고정한다. 같은 expected PNG를 Next production과 static export가 함께 사용하므로 runtime별로 서로 다른 baseline을 승인하지 않는다.
+
+fixture clock·locale·timezone·color scheme·DPR·reduced motion을 고정하고 remote request, write request, provider-shaped request는 즉시 실패시킨다. first-party `/icon.svg` 외 remote font·image·credential·실사용 데이터는 사용하지 않는다. product behavior suite는 nested global reply keyboard link와 capability에 없는 fake like·repost·follow·share action `0`을 별도로 검증한다.
+
+UI-F local technical Gate는 360×800·390×844·436×880 Phone, 1440×1000 centered Phone, 1440×900 Studio·Graph에서 horizontal overflow `0`, focus-visible, 200% text reflow, reduced motion을 확인한다. canonical pixel PASS는 Windows display scale 사용자 확인을 대신하지 않는다. UI-F merge 뒤 동일 exact SHA의 Windows 100%·125%·150%, Host Tauri dev, installer 사용자 Gate는 계속 별도다.
+
 ---
 
 ## 16. Implementation rules
@@ -944,6 +964,12 @@ uv run --project backend python scripts/ci/check_frontend_design_contract.py --c
 ```
 
 시각 회귀 검증은 저장소 루트의 기존 `browser-tests` Playwright 1.62.1 harness를 canonical 기반으로 확장한다. frontend package 아래에 중복 harness·별도 browser dependency graph를 만들지 않는다.
+
+```bash
+pnpm --dir browser-tests test:visual
+```
+
+canonical pixel 판정은 `security/frontend_design_policy.json`에 기록된 digest-pinned Noble image에서 수행한다. host Windows에서의 실행은 빠른 진단용이며 canonical PNG를 재정의하지 않는다.
 
 금지:
 
@@ -995,7 +1021,7 @@ hosted 구현을 이식할 때 PR에 다음을 기록한다.
 
 ## 18. 현재 conformance와 목표 판정
 
-UI-E recent-result follow-up local technical snapshot 시점의 현재 상태:
+UI-F local technical snapshot 시점의 현재 상태:
 
 - global Feed·Post detail과 World Feed·World-scoped detail이 feature-owned `SocialPostRow`와 하나의 social presentation 계약을 공유한다.
 - Local `WorldSocialFeed`는 큰 검증용 form/card나 접힘 토글 대신 compact World context·항상 보이는 owner composer·flat divided timeline을 사용한다.
@@ -1006,7 +1032,7 @@ UI-E recent-result follow-up local technical snapshot 시점의 현재 상태:
 - Social core는 payload와 실제 capability가 소유한 handle·avatar·media·action·count만 표시한다. read 응답의 authoritative `reply_count`·`like_count`는 실제 `0`까지 표시하고, payload에 없는 repost·follow·mutation capability나 count는 만들지 않는다.
 - `features/characters/public.ts`가 Next와 static/Tauri의 `/agents` dashboard를 함께 소유하고, 여러 Character의 독립 ON/OFF·scheduler 상태·active hours·World timezone next activity·recent result를 shared primitive로 표시한다. feature-owned recent-activity presenter는 raw result payload를 읽지 않고 사용자용 action summary와 authoritative `target_post_id` link만 제공한다. legacy `components/agents-dashboard-client.tsx`는 compatibility export만 유지한다.
 - Character activity control/list, Studio World-local leave, Device Home launchability, runtime state, Relationship Graph state, Settings와 local-owner surface의 UI-E 범위가 semantic token·shared component·capability-driven state로 수렴했다. public/World 작성자를 owner 전용 `/agents/{id}`로 잘못 연결하지 않는다.
-- raw style 기준선은 UI-A placeholder 59 files·1,938 occurrences에서 UI-B 56 files·1,894 occurrences, UI-C 53 files·1,860 occurrences, UI-D 후속 50 files·1,794 occurrences를 거쳐 UI-E checker 측정 42 files·1,496 occurrences로 감소했다. 이 수치는 남은 migration inventory이지 전역 conformance PASS가 아니다.
+- raw style 기준선은 UI-A placeholder 59 files·1,938 occurrences에서 UI-B 56 files·1,894 occurrences, UI-C 53 files·1,860 occurrences, UI-D 후속 50 files·1,794 occurrences, UI-E 42 files·1,496 occurrences를 거쳐 UI-F checker 측정 33 files·1,408 occurrences로 감소했다. 이 수치는 남은 migration inventory이지 전역 conformance PASS가 아니다.
 - `features/device-shell/model/device-navigation.ts`가 Local Phone route capability를 소유하고 Next-only destination을 fail-closed로 숨긴다.
 - `/agents`, `/studio/import`, World Post detail direct-open과 두 legacy Studio alias의 static/window parity가 코드와 functional contract에 반영됐다.
 
@@ -1054,9 +1080,19 @@ UI-E recent-result follow-up local technical snapshot 시점의 현재 상태:
 - Device Home은 World launchability와 runtime health를 별도 state로 표시한다. unavailable World는 link가 아니며 runtime은 starting·ready·degraded·failed·recovery-required·stopping·stopped를 합치지 않는다.
 - Relationship Graph는 ready·empty·degraded·rebuilding·unavailable·failed를 분리하고 canonical fallback 또는 lagging projection을 healthy LadybugDB로 표시하지 않는다.
 - Settings/local owner는 installation ID·label·owner·local session을 표시한다. 공개 Local runtime에 없는 owner 전체 `DELETE /auth/me`는 노출하지 않고, Character 삭제·World-local leave·session 종료의 exact scope를 구분한다.
-- UI-E의 최초 구현은 Issue #208·branch push·Draft PR #209와 pre-Hotfix exact-head Hosted CI까지 진행했다. 후속 Hotfix local technical 검증은 Next production build, Tauri static export, feature architecture/design checker, 전체 backend 회귀, Next/static Playwright와 Local Settings fail-closed 회귀를 포함한다. 후속 signed commit·같은 branch push·새 exact-head Hosted CI와 사용자 Ready·merge·post-merge Actions는 서로 별도 Gate로 남는다.
+- UI-E의 최초 구현과 same-PR recent-result Hotfix는 Issue #208·PR #209에서 exact head `81b5326b44b37768b8cd3519118fe793eef4625a` Hosted CI 22/22, 사용자 visual·Ready, merge `91577c7cccd29475bba91caf3a6208f74eb7e060`, exact-merge post-merge Actions 6/6 PASS까지 완료됐다.
 
-UI-E PR #209 후속 Hotfix는 사용자 visual에서 발견된 `최근 결과` raw JSON 노출만 frontend presentation 범위에서 교정한다. `CharacterRecentActivityPresentation`은 `action_type`·`created_at`·authoritative `target_post_id`만 신뢰하고 `result`를 사용자 문구나 route source로 읽지 않는다. 동일 Character component를 사용하는 Next와 static/Tauri 회귀는 production-shaped JSON·4,000자 내부 payload·malformed/unknown action·missing target·historical/empty fallback을 검증하며, visible JSON key·internal ID `0`, 360·390·436px overflow `0`, keyboard result-link route를 요구한다. backend·DB·API·scheduler·provider 의미 diff, 새 raw color·contrast exception, hosted code·asset·font 복사는 모두 `0`이다. 이 follow-up은 구현과 local technical Gate를 닫았지만, 새 exact-head Hosted CI와 사용자 recent-result visual 확인 전에는 Ready 또는 merge할 수 없다.
+UI-E PR #209 후속 Hotfix는 사용자 visual에서 발견된 `최근 결과` raw JSON 노출만 frontend presentation 범위에서 교정한다. `CharacterRecentActivityPresentation`은 `action_type`·`created_at`·authoritative `target_post_id`만 신뢰하고 `result`를 사용자 문구나 route source로 읽지 않는다. 동일 Character component를 사용하는 Next와 static/Tauri 회귀는 production-shaped JSON·4,000자 내부 payload·malformed/unknown action·missing target·historical/empty fallback을 검증하며, visible JSON key·internal ID `0`, 360·390·436px overflow `0`, keyboard result-link route를 요구한다. backend·DB·API·scheduler·provider 의미 diff, 새 raw color·contrast exception, hosted code·asset·font 복사는 모두 `0`이다. 이 follow-up은 사용자 visual·Ready·merge·post-merge Actions까지 닫혔다.
+
+### 18.5 UI-F local technical evidence
+
+- exact base는 UI-E merge와 post-merge Actions 6/6 PASS가 확인된 `91577c7cccd29475bba91caf3a6208f74eb7e060`이며 local branch는 `feat/l4-5-ui-f-visual-cross-runtime-closeout`이다.
+- `browser-tests/fixtures/visual-corpus.json`과 read-only fixture server가 동일한 owner·World·Character·social·runtime·graph 상태를 Next production과 static export에 제공한다. write·provider call·external network는 허용하지 않는다.
+- UI-B semantic PNG 한 장과 UI-F product PNG 10장을 합쳐 screenshot call·expected PNG를 정확히 11개로 고정했다. digest-pinned Noble container의 두 project 전체 visual matrix는 `36/36 PASS`다.
+- nested global reply는 실제 detail route link·keyboard Enter/Space를 제공하며 capability에 없는 fake social action은 계속 숨긴다. static router의 Feed read는 legacy community helper 대신 `features/social/public.ts`를 사용해 Next/static source fork를 한 단계 줄였다.
+- touched World App·Creator Studio·Device/Tauri chrome의 legacy raw colors를 semantic role로 수렴했고 raw-color inventory는 33 files·1,408 occurrences로 감소했다. Relationship Graph의 긴 한국어 node label은 두 줄로 읽을 수 있게 표현한다.
+- local verification은 frontend lint·typecheck·Next production build·static export, Next/static behavior, backend full regression, Rust fmt/test/clippy, Tauri shell, embedded sidecar, NSIS·MSI bundle까지 포함한다.
+- 이 evidence는 local technical PASS다. UI-F Issue·push·Draft PR·Hosted CI·사용자 Ready·merge·post-merge Actions와 최종 exact-SHA Windows 100%·125%·150%·Host Tauri·installer 사용자 Gate는 아직 시작하지 않았다.
 
 따라서 현재 허용되는 판정:
 
@@ -1067,8 +1103,8 @@ UI-B SEMANTIC TOKEN·PRIMITIVE FOUNDATION PASS
 UI-C PHONE SHELL·NAVIGATION·ROUTE PARITY PASS / MERGED / POST-MERGE PASS
 UI-D0 STATIC POST DETAIL HANDOFF FULL PASS / MERGED / POST-MERGE PASS
 UI-D SOCIAL CORE HOSTED PARITY FULL PASS / MERGED / POST-MERGE PASS
-UI-E CHARACTER·AUTONOMY·LOCAL-ONLY SURFACE FOLLOW-UP IMPLEMENTED / LOCAL TECH PASS / EXACT-HEAD HOSTED CI PENDING / USER READY BLOCKED
-UI-F VISUAL·CROSS-RUNTIME CLOSEOUT NOT STARTED
+UI-E CHARACTER·AUTONOMY·LOCAL-ONLY SURFACE FULL PASS / MERGED / POST-MERGE 6/6 PASS
+UI-F VISUAL·CROSS-RUNTIME CLOSEOUT IMPLEMENTED / LOCAL TECH PASS / CANONICAL VISUAL 36/36 PASS / EXTERNAL LIFECYCLE PENDING
 UI-C WINDOWS 100%·125%·150% SCALE USER GATE PASS / UI-F FINAL EXACT-SHA RECHECK PENDING
 ```
 

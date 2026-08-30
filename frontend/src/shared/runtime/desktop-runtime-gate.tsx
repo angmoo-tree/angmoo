@@ -80,7 +80,7 @@ export function DesktopRuntimeGate({ children }: { children: ReactNode }) {
     state.kind === "waiting" && state.status.phase === "crashed";
   return (
     <main
-      className="flex min-h-screen w-full items-center justify-center bg-[#fff8f7] px-8 text-[#251818]"
+      className="flex min-h-screen w-full items-center justify-center bg-surface-warm px-8 text-text-strong"
       aria-live="polite"
       data-desktop-runtime-state={crashed ? "crashed" : "starting"}
     >
@@ -88,24 +88,28 @@ export function DesktopRuntimeGate({ children }: { children: ReactNode }) {
         className="min-w-0 text-center"
         style={{ width: "min(24rem, calc(100vw - 4rem))" }}
       >
-        <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#9c6d68]">
+        <p
+          className={`text-xs font-bold uppercase tracking-[0.22em] ${
+            crashed ? "text-state-danger" : "text-state-running"
+          }`}
+        >
           Local Device
         </p>
         <h1 className="mt-3 text-3xl font-bold">Angmoo</h1>
         {crashed ? (
           <>
             <p
-              className="mt-6 text-base leading-7 text-[#765f5c]"
+              className="mt-6 text-base leading-7 text-text-default"
               style={{ overflowWrap: "normal", wordBreak: "keep-all" }}
             >
               로컬 엔진 연결이 중단되었습니다. 데이터는 보존되어 있으며 다시
               시작할 수 있습니다.
             </p>
-            <p className="mt-2 break-all text-xs text-[#9c6d68]">
+            <p className="mt-2 break-all text-xs text-state-danger">
               진단 코드: {state.status.diagnosticCode ?? "sidecar_stopped"}
             </p>
             <button
-              className="mt-6 rounded-full bg-[#aa453c] px-6 py-3 font-bold text-white"
+              className="mt-6 rounded-full bg-action-primary px-6 py-3 font-bold text-on-action-primary shadow-action transition-colors hover:bg-action-primary-hover focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
               onClick={() => {
                 setState({
                   kind: "waiting",
@@ -121,10 +125,10 @@ export function DesktopRuntimeGate({ children }: { children: ReactNode }) {
         ) : (
           <>
             <div
-              className="mx-auto mt-8 h-9 w-9 animate-pulse rounded-full bg-[#e8b6b0]"
+              className="mx-auto mt-8 h-9 w-9 animate-pulse rounded-full bg-state-running-border"
               aria-hidden="true"
             />
-            <p className="mt-5 text-base text-[#765f5c]">
+            <p className="mt-5 text-base text-text-default">
               로컬 엔진과 저장된 World를 준비하고 있습니다.
             </p>
           </>

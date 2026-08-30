@@ -4,7 +4,7 @@
   width: min(100%, 436px);
   height: min(880px, calc(100dvh - 40px));
   overflow: hidden;
-  border: var(--device-bezel-width) solid #30343b;
+  border: var(--device-bezel-width) solid var(--color-action-dark);
   border-radius: var(--device-corner-radius);
   background: var(--color-action-dark);
   box-shadow: var(--shadow-device);

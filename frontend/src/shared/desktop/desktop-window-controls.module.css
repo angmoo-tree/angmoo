@@ -7,10 +7,10 @@
   align-items: center;
   gap: 3px;
   padding: 3px;
-  border: 1px solid rgb(48 52 59 / 12%);
+  border: 1px solid var(--color-border-default);
   border-radius: 999px;
-  background: rgb(255 248 247 / 78%);
-  box-shadow: 0 4px 16px rgb(27 20 20 / 8%);
+  background: var(--sticky-surface);
+  box-shadow: var(--shadow-summary);
   backdrop-filter: blur(12px);
 }
 
@@ -21,7 +21,7 @@
   justify-content: center;
   height: 24px;
   border: 0;
-  color: #655655;
+  color: var(--color-text-default);
 }
 
 .dragHandle {
@@ -38,28 +38,28 @@
   width: 18px;
   height: 3px;
   border-radius: 999px;
-  background: #8f8281;
+  background: var(--color-text-muted);
 }
 
 .windowButton {
   width: 25px;
   border-radius: 50%;
   cursor: pointer;
-  background: rgb(255 255 255 / 66%);
+  background: color-mix(in srgb, var(--color-surface) 66%, transparent);
 }
 
 .windowButton:hover,
 .windowButton:focus-visible {
-  background: #ffffff;
-  color: #302829;
-  outline: 2px solid var(--focus-ring-color, #175cd3);
+  background: var(--color-surface);
+  color: var(--color-text-strong);
+  outline: 2px solid var(--focus-ring-color);
   outline-offset: 1px;
 }
 
 .closeButton:hover,
 .closeButton:focus-visible {
-  background: var(--color-state-danger, #c24141);
-  color: #ffffff;
+  background: var(--color-state-danger);
+  color: var(--color-on-error);
 }
 
 @media (max-width: 520px) {

@@ -202,7 +202,7 @@ test("semantic foundation keeps one production/static 436px Phone baseline", asy
     fixture: node.scrollWidth - node.clientWidth,
   }));
   expect(overflow).toEqual({ document: 0, fixture: 0 });
-  await expect(page).toHaveScreenshot("semantic-foundation-phone.png");
+  await expect(page).toHaveScreenshot(["ui-b", "semantic-foundation-phone.png"]);
 });
 
 test("interactive primitives expose real pointer, focus, and state semantics", async ({

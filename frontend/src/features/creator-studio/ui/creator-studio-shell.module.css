@@ -2,14 +2,14 @@
   display: grid;
   min-height: 100dvh;
   grid-template-columns: minmax(210px, 260px) minmax(0, 1fr);
-  background: #f6f7f9;
-  color: var(--color-on-surface, #251818);
+  background: var(--color-canvas);
+  color: var(--color-text-strong);
 }
 
 .navigation {
-  border-right: 1px solid #e4e7ec;
+  border-right: 1px solid var(--color-border-default);
   padding: 28px 20px;
-  background: #ffffff;
+  background: var(--color-surface);
 }
 
 .brandRow {
@@ -22,7 +22,7 @@
 
 .eyebrow {
   margin: 0 0 4px;
-  color: #ff6b6b;
+  color: var(--color-brand-accent);
   font-size: 0.68rem;
   font-weight: 900;
   letter-spacing: 0.14em;
@@ -46,7 +46,7 @@
 
   .navigation {
     border-right: 0;
-    border-bottom: 1px solid #e4e7ec;
+    border-bottom: 1px solid var(--color-border-default);
     padding: 18px;
   }
 

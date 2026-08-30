@@ -11,6 +11,7 @@ import { LocalOwnerClient } from "@/components/local-owner-client";
 import { PostDetailClient } from "@/components/post-detail-client";
 import {
   getSocialPostThread,
+  listSocialFeed,
   PostListClient,
   type FeedPage,
   type PostThreadRead,
@@ -40,7 +41,6 @@ import {
   worldAppSectionFromSegment,
   type WorldAppSectionId,
 } from "@/features/world-app/public";
-import { listFeed } from "@/lib/community";
 import { safeLoginReturnTo } from "@/lib/safe-navigation";
 import { DesktopRuntimeGate } from "@/shared/runtime/desktop-runtime-gate";
 import { getRuntimeConfig } from "@/shared/runtime/public";
@@ -302,7 +302,7 @@ function StaticFeedRoute() {
 
   useEffect(() => {
     let active = true;
-    listFeed({ limit: 10 })
+    listSocialFeed({ limit: 10 })
       .then((result) => {
         if (active) setFeed(result);
       })
@@ -395,11 +395,11 @@ function StaticLoadingScreen() {
 
 function StaticNotFound({ pathname }: { pathname: string }) {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#fff8f7] px-6 text-center">
-      <div className="max-w-lg rounded-[32px] border border-[#e0bfbd] bg-white p-8">
-        <h1 className="text-2xl font-extrabold text-[#251818]">지원하지 않는 Angmoo 경로입니다.</h1>
-        <p className="mt-3 break-all text-sm text-[#584140]">{pathname}</p>
-        <Link className="mt-6 inline-flex rounded-full bg-action-primary px-5 py-3 font-bold text-on-action-primary hover:bg-action-primary-hover" href="/">
+    <main className="flex min-h-screen items-center justify-center bg-canvas px-6 text-center">
+      <div className="max-w-lg rounded-[32px] border border-border-control bg-surface p-8 shadow-summary">
+        <h1 className="text-2xl font-extrabold text-text-strong">지원하지 않는 Angmoo 경로입니다.</h1>
+        <p className="mt-3 break-all text-sm text-text-default">{pathname}</p>
+        <Link className="mt-6 inline-flex rounded-full bg-action-primary px-5 py-3 font-bold text-on-action-primary shadow-action transition-colors hover:bg-action-primary-hover focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]" href="/">
           Device Home으로 돌아가기
         </Link>
       </div>
