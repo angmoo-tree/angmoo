@@ -39,6 +39,9 @@ from app.runtime.migrations.ladybug_versions.registry import (
     load_ladybug_manifest,
 )
 from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest
+from app.runtime.migrations.sqlite_versions.v2_to_v3_no_specific_role import (
+    upgrade_v2_to_v3,
+)
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
 from app.runtime.persistence.sqlite_database import (
     SqliteCanonicalDatabase,
@@ -486,6 +489,16 @@ def _seed_supported_predecessor(
             ]
         )
         session.commit()
+    if source_version >= 3:
+        # A frozen v3 predecessor must already contain the semantic result of
+        # the v2 -> v3 no-specific-role migration.  Leaving current-adapter
+        # seed rows in their pre-v3 roleless shape makes the real installer
+        # correctly skip v2 -> v3 and produces an invalid synthetic v3
+        # predecessor.  Apply only that historical data transition before
+        # freezing the v3 manifest; v1/v2 fixtures must remain roleless so the
+        # candidate installer still proves their consecutive upgrade path.
+        with database.engine.begin() as connection:
+            upgrade_v2_to_v3(connection)
     database.checkpoint(truncate=True)
     graph = LadybugProjectionUpgradeCoordinator(
         StaticRuntimeDataPath(root),

@@ -63,18 +63,52 @@ def test_supported_installer_builder_freezes_every_readable_predecessor(
         / "angmoo.sqlite3"
     )
     source = sqlite3.connect(database_path)
+    source.row_factory = sqlite3.Row
     try:
-        assert source.execute(
-            "SELECT schema_version FROM angmoo_schema_version"
-        ).fetchone() == (source_version,)
-        assert source.execute("PRAGMA integrity_check").fetchone() == ("ok",)
+        assert (
+            source.execute(
+                "SELECT schema_version FROM angmoo_schema_version"
+            ).fetchone()[0]
+            == source_version
+        )
+        assert source.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
         assert source.execute("PRAGMA foreign_key_check").fetchall() == []
-        assert source.execute("SELECT count(*) FROM message_threads").fetchone() == (
-            2,
+        assert source.execute(
+            "SELECT count(*) FROM message_threads"
+        ).fetchone()[0] == 2
+        assert source.execute(
+            "SELECT count(*) FROM message_messages"
+        ).fetchone()[0] == 2
+        roleless_count = int(
+            source.execute(
+                "SELECT count(*) FROM world_characters "
+                "WHERE control_mode = 'autonomous' AND role_key IS NULL"
+            ).fetchone()[0]
         )
-        assert source.execute("SELECT count(*) FROM message_messages").fetchone() == (
-            2,
-        )
+        reserved_roles = source.execute(
+            "SELECT world_id, status, version FROM world_roles "
+            "WHERE role_key = 'no_specific_role' ORDER BY world_id"
+        ).fetchall()
+        if source_version < 3:
+            assert roleless_count == 4
+            actual_reserved_roles = [
+                (row["world_id"], row["status"], row["version"])
+                for row in reserved_roles
+            ]
+            assert actual_reserved_roles == [
+                ("world-supported-v2-existing-role", "disabled", 3)
+            ]
+        else:
+            assert roleless_count == 0
+            actual_reserved_roles = [
+                (row["world_id"], row["status"], row["version"])
+                for row in reserved_roles
+            ]
+            assert actual_reserved_roles == [
+                ("world-supported-v2", "enabled", 1),
+                ("world-supported-v2-existing-role", "enabled", 4),
+                ("world-supported-v2-second", "enabled", 1),
+            ]
     finally:
         source.close()
     assert fixture["target_data_version"] == 4
