@@ -2,7 +2,10 @@
 
 import { Mail, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
+import {
+  useRuntimeRouter as useRouter,
+  worldChatThreadRoute,
+} from "@/shared/navigation/public";
 import { useEffect, useState } from "react";
 
 import { useAuth } from "@/shared/auth/public";
@@ -12,6 +15,7 @@ import {
   listMessageThreads,
 } from "../api/chat-client";
 import type { MessageThreadListRead } from "../model/chat-contract";
+import { resolvedLegacyWorldChatRouteParts } from "../model/world-chat-contract";
 
 export function MessagesClient() {
   const router = useRouter();
@@ -106,7 +110,7 @@ export function MessagesClient() {
           {items.map((thread) => (
             <div key={thread.id} className="flex items-center gap-3 px-5 py-4 md:px-9">
               <Link
-                href={`/messages/${thread.id}`}
+                href={legacyThreadHref(thread)}
                 className="flex min-w-0 flex-1 items-center gap-3"
               >
                 <ProfileAvatar
@@ -129,6 +133,13 @@ export function MessagesClient() {
                   <p className="mt-1 line-clamp-1 text-[14px] font-medium text-[#667085]">
                     {thread.latest_message?.content ?? "새 쪽지를 시작해보세요."}
                   </p>
+                  {thread.world_scope_status !== "resolved" ? (
+                    <p className="mt-1 text-[12px] font-bold text-state-warning">
+                      {thread.world_scope_status === "quarantined"
+                        ? "충돌 대화 격리됨"
+                        : "World 확인 필요"}
+                    </p>
+                  ) : null}
                 </div>
               </Link>
               <button
@@ -151,4 +162,11 @@ export function MessagesClient() {
       )}
     </section>
   );
+}
+
+function legacyThreadHref(thread: MessageThreadListRead["items"][number]) {
+  const resolved = resolvedLegacyWorldChatRouteParts(thread);
+  return resolved
+    ? worldChatThreadRoute(resolved.worldId, resolved.threadId)
+    : `/messages/${encodeURIComponent(thread.id)}`;
 }

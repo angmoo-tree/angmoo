@@ -581,3 +581,39 @@ World-scoped thread identity, `/worlds/{worldId}/chat` activation, requester
 resolution, generation streaming, typed retry, retrieval, Memory, a new
 schema/provider flow, or static/Tauri Chat support. Those capabilities remain
 owned by the later P8-L stages.
+
+P8-L-C was merged at
+`8a83f48ed565992f8c3e7dd1dbe958f33997e7ab` and its six exact-main
+post-merge Actions succeeded.
+
+## P8-L-D World-scoped read-only Chat boundary
+
+P8-L-D adds a canonical read-only list and thread detail to the existing
+Phone World App without creating a Chat-only window:
+
+| Surface | Next/static route | Tauri Phone route result |
+|---|---|---|
+| World Chat list | `/worlds/{worldId}/chat` | same list and World scope |
+| World Chat thread | `/worlds/{worldId}/chat/{threadId}` | same nested detail and role binding |
+
+Both route families compose `features/chat/public.ts`. The static parser
+recognizes the nested thread before the generic World section, and the Rust
+Phone allowlist accepts the same canonical paths. A thread is rendered only
+when its response matches the requested `world_id`, requester is
+`owner_controlled`, requester and responding WorldCharacter IDs differ, and
+every returned message belongs to that thread.
+
+The list/header/stored-transcript anatomy is adapted from legacy Chat. World
+scope, explicit requester-to-responding direction, and fail-closed errors are
+Local semantics. A resolved legacy `/messages/{threadId}` may redirect to the
+canonical World thread; `ambiguous` and `quarantined` history stays on the
+legacy surface with a no-guess warning.
+
+This stage deliberately has no profile/letter entry, requester picker,
+composer/send, generation, streaming, delayed typing presence, typed retry or
+Memory behavior. It is implemented from exact base
+`8a83f48ed565992f8c3e7dd1dbe958f33997e7ab` under Issue `#218`. Local
+technical verification passed with Next browser `18/18`, static/Tauri browser
+`61/61`, frontend lint/typecheck/build/export, Rust route/window `7/7`, and the
+full backend suite `1543 passed, 22 skipped`. Push, Draft PR, Hosted CI, user,
+merge and post-merge Gates remain pending.

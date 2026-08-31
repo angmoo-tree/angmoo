@@ -224,6 +224,23 @@ function renderStaticRoute(location: BrowserLocation) {
       return <WorldAppRouteClient postId={postId} sectionId="feed" worldId={worldId} />;
     }
   }
+  if (
+    segments[0] === "worlds" &&
+    segments[2] === "chat" &&
+    segments.length === 4
+  ) {
+    const worldId = decodedWorldId(segments[1]);
+    const threadId = decodedSegment(segments[3]);
+    if (worldId && threadId) {
+      return (
+        <WorldAppRouteClient
+          chatThreadId={threadId}
+          sectionId="chat"
+          worldId={worldId}
+        />
+      );
+    }
+  }
   if (segments[0] === "worlds" && segments.length >= 2 && segments.length <= 3) {
     const worldId = decodedWorldId(segments[1]);
     const section = staticWorldSection(segments[2]);

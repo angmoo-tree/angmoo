@@ -417,6 +417,16 @@
       "module": "app.api.v1.routes.worlds",
       "endpoint": "get_world_character_entry"
     },
+    "GET /api/v1/worlds/{world_id}/chat/threads": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_chat",
+      "endpoint": "list_world_threads"
+    },
+    "GET /api/v1/worlds/{world_id}/chat/threads/{thread_id}": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_chat",
+      "endpoint": "get_world_thread"
+    },
     "GET /api/v1/worlds/{world_id}/creator-context": {
       "access": "owner-only",
       "module": "app.api.v1.routes.worlds",
@@ -796,6 +806,11 @@
       "access": "owner-only",
       "module": "app.api.v1.routes.worlds",
       "endpoint": "leave_world_with_character"
+    },
+    "POST /api/v1/worlds/{world_id}/chat/threads": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_chat",
+      "endpoint": "create_or_get_world_thread"
     },
     "POST /api/v1/worlds/{world_id}/manual-social/posts": {
       "access": "owner-only",

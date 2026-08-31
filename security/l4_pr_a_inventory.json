@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 1808,
-      "internal_edge_count": 1267,
+      "external_import_count": 1824,
+      "internal_edge_count": 1284,
       "legacy_import_exception_count": 0,
-      "module_count": 550,
+      "module_count": 554,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -897,7 +897,7 @@
     "oracle_artifacts": [
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "5c888bdc53361963530e290ed6aeb17e1151d1765a0476fce31e5fb40eec7a07"
+        "sha256": "467ba75cdf7ccca15458ee21e3cbefdcef478af12759a79d8a31c7246e450553"
       },
       {
         "path": "docs/architecture/l3-er-postgres-neo4j-parity-oracle.json",
@@ -911,7 +911,7 @@
     "parity_test_files": [
       {
         "path": "backend/tests/test_embedded_data_migration.py",
-        "sha256": "7523efc9a9cdf40de0e9937919c8a4dd535ca37247ba122f21d7be90ad8d26ee"
+        "sha256": "0d36b5ae97769896c89bd9247f2297e891597b2ce8db783755806fe43521b0b1"
       },
       {
         "path": "backend/tests/test_feed_reaction_intent.py",
@@ -1086,7 +1086,7 @@
       "windows-installer"
     ],
     "workflow": ".github/workflows/windows-installer.yml",
-    "workflow_sha256": "9dc46cba26a01a4f73348863208f248694b4faf81effe12c07ea76d4f11ea495"
+    "workflow_sha256": "5fb5cd183a24a625f37b89a338ec1459dd1696710b23ff14b3fb36db45ec5530"
   },
   "policy_id": "angmoo-l4-pr-a-p5-p7-inventory-v1",
   "runtime": {
@@ -1156,7 +1156,7 @@
       ],
       "registry": {
         "path": "backend/app/runtime/migrations/sqlite_versions/registry.py",
-        "sha256": "b649a9bd0d3df5e1a95d4d9134d4b968931bca4703a37c56f028228a37b8bebf"
+        "sha256": "a1a9bbb064bf6f20a9710f43dbec0fced607f9767cbb800585b43684afa19ff8"
       },
       "steps": [
         {

@@ -1,7 +1,7 @@
 {
-  "edge_count": 1267,
-  "external_import_count": 1808,
-  "module_count": 550,
+  "edge_count": 1284,
+  "external_import_count": 1824,
+  "module_count": 554,
   "modules": [
     {
       "external_imports": [],
@@ -939,6 +939,19 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.chat.infrastructure.world_scope_migration"
+      ],
+      "module": "app.alembic.versions.20260831_0084_world_scoped_chat_identity",
+      "path": "backend/app/alembic/versions/20260831_0084_world_scoped_chat_identity.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.api.v1",
@@ -981,6 +994,7 @@
         "app.api.v1.routes.tree",
         "app.api.v1.routes.world_activity_runtime",
         "app.api.v1.routes.world_character_setup",
+        "app.api.v1.routes.world_chat",
         "app.api.v1.routes.worlds",
         "app.domains.device_home.public",
         "app.domains.world_characters.api.routes",
@@ -1008,6 +1022,7 @@
         "app.api.v1.routes.tree",
         "app.api.v1.routes.world_activity_runtime",
         "app.api.v1.routes.world_character_setup",
+        "app.api.v1.routes.world_chat",
         "app.api.v1.routes.worlds",
         "app.domains.device_home.public",
         "app.domains.identity.api.local_routes",
@@ -1235,6 +1250,22 @@
       ],
       "module": "app.api.v1.routes.world_character_setup",
       "path": "backend/app/api/v1/routes/world_character_setup.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "fastapi",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.api.v1.deps",
+        "app.core.browser_session",
+        "app.domains.chat.public",
+        "app.domains.identity.public",
+        "app.runtime.chat.composition"
+      ],
+      "module": "app.api.v1.routes.world_chat",
+      "path": "backend/app/api/v1/routes/world_chat.py",
       "wildcard_imports": []
     },
     {
@@ -1874,6 +1905,22 @@
       ],
       "module": "app.domains.chat.infrastructure.sqlalchemy_models",
       "path": "backend/app/domains/chat/infrastructure/sqlalchemy_models.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "logging",
+        "sqlalchemy",
+        "sqlalchemy.schema",
+        "typing"
+      ],
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.domains.chat.infrastructure.world_scope_migration",
+      "path": "backend/app/domains/chat/infrastructure/world_scope_migration.py",
       "wildcard_imports": []
     },
     {
@@ -5308,7 +5355,10 @@
       "imports": [
         "app.domains.characters.infrastructure.sqlalchemy_models",
         "app.domains.chat.infrastructure.sqlalchemy_models",
-        "app.domains.identity.infrastructure"
+        "app.domains.identity.infrastructure",
+        "app.domains.identity.public",
+        "app.domains.world_characters.infrastructure.sqlalchemy_models",
+        "app.domains.worlds.infrastructure.sqlalchemy_models"
       ],
       "module": "app.runtime.chat.model_bindings",
       "path": "backend/app/runtime/chat/model_bindings.py",
@@ -5333,6 +5383,7 @@
         "hashlib",
         "logging",
         "sqlalchemy",
+        "sqlalchemy.exc",
         "sqlalchemy.orm",
         "uuid"
       ],
@@ -5344,7 +5395,8 @@
         "app.domains.chat.domain.errors",
         "app.domains.chat.domain.policies",
         "app.integrations.direct_llm",
-        "app.runtime.chat.model_bindings"
+        "app.runtime.chat.model_bindings",
+        "app.runtime.relationships.sqlalchemy_social_event"
       ],
       "module": "app.runtime.chat.sqlalchemy_service",
       "path": "backend/app/runtime/chat/sqlalchemy_service.py",
@@ -5848,6 +5900,7 @@
         "app.runtime.migrations.sqlite_versions.contracts",
         "app.runtime.migrations.sqlite_versions.v1_to_v2_world_package_registry",
         "app.runtime.migrations.sqlite_versions.v2_to_v3_no_specific_role",
+        "app.runtime.migrations.sqlite_versions.v3_to_v4_world_scoped_chat",
         "app.runtime.persistence.sqlite_schema"
       ],
       "module": "app.runtime.migrations.sqlite_versions.registry",
@@ -5888,6 +5941,21 @@
       ],
       "module": "app.runtime.migrations.sqlite_versions.v2_to_v3_no_specific_role",
       "path": "backend/app/runtime/migrations/sqlite_versions/v2_to_v3_no_specific_role.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "sqlalchemy",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.chat.infrastructure.world_scope_migration",
+        "app.runtime.migrations.sqlite_versions.contracts"
+      ],
+      "module": "app.runtime.migrations.sqlite_versions.v3_to_v4_world_scoped_chat",
+      "path": "backend/app/runtime/migrations/sqlite_versions/v3_to_v4_world_scoped_chat.py",
       "wildcard_imports": []
     },
     {
@@ -5992,7 +6060,8 @@
         "sqlalchemy"
       ],
       "imports": [
-        "app.core.db"
+        "app.core.db",
+        "app.domains.chat.infrastructure.world_scope_migration"
       ],
       "module": "app.runtime.persistence.sqlite_schema",
       "path": "backend/app/runtime/persistence/sqlite_schema.py",

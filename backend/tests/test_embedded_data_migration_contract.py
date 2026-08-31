@@ -56,8 +56,8 @@ def test_sqlite_manifests_match_frozen_v1_and_latest_model_contract(
         version=SQLITE_SCHEMA_VERSION,
     )
     assert latest.canonical_table_count == 87
-    assert tuple(version for version, _step in migration_chain(1)) == (1, 2)
-    assert set(MIGRATIONS) == {1, 2}
+    assert tuple(version for version, _step in migration_chain(1)) == (1, 2, 3)
+    assert set(MIGRATIONS) == {1, 2, 3}
     assert set(MIGRATION_CONTRACTS) == set(MIGRATIONS)
     assert all(
         contract.source_version == source_version

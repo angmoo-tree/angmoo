@@ -15,6 +15,12 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 POLICY_PATH = ROOT / "security/p8_l_b_chat_domain_policy.json"
 OUTPUT_PATH = ROOT / "security/p8_l_b_chat_domain_inventory.json"
+SUCCESSOR_INVENTORY_PATH = (
+    ROOT / "docs/architecture/p8-l-d-world-chat-identity-inventory.json"
+)
+FROZEN_OUTPUT_SHA256 = (
+    "d9e5b83d78059d91629f001e48d3031bd44a495f625be1588f00770395c5d70e"
+)
 
 
 class InventoryError(RuntimeError):
@@ -318,6 +324,23 @@ def build_inventory() -> dict[str, Any]:
     }
 
 
+def _check_frozen_successor_boundary() -> None:
+    """Verify the immutable B artifact once append-only stage D owns current-tree drift."""
+
+    if _sha256(OUTPUT_PATH) != FROZEN_OUTPUT_SHA256:
+        raise InventoryError("frozen P8-L-B inventory digest drift")
+    inventory = _json(OUTPUT_PATH)
+    predecessor = inventory.get("predecessor")
+    if not isinstance(predecessor, dict):
+        raise InventoryError("frozen P8-L-B predecessor is missing")
+    predecessor_path = ROOT / str(predecessor.get("path") or "")
+    if (
+        not predecessor_path.is_file()
+        or _sha256(predecessor_path) != predecessor.get("sha256")
+    ):
+        raise InventoryError("frozen P8-L-A predecessor digest drift")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group(required=True)
@@ -325,6 +348,14 @@ def main() -> int:
     mode.add_argument("--check", action="store_true")
     args = parser.parse_args()
     try:
+        if SUCCESSOR_INVENTORY_PATH.is_file():
+            if args.write:
+                raise InventoryError(
+                    "P8-L-B inventory is frozen; current-tree ownership moved to P8-L-D"
+                )
+            _check_frozen_successor_boundary()
+            print("P8-L-B Chat domain inventory is frozen and chained to P8-L-D")
+            return 0
         inventory = build_inventory()
         rendered = json.dumps(inventory, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
         if args.write:

@@ -285,42 +285,53 @@ def _apply_chain(
 ) -> None:
     engine = create_engine(URL.create("sqlite+pysqlite", database=str(path)))
     try:
-        with engine.begin() as connection:
+        # Migrations run only against an unpublished staging copy.  SQLite
+        # requires FK enforcement to be disabled *before* the transaction when
+        # a referenced parent table is rebuilt.  Promotion is still gated by a
+        # post-commit foreign_key_check and the regular manifest validation.
+        with engine.connect() as connection:
+            connection.exec_driver_sql("PRAGMA foreign_keys = OFF")
+            connection.commit()
+            with connection.begin():
+                for source_version, migration in chain:
+                    contract = migration_contract(source_version)
+                    protected_identity = _connection_identity(
+                        connection,
+                        excluded_tables=set(contract.mutable_identity_tables),
+                    )
+                    snapshot = contract.capture(connection)
+                    migration(connection)
+                    contract.verify(connection, snapshot)
+                    if _connection_identity(
+                        connection,
+                        excluded_tables=set(contract.mutable_identity_tables),
+                    ) != protected_identity:
+                        raise SqliteCanonicalUpgradeError(
+                            "sqlite_migration_identity_changed"
+                        )
+                    target = load_sqlite_manifest(source_version + 1)
+                    contract_digest = sqlite_schema_contract_digest(connection)
+                    if contract_digest != target.schema_digest:
+                        raise SqliteCanonicalUpgradeError(
+                            "sqlite_schema_manifest_mismatch"
+                        )
+                    connection.exec_driver_sql(
+                        f"UPDATE {SCHEMA_VERSION_TABLE} "
+                        "SET schema_version = ?, source_revision = ?, "
+                        "source_migration_count = ?, schema_digest = ?, "
+                        "created_at = ? WHERE singleton_key = 1",
+                        (
+                            target.schema_version,
+                            target.source_revision,
+                            target.source_migration_count,
+                            sqlite_schema_digest(connection),
+                            encode_utc_timestamp(datetime.now(UTC)),
+                        ),
+                    )
             connection.exec_driver_sql("PRAGMA foreign_keys = ON")
-            for source_version, migration in chain:
-                contract = migration_contract(source_version)
-                protected_identity = _connection_identity(
-                    connection,
-                    excluded_tables=set(contract.mutable_identity_tables),
-                )
-                snapshot = contract.capture(connection)
-                migration(connection)
-                contract.verify(connection, snapshot)
-                if _connection_identity(
-                    connection,
-                    excluded_tables=set(contract.mutable_identity_tables),
-                ) != protected_identity:
-                    raise SqliteCanonicalUpgradeError(
-                        "sqlite_migration_identity_changed"
-                    )
-                target = load_sqlite_manifest(source_version + 1)
-                contract_digest = sqlite_schema_contract_digest(connection)
-                if contract_digest != target.schema_digest:
-                    raise SqliteCanonicalUpgradeError(
-                        "sqlite_schema_manifest_mismatch"
-                    )
-                connection.exec_driver_sql(
-                    f"UPDATE {SCHEMA_VERSION_TABLE} "
-                    "SET schema_version = ?, source_revision = ?, "
-                    "source_migration_count = ?, schema_digest = ?, "
-                    "created_at = ? WHERE singleton_key = 1",
-                    (
-                        target.schema_version,
-                        target.source_revision,
-                        target.source_migration_count,
-                        sqlite_schema_digest(connection),
-                        encode_utc_timestamp(datetime.now(UTC)),
-                    ),
+            if list(connection.exec_driver_sql("PRAGMA foreign_key_check")):
+                raise SqliteCanonicalUpgradeError(
+                    "sqlite_foreign_key_check_failed"
                 )
     except SqliteCanonicalUpgradeError:
         raise

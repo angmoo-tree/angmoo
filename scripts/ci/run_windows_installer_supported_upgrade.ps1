@@ -7,6 +7,8 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$SupportedV2FixtureArchive,
     [Parameter(Mandatory = $true)]
+    [string]$SupportedV3FixtureArchive,
+    [Parameter(Mandatory = $true)]
     [string]$ConflictFixtureArchive,
     [Parameter(Mandatory = $true)]
     [string]$Python,
@@ -57,6 +59,7 @@ foreach ($required in @(
     $Installer,
     $SupportedV1FixtureArchive,
     $SupportedV2FixtureArchive,
+    $SupportedV3FixtureArchive,
     $ConflictFixtureArchive,
     $Python,
     $Verifier
@@ -234,7 +237,18 @@ try {
             ([int]$supportedContract.source_data_version) `
             ([int]$supportedContract.ladybug_source_data_version)
 
-        # The exact installer must be idempotent after the first v2 -> v3 update.
+        $supportedManifest = Restore-IsolatedFixture $SupportedV3FixtureArchive
+        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+            ConvertFrom-Json
+        Invoke-Installer 0
+        Invoke-Verifier `
+            $supportedManifest `
+            'upgraded' `
+            ([int]$supportedContract.source_data_version) `
+            ([int]$supportedContract.ladybug_source_data_version)
+
+        # The exact installer must be idempotent after the supported v3 -> v4
+        # World-scoped Chat migration reaches the candidate schema.
         $idempotentPaths = @(
             (Join-Path $productRoot 'canonical\current-generation.json'),
             (Join-Path $productRoot 'canonical\previous-generation.json'),

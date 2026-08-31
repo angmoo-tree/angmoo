@@ -2,7 +2,8 @@
 
 The wire contract is intentionally unchanged in P8-L-B.  These schemas move
 under the Chat domain so routes no longer depend on the horizontal schema
-aggregate; World-scoped Chat v2 fields are deferred to P8-L-D.
+aggregate. P8-L-D adds explicit World-scoped read DTOs alongside the preserved
+legacy wire contract; it does not alter legacy request payloads.
 """
 
 from datetime import datetime
@@ -88,6 +89,10 @@ class MessageThreadRead(BaseModel):
     created_at: datetime
     latest_message: MessageMessageRead | None = None
     messages: list[MessageMessageRead] = Field(default_factory=list)
+    world_id: str | None = None
+    requester_world_character_id: str | None = None
+    responding_world_character_id: str | None = None
+    world_scope_status: Literal["resolved", "ambiguous", "quarantined"] = "ambiguous"
 
 
 class MessageThreadListRead(BaseModel):
@@ -99,3 +104,48 @@ class MessageSendRead(BaseModel):
     thread: MessageThreadRead
     user_message: MessageMessageRead
     assistant_message: MessageMessageRead
+
+
+class WorldChatThreadCreate(BaseModel):
+    responding_world_character_id: str = Field(min_length=1, max_length=64)
+    requester_world_character_id: str | None = Field(
+        default=None, min_length=1, max_length=64
+    )
+    selected_model: MessageGoogleModel | None = None
+
+
+class WorldChatRoleRead(BaseModel):
+    world_character_id: str
+    character_id: str
+    display_name: str
+    handle: str | None = None
+    avatar_url: str | None = None
+    banner_url: str | None = None
+    role_key: str | None = None
+    control_mode: Literal["autonomous", "owner_controlled"]
+
+
+class WorldChatThreadRead(BaseModel):
+    id: str
+    world_id: str
+    requester: WorldChatRoleRead
+    responding: WorldChatRoleRead
+    selected_model: str
+    last_message_at: datetime | None = None
+    created_at: datetime
+    latest_message: MessageMessageRead | None = None
+    messages: list[MessageMessageRead] = Field(default_factory=list)
+
+
+class WorldChatThreadListRead(BaseModel):
+    items: list[WorldChatThreadRead]
+    ambiguous_legacy_count: int = 0
+    max_threads: int = 5
+
+
+class WorldChatThreadCreateRead(BaseModel):
+    outcome: Literal["created", "reused", "resolution_required"]
+    thread: WorldChatThreadRead | None = None
+    resolution_code: Literal[
+        "requester_missing", "requester_cardinality_anomaly"
+    ] | None = None

@@ -8,6 +8,21 @@ from app.runtime.chat import sqlalchemy_service
 
 
 class SqlAlchemyChatRuntime:
+    def list_world_threads(self, db: Any, user: Any, world_id: str) -> Any:
+        return sqlalchemy_service.list_world_threads(db, user, world_id)
+
+    def get_world_thread(
+        self, db: Any, user: Any, world_id: str, thread_id: str
+    ) -> Any:
+        return sqlalchemy_service.get_world_thread(db, user, world_id, thread_id)
+
+    def create_or_get_world_thread(
+        self, db: Any, user: Any, world_id: str, data: Any
+    ) -> Any:
+        return sqlalchemy_service.create_or_get_world_thread(
+            db, user, world_id, data
+        )
+
     def list_threads(self, db: Any, user: Any) -> Any:
         return sqlalchemy_service.list_threads(db, user)
 

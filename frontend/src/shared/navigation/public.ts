@@ -4,6 +4,8 @@ export {
   relationshipGraphRoute,
   studioWorldRoute,
   worldAppRoute,
+  worldChatRoute,
+  worldChatThreadRoute,
   worldPostDetailRoute,
 } from "./product-routes";
 export type { ProductRouteSearchParams } from "./product-routes";

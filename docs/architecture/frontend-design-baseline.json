@@ -131,7 +131,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/world-app/ui/world-app.tsx",
-      "sha256": "48193169d2033bb4cc2d865c6aea44b6ec4b109b0c79ed92a09693d00216169f"
+      "sha256": "03657ee629b1e4d74690b2c75acb4e5a0027d6f5ece370982379bd9751c05632"
     },
     {
       "classifications": [
@@ -173,7 +173,7 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "736535417d0315049d0d810aa562387c5d4bd20046909af297bd449ec01955de"
+        "sha256": "82bf7fc6c538703bf25dd3dba422481c3a739cb5d48b91d5329ce97606f81d62"
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",
@@ -189,7 +189,7 @@
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "5c888bdc53361963530e290ed6aeb17e1151d1765a0476fce31e5fb40eec7a07"
+        "sha256": "467ba75cdf7ccca15458ee21e3cbefdcef478af12759a79d8a31c7246e450553"
       },
       {
         "path": "browser-tests/ui-e-local-settings/local-settings.spec.ts",
@@ -205,6 +205,7 @@
       "/worlds/world-static-probe",
       "/worlds/world-static-probe/feed",
       "/worlds/world-static-probe/chat",
+      "/worlds/world-static-probe/chat/thread-static-probe",
       "/worlds/world-static-probe/characters",
       "/worlds/world-static-probe/relationships",
       "/worlds/world-static-probe/posts/post-static-probe",
@@ -1106,8 +1107,8 @@
   "route_inventory": {
     "known_gap_count": 0,
     "next_static_inventory": "docs/architecture/next-static-compatibility.json",
-    "next_static_inventory_route_count": 40,
-    "next_static_inventory_sha256": "29e7b3d1ab3782f86847daa21f18df00cb1c4708e162b83568a00bf70b4b1a2b",
+    "next_static_inventory_route_count": 41,
+    "next_static_inventory_sha256": "48e13e3d178af208fee7ebc648ba011cdafd914c5253e20f1a2b73ce9ac8ee20",
     "reviewed_surface_count": 17
   },
   "schema_version": 1,
@@ -1143,7 +1144,7 @@
       {
         "path": "frontend/src/composition/static-product-router.tsx",
         "present": true,
-        "sha256": "c3bef8b8107677e99676690de3bc8933457edbd655edb1a88b04dddd649072be"
+        "sha256": "5d98d47c2f56ecd893e929db5563da82593699d60dd0299d597ca665d5a04e76"
       },
       {
         "path": "frontend/src/features/ui-foundation/public.ts",

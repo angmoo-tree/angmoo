@@ -2,7 +2,10 @@ import { expect, test, type Page, type Route } from "@playwright/test";
 
 import type { CharacterDashboardItem } from "../frontend/src/features/characters/model/character-dashboard-contract";
 import { presentCharacterRecentActivity } from "../frontend/src/features/characters/model/character-recent-activity-presentation";
-import type { MessageThreadRead } from "../frontend/src/features/chat/public";
+import type {
+  MessageThreadRead,
+  WorldChatThreadRead,
+} from "../frontend/src/features/chat/public";
 
 type WorldFixture = {
   world_id: string;
@@ -548,6 +551,174 @@ test("World App keeps the requested World boundary and never falls back", async 
   await expect(page.locator('[data-device-scroll-owner="true"]')).toHaveCount(1);
   await expect(page.getByRole("navigation", { name: "World 앱 기능" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Device Home", exact: true })).toBeVisible();
+  expect(audit.writes).toEqual([]);
+  expect(audit.providerCalls).toEqual([]);
+});
+
+test("P8-L-D World Chat list, thread, and resolved legacy entry converge on the scoped read-only route", async ({
+  page,
+}) => {
+  const audit = await installBackendFixture(page, {
+    worldReads: { [WORLD_ALPHA.world_id]: WORLD_ALPHA },
+  });
+  const worldId = WORLD_ALPHA.world_id;
+  const threadId = "thread-p8-l-d";
+  const worldThread: WorldChatThreadRead = {
+    id: threadId,
+    world_id: worldId,
+    requester: {
+      world_character_id: "wc-p8-l-d-owner",
+      character_id: "character-p8-l-d-owner",
+      display_name: "사용자 앵무",
+      handle: "owner_bird",
+      avatar_url: null,
+      banner_url: null,
+      role_key: "student",
+      control_mode: "owner_controlled",
+    },
+    responding: {
+      world_character_id: "wc-p8-l-d-friend",
+      character_id: "character-p8-l-d-friend",
+      display_name: "친구 앵무",
+      handle: "friend_bird",
+      avatar_url: null,
+      banner_url: null,
+      role_key: "mentor",
+      control_mode: "autonomous",
+    },
+    selected_model: "gemini-2.5-flash-lite",
+    last_message_at: "2026-09-01T03:04:00Z",
+    created_at: "2026-09-01T03:00:00Z",
+    latest_message: {
+      id: 2,
+      thread_id: threadId,
+      role: "assistant",
+      content: "World 경계를 기억하고 있어요.",
+      model: "gemini-2.5-flash-lite",
+      status: "ok",
+      error_code: null,
+      created_at: "2026-09-01T03:04:00Z",
+    },
+    messages: [
+      {
+        id: 1,
+        thread_id: threadId,
+        role: "user",
+        content: "여기는 어느 World야?",
+        model: "gemini-2.5-flash-lite",
+        status: "ok",
+        error_code: null,
+        created_at: "2026-09-01T03:03:00Z",
+      },
+      {
+        id: 2,
+        thread_id: threadId,
+        role: "assistant",
+        content: "World 경계를 기억하고 있어요.",
+        model: "gemini-2.5-flash-lite",
+        status: "ok",
+        error_code: null,
+        created_at: "2026-09-01T03:04:00Z",
+      },
+    ],
+  };
+  const worldChatCalls: string[] = [];
+
+  await page.route(`**/api/backend/worlds/${worldId}/chat/**`, async (route) => {
+    const request = route.request();
+    const url = new URL(request.url());
+    worldChatCalls.push(`${request.method()} ${url.pathname}`);
+    if (
+      request.method() === "GET" &&
+      url.pathname === `/api/backend/worlds/${worldId}/chat/threads`
+    ) {
+      return json(route, {
+        items: [worldThread],
+        ambiguous_legacy_count: 1,
+        max_threads: 5,
+      });
+    }
+    if (
+      request.method() === "GET" &&
+      url.pathname ===
+        `/api/backend/worlds/${worldId}/chat/threads/${threadId}`
+    ) {
+      return json(route, worldThread);
+    }
+    return json(route, { detail: "unexpected_world_chat_request" }, 404);
+  });
+  await page.route(
+    `**/api/backend/messages/threads/${threadId}`,
+    async (route) =>
+      json(route, {
+        id: threadId,
+        requester: {
+          profile_type: "user",
+          id: OWNER.id,
+          display_name: OWNER.display_name,
+          handle: null,
+          avatar_url: null,
+          banner_url: null,
+        },
+        character: {
+          profile_type: "character",
+          id: worldThread.responding.character_id,
+          display_name: worldThread.responding.display_name,
+          handle: worldThread.responding.handle,
+          avatar_url: null,
+          banner_url: null,
+        },
+        selected_model: worldThread.selected_model,
+        last_message_at: worldThread.last_message_at,
+        created_at: worldThread.created_at,
+        latest_message: worldThread.latest_message,
+        messages: worldThread.messages,
+        world_id: worldId,
+        requester_world_character_id: worldThread.requester.world_character_id,
+        responding_world_character_id: worldThread.responding.world_character_id,
+        world_scope_status: "resolved",
+      }),
+  );
+
+  await page.goto(`/worlds/${worldId}/chat`);
+  await expect(page.locator('[data-world-chat-surface="list"]')).toHaveAttribute(
+    "data-world-id",
+    worldId,
+  );
+  await expect(page.getByRole("heading", { name: "대화", exact: true })).toBeVisible();
+  await expect(page.getByText("친구 앵무", { exact: true })).toBeVisible();
+  await expect(page.getByText("사용자 앵무(으)로 대화", { exact: true })).toBeVisible();
+  await expect(page.getByText("1개의 이전 대화는 임의의 World에 연결하지")).toBeVisible();
+  await expect(page.getByRole("textbox")).toHaveCount(0);
+  await page.getByRole("link", { name: /친구 앵무/ }).click();
+
+  await expect(page).toHaveURL(
+    new RegExp(`/worlds/${worldId}/chat/${threadId}$`),
+  );
+  await expect(page.locator('[data-world-chat-surface="thread"]')).toHaveAttribute(
+    "data-thread-id",
+    threadId,
+  );
+  await expect(page.getByText("말하는 앵무", { exact: true })).toBeVisible();
+  await expect(page.getByText("답하는 앵무", { exact: true })).toBeVisible();
+  await expect(page.getByText("여기는 어느 World야?", { exact: true })).toBeVisible();
+  await expect(page.getByText("World 경계를 기억하고 있어요.", { exact: true })).toBeVisible();
+  await expect(page.getByText("저장된 World 대화를 안전하게 표시하고 있어요.")).toBeVisible();
+  await expect(page.getByRole("textbox")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "보내기" })).toHaveCount(0);
+
+  await page.goto(`/messages/${threadId}`);
+  await expect(page).toHaveURL(
+    new RegExp(`/worlds/${worldId}/chat/${threadId}$`),
+  );
+  await expect(page.locator('[data-world-chat-surface="thread"]')).toBeVisible();
+  expect([...new Set(worldChatCalls)].sort()).toEqual(
+    [
+      `GET /api/backend/worlds/${worldId}/chat/threads`,
+      `GET /api/backend/worlds/${worldId}/chat/threads/${threadId}`,
+    ].sort(),
+  );
+  expect(worldChatCalls.every((call) => call.startsWith("GET "))).toBe(true);
   expect(audit.writes).toEqual([]);
   expect(audit.providerCalls).toEqual([]);
 });
@@ -1416,6 +1587,10 @@ test("legacy Messages keeps list, thread, retry, model, send, and delete parity"
         created_at: "2026-09-01T00:01:00Z",
       },
     ],
+    requester_world_character_id: null,
+    responding_world_character_id: null,
+    world_id: null,
+    world_scope_status: "ambiguous",
   };
   let deleted = false;
   let releaseSend!: () => void;
@@ -1532,6 +1707,7 @@ test("legacy Messages keeps list, thread, retry, model, send, and delete parity"
 
   await expect(page).toHaveURL(/\/messages\/thread-p8-l-c$/);
   await expect(page.getByRole("heading", { name: "구조 이동 앵무" })).toBeVisible();
+  await expect(page.getByText("이 이전 대화의 World를 고유하게 확인할 수 없어요.")).toBeVisible();
   await expect(page.getByText("처음 질문", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "다시 시도" })).toHaveCount(1);
 

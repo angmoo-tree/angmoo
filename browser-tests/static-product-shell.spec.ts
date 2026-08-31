@@ -9,6 +9,7 @@ const ROUTES = [
   "/worlds/world-static-probe",
   "/worlds/world-static-probe/feed",
   "/worlds/world-static-probe/chat",
+  "/worlds/world-static-probe/chat/thread-static-probe",
   "/worlds/world-static-probe/characters",
   "/worlds/world-static-probe/relationships",
   "/worlds/world-static-probe/posts/post-static-probe",

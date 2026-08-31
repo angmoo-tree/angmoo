@@ -13,6 +13,11 @@ from app.domains.chat.api.schemas import (
     MessageThreadRead,
     MessageThreadUpdate,
     ProfileRef,
+    WorldChatRoleRead,
+    WorldChatThreadCreate,
+    WorldChatThreadCreateRead,
+    WorldChatThreadListRead,
+    WorldChatThreadRead,
 )
 from app.domains.chat.application.messages import ChatService
 from app.domains.chat.domain.errors import (
@@ -50,4 +55,9 @@ __all__ = [
     "MessageThreadUpdate",
     "MessageValidationError",
     "ProfileRef",
+    "WorldChatRoleRead",
+    "WorldChatThreadCreate",
+    "WorldChatThreadCreateRead",
+    "WorldChatThreadListRead",
+    "WorldChatThreadRead",
 ]
