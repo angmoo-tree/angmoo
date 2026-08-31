@@ -54,6 +54,16 @@ function position(index: number, count: number) {
   return { x: 240 + Math.cos(angle) * 145, y: 170 + Math.sin(angle) * 120 };
 }
 
+function graphNodeLabelLines(displayName: string): string[] {
+  const visibleCharacters = Array.from(displayName.replace(/\s+/g, "")).slice(0, 8);
+  if (visibleCharacters.length <= 4) return [visibleCharacters.join("")];
+  const splitAt = Math.ceil(visibleCharacters.length / 2);
+  return [
+    visibleCharacters.slice(0, splitAt).join(""),
+    visibleCharacters.slice(splitAt).join(""),
+  ];
+}
+
 export function RelationshipGraphClient({
   characterId,
   worldId,
@@ -301,11 +311,21 @@ export function RelationshipGraphClient({
                 })}
                 {orderedNodes.map((node) => {
                   const point = positions.get(node.world_character_id)!;
+                  const labelLines = graphNodeLabelLines(node.display_name);
                   return (
                     <g key={node.world_character_id}>
                       <circle cx={point.x} cy={point.y} r={node.is_center ? 35 : 29} className={node.is_center ? "fill-action-dark" : "fill-surface-container-high"} />
-                      <text x={point.x} y={point.y + 4} textAnchor="middle" className={node.is_center ? "fill-on-action-dark text-[12px] font-bold" : "fill-on-surface text-[11px] font-bold"}>
-                        {node.display_name.slice(0, 8)}
+                      <text
+                        x={point.x}
+                        y={labelLines.length === 1 ? point.y + 4 : point.y - 3}
+                        textAnchor="middle"
+                        className={node.is_center ? "fill-on-action-dark text-[12px] font-bold" : "fill-on-surface text-[11px] font-bold"}
+                      >
+                        {labelLines.map((line, index) => (
+                          <tspan key={`${node.world_character_id}-label-${index}`} x={point.x} dy={index === 0 ? 0 : 13}>
+                            {line}
+                          </tspan>
+                        ))}
                       </text>
                     </g>
                   );

@@ -11,7 +11,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 14px;
-  color: #787f8b;
+  color: var(--color-text-secondary);
   flex-direction: column;
   font-size: 0.58rem;
   font-weight: 800;
@@ -19,25 +19,30 @@
   text-decoration: none;
 }
 
-.navItem:hover,
-.navItem:focus-visible {
-  background: #f6e9e7;
-  color: #8f4f4c;
-  outline: none;
+.navItem:hover {
+  background: var(--color-surface-muted);
+  color: var(--color-text-strong);
 }
 
-.navItemActive {
-  background: #f8dfdc;
-  color: #9f413d;
+.navItem:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.navItemActive,
+.navItemActive:hover {
+  background: var(--color-brand-soft);
+  color: var(--color-brand-accent);
 }
 
 .homeReturn {
   display: inline-flex;
   min-height: 36px;
   align-items: center;
-  border: 1px solid #e3d6d3;
+  border: 1px solid var(--color-border-control);
   border-radius: 999px;
-  color: #615655;
+  background: var(--color-surface);
+  color: var(--color-text-default);
   font-size: 0.72rem;
   font-weight: 850;
   gap: 5px;
@@ -46,10 +51,14 @@
   white-space: nowrap;
 }
 
-.homeReturn:hover,
+.homeReturn:hover {
+  border-color: var(--color-border-interactive);
+  color: var(--color-text-strong);
+}
+
 .homeReturn:focus-visible {
-  border-color: #b8837f;
-  outline: 3px solid rgb(184 131 127 / 22%);
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .worldOverview,
@@ -65,7 +74,7 @@
 }
 
 .role {
-  color: #8a6f6d;
+  color: var(--color-text-secondary);
   font-size: 0.72rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -74,7 +83,7 @@
 .worldOverview h2,
 .capability h2 {
   margin: 22px 0 8px;
-  color: #252124;
+  color: var(--color-text-strong);
   font-size: 1.65rem;
   line-height: 1.2;
 }
@@ -82,7 +91,7 @@
 .tagline,
 .capability > p {
   margin: 0;
-  color: #6d6465;
+  color: var(--color-text-default);
   font-size: 0.94rem;
   line-height: 1.65;
 }
@@ -90,22 +99,22 @@
 .scopeNotice,
 .legacyNotice {
   margin-top: 26px;
-  border: 1px solid #efd7d2;
+  border: 1px solid var(--color-border-default);
   border-radius: 20px;
-  background: #fff4f0;
+  background: var(--color-surface-warm);
   padding: 18px;
 }
 
 .scopeNotice strong,
 .legacyNotice strong {
-  color: #7e4744;
+  color: var(--color-text-strong);
   font-size: 0.88rem;
 }
 
 .scopeNotice p,
 .legacyNotice p {
   margin: 7px 0 0;
-  color: #716464;
+  color: var(--color-text-default);
   font-size: 0.8rem;
   line-height: 1.55;
 }
@@ -121,13 +130,13 @@
   align-items: center;
   justify-content: center;
   border-radius: 20px;
-  background: #f8dfdc;
-  color: #9f413d;
+  background: var(--color-brand-soft);
+  color: var(--color-brand-accent);
 }
 
 .capabilityKicker {
   margin: 14px 0 0 !important;
-  color: #9f413d !important;
+  color: var(--color-brand-accent) !important;
   font-size: 0.7rem !important;
   font-weight: 900;
   letter-spacing: 0.08em;
@@ -141,18 +150,22 @@
   justify-content: center;
   margin-top: 20px;
   border-radius: 999px;
-  background: #9f413d;
-  color: #fff;
+  background: var(--color-action-primary);
+  color: var(--color-on-action-primary);
+  box-shadow: var(--shadow-action);
   font-size: 0.82rem;
   font-weight: 850;
   padding: 11px 18px;
   text-decoration: none;
 }
 
-.capabilityAction:hover,
+.capabilityAction:hover {
+  background: var(--color-action-primary-hover);
+}
+
 .capabilityAction:focus-visible {
-  background: #81322f;
-  outline: 3px solid rgb(159 65 61 / 22%);
+  outline: none;
+  box-shadow: var(--focus-ring), var(--shadow-action);
 }
 
 .legacyNotice {
@@ -163,35 +176,45 @@
 .gate a {
   display: inline-block;
   margin-top: 12px;
-  color: #8f3f3b;
+  color: var(--color-text-strong);
   font-weight: 850;
+  text-decoration: underline;
+  text-decoration-color: var(--color-border-interactive);
+  text-underline-offset: 3px;
+}
+
+.legacyNotice a:focus-visible,
+.gate a:focus-visible {
+  border-radius: var(--radius-control);
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .gate {
   display: grid;
   min-height: 100%;
   place-items: center;
-  background: #f4f5f7;
+  background: var(--color-canvas);
   padding: 24px;
 }
 
 .gateCard {
   width: min(100%, 430px);
-  border: 1px solid #e6dbd8;
+  border: 1px solid var(--color-border-default);
   border-radius: 28px;
-  background: #fff8f7;
-  box-shadow: 0 18px 50px rgb(16 24 40 / 12%);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-summary);
   padding: 28px;
 }
 
 .gateCard h1 {
   margin: 0;
-  color: #292326;
+  color: var(--color-text-strong);
   font-size: 1.35rem;
 }
 
 .gateCard p {
   margin: 10px 0 0;
-  color: #6d6465;
+  color: var(--color-text-default);
   line-height: 1.6;
 }

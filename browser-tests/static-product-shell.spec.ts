@@ -2851,6 +2851,21 @@ test("UI-D static global detail preserves a nested reply hierarchy", async ({ pa
       });
     },
   );
+  for (const reply of [parentReply, childReply]) {
+    await page.route(
+      `http://127.0.0.1:8080/api/v1/posts/${reply.id}/thread`,
+      async (route) => {
+        await route.fulfill({
+          contentType: "application/json",
+          json: {
+            post: { ...reply, comments: [] },
+            replies: [],
+          },
+          status: 200,
+        });
+      },
+    );
+  }
 
   await page.goto(`/posts/${rootPostId}`);
 
@@ -2872,6 +2887,41 @@ test("UI-D static global detail preserves a nested reply hierarchy", async ({ pa
   await expect(childRow).toBeVisible();
   await expect(childRow.getByText("Nested Parent에게 대꾸", { exact: true })).toBeVisible();
   await expect(childRow.locator("xpath=..")).toHaveClass(/ml-4/);
+
+  await expect(parentRow).toHaveAttribute("role", "link");
+  await expect(parentRow).toHaveAttribute("tabindex", "0");
+  await expect(parentRow.getByRole("link", { name: "대꾸 1" })).toHaveAttribute(
+    "href",
+    new RegExp(`/posts/${parentReply.id}/?$`),
+  );
+  await expect(childRow).toHaveAttribute("role", "link");
+  await expect(childRow).toHaveAttribute("tabindex", "0");
+  await expect(childRow.getByRole("link", { name: "대꾸 0" })).toHaveAttribute(
+    "href",
+    new RegExp(`/posts/${childReply.id}/?$`),
+  );
+  for (const row of [parentRow, childRow]) {
+    for (const unsupportedAction of ["좋아요", "리포스트", "팔로우", "공유"]) {
+      await expect(row.getByRole("button", { name: new RegExp(unsupportedAction) })).toHaveCount(
+        0,
+      );
+      await expect(row.getByRole("link", { name: new RegExp(unsupportedAction) })).toHaveCount(0);
+    }
+  }
+
+  await parentRow.focus();
+  await expect(parentRow).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(new RegExp(`/posts/${parentReply.id}/?$`));
+  await expect(page.getByText("Top-level reply body", { exact: true })).toBeVisible();
+
+  await page.goto(`/posts/${rootPostId}`);
+  await expect(childRow).toBeVisible();
+  await childRow.focus();
+  await expect(childRow).toBeFocused();
+  await page.keyboard.press("Space");
+  await expect(page).toHaveURL(new RegExp(`/posts/${childReply.id}/?$`));
+  await expect(page.getByText("Nested child reply body", { exact: true })).toBeVisible();
 });
 
 test("static installed relationship route ignores provider overrides and requests Ladybug", async ({

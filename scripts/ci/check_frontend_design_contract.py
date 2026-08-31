@@ -23,7 +23,8 @@ ABSOLUTE_UNIX_HOME_PATH = re.compile(
 PRIVATE_CHECKOUT_LABEL = "angmoo-private"
 UI_B_SCHEMA = "ui-b-semantic-primitives-v1"
 UI_B_BASE_COMMIT = "7c96d4bd6f3789036593c1e89ca8974fae620252"
-UI_B_CANONICAL_VISUAL_ENVIRONMENT = {
+UI_F_VISUAL_SCHEMA = "ui-f-product-visuals-v1"
+CANONICAL_VISUAL_ENVIRONMENT = {
     "browser": "chromium",
     "browser_revision": "1234",
     "browser_version": "151.0.7922.34",
@@ -34,9 +35,19 @@ UI_B_CANONICAL_VISUAL_ENVIRONMENT = {
     "operating_system": "ubuntu-24.04",
     "playwright_version": "1.62.1",
 }
-UI_B_VISUAL_PROJECTS = ["next-production", "static-export"]
-UI_B_REVIEWED_VIEWPORT = {"height": 880, "width": 436}
-UI_B_DIFF_POLICY = {"max_diff_pixels": 25, "threshold": 0.1}
+VISUAL_PROJECTS = ["next-production", "static-export"]
+UI_F_REVIEWED_VIEWPORTS = [
+    {"height": 800, "width": 360},
+    {"height": 844, "width": 390},
+    {"height": 880, "width": 436},
+    {"height": 1000, "width": 1440},
+    {"height": 900, "width": 1440},
+]
+VISUAL_DIFF_POLICY = {"max_diff_pixels": 25, "threshold": 0.1}
+UI_F_VISUAL_SPECS = [
+    "browser-tests/product-surfaces.visual.spec.ts",
+    "browser-tests/semantic-foundation.visual.spec.ts",
+]
 UI_B_COMPATIBILITY_BRIDGES = [
     {
         "adapter": "frontend/src/shared/ui/profile-avatar.tsx",
@@ -454,32 +465,62 @@ def _validate_policy(policy: dict[str, Any]) -> list[str]:
     if not isinstance(visual_manifest, dict):
         errors.append("policy.visual_manifest must be an object")
     else:
-        if visual_manifest.get("schema") != UI_B_SCHEMA:
-            errors.append(f"policy.visual_manifest.schema must be {UI_B_SCHEMA}")
-        if visual_manifest.get("canonical_environment") != UI_B_CANONICAL_VISUAL_ENVIRONMENT:
+        if visual_manifest.get("schema") != UI_F_VISUAL_SCHEMA:
+            errors.append(f"policy.visual_manifest.schema must be {UI_F_VISUAL_SCHEMA}")
+        if visual_manifest.get("canonical_environment") != CANONICAL_VISUAL_ENVIRONMENT:
             errors.append(
                 "policy.visual_manifest.canonical_environment must pin the Playwright "
                 "1.62.1 Noble container digest and Chromium 1234/151.0.7922.34"
             )
-        if visual_manifest.get("projects") != UI_B_VISUAL_PROJECTS:
+        if visual_manifest.get("projects") != VISUAL_PROJECTS:
             errors.append(
                 "policy.visual_manifest.projects must be [next-production, static-export]"
             )
-        if visual_manifest.get("reviewed_viewport") != UI_B_REVIEWED_VIEWPORT:
-            errors.append("policy.visual_manifest.reviewed_viewport must be 436x880")
-        if visual_manifest.get("diff_policy") != UI_B_DIFF_POLICY:
+        if visual_manifest.get("reviewed_viewports") != UI_F_REVIEWED_VIEWPORTS:
+            errors.append(
+                "policy.visual_manifest.reviewed_viewports must cover "
+                "360x800, 390x844, 436x880, 1440x1000, and 1440x900"
+            )
+        if visual_manifest.get("diff_policy") != VISUAL_DIFF_POLICY:
             errors.append(
                 "policy.visual_manifest.diff_policy must use threshold 0.1 and max_diff_pixels 25"
             )
-        if visual_manifest.get("expected_screenshot_call_count") != 1:
-            errors.append("policy.visual_manifest.expected_screenshot_call_count must be 1")
-        if visual_manifest.get("expected_snapshots") != [
-            "browser-tests/snapshots/ui-b/semantic-foundation-phone.png"
-        ]:
+        if visual_manifest.get("config") != "browser-tests/playwright.visual.config.ts":
             errors.append(
-                "policy.visual_manifest.expected_snapshots must contain the single UI-B "
-                "Phone baseline"
+                "policy.visual_manifest.config must use the canonical Playwright visual config"
             )
+        if visual_manifest.get("fixture") != "browser-tests/fixtures/visual-corpus.json":
+            errors.append(
+                "policy.visual_manifest.fixture must use the deterministic UI-F visual corpus"
+            )
+        expected_call_count = visual_manifest.get("expected_screenshot_call_count")
+        if (
+            not isinstance(expected_call_count, int)
+            or isinstance(expected_call_count, bool)
+            or expected_call_count <= 0
+        ):
+            errors.append(
+                "policy.visual_manifest.expected_screenshot_call_count must be a positive integer"
+            )
+        expected_snapshots = visual_manifest.get("expected_snapshots")
+        if not _is_sorted_unique_strings(expected_snapshots, minimum=1):
+            errors.append(
+                "policy.visual_manifest.expected_snapshots must be a non-empty sorted unique array"
+            )
+        else:
+            for index, relative in enumerate(expected_snapshots):
+                label = f"policy.visual_manifest.expected_snapshots[{index}]"
+                try:
+                    snapshot_path = _repository_path(relative, label=label)
+                except ValueError as exc:
+                    errors.append(str(exc))
+                    continue
+                if not relative.startswith("browser-tests/snapshots/"):
+                    errors.append(f"{label} must be owned by browser-tests/snapshots")
+                if snapshot_path.suffix.lower() not in {".png", ".jpg", ".jpeg", ".webp"}:
+                    errors.append(f"{label} must be a supported committed snapshot image")
+                if not snapshot_path.is_file():
+                    errors.append(f"[missing_visual_manifest_snapshot] {relative}")
         if visual_manifest.get("production_preview_script") != (
             "frontend/scripts/serve-production.mjs"
         ):
@@ -495,7 +536,24 @@ def _validate_policy(policy: dict[str, Any]) -> list[str]:
                 "policy.visual_manifest.first_party_fixture_asset must map the Local app "
                 "icon to /icon.svg"
             )
-        for field in ("config", "fixture", "production_preview_script", "spec"):
+        if visual_manifest.get("specs") != UI_F_VISUAL_SPECS:
+            errors.append(
+                "policy.visual_manifest.specs must contain the UI-F product corpus and "
+                "preserved UI-B semantic-foundation specs"
+            )
+        if visual_manifest.get("preserved_ui_b_fixture") != (
+            "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx"
+        ):
+            errors.append(
+                "policy.visual_manifest.preserved_ui_b_fixture must retain the reviewed "
+                "UI-B semantic-foundation fixture"
+            )
+        for field in (
+            "config",
+            "fixture",
+            "preserved_ui_b_fixture",
+            "production_preview_script",
+        ):
             relative = visual_manifest.get(field)
             if not isinstance(relative, str) or not relative:
                 errors.append(f"policy.visual_manifest.{field} must be a repository path")
@@ -507,6 +565,19 @@ def _validate_policy(policy: dict[str, Any]) -> list[str]:
             else:
                 if not path.is_file():
                     errors.append(f"[missing_visual_manifest_file] {relative}")
+        specs = visual_manifest.get("specs")
+        if isinstance(specs, list):
+            for index, relative in enumerate(specs):
+                if not isinstance(relative, str) or not relative:
+                    continue
+                label = f"policy.visual_manifest.specs[{index}]"
+                try:
+                    spec_path = _repository_path(relative, label=label)
+                except ValueError as exc:
+                    errors.append(str(exc))
+                else:
+                    if not spec_path.is_file():
+                        errors.append(f"[missing_visual_manifest_file] {relative}")
         fixture_asset = visual_manifest.get("first_party_fixture_asset")
         asset_source = fixture_asset.get("source") if isinstance(fixture_asset, dict) else None
         if isinstance(asset_source, str):
@@ -555,35 +626,58 @@ def _validate_policy(policy: dict[str, Any]) -> list[str]:
             errors.append(
                 "policy.browser_harness.visual_script_command must use the canonical visual config"
             )
-        if browser.get("visual_command_status") != "active_ui_b_semantic_foundation":
+        if browser.get("visual_command_status") != "active_ui_f_product_corpus":
             errors.append(
-                "policy.browser_harness.visual_command_status must activate the UI-B harness"
+                "policy.browser_harness.visual_command_status must activate the UI-F product corpus"
             )
         configs = browser.get("configs")
         specs = browser.get("specs")
         if not _is_sorted_unique_strings(configs, minimum=1):
             errors.append("policy.browser_harness.configs must be a sorted unique array")
         elif "browser-tests/playwright.visual.config.ts" not in configs:
-            errors.append("policy.browser_harness.configs must include the UI-B visual config")
+            errors.append("policy.browser_harness.configs must include the canonical visual config")
         if not _is_sorted_unique_strings(specs, minimum=1):
             errors.append("policy.browser_harness.specs must be a sorted unique array")
-        elif "browser-tests/semantic-foundation.visual.spec.ts" not in specs:
-            errors.append("policy.browser_harness.specs must include the UI-B visual spec")
+        elif not set(UI_F_VISUAL_SPECS).issubset(specs):
+            errors.append(
+                "policy.browser_harness.specs must include the UI-F product corpus and "
+                "preserved UI-B visual specs"
+            )
 
     screenshots = policy.get("screenshot_inventory")
     if not isinstance(screenshots, dict):
         errors.append("policy.screenshot_inventory must be an object")
     else:
         for field in ("baseline_call_count", "committed_baseline_count"):
-            if not isinstance(screenshots.get(field), int) or screenshots[field] < 0:
+            value = screenshots.get(field)
+            if not isinstance(value, int) or isinstance(value, bool) or value <= 0:
                 errors.append(
-                    f"policy.screenshot_inventory.{field} must be a non-negative integer"
+                    f"policy.screenshot_inventory.{field} must be a positive integer"
                 )
-        if screenshots.get("baseline_call_count") != 1:
-            errors.append("policy.screenshot_inventory.baseline_call_count must be 1 for UI-B")
-        if screenshots.get("committed_baseline_count") != 1:
+        if isinstance(visual_manifest, dict):
+            expected_call_count = visual_manifest.get("expected_screenshot_call_count")
+            expected_snapshots = visual_manifest.get("expected_snapshots")
+            if screenshots.get("baseline_call_count") != expected_call_count:
+                errors.append(
+                    "policy.screenshot_inventory.baseline_call_count must match "
+                    "visual_manifest.expected_screenshot_call_count"
+                )
+            if isinstance(expected_snapshots, list) and screenshots.get(
+                "committed_baseline_count"
+            ) != len(expected_snapshots):
+                errors.append(
+                    "policy.screenshot_inventory.committed_baseline_count must match the "
+                    "visual_manifest.expected_snapshots length"
+                )
+        target_viewports = screenshots.get("target_viewports")
+        expected_target_viewports = [
+            f"{viewport['width']}x{viewport['height']}"
+            for viewport in UI_F_REVIEWED_VIEWPORTS
+        ]
+        if target_viewports != expected_target_viewports:
             errors.append(
-                "policy.screenshot_inventory.committed_baseline_count must expect one UI-B PNG"
+                "policy.screenshot_inventory.target_viewports must match the five reviewed "
+                "UI-F viewports"
             )
 
     routes = policy.get("route_surface_inventory")
@@ -856,18 +950,25 @@ def _build_report(policy: dict[str, Any]) -> dict[str, Any]:
             ),
         },
         "fixture": _file_evidence(visual_manifest["fixture"], label="visual fixture"),
+        "preserved_ui_b_fixture": _file_evidence(
+            visual_manifest["preserved_ui_b_fixture"],
+            label="preserved UI-B visual fixture",
+        ),
         "projects": visual_manifest["projects"],
         "production_preview_script": _file_evidence(
             visual_manifest["production_preview_script"],
             label="production preview script",
         ),
-        "reviewed_viewport": visual_manifest["reviewed_viewport"],
+        "reviewed_viewports": visual_manifest["reviewed_viewports"],
         "schema": visual_manifest["schema"],
         "snapshots": [
             _file_evidence(relative, label="visual snapshot", binary=True)
             for relative in visual_manifest["expected_snapshots"]
         ],
-        "spec": _file_evidence(visual_manifest["spec"], label="visual spec"),
+        "specs": [
+            _file_evidence(relative, label="visual spec")
+            for relative in visual_manifest["specs"]
+        ],
     }
 
     return {
@@ -991,13 +1092,13 @@ def check(policy: dict[str, Any], report: dict[str, Any]) -> list[str]:
         "expected_screenshot_call_count"
     ]:
         errors.append(
-            "[visual_manifest_call_drift] the UI-B manifest requires exactly one screenshot call"
+            "[visual_manifest_call_drift] update the reviewed UI-F screenshot-call contract"
         )
     expected_snapshots = visual_manifest["expected_snapshots"]
     if report["visual_inventory"]["committed_snapshot_images"] != expected_snapshots:
         errors.append(
-            "[visual_manifest_snapshot_drift] commit exactly the reviewed UI-B semantic "
-            "foundation PNG"
+            "[visual_manifest_snapshot_drift] commit exactly the sorted reviewed UI-F "
+            "product visual snapshot set"
         )
     for snapshot in report["visual_inventory"]["manifest"]["snapshots"]:
         if not snapshot["present"] or "sha256" not in snapshot:

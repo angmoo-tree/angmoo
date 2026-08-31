@@ -29,12 +29,12 @@
   height: 68px;
   place-items: center;
   overflow: hidden;
-  border: 1px solid rgb(255 255 255 / 68%);
+  border: 1px solid color-mix(in srgb, var(--color-surface) 68%, transparent);
   border-radius: 21px;
-  background: var(--app-icon-background, #ffffff);
+  background: var(--app-icon-background, var(--color-surface));
   box-shadow:
-    0 9px 22px rgb(58 32 31 / 13%),
-    inset 0 1px 0 rgb(255 255 255 / 72%);
+    0 9px 22px color-mix(in srgb, var(--color-action-dark) 13%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--color-surface) 72%, transparent);
   transition:
     transform 140ms ease,
     box-shadow 140ms ease;
@@ -43,8 +43,8 @@
 .entryInteractive:hover .visual {
   transform: translateY(-2px);
   box-shadow:
-    0 13px 26px rgb(58 32 31 / 17%),
-    inset 0 1px 0 rgb(255 255 255 / 72%);
+    0 13px 26px color-mix(in srgb, var(--color-action-dark) 17%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--color-surface) 72%, transparent);
 }
 
 .entryDisabled {
@@ -61,7 +61,7 @@
 .label {
   max-width: 88px;
   overflow: hidden;
-  color: var(--color-on-surface, #251818);
+  color: var(--color-text-strong);
   font-size: 0.78rem;
   font-weight: 700;
   line-height: 1.2;

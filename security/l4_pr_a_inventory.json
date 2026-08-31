@@ -524,7 +524,7 @@
       "policy_allowed_cycle_count": 0
     },
     "frontend": {
-      "candidate_consumer_edge_count": 28,
+      "candidate_consumer_edge_count": 27,
       "candidate_consumers": {
         "frontend/src/app/api/community/characters/[characterId]/activity/route.ts": [],
         "frontend/src/app/api/community/posts/[postId]/comments/route.ts": [],
@@ -570,7 +570,6 @@
           "frontend/src/components/tree-community-client.tsx",
           "frontend/src/components/tree-post-detail-client.tsx",
           "frontend/src/components/user-profile-client.tsx",
-          "frontend/src/composition/static-product-router.tsx",
           "frontend/src/lib/agents.ts"
         ]
       },
@@ -706,7 +705,7 @@
             "react"
           ],
           "path": "frontend/src/features/relationships/ui/relationship-graph-client.tsx",
-          "sha256": "e051333c930af9c36148473835647fe2938c0af4feb86ccb04189fe1c5251157"
+          "sha256": "3904f11140882dae52e4b3bc63c2a84278a798f601b170b254f57877b42e5cb7"
         },
         {
           "exports": [
@@ -895,7 +894,7 @@
     "oracle_artifacts": [
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "c097d4b10be6864425cefc801f495dcc5746732cf4d222f90e16f22ecf6dabab"
+        "sha256": "5c888bdc53361963530e290ed6aeb17e1151d1765a0476fce31e5fb40eec7a07"
       },
       {
         "path": "docs/architecture/l3-er-postgres-neo4j-parity-oracle.json",

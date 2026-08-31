@@ -61,7 +61,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/relationships/ui/relationship-graph-client.tsx",
-      "sha256": "e051333c930af9c36148473835647fe2938c0af4feb86ccb04189fe1c5251157"
+      "sha256": "3904f11140882dae52e4b3bc63c2a84278a798f601b170b254f57877b42e5cb7"
     },
     {
       "classifications": [
@@ -164,7 +164,7 @@
       },
       {
         "path": "browser-tests/playwright.visual.config.ts",
-        "sha256": "8feff29c9b818499ff67d6743341ffeb2f09a9627cfc39a2c4fc5ad8ea82e2b8"
+        "sha256": "b7afab914962312b68d300f0008f7c0672897236c9546aaa3e0b6b67e3f0d3cb"
       }
     ],
     "lockfile_sha256": "63eec1e3d5bac29965e850bf751269c7a8b317929b570205a1e223544f80a470",
@@ -176,16 +176,20 @@
         "sha256": "244ef34d1b2da139352a67a5fc367deb14828b9140997975e92d03cca884a160"
       },
       {
+        "path": "browser-tests/product-surfaces.visual.spec.ts",
+        "sha256": "dd849bbc886ef9c63ddcd9f19281d49946443e7b0c06cc4cdfecb14b10757bc8"
+      },
+      {
         "path": "browser-tests/relationship-graph/product-shell.spec.ts",
         "sha256": "d5fd280716ec04006c17989f9629b009aedfa3ffdbf2278ce9febe00de7382e3"
       },
       {
         "path": "browser-tests/semantic-foundation.visual.spec.ts",
-        "sha256": "4ea63a35268f8537d63e15b156fcefd5c94333c9523cbefc805a735b640dce1d"
+        "sha256": "a7c3d278abe3e94153879eeae6da59b04c253e29a647abd704d922665e1c0eb3"
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "c097d4b10be6864425cefc801f495dcc5746732cf4d222f90e16f22ecf6dabab"
+        "sha256": "5c888bdc53361963530e290ed6aeb17e1151d1765a0476fce31e5fb40eec7a07"
       },
       {
         "path": "browser-tests/ui-e-local-settings/local-settings.spec.ts",
@@ -229,9 +233,11 @@
       "backend/app/domains/social/api/schemas.py",
       "backend/app/runtime/social/sqlalchemy_read_repository.py",
       "backend/tests/test_l3_owner_manual_social_inbox.py",
+      "browser-tests/fixtures/visual-corpus.json",
       "browser-tests/package.json",
       "browser-tests/playwright.ui-e-local-settings.config.ts",
       "browser-tests/playwright.visual.config.ts",
+      "browser-tests/product-surfaces.visual.spec.ts",
       "browser-tests/relationship-graph/product-shell.spec.ts",
       "browser-tests/semantic-foundation.visual.spec.ts",
       "browser-tests/static-product-shell.spec.ts",
@@ -284,21 +290,21 @@
     "forbidden_matches": []
   },
   "raw_colors": {
-    "files": 42,
-    "occurrences": 1496,
+    "files": 33,
+    "occurrences": 1408,
     "pattern": "#[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{5}|[0-9A-Fa-f]{3}|[0-9A-Fa-f])?\\b",
     "per_extension": {
       ".css": {
-        "files": 8,
-        "occurrences": 114
+        "files": 1,
+        "occurrences": 38
       },
       ".ts": {
         "files": 1,
         "occurrences": 2
       },
       ".tsx": {
-        "files": 33,
-        "occurrences": 1380
+        "files": 31,
+        "occurrences": 1368
       }
     },
     "per_file": [
@@ -828,59 +834,6 @@
         }
       },
       {
-        "occurrences": 4,
-        "path": "frontend/src/composition/static-product-router.tsx",
-        "values": {
-          "#251818": 1,
-          "#584140": 1,
-          "#e0bfbd": 1,
-          "#fff8f7": 1
-        }
-      },
-      {
-        "occurrences": 22,
-        "path": "frontend/src/features/creator-studio/ui/creator-studio-dashboard.module.css",
-        "values": {
-          "#101828": 5,
-          "#344054": 1,
-          "#475467": 2,
-          "#667085": 3,
-          "#98a2b3": 1,
-          "#d0d5dd": 1,
-          "#e1e5eb": 2,
-          "#f2f4f7": 1,
-          "#f7f8fa": 1,
-          "#ff6b6b": 1,
-          "#fff": 4
-        }
-      },
-      {
-        "occurrences": 11,
-        "path": "frontend/src/features/creator-studio/ui/creator-studio-frame.module.css",
-        "values": {
-          "#101828": 2,
-          "#475467": 1,
-          "#667085": 2,
-          "#98a2b3": 1,
-          "#e4e7ec": 1,
-          "#eef1f5": 1,
-          "#f2f4f7": 1,
-          "#f7f8fa": 1,
-          "#fff": 1
-        }
-      },
-      {
-        "occurrences": 6,
-        "path": "frontend/src/features/creator-studio/ui/creator-studio-shell.module.css",
-        "values": {
-          "#251818": 1,
-          "#e4e7ec": 2,
-          "#f6f7f9": 1,
-          "#ff6b6b": 1,
-          "#ffffff": 1
-        }
-      },
-      {
         "occurrences": 25,
         "path": "frontend/src/features/social/ui/active-agent-summary.tsx",
         "values": {
@@ -943,34 +896,6 @@
         }
       },
       {
-        "occurrences": 27,
-        "path": "frontend/src/features/world-app/ui/world-app.module.css",
-        "values": {
-          "#252124": 1,
-          "#292326": 1,
-          "#615655": 1,
-          "#6d6465": 2,
-          "#716464": 1,
-          "#787f8b": 1,
-          "#7e4744": 1,
-          "#81322f": 1,
-          "#8a6f6d": 1,
-          "#8f3f3b": 1,
-          "#8f4f4c": 1,
-          "#9f413d": 4,
-          "#b8837f": 1,
-          "#e3d6d3": 1,
-          "#e6dbd8": 1,
-          "#efd7d2": 1,
-          "#f4f5f7": 1,
-          "#f6e9e7": 1,
-          "#f8dfdc": 2,
-          "#fff": 1,
-          "#fff4f0": 1,
-          "#fff8f7": 1
-        }
-      },
-      {
         "occurrences": 19,
         "path": "frontend/src/features/world-packages/world-package-export-panel.tsx",
         "values": {
@@ -1016,45 +941,6 @@
         }
       },
       {
-        "occurrences": 7,
-        "path": "frontend/src/shared/desktop/desktop-window-controls.module.css",
-        "values": {
-          "#175cd3": 1,
-          "#302829": 1,
-          "#655655": 1,
-          "#8f8281": 1,
-          "#c24141": 1,
-          "#ffffff": 2
-        }
-      },
-      {
-        "occurrences": 8,
-        "path": "frontend/src/shared/runtime/desktop-runtime-gate.tsx",
-        "values": {
-          "#251818": 1,
-          "#765f5c": 2,
-          "#9c6d68": 2,
-          "#aa453c": 1,
-          "#e8b6b0": 1,
-          "#fff8f7": 1
-        }
-      },
-      {
-        "occurrences": 2,
-        "path": "frontend/src/shared/ui/app-icon.module.css",
-        "values": {
-          "#251818": 1,
-          "#ffffff": 1
-        }
-      },
-      {
-        "occurrences": 1,
-        "path": "frontend/src/shared/ui/device-frame.module.css",
-        "values": {
-          "#30343b": 1
-        }
-      },
-      {
         "occurrences": 38,
         "path": "frontend/src/shared/ui/semantic-tokens.css",
         "values": {
@@ -1097,51 +983,30 @@
       "#027a48": 5,
       "#039855": 1,
       "#05603a": 1,
-      "#101828": 202,
+      "#101828": 195,
       "#12b76a": 1,
       "#147a45": 3,
       "#166534": 1,
-      "#175cd3": 2,
+      "#175cd3": 1,
       "#17834b": 1,
       "#1d2939": 3,
       "#1f2330": 1,
       "#1f2937": 1,
-      "#251818": 4,
-      "#252124": 1,
-      "#292326": 1,
-      "#302829": 1,
-      "#30343b": 1,
-      "#344054": 97,
+      "#344054": 96,
       "#3b82f6": 1,
-      "#475467": 38,
+      "#475467": 35,
       "#52606d": 2,
       "#52610f": 1,
-      "#584140": 1,
-      "#615655": 1,
-      "#655655": 1,
-      "#667085": 194,
+      "#667085": 189,
       "#6941c6": 1,
-      "#6d6465": 2,
-      "#716464": 1,
-      "#765f5c": 2,
-      "#787f8b": 1,
       "#7a2e0e": 2,
       "#7a4b00": 1,
       "#7a808b": 1,
-      "#7e4744": 1,
-      "#81322f": 1,
       "#8a5a00": 1,
-      "#8a6f6d": 1,
-      "#8f3f3b": 1,
-      "#8f4f4c": 1,
-      "#8f8281": 1,
-      "#98a2b3": 55,
+      "#98a2b3": 53,
       "#9a3412": 1,
       "#9a5b13": 1,
-      "#9c6d68": 2,
-      "#9f413d": 4,
       "#a93636": 2,
-      "#aa453c": 1,
       "#abefc6": 1,
       "#b22f2f": 1,
       "#b2ddff": 1,
@@ -1150,13 +1015,12 @@
       "#b54708": 4,
       "#b7e4c7": 1,
       "#b7ebcd": 1,
-      "#b8837f": 1,
-      "#c24141": 43,
+      "#c24141": 42,
       "#c7933d": 2,
       "#c7d7fe": 1,
       "#c9ced6": 3,
       "#cdd3dc": 1,
-      "#d0d5dd": 20,
+      "#d0d5dd": 19,
       "#d7bd16": 1,
       "#d8a640": 1,
       "#d92d20": 5,
@@ -1166,45 +1030,36 @@
       "#d9f2e5": 3,
       "#dc6803": 1,
       "#dfe3e8": 2,
-      "#e0bfbd": 1,
-      "#e1e5eb": 81,
-      "#e3d6d3": 1,
+      "#e1e5eb": 79,
       "#e4a0a0": 2,
-      "#e4e7ec": 3,
       "#e4e8de": 1,
       "#e5c91e": 1,
       "#e6c91f": 1,
-      "#e6dbd8": 1,
       "#e7bd54": 1,
-      "#e8b6b0": 1,
       "#eaecf0": 1,
       "#eaedf2": 66,
       "#ecfdf3": 4,
       "#edf0f4": 1,
       "#edf0f5": 1,
-      "#eef1f5": 60,
+      "#eef1f5": 59,
       "#ef9a74": 1,
-      "#efd7d2": 1,
       "#eff8ff": 1,
       "#f0fbf5": 3,
       "#f0fff6": 1,
-      "#f2f4f7": 36,
+      "#f2f4f7": 34,
       "#f2f8df": 1,
       "#f2fbf5": 1,
       "#f3f4f6": 5,
       "#f4ddad": 1,
       "#f4df28": 1,
       "#f4f3ff": 1,
-      "#f4f5f7": 1,
       "#f4f7fb": 1,
       "#f5f8ff": 1,
-      "#f6e9e7": 1,
-      "#f6f7f9": 36,
+      "#f6f7f9": 35,
       "#f79009": 3,
       "#f7ead8": 1,
-      "#f7f8fa": 6,
+      "#f7f8fa": 4,
       "#f7faf6": 1,
-      "#f8dfdc": 2,
       "#f8fafc": 1,
       "#f9df9b": 1,
       "#f9fafb": 73,
@@ -1215,7 +1070,7 @@
       "#fedf89": 1,
       "#ff5252": 13,
       "#ff5a32": 2,
-      "#ff6b6b": 139,
+      "#ff6b6b": 137,
       "#ff8a8a": 5,
       "#ff8f8f": 1,
       "#ff9b9b": 1,
@@ -1228,26 +1083,24 @@
       "#ffe2e2": 13,
       "#ffe4bf": 1,
       "#ffe5c2": 1,
-      "#fff": 6,
       "#fff0ef": 16,
       "#fff0f0": 1,
       "#fff1f0": 1,
       "#fff1f1": 2,
       "#fff260": 1,
       "#fff45c": 1,
-      "#fff4f0": 1,
       "#fff5f5": 36,
       "#fff7e6": 1,
       "#fff7ed": 1,
       "#fff8e8": 1,
       "#fff8ec": 2,
       "#fff8ed": 2,
-      "#fff8f7": 5,
+      "#fff8f7": 2,
       "#fff8f8": 1,
       "#fffaeb": 3,
       "#fffaf0": 1,
       "#fffafa": 7,
-      "#ffffff": 9
+      "#ffffff": 5
     }
   },
   "route_inventory": {
@@ -1290,7 +1143,7 @@
       {
         "path": "frontend/src/composition/static-product-router.tsx",
         "present": true,
-        "sha256": "f28116ca2c2e74a7ba9449850bc66fe8feb068f760e425e808ff28205e02d71d"
+        "sha256": "c3bef8b8107677e99676690de3bc8933457edbd655edb1a88b04dddd649072be"
       },
       {
         "path": "frontend/src/features/ui-foundation/public.ts",
@@ -1454,7 +1307,17 @@
   },
   "visual_inventory": {
     "committed_snapshot_images": [
-      "browser-tests/snapshots/ui-b/semantic-foundation-phone.png"
+      "browser-tests/snapshots/ui-b/semantic-foundation-phone.png",
+      "browser-tests/snapshots/ui-f/characters-autonomy-phone-436x880.png",
+      "browser-tests/snapshots/ui-f/creator-studio-empty-1440x900.png",
+      "browser-tests/snapshots/ui-f/creator-studio-populated-1440x900.png",
+      "browser-tests/snapshots/ui-f/device-home-centered-1440x1000.png",
+      "browser-tests/snapshots/ui-f/device-home-phone-360x800.png",
+      "browser-tests/snapshots/ui-f/device-home-runtime-offline-390x844.png",
+      "browser-tests/snapshots/ui-f/global-feed-media-phone-390x844.png",
+      "browser-tests/snapshots/ui-f/relationship-graph-degraded-1440x900.png",
+      "browser-tests/snapshots/ui-f/relationship-graph-ready-1440x900.png",
+      "browser-tests/snapshots/ui-f/world-feed-composer-phone-436x880.png"
     ],
     "manifest": {
       "canonical_environment": {
@@ -1468,13 +1331,13 @@
       "config": {
         "path": "browser-tests/playwright.visual.config.ts",
         "present": true,
-        "sha256": "8feff29c9b818499ff67d6743341ffeb2f09a9627cfc39a2c4fc5ad8ea82e2b8"
+        "sha256": "b7afab914962312b68d300f0008f7c0672897236c9546aaa3e0b6b67e3f0d3cb"
       },
       "diff_policy": {
         "max_diff_pixels": 25,
         "threshold": 0.1
       },
-      "expected_screenshot_call_count": 1,
+      "expected_screenshot_call_count": 11,
       "first_party_fixture_asset": {
         "served_path": "/icon.svg",
         "source": {
@@ -1484,6 +1347,11 @@
         }
       },
       "fixture": {
+        "path": "browser-tests/fixtures/visual-corpus.json",
+        "present": true,
+        "sha256": "441a6fd00e8b82c930de86b3725f1761f29b428637b0100a37f6345ae22b28a3"
+      },
+      "preserved_ui_b_fixture": {
         "path": "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
         "present": true,
         "sha256": "2e811cb214b85a366f62b26c4ae449883f6dcd104f4db0211a3bd07afc2faf1f"
@@ -1497,26 +1365,101 @@
         "next-production",
         "static-export"
       ],
-      "reviewed_viewport": {
-        "height": 880,
-        "width": 436
-      },
-      "schema": "ui-b-semantic-primitives-v1",
+      "reviewed_viewports": [
+        {
+          "height": 800,
+          "width": 360
+        },
+        {
+          "height": 844,
+          "width": 390
+        },
+        {
+          "height": 880,
+          "width": 436
+        },
+        {
+          "height": 1000,
+          "width": 1440
+        },
+        {
+          "height": 900,
+          "width": 1440
+        }
+      ],
+      "schema": "ui-f-product-visuals-v1",
       "snapshots": [
         {
           "path": "browser-tests/snapshots/ui-b/semantic-foundation-phone.png",
           "present": true,
           "sha256": "5837ffe4500c5994dc6e617abf68a41412da98cf5ff409ced2a0cd4fed8e08e1"
+        },
+        {
+          "path": "browser-tests/snapshots/ui-f/characters-autonomy-phone-436x880.png",
+          "present": true,
+          "sha256": "f0dfb96eaeeed9e43b3797c7517a8d0e43b04556312d5f3ed59a87988a998456"
+        },
+        {
+          "path": "browser-tests/snapshots/ui-f/creator-studio-empty-1440x900.png",
+          "present": true,
+          "sha256": "27694b9940327598a89e499f3db9498a047c59b981525915a524e8776dbd1bdb"
+        },
+        {
+          "path": "browser-tests/snapshots/ui-f/creator-studio-populated-1440x900.png",
+          "present": true,
+          "sha256": "30af437b95536a34cce861a5758e1c1be3bb989ef738492b23f745c4e960f815"
+        },
+        {
+          "path": "browser-tests/snapshots/ui-f/device-home-centered-1440x1000.png",
+          "present": true,
+          "sha256": "ae55fb6a0a11a5bc18ab273673f0779954462a989ed59084e5684dbb5603dfa5"
+        },
+        {
+          "path": "browser-tests/snapshots/ui-f/device-home-phone-360x800.png",
+          "present": true,
+          "sha256": "a8a32e9d82a78bb475a8efb74ab57256840d27c9a242ad17ab88e3b0e8c66875"
+        },
+        {
+          "path": "browser-tests/snapshots/ui-f/device-home-runtime-offline-390x844.png",
+          "present": true,
+          "sha256": "2cf291abef353c16292fbaa32a2a51eddcea4b18680d1af5e3c7258d848e3fc3"
+        },
+        {
+          "path": "browser-tests/snapshots/ui-f/global-feed-media-phone-390x844.png",
+          "present": true,
+          "sha256": "c3ea913423106fc91d26895ef9ffe4ff59702482d481acf6b72d5514f67ddb98"
+        },
+        {
+          "path": "browser-tests/snapshots/ui-f/relationship-graph-degraded-1440x900.png",
+          "present": true,
+          "sha256": "77d248293a18a5ae74df2a1dabb5910e634b53535aa7ce8699b1dbb19d4b9ed3"
+        },
+        {
+          "path": "browser-tests/snapshots/ui-f/relationship-graph-ready-1440x900.png",
+          "present": true,
+          "sha256": "0995ec874d7c1681f5377b1d3334cbc554c4ad6348a5d60743187a79b56ff18d"
+        },
+        {
+          "path": "browser-tests/snapshots/ui-f/world-feed-composer-phone-436x880.png",
+          "present": true,
+          "sha256": "75bc94a820289bf6941a4ffec22a204d00022c3398c1097aee9e9ac8fc6b8e69"
         }
       ],
-      "spec": {
-        "path": "browser-tests/semantic-foundation.visual.spec.ts",
-        "present": true,
-        "sha256": "4ea63a35268f8537d63e15b156fcefd5c94333c9523cbefc805a735b640dce1d"
-      }
+      "specs": [
+        {
+          "path": "browser-tests/product-surfaces.visual.spec.ts",
+          "present": true,
+          "sha256": "dd849bbc886ef9c63ddcd9f19281d49946443e7b0c06cc4cdfecb14b10757bc8"
+        },
+        {
+          "path": "browser-tests/semantic-foundation.visual.spec.ts",
+          "present": true,
+          "sha256": "a7c3d278abe3e94153879eeae6da59b04c253e29a647abd704d922665e1c0eb3"
+        }
+      ]
     },
-    "screenshot_call_count": 1,
-    "status": "UI-D PR #207 follow-up intentionally refreshes the single reviewed semantic-foundation baseline for the bright-coral CTA and selected-navigation contract without expanding the screenshot corpus; the full product visual corpus remains owned by UI-F.",
+    "screenshot_call_count": 11,
+    "status": "UI-F extends the preserved UI-B semantic-foundation baseline into the deterministic production/static product visual corpus; the manifest owns the reviewed viewport, screenshot-call, and committed snapshot contract.",
     "target_viewports": [
       "360x800",
       "390x844",
