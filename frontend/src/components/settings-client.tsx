@@ -24,17 +24,19 @@ import {
   Toast,
 } from "@/shared/ui/public";
 import {
-  clearAuth,
   DEFAULT_MESSAGE_GOOGLE_MODEL,
-  getLocalBootstrapStatus,
   getMessageSettings,
-  logoutCurrentSession,
   MESSAGE_GOOGLE_GEMINI_MODELS,
   updateMessageSettings,
-  type LocalBootstrapRead,
   type MessageCredentialSource,
   type MessageGoogleGeminiModel,
   type MessageSettingsRead,
+} from "@/features/chat/public";
+import {
+  clearAuth,
+  getLocalBootstrapStatus,
+  logoutCurrentSession,
+  type LocalBootstrapRead,
 } from "@/lib/agents";
 import { safeSettingsReturnTo } from "@/lib/safe-navigation";
 

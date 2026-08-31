@@ -2,6 +2,7 @@
   "documentation": "docs/architecture/frontend-product-shell.md",
   "feature_names": [
     "characters",
+    "chat",
     "creator-studio",
     "device-home",
     "device-shell",
@@ -30,6 +31,16 @@
       "scope: \"/\"",
       "start_url: \"/\""
     ],
+    "frontend/src/app/messages/[threadId]/page.tsx": [
+      "@/features/chat/public",
+      "MessageThreadClient",
+      "dynamic = \"force-dynamic\""
+    ],
+    "frontend/src/app/messages/page.tsx": [
+      "@/features/chat/public",
+      "MessagesClient",
+      "dynamic = \"force-dynamic\""
+    ],
     "frontend/src/app/ui-foundation/page.tsx": [
       "SemanticFoundationFixture",
       "follow: false",
@@ -51,6 +62,30 @@
       "AgentsDashboardClient",
       "presentCharacterAutonomy",
       "presentCharacterRecentActivity"
+    ],
+    "frontend/src/features/chat/api/chat-client.ts": [
+      "/api/backend",
+      "clearStoredUser",
+      "requestChatApi",
+      "runtimeFetch"
+    ],
+    "frontend/src/features/chat/model/chat-contract.ts": [
+      "DEFAULT_MESSAGE_GOOGLE_MODEL",
+      "MESSAGE_GOOGLE_GEMINI_MODELS",
+      "MessageThreadRead"
+    ],
+    "frontend/src/features/chat/public.ts": [
+      "MessageThreadClient",
+      "MessagesClient",
+      "createMessageThread"
+    ],
+    "frontend/src/features/chat/ui/message-thread-client.tsx": [
+      "model_busy",
+      "답장 중"
+    ],
+    "frontend/src/features/chat/ui/messages-client.tsx": [
+      "/messages/",
+      "listMessageThreads"
     ],
     "frontend/src/features/creator-studio/ui/creator-studio-dashboard.tsx": [
       "getLocalWorldSurface(\"creator_studio\"",
@@ -157,6 +192,8 @@
   "required_paths": [
     "frontend/public/sw.js",
     "frontend/src/app/manifest.ts",
+    "frontend/src/app/messages/[threadId]/page.tsx",
+    "frontend/src/app/messages/page.tsx",
     "frontend/src/app/ui-foundation/page.tsx",
     "frontend/src/features/characters/api/character-dashboard-client.ts",
     "frontend/src/features/characters/model/character-dashboard-contract.ts",
@@ -165,6 +202,11 @@
     "frontend/src/features/characters/public.ts",
     "frontend/src/features/characters/ui/agents-dashboard-client.tsx",
     "frontend/src/features/characters/ui/characters-dashboard.module.css",
+    "frontend/src/features/chat/api/chat-client.ts",
+    "frontend/src/features/chat/model/chat-contract.ts",
+    "frontend/src/features/chat/public.ts",
+    "frontend/src/features/chat/ui/message-thread-client.tsx",
+    "frontend/src/features/chat/ui/messages-client.tsx",
     "frontend/src/features/creator-studio/public.ts",
     "frontend/src/features/creator-studio/ui/creator-studio-dashboard.tsx",
     "frontend/src/features/creator-studio/ui/creator-studio-frame.tsx",

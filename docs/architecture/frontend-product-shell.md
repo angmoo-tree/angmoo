@@ -543,3 +543,41 @@ capabilities exist, the current unavailable/disabled states remain truthful.
 The full machine-verifiable baseline and decisions live in
 `docs/architecture/p8-l-a-contract-closeout.md` and
 `security/p8_l_a_inventory.json`.
+
+## P8-L-C legacy Chat feature boundary
+
+P8-L-C moves the existing Next-only Chat v1 frontend behind a feature-first
+public boundary without changing its product behavior. The canonical owner is
+now:
+
+```text
+frontend/src/features/chat/
+  api/chat-client.ts
+  model/chat-contract.ts
+  ui/messages-client.tsx
+  ui/message-thread-client.tsx
+  public.ts
+```
+
+Both `app/messages/page.tsx` and `app/messages/[threadId]/page.tsx` remain
+thin Next route wrappers and import Chat only through
+`@/features/chat/public`. The former global component paths are one-line
+compatibility facades, and the message exports in `lib/agents.ts` are
+compatibility re-exports. New consumers use the feature public boundary;
+Chat internals do not import `@/components` or `@/lib` and no Chat-specific
+policy moved into `shared`.
+
+This stage deliberately preserves the eleven existing Chat v1 transport
+operations, request bodies, 401 behavior, thread/model state, optimistic send,
+latest-`model_busy` retry, deletion navigation, keyboard handling, accessible
+names, `답장 중` pending anatomy, and exact visual classes. The design baseline
+therefore moves 39 and 16 raw-color occurrences to the two feature-owned UI
+paths while the repository total remains 1,408 occurrences across 33 files.
+There is no intentional screenshot or visual result change.
+
+Legacy `/messages` stays `next: supported` and `static: unsupported` in the
+reviewed route matrix. This structural parity is not evidence for
+World-scoped thread identity, `/worlds/{worldId}/chat` activation, requester
+resolution, generation streaming, typed retry, retrieval, Memory, a new
+schema/provider flow, or static/Tauri Chat support. Those capabilities remain
+owned by the later P8-L stages.
