@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "policy_id": "angmoo-p8-l-b-chat-domain-parity-v1",
+  "owner_stage": "P8-L-B",
+  "predecessor": {
+    "path": "security/p8_l_a_inventory.json",
+    "sha256": "934c1410810e8f0b0899e09c3c34b5c67f43050c4a354a15fcea72f264c9847e"
+  },
+  "documentation": "docs/architecture/p8-l-b-chat-domain-parity.md",
+  "architecture_inventory": "security/architecture_import_baseline.json",
+  "required_files": [
+    "backend/app/domains/chat/__init__.py",
+    "backend/app/domains/chat/public.py",
+    "backend/app/domains/chat/api/__init__.py",
+    "backend/app/domains/chat/api/schemas.py",
+    "backend/app/domains/chat/domain/__init__.py",
+    "backend/app/domains/chat/domain/errors.py",
+    "backend/app/domains/chat/domain/policies.py",
+    "backend/app/domains/chat/application/__init__.py",
+    "backend/app/domains/chat/application/messages.py",
+    "backend/app/domains/chat/ports/__init__.py",
+    "backend/app/domains/chat/ports/runtime.py",
+    "backend/app/domains/chat/infrastructure/__init__.py",
+    "backend/app/domains/chat/infrastructure/sqlalchemy_models.py",
+    "backend/app/runtime/chat/__init__.py",
+    "backend/app/runtime/chat/sqlalchemy_service.py",
+    "backend/app/runtime/chat/sqlalchemy_adapter.py",
+    "backend/app/runtime/chat/composition.py",
+    "backend/app/runtime/chat/model_bindings.py",
+    "backend/app/core/profile_ref.py",
+    "backend/app/core/prompt_safety.py",
+    "backend/app/schemas/community.py",
+    "backend/app/models/messages.py",
+    "backend/app/schemas/messages.py",
+    "backend/app/services/messages.py",
+    "backend/app/services/prompt_safety.py",
+    "backend/app/api/v1/routes/messages.py"
+  ],
+  "required_module_imports": {
+    "app.api.v1.routes.messages": [
+      "app.domains.chat.public",
+      "app.runtime.chat.composition"
+    ],
+    "app.domains.chat.api.schemas": [
+      "app.core.profile_ref"
+    ],
+    "app.schemas.community": [
+      "app.core.profile_ref"
+    ],
+    "app.models": [
+      "app.domains.chat.infrastructure.sqlalchemy_models"
+    ],
+    "app.schemas": [
+      "app.domains.chat.api.schemas"
+    ],
+    "app.models.messages": [
+      "app.domains.chat.infrastructure.sqlalchemy_models"
+    ],
+    "app.schemas.messages": [
+      "app.domains.chat.api.schemas"
+    ],
+    "app.services.messages": [
+      "app.runtime.chat.sqlalchemy_service"
+    ],
+    "app.services.prompt_safety": [
+      "app.core.prompt_safety"
+    ],
+    "app.runtime.chat.composition": [
+      "app.domains.chat.application.messages",
+      "app.runtime.chat.sqlalchemy_adapter"
+    ]
+  },
+  "pure_layer_prefixes": [
+    "app.domains.chat.domain",
+    "app.domains.chat.application",
+    "app.domains.chat.ports"
+  ],
+  "pure_layer_forbidden_internal_prefixes": [
+    "app.models",
+    "app.schemas",
+    "app.services",
+    "app.runtime",
+    "app.integrations"
+  ],
+  "pure_layer_forbidden_external_prefixes": [
+    "fastapi",
+    "sqlalchemy",
+    "google",
+    "oci",
+    "replicate"
+  ],
+  "legacy_message_edges": [
+    ["app.api.v1.routes.messages", "app.models"],
+    ["app.api.v1.routes.messages", "app.schemas"],
+    ["app.api.v1.routes.messages", "app.services.messages"],
+    ["app.models", "app.models.messages"],
+    ["app.schemas", "app.schemas.messages"],
+    ["app.schemas.messages", "app.schemas.community"],
+    ["app.services.messages", "app.models"],
+    ["app.services.messages", "app.schemas"],
+    ["app.services.messages", "app.services.direct_llm"],
+    ["app.services.messages", "app.services.prompt_safety"]
+  ],
+  "required_route_operations": [
+    "DELETE /api/v1/messages/threads/{thread_id}",
+    "GET /api/v1/characters/{character_id}/message-settings",
+    "GET /api/v1/messages/settings",
+    "GET /api/v1/messages/threads",
+    "GET /api/v1/messages/threads/{thread_id}",
+    "PATCH /api/v1/characters/{character_id}/message-settings",
+    "PATCH /api/v1/messages/settings",
+    "PATCH /api/v1/messages/threads/{thread_id}",
+    "POST /api/v1/messages/threads",
+    "POST /api/v1/messages/threads/{thread_id}/messages",
+    "POST /api/v1/messages/threads/{thread_id}/messages/{message_id}/retry"
+  ],
+  "required_tables": [
+    "character_message_settings",
+    "message_messages",
+    "message_threads",
+    "user_message_preferences"
+  ],
+  "required_message_migrations": [
+    "backend/app/alembic/versions/20260616_0046_messages_v1.py",
+    "backend/app/alembic/versions/20260616_0047_message_default_gemma4_26b.py",
+    "backend/app/alembic/versions/20260617_0050_message_default_gemini25_flash_lite.py",
+    "backend/app/alembic/versions/20260617_0051_backfill_unconfigured_message_default.py",
+    "backend/app/alembic/versions/20260802_0068_message_response_leases.py"
+  ],
+  "migration_baseline": {
+    "alembic_revision_count": 82,
+    "alembic_head": "20260825_0083",
+    "embedded_manifest": "backend/app/runtime/migrations/sqlite_versions/manifests/v3.json",
+    "embedded_schema_version": 3,
+    "embedded_source_revision": "20260825_0083",
+    "embedded_source_migration_count": 82,
+    "embedded_canonical_table_count": 87,
+    "embedded_schema_digest": "e8f4567a32efb3250a9c6f8d36bd6ae604364f3196e039922555ead6e6ec42aa"
+  },
+  "service_contract": {
+    "MAX_ACTIVE_THREADS": 5,
+    "CONTEXT_MESSAGE_LIMIT": 20,
+    "CONTEXT_CHAR_LIMIT": 12000,
+    "USER_MESSAGE_LIMIT": 2000,
+    "MODEL_OUTPUT_TOKENS": 1024,
+    "DEFAULT_MESSAGE_MODEL": "gemini-2.5-flash-lite",
+    "MESSAGE_RESPONSE_LEASE_SECONDS": 150,
+    "provider_calls_per_attempt": 1
+  },
+  "profile_ref_contract": {
+    "fields": [
+      "profile_type",
+      "id",
+      "display_name",
+      "handle",
+      "avatar_url",
+      "banner_url"
+    ],
+    "required_fields": [
+      "profile_type",
+      "id",
+      "display_name"
+    ],
+    "profile_types": [
+      "user",
+      "character"
+    ]
+  },
+  "compatibility_exports": {
+    "models": [
+      "CharacterMessageSetting",
+      "MessageMessage",
+      "MessageThread",
+      "UserMessagePreference"
+    ],
+    "schemas": [
+      "CharacterMessageSettingRead",
+      "CharacterMessageSettingUpdate",
+      "MessageCredentialSource",
+      "MessageGoogleModel",
+      "MessageMessageCreate",
+      "MessageMessageRead",
+      "MessageSendRead",
+      "MessageSettingsRead",
+      "MessageSettingsUpdate",
+      "MessageThreadCreate",
+      "MessageThreadListRead",
+      "MessageThreadRead",
+      "MessageThreadUpdate",
+      "ProfileRef"
+    ]
+  },
+  "postgres_concurrency_status": "NOT_VERIFIED_WITHOUT_POSTGRES_TEST_ENV"
+}

@@ -31,7 +31,7 @@ from app.models.community import (
     PostRepost,
     ProfileFollow,
 )
-from app.models.messages import (
+from app.domains.chat.infrastructure.sqlalchemy_models import (
     CharacterMessageSetting,
     MessageMessage,
     MessageThread,

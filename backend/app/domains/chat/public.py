@@ -1,0 +1,53 @@
+"""Supported backend boundary for Chat consumers."""
+
+from app.domains.chat.api.schemas import (
+    CharacterMessageSettingRead,
+    CharacterMessageSettingUpdate,
+    MessageMessageCreate,
+    MessageMessageRead,
+    MessageSendRead,
+    MessageSettingsRead,
+    MessageSettingsUpdate,
+    MessageThreadCreate,
+    MessageThreadListRead,
+    MessageThreadRead,
+    MessageThreadUpdate,
+    ProfileRef,
+)
+from app.domains.chat.application.messages import ChatService
+from app.domains.chat.domain.errors import (
+    MessageCredentialInvalidError,
+    MessageCredentialRequiredError,
+    MessageForbiddenError,
+    MessageInFlightError,
+    MessageModelBusyError,
+    MessageNotFoundError,
+    MessageServiceError,
+    MessageThreadLimitError,
+    MessageValidationError,
+)
+
+__all__ = [
+    "CharacterMessageSettingRead",
+    "CharacterMessageSettingUpdate",
+    "ChatService",
+    "MessageCredentialInvalidError",
+    "MessageCredentialRequiredError",
+    "MessageForbiddenError",
+    "MessageInFlightError",
+    "MessageMessageCreate",
+    "MessageMessageRead",
+    "MessageModelBusyError",
+    "MessageNotFoundError",
+    "MessageSendRead",
+    "MessageServiceError",
+    "MessageSettingsRead",
+    "MessageSettingsUpdate",
+    "MessageThreadCreate",
+    "MessageThreadLimitError",
+    "MessageThreadListRead",
+    "MessageThreadRead",
+    "MessageThreadUpdate",
+    "MessageValidationError",
+    "ProfileRef",
+]

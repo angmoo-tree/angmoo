@@ -1,7 +1,7 @@
 {
-  "edge_count": 1250,
-  "external_import_count": 1798,
-  "module_count": 530,
+  "edge_count": 1267,
+  "external_import_count": 1808,
+  "module_count": 550,
   "modules": [
     {
       "external_imports": [],
@@ -1158,9 +1158,9 @@
       ],
       "imports": [
         "app.api.v1.deps",
-        "app.models",
-        "app.schemas",
-        "app.services.messages"
+        "app.domains.chat.public",
+        "app.domains.identity.public",
+        "app.runtime.chat.composition"
       ],
       "module": "app.api.v1.routes.messages",
       "path": "backend/app/api/v1/routes/messages.py",
@@ -1451,6 +1451,28 @@
       "imports": [],
       "module": "app.core.image_generation",
       "path": "backend/app/core/image_generation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "pydantic",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.core.profile_ref",
+      "path": "backend/app/core/profile_ref.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "re",
+        "unicodedata"
+      ],
+      "imports": [],
+      "module": "app.core.prompt_safety",
+      "path": "backend/app/core/prompt_safety.py",
       "wildcard_imports": []
     },
     {
@@ -1763,6 +1785,123 @@
       ],
       "module": "app.domains.characters.public",
       "path": "backend/app/domains/characters/public.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.chat",
+      "path": "backend/app/domains/chat/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.chat.api",
+      "path": "backend/app/domains/chat/api/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.core.profile_ref",
+        "app.providers.registry"
+      ],
+      "module": "app.domains.chat.api.schemas",
+      "path": "backend/app/domains/chat/api/schemas.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.chat.application",
+      "path": "backend/app/domains/chat/application/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.chat.ports.runtime"
+      ],
+      "module": "app.domains.chat.application.messages",
+      "path": "backend/app/domains/chat/application/messages.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.chat.domain",
+      "path": "backend/app/domains/chat/domain/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.chat.domain.errors",
+      "path": "backend/app/domains/chat/domain/errors.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.chat.domain.policies",
+      "path": "backend/app/domains/chat/domain/policies.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.chat.infrastructure",
+      "path": "backend/app/domains/chat/infrastructure/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.domains.chat.infrastructure.sqlalchemy_models",
+      "path": "backend/app/domains/chat/infrastructure/sqlalchemy_models.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.chat.ports",
+      "path": "backend/app/domains/chat/ports/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.chat.ports.runtime",
+      "path": "backend/app/domains/chat/ports/runtime.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.chat.api.schemas",
+        "app.domains.chat.application.messages",
+        "app.domains.chat.domain.errors"
+      ],
+      "module": "app.domains.chat.public",
+      "path": "backend/app/domains/chat/public.py",
       "wildcard_imports": []
     },
     {
@@ -4747,6 +4886,7 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.chat.infrastructure.sqlalchemy_models",
         "app.domains.identity.infrastructure",
         "app.domains.relationships.infrastructure.sqlalchemy_models",
         "app.domains.relationships.infrastructure.sqlalchemy_social_models",
@@ -4763,7 +4903,6 @@
         "app.models.characters",
         "app.models.community",
         "app.models.local_bot_quotas",
-        "app.models.messages",
         "app.models.profile_images",
         "app.models.tree",
         "app.models.world_activity_runtime",
@@ -4931,14 +5070,9 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "datetime",
-        "sqlalchemy",
-        "sqlalchemy.orm",
-        "typing"
-      ],
+      "external_imports": [],
       "imports": [
-        "app.core.db"
+        "app.domains.chat.infrastructure.sqlalchemy_models"
       ],
       "module": "app.models.messages",
       "path": "backend/app/models/messages.py",
@@ -5150,6 +5284,70 @@
       "imports": [],
       "module": "app.runtime",
       "path": "backend/app/runtime/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.runtime.chat",
+      "path": "backend/app/runtime/chat/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.chat.application.messages",
+        "app.runtime.chat.sqlalchemy_adapter"
+      ],
+      "module": "app.runtime.chat.composition",
+      "path": "backend/app/runtime/chat/composition.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.characters.infrastructure.sqlalchemy_models",
+        "app.domains.chat.infrastructure.sqlalchemy_models",
+        "app.domains.identity.infrastructure"
+      ],
+      "module": "app.runtime.chat.model_bindings",
+      "path": "backend/app/runtime/chat/model_bindings.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [
+        "app.runtime.chat.sqlalchemy_service"
+      ],
+      "module": "app.runtime.chat.sqlalchemy_adapter",
+      "path": "backend/app/runtime/chat/sqlalchemy_adapter.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "hashlib",
+        "logging",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "uuid"
+      ],
+      "imports": [
+        "app.core.prompt_safety",
+        "app.core.security",
+        "app.credentials",
+        "app.domains.chat.api.schemas",
+        "app.domains.chat.domain.errors",
+        "app.domains.chat.domain.policies",
+        "app.integrations.direct_llm",
+        "app.runtime.chat.model_bindings"
+      ],
+      "module": "app.runtime.chat.sqlalchemy_service",
+      "path": "backend/app/runtime/chat/sqlalchemy_service.py",
       "wildcard_imports": []
     },
     {
@@ -6066,6 +6264,7 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.chat.api.schemas",
         "app.domains.identity.api",
         "app.domains.relationships.graph_read.schemas",
         "app.schemas.agent_runs",
@@ -6074,7 +6273,6 @@
         "app.schemas.characters",
         "app.schemas.community",
         "app.schemas.maintenance",
-        "app.schemas.messages",
         "app.schemas.routine_post",
         "app.schemas.social_memory",
         "app.schemas.tree",
@@ -6155,7 +6353,9 @@
         "pydantic",
         "typing"
       ],
-      "imports": [],
+      "imports": [
+        "app.core.profile_ref"
+      ],
       "module": "app.schemas.community",
       "path": "backend/app/schemas/community.py",
       "wildcard_imports": []
@@ -6179,14 +6379,9 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "datetime",
-        "pydantic",
-        "typing"
-      ],
+      "external_imports": [],
       "imports": [
-        "app.providers.registry",
-        "app.schemas.community"
+        "app.domains.chat.api.schemas"
       ],
       "module": "app.schemas.messages",
       "path": "backend/app/schemas/messages.py",
@@ -6997,21 +7192,10 @@
     },
     {
       "external_imports": [
-        "__future__",
-        "datetime",
-        "hashlib",
-        "logging",
-        "sqlalchemy",
-        "sqlalchemy.orm",
-        "uuid"
+        "sys"
       ],
       "imports": [
-        "app.core.security",
-        "app.credentials",
-        "app.models",
-        "app.schemas",
-        "app.services.direct_llm",
-        "app.services.prompt_safety"
+        "app.runtime.chat.sqlalchemy_service"
       ],
       "module": "app.services.messages",
       "path": "backend/app/services/messages.py",
@@ -7132,12 +7316,11 @@
     },
     {
       "external_imports": [
-        "__future__",
-        "dataclasses",
-        "re",
-        "unicodedata"
+        "sys"
       ],
-      "imports": [],
+      "imports": [
+        "app.core.prompt_safety"
+      ],
       "module": "app.services.prompt_safety",
       "path": "backend/app/services/prompt_safety.py",
       "wildcard_imports": []
