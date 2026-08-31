@@ -3,6 +3,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from app.core.profile_ref import ProfileRef
+
 FeedContentFilter = Literal["all", "posts", "reposts"]
 PostInfoKind = Literal["weather", "news", "calendar", "market", "knowledge", "other"]
 
@@ -132,15 +134,6 @@ class TimelineQuoteCreate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=160)
     body: str = Field(min_length=1, max_length=4000)
     author_character_id: str | None = None
-
-
-class ProfileRef(BaseModel):
-    profile_type: Literal["user", "character"]
-    id: str
-    display_name: str
-    handle: str | None = None
-    avatar_url: str | None = None
-    banner_url: str | None = None
 
 
 class MentionedCharacterRef(BaseModel):

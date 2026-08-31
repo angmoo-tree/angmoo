@@ -127,33 +127,57 @@ backend/app/
 | feed and `social` | `app.domains.social.public` | L4 | P5 search, canonical source writes, observation and causal apply are active; concrete SQLite adapters are under `app.runtime.social` |
 | `relationships` graph read | `app.domains.relationships.public` | T2.5/L4 | canonical read slice active; PR E owns its runtime composition under `app.runtime.graph_projection` |
 | relationships write and graph projection | domain/runtime public ports | L4 | PR E removes horizontal service/CRUD/model bridges; runtime SQLAlchemy composition is isolated under `app.runtime.relationships` and graph lifecycle under `app.runtime.graph_projection` |
-| Chat entry, thread, message, response request/generation, retry and response commit | `app.domains.chat.public` | P8-L | P8-L-A contract/inventory frozen; runtime package is still absent and P8-L-B begins with parity-only migration |
+| Chat entry, thread, message, response request/generation, retry and response commit | `app.domains.chat.public` | P8-L | P8-L-B establishes the canonical public/application/port boundary and `app.runtime.chat` composition while preserving Chat v1 behavior through reviewed compatibility surfaces; World-scoped Chat v2 remains P8-L-D work |
 | canonical Memory setting, candidate, item, evidence, lifecycle and recall | `app.domains.memory.public` | P8-L | P8-L-A contract/inventory frozen; runtime package and schema are still absent until P8-L-F |
 | remaining active legacy or ownerless shim | none | L6 | final removal gate |
 
 P8-L-A freezes the pre-migration Chat baseline in
-`security/p8_l_a_inventory.json`. The current implementation remains four
-horizontal `models/schemas/services/routes/messages.py` modules, eleven
-owner-only operations, four ORM tables and ten exact legacy import edges.
-Those ten edges are P8-L-B migration inventory even though they also appear in
-the older broad horizontal-layer exception. P8-L-B may preserve compatibility
-exports for reviewed consumers, but it may not defer Chat ownership to L6.
+`security/p8_l_a_inventory.json`: four horizontal
+`models/schemas/services/routes/messages.py` modules, eleven owner-only
+operations, four ORM tables and ten exact legacy import edges. That snapshot
+remains immutable historical evidence after the source tree moves.
 
-The target split is deliberate. `domains/chat` owns Chat entry, active-thread
-create-or-get, message/request/generation lifecycle, retry, request-wide call
-budget, Evidence Bundle boundary and fenced response commit. `domains/memory`
-owns Memory scope, provenance, lifecycle, retention, correction, deletion and
-canonical recall. Neither package owns WorldCharacter eligibility or graph
-semantics; they use the existing worlds/characters and relationships public
-facades. Provider adapters and CRG delta transport remain integrations, while
-SQLite, the separate private P8 FTS5 projection and LadybugDB execution remain
-runtime concerns.
+P8-L-B consumes that inventory as a parity migration. `app.domains.chat.public`
+exports the supported Chat schemas, errors and `ChatService`; the application
+service depends only on the framework-free `ChatRuntimePort`.
+`app.runtime.chat.composition` binds that application boundary to the concrete
+SQLAlchemy Chat runtime. ORM definitions are owned by
+`app.domains.chat.infrastructure.sqlalchemy_models`, while SQLAlchemy session,
+credential, prompt-safety and direct-provider execution remain below the
+application boundary in `app.runtime.chat`.
 
-P8-L-A changes no schema. It records the current one-head Alembic
-`20260825_0083` and Embedded SQLite v3 baseline and reserves append-only P8
-schema work for later stages. The full frozen decisions, including the
-PostgreSQL/Embedded legacy constraint drift and request-row/fencing choice, are
-in `docs/architecture/p8-l-a-contract-closeout.md`.
+The existing `app.api.v1.routes.messages` module remains a compatibility HTTP
+transport with the same route family. `app.services.messages`,
+`app.models.messages` and `app.schemas.messages` remain thin compatibility
+facades or aliases for reviewed aggregate imports, tests and migration
+registration. They do not retain Chat policy ownership, and their remaining
+consumers and cleanup gate must stay visible in the architecture inventory
+rather than being silently deferred to L6.
+
+This structure-only move preserves the eleven route operations, request and
+response payloads, authorization, four table identities, Alembic and Embedded
+SQLite schema, one-provider-call cap, bounded transcript and output limits,
+full-result response behavior, transaction boundaries, 150-second response
+lease and retry-in-place behavior. It does not enable Local Character chat,
+streaming, retrieval or Memory.
+
+P8-L-D separately owns `world_id`, requester/responding WorldCharacter
+identity, active World-thread uniqueness, backfill, collision quarantine and
+rollback. P8-L-B therefore does not repair the frozen PostgreSQL/Embedded
+legacy uniqueness drift or create a schema revision while moving ownership.
+The one-head Alembic `20260825_0083` and Embedded SQLite v3 baseline remain
+unchanged.
+
+The final target split remains deliberate. `domains/chat` owns Chat entry,
+active-thread create-or-get, message/request/generation lifecycle, retry,
+request-wide call budget, Evidence Bundle boundary and fenced response commit.
+`domains/memory` owns Memory scope, provenance, lifecycle, retention,
+correction, deletion and canonical recall. Neither package owns WorldCharacter
+eligibility or graph semantics; they use the existing worlds/characters and
+relationships public facades. Provider adapters and CRG delta transport remain
+integrations, while SQLite, the separate private P8 FTS5 projection and
+LadybugDB execution remain runtime concerns. The full frozen decisions are in
+`docs/architecture/p8-l-a-contract-closeout.md`.
 
 PR A added the contract and checker but moved **zero product source files**.
 PR B moved only the P7 relationship graph read path. PR C removes only shims

@@ -1,0 +1,518 @@
+{
+  "architecture": {
+    "baseline": {
+      "path": "security/architecture_import_baseline.json",
+      "sha256": "f57016275fbc1b0eee9ea9396eb179648ee20a727f02483b6cf040eb875ff5ab",
+      "size": 221334
+    },
+    "external_import_count": 1808,
+    "internal_edge_count": 1267,
+    "module_count": 550,
+    "pure_layer_violations": [],
+    "remaining_frozen_legacy_edges": [],
+    "removed_frozen_legacy_edge_count": 10,
+    "selected_modules": [
+      {
+        "external_imports": [
+          "fastapi",
+          "sqlalchemy.orm"
+        ],
+        "imports": [
+          "app.api.v1.deps",
+          "app.domains.chat.public",
+          "app.domains.identity.public",
+          "app.runtime.chat.composition"
+        ],
+        "module": "app.api.v1.routes.messages",
+        "path": "backend/app/api/v1/routes/messages.py"
+      },
+      {
+        "external_imports": [
+          "datetime",
+          "pydantic",
+          "typing"
+        ],
+        "imports": [
+          "app.core.profile_ref",
+          "app.providers.registry"
+        ],
+        "module": "app.domains.chat.api.schemas",
+        "path": "backend/app/domains/chat/api/schemas.py"
+      },
+      {
+        "external_imports": [
+          "__future__",
+          "typing"
+        ],
+        "imports": [
+          "app.domains.chat.ports.runtime"
+        ],
+        "module": "app.domains.chat.application.messages",
+        "path": "backend/app/domains/chat/application/messages.py"
+      },
+      {
+        "external_imports": [],
+        "imports": [],
+        "module": "app.domains.chat.domain.errors",
+        "path": "backend/app/domains/chat/domain/errors.py"
+      },
+      {
+        "external_imports": [],
+        "imports": [],
+        "module": "app.domains.chat.domain.policies",
+        "path": "backend/app/domains/chat/domain/policies.py"
+      },
+      {
+        "external_imports": [
+          "datetime",
+          "sqlalchemy",
+          "sqlalchemy.orm",
+          "typing"
+        ],
+        "imports": [
+          "app.core.db"
+        ],
+        "module": "app.domains.chat.infrastructure.sqlalchemy_models",
+        "path": "backend/app/domains/chat/infrastructure/sqlalchemy_models.py"
+      },
+      {
+        "external_imports": [
+          "__future__",
+          "typing"
+        ],
+        "imports": [],
+        "module": "app.domains.chat.ports.runtime",
+        "path": "backend/app/domains/chat/ports/runtime.py"
+      },
+      {
+        "external_imports": [],
+        "imports": [
+          "app.domains.chat.api.schemas",
+          "app.domains.chat.application.messages",
+          "app.domains.chat.domain.errors"
+        ],
+        "module": "app.domains.chat.public",
+        "path": "backend/app/domains/chat/public.py"
+      },
+      {
+        "external_imports": [],
+        "imports": [
+          "app.domains.chat.infrastructure.sqlalchemy_models",
+          "app.domains.identity.infrastructure",
+          "app.domains.relationships.infrastructure.sqlalchemy_models",
+          "app.domains.relationships.infrastructure.sqlalchemy_social_models",
+          "app.domains.runtime.infrastructure",
+          "app.domains.social.infrastructure.sqlalchemy_models",
+          "app.domains.world_packages.infrastructure.sqlalchemy_models",
+          "app.models.admin_ops",
+          "app.models.agent_creation_drafts",
+          "app.models.agent_local_keys",
+          "app.models.agent_runs",
+          "app.models.agent_settings",
+          "app.models.agent_slots",
+          "app.models.character_lore",
+          "app.models.characters",
+          "app.models.community",
+          "app.models.local_bot_quotas",
+          "app.models.profile_images",
+          "app.models.tree",
+          "app.models.world_activity_runtime",
+          "app.models.world_character_setup",
+          "app.models.world_feed",
+          "app.models.worlds"
+        ],
+        "module": "app.models",
+        "path": "backend/app/models/__init__.py"
+      },
+      {
+        "external_imports": [],
+        "imports": [
+          "app.domains.chat.infrastructure.sqlalchemy_models"
+        ],
+        "module": "app.models.messages",
+        "path": "backend/app/models/messages.py"
+      },
+      {
+        "external_imports": [],
+        "imports": [
+          "app.domains.chat.application.messages",
+          "app.runtime.chat.sqlalchemy_adapter"
+        ],
+        "module": "app.runtime.chat.composition",
+        "path": "backend/app/runtime/chat/composition.py"
+      },
+      {
+        "external_imports": [],
+        "imports": [
+          "app.domains.characters.infrastructure.sqlalchemy_models",
+          "app.domains.chat.infrastructure.sqlalchemy_models",
+          "app.domains.identity.infrastructure"
+        ],
+        "module": "app.runtime.chat.model_bindings",
+        "path": "backend/app/runtime/chat/model_bindings.py"
+      },
+      {
+        "external_imports": [
+          "__future__",
+          "typing"
+        ],
+        "imports": [
+          "app.runtime.chat.sqlalchemy_service"
+        ],
+        "module": "app.runtime.chat.sqlalchemy_adapter",
+        "path": "backend/app/runtime/chat/sqlalchemy_adapter.py"
+      },
+      {
+        "external_imports": [
+          "__future__",
+          "datetime",
+          "hashlib",
+          "logging",
+          "sqlalchemy",
+          "sqlalchemy.orm",
+          "uuid"
+        ],
+        "imports": [
+          "app.core.prompt_safety",
+          "app.core.security",
+          "app.credentials",
+          "app.domains.chat.api.schemas",
+          "app.domains.chat.domain.errors",
+          "app.domains.chat.domain.policies",
+          "app.integrations.direct_llm",
+          "app.runtime.chat.model_bindings"
+        ],
+        "module": "app.runtime.chat.sqlalchemy_service",
+        "path": "backend/app/runtime/chat/sqlalchemy_service.py"
+      },
+      {
+        "external_imports": [],
+        "imports": [
+          "app.domains.chat.api.schemas",
+          "app.domains.identity.api",
+          "app.domains.relationships.graph_read.schemas",
+          "app.schemas.agent_runs",
+          "app.schemas.agents",
+          "app.schemas.character_lore",
+          "app.schemas.characters",
+          "app.schemas.community",
+          "app.schemas.maintenance",
+          "app.schemas.routine_post",
+          "app.schemas.social_memory",
+          "app.schemas.tree",
+          "app.schemas.world_activity_runtime",
+          "app.schemas.world_character_setup",
+          "app.schemas.world_feed",
+          "app.schemas.worlds"
+        ],
+        "module": "app.schemas",
+        "path": "backend/app/schemas/__init__.py"
+      },
+      {
+        "external_imports": [
+          "datetime",
+          "pydantic",
+          "typing"
+        ],
+        "imports": [
+          "app.core.profile_ref"
+        ],
+        "module": "app.schemas.community",
+        "path": "backend/app/schemas/community.py"
+      },
+      {
+        "external_imports": [],
+        "imports": [
+          "app.domains.chat.api.schemas"
+        ],
+        "module": "app.schemas.messages",
+        "path": "backend/app/schemas/messages.py"
+      },
+      {
+        "external_imports": [
+          "sys"
+        ],
+        "imports": [
+          "app.runtime.chat.sqlalchemy_service"
+        ],
+        "module": "app.services.messages",
+        "path": "backend/app/services/messages.py"
+      },
+      {
+        "external_imports": [
+          "sys"
+        ],
+        "imports": [
+          "app.core.prompt_safety"
+        ],
+        "module": "app.services.prompt_safety",
+        "path": "backend/app/services/prompt_safety.py"
+      }
+    ]
+  },
+  "compatibility_exports": {
+    "models": [
+      "CharacterMessageSetting",
+      "MessageMessage",
+      "MessageThread",
+      "UserMessagePreference"
+    ],
+    "schemas": [
+      "CharacterMessageSettingRead",
+      "CharacterMessageSettingUpdate",
+      "MessageCredentialSource",
+      "MessageGoogleModel",
+      "MessageMessageCreate",
+      "MessageMessageRead",
+      "MessageSendRead",
+      "MessageSettingsRead",
+      "MessageSettingsUpdate",
+      "MessageThreadCreate",
+      "MessageThreadListRead",
+      "MessageThreadRead",
+      "MessageThreadUpdate",
+      "ProfileRef"
+    ]
+  },
+  "documentation": {
+    "path": "docs/architecture/p8-l-b-chat-domain-parity.md",
+    "sha256": "3d3c7e884a277c8d1711b9d345e3c562674dc2b7438ba57302708be279e673a3",
+    "size": 3021
+  },
+  "message_migrations": [
+    {
+      "path": "backend/app/alembic/versions/20260616_0046_messages_v1.py",
+      "sha256": "7ae15de22fe71fd6a403c07256e74ef92e4cc79359030e16c2704a5cd21108ae",
+      "size": 6721
+    },
+    {
+      "path": "backend/app/alembic/versions/20260616_0047_message_default_gemma4_26b.py",
+      "sha256": "12b1a96c275a2c3429147b9a281f5f6115e017b0078a78dc08d32d3bd382edbf",
+      "size": 2376
+    },
+    {
+      "path": "backend/app/alembic/versions/20260617_0050_message_default_gemini25_flash_lite.py",
+      "sha256": "e9579f667a8284a23ca25955ca435af5760959b153812751463d13b11c3df76e",
+      "size": 1296
+    },
+    {
+      "path": "backend/app/alembic/versions/20260617_0051_backfill_unconfigured_message_default.py",
+      "sha256": "74e50c4ab584fa45cb1d01314d9850ff5508ab8424c50459fe0461b3f707970c",
+      "size": 1674
+    },
+    {
+      "path": "backend/app/alembic/versions/20260802_0068_message_response_leases.py",
+      "sha256": "4d29c8de1feedad477bc6416b747b69cd815398d196d0791cd3a2671f7d96e3d",
+      "size": 1192
+    }
+  ],
+  "migration_baseline": {
+    "alembic": {
+      "heads": [
+        "20260825_0083"
+      ],
+      "revision_count": 82
+    },
+    "embedded_sqlite": {
+      "canonical_table_count": 87,
+      "schema_digest": "e8f4567a32efb3250a9c6f8d36bd6ae604364f3196e039922555ead6e6ec42aa",
+      "schema_version": 3,
+      "source_migration_count": 82,
+      "source_revision": "20260825_0083"
+    }
+  },
+  "owner_stage": "P8-L-B",
+  "policy": {
+    "path": "security/p8_l_b_chat_domain_policy.json",
+    "sha256": "04f93d22b93986395266375414f191728693007ecb97f70f3b26a8899be26978",
+    "size": 6476
+  },
+  "policy_id": "angmoo-p8-l-b-chat-domain-parity-v1",
+  "postgres_concurrency_status": "NOT_VERIFIED_WITHOUT_POSTGRES_TEST_ENV",
+  "predecessor": {
+    "path": "security/p8_l_a_inventory.json",
+    "sha256": "934c1410810e8f0b0899e09c3c34b5c67f43050c4a354a15fcea72f264c9847e",
+    "size": 18593
+  },
+  "profile_ref_contract": {
+    "fields": [
+      "profile_type",
+      "id",
+      "display_name",
+      "handle",
+      "avatar_url",
+      "banner_url"
+    ],
+    "profile_types": [
+      "user",
+      "character"
+    ],
+    "required_fields": [
+      "profile_type",
+      "id",
+      "display_name"
+    ]
+  },
+  "required_files": [
+    {
+      "path": "backend/app/domains/chat/__init__.py",
+      "sha256": "a123a97d00c2c8cd848ef45eafe78ff7a363fd69c346eb39299af7e7d8732dce",
+      "size": 38
+    },
+    {
+      "path": "backend/app/domains/chat/public.py",
+      "sha256": "824ce7d34780173e67d957dfe555b03b1417404d067822a4bda21149b5902c1f",
+      "size": 1416
+    },
+    {
+      "path": "backend/app/domains/chat/api/__init__.py",
+      "sha256": "84336f43f6a334b99cc33ed48b468bb09f1ba68abe5f393c09c59ea9fd705e11",
+      "size": 38
+    },
+    {
+      "path": "backend/app/domains/chat/api/schemas.py",
+      "sha256": "3c6dab554e33c41818b44087f7e2ee2f08e658a6f8cc31bd7d77f0533ff30d99",
+      "size": 3069
+    },
+    {
+      "path": "backend/app/domains/chat/domain/__init__.py",
+      "sha256": "bdf4562d3b77a2bb10f13557b67902ed43a8f618a266198961e8750a2ed87570",
+      "size": 42
+    },
+    {
+      "path": "backend/app/domains/chat/domain/errors.py",
+      "sha256": "e48cda2470b0ebe08ef69f2b365c1cfa177b77bb48ac67e79bf7e0ce937ac064",
+      "size": 691
+    },
+    {
+      "path": "backend/app/domains/chat/domain/policies.py",
+      "sha256": "7ab543e0f7ebc454aaa0818f13777d32662579c21e7b411de7236284c96930c3",
+      "size": 1249
+    },
+    {
+      "path": "backend/app/domains/chat/application/__init__.py",
+      "sha256": "253ac299a9b025048be090f7e0c42851105d02e820d39b43443fcf34cb26849e",
+      "size": 34
+    },
+    {
+      "path": "backend/app/domains/chat/application/messages.py",
+      "sha256": "a3d944b46006c6b93284e6ec4364b193227a12498c813c73b86e6f1b47345822",
+      "size": 2319
+    },
+    {
+      "path": "backend/app/domains/chat/ports/__init__.py",
+      "sha256": "76127a3815889f20e85c823698d20ca167959ef3ff92a53c8b815e27af207d95",
+      "size": 45
+    },
+    {
+      "path": "backend/app/domains/chat/ports/runtime.py",
+      "sha256": "4cb6c03b4cd47f83234319360b39d96a074745030113ba261b69c6291e0de706",
+      "size": 1156
+    },
+    {
+      "path": "backend/app/domains/chat/infrastructure/__init__.py",
+      "sha256": "82e264c2c47f36a51392e6980272c2abb11287b6af97b557e0b8e05b2a52a0e0",
+      "size": 59
+    },
+    {
+      "path": "backend/app/domains/chat/infrastructure/sqlalchemy_models.py",
+      "sha256": "ce608b08b75722fc380e032d7009e7ae7d9548a17b5b55a7b820d179c9e54bff",
+      "size": 4512
+    },
+    {
+      "path": "backend/app/runtime/chat/__init__.py",
+      "sha256": "db077c753d3bc22bd5f666efae11b0ad3d69fc8672577748c767c36ddd7637c5",
+      "size": 61
+    },
+    {
+      "path": "backend/app/runtime/chat/sqlalchemy_service.py",
+      "sha256": "1555b4e1ee528da062aa7ff9fa00e4435c7094fca31d64de1a0ddf40c33578f1",
+      "size": 31178
+    },
+    {
+      "path": "backend/app/runtime/chat/sqlalchemy_adapter.py",
+      "sha256": "91307d30be6b258c9f4470b365b9c66a43b8c01d5a82372ec67648fc29adc1c6",
+      "size": 1988
+    },
+    {
+      "path": "backend/app/runtime/chat/composition.py",
+      "sha256": "d56910dca2650e4d7f33daa5a48fc8f6f1b09ed540037c41ad64d08aa21b53e8",
+      "size": 289
+    },
+    {
+      "path": "backend/app/runtime/chat/model_bindings.py",
+      "sha256": "1ed9f9bf5b9a202a06a333e130983c9be2296ff23e92c79789d8be07a4be9a40",
+      "size": 556
+    },
+    {
+      "path": "backend/app/core/profile_ref.py",
+      "sha256": "1fd138bbb36b53db671fa47dc57eb1a3d997a4a9a3ef00c1c4f04639b92b79d4",
+      "size": 366
+    },
+    {
+      "path": "backend/app/core/prompt_safety.py",
+      "sha256": "8add0a71a9fc2c620d350b68bb9cdb92b89b6aedf8530de98a5814e0301b67e4",
+      "size": 6995
+    },
+    {
+      "path": "backend/app/schemas/community.py",
+      "sha256": "07770dc41231320dfd7f659c0e331c09dbe423cf4bb967e0eff25efb67f3368e",
+      "size": 20574
+    },
+    {
+      "path": "backend/app/models/messages.py",
+      "sha256": "d8c2c70f860343c806a8f5bac40f8936c232292b129d58c859ec64b69d7e9a0a",
+      "size": 350
+    },
+    {
+      "path": "backend/app/schemas/messages.py",
+      "sha256": "328af76fa5af5fc803a6d0aa37c71153d0f1d4b837a1d3b7f479237443b72b1e",
+      "size": 874
+    },
+    {
+      "path": "backend/app/services/messages.py",
+      "sha256": "5bcf73ad0b2c55414959d3a545a5b560bff4070b45059b80119672530721fb9f",
+      "size": 197
+    },
+    {
+      "path": "backend/app/services/prompt_safety.py",
+      "sha256": "a29cb82ac4a3ded3ed1f8f03026b4d4900dc35c76266e3014659c287101c4126",
+      "size": 175
+    },
+    {
+      "path": "backend/app/api/v1/routes/messages.py",
+      "sha256": "58bf634cfea181617576730e2989d4a9e6b0ac38910683d6e6b31dc75b0c2b26",
+      "size": 8635
+    }
+  ],
+  "route_operations": [
+    "DELETE /api/v1/messages/threads/{thread_id}",
+    "GET /api/v1/characters/{character_id}/message-settings",
+    "GET /api/v1/messages/settings",
+    "GET /api/v1/messages/threads",
+    "GET /api/v1/messages/threads/{thread_id}",
+    "PATCH /api/v1/characters/{character_id}/message-settings",
+    "PATCH /api/v1/messages/settings",
+    "PATCH /api/v1/messages/threads/{thread_id}",
+    "POST /api/v1/messages/threads",
+    "POST /api/v1/messages/threads/{thread_id}/messages",
+    "POST /api/v1/messages/threads/{thread_id}/messages/{message_id}/retry"
+  ],
+  "schema_version": 1,
+  "service_contract": {
+    "CONTEXT_CHAR_LIMIT": 12000,
+    "CONTEXT_MESSAGE_LIMIT": 20,
+    "DEFAULT_MESSAGE_MODEL": "gemini-2.5-flash-lite",
+    "MAX_ACTIVE_THREADS": 5,
+    "MESSAGE_RESPONSE_LEASE_SECONDS": 150,
+    "MODEL_OUTPUT_TOKENS": 1024,
+    "USER_MESSAGE_LIMIT": 2000,
+    "provider_calls_per_attempt": 1
+  },
+  "tables": [
+    "character_message_settings",
+    "message_messages",
+    "message_threads",
+    "user_message_preferences"
+  ]
+}

@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 1798,
-      "internal_edge_count": 1250,
+      "external_import_count": 1808,
+      "internal_edge_count": 1267,
       "legacy_import_exception_count": 0,
-      "module_count": 530,
+      "module_count": 550,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -485,7 +485,9 @@
             "path": "backend/app/models/world_feed.py"
           },
           {
-            "imports": [],
+            "imports": [
+              "app.core.profile_ref"
+            ],
             "module": "app.schemas.community",
             "path": "backend/app/schemas/community.py"
           },

@@ -613,6 +613,21 @@
     },
     {
       "markers": {
+        "advisory_lock": [
+          139
+        ],
+        "driver_or_url": [
+          129
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/runtime/chat/sqlalchemy_service.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "1555b4e1ee528da062aa7ff9fa00e4435c7094fca31d64de1a0ddf40c33578f1",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
         "row_lock": [
           118,
           198
@@ -953,21 +968,6 @@
       "path": "backend/app/services/lore_parser_quota.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "3fc781ea9ccb0caff9a1986e99da09de91abaaefcbd4585019630bd55e746033",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
-    },
-    {
-      "markers": {
-        "advisory_lock": [
-          176
-        ],
-        "driver_or_url": [
-          166
-        ]
-      },
-      "owner": "ER2-ER7 legacy evidence",
-      "path": "backend/app/services/messages.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "dd9312f76309d204f7a8c4a5c4ec8389d5a3ec8d165550cd6d2acc4e8eac9784",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

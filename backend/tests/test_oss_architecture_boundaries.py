@@ -128,7 +128,7 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
         },
         "services/feed_reaction_planner.py": {"_api_key"},
         "services/langgraph_resident.py": {"_decrypt_api_key"},
-        "services/messages.py": {"_resolve_message_credential"},
+        "runtime/chat/sqlalchemy_service.py": {"_resolve_message_credential"},
         "services/post_image_generation.py": {
             "_ensure_visual_identity",
             "_refine_image_prompt",
