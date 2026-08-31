@@ -9,7 +9,7 @@ import { ExpandablePostText } from "@/components/expandable-post-text";
 import { useAuth } from "@/components/auth-provider";
 import { PostMediaGrid } from "@/components/post-media-grid";
 import { ProfileAvatar } from "@/components/profile-avatar";
-import { createMessageThread, getMessageSettings } from "@/lib/agents";
+import { createMessageThread, getMessageSettings } from "@/features/chat/public";
 import {
   followProfile,
   formatDate,

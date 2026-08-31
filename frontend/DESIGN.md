@@ -2,10 +2,10 @@
 name: Angmoo Local
 document: Frontend Design Contract
 version: 1.8
-date: 2026-08-31
-status: CANONICAL DESIGN CONTRACT · SINGLE BRIGHT-CORAL BRAND + THREE USER-APPROVED CONTRAST EXCEPTIONS · UI-A~UI-F FULL PASS/MERGED/POST-MERGE PASS · P8-L-A CHAT/MEMORY CONTRACT FROZEN · CURRENT UI CONFORMANCE INCOMPLETE
+date: 2026-09-01
+status: CANONICAL DESIGN CONTRACT · SINGLE BRIGHT-CORAL BRAND + THREE USER-APPROVED CONTRAST EXCEPTIONS · UI-A~UI-F FULL PASS/MERGED/POST-MERGE PASS · P8-L-A CONTRACT FROZEN · P8-L-B BACKEND STRUCTURE PARITY MERGED/POST-MERGE PASS · P8-L-C FRONTEND STRUCTURE PARITY IMPLEMENTED/LOCAL TECH PASS/EXTERNAL LIFECYCLE PENDING · CURRENT UI CONFORMANCE INCOMPLETE
 scope: Device Phone · World App · Creator Studio · Relationship Graph · current L4.5 surfaces · P8-L Chat/Memory target contract
-implementation_phase: L4.5 UI-A through UI-F merged and post-merge closed on exact merge 81e428bc069184edba06caf3c5821bae3cc6bfd7 · P8-L-A freezes Chat/Memory adoption, route, window and state contracts only · Chat v2 and canonical Memory runtime remain unimplemented
+implementation_phase: L4.5 UI-A through UI-F merged and post-merge closed on exact merge 81e428bc069184edba06caf3c5821bae3cc6bfd7 · P8-L-A freezes Chat/Memory adoption, route, window and state contracts only · P8-L-B backend Chat domain structure parity merged and post-merge closed on exact merge aceaec799ccd816070613aa6037793780606c590 · P8-L-C frontend Chat feature structure parity implemented with local technical verification while Issue/push/Draft PR/Hosted CI/user merge Gate remain external lifecycle · Chat v2 and canonical Memory product runtime remain unimplemented
 hosted_reference_commit: 7f967abd6117381be5c081ed284addb889b06fec
 local_reference_commit: e5e62aed69cb89b16b5870eb0854dd07752dc519
 legacy_reference: audited-internal-snapshot
@@ -30,7 +30,11 @@ L4.5 UI-D0 STATIC POST DETAIL HANDOFF: COMPLETE · MERGED · POST-MERGE PASS
 L4.5 UI-D SOCIAL CORE HOSTED PARITY: COMPLETE · MERGED · POST-MERGE PASS
 HOSTED BRIGHT CORAL DESIGN: CANONICAL · SINGLE CORE BRAND · THREE CLOSED USER-APPROVED CONTRAST EXCEPTIONS
 L4.5 UI-E CHARACTER·AUTONOMY·LOCAL-ONLY SURFACE: FULL PASS · MERGED · POST-MERGE 6/6 PASS
-L4.5 UI-F VISUAL·CROSS-RUNTIME CLOSEOUT: IMPLEMENTED · LOCAL TECH PASS · CANONICAL VISUAL 36/36 PASS · EXTERNAL LIFECYCLE PENDING
+L4.5 UI-F VISUAL·CROSS-RUNTIME CLOSEOUT: FULL PASS · MERGED · POST-MERGE 6/6 PASS
+P8-L-A CHAT·MEMORY CONTRACT AND INVENTORY: FROZEN
+P8-L-B BACKEND CHAT DOMAIN STRUCTURE PARITY: MERGED · POST-MERGE 5/5 PASS
+P8-L-C FRONTEND CHAT FEATURE STRUCTURE PARITY: IMPLEMENTED · LOCAL TECH PASS · EXTERNAL LIFECYCLE PENDING
+P8-L CHAT V2·CANONICAL MEMORY PRODUCT RUNTIME: IMPLEMENTATION NOT STARTED
 ```
 
 ---
@@ -1115,6 +1119,14 @@ UI-E PR #209 후속 Hotfix는 사용자 visual에서 발견된 `최근 결과` r
 - machine-readable baseline, DIRECT·ADAPTED·LOCAL·REJECTED matrix와 exact route/window decisions는 `security/p8_l_a_inventory.json`과 `docs/architecture/p8-l-a-contract-closeout.md`가 소유한다.
 - P8-L-A는 contract/inventory 단계다. runtime UI, API, schema, provider call, user Chat/Memory PASS를 뜻하지 않는다.
 
+### 18.7 P8-L-C frontend Chat structure parity
+
+- 현재 Next-only `/messages` list/thread UI와 message DTO·11개 transport operation의 frontend owner는 `features/chat/{api,model,ui}`이며 외부 조합 경계는 `features/chat/public.ts`다.
+- `app/messages/page.tsx`와 `app/messages/[threadId]/page.tsx`는 Chat public entry만 조합하는 thin wrapper다. 기존 global component path와 `lib/agents.ts` message export는 thin compatibility facade로만 남는다.
+- feature 내부는 `@/components`·`@/lib`를 import하지 않고 auth·navigation·runtime·UI의 product-neutral shared public boundary만 사용한다. thread·retry·provider 의미를 `shared`로 옮기지 않는다.
+- 이 단계의 의도적 visual diff는 `0`이다. 기존 39+16 raw-color occurrence는 feature-owned UI path로만 이동했고 전체 baseline은 33 files·1,408 occurrences를 유지한다. ARIA·keyboard·optimistic send·latest `model_busy` retry·`답장 중` 표현도 유지한다.
+- legacy `/messages`는 계속 Next-only·static unsupported다. World-scoped Chat route·requester/responding WorldCharacter·streaming·typed retry·retrieval·Memory·schema·provider lifecycle 구현 증거가 아니며, 해당 LOCAL behavior는 후속 P8-L 단계가 소유한다.
+
 따라서 현재 허용되는 판정:
 
 ```text
@@ -1128,6 +1140,9 @@ UI-E CHARACTER·AUTONOMY·LOCAL-ONLY SURFACE FULL PASS / MERGED / POST-MERGE 6/6
 UI-F VISUAL·CROSS-RUNTIME CLOSEOUT FULL PASS / MERGED / POST-MERGE 6/6 PASS
 UI-C AND UI-F FINAL WINDOWS 100%·125%·150% SCALE USER GATES PASS
 P8-L-A CHAT·MEMORY CONTRACT AND INVENTORY FROZEN / RUNTIME FEATURE NOT IMPLEMENTED
+P8-L-B BACKEND CHAT DOMAIN STRUCTURE PARITY MERGED / POST-MERGE 5/5 PASS
+P8-L-C FRONTEND CHAT FEATURE STRUCTURE PARITY IMPLEMENTED / LOCAL TECH PASS / EXTERNAL LIFECYCLE PENDING
+P8-L CHAT V2·CANONICAL MEMORY PRODUCT RUNTIME IMPLEMENTATION NOT STARTED
 ```
 
 token·shell·social core·Local-only surface·visual/runtime Gate와 사용자 승인이 모두 닫혔으므로 현재 함께 허용되는 판정:

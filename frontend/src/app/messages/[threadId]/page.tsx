@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { AppShell } from "@/components/app-shell";
-import { MessageThreadClient } from "@/components/message-thread-client";
+import { MessageThreadClient } from "@/features/chat/public";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";

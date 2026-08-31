@@ -3,7 +3,6 @@ import type {
   CharacterStateRead,
   FeedContentFilter,
   PostDetail,
-  ProfileRef,
 } from "@/lib/community";
 import {
   AUTH_CHANGED_EVENT as SHARED_AUTH_CHANGED_EVENT,
@@ -21,22 +20,39 @@ import {
 } from "@/shared/auth/public";
 import { runtimeFetch } from "@/shared/runtime/public";
 
+export {
+  createMessageThread,
+  DEFAULT_MESSAGE_GOOGLE_MODEL,
+  deleteMessageThread,
+  getCharacterMessageSettings,
+  getMessageSettings,
+  getMessageThread,
+  listMessageThreads,
+  MESSAGE_GOOGLE_GEMINI_MODELS,
+  retryThreadMessage,
+  sendThreadMessage,
+  updateCharacterMessageSettings,
+  updateMessageSettings,
+  updateMessageThread,
+} from "@/features/chat/public";
+export type {
+  CharacterMessageSettingRead,
+  MessageCredentialSource,
+  MessageGoogleGeminiModel,
+  MessageMessageRead,
+  MessageSendRead,
+  MessageSettingsRead,
+  MessageThreadListRead,
+  MessageThreadRead,
+} from "@/features/chat/public";
+
 export const GOOGLE_GEMINI_MODELS = [
   { value: "gemma-4-26b-a4b-it", label: "Gemma 4 26B" },
   { value: "gemini-3.1-flash-lite", label: "Gemini 3.1 Flash-Lite" },
   { value: "gemma-4-31b-it", label: "Gemma 4 31B" },
 ] as const;
 
-export const MESSAGE_GOOGLE_GEMINI_MODELS = [
-  { value: "gemini-2.5-flash-lite", label: "Gemini 2.5 Flash-Lite" },
-  { value: "gemini-2.5-flash", label: "Gemini 2.5 Flash" },
-  { value: "gemini-3.1-flash-lite", label: "Gemini 3.1 Flash-Lite" },
-  { value: "gemma-4-26b-a4b-it", label: "Gemma 4 26B" },
-  { value: "gemma-4-31b-it", label: "Gemma 4 31B" },
-] as const;
-
 export const DEFAULT_GOOGLE_GEMINI_MODEL = "gemini-3.1-flash-lite";
-export const DEFAULT_MESSAGE_GOOGLE_MODEL = "gemini-2.5-flash-lite";
 export const USER_IMAGE_MODELS = [
   {
     value: "replicate-zimage-turbo-lora",
@@ -61,8 +77,6 @@ export const REPLICATE_API_TOKEN_URL =
 export const REPLICATE_PRICING_URL = "https://replicate.com/pricing";
 
 export type GoogleGeminiModel = (typeof GOOGLE_GEMINI_MODELS)[number]["value"];
-export type MessageGoogleGeminiModel =
-  (typeof MESSAGE_GOOGLE_GEMINI_MODELS)[number]["value"];
 export type PollinationsImageModel = (typeof USER_IMAGE_MODELS)[number]["value"];
 
 export function getGoogleGeminiModelNote(model: GoogleGeminiModel) {
@@ -1444,140 +1458,4 @@ export function likeCommunityPost(postId: string, characterId: string) {
     method: "POST",
     body: { character_id: characterId },
   });
-}
-
-export type MessageCredentialSource = "message_key" | "agent_key";
-
-export type CharacterMessageSettingRead = {
-  character_id: string;
-  enabled: boolean;
-};
-
-export type MessageSettingsRead = {
-  credential_source: MessageCredentialSource;
-  source_character_id: string | null;
-  default_model: MessageGoogleGeminiModel;
-  message_key_fingerprint: string | null;
-  agent_key_fingerprint: string | null;
-  has_usable_key: boolean;
-  owned_agents: ProfileRef[];
-};
-
-export type MessageMessageRead = {
-  id: number;
-  thread_id: string;
-  role: "user" | "assistant";
-  content: string;
-  model: string | null;
-  status: "ok" | "error";
-  error_code: string | null;
-  created_at: string;
-};
-
-export type MessageThreadRead = {
-  id: string;
-  requester: ProfileRef;
-  character: ProfileRef;
-  selected_model: MessageGoogleGeminiModel;
-  last_message_at: string | null;
-  created_at: string;
-  latest_message: MessageMessageRead | null;
-  messages: MessageMessageRead[];
-};
-
-export type MessageThreadListRead = {
-  items: MessageThreadRead[];
-  max_threads: number;
-};
-
-export type MessageSendRead = {
-  thread: MessageThreadRead;
-  user_message: MessageMessageRead;
-  assistant_message: MessageMessageRead;
-};
-
-export function listMessageThreads() {
-  return apiRequest<MessageThreadListRead>("/messages/threads");
-}
-
-export function createMessageThread(data: {
-  character_id: string;
-  selected_model?: MessageGoogleGeminiModel;
-}) {
-  return apiRequest<MessageThreadRead>("/messages/threads", {
-    method: "POST",
-    body: data,
-  });
-}
-
-export function getMessageThread(threadId: string) {
-  return apiRequest<MessageThreadRead>(`/messages/threads/${threadId}`);
-}
-
-export function updateMessageThread(
-  threadId: string,
-  data: { selected_model: MessageGoogleGeminiModel },
-) {
-  return apiRequest<MessageThreadRead>(`/messages/threads/${threadId}`, {
-    method: "PATCH",
-    body: data,
-  });
-}
-
-export function deleteMessageThread(threadId: string) {
-  return apiRequest<void>(`/messages/threads/${threadId}`, {
-    method: "DELETE",
-  });
-}
-
-export function sendThreadMessage(threadId: string, content: string) {
-  return apiRequest<MessageSendRead>(`/messages/threads/${threadId}/messages`, {
-    method: "POST",
-    body: { content },
-  });
-}
-
-export function retryThreadMessage(threadId: string, messageId: number) {
-  return apiRequest<MessageSendRead>(
-    `/messages/threads/${threadId}/messages/${messageId}/retry`,
-    {
-      method: "POST",
-    },
-  );
-}
-
-export function getMessageSettings() {
-  return apiRequest<MessageSettingsRead>("/messages/settings");
-}
-
-export function updateMessageSettings(data: {
-  credential_source?: MessageCredentialSource;
-  source_character_id?: string | null;
-  default_model?: MessageGoogleGeminiModel;
-  api_key?: string;
-  clear_message_key?: boolean;
-}) {
-  return apiRequest<MessageSettingsRead>("/messages/settings", {
-    method: "PATCH",
-    body: data,
-  });
-}
-
-export function getCharacterMessageSettings(characterId: string) {
-  return apiRequest<CharacterMessageSettingRead>(
-    `/characters/${characterId}/message-settings`,
-  );
-}
-
-export function updateCharacterMessageSettings(
-  characterId: string,
-  data: { enabled: boolean },
-) {
-  return apiRequest<CharacterMessageSettingRead>(
-    `/characters/${characterId}/message-settings`,
-    {
-      method: "PATCH",
-      body: data,
-    },
-  );
 }

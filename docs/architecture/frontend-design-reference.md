@@ -132,6 +132,24 @@ design system in a wide `/memory` workspace; narrow Browser uses the same
 feature in a single-column drill-in. The current disabled `/memory-explorer`
 placeholder is not a current route or compatibility promise.
 
+### P8-L-C legacy Chat structure parity
+
+P8-L-C applies the feature-first ownership rule to the current Next-only
+Chat v1 without adopting its Hosted/global semantics as the future World Chat
+product. The existing list and thread UI, typed DTOs and eleven transport
+operations now live behind `features/chat/public.ts`; `/messages` route files
+compose that public entry, while the former global component and
+`lib/agents.ts` paths remain thin compatibility facades.
+
+This stage has no intentional visual delta. The legacy message list and
+thread keep their exact ADAPTED anatomy, accessible names, keyboard behavior,
+latest-`model_busy` retry and `답장 중` pending presentation. Their 55 raw
+color occurrences moved to feature-owned paths without increasing the design
+baseline (`33 files / 1,408 occurrences`). The route remains Next-only and
+static-unsupported. World scope, requester resolution, streaming,
+retrieval/Memory and the LOCAL behavior in the adoption matrix remain later
+P8-L work rather than evidence supplied by this structural move.
+
 ## Feature-first ownership contract
 
 The existing feature-first boundary remains authoritative:

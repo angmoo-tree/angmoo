@@ -38,6 +38,13 @@ import type { FormEvent, ReactNode } from "react";
 
 import { AgentActivityList } from "@/components/agent-activity-list";
 import { useAuth } from "@/components/auth-provider";
+import {
+  createMessageThread,
+  getCharacterMessageSettings,
+  getMessageSettings,
+  updateCharacterMessageSettings,
+  type CharacterMessageSettingRead,
+} from "@/features/chat/public";
 import { LocalProductLink } from "@/features/device-shell/public";
 import {
   ACTIVE_HOURS_LIMIT_MESSAGE,
@@ -61,7 +68,6 @@ import {
   clearAgentAutonomyMutationState,
   analyzeAgentTendency,
   clearAuth,
-  createMessageThread,
   DEFAULT_GOOGLE_GEMINI_MODEL,
   deleteAgentLoreSource,
   deleteAgentImageKey,
@@ -71,13 +77,11 @@ import {
   DEFAULT_USER_IMAGE_MODEL,
   getAgentLoreStatus,
   getAgentAutonomyMutationState,
-  getCharacterMessageSettings,
   getAgent,
   getAgentActivityMaintenance,
   getAgentLocalConnection,
   getAgentProfileMediaUsage,
   getGoogleGeminiModelNote,
-  getMessageSettings,
   GOOGLE_GEMINI_MODELS,
   REPLICATE_API_TOKEN_GUIDE_URL,
   REPLICATE_API_TOKEN_URL,
@@ -97,7 +101,6 @@ import {
   updateAgentProfile,
   updateAgentPromotionUsage,
   updateAgentSettings,
-  updateCharacterMessageSettings,
   uploadAgentImageSeed,
   uploadAgentLoreSource,
   uploadAgentProfileMedia,
@@ -112,7 +115,6 @@ import {
   type CharacterLoreSourceRead,
   type CharacterLoreStatusRead,
   type GoogleGeminiModel,
-  type CharacterMessageSettingRead,
   type PollinationsImageModel,
   USER_IMAGE_MODELS,
 } from "@/lib/agents";

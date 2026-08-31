@@ -12,7 +12,7 @@
         "ADAPTED"
       ],
       "path": "frontend/src/components/character-profile-client.tsx",
-      "sha256": "646b9fb560444cf7214d415dc42426ae56734f5e559433ea0901623b770f3654"
+      "sha256": "d3b7b6e98ecf13be749b45653a281fcfa0aa3b59216723292b0a3c8c0367ee03"
     },
     {
       "classifications": [
@@ -173,7 +173,7 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "244ef34d1b2da139352a67a5fc367deb14828b9140997975e92d03cca884a160"
+        "sha256": "736535417d0315049d0d810aa562387c5d4bd20046909af297bd449ec01955de"
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",
@@ -541,41 +541,6 @@
         }
       },
       {
-        "occurrences": 39,
-        "path": "frontend/src/components/message-thread-client.tsx",
-        "values": {
-          "#101828": 5,
-          "#344054": 1,
-          "#667085": 2,
-          "#98a2b3": 8,
-          "#c24141": 1,
-          "#d0d5dd": 3,
-          "#d92d20": 1,
-          "#eaedf2": 3,
-          "#f2f4f7": 3,
-          "#f6f7f9": 4,
-          "#ff5252": 1,
-          "#ff6b6b": 2,
-          "#ffd7d7": 2,
-          "#fff0ef": 1,
-          "#fff5f5": 2
-        }
-      },
-      {
-        "occurrences": 16,
-        "path": "frontend/src/components/messages-client.tsx",
-        "values": {
-          "#101828": 2,
-          "#667085": 1,
-          "#98a2b3": 5,
-          "#d92d20": 1,
-          "#eaedf2": 2,
-          "#ff6b6b": 2,
-          "#ffd7d7": 1,
-          "#fff5f5": 2
-        }
-      },
-      {
         "occurrences": 5,
         "path": "frontend/src/components/nest-search-form.tsx",
         "values": {
@@ -830,6 +795,41 @@
           "#ffd2d2": 1,
           "#ffe2e2": 2,
           "#fff0f0": 1,
+          "#fff5f5": 2
+        }
+      },
+      {
+        "occurrences": 39,
+        "path": "frontend/src/features/chat/ui/message-thread-client.tsx",
+        "values": {
+          "#101828": 5,
+          "#344054": 1,
+          "#667085": 2,
+          "#98a2b3": 8,
+          "#c24141": 1,
+          "#d0d5dd": 3,
+          "#d92d20": 1,
+          "#eaedf2": 3,
+          "#f2f4f7": 3,
+          "#f6f7f9": 4,
+          "#ff5252": 1,
+          "#ff6b6b": 2,
+          "#ffd7d7": 2,
+          "#fff0ef": 1,
+          "#fff5f5": 2
+        }
+      },
+      {
+        "occurrences": 16,
+        "path": "frontend/src/features/chat/ui/messages-client.tsx",
+        "values": {
+          "#101828": 2,
+          "#667085": 1,
+          "#98a2b3": 5,
+          "#d92d20": 1,
+          "#eaedf2": 2,
+          "#ff6b6b": 2,
+          "#ffd7d7": 1,
           "#fff5f5": 2
         }
       },
@@ -1107,7 +1107,7 @@
     "known_gap_count": 0,
     "next_static_inventory": "docs/architecture/next-static-compatibility.json",
     "next_static_inventory_route_count": 40,
-    "next_static_inventory_sha256": "040b5c9519098c97446a0b566cfbfa202596b9efa7b99fe460417dc679766c65",
+    "next_static_inventory_sha256": "29e7b3d1ab3782f86847daa21f18df00cb1c4708e162b83568a00bf70b4b1a2b",
     "reviewed_surface_count": 17
   },
   "schema_version": 1,

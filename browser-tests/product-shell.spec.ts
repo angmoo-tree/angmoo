@@ -2,6 +2,7 @@ import { expect, test, type Page, type Route } from "@playwright/test";
 
 import type { CharacterDashboardItem } from "../frontend/src/features/characters/model/character-dashboard-contract";
 import { presentCharacterRecentActivity } from "../frontend/src/features/characters/model/character-recent-activity-presentation";
+import type { MessageThreadRead } from "../frontend/src/features/chat/public";
 
 type WorldFixture = {
   world_id: string;
@@ -1353,4 +1354,246 @@ test("PWA is standalone, cache-free, and shares the canonical Home", async ({ pa
   await expect(page.locator('main[data-product-surface="device-home"]')).toBeVisible();
   expect(audit.writes).toEqual([]);
   expect(audit.providerCalls).toEqual([]);
+});
+
+test("legacy Messages keeps list, thread, retry, model, send, and delete parity", async ({
+  page,
+}) => {
+  await installBackendFixture(page);
+
+  const character = {
+    profile_type: "character" as const,
+    id: "character-p8-l-c",
+    display_name: "구조 이동 앵무",
+    handle: "p8_l_c",
+    avatar_url: null,
+    banner_url: null,
+  };
+  const requester = {
+    profile_type: "user" as const,
+    id: OWNER.id,
+    display_name: OWNER.display_name,
+    handle: "local_owner",
+    avatar_url: null,
+    banner_url: null,
+  };
+  let thread: MessageThreadRead = {
+    id: "thread-p8-l-c",
+    requester,
+    character,
+    selected_model: "gemini-2.5-flash-lite",
+    last_message_at: "2026-09-01T00:01:00Z",
+    created_at: "2026-09-01T00:00:00Z",
+    latest_message: {
+      id: 2,
+      thread_id: "thread-p8-l-c",
+      role: "assistant" as const,
+      content: "답장을 만들지 못했어요.",
+      model: "gemini-2.5-flash-lite",
+      status: "error" as const,
+      error_code: "model_busy",
+      created_at: "2026-09-01T00:01:00Z",
+    },
+    messages: [
+      {
+        id: 1,
+        thread_id: "thread-p8-l-c",
+        role: "user" as const,
+        content: "처음 질문",
+        model: "gemini-2.5-flash-lite",
+        status: "ok" as const,
+        error_code: null,
+        created_at: "2026-09-01T00:00:30Z",
+      },
+      {
+        id: 2,
+        thread_id: "thread-p8-l-c",
+        role: "assistant" as const,
+        content: "답장을 만들지 못했어요.",
+        model: "gemini-2.5-flash-lite",
+        status: "error" as const,
+        error_code: "model_busy",
+        created_at: "2026-09-01T00:01:00Z",
+      },
+    ],
+  };
+  let deleted = false;
+  let releaseSend!: () => void;
+  const sendGate = new Promise<void>((resolve) => {
+    releaseSend = resolve;
+  });
+  const calls: Array<{ body: unknown; method: string; path: string }> = [];
+
+  await page.route("**/api/backend/messages/**", async (route) => {
+    const request = route.request();
+    const url = new URL(request.url());
+    const method = request.method();
+    const body = request.postData() ? request.postDataJSON() : null;
+    calls.push({ body, method, path: url.pathname });
+
+    if (url.pathname === "/api/backend/messages/threads" && method === "GET") {
+      return json(route, {
+        items: deleted ? [] : [thread],
+        max_threads: 30,
+      });
+    }
+    if (
+      url.pathname === "/api/backend/messages/threads/thread-p8-l-c" &&
+      method === "GET"
+    ) {
+      return json(route, thread);
+    }
+    if (
+      url.pathname === "/api/backend/messages/threads/thread-p8-l-c" &&
+      method === "PATCH"
+    ) {
+      thread = { ...thread, selected_model: body.selected_model };
+      return json(route, thread);
+    }
+    if (
+      url.pathname ===
+        "/api/backend/messages/threads/thread-p8-l-c/messages/2/retry" &&
+      method === "POST"
+    ) {
+      const assistantMessage = {
+        ...thread.messages[1],
+        content: "다시 만든 답장",
+        error_code: null,
+        status: "ok" as const,
+      };
+      thread = {
+        ...thread,
+        latest_message: assistantMessage,
+        messages: [thread.messages[0], assistantMessage],
+      };
+      return json(route, {
+        thread,
+        user_message: thread.messages[0],
+        assistant_message: assistantMessage,
+      });
+    }
+    if (
+      url.pathname ===
+        "/api/backend/messages/threads/thread-p8-l-c/messages" &&
+      method === "POST"
+    ) {
+      await sendGate;
+      const userMessage = {
+        id: 3,
+        thread_id: thread.id,
+        role: "user" as const,
+        content: body.content,
+        model: thread.selected_model,
+        status: "ok" as const,
+        error_code: null,
+        created_at: "2026-09-01T00:02:00Z",
+      };
+      const assistantMessage = {
+        id: 4,
+        thread_id: thread.id,
+        role: "assistant" as const,
+        content: "새 질문에 대한 답장",
+        model: thread.selected_model,
+        status: "ok" as const,
+        error_code: null,
+        created_at: "2026-09-01T00:02:10Z",
+      };
+      thread = {
+        ...thread,
+        last_message_at: assistantMessage.created_at,
+        latest_message: assistantMessage,
+        messages: [...thread.messages, userMessage, assistantMessage],
+      };
+      return json(route, {
+        thread,
+        user_message: userMessage,
+        assistant_message: assistantMessage,
+      });
+    }
+    if (
+      url.pathname === "/api/backend/messages/threads/thread-p8-l-c" &&
+      method === "DELETE"
+    ) {
+      deleted = true;
+      return route.fulfill({ status: 204 });
+    }
+    return json(
+      route,
+      { detail: `unexpected_messages_request:${url.pathname}` },
+      404,
+    );
+  });
+
+  await page.goto("/messages");
+  await expect(page.getByRole("heading", { name: "쪽지함" })).toBeVisible();
+  await expect(page.getByText("1/30", { exact: true })).toBeVisible();
+  await expect(page.getByText("구조 이동 앵무", { exact: true })).toBeVisible();
+  await page.locator('a[href="/messages/thread-p8-l-c"]').click();
+
+  await expect(page).toHaveURL(/\/messages\/thread-p8-l-c$/);
+  await expect(page.getByRole("heading", { name: "구조 이동 앵무" })).toBeVisible();
+  await expect(page.getByText("처음 질문", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "다시 시도" })).toHaveCount(1);
+
+  await page.getByRole("button", { name: "다시 시도" }).click();
+  await expect(page.getByText("다시 만든 답장", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "다시 시도" })).toHaveCount(0);
+
+  await page.getByRole("combobox", { name: "모델 선택" }).selectOption(
+    "gemini-2.5-flash",
+  );
+  await expect(page.getByRole("combobox", { name: "모델 선택" })).toHaveValue(
+    "gemini-2.5-flash",
+  );
+
+  await page.getByPlaceholder("쪽지를 입력하세요").fill("새 질문");
+  await page.getByRole("button", { name: "보내기" }).click();
+  await expect(page.getByText("새 질문", { exact: true })).toBeVisible();
+  await expect(page.getByText("답장 중", { exact: true })).toBeVisible();
+  releaseSend();
+  await expect(page.getByText("새 질문에 대한 답장", { exact: true })).toBeVisible();
+  await expect(page.getByText("답장 중", { exact: true })).toHaveCount(0);
+
+  await page.getByRole("button", { name: "쪽지 내역 삭제" }).click();
+  await expect(page).toHaveURL(/\/messages$/);
+  await expect(
+    page.getByText("아직 나눈 쪽지가 없습니다.", { exact: true }),
+  ).toBeVisible();
+
+  expect(calls.filter((call) => call.method !== "GET")).toEqual([
+    {
+      body: null,
+      method: "POST",
+      path: "/api/backend/messages/threads/thread-p8-l-c/messages/2/retry",
+    },
+    {
+      body: { selected_model: "gemini-2.5-flash" },
+      method: "PATCH",
+      path: "/api/backend/messages/threads/thread-p8-l-c",
+    },
+    {
+      body: { content: "새 질문" },
+      method: "POST",
+      path: "/api/backend/messages/threads/thread-p8-l-c/messages",
+    },
+    {
+      body: null,
+      method: "DELETE",
+      path: "/api/backend/messages/threads/thread-p8-l-c",
+    },
+  ]);
+  expect(
+    calls.filter(
+      (call) =>
+        call.method === "GET" &&
+        call.path === "/api/backend/messages/threads",
+    ).length,
+  ).toBeGreaterThanOrEqual(2);
+  expect(
+    calls.filter(
+      (call) =>
+        call.method === "GET" &&
+        call.path === "/api/backend/messages/threads/thread-p8-l-c",
+    ).length,
+  ).toBeGreaterThanOrEqual(1);
 });
