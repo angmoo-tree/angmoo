@@ -1,0 +1,589 @@
+{
+  "architecture": {
+    "external_import_count": 1798,
+    "internal_edge_count": 1250,
+    "legacy_exact_edge_count": 322,
+    "message_legacy_edges": [
+      {
+        "group": "pre-t2-5-horizontal-layer-imports",
+        "imported": "app.models",
+        "importer": "app.api.v1.routes.messages"
+      },
+      {
+        "group": "pre-t2-5-horizontal-layer-imports",
+        "imported": "app.schemas",
+        "importer": "app.api.v1.routes.messages"
+      },
+      {
+        "group": "pre-t2-5-horizontal-layer-imports",
+        "imported": "app.services.messages",
+        "importer": "app.api.v1.routes.messages"
+      },
+      {
+        "group": "pre-t2-5-horizontal-layer-imports",
+        "imported": "app.models.messages",
+        "importer": "app.models"
+      },
+      {
+        "group": "pre-t2-5-horizontal-layer-imports",
+        "imported": "app.schemas.messages",
+        "importer": "app.schemas"
+      },
+      {
+        "group": "pre-t2-5-horizontal-layer-imports",
+        "imported": "app.schemas.community",
+        "importer": "app.schemas.messages"
+      },
+      {
+        "group": "pre-t2-5-horizontal-layer-imports",
+        "imported": "app.models",
+        "importer": "app.services.messages"
+      },
+      {
+        "group": "pre-t2-5-horizontal-layer-imports",
+        "imported": "app.schemas",
+        "importer": "app.services.messages"
+      },
+      {
+        "group": "pre-t2-5-horizontal-layer-imports",
+        "imported": "app.services.direct_llm",
+        "importer": "app.services.messages"
+      },
+      {
+        "group": "pre-t2-5-horizontal-layer-imports",
+        "imported": "app.services.prompt_safety",
+        "importer": "app.services.messages"
+      }
+    ],
+    "message_module_count": 9,
+    "message_modules": [
+      {
+        "imports": [],
+        "module": "app.alembic.versions.20260616_0046_messages_v1",
+        "path": "backend/app/alembic/versions/20260616_0046_messages_v1.py"
+      },
+      {
+        "imports": [],
+        "module": "app.alembic.versions.20260616_0047_message_default_gemma4_26b",
+        "path": "backend/app/alembic/versions/20260616_0047_message_default_gemma4_26b.py"
+      },
+      {
+        "imports": [],
+        "module": "app.alembic.versions.20260617_0050_message_default_gemini25_flash_lite",
+        "path": "backend/app/alembic/versions/20260617_0050_message_default_gemini25_flash_lite.py"
+      },
+      {
+        "imports": [],
+        "module": "app.alembic.versions.20260617_0051_backfill_unconfigured_message_default",
+        "path": "backend/app/alembic/versions/20260617_0051_backfill_unconfigured_message_default.py"
+      },
+      {
+        "imports": [],
+        "module": "app.alembic.versions.20260802_0068_message_response_leases",
+        "path": "backend/app/alembic/versions/20260802_0068_message_response_leases.py"
+      },
+      {
+        "imports": [
+          "app.api.v1.deps",
+          "app.models",
+          "app.schemas",
+          "app.services.messages"
+        ],
+        "module": "app.api.v1.routes.messages",
+        "path": "backend/app/api/v1/routes/messages.py"
+      },
+      {
+        "imports": [
+          "app.core.db"
+        ],
+        "module": "app.models.messages",
+        "path": "backend/app/models/messages.py"
+      },
+      {
+        "imports": [
+          "app.providers.registry",
+          "app.schemas.community"
+        ],
+        "module": "app.schemas.messages",
+        "path": "backend/app/schemas/messages.py"
+      },
+      {
+        "imports": [
+          "app.core.security",
+          "app.credentials",
+          "app.models",
+          "app.schemas",
+          "app.services.direct_llm",
+          "app.services.prompt_safety"
+        ],
+        "module": "app.services.messages",
+        "path": "backend/app/services/messages.py"
+      }
+    ],
+    "module_count": 530
+  },
+  "baseline": {
+    "commit": "81e428bc069184edba06caf3c5821bae3cc6bfd7",
+    "tree": "c932080bdd55b03de30123076ac48eb8b17f6cb4"
+  },
+  "contract": {
+    "call_budget": {
+      "normal_full_path": {
+        "BOTH": 4,
+        "CANONICAL": 3,
+        "CLARIFICATION": 2,
+        "CURRENT_CONTEXT": 2,
+        "GRAPH": 3
+      },
+      "request_wide_schema_repair_max": 1
+    },
+    "canonical_chat_routes": {
+      "list": "/worlds/{worldId}/chat",
+      "thread": "/worlds/{worldId}/chat/{threadId}",
+      "window_kind": "phone"
+    },
+    "canonical_memory_surface": {
+      "browser_route": "/memory",
+      "legacy_planned_placeholder": "/memory-explorer",
+      "window_kind": "memory"
+    },
+    "canonical_profile_route": "/worlds/{worldId}/characters/{worldCharacterId}",
+    "evaluation": {
+      "corpus_case_count": 315,
+      "corpus_path": "backend/tests/fixtures/p8_l/retrieval_topology_v1/held_out_ko.jsonl",
+      "model": "gemini-2.5-flash-lite",
+      "model_purpose": "P8 comparison fixture only; not a production default decision",
+      "provider": "google",
+      "seed": 8312026,
+      "temperature": 0.0,
+      "top_p": 1.0
+    },
+    "fts_ownership": {
+      "decision": "separate-private-recall-index",
+      "p5_existing_relative_path": "search/generations/v1/angmoo-search.sqlite3",
+      "p8_reserved_relative_path": "search/memory-recall/generations/v1/angmoo-memory-recall.sqlite3"
+    },
+    "migration_reservations": [
+      {
+        "alembic_revision": "20260831_0084",
+        "down_revision": "20260825_0083",
+        "embedded_sqlite_version": 4,
+        "owner_stage": "P8-L-D",
+        "purpose": "World-scoped Chat v2 identity and role binding"
+      },
+      {
+        "alembic_revision": "20260831_0085",
+        "down_revision": "20260831_0084",
+        "embedded_sqlite_version": 5,
+        "owner_stage": "P8-L-F",
+        "purpose": "canonical Memory schema and scope control"
+      },
+      {
+        "alembic_revision": "20260831_0086",
+        "down_revision": "20260831_0085",
+        "embedded_sqlite_version": 6,
+        "owner_stage": "P8-L-J",
+        "purpose": "response request and generation lifecycle"
+      }
+    ],
+    "response_lifecycle": {
+      "canonical_row": "chat_response_requests",
+      "decision": "request-row-with-renewable-lease-generation-and-fenced-finalize",
+      "raw_delta_columns": 0,
+      "stable_presentation_key": "response_slot_id"
+    },
+    "retrieval_contract_versions": {
+      "canonical_plan": "canonical-plan.v1",
+      "graph_plan": "graph-plan.v1",
+      "intent": "retrieval-intent.v1",
+      "resolved": "resolved-retrieval.v1",
+      "workflow": "retrieval-workflow.v1"
+    },
+    "retrieval_routes": [
+      "CURRENT_CONTEXT",
+      "CANONICAL",
+      "GRAPH",
+      "BOTH",
+      "CLARIFICATION"
+    ],
+    "stream": {
+      "crg_delta_only": true,
+      "presence_reveal_ms": 300,
+      "protocol": "chat-generation-stream.v1",
+      "transport": "fetch-ndjson"
+    },
+    "workflow_recipes": [
+      "INDEPENDENT_PARALLEL",
+      "GRAPH_THEN_CANONICAL",
+      "CANONICAL_THEN_GRAPH"
+    ]
+  },
+  "contract_registry": {
+    "path": "security/p8_l_a_contract_registry.json",
+    "sha256": "432d6e8c38cf8667036cd72d2e31668b150ba5406ad5804a3eed05a84a23840f",
+    "size": 14888
+  },
+  "corpus": {
+    "case_count": 315,
+    "category_counts": {
+      "both_chain": 30,
+      "canonical_history": 30,
+      "clarification_identity": 20,
+      "current_context": 20,
+      "graph_direction": 30,
+      "graph_path_shared": 25,
+      "injection_and_caps": 30,
+      "no_evidence_policy": 20,
+      "relationship_cause": 30,
+      "safety_scope": 30,
+      "temporal_comparison": 20,
+      "time_rank_aggregate": 30
+    },
+    "path": "backend/tests/fixtures/p8_l/retrieval_topology_v1/held_out_ko.jsonl",
+    "sha256": "532a55d56947067637ff53e8500091eb62ec0a4b7ddd22f725513c2f45e9ccf1"
+  },
+  "documentation": "docs/architecture/p8-l-a-contract-closeout.md",
+  "evaluation_thresholds": {
+    "absolute": {
+      "both_recipe_success_min": 0.95,
+      "canonical_plan_executable_min": 0.98,
+      "clarification_f1_min": 0.9,
+      "entity_role_direction_time_accuracy_min": 0.95,
+      "evidence_precision_min": 0.95,
+      "evidence_recall_min": 0.85,
+      "graph_plan_executable_min": 0.98,
+      "grounded_response_rate_min": 0.9,
+      "router_macro_f1_min": 0.9,
+      "schema_repair_rate_max": 0.05,
+      "unnecessary_retrieval_rate_max": 0.1
+    },
+    "adoption_any_of": [
+      {
+        "all_of": [
+          {
+            "metric": "evidence_f1_delta",
+            "operator": ">=",
+            "value": 0.03
+          }
+        ],
+        "id": "same_model_evidence_f1_improvement"
+      },
+      {
+        "all_of": [
+          {
+            "metric": "critical_semantic_error_relative_reduction",
+            "operator": ">=",
+            "value": 0.3
+          },
+          {
+            "metric": "evidence_f1_delta",
+            "operator": ">=",
+            "value": -0.01
+          }
+        ],
+        "id": "critical_error_reduction_with_noninferior_evidence_f1"
+      },
+      {
+        "all_of": [
+          {
+            "condition": "candidate_model_is_smaller",
+            "equals": true
+          },
+          {
+            "condition": "all_absolute_gates_pass",
+            "equals": true
+          },
+          {
+            "condition": "all_safety_gates_pass",
+            "equals": true
+          }
+        ],
+        "id": "smaller_model_meets_all_gates"
+      },
+      {
+        "all_of": [
+          {
+            "condition": "candidate_uses_node_specific_models",
+            "equals": true
+          },
+          {
+            "condition": "measured_resource_or_cost_reduction_is_positive",
+            "equals": true
+          },
+          {
+            "condition": "end_to_end_quality_is_noninferior",
+            "equals": true
+          },
+          {
+            "condition": "all_absolute_gates_pass",
+            "equals": true
+          },
+          {
+            "condition": "all_safety_gates_pass",
+            "equals": true
+          }
+        ],
+        "id": "node_specific_model_resource_reduction_with_noninferior_quality"
+      }
+    ],
+    "measurement": {
+      "comparison_cases": "same-frozen-case-ids",
+      "critical_semantic_error_denominator": "eligible-held-out-cases",
+      "evidence_f1": "harmonic-mean-of-micro-evidence-precision-and-recall",
+      "latency_percentiles": [
+        "p50",
+        "p95"
+      ],
+      "metric_contract_version": "p8-l-retrieval-eval.v1",
+      "safety_taxonomy_version": "p8-l-retrieval-safety.v1",
+      "warm_same_model_role_reload_max": 0,
+      "warm_same_model_role_swap_max": 0
+    },
+    "safety_violation_max": 0
+  },
+  "legacy": {
+    "files": [
+      {
+        "path": "backend/app/alembic/versions/20260616_0046_messages_v1.py",
+        "sha256": "7ae15de22fe71fd6a403c07256e74ef92e4cc79359030e16c2704a5cd21108ae",
+        "size": 6721
+      },
+      {
+        "path": "backend/app/alembic/versions/20260616_0047_message_default_gemma4_26b.py",
+        "sha256": "12b1a96c275a2c3429147b9a281f5f6115e017b0078a78dc08d32d3bd382edbf",
+        "size": 2376
+      },
+      {
+        "path": "backend/app/alembic/versions/20260617_0050_message_default_gemini25_flash_lite.py",
+        "sha256": "e9579f667a8284a23ca25955ca435af5760959b153812751463d13b11c3df76e",
+        "size": 1296
+      },
+      {
+        "path": "backend/app/alembic/versions/20260617_0051_backfill_unconfigured_message_default.py",
+        "sha256": "74e50c4ab584fa45cb1d01314d9850ff5508ab8424c50459fe0461b3f707970c",
+        "size": 1674
+      },
+      {
+        "path": "backend/app/alembic/versions/20260802_0068_message_response_leases.py",
+        "sha256": "4d29c8de1feedad477bc6416b747b69cd815398d196d0791cd3a2671f7d96e3d",
+        "size": 1192
+      },
+      {
+        "path": "backend/app/api/v1/routes/messages.py",
+        "sha256": "3329e05edad409f6faefccc3bc44bfa4593e4181f302f232a5da2773c53286fe",
+        "size": 9092
+      },
+      {
+        "path": "backend/app/models/messages.py",
+        "sha256": "352bff56608f1622f5d8183f034ffef981e9da2789ec6e2e206bbf3d2673cf7d",
+        "size": 4277
+      },
+      {
+        "path": "backend/app/schemas/messages.py",
+        "sha256": "c82489fdae995efb2c5f85d3e2949e993287975156112a9097176660b636fd15",
+        "size": 2789
+      },
+      {
+        "path": "backend/app/services/messages.py",
+        "sha256": "dd9312f76309d204f7a8c4a5c4ec8389d5a3ec8d165550cd6d2acc4e8eac9784",
+        "size": 32058
+      },
+      {
+        "path": "backend/tests/fixtures/core_experience/p0-contract-v1/memory_deleted_blocked.json",
+        "sha256": "ec77bd08b88902967262cdbea5b8747ad2a3c4dea564dd0c05710b918a7fadd3",
+        "size": 613
+      },
+      {
+        "path": "backend/tests/fixtures/core_experience/p0-contract-v1/memory_opt_out_blocked.json",
+        "sha256": "133662726f1400378764ce8106a6332ae4e1fda7ae2b6da9d3d38215f6f092ac",
+        "size": 570
+      },
+      {
+        "path": "backend/tests/test_google_model_selection.py",
+        "sha256": "bec7e77812175868f69e2fb3ae0dc49a535d85b761c0f2ccfb193f902a4b3a62",
+        "size": 11116
+      },
+      {
+        "path": "backend/tests/test_m3_authorization_deletion.py",
+        "sha256": "27b19d2f2d4bf9f77826d009e1c3cabe6b074d6abacc87129530ade2577fb5cb",
+        "size": 27298
+      },
+      {
+        "path": "backend/tests/test_messages_service.py",
+        "sha256": "e55930c32b8162a607cecb5404703fe422396ef91b7a7f28b3199b0df7d7fd85",
+        "size": 27612
+      },
+      {
+        "path": "backend/tests/test_p0_contract_fixtures.py",
+        "sha256": "2368528ac1a35ff6b7d2727d6ce9d4edf4bb5a6c7c1a03586b5fa04dc7b615e4",
+        "size": 2365
+      },
+      {
+        "path": "backend/tests/test_postgres_security_concurrency.py",
+        "sha256": "0d450012071647e3e69a073183db28b7d74e4b0230e8eb9ca800ed69a3da885f",
+        "size": 70488
+      },
+      {
+        "path": "backend/tests/test_r7_residual_security.py",
+        "sha256": "3ffe10e43f6e2ecc1353fd768c82cfa9a773e026a2b6b55b9920b2c3bad8f47f",
+        "size": 5196
+      },
+      {
+        "path": "frontend/src/app/messages/[threadId]/page.tsx",
+        "sha256": "39072bbe92a05e877dc49419515f235cc4f32e072eaa54dfe2f0cb781862fd62",
+        "size": 598
+      },
+      {
+        "path": "frontend/src/app/messages/page.tsx",
+        "sha256": "9c13a446d299da141f468790eb43f5cfe96f38b5164ec93c464454c4bd66974f",
+        "size": 422
+      },
+      {
+        "path": "frontend/src/components/message-thread-client.tsx",
+        "sha256": "5fee0421518a311755f07136b08e3605821e72c98dcd08135c1f0bebf9076b8d",
+        "size": 13424
+      },
+      {
+        "path": "frontend/src/components/messages-client.tsx",
+        "sha256": "6d426b6569b0c1d8420eeaed146472313537f685bee2382de6b29f78dcd17e9f",
+        "size": 5456
+      },
+      {
+        "path": "frontend/src/lib/agents.ts",
+        "sha256": "e65ac6f8b43a532703b2c3a14c9d49de2dd27a2e50ea60652a49fa9bfbc88886",
+        "size": 41485
+      }
+    ],
+    "route_operations": [
+      "DELETE /api/v1/messages/threads/{thread_id}",
+      "GET /api/v1/characters/{character_id}/message-settings",
+      "GET /api/v1/messages/settings",
+      "GET /api/v1/messages/threads",
+      "GET /api/v1/messages/threads/{thread_id}",
+      "PATCH /api/v1/characters/{character_id}/message-settings",
+      "PATCH /api/v1/messages/settings",
+      "PATCH /api/v1/messages/threads/{thread_id}",
+      "POST /api/v1/messages/threads",
+      "POST /api/v1/messages/threads/{thread_id}/messages",
+      "POST /api/v1/messages/threads/{thread_id}/messages/{message_id}/retry"
+    ],
+    "tables": [
+      "character_message_settings",
+      "message_messages",
+      "message_threads",
+      "user_message_preferences"
+    ]
+  },
+  "migration_baseline": {
+    "alembic": {
+      "head_count": 1,
+      "heads": [
+        {
+          "down_revision": "20260819_0082",
+          "path": "backend/app/alembic/versions/20260825_0083_world_package_registry.py",
+          "revision": "20260825_0083"
+        }
+      ],
+      "revision_count": 82,
+      "revision_ids": [
+        "20260510_0001",
+        "20260511_0002",
+        "20260511_0003",
+        "20260511_0004",
+        "20260513_0005",
+        "20260513_0006",
+        "20260514_0007",
+        "20260514_0008",
+        "20260514_0009",
+        "20260516_0010",
+        "20260516_0011",
+        "20260516_0012",
+        "20260516_0013",
+        "20260516_0014",
+        "20260517_0015",
+        "20260519_0016",
+        "20260519_0017",
+        "20260519_0018",
+        "20260520_0019",
+        "20260520_0020",
+        "20260520_0021",
+        "20260520_0022",
+        "20260520_0023",
+        "20260520_0024",
+        "20260522_0025",
+        "20260522_0026",
+        "20260522_0027",
+        "20260522_0028",
+        "20260526_0029",
+        "20260528_0030",
+        "20260529_0031",
+        "20260529_0032",
+        "20260529_0033",
+        "20260530_0034",
+        "20260530_0035",
+        "20260601_0036",
+        "20260604_0037",
+        "20260605_0038",
+        "20260609_0039",
+        "20260610_0040",
+        "20260610_0041",
+        "20260614_0042",
+        "20260615_0043",
+        "20260615_0044",
+        "20260615_0045",
+        "20260616_0046",
+        "20260616_0047",
+        "20260616_0048",
+        "20260616_0049",
+        "20260617_0050",
+        "20260617_0051",
+        "20260618_0052",
+        "20260620_0053",
+        "20260624_0054",
+        "20260625_0055",
+        "20260625_0056",
+        "20260627_0057",
+        "20260705_0058",
+        "20260721_0059",
+        "20260726_0060",
+        "20260726_0061",
+        "20260726_0062",
+        "20260726_0063",
+        "20260726_0064",
+        "20260726_0065",
+        "20260726_0066",
+        "20260802_0067",
+        "20260802_0068",
+        "20260804_0069",
+        "20260807_0070",
+        "20260807_0072",
+        "20260808_0073",
+        "20260809_0074",
+        "20260810_0075",
+        "20260811_0076",
+        "20260811_0077",
+        "20260812_0078",
+        "20260815_0079",
+        "20260816_0080",
+        "20260818_0081",
+        "20260819_0082",
+        "20260825_0083"
+      ]
+    },
+    "embedded_sqlite": {
+      "canonical_table_count": 87,
+      "schema_digest": "e8f4567a32efb3250a9c6f8d36bd6ae604364f3196e039922555ead6e6ec42aa",
+      "schema_version": 3,
+      "source_migration_count": 82,
+      "source_revision": "20260825_0083"
+    }
+  },
+  "policy_id": "angmoo-p8-l-a-contract-inventory-v1",
+  "required_absence": {
+    "backend/app/domains/chat": true,
+    "backend/app/domains/memory": true,
+    "frontend/src/features/chat": true,
+    "frontend/src/features/memory": true
+  },
+  "schema_version": 1
+}

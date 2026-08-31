@@ -17,10 +17,11 @@ one feature-owned social presentation across global and World-scoped adapters.
 UI-E implements the Character, autonomy, Device Home, Studio, Relationship
 Graph, Settings, and local-owner surface adoption. Its recent-result follow-up
 closed through exact-head Hosted CI, user review, merge, and post-merge Actions.
-UI-F now implements the deterministic product visual/cross-runtime corpus and
-has passed local technical verification. UI-F's Issue, push, Draft PR, Hosted
-CI, user Ready, merge, post-merge Actions, and final exact-SHA Windows user
-Gates remain separate and pending.
+UI-F implements the deterministic product visual/cross-runtime corpus and has
+completed local technical verification, PR-head Hosted CI, user Ready, merge,
+final exact-SHA Windows user Gates, and post-merge Actions on merge
+`81e428bc069184edba06caf3c5821bae3cc6bfd7`. P8-L-A now freezes the next
+Chat/Memory adoption contract without claiming those product features exist.
 
 ## Exact baseline
 
@@ -106,9 +107,30 @@ entire mixed-purpose source file.
 - actions or counts absent from the Local payload, including fake zero values
 - remote build-time fonts, unreviewed hosted assets, and sibling-repository imports
 
-Notifications, messages, and profile anatomy may be reconsidered in their
-own product stages. Their current hosted semantics are not silently enabled by
-this design reference.
+Notifications remain deferred. P8-L-A has now classified message and profile
+anatomy for the Chat/Memory stage, but their current hosted semantics are not
+silently enabled by this design reference.
+
+### P8-L-A Chat and Memory adoption
+
+The authoritative inventory and full decision record are
+`docs/architecture/p8-l-a-contract-closeout.md` and
+`security/p8_l_a_inventory.json`. This section fixes visual adoption only; the
+Chat and Memory domains, routes and capabilities remain owned by their P8
+stages.
+
+| Current source/anatomy | Classification | P8 boundary |
+|---|---|---|
+| `SocialPostRow` author hierarchy/link slot, `ProfileAvatar`, World App Phone shell and fail-closed `LocalProductLink` | `DIRECT` | retain the shared anatomy and route primitives |
+| public profile hero/tabs, round letter action, legacy message list/header/bubble/composer, failure bubble and retry spinner | `ADAPTED` | retain visual grammar only; use WorldCharacter capability, P8 lifecycle and semantic tokens |
+| WorldCharacter profile, requester resolution, active-thread create-or-get, `features/chat`, CRG-only stream, `features/memory`, `/memory` and the wide `memory` window | `LOCAL` | implement as Local feature-owned product meaning |
+| global `/profiles` or owner `/agents` as World profile, global `{character_id}` thread create, immediate client `pending` as stream proof, message-ID in-place retry, fake metrics/actions and Chat-only Tauri window | `REJECTED` | conflicts with World scope, capability or lifecycle truth |
+
+Canonical Chat stays in the existing Phone World App at
+`/worlds/{worldId}/chat` and its thread route. Memory management uses the same
+design system in a wide `/memory` workspace; narrow Browser uses the same
+feature in a single-column drill-in. The current disabled `/memory-explorer`
+placeholder is not a current route or compatibility promise.
 
 ## Feature-first ownership contract
 

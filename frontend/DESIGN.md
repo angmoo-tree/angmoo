@@ -1,11 +1,11 @@
 ---
 name: Angmoo Local
 document: Frontend Design Contract
-version: 1.7
+version: 1.8
 date: 2026-08-31
-status: CANONICAL DESIGN CONTRACT · SINGLE BRIGHT-CORAL BRAND + THREE USER-APPROVED CONTRAST EXCEPTIONS · UI-A~UI-E FULL PASS · UI-F IMPLEMENTED/LOCAL TECH PASS · EXTERNAL LIFECYCLE PENDING · CURRENT UI CONFORMANCE INCOMPLETE
-scope: Device Phone · World App · Creator Studio · Relationship Graph · current L4 surfaces
-implementation_phase: L4.5 UI-A through UI-E merged and post-merge closed · UI-D0 merged and post-merge closed · UI-F product visual/cross-runtime corpus implemented on exact base 91577c7cccd29475bba91caf3a6208f74eb7e060 with local technical and canonical pinned-Noble verification · Issue/push/Draft PR/Hosted CI/user Ready/merge/post-merge/final exact-SHA Windows user Gates pending
+status: CANONICAL DESIGN CONTRACT · SINGLE BRIGHT-CORAL BRAND + THREE USER-APPROVED CONTRAST EXCEPTIONS · UI-A~UI-F FULL PASS/MERGED/POST-MERGE PASS · P8-L-A CHAT/MEMORY CONTRACT FROZEN · CURRENT UI CONFORMANCE INCOMPLETE
+scope: Device Phone · World App · Creator Studio · Relationship Graph · current L4.5 surfaces · P8-L Chat/Memory target contract
+implementation_phase: L4.5 UI-A through UI-F merged and post-merge closed on exact merge 81e428bc069184edba06caf3c5821bae3cc6bfd7 · P8-L-A freezes Chat/Memory adoption, route, window and state contracts only · Chat v2 and canonical Memory runtime remain unimplemented
 hosted_reference_commit: 7f967abd6117381be5c081ed284addb889b06fec
 local_reference_commit: e5e62aed69cb89b16b5870eb0854dd07752dc519
 legacy_reference: audited-internal-snapshot
@@ -62,7 +62,7 @@ L4.5 UI-F VISUAL·CROSS-RUNTIME CLOSEOUT: IMPLEMENTED · LOCAL TECH PASS · CANO
 - World-local leave와 전역 Character 삭제 의미
 - scheduler·provider·SocialEvent·relationship·graph transaction
 - owner scope·권한·idempotency·canonical data
-- backup·restore·memory·diagnostics의 아직 확정되지 않은 기능 계약
+- backup·restore·diagnostics와 Memory backend·lifecycle의 domain 계약 — 단, P8-L-A가 고정한 `/memory`·wide logical `memory` UI target·surface 경계는 이 문서 §4·§11을 따른다
 - Tauri route와 product-window destination의 backend 의미
 
 UI는 domain 의미를 표현한다. UI가 domain 의미를 추측하거나 바꾸지 않는다.
@@ -228,12 +228,20 @@ backend payload와 현재 제품 계약에 있는 기능만 interactive하게 �
 | Surface | Product kind | Shell | 기본 layout | 현재 Tauri window kind |
 |---|---|---|---|---|
 | Device Home | Device | `DeviceShell` → `DeviceFrame` | Phone | `phone` |
-| World Home·Feed·Chat·Characters | World App | `DeviceShell` → `DeviceFrame` | Phone | `phone` |
+| World Home·Feed·Chat·Characters | World App route slots | `DeviceShell` → `DeviceFrame` | Phone | `phone` |
 | 내 앵무·Character·Settings·compatibility routes | Device | `AppShell` compatibility facade → `DeviceShell` | Phone | `phone` |
 | Creator Studio | Workspace | `CreatorStudioFrame` | Wide | `studio` |
 | Relationship Graph | Workspace | `RelationshipGraphFrame` | Wide | `relationship-graph` |
 
-Memory·Diagnostics·Backup은 미래 wide 후보일 뿐 현재 Tauri window kind가 구현된 것으로 기록하지 않는다. 해당 단계가 실제 route·window 계약을 만들 때 이 matrix를 갱신한다.
+이 표의 World Chat·Characters는 route와 shell slot을 뜻하며 기능 완료를 뜻하지 않는다. 현재 Chat은 unavailable이다. P8-L-A는 Memory의 목표 route `/memory`와 wide logical window kind `memory`를 계약으로 고정했지만 실제 route·window·feature가 구현된 것으로 기록하지 않는다. Diagnostics·Backup도 여전히 후속 단계 전에는 구현된 window kind로 간주하지 않는다.
+
+P8-L 목표 surface:
+
+| Surface | Product kind | Shell | layout | target Tauri kind | 현재 상태 |
+|---|---|---|---|---|---|
+| World Chat list/thread | World App | `DeviceShell` → `DeviceFrame` | Phone | existing `phone` | route groundwork only; feature unavailable |
+| WorldCharacter public profile | World App | `DeviceShell` → `DeviceFrame` | Phone | existing `phone` | route·capability absent |
+| owner Memory workspace | Workspace | `MemoryWorkspaceShell` | Wide; narrow Browser single-column | new `memory` | contract only; route·window absent |
 
 ### 4.2 실행 경로별 Device 표현
 
@@ -762,7 +770,7 @@ next activity: World timezone을 반영한 local display
 
 ### 11.5 Future Local surfaces
 
-Memory, Diagnostics, Backup·Restore는 이 token과 state vocabulary를 재사용한다. 그러나 해당 단계 전에 route·window kind·data contract를 미리 구현된 것으로 간주하지 않는다.
+Memory, Diagnostics, Backup·Restore는 이 token과 state vocabulary를 재사용한다. P8-L-A는 Memory에 한해 `/memory`·wide `memory` target과 scope/state 계약을 고정했지만 실제 feature·route·window·backend capability를 미리 구현된 것으로 간주하지 않는다. Diagnostics와 Backup·Restore도 각 단계 전에는 route·window kind·data contract가 없다.
 
 ---
 
@@ -1092,7 +1100,20 @@ UI-E PR #209 후속 Hotfix는 사용자 visual에서 발견된 `최근 결과` r
 - nested global reply는 실제 detail route link·keyboard Enter/Space를 제공하며 capability에 없는 fake social action은 계속 숨긴다. static router의 Feed read는 legacy community helper 대신 `features/social/public.ts`를 사용해 Next/static source fork를 한 단계 줄였다.
 - touched World App·Creator Studio·Device/Tauri chrome의 legacy raw colors를 semantic role로 수렴했고 raw-color inventory는 33 files·1,408 occurrences로 감소했다. Relationship Graph의 긴 한국어 node label은 두 줄로 읽을 수 있게 표현한다.
 - local verification은 frontend lint·typecheck·Next production build·static export, Next/static behavior, backend full regression, Rust fmt/test/clippy, Tauri shell, embedded sidecar, NSIS·MSI bundle까지 포함한다.
-- 이 evidence는 local technical PASS다. UI-F Issue·push·Draft PR·Hosted CI·사용자 Ready·merge·post-merge Actions와 최종 exact-SHA Windows 100%·125%·150%·Host Tauri·installer 사용자 Gate는 아직 시작하지 않았다.
+- UI-F는 Issue #210·PR #211, exact PR head `904298f93450878d38e0081233d61f627c02da80`, Hosted CI 22/22, 사용자 Ready, merge `81e428bc069184edba06caf3c5821bae3cc6bfd7`, final exact-SHA Windows 100%·125%·150%·Next·Docker·Host Tauri·installer 사용자 Gate와 post-merge Actions 6/6 PASS까지 닫혔다.
+
+### 18.6 P8-L-A Chat·Memory contract evidence
+
+- exact pre-P8 baseline은 UI-F exact merge `81e428bc069184edba06caf3c5821bae3cc6bfd7`와 tree `c932080bdd55b03de30123076ac48eb8b17f6cb4`다.
+- `/worlds/{worldId}/chat`은 Next·static·Rust Phone route groundwork만 존재하고 실제 section은 unavailable이다. legacy `/messages`는 Next-only이며 streaming·WorldCharacter role·generation lifecycle 증거가 아니다.
+- Chat의 canonical surface는 existing Phone `/worlds/{worldId}/chat`과 nested thread route다. 별도 Chat window kind를 만들지 않는다.
+- World Feed·post detail·reply author는 backend가 `world_id + author_world_character_id + profile capability`를 제공할 때만 `/worlds/{worldId}/characters/{worldCharacterId}`로 연결한다. owner `/agents`나 global `/profiles` fallback은 금지한다.
+- Hosted profile·letter·message bubble·composer·failure/retry anatomy는 ADAPTED reference다. World requester resolution, create-or-get, generation stream, single delayed presence와 typed retry는 LOCAL behavior다.
+- active generation의 Router·Planner·DB·revalidation phase는 약 300ms 뒤 단일 `입력 중 …`으로만 표시한다. Character Response Generator text delta만 stream하며 partial text와 raw internal output은 canonical message나 기억이 아니다.
+- owner Memory는 `/memory`와 new wide logical window kind `memory`를 target으로 한다. 이 결정은 route/window가 지금 구현됐다는 뜻이 아니다. current disabled `/memory-explorer`는 shipped route가 아니며 canonical destination도 아니다.
+- `features/chat`과 `features/memory`는 실제 feature가 생길 때 각 `public.ts` 경계를 소유한다. social/profile/World route는 그 public boundary만 조합하고 shared UI에 thread·retry·memory policy를 넣지 않는다.
+- machine-readable baseline, DIRECT·ADAPTED·LOCAL·REJECTED matrix와 exact route/window decisions는 `security/p8_l_a_inventory.json`과 `docs/architecture/p8-l-a-contract-closeout.md`가 소유한다.
+- P8-L-A는 contract/inventory 단계다. runtime UI, API, schema, provider call, user Chat/Memory PASS를 뜻하지 않는다.
 
 따라서 현재 허용되는 판정:
 
@@ -1104,11 +1125,12 @@ UI-C PHONE SHELL·NAVIGATION·ROUTE PARITY PASS / MERGED / POST-MERGE PASS
 UI-D0 STATIC POST DETAIL HANDOFF FULL PASS / MERGED / POST-MERGE PASS
 UI-D SOCIAL CORE HOSTED PARITY FULL PASS / MERGED / POST-MERGE PASS
 UI-E CHARACTER·AUTONOMY·LOCAL-ONLY SURFACE FULL PASS / MERGED / POST-MERGE 6/6 PASS
-UI-F VISUAL·CROSS-RUNTIME CLOSEOUT IMPLEMENTED / LOCAL TECH PASS / CANONICAL VISUAL 36/36 PASS / EXTERNAL LIFECYCLE PENDING
-UI-C WINDOWS 100%·125%·150% SCALE USER GATE PASS / UI-F FINAL EXACT-SHA RECHECK PENDING
+UI-F VISUAL·CROSS-RUNTIME CLOSEOUT FULL PASS / MERGED / POST-MERGE 6/6 PASS
+UI-C AND UI-F FINAL WINDOWS 100%·125%·150% SCALE USER GATES PASS
+P8-L-A CHAT·MEMORY CONTRACT AND INVENTORY FROZEN / RUNTIME FEATURE NOT IMPLEMENTED
 ```
 
-token·shell·social core·Local-only surface·visual/runtime Gate와 사용자 승인을 모두 통과한 뒤에만 허용되는 판정:
+token·shell·social core·Local-only surface·visual/runtime Gate와 사용자 승인이 모두 닫혔으므로 현재 함께 허용되는 판정:
 
 ```text
 ANGMOO LOCAL DESIGN FOUNDATION PASS

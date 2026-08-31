@@ -1,0 +1,306 @@
+{
+  "baseline": {
+    "commit": "81e428bc069184edba06caf3c5821bae3cc6bfd7",
+    "tree": "c932080bdd55b03de30123076ac48eb8b17f6cb4"
+  },
+  "contract": {
+    "call_budget": {
+      "normal_full_path": {
+        "BOTH": 4,
+        "CANONICAL": 3,
+        "CLARIFICATION": 2,
+        "CURRENT_CONTEXT": 2,
+        "GRAPH": 3
+      },
+      "request_wide_schema_repair_max": 1
+    },
+    "canonical_chat_routes": {
+      "list": "/worlds/{worldId}/chat",
+      "thread": "/worlds/{worldId}/chat/{threadId}",
+      "window_kind": "phone"
+    },
+    "canonical_memory_surface": {
+      "browser_route": "/memory",
+      "legacy_planned_placeholder": "/memory-explorer",
+      "window_kind": "memory"
+    },
+    "canonical_profile_route": "/worlds/{worldId}/characters/{worldCharacterId}",
+    "evaluation": {
+      "corpus_case_count": 315,
+      "corpus_path": "backend/tests/fixtures/p8_l/retrieval_topology_v1/held_out_ko.jsonl",
+      "model": "gemini-2.5-flash-lite",
+      "model_purpose": "P8 comparison fixture only; not a production default decision",
+      "provider": "google",
+      "seed": 8312026,
+      "temperature": 0.0,
+      "top_p": 1.0
+    },
+    "fts_ownership": {
+      "decision": "separate-private-recall-index",
+      "p5_existing_relative_path": "search/generations/v1/angmoo-search.sqlite3",
+      "p8_reserved_relative_path": "search/memory-recall/generations/v1/angmoo-memory-recall.sqlite3"
+    },
+    "migration_reservations": [
+      {
+        "alembic_revision": "20260831_0084",
+        "down_revision": "20260825_0083",
+        "embedded_sqlite_version": 4,
+        "owner_stage": "P8-L-D",
+        "purpose": "World-scoped Chat v2 identity and role binding"
+      },
+      {
+        "alembic_revision": "20260831_0085",
+        "down_revision": "20260831_0084",
+        "embedded_sqlite_version": 5,
+        "owner_stage": "P8-L-F",
+        "purpose": "canonical Memory schema and scope control"
+      },
+      {
+        "alembic_revision": "20260831_0086",
+        "down_revision": "20260831_0085",
+        "embedded_sqlite_version": 6,
+        "owner_stage": "P8-L-J",
+        "purpose": "response request and generation lifecycle"
+      }
+    ],
+    "response_lifecycle": {
+      "canonical_row": "chat_response_requests",
+      "decision": "request-row-with-renewable-lease-generation-and-fenced-finalize",
+      "raw_delta_columns": 0,
+      "stable_presentation_key": "response_slot_id"
+    },
+    "retrieval_contract_versions": {
+      "canonical_plan": "canonical-plan.v1",
+      "graph_plan": "graph-plan.v1",
+      "intent": "retrieval-intent.v1",
+      "resolved": "resolved-retrieval.v1",
+      "workflow": "retrieval-workflow.v1"
+    },
+    "retrieval_routes": [
+      "CURRENT_CONTEXT",
+      "CANONICAL",
+      "GRAPH",
+      "BOTH",
+      "CLARIFICATION"
+    ],
+    "stream": {
+      "crg_delta_only": true,
+      "presence_reveal_ms": 300,
+      "protocol": "chat-generation-stream.v1",
+      "transport": "fetch-ndjson"
+    },
+    "workflow_recipes": [
+      "INDEPENDENT_PARALLEL",
+      "GRAPH_THEN_CANONICAL",
+      "CANONICAL_THEN_GRAPH"
+    ]
+  },
+  "corpus_categories": {
+    "both_chain": 30,
+    "canonical_history": 30,
+    "clarification_identity": 20,
+    "current_context": 20,
+    "graph_direction": 30,
+    "graph_path_shared": 25,
+    "injection_and_caps": 30,
+    "no_evidence_policy": 20,
+    "relationship_cause": 30,
+    "safety_scope": 30,
+    "temporal_comparison": 20,
+    "time_rank_aggregate": 30
+  },
+  "contract_registry": {
+    "path": "security/p8_l_a_contract_registry.json",
+    "sha256": "432d6e8c38cf8667036cd72d2e31668b150ba5406ad5804a3eed05a84a23840f"
+  },
+  "documentation": "docs/architecture/p8-l-a-contract-closeout.md",
+  "evaluation_thresholds": {
+    "absolute": {
+      "both_recipe_success_min": 0.95,
+      "canonical_plan_executable_min": 0.98,
+      "clarification_f1_min": 0.9,
+      "entity_role_direction_time_accuracy_min": 0.95,
+      "evidence_precision_min": 0.95,
+      "evidence_recall_min": 0.85,
+      "graph_plan_executable_min": 0.98,
+      "grounded_response_rate_min": 0.9,
+      "router_macro_f1_min": 0.9,
+      "schema_repair_rate_max": 0.05,
+      "unnecessary_retrieval_rate_max": 0.1
+    },
+    "adoption_any_of": [
+      {
+        "all_of": [
+          {
+            "metric": "evidence_f1_delta",
+            "operator": ">=",
+            "value": 0.03
+          }
+        ],
+        "id": "same_model_evidence_f1_improvement"
+      },
+      {
+        "all_of": [
+          {
+            "metric": "critical_semantic_error_relative_reduction",
+            "operator": ">=",
+            "value": 0.3
+          },
+          {
+            "metric": "evidence_f1_delta",
+            "operator": ">=",
+            "value": -0.01
+          }
+        ],
+        "id": "critical_error_reduction_with_noninferior_evidence_f1"
+      },
+      {
+        "all_of": [
+          {
+            "condition": "candidate_model_is_smaller",
+            "equals": true
+          },
+          {
+            "condition": "all_absolute_gates_pass",
+            "equals": true
+          },
+          {
+            "condition": "all_safety_gates_pass",
+            "equals": true
+          }
+        ],
+        "id": "smaller_model_meets_all_gates"
+      },
+      {
+        "all_of": [
+          {
+            "condition": "candidate_uses_node_specific_models",
+            "equals": true
+          },
+          {
+            "condition": "measured_resource_or_cost_reduction_is_positive",
+            "equals": true
+          },
+          {
+            "condition": "end_to_end_quality_is_noninferior",
+            "equals": true
+          },
+          {
+            "condition": "all_absolute_gates_pass",
+            "equals": true
+          },
+          {
+            "condition": "all_safety_gates_pass",
+            "equals": true
+          }
+        ],
+        "id": "node_specific_model_resource_reduction_with_noninferior_quality"
+      }
+    ],
+    "measurement": {
+      "comparison_cases": "same-frozen-case-ids",
+      "critical_semantic_error_denominator": "eligible-held-out-cases",
+      "evidence_f1": "harmonic-mean-of-micro-evidence-precision-and-recall",
+      "latency_percentiles": [
+        "p50",
+        "p95"
+      ],
+      "metric_contract_version": "p8-l-retrieval-eval.v1",
+      "safety_taxonomy_version": "p8-l-retrieval-safety.v1",
+      "warm_same_model_role_reload_max": 0,
+      "warm_same_model_role_swap_max": 0
+    },
+    "safety_violation_max": 0
+  },
+  "legacy": {
+    "backend_files": [
+      "backend/app/api/v1/routes/messages.py",
+      "backend/app/models/messages.py",
+      "backend/app/schemas/messages.py",
+      "backend/app/services/messages.py"
+    ],
+    "frontend_files": [
+      "frontend/src/app/messages/[threadId]/page.tsx",
+      "frontend/src/app/messages/page.tsx",
+      "frontend/src/components/message-thread-client.tsx",
+      "frontend/src/components/messages-client.tsx",
+      "frontend/src/lib/agents.ts"
+    ],
+    "message_migrations": [
+      "backend/app/alembic/versions/20260616_0046_messages_v1.py",
+      "backend/app/alembic/versions/20260616_0047_message_default_gemma4_26b.py",
+      "backend/app/alembic/versions/20260617_0050_message_default_gemini25_flash_lite.py",
+      "backend/app/alembic/versions/20260617_0051_backfill_unconfigured_message_default.py",
+      "backend/app/alembic/versions/20260802_0068_message_response_leases.py"
+    ],
+    "relevant_fixtures": [
+      "backend/tests/fixtures/core_experience/p0-contract-v1/memory_deleted_blocked.json",
+      "backend/tests/fixtures/core_experience/p0-contract-v1/memory_opt_out_blocked.json"
+    ],
+    "relevant_tests": [
+      "backend/tests/test_google_model_selection.py",
+      "backend/tests/test_m3_authorization_deletion.py",
+      "backend/tests/test_messages_service.py",
+      "backend/tests/test_p0_contract_fixtures.py",
+      "backend/tests/test_postgres_security_concurrency.py",
+      "backend/tests/test_r7_residual_security.py"
+    ],
+    "required_route_operations": [
+      "DELETE /api/v1/messages/threads/{thread_id}",
+      "GET /api/v1/characters/{character_id}/message-settings",
+      "GET /api/v1/messages/settings",
+      "GET /api/v1/messages/threads",
+      "GET /api/v1/messages/threads/{thread_id}",
+      "PATCH /api/v1/characters/{character_id}/message-settings",
+      "PATCH /api/v1/messages/settings",
+      "PATCH /api/v1/messages/threads/{thread_id}",
+      "POST /api/v1/messages/threads",
+      "POST /api/v1/messages/threads/{thread_id}/messages",
+      "POST /api/v1/messages/threads/{thread_id}/messages/{message_id}/retry"
+    ],
+    "required_tables": [
+      "character_message_settings",
+      "message_messages",
+      "message_threads",
+      "user_message_preferences"
+    ]
+  },
+  "required_absent_paths": [
+    "backend/app/domains/chat",
+    "backend/app/domains/memory",
+    "frontend/src/features/chat",
+    "frontend/src/features/memory"
+  ],
+  "required_markers": {
+    "backend/app/runtime/search/social_projection.py": [
+      "self.index.rebuild",
+      "Post"
+    ],
+    "backend/app/services/messages.py": [
+      "CONTEXT_MESSAGE_LIMIT = 20",
+      "CONTEXT_CHAR_LIMIT = 12_000",
+      "MESSAGE_RESPONSE_LEASE_SECONDS = 150",
+      "RunLlmTracker(max_calls=1)"
+    ],
+    "desktop/src-tauri/src/product_windows.rs": [
+      "ProductWindowKind::Phone",
+      "\"feed\" | \"chat\" | \"characters\" | \"relationships\""
+    ],
+    "frontend/src/features/device-home/model/device-home-contract.ts": [
+      "id: \"memory-explorer\"",
+      "href: \"/memory-explorer\"",
+      "availability: \"planned\""
+    ],
+    "frontend/src/features/world-app/model/world-app-contract.ts": [
+      "id: \"chat\"",
+      "availability: \"unavailable\""
+    ],
+    "frontend/src/shared/desktop/product-window.ts": [
+      "\"phone\"",
+      "\"studio\"",
+      "\"relationship-graph\""
+    ]
+  },
+  "schema_version": 1,
+  "policy_id": "angmoo-p8-l-a-contract-inventory-v1"
+}

@@ -470,6 +470,76 @@ than maintaining runtime-specific baselines.
 The pinned-Noble local canonical run passed `36/36`. UI-F also reduced a static
 composition fork by routing Feed reads through `features/social/public.ts`, and
 its source inventory now records 27 legacy candidate-consumer edges instead of
-28. The implementation remains a local technical result until Issue/push/Draft
-PR/Hosted CI/user Ready/merge/post-merge and final exact-SHA Windows/installer
-Gates are complete.
+28. UI-F subsequently completed Issue, PR-head Hosted CI, user Ready, merge,
+exact-SHA Windows/installer Gates, and post-merge Actions on exact merge
+`81e428bc069184edba06caf3c5821bae3cc6bfd7`.
+
+## P8-L-A Chat and Memory product boundary
+
+P8-L-A freezes an inventory and target contract; it does not make Chat or
+Memory available. The current `/worlds/{worldId}/chat` path already reaches the
+same Next/static `WorldApp` Phone shell and is accepted by the Rust Phone
+allowlist, but its section is deliberately `unavailable`. Legacy `/messages`
+and `/messages/{threadId}` remain Next-only wrappers over legacy components.
+There is no `features/chat`, `features/memory`, WorldCharacter profile route,
+generation stream, or Memory window at the audited baseline.
+
+The P8 target stays feature-first:
+
+```text
+World App route wrapper
+  -> features/chat/public
+  -> feature-owned API/model/UI
+
+World social author or features/characters profile
+  -> features/chat/public entry capability only
+
+Memory route/window composition
+  -> features/memory/public
+```
+
+No route, profile or social feature may deep-import Chat internals. Chat may
+use the Memory public facade for owner-management entry and evidence
+presentation, but it does not own Memory lifecycle policy. Shared UI retains
+only product-neutral avatar, button, dialog, live-region, status and feedback
+primitives.
+
+The canonical routes and windows are:
+
+| Surface | Browser/static route | Tauri window |
+|---|---|---|
+| World Chat list | `/worlds/{worldId}/chat` | existing `phone`/`main` |
+| World Chat thread | `/worlds/{worldId}/chat/{threadId}` | existing `phone`/`main` |
+| WorldCharacter profile | `/worlds/{worldId}/characters/{worldCharacterId}` | existing `phone`/`main` |
+| owner Memory workspace | `/memory` | new wide `memory` singleton |
+
+The current disabled Device Home `/memory-explorer` placeholder is not a
+shipped route and is not implementation evidence. P8 may retain it only as a
+hidden compatibility redirect to `/memory` after the real feature exists.
+Phone Chat uses a Dialog for quick evidence inspection; list, filter, pin,
+correction and deletion belong to the wide Memory workspace.
+
+World social DTOs must retain `world_id + author_world_character_id` through
+presentation. A profile link or letter CTA is rendered only when the backend
+returns the corresponding capability; unsupported runtimes keep the identity
+inert. Global `/profiles`, owner-management `/agents`, and global
+`{character_id}` message creation are not fallbacks. The requester candidate
+contract is 0 = setup guidance, 1 = automatic resolve, N = anomaly and no
+thread. Active-thread create-or-get must remain idempotent under double click,
+replay and concurrency.
+
+Legacy message/profile visual anatomy is adoption evidence, not behavior
+parity. Avatar/row/World shell primitives are DIRECT; profile, letter,
+transcript, composer, failure bubble and retry spinner are ADAPTED; World
+identity, requester resolution, generation lifecycle, CRG-only stream and
+Memory workspace are LOCAL. Immediate client `pending` as stream proof,
+message-ID in-place retry, fake counts/actions, a Chat-only Tauri window, and
+automatic use of the clicked post as evidence are REJECTED.
+
+P8 later adds exact Next/static/Rust route tests, unauthenticated Chat return,
+profile-to-Chat/back restoration, delayed single presence, stream/reconnect,
+typed retry and Memory window parity. Until those tests and backend
+capabilities exist, the current unavailable/disabled states remain truthful.
+The full machine-verifiable baseline and decisions live in
+`docs/architecture/p8-l-a-contract-closeout.md` and
+`security/p8_l_a_inventory.json`.
