@@ -1,0 +1,495 @@
+{
+  "api": {
+    "canonical_operations": [
+      {
+        "handle": "chat_threads_list",
+        "method": "GET",
+        "path": "/api/v1/worlds/{world_id}/chat/threads"
+      },
+      {
+        "handle": "chat_threads_create_or_get",
+        "method": "POST",
+        "path": "/api/v1/worlds/{world_id}/chat/threads"
+      },
+      {
+        "handle": "chat_entry_get",
+        "method": "GET",
+        "path": "/api/v1/worlds/{world_id}/world-characters/{responding_id}/chat-entry"
+      },
+      {
+        "handle": "chat_thread_get",
+        "method": "GET",
+        "path": "/api/v1/worlds/{world_id}/chat/threads/{thread_id}"
+      },
+      {
+        "handle": "chat_message_create",
+        "method": "POST",
+        "path": "/api/v1/worlds/{world_id}/chat/threads/{thread_id}/messages"
+      },
+      {
+        "handle": "chat_response_retry",
+        "method": "POST",
+        "path": "/api/v1/worlds/{world_id}/chat/threads/{thread_id}/retry"
+      },
+      {
+        "handle": "chat_response_request_get",
+        "method": "GET",
+        "path": "/api/v1/worlds/{world_id}/chat/threads/{thread_id}/requests/{request_id}"
+      },
+      {
+        "handle": "chat_response_events_stream",
+        "method": "GET",
+        "path": "/api/v1/worlds/{world_id}/chat/threads/{thread_id}/requests/{request_id}/events",
+        "transport": "fetch-ndjson"
+      },
+      {
+        "handle": "memory_settings_get",
+        "method": "GET",
+        "path": "/api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/settings"
+      },
+      {
+        "handle": "memory_settings_update",
+        "method": "PATCH",
+        "path": "/api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/settings"
+      },
+      {
+        "handle": "memories_list",
+        "method": "GET",
+        "path": "/api/v1/worlds/{world_id}/world-characters/{subject_id}/memories"
+      },
+      {
+        "handle": "memory_get",
+        "method": "GET",
+        "path": "/api/v1/worlds/{world_id}/world-characters/{subject_id}/memories/{memory_id}"
+      },
+      {
+        "handle": "memory_pin",
+        "method": "POST",
+        "path": "/api/v1/worlds/{world_id}/world-characters/{subject_id}/memories/{memory_id}/pin"
+      },
+      {
+        "handle": "memory_correct",
+        "method": "POST",
+        "path": "/api/v1/worlds/{world_id}/world-characters/{subject_id}/memories/{memory_id}/corrections"
+      },
+      {
+        "handle": "memory_delete",
+        "method": "DELETE",
+        "path": "/api/v1/worlds/{world_id}/world-characters/{subject_id}/memories/{memory_id}"
+      }
+    ],
+    "chat_entry_enums": {
+      "create_or_get_outcome": [
+        "created",
+        "reused",
+        "resolution_required"
+      ],
+      "requester_cardinality": [
+        "zero",
+        "one",
+        "anomaly"
+      ]
+    },
+    "handle_semantics": "registry-derived-label-not-openapi-operation-id",
+    "http_classes": {
+      "400": "invalid-plan-independent-user-input",
+      "401": "local-auth-unavailable",
+      "403": "owner-world-or-observation-scope-denied",
+      "404": "missing-or-safely-undisclosed-resource",
+      "409": "stale-version-lease-conflict-or-duplicate-active-request",
+      "422": "invalid-plan-independent-schema-or-no-safe-clarification",
+      "429": "provider-budget-or-request-concurrency",
+      "503": "provider-fts-or-graph-unavailable"
+    },
+    "scope_rules": [
+      "owner-identity-is-injected-from-authenticated-local-context",
+      "requester-and-responding-world-characters-must-be-active-in-the-same-world",
+      "thread-create-is-idempotent-create-or-get",
+      "memory-mutation-requires-monotonic-version-or-etag-equivalent"
+    ],
+    "typed_outcomes": [
+      "target_profile_unavailable",
+      "target_not_chat_capable",
+      "requester_missing",
+      "requester_cardinality_anomaly",
+      "thread_create_conflict_recovered",
+      "generation_active",
+      "generation_stale",
+      "sequence_gap",
+      "already_committed",
+      "cancelled",
+      "timed_out",
+      "orphaned",
+      "retryable_failure",
+      "nonretryable_failure"
+    ],
+    "unfrozen": [
+      "openapi-operation-id",
+      "exact-error-envelope-fields",
+      "per-operation-http-outcome-cross-product"
+    ]
+  },
+  "evidence": {
+    "bundle_minimum_semantics": [
+      "canonical-source-reference-kind-time-world-and-subject",
+      "verified-short-excerpt-or-summary",
+      "provenance-and-observation-state",
+      "relationship-direction",
+      "memory-item-lifecycle-state",
+      "retrieval-axis-primitive-rank-and-revalidation-result",
+      "user-disclosable-evidence-capability"
+    ],
+    "classes": [
+      "current_context",
+      "canonical",
+      "graph"
+    ],
+    "evaluation_outcomes": [
+      "ANSWER",
+      "CLARIFICATION",
+      "NO_EVIDENCE"
+    ],
+    "revalidation_checks": [
+      "request-and-envelope-match",
+      "source-success-or-committed",
+      "not-deleted-hidden-tombstoned-or-superseded",
+      "owner-and-world-match",
+      "subject-counterpart-and-direction-match",
+      "active-world-character-membership",
+      "not-blocked-departed-or-revoked",
+      "responding-character-observed",
+      "memory-enabled-and-retention-valid"
+    ]
+  },
+  "registry_id": "angmoo-p8-l-a-contract-registry-v1",
+  "response_lifecycle": {
+    "canonical_row": "chat_response_requests",
+    "decision": "request-row-with-renewable-lease-generation-and-fenced-finalize",
+    "fence_scope_fields": [
+      "request_id",
+      "thread_id",
+      "request_scope_hash",
+      "generation_id",
+      "attempt_number",
+      "lease_generation",
+      "expected_prior_state"
+    ],
+    "minimum_row_semantics": [
+      "request_id",
+      "thread_id",
+      "user_message_id",
+      "response_slot_id",
+      "request_scope_hash",
+      "idempotency_key",
+      "generation_id",
+      "attempt_number",
+      "retry_of_request_id",
+      "route",
+      "workflow_recipe",
+      "lease_generation",
+      "state",
+      "last_emitted_sequence",
+      "terminal_reason",
+      "retryable",
+      "committed_assistant_message_id",
+      "created_at",
+      "updated_at",
+      "terminal_at"
+    ],
+    "phases": [
+      "accepted",
+      "lease_acquired",
+      "preflighted",
+      "routing",
+      "resolving",
+      "current_context_ready",
+      "canonical_planning",
+      "graph_planning",
+      "both_coordinating",
+      "clarification_prepared",
+      "optional_retrieving",
+      "evidence_frozen",
+      "response_generating",
+      "response_streaming",
+      "committing",
+      "committed",
+      "rejected",
+      "cancelled",
+      "timed_out",
+      "failed",
+      "orphaned"
+    ],
+    "raw_delta_columns": 0,
+    "retry_rules": [
+      "only-latest-retryable-failure-is-user-retryable",
+      "retry-uses-same-stored-user-message-and-new-request-generation-attempt",
+      "retry-does-not-rewrite-prior-failed-assistant-row",
+      "committed-terminal-delivery-loss-rehydrates-without-crg-recall",
+      "stream-disconnect-never-auto-regenerates"
+    ],
+    "stable_presentation_key": "response_slot_id",
+    "terminal_states": {
+      "success": [
+        "committed"
+      ],
+      "unsuccessful": [
+        "rejected",
+        "cancelled",
+        "timed_out",
+        "failed",
+        "orphaned"
+      ]
+    },
+    "unfrozen": [
+      "exact-state-transition-matrix",
+      "phase-persistence-versus-diagnostic-only",
+      "terminal-reason-enum"
+    ]
+  },
+  "retrieval": {
+    "contracts": {
+      "canonical_plan": {
+        "binding_fields": [
+          "version",
+          "request_id",
+          "envelope_version",
+          "envelope_hash",
+          "steps"
+        ],
+        "forbidden_meanings": [
+          "raw-sql-table-or-column",
+          "graph-primitive",
+          "route-intent-entity-or-direction-reinterpretation",
+          "actual-id-or-hard-cap",
+          "database-execution-or-character-response"
+        ],
+        "owns": [
+          "canonical-and-fts-primitive-selection",
+          "source-kind-event-type-and-search-concept",
+          "resolved-time-entity-filters",
+          "aggregation-comparison-ranking-and-canonical-dependencies"
+        ],
+        "version": "canonical-plan.v1"
+      },
+      "graph_plan": {
+        "binding_fields": [
+          "version",
+          "request_id",
+          "envelope_version",
+          "envelope_hash",
+          "steps"
+        ],
+        "forbidden_meanings": [
+          "raw-cypher-label-property-or-relationship-type",
+          "canonical-primitive",
+          "route-intent-entity-or-direction-reinterpretation",
+          "actual-id-or-hard-cap",
+          "graph-execution-or-character-response"
+        ],
+        "owns": [
+          "direct-relationship-and-evidence",
+          "shared-neighbor-and-shortest-path",
+          "related-character-ranking-and-graph-dependencies"
+        ],
+        "version": "graph-plan.v1"
+      },
+      "intent": {
+        "forbidden_meanings": [
+          "actual-owner-world-thread-world-character-or-source-id",
+          "raw-sql-or-cypher-schema-identifier",
+          "canonical-or-graph-primitive-step",
+          "hard-cap-or-permission-decision",
+          "character-response-text"
+        ],
+        "minimum_semantic_fields": [
+          "version",
+          "decision",
+          "route",
+          "intent",
+          "entities",
+          "optional-relationship-from-to",
+          "optional-time-scope",
+          "optional-aggregation",
+          "optional-coordination-hint",
+          "optional-clarification-slot"
+        ],
+        "owner": "retrieval-router-llm",
+        "version": "retrieval-intent.v1"
+      },
+      "resolved": {
+        "immutable_for_planners": true,
+        "minimum_semantic_fields": [
+          "request_id",
+          "envelope_version",
+          "envelope_hash",
+          "authenticated-owner",
+          "current-world",
+          "requester-world-character",
+          "responding-world-character",
+          "entity-reference-bindings",
+          "relationship-direction-bindings",
+          "absolute-time-scope",
+          "membership-block-visibility-and-observation-scope",
+          "memory-enabled",
+          "operation-allowlist",
+          "row-hop-fanout-timeout-and-token-caps"
+        ],
+        "owner": "code-entity-resolver-and-policy-envelope",
+        "version": "resolved-retrieval.v1"
+      },
+      "workflow": {
+        "forbidden_meanings": [
+          "coordinator-ai",
+          "arbitrary-expression",
+          "circular-dependency",
+          "unbounded-fanout",
+          "result-driven-unbounded-replanning"
+        ],
+        "owner": "code-dependency-coordinator",
+        "recipes": [
+          "INDEPENDENT_PARALLEL",
+          "GRAPH_THEN_CANONICAL",
+          "CANONICAL_THEN_GRAPH"
+        ],
+        "version": "retrieval-workflow.v1"
+      }
+    },
+    "logical_call_matrix": {
+      "BOTH": {
+        "canonical_planner": 1,
+        "character_response_generator": 1,
+        "graph_planner": 1,
+        "normal_total": 4,
+        "retrieval_router": 1,
+        "with_request_wide_repair_max": 5
+      },
+      "CANONICAL": {
+        "canonical_planner": 1,
+        "character_response_generator": 1,
+        "graph_planner": 0,
+        "normal_total": 3,
+        "retrieval_router": 1,
+        "with_request_wide_repair_max": 4
+      },
+      "CLARIFICATION": {
+        "canonical_planner": 0,
+        "character_response_generator": 1,
+        "graph_planner": 0,
+        "normal_total": 2,
+        "retrieval_router": 1,
+        "with_request_wide_repair_max": 3
+      },
+      "CURRENT_CONTEXT": {
+        "canonical_planner": 0,
+        "character_response_generator": 1,
+        "graph_planner": 0,
+        "normal_total": 2,
+        "retrieval_router": 1,
+        "with_request_wide_repair_max": 3
+      },
+      "GRAPH": {
+        "canonical_planner": 0,
+        "character_response_generator": 1,
+        "graph_planner": 1,
+        "normal_total": 3,
+        "retrieval_router": 1,
+        "with_request_wide_repair_max": 4
+      }
+    },
+    "rules": [
+      "budget-is-per-accepted-generation-attempt",
+      "foreground-request-has-one-shared-schema-repair-maximum",
+      "crg-has-no-schema-repair-or-automatic-regeneration-budget",
+      "logical-node-calls-and-physical-provider-attempts-are-counted-separately",
+      "policy-denial-empty-dependency-or-typed-short-circuit-may-skip-a-planner"
+    ],
+    "routes": [
+      "CURRENT_CONTEXT",
+      "CANONICAL",
+      "GRAPH",
+      "BOTH",
+      "CLARIFICATION"
+    ],
+    "unfrozen": [
+      "strict-runtime-json-schema",
+      "complete-intent-and-primitive-enums",
+      "resolved-envelope-hash-algorithm",
+      "workflow-slot-and-opaque-reference-shape"
+    ]
+  },
+  "safety": {
+    "forbidden_evidence_reasons": [
+      "cross_owner",
+      "cross_world",
+      "blocked",
+      "deleted",
+      "hidden",
+      "unobserved"
+    ],
+    "violation_classes": [
+      "raw_sql_or_cypher_execution",
+      "disallowed_evidence_scope",
+      "reversed_relationship_direction",
+      "llm_id_trusted_as_canonical",
+      "hard_cap_bypass",
+      "unsupported_historical_event_fabrication",
+      "request_wide_repair_overflow",
+      "duplicate_crg_call_or_assistant_commit",
+      "internal_data_user_visible_stream",
+      "partial_delta_canonicalized_or_memorized",
+      "stream_scope_generation_sequence_mismatch_accepted",
+      "crg_recalled_after_committed_delivery_loss"
+    ],
+    "violation_max_each": 0
+  },
+  "schema_version": 1,
+  "status": "contract-only-runtime-not-implemented",
+  "stream": {
+    "common_envelope_fields": [
+      "protocol_version",
+      "request_id",
+      "request_scope_hash",
+      "generation_id",
+      "attempt_number",
+      "sequence",
+      "event_type",
+      "payload"
+    ],
+    "crg_delta_only": true,
+    "event_types": [
+      "accepted",
+      "delta",
+      "completed",
+      "failed",
+      "cancelled"
+    ],
+    "forbidden_user_visible_payloads": [
+      "router-output",
+      "planner-output",
+      "raw-db-row",
+      "raw-evidence-bundle",
+      "provider-error-object",
+      "internal-canonical-id",
+      "stack-trace"
+    ],
+    "presence_reveal_ms": 300,
+    "protocol": "chat-generation-stream.v1",
+    "sequence_rules": [
+      "starts-at-zero-per-generation",
+      "monotonically-increases",
+      "exact-replay-is-idempotently-ignored",
+      "scope-generation-attempt-mismatch-is-not-applied",
+      "reversed-sequence-or-gap-is-not-applied",
+      "gap-stale-or-mismatch-enters-typed-reconnect-or-reload",
+      "reconnect-reads-canonical-request-status-first",
+      "committed-status-rehydrates-without-crg-recall"
+    ],
+    "transport": "fetch-ndjson",
+    "unfrozen": [
+      "per-event-exact-payload-schema",
+      "bounded-sequence-window-size",
+      "reconnect-cursor-shape",
+      "same-sequence-different-payload-digest-rule"
+    ]
+  }
+}

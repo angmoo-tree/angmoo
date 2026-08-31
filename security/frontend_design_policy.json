@@ -549,7 +549,7 @@
       "isWindows ? frontendRoot : standaloneRoot"
     ],
     "frontend/DESIGN.md": [
-      "version: 1.7",
+      "version: 1.8",
       "EXCEPTION-A",
       "EXCEPTION-B",
       "EXCEPTION-C",
