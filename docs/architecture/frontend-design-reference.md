@@ -170,8 +170,10 @@ streaming, retry lifecycle, profile letter entry or Memory. It is implemented
 on Issue `#218` branch `feat/p8-l-d-world-chat-identity-role-binding`. Local
 technical verification passed with frontend lint/typecheck/build/static export,
 Next browser `18/18`, static/Tauri browser `61/61`, Rust route/window `7/7`, and
-the full backend suite `1543 passed, 22 skipped`. Push, Draft PR, Hosted CI,
-user, merge and post-merge Gates remain open.
+the full backend suite `1543 passed, 22 skipped`. Implementation commit
+`9351b38d70496ff60d97a1484808cbe7c3be58c5` is pushed and Draft PR `#219` is
+open. Hosted CI is running while user, Ready, merge and post-merge Gates remain
+open.
 
 ## Feature-first ownership contract
 

@@ -1,6 +1,6 @@
 # P8-L-D World-scoped Chat identity inventory
 
-Status: **IMPLEMENTED · LOCAL TECH PASS · ISSUE #218 OPEN · BRANCH `feat/p8-l-d-world-chat-identity-role-binding` · EXACT BASE `8a83f48ed565992f8c3e7dd1dbe958f33997e7ab` · PUSH/DRAFT PR/HOSTED CI/USER/READY/MERGE/POST-MERGE PENDING**
+Status: **IMPLEMENTED · LOCAL TECH PASS · ISSUE #218 OPEN · BRANCH `feat/p8-l-d-world-chat-identity-role-binding` · EXACT BASE `8a83f48ed565992f8c3e7dd1dbe958f33997e7ab` · IMPLEMENTATION COMMIT `9351b38d70496ff60d97a1484808cbe7c3be58c5` PUSHED · DRAFT PR #219 OPEN · HOSTED CI RUNNING · USER/READY/MERGE/POST-MERGE PENDING**
 
 P8-L-D owns the first append-only successor inventory after the P8-L-B Chat domain parity closeout. The machine-readable artifact is `p8-l-d-world-chat-identity-inventory.json`; it records the World-scoped thread identity, the Alembic/Embedded v4 migration pair, canonical World Chat routes, and the supported Windows installer `v3 → v4` upgrade fixture.
 

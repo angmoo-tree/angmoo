@@ -171,9 +171,11 @@ is owned by `app.api.v1.routes.world_chat`; it composes the Chat domain public
 DTO/error boundary and runtime service without importing runtime composition
 back into the domain. P8-L-D is implemented on Issue `#218` branch
 `feat/p8-l-d-world-chat-identity-role-binding`; local technical verification
-passed with the full backend suite at `1543 passed, 22 skipped`. Push, Draft PR,
-Hosted CI, user, merge and post-merge Gates are still pending, so this is not
-merged-main evidence. PostgreSQL-specific concurrency also remains unverified.
+passed with the full backend suite at `1543 passed, 22 skipped`. Implementation
+commit `9351b38d70496ff60d97a1484808cbe7c3be58c5` is pushed and Draft PR `#219`
+is open; Hosted CI is running while user, Ready, merge and post-merge Gates
+remain pending, so this is not merged-main evidence. PostgreSQL-specific
+concurrency also remains unverified.
 
 The final target split remains deliberate. `domains/chat` owns Chat entry,
 active-thread create-or-get, message/request/generation lifecycle, retry,

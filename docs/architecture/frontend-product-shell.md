@@ -615,5 +615,7 @@ Memory behavior. It is implemented from exact base
 `8a83f48ed565992f8c3e7dd1dbe958f33997e7ab` under Issue `#218`. Local
 technical verification passed with Next browser `18/18`, static/Tauri browser
 `61/61`, frontend lint/typecheck/build/export, Rust route/window `7/7`, and the
-full backend suite `1543 passed, 22 skipped`. Push, Draft PR, Hosted CI, user,
-merge and post-merge Gates remain pending.
+full backend suite `1543 passed, 22 skipped`. Implementation commit
+`9351b38d70496ff60d97a1484808cbe7c3be58c5` is pushed and Draft PR `#219` is
+open. Hosted CI is running while user, Ready, merge and post-merge Gates remain
+pending.
