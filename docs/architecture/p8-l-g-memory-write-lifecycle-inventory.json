@@ -1,0 +1,182 @@
+{
+  "contract_version": "memory-write.v1",
+  "domain_boundary": {
+    "application_service": "MemoryWriteLifecycleService",
+    "backend_ownership": "domains/memory",
+    "canonical_transaction": [
+      "memory_candidate_decision",
+      "memory_item",
+      "memory_item_evidence",
+      "maintenance_job"
+    ],
+    "ordinary_turn_provider_call_count": 0,
+    "provider_dependency": null,
+    "public_facade": "app.domains.memory.public",
+    "raw_sql_or_cypher_from_llm": 0
+  },
+  "eligibility_fail_closed": [
+    "source_not_found",
+    "source_identity_mismatch",
+    "world_mismatch",
+    "not_successful",
+    "not_visible",
+    "membership_inactive",
+    "blocked",
+    "unobserved",
+    "empty_summary",
+    "source_digest_conflict"
+  ],
+  "eligible_source_types": [
+    "CHAT_MESSAGE",
+    "OWNER_MEMORY_REQUEST",
+    "POST",
+    "REPLY",
+    "REACTION",
+    "SOCIAL_EVENT",
+    "ACTIVITY_EVENT",
+    "RELATIONSHIP_EVENT",
+    "JOINT_COMMITMENT"
+  ],
+  "executable_contract_gates": [
+    {
+      "expected": {
+        "code": "memory_opt_out",
+        "notes": [
+          "no candidate",
+          "no retrieval"
+        ],
+        "outcome": "rejected",
+        "provider_call_count": 0,
+        "writes": []
+      },
+      "fixture_id": "memory_opt_out_blocked",
+      "sha256": "133662726f1400378764ce8106a6332ae4e1fda7ae2b6da9d3d38215f6f092ac"
+    },
+    {
+      "expected": {
+        "code": "memory_not_retrievable",
+        "notes": [
+          "other user excluded",
+          "other world excluded"
+        ],
+        "outcome": "rejected",
+        "provider_call_count": 0,
+        "writes": []
+      },
+      "fixture_id": "memory_deleted_blocked",
+      "sha256": "ec77bd08b88902967262cdbea5b8747ad2a3c4dea564dd0c05710b918a7fadd3"
+    }
+  ],
+  "historical_chain": {
+    "current_tree_owner": "P8-L-G",
+    "p8_l_f_sha256": "3558e78857a0095664815cb1364044e0d063115f76eed976be981cba95a96aab",
+    "predecessor_mode": "frozen_digest"
+  },
+  "lifecycle": {
+    "candidate": [
+      "pending",
+      "accepted",
+      "rejected"
+    ],
+    "cleanup": "idempotent_leased_maintenance_job",
+    "correction": "new_item_plus_evidence_then_old_superseded",
+    "delete": "immediate_canonical_read_block",
+    "expired_item_pin_resurrection": false,
+    "expired_or_superseded_lease_terminal_write": false,
+    "item": [
+      "active",
+      "superseded",
+      "deleted"
+    ],
+    "pin_bypasses_expiry_only": true,
+    "retention_days_default": 180,
+    "same_scope_serialization": true
+  },
+  "non_scope": [
+    "fts5_projection_and_recall",
+    "ladybugdb_recall",
+    "retrieval_router_or_planners",
+    "character_response_generation",
+    "chat_send_or_streaming",
+    "memory_owner_ui",
+    "maintenance_llm_provider",
+    "chat_after_commit_producer_and_consolidation_threshold"
+  ],
+  "owner_stage": "P8-L-G",
+  "predecessor": {
+    "path": "docs/architecture/p8-l-f-canonical-memory-inventory.json",
+    "sha256": "3558e78857a0095664815cb1364044e0d063115f76eed976be981cba95a96aab",
+    "size": 9434
+  },
+  "required_files": [
+    {
+      "path": "backend/app/domains/memory/domain/lifecycle.py",
+      "sha256": "eb8d09789df2fe48839817414a03f567f2f594855934955ef96998ba46841b72",
+      "size": 5344
+    },
+    {
+      "path": "backend/app/domains/memory/application/write_lifecycle.py",
+      "sha256": "4888b94ab28355499095540d23ab531d88eccbdd1230de725f73c26c97b0ba45",
+      "size": 15721
+    },
+    {
+      "path": "backend/app/domains/memory/ports/repository.py",
+      "sha256": "58ffca4d67b1048f57877cebcb97c1f83012930bc9b2c426b157893abe5af432",
+      "size": 3805
+    },
+    {
+      "path": "backend/app/domains/memory/ports/source_reader.py",
+      "sha256": "a1583945eb6225ed425b849f2039dce2c5722111548c40b77ab90241b8003bf0",
+      "size": 1255
+    },
+    {
+      "path": "backend/app/domains/memory/ports/maintenance_queue.py",
+      "sha256": "643d0aee2f333292bd4268ccf2baa3d21c3fafe0d27b6e53fb300aba94d4dc72",
+      "size": 1107
+    },
+    {
+      "path": "backend/app/domains/memory/infrastructure/repository.py",
+      "sha256": "d42f0aed44d6ac5ea1b4dad458855ff9dbf587e44fd4c670a80315343072a5ca",
+      "size": 32005
+    },
+    {
+      "path": "backend/app/domains/memory/infrastructure/source_reader.py",
+      "sha256": "a314c849c8aed81fc06f176331f5c8ad72f311be4163fcca1db1a42a39244f77",
+      "size": 23305
+    },
+    {
+      "path": "backend/app/domains/memory/infrastructure/maintenance_queue.py",
+      "sha256": "64340c5d79f2f0f4c8004cf98727157ff6c292b261dd6b6581efe9d53e883aa8",
+      "size": 8220
+    },
+    {
+      "path": "backend/app/domains/memory/public.py",
+      "sha256": "4aa9fc541d717d3e0c17795b4b6d931cf28a45a936a99b4f66b22a17fafa42d5",
+      "size": 2225
+    },
+    {
+      "path": "backend/tests/test_p8_l_g_memory_write_lifecycle.py",
+      "sha256": "7746b7cd295dce6aae18fee3d77756f9a42cff5fe5ce48374fde74cab4ec0691",
+      "size": 31782
+    },
+    {
+      "path": "docs/architecture/p8-l-g-memory-write-lifecycle.md",
+      "sha256": "611ed773a78b15f2f5bd9dc593b1c07f3be63696e848d296f34be115a0485967",
+      "size": 4609
+    }
+  ],
+  "schema": {
+    "new_migration": null,
+    "new_tables": [],
+    "reused_tables": [
+      "memory_scope_settings",
+      "memory_candidates",
+      "memory_items",
+      "memory_item_evidence",
+      "memory_hot_briefs",
+      "memory_hot_brief_items",
+      "memory_maintenance_jobs"
+    ]
+  },
+  "schema_version": 1
+}

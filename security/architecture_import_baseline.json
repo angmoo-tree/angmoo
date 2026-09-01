@@ -1,7 +1,7 @@
 {
-  "edge_count": 1353,
-  "external_import_count": 1883,
-  "module_count": 581,
+  "edge_count": 1380,
+  "external_import_count": 1907,
+  "module_count": 585,
   "modules": [
     {
       "external_imports": [],
@@ -2383,7 +2383,8 @@
     {
       "external_imports": [],
       "imports": [
-        "app.domains.memory.application.scope_control"
+        "app.domains.memory.application.scope_control",
+        "app.domains.memory.application.write_lifecycle"
       ],
       "module": "app.domains.memory.application",
       "path": "backend/app/domains/memory/application/__init__.py",
@@ -2402,9 +2403,28 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "datetime"
+      ],
+      "imports": [
+        "app.domains.memory.domain.errors",
+        "app.domains.memory.domain.lifecycle",
+        "app.domains.memory.domain.policies",
+        "app.domains.memory.domain.provenance",
+        "app.domains.memory.domain.scope",
+        "app.domains.memory.ports.repository",
+        "app.domains.memory.ports.source_reader"
+      ],
+      "module": "app.domains.memory.application.write_lifecycle",
+      "path": "backend/app/domains/memory/application/write_lifecycle.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.domains.memory.domain.errors",
+        "app.domains.memory.domain.lifecycle",
         "app.domains.memory.domain.policies",
         "app.domains.memory.domain.provenance",
         "app.domains.memory.domain.retention",
@@ -2419,6 +2439,24 @@
       "imports": [],
       "module": "app.domains.memory.domain.errors",
       "path": "backend/app/domains/memory/domain/errors.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "enum",
+        "hashlib",
+        "re"
+      ],
+      "imports": [
+        "app.domains.memory.domain.errors",
+        "app.domains.memory.domain.provenance",
+        "app.domains.memory.domain.scope"
+      ],
+      "module": "app.domains.memory.domain.lifecycle",
+      "path": "backend/app/domains/memory/domain/lifecycle.py",
       "wildcard_imports": []
     },
     {
@@ -2470,7 +2508,9 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.memory.infrastructure.maintenance_queue",
         "app.domains.memory.infrastructure.repository",
+        "app.domains.memory.infrastructure.source_reader",
         "app.domains.memory.infrastructure.sqlalchemy_models"
       ],
       "module": "app.domains.memory.infrastructure",
@@ -2480,6 +2520,27 @@
     {
       "external_imports": [
         "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm",
+        "uuid"
+      ],
+      "imports": [
+        "app.domains.memory.domain.errors",
+        "app.domains.memory.domain.lifecycle",
+        "app.domains.memory.domain.provenance",
+        "app.domains.memory.infrastructure.sqlalchemy_models",
+        "app.domains.memory.ports.maintenance_queue"
+      ],
+      "module": "app.domains.memory.infrastructure.maintenance_queue",
+      "path": "backend/app/domains/memory/infrastructure/maintenance_queue.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
         "sqlalchemy",
         "sqlalchemy.exc",
         "sqlalchemy.orm",
@@ -2488,13 +2549,35 @@
       "imports": [
         "app.core.db",
         "app.domains.memory.domain.errors",
+        "app.domains.memory.domain.lifecycle",
         "app.domains.memory.domain.provenance",
         "app.domains.memory.domain.retention",
         "app.domains.memory.domain.scope",
-        "app.domains.memory.infrastructure.sqlalchemy_models"
+        "app.domains.memory.infrastructure.sqlalchemy_models",
+        "app.domains.memory.ports.source_reader"
       ],
       "module": "app.domains.memory.infrastructure.repository",
       "path": "backend/app/domains/memory/infrastructure/repository.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "hashlib",
+        "json",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.memory.domain.provenance",
+        "app.domains.memory.domain.scope",
+        "app.domains.memory.ports.source_reader",
+        "app.models"
+      ],
+      "module": "app.domains.memory.infrastructure.source_reader",
+      "path": "backend/app/domains/memory/infrastructure/source_reader.py",
       "wildcard_imports": []
     },
     {
@@ -2529,6 +2612,7 @@
       "external_imports": [
         "__future__",
         "dataclasses",
+        "datetime",
         "typing"
       ],
       "imports": [],
@@ -2539,11 +2623,14 @@
     {
       "external_imports": [
         "__future__",
+        "datetime",
         "typing"
       ],
       "imports": [
+        "app.domains.memory.domain.lifecycle",
         "app.domains.memory.domain.provenance",
-        "app.domains.memory.domain.scope"
+        "app.domains.memory.domain.scope",
+        "app.domains.memory.ports.source_reader"
       ],
       "module": "app.domains.memory.ports.repository",
       "path": "backend/app/domains/memory/ports/repository.py",
