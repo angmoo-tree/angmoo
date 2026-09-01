@@ -331,6 +331,51 @@ function uiDManualFeed(
   } as const;
 }
 
+function uiDWorldCharacterSocialProfile(
+  tab: "posts" | "replies" | "likes",
+  worldId = UI_D_WORLD_ID,
+  worldCharacterId = "wc-ui-d-autonomous",
+) {
+  const replyToPostId = tab === "replies" ? "post-p8-l-e" : null;
+  const ownerActivity = tab === "likes";
+  return {
+    schema_version: "world-character-social-profile-v1",
+    world_id: worldId,
+    world_character_id: worldCharacterId,
+    character_id: "character-ui-d-autonomous",
+    counts: {
+      post_count: 16,
+      reply_count: 10,
+      liked_post_count: 9,
+      received_like_count: 7,
+    },
+    tab,
+    items: [
+      {
+        id: `profile-${tab}-current-world`,
+        world_id: worldId,
+        author_world_character_id: ownerActivity
+          ? "wc-ui-d-owner"
+          : worldCharacterId,
+        author_name: ownerActivity ? "UI-D Owner" : "UI-D Autonomous",
+        author_handle: ownerActivity ? "ui_d_owner" : "ui_d_autonomous",
+        author_avatar_url: null,
+        title: tab === "replies" ? "" : `현재 World ${tab} 활동`,
+        body: `CURRENT WORLD ${tab.toUpperCase()} ACTIVITY`,
+        post_type: replyToPostId ? "reply" : "text",
+        reply_to_post_id: replyToPostId,
+        created_at: "2026-09-01T05:00:00Z",
+        reply_count: 3,
+        like_count: 4,
+        author_profile_capability: "available",
+        mentioned_characters: [],
+        media: [],
+      },
+    ],
+    next_cursor: null,
+  } as const;
+}
+
 function uiDManualWrite(
   post: ReturnType<typeof uiDManualPost>,
   operation: "post" | "reply" = "reply",
@@ -782,6 +827,7 @@ test("P8-L-E World social author profile and letter CTA open one exact World Cha
     messages: [],
   };
   const requests: string[] = [];
+  const profileTabs: string[] = [];
   let createCalls = 0;
 
   await page.route("**/api/backend/**", async (route) => {
@@ -802,6 +848,51 @@ test("P8-L-E World social author profile and letter CTA open one exact World Cha
       url.pathname === `/api/backend/worlds/${worldId}/manual-social/feed`
     ) {
       await json(route, uiDManualFeed([post], worldId));
+      return;
+    }
+    if (
+      method === "GET" &&
+      url.pathname ===
+        `/api/backend/worlds/${worldId}/world-characters/${respondingId}/social-profile`
+    ) {
+      const tab = url.searchParams.get("tab") ?? "posts";
+      expect(["posts", "replies", "likes"]).toContain(tab);
+      profileTabs.push(tab);
+      await json(
+        route,
+        uiDWorldCharacterSocialProfile(
+          tab as "posts" | "replies" | "likes",
+          worldId,
+          respondingId,
+        ),
+      );
+      return;
+    }
+    if (
+      method === "GET" &&
+      url.pathname === `/api/backend/worlds/${worldId}/world-characters`
+    ) {
+      await json(route, {
+        schema_version: "world-character-profile-list-v1",
+        world_id: worldId,
+        items: [
+          {
+            schema_version: "world-character-profile-v1",
+            world_id: worldId,
+            world_character_id: respondingId,
+            character_id: responding.character_id,
+            display_name: responding.display_name,
+            handle: responding.handle,
+            avatar_url: null,
+            banner_url: null,
+            intro: "같은 World에서 활동하는 자율 앵무입니다.",
+            role_key: responding.role_key,
+            control_mode: responding.control_mode,
+            status: "active",
+            profile_capability: "available",
+          },
+        ],
+      });
       return;
     }
     if (
@@ -869,6 +960,26 @@ test("P8-L-E World social author profile and letter CTA open one exact World Cha
   });
 
   await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`/worlds/${worldId}/characters`);
+  const directoryIcon = page.locator("[data-world-character-directory-icon]");
+  const directoryIconOffset = await directoryIcon.evaluate((tile) => {
+    const icon = tile.querySelector("svg");
+    if (!icon) return null;
+    const tileRect = tile.getBoundingClientRect();
+    const iconRect = icon.getBoundingClientRect();
+    return {
+      x: Math.abs(
+        iconRect.left + iconRect.width / 2 - (tileRect.left + tileRect.width / 2),
+      ),
+      y: Math.abs(
+        iconRect.top + iconRect.height / 2 - (tileRect.top + tileRect.height / 2),
+      ),
+    };
+  });
+  expect(directoryIconOffset).not.toBeNull();
+  expect(directoryIconOffset?.x).toBeLessThanOrEqual(1);
+  expect(directoryIconOffset?.y).toBeLessThanOrEqual(1);
+
   await page.goto(`/worlds/${worldId}/feed`);
   await expect(page.getByText("P8-L-E author entry", { exact: true })).toBeVisible();
   const authorLinks = page.getByRole("link", {
@@ -883,9 +994,58 @@ test("P8-L-E World social author profile and letter CTA open one exact World Cha
   const profile = page.locator('[data-world-character-surface="profile"]');
   await expect(profile).toHaveAttribute("data-world-character-id", respondingId);
   await expect(profile.getByRole("heading", { name: "UI-D Autonomous" })).toBeVisible();
-  await expect(profile.getByText("@ui_d_autonomous", { exact: true })).toBeVisible();
+  await expect(
+    profile.getByRole("paragraph").filter({ hasText: "@ui_d_autonomous" }),
+  ).toBeVisible();
   await expect(profile.getByText("같은 World에서 활동하는 자율 앵무입니다.")).toBeVisible();
-  await expect(profile.getByText(/팔로잉|지저귐|좋아요/)).toHaveCount(0);
+  await profile.getByRole("button", { name: "이전 화면으로" }).click();
+  await expect(page.locator('[data-world-social-surface="feed"]')).toBeVisible();
+  await authorLinks.first().click();
+  await expect(profile).toBeVisible();
+  const activity = profile.locator("[data-world-character-social-activity]");
+  await expect(activity).toBeVisible();
+  const metrics = activity.locator("dl");
+  for (const text of ["지저귐", "16", "대꾸", "10", "좋아요", "9", "받은 좋아요", "7"]) {
+    await expect(metrics).toContainText(text);
+  }
+  await expect(activity.getByRole("tab")).toHaveCount(3);
+  await expect(activity.getByRole("tab", { name: "받은 좋아요" })).toHaveCount(0);
+  await expect(activity.getByText("CURRENT WORLD POSTS ACTIVITY")).toBeVisible();
+  await expect(activity.getByText("다른 World 비밀 활동")).toHaveCount(0);
+  await expect(profile.getByRole("textbox")).toHaveCount(0);
+  await expect(
+    profile.getByRole("button", { name: /프로필 수정|자율활동|설정/ }),
+  ).toHaveCount(0);
+
+  await activity.getByRole("tab", { name: "대꾸" }).click();
+  await expect(page).toHaveURL(new RegExp(`\\?tab=replies$`));
+  await expect(activity.getByText("CURRENT WORLD REPLIES ACTIVITY")).toBeVisible();
+  await activity.getByRole("tab", { name: "좋아요" }).click();
+  await expect(page).toHaveURL(new RegExp(`\\?tab=likes$`));
+  await expect(activity.getByText("CURRENT WORLD LIKES ACTIVITY")).toBeVisible();
+
+  const scrollOwner = page.locator('[data-device-scroll-owner="true"]');
+  const scrollContract = await scrollOwner.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      gutter: style.scrollbarGutter,
+      scrollbarWidth: style.scrollbarWidth,
+      reservedWidth: element.offsetWidth - element.clientWidth,
+      scrollable: element.scrollHeight > element.clientHeight,
+    };
+  });
+  expect(scrollContract.gutter).not.toContain("stable");
+  expect(scrollContract.scrollbarWidth).toBe("none");
+  expect(scrollContract.reservedWidth).toBe(0);
+  expect(scrollContract.scrollable).toBe(true);
+  await scrollOwner.evaluate((element) => {
+    element.scrollTop = 0;
+  });
+  await scrollOwner.hover();
+  await page.mouse.wheel(0, 480);
+  await expect
+    .poll(() => scrollOwner.evaluate((element) => element.scrollTop))
+    .toBeGreaterThan(0);
 
   const letter = profile.getByRole("button", {
     name: "UI-D Autonomous와 채팅 시작",
@@ -905,6 +1065,7 @@ test("P8-L-E World social author profile and letter CTA open one exact World Cha
   await expect(page.locator('[data-world-character-surface="profile"]')).toBeVisible();
   await page.goBack();
   await expect(page.locator('[data-world-social-surface="feed"]')).toBeVisible();
+  expect(profileTabs).toEqual(expect.arrayContaining(["posts", "replies", "likes"]));
   expect(requests).not.toContain(
     `GET /api/backend/worlds/${worldId}/manual-social/posts/post-p8-l-e`,
   );

@@ -3,9 +3,9 @@ name: Angmoo Local
 document: Frontend Design Contract
 version: 1.8
 date: 2026-09-01
-status: CANONICAL DESIGN CONTRACT · SINGLE BRIGHT-CORAL BRAND + THREE USER-APPROVED CONTRAST EXCEPTIONS · UI-A~UI-F FULL PASS/MERGED/POST-MERGE PASS · P8-L-A CONTRACT FROZEN · P8-L-B BACKEND STRUCTURE PARITY MERGED/POST-MERGE PASS · P8-L-C FRONTEND STRUCTURE PARITY MERGED/POST-MERGE 6/6 PASS · P8-L-D WORLD CHAT IDENTITY/READ-ONLY SLICE MERGED/POST-MERGE 7/7 PASS · P8-L-E WORLD SOCIAL PROFILE/LETTER ENTRY IMPLEMENTED/LOCAL TECH PASS/EXTERNAL LIFECYCLE PENDING · CURRENT UI CONFORMANCE INCOMPLETE
+status: CANONICAL DESIGN CONTRACT · SINGLE BRIGHT-CORAL BRAND + THREE USER-APPROVED CONTRAST EXCEPTIONS · UI-A~UI-F FULL PASS/MERGED/POST-MERGE PASS · P8-L-A CONTRACT FROZEN · P8-L-B BACKEND STRUCTURE PARITY MERGED/POST-MERGE PASS · P8-L-C FRONTEND STRUCTURE PARITY MERGED/POST-MERGE 6/6 PASS · P8-L-D WORLD CHAT IDENTITY/READ-ONLY SLICE MERGED/POST-MERGE 7/7 PASS · P8-L-E WORLD SOCIAL PROFILE/LETTER ENTRY PR #221 HOTFIX IMPLEMENTED IN WORKTREE/EXACT-HEAD RECERTIFICATION IN PROGRESS · CURRENT UI CONFORMANCE INCOMPLETE
 scope: Device Phone · World App · Creator Studio · Relationship Graph · current L4.5 surfaces · P8-L Chat/Memory target contract
-implementation_phase: L4.5 UI-A through UI-F merged and post-merge closed on exact merge 81e428bc069184edba06caf3c5821bae3cc6bfd7 · P8-L-A freezes Chat/Memory adoption, route, window and state contracts only · P8-L-B backend Chat domain structure parity merged and post-merge closed on exact merge aceaec799ccd816070613aa6037793780606c590 · P8-L-C frontend Chat feature structure parity merged on exact merge 8a83f48ed565992f8c3e7dd1dbe958f33997e7ab and post-merge closed 6/6 · P8-L-D World-scoped identity/read-only list-thread slice merged on exact merge 4359951b34768b16f83dbc0e6c8435b13bfbc821 with user Gate and post-merge Actions 7/7 PASS · P8-L-E implements exact World social author profile capability, WorldCharacter public profile, letter CTA and idempotent Chat thread entry on branch feat/p8-l-e-world-social-author-profile-chat-entry with local technical verification PASS while push/PR/Hosted CI/user/merge Gates remain pending · message write, generation, retrieval and canonical Memory remain unimplemented
+implementation_phase: L4.5 UI-A through UI-F merged and post-merge closed on exact merge 81e428bc069184edba06caf3c5821bae3cc6bfd7 · P8-L-A freezes Chat/Memory adoption, route, window and state contracts only · P8-L-B backend Chat domain structure parity merged and post-merge closed on exact merge aceaec799ccd816070613aa6037793780606c590 · P8-L-C frontend Chat feature structure parity merged on exact merge 8a83f48ed565992f8c3e7dd1dbe958f33997e7ab and post-merge closed 6/6 · P8-L-D World-scoped identity/read-only list-thread slice merged on exact merge 4359951b34768b16f83dbc0e6c8435b13bfbc821 with user Gate and post-merge Actions 7/7 PASS · P8-L-E Draft PR #221 implements exact World social author profile capability, WorldCharacter public profile, letter CTA and idempotent Chat thread entry; its merge-before follow-up adds current-World four-count/three-tab activity, hidden Phone scrollbar/no gutter, centered directory icon and Tauri-safe back navigation while new exact-head recertification and user/merge Gates remain pending · message write, generation, retrieval and canonical Memory remain unimplemented
 hosted_reference_commit: 7f967abd6117381be5c081ed284addb889b06fec
 local_reference_commit: e5e62aed69cb89b16b5870eb0854dd07752dc519
 legacy_reference: audited-internal-snapshot
@@ -35,7 +35,7 @@ P8-L-A CHAT·MEMORY CONTRACT AND INVENTORY: FROZEN
 P8-L-B BACKEND CHAT DOMAIN STRUCTURE PARITY: MERGED · POST-MERGE 5/5 PASS
 P8-L-C FRONTEND CHAT FEATURE STRUCTURE PARITY: MERGED · POST-MERGE 6/6 PASS
 P8-L-D WORLD CHAT IDENTITY·READ-ONLY SLICE: MERGED · POST-MERGE 7/7 PASS
-P8-L-E WORLD SOCIAL PROFILE·LETTER CHAT ENTRY: IMPLEMENTED · LOCAL TECH PASS · EXTERNAL LIFECYCLE PENDING
+P8-L-E WORLD SOCIAL PROFILE·LETTER CHAT ENTRY: PR #221 HOTFIX IMPLEMENTED IN WORKTREE · EXACT-HEAD RECERTIFICATION IN PROGRESS
 P8-L CHAT V2·CANONICAL MEMORY PRODUCT RUNTIME: PARTIAL · MESSAGE WRITE·GENERATION·RETRIEVAL·MEMORY NOT STARTED
 ```
 
@@ -246,7 +246,7 @@ P8-L 목표 surface:
 | Surface | Product kind | Shell | layout | target Tauri kind | 현재 상태 |
 |---|---|---|---|---|---|
 | World Chat list/thread | World App | `DeviceShell` → `DeviceFrame` | Phone | existing `phone` | P8-L-D read-only identity slice; write/generation absent |
-| WorldCharacter public profile | World App | `DeviceShell` → `DeviceFrame` | Phone | existing `phone` | P8-L-E exact same-World profile·letter entry implemented; send/generation absent |
+| WorldCharacter public profile | World App | `DeviceShell` → `DeviceFrame` | Phone | existing `phone` | P8-L-E exact same-World identity·4 metrics·3 activity tabs·letter entry; send/generation absent |
 | owner Memory workspace | Workspace | `MemoryWorkspaceShell` | Wide; narrow Browser single-column | new `memory` | contract only; route·window absent |
 
 ### 4.2 실행 경로별 Device 표현
@@ -1142,7 +1142,9 @@ UI-E PR #209 후속 Hotfix는 사용자 visual에서 발견된 `최근 결과` r
 
 - `/worlds/{worldId}/characters/{worldCharacterId}`는 Next·static·Tauri Phone이 공유하는 canonical WorldCharacter public profile route다. profile UI는 `features/characters/public.ts`, letter와 create-or-get transport는 `features/chat/public.ts`가 소유한다.
 - Feed·게시글 상세·대꾸의 작성자 avatar/name은 backend가 exact same-World `world_character_id`와 `author_profile_capability=available`을 준 경우에만 profile link가 된다. post card 본문은 계속 post detail로 이동하며 interaction boundary를 섞지 않는다.
-- profile에는 실제 banner/avatar/display name/handle/intro/role/control mode만 표시하고 Hosted follower·post·reply·like 통계를 꾸며내지 않는다.
+- profile identity shell은 실제 banner/avatar/display name/handle/intro/role/control mode만 표시한다. 활동 surface는 current World의 canonical social read만 사용해 `지저귐 / 대꾸 / 좋아요 / 받은 좋아요` 네 지표와 `지저귐 / 대꾸 / 좋아요` 세 tab을 표시하며, 받은 좋아요는 count-only다. 다른 World·blocked·deleted·hidden source나 Hosted global 통계를 섞지 않는다.
+- 활동 row는 `features/social/public.ts`의 기존 presentation을 재사용하고 profile 수정·autonomy·runtime·설정·follow 같은 owner/global action은 가져오지 않는다.
+- Phone main scroll은 유지하되 visible scrollbar와 stable gutter는 숨긴다. Characters header icon은 tile 중앙에 맞추며, Tauri profile back은 popstate URL을 desktop route store와 동기화해 실제 Feed/Characters origin으로 복귀하고 이전 product history가 없으면 current-World Characters로 fallback한다.
 - requester `zero / one / anomaly`를 typed chat-entry로 확인한다. one만 idempotent active thread create-or-get을 실행하며 zero/anomaly/self/blocked/inactive/cross-World는 fail closed다.
 - letter entry는 navigation origin인 post/reply를 Chat evidence로 자동 주입하지 않는다. composer/send·generation·streaming·retrieval·Memory는 후속 단계에 남는다.
 
@@ -1162,7 +1164,7 @@ P8-L-A CHAT·MEMORY CONTRACT AND INVENTORY FROZEN / RUNTIME FEATURE NOT IMPLEMEN
 P8-L-B BACKEND CHAT DOMAIN STRUCTURE PARITY MERGED / POST-MERGE 5/5 PASS
 P8-L-C FRONTEND CHAT FEATURE STRUCTURE PARITY MERGED / POST-MERGE 6/6 PASS
 P8-L-D WORLD CHAT IDENTITY·READ-ONLY SLICE MERGED / POST-MERGE 7/7 PASS
-P8-L-E WORLD SOCIAL PROFILE·LETTER CHAT ENTRY IMPLEMENTED / LOCAL TECH PASS / EXTERNAL LIFECYCLE PENDING
+P8-L-E WORLD SOCIAL PROFILE·LETTER CHAT ENTRY PR #221 HOTFIX IMPLEMENTED IN WORKTREE / EXACT-HEAD RECERTIFICATION IN PROGRESS
 P8-L CHAT V2·CANONICAL MEMORY PRODUCT RUNTIME PARTIAL / WRITE·GENERATION·RETRIEVAL·MEMORY NOT STARTED
 ```
 

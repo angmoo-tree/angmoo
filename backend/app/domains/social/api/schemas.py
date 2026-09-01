@@ -7,6 +7,10 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.domains.social.domain.profile_activity import (
+    WorldCharacterSocialProfilePage,
+)
+
 
 def _clean(value: str) -> str:
     return " ".join(value.strip().split())
@@ -78,6 +82,127 @@ class ManualSocialFeedRead(BaseModel):
     items: list[ManualSocialPostRead]
 
 
+class WorldCharacterSocialProfileCountsRead(BaseModel):
+    post_count: int = Field(ge=0)
+    reply_count: int = Field(ge=0)
+    liked_post_count: int = Field(ge=0)
+    received_like_count: int = Field(ge=0)
+
+
+class WorldCharacterSocialProfileMentionRead(BaseModel):
+    handle: str
+    character_id: str
+    name: str
+
+
+class WorldCharacterSocialProfileMediaRead(BaseModel):
+    id: int
+    post_id: str
+    media_type: str
+    url: str
+    alt_text: str
+    model: str
+    prompt_hash: str
+    byte_size: int
+    width: int
+    height: int
+    created_at: datetime
+
+
+class WorldCharacterSocialProfilePostRead(BaseModel):
+    id: str
+    world_id: str
+    author_world_character_id: str
+    author_name: str
+    author_handle: str | None
+    author_avatar_url: str | None
+    title: str
+    body: str
+    post_type: str
+    reply_to_post_id: str | None
+    created_at: datetime
+    reply_count: int = Field(ge=0)
+    like_count: int = Field(ge=0)
+    author_profile_capability: Literal["available", "unavailable"]
+    mentioned_characters: list[WorldCharacterSocialProfileMentionRead]
+    media: list[WorldCharacterSocialProfileMediaRead]
+
+
+class WorldCharacterSocialProfileRead(BaseModel):
+    schema_version: Literal["world-character-social-profile-v1"] = (
+        "world-character-social-profile-v1"
+    )
+    world_id: str
+    world_character_id: str
+    character_id: str
+    counts: WorldCharacterSocialProfileCountsRead
+    tab: Literal["posts", "replies", "likes"]
+    items: list[WorldCharacterSocialProfilePostRead]
+    next_cursor: str | None
+
+    @classmethod
+    def from_snapshot(
+        cls,
+        snapshot: WorldCharacterSocialProfilePage,
+    ) -> WorldCharacterSocialProfileRead:
+        return cls(
+            world_id=snapshot.world_id,
+            world_character_id=snapshot.world_character_id,
+            character_id=snapshot.character_id,
+            counts=WorldCharacterSocialProfileCountsRead(
+                post_count=snapshot.counts.post_count,
+                reply_count=snapshot.counts.reply_count,
+                liked_post_count=snapshot.counts.liked_post_count,
+                received_like_count=snapshot.counts.received_like_count,
+            ),
+            tab=snapshot.tab,
+            items=[
+                WorldCharacterSocialProfilePostRead(
+                    id=item.id,
+                    world_id=item.world_id,
+                    author_world_character_id=item.author_world_character_id,
+                    author_name=item.author_name,
+                    author_handle=item.author_handle,
+                    author_avatar_url=item.author_avatar_url,
+                    title=item.title,
+                    body=item.body,
+                    post_type=item.post_type,
+                    reply_to_post_id=item.reply_to_post_id,
+                    created_at=item.created_at,
+                    reply_count=item.reply_count,
+                    like_count=item.like_count,
+                    author_profile_capability=item.author_profile_capability,
+                    mentioned_characters=[
+                        WorldCharacterSocialProfileMentionRead(
+                            handle=mention.handle,
+                            character_id=mention.character_id,
+                            name=mention.name,
+                        )
+                        for mention in item.mentioned_characters
+                    ],
+                    media=[
+                        WorldCharacterSocialProfileMediaRead(
+                            id=media.id,
+                            post_id=media.post_id,
+                            media_type=media.media_type,
+                            url=media.url,
+                            alt_text=media.alt_text,
+                            model=media.model,
+                            prompt_hash=media.prompt_hash,
+                            byte_size=media.byte_size,
+                            width=media.width,
+                            height=media.height,
+                            created_at=media.created_at,
+                        )
+                        for media in item.media
+                    ],
+                )
+                for item in snapshot.items
+            ],
+            next_cursor=snapshot.next_cursor,
+        )
+
+
 __all__ = [
     "ManualSocialDeliveryRead",
     "ManualSocialFeedRead",
@@ -86,4 +211,9 @@ __all__ = [
     "ManualSocialWriteRead",
     "OwnerManualPostWrite",
     "OwnerManualReplyWrite",
+    "WorldCharacterSocialProfileCountsRead",
+    "WorldCharacterSocialProfileMediaRead",
+    "WorldCharacterSocialProfileMentionRead",
+    "WorldCharacterSocialProfilePostRead",
+    "WorldCharacterSocialProfileRead",
 ]

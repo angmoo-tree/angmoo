@@ -17,7 +17,24 @@
       "zero",
       "one",
       "anomaly"
-    ]
+    ],
+    "social_profile_contract": {
+      "counts": [
+        "post_count",
+        "reply_count",
+        "liked_post_count",
+        "received_like_count"
+      ],
+      "cursor": "opaque_world_character_tab_scoped",
+      "scope": "exact_current_world",
+      "tabs": [
+        "posts",
+        "replies",
+        "likes"
+      ],
+      "visibility": "active_unblocked_visible_only"
+    },
+    "social_profile_operation": "GET /worlds/{world_id}/world-characters/{world_character_id}/social-profile"
   },
   "frontend": {
     "feature_owners": {
@@ -30,6 +47,23 @@
       "author_avatar_to_profile",
       "author_name_to_profile"
     ],
+    "phone_presentation": {
+      "directory_icon_alignment": "centered",
+      "reserved_scrollbar_gutter": "removed",
+      "scrolling": "preserved",
+      "visible_scrollbar": "hidden"
+    },
+    "profile_activity": {
+      "feature_owner": "features/social",
+      "metrics": 4,
+      "owner_actions": 0,
+      "scope": "exact_current_world",
+      "tabs": 3
+    },
+    "profile_back_navigation": {
+      "direct_entry_fallback": "/worlds/{worldId}/characters",
+      "tauri_popstate_store_sync": true
+    },
     "profile_route": "/worlds/{worldId}/characters/{worldCharacterId}",
     "route_parity": [
       "next",
@@ -56,5 +90,5 @@
     "sha256": "f0f5c1e1b9bf5ddcbf86f30ccc812ce30597f1a16ca08dd61040eb9610a322a3",
     "size": 3387
   },
-  "schema_version": 1
+  "schema_version": 2
 }

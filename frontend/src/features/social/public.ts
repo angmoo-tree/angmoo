@@ -20,6 +20,10 @@ export {
   getManualSocialPostThread,
   SocialWriteApiError,
 } from "./api/social-write-client";
+export {
+  getWorldCharacterSocialProfile,
+  WorldCharacterSocialProfileApiError,
+} from "./api/world-character-social-profile-client";
 export type {
   FeedContentFilter,
   FeedPage,
@@ -43,6 +47,13 @@ export type {
   ManualSocialWriteRead,
   SocialOwnerActor,
 } from "./model/social-write-contract";
+export {
+  parseWorldCharacterSocialProfileTab,
+  type WorldCharacterSocialProfileCounts,
+  type WorldCharacterSocialProfilePost,
+  type WorldCharacterSocialProfileRead,
+  type WorldCharacterSocialProfileTab,
+} from "./model/world-character-social-profile-contract";
 export type {
   SocialPostActionKind,
   SocialPostActionPresentation,
@@ -78,3 +89,4 @@ export {
   shouldOpenPostFromCardKeyDown,
 } from "./model/post-card-navigation";
 export { WorldSocialFeed } from "./ui/world-social-feed";
+export { WorldCharacterSocialProfileActivity } from "./ui/world-character-social-profile-activity";

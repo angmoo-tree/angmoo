@@ -88,6 +88,23 @@ def _backend_contract() -> dict[str, Any]:
             "world_character_pair_is_blocked",
         ),
     )
+    _require_text(
+        "backend/app/api/v1/routes/manual_social.py",
+        (
+            '"/{world_id}/world-characters/{world_character_id}/social-profile"',
+            'Literal["posts", "replies", "likes"]',
+            "WorldCharacterSocialProfileRead",
+        ),
+    )
+    _require_text(
+        "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+        (
+            "SqlAlchemyWorldCharacterSocialProfileReader",
+            "world-character-social-profile-cursor-v1",
+            "received_like_count",
+            "_blocked_world_character_ids",
+        ),
+    )
     return {
         "profile_operations": [
             "GET /worlds/{world_id}/world-characters",
@@ -97,6 +114,21 @@ def _backend_contract() -> dict[str, Any]:
             "GET /worlds/{world_id}/world-characters/{responding_id}/chat-entry"
         ),
         "create_or_get_operation": "POST /worlds/{world_id}/chat/threads",
+        "social_profile_operation": (
+            "GET /worlds/{world_id}/world-characters/{world_character_id}/social-profile"
+        ),
+        "social_profile_contract": {
+            "scope": "exact_current_world",
+            "tabs": ["posts", "replies", "likes"],
+            "counts": [
+                "post_count",
+                "reply_count",
+                "liked_post_count",
+                "received_like_count",
+            ],
+            "cursor": "opaque_world_character_tab_scoped",
+            "visibility": "active_unblocked_visible_only",
+        },
         "requester_cardinality": ["zero", "one", "anomaly"],
         "fail_closed_reasons": [
             "requester_missing",
@@ -144,6 +176,29 @@ def _frontend_contract() -> dict[str, Any]:
             "self_target",
             "blocked",
             "worldChatThreadRoute",
+            "WorldCharacterSocialProfileActivity",
+            "useRuntimeBack",
+            "data-world-character-directory-icon",
+        ),
+    )
+    _require_text(
+        "frontend/src/features/social/public.ts",
+        (
+            "getWorldCharacterSocialProfile",
+            "WorldCharacterSocialProfileActivity",
+            "WorldCharacterSocialProfileTab",
+        ),
+    )
+    _require_text(
+        "frontend/src/shared/ui/device-frame.module.css",
+        ("scrollbar-gutter: auto", "scrollbar-width: none", "::-webkit-scrollbar"),
+    )
+    _require_text(
+        "frontend/src/shared/desktop/product-window.ts",
+        (
+            "DESKTOP_ROUTE_HISTORY_INDEX",
+            "synchronizeDesktopRouteFromBrowserHistory",
+            "navigateBackCurrentDesktopRoute",
         ),
     )
     _require_text(
@@ -175,6 +230,23 @@ def _frontend_contract() -> dict[str, Any]:
             "author_name_to_profile",
         ],
         "thread_entry": "idempotent_create_or_get",
+        "profile_activity": {
+            "feature_owner": "features/social",
+            "scope": "exact_current_world",
+            "metrics": 4,
+            "tabs": 3,
+            "owner_actions": 0,
+        },
+        "phone_presentation": {
+            "scrolling": "preserved",
+            "visible_scrollbar": "hidden",
+            "reserved_scrollbar_gutter": "removed",
+            "directory_icon_alignment": "centered",
+        },
+        "profile_back_navigation": {
+            "tauri_popstate_store_sync": True,
+            "direct_entry_fallback": "/worlds/{worldId}/characters",
+        },
     }
 
 
@@ -182,7 +254,7 @@ def build_inventory() -> dict[str, Any]:
     if _sha256(D_INVENTORY_PATH) != D_INVENTORY_SHA256:
         raise InventoryError("frozen P8-L-D inventory digest drift")
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "owner_stage": "P8-L-E",
         "predecessor": _record(
             "docs/architecture/p8-l-d-world-chat-identity-inventory.json"

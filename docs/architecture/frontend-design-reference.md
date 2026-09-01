@@ -180,12 +180,24 @@ and name link only when the response includes the exact same-World
 its separate post-detail action.
 
 The profile and World directory are owned by `features/characters/public.ts`.
+The exact current-World activity read and presentation are owned through
+`features/social/public.ts`: four canonical metrics and three cursor-paged
+post/reply/liked-post tabs, with received likes remaining count-only. The
+public World profile imports no owner-only edit, autonomy, runtime, settings,
+or follow actions.
 The letter CTA and typed chat-entry/create-or-get transports are owned by
 `features/chat/public.ts`. Next, static and Tauri share the canonical
 `/worlds/{worldId}/characters/{worldCharacterId}` route. Zero or anomalous
 requester cardinality produces guidance rather than a thread, and self,
 blocked, inactive and cross-World targets fail closed. This stage does not add
 composer/send, generation, streaming, retrieval or Memory behavior.
+
+The Phone scroll owner preserves touch, wheel, keyboard and programmatic
+scrolling while hiding the visible scrollbar and removing its stable gutter.
+The Characters directory icon remains centered through an icon-specific
+selector. Tauri same-window back navigation synchronizes popstate URL and the
+desktop route store; a direct profile entry without product history falls back
+only to the current World's Characters directory.
 
 ## Feature-first ownership contract
 

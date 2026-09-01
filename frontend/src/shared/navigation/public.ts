@@ -12,6 +12,7 @@ export {
 } from "./product-routes";
 export type { ProductRouteSearchParams } from "./product-routes";
 export {
+  useRuntimeBack,
   useRuntimePathname,
   useRuntimeRouter,
   useRuntimeSearchParams,

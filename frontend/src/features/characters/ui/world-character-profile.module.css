@@ -27,7 +27,7 @@
 
 .directoryHeading p,
 .directoryHeading h2,
-.directoryHeading span,
+.directoryMeta,
 .identity h2,
 .identity p {
   margin: 0;
@@ -46,7 +46,7 @@
   font-size: 1.45rem;
 }
 
-.directoryHeading span {
+.directoryMeta {
   display: block;
   margin-top: 3px;
   color: var(--color-text-secondary);

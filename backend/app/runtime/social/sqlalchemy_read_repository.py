@@ -30,6 +30,21 @@ from app.runtime.relationships.sqlalchemy_social_event import (
 )
 
 
+class _SocialPersistenceModels:
+    """L6-removable ORM mapping exposed only to sibling social adapters."""
+
+    Character = models.Character
+    Post = models.Post
+    PostLike = models.PostLike
+    PostMedia = models.PostMedia
+    WorldCharacter = models.WorldCharacter
+    WorldCharacterBlock = models.WorldCharacterBlock
+    WorldMembership = models.WorldMembership
+
+
+social_persistence_models = _SocialPersistenceModels()
+
+
 def _owner_actor(
     db: Session, *, world_id: str, current_user_id: str
 ) -> tuple[models.WorldCharacter, models.Character]:
@@ -293,4 +308,5 @@ __all__ = [
     "ManualSocialNotFoundError",
     "get_owner_world_post_thread",
     "list_owner_world_feed",
+    "social_persistence_models",
 ]

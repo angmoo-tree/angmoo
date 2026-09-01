@@ -51,6 +51,7 @@ declare global {
 export const DESKTOP_ROUTE_EVENT = "angmoo:desktop-route";
 const DESKTOP_WINDOW_KIND_QUERY = "__angmoo_window_kind";
 const DESKTOP_WINDOW_ROUTE_QUERY = "__angmoo_window_route";
+const DESKTOP_ROUTE_HISTORY_INDEX = "__angmooDesktopRouteHistoryIndex";
 const DESKTOP_WINDOW_KINDS = new Set<AngmooDesktopWindowKind>([
   "phone",
   "studio",
@@ -114,7 +115,7 @@ export function consumeDesktopWindowBootstrapRoute(
   ) {
     return;
   }
-  window.history.replaceState(null, "", state.route);
+  window.history.replaceState(desktopRouteHistoryState(0), "", state.route);
 }
 
 export function desktopWindowKindForRoute(
@@ -143,12 +144,45 @@ export function currentDesktopRoute() {
 
 export function subscribeDesktopRoute(onStoreChange: () => void) {
   if (typeof window === "undefined") return () => undefined;
+  const handlePopState = () => {
+    synchronizeDesktopRouteFromBrowserHistory();
+    onStoreChange();
+  };
   window.addEventListener(DESKTOP_ROUTE_EVENT, onStoreChange);
-  window.addEventListener("popstate", onStoreChange);
+  window.addEventListener("popstate", handlePopState);
   return () => {
     window.removeEventListener(DESKTOP_ROUTE_EVENT, onStoreChange);
-    window.removeEventListener("popstate", onStoreChange);
+    window.removeEventListener("popstate", handlePopState);
   };
+}
+
+function desktopRouteHistoryIndex() {
+  const state = window.history.state;
+  if (!state || typeof state !== "object") return 0;
+  const value = (state as Record<string, unknown>)[DESKTOP_ROUTE_HISTORY_INDEX];
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0
+    ? value
+    : 0;
+}
+
+function desktopRouteHistoryState(index: number) {
+  const state = window.history.state;
+  return {
+    ...(state && typeof state === "object" ? state : {}),
+    [DESKTOP_ROUTE_HISTORY_INDEX]: index,
+  };
+}
+
+function synchronizeDesktopRouteFromBrowserHistory() {
+  if (!isTauriDesktopRuntime()) return false;
+  const state = getDesktopWindowState();
+  if (!state) return false;
+  const route = canonicalProductRoute(
+    `${window.location.pathname}${window.location.search}`,
+  );
+  if (desktopWindowKindForRoute(route) !== state.kind) return false;
+  window.__ANGMOO_DESKTOP_WINDOW__ = { ...state, route };
+  return true;
 }
 
 export function navigateCurrentDesktopRoute(route: string, replace = false) {
@@ -158,10 +192,27 @@ export function navigateCurrentDesktopRoute(route: string, replace = false) {
   const normalized = canonicalProductRoute(route);
   if (desktopWindowKindForRoute(normalized) !== state.kind) return false;
   window.__ANGMOO_DESKTOP_WINDOW__ = { ...state, route: normalized };
-  if (replace) window.history.replaceState(null, "", normalized);
-  else window.history.pushState(null, "", normalized);
+  const historyIndex = desktopRouteHistoryIndex();
+  if (replace) {
+    window.history.replaceState(desktopRouteHistoryState(historyIndex), "", normalized);
+  } else {
+    window.history.pushState(desktopRouteHistoryState(historyIndex + 1), "", normalized);
+  }
   window.dispatchEvent(new Event(DESKTOP_ROUTE_EVENT));
   return true;
+}
+
+export function navigateBackCurrentDesktopRoute(fallbackRoute: string) {
+  if (!isTauriDesktopRuntime()) return false;
+  const state = getDesktopWindowState();
+  if (!state) return false;
+  const fallback = canonicalProductRoute(fallbackRoute);
+  if (desktopWindowKindForRoute(fallback) !== state.kind) return false;
+  if (desktopRouteHistoryIndex() > 0) {
+    window.history.back();
+    return true;
+  }
+  return navigateCurrentDesktopRoute(fallback, true);
 }
 
 export async function navigateDesktopProductRoute(

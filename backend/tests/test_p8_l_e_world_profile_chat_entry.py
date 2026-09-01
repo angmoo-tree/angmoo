@@ -11,10 +11,10 @@ from sqlalchemy.pool import StaticPool
 from app import models
 from app.api.v1.deps import get_current_user
 from app.api.v1.routes.manual_social import router as manual_social_router
-from app.api.v1.routes.world_chat import entry_router, router as world_chat_router
+from app.api.v1.routes.world_chat import entry_router
+from app.api.v1.routes.world_chat import router as world_chat_router
 from app.core.db import Base, get_db
 from app.domains.world_characters.api.routes import router as world_character_router
-
 
 FRONTEND_HEADERS = {"Origin": "http://127.0.0.1:3000"}
 
@@ -223,8 +223,11 @@ def test_p8_l_e_api_contract_exposes_profile_and_chat_entry_operations() -> None
 
     assert set(paths["/api/v1/worlds/{world_id}/world-characters"]) == {"get"}
     assert set(
+        paths["/api/v1/worlds/{world_id}/world-characters/{world_character_id}"]
+    ) == {"get"}
+    assert set(
         paths[
-            "/api/v1/worlds/{world_id}/world-characters/{world_character_id}"
+            "/api/v1/worlds/{world_id}/world-characters/{world_character_id}/social-profile"
         ]
     ) == {"get"}
     assert set(
@@ -244,9 +247,7 @@ def test_profile_and_social_author_use_exact_world_character_identity() -> None:
         for item in listing.json()["items"]
     } == {("world-a", "wc-requester"), ("world-a", "wc-responding")}
 
-    profile = client.get(
-        "/api/v1/worlds/world-a/world-characters/wc-responding"
-    )
+    profile = client.get("/api/v1/worlds/world-a/world-characters/wc-responding")
     assert profile.status_code == 200
     assert profile.json() == {
         "schema_version": "world-character-profile-v1",
@@ -393,15 +394,20 @@ def test_inactive_and_cross_world_profile_routes_do_not_leak_identity() -> None:
         responding.status = "left"
         db.commit()
 
-    assert client.get(
-        "/api/v1/worlds/world-a/world-characters/wc-responding"
-    ).status_code == 404
-    assert client.get(
-        "/api/v1/worlds/world-b/world-characters/wc-responding"
-    ).status_code == 404
-    assert client.get(
-        "/api/v1/worlds/world-a/world-characters/wc-responding/chat-entry"
-    ).status_code == 404
+    assert (
+        client.get("/api/v1/worlds/world-a/world-characters/wc-responding").status_code
+        == 404
+    )
+    assert (
+        client.get("/api/v1/worlds/world-b/world-characters/wc-responding").status_code
+        == 404
+    )
+    assert (
+        client.get(
+            "/api/v1/worlds/world-a/world-characters/wc-responding/chat-entry"
+        ).status_code
+        == 404
+    )
     feed = client.get("/api/v1/worlds/world-a/manual-social/feed")
     assert feed.status_code == 200
     assert feed.json()["items"][0]["author_profile_capability"] == "unavailable"

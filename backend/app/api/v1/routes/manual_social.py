@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 
 from app.api.v1.deps import get_current_user
@@ -13,13 +13,7 @@ from app.domains.social.api.schemas import (
     ManualSocialWriteRead,
     OwnerManualPostWrite,
     OwnerManualReplyWrite,
-)
-from app.runtime.social.sqlalchemy_read_repository import (
-    get_owner_world_post_thread,
-    list_owner_world_feed,
-)
-from app.runtime.social.sqlalchemy_unit_of_work import (
-    SqlAlchemySocialWriteUnitOfWork,
+    WorldCharacterSocialProfileRead,
 )
 from app.domains.social.public import (
     OwnerPostCommand,
@@ -29,11 +23,28 @@ from app.domains.social.public import (
     SocialWriteForbiddenError,
     SocialWriteNotFoundError,
     SocialWriteRetryableError,
+    WorldCharacterSocialProfileError,
+    WorldCharacterSocialProfileForbiddenError,
+    WorldCharacterSocialProfileNotFoundError,
+    WorldCharacterSocialProfileQuery,
+    WorldCharacterSocialProfileValidationError,
     create_owner_post,
     create_owner_reply,
+    read_world_character_social_profile,
 )
 from app.domains.world_characters.public import (
     OwnerControlledIdentityError,
+)
+from app.domains.worlds import public as world_service
+from app.runtime.social.sqlalchemy_profile_repository import (
+    SqlAlchemyWorldCharacterSocialProfileReader,
+)
+from app.runtime.social.sqlalchemy_read_repository import (
+    get_owner_world_post_thread,
+    list_owner_world_feed,
+)
+from app.runtime.social.sqlalchemy_unit_of_work import (
+    SqlAlchemySocialWriteUnitOfWork,
 )
 
 router = APIRouter(prefix="/worlds", tags=["manual-social"])
@@ -44,17 +55,70 @@ IdempotencyKey = Annotated[
 
 def _raise_error(exc: Exception) -> None:
     reason = getattr(exc, "reason_code", "manual_social_error")
-    if isinstance(exc, SocialWriteNotFoundError):
+    if isinstance(
+        exc,
+        (
+            SocialWriteNotFoundError,
+            WorldCharacterSocialProfileNotFoundError,
+            world_service.WorldNotFoundError,
+        ),
+    ):
         code = status.HTTP_404_NOT_FOUND
-    elif isinstance(exc, (SocialWriteForbiddenError, OwnerControlledIdentityError)):
+    elif isinstance(
+        exc,
+        (
+            SocialWriteForbiddenError,
+            WorldCharacterSocialProfileForbiddenError,
+            OwnerControlledIdentityError,
+            world_service.WorldMembershipRequiredError,
+            world_service.WorldCreatorRoleRequiredError,
+        ),
+    ):
         code = status.HTTP_403_FORBIDDEN
-    elif isinstance(exc, SocialWriteConflictError):
+    elif isinstance(exc, WorldCharacterSocialProfileValidationError):
+        code = status.HTTP_422_UNPROCESSABLE_CONTENT
+    elif isinstance(exc, world_service.WorldArchivedError) or isinstance(
+        exc, SocialWriteConflictError
+    ):
         code = status.HTTP_409_CONFLICT
     elif isinstance(exc, SocialWriteRetryableError):
         code = status.HTTP_503_SERVICE_UNAVAILABLE
     else:
         code = status.HTTP_400_BAD_REQUEST
     raise HTTPException(status_code=code, detail=reason) from exc
+
+
+@router.get(
+    "/{world_id}/world-characters/{world_character_id}/social-profile",
+    response_model=WorldCharacterSocialProfileRead,
+)
+def read_world_character_social_activity(
+    world_id: str,
+    world_character_id: str,
+    request: Request,
+    tab: Literal["posts", "replies", "likes"] = Query("posts"),
+    limit: int = Query(10, ge=1, le=20),
+    cursor: str | None = Query(None, min_length=1, max_length=2048),
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+) -> WorldCharacterSocialProfileRead:
+    browser_session.require_local_frontend_request(request, mutation=False)
+    try:
+        page = read_world_character_social_profile(
+            SqlAlchemyWorldCharacterSocialProfileReader(db),
+            WorldCharacterSocialProfileQuery(
+                world_id=world_id,
+                world_character_id=world_character_id,
+                current_user_id=str(current_user.id),
+                tab=tab,
+                limit=limit,
+                cursor=cursor,
+            ),
+        )
+    except (WorldCharacterSocialProfileError, world_service.WorldServiceError) as exc:
+        _raise_error(exc)
+        raise AssertionError("unreachable")
+    return WorldCharacterSocialProfileRead.from_snapshot(page)
 
 
 @router.get(

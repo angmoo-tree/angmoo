@@ -14,6 +14,9 @@ from app.domains.social.application.writes import (
     create_owner_post,
     create_owner_reply,
 )
+from app.domains.social.application.profile_activity import (
+    read_world_character_social_profile,
+)
 
 __all__ = [
     "KeywordPostLookup",
@@ -26,4 +29,5 @@ __all__ = [
     "observe_social_source",
     "register_social_search",
     "unregister_social_search",
+    "read_world_character_social_profile",
 ]

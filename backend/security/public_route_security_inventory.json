@@ -467,6 +467,11 @@
       "module": "app.domains.world_characters.api.routes",
       "endpoint": "read_world_character_profile"
     },
+    "GET /api/v1/worlds/{world_id}/world-characters/{world_character_id}/social-profile": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.manual_social",
+      "endpoint": "read_world_character_social_activity"
+    },
     "GET /health": {
       "access": "public",
       "module": "app.public_main",

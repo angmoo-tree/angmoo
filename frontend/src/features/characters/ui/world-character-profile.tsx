@@ -10,9 +10,17 @@ import {
   WorldChatApiError,
 } from "@/features/chat/public";
 import { LocalProductLink } from "@/features/device-shell/public";
+import {
+  parseWorldCharacterSocialProfileTab,
+  WorldCharacterSocialProfileActivity,
+  type WorldCharacterSocialProfileTab,
+} from "@/features/social/public";
 import { safeSameOriginMediaUrl, useRuntimeMediaUrl } from "@/shared/media/public";
 import {
+  useRuntimeBack,
   useRuntimeRouter,
+  useRuntimeSearchParams,
+  worldCharacterDirectoryRoute,
   worldCharacterProfileRoute,
   worldChatThreadRoute,
 } from "@/shared/navigation/public";
@@ -70,13 +78,15 @@ export function WorldCharacterDirectory({ worldId }: { worldId: string }) {
   return (
     <section className={styles.directory} data-world-character-surface="list">
       <header className={styles.directoryHeading}>
-        <span className={styles.headingIcon}>
+        <span className={styles.headingIcon} data-world-character-directory-icon>
           <Users aria-hidden="true" size={21} />
         </span>
         <div>
           <p>WORLD CHARACTERS</p>
           <h2>이 World의 앵무</h2>
-          <span>현재 참여 중인 Character {read.items.length}명</span>
+          <span className={styles.directoryMeta}>
+            현재 참여 중인 Character {read.items.length}명
+          </span>
         </div>
       </header>
       {read.items.length === 0 ? (
@@ -122,6 +132,11 @@ export function WorldCharacterProfile({
   worldId: string;
 }) {
   const router = useRuntimeRouter();
+  const goBack = useRuntimeBack(worldCharacterDirectoryRoute(worldId));
+  const searchParams = useRuntimeSearchParams();
+  const activeSocialTab = parseWorldCharacterSocialProfileTab(
+    searchParams.get("tab"),
+  );
   const [profile, setProfile] = useState<WorldCharacterPublicProfile | null>(null);
   const [chatEntry, setChatEntry] = useState<WorldChatEntryRead | null>(null);
   const [state, setState] = useState<LoadState>("loading");
@@ -170,6 +185,18 @@ export function WorldCharacterProfile({
     setChatError(null);
     setAttempt((value) => value + 1);
   }, []);
+
+  const selectSocialTab = useCallback(
+    (tab: WorldCharacterSocialProfileTab) => {
+      const next = new URLSearchParams(searchParams.toString());
+      if (tab === "posts") next.delete("tab");
+      else next.set("tab", tab);
+      const query = next.toString();
+      const pathname = worldCharacterProfileRoute(worldId, worldCharacterId);
+      router.replace(query ? `${pathname}?${query}` : pathname);
+    },
+    [router, searchParams, worldCharacterId, worldId],
+  );
 
   async function startChat() {
     if (
@@ -220,7 +247,7 @@ export function WorldCharacterProfile({
         <button
           aria-label="이전 화면으로"
           className={styles.backButton}
-          onClick={() => router.back()}
+          onClick={goBack}
           title="이전 화면으로"
           type="button"
         >
@@ -276,6 +303,12 @@ export function WorldCharacterProfile({
           </div>
         ) : null}
       </div>
+      <WorldCharacterSocialProfileActivity
+        activeTab={activeSocialTab}
+        onTabChange={selectSocialTab}
+        worldCharacterId={worldCharacterId}
+        worldId={worldId}
+      />
     </section>
   );
 }

@@ -518,6 +518,50 @@ function staticUiECreatorContext(worldId: string) {
   } as const;
 }
 
+function staticUiDWorldCharacterSocialProfile(
+  tab: "posts" | "replies" | "likes",
+  worldId = UI_D_STATIC_WORLD_ID,
+  worldCharacterId = "wc-ui-d-static-autonomous",
+) {
+  return {
+    schema_version: "world-character-social-profile-v1",
+    world_id: worldId,
+    world_character_id: worldCharacterId,
+    character_id: "character-ui-d-static-autonomous",
+    counts: {
+      post_count: 8,
+      reply_count: 5,
+      liked_post_count: 4,
+      received_like_count: 3,
+    },
+    tab,
+    items: [
+      {
+        id: `static-profile-${tab}`,
+        world_id: worldId,
+        author_world_character_id:
+          tab === "likes" ? "wc-ui-d-static-owner" : worldCharacterId,
+        author_name:
+          tab === "likes" ? "Static UI-D Owner" : "Static UI-D Autonomous",
+        author_handle:
+          tab === "likes" ? "static_ui_d_owner" : "static_ui_d_autonomous",
+        author_avatar_url: null,
+        title: tab === "replies" ? "" : `Static ${tab}`,
+        body: `STATIC CURRENT WORLD ${tab.toUpperCase()} ACTIVITY`,
+        post_type: tab === "replies" ? "reply" : "text",
+        reply_to_post_id: tab === "replies" ? "post-p8-l-e-static" : null,
+        created_at: "2026-09-01T05:30:00Z",
+        reply_count: 2,
+        like_count: 3,
+        author_profile_capability: "available",
+        mentioned_characters: [],
+        media: [],
+      },
+    ],
+    next_cursor: null,
+  } as const;
+}
+
 for (const route of ROUTES) {
   test(`direct-open static route ${route}`, async ({ page }) => {
     await page.goto(route);
@@ -2259,6 +2303,32 @@ test("P8-L-E static World author profile and letter entry keep exact Tauri route
   };
   let createCalls = 0;
 
+  await page.addInitScript(
+    ({ initialRoute }) => {
+      const desktop = window as unknown as {
+        __ANGMOO_DESKTOP_WINDOW__: { kind: "phone"; route: string };
+        __TAURI__: {
+          core: { invoke: (command: string) => Promise<unknown> };
+        };
+      };
+      desktop.__ANGMOO_DESKTOP_WINDOW__ = { kind: "phone", route: initialRoute };
+      desktop.__TAURI__ = {
+        core: {
+          invoke: async (command) =>
+            command === "desktop_runtime_status"
+              ? {
+                  phase: "ready",
+                  apiBaseUrl: "http://127.0.0.1:8080",
+                  graphProvider: "ladybug",
+                  launchToken: "static-route-probe-token-000000000000",
+                }
+              : undefined,
+        },
+      };
+    },
+    { initialRoute: `/worlds/${worldId}/feed` },
+  );
+
   await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -2286,6 +2356,24 @@ test("P8-L-E static World author profile and letter entry keep exact Tauri route
       await route.fulfill({
         contentType: "application/json",
         json: staticUiDManualFeed([post], worldId),
+        status: 200,
+      });
+      return;
+    }
+    if (
+      method === "GET" &&
+      url.pathname ===
+        `/api/v1/worlds/${worldId}/world-characters/${respondingId}/social-profile`
+    ) {
+      const tab = url.searchParams.get("tab") ?? "posts";
+      expect(["posts", "replies", "likes"]).toContain(tab);
+      await route.fulfill({
+        contentType: "application/json",
+        json: staticUiDWorldCharacterSocialProfile(
+          tab as "posts" | "replies" | "likes",
+          worldId,
+          respondingId,
+        ),
         status: 200,
       });
       return;
@@ -2377,6 +2465,32 @@ test("P8-L-E static World author profile and letter entry keep exact Tauri route
   );
   const profile = page.locator('[data-world-character-surface="profile"]');
   await expect(profile.getByRole("heading", { name: responding.display_name })).toBeVisible();
+  await profile.getByRole("button", { name: "이전 화면으로" }).click();
+  await expect(page.locator('[data-world-social-surface="feed"]')).toBeVisible();
+  await authorLinks.last().click();
+  await expect(profile).toBeVisible();
+  const activity = profile.locator("[data-world-character-social-activity]");
+  const metrics = activity.locator("dl");
+  for (const text of ["지저귐", "8", "대꾸", "5", "좋아요", "4", "받은 좋아요", "3"]) {
+    await expect(metrics).toContainText(text);
+  }
+  await expect(activity.getByRole("tab")).toHaveCount(3);
+  await expect(activity.getByRole("tab", { name: "받은 좋아요" })).toHaveCount(0);
+  await expect(activity.getByText("STATIC CURRENT WORLD POSTS ACTIVITY")).toBeVisible();
+  await expect(profile.getByRole("textbox")).toHaveCount(0);
+  const staticScrollContract = await page
+    .locator('[data-device-scroll-owner="true"]')
+    .evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        gutter: style.scrollbarGutter,
+        scrollbarWidth: style.scrollbarWidth,
+        reservedWidth: element.offsetWidth - element.clientWidth,
+      };
+    });
+  expect(staticScrollContract.gutter).not.toContain("stable");
+  expect(staticScrollContract.scrollbarWidth).toBe("none");
+  expect(staticScrollContract.reservedWidth).toBe(0);
   await profile
     .getByRole("button", { name: `${responding.display_name}와 채팅 시작` })
     .click();

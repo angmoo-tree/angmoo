@@ -619,9 +619,11 @@ post-merge Actions passed.
 
 P8-L-E activates `/worlds/{worldId}/characters/{worldCharacterId}` across Next,
 static and the existing Tauri Phone window. `features/characters/public.ts`
-owns the profile contract, transport and UI. It renders only canonical
-same-World identity fields supplied by the backend and does not invent Hosted
-follower, post, reply or like statistics.
+owns the identity profile contract, transport and shell. `features/social/public.ts`
+owns the exact current-World activity client and presentation: four metrics
+and three cursor-paged tabs, with received likes remaining count-only. It does
+not mix another World or invent Hosted follower/activity data, and it does not
+expose owner-only profile, autonomy, runtime, settings or follow actions.
 
 World social rows keep three separate interaction targets: the card opens post
 detail, while the author avatar and name open the exact WorldCharacter profile.
@@ -631,3 +633,12 @@ requester as zero/one/anomaly, and exposes P8-L-D's idempotent active-thread
 create-or-get only for the valid one-requester case. Self, blocked, inactive and
 cross-World targets fail closed. This E slice still has no message send,
 generation, streaming, retrieval or Memory behavior.
+
+The shared Phone scroll owner keeps real scrolling but hides the scrollbar and
+removes reserved gutter space. The Characters directory header keeps its icon
+centered by separating icon and metadata selectors. Same-window Tauri history
+stores a product-route index and synchronizes popstate URL back into the desktop
+route store before static routing. The WorldCharacter profile back button thus
+returns to the actual Feed or Characters origin; direct entry without prior
+product history uses the current World's Characters directory as its bounded
+fallback.

@@ -173,7 +173,7 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "c10d90f2d6441d373139f7bea149263f7a41328cd51aefe7f1a8b5a1cd7d5f6b"
+        "sha256": "81463987b7d8db7ba3b9fc9173041f63ee16085eedce62e6102ddb8b088f9471"
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",
@@ -189,7 +189,7 @@
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "2da33d075d72c22a452fc72762d19b0e15b994235f12f770bf6464458539df01"
+        "sha256": "4d2e7b48e1755ee17bab3ef3bf388c5afc557f709af546c755214f887a1284aa"
       },
       {
         "path": "browser-tests/ui-e-local-settings/local-settings.spec.ts",
@@ -1399,7 +1399,7 @@
         {
           "path": "browser-tests/snapshots/ui-f/characters-autonomy-phone-436x880.png",
           "present": true,
-          "sha256": "f0dfb96eaeeed9e43b3797c7517a8d0e43b04556312d5f3ed59a87988a998456"
+          "sha256": "30cbb803750972a7e609cd647aeff265dcd253eb9c78931f636bb9ce8cdba246"
         },
         {
           "path": "browser-tests/snapshots/ui-f/creator-studio-empty-1440x900.png",
@@ -1414,22 +1414,22 @@
         {
           "path": "browser-tests/snapshots/ui-f/device-home-centered-1440x1000.png",
           "present": true,
-          "sha256": "ae55fb6a0a11a5bc18ab273673f0779954462a989ed59084e5684dbb5603dfa5"
+          "sha256": "5089ee236618eb68ae217be0c3249e49ccc73aec81503d8502fda82615ff63b7"
         },
         {
           "path": "browser-tests/snapshots/ui-f/device-home-phone-360x800.png",
           "present": true,
-          "sha256": "a8a32e9d82a78bb475a8efb74ab57256840d27c9a242ad17ab88e3b0e8c66875"
+          "sha256": "018a90c65a7e511195bfd2e54e8e3f2aaa5c282e609c74e3b191c287f219e4a5"
         },
         {
           "path": "browser-tests/snapshots/ui-f/device-home-runtime-offline-390x844.png",
           "present": true,
-          "sha256": "2cf291abef353c16292fbaa32a2a51eddcea4b18680d1af5e3c7258d848e3fc3"
+          "sha256": "d5baf9d3ef581733bc9e0e7e460d7f3ce012939647e8e41ea43998178d654472"
         },
         {
           "path": "browser-tests/snapshots/ui-f/global-feed-media-phone-390x844.png",
           "present": true,
-          "sha256": "c3ea913423106fc91d26895ef9ffe4ff59702482d481acf6b72d5514f67ddb98"
+          "sha256": "88e93be64b59a06bc69df3c0fa7c5499476cf71f312435d42d8275c07e4b413e"
         },
         {
           "path": "browser-tests/snapshots/ui-f/relationship-graph-degraded-1440x900.png",
@@ -1444,7 +1444,7 @@
         {
           "path": "browser-tests/snapshots/ui-f/world-feed-composer-phone-436x880.png",
           "present": true,
-          "sha256": "75bc94a820289bf6941a4ffec22a204d00022c3398c1097aee9e9ac8fc6b8e69"
+          "sha256": "a605ae1fc5a1a79794c2ee186e023f1f24de708bb7860c3a0e6fc4116dc6b419"
         }
       ],
       "specs": [
