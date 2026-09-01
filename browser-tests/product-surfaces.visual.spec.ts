@@ -279,7 +279,7 @@ test("UI-F captures runtime-offline truth without hiding launchability", async (
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
 
-  await expect(page.locator('[data-runtime-state="stale_state"]')).toBeVisible();
+  await expect(page.locator('[data-runtime-state="degraded"]')).toBeVisible();
   await expect(page.locator('[data-world-launchability="launchable"]')).toBeVisible();
   await settleVisualSurface(page);
   await expect(page).toHaveScreenshot(["ui-f", "device-home-runtime-offline-390x844.png"]);

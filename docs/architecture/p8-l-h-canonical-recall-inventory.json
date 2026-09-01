@@ -1,0 +1,166 @@
+{
+  "canonical_revalidation": [
+    "memory_enabled",
+    "active_not_deleted_not_superseded_not_expired",
+    "source_digest_current",
+    "source_successful",
+    "source_visible",
+    "source_observed_by_subject",
+    "membership_active",
+    "not_blocked",
+    "same_owner_world_subject_counterpart_thread"
+  ],
+  "canonical_schema": {
+    "new_migration": null,
+    "new_tables": [],
+    "reused_tables": [
+      "memory_scope_settings",
+      "memory_candidates",
+      "memory_items",
+      "memory_item_evidence",
+      "memory_hot_briefs",
+      "memory_hot_brief_items",
+      "memory_maintenance_jobs"
+    ]
+  },
+  "contract_version": "memory-recall.v1",
+  "domain_boundary": {
+    "backend_ownership": "domains/memory",
+    "canonical_schema_changed": false,
+    "planner_call_count": 0,
+    "provider_dependency": null,
+    "public_facade": "app.domains.memory.public",
+    "raw_sql_or_cypher_from_llm": 0,
+    "response_generator_call_count": 0,
+    "runtime_projection": "app.runtime.memory"
+  },
+  "executable_contract_gates": [
+    "private_path_and_p5_preservation",
+    "cjk_and_special_fts_syntax",
+    "owner_world_subject_counterpart_thread_scope",
+    "staging_promote_and_rollback",
+    "stale_candidate_canonical_exclusion",
+    "memory_off_zero_recall",
+    "transaction_rollback_not_projected",
+    "scope_off_and_delete_tombstone",
+    "closed_typed_registry_and_hard_caps"
+  ],
+  "historical_chain": {
+    "current_tree_owner": "P8-L-H",
+    "p8_l_g_sha256": "81a4b9691434e6ccb9a9a6a04ef198b27bcab0852a9e74496000829b81598562",
+    "predecessor_mode": "frozen_digest"
+  },
+  "non_scope": [
+    "retrieval_router_llm",
+    "canonical_retrieval_planner_llm",
+    "graph_retrieval_planner_llm",
+    "ladybugdb_recall",
+    "evidence_bundle_merge",
+    "character_response_generator",
+    "chat_send_stream_retry",
+    "memory_owner_ui",
+    "maintenance_llm_provider"
+  ],
+  "owner_stage": "P8-L-H",
+  "p5_feed_index": {
+    "document_loss_allowed": 0,
+    "relative_path": "search/generations/v1/angmoo-search.sqlite3",
+    "schema_changed": false
+  },
+  "predecessor": {
+    "path": "docs/architecture/p8-l-g-memory-write-lifecycle-inventory.json",
+    "sha256": "81a4b9691434e6ccb9a9a6a04ef198b27bcab0852a9e74496000829b81598562",
+    "size": 5468
+  },
+  "private_projection": {
+    "after_commit_sync": true,
+    "canonical": false,
+    "doctor": true,
+    "encrypted_secret_material": false,
+    "failed_projection_rolls_back_canonical_write": false,
+    "generation": "v1",
+    "relative_path": "search/memory-recall/generations/v1/angmoo-memory-recall.sqlite3",
+    "rollback_image_count": 1,
+    "schema_version": 1,
+    "staging_verify_atomic_promote": true,
+    "startup_rebuild": true,
+    "tokenizer": "unicode61 + CJK bigram terms + normalized substring fallback",
+    "tombstones": true
+  },
+  "required_files": [
+    {
+      "path": "backend/app/domains/memory/domain/recall.py",
+      "sha256": "d18b1dbe96e0769e131dab383535897da9750f96e8569b295e99160fd78ae97b",
+      "size": 5673
+    },
+    {
+      "path": "backend/app/domains/memory/application/recall.py",
+      "sha256": "58f0fb13b2616226ebbdeafc96041ca5c290247acacc292efcc136cdb9fc2048",
+      "size": 8610
+    },
+    {
+      "path": "backend/app/domains/memory/ports/recall.py",
+      "sha256": "8ca09016cec816860f98ab1e143e3a9a6ff338efb978c73788dfaad31342f495",
+      "size": 1170
+    },
+    {
+      "path": "backend/app/domains/memory/public.py",
+      "sha256": "c838a061575214158ccd23b87ae2df4541f2030dff29f622fcbdb2f0b730ea1a",
+      "size": 3483
+    },
+    {
+      "path": "backend/app/runtime/memory/sqlite_fts5_recall.py",
+      "sha256": "043d9a289bcd3af48ef6e0e752dbb314ee74c9198aa9ee769a567802a41d3025",
+      "size": 35257
+    },
+    {
+      "path": "backend/app/runtime/memory/sqlalchemy_recall.py",
+      "sha256": "cc7b5b7038fb7205baa684a82d7ecee841a79303728c6179e60d2d4ac429862f",
+      "size": 23569
+    },
+    {
+      "path": "backend/app/runtime/memory/recall_projection.py",
+      "sha256": "0a64dd7cd24228e44a7a5d4ee5878e37b8f4eced4153fa939c12ab10cfe0b08d",
+      "size": 7343
+    },
+    {
+      "path": "backend/app/runtime/configuration.py",
+      "sha256": "46e2e49a824924e18780eb3614084add7255690d354847f319efbebe90cf05c8",
+      "size": 9282
+    },
+    {
+      "path": "backend/app/public_main.py",
+      "sha256": "d9214da6b117d297e7769d372849687031d776f221f361bc7d0aabbb4ae25625",
+      "size": 14445
+    },
+    {
+      "path": "backend/tests/test_p8_l_h_canonical_recall.py",
+      "sha256": "e82f4724c713e38d91405db0ceb67b879f824202b2dd3a3c734c0a5122d482a4",
+      "size": 17995
+    },
+    {
+      "path": "docs/architecture/p8-l-h-canonical-recall.md",
+      "sha256": "86f05758ba8e18776a581944e61694c507cad7729b0f3d9362fec78ea3563d0e",
+      "size": 8484
+    }
+  ],
+  "schema_version": 1,
+  "scope": [
+    "owner_id",
+    "world_id",
+    "subject_world_character_id",
+    "counterpart_world_character_id_optional",
+    "thread_id_optional"
+  ],
+  "typed_operations": [
+    "search_thread_messages",
+    "search_posts",
+    "search_memory_items",
+    "list_social_events",
+    "canonical_event_details",
+    "get_post_thread",
+    "list_activity_episodes",
+    "list_relationship_changes",
+    "get_character_summaries"
+  ]
+}

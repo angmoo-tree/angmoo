@@ -1147,13 +1147,13 @@
     {
       "markers": {
         "row_lock": [
-          145
+          149
         ]
       },
       "owner": "P8-L-G",
       "path": "scripts/ci/generate_p8_l_g_memory_write_inventory.py",
       "removal_condition": "retain only while cross-provider same-scope serialization or its negative inventory guard is required",
-      "source_sha256": "c7a78e6887bf86ed55d5b288dd49438070c03eb43f15a7dcfdfed9312ed8a807",
+      "source_sha256": "8879065e1085cd9b1c49141eb023e6f08223df3e75a97672c34e786f1adfc8f6",
       "transition_pr": "P8-L-G memory write/lifecycle"
     }
   ],

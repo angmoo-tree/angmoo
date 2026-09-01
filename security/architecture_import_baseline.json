@@ -1,7 +1,7 @@
 {
-  "edge_count": 1381,
-  "external_import_count": 1907,
-  "module_count": 586,
+  "edge_count": 1406,
+  "external_import_count": 1942,
+  "module_count": 592,
   "modules": [
     {
       "external_imports": [],
@@ -2383,11 +2383,27 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.memory.application.recall",
         "app.domains.memory.application.scope_control",
         "app.domains.memory.application.write_lifecycle"
       ],
       "module": "app.domains.memory.application",
       "path": "backend/app/domains/memory/application/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime"
+      ],
+      "imports": [
+        "app.domains.memory.domain.errors",
+        "app.domains.memory.domain.recall",
+        "app.domains.memory.ports.recall"
+      ],
+      "module": "app.domains.memory.application.recall",
+      "path": "backend/app/domains/memory/application/recall.py",
       "wildcard_imports": []
     },
     {
@@ -2427,6 +2443,7 @@
         "app.domains.memory.domain.lifecycle",
         "app.domains.memory.domain.policies",
         "app.domains.memory.domain.provenance",
+        "app.domains.memory.domain.recall",
         "app.domains.memory.domain.retention",
         "app.domains.memory.domain.scope"
       ],
@@ -2476,6 +2493,22 @@
       "imports": [],
       "module": "app.domains.memory.domain.provenance",
       "path": "backend/app/domains/memory/domain/provenance.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "enum",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.memory.domain.provenance",
+        "app.domains.memory.domain.scope"
+      ],
+      "module": "app.domains.memory.domain.recall",
+      "path": "backend/app/domains/memory/domain/recall.py",
       "wildcard_imports": []
     },
     {
@@ -2580,6 +2613,7 @@
       "external_imports": [],
       "imports": [
         "app.domains.memory.ports.maintenance_queue",
+        "app.domains.memory.ports.recall",
         "app.domains.memory.ports.repository",
         "app.domains.memory.ports.source_reader"
       ],
@@ -2597,6 +2631,20 @@
       "imports": [],
       "module": "app.domains.memory.ports.maintenance_queue",
       "path": "backend/app/domains/memory/ports/maintenance_queue.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.memory.domain.recall",
+        "app.domains.memory.domain.scope"
+      ],
+      "module": "app.domains.memory.ports.recall",
+      "path": "backend/app/domains/memory/ports/recall.py",
       "wildcard_imports": []
     },
     {
@@ -5818,7 +5866,9 @@
         "app.core.db",
         "app.domains.identity.application.local_owner",
         "app.domains.identity.infrastructure.sqlalchemy_identity_repository",
+        "app.domains.memory.public",
         "app.domains.runtime.ports.runtime_data_path",
+        "app.runtime.memory",
         "app.runtime.persistence.runtime_data_path",
         "app.runtime.search"
       ],
@@ -6079,10 +6129,49 @@
     {
       "external_imports": [],
       "imports": [
-        "app.runtime.memory.sqlalchemy_source_reader"
+        "app.runtime.memory.recall_projection",
+        "app.runtime.memory.sqlalchemy_recall",
+        "app.runtime.memory.sqlalchemy_source_reader",
+        "app.runtime.memory.sqlite_fts5_recall"
       ],
       "module": "app.runtime.memory",
       "path": "backend/app/runtime/memory/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "enum",
+        "logging",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.memory.infrastructure",
+        "app.runtime.memory.sqlalchemy_recall",
+        "app.runtime.memory.sqlite_fts5_recall"
+      ],
+      "module": "app.runtime.memory.recall_projection",
+      "path": "backend/app/runtime/memory/recall_projection.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.characters.public",
+        "app.domains.memory.infrastructure",
+        "app.domains.memory.public",
+        "app.runtime.memory.sqlalchemy_source_reader"
+      ],
+      "module": "app.runtime.memory.sqlalchemy_recall",
+      "path": "backend/app/runtime/memory/sqlalchemy_recall.py",
       "wildcard_imports": []
     },
     {
@@ -6104,6 +6193,31 @@
       ],
       "module": "app.runtime.memory.sqlalchemy_source_reader",
       "path": "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "contextlib",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "json",
+        "os",
+        "pathlib",
+        "re",
+        "sqlite3",
+        "threading",
+        "unicodedata"
+      ],
+      "imports": [
+        "app.core.search_text",
+        "app.domains.memory.public",
+        "app.domains.runtime.ports.runtime_data_path"
+      ],
+      "module": "app.runtime.memory.sqlite_fts5_recall",
+      "path": "backend/app/runtime/memory/sqlite_fts5_recall.py",
       "wildcard_imports": []
     },
     {
