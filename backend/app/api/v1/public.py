@@ -30,6 +30,7 @@ PUBLIC_ROUTERS = (
     local_identity_router,
     device_home_router,
     world_chat.router,
+    world_chat.entry_router,
     world_character_router,
     manual_social_router,
     world_package_router,

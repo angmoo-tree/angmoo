@@ -1,0 +1,330 @@
+.directory,
+.profile {
+  min-height: 100%;
+  background: var(--color-surface);
+  color: var(--color-text-default);
+}
+
+.directoryHeading {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--color-border-default);
+  gap: 12px;
+  padding: 20px;
+}
+
+.headingIcon {
+  display: inline-flex;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border-radius: 17px;
+  background: var(--color-brand-soft);
+  color: var(--color-brand-accent);
+}
+
+.directoryHeading p,
+.directoryHeading h2,
+.directoryMeta,
+.identity h2,
+.identity p {
+  margin: 0;
+}
+
+.directoryHeading p {
+  color: var(--color-brand-accent);
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.directoryHeading h2 {
+  margin-top: 2px;
+  color: var(--color-text-strong);
+  font-size: 1.45rem;
+}
+
+.directoryMeta {
+  display: block;
+  margin-top: 3px;
+  color: var(--color-text-secondary);
+  font-size: 0.73rem;
+  font-weight: 750;
+}
+
+.profileList {
+  margin: 0;
+  list-style: none;
+  padding: 0;
+}
+
+.profileList > li + li {
+  border-top: 1px solid var(--color-border-default);
+}
+
+.profileListLink {
+  display: flex;
+  min-height: 76px;
+  align-items: center;
+  color: inherit;
+  gap: 12px;
+  padding: 14px 20px;
+  text-decoration: none;
+}
+
+.profileListLink:hover {
+  background: var(--color-surface-muted);
+}
+
+.profileListLink:focus-visible,
+.backButton:focus-visible,
+.letterButton:focus-visible,
+.status button:focus-visible {
+  border-radius: var(--radius-control);
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.listAvatar {
+  width: 48px;
+  height: 48px;
+}
+
+.listAvatarText {
+  font-size: 18px;
+}
+
+.listIdentity {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.listIdentity strong {
+  overflow: hidden;
+  color: var(--color-text-strong);
+  font-size: 0.92rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.listIdentity span,
+.listIdentity small {
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.listIdentity small {
+  margin-top: 4px;
+  color: var(--color-text-default);
+  font-weight: 600;
+}
+
+.banner {
+  position: relative;
+  height: 170px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--color-border-default);
+  background: var(--color-surface-muted);
+}
+
+.banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profileBody {
+  position: relative;
+  padding: 0 20px 28px;
+}
+
+.backButton,
+.letterButton {
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border-control);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text-strong);
+  cursor: pointer;
+}
+
+.backButton {
+  position: absolute;
+  top: -154px;
+  left: 16px;
+  box-shadow: var(--shadow-summary);
+}
+
+.backButton:hover,
+.letterButton:hover:not(:disabled),
+.status button:hover {
+  border-color: var(--color-border-interactive);
+  background: var(--color-surface-muted);
+}
+
+.avatarRow {
+  display: flex;
+  min-height: 72px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.avatarFrame {
+  display: inline-flex;
+  margin-top: -54px;
+  border: 5px solid var(--color-surface);
+  border-radius: 999px;
+  background: var(--color-surface);
+}
+
+.profileAvatar {
+  width: 108px;
+  height: 108px;
+}
+
+.profileAvatarText {
+  font-size: 40px;
+}
+
+.letterButton {
+  margin-top: 14px;
+}
+
+.letterButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.identity h2 {
+  color: var(--color-text-strong);
+  font-size: 1.8rem;
+  line-height: 1.2;
+}
+
+.identity > p {
+  margin-top: 5px;
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+  font-weight: 750;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.badges span {
+  border-radius: 999px;
+  background: var(--color-surface-muted);
+  color: var(--color-text-secondary);
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 6px 10px;
+}
+
+.intro {
+  margin-top: 16px;
+  color: var(--color-text-default);
+  font-size: 0.9rem;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.chatNotice,
+.chatError {
+  display: flex;
+  align-items: flex-start;
+  border: 1px solid var(--color-border-default);
+  border-radius: 18px;
+  gap: 9px;
+  margin-top: 20px;
+  padding: 13px 14px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.chatNotice {
+  background: var(--color-surface-warm);
+  color: var(--color-text-secondary);
+}
+
+.chatError {
+  background: var(--color-state-danger-surface);
+  color: var(--color-state-danger);
+}
+
+.status,
+.empty {
+  display: flex;
+  min-height: 280px;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+  flex-direction: column;
+  padding: 28px;
+  text-align: center;
+}
+
+.status h2,
+.empty h3 {
+  margin: 13px 0 0;
+  color: var(--color-text-strong);
+  font-size: 1.05rem;
+}
+
+.status p,
+.empty p {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+
+.status button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border-control);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text-strong);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 850;
+  gap: 6px;
+  margin-top: 16px;
+  padding: 9px 14px;
+}
+
+.spin {
+  animation: profile-spin 0.9s linear infinite;
+}
+
+@keyframes profile-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spin {
+    animation: none;
+  }
+}

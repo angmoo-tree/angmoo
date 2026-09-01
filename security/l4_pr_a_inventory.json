@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 1824,
-      "internal_edge_count": 1284,
+      "external_import_count": 1854,
+      "internal_edge_count": 1311,
       "legacy_import_exception_count": 0,
-      "module_count": 554,
+      "module_count": 562,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -141,7 +141,9 @@
             "path": "backend/app/domains/social/api/__init__.py"
           },
           {
-            "imports": [],
+            "imports": [
+              "app.domains.social.domain.profile_activity"
+            ],
             "module": "app.domains.social.api.schemas",
             "path": "backend/app/domains/social/api/schemas.py"
           },
@@ -149,6 +151,7 @@
             "imports": [
               "app.domains.social.application.keyword_feed",
               "app.domains.social.application.observations",
+              "app.domains.social.application.profile_activity",
               "app.domains.social.application.search_runtime",
               "app.domains.social.application.writes"
             ],
@@ -173,6 +176,14 @@
           },
           {
             "imports": [
+              "app.domains.social.domain.profile_activity",
+              "app.domains.social.ports.profile_activity"
+            ],
+            "module": "app.domains.social.application.profile_activity",
+            "path": "backend/app/domains/social/application/profile_activity.py"
+          },
+          {
+            "imports": [
               "app.domains.social.domain",
               "app.domains.social.ports"
             ],
@@ -190,6 +201,7 @@
           {
             "imports": [
               "app.domains.social.domain.observations",
+              "app.domains.social.domain.profile_activity",
               "app.domains.social.domain.search_state",
               "app.domains.social.domain.writes"
             ],
@@ -205,6 +217,11 @@
             "imports": [],
             "module": "app.domains.social.domain.observations",
             "path": "backend/app/domains/social/domain/observations.py"
+          },
+          {
+            "imports": [],
+            "module": "app.domains.social.domain.profile_activity",
+            "path": "backend/app/domains/social/domain/profile_activity.py"
           },
           {
             "imports": [],
@@ -226,6 +243,7 @@
           {
             "imports": [
               "app.domains.social.ports.observation_unit_of_work",
+              "app.domains.social.ports.profile_activity",
               "app.domains.social.ports.search_index",
               "app.domains.social.ports.write_unit_of_work"
             ],
@@ -238,6 +256,13 @@
             ],
             "module": "app.domains.social.ports.observation_unit_of_work",
             "path": "backend/app/domains/social/ports/observation_unit_of_work.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.domain.profile_activity"
+            ],
+            "module": "app.domains.social.ports.profile_activity",
+            "path": "backend/app/domains/social/ports/profile_activity.py"
           },
           {
             "imports": [
@@ -428,10 +453,21 @@
           },
           {
             "imports": [
+              "app.core.config",
+              "app.domains.social.public",
+              "app.domains.world_characters.public",
+              "app.runtime.social.sqlalchemy_read_repository"
+            ],
+            "module": "app.runtime.social.sqlalchemy_profile_repository",
+            "path": "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+          },
+          {
+            "imports": [
               "app.domains.social.api.schemas",
               "app.domains.social.domain",
               "app.domains.world_characters.public",
-              "app.models"
+              "app.models",
+              "app.runtime.relationships.sqlalchemy_social_event"
             ],
             "module": "app.runtime.social.sqlalchemy_read_repository",
             "path": "backend/app/runtime/social/sqlalchemy_read_repository.py"
@@ -752,7 +788,7 @@
             "react"
           ],
           "path": "frontend/src/features/social/ui/world-social-feed.tsx",
-          "sha256": "fb8c6440138d116d924fede989ef9da6ba8e6a4cd30c56804b705074359bdd10"
+          "sha256": "cdce9e395a29c64802f3bafb172985db67c1b49219438f1524852b0687e25e8c"
         },
         {
           "exports": [
@@ -897,7 +933,7 @@
     "oracle_artifacts": [
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "467ba75cdf7ccca15458ee21e3cbefdcef478af12759a79d8a31c7246e450553"
+        "sha256": "4d2e7b48e1755ee17bab3ef3bf388c5afc557f709af546c755214f887a1284aa"
       },
       {
         "path": "docs/architecture/l3-er-postgres-neo4j-parity-oracle.json",

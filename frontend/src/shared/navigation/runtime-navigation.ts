@@ -5,11 +5,12 @@ import {
   useRouter as useNextRouter,
   useSearchParams as useNextSearchParams,
 } from "next/navigation";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 import {
   currentDesktopRoute,
   isTauriDesktopRuntime,
+  navigateBackCurrentDesktopRoute,
   navigateDesktopProductRoute,
 } from "@/shared/desktop/public";
 import { isStaticFrontendProfile } from "@/shared/runtime/public";
@@ -38,6 +39,18 @@ export function useRuntimeRouter() {
       replace: (href: string) => staticNavigate(href, true),
     };
   }, [router]);
+}
+
+export function useRuntimeBack(fallbackHref: string) {
+  const router = useRuntimeRouter();
+  return useCallback(() => {
+    if (isTauriDesktopRuntime()) {
+      if (navigateBackCurrentDesktopRoute(fallbackHref)) return;
+      staticNavigate(fallbackHref, true);
+      return;
+    }
+    router.back();
+  }, [fallbackHref, router]);
 }
 
 export function useRuntimePathname() {

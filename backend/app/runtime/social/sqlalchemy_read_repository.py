@@ -25,6 +25,24 @@ from app.domains.social.domain import (
 from app.domains.world_characters.public import (
     SqlAlchemyOwnerControlledIdentityRepository,
 )
+from app.runtime.relationships.sqlalchemy_social_event import (
+    world_character_pair_is_blocked,
+)
+
+
+class _SocialPersistenceModels:
+    """L6-removable ORM mapping exposed only to sibling social adapters."""
+
+    Character = models.Character
+    Post = models.Post
+    PostLike = models.PostLike
+    PostMedia = models.PostMedia
+    WorldCharacter = models.WorldCharacter
+    WorldCharacterBlock = models.WorldCharacterBlock
+    WorldMembership = models.WorldMembership
+
+
+social_persistence_models = _SocialPersistenceModels()
 
 
 def _owner_actor(
@@ -65,15 +83,34 @@ def _post_read(
     *,
     reply_count: int,
     like_count: int,
+    viewer_world_character_id: str,
 ) -> ManualSocialPostRead:
     if post.world_id is None or post.author_world_character_id is None:
         raise ManualSocialConflictError("world_post_scope_missing")
     author = db.get(models.WorldCharacter, post.author_world_character_id)
+    author_character = (
+        db.get(models.Character, author.character_id) if author is not None else None
+    )
+    local_profile = author.local_profile if author is not None else None
+    local_profile = local_profile if isinstance(local_profile, dict) else {}
+    author_profile_available = _author_profile_available(
+        db,
+        world_id=post.world_id,
+        author_world_character_id=post.author_world_character_id,
+        viewer_world_character_id=viewer_world_character_id,
+    )
     return ManualSocialPostRead(
         id=post.id,
         world_id=post.world_id,
         author_world_character_id=post.author_world_character_id,
         author_name=post.author_name,
+        author_handle=author_character.handle if author_character is not None else None,
+        author_avatar_url=(
+            str(local_profile.get("avatar_url") or author_character.avatar_url)
+            if author_character is not None
+            and (local_profile.get("avatar_url") or author_character.avatar_url)
+            else None
+        ),
         title=post.title,
         body=post.body,
         post_type=post.post_type,
@@ -81,6 +118,9 @@ def _post_read(
         created_at=post.created_at,
         reply_count=reply_count,
         like_count=like_count,
+        author_profile_capability=(
+            "available" if author_profile_available else "unavailable"
+        ),
         can_owner_reply=(
             post.reply_to_post_id is None
             and author is not None
@@ -92,7 +132,11 @@ def _post_read(
 
 
 def _post_reads(
-    db: Session, *, world_id: str, posts: list[models.Post]
+    db: Session,
+    *,
+    world_id: str,
+    posts: list[models.Post],
+    viewer_world_character_id: str,
 ) -> list[ManualSocialPostRead]:
     post_ids = [post.id for post in posts]
     if not post_ids:
@@ -133,9 +177,49 @@ def _post_reads(
             post,
             reply_count=reply_counts.get(post.id, 0),
             like_count=like_counts.get(post.id, 0),
+            viewer_world_character_id=viewer_world_character_id,
         )
         for post in posts
     ]
+
+
+def _author_profile_available(
+    db: Session,
+    *,
+    world_id: str,
+    author_world_character_id: str,
+    viewer_world_character_id: str,
+) -> bool:
+    active_author_id = db.scalar(
+        select(models.WorldCharacter.id)
+        .join(
+            models.Character,
+            models.Character.id == models.WorldCharacter.character_id,
+        )
+        .join(
+            models.WorldMembership,
+            (models.WorldMembership.id == models.WorldCharacter.membership_id)
+            & (models.WorldMembership.world_id == models.WorldCharacter.world_id),
+        )
+        .where(
+            models.WorldCharacter.id == author_world_character_id,
+            models.WorldCharacter.world_id == world_id,
+            models.WorldCharacter.status == "active",
+            models.WorldMembership.status == "active",
+            models.Character.deleted_at.is_(None),
+            models.Character.moderation_status == "active",
+        )
+    )
+    if active_author_id is None:
+        return False
+    if author_world_character_id == viewer_world_character_id:
+        return True
+    return not world_character_pair_is_blocked(
+        db,
+        world_id=world_id,
+        first_world_character_id=viewer_world_character_id,
+        second_world_character_id=author_world_character_id,
+    )
 
 
 def list_owner_world_feed(
@@ -160,7 +244,12 @@ def list_owner_world_feed(
     return ManualSocialFeedRead(
         world_id=world_id,
         owner_world_character_id=actor.id,
-        items=_post_reads(db, world_id=world_id, posts=items),
+        items=_post_reads(
+            db,
+            world_id=world_id,
+            posts=items,
+            viewer_world_character_id=actor.id,
+        ),
     )
 
 
@@ -203,7 +292,12 @@ def get_owner_world_post_thread(
     return ManualSocialFeedRead(
         world_id=world_id,
         owner_world_character_id=actor.id,
-        items=_post_reads(db, world_id=world_id, posts=items),
+        items=_post_reads(
+            db,
+            world_id=world_id,
+            posts=items,
+            viewer_world_character_id=actor.id,
+        ),
     )
 
 
@@ -214,4 +308,5 @@ __all__ = [
     "ManualSocialNotFoundError",
     "get_owner_world_post_thread",
     "list_owner_world_feed",
+    "social_persistence_models",
 ]

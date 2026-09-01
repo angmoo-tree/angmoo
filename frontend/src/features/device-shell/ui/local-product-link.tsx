@@ -10,6 +10,7 @@ import { isStaticLocalProductRouteSupported } from "../model/device-navigation";
 import styles from "./local-product-link.module.css";
 
 export type LocalProductLinkProps = {
+  "data-post-card-ignore"?: boolean | string;
   ariaLabel?: string;
   children: ReactNode;
   className?: string;
@@ -25,6 +26,7 @@ export type LocalProductLinkProps = {
  * instead of a control that can only end in StaticNotFound.
  */
 export function LocalProductLink({
+  "data-post-card-ignore": dataPostCardIgnore,
   ariaLabel,
   children,
   className,
@@ -42,6 +44,7 @@ export function LocalProductLink({
         aria-disabled="true"
         aria-label={ariaLabel}
         className={[className, styles.unavailable].filter(Boolean).join(" ")}
+        data-post-card-ignore={dataPostCardIgnore}
         data-product-route-unavailable="true"
         onClick={(event) => {
           // A disabled destination can live inside a clickable feed row. Keep
@@ -62,6 +65,7 @@ export function LocalProductLink({
     <Link
       aria-label={ariaLabel}
       className={className}
+      data-post-card-ignore={dataPostCardIgnore}
       href={href}
       rel={rel}
       target={target}

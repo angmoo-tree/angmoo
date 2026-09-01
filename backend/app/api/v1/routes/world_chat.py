@@ -11,6 +11,36 @@ from app.runtime.chat.composition import chat_service
 
 
 router = APIRouter(prefix="/worlds/{world_id}/chat", tags=["world-chat"])
+entry_router = APIRouter(
+    prefix="/worlds/{world_id}/world-characters",
+    tags=["world-chat"],
+)
+
+
+@entry_router.get(
+    "/{responding_id}/chat-entry",
+    response_model=chat.WorldChatEntryRead,
+)
+def get_world_chat_entry(
+    world_id: str,
+    responding_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> chat.WorldChatEntryRead:
+    browser_session.require_local_frontend_request(request, mutation=False)
+    try:
+        return chat_service.get_world_chat_entry(db, user, world_id, responding_id)
+    except chat.MessageNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="target_profile_unavailable",
+        ) from exc
+    except chat.MessageForbiddenError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(exc),
+        ) from exc
 
 
 @router.get("/threads", response_model=chat.WorldChatThreadListRead)
@@ -72,4 +102,4 @@ def get_world_thread(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
 
 
-__all__ = ["router"]
+__all__ = ["entry_router", "router"]

@@ -11,6 +11,7 @@ const ROUTES = [
   "/worlds/world-static-probe/chat",
   "/worlds/world-static-probe/chat/thread-static-probe",
   "/worlds/world-static-probe/characters",
+  "/worlds/world-static-probe/characters/wc-static-profile-probe",
   "/worlds/world-static-probe/relationships",
   "/worlds/world-static-probe/posts/post-static-probe",
   "/characters/character-static-probe/worlds/world-static-probe/autonomy-setup",
@@ -184,6 +185,12 @@ function staticUiDManualPost({
         ? "wc-ui-d-static-owner"
         : "wc-ui-d-static-autonomous",
     author_name: authorName,
+    author_handle:
+      authorName === "Static UI-D Owner"
+        ? "static_ui_d_owner"
+        : "static_ui_d_autonomous",
+    author_avatar_url: null,
+    author_profile_capability: "available" as const,
     title,
     body,
     post_type: replyToPostId ? "reply" : "text",
@@ -216,6 +223,9 @@ function staticUiDManualWrite(
     world_id: post.world_id,
     author_world_character_id: post.author_world_character_id,
     author_name: post.author_name,
+    author_handle: post.author_handle,
+    author_avatar_url: post.author_avatar_url,
+    author_profile_capability: post.author_profile_capability,
     title: post.title,
     body: post.body,
     post_type: post.post_type,
@@ -505,6 +515,50 @@ function staticUiECreatorContext(worldId: string) {
       ready_for_publish: true,
       evaluated_at: "2026-08-30T00:00:00Z",
     },
+  } as const;
+}
+
+function staticUiDWorldCharacterSocialProfile(
+  tab: "posts" | "replies" | "likes",
+  worldId = UI_D_STATIC_WORLD_ID,
+  worldCharacterId = "wc-ui-d-static-autonomous",
+) {
+  return {
+    schema_version: "world-character-social-profile-v1",
+    world_id: worldId,
+    world_character_id: worldCharacterId,
+    character_id: "character-ui-d-static-autonomous",
+    counts: {
+      post_count: 8,
+      reply_count: 5,
+      liked_post_count: 4,
+      received_like_count: 3,
+    },
+    tab,
+    items: [
+      {
+        id: `static-profile-${tab}`,
+        world_id: worldId,
+        author_world_character_id:
+          tab === "likes" ? "wc-ui-d-static-owner" : worldCharacterId,
+        author_name:
+          tab === "likes" ? "Static UI-D Owner" : "Static UI-D Autonomous",
+        author_handle:
+          tab === "likes" ? "static_ui_d_owner" : "static_ui_d_autonomous",
+        author_avatar_url: null,
+        title: tab === "replies" ? "" : `Static ${tab}`,
+        body: `STATIC CURRENT WORLD ${tab.toUpperCase()} ACTIVITY`,
+        post_type: tab === "replies" ? "reply" : "text",
+        reply_to_post_id: tab === "replies" ? "post-p8-l-e-static" : null,
+        created_at: "2026-09-01T05:30:00Z",
+        reply_count: 2,
+        like_count: 3,
+        author_profile_capability: "available",
+        mentioned_characters: [],
+        media: [],
+      },
+    ],
+    next_cursor: null,
   } as const;
 }
 
@@ -1007,7 +1061,8 @@ test("static feed paginates on the Device scroll owner and keeps hosted-only rou
   await expect(page.getByText("첫 번째 페이지", { exact: true })).toBeVisible();
   await expect(page.locator('a[href^="/profiles/"]')).toHaveCount(0);
   const unavailableRoutes = page.locator('[data-product-route-unavailable="true"]');
-  await expect(unavailableRoutes).toHaveCount(2);
+  await expect(unavailableRoutes).toHaveCount(3);
+  await expect(page.getByLabel("첫 번째 앵무 프로필 열기")).toHaveCount(2);
   await expect(unavailableRoutes.first()).toHaveAttribute("aria-disabled", "true");
   await expect(unavailableRoutes.first()).toHaveAttribute("role", "link");
   await expect(unavailableRoutes.first()).toHaveAttribute(
@@ -2167,6 +2222,9 @@ test("static P4 evidence opens the exact World-scoped post thread", async ({
               world_id: "world-static-probe",
               author_world_character_id: "wc-static-autonomous",
               author_name: "Static Mango",
+              author_handle: "static_mango",
+              author_avatar_url: null,
+              author_profile_capability: "available",
               title: "World-scoped evidence",
               body: "This post belongs only to Static World.",
               post_type: "text",
@@ -2196,6 +2254,251 @@ test("static P4 evidence opens the exact World-scoped post thread", async ({
     "/api/v1/worlds/world-static-probe/manual-social/posts/post-static-probe",
   );
   expect(requestedPaths).not.toContain("/api/v1/posts/post-static-probe");
+});
+
+test("P8-L-E static World author profile and letter entry keep exact Tauri route parity", async ({
+  page,
+}) => {
+  const worldId = UI_D_STATIC_WORLD_ID;
+  const respondingId = "wc-ui-d-static-autonomous";
+  const requesterId = "wc-ui-d-static-owner";
+  const threadId = "thread-p8-l-e-static";
+  const post = staticUiDManualPost({
+    body: "Static/Tauri profile and letter entry evidence.",
+    id: "post-p8-l-e-static",
+    title: "P8-L-E static entry",
+  });
+  const requester = {
+    world_character_id: requesterId,
+    character_id: "character-ui-d-static-owner",
+    display_name: "Static UI-D Owner",
+    handle: "static_ui_d_owner",
+    avatar_url: null,
+    banner_url: null,
+    role_key: "student",
+    control_mode: "owner_controlled",
+    profile_capability: "available",
+  };
+  const responding = {
+    world_character_id: respondingId,
+    character_id: "character-ui-d-static-autonomous",
+    display_name: "Static UI-D Autonomous",
+    handle: "static_ui_d_autonomous",
+    avatar_url: null,
+    banner_url: null,
+    role_key: "mentor",
+    control_mode: "autonomous",
+    profile_capability: "available",
+  };
+  const thread = {
+    id: threadId,
+    world_id: worldId,
+    requester,
+    responding,
+    selected_model: "gemini-2.5-flash-lite",
+    last_message_at: null,
+    created_at: "2026-09-01T04:30:00Z",
+    latest_message: null,
+    messages: [],
+  };
+  let createCalls = 0;
+
+  await page.addInitScript(
+    ({ initialRoute }) => {
+      const desktop = window as unknown as {
+        __ANGMOO_DESKTOP_WINDOW__: { kind: "phone"; route: string };
+        __TAURI__: {
+          core: { invoke: (command: string) => Promise<unknown> };
+        };
+      };
+      desktop.__ANGMOO_DESKTOP_WINDOW__ = { kind: "phone", route: initialRoute };
+      desktop.__TAURI__ = {
+        core: {
+          invoke: async (command) =>
+            command === "desktop_runtime_status"
+              ? {
+                  phase: "ready",
+                  apiBaseUrl: "http://127.0.0.1:8080",
+                  graphProvider: "ladybug",
+                  launchToken: "static-route-probe-token-000000000000",
+                }
+              : undefined,
+        },
+      };
+    },
+    { initialRoute: `/worlds/${worldId}/feed` },
+  );
+
+  await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+    const request = route.request();
+    const url = new URL(request.url());
+    const method = request.method();
+    if (url.pathname === `/api/v1/worlds/mine/${worldId}`) {
+      await route.fulfill({
+        contentType: "application/json",
+        json: staticUiDWorld(worldId),
+        status: 200,
+      });
+      return;
+    }
+    if (url.pathname === `/api/v1/worlds/${worldId}/owner-character`) {
+      await route.fulfill({
+        contentType: "application/json",
+        json: staticUiDOwnerActor(worldId),
+        status: 200,
+      });
+      return;
+    }
+    if (
+      method === "GET" &&
+      url.pathname === `/api/v1/worlds/${worldId}/manual-social/feed`
+    ) {
+      await route.fulfill({
+        contentType: "application/json",
+        json: staticUiDManualFeed([post], worldId),
+        status: 200,
+      });
+      return;
+    }
+    if (
+      method === "GET" &&
+      url.pathname ===
+        `/api/v1/worlds/${worldId}/world-characters/${respondingId}/social-profile`
+    ) {
+      const tab = url.searchParams.get("tab") ?? "posts";
+      expect(["posts", "replies", "likes"]).toContain(tab);
+      await route.fulfill({
+        contentType: "application/json",
+        json: staticUiDWorldCharacterSocialProfile(
+          tab as "posts" | "replies" | "likes",
+          worldId,
+          respondingId,
+        ),
+        status: 200,
+      });
+      return;
+    }
+    if (
+      method === "GET" &&
+      url.pathname === `/api/v1/worlds/${worldId}/world-characters/${respondingId}`
+    ) {
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          schema_version: "world-character-profile-v1",
+          world_id: worldId,
+          world_character_id: respondingId,
+          character_id: responding.character_id,
+          display_name: responding.display_name,
+          handle: responding.handle,
+          avatar_url: null,
+          banner_url: null,
+          intro: "Static same-World autonomous Character.",
+          role_key: responding.role_key,
+          control_mode: responding.control_mode,
+          status: "active",
+          profile_capability: "available",
+        },
+        status: 200,
+      });
+      return;
+    }
+    if (
+      method === "GET" &&
+      url.pathname ===
+        `/api/v1/worlds/${worldId}/world-characters/${respondingId}/chat-entry`
+    ) {
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          schema_version: "world-chat-entry-v1",
+          world_id: worldId,
+          responding,
+          requester_cardinality: "one",
+          requester,
+          create_or_get_capability: "available",
+          disabled_reason: null,
+        },
+        status: 200,
+      });
+      return;
+    }
+    if (
+      method === "POST" &&
+      url.pathname === `/api/v1/worlds/${worldId}/chat/threads`
+    ) {
+      createCalls += 1;
+      expect(request.postDataJSON()).toEqual({
+        responding_world_character_id: respondingId,
+        requester_world_character_id: requesterId,
+      });
+      await route.fulfill({
+        contentType: "application/json",
+        json: { outcome: "created", thread, resolution_code: null },
+        status: 200,
+      });
+      return;
+    }
+    if (
+      method === "GET" &&
+      url.pathname === `/api/v1/worlds/${worldId}/chat/threads/${threadId}`
+    ) {
+      await route.fulfill({
+        contentType: "application/json",
+        json: thread,
+        status: 200,
+      });
+      return;
+    }
+    await route.fallback();
+  });
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`/worlds/${worldId}/feed`);
+  const authorLinks = page.getByRole("link", {
+    name: "Static UI-D Autonomous 프로필 열기",
+  });
+  await expect(authorLinks).toHaveCount(2);
+  await authorLinks.last().click();
+  await expect(page).toHaveURL(
+    new RegExp(`/worlds/${worldId}/characters/${respondingId}/?$`),
+  );
+  const profile = page.locator('[data-world-character-surface="profile"]');
+  await expect(profile.getByRole("heading", { name: responding.display_name })).toBeVisible();
+  await profile.getByRole("button", { name: "이전 화면으로" }).click();
+  await expect(page.locator('[data-world-social-surface="feed"]')).toBeVisible();
+  await authorLinks.last().click();
+  await expect(profile).toBeVisible();
+  const activity = profile.locator("[data-world-character-social-activity]");
+  const metrics = activity.locator("dl");
+  for (const text of ["지저귐", "8", "대꾸", "5", "좋아요", "4", "받은 좋아요", "3"]) {
+    await expect(metrics).toContainText(text);
+  }
+  await expect(activity.getByRole("tab")).toHaveCount(3);
+  await expect(activity.getByRole("tab", { name: "받은 좋아요" })).toHaveCount(0);
+  await expect(activity.getByText("STATIC CURRENT WORLD POSTS ACTIVITY")).toBeVisible();
+  await expect(profile.getByRole("textbox")).toHaveCount(0);
+  const staticScrollContract = await page
+    .locator('[data-device-scroll-owner="true"]')
+    .evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        gutter: style.scrollbarGutter,
+        scrollbarWidth: style.scrollbarWidth,
+        reservedWidth: element.offsetWidth - element.clientWidth,
+      };
+    });
+  expect(staticScrollContract.gutter).not.toContain("stable");
+  expect(staticScrollContract.scrollbarWidth).toBe("none");
+  expect(staticScrollContract.reservedWidth).toBe(0);
+  await profile
+    .getByRole("button", { name: `${responding.display_name}와 채팅 시작` })
+    .click();
+  await expect(page).toHaveURL(
+    new RegExp(`/worlds/${worldId}/chat/${threadId}/?$`),
+  );
+  await expect(page.locator('[data-world-chat-surface="thread"]')).toBeVisible();
+  expect(createCalls).toBe(1);
 });
 
 test("UI-D static World social core keeps compact composition, flat rows, exact detail navigation, and scoped replies", async ({

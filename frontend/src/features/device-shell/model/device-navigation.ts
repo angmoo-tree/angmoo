@@ -82,6 +82,14 @@ export const LOCAL_PRODUCT_ROUTE_CAPABILITIES = [
   },
   {
     exposure: "direct-only",
+    id: "world-character-profile",
+    next: "supported",
+    routeFamily: "/worlds/{worldId}/characters/{worldCharacterId}",
+    static: "supported",
+    window: "phone",
+  },
+  {
+    exposure: "direct-only",
     id: "creator-studio",
     next: "supported",
     routeFamily: "/studio",
@@ -156,6 +164,7 @@ const STATIC_PRODUCT_ROUTE_PATTERNS = [
   /^\/worlds\/[^/]+\/creator$/,
   /^\/worlds\/(?!new(?:\/|$))[^/]+(?:\/(?:feed|chat|characters|relationships))?$/,
   /^\/worlds\/(?!new(?:\/|$))[^/]+\/chat\/[^/]+$/,
+  /^\/worlds\/(?!new(?:\/|$))[^/]+\/characters\/[^/]+$/,
   /^\/worlds\/(?!new(?:\/|$))[^/]+\/posts\/[^/]+$/,
   /^\/characters\/[^/]+\/worlds\/(?!new(?:\/|$))[^/]+\/(?:autonomy-setup|relationship-graph)$/,
 ] as const;

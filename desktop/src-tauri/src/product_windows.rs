@@ -95,6 +95,9 @@ fn phone_path_matches(segments: &[&str]) -> bool {
         ["worlds", world_id, "chat", thread_id] => {
             safe_world_id(world_id) && safe_segment(thread_id)
         }
+        ["worlds", world_id, "characters", world_character_id] => {
+            safe_world_id(world_id) && safe_segment(world_character_id)
+        }
         ["worlds", world_id, "posts", post_id] => safe_world_id(world_id) && safe_segment(post_id),
         [
             "characters",
@@ -290,6 +293,13 @@ mod tests {
         assert!(
             validate_product_route(ProductWindowKind::Phone, "/worlds/world-1/chat/thread-1")
                 .is_ok()
+        );
+        assert!(
+            validate_product_route(
+                ProductWindowKind::Phone,
+                "/worlds/world-1/characters/world-character-1"
+            )
+            .is_ok()
         );
         assert!(
             validate_product_route(

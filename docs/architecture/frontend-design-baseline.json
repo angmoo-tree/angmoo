@@ -110,28 +110,28 @@
         "DIRECT"
       ],
       "path": "frontend/src/features/social/ui/social-post-row.tsx",
-      "sha256": "bc57dfc9553939fecb6a1f5b24cb45271088e835d748c6908e35ab3118ead739"
+      "sha256": "0e0de56ac3b05c2c08eba83e92f98faad560653a16226ad6a5d1d73bd277fe25"
     },
     {
       "classifications": [
         "DIRECT"
       ],
       "path": "frontend/src/features/social/ui/social-presentation.module.css",
-      "sha256": "1de62db29b989a9d66f80332dfa28a03d163446f3dbd404ce9db4da5b0cc78de"
+      "sha256": "d24b5e775f25a7bb7cb6ec019995af77bc9aa7328fcd7ccdb13a30d229195897"
     },
     {
       "classifications": [
         "ADAPTED"
       ],
       "path": "frontend/src/features/social/ui/world-social-feed.tsx",
-      "sha256": "fb8c6440138d116d924fede989ef9da6ba8e6a4cd30c56804b705074359bdd10"
+      "sha256": "cdce9e395a29c64802f3bafb172985db67c1b49219438f1524852b0687e25e8c"
     },
     {
       "classifications": [
         "LOCAL"
       ],
       "path": "frontend/src/features/world-app/ui/world-app.tsx",
-      "sha256": "03657ee629b1e4d74690b2c75acb4e5a0027d6f5ece370982379bd9751c05632"
+      "sha256": "aeabe7ec9d3c3659b03dfc1d4b1547ee228bb14134462a3cda54765c2158f72e"
     },
     {
       "classifications": [
@@ -173,7 +173,7 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "82bf7fc6c538703bf25dd3dba422481c3a739cb5d48b91d5329ce97606f81d62"
+        "sha256": "81463987b7d8db7ba3b9fc9173041f63ee16085eedce62e6102ddb8b088f9471"
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",
@@ -189,7 +189,7 @@
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "467ba75cdf7ccca15458ee21e3cbefdcef478af12759a79d8a31c7246e450553"
+        "sha256": "4d2e7b48e1755ee17bab3ef3bf388c5afc557f709af546c755214f887a1284aa"
       },
       {
         "path": "browser-tests/ui-e-local-settings/local-settings.spec.ts",
@@ -207,6 +207,7 @@
       "/worlds/world-static-probe/chat",
       "/worlds/world-static-probe/chat/thread-static-probe",
       "/worlds/world-static-probe/characters",
+      "/worlds/world-static-probe/characters/wc-static-profile-probe",
       "/worlds/world-static-probe/relationships",
       "/worlds/world-static-probe/posts/post-static-probe",
       "/characters/character-static-probe/worlds/world-static-probe/autonomy-setup",
@@ -1107,8 +1108,8 @@
   "route_inventory": {
     "known_gap_count": 0,
     "next_static_inventory": "docs/architecture/next-static-compatibility.json",
-    "next_static_inventory_route_count": 41,
-    "next_static_inventory_sha256": "48e13e3d178af208fee7ebc648ba011cdafd914c5253e20f1a2b73ce9ac8ee20",
+    "next_static_inventory_route_count": 42,
+    "next_static_inventory_sha256": "67b47ed97c1299ddfea1917868a8bd633182fce776f884619e04edc9efe3aec5",
     "reviewed_surface_count": 17
   },
   "schema_version": 1,
@@ -1144,7 +1145,7 @@
       {
         "path": "frontend/src/composition/static-product-router.tsx",
         "present": true,
-        "sha256": "5d98d47c2f56ecd893e929db5563da82593699d60dd0299d597ca665d5a04e76"
+        "sha256": "fd51e8ea254405dcf5ba92ce2571c4cdf5345041a2cecf86fdf534d9d3b5bca6"
       },
       {
         "path": "frontend/src/features/ui-foundation/public.ts",
@@ -1350,7 +1351,7 @@
       "fixture": {
         "path": "browser-tests/fixtures/visual-corpus.json",
         "present": true,
-        "sha256": "441a6fd00e8b82c930de86b3725f1761f29b428637b0100a37f6345ae22b28a3"
+        "sha256": "f5bc877a1b0158dfeb8f32bf2221988cbcd0bac53e3c9c55c3ff9d4170379cba"
       },
       "preserved_ui_b_fixture": {
         "path": "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
@@ -1398,7 +1399,7 @@
         {
           "path": "browser-tests/snapshots/ui-f/characters-autonomy-phone-436x880.png",
           "present": true,
-          "sha256": "f0dfb96eaeeed9e43b3797c7517a8d0e43b04556312d5f3ed59a87988a998456"
+          "sha256": "30cbb803750972a7e609cd647aeff265dcd253eb9c78931f636bb9ce8cdba246"
         },
         {
           "path": "browser-tests/snapshots/ui-f/creator-studio-empty-1440x900.png",
@@ -1413,22 +1414,22 @@
         {
           "path": "browser-tests/snapshots/ui-f/device-home-centered-1440x1000.png",
           "present": true,
-          "sha256": "ae55fb6a0a11a5bc18ab273673f0779954462a989ed59084e5684dbb5603dfa5"
+          "sha256": "5089ee236618eb68ae217be0c3249e49ccc73aec81503d8502fda82615ff63b7"
         },
         {
           "path": "browser-tests/snapshots/ui-f/device-home-phone-360x800.png",
           "present": true,
-          "sha256": "a8a32e9d82a78bb475a8efb74ab57256840d27c9a242ad17ab88e3b0e8c66875"
+          "sha256": "018a90c65a7e511195bfd2e54e8e3f2aaa5c282e609c74e3b191c287f219e4a5"
         },
         {
           "path": "browser-tests/snapshots/ui-f/device-home-runtime-offline-390x844.png",
           "present": true,
-          "sha256": "2cf291abef353c16292fbaa32a2a51eddcea4b18680d1af5e3c7258d848e3fc3"
+          "sha256": "d5baf9d3ef581733bc9e0e7e460d7f3ce012939647e8e41ea43998178d654472"
         },
         {
           "path": "browser-tests/snapshots/ui-f/global-feed-media-phone-390x844.png",
           "present": true,
-          "sha256": "c3ea913423106fc91d26895ef9ffe4ff59702482d481acf6b72d5514f67ddb98"
+          "sha256": "88e93be64b59a06bc69df3c0fa7c5499476cf71f312435d42d8275c07e4b413e"
         },
         {
           "path": "browser-tests/snapshots/ui-f/relationship-graph-degraded-1440x900.png",
@@ -1443,7 +1444,7 @@
         {
           "path": "browser-tests/snapshots/ui-f/world-feed-composer-phone-436x880.png",
           "present": true,
-          "sha256": "75bc94a820289bf6941a4ffec22a204d00022c3398c1097aee9e9ac8fc6b8e69"
+          "sha256": "a605ae1fc5a1a79794c2ee186e023f1f24de708bb7860c3a0e6fc4116dc6b419"
         }
       ],
       "specs": [

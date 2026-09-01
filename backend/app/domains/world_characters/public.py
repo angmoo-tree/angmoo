@@ -3,6 +3,15 @@
 from app.domains.world_characters.infrastructure.sqlalchemy_owner_controlled_identity import (
     SqlAlchemyOwnerControlledIdentityRepository,
 )
+from app.domains.world_characters.domain.public_profile import (
+    WorldCharacterProfileError,
+    WorldCharacterProfileForbiddenError,
+    WorldCharacterProfileNotFoundError,
+    WorldCharacterPublicProfile,
+)
+from app.domains.world_characters.infrastructure.sqlalchemy_public_profile import (
+    SqlAlchemyWorldCharacterPublicProfileReader,
+)
 from app.domains.world_characters.domain.owner_controlled_identity import (
     OwnerControlledIdentityError,
 )
@@ -110,6 +119,11 @@ __all__ = [
     "WorldActivityRepertoire",
     "WorldCharacter",
     "WorldCommunityProfile",
+    "WorldCharacterProfileError",
+    "WorldCharacterProfileForbiddenError",
+    "WorldCharacterProfileNotFoundError",
+    "WorldCharacterPublicProfile",
+    "SqlAlchemyWorldCharacterPublicProfileReader",
     "SqlAlchemyOwnerControlledIdentityRepository",
     "approve_setup",
     "character_contract_hash",

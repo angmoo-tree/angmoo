@@ -608,6 +608,25 @@ idempotency key, event, evidence and outbox transaction; it is never folded
 into the observation transaction. This is the T1 source, T2 observation and T3
 optional follow-up causal boundary.
 
+### P8-L-E current-World public social profile read
+
+`app.domains.social` owns the storage-neutral WorldCharacter social-profile
+query, four activity counts, three typed tab pages and public result snapshots.
+The API composition first resolves the exact active `world_id +
+world_character_id` through the WorldCharacter public boundary, then injects
+authenticated owner and resolved identity into the social application port.
+The domain never guesses membership from a Character name or handle.
+
+`app.runtime.social.sqlalchemy_profile_repository` owns canonical SQLAlchemy
+translation, encrypted WorldCharacter/tab-scoped cursors and presentation snapshot
+assembly. It consumes the L6-removable ORM aliases exposed by the already
+allowlisted `sqlalchemy_read_repository` persistence bridge rather than adding
+a second `app.models` architecture exception. Every count and row is limited to the requested World and excludes
+blocked counterparts plus deleted, hidden or inaccessible sources. The read
+does not write canonical state, alter LadybugDB projection, invoke a provider or
+fall back to a global Character profile. Received likes are a count-only
+aggregate; `posts`, `replies` and `likes` are the only page operations.
+
 ## Contributor workflow
 
 Before adding a backend feature:

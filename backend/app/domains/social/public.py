@@ -11,6 +11,7 @@ from app.domains.social.application import (
     current_social_search,
     find_keyword_post_ids,
     observe_social_source,
+    read_world_character_social_profile,
     register_social_search,
     unregister_social_search,
 )
@@ -30,13 +31,25 @@ from app.domains.social.domain import (
     SocialWriteResult,
     SocialWriteRetryableError,
     ValidatedAutonomousWriteCommand,
+    WorldCharacterSocialProfileCounts,
+    WorldCharacterSocialProfileError,
+    WorldCharacterSocialProfileForbiddenError,
+    WorldCharacterSocialProfileMedia,
+    WorldCharacterSocialProfileMention,
+    WorldCharacterSocialProfileNotFoundError,
+    WorldCharacterSocialProfilePage,
+    WorldCharacterSocialProfilePost,
+    WorldCharacterSocialProfileQuery,
+    WorldCharacterSocialProfileTab,
+    WorldCharacterSocialProfileValidationError,
 )
+from app.domains.social.domain.inbox import ManualInboxInteractionCandidate
 from app.domains.social.ports import (
     SocialObservationUnitOfWorkPort,
     SocialSearchIndexPort,
     SocialWriteUnitOfWorkPort,
+    WorldCharacterSocialProfileReader,
 )
-from app.domains.social.domain.inbox import ManualInboxInteractionCandidate
 
 apply_validated_autonomous_social_result = apply_validated_autonomous_result
 
@@ -63,12 +76,25 @@ __all__ = [
     "SocialWriteRetryableError",
     "SocialWriteUnitOfWorkPort",
     "ValidatedAutonomousWriteCommand",
+    "WorldCharacterSocialProfileCounts",
+    "WorldCharacterSocialProfileError",
+    "WorldCharacterSocialProfileForbiddenError",
+    "WorldCharacterSocialProfileMedia",
+    "WorldCharacterSocialProfileMention",
+    "WorldCharacterSocialProfileNotFoundError",
+    "WorldCharacterSocialProfilePage",
+    "WorldCharacterSocialProfilePost",
+    "WorldCharacterSocialProfileQuery",
+    "WorldCharacterSocialProfileReader",
+    "WorldCharacterSocialProfileTab",
+    "WorldCharacterSocialProfileValidationError",
     "apply_validated_autonomous_social_result",
     "create_owner_post",
     "create_owner_reply",
     "current_social_search",
     "find_keyword_post_ids",
     "observe_social_source",
+    "read_world_character_social_profile",
     "register_social_search",
     "unregister_social_search",
 ]

@@ -21,6 +21,19 @@ from app.domains.social.domain.writes import (
     SocialWriteRetryableError,
     ValidatedAutonomousWriteCommand,
 )
+from app.domains.social.domain.profile_activity import (
+    WorldCharacterSocialProfileCounts,
+    WorldCharacterSocialProfileError,
+    WorldCharacterSocialProfileForbiddenError,
+    WorldCharacterSocialProfileMedia,
+    WorldCharacterSocialProfileMention,
+    WorldCharacterSocialProfileNotFoundError,
+    WorldCharacterSocialProfilePage,
+    WorldCharacterSocialProfilePost,
+    WorldCharacterSocialProfileQuery,
+    WorldCharacterSocialProfileTab,
+    WorldCharacterSocialProfileValidationError,
+)
 
 __all__ = [
     "OwnerPostCommand",
@@ -40,4 +53,15 @@ __all__ = [
     "SocialWriteResult",
     "SocialWriteRetryableError",
     "ValidatedAutonomousWriteCommand",
+    "WorldCharacterSocialProfileCounts",
+    "WorldCharacterSocialProfileError",
+    "WorldCharacterSocialProfileForbiddenError",
+    "WorldCharacterSocialProfileMedia",
+    "WorldCharacterSocialProfileMention",
+    "WorldCharacterSocialProfileNotFoundError",
+    "WorldCharacterSocialProfilePage",
+    "WorldCharacterSocialProfilePost",
+    "WorldCharacterSocialProfileQuery",
+    "WorldCharacterSocialProfileTab",
+    "WorldCharacterSocialProfileValidationError",
 ]

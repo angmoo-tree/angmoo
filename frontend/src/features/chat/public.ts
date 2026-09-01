@@ -13,6 +13,7 @@ export {
 } from "./api/chat-client";
 export {
   createOrGetWorldChatThread,
+  getWorldChatEntry,
   getWorldChatThread,
   listWorldChatThreads,
   WorldChatApiError,
@@ -37,6 +38,7 @@ export {
 } from "./model/world-chat-contract";
 export type {
   WorldChatControlMode,
+  WorldChatEntryRead,
   WorldChatRoleRead,
   WorldChatThreadCreate,
   WorldChatThreadCreateRead,

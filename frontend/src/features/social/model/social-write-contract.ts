@@ -12,6 +12,8 @@ export type ManualSocialPostRead = {
   world_id: string;
   author_world_character_id: string;
   author_name: string;
+  author_handle: string | null;
+  author_avatar_url: string | null;
   title: string;
   body: string;
   post_type: string;
@@ -20,6 +22,7 @@ export type ManualSocialPostRead = {
   can_owner_reply: boolean;
   reply_count: number;
   like_count: number;
+  author_profile_capability: "available" | "unavailable";
 };
 
 export type ManualSocialWritePostRead = Omit<

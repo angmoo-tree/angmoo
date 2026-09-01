@@ -8,11 +8,13 @@ export function WorldAppRouteClient({
   chatThreadId,
   postId,
   sectionId,
+  worldCharacterId,
   worldId,
 }: {
   chatThreadId?: string;
   postId?: string;
   sectionId: WorldAppSectionId;
+  worldCharacterId?: string;
   worldId: string;
 }) {
   const { status } = useAuth();
@@ -23,6 +25,7 @@ export function WorldAppRouteClient({
       key={`${worldId}:${chatThreadId ?? "section"}`}
       postId={postId}
       sectionId={sectionId}
+      worldCharacterId={worldCharacterId}
       worldId={worldId}
     />
   );

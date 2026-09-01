@@ -34,8 +34,9 @@ def test_world_app_navigation_keeps_world_scope_and_marks_missing_capabilities()
     for segment in ("feed", "chat", "characters", "relationships"):
         assert f'segment: "{segment}"' in contract
     # P8-L-D makes Chat available as a World-scoped, read-only list/detail
-    # surface. Characters remains the only reserved World App section.
-    assert contract.count('availability: "unavailable"') == 1
+    # surface. P8-L-E activates the same-World Character directory/profile
+    # surface, so no World App section remains reserved at this boundary.
+    assert contract.count('availability: "unavailable"') == 0
     assert 'id: "feed"' in contract
     assert 'id: "relationships"' in contract
     assert 'availability: "available"' in contract
@@ -44,6 +45,9 @@ def test_world_app_navigation_keeps_world_scope_and_marks_missing_capabilities()
     assert "다른 World로 자동 이동하지 않습니다" in world_app
     assert "WorldSocialFeed" in world_app
     assert 'from "@/features/social/public"' in world_app
+    assert "WorldCharacterDirectory" in world_app
+    assert "WorldCharacterProfile" in world_app
+    assert 'from "@/features/characters/public"' in world_app
     assert "/api/backend/worlds/mine/${encodeURIComponent(worldId)}" in client
 
 

@@ -14,6 +14,23 @@ export type WorldChatRoleRead = {
   banner_url: string | null;
   role_key: string | null;
   control_mode: WorldChatControlMode;
+  profile_capability: "available";
+};
+
+export type WorldChatEntryRead = {
+  schema_version: "world-chat-entry-v1";
+  world_id: string;
+  responding: WorldChatRoleRead;
+  requester_cardinality: "zero" | "one" | "anomaly";
+  requester: WorldChatRoleRead | null;
+  create_or_get_capability: "available" | "unavailable";
+  disabled_reason:
+    | "requester_missing"
+    | "requester_cardinality_anomaly"
+    | "self_target"
+    | "blocked"
+    | "target_not_chat_capable"
+    | null;
 };
 
 export type WorldChatThreadRead = {

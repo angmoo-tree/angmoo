@@ -6,6 +6,10 @@ from typing import Any, Protocol
 
 
 class ChatRuntimePort(Protocol):
+    def get_world_chat_entry(
+        self, db: Any, user: Any, world_id: str, responding_id: str
+    ) -> Any: ...
+
     def list_world_threads(
         self, db: Any, user: Any, world_id: str
     ) -> Any: ...

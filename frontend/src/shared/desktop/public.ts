@@ -7,6 +7,7 @@ export {
   getDesktopWindowState,
   getDesktopRuntimeStatus,
   isTauriDesktopRuntime,
+  navigateBackCurrentDesktopRoute,
   navigateCurrentDesktopRoute,
   navigateDesktopProductRoute,
   normalizeInternalRoute,
