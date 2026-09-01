@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 1950,
-      "internal_edge_count": 1413,
+      "external_import_count": 2008,
+      "internal_edge_count": 1464,
       "legacy_import_exception_count": 0,
-      "module_count": 595,
+      "module_count": 610,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -12,6 +12,18 @@
             "imports": [],
             "module": "app.domains.relationships",
             "path": "backend/app/domains/relationships/__init__.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.domain.graph_retrieval_plan"
+            ],
+            "module": "app.domains.relationships.domain",
+            "path": "backend/app/domains/relationships/domain/__init__.py"
+          },
+          {
+            "imports": [],
+            "module": "app.domains.relationships.domain.graph_retrieval_plan",
+            "path": "backend/app/domains/relationships/domain/graph_retrieval_plan.py"
           },
           {
             "imports": [],
@@ -144,6 +156,7 @@
           },
           {
             "imports": [
+              "app.domains.relationships.domain",
               "app.domains.relationships.graph_read.errors",
               "app.domains.relationships.graph_read.schemas",
               "app.domains.relationships.graph_read.use_case",
@@ -971,7 +984,7 @@
     "parity_test_files": [
       {
         "path": "backend/tests/test_embedded_data_migration.py",
-        "sha256": "ca284a9124081704b746e0c629216e69e00d085b43cf469e54ccda24ead75be2"
+        "sha256": "61c59fad881651c11f74e824ca5e594695b9cf8c9057943928e3a3e233288444"
       },
       {
         "path": "backend/tests/test_feed_reaction_intent.py",
@@ -1146,7 +1159,7 @@
       "windows-installer"
     ],
     "workflow": ".github/workflows/windows-installer.yml",
-    "workflow_sha256": "d1aa600923a2d2e781568195973d29963f4f9143e13da7762d1378e2aa580470"
+    "workflow_sha256": "276a12d8fb250a226fd45a9e68627fb4e3b354bfefd10d831059989b7b675aba"
   },
   "policy_id": "angmoo-l4-pr-a-p5-p7-inventory-v1",
   "runtime": {
@@ -1216,7 +1229,7 @@
       ],
       "registry": {
         "path": "backend/app/runtime/migrations/sqlite_versions/registry.py",
-        "sha256": "9b53c1131d3139de940271f63ff2af284fa265873711045e17d076a155981081"
+        "sha256": "4471a3c6031162f616c92d1f7953ec1a56f3c4d64d09be14f6dbc5278740413d"
       },
       "steps": [
         {

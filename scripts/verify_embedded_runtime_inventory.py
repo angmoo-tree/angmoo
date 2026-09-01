@@ -514,8 +514,8 @@ def validate(payloads: dict[Path, str]) -> list[str]:
     errors: list[str] = []
     parsed = {path: json.loads(text) for path, text in payloads.items()}
     migrations = parsed[MIGRATION_OUTPUT]
-    if migrations["migration_count"] != 83:
-        errors.append(f"expected 83 Alembic migrations, found {migrations['migration_count']}")
+    if migrations["migration_count"] != 84:
+        errors.append(f"expected 84 Alembic migrations, found {migrations['migration_count']}")
     migration_paths = [entry["path"] for entry in migrations["entries"]]
     if len(migration_paths) != len(set(migration_paths)):
         errors.append("a migration appears more than once")

@@ -27,7 +27,9 @@ from app.runtime.migrations.sqlite_versions.v4_to_v5_canonical_memory import (
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
 from app.runtime.persistence.sqlite_codecs import encode_utc_timestamp
 from app.runtime.persistence.sqlite_schema import (
+    RESPONSE_REQUEST_V6_TABLES,
     SCHEMA_VERSION_TABLE,
+    SQLITE_SCHEMA_VERSION,
     build_sqlite_v4_metadata,
     create_schema_version_table,
     sqlite_schema_contract_digest,
@@ -110,7 +112,7 @@ def test_v4_generation_upgrades_copy_on_write_and_preserves_source(tmp_path: Pat
     ).upgrade()
 
     assert result.source_version == 4
-    assert result.target_version == 5
+    assert result.target_version == SQLITE_SCHEMA_VERSION
     assert result.migrated is True
     assert result.database_path != source
     assert hashlib.sha256(source.read_bytes()).hexdigest() == source_sha
@@ -123,7 +125,7 @@ def test_v4_generation_upgrades_copy_on_write_and_preserves_source(tmp_path: Pat
         ).fetchone() == (4,)
         assert upgraded_connection.execute(
             f"SELECT schema_version FROM {SCHEMA_VERSION_TABLE}"
-        ).fetchone() == (5,)
+        ).fetchone() == (SQLITE_SCHEMA_VERSION,)
         assert upgraded_connection.execute(
             "SELECT display_name FROM users WHERE id = 'preserved-owner'"
         ).fetchone() == ("Preserved Owner",)
@@ -134,6 +136,7 @@ def test_v4_generation_upgrades_copy_on_write_and_preserves_source(tmp_path: Pat
             )
         }
         assert set(MEMORY_SCHEMA_V1_TABLES) <= tables
+        assert set(RESPONSE_REQUEST_V6_TABLES) <= tables
         assert upgraded_connection.execute("PRAGMA integrity_check").fetchone() == (
             "ok",
         )

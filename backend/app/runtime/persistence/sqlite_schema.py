@@ -11,11 +11,17 @@ from sqlalchemy import Connection, MetaData, text
 from app.core.db import Base
 
 
-SQLITE_SCHEMA_VERSION = 5
-SOURCE_ALEMBIC_REVISION = "20260831_0085"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 84
-EXPECTED_CANONICAL_TABLE_COUNT = 94
+SQLITE_SCHEMA_VERSION = 6
+SOURCE_ALEMBIC_REVISION = "20260831_0086"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 85
+EXPECTED_CANONICAL_TABLE_COUNT = 95
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
+
+SQLITE_V5_SCHEMA_VERSION = 5
+SQLITE_V5_SOURCE_ALEMBIC_REVISION = "20260831_0085"
+SQLITE_V5_SOURCE_ALEMBIC_MIGRATION_COUNT = 84
+SQLITE_V5_CANONICAL_TABLE_COUNT = 94
+RESPONSE_REQUEST_V6_TABLES = ("chat_response_requests",)
 
 SQLITE_V4_SCHEMA_VERSION = 4
 SQLITE_V4_SOURCE_ALEMBIC_REVISION = "20260831_0084"
@@ -89,7 +95,7 @@ def build_sqlite_v4_metadata() -> MetaData:
 
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
-        if table_name in MEMORY_V5_TABLES:
+        if table_name in MEMORY_V5_TABLES or table_name in RESPONSE_REQUEST_V6_TABLES:
             continue
         Base.metadata.tables[table_name].to_metadata(metadata)
     _copy_partial_index_predicates(metadata)
@@ -110,7 +116,11 @@ def build_sqlite_v3_metadata() -> MetaData:
 
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
-        if table_name == "message_threads" or table_name in MEMORY_V5_TABLES:
+        if (
+            table_name == "message_threads"
+            or table_name in MEMORY_V5_TABLES
+            or table_name in RESPONSE_REQUEST_V6_TABLES
+        ):
             continue
         Base.metadata.tables[table_name].to_metadata(metadata)
     add_legacy_message_threads_table(metadata)
@@ -119,6 +129,23 @@ def build_sqlite_v3_metadata() -> MetaData:
         raise RuntimeError(
             "SQLite v3 table inventory drifted: "
             f"expected {SQLITE_V4_CANONICAL_TABLE_COUNT}, got {len(metadata.tables)}"
+        )
+    return metadata
+
+
+def build_sqlite_v5_metadata() -> MetaData:
+    """Return the immutable pre-response-lifecycle embedded inventory."""
+
+    metadata = MetaData()
+    for table_name in sorted(Base.metadata.tables):
+        if table_name in RESPONSE_REQUEST_V6_TABLES:
+            continue
+        Base.metadata.tables[table_name].to_metadata(metadata)
+    _copy_partial_index_predicates(metadata)
+    if len(metadata.tables) != SQLITE_V5_CANONICAL_TABLE_COUNT:
+        raise RuntimeError(
+            "SQLite v5 table inventory drifted: "
+            f"expected {SQLITE_V5_CANONICAL_TABLE_COUNT}, got {len(metadata.tables)}"
         )
     return metadata
 
@@ -277,10 +304,15 @@ def _split_top_level(value: str) -> list[str]:
 __all__ = [
     "EXPECTED_CANONICAL_TABLE_COUNT",
     "MEMORY_V5_TABLES",
+    "RESPONSE_REQUEST_V6_TABLES",
     "SCHEMA_VERSION_TABLE",
     "SOURCE_ALEMBIC_MIGRATION_COUNT",
     "SOURCE_ALEMBIC_REVISION",
     "SQLITE_SCHEMA_VERSION",
+    "SQLITE_V5_CANONICAL_TABLE_COUNT",
+    "SQLITE_V5_SCHEMA_VERSION",
+    "SQLITE_V5_SOURCE_ALEMBIC_MIGRATION_COUNT",
+    "SQLITE_V5_SOURCE_ALEMBIC_REVISION",
     "SQLITE_V4_CANONICAL_TABLE_COUNT",
     "SQLITE_V4_SCHEMA_VERSION",
     "SQLITE_V4_SOURCE_ALEMBIC_MIGRATION_COUNT",
@@ -294,6 +326,7 @@ __all__ = [
     "build_sqlite_v1_metadata",
     "build_sqlite_v3_metadata",
     "build_sqlite_v4_metadata",
+    "build_sqlite_v5_metadata",
     "create_schema_version_table",
     "sqlite_schema_contract_digest",
     "sqlite_schema_digest",

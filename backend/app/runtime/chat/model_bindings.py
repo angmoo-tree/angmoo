@@ -3,6 +3,7 @@
 from app.domains.characters.infrastructure.sqlalchemy_models import Character
 from app.domains.chat.infrastructure.sqlalchemy_models import (
     CharacterMessageSetting,
+    ChatResponseRequest,
     MessageMessage,
     MessageThread,
     UserMessagePreference,
@@ -18,6 +19,7 @@ from app.domains.worlds.infrastructure.sqlalchemy_models import World, WorldMemb
 __all__ = [
     "Character",
     "CharacterMessageSetting",
+    "ChatResponseRequest",
     "InstallationIdentity",
     "LOCAL_INSTALLATION_KEY",
     "LlmCredential",

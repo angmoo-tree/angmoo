@@ -1,0 +1,331 @@
+{
+  "call_accounting": {
+    "character_response_generator_logical_max": 1,
+    "character_response_generator_repair_allowed": false,
+    "deadline_and_cancel_enforced": true,
+    "logical_and_physical_separate": true,
+    "physical_attempts_per_logical_max": 2,
+    "request_wide_schema_repair_max": 1
+  },
+  "canonical_response_request": {
+    "columns": [
+      "request_id",
+      "thread_id",
+      "user_message_id",
+      "response_slot_id",
+      "request_scope_hash",
+      "idempotency_key",
+      "generation_id",
+      "attempt_number",
+      "retry_of_request_id",
+      "selected_model",
+      "route",
+      "workflow_recipe",
+      "lease_generation",
+      "lease_token",
+      "lease_expires_at",
+      "state",
+      "last_emitted_sequence",
+      "terminal_reason",
+      "retryable",
+      "committed_assistant_message_id",
+      "node_state_json",
+      "call_tracker_json",
+      "response_metadata_json",
+      "deadline_at",
+      "cancel_requested_at",
+      "created_at",
+      "updated_at",
+      "terminal_at"
+    ],
+    "memory_candidate_before_committed_ok": 0,
+    "raw_partial_delta_columns": 0,
+    "table": "chat_response_requests"
+  },
+  "contract_versions": {
+    "canonical_plan": "canonical-plan.v1",
+    "generation_stream": "chat-generation-stream.v1",
+    "graph_plan": "graph-plan.v1",
+    "resolved_retrieval": "resolved-retrieval.v1",
+    "retrieval_intent": "retrieval-intent.v1",
+    "workflow": "retrieval-workflow.v1"
+  },
+  "domain_boundary": {
+    "backend_ownership": "domains/chat",
+    "canonical_plan_ownership": "domains/memory",
+    "existing_chat_provider_path_changed": false,
+    "fake_executor_provider_calls": 0,
+    "graph_plan_ownership": "domains/relationships",
+    "live_canonical_planner_provider_calls": 0,
+    "live_character_response_generator_calls": 0,
+    "live_graph_planner_provider_calls": 0,
+    "live_router_provider_calls": 0,
+    "public_facade": "app.domains.chat.public",
+    "raw_sql_or_cypher_from_llm": 0,
+    "runtime_composition": "app.runtime.chat"
+  },
+  "executable_contract_gates": [
+    "route_budget_matrix_and_zero_provider_calls",
+    "request_wide_single_repair",
+    "single_character_response_generator",
+    "intent_resolved_plan_hash_binding",
+    "closed_h_i_primitive_catalogs",
+    "no_raw_sql_or_cypher",
+    "renewable_lease_stale_fence_rejection",
+    "monotonic_stream_sequence",
+    "deadline_cancel_and_late_result_rejection",
+    "atomic_fenced_assistant_commit",
+    "duplicate_finalize_idempotency",
+    "no_transient_delta_canonical_storage",
+    "v5_to_v6_copy_on_write_preservation",
+    "v1_to_v5_real_installer_predecessor_matrix"
+  ],
+  "historical_chain": {
+    "current_tree_owner": "P8-L-J",
+    "p8_l_i_sha256": "1de9f8218ddc8ecfb5af8a3a9873b0a84d71d6bf62f498a079d0f983f49569df",
+    "predecessor_mode": "frozen_digest"
+  },
+  "installer_upgrade_matrix": {
+    "readable_predecessors": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "target_version": 6,
+    "v5_omits_response_request_schema": true,
+    "v5_retains_memory_schema": true
+  },
+  "lifecycle": {
+    "assistant_and_metadata_and_commit_atomic": true,
+    "duplicate_assistant_commit_max": 0,
+    "duplicate_sequence_idempotent": true,
+    "fenced_compare_and_swap": true,
+    "gap_or_reversal_rejected": true,
+    "late_result_rejected": true,
+    "monotonic_stream_sequence": true,
+    "renewable_lease_generation": true,
+    "states": [
+      "accepted",
+      "lease_acquired",
+      "preflighted",
+      "routing",
+      "resolving",
+      "current_context_ready",
+      "canonical_planning",
+      "graph_planning",
+      "both_coordinating",
+      "clarification_prepared",
+      "optional_retrieving",
+      "evidence_frozen",
+      "response_generating",
+      "response_streaming",
+      "committing",
+      "committed",
+      "rejected",
+      "cancelled",
+      "timed_out",
+      "failed",
+      "orphaned"
+    ],
+    "terminal_reasons": [
+      "committed",
+      "policy_denied",
+      "entity_ambiguous",
+      "user_cancelled",
+      "deadline_exceeded",
+      "provider_failure",
+      "retrieval_failure",
+      "contract_invalid",
+      "lease_lost",
+      "orphan_recovered",
+      "commit_conflict"
+    ]
+  },
+  "non_scope": [
+    "live_retrieval_router_provider_adapter",
+    "live_canonical_retrieval_planner_provider_adapter",
+    "live_graph_retrieval_planner_provider_adapter",
+    "live_character_response_generator_provider_adapter",
+    "new_world_chat_send_or_retry_api",
+    "sse_or_websocket_stream_transport",
+    "typing_presence_and_retry_ui",
+    "evidence_bundle_content_policy",
+    "assistant_message_memory_candidate_creation",
+    "memory_owner_ui"
+  ],
+  "owner_stage": "P8-L-J",
+  "plan_limits": {
+    "canonical_steps": 6,
+    "graph_steps": 3,
+    "workflow_recipes": [
+      "INDEPENDENT_PARALLEL",
+      "GRAPH_THEN_CANONICAL",
+      "CANONICAL_THEN_GRAPH"
+    ]
+  },
+  "predecessor": {
+    "path": "docs/architecture/p8-l-i-graph-recall-inventory.json",
+    "sha256": "1de9f8218ddc8ecfb5af8a3a9873b0a84d71d6bf62f498a079d0f983f49569df",
+    "size": 5484
+  },
+  "required_files": [
+    {
+      "path": "backend/app/domains/chat/domain/retrieval_intent.py",
+      "sha256": "a4276f0cf39dab967880b34a4fcf7341d594e0c6d3537e3d7c1a082ba8fac5ea",
+      "size": 7335
+    },
+    {
+      "path": "backend/app/domains/chat/domain/resolved_envelope.py",
+      "sha256": "ba7982bce15c296a850ad3e4eda3d9744a4e53a54cd27bcb7ae343922abf0153",
+      "size": 6864
+    },
+    {
+      "path": "backend/app/domains/chat/domain/workflow_recipe.py",
+      "sha256": "520071df540652a5b39845cae772d99ec85efc5fff6b398f1c0ecfa87da66039",
+      "size": 2315
+    },
+    {
+      "path": "backend/app/domains/chat/domain/call_tracker.py",
+      "sha256": "65077f3e511443b57859ecd1e6de5b7dd421686c01971a91d2808ac29e20b3d2",
+      "size": 5412
+    },
+    {
+      "path": "backend/app/domains/chat/domain/generation_lifecycle.py",
+      "sha256": "c6c0ba6b49cdb7c955d2b86357cca1e10b8091e9d319a7f10be56140f9cd072c",
+      "size": 10914
+    },
+    {
+      "path": "backend/app/domains/chat/domain/response_request.py",
+      "sha256": "22b7c32d6c577641f10f956b33e311659c05f03559d1ed33a7a6016778b03497",
+      "size": 7965
+    },
+    {
+      "path": "backend/app/domains/chat/application/answer_request.py",
+      "sha256": "953e5fd73af974b9ccec0293a4842adf7bb4022cb1613d67747dd8ddb8812d93",
+      "size": 5136
+    },
+    {
+      "path": "backend/app/domains/chat/application/generation_lifecycle.py",
+      "sha256": "4e3524d1d5c685b06026b5c3342fef556a661a7d7359f6936668e43c055bd5d9",
+      "size": 3841
+    },
+    {
+      "path": "backend/app/domains/chat/ports/response_lifecycle.py",
+      "sha256": "2f011f92916248d2ad3bbeebc1cfdd9000d78b559450e1c6fdedf815bcaed756",
+      "size": 2560
+    },
+    {
+      "path": "backend/app/domains/chat/infrastructure/response_lifecycle_repository.py",
+      "sha256": "9fb7d81dcae4ac0381623a9e1b62509925a65c642a218191a867dada2147c699",
+      "size": 25359
+    },
+    {
+      "path": "backend/app/domains/memory/domain/canonical_retrieval_plan.py",
+      "sha256": "a92ac065ebe3757f5f373a901fdd6d997c475b1070d4c105ae25f315aa185f99",
+      "size": 3324
+    },
+    {
+      "path": "backend/app/domains/relationships/domain/graph_retrieval_plan.py",
+      "sha256": "667fd3cafae3b32bc168b5e9c9b597955d3784a8c84c1af8be95a649085d5c31",
+      "size": 3170
+    },
+    {
+      "path": "backend/app/alembic/versions/20260831_0086_chat_response_request_lifecycle.py",
+      "sha256": "9500790785b2359ee5c6488f0651d5ba8d172f5a9088bd3c32d8ae9f525045d8",
+      "size": 634
+    },
+    {
+      "path": "backend/app/runtime/migrations/sqlite_versions/v5_to_v6_chat_response_requests.py",
+      "sha256": "2e63588fb8fd0d3137a5ebe2f0a1e9c87bd29703bd9e2fd7c7960d3fde7a6cb9",
+      "size": 1739
+    },
+    {
+      "path": "backend/app/runtime/migrations/sqlite_versions/manifests/v6.json",
+      "sha256": "41facdb244f0e14f506dc1c73528ee84cf867d7c36a8c38c503a348969604927",
+      "size": 2949
+    },
+    {
+      "path": "backend/tests/test_p8_l_j_response_generation_lifecycle.py",
+      "sha256": "297e2aceb2760ab2b0eb01e31bfad1836c590f97493c5e3111e81f16102ec8f7",
+      "size": 24875
+    },
+    {
+      "path": "backend/tests/test_p8_l_j_response_generation_migration.py",
+      "sha256": "50e0b0d0df9db51a1da189ab4dbff5fa0ed744bd28bc0da0dca2aceb1acf19ea",
+      "size": 4967
+    },
+    {
+      "path": "docs/architecture/p8-l-j-response-generation-lifecycle.md",
+      "sha256": "c090eba7c52b3653df1671105dbb17e3bac638016a65a3efd2335759ab75fd35",
+      "size": 7691
+    }
+  ],
+  "route_call_budgets": {
+    "BOTH": {
+      "nodes": {
+        "canonical_planner": 1,
+        "character_response_generator": 1,
+        "graph_planner": 1,
+        "retrieval_router": 1
+      },
+      "normal_full_path": 4,
+      "request_wide_repair_max": 1
+    },
+    "CANONICAL": {
+      "nodes": {
+        "canonical_planner": 1,
+        "character_response_generator": 1,
+        "graph_planner": 0,
+        "retrieval_router": 1
+      },
+      "normal_full_path": 3,
+      "request_wide_repair_max": 1
+    },
+    "CLARIFICATION": {
+      "nodes": {
+        "canonical_planner": 0,
+        "character_response_generator": 1,
+        "graph_planner": 0,
+        "retrieval_router": 1
+      },
+      "normal_full_path": 2,
+      "request_wide_repair_max": 1
+    },
+    "CURRENT_CONTEXT": {
+      "nodes": {
+        "canonical_planner": 0,
+        "character_response_generator": 1,
+        "graph_planner": 0,
+        "retrieval_router": 1
+      },
+      "normal_full_path": 2,
+      "request_wide_repair_max": 1
+    },
+    "GRAPH": {
+      "nodes": {
+        "canonical_planner": 0,
+        "character_response_generator": 1,
+        "graph_planner": 1,
+        "retrieval_router": 1
+      },
+      "normal_full_path": 3,
+      "request_wide_repair_max": 1
+    }
+  },
+  "schema": {
+    "canonical_table_count": 95,
+    "ladybug_remains_replayable_projection": true,
+    "new_alembic_migration": "20260831_0086",
+    "new_canonical_tables": [
+      "chat_response_requests"
+    ],
+    "new_embedded_schema_version": 6,
+    "new_ladybug_generation": null,
+    "source_migration_count": 85,
+    "source_revision": "20260831_0086",
+    "sqlite_remains_canonical": true
+  },
+  "schema_version": 1
+}

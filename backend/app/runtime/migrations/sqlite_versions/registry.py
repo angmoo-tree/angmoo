@@ -34,6 +34,12 @@ from app.runtime.migrations.sqlite_versions.v4_to_v5_canonical_memory import (
     upgrade_v4_to_v5,
     verify_v4_to_v5_delta,
 )
+from app.runtime.migrations.sqlite_versions.v5_to_v6_chat_response_requests import (
+    MUTABLE_IDENTITY_TABLES as V5_TO_V6_MUTABLE_TABLES,
+    capture_v5_to_v6_delta,
+    upgrade_v5_to_v6,
+    verify_v5_to_v6_delta,
+)
 from app.runtime.migrations.sqlite_versions.contracts import SqliteMigrationContract
 from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION
 
@@ -79,6 +85,7 @@ MIGRATIONS: dict[int, SqliteMigration] = {
     2: upgrade_v2_to_v3,
     3: upgrade_v3_to_v4,
     4: upgrade_v4_to_v5,
+    5: upgrade_v5_to_v6,
 }
 
 MIGRATION_CONTRACTS: dict[int, SqliteMigrationContract] = {
@@ -113,6 +120,14 @@ MIGRATION_CONTRACTS: dict[int, SqliteMigrationContract] = {
         mutable_identity_tables=V4_TO_V5_MUTABLE_TABLES,
         capture=capture_v4_to_v5_delta,
         verify=verify_v4_to_v5_delta,
+    ),
+    5: SqliteMigrationContract(
+        source_version=5,
+        target_version=6,
+        name="chat_response_requests",
+        mutable_identity_tables=V5_TO_V6_MUTABLE_TABLES,
+        capture=capture_v5_to_v6_delta,
+        verify=verify_v5_to_v6_delta,
     ),
 }
 

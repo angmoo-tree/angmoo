@@ -16,6 +16,12 @@ if str(BACKEND_ROOT) not in sys.path:
     sys.path.insert(0, str(BACKEND_ROOT))
 
 OUTPUT_PATH = ROOT / "docs/architecture/p8-l-i-graph-recall-inventory.json"
+SUCCESSOR_INVENTORY_PATH = (
+    ROOT / "docs/architecture/p8-l-j-response-generation-inventory.json"
+)
+FROZEN_OUTPUT_SHA256 = (
+    "1de9f8218ddc8ecfb5af8a3a9873b0a84d71d6bf62f498a079d0f983f49569df"
+)
 H_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-h-canonical-recall-inventory.json"
 H_INVENTORY_SHA256 = (
     "1228178d70130040b453296c1ac71fcdd1b26b0347c0c7a0eb91d05d47e8ad48"
@@ -221,6 +227,23 @@ def build_inventory() -> dict[str, Any]:
     }
 
 
+def _check_frozen_successor_boundary() -> None:
+    """Verify immutable P8-L-I evidence after J owns successor drift."""
+
+    if _sha256(OUTPUT_PATH) != FROZEN_OUTPUT_SHA256:
+        raise InventoryError("frozen P8-L-I inventory digest drift")
+    inventory = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
+    predecessor = inventory.get("predecessor")
+    if not isinstance(predecessor, dict):
+        raise InventoryError("frozen P8-L-I predecessor is missing")
+    predecessor_path = ROOT / str(predecessor.get("path") or "")
+    if (
+        not predecessor_path.is_file()
+        or _sha256(predecessor_path) != predecessor.get("sha256")
+    ):
+        raise InventoryError("frozen P8-L-H predecessor digest drift")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group(required=True)
@@ -228,6 +251,14 @@ def main() -> int:
     mode.add_argument("--check", action="store_true")
     args = parser.parse_args()
     try:
+        if SUCCESSOR_INVENTORY_PATH.is_file():
+            if args.write:
+                raise InventoryError(
+                    "P8-L-I inventory is frozen; current-tree ownership moved to P8-L-J"
+                )
+            _check_frozen_successor_boundary()
+            print("P8-L-I graph recall inventory is frozen and chained to P8-L-J")
+            return 0
         inventory = build_inventory()
         rendered = json.dumps(
             inventory,

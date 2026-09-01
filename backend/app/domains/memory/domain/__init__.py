@@ -36,6 +36,13 @@ from app.domains.memory.domain.retention import (
     is_memory_expired,
     validate_retention_days,
 )
+from app.domains.memory.domain.canonical_retrieval_plan import (
+    CANONICAL_PLAN_VERSION,
+    MAX_CANONICAL_PLAN_STEPS,
+    CanonicalPlanContractError,
+    CanonicalPlanStep,
+    CanonicalRetrievalPlan,
+)
 from app.domains.memory.domain.recall import (
     CanonicalRecallOperation,
     CanonicalRecallQuery,
@@ -59,6 +66,11 @@ from app.domains.memory.domain.scope import (
 )
 
 __all__ = [
+    "CANONICAL_PLAN_VERSION",
+    "MAX_CANONICAL_PLAN_STEPS",
+    "CanonicalPlanContractError",
+    "CanonicalPlanStep",
+    "CanonicalRetrievalPlan",
     "DEFAULT_MEMORY_RETENTION_DAYS",
     "MAX_MEMORY_SUMMARY_LENGTH",
     "MEMORY_WRITE_CONTRACT_VERSION",

@@ -128,7 +128,7 @@ backend/app/
 | feed and `social` | `app.domains.social.public` | L4 | P5 search, canonical source writes, observation and causal apply are active; concrete SQLite adapters are under `app.runtime.social` |
 | `relationships` graph read and P8 recall | `app.domains.relationships.public` | T2.5/L4/P8-L | canonical API read remains active; P8-L-I adds the closed six-primitive recall facade, canonical/observation revalidation and bounded degraded policy while runtime composition stays under `app.runtime.graph_projection` |
 | relationships write and graph projection | domain/runtime public ports | L4 | PR E removes horizontal service/CRUD/model bridges; runtime SQLAlchemy composition is isolated under `app.runtime.relationships` and graph lifecycle under `app.runtime.graph_projection` |
-| Chat entry, thread, message, response request/generation, retry and response commit | `app.domains.chat.public` | P8-L | P8-L-B establishes the canonical public/application/port boundary and `app.runtime.chat` composition; P8-L-D adds World-scoped identity, create-or-get API and read-only list/thread while message write/generation remains later work |
+| Chat entry, thread, message, response request/generation, retry and response commit | `app.domains.chat.public` | P8-L | P8-L-B establishes the public/application/port boundary, P8-L-D adds World-scoped identity and read-only entry, and P8-L-J adds the durable response-attempt row, strict typed retrieval envelopes, fenced lifecycle and route-aware call tracker without enabling live generation |
 | canonical Memory setting, candidate, item, evidence, lifecycle and recall | `app.domains.memory.public` | P8-L | P8-L-F owns the seven-table canonical schema and opt-in scope, P8-L-G owns provider-free write/lifecycle, and P8-L-H owns the typed canonical read boundary plus the separate private FTS5 projection under `app.runtime.memory` |
 | remaining active legacy or ownerless shim | none | L6 | final removal gate |
 
@@ -201,6 +201,22 @@ evidence, shared-neighbor and ranking operations have bounded canonical
 fallbacks; path and neighborhood degrade to no evidence rather than performing
 an unbounded relational scan. The detailed contract and executable evidence
 are recorded in `docs/architecture/p8-l-i-graph-recall.md`.
+
+P8-L-J keeps response-request orchestration in `domains/chat` while typed
+Canonical plan semantics stay in `domains/memory` and typed Graph plan semantics
+stay in `domains/relationships`. `retrieval-intent.v1` carries only semantic
+meaning; code produces the immutable `resolved-retrieval.v1` identity, scope,
+policy and hard-cap envelope. Both specialist plans bind to its hash and the
+code-owned `retrieval-workflow.v1` recipe. Embedded SQLite v6 and Alembic
+`20260831_0086` add the sole `chat_response_requests` table. Renewable lease
+generation, request/generation/attempt fencing, strict stream sequence and an
+atomic assistant-message/request commit prevent stale or duplicate writers.
+The call tracker distinguishes logical node calls from physical attempts,
+enforces route caps of 2/3/3/4/2 plus one request-wide Router/Planner schema
+repair, and permits exactly one Character Response Generator call. P8-L-J uses
+provider-free fake nodes; live adapters, send/stream/retry transport and UI
+remain later scope. The full boundary is recorded in
+`docs/architecture/p8-l-j-response-generation-lifecycle.md`.
 
 PR A added the contract and checker but moved **zero product source files**.
 PR B moved only the P7 relationship graph read path. PR C removes only shims
