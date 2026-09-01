@@ -55,6 +55,10 @@ def test_supported_installer_builder_freezes_every_readable_predecessor(
     fixture = json.loads(
         (fixture_root / "fixture-manifest.json").read_text(encoding="utf-8")
     )
+    verifier = _script_module(
+        f"p8_l_d_supported_upgrade_verifier_v{source_version}",
+        "scripts/ci/verify_windows_installer_supported_upgrade_fixture.py",
+    )
     database_path = (
         fixture_root
         / "canonical"
@@ -79,6 +83,11 @@ def test_supported_installer_builder_freezes_every_readable_predecessor(
         assert source.execute(
             "SELECT count(*) FROM message_messages"
         ).fetchone()[0] == 2
+        if source_version == 4:
+            # A frozen v4 predecessor already owns the P8-L-D World-scoped
+            # identity result.  The v4 -> v5 Memory migration must preserve it
+            # without relying on the skipped v3 -> v4 backfill.
+            verifier._verify_world_chat_identity(source, fixture)
         roleless_count = int(
             source.execute(
                 "SELECT count(*) FROM world_characters "

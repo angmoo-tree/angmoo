@@ -1,6 +1,6 @@
 # P8-L-F canonical Memory schema and scope control
 
-Status: **IMPLEMENTED · LOCAL TECH PASS · IMPLEMENTATION COMMIT `cb348f6ca8adde22cf467e3a8b4a121b28178d71` · PUSH PASS · ISSUE #222 OPEN · DRAFT PR #223 OPEN · HOSTED CI EXACT-HEAD PASS PENDING · USER GATE/MERGE PENDING**
+Status: **IMPLEMENTED · LOCAL TECH PASS · IMPLEMENTATION COMMIT `cb348f6ca8adde22cf467e3a8b4a121b28178d71` · PUSH PASS · ISSUE #222 OPEN · DRAFT PR #223 OPEN · HOSTED CI V4 FIXTURE CORRECTION PENDING · USER GATE/MERGE PENDING**
 
 P8-L-F establishes the canonical persistence boundary required by later memory write, recall, and owner-control stages. It does not call a provider, select a retrieval route, build an FTS index, mutate LadybugDB, generate a Chat answer, or expose a Memory UI.
 
@@ -38,10 +38,13 @@ The machine-readable successor inventory is `p8-l-f-canonical-memory-inventory.j
 
 - canonical domain, repository, schema, migration, and successor-inventory focus: `29 passed`;
 - embedded-upgrade, installer, ER0, L4, and privacy-deletion regression bundle after v5 fixture synchronization: `35 passed`;
-- full backend regression: `1,567 passed, 22 skipped`;
+- v4 predecessor World Chat identity fixture correction regression: `20 passed`;
+- full backend regression after the v4 fixture correction: `1,567 passed, 22 skipped`;
 - P8-L-F/D/E generated inventories, ER0 inventories, architecture boundaries, desktop installer contract, and Windows supported-upgrade matrix: current and passing;
-- C-drive free space during the final full regression: approximately `16.84 GiB`, above the `3 GiB` stop threshold.
+- C-drive free space before the corrected full regression: approximately `16.42 GiB`, above the `3 GiB` stop threshold.
 
-The first Draft PR #223 Core CI backend job (`33490748179` / `99801483547`) preserved an append-only failure after `1,566 passed, 22 skipped`: the ER0 generator correctly rejected the stale `20260831_0085` source hash in `migration-conversion-inventory.json`. The migration received a final maintenance-lease constraint after the previous inventory write, so the checked-in hash still described the pre-constraint source. The correction changes only that generated entry to the normalized current-source digest `251cb4256c77f7047eb6b6eb2eab1eb35eac1059657ebd8f49d60da2db704b16`; the ER0 verifier and focused P8-L-F regression must pass again before a new exact head is pushed.
+The first Draft PR #223 Core CI backend job (`33490748179` / `99801483547`) preserved an append-only failure after `1,566 passed, 22 skipped`: the ER0 generator correctly rejected the stale `20260831_0085` source hash in `migration-conversion-inventory.json`. The migration received a final maintenance-lease constraint after the previous inventory write, so the checked-in hash still described the pre-constraint source. Exact head `4e2b888813f7d43c1da839eec1d88a52efc70817` corrected only that generated entry to normalized current-source digest `251cb4256c77f7047eb6b6eb2eab1eb35eac1059657ebd8f49d60da2db704b16` and passed the corrected full backend suite.
 
-The branch push and Draft PR exist, but local evidence and the correction do not imply an exact-head Hosted CI pass, user installation Gate, merge, post-merge validation, or P8-L completion.
+The second exact-head Windows Installer run (`33492170373` / supported-upgrade job `99813114023`) passed v1, v2, and v3 direct upgrades, clean install, migration-failure rollback, installer build, and all non-installer checks, but preserved `supported_upgrade_world_chat_identity_mismatch` for synthetic v4. The v4 fixture had been created with the current table shape while its two rows still held the ORM defaults instead of the already-migrated P8-L-D resolved/ambiguous identity state; v4 correctly skips the v3→v4 backfill, so the verifier exposed the fixture inconsistency. The correction freezes the resolved row with exact World/requester/responding WorldCharacter IDs, freezes the ambiguous row explicitly, and makes the local v4 builder test execute the same full identity verifier. It does not change production migration or product data. The related `20 passed`, full backend `1,567 passed / 22 skipped`, and generated P8-L-D/F inventories pass locally; a new exact-head Hosted CI pass is still required.
+
+The branch push and Draft PR exist, but local evidence and either correction do not imply an exact-head Hosted CI pass, user installation Gate, merge, post-merge validation, or P8-L completion.
