@@ -16,7 +16,13 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import Settings
 from app.core.db import create_database_engine, create_session_factory
+from app.domains.memory.public import CanonicalRecallService
 from app.domains.runtime.ports.runtime_data_path import RuntimeDataPaths
+from app.runtime.memory import (
+    EmbeddedMemoryRecallProjection,
+    SqlAlchemyCanonicalRecallRepository,
+    SqliteMemoryRecallIndex,
+)
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
 from app.runtime.search import (
     EmbeddedSocialSearchProjection,
@@ -194,8 +200,11 @@ class RuntimeComposition:
     engine: Engine
     session_factory: sessionmaker[Session]
     social_search_projection: EmbeddedSocialSearchProjection
+    memory_recall_projection: EmbeddedMemoryRecallProjection
+    memory_recall_service: CanonicalRecallService
 
     def dispose(self) -> None:
+        self.memory_recall_projection.stop()
         self.social_search_projection.stop()
         self.engine.dispose()
 
@@ -208,16 +217,24 @@ def compose_runtime(
     runtime_settings = settings_from_runtime_config(config, base=base_settings)
     engine = create_database_engine(runtime_settings.database_url)
     session_factory = create_session_factory(engine)
+    data_paths = StaticRuntimeDataPath(config.data_paths.root)
+    memory_recall_index = SqliteMemoryRecallIndex(data_paths)
     return RuntimeComposition(
         config=config,
         settings=runtime_settings,
         engine=engine,
         session_factory=session_factory,
         social_search_projection=EmbeddedSocialSearchProjection(
-            index=SqliteFts5SearchIndex(
-                StaticRuntimeDataPath(config.data_paths.root)
-            ),
+            index=SqliteFts5SearchIndex(data_paths),
             session_factory=session_factory,
+        ),
+        memory_recall_projection=EmbeddedMemoryRecallProjection(
+            index=memory_recall_index,
+            session_factory=session_factory,
+        ),
+        memory_recall_service=CanonicalRecallService(
+            SqlAlchemyCanonicalRecallRepository(session_factory),
+            memory_recall_index,
         ),
     )
 

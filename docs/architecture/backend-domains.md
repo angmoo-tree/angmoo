@@ -100,6 +100,7 @@ backend/app/
 │   ├── relationships/
 │   ├── runtime/                  # application runtime state and public ports
 │   ├── chat/
+│   ├── memory/
 │   ├── world_packages/
 │   └── media/
 ├── runtime/
@@ -128,7 +129,7 @@ backend/app/
 | `relationships` graph read | `app.domains.relationships.public` | T2.5/L4 | canonical read slice active; PR E owns its runtime composition under `app.runtime.graph_projection` |
 | relationships write and graph projection | domain/runtime public ports | L4 | PR E removes horizontal service/CRUD/model bridges; runtime SQLAlchemy composition is isolated under `app.runtime.relationships` and graph lifecycle under `app.runtime.graph_projection` |
 | Chat entry, thread, message, response request/generation, retry and response commit | `app.domains.chat.public` | P8-L | P8-L-B establishes the canonical public/application/port boundary and `app.runtime.chat` composition; P8-L-D adds World-scoped identity, create-or-get API and read-only list/thread while message write/generation remains later work |
-| canonical Memory setting, candidate, item, evidence, lifecycle and recall | `app.domains.memory.public` | P8-L | P8-L-A contract/inventory frozen; runtime package and schema are still absent until P8-L-F |
+| canonical Memory setting, candidate, item, evidence, lifecycle and recall | `app.domains.memory.public` | P8-L | P8-L-F owns the seven-table canonical schema and opt-in scope, P8-L-G owns provider-free write/lifecycle, and P8-L-H owns the typed canonical read boundary plus the separate private FTS5 projection under `app.runtime.memory` |
 | remaining active legacy or ownerless shim | none | L6 | final removal gate |
 
 P8-L-A freezes the pre-migration Chat baseline in

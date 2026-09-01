@@ -5,6 +5,10 @@ from app.domains.memory.ports.maintenance_queue import (
     MemoryMaintenanceWorkItem,
 )
 from app.domains.memory.ports.repository import MemoryRepositoryPort
+from app.domains.memory.ports.recall import (
+    CanonicalRecallRepositoryPort,
+    MemoryRecallIndexPort,
+)
 from app.domains.memory.ports.source_reader import (
     CanonicalMemoryEvidence,
     MemorySourceEvidenceReaderPort,
@@ -12,8 +16,10 @@ from app.domains.memory.ports.source_reader import (
 
 __all__ = [
     "CanonicalMemoryEvidence",
+    "CanonicalRecallRepositoryPort",
     "MemoryMaintenanceQueuePort",
     "MemoryMaintenanceWorkItem",
     "MemoryRepositoryPort",
+    "MemoryRecallIndexPort",
     "MemorySourceEvidenceReaderPort",
 ]

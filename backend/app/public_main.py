@@ -261,6 +261,7 @@ def create_app(
                 sum(count for _reason, count in repair_result.skipped_reasons),
             )
             composition.social_search_projection.start()
+            composition.memory_recall_projection.start()
 
         if runtime_lifespan is None:
             runtime_lifespan = create_lifespan(
