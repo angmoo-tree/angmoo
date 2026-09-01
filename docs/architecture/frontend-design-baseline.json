@@ -1351,7 +1351,7 @@
       "fixture": {
         "path": "browser-tests/fixtures/visual-corpus.json",
         "present": true,
-        "sha256": "441a6fd00e8b82c930de86b3725f1761f29b428637b0100a37f6345ae22b28a3"
+        "sha256": "f5bc877a1b0158dfeb8f32bf2221988cbcd0bac53e3c9c55c3ff9d4170379cba"
       },
       "preserved_ui_b_fixture": {
         "path": "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
