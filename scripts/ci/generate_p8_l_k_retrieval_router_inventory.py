@@ -154,7 +154,7 @@ def _boundary_contract() -> dict[str, Any]:
             "LOCAL_INSTALLATION_KEY",
             "MessageThread.world_scope_status == \"resolved\"",
             "MemoryScopeSettingModel.enabled",
-            "WorldCharacterBlock",
+            "world_character_pair_is_blocked",
         ),
     )
     return {
@@ -275,6 +275,7 @@ def build_inventory() -> dict[str, Any]:
             "direct_adapter_no_hidden_json_retry",
             "held_out_ko_315_contract_normalization",
             "sqlalchemy_local_owner_world_thread_memory_scope",
+            "runtime_boundary_uses_existing_relationship_block_port",
         ],
         "required_files": [_record(relative) for relative in REQUIRED_FILES],
         "non_scope": [

@@ -71,7 +71,8 @@
     "request_wide_single_router_repair",
     "direct_adapter_no_hidden_json_retry",
     "held_out_ko_315_contract_normalization",
-    "sqlalchemy_local_owner_world_thread_memory_scope"
+    "sqlalchemy_local_owner_world_thread_memory_scope",
+    "runtime_boundary_uses_existing_relationship_block_port"
   ],
   "held_out_ko_contract": {
     "case_count": 315,
@@ -165,8 +166,8 @@
     },
     {
       "path": "backend/app/runtime/chat/retrieval_policy.py",
-      "sha256": "a12d753ca52e4f8ee53e496968be16da52b926c1f04fbf609eeaa12a7d99ef8c",
-      "size": 10485
+      "sha256": "443cc8245d80e1529f15eca0fd794dc0c67711261e10b1a300625ca16642c43b",
+      "size": 9901
     },
     {
       "path": "backend/tests/test_p8_l_k_retrieval_router.py",

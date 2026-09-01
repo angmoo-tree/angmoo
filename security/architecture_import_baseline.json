@@ -6170,7 +6170,7 @@
         "app.domains.memory.infrastructure.sqlalchemy_models",
         "app.domains.world_characters.infrastructure.sqlalchemy_models",
         "app.domains.worlds.infrastructure.sqlalchemy_models",
-        "app.models.world_feed"
+        "app.runtime.relationships.sqlalchemy_social_event"
       ],
       "module": "app.runtime.chat.retrieval_policy",
       "path": "backend/app/runtime/chat/retrieval_policy.py",

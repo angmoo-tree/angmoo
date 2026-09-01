@@ -25,7 +25,9 @@ from app.domains.world_characters.infrastructure.sqlalchemy_models import (
     WorldCharacter,
 )
 from app.domains.worlds.infrastructure.sqlalchemy_models import World, WorldMembership
-from app.models.world_feed import WorldCharacterBlock
+from app.runtime.relationships.sqlalchemy_social_event import (
+    world_character_pair_is_blocked,
+)
 
 
 class SqlAlchemyRetrievalPolicyResolver:
@@ -219,27 +221,11 @@ class SqlAlchemyRetrievalPolicyResolver:
         ).one_or_none()
 
     def _pair_is_blocked(self, world_id: str, first_id: str, second_id: str) -> bool:
-        return (
-            self._session.scalar(
-                select(WorldCharacterBlock.id).where(
-                    WorldCharacterBlock.world_id == world_id,
-                    or_(
-                        (
-                            WorldCharacterBlock.blocker_world_character_id == first_id
-                        )
-                        & (
-                            WorldCharacterBlock.blocked_world_character_id == second_id
-                        ),
-                        (
-                            WorldCharacterBlock.blocker_world_character_id == second_id
-                        )
-                        & (
-                            WorldCharacterBlock.blocked_world_character_id == first_id
-                        ),
-                    ),
-                )
-            )
-            is not None
+        return world_character_pair_is_blocked(
+            self._session,
+            world_id=world_id,
+            first_world_character_id=first_id,
+            second_world_character_id=second_id,
         )
 
 
