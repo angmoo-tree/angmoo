@@ -41,7 +41,7 @@ REQUIRED_FILES = (
     "backend/app/domains/memory/ports/source_reader.py",
     "backend/app/domains/memory/ports/maintenance_queue.py",
     "backend/app/domains/memory/infrastructure/repository.py",
-    "backend/app/domains/memory/infrastructure/source_reader.py",
+    "backend/app/runtime/memory/sqlalchemy_source_reader.py",
     "backend/app/domains/memory/infrastructure/maintenance_queue.py",
     "backend/app/domains/memory/public.py",
     "backend/tests/test_p8_l_g_memory_write_lifecycle.py",
@@ -113,7 +113,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/domains/memory/infrastructure/source_reader.py",
+        "backend/app/runtime/memory/sqlalchemy_source_reader.py",
         (
             "MemorySourceTypeV1.CHAT_MESSAGE",
             "MemorySourceTypeV1.POST",
@@ -150,6 +150,7 @@ def _boundary_contract() -> dict[str, Any]:
     )
     return {
         "backend_ownership": "domains/memory",
+        "canonical_source_adapter": "app.runtime.memory",
         "public_facade": "app.domains.memory.public",
         "application_service": "MemoryWriteLifecycleService",
         "provider_dependency": None,

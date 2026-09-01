@@ -15,8 +15,8 @@ from app.core.db import Base
 from app.domains.memory.infrastructure import (
     SqlAlchemyMemoryMaintenanceQueue,
     SqlAlchemyMemoryRepository,
-    SqlAlchemyMemorySourceEvidenceReader,
 )
+from app.runtime.memory import SqlAlchemyMemorySourceEvidenceReader
 from app.domains.memory.public import (
     CanonicalMemoryEvidence,
     MemoryCandidateStatus,

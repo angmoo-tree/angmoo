@@ -1,7 +1,7 @@
 {
-  "edge_count": 1380,
+  "edge_count": 1381,
   "external_import_count": 1907,
-  "module_count": 585,
+  "module_count": 586,
   "modules": [
     {
       "external_imports": [],
@@ -2510,7 +2510,6 @@
       "imports": [
         "app.domains.memory.infrastructure.maintenance_queue",
         "app.domains.memory.infrastructure.repository",
-        "app.domains.memory.infrastructure.source_reader",
         "app.domains.memory.infrastructure.sqlalchemy_models"
       ],
       "module": "app.domains.memory.infrastructure",
@@ -2558,26 +2557,6 @@
       ],
       "module": "app.domains.memory.infrastructure.repository",
       "path": "backend/app/domains/memory/infrastructure/repository.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "datetime",
-        "hashlib",
-        "json",
-        "sqlalchemy",
-        "sqlalchemy.orm",
-        "typing"
-      ],
-      "imports": [
-        "app.domains.memory.domain.provenance",
-        "app.domains.memory.domain.scope",
-        "app.domains.memory.ports.source_reader",
-        "app.models"
-      ],
-      "module": "app.domains.memory.infrastructure.source_reader",
-      "path": "backend/app/domains/memory/infrastructure/source_reader.py",
       "wildcard_imports": []
     },
     {
@@ -6095,6 +6074,36 @@
       ],
       "module": "app.runtime.installer_update",
       "path": "backend/app/runtime/installer_update.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.runtime.memory.sqlalchemy_source_reader"
+      ],
+      "module": "app.runtime.memory",
+      "path": "backend/app/runtime/memory/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "hashlib",
+        "json",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.memory.public",
+        "app.domains.relationships.infrastructure.sqlalchemy_social_models",
+        "app.domains.routines.infrastructure.sqlalchemy_models",
+        "app.runtime.chat.model_bindings",
+        "app.runtime.social.sqlalchemy_read_repository"
+      ],
+      "module": "app.runtime.memory.sqlalchemy_source_reader",
+      "path": "backend/app/runtime/memory/sqlalchemy_source_reader.py",
       "wildcard_imports": []
     },
     {

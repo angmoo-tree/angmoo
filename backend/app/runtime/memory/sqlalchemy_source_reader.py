@@ -1,4 +1,4 @@
-"""Read-only SQLAlchemy adapter for eligible canonical Memory evidence."""
+"""Runtime SQLAlchemy composition for eligible canonical Memory evidence."""
 
 from __future__ import annotations
 
@@ -10,10 +10,49 @@ from typing import Any
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
-from app import models
-from app.domains.memory.domain.provenance import MemorySourceTypeV1
-from app.domains.memory.domain.scope import MemoryScope
-from app.domains.memory.ports.source_reader import CanonicalMemoryEvidence
+from app.domains.memory.public import (
+    CanonicalMemoryEvidence,
+    MemoryScope,
+    MemorySourceTypeV1,
+)
+from app.domains.relationships.infrastructure.sqlalchemy_social_models import (
+    RelationshipStateChange,
+    SocialEvent,
+    SocialEventEvidence,
+)
+from app.domains.routines.infrastructure.sqlalchemy_models import (
+    ActivityBeat,
+    JointActivity,
+    JointActivityParticipant,
+)
+from app.runtime.chat.model_bindings import MessageMessage, MessageThread
+from app.runtime.social.sqlalchemy_read_repository import (
+    social_persistence_models,
+)
+
+
+class _MemorySourceModels:
+    """Concrete runtime bindings kept above the Memory domain boundary."""
+
+    ActivityBeat = ActivityBeat
+    JointActivity = JointActivity
+    JointActivityParticipant = JointActivityParticipant
+    MessageMessage = MessageMessage
+    MessageThread = MessageThread
+    RelationshipStateChange = RelationshipStateChange
+    SocialEvent = SocialEvent
+    SocialEventEvidence = SocialEventEvidence
+    Post = social_persistence_models.Post
+    PostLike = social_persistence_models.PostLike
+    WorldCharacter = social_persistence_models.WorldCharacter
+    WorldCharacterBlock = social_persistence_models.WorldCharacterBlock
+    WorldCharacterFeedObservation = (
+        social_persistence_models.WorldCharacterFeedObservation
+    )
+    WorldMembership = social_persistence_models.WorldMembership
+
+
+models = _MemorySourceModels()
 
 
 class SqlAlchemyMemorySourceEvidenceReader:

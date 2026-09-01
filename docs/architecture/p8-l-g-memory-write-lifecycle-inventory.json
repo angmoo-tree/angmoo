@@ -3,6 +3,7 @@
   "domain_boundary": {
     "application_service": "MemoryWriteLifecycleService",
     "backend_ownership": "domains/memory",
+    "canonical_source_adapter": "app.runtime.memory",
     "canonical_transaction": [
       "memory_candidate_decision",
       "memory_item",
@@ -140,9 +141,9 @@
       "size": 32005
     },
     {
-      "path": "backend/app/domains/memory/infrastructure/source_reader.py",
-      "sha256": "a314c849c8aed81fc06f176331f5c8ad72f311be4163fcca1db1a42a39244f77",
-      "size": 23305
+      "path": "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+      "sha256": "6d109f51d20e2c61719d069cb6032e4ae2be6214f38c449ad8a12cf5669b4df4",
+      "size": 24512
     },
     {
       "path": "backend/app/domains/memory/infrastructure/maintenance_queue.py",
@@ -156,13 +157,13 @@
     },
     {
       "path": "backend/tests/test_p8_l_g_memory_write_lifecycle.py",
-      "sha256": "7746b7cd295dce6aae18fee3d77756f9a42cff5fe5ce48374fde74cab4ec0691",
-      "size": 31782
+      "sha256": "3b3a2c52f8aef351ebbdc7ccc164946e431802fdf15afef9c4ed3bc1d22dad46",
+      "size": 31808
     },
     {
       "path": "docs/architecture/p8-l-g-memory-write-lifecycle.md",
-      "sha256": "611ed773a78b15f2f5bd9dc593b1c07f3be63696e848d296f34be115a0485967",
-      "size": 4609
+      "sha256": "b8ee45984076cc455fa99520fe8f12dde4b8222ab37ce8114856da47ede71eee",
+      "size": 4766
     }
   ],
   "schema": {
