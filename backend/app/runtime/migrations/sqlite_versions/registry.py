@@ -28,6 +28,12 @@ from app.runtime.migrations.sqlite_versions.v3_to_v4_world_scoped_chat import (
     upgrade_v3_to_v4,
     verify_v3_to_v4_delta,
 )
+from app.runtime.migrations.sqlite_versions.v4_to_v5_canonical_memory import (
+    MUTABLE_IDENTITY_TABLES as V4_TO_V5_MUTABLE_TABLES,
+    capture_v4_to_v5_delta,
+    upgrade_v4_to_v5,
+    verify_v4_to_v5_delta,
+)
 from app.runtime.migrations.sqlite_versions.contracts import SqliteMigrationContract
 from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION
 
@@ -72,6 +78,7 @@ MIGRATIONS: dict[int, SqliteMigration] = {
     1: upgrade_v1_to_v2,
     2: upgrade_v2_to_v3,
     3: upgrade_v3_to_v4,
+    4: upgrade_v4_to_v5,
 }
 
 MIGRATION_CONTRACTS: dict[int, SqliteMigrationContract] = {
@@ -98,6 +105,14 @@ MIGRATION_CONTRACTS: dict[int, SqliteMigrationContract] = {
         mutable_identity_tables=V3_TO_V4_MUTABLE_TABLES,
         capture=capture_v3_to_v4_delta,
         verify=verify_v3_to_v4_delta,
+    ),
+    4: SqliteMigrationContract(
+        source_version=4,
+        target_version=5,
+        name="canonical_memory",
+        mutable_identity_tables=V4_TO_V5_MUTABLE_TABLES,
+        capture=capture_v4_to_v5_delta,
+        verify=verify_v4_to_v5_delta,
     ),
 }
 

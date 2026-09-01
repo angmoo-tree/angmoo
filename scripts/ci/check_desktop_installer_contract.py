@@ -166,6 +166,7 @@ def main() -> int:
         "supported-v1.zip",
         "supported-v2.zip",
         "supported-v3.zip",
+        "supported-v4.zip",
         "conflicting-v2.zip",
         "name: windows-installer-build",
         "name: windows-installer-clean-install",

@@ -29,7 +29,7 @@ def _script_module(name: str, relative: str) -> ModuleType:
     return module
 
 
-@pytest.mark.parametrize("source_version", (1, 2, 3))
+@pytest.mark.parametrize("source_version", (1, 2, 3, 4))
 def test_supported_installer_builder_freezes_every_readable_predecessor(
     tmp_path: Path,
     source_version: int,
@@ -111,8 +111,8 @@ def test_supported_installer_builder_freezes_every_readable_predecessor(
             ]
     finally:
         source.close()
-    assert fixture["target_data_version"] == 4
-    assert fixture["target_table_count"] == 87
+    assert fixture["target_data_version"] == 5
+    assert fixture["target_table_count"] == 94
 
 
 def test_v3_installer_fixture_is_legacy_shaped_and_proves_v4_chat_backfill(

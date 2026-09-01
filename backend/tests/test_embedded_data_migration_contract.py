@@ -19,6 +19,7 @@ from app.runtime.migrations.sqlite_versions.registry import (
     migration_chain,
 )
 from app.runtime.persistence.sqlite_schema import (
+    EXPECTED_CANONICAL_TABLE_COUNT,
     SQLITE_SCHEMA_VERSION,
     build_sqlite_baseline_metadata,
     build_sqlite_v1_metadata,
@@ -55,9 +56,11 @@ def test_sqlite_manifests_match_frozen_v1_and_latest_model_contract(
         tmp_path,
         version=SQLITE_SCHEMA_VERSION,
     )
-    assert latest.canonical_table_count == 87
-    assert tuple(version for version, _step in migration_chain(1)) == (1, 2, 3)
-    assert set(MIGRATIONS) == {1, 2, 3}
+    assert latest.canonical_table_count == EXPECTED_CANONICAL_TABLE_COUNT
+    assert tuple(version for version, _step in migration_chain(1)) == tuple(
+        range(1, SQLITE_SCHEMA_VERSION)
+    )
+    assert set(MIGRATIONS) == set(range(1, SQLITE_SCHEMA_VERSION))
     assert set(MIGRATION_CONTRACTS) == set(MIGRATIONS)
     assert all(
         contract.source_version == source_version
