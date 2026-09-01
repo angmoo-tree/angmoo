@@ -10,6 +10,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 A_INVENTORY_SHA256 = "934c1410810e8f0b0899e09c3c34b5c67f43050c4a354a15fcea72f264c9847e"
+B_INVENTORY_SHA256 = "d9e5b83d78059d91629f001e48d3031bd44a495f625be1588f00770395c5d70e"
 BACKEND = ROOT / "backend"
 if str(BACKEND) not in sys.path:
     sys.path.insert(0, str(BACKEND))
@@ -38,6 +39,7 @@ def test_p8_l_b_generated_inventory_is_current() -> None:
 def test_p8_l_b_is_append_only_from_the_frozen_a_inventory() -> None:
     inventory = _json("security/p8_l_b_chat_domain_inventory.json")
     assert _sha256("security/p8_l_a_inventory.json") == A_INVENTORY_SHA256
+    assert _sha256("security/p8_l_b_chat_domain_inventory.json") == B_INVENTORY_SHA256
     assert inventory["predecessor"]["sha256"] == A_INVENTORY_SHA256
     assert inventory["owner_stage"] == "P8-L-B"
     assert inventory["architecture"]["removed_frozen_legacy_edge_count"] == 10

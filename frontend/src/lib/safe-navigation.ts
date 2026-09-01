@@ -6,6 +6,7 @@ const ALLOWED_RETURN_PATHS = [
 const ALLOWED_LOGIN_RETURN_PATHS = [
   /^\/worlds\/new$/,
   /^\/worlds\/[^/?#]+\/creator$/,
+  /^\/worlds\/(?!new(?:\/|$))[^/?#]+\/chat(?:\/[^/?#]+)?$/,
   /^\/characters\/[^/?#]+\/worlds\/[^/?#]+\/autonomy-setup$/,
 ];
 

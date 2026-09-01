@@ -165,6 +165,7 @@ def main() -> int:
         "installer_payload_digest_parity_pass",
         "supported-v1.zip",
         "supported-v2.zip",
+        "supported-v3.zip",
         "conflicting-v2.zip",
         "name: windows-installer-build",
         "name: windows-installer-clean-install",

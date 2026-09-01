@@ -127,7 +127,7 @@ backend/app/
 | feed and `social` | `app.domains.social.public` | L4 | P5 search, canonical source writes, observation and causal apply are active; concrete SQLite adapters are under `app.runtime.social` |
 | `relationships` graph read | `app.domains.relationships.public` | T2.5/L4 | canonical read slice active; PR E owns its runtime composition under `app.runtime.graph_projection` |
 | relationships write and graph projection | domain/runtime public ports | L4 | PR E removes horizontal service/CRUD/model bridges; runtime SQLAlchemy composition is isolated under `app.runtime.relationships` and graph lifecycle under `app.runtime.graph_projection` |
-| Chat entry, thread, message, response request/generation, retry and response commit | `app.domains.chat.public` | P8-L | P8-L-B establishes the canonical public/application/port boundary and `app.runtime.chat` composition while preserving Chat v1 behavior through reviewed compatibility surfaces; World-scoped Chat v2 remains P8-L-D work |
+| Chat entry, thread, message, response request/generation, retry and response commit | `app.domains.chat.public` | P8-L | P8-L-B establishes the canonical public/application/port boundary and `app.runtime.chat` composition; P8-L-D adds World-scoped identity, create-or-get API and read-only list/thread while message write/generation remains later work |
 | canonical Memory setting, candidate, item, evidence, lifecycle and recall | `app.domains.memory.public` | P8-L | P8-L-A contract/inventory frozen; runtime package and schema are still absent until P8-L-F |
 | remaining active legacy or ownerless shim | none | L6 | final removal gate |
 
@@ -161,12 +161,21 @@ full-result response behavior, transaction boundaries, 150-second response
 lease and retry-in-place behavior. It does not enable Local Character chat,
 streaming, retrieval or Memory.
 
-P8-L-D separately owns `world_id`, requester/responding WorldCharacter
-identity, active World-thread uniqueness, backfill, collision quarantine and
-rollback. P8-L-B therefore does not repair the frozen PostgreSQL/Embedded
-legacy uniqueness drift or create a schema revision while moving ownership.
-The one-head Alembic `20260825_0083` and Embedded SQLite v3 baseline remain
-unchanged.
+P8-L-D now implements `world_id`, requester/responding WorldCharacter
+identity, active World-thread uniqueness, deterministic backfill, collision
+quarantine and lossless rollback refusal. Alembic `20260831_0084` and Embedded
+SQLite v4 preserve legacy IDs/messages, bind only a unique eligible
+owner-controlled requester/responding pair, leave unresolved history
+`ambiguous`, and mark active collisions `quarantined`. The canonical transport
+is owned by `app.api.v1.routes.world_chat`; it composes the Chat domain public
+DTO/error boundary and runtime service without importing runtime composition
+back into the domain. P8-L-D is implemented on Issue `#218` branch
+`feat/p8-l-d-world-chat-identity-role-binding`; local technical verification
+passed with the full backend suite at `1543 passed, 22 skipped`. Implementation
+commit `9351b38d70496ff60d97a1484808cbe7c3be58c5` is pushed and Draft PR `#219`
+is open; Hosted CI is running while user, Ready, merge and post-merge Gates
+remain pending, so this is not merged-main evidence. PostgreSQL-specific
+concurrency also remains unverified.
 
 The final target split remains deliberate. `domains/chat` owns Chat entry,
 active-thread create-or-get, message/request/generation lifecycle, retry,
@@ -639,9 +648,11 @@ caller-owned SQLite session selected by the typed runtime composition.
 
 The schema and connection contract is documented in
 `docs/architecture/l3-er2-sqlite-canonical-adapter.md`. The cutover, migration,
-FTS5, direct-update and supported-predecessor gates are complete. SQLite v3 is
-the L4 baseline and v1-to-v2-to-v3 remains a consecutive copy-on-write upgrade
-chain.
+FTS5, direct-update and supported-predecessor gates are complete. SQLite v3
+remains the supported pre-World-Chat predecessor; P8-L-D introduces SQLite v4
+and extends the consecutive copy-on-write chain to v1-to-v2-to-v3-to-v4. The
+candidate installer must prove all three predecessor upgrades and same-version
+idempotency before merge.
 
 ## Embedded canonical concurrency
 

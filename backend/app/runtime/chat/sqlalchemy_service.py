@@ -5,7 +5,8 @@ import hashlib
 import logging
 from uuid import uuid4
 
-from sqlalchemy import func, or_, select, text, update
+from sqlalchemy import func, inspect, or_, select, text, update
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from app.domains.chat.api import schemas
@@ -51,8 +52,351 @@ from app.integrations.direct_llm import (
     RunLlmTracker,
     generate_text,
 )
+from app.runtime.relationships.sqlalchemy_social_event import (
+    world_character_pair_is_blocked,
+)
 
 logger = logging.getLogger(__name__)
+
+LEGACY_WORLD_THREAD_MUTATION_MESSAGE = (
+    "World가 확정된 대화는 해당 World Chat에서만 변경할 수 있습니다."
+)
+LEGACY_LOCAL_THREAD_CREATION_MESSAGE = (
+    "새 대화는 Character가 속한 World Chat에서 시작해 주세요."
+)
+
+
+def list_world_threads(
+    db: Session, user: models.User, world_id: str
+) -> schemas.WorldChatThreadListRead:
+    _require_world_chat_owner_scope(db, user.id, world_id)
+    threads = db.scalars(
+        select(models.MessageThread)
+        .where(
+            models.MessageThread.requester_id == user.id,
+            models.MessageThread.world_id == world_id,
+            models.MessageThread.world_scope_status == "resolved",
+            models.MessageThread.deleted_at.is_(None),
+        )
+        .order_by(
+            models.MessageThread.last_message_at.desc().nullslast(),
+            models.MessageThread.created_at.desc(),
+        )
+    ).all()
+    ambiguous_count = db.scalar(
+        select(func.count(models.MessageThread.id)).where(
+            models.MessageThread.requester_id == user.id,
+            models.MessageThread.world_scope_status.in_(("ambiguous", "quarantined")),
+            models.MessageThread.deleted_at.is_(None),
+        )
+    ) or 0
+    items: list[schemas.WorldChatThreadRead] = []
+    for thread in threads:
+        try:
+            items.append(_world_thread_read(db, thread, include_messages=False))
+        except (MessageNotFoundError, MessageForbiddenError, MessageValidationError):
+            logger.warning(
+                "world_chat_thread_ineligible thread_id=%s world_id=%s",
+                thread.id,
+                world_id,
+            )
+    return schemas.WorldChatThreadListRead(
+        items=items,
+        ambiguous_legacy_count=ambiguous_count,
+        max_threads=MAX_ACTIVE_THREADS,
+    )
+
+
+def get_world_thread(
+    db: Session, user: models.User, world_id: str, thread_id: str
+) -> schemas.WorldChatThreadRead:
+    _require_world_chat_owner_scope(db, user.id, world_id)
+    thread = _get_owned_world_thread(db, user, world_id, thread_id)
+    return _world_thread_read(db, thread, include_messages=True)
+
+
+def create_or_get_world_thread(
+    db: Session,
+    user: models.User,
+    world_id: str,
+    data: schemas.WorldChatThreadCreate,
+    *,
+    _integrity_retry_available: bool = True,
+) -> schemas.WorldChatThreadCreateRead:
+    _require_world_chat_owner_scope(db, user.id, world_id)
+    requester_candidates = _owner_controlled_world_characters(db, user.id, world_id)
+    if not requester_candidates:
+        return schemas.WorldChatThreadCreateRead(
+            outcome="resolution_required",
+            resolution_code="requester_missing",
+        )
+    if len(requester_candidates) != 1:
+        return schemas.WorldChatThreadCreateRead(
+            outcome="resolution_required",
+            resolution_code="requester_cardinality_anomaly",
+        )
+    requester = requester_candidates[0]
+    if (
+        data.requester_world_character_id is not None
+        and data.requester_world_character_id != requester.id
+    ):
+        raise MessageForbiddenError("요청자 역할을 임의로 바꿀 수 없습니다.")
+
+    responding, character = _active_responding_world_character(
+        db, world_id, data.responding_world_character_id
+    )
+    if requester.id == responding.id:
+        raise MessageValidationError("같은 WorldCharacter와 자기 자신으로 대화할 수 없습니다.")
+    if _world_characters_are_blocked(db, world_id, requester.id, responding.id):
+        raise MessageForbiddenError("이 Character와는 지금 대화를 시작할 수 없습니다.")
+
+    _lock_world_thread_tuple(db, user.id, world_id, requester.id, responding.id)
+    existing = _find_active_world_thread(
+        db, user.id, world_id, requester.id, responding.id
+    )
+    if existing is not None:
+        try:
+            if data.selected_model:
+                _ensure_supported_model(data.selected_model)
+                existing.selected_model = data.selected_model
+                db.flush()
+                thread_read = _world_thread_read(
+                    db, existing, include_messages=True, lock_scope=True
+                )
+                db.commit()
+            else:
+                thread_read = _world_thread_read(
+                    db, existing, include_messages=True
+                )
+        except Exception:
+            db.rollback()
+            raise
+        return schemas.WorldChatThreadCreateRead(
+            outcome="reused",
+            thread=thread_read,
+        )
+
+    _lock_message_thread_quota(db, user.id)
+    active_count = db.scalar(
+        select(func.count(models.MessageThread.id)).where(
+            models.MessageThread.requester_id == user.id,
+            models.MessageThread.deleted_at.is_(None),
+        )
+    ) or 0
+    if active_count >= MAX_ACTIVE_THREADS:
+        raise MessageThreadLimitError(THREAD_LIMIT_MESSAGE)
+
+    try:
+        preference = ensure_user_preference(db, user, commit_if_created=False)
+        selected_model = data.selected_model or preference.default_model
+        _ensure_supported_model(selected_model)
+        thread = models.MessageThread(
+            id=f"msg-thread-{uuid4().hex[:12]}",
+            requester_id=user.id,
+            character_id=character.id,
+            world_id=world_id,
+            requester_world_character_id=requester.id,
+            responding_world_character_id=responding.id,
+            world_scope_status="resolved",
+            selected_model=selected_model,
+        )
+        db.add(thread)
+        db.flush()
+        db.refresh(thread)
+        thread_read = _world_thread_read(
+            db, thread, include_messages=True, lock_scope=True
+        )
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        if not _integrity_retry_available:
+            raise
+        # A first-use preference row and the active World-role tuple are both
+        # protected by UNIQUE constraints.  SQLite cannot use PostgreSQL's
+        # advisory locks, so concurrent first creates may lose either race.
+        # Re-enter the complete validation path once after rollback: this
+        # observes the winner's preference/thread, applies the caller's model
+        # override on reuse, and never spins on an unrelated integrity error.
+        return create_or_get_world_thread(
+            db,
+            user,
+            world_id,
+            data,
+            _integrity_retry_available=False,
+        )
+    except Exception:
+        db.rollback()
+        raise
+    return schemas.WorldChatThreadCreateRead(
+        outcome="created",
+        thread=thread_read,
+    )
+
+
+def _owner_controlled_world_characters(
+    db: Session, owner_id: str, world_id: str, *, lock_scope: bool = False
+) -> list[models.WorldCharacter]:
+    statement = (
+        select(models.WorldCharacter)
+        .join(
+            models.Character,
+            models.Character.id == models.WorldCharacter.character_id,
+        )
+        .join(
+            models.WorldMembership,
+            (models.WorldMembership.id == models.WorldCharacter.membership_id)
+            & (models.WorldMembership.world_id == models.WorldCharacter.world_id),
+        )
+        .where(
+            models.WorldCharacter.world_id == world_id,
+            models.WorldCharacter.owner_user_id == owner_id,
+            models.WorldCharacter.control_mode == "owner_controlled",
+            models.WorldCharacter.status == "active",
+            models.Character.owner_id == owner_id,
+            models.WorldMembership.status == "active",
+            models.WorldMembership.user_id == owner_id,
+            models.WorldMembership.role == "owner",
+            models.Character.deleted_at.is_(None),
+            models.Character.moderation_status == "active",
+        )
+        .order_by(models.WorldCharacter.id)
+        .limit(2)
+    )
+    if lock_scope and _is_postgresql_session(db):
+        statement = statement.with_for_update()
+    return list(
+        db.scalars(statement)
+    )
+
+
+def _require_world_chat_owner_scope(
+    db: Session, owner_id: str, world_id: str, *, lock_scope: bool = False
+) -> None:
+    if lock_scope and _is_postgresql_session(db):
+        installation = db.scalar(
+            select(models.InstallationIdentity)
+            .where(
+                models.InstallationIdentity.singleton_key
+                == models.LOCAL_INSTALLATION_KEY
+            )
+            .with_for_update()
+        )
+    else:
+        installation = db.get(
+            models.InstallationIdentity, models.LOCAL_INSTALLATION_KEY
+        )
+    if (
+        installation is None
+        or installation.bootstrap_state != "claimed"
+        or installation.owner_user_id != owner_id
+    ):
+        raise MessageForbiddenError("이 설치의 local owner만 World Chat을 사용할 수 있습니다.")
+    owned_world_statement = (
+        select(models.World.id)
+        .join(
+            models.WorldMembership,
+            (models.WorldMembership.world_id == models.World.id)
+            & (models.WorldMembership.user_id == owner_id),
+        )
+        .where(
+            models.World.id == world_id,
+            models.World.owner_user_id == owner_id,
+            models.World.status != "archived",
+            models.WorldMembership.role == "owner",
+            models.WorldMembership.status == "active",
+        )
+    )
+    if lock_scope and _is_postgresql_session(db):
+        owned_world_statement = owned_world_statement.with_for_update()
+    owned_world = db.scalar(owned_world_statement)
+    if owned_world is None:
+        raise MessageNotFoundError("World Chat을 찾을 수 없습니다.")
+
+
+def _active_responding_world_character(
+    db: Session, world_id: str, world_character_id: str
+) -> tuple[models.WorldCharacter, models.Character]:
+    row = db.execute(
+        select(models.WorldCharacter, models.Character)
+        .join(
+            models.Character,
+            models.Character.id == models.WorldCharacter.character_id,
+        )
+        .join(
+            models.WorldMembership,
+            (models.WorldMembership.id == models.WorldCharacter.membership_id)
+            & (models.WorldMembership.world_id == models.WorldCharacter.world_id),
+        )
+        .where(
+            models.WorldCharacter.id == world_character_id,
+            models.WorldCharacter.world_id == world_id,
+            models.WorldCharacter.status == "active",
+            models.WorldMembership.status == "active",
+            models.Character.deleted_at.is_(None),
+            models.Character.moderation_status == "active",
+        )
+    ).one_or_none()
+    if row is None:
+        raise MessageNotFoundError("이 World에서 대화할 Character를 찾을 수 없습니다.")
+    return row[0], row[1]
+
+
+def _world_characters_are_blocked(
+    db: Session, world_id: str, first_id: str, second_id: str
+) -> bool:
+    return world_character_pair_is_blocked(
+        db,
+        world_id=world_id,
+        first_world_character_id=first_id,
+        second_world_character_id=second_id,
+    )
+
+
+def _find_active_world_thread(
+    db: Session,
+    owner_id: str,
+    world_id: str,
+    requester_world_character_id: str,
+    responding_world_character_id: str,
+) -> models.MessageThread | None:
+    return db.scalar(
+        select(models.MessageThread).where(
+            models.MessageThread.requester_id == owner_id,
+            models.MessageThread.world_id == world_id,
+            models.MessageThread.requester_world_character_id
+            == requester_world_character_id,
+            models.MessageThread.responding_world_character_id
+            == responding_world_character_id,
+            models.MessageThread.world_scope_status == "resolved",
+            models.MessageThread.deleted_at.is_(None),
+        )
+    )
+
+
+def _lock_world_thread_tuple(
+    db: Session,
+    owner_id: str,
+    world_id: str,
+    requester_world_character_id: str,
+    responding_world_character_id: str,
+) -> None:
+    if not _is_postgresql_session(db):
+        return
+    material = ":".join(
+        (
+            "angmoo-world-chat-thread-v1",
+            owner_id,
+            world_id,
+            requester_world_character_id,
+            responding_world_character_id,
+        )
+    )
+    lock_key = int.from_bytes(
+        hashlib.sha256(material.encode("utf-8")).digest()[:8],
+        byteorder="big",
+        signed=True,
+    )
+    db.execute(text("select pg_advisory_xact_lock(:lock_key)"), {"lock_key": lock_key})
 
 
 def list_threads(db: Session, user: models.User) -> schemas.MessageThreadListRead:
@@ -71,7 +415,10 @@ def list_threads(db: Session, user: models.User) -> schemas.MessageThreadListRea
         .all()
     )
     return schemas.MessageThreadListRead(
-        items=[_thread_read(db, thread, include_messages=False) for thread in threads],
+        items=[
+            _legacy_thread_read(db, thread, include_messages=False)
+            for thread in threads
+        ],
         max_threads=MAX_ACTIVE_THREADS,
     )
 
@@ -79,7 +426,9 @@ def list_threads(db: Session, user: models.User) -> schemas.MessageThreadListRea
 def get_thread(
     db: Session, user: models.User, thread_id: str
 ) -> schemas.MessageThreadRead:
-    return _thread_read(db, _get_owned_thread(db, user, thread_id), include_messages=True)
+    return _legacy_thread_read(
+        db, _get_owned_thread(db, user, thread_id), include_messages=True
+    )
 
 
 def create_or_get_thread(
@@ -88,19 +437,31 @@ def create_or_get_thread(
     character = _get_character(db, data.character_id)
     _ensure_character_available_for_messages(db, user, character)
     _lock_message_thread_quota(db, user.id)
-    existing = db.scalar(
-        select(models.MessageThread)
-        .where(models.MessageThread.requester_id == user.id)
-        .where(models.MessageThread.character_id == character.id)
-        .where(models.MessageThread.deleted_at.is_(None))
+    existing_rows = list(
+        db.scalars(
+            select(models.MessageThread)
+            .where(models.MessageThread.requester_id == user.id)
+            .where(models.MessageThread.character_id == character.id)
+            .where(models.MessageThread.deleted_at.is_(None))
+            .order_by(models.MessageThread.created_at, models.MessageThread.id)
+            .limit(2)
+        )
     )
-    if existing is not None:
-        if data.selected_model:
+    if len(existing_rows) > 1:
+        raise MessageValidationError(
+            "여러 World에 연결된 대화입니다. 해당 World Chat에서 열어 주세요."
+        )
+    if existing_rows:
+        existing = existing_rows[0]
+        if data.selected_model and existing.world_scope_status != "resolved":
             _ensure_supported_model(data.selected_model)
             existing.selected_model = data.selected_model
             db.commit()
             db.refresh(existing)
-        return _thread_read(db, existing, include_messages=True)
+        return _legacy_thread_read(db, existing, include_messages=True)
+
+    if _claimed_local_installation_exists(db):
+        raise MessageValidationError(LEGACY_LOCAL_THREAD_CREATION_MESSAGE)
 
     active_count = db.scalar(
         select(func.count(models.MessageThread.id))
@@ -110,13 +471,14 @@ def create_or_get_thread(
     if active_count >= MAX_ACTIVE_THREADS:
         raise MessageThreadLimitError(THREAD_LIMIT_MESSAGE)
 
-    preference = ensure_user_preference(db, user)
+    preference = ensure_user_preference(db, user, commit_if_created=False)
     selected_model = data.selected_model or preference.default_model
     _ensure_supported_model(selected_model)
     thread = models.MessageThread(
         id=f"msg-thread-{uuid4().hex[:12]}",
         requester_id=user.id,
         character_id=character.id,
+        world_scope_status="ambiguous",
         selected_model=selected_model,
     )
     db.add(thread)
@@ -126,7 +488,7 @@ def create_or_get_thread(
 
 
 def _lock_message_thread_quota(db: Session, requester_id: str) -> None:
-    if db.bind is None or db.bind.dialect.name != "postgresql":
+    if not _is_postgresql_session(db):
         return
     lock_key = int.from_bytes(
         hashlib.sha256(
@@ -145,7 +507,7 @@ def update_thread(
     db: Session, user: models.User, thread_id: str, data: schemas.MessageThreadUpdate
 ) -> schemas.MessageThreadRead:
     _ensure_supported_model(data.selected_model)
-    thread = _get_owned_thread(db, user, thread_id)
+    thread = _get_owned_legacy_mutable_thread(db, user, thread_id)
     thread.selected_model = data.selected_model
     db.commit()
     db.refresh(thread)
@@ -153,7 +515,7 @@ def update_thread(
 
 
 def delete_thread(db: Session, user: models.User, thread_id: str) -> None:
-    thread = _get_owned_thread(db, user, thread_id)
+    thread = _get_owned_legacy_mutable_thread(db, user, thread_id)
     thread.deleted_at = datetime.now(UTC)
     db.commit()
 
@@ -189,7 +551,7 @@ def _acquire_response_lease(
     user: models.User,
     thread_id: str,
 ) -> str:
-    _get_owned_thread(db, user, thread_id)
+    _get_owned_legacy_mutable_thread(db, user, thread_id)
     now = datetime.now(UTC)
     token = uuid4().hex
     acquired_thread_id = db.execute(
@@ -197,6 +559,7 @@ def _acquire_response_lease(
         .where(
             models.MessageThread.id == thread_id,
             models.MessageThread.requester_id == user.id,
+            models.MessageThread.world_scope_status != "resolved",
             models.MessageThread.deleted_at.is_(None),
             or_(
                 models.MessageThread.response_lease_token.is_(None),
@@ -240,7 +603,7 @@ def _release_response_lease(db: Session, thread_id: str, token: str) -> None:
 async def _send_message_locked(
     db: Session, user: models.User, thread_id: str, content: str
 ) -> schemas.MessageSendRead:
-    thread = _get_owned_thread(db, user, thread_id)
+    thread = _get_owned_legacy_mutable_thread(db, user, thread_id)
     character = _get_character(db, thread.character_id)
     _ensure_character_available_for_messages(db, user, character)
     credential, api_key = _resolve_message_credential(db, user)
@@ -313,7 +676,7 @@ async def _send_message_locked(
 async def _retry_message_locked(
     db: Session, user: models.User, thread_id: str, message_id: int
 ) -> schemas.MessageSendRead:
-    thread = _get_owned_thread(db, user, thread_id)
+    thread = _get_owned_legacy_mutable_thread(db, user, thread_id)
     character = _get_character(db, thread.character_id)
     _ensure_character_available_for_messages(db, user, character)
     credential, api_key = _resolve_message_credential(db, user)
@@ -520,7 +883,10 @@ def update_character_message_settings(
 
 
 def ensure_user_preference(
-    db: Session, user: models.User
+    db: Session,
+    user: models.User,
+    *,
+    commit_if_created: bool = True,
 ) -> models.UserMessagePreference:
     preference = db.get(models.UserMessagePreference, user.id)
     if preference is not None:
@@ -531,8 +897,11 @@ def ensure_user_preference(
         default_model=DEFAULT_MESSAGE_MODEL,
     )
     db.add(preference)
-    db.commit()
-    db.refresh(preference)
+    if commit_if_created:
+        db.commit()
+        db.refresh(preference)
+    else:
+        db.flush()
     return preference
 
 
@@ -550,10 +919,24 @@ def ensure_character_setting(
 
 
 def _thread_read(
-    db: Session, thread: models.MessageThread, *, include_messages: bool
+    db: Session,
+    thread: models.MessageThread,
+    *,
+    include_messages: bool,
+    redact_content: bool = False,
 ) -> schemas.MessageThreadRead:
-    messages = _thread_messages(db, thread.id) if include_messages else []
-    latest_message = messages[-1] if messages else _latest_thread_message(db, thread.id)
+    messages = (
+        _thread_messages(db, thread.id)
+        if include_messages and not redact_content
+        else []
+    )
+    latest_message = (
+        None
+        if redact_content
+        else messages[-1]
+        if messages
+        else _latest_thread_message(db, thread.id)
+    )
     return schemas.MessageThreadRead(
         id=thread.id,
         requester=_user_ref(thread.requester),
@@ -563,6 +946,139 @@ def _thread_read(
         created_at=thread.created_at,
         latest_message=latest_message,
         messages=messages,
+        world_id=thread.world_id,
+        requester_world_character_id=thread.requester_world_character_id,
+        responding_world_character_id=thread.responding_world_character_id,
+        world_scope_status=thread.world_scope_status,
+    )
+
+
+def _legacy_thread_read(
+    db: Session, thread: models.MessageThread, *, include_messages: bool
+) -> schemas.MessageThreadRead:
+    """Expose only redirect metadata for resolved World-scoped legacy rows."""
+
+    return _thread_read(
+        db,
+        thread,
+        include_messages=include_messages,
+        redact_content=thread.world_scope_status == "resolved",
+    )
+
+
+def _world_thread_read(
+    db: Session,
+    thread: models.MessageThread,
+    *,
+    include_messages: bool,
+    lock_scope: bool = False,
+) -> schemas.WorldChatThreadRead:
+    if (
+        thread.world_scope_status != "resolved"
+        or thread.world_id is None
+        or thread.requester_world_character_id is None
+        or thread.responding_world_character_id is None
+    ):
+        raise MessageValidationError("World를 확정하지 못한 legacy thread입니다.")
+    _require_world_chat_owner_scope(
+        db, thread.requester_id, thread.world_id, lock_scope=lock_scope
+    )
+    requester_candidates = _owner_controlled_world_characters(
+        db, thread.requester_id, thread.world_id, lock_scope=lock_scope
+    )
+    if (
+        len(requester_candidates) != 1
+        or requester_candidates[0].id != thread.requester_world_character_id
+    ):
+        raise MessageValidationError("World Chat 요청자 역할을 고유하게 확인할 수 없습니다.")
+    requester = _world_chat_role(
+        db,
+        thread.requester_world_character_id,
+        world_id=thread.world_id,
+        expected_owner_id=thread.requester_id,
+        lock_scope=lock_scope,
+    )
+    responding = _world_chat_role(
+        db,
+        thread.responding_world_character_id,
+        world_id=thread.world_id,
+        lock_scope=lock_scope,
+    )
+    if requester.world_character_id == responding.world_character_id:
+        raise MessageValidationError("World Chat 역할이 올바르지 않습니다.")
+    if _world_characters_are_blocked(
+        db,
+        thread.world_id,
+        requester.world_character_id,
+        responding.world_character_id,
+    ):
+        raise MessageForbiddenError("이 Character와는 지금 대화할 수 없습니다.")
+    messages = _thread_messages(db, thread.id) if include_messages else []
+    latest_message = messages[-1] if messages else _latest_thread_message(db, thread.id)
+    return schemas.WorldChatThreadRead(
+        id=thread.id,
+        world_id=thread.world_id,
+        requester=requester,
+        responding=responding,
+        selected_model=thread.selected_model,
+        last_message_at=thread.last_message_at,
+        created_at=thread.created_at,
+        latest_message=latest_message,
+        messages=messages,
+    )
+
+
+def _world_chat_role(
+    db: Session,
+    world_character_id: str,
+    *,
+    world_id: str,
+    expected_owner_id: str | None = None,
+    lock_scope: bool = False,
+) -> schemas.WorldChatRoleRead:
+    statement = (
+        select(models.WorldCharacter, models.Character)
+        .join(
+            models.Character,
+            models.Character.id == models.WorldCharacter.character_id,
+        )
+        .join(
+            models.WorldMembership,
+            (models.WorldMembership.id == models.WorldCharacter.membership_id)
+            & (models.WorldMembership.world_id == models.WorldCharacter.world_id),
+        )
+        .where(
+            models.WorldCharacter.id == world_character_id,
+            models.WorldCharacter.world_id == world_id,
+            models.WorldCharacter.status == "active",
+            models.WorldMembership.status == "active",
+            models.Character.deleted_at.is_(None),
+            models.Character.moderation_status == "active",
+        )
+    )
+    if expected_owner_id is not None:
+        statement = statement.where(
+            models.WorldCharacter.control_mode == "owner_controlled",
+            models.WorldCharacter.owner_user_id == expected_owner_id,
+            models.Character.owner_id == expected_owner_id,
+            models.WorldMembership.user_id == expected_owner_id,
+            models.WorldMembership.role == "owner",
+        )
+    if lock_scope and _is_postgresql_session(db):
+        statement = statement.with_for_update()
+    row = db.execute(statement).one_or_none()
+    if row is None:
+        raise MessageNotFoundError("World Chat 참여자를 찾을 수 없습니다.")
+    world_character, character = row
+    return schemas.WorldChatRoleRead(
+        world_character_id=world_character.id,
+        character_id=character.id,
+        display_name=character.name,
+        handle=character.handle,
+        avatar_url=character.avatar_url,
+        banner_url=character.banner_url,
+        role_key=world_character.role_key,
+        control_mode=world_character.control_mode,
     )
 
 
@@ -603,6 +1119,46 @@ def _get_owned_thread(
     if thread is None:
         raise MessageNotFoundError("쪽지를 찾을 수 없습니다.")
     return thread
+
+
+def _get_owned_legacy_mutable_thread(
+    db: Session, user: models.User, thread_id: str
+) -> models.MessageThread:
+    thread = _get_owned_thread(db, user, thread_id)
+    if thread.world_scope_status == "resolved":
+        raise MessageValidationError(LEGACY_WORLD_THREAD_MUTATION_MESSAGE)
+    return thread
+
+
+def _get_owned_world_thread(
+    db: Session, user: models.User, world_id: str, thread_id: str
+) -> models.MessageThread:
+    thread = db.scalar(
+        select(models.MessageThread).where(
+            models.MessageThread.id == thread_id,
+            models.MessageThread.requester_id == user.id,
+            models.MessageThread.world_id == world_id,
+            models.MessageThread.world_scope_status == "resolved",
+            models.MessageThread.deleted_at.is_(None),
+        )
+    )
+    if thread is None:
+        raise MessageNotFoundError("World Chat thread를 찾을 수 없습니다.")
+    return thread
+
+
+def _claimed_local_installation_exists(db: Session) -> bool:
+    if not inspect(db.get_bind()).has_table(models.InstallationIdentity.__tablename__):
+        return False
+    installation = db.get(
+        models.InstallationIdentity, models.LOCAL_INSTALLATION_KEY
+    )
+    return bool(installation and installation.bootstrap_state == "claimed")
+
+
+def _is_postgresql_session(db: Session) -> bool:
+    bind = db.get_bind()
+    return bind.dialect.name == "postgresql"
 
 
 def _get_character(db: Session, character_id: str) -> models.Character:

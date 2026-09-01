@@ -93,6 +93,10 @@ def delete_thread(
         chat_service.delete_thread(db, user, thread_id)
     except chat.MessageNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except chat.MessageValidationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
+        ) from exc
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 

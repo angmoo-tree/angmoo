@@ -215,7 +215,7 @@ def _validate_world_character(
     return row
 
 
-def _pair_blocked(
+def world_character_pair_is_blocked(
     db: Session,
     *,
     world_id: str,
@@ -581,7 +581,7 @@ def record_successful_social_event(
             world_id=world_id,
             world_character_id=target_world_character_id,
         )
-        if _pair_blocked(
+        if world_character_pair_is_blocked(
             db,
             world_id=world_id,
             first_world_character_id=actor_world_character_id,

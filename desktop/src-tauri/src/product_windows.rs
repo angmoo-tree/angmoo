@@ -92,6 +92,9 @@ fn phone_path_matches(segments: &[&str]) -> bool {
             safe_world_id(world_id)
                 && matches!(*section, "feed" | "chat" | "characters" | "relationships")
         }
+        ["worlds", world_id, "chat", thread_id] => {
+            safe_world_id(world_id) && safe_segment(thread_id)
+        }
         ["worlds", world_id, "posts", post_id] => safe_world_id(world_id) && safe_segment(post_id),
         [
             "characters",
@@ -285,6 +288,10 @@ mod tests {
         assert!(validate_product_route(ProductWindowKind::Phone, "/agents").is_ok());
         assert!(validate_product_route(ProductWindowKind::Phone, "/worlds/world-1/feed").is_ok());
         assert!(
+            validate_product_route(ProductWindowKind::Phone, "/worlds/world-1/chat/thread-1")
+                .is_ok()
+        );
+        assert!(
             validate_product_route(
                 ProductWindowKind::Phone,
                 "/worlds/world-1/posts/post-1?returnTo=%2Fworlds%2Fworld-1%2Ffeed"
@@ -332,6 +339,7 @@ mod tests {
             "/worlds/new",
             "/worlds/new/feed",
             "/worlds/new/posts/post-1",
+            "/worlds/new/chat/thread-1",
             "/characters/mango/worlds/new/autonomy-setup",
         ] {
             assert!(validate_product_route(ProductWindowKind::Phone, route).is_err());

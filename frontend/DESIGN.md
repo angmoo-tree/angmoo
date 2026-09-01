@@ -3,9 +3,9 @@ name: Angmoo Local
 document: Frontend Design Contract
 version: 1.8
 date: 2026-09-01
-status: CANONICAL DESIGN CONTRACT · SINGLE BRIGHT-CORAL BRAND + THREE USER-APPROVED CONTRAST EXCEPTIONS · UI-A~UI-F FULL PASS/MERGED/POST-MERGE PASS · P8-L-A CONTRACT FROZEN · P8-L-B BACKEND STRUCTURE PARITY MERGED/POST-MERGE PASS · P8-L-C FRONTEND STRUCTURE PARITY IMPLEMENTED/LOCAL TECH PASS/EXTERNAL LIFECYCLE PENDING · CURRENT UI CONFORMANCE INCOMPLETE
+status: CANONICAL DESIGN CONTRACT · SINGLE BRIGHT-CORAL BRAND + THREE USER-APPROVED CONTRAST EXCEPTIONS · UI-A~UI-F FULL PASS/MERGED/POST-MERGE PASS · P8-L-A CONTRACT FROZEN · P8-L-B BACKEND STRUCTURE PARITY MERGED/POST-MERGE PASS · P8-L-C FRONTEND STRUCTURE PARITY MERGED/POST-MERGE 6/6 PASS · P8-L-D WORLD CHAT IDENTITY/READ-ONLY SLICE IMPLEMENTED/LOCAL TECH PASS/EXTERNAL LIFECYCLE PENDING · CURRENT UI CONFORMANCE INCOMPLETE
 scope: Device Phone · World App · Creator Studio · Relationship Graph · current L4.5 surfaces · P8-L Chat/Memory target contract
-implementation_phase: L4.5 UI-A through UI-F merged and post-merge closed on exact merge 81e428bc069184edba06caf3c5821bae3cc6bfd7 · P8-L-A freezes Chat/Memory adoption, route, window and state contracts only · P8-L-B backend Chat domain structure parity merged and post-merge closed on exact merge aceaec799ccd816070613aa6037793780606c590 · P8-L-C frontend Chat feature structure parity implemented with local technical verification while Issue/push/Draft PR/Hosted CI/user merge Gate remain external lifecycle · Chat v2 and canonical Memory product runtime remain unimplemented
+implementation_phase: L4.5 UI-A through UI-F merged and post-merge closed on exact merge 81e428bc069184edba06caf3c5821bae3cc6bfd7 · P8-L-A freezes Chat/Memory adoption, route, window and state contracts only · P8-L-B backend Chat domain structure parity merged and post-merge closed on exact merge aceaec799ccd816070613aa6037793780606c590 · P8-L-C frontend Chat feature structure parity merged on exact merge 8a83f48ed565992f8c3e7dd1dbe958f33997e7ab and post-merge closed 6/6 · P8-L-D implements World-scoped identity and a read-only list/thread slice on branch feat/p8-l-d-world-chat-identity-role-binding with local technical verification PASS, pushed implementation commit 9351b38d70496ff60d97a1484808cbe7c3be58c5 and Draft PR #219 while Hosted CI is running and user/Ready/merge Gates remain pending · profile/letter, message write, generation, retrieval and canonical Memory remain unimplemented
 hosted_reference_commit: 7f967abd6117381be5c081ed284addb889b06fec
 local_reference_commit: e5e62aed69cb89b16b5870eb0854dd07752dc519
 legacy_reference: audited-internal-snapshot
@@ -33,8 +33,9 @@ L4.5 UI-E CHARACTER·AUTONOMY·LOCAL-ONLY SURFACE: FULL PASS · MERGED · POST-M
 L4.5 UI-F VISUAL·CROSS-RUNTIME CLOSEOUT: FULL PASS · MERGED · POST-MERGE 6/6 PASS
 P8-L-A CHAT·MEMORY CONTRACT AND INVENTORY: FROZEN
 P8-L-B BACKEND CHAT DOMAIN STRUCTURE PARITY: MERGED · POST-MERGE 5/5 PASS
-P8-L-C FRONTEND CHAT FEATURE STRUCTURE PARITY: IMPLEMENTED · LOCAL TECH PASS · EXTERNAL LIFECYCLE PENDING
-P8-L CHAT V2·CANONICAL MEMORY PRODUCT RUNTIME: IMPLEMENTATION NOT STARTED
+P8-L-C FRONTEND CHAT FEATURE STRUCTURE PARITY: MERGED · POST-MERGE 6/6 PASS
+P8-L-D WORLD CHAT IDENTITY·READ-ONLY SLICE: IMPLEMENTED · LOCAL TECH PASS · EXTERNAL LIFECYCLE PENDING
+P8-L CHAT V2·CANONICAL MEMORY PRODUCT RUNTIME: PARTIAL · PROFILE/LETTER·MESSAGE WRITE·GENERATION·RETRIEVAL·MEMORY NOT STARTED
 ```
 
 ---
@@ -237,13 +238,13 @@ backend payload와 현재 제품 계약에 있는 기능만 interactive하게 �
 | Creator Studio | Workspace | `CreatorStudioFrame` | Wide | `studio` |
 | Relationship Graph | Workspace | `RelationshipGraphFrame` | Wide | `relationship-graph` |
 
-이 표의 World Chat·Characters는 route와 shell slot을 뜻하며 기능 완료를 뜻하지 않는다. 현재 Chat은 unavailable이다. P8-L-A는 Memory의 목표 route `/memory`와 wide logical window kind `memory`를 계약으로 고정했지만 실제 route·window·feature가 구현된 것으로 기록하지 않는다. Diagnostics·Backup도 여전히 후속 단계 전에는 구현된 window kind로 간주하지 않는다.
+이 표의 Characters는 route와 shell slot만 존재하는 unavailable surface다. World Chat은 P8-L-D에서 현재 World의 explicit requester→responding binding을 사용하는 읽기 전용 list/thread로 활성화됐지만, profile/letter 진입·composer/send·generation·streaming·retry lifecycle·Memory는 구현되지 않았다. P8-L-A는 Memory의 목표 route `/memory`와 wide logical window kind `memory`를 계약으로 고정했지만 실제 route·window·feature가 구현된 것으로 기록하지 않는다. Diagnostics·Backup도 여전히 후속 단계 전에는 구현된 window kind로 간주하지 않는다.
 
 P8-L 목표 surface:
 
 | Surface | Product kind | Shell | layout | target Tauri kind | 현재 상태 |
 |---|---|---|---|---|---|
-| World Chat list/thread | World App | `DeviceShell` → `DeviceFrame` | Phone | existing `phone` | route groundwork only; feature unavailable |
+| World Chat list/thread | World App | `DeviceShell` → `DeviceFrame` | Phone | existing `phone` | P8-L-D read-only identity slice; write/generation absent |
 | WorldCharacter public profile | World App | `DeviceShell` → `DeviceFrame` | Phone | existing `phone` | route·capability absent |
 | owner Memory workspace | Workspace | `MemoryWorkspaceShell` | Wide; narrow Browser single-column | new `memory` | contract only; route·window absent |
 
@@ -1125,7 +1126,16 @@ UI-E PR #209 후속 Hotfix는 사용자 visual에서 발견된 `최근 결과` r
 - `app/messages/page.tsx`와 `app/messages/[threadId]/page.tsx`는 Chat public entry만 조합하는 thin wrapper다. 기존 global component path와 `lib/agents.ts` message export는 thin compatibility facade로만 남는다.
 - feature 내부는 `@/components`·`@/lib`를 import하지 않고 auth·navigation·runtime·UI의 product-neutral shared public boundary만 사용한다. thread·retry·provider 의미를 `shared`로 옮기지 않는다.
 - 이 단계의 의도적 visual diff는 `0`이다. 기존 39+16 raw-color occurrence는 feature-owned UI path로만 이동했고 전체 baseline은 33 files·1,408 occurrences를 유지한다. ARIA·keyboard·optimistic send·latest `model_busy` retry·`답장 중` 표현도 유지한다.
-- legacy `/messages`는 계속 Next-only·static unsupported다. World-scoped Chat route·requester/responding WorldCharacter·streaming·typed retry·retrieval·Memory·schema·provider lifecycle 구현 증거가 아니며, 해당 LOCAL behavior는 후속 P8-L 단계가 소유한다.
+- legacy `/messages` 구조 parity는 exact merge `8a83f48ed565992f8c3e7dd1dbe958f33997e7ab`와 post-merge Actions 6/6 PASS로 닫혔다. 이 C 단계 자체는 World-scoped Chat route·requester/responding WorldCharacter·streaming·typed retry·retrieval·Memory·schema·provider lifecycle 구현 증거가 아니며, 해당 LOCAL behavior는 후속 P8-L 단계가 소유한다.
+
+### 18.8 P8-L-D World-scoped identity·read-only Chat slice
+
+- exact base는 P8-L-C merge `8a83f48ed565992f8c3e7dd1dbe958f33997e7ab`이며 Issue `#218`, branch `feat/p8-l-d-world-chat-identity-role-binding`에서 구현한다. local technical Gate와 implementation commit `9351b38d70496ff60d97a1484808cbe7c3be58c5` push는 PASS했고 Draft PR `#219`가 열려 있다. Hosted CI는 진행 중이며 사용자·Ready·merge·post-merge Gate는 아직 닫히지 않았다.
+- `/worlds/{worldId}/chat`과 `/worlds/{worldId}/chat/{threadId}`는 같은 Phone shell 안에서 Next·static·Host/installer Tauri가 공유하는 읽기 전용 list/thread surface다. requester와 responding은 이름으로 추정하지 않고 canonical `world_character_id`로 분리한다.
+- legacy message list/header/stored transcript의 시각 anatomy는 `ADAPTED`다. World scope, explicit requester→responding role, route scope failure, `ambiguous`·`quarantined` legacy no-guess 처리는 `LOCAL`이다.
+- resolved legacy thread만 canonical World Chat으로 연결한다. ambiguous/quarantined thread는 다른 World나 default Character로 추측하지 않고 기존 global 화면에서 명시적 경고를 보여 준다.
+- 이 D slice는 profile/letter CTA, requester picker, composer/send, generation, retrieval, delayed `입력 중`, streaming, retry lifecycle, Memory를 구현하지 않는다. UI에 create-or-get transport가 존재해도 아직 사용자 action으로 노출하지 않는다.
+- local evidence는 frontend lint·typecheck·Next build·static export PASS, Next browser `18/18`, static/Tauri browser `61/61`, Rust Phone route/window `7/7`, backend 전체 `1543 passed, 22 skipped`다. 실제 file-backed SQLite/WAL 동시 create-or-get도 `created + reused`, 예외 `0`, thread·preference 각 `1`로 수렴했다.
 
 따라서 현재 허용되는 판정:
 
@@ -1141,8 +1151,9 @@ UI-F VISUAL·CROSS-RUNTIME CLOSEOUT FULL PASS / MERGED / POST-MERGE 6/6 PASS
 UI-C AND UI-F FINAL WINDOWS 100%·125%·150% SCALE USER GATES PASS
 P8-L-A CHAT·MEMORY CONTRACT AND INVENTORY FROZEN / RUNTIME FEATURE NOT IMPLEMENTED
 P8-L-B BACKEND CHAT DOMAIN STRUCTURE PARITY MERGED / POST-MERGE 5/5 PASS
-P8-L-C FRONTEND CHAT FEATURE STRUCTURE PARITY IMPLEMENTED / LOCAL TECH PASS / EXTERNAL LIFECYCLE PENDING
-P8-L CHAT V2·CANONICAL MEMORY PRODUCT RUNTIME IMPLEMENTATION NOT STARTED
+P8-L-C FRONTEND CHAT FEATURE STRUCTURE PARITY MERGED / POST-MERGE 6/6 PASS
+P8-L-D WORLD CHAT IDENTITY·READ-ONLY SLICE IMPLEMENTED / LOCAL TECH PASS / EXTERNAL LIFECYCLE PENDING
+P8-L CHAT V2·CANONICAL MEMORY PRODUCT RUNTIME PARTIAL / PROFILE·WRITE·GENERATION·RETRIEVAL·MEMORY NOT STARTED
 ```
 
 token·shell·social core·Local-only surface·visual/runtime Gate와 사용자 승인이 모두 닫혔으므로 현재 함께 허용되는 판정:

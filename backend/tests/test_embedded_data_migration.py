@@ -20,6 +20,9 @@ from app.integrations.ladybug_projection import LadybugRelationshipProjection
 from app.integrations.relationship_graph_read import RelationshipGraphRepository
 from app.runtime.migrations.embedded_data import EmbeddedDataUpgradeCoordinator
 from app.runtime.migrations.embedded_sqlite import SqliteCanonicalUpgradeError
+from app.domains.chat.infrastructure.world_scope_migration import (
+    rebuild_message_threads_v3,
+)
 from app.runtime.migrations.ladybug_versions import registry as graph_registry
 from app.runtime.migrations.local_app_data import LegacyLocalAppDataMigration
 from app.runtime.migrations.sqlite_versions import registry as sqlite_registry
@@ -342,27 +345,31 @@ def _seed_v2_roleless(
     database.close()
 
     manifest = sqlite_registry.load_sqlite_manifest(2)
-    connection = sqlite3.connect(path)
+    predecessor_engine = create_engine(
+        URL.create("sqlite+pysqlite", database=str(path))
+    )
     try:
-        current_digest = connection.execute(
-            f"SELECT schema_digest FROM {SCHEMA_VERSION_TABLE} "
-            "WHERE singleton_key = 1"
-        ).fetchone()[0]
-        connection.execute(
-            f"UPDATE {SCHEMA_VERSION_TABLE} "
-            "SET schema_version = ?, source_revision = ?, "
-            "source_migration_count = ?, schema_digest = ? "
-            "WHERE singleton_key = 1",
-            (
-                manifest.schema_version,
-                manifest.source_revision,
-                manifest.source_migration_count,
-                current_digest,
-            ),
-        )
-        connection.commit()
+        with predecessor_engine.connect() as connection:
+            connection.exec_driver_sql("PRAGMA foreign_keys = OFF")
+            connection.commit()
+            with connection.begin():
+                rebuild_message_threads_v3(
+                    connection, create_legacy_unique_index=False
+                )
+                connection.exec_driver_sql(
+                    f"UPDATE {SCHEMA_VERSION_TABLE} "
+                    "SET schema_version = ?, source_revision = ?, "
+                    "source_migration_count = ?, schema_digest = ? "
+                    "WHERE singleton_key = 1",
+                    (
+                        manifest.schema_version,
+                        manifest.source_revision,
+                        manifest.source_migration_count,
+                        sqlite_schema_digest(connection),
+                    ),
+                )
     finally:
-        connection.close()
+        predecessor_engine.dispose()
     return path
 
 

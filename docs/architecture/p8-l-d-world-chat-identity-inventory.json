@@ -1,0 +1,102 @@
+{
+  "historical_chain": {
+    "current_tree_owner": "P8-L-D",
+    "p8_l_a_sha256": "934c1410810e8f0b0899e09c3c34b5c67f43050c4a354a15fcea72f264c9847e",
+    "p8_l_b_sha256": "d9e5b83d78059d91629f001e48d3031bd44a495f625be1588f00770395c5d70e",
+    "predecessor_mode": "frozen_digest"
+  },
+  "immutable_files": [
+    {
+      "path": "backend/app/alembic/versions/20260831_0084_world_scoped_chat_identity.py",
+      "sha256": "66262435a719a64d93a3485c5b3127d2d1fe521d12cee6768e919822cf9214e5",
+      "size": 5636
+    },
+    {
+      "path": "backend/app/domains/chat/infrastructure/world_scope_migration.py",
+      "sha256": "643c1af687dd0926464c4fef4b6affd0c89c86b0a5730e5580ba42e83354e634",
+      "size": 20595
+    },
+    {
+      "path": "backend/app/runtime/migrations/sqlite_versions/v3_to_v4_world_scoped_chat.py",
+      "sha256": "73a87b26f62ff90f58d9c840bf9901369794070496f35f60e1377ff0a0bf7083",
+      "size": 2527
+    },
+    {
+      "path": "backend/app/runtime/migrations/sqlite_versions/manifests/v4.json",
+      "sha256": "6d563122a802dd1b968febf9d18994b36959302354a4c476778a4b8ae43cd5a8",
+      "size": 2507
+    }
+  ],
+  "installer_upgrade": {
+    "hosted_workflow_archive": "supported-v3.zip",
+    "idempotent_target_reinstall_verified": true,
+    "message_survival_verified": true,
+    "required_predecessor": 3,
+    "supported_predecessor_present": true,
+    "synthetic_fixture_has_resolved_and_ambiguous_threads": true
+  },
+  "message_thread": {
+    "added_columns": [
+      "world_id",
+      "requester_world_character_id",
+      "responding_world_character_id",
+      "world_scope_status"
+    ],
+    "backfill_outcomes": [
+      "resolved",
+      "ambiguous",
+      "quarantined"
+    ],
+    "collision_rows_quarantined": true,
+    "legacy_columns_preserved": true,
+    "lossless_messages_required": true,
+    "required_constraints": [
+      "ck_message_threads_world_scope_binding",
+      "fk_message_threads_world",
+      "fk_message_threads_requester_world",
+      "fk_message_threads_responding_world",
+      "fk_message_threads_responding_character"
+    ],
+    "required_indexes": [
+      "ix_message_threads_owner_world_status",
+      "uq_message_threads_active_legacy_ambiguous",
+      "uq_message_threads_active_world_roles"
+    ],
+    "table": "message_threads"
+  },
+  "migration": {
+    "alembic_down_revision": "20260825_0083",
+    "alembic_revision": "20260831_0084",
+    "embedded_sqlite": {
+      "canonical_table_count": 87,
+      "schema_digest": "520b6dfafdae9fc26b11a40ff147eef4596122cde3a40559a2cd4fc1a3ea875c",
+      "schema_version": 4,
+      "source_migration_count": 83,
+      "source_revision": "20260831_0084"
+    },
+    "migration_registry_step": "v3_to_v4_world_scoped_chat",
+    "mutable_identity_tables": [
+      "message_threads"
+    ]
+  },
+  "owner_stage": "P8-L-D",
+  "predecessor": {
+    "path": "security/p8_l_b_chat_domain_inventory.json",
+    "sha256": "d9e5b83d78059d91629f001e48d3031bd44a495f625be1588f00770395c5d70e",
+    "size": 16286
+  },
+  "schema_version": 1,
+  "transport": {
+    "frontend_contract": "world-scoped",
+    "legacy_ambiguous_route_resolution": "explicit-only",
+    "registered_runtime_routers": [
+      "main",
+      "public"
+    ],
+    "route_operations": [
+      "GET /worlds/{world_id}/chat/threads",
+      "GET /worlds/{world_id}/chat/threads/{thread_id}",
+      "POST /worlds/{world_id}/chat/threads"
+    ]
+  }
+}

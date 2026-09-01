@@ -18,6 +18,19 @@ class ChatService:
     def __init__(self, runtime: ChatRuntimePort) -> None:
         self._runtime = runtime
 
+    def list_world_threads(self, db: Any, user: Any, world_id: str) -> Any:
+        return self._runtime.list_world_threads(db, user, world_id)
+
+    def get_world_thread(
+        self, db: Any, user: Any, world_id: str, thread_id: str
+    ) -> Any:
+        return self._runtime.get_world_thread(db, user, world_id, thread_id)
+
+    def create_or_get_world_thread(
+        self, db: Any, user: Any, world_id: str, data: Any
+    ) -> Any:
+        return self._runtime.create_or_get_world_thread(db, user, world_id, data)
+
     def list_threads(self, db: Any, user: Any) -> Any:
         return self._runtime.list_threads(db, user)
 

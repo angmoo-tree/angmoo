@@ -74,6 +74,14 @@ export const LOCAL_PRODUCT_ROUTE_CAPABILITIES = [
   },
   {
     exposure: "direct-only",
+    id: "world-chat-thread",
+    next: "supported",
+    routeFamily: "/worlds/{worldId}/chat/{threadId}",
+    static: "supported",
+    window: "phone",
+  },
+  {
+    exposure: "direct-only",
     id: "creator-studio",
     next: "supported",
     routeFamily: "/studio",
@@ -147,6 +155,7 @@ const STATIC_PRODUCT_ROUTE_PATTERNS = [
   /^\/worlds\/new$/,
   /^\/worlds\/[^/]+\/creator$/,
   /^\/worlds\/(?!new(?:\/|$))[^/]+(?:\/(?:feed|chat|characters|relationships))?$/,
+  /^\/worlds\/(?!new(?:\/|$))[^/]+\/chat\/[^/]+$/,
   /^\/worlds\/(?!new(?:\/|$))[^/]+\/posts\/[^/]+$/,
   /^\/characters\/[^/]+\/worlds\/(?!new(?:\/|$))[^/]+\/(?:autonomy-setup|relationship-graph)$/,
 ] as const;

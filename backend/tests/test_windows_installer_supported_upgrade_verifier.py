@@ -44,11 +44,12 @@ def test_verifier_distinguishes_graph_rebuild_from_idempotent_reinstall(
     payload = {
         "build_commit": "a" * 40,
         "payload_generation": "b" * 64,
-        "embedded_data": {"sqlite": {"target_version": 3}},
+        "embedded_data": {"sqlite": {"target_version": 4}},
     }
     fixture = {
         "ladybug_source_data_version": 1,
         "app_host_sha256": "0" * 64,
+        "target_data_version": 4,
     }
 
     monkeypatch.setattr(verifier, "_source_database", lambda *_: None)
@@ -64,7 +65,7 @@ def test_verifier_distinguishes_graph_rebuild_from_idempotent_reinstall(
                 "status": "upgraded",
                 "operation": "upgrade",
                 "sqlite_source_version": 3,
-                "sqlite_target_version": 3,
+                "sqlite_target_version": 4,
                 "ladybug_source_version": 2,
                 "ladybug_target_version": 2,
                 "build_commit": payload["build_commit"],

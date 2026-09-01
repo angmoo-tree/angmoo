@@ -13,6 +13,7 @@ from app.api.v1.routes import tree
 from app.api.v1.routes import worlds
 from app.api.v1.routes import world_character_setup
 from app.api.v1.routes import world_activity_runtime
+from app.api.v1.routes import world_chat
 from app.domains.device_home.public import router as device_home_router
 from app.domains.world_characters.api.routes import router as world_character_router
 from app.domains.world_packages.api.routes import router as world_package_router
@@ -24,6 +25,7 @@ class HostedRouterConfigurationError(RuntimeError):
 
 PUBLIC_ROUTERS = (
     device_home_router,
+    world_chat.router,
     world_character_router,
     world_package_router,
     auth.public_router,

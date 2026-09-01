@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   useRuntimeRouter as useRouter,
   useRuntimeSearchParams as useSearchParams,
+  worldChatThreadRoute,
 } from "@/shared/navigation/public";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -24,6 +25,7 @@ import {
   type MessageMessageRead,
   type MessageThreadRead,
 } from "../model/chat-contract";
+import { resolvedLegacyWorldChatRouteParts } from "../model/world-chat-contract";
 
 function asMessageGoogleModel(value: string | undefined): MessageGoogleGeminiModel {
   return MESSAGE_GOOGLE_GEMINI_MODELS.some((option) => option.value === value)
@@ -55,7 +57,13 @@ export function MessageThreadClient({ threadId }: { threadId: string }) {
     let active = true;
     getMessageThread(threadId)
       .then((result) => {
-        if (active) setThread(result);
+        if (!active) return;
+        const resolved = resolvedLegacyWorldChatRouteParts(result);
+        if (resolved) {
+          router.replace(worldChatThreadRoute(resolved.worldId, resolved.threadId));
+          return;
+        }
+        setThread(result);
       })
       .catch((err) => {
         if (active) {
@@ -222,6 +230,14 @@ export function MessageThreadClient({ threadId }: { threadId: string }) {
           <div className="text-[15px] font-bold text-[#98a2b3]">쪽지를 불러오는 중입니다.</div>
         )}
       </div>
+
+      {thread && thread.world_scope_status !== "resolved" ? (
+        <div className="border-b border-state-warning-border bg-state-warning-surface px-4 py-3 text-[13px] font-bold leading-6 text-state-warning md:px-6" role="status">
+          {thread.world_scope_status === "quarantined"
+            ? "이 이전 대화는 identity 충돌로 격리됐어요. 임의의 World로 연결하지 않습니다."
+            : "이 이전 대화의 World를 고유하게 확인할 수 없어요. 임의의 World로 연결하지 않고 기존 쪽지 화면에서 표시합니다."}
+        </div>
+      ) : null}
 
       <div className="flex-1 space-y-4 px-4 py-5 md:px-6">
         {thread?.messages.map((message) => {

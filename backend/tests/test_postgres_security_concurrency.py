@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import NullPool
 
 from app import models, schemas
+from app.domains.chat.api import schemas as chat_schemas
 from app.core.config import settings
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import community as community_crud
@@ -1717,6 +1718,206 @@ def test_message_thread_quota_is_atomic_across_postgres_sessions() -> None:
             )
             db.execute(delete(models.Character).where(models.Character.id.in_(character_ids)))
             db.execute(delete(models.User).where(models.User.id.in_([requester_id, owner_id])))
+            db.commit()
+
+
+def test_world_chat_create_or_get_keeps_preference_and_tuple_lock_atomic() -> None:
+    engine = _engine()
+    suffix = uuid4().hex
+    owner_id = f"user-world-chat-owner-{suffix}"
+    responder_owner_id = f"user-world-chat-responder-{suffix}"
+    requester_character_id = f"char-world-chat-requester-{suffix}"
+    responding_character_id = f"char-world-chat-responding-{suffix}"
+    world_id = f"world-chat-{suffix}"
+    owner_membership_id = f"membership-world-chat-owner-{suffix}"
+    responder_membership_id = f"membership-world-chat-responder-{suffix}"
+    requester_world_character_id = f"wc-world-chat-requester-{suffix}"
+    responding_world_character_id = f"wc-world-chat-responding-{suffix}"
+
+    with Session(engine) as db:
+        if db.get(models.InstallationIdentity, models.LOCAL_INSTALLATION_KEY):
+            pytest.skip("PostgreSQL fixture requires an unclaimed installation singleton")
+        owner = models.User(
+            id=owner_id,
+            email=f"world-chat-owner-{suffix}@example.invalid",
+            display_name=owner_id,
+            display_name_normalized=owner_id,
+            profile_setup_completed=True,
+        )
+        responder_owner = models.User(
+            id=responder_owner_id,
+            email=f"world-chat-responder-{suffix}@example.invalid",
+            display_name=responder_owner_id,
+            display_name_normalized=responder_owner_id,
+            profile_setup_completed=True,
+        )
+        db.add_all([owner, responder_owner])
+        db.flush()
+        db.add(
+            models.InstallationIdentity(
+                singleton_key=models.LOCAL_INSTALLATION_KEY,
+                installation_id=f"p8-l-d-postgres-{suffix}",
+                owner_user_id=owner_id,
+                bootstrap_state="claimed",
+                local_label="P8-L-D PostgreSQL concurrency fixture",
+                claimed_at=datetime.now(UTC),
+            )
+        )
+        requester_character = models.Character(
+            id=requester_character_id,
+            owner_id=owner_id,
+            name="Requester",
+            handle=f"requester_{suffix[:20]}",
+            persona_summary="world chat requester",
+            execution_mode="local",
+        )
+        responding_character = models.Character(
+            id=responding_character_id,
+            owner_id=responder_owner_id,
+            name="Responding",
+            handle=f"responding_{suffix[:20]}",
+            persona_summary="world chat responder",
+            execution_mode="local",
+        )
+        world = models.World(
+            id=world_id,
+            slug=world_id,
+            owner_user_id=owner_id,
+            name="P8-L-D world chat",
+            contract_version="world-v1",
+            contract_hash="a" * 64,
+            create_idempotency_key=world_id,
+        )
+        db.add_all([requester_character, responding_character, world])
+        db.flush()
+        owner_membership = models.WorldMembership(
+            id=owner_membership_id,
+            world_id=world_id,
+            user_id=owner_id,
+            role="owner",
+            status="active",
+            joined_at=datetime.now(UTC),
+        )
+        responder_membership = models.WorldMembership(
+            id=responder_membership_id,
+            world_id=world_id,
+            user_id=responder_owner_id,
+            role="member",
+            status="active",
+            joined_at=datetime.now(UTC),
+        )
+        db.add_all([owner_membership, responder_membership])
+        db.flush()
+        db.add_all(
+            [
+                models.WorldCharacter(
+                    id=requester_world_character_id,
+                    world_id=world_id,
+                    character_id=requester_character_id,
+                    membership_id=owner_membership_id,
+                    role_key="no_specific_role",
+                    status="active",
+                    control_mode="owner_controlled",
+                    owner_user_id=owner_id,
+                    autonomous_enabled=False,
+                    world_contract_hash="a" * 64,
+                    version=1,
+                ),
+                models.WorldCharacter(
+                    id=responding_world_character_id,
+                    world_id=world_id,
+                    character_id=responding_character_id,
+                    membership_id=responder_membership_id,
+                    role_key="no_specific_role",
+                    status="active",
+                    control_mode="autonomous",
+                    owner_user_id=None,
+                    autonomous_enabled=True,
+                    world_contract_hash="a" * 64,
+                    version=1,
+                ),
+            ]
+        )
+        db.commit()
+
+    barrier = Barrier(2)
+
+    def attempt() -> str:
+        with Session(engine) as db:
+            owner = db.get(models.User, owner_id)
+            assert owner is not None
+            barrier.wait()
+            result = message_service.create_or_get_world_thread(
+                db,
+                owner,
+                world_id,
+                chat_schemas.WorldChatThreadCreate(
+                    responding_world_character_id=responding_world_character_id
+                ),
+            )
+            return result.outcome
+
+    try:
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            outcomes = sorted(executor.map(lambda _index: attempt(), range(2)))
+        assert outcomes == ["created", "reused"]
+        with Session(engine) as db:
+            assert db.scalar(
+                select(func.count(models.MessageThread.id)).where(
+                    models.MessageThread.requester_id == owner_id,
+                    models.MessageThread.world_id == world_id,
+                )
+            ) == 1
+            assert db.scalar(
+                select(func.count(models.UserMessagePreference.user_id)).where(
+                    models.UserMessagePreference.user_id == owner_id
+                )
+            ) == 1
+    finally:
+        with Session(engine) as db:
+            db.execute(
+                delete(models.MessageThread).where(
+                    models.MessageThread.requester_id == owner_id
+                )
+            )
+            db.execute(
+                delete(models.UserMessagePreference).where(
+                    models.UserMessagePreference.user_id == owner_id
+                )
+            )
+            db.execute(
+                delete(models.WorldCharacter).where(
+                    models.WorldCharacter.id.in_(
+                        [requester_world_character_id, responding_world_character_id]
+                    )
+                )
+            )
+            db.execute(
+                delete(models.WorldMembership).where(
+                    models.WorldMembership.id.in_(
+                        [owner_membership_id, responder_membership_id]
+                    )
+                )
+            )
+            db.execute(delete(models.World).where(models.World.id == world_id))
+            db.execute(
+                delete(models.Character).where(
+                    models.Character.id.in_(
+                        [requester_character_id, responding_character_id]
+                    )
+                )
+            )
+            db.execute(
+                delete(models.InstallationIdentity).where(
+                    models.InstallationIdentity.singleton_key
+                    == models.LOCAL_INSTALLATION_KEY
+                )
+            )
+            db.execute(
+                delete(models.User).where(
+                    models.User.id.in_([owner_id, responder_owner_id])
+                )
+            )
             db.commit()
 
 

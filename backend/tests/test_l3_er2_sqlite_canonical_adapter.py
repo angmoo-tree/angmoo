@@ -152,7 +152,9 @@ def test_file_backed_baseline_records_lineage_pragmas_and_schema_digest(
         for index in inspector.get_indexes(table_name)
         if index.get("dialect_options", {}).get("sqlite_where") is not None
     ]
-    assert len(partial_indexes) == 13
+    # P8-L-D adds the resolved World-role tuple and unresolved legacy-pair
+    # uniqueness guards to the existing canonical partial-index set.
+    assert len(partial_indexes) == 15
     lore_columns = {
         column["name"]: str(column["type"])
         for column in inspector.get_columns("character_lore_chunks")

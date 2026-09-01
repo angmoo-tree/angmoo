@@ -1,8 +1,4 @@
-"""SQLAlchemy persistence models for the legacy-compatible Chat v1 boundary.
-
-P8-L-B moves ownership without changing tables, columns, constraints, indexes,
-or runtime behavior. World-scoped Chat v2 schema work remains in P8-L-D.
-"""
+"""SQLAlchemy persistence models for Chat v1 compatibility and World Chat v2."""
 
 from datetime import datetime
 from typing import Optional
@@ -12,10 +8,13 @@ from sqlalchemy import (
     CheckConstraint,
     DateTime,
     ForeignKey,
+    ForeignKeyConstraint,
+    Index,
     Integer,
     String,
     Text,
     func,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -77,11 +76,86 @@ class MessageThread(Base):
             "(response_lease_expires_at IS NULL)",
             name="ck_message_threads_response_lease_pair",
         ),
+        CheckConstraint(
+            "(world_scope_status = 'resolved' AND world_id IS NOT NULL "
+            "AND requester_world_character_id IS NOT NULL "
+            "AND responding_world_character_id IS NOT NULL "
+            "AND requester_world_character_id <> responding_world_character_id) OR "
+            "(world_scope_status IN ('ambiguous', 'quarantined') "
+            "AND world_id IS NULL "
+            "AND requester_world_character_id IS NULL "
+            "AND responding_world_character_id IS NULL)",
+            name="ck_message_threads_world_scope_binding",
+        ),
+        ForeignKeyConstraint(
+            ["requester_world_character_id", "world_id"],
+            ["world_characters.id", "world_characters.world_id"],
+            name="fk_message_threads_requester_world",
+        ),
+        ForeignKeyConstraint(
+            ["responding_world_character_id", "world_id"],
+            ["world_characters.id", "world_characters.world_id"],
+            name="fk_message_threads_responding_world",
+        ),
+        ForeignKeyConstraint(
+            ["responding_world_character_id", "character_id"],
+            ["world_characters.id", "world_characters.character_id"],
+            name="fk_message_threads_responding_character",
+        ),
+        Index(
+            "uq_message_threads_active_world_roles",
+            "requester_id",
+            "world_id",
+            "requester_world_character_id",
+            "responding_world_character_id",
+            unique=True,
+            postgresql_where=text(
+                "deleted_at IS NULL AND world_scope_status = 'resolved'"
+            ),
+            sqlite_where=text(
+                "deleted_at IS NULL AND world_scope_status = 'resolved'"
+            ),
+        ),
+        Index(
+            "uq_message_threads_active_legacy_ambiguous",
+            "requester_id",
+            "character_id",
+            unique=True,
+            postgresql_where=text(
+                "deleted_at IS NULL AND world_scope_status = 'ambiguous'"
+            ),
+            sqlite_where=text(
+                "deleted_at IS NULL AND world_scope_status = 'ambiguous'"
+            ),
+        ),
+        Index(
+            "ix_message_threads_owner_world_status",
+            "requester_id",
+            "world_id",
+            "world_scope_status",
+        ),
+        Index(
+            "ix_message_threads_requester_last",
+            "requester_id",
+            "last_message_at",
+        ),
     )
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     requester_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
     character_id: Mapped[str] = mapped_column(ForeignKey("characters.id"), nullable=False)
+    world_id: Mapped[Optional[str]] = mapped_column(
+        ForeignKey("worlds.id", name="fk_message_threads_world"), nullable=True
+    )
+    requester_world_character_id: Mapped[Optional[str]] = mapped_column(
+        String(64), nullable=True
+    )
+    responding_world_character_id: Mapped[Optional[str]] = mapped_column(
+        String(64), nullable=True
+    )
+    world_scope_status: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="ambiguous", server_default="ambiguous"
+    )
     selected_model: Mapped[str] = mapped_column(
         String(120), nullable=False, default="gemini-2.5-flash-lite"
     )

@@ -33,7 +33,9 @@ def test_world_app_navigation_keeps_world_scope_and_marks_missing_capabilities()
     assert "encodeURIComponent(worldId)" in _read("shared/navigation/product-routes.ts")
     for segment in ("feed", "chat", "characters", "relationships"):
         assert f'segment: "{segment}"' in contract
-    assert contract.count('availability: "unavailable"') == 2
+    # P8-L-D makes Chat available as a World-scoped, read-only list/detail
+    # surface. Characters remains the only reserved World App section.
+    assert contract.count('availability: "unavailable"') == 1
     assert 'id: "feed"' in contract
     assert 'id: "relationships"' in contract
     assert 'availability: "available"' in contract

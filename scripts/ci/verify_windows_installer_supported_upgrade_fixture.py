@@ -128,6 +128,52 @@ def _verify_seed_identity(connection: sqlite3.Connection, fixture: dict[str, Any
         _fail("supported_upgrade_worlds_changed")
 
 
+def _verify_world_chat_identity(
+    connection: sqlite3.Connection, fixture: dict[str, Any]
+) -> None:
+    expected_threads = fixture.get("expected_world_chat_threads")
+    if not isinstance(expected_threads, dict) or not expected_threads:
+        _fail("supported_upgrade_fixture_contract_invalid")
+    for thread_id, expected in sorted(expected_threads.items()):
+        if not isinstance(expected, dict):
+            _fail("supported_upgrade_fixture_contract_invalid")
+        row = connection.execute(
+            "SELECT requester_id, character_id, world_id, "
+            "requester_world_character_id, responding_world_character_id, "
+            "world_scope_status, selected_model "
+            "FROM message_threads WHERE id = ?",
+            (thread_id,),
+        ).fetchone()
+        if row is None or any(
+            row[key] != expected.get(key)
+            for key in (
+                "requester_id",
+                "character_id",
+                "world_id",
+                "requester_world_character_id",
+                "responding_world_character_id",
+                "world_scope_status",
+                "selected_model",
+            )
+        ):
+            _fail("supported_upgrade_world_chat_identity_mismatch")
+        messages = [
+            {
+                "role": item["role"],
+                "content": item["content"],
+                "model": item["model"],
+                "status": item["status"],
+            }
+            for item in connection.execute(
+                "SELECT role, content, model, status FROM message_messages "
+                "WHERE thread_id = ? ORDER BY id",
+                (thread_id,),
+            ).fetchall()
+        ]
+        if messages != expected.get("messages"):
+            _fail("supported_upgrade_world_chat_messages_changed")
+
+
 def _verify_graph(
     data_root: Path,
     fixture: dict[str, Any],
@@ -166,9 +212,13 @@ def _verify_graph(
 
 def _verify_database(data_root: Path, fixture: dict[str, Any]) -> None:
     source_version = int(fixture.get("source_data_version", 0))
+    target_version = int(fixture.get("target_data_version", 0))
+    target_table_count = int(fixture.get("target_table_count", 0))
+    if target_version <= source_version or target_table_count <= 0:
+        _fail("supported_upgrade_fixture_contract_invalid")
     canonical = data_root / "canonical"
     marker = _json(canonical / "current-generation.json")
-    if int(marker.get("data_version", 0)) != 3:
+    if int(marker.get("data_version", 0)) != target_version:
         _fail("supported_upgrade_target_version_mismatch")
     previous = _json(canonical / "previous-generation.json")
     if int(previous.get("data_version", 0)) != source_version:
@@ -185,7 +235,7 @@ def _verify_database(data_root: Path, fixture: dict[str, Any]) -> None:
             "SELECT schema_version FROM angmoo_schema_version "
             "WHERE singleton_key = 1"
         ).fetchone()
-        if version is None or int(version[0]) != 3:
+        if version is None or int(version[0]) != target_version:
             _fail("supported_upgrade_database_version_mismatch")
         table_count = int(
             connection.execute(
@@ -194,9 +244,10 @@ def _verify_database(data_root: Path, fixture: dict[str, Any]) -> None:
                 "AND name != 'angmoo_schema_version'"
             ).fetchone()[0]
         )
-        if table_count != 87:
+        if table_count != target_table_count:
             _fail("supported_upgrade_table_count_mismatch")
         _verify_seed_identity(connection, fixture)
+        _verify_world_chat_identity(connection, fixture)
         expected_roles = fixture.get("expected_reserved_roles")
         if not isinstance(expected_roles, dict):
             _fail("supported_upgrade_fixture_contract_invalid")
@@ -308,9 +359,12 @@ def verify_upgraded(
     expected_ladybug_source_version: int,
 ) -> None:
     _source_database(data_root, fixture)
+    target_version = int(fixture.get("target_data_version", 0))
+    if target_version <= 0:
+        _fail("supported_upgrade_fixture_contract_invalid")
     payload = _verify_payload(data_root / "app")
     sqlite_contract = payload.get("embedded_data", {}).get("sqlite", {})
-    if int(sqlite_contract.get("target_version", 0)) != 3:
+    if int(sqlite_contract.get("target_version", 0)) != target_version:
         _fail("supported_upgrade_candidate_contract_invalid")
     if _sha256(data_root / "app" / "angmoo-desktop.exe") == fixture.get(
         "app_host_sha256"
@@ -332,7 +386,7 @@ def verify_upgraded(
         or result.get("operation") != "upgrade"
         or int(result.get("sqlite_source_version", 0))
         != expected_source_version
-        or int(result.get("sqlite_target_version", 0)) != 3
+        or int(result.get("sqlite_target_version", 0)) != target_version
         or int(result.get("ladybug_source_version", 0))
         != expected_ladybug_source_version
         or int(result.get("ladybug_target_version", 0)) != 2
@@ -356,6 +410,7 @@ def verify_restored(data_root: Path, fixture: dict[str, Any]) -> None:
     source = _source_database(data_root, fixture)
     marker = _json(data_root / "canonical" / "current-generation.json")
     source_version = int(fixture.get("source_data_version", 0))
+    target_version = int(fixture.get("target_data_version", 0))
     if int(marker.get("data_version", 0)) != source_version:
         _fail("supported_upgrade_failure_changed_active_generation")
     if (data_root / "canonical" / "previous-generation.json").exists():
@@ -402,7 +457,7 @@ def verify_restored(data_root: Path, fixture: dict[str, Any]) -> None:
         or result.get("code") != "sqlite_migration_reserved_role_conflict"
         or int(result.get("sqlite_source_version", 0)) != source_version
         or int(result.get("sqlite_active_version", 0)) != source_version
-        or int(result.get("sqlite_target_version", 0)) != 3
+        or int(result.get("sqlite_target_version", 0)) != target_version
         or int(result.get("ladybug_source_version", 0)) != 1
         or int(result.get("ladybug_active_version", 0)) != 1
         or int(result.get("ladybug_target_version", 0)) != 2

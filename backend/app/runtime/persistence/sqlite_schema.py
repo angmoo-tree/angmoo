@@ -11,9 +11,9 @@ from sqlalchemy import Connection, MetaData, text
 from app.core.db import Base
 
 
-SQLITE_SCHEMA_VERSION = 3
-SOURCE_ALEMBIC_REVISION = "20260825_0083"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 82
+SQLITE_SCHEMA_VERSION = 4
+SOURCE_ALEMBIC_REVISION = "20260831_0084"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 83
 EXPECTED_CANONICAL_TABLE_COUNT = 87
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 
@@ -58,7 +58,7 @@ def build_sqlite_baseline_metadata() -> MetaData:
 def build_sqlite_v1_metadata() -> MetaData:
     """Return the immutable pre-World-Package embedded SQLite inventory."""
 
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v3_metadata()
     for table_name in reversed(WORLD_PACKAGE_REGISTRY_TABLES):
         metadata.remove(metadata.tables[table_name])
     if len(metadata.tables) != SQLITE_V1_CANONICAL_TABLE_COUNT:
@@ -66,6 +66,34 @@ def build_sqlite_v1_metadata() -> MetaData:
             "SQLite v1 table inventory drifted: "
             f"expected {SQLITE_V1_CANONICAL_TABLE_COUNT}, "
             f"got {len(metadata.tables)}"
+        )
+    return metadata
+
+
+def build_sqlite_v3_metadata() -> MetaData:
+    """Return the immutable pre-World-Chat-v2 embedded schema."""
+
+    from app.domains.chat.infrastructure.world_scope_migration import (
+        add_legacy_message_threads_table,
+    )
+
+    metadata = MetaData()
+    for table_name in sorted(Base.metadata.tables):
+        if table_name == "message_threads":
+            continue
+        Base.metadata.tables[table_name].to_metadata(metadata)
+    add_legacy_message_threads_table(metadata)
+    for table in metadata.tables.values():
+        for index in table.indexes:
+            postgresql_where = index.dialect_options["postgresql"].get("where")
+            if postgresql_where is not None:
+                index.dialect_options["sqlite"]["where"] = text(
+                    str(postgresql_where)
+                )
+    if len(metadata.tables) != EXPECTED_CANONICAL_TABLE_COUNT:
+        raise RuntimeError(
+            "SQLite v3 table inventory drifted: "
+            f"expected {EXPECTED_CANONICAL_TABLE_COUNT}, got {len(metadata.tables)}"
         )
     return metadata
 
@@ -224,6 +252,7 @@ __all__ = [
     "WORLD_PACKAGE_REGISTRY_TABLES",
     "build_sqlite_baseline_metadata",
     "build_sqlite_v1_metadata",
+    "build_sqlite_v3_metadata",
     "create_schema_version_table",
     "sqlite_schema_contract_digest",
     "sqlite_schema_digest",

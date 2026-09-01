@@ -57,6 +57,10 @@ export type MessageThreadRead = {
   created_at: string;
   latest_message: MessageMessageRead | null;
   messages: MessageMessageRead[];
+  world_id: string | null;
+  requester_world_character_id: string | null;
+  responding_world_character_id: string | null;
+  world_scope_status: "resolved" | "ambiguous" | "quarantined";
 };
 
 export type MessageThreadListRead = {

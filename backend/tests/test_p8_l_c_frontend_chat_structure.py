@@ -31,13 +31,18 @@ def test_chat_feature_has_no_legacy_component_or_lib_imports() -> None:
     files = sorted(
         path for path in feature_root.rglob("*") if path.suffix in {".ts", ".tsx"}
     )
-    assert [path.relative_to(feature_root).as_posix() for path in files] == [
+    # P8-L-C freezes the five migrated Chat v1 files as a required subset.
+    # Later product stages add new feature-owned files without rewriting that
+    # historical inventory, so this must not assert an exact directory list.
+    assert {
+        path.relative_to(feature_root).as_posix() for path in files
+    }.issuperset({
         "api/chat-client.ts",
         "model/chat-contract.ts",
         "public.ts",
         "ui/message-thread-client.tsx",
         "ui/messages-client.tsx",
-    ]
+    })
     for path in files:
         text = path.read_text(encoding="utf-8")
         assert 'from "@/components' not in text
@@ -101,7 +106,7 @@ def test_chat_v1_behavior_and_next_only_exposure_markers_are_preserved() -> None
     for marker in (
         'router.replace("/login")',
         'aria-label="쪽지 내역 삭제"',
-        'href={`/messages/${thread.id}`}',
+        ': `/messages/${encodeURIComponent(thread.id)}`;',
     ):
         assert marker in listing
     navigation = _read(

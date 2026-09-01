@@ -23,6 +23,9 @@ if str(BACKEND_ROOT) not in sys.path:
     sys.path.insert(0, str(BACKEND_ROOT))
 
 from app import models
+from app.domains.chat.infrastructure.world_scope_migration import (
+    rebuild_message_threads_v3,
+)
 from app.domains.worlds.domain.reserved_roles import (
     NO_SPECIFIC_ROLE_DESCRIPTION,
     NO_SPECIFIC_ROLE_KEY,
@@ -36,6 +39,9 @@ from app.runtime.migrations.ladybug_versions.registry import (
     load_ladybug_manifest,
 )
 from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest
+from app.runtime.migrations.sqlite_versions.v2_to_v3_no_specific_role import (
+    upgrade_v2_to_v3,
+)
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
 from app.runtime.persistence.sqlite_database import (
     SqliteCanonicalDatabase,
@@ -43,12 +49,13 @@ from app.runtime.persistence.sqlite_database import (
 )
 from app.runtime.persistence.sqlite_schema import (
     SCHEMA_VERSION_TABLE,
+    SQLITE_SCHEMA_VERSION,
     sqlite_schema_contract_digest,
     sqlite_schema_digest,
 )
 
 
-SUPPORTED_SOURCE_VERSIONS = (1, 2)
+SUPPORTED_SOURCE_VERSIONS = (1, 2, 3)
 PREDECESSOR_BUILD_COMMIT = "1" * 40
 PREDECESSOR_OVERLAY = b"\nANGMOO_SYNTHETIC_SUPPORTED_PREDECESSOR_PAYLOAD\n"
 
@@ -188,6 +195,16 @@ def _seed_supported_predecessor(
         ]
         session.add(owner)
         session.flush()
+        session.add(
+            models.InstallationIdentity(
+                singleton_key="local-installation",
+                installation_id="supported-upgrade-fixture-installation",
+                owner_user_id=owner.id,
+                bootstrap_state="claimed",
+                local_label="Supported upgrade fixture",
+                claimed_at=datetime(2026, 8, 31, 0, 0, tzinfo=UTC),
+            )
+        )
         session.add_all([world, *characters])
         session.flush()
         session.add(
@@ -431,7 +448,57 @@ def _seed_supported_predecessor(
                 ),
             ]
         )
+        session.flush()
+        resolved_thread = models.MessageThread(
+            id="thread-supported-world-resolved",
+            requester_id=owner.id,
+            character_id=characters[0].id,
+            selected_model="fixture-chat-model",
+            last_message_at=datetime(2026, 8, 31, 1, 2, tzinfo=UTC),
+            created_at=datetime(2026, 8, 31, 1, 0, tzinfo=UTC),
+            updated_at=datetime(2026, 8, 31, 1, 2, tzinfo=UTC),
+        )
+        ambiguous_thread = models.MessageThread(
+            id="thread-supported-world-ambiguous",
+            requester_id=owner.id,
+            character_id=characters[3].id,
+            selected_model="fixture-chat-model",
+            last_message_at=datetime(2026, 8, 31, 2, 2, tzinfo=UTC),
+            created_at=datetime(2026, 8, 31, 2, 0, tzinfo=UTC),
+            updated_at=datetime(2026, 8, 31, 2, 2, tzinfo=UTC),
+        )
+        session.add_all([resolved_thread, ambiguous_thread])
+        session.flush()
+        session.add_all(
+            [
+                models.MessageMessage(
+                    thread_id=resolved_thread.id,
+                    role="user",
+                    content="resolved predecessor message must survive",
+                    status="ok",
+                    created_at=datetime(2026, 8, 31, 1, 1, tzinfo=UTC),
+                ),
+                models.MessageMessage(
+                    thread_id=ambiguous_thread.id,
+                    role="assistant",
+                    content="ambiguous predecessor message must survive",
+                    model="fixture-chat-model",
+                    status="ok",
+                    created_at=datetime(2026, 8, 31, 2, 1, tzinfo=UTC),
+                ),
+            ]
+        )
         session.commit()
+    if source_version >= 3:
+        # A frozen v3 predecessor must already contain the semantic result of
+        # the v2 -> v3 no-specific-role migration.  Leaving current-adapter
+        # seed rows in their pre-v3 roleless shape makes the real installer
+        # correctly skip v2 -> v3 and produces an invalid synthetic v3
+        # predecessor.  Apply only that historical data transition before
+        # freezing the v3 manifest; v1/v2 fixtures must remain roleless so the
+        # candidate installer still proves their consecutive upgrade path.
+        with database.engine.begin() as connection:
+            upgrade_v2_to_v3(connection)
     database.checkpoint(truncate=True)
     graph = LadybugProjectionUpgradeCoordinator(
         StaticRuntimeDataPath(root),
@@ -477,6 +544,22 @@ def _seed_supported_predecessor(
     )
     database_path = database.database_path
     database.close()
+
+    # Every supported predecessor predates the v4 World-scoped Chat binding.
+    # Build rich canonical data through the current adapter, then reconstruct
+    # the immutable v3 MessageThread shape before freezing v1/v2/v3 manifests.
+    # The candidate installer must therefore prove the real v3 -> v4 backfill
+    # instead of receiving already-upgraded synthetic rows.
+    predecessor_engine = create_engine(
+        URL.create("sqlite+pysqlite", database=str(database_path))
+    )
+    try:
+        with predecessor_engine.begin() as sql_connection:
+            rebuild_message_threads_v3(
+                sql_connection, create_legacy_unique_index=False
+            )
+    finally:
+        predecessor_engine.dispose()
 
     manifest = load_sqlite_manifest(source_version)
     connection = sqlite3.connect(database_path)
@@ -582,7 +665,10 @@ def build_fixture(
             "synthetic_fixture": True,
             "contains_real_credentials": False,
             "source_data_version": source_version,
-            "target_data_version": 3,
+            "target_data_version": SQLITE_SCHEMA_VERSION,
+            "target_table_count": load_sqlite_manifest(
+                SQLITE_SCHEMA_VERSION
+            ).canonical_table_count,
             "ladybug_source_data_version": 1,
             "reserved_role_conflict": conflict,
             "generation": generation,
@@ -648,6 +734,50 @@ def build_fixture(
             "expected_owner_controlled_world_character_id": (
                 "owner-controlled-supported-v2"
             ),
+            "expected_world_chat_threads": {
+                "thread-supported-world-resolved": {
+                    "requester_id": "owner-supported-v2",
+                    "character_id": "character-supported-v2-1",
+                    "world_scope_status": "resolved",
+                    "world_id": "world-supported-v2",
+                    "requester_world_character_id": (
+                        "owner-controlled-supported-v2"
+                    ),
+                    "responding_world_character_id": (
+                        "autonomous-supported-v2-a"
+                    ),
+                    "selected_model": "fixture-chat-model",
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": (
+                                "resolved predecessor message must survive"
+                            ),
+                            "model": None,
+                            "status": "ok",
+                        }
+                    ],
+                },
+                "thread-supported-world-ambiguous": {
+                    "requester_id": "owner-supported-v2",
+                    "character_id": "character-supported-v2-4",
+                    "world_scope_status": "ambiguous",
+                    "world_id": None,
+                    "requester_world_character_id": None,
+                    "responding_world_character_id": None,
+                    "selected_model": "fixture-chat-model",
+                    "messages": [
+                        {
+                            "role": "assistant",
+                            "content": (
+                                "ambiguous predecessor message must survive"
+                            ),
+                            "model": "fixture-chat-model",
+                            "status": "ok",
+                        }
+                    ],
+                },
+            },
         },
     )
 

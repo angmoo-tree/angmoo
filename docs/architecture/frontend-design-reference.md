@@ -150,6 +150,31 @@ static-unsupported. World scope, requester resolution, streaming,
 retrieval/Memory and the LOCAL behavior in the adoption matrix remain later
 P8-L work rather than evidence supplied by this structural move.
 
+P8-L-C was subsequently merged at
+`8a83f48ed565992f8c3e7dd1dbe958f33997e7ab`; all six exact-main post-merge
+Actions succeeded.
+
+### P8-L-D World Chat identity and read-only adoption
+
+P8-L-D activates `/worlds/{worldId}/chat` and its nested thread route as one
+read-only feature-owned surface across Next, static and the existing Tauri
+Phone window. The existing message list, header and stored-transcript anatomy
+remain `ADAPTED`. Explicit World identity, requester-to-responding
+WorldCharacter roles, scope failures, and fail-closed handling of legacy
+`ambiguous` or `quarantined` threads are `LOCAL` behavior.
+
+Only a `resolved` legacy thread may redirect to its canonical World route.
+The UI never guesses a default World or role for unresolved history. This
+stage does not adopt the composer, send/generation path, delayed presence,
+streaming, retry lifecycle, profile letter entry or Memory. It is implemented
+on Issue `#218` branch `feat/p8-l-d-world-chat-identity-role-binding`. Local
+technical verification passed with frontend lint/typecheck/build/static export,
+Next browser `18/18`, static/Tauri browser `61/61`, Rust route/window `7/7`, and
+the full backend suite `1543 passed, 22 skipped`. Implementation commit
+`9351b38d70496ff60d97a1484808cbe7c3be58c5` is pushed and Draft PR `#219` is
+open. Hosted CI is running while user, Ready, merge and post-merge Gates remain
+open.
+
 ## Feature-first ownership contract
 
 The existing feature-first boundary remains authoritative:
@@ -164,7 +189,7 @@ shared/ui
   -> never imports a feature, app route, legacy component, or data client
 ```
 
-The current eleven public feature boundaries and zero exact legacy exceptions are
+The current twelve public feature boundaries and zero exact legacy exceptions are
 enforced by `scripts/ci/check_frontend_architecture_boundaries.py`. The ninth
 boundary is the UI-B-only `features/ui-foundation/public.ts` test fixture. It
 is not a product surface. The tenth is the UI-C product boundary
@@ -173,6 +198,9 @@ capabilities without moving those decisions into neutral `shared/ui`. The
 eleventh is the UI-E `features/characters/public.ts` boundary; it owns the
 Next/static Character dashboard without moving Character policy into neutral
 presentation or legacy compatibility modules.
+The twelfth is the P8-L-C/D `features/chat/public.ts` boundary; it owns both
+the legacy Next-only compatibility surface and the World-scoped read-only
+Chat surface while keeping route composition outside feature internals.
 The Character model also owns the pure recent-activity presenter. It consumes
 no `@/lib/activity` compatibility helper, never parses raw result JSON, and
 gives the shared Next/static dashboard only a user-facing action summary,
