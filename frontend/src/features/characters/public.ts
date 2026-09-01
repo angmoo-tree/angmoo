@@ -30,3 +30,17 @@ export {
 } from "./model/character-dashboard-session";
 export type { CharacterAutonomyMutationEventDetail } from "./model/character-dashboard-session";
 export { AgentsDashboardClient } from "./ui/agents-dashboard-client";
+export {
+  getWorldCharacterProfile,
+  listWorldCharacterProfiles,
+  WorldCharacterProfileApiError,
+} from "./api/world-character-profile-client";
+export type {
+  WorldCharacterProfileListRead,
+  WorldCharacterPublicProfile,
+  WorldCharacterProfileCapability,
+} from "./model/world-character-profile-contract";
+export {
+  WorldCharacterDirectory,
+  WorldCharacterProfile,
+} from "./ui/world-character-profile";

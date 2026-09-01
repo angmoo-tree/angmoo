@@ -123,6 +123,23 @@ class WorldChatRoleRead(BaseModel):
     banner_url: str | None = None
     role_key: str | None = None
     control_mode: Literal["autonomous", "owner_controlled"]
+    profile_capability: Literal["available"] = "available"
+
+
+class WorldChatEntryRead(BaseModel):
+    schema_version: Literal["world-chat-entry-v1"] = "world-chat-entry-v1"
+    world_id: str
+    responding: WorldChatRoleRead
+    requester_cardinality: Literal["zero", "one", "anomaly"]
+    requester: WorldChatRoleRead | None = None
+    create_or_get_capability: Literal["available", "unavailable"]
+    disabled_reason: Literal[
+        "requester_missing",
+        "requester_cardinality_anomaly",
+        "self_target",
+        "blocked",
+        "target_not_chat_capable",
+    ] | None = None
 
 
 class WorldChatThreadRead(BaseModel):

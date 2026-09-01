@@ -7,7 +7,9 @@ import { useCallback, useEffect, useState } from "react";
 import {
   worldChatRoute,
   worldChatThreadRoute,
+  worldCharacterProfileRoute,
 } from "@/shared/navigation/public";
+import { LocalProductLink } from "@/features/device-shell/public";
 import { ProfileAvatar, formatHandle } from "@/shared/ui/public";
 import {
   getWorldChatThread,
@@ -110,37 +112,49 @@ function WorldChatList({ worldId }: { worldId: string }) {
         <ol className={styles.threadList} aria-label="World 대화 목록">
           {read.items.map((thread) => (
             <li key={thread.id}>
-              <Link
-                className={styles.threadLink}
-                href={worldChatThreadRoute(worldId, thread.id)}
-              >
-                <ProfileAvatar
-                  avatarUrl={thread.responding.avatar_url}
-                  name={thread.responding.display_name}
-                  sizeClassName="size-12"
-                  textClassName="text-[18px]"
-                />
-                <div className={styles.threadBody}>
+              <div className={styles.threadRow}>
+                <LocalProductLink
+                  ariaLabel={`${thread.responding.display_name}의 World 프로필 열기`}
+                  className={styles.threadProfileLink}
+                  href={worldCharacterProfileRoute(
+                    worldId,
+                    thread.responding.world_character_id,
+                  )}
+                >
+                  <ProfileAvatar
+                    avatarUrl={thread.responding.avatar_url}
+                    name={thread.responding.display_name}
+                    sizeClassName="size-12"
+                    textClassName="text-[18px]"
+                  />
                   <div className={styles.identityLine}>
                     <strong>{thread.responding.display_name}</strong>
                     {thread.responding.handle ? (
                       <span>{formatHandle(thread.responding.handle)}</span>
                     ) : null}
                   </div>
-                  <p className={styles.requesterLabel}>
-                    {thread.requester.display_name}(으)로 대화
-                  </p>
-                  <p className={styles.preview}>
-                    {thread.latest_message?.content ?? "아직 메시지가 없어요."}
-                  </p>
-                </div>
-                <time
-                  className={styles.time}
-                  dateTime={thread.last_message_at ?? thread.created_at}
+                </LocalProductLink>
+                <Link
+                  aria-label={`${thread.responding.display_name}와의 대화 열기`}
+                  className={styles.threadLink}
+                  href={worldChatThreadRoute(worldId, thread.id)}
                 >
-                  {compactDate(thread.last_message_at ?? thread.created_at)}
-                </time>
-              </Link>
+                  <div className={styles.threadBody}>
+                    <p className={styles.requesterLabel}>
+                      {thread.requester.display_name}(으)로 대화
+                    </p>
+                    <p className={styles.preview}>
+                      {thread.latest_message?.content ?? "아직 메시지가 없어요."}
+                    </p>
+                  </div>
+                  <time
+                    className={styles.time}
+                    dateTime={thread.last_message_at ?? thread.created_at}
+                  >
+                    {compactDate(thread.last_message_at ?? thread.created_at)}
+                  </time>
+                </Link>
+              </div>
             </li>
           ))}
         </ol>
@@ -212,16 +226,25 @@ function WorldChatThread({
         >
           <ArrowLeft aria-hidden="true" size={20} />
         </Link>
-        <ProfileAvatar
-          avatarUrl={thread.responding.avatar_url}
-          name={thread.responding.display_name}
-          sizeClassName="size-11"
-          textClassName="text-[17px]"
-        />
-        <div className={styles.threadTitle}>
-          <h2>{thread.responding.display_name}</h2>
-          <p>{thread.requester.display_name}(으)로 대화 중</p>
-        </div>
+        <LocalProductLink
+          ariaLabel={`${thread.responding.display_name}의 World 프로필 열기`}
+          className={styles.headerProfileLink}
+          href={worldCharacterProfileRoute(
+            worldId,
+            thread.responding.world_character_id,
+          )}
+        >
+          <ProfileAvatar
+            avatarUrl={thread.responding.avatar_url}
+            name={thread.responding.display_name}
+            sizeClassName="size-11"
+            textClassName="text-[17px]"
+          />
+          <div className={styles.threadTitle}>
+            <h2>{thread.responding.display_name}</h2>
+            <p>{thread.requester.display_name}(으)로 대화 중</p>
+          </div>
+        </LocalProductLink>
       </header>
 
       <div className={styles.roleBoundary}>

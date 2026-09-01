@@ -49,6 +49,17 @@ export function worldChatThreadRoute(worldId: string, threadId: string): string 
   return `${worldChatRoute(worldId)}/${encodeURIComponent(threadId)}`;
 }
 
+export function worldCharacterProfileRoute(
+  worldId: string,
+  worldCharacterId: string,
+): string {
+  return `${worldAppRoute(worldId)}/characters/${encodeURIComponent(worldCharacterId)}`;
+}
+
+export function worldCharacterDirectoryRoute(worldId: string): string {
+  return `${worldAppRoute(worldId)}/characters`;
+}
+
 export function studioWorldRoute(worldId: string): string {
   return `/studio/worlds/${encodeURIComponent(worldId)}`;
 }

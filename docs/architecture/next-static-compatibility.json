@@ -31,7 +31,7 @@
   ],
   "current_output_mode": "standalone",
   "purpose": "L3-ER0 Next.js static-export compatibility inventory",
-  "route_count": 41,
+  "route_count": 42,
   "routes": [
     {
       "blockers": [],
@@ -391,6 +391,16 @@
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/worlds/[worldId]/[section]",
       "source_sha256": "df56765945cbb2e23402c4dcc4354040d396833fbcd98ad60b3572a7e9343076",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/worlds/[worldId]/characters/[worldCharacterId]/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/worlds/[worldId]/characters/[worldCharacterId]",
+      "source_sha256": "318640163354e22a80e95a888ae713fbccca079f58128adf7e5c84075d55a6b7",
       "transition_pr": "ER5 PR K"
     },
     {

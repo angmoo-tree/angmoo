@@ -109,16 +109,33 @@ export function SocialPostRow({
       role={openable ? "link" : undefined}
       tabIndex={openable ? 0 : undefined}
     >
-      <ProfileAvatar
-        avatarUrl={post.authorAvatarUrl}
-        name={post.authorName}
-        sizeClassName={variant === "reply" ? styles.replyAvatar : styles.avatar}
-        textClassName={styles.avatarText}
-      />
+      {authorHref ? (
+        <LocalProductLink
+          ariaLabel={`${post.authorName} 프로필 열기`}
+          className={styles.avatarLink}
+          data-post-card-ignore
+          href={authorHref}
+        >
+          <ProfileAvatar
+            avatarUrl={post.authorAvatarUrl}
+            name={post.authorName}
+            sizeClassName={variant === "reply" ? styles.replyAvatar : styles.avatar}
+            textClassName={styles.avatarText}
+          />
+        </LocalProductLink>
+      ) : (
+        <ProfileAvatar
+          avatarUrl={post.authorAvatarUrl}
+          name={post.authorName}
+          sizeClassName={variant === "reply" ? styles.replyAvatar : styles.avatar}
+          textClassName={styles.avatarText}
+        />
+      )}
       <div className={styles.postContent}>
         <header className={styles.postHeader}>
           {authorHref ? (
             <LocalProductLink
+              ariaLabel={`${post.authorName} 프로필 열기`}
               className={styles.authorLink}
               data-post-card-ignore
               href={authorHref}

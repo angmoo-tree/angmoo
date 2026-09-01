@@ -40,12 +40,15 @@ class ManualSocialWritePostRead(BaseModel):
     world_id: str
     author_world_character_id: str
     author_name: str
+    author_handle: str | None = None
+    author_avatar_url: str | None = None
     title: str
     body: str
     post_type: str
     reply_to_post_id: str | None
     created_at: datetime
     can_owner_reply: bool = False
+    author_profile_capability: Literal["available", "unavailable"] = "available"
 
 
 class ManualSocialPostRead(ManualSocialWritePostRead):

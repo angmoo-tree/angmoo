@@ -226,6 +226,23 @@ function renderStaticRoute(location: BrowserLocation) {
   }
   if (
     segments[0] === "worlds" &&
+    segments[2] === "characters" &&
+    segments.length === 4
+  ) {
+    const worldId = decodedWorldId(segments[1]);
+    const worldCharacterId = decodedSegment(segments[3]);
+    if (worldId && worldCharacterId) {
+      return (
+        <WorldAppRouteClient
+          sectionId="characters"
+          worldCharacterId={worldCharacterId}
+          worldId={worldId}
+        />
+      );
+    }
+  }
+  if (
+    segments[0] === "worlds" &&
     segments[2] === "chat" &&
     segments.length === 4
   ) {

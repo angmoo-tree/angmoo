@@ -447,6 +447,21 @@
       "module": "app.domains.world_characters.api.routes",
       "endpoint": "read_owner_character"
     },
+    "GET /api/v1/worlds/{world_id}/world-characters": {
+      "access": "owner-only",
+      "module": "app.domains.world_characters.api.routes",
+      "endpoint": "read_world_character_profiles"
+    },
+    "GET /api/v1/worlds/{world_id}/world-characters/{responding_id}/chat-entry": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_chat",
+      "endpoint": "get_world_chat_entry"
+    },
+    "GET /api/v1/worlds/{world_id}/world-characters/{world_character_id}": {
+      "access": "owner-only",
+      "module": "app.domains.world_characters.api.routes",
+      "endpoint": "read_world_character_profile"
+    },
     "GET /health": {
       "access": "public",
       "module": "app.public_main",

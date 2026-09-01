@@ -609,13 +609,25 @@ Local semantics. A resolved legacy `/messages/{threadId}` may redirect to the
 canonical World thread; `ambiguous` and `quarantined` history stays on the
 legacy surface with a no-guess warning.
 
-This stage deliberately has no profile/letter entry, requester picker,
+This historical stage deliberately had no profile/letter entry, requester picker,
 composer/send, generation, streaming, delayed typing presence, typed retry or
-Memory behavior. It is implemented from exact base
-`8a83f48ed565992f8c3e7dd1dbe958f33997e7ab` under Issue `#218`. Local
-technical verification passed with Next browser `18/18`, static/Tauri browser
-`61/61`, frontend lint/typecheck/build/export, Rust route/window `7/7`, and the
-full backend suite `1543 passed, 22 skipped`. Implementation commit
-`9351b38d70496ff60d97a1484808cbe7c3be58c5` is pushed and Draft PR `#219` is
-open. Hosted CI is running while user, Ready, merge and post-merge Gates remain
-pending.
+Memory behavior. It was merged as PR `#219` at exact merge
+`4359951b34768b16f83dbc0e6c8435b13bfbc821`; user Gate and all seven
+post-merge Actions passed.
+
+## P8-L-E World social author profile and letter entry boundary
+
+P8-L-E activates `/worlds/{worldId}/characters/{worldCharacterId}` across Next,
+static and the existing Tauri Phone window. `features/characters/public.ts`
+owns the profile contract, transport and UI. It renders only canonical
+same-World identity fields supplied by the backend and does not invent Hosted
+follower, post, reply or like statistics.
+
+World social rows keep three separate interaction targets: the card opens post
+detail, while the author avatar and name open the exact WorldCharacter profile.
+An absent or unavailable `author_profile_capability` leaves author identity
+inert. The letter CTA calls `features/chat/public.ts`, resolves the local owner
+requester as zero/one/anomaly, and exposes P8-L-D's idempotent active-thread
+create-or-get only for the valid one-requester case. Self, blocked, inactive and
+cross-World targets fail closed. This E slice still has no message send,
+generation, streaming, retrieval or Memory behavior.

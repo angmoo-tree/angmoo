@@ -15,6 +15,8 @@ from app.domains.world_characters.api.schemas import (
     StudioCharacterCandidateRead,
     StudioWorldCharacterListRead,
     StudioWorldCharacterRead,
+    WorldCharacterProfileListRead,
+    WorldCharacterProfileRead,
     identity_read,
 )
 from app.domains.world_characters.application.owner_controlled_identity import (
@@ -27,6 +29,10 @@ from app.domains.world_characters.application.studio_surface import (
 )
 from app.domains.world_characters.application.studio_lifecycle import (
     list_studio_character_candidates,
+)
+from app.domains.world_characters.application.public_profile import (
+    get_world_character_profile,
+    list_world_character_profiles,
 )
 from app.domains.world_characters.domain.owner_controlled_identity import (
     LocalOwnerRequiredError,
@@ -44,6 +50,12 @@ from app.domains.world_characters.infrastructure.sqlalchemy_studio_surface impor
 )
 from app.domains.world_characters.infrastructure.sqlalchemy_studio_lifecycle import (
     SqlAlchemyStudioWorldCharacterLifecycle,
+)
+from app.domains.world_characters.domain.public_profile import (
+    WorldCharacterProfileNotFoundError,
+)
+from app.domains.world_characters.infrastructure.sqlalchemy_public_profile import (
+    SqlAlchemyWorldCharacterPublicProfileReader,
 )
 from app.domains.worlds import public as world_service
 
@@ -67,6 +79,78 @@ def _raise_studio_surface_error(exc: world_service.WorldServiceError) -> None:
     else:
         code = status.HTTP_400_BAD_REQUEST
     raise HTTPException(status_code=code, detail=exc.reason_code) from exc
+
+
+def _raise_public_profile_error(exc: Exception) -> None:
+    if isinstance(exc, (WorldCharacterProfileNotFoundError, world_service.WorldNotFoundError)):
+        code = status.HTTP_404_NOT_FOUND
+    elif isinstance(
+        exc,
+        (
+            world_service.WorldMembershipRequiredError,
+            world_service.WorldCreatorRoleRequiredError,
+        ),
+    ):
+        code = status.HTTP_403_FORBIDDEN
+    elif isinstance(exc, world_service.WorldArchivedError):
+        code = status.HTTP_409_CONFLICT
+    else:
+        code = status.HTTP_400_BAD_REQUEST
+    raise HTTPException(
+        status_code=code,
+        detail=getattr(exc, "reason_code", "world_character_profile_error"),
+    ) from exc
+
+
+@router.get(
+    "/{world_id}/world-characters",
+    response_model=WorldCharacterProfileListRead,
+)
+def read_world_character_profiles(
+    world_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+) -> WorldCharacterProfileListRead:
+    browser_session.require_local_frontend_request(request, mutation=False)
+    try:
+        items = list_world_character_profiles(
+            SqlAlchemyWorldCharacterPublicProfileReader(db),
+            world_id=world_id,
+            current_user_id=current_user.id,
+        )
+    except (WorldCharacterProfileNotFoundError, world_service.WorldServiceError) as exc:
+        _raise_public_profile_error(exc)
+        raise AssertionError("unreachable")
+    return WorldCharacterProfileListRead(
+        world_id=world_id,
+        items=[WorldCharacterProfileRead.from_snapshot(item) for item in items],
+    )
+
+
+@router.get(
+    "/{world_id}/world-characters/{world_character_id}",
+    response_model=WorldCharacterProfileRead,
+)
+def read_world_character_profile(
+    world_id: str,
+    world_character_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+) -> WorldCharacterProfileRead:
+    browser_session.require_local_frontend_request(request, mutation=False)
+    try:
+        profile = get_world_character_profile(
+            SqlAlchemyWorldCharacterPublicProfileReader(db),
+            world_id=world_id,
+            world_character_id=world_character_id,
+            current_user_id=current_user.id,
+        )
+    except (WorldCharacterProfileNotFoundError, world_service.WorldServiceError) as exc:
+        _raise_public_profile_error(exc)
+        raise AssertionError("unreachable")
+    return WorldCharacterProfileRead.from_snapshot(profile)
 
 
 @router.get(

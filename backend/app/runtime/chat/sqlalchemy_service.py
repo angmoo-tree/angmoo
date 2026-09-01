@@ -115,6 +115,76 @@ def get_world_thread(
     return _world_thread_read(db, thread, include_messages=True)
 
 
+def get_world_chat_entry(
+    db: Session,
+    user: models.User,
+    world_id: str,
+    responding_id: str,
+) -> schemas.WorldChatEntryRead:
+    """Resolve the read-only capability behind a World profile letter CTA."""
+
+    _require_world_chat_owner_scope(db, user.id, world_id)
+    responding, _character = _active_responding_world_character(
+        db, world_id, responding_id
+    )
+    responding_read = _world_chat_role(
+        db,
+        responding.id,
+        world_id=world_id,
+    )
+    requester_candidates = _owner_controlled_world_characters(
+        db, user.id, world_id
+    )
+    if not requester_candidates:
+        return schemas.WorldChatEntryRead(
+            world_id=world_id,
+            responding=responding_read,
+            requester_cardinality="zero",
+            create_or_get_capability="unavailable",
+            disabled_reason="requester_missing",
+        )
+    if len(requester_candidates) != 1:
+        return schemas.WorldChatEntryRead(
+            world_id=world_id,
+            responding=responding_read,
+            requester_cardinality="anomaly",
+            create_or_get_capability="unavailable",
+            disabled_reason="requester_cardinality_anomaly",
+        )
+    requester = requester_candidates[0]
+    requester_read = _world_chat_role(
+        db,
+        requester.id,
+        world_id=world_id,
+        expected_owner_id=user.id,
+    )
+    if requester.id == responding.id:
+        return schemas.WorldChatEntryRead(
+            world_id=world_id,
+            responding=responding_read,
+            requester_cardinality="one",
+            requester=requester_read,
+            create_or_get_capability="unavailable",
+            disabled_reason="self_target",
+        )
+    if _world_characters_are_blocked(db, world_id, requester.id, responding.id):
+        return schemas.WorldChatEntryRead(
+            world_id=world_id,
+            responding=responding_read,
+            requester_cardinality="one",
+            requester=requester_read,
+            create_or_get_capability="unavailable",
+            disabled_reason="blocked",
+        )
+    return schemas.WorldChatEntryRead(
+        world_id=world_id,
+        responding=responding_read,
+        requester_cardinality="one",
+        requester=requester_read,
+        create_or_get_capability="available",
+    )
+
+
 def create_or_get_world_thread(
     db: Session,
     user: models.User,
@@ -1079,6 +1149,7 @@ def _world_chat_role(
         banner_url=character.banner_url,
         role_key=world_character.role_key,
         control_mode=world_character.control_mode,
+        profile_capability="available",
     )
 
 

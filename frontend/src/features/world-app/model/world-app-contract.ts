@@ -38,8 +38,8 @@ export const WORLD_APP_SECTIONS: readonly WorldAppSection[] = [
     segment: "chat",
   },
   {
-    availability: "unavailable",
-    description: "World 범위 Character 목록 API가 준비된 뒤 연결됩니다.",
+    availability: "available",
+    description: "현재 World에 active membership으로 참여 중인 Character를 확인합니다.",
     id: "characters",
     label: "Characters",
     segment: "characters",

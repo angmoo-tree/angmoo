@@ -110,28 +110,28 @@
         "DIRECT"
       ],
       "path": "frontend/src/features/social/ui/social-post-row.tsx",
-      "sha256": "bc57dfc9553939fecb6a1f5b24cb45271088e835d748c6908e35ab3118ead739"
+      "sha256": "0e0de56ac3b05c2c08eba83e92f98faad560653a16226ad6a5d1d73bd277fe25"
     },
     {
       "classifications": [
         "DIRECT"
       ],
       "path": "frontend/src/features/social/ui/social-presentation.module.css",
-      "sha256": "1de62db29b989a9d66f80332dfa28a03d163446f3dbd404ce9db4da5b0cc78de"
+      "sha256": "d24b5e775f25a7bb7cb6ec019995af77bc9aa7328fcd7ccdb13a30d229195897"
     },
     {
       "classifications": [
         "ADAPTED"
       ],
       "path": "frontend/src/features/social/ui/world-social-feed.tsx",
-      "sha256": "fb8c6440138d116d924fede989ef9da6ba8e6a4cd30c56804b705074359bdd10"
+      "sha256": "cdce9e395a29c64802f3bafb172985db67c1b49219438f1524852b0687e25e8c"
     },
     {
       "classifications": [
         "LOCAL"
       ],
       "path": "frontend/src/features/world-app/ui/world-app.tsx",
-      "sha256": "03657ee629b1e4d74690b2c75acb4e5a0027d6f5ece370982379bd9751c05632"
+      "sha256": "aeabe7ec9d3c3659b03dfc1d4b1547ee228bb14134462a3cda54765c2158f72e"
     },
     {
       "classifications": [
@@ -173,7 +173,7 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "82bf7fc6c538703bf25dd3dba422481c3a739cb5d48b91d5329ce97606f81d62"
+        "sha256": "c10d90f2d6441d373139f7bea149263f7a41328cd51aefe7f1a8b5a1cd7d5f6b"
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",
@@ -189,7 +189,7 @@
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "467ba75cdf7ccca15458ee21e3cbefdcef478af12759a79d8a31c7246e450553"
+        "sha256": "2da33d075d72c22a452fc72762d19b0e15b994235f12f770bf6464458539df01"
       },
       {
         "path": "browser-tests/ui-e-local-settings/local-settings.spec.ts",
@@ -207,6 +207,7 @@
       "/worlds/world-static-probe/chat",
       "/worlds/world-static-probe/chat/thread-static-probe",
       "/worlds/world-static-probe/characters",
+      "/worlds/world-static-probe/characters/wc-static-profile-probe",
       "/worlds/world-static-probe/relationships",
       "/worlds/world-static-probe/posts/post-static-probe",
       "/characters/character-static-probe/worlds/world-static-probe/autonomy-setup",
@@ -1107,8 +1108,8 @@
   "route_inventory": {
     "known_gap_count": 0,
     "next_static_inventory": "docs/architecture/next-static-compatibility.json",
-    "next_static_inventory_route_count": 41,
-    "next_static_inventory_sha256": "48e13e3d178af208fee7ebc648ba011cdafd914c5253e20f1a2b73ce9ac8ee20",
+    "next_static_inventory_route_count": 42,
+    "next_static_inventory_sha256": "67b47ed97c1299ddfea1917868a8bd633182fce776f884619e04edc9efe3aec5",
     "reviewed_surface_count": 17
   },
   "schema_version": 1,
@@ -1144,7 +1145,7 @@
       {
         "path": "frontend/src/composition/static-product-router.tsx",
         "present": true,
-        "sha256": "5d98d47c2f56ecd893e929db5563da82593699d60dd0299d597ca665d5a04e76"
+        "sha256": "fd51e8ea254405dcf5ba92ce2571c4cdf5345041a2cecf86fdf534d9d3b5bca6"
       },
       {
         "path": "frontend/src/features/ui-foundation/public.ts",

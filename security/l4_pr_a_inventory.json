@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 1824,
-      "internal_edge_count": 1284,
+      "external_import_count": 1833,
+      "internal_edge_count": 1298,
       "legacy_import_exception_count": 0,
-      "module_count": 554,
+      "module_count": 558,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -431,7 +431,8 @@
               "app.domains.social.api.schemas",
               "app.domains.social.domain",
               "app.domains.world_characters.public",
-              "app.models"
+              "app.models",
+              "app.runtime.relationships.sqlalchemy_social_event"
             ],
             "module": "app.runtime.social.sqlalchemy_read_repository",
             "path": "backend/app/runtime/social/sqlalchemy_read_repository.py"
@@ -752,7 +753,7 @@
             "react"
           ],
           "path": "frontend/src/features/social/ui/world-social-feed.tsx",
-          "sha256": "fb8c6440138d116d924fede989ef9da6ba8e6a4cd30c56804b705074359bdd10"
+          "sha256": "cdce9e395a29c64802f3bafb172985db67c1b49219438f1524852b0687e25e8c"
         },
         {
           "exports": [
@@ -897,7 +898,7 @@
     "oracle_artifacts": [
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "467ba75cdf7ccca15458ee21e3cbefdcef478af12759a79d8a31c7246e450553"
+        "sha256": "2da33d075d72c22a452fc72762d19b0e15b994235f12f770bf6464458539df01"
       },
       {
         "path": "docs/architecture/l3-er-postgres-neo4j-parity-oracle.json",

@@ -122,7 +122,9 @@ function assertWorldScopedFeed(
         !Number.isInteger(item.reply_count) ||
         item.reply_count < 0 ||
         !Number.isInteger(item.like_count) ||
-        item.like_count < 0,
+        item.like_count < 0 ||
+        typeof item.author_world_character_id !== "string" ||
+        !["available", "unavailable"].includes(item.author_profile_capability),
     )
   ) {
     throw new SocialWriteApiError(502, "manual_social_count_schema_mismatch");

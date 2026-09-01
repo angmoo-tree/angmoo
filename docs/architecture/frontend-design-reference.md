@@ -165,15 +165,27 @@ WorldCharacter roles, scope failures, and fail-closed handling of legacy
 
 Only a `resolved` legacy thread may redirect to its canonical World route.
 The UI never guesses a default World or role for unresolved history. This
-stage does not adopt the composer, send/generation path, delayed presence,
-streaming, retry lifecycle, profile letter entry or Memory. It is implemented
-on Issue `#218` branch `feat/p8-l-d-world-chat-identity-role-binding`. Local
-technical verification passed with frontend lint/typecheck/build/static export,
-Next browser `18/18`, static/Tauri browser `61/61`, Rust route/window `7/7`, and
-the full backend suite `1543 passed, 22 skipped`. Implementation commit
-`9351b38d70496ff60d97a1484808cbe7c3be58c5` is pushed and Draft PR `#219` is
-open. Hosted CI is running while user, Ready, merge and post-merge Gates remain
-open.
+historical stage did not adopt the composer, send/generation path, delayed
+presence, streaming, retry lifecycle, profile letter entry or Memory. PR
+`#219` was merged at exact merge
+`4359951b34768b16f83dbc0e6c8435b13bfbc821`; user Gate and exact-main
+post-merge Actions `7/7` passed.
+
+### P8-L-E WorldCharacter profile and letter entry adoption
+
+P8-L-E adapts the Hosted public-profile anatomy to the Local World scope while
+keeping canonical identity `LOCAL`. Feed, post detail and reply author avatar
+and name link only when the response includes the exact same-World
+`world_character_id` and an available profile capability. The post card keeps
+its separate post-detail action.
+
+The profile and World directory are owned by `features/characters/public.ts`.
+The letter CTA and typed chat-entry/create-or-get transports are owned by
+`features/chat/public.ts`. Next, static and Tauri share the canonical
+`/worlds/{worldId}/characters/{worldCharacterId}` route. Zero or anomalous
+requester cardinality produces guidance rather than a thread, and self,
+blocked, inactive and cross-World targets fail closed. This stage does not add
+composer/send, generation, streaming, retrieval or Memory behavior.
 
 ## Feature-first ownership contract
 
@@ -198,9 +210,11 @@ capabilities without moving those decisions into neutral `shared/ui`. The
 eleventh is the UI-E `features/characters/public.ts` boundary; it owns the
 Next/static Character dashboard without moving Character policy into neutral
 presentation or legacy compatibility modules.
-The twelfth is the P8-L-C/D `features/chat/public.ts` boundary; it owns both
+The twelfth is the P8-L-C/D/E `features/chat/public.ts` boundary; it owns both
 the legacy Next-only compatibility surface and the World-scoped read-only
-Chat surface while keeping route composition outside feature internals.
+Chat surface plus typed letter entry while keeping route composition outside
+feature internals. P8-L-E also extends the existing Character boundary with
+the WorldCharacter public profile and directory surface.
 The Character model also owns the pure recent-activity presenter. It consumes
 no `@/lib/activity` compatibility helper, never parses raw result JSON, and
 gives the shared Next/static dashboard only a user-facing action summary,

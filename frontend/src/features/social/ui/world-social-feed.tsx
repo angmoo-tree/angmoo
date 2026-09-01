@@ -15,6 +15,7 @@ import { useMobilePullToRefresh } from "@/shared/interaction/public";
 import {
   worldAppRoute,
   worldPostDetailRoute,
+  worldCharacterProfileRoute,
 } from "@/shared/navigation/public";
 import {
   Button,
@@ -161,6 +162,8 @@ function feedFailure(reason: unknown): FeedFailure {
 function presentManualPost(post: ManualSocialPostRead): SocialPostPresentation {
   return {
     id: post.id,
+    authorAvatarUrl: post.author_avatar_url,
+    authorHandle: post.author_handle,
     authorName: post.author_name,
     createdAt: post.created_at,
     timeLabel: formatDate(post.created_at),
@@ -479,9 +482,14 @@ export function WorldSocialFeed({ ownerActor, postId, worldId }: Props) {
         <div className={styles.socialStream} data-social-stream="world">
           {roots.map((post) => {
             const detailHref = worldPostDetailRoute(worldId, post.id);
+            const authorHref =
+              post.author_profile_capability === "available"
+                ? worldCharacterProfileRoute(worldId, post.author_world_character_id)
+                : undefined;
             return (
               <SocialPostRow
                 actions={aggregateManualPostActions(post, detailHref)}
+                authorHref={authorHref}
                 href={detailHref}
                 key={post.id}
                 post={presentManualPost(post)}
@@ -498,6 +506,14 @@ export function WorldSocialFeed({ ownerActor, postId, worldId }: Props) {
               detailRoot,
               worldPostDetailRoute(worldId, detailRoot.id),
             )}
+            authorHref={
+              detailRoot.author_profile_capability === "available"
+                ? worldCharacterProfileRoute(
+                    worldId,
+                    detailRoot.author_world_character_id,
+                  )
+                : undefined
+            }
             post={presentManualPost(detailRoot)}
             variant="detail"
           />
@@ -508,6 +524,14 @@ export function WorldSocialFeed({ ownerActor, postId, worldId }: Props) {
                 {detailReplies.map((reply) => (
                   <SocialPostRow
                     actions={aggregateManualPostActions(reply)}
+                    authorHref={
+                      reply.author_profile_capability === "available"
+                        ? worldCharacterProfileRoute(
+                            worldId,
+                            reply.author_world_character_id,
+                          )
+                        : undefined
+                    }
                     key={reply.id}
                     post={presentManualPost(reply)}
                     variant="reply"

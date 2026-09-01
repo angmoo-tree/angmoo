@@ -13,10 +13,15 @@ import { useEffect, useState, type ReactNode } from "react";
 
 import type { WorldSurfaceItem } from "@/features/device-home/public";
 import { WorldChat } from "@/features/chat/public";
+import {
+  WorldCharacterDirectory,
+  WorldCharacterProfile,
+} from "@/features/characters/public";
 import { WorldSocialFeed } from "@/features/social/public";
 import {
   PRODUCT_ROUTES,
   relationshipGraphRoute,
+  worldCharacterProfileRoute,
 } from "@/shared/navigation/public";
 import {
   BottomNavigation,
@@ -49,6 +54,7 @@ type WorldAppProps = {
   chatThreadId?: string;
   postId?: string;
   sectionId: WorldAppSectionId;
+  worldCharacterId?: string;
   worldId: string;
 };
 
@@ -71,6 +77,7 @@ export function WorldApp({
   chatThreadId,
   postId,
   sectionId,
+  worldCharacterId,
   worldId,
 }: WorldAppProps) {
   const [world, setWorld] = useState<WorldSurfaceItem | null>(null);
@@ -115,7 +122,9 @@ export function WorldApp({
   }
   if (authStatus === "unauthenticated") {
     const returnTo =
-      sectionId === "chat" && chatThreadId
+      sectionId === "characters" && worldCharacterId
+        ? worldCharacterProfileRoute(worldId, worldCharacterId)
+        : sectionId === "chat" && chatThreadId
         ? `${worldAppSectionRoute(worldId, activeSection)}/${encodeURIComponent(chatThreadId)}`
         : worldAppSectionRoute(worldId, activeSection);
     return (
@@ -162,6 +171,7 @@ export function WorldApp({
         ownerActor={ownerActor}
         postId={postId}
         world={world}
+        worldCharacterId={worldCharacterId}
         worldId={worldId}
       />
     </WorldAppShell>
@@ -205,6 +215,7 @@ function WorldSection({
   ownerActor,
   postId,
   world,
+  worldCharacterId,
   worldId,
 }: {
   activeSection: WorldAppSection;
@@ -212,6 +223,7 @@ function WorldSection({
   ownerActor: OwnerControlledActorRead | null;
   postId?: string;
   world: WorldSurfaceItem;
+  worldCharacterId?: string;
   worldId: string;
 }) {
   if (activeSection.id === "home") {
@@ -254,6 +266,17 @@ function WorldSection({
 
   if (activeSection.id === "chat") {
     return <WorldChat threadId={chatThreadId} worldId={worldId} />;
+  }
+
+  if (activeSection.id === "characters") {
+    return worldCharacterId ? (
+      <WorldCharacterProfile
+        worldCharacterId={worldCharacterId}
+        worldId={worldId}
+      />
+    ) : (
+      <WorldCharacterDirectory worldId={worldId} />
+    );
   }
 
   if (activeSection.id === "relationships") {

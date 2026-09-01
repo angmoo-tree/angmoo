@@ -26,6 +26,7 @@ class HostedRouterConfigurationError(RuntimeError):
 PUBLIC_ROUTERS = (
     device_home_router,
     world_chat.router,
+    world_chat.entry_router,
     world_character_router,
     world_package_router,
     auth.public_router,

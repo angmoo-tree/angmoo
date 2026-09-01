@@ -60,6 +60,7 @@
     ],
     "frontend/src/features/characters/public.ts": [
       "AgentsDashboardClient",
+      "WorldCharacterProfile",
       "presentCharacterAutonomy",
       "presentCharacterRecentActivity"
     ],
@@ -77,7 +78,8 @@
     "frontend/src/features/chat/public.ts": [
       "MessageThreadClient",
       "MessagesClient",
-      "createMessageThread"
+      "createMessageThread",
+      "getWorldChatEntry"
     ],
     "frontend/src/features/chat/ui/message-thread-client.tsx": [
       "model_busy",
@@ -144,6 +146,7 @@
       "SocialPostRow"
     ],
     "frontend/src/features/social/ui/social-post-row.tsx": [
+      "authorHref",
       "shouldOpenPostFromCardClick",
       "shouldOpenPostFromCardKeyDown",
       "useRuntimeRouter"
@@ -159,7 +162,8 @@
       "src=\"/icon.svg\""
     ],
     "frontend/src/features/world-app/model/world-app-contract.ts": [
-      "availability: \"unavailable\"",
+      "availability: \"available\"",
+      "id: \"characters\"",
       "id: \"relationships\"",
       "segment: \"feed\"",
       "worldAppSectionRoute"
@@ -195,18 +199,27 @@
     "frontend/src/app/messages/[threadId]/page.tsx",
     "frontend/src/app/messages/page.tsx",
     "frontend/src/app/ui-foundation/page.tsx",
+    "frontend/src/app/worlds/[worldId]/characters/[worldCharacterId]/page.tsx",
     "frontend/src/features/characters/api/character-dashboard-client.ts",
+    "frontend/src/features/characters/api/world-character-profile-client.ts",
     "frontend/src/features/characters/model/character-dashboard-contract.ts",
     "frontend/src/features/characters/model/character-dashboard-session.ts",
     "frontend/src/features/characters/model/character-recent-activity-presentation.ts",
+    "frontend/src/features/characters/model/world-character-profile-contract.ts",
     "frontend/src/features/characters/public.ts",
     "frontend/src/features/characters/ui/agents-dashboard-client.tsx",
     "frontend/src/features/characters/ui/characters-dashboard.module.css",
+    "frontend/src/features/characters/ui/world-character-profile.module.css",
+    "frontend/src/features/characters/ui/world-character-profile.tsx",
     "frontend/src/features/chat/api/chat-client.ts",
+    "frontend/src/features/chat/api/world-chat-client.ts",
     "frontend/src/features/chat/model/chat-contract.ts",
+    "frontend/src/features/chat/model/world-chat-contract.ts",
     "frontend/src/features/chat/public.ts",
     "frontend/src/features/chat/ui/message-thread-client.tsx",
     "frontend/src/features/chat/ui/messages-client.tsx",
+    "frontend/src/features/chat/ui/world-chat.module.css",
+    "frontend/src/features/chat/ui/world-chat.tsx",
     "frontend/src/features/creator-studio/public.ts",
     "frontend/src/features/creator-studio/ui/creator-studio-dashboard.tsx",
     "frontend/src/features/creator-studio/ui/creator-studio-frame.tsx",

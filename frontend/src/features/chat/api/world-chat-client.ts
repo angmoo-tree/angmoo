@@ -4,6 +4,7 @@ import { runtimeFetch } from "@/shared/runtime/public";
 import type {
   WorldChatThreadCreate,
   WorldChatThreadCreateRead,
+  WorldChatEntryRead,
   WorldChatThreadListRead,
   WorldChatThreadRead,
 } from "../model/world-chat-contract";
@@ -38,6 +39,31 @@ export async function listWorldChatThreads(
     payload.items.some((thread) => !worldChatThreadMatchesScope(thread, worldId))
   ) {
     throw new WorldChatApiError(502, "world_chat_scope_mismatch");
+  }
+  return payload;
+}
+
+export async function getWorldChatEntry(
+  worldId: string,
+  respondingWorldCharacterId: string,
+  options: { signal?: AbortSignal } = {},
+): Promise<WorldChatEntryRead> {
+  const payload = await requestWorldChatApi<WorldChatEntryRead>(
+    `/worlds/${encodeURIComponent(worldId)}/world-characters/${encodeURIComponent(respondingWorldCharacterId)}/chat-entry`,
+    { signal: options.signal },
+  );
+  if (
+    payload?.schema_version !== "world-chat-entry-v1" ||
+    payload.world_id !== worldId ||
+    payload.responding?.world_character_id !== respondingWorldCharacterId ||
+    payload.responding.profile_capability !== "available" ||
+    (payload.requester && payload.requester.control_mode !== "owner_controlled") ||
+    (payload.requester_cardinality === "one" && !payload.requester) ||
+    (payload.requester_cardinality !== "one" && payload.requester !== null) ||
+    (payload.create_or_get_capability === "available" &&
+      (payload.requester_cardinality !== "one" || payload.disabled_reason !== null))
+  ) {
+    throw new WorldChatApiError(502, "world_chat_entry_scope_mismatch");
   }
   return payload;
 }
@@ -140,6 +166,8 @@ function worldChatThreadMatchesScope(
     !thread.requester ||
     !thread.responding ||
     thread.requester.control_mode !== "owner_controlled" ||
+    thread.requester.profile_capability !== "available" ||
+    thread.responding.profile_capability !== "available" ||
     typeof thread.requester.world_character_id !== "string" ||
     typeof thread.responding.world_character_id !== "string" ||
     thread.requester.world_character_id === thread.responding.world_character_id ||

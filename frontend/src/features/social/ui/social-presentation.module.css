@@ -51,6 +51,19 @@
   line-height: 1;
 }
 
+.avatarLink {
+  display: inline-flex;
+  align-self: start;
+  border-radius: 999px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.avatarLink:focus-visible {
+  outline: 2px solid var(--focus-ring-color);
+  outline-offset: 2px;
+}
+
 .postContent {
   min-width: 0;
 }

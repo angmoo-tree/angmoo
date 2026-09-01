@@ -10,6 +10,9 @@ from app.domains.world_characters.domain.owner_controlled_identity import (
     OwnerControlledIdentitySnapshot,
     OwnerControlledProfile,
 )
+from app.domains.world_characters.domain.public_profile import (
+    WorldCharacterPublicProfile,
+)
 from app.domains.world_characters.domain.studio_surface import StudioWorldCharacter
 from app.domains.world_characters.domain.studio_lifecycle import (
     StudioCharacterCandidate,
@@ -162,6 +165,39 @@ class StudioCharacterCandidateListRead(BaseModel):
     items: list[StudioCharacterCandidateRead]
 
 
+class WorldCharacterProfileRead(BaseModel):
+    schema_version: Literal["world-character-profile-v1"] = (
+        "world-character-profile-v1"
+    )
+    world_id: str
+    world_character_id: str
+    character_id: str
+    display_name: str
+    handle: str | None
+    avatar_url: str | None
+    banner_url: str | None
+    intro: str
+    role_key: str | None
+    control_mode: Literal["autonomous", "owner_controlled"]
+    status: Literal["active"]
+    profile_capability: Literal["available"]
+
+    @classmethod
+    def from_snapshot(
+        cls,
+        snapshot: WorldCharacterPublicProfile,
+    ) -> "WorldCharacterProfileRead":
+        return cls(**asdict(snapshot))
+
+
+class WorldCharacterProfileListRead(BaseModel):
+    schema_version: Literal["world-character-profile-list-v1"] = (
+        "world-character-profile-list-v1"
+    )
+    world_id: str
+    items: list[WorldCharacterProfileRead]
+
+
 def identity_read(
     snapshot: OwnerControlledIdentitySnapshot,
 ) -> OwnerControlledIdentityRead:
@@ -192,5 +228,7 @@ __all__ = [
     "StudioCharacterCandidateRead",
     "StudioWorldCharacterListRead",
     "StudioWorldCharacterRead",
+    "WorldCharacterProfileListRead",
+    "WorldCharacterProfileRead",
     "identity_read",
 ]
