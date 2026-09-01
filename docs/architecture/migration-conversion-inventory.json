@@ -949,7 +949,7 @@
       "path": "backend/app/alembic/versions/20260831_0085_canonical_memory_schema.py",
       "removal_condition": "preserve immutable historical revision identity; do not execute as the current SQLite runtime chain",
       "revision": "20260831_0085",
-      "source_sha256": "f8f7a8d4198af41e2ab326a62063be5e6614b2fbda3c1e77d4c630031b1415f2",
+      "source_sha256": "251cb4256c77f7047eb6b6eb2eab1eb35eac1059657ebd8f49d60da2db704b16",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
     }

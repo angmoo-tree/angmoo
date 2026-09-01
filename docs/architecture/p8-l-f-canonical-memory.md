@@ -1,6 +1,6 @@
 # P8-L-F canonical Memory schema and scope control
 
-Status: **IMPLEMENTED · LOCAL TECH PASS · IMPLEMENTATION COMMIT `cb348f6ca8adde22cf467e3a8b4a121b28178d71` · PUSH PASS · ISSUE #222 OPEN · DRAFT PR #223 OPEN · HOSTED CI/USER GATE/MERGE PENDING**
+Status: **IMPLEMENTED · LOCAL TECH PASS · IMPLEMENTATION COMMIT `cb348f6ca8adde22cf467e3a8b4a121b28178d71` · PUSH PASS · ISSUE #222 OPEN · DRAFT PR #223 OPEN · HOSTED CI EXACT-HEAD PASS PENDING · USER GATE/MERGE PENDING**
 
 P8-L-F establishes the canonical persistence boundary required by later memory write, recall, and owner-control stages. It does not call a provider, select a retrieval route, build an FTS index, mutate LadybugDB, generate a Chat answer, or expose a Memory UI.
 
@@ -42,4 +42,6 @@ The machine-readable successor inventory is `p8-l-f-canonical-memory-inventory.j
 - P8-L-F/D/E generated inventories, ER0 inventories, architecture boundaries, desktop installer contract, and Windows supported-upgrade matrix: current and passing;
 - C-drive free space during the final full regression: approximately `16.84 GiB`, above the `3 GiB` stop threshold.
 
-This evidence is local worktree evidence only. It does not imply a pushed exact head, Draft PR, Hosted CI, user installation Gate, merge, post-merge validation, or P8-L completion.
+The first Draft PR #223 Core CI backend job (`33490748179` / `99801483547`) preserved an append-only failure after `1,566 passed, 22 skipped`: the ER0 generator correctly rejected the stale `20260831_0085` source hash in `migration-conversion-inventory.json`. The migration received a final maintenance-lease constraint after the previous inventory write, so the checked-in hash still described the pre-constraint source. The correction changes only that generated entry to the normalized current-source digest `251cb4256c77f7047eb6b6eb2eab1eb35eac1059657ebd8f49d60da2db704b16`; the ER0 verifier and focused P8-L-F regression must pass again before a new exact head is pushed.
+
+The branch push and Draft PR exist, but local evidence and the correction do not imply an exact-head Hosted CI pass, user installation Gate, merge, post-merge validation, or P8-L completion.
