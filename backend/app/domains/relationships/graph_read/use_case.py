@@ -81,6 +81,7 @@ class RelationshipGraphReadGateway(Protocol):
         *,
         world_id: str,
         hits: list[GraphRelationshipHit],
+        subject_world_character_id: str | None = None,
     ) -> dict[str, RelationshipRevalidationFacts]: ...
 
     def evidence_candidates(
@@ -88,6 +89,7 @@ class RelationshipGraphReadGateway(Protocol):
         *,
         world_id: str,
         event_ids: list[str],
+        subject_world_character_id: str | None = None,
     ) -> list[GraphEvidenceCandidate]: ...
 
     def node_candidates(
@@ -95,6 +97,7 @@ class RelationshipGraphReadGateway(Protocol):
         *,
         world_id: str,
         world_character_ids: set[str],
+        subject_world_character_id: str | None = None,
     ) -> list[GraphNodeCandidate]: ...
 
 
