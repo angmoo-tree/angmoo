@@ -1,0 +1,170 @@
+{
+  "canonical_revalidation": [
+    "same_world",
+    "subject_owned_by_local_owner",
+    "subject_and_candidate_membership_active",
+    "not_deleted",
+    "not_blocked",
+    "relationship_direction_matches",
+    "relationship_state_and_version_current",
+    "source_event_succeeded_and_eligible",
+    "source_event_not_invalidated",
+    "source_visible_and_not_deleted_or_hidden",
+    "source_observed_by_subject"
+  ],
+  "contract_version": "graph-recall.v1",
+  "degraded_policy": {
+    "direct_relationship": "bounded_canonical_exact_pair",
+    "rank_related_characters": "bounded_canonical_subject_direct_ranking",
+    "relationship_evidence": "bounded_canonical_pair_and_last_event",
+    "relationship_neighborhood": "no_evidence_no_relational_full_scan",
+    "shared_neighbors": "bounded_canonical_direct_set_intersection",
+    "shortest_path": "no_evidence_no_relational_full_scan"
+  },
+  "domain_boundary": {
+    "backend_ownership": "domains/relationships",
+    "canonical_schema_changed": false,
+    "ladybug_schema_changed": false,
+    "planner_call_count": 0,
+    "provider_dependency_in_domain": null,
+    "public_facade": "app.domains.relationships.public",
+    "query_port": "RelationshipGraphQueryPort",
+    "raw_sql_or_cypher_from_llm": 0,
+    "response_generator_call_count": 0,
+    "runtime_composition": "app.runtime.graph_projection"
+  },
+  "executable_contract_gates": [
+    "closed_registry_and_hard_caps",
+    "direction_and_owner_world_scope",
+    "stale_projection_replaced_by_canonical",
+    "inactive_blocked_deleted_candidate_exclusion",
+    "subject_observation_and_source_visibility",
+    "shared_path_rank_neighborhood_revalidation",
+    "graph_disabled_or_outage_bounded_fallback",
+    "path_and_neighborhood_no_full_scan_degradation",
+    "legacy_p7_graph_api_regression"
+  ],
+  "hard_caps": {
+    "evidence_limit": 5,
+    "neighborhood_depth": 2,
+    "neighborhood_edges": 40,
+    "path_hops": 3,
+    "result_limit": 20
+  },
+  "historical_chain": {
+    "current_tree_owner": "P8-L-I",
+    "p8_l_h_sha256": "1228178d70130040b453296c1ac71fcdd1b26b0347c0c7a0eb91d05d47e8ad48",
+    "predecessor_mode": "frozen_digest"
+  },
+  "non_scope": [
+    "retrieval_router_llm",
+    "graph_retrieval_planner_llm",
+    "canonical_retrieval_planner_llm",
+    "retrieval_intent_or_resolved_envelope",
+    "multi_step_graph_plan_schema",
+    "both_dependency_coordinator",
+    "evidence_bundle_merge",
+    "character_response_generator",
+    "chat_send_stream_retry",
+    "memory_owner_ui"
+  ],
+  "owner_stage": "P8-L-I",
+  "predecessor": {
+    "path": "docs/architecture/p8-l-h-canonical-recall-inventory.json",
+    "sha256": "1228178d70130040b453296c1ac71fcdd1b26b0347c0c7a0eb91d05d47e8ad48",
+    "size": 5255
+  },
+  "primitive_registry": {
+    "direct_relationship": {
+      "fallback_mode": "direct",
+      "max_results": 20,
+      "requires_counterpart": true
+    },
+    "rank_related_characters": {
+      "fallback_mode": "rank",
+      "max_results": 20,
+      "requires_counterpart": false
+    },
+    "relationship_evidence": {
+      "fallback_mode": "evidence",
+      "max_results": 5,
+      "requires_counterpart": true
+    },
+    "relationship_neighborhood": {
+      "fallback_mode": "none",
+      "max_results": 20,
+      "requires_counterpart": false
+    },
+    "shared_neighbors": {
+      "fallback_mode": "shared",
+      "max_results": 20,
+      "requires_counterpart": true
+    },
+    "shortest_path": {
+      "fallback_mode": "none",
+      "max_results": 20,
+      "requires_counterpart": true
+    }
+  },
+  "required_files": [
+    {
+      "path": "backend/app/domains/relationships/graph_recall/contracts.py",
+      "sha256": "e70f2578aedcf4d9693e4df1e0f52da8137ded8268b1aaf1711f1514bd10ff75",
+      "size": 3800
+    },
+    {
+      "path": "backend/app/domains/relationships/graph_recall/service.py",
+      "sha256": "f977fe07dcb3e135ead35a887700e3d5a115857e99767e1bf8e589954bce23d2",
+      "size": 40329
+    },
+    {
+      "path": "backend/app/domains/relationships/public.py",
+      "sha256": "73d9a8e17c25ef0e77698180003d19c0e7f12c991d6e87c2a49e03c627ac22fe",
+      "size": 3304
+    },
+    {
+      "path": "backend/app/domains/relationships/graph_read/repository.py",
+      "sha256": "fdec06d3269a742b7ee85fd1ead07b10dbc65b2c6e0465c005bb46a9e9f5a85d",
+      "size": 5471
+    },
+    {
+      "path": "backend/app/runtime/graph_projection/relationship_graph_read.py",
+      "sha256": "fc47426a204dff2e45fc8523f9171a2788d190fe41a1dacd550fb533fec04578",
+      "size": 28653
+    },
+    {
+      "path": "backend/tests/test_p8_l_i_graph_recall.py",
+      "sha256": "9195daf8567480b892101bdf6a2e20f27966153487b9eaebd46d4d83a970fa24",
+      "size": 24695
+    },
+    {
+      "path": "docs/architecture/p8-l-i-graph-recall.md",
+      "sha256": "3f202c72517daec552c86618576db350dd9a7bf279828131fe49a96855286b0a",
+      "size": 6196
+    }
+  ],
+  "schema": {
+    "ladybug_remains_replayable_projection": true,
+    "new_alembic_migration": null,
+    "new_canonical_tables": [],
+    "new_embedded_schema_version": null,
+    "new_ladybug_generation": null,
+    "sqlite_remains_canonical": true
+  },
+  "schema_version": 1,
+  "scope": [
+    "owner_id",
+    "world_id",
+    "subject_world_character_id",
+    "counterpart_world_character_id_when_required",
+    "direction"
+  ],
+  "typed_operations": [
+    "direct_relationship",
+    "relationship_evidence",
+    "shared_neighbors",
+    "shortest_path",
+    "rank_related_characters",
+    "relationship_neighborhood"
+  ]
+}

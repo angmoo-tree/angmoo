@@ -133,6 +133,53 @@ class SqlAlchemyRelationshipGraphReadGateway:
             ),
         )
 
+    def graph_recall_scope_access(
+        self,
+        *,
+        scope: relationships.GraphRecallScope,
+    ) -> relationships.GraphRecallScopeAccess:
+        world_character = self._db.get(
+            models.WorldCharacter,
+            scope.subject_world_character_id,
+        )
+        character = (
+            self._db.get(models.Character, world_character.character_id)
+            if world_character is not None
+            else None
+        )
+        membership = (
+            self._db.get(models.WorldMembership, world_character.membership_id)
+            if world_character is not None
+            else None
+        )
+        return relationships.GraphRecallScopeAccess(
+            subject_exists=world_character is not None and character is not None,
+            subject_world_id=(
+                world_character.world_id
+                if world_character is not None
+                else None
+            ),
+            character_deleted=(
+                character.deleted_at is not None
+                if character is not None
+                else False
+            ),
+            character_owner_id=(
+                character.owner_id if character is not None else None
+            ),
+            world_character_status=(
+                world_character.status
+                if world_character is not None
+                else None
+            ),
+            membership_status=(
+                membership.status if membership is not None else None
+            ),
+            membership_world_id=(
+                membership.world_id if membership is not None else None
+            ),
+        )
+
     def target_world_id(self, *, world_character_id: str) -> str | None:
         target = self._db.get(models.WorldCharacter, world_character_id)
         return target.world_id if target is not None else None
@@ -292,6 +339,7 @@ class SqlAlchemyRelationshipGraphReadGateway:
         *,
         world_id: str,
         hits: list[GraphRelationshipHit],
+        subject_world_character_id: str | None = None,
     ) -> dict[str, RelationshipRevalidationFacts]:
         if not hits:
             return {}
@@ -337,6 +385,22 @@ class SqlAlchemyRelationshipGraphReadGateway:
             )
         }
         blocked = self._blocked_pairs(world_id=world_id)
+        event_ids = {
+            value
+            for hit in hits
+            for value in (hit.last_event_id,)
+            if value is not None
+        }
+        event_ids.update(
+            row.last_event_id
+            for row in rows.values()
+            if row.last_event_id is not None
+        )
+        observed_event_ids = self._subject_observed_event_ids(
+            world_id=world_id,
+            subject_world_character_id=subject_world_character_id,
+            event_ids=event_ids,
+        )
         facts: dict[str, RelationshipRevalidationFacts] = {}
         for hit in hits:
             row = rows.get(hit.relationship_state_id)
@@ -361,13 +425,102 @@ class SqlAlchemyRelationshipGraphReadGateway:
                     and target is not None
                     and frozenset((actor.id, target.id)) in blocked
                 ),
+                observed_by_subject=(
+                    subject_world_character_id is None
+                    or (
+                        row is not None
+                        and row.last_event_id in observed_event_ids
+                    )
+                ),
             )
         return facts
+
+    def _subject_observed_event_ids(
+        self,
+        *,
+        world_id: str,
+        subject_world_character_id: str | None,
+        event_ids: set[str],
+    ) -> set[str]:
+        if subject_world_character_id is None:
+            return set(event_ids)
+        if not event_ids:
+            return set()
+        events = {
+            row.id: row
+            for row in self._db.scalars(
+                select(models.SocialEvent).where(
+                    models.SocialEvent.id.in_(event_ids),
+                    models.SocialEvent.world_id == world_id,
+                    models.SocialEvent.result == "succeeded",
+                    models.SocialEvent.retrieval_status == "eligible",
+                    models.SocialEvent.invalidated_at.is_(None),
+                )
+            )
+        }
+        observed = {
+            event.id
+            for event in events.values()
+            if subject_world_character_id
+            in {
+                event.actor_world_character_id,
+                event.target_world_character_id,
+            }
+        }
+        remaining = set(events) - observed
+        if not remaining:
+            return observed
+        evidence_rows = list(
+            self._db.scalars(
+                select(models.SocialEventEvidence).where(
+                    models.SocialEventEvidence.social_event_id.in_(remaining)
+                )
+            )
+        )
+        post_events: dict[str, set[str]] = {}
+        for evidence in evidence_rows:
+            post_ids = {
+                value
+                for value in (
+                    evidence.source_post_id,
+                    evidence.target_post_id,
+                    evidence.root_post_id,
+                    (
+                        evidence.source_object_id
+                        if evidence.source_object_type == "post"
+                        else None
+                    ),
+                )
+                if value is not None
+            }
+            for post_id in post_ids:
+                post_events.setdefault(post_id, set()).add(
+                    evidence.social_event_id
+                )
+        if not post_events:
+            return observed
+        observed_post_ids = set(
+            self._db.scalars(
+                select(models.WorldCharacterFeedObservation.post_id).where(
+                    models.WorldCharacterFeedObservation.world_id == world_id,
+                    models.WorldCharacterFeedObservation.observer_world_character_id
+                    == subject_world_character_id,
+                    models.WorldCharacterFeedObservation.post_id.in_(post_events),
+                    models.WorldCharacterFeedObservation.status == "observed",
+                    models.WorldCharacterFeedObservation.observed_at.is_not(None),
+                )
+            )
+        )
+        for post_id in observed_post_ids:
+            observed.update(post_events.get(post_id, ()))
+        return observed
+
     def evidence_candidates(
         self,
         *,
         world_id: str,
         event_ids: list[str],
+        subject_world_character_id: str | None = None,
     ) -> list[GraphEvidenceCandidate]:
         if not event_ids:
             return []
@@ -392,6 +545,12 @@ class SqlAlchemyRelationshipGraphReadGateway:
                 evidence.social_event_id, []
             ).append(evidence)
 
+        observed_event_ids = self._subject_observed_event_ids(
+            world_id=world_id,
+            subject_world_character_id=subject_world_character_id,
+            event_ids=set(event_ids),
+        )
+
         result = []
         for event_id in event_ids:
             event = events.get(event_id)
@@ -399,41 +558,48 @@ class SqlAlchemyRelationshipGraphReadGateway:
                 continue
             posts = []
             for evidence_row in evidence_by_event.get(event_id, []):
-                post_id = (
-                    evidence_row.source_post_id
-                    or evidence_row.target_post_id
-                    or evidence_row.root_post_id
-                    or (
-                        evidence_row.source_object_id
-                        if evidence_row.source_object_type == "post"
-                        else None
+                post_ids = tuple(
+                    dict.fromkeys(
+                        value
+                        for value in (
+                            evidence_row.source_post_id,
+                            evidence_row.target_post_id,
+                            evidence_row.root_post_id,
+                            (
+                                evidence_row.source_object_id
+                                if evidence_row.source_object_type == "post"
+                                else None
+                            ),
+                        )
+                        if value is not None
                     )
                 )
-                if post_id is None:
-                    continue
-                post = self._db.get(models.Post, post_id)
-                posts.append(
-                    EvidencePostFacts(
-                        post_id=post_id,
-                        root_post_id=evidence_row.root_post_id,
-                        source_post_id=evidence_row.source_post_id,
-                        exists=post is not None,
-                        world_id=post.world_id if post is not None else None,
-                        deleted=(
-                            post.deleted_at is not None
-                            if post is not None
-                            else False
-                        ),
-                        report_hidden=(
-                            post.report_hidden_at is not None
-                            if post is not None
-                            else False
-                        ),
-                        visibility=(
-                            post.visibility if post is not None else None
-                        ),
+                for post_id in post_ids:
+                    post = self._db.get(models.Post, post_id)
+                    posts.append(
+                        EvidencePostFacts(
+                            post_id=post_id,
+                            root_post_id=evidence_row.root_post_id,
+                            source_post_id=evidence_row.source_post_id,
+                            exists=post is not None,
+                            world_id=(
+                                post.world_id if post is not None else None
+                            ),
+                            deleted=(
+                                post.deleted_at is not None
+                                if post is not None
+                                else False
+                            ),
+                            report_hidden=(
+                                post.report_hidden_at is not None
+                                if post is not None
+                                else False
+                            ),
+                            visibility=(
+                                post.visibility if post is not None else None
+                            ),
+                        )
                     )
-                )
             result.append(
                 GraphEvidenceCandidate(
                     event_id=event.id,
@@ -447,14 +613,21 @@ class SqlAlchemyRelationshipGraphReadGateway:
                     result=event.result,
                     retrieval_status=event.retrieval_status,
                     posts=tuple(posts),
+                    observed_by_subject=(
+                        subject_world_character_id is None
+                        or event.id in observed_event_ids
+                    ),
+                    invalidated=event.invalidated_at is not None,
                 )
             )
         return result
+
     def node_candidates(
         self,
         *,
         world_id: str,
         world_character_ids: set[str],
+        subject_world_character_id: str | None = None,
     ) -> list[GraphNodeCandidate]:
         world_characters = {
             row.id: row
@@ -474,12 +647,27 @@ class SqlAlchemyRelationshipGraphReadGateway:
                 )
             )
         }
+        memberships = {
+            row.id: row
+            for row in self._db.scalars(
+                select(models.WorldMembership).where(
+                    models.WorldMembership.id.in_(
+                        [
+                            row.membership_id
+                            for row in world_characters.values()
+                        ]
+                    )
+                )
+            )
+        }
+        blocked = self._blocked_pairs(world_id=world_id)
         result = []
         for world_character_id in sorted(world_characters):
             world_character = world_characters[world_character_id]
             character = characters.get(world_character.character_id)
             if character is None:
                 continue
+            membership = memberships.get(world_character.membership_id)
             result.append(
                 GraphNodeCandidate(
                     world_character_id=world_character.id,
@@ -487,6 +675,25 @@ class SqlAlchemyRelationshipGraphReadGateway:
                     character_id=character.id,
                     display_name=character.name,
                     character_deleted=character.deleted_at is not None,
+                    world_character_status=world_character.status,
+                    membership_status=(
+                        membership.status if membership is not None else None
+                    ),
+                    membership_world_id=(
+                        membership.world_id if membership is not None else None
+                    ),
+                    blocked_with_subject=(
+                        subject_world_character_id is not None
+                        and world_character.id
+                        != subject_world_character_id
+                        and frozenset(
+                            (
+                                subject_world_character_id,
+                                world_character.id,
+                            )
+                        )
+                        in blocked
+                    ),
                 )
             )
         return result
@@ -529,6 +736,33 @@ def get_owner_relationship_graph(
         graph_projection_enabled=config.graph_projection_enabled,
         repository=mapped_repository,
         graph_provider=graph_provider,
+    )
+
+
+def execute_graph_recall(
+    db: Session,
+    *,
+    query: relationships.GraphRecallQuery,
+    config: Settings = settings,
+    repository: RelationshipGraphQueryPort | None = None,
+    graph_provider: relationships.GraphProvider = "ladybug",
+) -> relationships.GraphRecallResult:
+    """Compose runtime adapters behind the relationships public facade."""
+
+    gateway = SqlAlchemyRelationshipGraphReadGateway(
+        db,
+        config=config,
+        graph_provider=graph_provider,
+    )
+    mapped_repository = (
+        _BackendErrorMappingRepository(repository)
+        if repository is not None
+        else None
+    )
+    return relationships.GraphRecallService(gateway).execute(
+        query,
+        graph_projection_enabled=config.graph_projection_enabled,
+        repository=mapped_repository,
     )
 
 

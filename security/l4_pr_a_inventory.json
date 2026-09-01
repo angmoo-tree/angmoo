@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 1942,
-      "internal_edge_count": 1406,
+      "external_import_count": 1950,
+      "internal_edge_count": 1413,
       "legacy_import_exception_count": 0,
-      "module_count": 592,
+      "module_count": 595,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -41,6 +41,29 @@
             ],
             "module": "app.domains.relationships.graph_read.use_case",
             "path": "backend/app/domains/relationships/graph_read/use_case.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.graph_recall.contracts",
+              "app.domains.relationships.graph_recall.service"
+            ],
+            "module": "app.domains.relationships.graph_recall",
+            "path": "backend/app/domains/relationships/graph_recall/__init__.py"
+          },
+          {
+            "imports": [],
+            "module": "app.domains.relationships.graph_recall.contracts",
+            "path": "backend/app/domains/relationships/graph_recall/contracts.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.graph_read.errors",
+              "app.domains.relationships.graph_read.repository",
+              "app.domains.relationships.graph_read.use_case",
+              "app.domains.relationships.graph_recall.contracts"
+            ],
+            "module": "app.domains.relationships.graph_recall.service",
+            "path": "backend/app/domains/relationships/graph_recall/service.py"
           },
           {
             "imports": [],
@@ -124,6 +147,7 @@
               "app.domains.relationships.graph_read.errors",
               "app.domains.relationships.graph_read.schemas",
               "app.domains.relationships.graph_read.use_case",
+              "app.domains.relationships.graph_recall",
               "app.domains.relationships.ports",
               "app.domains.relationships.projection"
             ],

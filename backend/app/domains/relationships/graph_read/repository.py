@@ -95,6 +95,7 @@ class RelationshipRevalidationFacts:
     actor_active: bool
     target_active: bool
     blocked: bool
+    observed_by_subject: bool = True
 
 
 @dataclass(frozen=True)
@@ -120,6 +121,8 @@ class GraphEvidenceCandidate:
     result: str
     retrieval_status: str
     posts: tuple[EvidencePostFacts, ...]
+    observed_by_subject: bool = True
+    invalidated: bool = False
 
 
 @dataclass(frozen=True)
@@ -129,6 +132,10 @@ class GraphNodeCandidate:
     character_id: str
     display_name: str
     character_deleted: bool
+    world_character_status: str | None = "active"
+    membership_status: str | None = "active"
+    membership_world_id: str | None = None
+    blocked_with_subject: bool = False
 
 
 @runtime_checkable

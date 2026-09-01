@@ -1,7 +1,7 @@
 {
-  "edge_count": 1406,
-  "external_import_count": 1942,
-  "module_count": 592,
+  "edge_count": 1413,
+  "external_import_count": 1950,
+  "module_count": 595,
   "modules": [
     {
       "external_imports": [],
@@ -2755,6 +2755,45 @@
     },
     {
       "external_imports": [],
+      "imports": [
+        "app.domains.relationships.graph_recall.contracts",
+        "app.domains.relationships.graph_recall.service"
+      ],
+      "module": "app.domains.relationships.graph_recall",
+      "path": "backend/app/domains/relationships/graph_recall/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "enum"
+      ],
+      "imports": [],
+      "module": "app.domains.relationships.graph_recall.contracts",
+      "path": "backend/app/domains/relationships/graph_recall/contracts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.relationships.graph_read.errors",
+        "app.domains.relationships.graph_read.repository",
+        "app.domains.relationships.graph_read.use_case",
+        "app.domains.relationships.graph_recall.contracts"
+      ],
+      "module": "app.domains.relationships.graph_recall.service",
+      "path": "backend/app/domains/relationships/graph_recall/service.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
       "imports": [],
       "module": "app.domains.relationships.infrastructure",
       "path": "backend/app/domains/relationships/infrastructure/__init__.py",
@@ -2889,6 +2928,7 @@
         "app.domains.relationships.graph_read.errors",
         "app.domains.relationships.graph_read.schemas",
         "app.domains.relationships.graph_read.use_case",
+        "app.domains.relationships.graph_recall",
         "app.domains.relationships.ports",
         "app.domains.relationships.projection"
       ],
