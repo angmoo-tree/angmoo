@@ -39,6 +39,7 @@ class _SocialPersistenceModels:
     PostMedia = models.PostMedia
     WorldCharacter = models.WorldCharacter
     WorldCharacterBlock = models.WorldCharacterBlock
+    WorldCharacterFeedObservation = models.WorldCharacterFeedObservation
     WorldMembership = models.WorldMembership
 
 
