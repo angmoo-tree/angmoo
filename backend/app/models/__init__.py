@@ -37,6 +37,15 @@ from app.domains.chat.infrastructure.sqlalchemy_models import (
     MessageThread,
     UserMessagePreference,
 )
+from app.domains.memory.infrastructure.sqlalchemy_models import (
+    MemoryCandidate,
+    MemoryHotBrief,
+    MemoryHotBriefItem,
+    MemoryItem,
+    MemoryItemEvidence,
+    MemoryMaintenanceJob,
+    MemoryScopeSettingModel,
+)
 from app.models.profile_images import ProfileImageCandidate, ProfileImageQuotaReservation
 from app.models.agent_runs import (
     AgentActivityLog,
@@ -137,6 +146,13 @@ __all__ = [
     "LocalBotReadQuotaBucket",
     "MessageMessage",
     "MessageThread",
+    "MemoryCandidate",
+    "MemoryHotBrief",
+    "MemoryHotBriefItem",
+    "MemoryItem",
+    "MemoryItemEvidence",
+    "MemoryMaintenanceJob",
+    "MemoryScopeSettingModel",
     "Notification",
     "Post",
     "PostImageGenerationJob",

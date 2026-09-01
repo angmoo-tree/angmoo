@@ -749,18 +749,18 @@
     {
       "markers": {
         "driver_or_url": [
-          45,
-          46,
-          48,
-          88,
-          89,
-          91
+          59,
+          60,
+          62,
+          129,
+          130,
+          132
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/persistence/sqlite_schema.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "23eee33f36b09574d8aeae1b87bc30be57d2b4a8b1ae4f0364860aa58b400fb5",
+      "source_sha256": "9e39a4186e9993744d43c67fd9b75c0830a15420bbd5dcd88c6cfa20a65ed24d",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1079,14 +1079,14 @@
     {
       "markers": {
         "driver_or_url": [
-          196,
-          197
+          197,
+          198
         ]
       },
       "owner": "ER7",
       "path": "scripts/ci/check_desktop_installer_contract.py",
       "removal_condition": "embedded canonical rollback window PASS and user-approved legacy-default removal",
-      "source_sha256": "7550dd8d71fad94a648c1c19f8b0dba381d6a66333ca9acb0b0be619bc29fb67",
+      "source_sha256": "a559f5169c227aa15ee68da01c1ad06bdb95ededb4b1ee89c1a5300c99323f86",
       "transition_pr": "ER7 PR P"
     },
     {

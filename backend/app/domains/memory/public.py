@@ -1,0 +1,57 @@
+"""Supported backend boundary for canonical Memory consumers."""
+
+from app.domains.memory.application import MemoryScopeService
+from app.domains.memory.domain import (
+    DEFAULT_MEMORY_RETENTION_DAYS,
+    MemoryCandidateStatus,
+    MemoryConflictError,
+    MemoryDomainError,
+    MemoryHotBriefStatus,
+    MemoryItemStatus,
+    MemoryJobStatus,
+    MemoryKindV1,
+    MemoryNotFoundError,
+    MemoryProviderMode,
+    MemoryScope,
+    MemoryScopeError,
+    MemoryScopeSetting,
+    MemorySourceTypeV1,
+    MemoryValidationError,
+    is_memory_expired,
+    validate_memory_item_shape,
+    validate_retention_days,
+)
+from app.domains.memory.ports import (
+    CanonicalMemoryEvidence,
+    MemoryMaintenanceQueuePort,
+    MemoryMaintenanceWorkItem,
+    MemoryRepositoryPort,
+    MemorySourceEvidenceReaderPort,
+)
+
+__all__ = [
+    "CanonicalMemoryEvidence",
+    "DEFAULT_MEMORY_RETENTION_DAYS",
+    "MemoryCandidateStatus",
+    "MemoryConflictError",
+    "MemoryDomainError",
+    "MemoryHotBriefStatus",
+    "MemoryItemStatus",
+    "MemoryJobStatus",
+    "MemoryKindV1",
+    "MemoryMaintenanceQueuePort",
+    "MemoryMaintenanceWorkItem",
+    "MemoryNotFoundError",
+    "MemoryProviderMode",
+    "MemoryRepositoryPort",
+    "MemoryScope",
+    "MemoryScopeError",
+    "MemoryScopeService",
+    "MemoryScopeSetting",
+    "MemorySourceEvidenceReaderPort",
+    "MemorySourceTypeV1",
+    "MemoryValidationError",
+    "is_memory_expired",
+    "validate_memory_item_shape",
+    "validate_retention_days",
+]

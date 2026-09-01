@@ -1,7 +1,7 @@
 {
-  "edge_count": 1311,
-  "external_import_count": 1854,
-  "module_count": 562,
+  "edge_count": 1353,
+  "external_import_count": 1883,
+  "module_count": 581,
   "modules": [
     {
       "external_imports": [],
@@ -949,6 +949,18 @@
       ],
       "module": "app.alembic.versions.20260831_0084_world_scoped_chat_identity",
       "path": "backend/app/alembic/versions/20260831_0084_world_scoped_chat_identity.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "alembic",
+        "collections.abc"
+      ],
+      "imports": [
+        "app.domains.memory.infrastructure.sqlalchemy_models"
+      ],
+      "module": "app.alembic.versions.20260831_0085_canonical_memory_schema",
+      "path": "backend/app/alembic/versions/20260831_0085_canonical_memory_schema.py",
       "wildcard_imports": []
     },
     {
@@ -2359,6 +2371,208 @@
       ],
       "module": "app.domains.identity.public",
       "path": "backend/app/domains/identity/public.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.memory",
+      "path": "backend/app/domains/memory/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.memory.application.scope_control"
+      ],
+      "module": "app.domains.memory.application",
+      "path": "backend/app/domains/memory/application/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.memory.domain.provenance",
+        "app.domains.memory.domain.retention",
+        "app.domains.memory.domain.scope",
+        "app.domains.memory.ports.repository"
+      ],
+      "module": "app.domains.memory.application.scope_control",
+      "path": "backend/app/domains/memory/application/scope_control.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.memory.domain.errors",
+        "app.domains.memory.domain.policies",
+        "app.domains.memory.domain.provenance",
+        "app.domains.memory.domain.retention",
+        "app.domains.memory.domain.scope"
+      ],
+      "module": "app.domains.memory.domain",
+      "path": "backend/app/domains/memory/domain/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.memory.domain.errors",
+      "path": "backend/app/domains/memory/domain/errors.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.memory.domain.errors",
+        "app.domains.memory.domain.provenance"
+      ],
+      "module": "app.domains.memory.domain.policies",
+      "path": "backend/app/domains/memory/domain/policies.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "enum"
+      ],
+      "imports": [],
+      "module": "app.domains.memory.domain.provenance",
+      "path": "backend/app/domains/memory/domain/provenance.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime"
+      ],
+      "imports": [
+        "app.domains.memory.domain.errors"
+      ],
+      "module": "app.domains.memory.domain.retention",
+      "path": "backend/app/domains/memory/domain/retention.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime"
+      ],
+      "imports": [
+        "app.domains.memory.domain.errors",
+        "app.domains.memory.domain.provenance",
+        "app.domains.memory.domain.retention"
+      ],
+      "module": "app.domains.memory.domain.scope",
+      "path": "backend/app/domains/memory/domain/scope.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.memory.infrastructure.repository",
+        "app.domains.memory.infrastructure.sqlalchemy_models"
+      ],
+      "module": "app.domains.memory.infrastructure",
+      "path": "backend/app/domains/memory/infrastructure/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm",
+        "uuid"
+      ],
+      "imports": [
+        "app.core.db",
+        "app.domains.memory.domain.errors",
+        "app.domains.memory.domain.provenance",
+        "app.domains.memory.domain.retention",
+        "app.domains.memory.domain.scope",
+        "app.domains.memory.infrastructure.sqlalchemy_models"
+      ],
+      "module": "app.domains.memory.infrastructure.repository",
+      "path": "backend/app/domains/memory/infrastructure/repository.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.engine",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.db",
+        "app.domains.memory.domain.provenance",
+        "app.domains.memory.domain.retention"
+      ],
+      "module": "app.domains.memory.infrastructure.sqlalchemy_models",
+      "path": "backend/app/domains/memory/infrastructure/sqlalchemy_models.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.memory.ports.maintenance_queue",
+        "app.domains.memory.ports.repository",
+        "app.domains.memory.ports.source_reader"
+      ],
+      "module": "app.domains.memory.ports",
+      "path": "backend/app/domains/memory/ports/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.memory.ports.maintenance_queue",
+      "path": "backend/app/domains/memory/ports/maintenance_queue.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.memory.domain.provenance",
+        "app.domains.memory.domain.scope"
+      ],
+      "module": "app.domains.memory.ports.repository",
+      "path": "backend/app/domains/memory/ports/repository.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.memory.domain.provenance",
+        "app.domains.memory.domain.scope"
+      ],
+      "module": "app.domains.memory.ports.source_reader",
+      "path": "backend/app/domains/memory/ports/source_reader.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.memory.application",
+        "app.domains.memory.domain",
+        "app.domains.memory.ports"
+      ],
+      "module": "app.domains.memory.public",
+      "path": "backend/app/domains/memory/public.py",
       "wildcard_imports": []
     },
     {
@@ -5035,6 +5249,7 @@
       "imports": [
         "app.domains.chat.infrastructure.sqlalchemy_models",
         "app.domains.identity.infrastructure",
+        "app.domains.memory.infrastructure.sqlalchemy_models",
         "app.domains.relationships.infrastructure.sqlalchemy_models",
         "app.domains.relationships.infrastructure.sqlalchemy_social_models",
         "app.domains.runtime.infrastructure",
@@ -6001,6 +6216,7 @@
         "app.runtime.migrations.sqlite_versions.v1_to_v2_world_package_registry",
         "app.runtime.migrations.sqlite_versions.v2_to_v3_no_specific_role",
         "app.runtime.migrations.sqlite_versions.v3_to_v4_world_scoped_chat",
+        "app.runtime.migrations.sqlite_versions.v4_to_v5_canonical_memory",
         "app.runtime.persistence.sqlite_schema"
       ],
       "module": "app.runtime.migrations.sqlite_versions.registry",
@@ -6056,6 +6272,19 @@
       ],
       "module": "app.runtime.migrations.sqlite_versions.v3_to_v4_world_scoped_chat",
       "path": "backend/app/runtime/migrations/sqlite_versions/v3_to_v4_world_scoped_chat.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.memory.infrastructure.sqlalchemy_models",
+        "app.runtime.migrations.sqlite_versions.contracts"
+      ],
+      "module": "app.runtime.migrations.sqlite_versions.v4_to_v5_canonical_memory",
+      "path": "backend/app/runtime/migrations/sqlite_versions/v4_to_v5_canonical_memory.py",
       "wildcard_imports": []
     },
     {

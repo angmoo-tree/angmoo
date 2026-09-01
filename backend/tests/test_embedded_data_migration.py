@@ -23,6 +23,9 @@ from app.runtime.migrations.embedded_sqlite import SqliteCanonicalUpgradeError
 from app.domains.chat.infrastructure.world_scope_migration import (
     rebuild_message_threads_v3,
 )
+from app.domains.memory.infrastructure.sqlalchemy_models import (
+    drop_memory_schema_v1,
+)
 from app.runtime.migrations.ladybug_versions import registry as graph_registry
 from app.runtime.migrations.local_app_data import LegacyLocalAppDataMigration
 from app.runtime.migrations.sqlite_versions import registry as sqlite_registry
@@ -353,6 +356,7 @@ def _seed_v2_roleless(
             connection.exec_driver_sql("PRAGMA foreign_keys = OFF")
             connection.commit()
             with connection.begin():
+                drop_memory_schema_v1(connection)
                 rebuild_message_threads_v3(
                     connection, create_legacy_unique_index=False
                 )
