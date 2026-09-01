@@ -1,6 +1,6 @@
 # P8-L-F canonical Memory schema and scope control
 
-Status: **IMPLEMENTED IN WORKTREE · LOCAL TECH PASS · ISSUE #222 OPEN · BRANCH `feat/p8-l-f-canonical-memory-schema` · DRAFT PR/HOSTED CI/USER GATE/MERGE PENDING**
+Status: **IMPLEMENTED · LOCAL TECH PASS · IMPLEMENTATION COMMIT `cb348f6ca8adde22cf467e3a8b4a121b28178d71` · PUSH PASS · ISSUE #222 OPEN · DRAFT PR #223 OPEN · HOSTED CI/USER GATE/MERGE PENDING**
 
 P8-L-F establishes the canonical persistence boundary required by later memory write, recall, and owner-control stages. It does not call a provider, select a retrieval route, build an FTS index, mutate LadybugDB, generate a Chat answer, or expose a Memory UI.
 
