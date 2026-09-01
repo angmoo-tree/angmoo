@@ -26,6 +26,9 @@ from app import models
 from app.domains.chat.infrastructure.world_scope_migration import (
     rebuild_message_threads_v3,
 )
+from app.domains.chat.infrastructure.sqlalchemy_models import (
+    drop_response_request_schema,
+)
 from app.domains.memory.infrastructure.sqlalchemy_models import (
     drop_memory_schema_v1,
 )
@@ -58,7 +61,7 @@ from app.runtime.persistence.sqlite_schema import (
 )
 
 
-SUPPORTED_SOURCE_VERSIONS = (1, 2, 3, 4)
+SUPPORTED_SOURCE_VERSIONS = (1, 2, 3, 4, 5)
 PREDECESSOR_BUILD_COMMIT = "1" * 40
 PREDECESSOR_OVERLAY = b"\nANGMOO_SYNTHETIC_SUPPORTED_PREDECESSOR_PAYLOAD\n"
 
@@ -554,10 +557,10 @@ def _seed_supported_predecessor(
     database.close()
 
     # Build rich canonical data through the current adapter, then remove the
-    # empty v5 Memory schema from every predecessor.  v1/v2/v3 additionally
-    # reconstruct the immutable legacy MessageThread shape; v4 keeps its
-    # World-scoped binding.  The candidate installer therefore proves both the
-    # real v3 -> v4 backfill and the new v4 -> v5 Memory migration.
+    # empty v6 response-request schema from every predecessor.  v1-v4 also
+    # remove the v5 Memory schema, while v1-v3 reconstruct the immutable legacy
+    # MessageThread shape.  The candidate installer therefore proves each real
+    # readable-predecessor chain through v5 -> v6.
     predecessor_engine = create_engine(
         URL.create("sqlite+pysqlite", database=str(database_path))
     )
@@ -566,7 +569,9 @@ def _seed_supported_predecessor(
             sql_connection.exec_driver_sql("PRAGMA foreign_keys = OFF")
             sql_connection.commit()
             with sql_connection.begin():
-                drop_memory_schema_v1(sql_connection)
+                drop_response_request_schema(sql_connection)
+                if source_version <= 4:
+                    drop_memory_schema_v1(sql_connection)
                 if source_version <= 3:
                     rebuild_message_threads_v3(
                         sql_connection, create_legacy_unique_index=False

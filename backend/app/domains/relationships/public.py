@@ -1,5 +1,12 @@
 """Stable public API for the relationships domain."""
 
+from app.domains.relationships.domain import (
+    GRAPH_PLAN_VERSION,
+    GraphPlanContractError,
+    GraphPlanStep,
+    GraphRetrievalPlan,
+)
+
 from app.domains.relationships.graph_read.errors import (
     RelationshipGraphForbiddenError,
     RelationshipGraphNotFoundError,
@@ -65,9 +72,13 @@ from app.domains.relationships.projection import (
 
 
 __all__ = [
+    "GRAPH_PLAN_VERSION",
     "GRAPH_RECALL_CONTRACT_VERSION",
     "GRAPH_RECALL_PRIMITIVE_REGISTRY",
     "GraphStatus",
+    "GraphPlanContractError",
+    "GraphPlanStep",
+    "GraphRetrievalPlan",
     "GraphProvider",
     "GraphProjectionCounts",
     "GraphRecallDirection",

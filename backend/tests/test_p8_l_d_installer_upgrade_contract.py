@@ -29,7 +29,7 @@ def _script_module(name: str, relative: str) -> ModuleType:
     return module
 
 
-@pytest.mark.parametrize("source_version", (1, 2, 3, 4))
+@pytest.mark.parametrize("source_version", (1, 2, 3, 4, 5))
 def test_supported_installer_builder_freezes_every_readable_predecessor(
     tmp_path: Path,
     source_version: int,
@@ -83,11 +83,22 @@ def test_supported_installer_builder_freezes_every_readable_predecessor(
         assert source.execute(
             "SELECT count(*) FROM message_messages"
         ).fetchone()[0] == 2
-        if source_version == 4:
-            # A frozen v4 predecessor already owns the P8-L-D World-scoped
-            # identity result.  The v4 -> v5 Memory migration must preserve it
-            # without relying on the skipped v3 -> v4 backfill.
+        if source_version >= 4:
+            # Frozen v4/v5 predecessors already own the P8-L-D World-scoped
+            # identity result.  Later migrations must preserve it without
+            # relying on the skipped v3 -> v4 backfill.
             verifier._verify_world_chat_identity(source, fixture)
+        memory_tables = {
+            row[0]
+            for row in source.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'table'"
+            ).fetchall()
+        }
+        if source_version == 5:
+            assert "memory_items" in memory_tables
+        else:
+            assert "memory_items" not in memory_tables
+        assert "chat_response_requests" not in memory_tables
         roleless_count = int(
             source.execute(
                 "SELECT count(*) FROM world_characters "
@@ -120,8 +131,8 @@ def test_supported_installer_builder_freezes_every_readable_predecessor(
             ]
     finally:
         source.close()
-    assert fixture["target_data_version"] == 5
-    assert fixture["target_table_count"] == 94
+    assert fixture["target_data_version"] == 6
+    assert fixture["target_table_count"] == 95
 
 
 def test_v3_installer_fixture_is_legacy_shaped_and_proves_v4_chat_backfill(

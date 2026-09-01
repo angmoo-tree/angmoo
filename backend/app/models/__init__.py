@@ -33,6 +33,7 @@ from app.models.community import (
 )
 from app.domains.chat.infrastructure.sqlalchemy_models import (
     CharacterMessageSetting,
+    ChatResponseRequest,
     MessageMessage,
     MessageThread,
     UserMessagePreference,
@@ -136,6 +137,7 @@ __all__ = [
     "RuntimeSchedulerLease",
     "Character",
     "CharacterMessageSetting",
+    "ChatResponseRequest",
     "CharacterLoreChunk",
     "CharacterLoreSource",
     "LoreParserLease",

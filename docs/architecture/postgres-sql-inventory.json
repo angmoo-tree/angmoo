@@ -331,14 +331,14 @@
     {
       "markers": {
         "driver_or_url": [
-          112,
-          124
+          128,
+          140
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/chat/infrastructure/sqlalchemy_models.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "2ca7b3c2c2a9a70062f9941fbccc21c4ad5f13f421f4792f63595269fdc15ee5",
+      "source_sha256": "e40d2fe98c98cbf5dcff7ee20e40b6cb1549ab3eea3225557ef9ad2e504b63f5",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -779,18 +779,18 @@
     {
       "markers": {
         "driver_or_url": [
-          59,
-          60,
-          62,
-          129,
-          130,
-          132
+          65,
+          66,
+          68,
+          156,
+          157,
+          159
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/persistence/sqlite_schema.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "9e39a4186e9993744d43c67fd9b75c0830a15420bbd5dcd88c6cfa20a65ed24d",
+      "source_sha256": "5445cee3f68104a39712d6e81093f90de8ce0b1a89a28af1f7a096e8bfb44e61",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1109,14 +1109,14 @@
     {
       "markers": {
         "driver_or_url": [
-          197,
-          198
+          198,
+          199
         ]
       },
       "owner": "ER7",
       "path": "scripts/ci/check_desktop_installer_contract.py",
       "removal_condition": "embedded canonical rollback window PASS and user-approved legacy-default removal",
-      "source_sha256": "a559f5169c227aa15ee68da01c1ad06bdb95ededb4b1ee89c1a5300c99323f86",
+      "source_sha256": "febe9d99530a11ccd7d7c192c894fdc74125eade5751bf32d5ad896b6289edb6",
       "transition_pr": "ER7 PR P"
     },
     {

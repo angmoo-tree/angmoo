@@ -11,6 +11,8 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$SupportedV4FixtureArchive,
     [Parameter(Mandatory = $true)]
+    [string]$SupportedV5FixtureArchive,
+    [Parameter(Mandatory = $true)]
     [string]$ConflictFixtureArchive,
     [Parameter(Mandatory = $true)]
     [string]$Python,
@@ -63,6 +65,7 @@ foreach ($required in @(
     $SupportedV2FixtureArchive,
     $SupportedV3FixtureArchive,
     $SupportedV4FixtureArchive,
+    $SupportedV5FixtureArchive,
     $ConflictFixtureArchive,
     $Python,
     $Verifier
@@ -260,8 +263,19 @@ try {
             ([int]$supportedContract.source_data_version) `
             ([int]$supportedContract.ladybug_source_data_version)
 
+        $supportedManifest = Restore-IsolatedFixture $SupportedV5FixtureArchive
+        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+            ConvertFrom-Json
+        Invoke-Installer 0
+        Invoke-Verifier `
+            $supportedManifest `
+            'upgraded' `
+            ([int]$supportedContract.source_data_version) `
+            ([int]$supportedContract.ladybug_source_data_version)
+
         # The exact installer must be idempotent after the supported v3 -> v4
-        # World-scoped Chat and v4 -> v5 Memory migrations reach the candidate.
+        # World-scoped Chat, v4 -> v5 Memory, and v5 -> v6 response lifecycle
+        # migrations reach the candidate.
         $idempotentPaths = @(
             (Join-Path $productRoot 'canonical\current-generation.json'),
             (Join-Path $productRoot 'canonical\previous-generation.json'),

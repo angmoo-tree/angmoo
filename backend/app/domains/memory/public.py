@@ -9,6 +9,10 @@ from app.domains.memory.application import (
     MemoryWriteLifecycleService,
 )
 from app.domains.memory.domain import (
+    CANONICAL_PLAN_VERSION,
+    CanonicalPlanContractError,
+    CanonicalPlanStep,
+    CanonicalRetrievalPlan,
     CanonicalRecallOperation,
     CanonicalRecallQuery,
     CanonicalRecallRecord,
@@ -65,8 +69,12 @@ from app.domains.memory.ports import (
 )
 
 __all__ = [
+    "CANONICAL_PLAN_VERSION",
     "CANONICAL_PRIMITIVE_REGISTRY",
     "CanonicalMemoryEvidence",
+    "CanonicalPlanContractError",
+    "CanonicalPlanStep",
+    "CanonicalRetrievalPlan",
     "CanonicalPrimitiveSpec",
     "CanonicalRecallOperation",
     "CanonicalRecallQuery",
