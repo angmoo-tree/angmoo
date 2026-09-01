@@ -45,6 +45,15 @@ from app.domains.chat.domain.retrieval_intent import (
     RetrievalTimeKind,
     RetrievalTimeMeaning,
 )
+from app.domains.chat.domain.retrieval_router import (
+    ROUTER_AGGREGATION_TARGETS,
+    ROUTER_CLARIFICATION_SLOTS,
+    ROUTER_COORDINATION_HINTS,
+    ROUTER_ENTITY_ROLES,
+    ROUTER_INTENTS,
+    parse_retrieval_intent_payload,
+    retrieval_router_response_schema,
+)
 from app.domains.chat.domain.workflow_recipe import (
     RETRIEVAL_WORKFLOW_VERSION,
     RetrievalWorkflow,
@@ -85,9 +94,16 @@ __all__ = [
     "RetrievalTimeMeaning",
     "RetrievalOutcome",
     "RetrievalWorkflow",
+    "ROUTER_AGGREGATION_TARGETS",
+    "ROUTER_CLARIFICATION_SLOTS",
+    "ROUTER_COORDINATION_HINTS",
+    "ROUTER_ENTITY_ROLES",
+    "ROUTER_INTENTS",
     "RouteAwareCallTracker",
     "SequenceOutcome",
     "TERMINAL_STATES",
     "WorkflowRecipe",
     "build_request_scope_hash",
+    "parse_retrieval_intent_payload",
+    "retrieval_router_response_schema",
 ]

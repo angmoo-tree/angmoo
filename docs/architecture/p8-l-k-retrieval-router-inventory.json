@@ -1,0 +1,253 @@
+{
+  "call_accounting": {
+    "clarification_full_path_cap": 2,
+    "current_context_full_path_cap": 2,
+    "generic_hidden_json_repair": false,
+    "logical_and_physical_separate": true,
+    "normal_router_logical_calls": 1,
+    "request_wide_schema_repair_max": 1
+  },
+  "clarification_policy": {
+    "ambiguity_broadened_to_both": false,
+    "ambiguous_identity_direction_world_time_to_clarification": true,
+    "blocked_inactive_hidden_unobservable_candidates_exposed": 0,
+    "normal_route": true,
+    "retrieval_operations_on_clarification": 0
+  },
+  "code_owned_hard_caps": {
+    "fanout_limit": 20,
+    "max_hops": 3,
+    "row_limit": 20,
+    "timeout_ms": 4000,
+    "token_budget": 4000
+  },
+  "code_owned_operation_allowlists": {
+    "canonical": [
+      "canonical_event_details",
+      "get_character_summaries",
+      "get_post_thread",
+      "list_activity_episodes",
+      "list_relationship_changes",
+      "list_social_events",
+      "search_memory_items",
+      "search_posts",
+      "search_thread_messages"
+    ],
+    "graph": [
+      "direct_relationship",
+      "rank_related_characters",
+      "relationship_evidence",
+      "relationship_neighborhood",
+      "shared_neighbors",
+      "shortest_path"
+    ]
+  },
+  "contract_versions": {
+    "resolved_retrieval": "resolved-retrieval.v1",
+    "retrieval_intent": "retrieval-intent.v1"
+  },
+  "domain_boundary": {
+    "backend_ownership": "domains/chat",
+    "canonical_runtime_adapter": "app.runtime.chat.retrieval_policy",
+    "existing_chat_send_path_changed": false,
+    "policy_port": "RetrievalPolicyResolverPort",
+    "provider_adapter": "app.integrations.llm.retrieval_router",
+    "provider_port": "RetrievalRouterProviderPort",
+    "provider_prompt_canonical_ids": 0,
+    "provider_prompt_query_primitives": 0,
+    "raw_sql_or_cypher_from_llm": 0,
+    "test_live_provider_calls": 0
+  },
+  "executable_contract_gates": [
+    "strict_exact_key_schema",
+    "canonical_id_and_raw_query_rejection",
+    "current_context_router_one_and_retrieval_zero",
+    "same_world_entity_and_direction_binding",
+    "world_timezone_to_absolute_utc",
+    "immutable_intent_hash_binding",
+    "route_specific_operation_allowlists",
+    "ambiguity_to_safe_clarification_not_both",
+    "blocked_candidate_non_disclosure",
+    "request_wide_single_router_repair",
+    "direct_adapter_no_hidden_json_retry",
+    "held_out_ko_315_contract_normalization",
+    "sqlalchemy_local_owner_world_thread_memory_scope"
+  ],
+  "held_out_ko_contract": {
+    "case_count": 315,
+    "category_counts": {
+      "both_chain": 30,
+      "canonical_history": 30,
+      "clarification_identity": 20,
+      "current_context": 20,
+      "graph_direction": 30,
+      "graph_path_shared": 25,
+      "injection_and_caps": 30,
+      "no_evidence_policy": 20,
+      "relationship_cause": 30,
+      "safety_scope": 30,
+      "temporal_comparison": 20,
+      "time_rank_aggregate": 30
+    },
+    "contract_normalization_executable": true,
+    "live_model_evaluation_completed": false,
+    "route_counts": {
+      "BOTH": 140,
+      "CANONICAL": 50,
+      "CLARIFICATION": 20,
+      "CURRENT_CONTEXT": 20,
+      "GRAPH": 85
+    },
+    "schema_version": "p8-l-held-out-ko.v1",
+    "unique_case_count": 315
+  },
+  "historical_chain": {
+    "current_tree_owner": "P8-L-K",
+    "p8_l_j_sha256": "7479d1216aeeda010d88faa55fd045b8bcf887a757afc605b8d99526afa9fd45",
+    "predecessor_mode": "frozen_digest"
+  },
+  "metrics": [
+    "route",
+    "first_pass_valid",
+    "repair_used",
+    "rejected",
+    "clarification",
+    "entity_resolution_outcome",
+    "direction_resolution_outcome",
+    "time_resolution_outcome",
+    "router_logical_calls",
+    "router_physical_attempts",
+    "provider",
+    "model"
+  ],
+  "non_scope": [
+    "canonical_retrieval_planner_provider",
+    "graph_retrieval_planner_provider",
+    "both_dependency_coordinator",
+    "evidence_bundle",
+    "character_response_generator",
+    "world_chat_send_retry_route_integration",
+    "typing_presence_or_streaming_ui",
+    "live_held_out_model_quality_pass",
+    "installer_or_schema_change"
+  ],
+  "owner_stage": "P8-L-K",
+  "predecessor": {
+    "path": "docs/architecture/p8-l-j-response-generation-inventory.json",
+    "sha256": "7479d1216aeeda010d88faa55fd045b8bcf887a757afc605b8d99526afa9fd45",
+    "size": 10307
+  },
+  "required_files": [
+    {
+      "path": "backend/app/domains/chat/domain/retrieval_router.py",
+      "sha256": "f9fa1c178fb39d581627ee69cfdaaf99ba8fc7fd2a7978c1423e661b0fcb54c5",
+      "size": 14859
+    },
+    {
+      "path": "backend/app/domains/chat/ports/retrieval_router_provider.py",
+      "sha256": "fd2d6fc5a16ad83f9f186b240e71546a845bebad3dc45312e6623aaad0c53985",
+      "size": 4039
+    },
+    {
+      "path": "backend/app/domains/chat/ports/retrieval_policy.py",
+      "sha256": "d42736c8b547e4c8057711b566b897a80e4af71197d87b0743b70d999bff9ebb",
+      "size": 3222
+    },
+    {
+      "path": "backend/app/domains/chat/application/retrieval_routing.py",
+      "sha256": "aa2957a1f4c47e93bf3476edf76a11881449b90cd2951380d4e564b271950df4",
+      "size": 18459
+    },
+    {
+      "path": "backend/app/integrations/llm/retrieval_router.py",
+      "sha256": "d1784e322743340c789e9e5af1d7004ccc27090455c29e05a2fe864bcade6839",
+      "size": 5600
+    },
+    {
+      "path": "backend/app/runtime/chat/retrieval_policy.py",
+      "sha256": "a12d753ca52e4f8ee53e496968be16da52b926c1f04fbf609eeaa12a7d99ef8c",
+      "size": 10485
+    },
+    {
+      "path": "backend/tests/test_p8_l_k_retrieval_router.py",
+      "sha256": "6061306e2d5290072725df9ae952f669cb5ee33c6889175c0a786611570407ec",
+      "size": 23212
+    },
+    {
+      "path": "backend/tests/test_oss_architecture_boundaries.py",
+      "sha256": "2d6e245f4211a8202b40f1ebd2439c5bcb8de20814dcb02063867b4a960852af",
+      "size": 7231
+    },
+    {
+      "path": "backend/tests/test_l4_pr_a_inventory.py",
+      "sha256": "ca2399cac4a974cb1657016239e70f41f2cd1850c5762d7e3c6fe7ddbd0faa79",
+      "size": 3767
+    },
+    {
+      "path": "docs/architecture/p8-l-k-retrieval-router.md",
+      "sha256": "6333430857315a101236ab962e5caebf9c6c801f613f19c37f212e175b1b540b",
+      "size": 7696
+    },
+    {
+      "path": "security/l4_pr_a_inventory.json",
+      "sha256": "cd56318d2471a646226e5bce059e59f4413c91a934218bc5d70b51c3182debf5",
+      "size": 55860
+    }
+  ],
+  "routes": [
+    "CURRENT_CONTEXT",
+    "CANONICAL",
+    "GRAPH",
+    "BOTH",
+    "CLARIFICATION"
+  ],
+  "schema": {
+    "canonical_table_count": 95,
+    "current_embedded_schema_version": 6,
+    "new_alembic_migration": null,
+    "new_canonical_tables": [],
+    "new_embedded_schema_version": null,
+    "new_ladybug_generation": null
+  },
+  "schema_version": 1,
+  "semantic_catalogs": {
+    "aggregation_targets": [
+      "character_sets",
+      "characters",
+      "events",
+      "relationship_states",
+      "relationships"
+    ],
+    "clarification_slots": [
+      "counterpart",
+      "entity_identity",
+      "pronoun_reference",
+      "relationship_direction",
+      "time_scope",
+      "world"
+    ],
+    "coordination_hints": [
+      "CANONICAL_THEN_GRAPH",
+      "GRAPH_THEN_CANONICAL",
+      "INDEPENDENT_PARALLEL"
+    ],
+    "entity_roles": [
+      "actor",
+      "counterpart",
+      "mentioned_third_party",
+      "subject",
+      "target"
+    ],
+    "intents": [
+      "clarification_required",
+      "current_context",
+      "event_aggregation",
+      "historical_recall",
+      "mixed_evidence",
+      "relationship_cause",
+      "relationship_comparison",
+      "relationship_path",
+      "relationship_state"
+    ]
+  }
+}
