@@ -40,6 +40,15 @@ class MemoryMaintenanceQueuePort(Protocol):
         now: datetime,
     ) -> None: ...
 
+    def renew(
+        self,
+        *,
+        job_id: str,
+        lease_token: str,
+        now: datetime,
+        lease_for: timedelta,
+    ) -> None: ...
+
     def fail(
         self,
         *,

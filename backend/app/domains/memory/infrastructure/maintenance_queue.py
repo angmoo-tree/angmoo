@@ -167,6 +167,24 @@ class SqlAlchemyMemoryMaintenanceQueue:
         row.completed_at = now
         self._session.flush()
 
+    def renew(
+        self,
+        *,
+        job_id: str,
+        lease_token: str,
+        now: datetime,
+        lease_for: timedelta,
+    ) -> None:
+        if lease_for <= timedelta(0) or lease_for > timedelta(minutes=30):
+            raise MemoryConflictError("memory_job_lease_duration_invalid")
+        row = self._leased_job(
+            job_id=job_id,
+            lease_token=lease_token,
+            now=now,
+        )
+        row.lease_expires_at = now + lease_for
+        self._session.flush()
+
     def fail(
         self,
         *,

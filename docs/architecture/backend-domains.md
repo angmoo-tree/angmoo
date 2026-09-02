@@ -698,6 +698,31 @@ does not write canonical state, alter LadybugDB projection, invoke a provider or
 fall back to a global Character profile. Received likes are a count-only
 aggregate; `posts`, `replies` and `likes` are the only page operations.
 
+### P8-L-O bounded Memory consolidation and hot brief
+
+`app.domains.memory` owns the automatic/immediate maintenance threshold, leased
+queue orchestration, canonical source revalidation, candidate acceptance,
+source-version-fenced hot brief and bounded retry/drain contract. The
+SQLAlchemy adapter reuses the P8-L-F SQLite v6 tables; P8-L-O adds no migration
+or persistence generation. `memory_hot_briefs` remains a disposable cache over
+exact accepted item ID+version rows and is invalidated by lifecycle changes or
+Memory OFF.
+
+`app.integrations.llm.memory_consolidation` is an optional, background-only
+summary-proposal adapter. It receives opaque candidate refs and validated,
+bounded deterministic summaries, performs at most one physical provider call
+per claimed batch, and disables hidden overload/JSON-repair retries. It never
+owns canonical IDs, scope, TTL, evidence, acceptance, hot-brief source
+selection, foreground Chat budget or final Character text. Provider absence or
+failure falls back to deterministic summaries without blocking canonical
+source writes or basic Chat.
+
+The exact thresholds, call/input/lease/retry/drain ceilings and executable
+failure contract are frozen in
+`docs/architecture/p8-l-o-memory-consolidation-hot-brief.md` and its generated
+inventory. Live Chat producer/streaming and Memory UI remain later-stage
+consumers of this backend capability.
+
 ## Contributor workflow
 
 Before adding a backend feature:

@@ -7,9 +7,13 @@ from app.integrations.llm.canonical_retrieval_planner import (
 from app.integrations.llm.graph_retrieval_planner import (
     DirectLlmGraphRetrievalPlannerProvider,
 )
+from app.integrations.llm.memory_consolidation import (
+    DirectLlmMemoryConsolidationProvider,
+)
 
 __all__ = [
     "DirectLlmCanonicalRetrievalPlannerProvider",
     "DirectLlmGraphRetrievalPlannerProvider",
+    "DirectLlmMemoryConsolidationProvider",
     "DirectLlmRetrievalRouterProvider",
 ]

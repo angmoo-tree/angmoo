@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from sqlalchemy import select, update
@@ -120,6 +120,9 @@ class SqlAlchemyMemoryRepository:
         updated = self._find_scope(scope, populate_existing=True)
         if updated is None:
             raise MemoryConflictError("memory_scope_update_missing")
+        if not enabled:
+            self._invalidate_hot_briefs(updated.id, now=datetime.now(UTC))
+            self._session.flush()
         return self._to_scope(updated)
 
     def upsert_candidate(
@@ -210,6 +213,7 @@ class SqlAlchemyMemoryRepository:
         valid_from: datetime,
         valid_until: datetime | None,
         now: datetime,
+        enqueue_maintenance: bool = True,
     ) -> tuple[MemoryCandidateRecord, MemoryItemRecord, bool]:
         self._require_setting(setting)
         candidate = self._require_candidate(
@@ -247,11 +251,12 @@ class SqlAlchemyMemoryRepository:
             candidate.decided_at = now
             candidate.version += 1
             self._invalidate_hot_briefs(setting.id, now=now)
-            self._enqueue_job(
-                setting.id,
-                reason="memory_item_accepted",
-                idempotency_key=f"memory-item:{item.id}:accepted:v1",
-            )
+            if enqueue_maintenance:
+                self._enqueue_job(
+                    setting.id,
+                    reason="memory_item_accepted",
+                    idempotency_key=f"memory-item:{item.id}:accepted:v1",
+                )
             self._session.flush()
         self._session.refresh(item)
         return self._to_candidate(candidate), self._to_item(item), True
