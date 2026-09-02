@@ -68,6 +68,10 @@ from app.domains.chat.domain.workflow_recipe import (
     WorkflowRecipeSpec,
     select_workflow_recipe,
 )
+from app.domains.chat.domain.model_binding import (
+    MESSAGE_MODEL_BINDING_MODES,
+    MessageModelBindingMode,
+)
 from app.domains.chat.domain.evidence_bundle import (
     EVIDENCE_BUNDLE_VERSION,
     EvidenceBundle,
@@ -91,6 +95,8 @@ __all__ = [
     "GenerationEventType",
     "GenerationFence",
     "LlmNode",
+    "MESSAGE_MODEL_BINDING_MODES",
+    "MessageModelBindingMode",
     "NORMAL_NODE_BUDGETS",
     "RESOLVED_RETRIEVAL_VERSION",
     "RETRIEVAL_INTENT_VERSION",

@@ -19,7 +19,7 @@ if str(BACKEND_ROOT) not in sys.path:
 OUTPUT_PATH = ROOT / "docs/architecture/p8-l-k-retrieval-router-inventory.json"
 J_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-j-response-generation-inventory.json"
 J_INVENTORY_SHA256 = (
-    "e68f4ad4f2d1a1756c01d26b99c89fb145329036d431e680c1ece831f1fee4a5"
+    "2af4fdb0fc707e4a78a4b95e9e7ca61859278ece07b2ab61cec0f3233440ef9e"
 )
 CORPUS_PATH = (
     ROOT / "backend/tests/fixtures/p8_l/retrieval_topology_v1/held_out_ko.jsonl"
@@ -177,9 +177,9 @@ def build_inventory() -> dict[str, Any]:
     predecessor = json.loads(J_INVENTORY_PATH.read_text(encoding="utf-8"))
     if predecessor["owner_stage"] != "P8-L-J":
         raise InventoryError("P8-L-J predecessor owner drift")
-    if SQLITE_SCHEMA_VERSION != 6:
+    if SQLITE_SCHEMA_VERSION < 6:
         raise InventoryError("P8-L-K must not change Embedded schema version")
-    manifest = load_sqlite_manifest(SQLITE_SCHEMA_VERSION)
+    manifest = load_sqlite_manifest(6)
     schema = retrieval_router_response_schema()
     forbidden_schema_text = json.dumps(schema, sort_keys=True).casefold()
     forbidden = [
@@ -208,7 +208,7 @@ def build_inventory() -> dict[str, Any]:
         "schema": {
             "new_alembic_migration": None,
             "new_embedded_schema_version": None,
-            "current_embedded_schema_version": SQLITE_SCHEMA_VERSION,
+            "current_embedded_schema_version": 6,
             "canonical_table_count": manifest.canonical_table_count,
             "new_canonical_tables": [],
             "new_ladybug_generation": None,

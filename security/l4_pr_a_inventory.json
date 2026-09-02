@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2153,
-      "internal_edge_count": 1659,
+      "external_import_count": 2167,
+      "internal_edge_count": 1672,
       "legacy_import_exception_count": 0,
-      "module_count": 649,
+      "module_count": 653,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -1005,7 +1005,7 @@
     "oracle_artifacts": [
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "8cac949c9be9315be6b2846839d774cc23b19e8fd38a97b695a15762cdefaab6"
+        "sha256": "4bf234292846efd9fbfdb17554c34de17ea07b163d470b1b05466bb8d32e8aec"
       },
       {
         "path": "docs/architecture/l3-er-postgres-neo4j-parity-oracle.json",
@@ -1264,7 +1264,7 @@
       ],
       "registry": {
         "path": "backend/app/runtime/migrations/sqlite_versions/registry.py",
-        "sha256": "4471a3c6031162f616c92d1f7953ec1a56f3c4d64d09be14f6dbc5278740413d"
+        "sha256": "bc87bd49aec6ceace3218c7774a14a8cec6bf00f92d835553d7b6f4c23a42e1c"
       },
       "steps": [
         {

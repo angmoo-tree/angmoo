@@ -22,6 +22,15 @@ class ChatRuntimePort(Protocol):
         self, db: Any, user: Any, world_id: str, data: Any
     ) -> Any: ...
 
+    def update_world_thread_model(
+        self,
+        db: Any,
+        user: Any,
+        world_id: str,
+        thread_id: str,
+        data: Any,
+    ) -> Any: ...
+
     def accept_world_message(
         self, db: Any, user: Any, world_id: str, thread_id: str, data: Any
     ) -> Any: ...

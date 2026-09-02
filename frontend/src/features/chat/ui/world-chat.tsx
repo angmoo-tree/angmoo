@@ -32,8 +32,13 @@ import {
   retryWorldChatResponse,
   sendWorldChatMessage,
   streamWorldChatResponse,
+  updateWorldChatThreadModel,
   WorldChatApiError,
 } from "../api/world-chat-client";
+import {
+  MESSAGE_GOOGLE_GEMINI_MODELS,
+  type MessageGoogleGeminiModel,
+} from "../model/chat-contract";
 import type {
   WorldChatGenerationRequestRead,
   WorldChatThreadListRead,
@@ -48,6 +53,7 @@ type WorldChatProps = {
 };
 
 type LoadState = "loading" | "ready" | "error";
+type ModelSelection = "default" | MessageGoogleGeminiModel;
 
 export function WorldChat({ threadId, worldId }: WorldChatProps) {
   return threadId ? (
@@ -199,6 +205,9 @@ function WorldChatThread({
     content: string;
     idempotencyKey: string;
   } | null>(null);
+  const [modelSelection, setModelSelection] = useState<ModelSelection>("default");
+  const [modelUpdating, setModelUpdating] = useState(false);
+  const [modelFailure, setModelFailure] = useState<ModelSelection | null>(null);
   const [generation, setGeneration] = useState<{
     phase: "pending" | "streaming" | "failed";
     request: WorldChatGenerationRequestRead;
@@ -209,6 +218,7 @@ function WorldChatThread({
   const streamControllerRef = useRef<AbortController | null>(null);
   const activeGenerationRef = useRef<string | null>(null);
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const modelUpdateSequenceRef = useRef(0);
 
   const clearTypingTimer = useCallback(() => {
     if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
@@ -457,6 +467,7 @@ function WorldChatThread({
       .then(async ([result, latest]) => {
         if (controller.signal.aborted) return;
         setThread(result);
+        setModelSelection(threadModelSelection(result));
         setState("ready");
         if (latest.response_request) {
           await hydrateRequest(latest.response_request, controller.signal);
@@ -524,14 +535,24 @@ function WorldChatThread({
     (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       const content = draft.trim();
-      if (!content || sending || (generation && generation.phase !== "failed")) return;
+      if (
+        !content ||
+        sending ||
+        modelUpdating ||
+        (generation && generation.phase !== "failed")
+      ) return;
       void submitMessage(content, newIdempotencyKey("message"));
     },
-    [draft, generation, sending, submitMessage],
+    [draft, generation, modelUpdating, sending, submitMessage],
   );
 
   const retryResponse = useCallback(async () => {
-    if (!generation || generation.phase !== "failed" || !generation.request.retryable) {
+    if (
+      !generation ||
+      generation.phase !== "failed" ||
+      !generation.request.retryable ||
+      modelUpdating
+    ) {
       return;
     }
     const failed = generation.request;
@@ -549,7 +570,40 @@ function WorldChatThread({
         current ? { ...current, retrying: false } : current,
       );
     }
-  }, [consumeGeneration, generation, threadId, worldId]);
+  }, [consumeGeneration, generation, modelUpdating, threadId, worldId]);
+
+  const updateModelSelection = useCallback(
+    async (selection: ModelSelection) => {
+      if (!thread) return;
+      const sequence = modelUpdateSequenceRef.current + 1;
+      modelUpdateSequenceRef.current = sequence;
+      const confirmed = threadModelSelection(thread);
+      setModelSelection(selection);
+      setModelUpdating(true);
+      setModelFailure(null);
+      try {
+        const updated = await updateWorldChatThreadModel(
+          worldId,
+          threadId,
+          selection === "default"
+            ? { mode: "default" }
+            : { mode: "thread_override", selected_model: selection },
+        );
+        if (modelUpdateSequenceRef.current !== sequence) return;
+        setThread(updated);
+        setModelSelection(threadModelSelection(updated));
+      } catch {
+        if (modelUpdateSequenceRef.current !== sequence) return;
+        setModelSelection(confirmed);
+        setModelFailure(selection);
+      } finally {
+        if (modelUpdateSequenceRef.current === sequence) {
+          setModelUpdating(false);
+        }
+      }
+    },
+    [thread, threadId, worldId],
+  );
 
   if (state === "loading") {
     return <WorldChatStatus title="대화를 불러오는 중" />;
@@ -563,6 +617,17 @@ function WorldChatThread({
       />
     );
   }
+
+  const generationBusy = Boolean(
+    generation &&
+      (generation.phase !== "failed" || generation.retrying),
+  );
+  const modelControlDisabled = sending || generationBusy || modelUpdating;
+  const modelControlDescription = modelControlDisabled
+    ? "답장을 처리하는 동안에는 응답 모델을 변경할 수 없습니다."
+    : thread.model_binding_mode === "default"
+      ? `기본 모델 ${modelLabel(thread.default_model)}을 다음 답장에 사용합니다.`
+      : `${modelLabel(thread.selected_model)}을 이 대화에서 고정해 사용합니다.`;
 
   return (
     <section
@@ -607,6 +672,41 @@ function WorldChatThread({
         <span aria-hidden="true">→</span>
         <span>답하는 앵무</span>
         <strong>{thread.responding.display_name}</strong>
+      </div>
+
+      <div className={styles.modelControl}>
+        <label htmlFor={`world-chat-model-${thread.id}`}>응답 모델</label>
+        <select
+          aria-describedby={`world-chat-model-help-${thread.id}`}
+          disabled={modelControlDisabled}
+          id={`world-chat-model-${thread.id}`}
+          onChange={(event) =>
+            void updateModelSelection(event.target.value as ModelSelection)
+          }
+          value={modelSelection}
+        >
+          <option value="default">
+            기본 모델 사용 — 현재 {modelLabel(thread.default_model)}
+          </option>
+          {MESSAGE_GOOGLE_GEMINI_MODELS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label} — 이 대화에서 고정
+            </option>
+          ))}
+        </select>
+        <p id={`world-chat-model-help-${thread.id}`}>{modelControlDescription}</p>
+        {modelFailure ? (
+          <div className={styles.modelFailure} role="alert">
+            <span>모델을 바꾸지 못했어요.</span>
+            <button
+              disabled={modelControlDisabled}
+              onClick={() => void updateModelSelection(modelFailure)}
+              type="button"
+            >
+              다시 시도
+            </button>
+          </div>
+        ) : null}
       </div>
 
       {thread.messages.length === 0 && !generation ? (
@@ -658,6 +758,7 @@ function WorldChatThread({
                 </p>
               ) : generation.phase === "failed" ? (
                 <GenerationFailure
+                  disabled={modelUpdating}
                   failureClass={generation.request.failure_class}
                   onRetry={() => void retryResponse()}
                   retryable={generation.request.retryable}
@@ -674,7 +775,7 @@ function WorldChatThread({
           {thread.responding.display_name}에게 보낼 메시지
         </label>
         <textarea
-          disabled={sending || (!!generation && generation.phase !== "failed")}
+          disabled={sending || modelUpdating || (!!generation && generation.phase !== "failed")}
           id={`world-chat-${thread.id}`}
           maxLength={4000}
           onChange={(event) => setDraft(event.target.value)}
@@ -687,6 +788,7 @@ function WorldChatThread({
           disabled={
             !draft.trim() ||
             sending ||
+            modelUpdating ||
             (!!generation && generation.phase !== "failed")
           }
           type="submit"
@@ -737,11 +839,13 @@ function TypingPresence({ name }: { name: string }) {
 }
 
 function GenerationFailure({
+  disabled,
   failureClass,
   onRetry,
   retryable,
   retrying,
 }: {
+  disabled: boolean;
   failureClass: string | null;
   onRetry: () => void;
   retryable: boolean;
@@ -760,7 +864,7 @@ function GenerationFailure({
           : "답장을 만들지 못했어요."}
       </strong>
       {retryable ? (
-        <button disabled={retrying} onClick={onRetry} type="button">
+        <button disabled={disabled || retrying} onClick={onRetry} type="button">
           {retrying ? (
             <LoaderCircle aria-hidden="true" className={styles.spin} size={16} />
           ) : (
@@ -889,4 +993,15 @@ function compactDate(value: string) {
     minute: "2-digit",
     month: "2-digit",
   }).format(date);
+}
+
+function threadModelSelection(thread: WorldChatThreadRead): ModelSelection {
+  return thread.model_binding_mode === "default" ? "default" : thread.selected_model;
+}
+
+function modelLabel(model: MessageGoogleGeminiModel) {
+  return (
+    MESSAGE_GOOGLE_GEMINI_MODELS.find((option) => option.value === model)?.label ??
+    model
+  );
 }

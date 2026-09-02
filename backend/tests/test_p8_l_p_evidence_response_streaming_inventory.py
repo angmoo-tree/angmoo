@@ -37,9 +37,14 @@ def test_p8_l_p_inventory_closes_streaming_and_after_commit_contract() -> None:
     inventory = _inventory()
     assert inventory["owner_stage"] == "P8-L-P"
     assert inventory["predecessor"]["sha256"] == (
-        "3fe3a33e970c0d50b915e93f9cfd1f4d2f78288b54d17ec2dce48aa0e2422f40"
+        "0d09d1c6b366c2fa773599abff97584b544d210671a68bfbe2be1d4414a709b1"
     )
-    assert inventory["schema"]["current_embedded_schema_version"] == 6
+    assert inventory["schema"]["current_embedded_schema_version"] == 7
+    assert inventory["schema"]["new_alembic_migration"] == "20260903_0087"
+    assert inventory["model_hotfix"]["binding_modes"] == [
+        "default",
+        "thread_override",
+    ]
     assert inventory["bounds"]["evidence_items"] == 12
     assert inventory["route_call_caps"] == {
         "CURRENT_CONTEXT": 2,

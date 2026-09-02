@@ -31,6 +31,18 @@ class SqlAlchemyChatRuntime:
             db, user, world_id, data
         )
 
+    def update_world_thread_model(
+        self,
+        db: Any,
+        user: Any,
+        world_id: str,
+        thread_id: str,
+        data: Any,
+    ) -> Any:
+        return sqlalchemy_service.update_world_thread_model(
+            db, user, world_id, thread_id, data
+        )
+
     def accept_world_message(
         self, db: Any, user: Any, world_id: str, thread_id: str, data: Any
     ) -> Any:

@@ -174,8 +174,8 @@ def build_inventory() -> dict[str, Any]:
     if predecessor["owner_stage"] != "P8-L-I":
         raise InventoryError("P8-L-I predecessor owner drift")
 
-    manifest = load_sqlite_manifest(SQLITE_SCHEMA_VERSION)
-    if SQLITE_SCHEMA_VERSION != 6 or manifest.canonical_table_count != 95:
+    manifest = load_sqlite_manifest(6)
+    if SQLITE_SCHEMA_VERSION < 6 or manifest.canonical_table_count != 95:
         raise InventoryError("P8-L-J embedded schema contract drift")
     columns = [column.name for column in ChatResponseRequest.__table__.columns]
     forbidden_columns = {

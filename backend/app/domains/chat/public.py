@@ -23,6 +23,7 @@ from app.domains.chat.api.schemas import (
     WorldChatThreadCreate,
     WorldChatThreadCreateRead,
     WorldChatThreadListRead,
+    WorldChatThreadModelUpdate,
     WorldChatThreadRead,
 )
 from app.domains.chat.application import (
@@ -61,6 +62,7 @@ from app.domains.chat.domain import (
     GenerationEventType,
     GenerationFence,
     LlmNode,
+    MessageModelBindingMode,
     ResolvedEntityBinding,
     ResolvedRetrievalEnvelope,
     ResponseCommitPayload,
@@ -159,6 +161,7 @@ __all__ = [
     "GraphRetrievalPlanningService",
     "GraphRetrievalPlan",
     "LlmNode",
+    "MessageModelBindingMode",
     "MessageCredentialInvalidError",
     "MessageCredentialRequiredError",
     "MessageForbiddenError",
@@ -241,6 +244,7 @@ __all__ = [
     "WorldChatThreadCreate",
     "WorldChatThreadCreateRead",
     "WorldChatThreadListRead",
+    "WorldChatThreadModelUpdate",
     "WorldChatThreadRead",
     "build_request_scope_hash",
     "parse_retrieval_intent_payload",

@@ -10,8 +10,10 @@ import type {
   WorldChatThreadCreateRead,
   WorldChatEntryRead,
   WorldChatThreadListRead,
+  WorldChatThreadModelUpdate,
   WorldChatThreadRead,
 } from "../model/world-chat-contract";
+import { MESSAGE_GOOGLE_GEMINI_MODELS } from "../model/chat-contract";
 
 type WorldChatRequestOptions = Omit<RequestInit, "body"> & {
   body?: unknown;
@@ -106,6 +108,27 @@ export async function createOrGetWorldChatThread(
     !validOutcome ||
     (requiresThread && !payload.thread) ||
     (payload.thread && !worldChatThreadMatchesScope(payload.thread, worldId))
+  ) {
+    throw new WorldChatApiError(502, "world_chat_scope_mismatch");
+  }
+  return payload;
+}
+
+export async function updateWorldChatThreadModel(
+  worldId: string,
+  threadId: string,
+  data: WorldChatThreadModelUpdate,
+): Promise<WorldChatThreadRead> {
+  const payload = await requestWorldChatApi<WorldChatThreadRead>(
+    worldChatApiPath(
+      worldId,
+      `/threads/${encodeURIComponent(threadId)}/model`,
+    ),
+    { body: data, method: "PATCH" },
+  );
+  if (
+    !worldChatThreadMatchesScope(payload, worldId) ||
+    payload.id !== threadId
   ) {
     throw new WorldChatApiError(502, "world_chat_scope_mismatch");
   }
@@ -304,6 +327,9 @@ function worldChatThreadMatchesScope(
 ): value is WorldChatThreadRead {
   if (!value || typeof value !== "object") return false;
   const thread = value as Partial<WorldChatThreadRead>;
+  const supportedModels = new Set<string>(
+    MESSAGE_GOOGLE_GEMINI_MODELS.map((option) => option.value),
+  );
   if (
     typeof thread.id !== "string" ||
     thread.world_id !== worldId ||
@@ -315,6 +341,12 @@ function worldChatThreadMatchesScope(
     typeof thread.requester.world_character_id !== "string" ||
     typeof thread.responding.world_character_id !== "string" ||
     thread.requester.world_character_id === thread.responding.world_character_id ||
+    !supportedModels.has(thread.selected_model ?? "") ||
+    !supportedModels.has(thread.default_model ?? "") ||
+    (thread.model_binding_mode !== "default" &&
+      thread.model_binding_mode !== "thread_override") ||
+    (thread.model_binding_mode === "default" &&
+      thread.selected_model !== thread.default_model) ||
     !Array.isArray(thread.messages)
   ) {
     return false;

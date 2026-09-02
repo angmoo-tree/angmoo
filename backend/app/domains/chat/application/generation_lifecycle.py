@@ -117,6 +117,7 @@ class GenerationLifecycleService:
         reason: ResponseTerminalReason,
         retryable: bool,
         failure_class: str | None = None,
+        failure_diagnostic: dict | None = None,
         call_tracker: dict | None = None,
         now: datetime,
     ) -> ResponseRequestRecord:
@@ -126,6 +127,7 @@ class GenerationLifecycleService:
             reason=reason,
             retryable=retryable,
             failure_class=failure_class,
+            failure_diagnostic=failure_diagnostic,
             call_tracker=call_tracker,
             now=now,
         )

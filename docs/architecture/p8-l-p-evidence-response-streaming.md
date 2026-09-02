@@ -11,7 +11,8 @@ Character Response Generator(CRG)를 generation attempt당 최대 한 번 호출
 ```text
 domains/chat
   request·generation fence, Evidence Bundle, response orchestration,
-  public event protocol, assistant atomic commit
+  public event protocol, assistant atomic commit,
+  World thread model binding(default / thread_override)
 
 domains/memory
   canonical/FTS retrieval과 successful Chat candidate lifecycle
@@ -20,7 +21,8 @@ domains/relationships
   graph primitive·execution·canonical revalidation
 
 integrations/llm
-  Retrieval Router, Canonical Planner, Graph Planner, CRG provider adapters
+  Retrieval Router, Canonical Planner, Graph Planner, CRG provider adapters,
+  provider-family thinking resolver
 
 runtime/chat
   SQLAlchemy identity/policy composition, NDJSON route,
@@ -28,7 +30,8 @@ runtime/chat
 
 features/chat
   composer, 300ms delayed single typing presence, CRG delta,
-  typed failure·explicit retry·terminal rehydrate
+  typed failure·explicit retry·terminal rehydrate,
+  World thread model selector and optimistic rollback
 ```
 
 Chat domain/application/ports는 FastAPI, SQLAlchemy, provider SDK와 runtime을
@@ -40,7 +43,8 @@ query execution, commit은 코드가 소유한다. CRG는 route를 다시 고르
 
 ```text
 POST message
-→ user message + accepted response request commit
+→ current thread binding에서 effective model resolve
+→ user message + accepted response request + immutable model snapshot commit
 → GET NDJSON events
 → lease + accepted event
 → Retrieval Router
@@ -59,6 +63,39 @@ POST message
 하나 포함한다. request-wide Router/Planner schema repair는 최대 하나이며, explicit
 retry는 같은 user message와 response slot을 사용하되 새 request·generation·attempt와
 새 full-path budget을 가진다.
+
+## World thread model binding
+
+World Chat thread의 모델 선택은 `default`와 `thread_override` 두 상태만 가진다.
+`default` thread는 Local 제품 설정의 현재 기본 모델을 따르고, 설정이 바뀌면 다음
+요청 수락 시 새 기본 모델을 snapshot한다. `thread_override` thread는 사용자가 채팅방
+header에서 고른 모델을 유지한다. 채팅방 selector의 `기본 모델 사용`은 override를
+해제하고 현재 기본 모델로 되돌린다.
+
+실행 중인 generation이 있으면 model PATCH는 `409`로 거절된다. UI는 pending,
+streaming, retry 중 selector를 disable하고, model PATCH 실패 시 이전 선택으로
+rollback한 뒤 `모델을 바꾸지 못했어요.`와 명시적 재시도를 제공한다. 모델 변경은
+실패한 응답을 자동 재시도하지 않는다.
+
+요청이 accepted된 뒤 `chat_response_requests.selected_model`은 immutable하다. 설정이나
+thread binding이 이후 바뀌어도 그 request와 diagnostic은 수락 당시 모델을 가리킨다.
+명시적 `[다시 시도]`는 새 request·generation·attempt를 만들므로 재시도 시점의 현재
+binding으로 effective model을 다시 resolve하고 새 snapshot을 저장한다.
+
+## provider-family thinking compatibility
+
+provider adapter는 모델 이름을 코드가 소유하는 closed family로 분류한다.
+
+- Gemini 3는 `thinkingLevel`만 사용한다.
+- Gemini 2.5 Flash / Flash-Lite의 low thinking은 `thinkingBudget: 0`을 사용한다.
+- Gemma 계열에는 Gemini thinking config를 보내지 않는다.
+- 알 수 없는 family는 provider I/O 전에 fail closed한다.
+
+structured JSON을 요구하는 Router·Planner와 text를 생성하는 CRG 모두 같은 resolver를
+사용한다. provider 실패의 durable diagnostic은 node, provider, accepted model,
+normalized failure class, provider status/code/error hint, retryable 여부의 bounded
+allowlist만 저장한다. API key, prompt, raw provider body와 stack trace는 저장하거나
+사용자 stream에 노출하지 않는다.
 
 ## Evidence Bundle
 
@@ -117,7 +154,13 @@ candidate producer·queue·projection 실패는 이미 성공한 Chat commit을 
 
 ## non-scope
 
-P8-L-P는 schema, migration, Embedded SQLite v6, LadybugDB generation을 바꾸지 않는다.
+이 Hotfix는 `message_threads.model_binding_mode` 하나만 추가한다. Alembic
+`20260903_0087`과 Embedded SQLite v7은 기존 thread를 deterministic하게
+`default` 또는 `thread_override`로 backfill하고, unknown model은 fail closed한다.
+기존 실패 request의 accepted `selected_model` history는 다시 쓰지 않는다. v6→v7은
+copy-on-write, manifest digest, rollback 및 installer supported-upgrade fixture 계약을
+유지한다. 새 canonical table이나 LadybugDB generation은 추가하지 않는다.
+
 Memory read/inspector와 owner ON/OFF·pin·correction·delete UI는 P8-L-Q/R, held-out
 quality·warm/cold latency·cross-runtime user Gate와 전체 causal closeout은 P8-L-S가
 소유한다. merge, release와 Production도 별도 사용자 Gate다.

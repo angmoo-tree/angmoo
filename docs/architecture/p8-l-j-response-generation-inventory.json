@@ -208,18 +208,18 @@
     },
     {
       "path": "backend/app/domains/chat/application/generation_lifecycle.py",
-      "sha256": "096c51d0b01ce8cd39080c1d3e813eb113d8694b88224efc7a88736a61322cd4",
-      "size": 4005
+      "sha256": "93f4237d39bcf1b01979be7dbd68e9306b5243c00d29867dec2baa84998b6433",
+      "size": 4104
     },
     {
       "path": "backend/app/domains/chat/ports/response_lifecycle.py",
-      "sha256": "1ebdbb2d374d2003b829647c015c2de9b4c727d2dda5451361cdd7d5473731a3",
-      "size": 2644
+      "sha256": "22037b108a8ba843e1c143e5592bf5cad417508c7f9f1bf05ebf8ad242ef30c9",
+      "size": 2692
     },
     {
       "path": "backend/app/domains/chat/infrastructure/response_lifecycle_repository.py",
-      "sha256": "5c08717cd24cba3ed096729b37af551aa6b9156c4cf354029666474efc0a3aa1",
-      "size": 26256
+      "sha256": "f6c4a4e84e4a7739f4ea78124195177ca38c56374bf41e07141265008d9f6e54",
+      "size": 28192
     },
     {
       "path": "backend/app/domains/memory/domain/canonical_retrieval_plan.py",
@@ -253,8 +253,8 @@
     },
     {
       "path": "backend/tests/test_p8_l_j_response_generation_migration.py",
-      "sha256": "50e0b0d0df9db51a1da189ab4dbff5fa0ed744bd28bc0da0dca2aceb1acf19ea",
-      "size": 4967
+      "sha256": "82713202002d285170a82f8589acaccb8455f67caf04a8b42047c89d73766e3f",
+      "size": 5263
     },
     {
       "path": "docs/architecture/p8-l-j-response-generation-lifecycle.md",

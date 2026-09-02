@@ -59,7 +59,7 @@
   },
   "historical_chain": {
     "current_tree_owner": "P8-L-O",
-    "p8_l_n_sha256": "b897cab121274c4c446602c0481b01514fead9607fe36c4569f416dd2d3d2ecf",
+    "p8_l_n_sha256": "f765297dc4484aac5f8f800acbc9d6eaee5c3c819b04005a4d901b3269065797",
     "predecessor_mode": "frozen_digest"
   },
   "hot_brief_contract": {
@@ -84,7 +84,7 @@
   "owner_stage": "P8-L-O",
   "predecessor": {
     "path": "docs/architecture/p8-l-n-both-workflow-coordinator-inventory.json",
-    "sha256": "b897cab121274c4c446602c0481b01514fead9607fe36c4569f416dd2d3d2ecf",
+    "sha256": "f765297dc4484aac5f8f800acbc9d6eaee5c3c819b04005a4d901b3269065797",
     "size": 6625
   },
   "required_files": [
@@ -150,13 +150,13 @@
     },
     {
       "path": "backend/tests/test_p8_l_o_memory_consolidation_inventory.py",
-      "sha256": "59e0b57d1a1b32156b36277621e9246caa6bcd82814ce618b05187f46cd8122f",
+      "sha256": "d1b13f9f95bc27c3531d8def0dacb3806c7e871cccd36cfd176912cce8005c07",
       "size": 1891
     },
     {
       "path": "docs/architecture/backend-domains.md",
-      "sha256": "5e29457e3dee7bae04fa806c5e1c9b09e102d5fa61c6c4c2f303ed8a814e92e7",
-      "size": 47730
+      "sha256": "140ab57802df2eb529b527a88e0d30fcf7a259c8a00827d5d623fed96b743573",
+      "size": 49073
     },
     {
       "path": "docs/architecture/p8-l-o-memory-consolidation-hot-brief.md",
@@ -165,8 +165,8 @@
     },
     {
       "path": "scripts/ci/generate_p8_l_o_memory_consolidation_inventory.py",
-      "sha256": "8adb9e7316d24392ef8219be25e6a2a13ce77f8cb07c509b2965effa030b436a",
-      "size": 12507
+      "sha256": "4ee0fe6df1f050861a5d4c841c8a7efef31d86c2aa68e164a2643f34d1ad5438",
+      "size": 12486
     }
   ],
   "schema": {

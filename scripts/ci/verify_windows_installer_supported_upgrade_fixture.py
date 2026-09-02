@@ -132,16 +132,25 @@ def _verify_world_chat_identity(
     connection: sqlite3.Connection, fixture: dict[str, Any]
 ) -> None:
     expected_threads = fixture.get("expected_world_chat_threads")
+    source_models = fixture.get("source_world_chat_selected_models")
     if not isinstance(expected_threads, dict) or not expected_threads:
         _fail("supported_upgrade_fixture_contract_invalid")
+    if not isinstance(source_models, dict):
+        _fail("supported_upgrade_fixture_contract_invalid")
+    thread_columns = {
+        str(row[1])
+        for row in connection.execute("PRAGMA table_info(message_threads)").fetchall()
+    }
+    has_model_binding = "model_binding_mode" in thread_columns
     for thread_id, expected in sorted(expected_threads.items()):
         if not isinstance(expected, dict):
             _fail("supported_upgrade_fixture_contract_invalid")
+        binding_projection = ", model_binding_mode" if has_model_binding else ""
         row = connection.execute(
             "SELECT requester_id, character_id, world_id, "
             "requester_world_character_id, responding_world_character_id, "
-            "world_scope_status, selected_model "
-            "FROM message_threads WHERE id = ?",
+            "world_scope_status, selected_model"
+            f"{binding_projection} FROM message_threads WHERE id = ?",
             (thread_id,),
         ).fetchone()
         if row is None or any(
@@ -153,8 +162,17 @@ def _verify_world_chat_identity(
                 "requester_world_character_id",
                 "responding_world_character_id",
                 "world_scope_status",
-                "selected_model",
             )
+        ):
+            _fail("supported_upgrade_world_chat_identity_mismatch")
+        expected_model = (
+            expected.get("selected_model")
+            if has_model_binding
+            else source_models.get(thread_id)
+        )
+        if row["selected_model"] != expected_model or (
+            has_model_binding
+            and row["model_binding_mode"] != expected.get("model_binding_mode")
         ):
             _fail("supported_upgrade_world_chat_identity_mismatch")
         messages = [

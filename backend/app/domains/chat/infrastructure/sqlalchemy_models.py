@@ -26,6 +26,7 @@ from app.domains.chat.domain.generation_lifecycle import (
     ResponseRequestState,
     ResponseTerminalReason,
 )
+from app.domains.chat.domain.model_binding import MESSAGE_MODEL_BINDING_MODES
 from app.domains.chat.domain.retrieval_intent import RetrievalRoute
 from app.domains.chat.domain.workflow_recipe import WorkflowRecipe
 
@@ -103,6 +104,15 @@ class MessageThread(Base):
             "AND responding_world_character_id IS NULL)",
             name="ck_message_threads_world_scope_binding",
         ),
+        CheckConstraint(
+            f"model_binding_mode IN ({_sql_values(MESSAGE_MODEL_BINDING_MODES)})",
+            name="ck_message_threads_model_binding_mode",
+        ),
+        CheckConstraint(
+            "world_scope_status = 'resolved' OR "
+            "model_binding_mode = 'thread_override'",
+            name="ck_message_threads_legacy_model_binding",
+        ),
         ForeignKeyConstraint(
             ["requester_world_character_id", "world_id"],
             ["world_characters.id", "world_characters.world_id"],
@@ -174,6 +184,12 @@ class MessageThread(Base):
     )
     selected_model: Mapped[str] = mapped_column(
         String(120), nullable=False, default="gemini-2.5-flash-lite"
+    )
+    model_binding_mode: Mapped[str] = mapped_column(
+        String(20),
+        nullable=False,
+        default="thread_override",
+        server_default="thread_override",
     )
     response_lease_token: Mapped[Optional[str]] = mapped_column(
         String(64), nullable=True

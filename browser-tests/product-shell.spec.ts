@@ -640,7 +640,9 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
       control_mode: "autonomous",
       profile_capability: "available",
     },
-    selected_model: "gemini-2.5-flash-lite",
+    selected_model: "gemini-3.1-flash-lite",
+    default_model: "gemini-3.1-flash-lite",
+    model_binding_mode: "default",
     last_message_at: "2026-09-01T03:04:00Z",
     created_at: "2026-09-01T03:00:00Z",
     latest_message: {
@@ -715,6 +717,7 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
   };
   let messageAccepted = false;
   let responseCommitted = false;
+  let failNextModelUpdate = false;
 
   await page.route(`**/api/backend/worlds/${worldId}/chat/**`, async (route) => {
     const request = route.request();
@@ -729,6 +732,26 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
         ambiguous_legacy_count: 1,
         max_threads: 5,
       });
+    }
+    if (
+      request.method() === "PATCH" &&
+      url.pathname ===
+        `/api/backend/worlds/${worldId}/chat/threads/${threadId}/model`
+    ) {
+      if (failNextModelUpdate) {
+        failNextModelUpdate = false;
+        return json(route, { detail: "temporary_model_update_failure" }, 503);
+      }
+      const body = request.postDataJSON() as {
+        mode: "default" | "thread_override";
+        selected_model?: WorldChatThreadRead["selected_model"];
+      };
+      worldThread.model_binding_mode = body.mode;
+      worldThread.selected_model =
+        body.mode === "default"
+          ? worldThread.default_model
+          : (body.selected_model ?? worldThread.selected_model);
+      return json(route, worldThread);
     }
     if (
       request.method() === "GET" &&
@@ -889,6 +912,25 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
   await expect(page.getByText("답하는 앵무", { exact: true })).toBeVisible();
   await expect(page.getByText("여기는 어느 World야?", { exact: true })).toBeVisible();
   await expect(page.getByText("World 경계를 기억하고 있어요.", { exact: true })).toBeVisible();
+  const modelSelect = page.getByRole("combobox", { name: "응답 모델" });
+  await expect(modelSelect).toHaveValue("default");
+  await modelSelect.selectOption("gemini-2.5-flash-lite");
+  await expect(modelSelect).toHaveValue("gemini-2.5-flash-lite");
+  await expect(
+    page.getByText("Gemini 2.5 Flash-Lite을 이 대화에서 고정해 사용합니다."),
+  ).toBeVisible();
+  failNextModelUpdate = true;
+  await modelSelect.selectOption("default");
+  await expect(modelSelect).toHaveValue("gemini-2.5-flash-lite");
+  const modelFailure = page.getByRole("alert").filter({
+    hasText: "모델을 바꾸지 못했어요.",
+  });
+  await expect(modelFailure).toBeVisible();
+  await modelFailure.getByRole("button", { name: "다시 시도" }).click();
+  await expect(modelSelect).toHaveValue("default");
+  await expect(
+    page.getByText("기본 모델 Gemini 3.1 Flash-Lite을 다음 답장에 사용합니다."),
+  ).toBeVisible();
   const composer = page.getByRole("textbox", {
     name: "친구 앵무에게 보낼 메시지",
   });
@@ -899,9 +941,11 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
   await expect(
     page.getByRole("status", { name: "친구 앵무가 응답을 입력하고 있습니다." }),
   ).toBeVisible();
+  await expect(modelSelect).toBeDisabled();
   await expect(
     page.getByText(generatedAssistantMessage.content, { exact: true }),
   ).toBeVisible();
+  await expect(modelSelect).toBeEnabled();
   await expect(page.getByText("Canonical Planner", { exact: false })).toHaveCount(0);
   await expect(page.getByText("Evidence Bundle", { exact: false })).toHaveCount(0);
 
@@ -910,6 +954,9 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
     new RegExp(`/worlds/${worldId}/chat/${threadId}$`),
   );
   await expect(page.locator('[data-world-chat-surface="thread"]')).toBeVisible();
+  expect(worldChatCalls).toContain(
+    `PATCH /api/backend/worlds/${worldId}/chat/threads/${threadId}/model`,
+  );
   expect(worldChatCalls).toContain(
     `POST /api/backend/worlds/${worldId}/chat/threads/${threadId}/messages`,
   );
@@ -963,7 +1010,9 @@ test("P8-L-E World social author profile and letter CTA open one exact World Cha
     world_id: worldId,
     requester,
     responding,
-    selected_model: "gemini-2.5-flash-lite",
+    selected_model: "gemini-3.1-flash-lite",
+    default_model: "gemini-3.1-flash-lite",
+    model_binding_mode: "default",
     last_message_at: null,
     created_at: "2026-09-01T04:00:00Z",
     latest_message: null,

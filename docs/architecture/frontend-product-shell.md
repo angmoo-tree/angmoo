@@ -664,3 +664,13 @@ separate. The former keeps draft content and its idempotency key for `다시
 requesting a new generation for `다시 시도`. Non-retryable credential or
 configuration failures expose an allowed Settings CTA instead of a misleading
 retry. Memory owner/read surfaces remain P8-L-Q/R scope.
+
+The same `features/chat` boundary owns the World-scoped thread model selector.
+Its two durable meanings are `기본 모델 사용`, which follows the current Local
+product setting, and a fixed thread override. The selected and default model
+come from the thread read contract rather than browser storage. The selector is
+disabled while a message, generation, stream or retry is active; a failed model
+PATCH restores the previous value and exposes a bounded retry surface. Changing
+the model after a failed answer does not implicitly regenerate that answer.
+Next, static and Tauri therefore share one binding, rollback and busy-state
+contract.

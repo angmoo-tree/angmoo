@@ -128,7 +128,7 @@ backend/app/
 | feed and `social` | `app.domains.social.public` | L4 | P5 search, canonical source writes, observation and causal apply are active; concrete SQLite adapters are under `app.runtime.social` |
 | `relationships` graph read and P8 recall | `app.domains.relationships.public` | T2.5/L4/P8-L | canonical API read remains active; P8-L-I adds the closed six-primitive recall facade, canonical/observation revalidation and bounded degraded policy; P8-L-M adds the ID-free Graph Planner port, strict direction-aware plan validator and typed execution over that I boundary while runtime composition stays under `app.runtime.graph_projection` |
 | relationships write and graph projection | domain/runtime public ports | L4 | PR E removes horizontal service/CRUD/model bridges; runtime SQLAlchemy composition is isolated under `app.runtime.relationships` and graph lifecycle under `app.runtime.graph_projection` |
-| Chat entry, thread, message, response request/generation, retry and response commit | `app.domains.chat.public` | P8-L | P8-L-B/D establish the domain and World-scoped identity; P8-L-J~N add durable lifecycle, typed Router/Planners and bounded BOTH; P8-L-P connects live send/retry, immutable Evidence Bundle, exactly-once CRG, fenced commit and CRG-only NDJSON transport |
+| Chat entry, thread, model binding, message, response request/generation, retry and response commit | `app.domains.chat.public` | P8-L | P8-L-B/D establish the domain and World-scoped identity; P8-L-J~N add durable lifecycle, typed Router/Planners and bounded BOTH; P8-L-P connects live send/retry, immutable Evidence Bundle, exactly-once CRG, fenced commit and CRG-only NDJSON transport; its PR #245 Hotfix adds default/override thread model binding, immutable accepted-request model snapshots and family-safe provider thinking resolution |
 | canonical Memory setting, candidate, item, evidence, lifecycle and recall | `app.domains.memory.public` | P8-L | P8-L-F owns the seven-table canonical schema and opt-in scope, P8-L-G/H own provider-free write and typed canonical/FTS read, P8-L-L/O add Canonical Planner and background maintenance, and P8-L-P invokes the existing candidate lifecycle only after a successful Chat commit |
 | remaining active legacy or ownerless shim | none | L6 | final removal gate |
 
@@ -743,9 +743,26 @@ are fenced and atomic. A separate provider-free producer then proposes the
 committed assistant message to canonical Memory when that exact responding
 WorldCharacter scope is ON; producer failure cannot roll back Chat.
 
-P8-L-P changes no schema, migration, Embedded SQLite v6 generation or
-LadybugDB generation. The exact bounds, public event allowlist, after-commit
-contract and executable gates are in
+The P8-L-P PR #245 Hotfix keeps model policy in `domains/chat`: a thread is
+either `default`, which follows the current Local product preference, or
+`thread_override`, which preserves the World-scoped selection. Runtime code
+resolves the effective model before accepting a request and persists that
+immutable snapshot on `chat_response_requests`; explicit retry creates a new
+request and snapshots the binding again. Active generation rejects model
+changes. Provider adapters use a closed family resolver: Gemini 3 receives
+`thinkingLevel`, Gemini 2.5 Flash/Flash-Lite low thinking receives
+`thinkingBudget: 0`, Gemma receives no Gemini thinking field, and unknown
+families fail before provider I/O. Durable failure diagnostics use a bounded
+allowlist and never persist credentials, prompts or raw provider bodies.
+
+Alembic `20260903_0087` and Embedded SQLite v7 add only
+`message_threads.model_binding_mode`; deterministic backfill uses the current
+product preference, preserves unambiguous thread overrides and fails closed on
+unknown models without rewriting historical accepted request snapshots. The
+copy-on-write manifest/digest/rollback and installer supported-upgrade fixture
+contracts remain enforced. There is no new canonical table or LadybugDB
+generation. The exact bounds, public event allowlist, after-commit contract and
+executable gates are in
 `docs/architecture/p8-l-p-evidence-response-streaming.md` and its generated
 inventory. Memory read/control UI, held-out quality/latency and cross-runtime
 user closeout remain P8-L-Q~S scope.

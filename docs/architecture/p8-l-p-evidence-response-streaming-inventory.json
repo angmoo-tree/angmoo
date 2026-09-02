@@ -37,11 +37,17 @@
     "successful_chat_after_commit_candidate",
     "memory_off_and_producer_failure_isolation",
     "typing_delay_and_first_delta_replacement",
-    "stale_scope_generation_attempt_sequence_guard"
+    "stale_scope_generation_attempt_sequence_guard",
+    "default_and_override_model_binding",
+    "accepted_request_model_snapshot_and_retry_resnapshot",
+    "provider_family_thinking_compatibility",
+    "safe_durable_provider_failure_diagnostic",
+    "embedded_v6_to_v7_model_binding_upgrade",
+    "model_selector_busy_guard_and_failure_rollback"
   ],
   "historical_chain": {
     "current_tree_owner": "P8-L-P",
-    "p8_l_o_sha256": "3fe3a33e970c0d50b915e93f9cfd1f4d2f78288b54d17ec2dce48aa0e2422f40",
+    "p8_l_o_sha256": "0d09d1c6b366c2fa773599abff97584b544d210671a68bfbe2be1d4414a709b1",
     "predecessor_mode": "frozen_digest"
   },
   "memory_after_commit": {
@@ -53,25 +59,55 @@
     "source": "committed_assistant_message",
     "source_type": "CHAT_MESSAGE"
   },
+  "model_hotfix": {
+    "accepted_request_model_snapshot_immutable": true,
+    "active_generation_model_update_status": 409,
+    "binding_modes": [
+      "default",
+      "thread_override"
+    ],
+    "default_binding_follows_current_product_preference": true,
+    "durable_provider_diagnostic_fields": [
+      "node",
+      "provider",
+      "model",
+      "failure_class",
+      "provider_status",
+      "provider_code",
+      "provider_error_hint",
+      "retryable"
+    ],
+    "explicit_retry_resnapshots_current_binding": true,
+    "gemini_2_5_low_thinking_budget": 0,
+    "gemini_3_thinking_field": "thinkingLevel",
+    "gemma_thinking_config": null,
+    "model_update_failure_rolls_back": true,
+    "unknown_model_family": "fail_before_provider_io",
+    "world_scoped_selector": true
+  },
   "non_scope": [
     "memory_read_or_owner_control_ui",
     "provider_native_token_transport",
     "held_out_quality_or_latency_pass",
     "cross_runtime_user_gate",
-    "release_or_production",
-    "installer_or_schema_change"
+    "release_or_production"
   ],
   "owner_stage": "P8-L-P",
   "predecessor": {
     "path": "docs/architecture/p8-l-o-memory-consolidation-inventory.json",
-    "sha256": "3fe3a33e970c0d50b915e93f9cfd1f4d2f78288b54d17ec2dce48aa0e2422f40",
+    "sha256": "0d09d1c6b366c2fa773599abff97584b544d210671a68bfbe2be1d4414a709b1",
     "size": 7037
   },
   "required_files": [
     {
+      "path": "backend/app/alembic/versions/20260903_0087_world_chat_model_binding.py",
+      "sha256": "0b04326b5da9cc3eb2e7dc21c407d910c488283664feca6d02710e60be047195",
+      "size": 2282
+    },
+    {
       "path": "backend/app/api/v1/routes/world_chat.py",
-      "sha256": "b4e3901f2f60ce9381d9e41fa12c88c4690b5a4852fff492c4b16c3d5a724bcf",
-      "size": 4054
+      "sha256": "804db3e2243680b7af80dbd45f0901098b0772699016f32310df12d8e47d8999",
+      "size": 5331
     },
     {
       "path": "backend/app/api/v1/routes/world_chat_response.py",
@@ -80,8 +116,8 @@
     },
     {
       "path": "backend/app/domains/chat/api/schemas.py",
-      "sha256": "92ee6d6d0c25fe0f54d5fc84d0e3f5ca9d42cca12c54e54343c327c42002c8a1",
-      "size": 6529
+      "sha256": "b7d20e67b49e5ec72291c0fda1eef07e7955b9167d7594e17f94ec197a8dbd0b",
+      "size": 7739
     },
     {
       "path": "backend/app/domains/chat/application/character_response.py",
@@ -94,9 +130,14 @@
       "size": 13170
     },
     {
+      "path": "backend/app/domains/chat/application/generation_lifecycle.py",
+      "sha256": "93f4237d39bcf1b01979be7dbd68e9306b5243c00d29867dec2baa84998b6433",
+      "size": 4104
+    },
+    {
       "path": "backend/app/domains/chat/application/response_workflow.py",
-      "sha256": "09a416f7ca922c2f6d2650467a407a4bc463d442ce7a3a3ddb4ee50f05067b08",
-      "size": 24169
+      "sha256": "5a594d0f67cb7fd894c6b673bb7d95a135df9ca5c1bdeb8803932624e1baa059",
+      "size": 25017
     },
     {
       "path": "backend/app/domains/chat/domain/evidence_bundle.py",
@@ -104,14 +145,34 @@
       "size": 7648
     },
     {
+      "path": "backend/app/domains/chat/domain/model_binding.py",
+      "sha256": "178a9d1acec30f5daa83376de7101c237c81e253ba33aa71a75c35d4043c26ce",
+      "size": 433
+    },
+    {
+      "path": "backend/app/domains/chat/infrastructure/model_binding_migration.py",
+      "sha256": "f95595aed5a808bedb616d133e0a043a545d9a7171d26e08c3941e1126661816",
+      "size": 7518
+    },
+    {
       "path": "backend/app/domains/chat/infrastructure/response_lifecycle_repository.py",
-      "sha256": "5c08717cd24cba3ed096729b37af551aa6b9156c4cf354029666474efc0a3aa1",
-      "size": 26256
+      "sha256": "f6c4a4e84e4a7739f4ea78124195177ca38c56374bf41e07141265008d9f6e54",
+      "size": 28192
+    },
+    {
+      "path": "backend/app/domains/chat/infrastructure/sqlalchemy_models.py",
+      "sha256": "1c18e926cf585d4ee5ce2b08ffab2e0ac84208e922c42023210f60bb5030c7c4",
+      "size": 15215
     },
     {
       "path": "backend/app/domains/chat/ports/character_response_generator.py",
-      "sha256": "efc9eee10a6510f93a79927c0288bdba786cfc1590f812cb37aa194506dff8a4",
-      "size": 2958
+      "sha256": "2f0e74eb5b16c90a8086e743eb5615e440d7ddda98d407c337e35c29fb6983cd",
+      "size": 3182
+    },
+    {
+      "path": "backend/app/domains/chat/ports/response_lifecycle.py",
+      "sha256": "22037b108a8ba843e1c143e5592bf5cad417508c7f9f1bf05ebf8ad242ef30c9",
+      "size": 2692
     },
     {
       "path": "backend/app/domains/chat/ports/response_workflow.py",
@@ -124,9 +185,19 @@
       "size": 745
     },
     {
+      "path": "backend/app/integrations/direct_llm.py",
+      "sha256": "564867cf1d390722c5a8b4748deb3b55a1fc7675632243b25ad2df6194c45fed",
+      "size": 40166
+    },
+    {
       "path": "backend/app/integrations/llm/character_response_generator.py",
-      "sha256": "3b21faa8a6a77a57964c33ac0051b797c70773dc69fc1a4aaf797f70d0753cfe",
-      "size": 6555
+      "sha256": "85f8f2a44cd7a9c77d7c2ccbb5c8517c0855552cd61eb5939f41777562eacbe8",
+      "size": 6634
+    },
+    {
+      "path": "backend/app/providers/gemini.py",
+      "sha256": "a071a97fb734fc3497a9e71aeba1372126044397324ea74da71b7041f29ef81e",
+      "size": 11331
     },
     {
       "path": "backend/app/runtime/chat/memory_producer.py",
@@ -134,9 +205,34 @@
       "size": 1635
     },
     {
+      "path": "backend/app/runtime/chat/sqlalchemy_service.py",
+      "sha256": "06cb520ba70fcbf03187ea78d65842237b890c5d51e44f6ba0803eb0f85fbc59",
+      "size": 58644
+    },
+    {
       "path": "backend/app/runtime/chat/world_generation.py",
-      "sha256": "eadc3b6d56c8f64ce9a9c4d789be128bc1d22d5354b0954a1501f22968aa0bf1",
-      "size": 24238
+      "sha256": "655b90a1aa5ab64ccd454dc530b35000209ac73579bf2266fd4b1b704f23ae33",
+      "size": 24734
+    },
+    {
+      "path": "backend/app/runtime/migrations/sqlite_versions/registry.py",
+      "sha256": "bc87bd49aec6ceace3218c7774a14a8cec6bf00f92d835553d7b6f4c23a42e1c",
+      "size": 7286
+    },
+    {
+      "path": "backend/app/runtime/migrations/sqlite_versions/v6_to_v7_chat_model_binding.py",
+      "sha256": "0ef546006d5608833a19a1de32dcab7b78f9f854e4bfe56934e440e8feb8abfc",
+      "size": 2376
+    },
+    {
+      "path": "backend/app/runtime/migrations/sqlite_versions/manifests/v7.json",
+      "sha256": "828ecb0171995aa563eb5a6b4e91e8bc91fbd7f03700467a0cca47c44ed2a682",
+      "size": 2949
+    },
+    {
+      "path": "backend/app/runtime/persistence/sqlite_schema.py",
+      "sha256": "ed9d043d4a0206e6cf738f6df490932d0d4bcd54c588404870fea337ceeebe80",
+      "size": 12709
     },
     {
       "path": "backend/app/runtime/memory/sqlalchemy_source_reader.py",
@@ -145,8 +241,8 @@
     },
     {
       "path": "backend/tests/test_p8_l_p_evidence_response_streaming.py",
-      "sha256": "590319ab3cd80d3396ef1dc00d47494145bd7c386cf2f7311c29027c5a163e3e",
-      "size": 30914
+      "sha256": "974b0eef6c37f5e56cd3a515ef08c2aa9aee06401a927a221ca06e9a87f83e0a",
+      "size": 33042
     },
     {
       "path": "backend/tests/test_p8_l_p_frontend_streaming.py",
@@ -154,64 +250,79 @@
       "size": 1902
     },
     {
+      "path": "backend/tests/test_p8_l_p_model_hotfix.py",
+      "sha256": "276f571ce459152adc8928e236ed2102539c48afa61edd75eb0a45ced71296ae",
+      "size": 10649
+    },
+    {
       "path": "browser-tests/product-shell.spec.ts",
-      "sha256": "c3d8015352179b4332350373da6e1fcad8f03336423478773ad1cc4a1b0b97a4",
-      "size": 82742
+      "sha256": "ec9b29c10aef1bb09675e47178173328fb5b20ffd0ad93b11f0e1e695a16c35b",
+      "size": 84813
     },
     {
       "path": "browser-tests/static-product-shell.spec.ts",
-      "sha256": "8cac949c9be9315be6b2846839d774cc23b19e8fd38a97b695a15762cdefaab6",
-      "size": 142069
+      "sha256": "4bf234292846efd9fbfdb17554c34de17ea07b163d470b1b05466bb8d32e8aec",
+      "size": 142148
     },
     {
       "path": "frontend/DESIGN.md",
-      "sha256": "65016e7ecc0e6e0863818083f57673ca3c1bd63ade2280f383fe51db4e1bd386",
-      "size": 75329
+      "sha256": "339cf6ba97fbef12d094c9f9567d5f41f0ccab2e714416a3ef042ca427392917",
+      "size": 76089
     },
     {
       "path": "frontend/src/features/chat/api/world-chat-client.ts",
-      "sha256": "f066c9d389860d4336759ea0186d6aa10ac0c0400515d64a11270645418fb7e2",
-      "size": 13582
+      "sha256": "f1c77a884b5a4ac1bb2436d6e99853713391ff3e1e4ac8faee9158c18c6f4e89",
+      "size": 14673
     },
     {
       "path": "frontend/src/features/chat/model/world-chat-contract.ts",
-      "sha256": "e226493dc6d3334a77acdb7023a4cf721a1656c810c8710f6c71b8eb68fd5bac",
-      "size": 4055
+      "sha256": "cf20d3374930617e566e3a97a85615f844de1c1674e15e69439f092263679b20",
+      "size": 4394
     },
     {
       "path": "frontend/src/features/chat/ui/world-chat.module.css",
-      "sha256": "839e655e9a00d2ed9ab229aebbd3c43533bb38bd4c273bc6c44b251a81f994d2",
-      "size": 9991
+      "sha256": "e08cd86dd12b1962e53873a9c02ec937b8c824185e2ee5c1f47d2700cf855043",
+      "size": 11363
     },
     {
       "path": "frontend/src/features/chat/ui/world-chat.tsx",
-      "sha256": "6bb1bf37e8f3ba2b444059979a8bfcc3b4a85be1961f4bcd90c5b92732515e5c",
-      "size": 28039
+      "sha256": "c2e7dbe0a4e550777fa330bcfde1799ff383153b62c25f12c057c4e777694105",
+      "size": 32178
     },
     {
       "path": "docs/architecture/backend-domains.md",
-      "sha256": "5e29457e3dee7bae04fa806c5e1c9b09e102d5fa61c6c4c2f303ed8a814e92e7",
-      "size": 47730
+      "sha256": "140ab57802df2eb529b527a88e0d30fcf7a259c8a00827d5d623fed96b743573",
+      "size": 49073
     },
     {
       "path": "docs/architecture/frontend-design-reference.md",
-      "sha256": "7e4cb0ca62bc2536f11497b2e0b0be24a8b2063de0af8c6ae1bb97e2fe3e5328",
-      "size": 35793
+      "sha256": "67223bffb690cdb4a7616a271213f97b17d54bf971787e7462d46c0b183ab147",
+      "size": 36338
     },
     {
       "path": "docs/architecture/frontend-product-shell.md",
-      "sha256": "eb0e1171f38287f5282a81978aaf668a5aea3c364483f18b55cc5b69d1f80779",
-      "size": 38192
+      "sha256": "5663df34aaebf8d380e645af2704a44a3580ef18352f03127739d3861e32324e",
+      "size": 38836
     },
     {
       "path": "docs/architecture/p8-l-p-evidence-response-streaming.md",
-      "sha256": "225a7c18aaf7938ecb61635d34c39e7cd8fbaf3990e45d7978e565794071fc9f",
-      "size": 6397
+      "sha256": "ef51bd6a0a5ee0f64ab46047fe5dd22d456403df53443af325011caa27b27fe9",
+      "size": 9121
+    },
+    {
+      "path": "scripts/ci/build_windows_installer_supported_upgrade_fixture.py",
+      "sha256": "48c1ccb1f37f5ecf7501f7477f72aa904a275a5fb7d99ac00659fb69031b2996",
+      "size": 33172
     },
     {
       "path": "scripts/ci/generate_p8_l_p_evidence_response_streaming_inventory.py",
-      "sha256": "082a62994acd5209e957ad2cd5c4c0bfd07bd4b01644a62ef10e41f8dbdc4706",
-      "size": 12174
+      "sha256": "f45f55e611cfbc2206b11dc291558959062d844dba46cfee97e0edb913541095",
+      "size": 15433
+    },
+    {
+      "path": "scripts/ci/verify_windows_installer_supported_upgrade_fixture.py",
+      "sha256": "8bfd5942652e306eb82977ef49a5116f2517f6c72fca42e9b123d71418b91703",
+      "size": 21816
     }
   ],
   "route_call_caps": {
@@ -222,11 +333,17 @@
     "GRAPH": 3
   },
   "schema": {
-    "current_embedded_schema_version": 6,
-    "new_alembic_migration": null,
+    "canonical_table_count": 95,
+    "current_embedded_schema_version": 7,
+    "new_alembic_migration": "20260903_0087",
+    "new_canonical_columns": [
+      "message_threads.model_binding_mode"
+    ],
     "new_canonical_tables": [],
-    "new_embedded_schema_version": null,
-    "new_ladybug_generation": null
+    "new_embedded_schema_version": 7,
+    "new_ladybug_generation": null,
+    "source_migration_count": 86,
+    "source_revision": "20260903_0087"
   },
   "schema_version": 1,
   "stream_contract": {

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from collections.abc import Mapping
 from typing import Any, Protocol
 
 from app.domains.chat.domain.evidence_bundle import EvidenceBundle
@@ -15,6 +16,7 @@ class CharacterResponseGeneratorError(RuntimeError):
         *,
         retryable: bool,
         physical_attempt_count: int = 1,
+        provider_diagnostic: Mapping[str, Any] | None = None,
     ) -> None:
         if not failure_class or not 1 <= physical_attempt_count <= 2:
             raise ValueError("character_response_error_invalid")
@@ -23,6 +25,9 @@ class CharacterResponseGeneratorError(RuntimeError):
         self.retryable = retryable
         self.physical_attempt_count = physical_attempt_count
         self.call_tracker: dict[str, Any] | None = None
+        self.provider_diagnostic = (
+            None if provider_diagnostic is None else dict(provider_diagnostic)
+        )
 
 
 @dataclass(frozen=True, slots=True)

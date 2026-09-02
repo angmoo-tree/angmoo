@@ -38,6 +38,18 @@ class ChatService:
     ) -> Any:
         return self._runtime.create_or_get_world_thread(db, user, world_id, data)
 
+    def update_world_thread_model(
+        self,
+        db: Any,
+        user: Any,
+        world_id: str,
+        thread_id: str,
+        data: Any,
+    ) -> Any:
+        return self._runtime.update_world_thread_model(
+            db, user, world_id, thread_id, data
+        )
+
     def accept_world_message(
         self, db: Any, user: Any, world_id: str, thread_id: str, data: Any
     ) -> Any:

@@ -10,7 +10,11 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.core.db import Base
-from app.domains.chat.api.schemas import WorldChatMessageCreate, WorldChatRetryCreate
+from app.domains.chat.api.schemas import (
+    MessageSettingsUpdate,
+    WorldChatMessageCreate,
+    WorldChatRetryCreate,
+)
 from app.domains.chat.application.both_retrieval import (
     BothRetrievalResult,
     WorkflowCoordinatorMetrics,
@@ -99,6 +103,7 @@ from app.runtime.chat.world_generation import (
     retry_world_response,
 )
 from app.runtime.chat.memory_producer import SqlAlchemySuccessfulChatMemoryProducer
+from app.runtime.chat import sqlalchemy_service as world_chat
 
 
 NOW = datetime(2026, 9, 2, 12, tzinfo=UTC)
@@ -225,6 +230,13 @@ def response_session() -> Session:
     session.flush()
     session.add_all([requester, responding])
     session.flush()
+    session.add(
+        models.UserMessagePreference(
+            user_id=owner.id,
+            default_model="gemini-3.1-flash-lite",
+        )
+    )
+    session.flush()
     thread = models.MessageThread(
         id="p-thread",
         requester_id=owner.id,
@@ -233,7 +245,10 @@ def response_session() -> Session:
         requester_world_character_id=requester.id,
         responding_world_character_id=responding.id,
         world_scope_status="resolved",
-        selected_model="fixture-model",
+        # Simulate a thread created before the user changed their global
+        # default.  The default binding must resolve 3.1 at acceptance time.
+        selected_model="gemini-2.5-flash-lite",
+        model_binding_mode="default",
     )
     session.add(thread)
     session.flush()
@@ -640,7 +655,20 @@ def test_failure_is_durable_retryable_and_partial_assistant_is_not_committed(
     record = _request(response_session, route)
     response_session.commit()
     generator = _Generator(
-        failure=CharacterResponseGeneratorError("provider_timeout", retryable=True)
+        failure=CharacterResponseGeneratorError(
+            "provider_timeout",
+            retryable=True,
+            provider_diagnostic={
+                "node": "character_response_generator",
+                "provider": "google",
+                "model": "gemini-2.5-flash-lite",
+                "failure_class": "timeout",
+                "provider_status": "DEADLINE_EXCEEDED",
+                "provider_code": 504,
+                "provider_error_hint": "provider_timeout",
+                "retryable": True,
+            },
+        )
     )
     memory_producer = _MemoryProducer()
     workflow = _workflow(
@@ -666,6 +694,16 @@ def test_failure_is_durable_retryable_and_partial_assistant_is_not_committed(
     assert failed.state is ResponseRequestState.FAILED
     assert failed.retryable is True
     assert failed.node_state["failure_class"] == "provider_timeout"
+    assert failed.node_state["provider_diagnostic"] == {
+        "node": "character_response_generator",
+        "provider": "google",
+        "model": "gemini-2.5-flash-lite",
+        "failure_class": "provider_timeout",
+        "provider_status": "DEADLINE_EXCEEDED",
+        "provider_code": 504,
+        "provider_error_hint": "provider_timeout",
+        "retryable": True,
+    }
     assert failed.call_tracker["logical_counts"]["character_response_generator"] == 1
     assert failed.call_tracker["physical_counts"]["character_response_generator"] == 1
     assert response_session.scalar(
@@ -829,6 +867,15 @@ def test_send_replay_and_retry_reuse_one_user_message_and_response_slot(
     )
     assert replayed.outcome == "replayed"
     assert replayed.user_message.id == accepted.user_message.id
+    accepted_snapshot = response_session.get(
+        models.ChatResponseRequest,
+        accepted.response_request.request_id,
+    )
+    assert accepted_snapshot is not None
+    assert accepted_snapshot.selected_model == "gemini-3.1-flash-lite"
+    persisted_thread = response_session.get(models.MessageThread, "p-thread")
+    assert persisted_thread is not None
+    assert persisted_thread.selected_model == "gemini-3.1-flash-lite"
 
     repository = SqlAlchemyResponseLifecycleRepository(response_session)
     record = repository.get_request(accepted.response_request.request_id)
@@ -856,6 +903,11 @@ def test_send_replay_and_retry_reuse_one_user_message_and_response_slot(
         now=now,
     )
     response_session.commit()
+    world_chat.update_user_settings(
+        response_session,
+        owner,
+        MessageSettingsUpdate(default_model="gemini-2.5-flash"),
+    )
     retried = retry_world_response(
         response_session,
         owner,
@@ -871,6 +923,12 @@ def test_send_replay_and_retry_reuse_one_user_message_and_response_slot(
     assert retried.response_request.response_slot_id == accepted.response_request.response_slot_id
     assert retried.response_request.attempt_number == 2
     assert retried.response_request.generation_id != accepted.response_request.generation_id
+    retry_snapshot = response_session.get(
+        models.ChatResponseRequest,
+        retried.response_request.request_id,
+    )
+    assert retry_snapshot is not None
+    assert retry_snapshot.selected_model == "gemini-2.5-flash"
     assert response_session.scalar(
         select(func.count(models.MessageMessage.id)).where(
             models.MessageMessage.thread_id == "p-thread",

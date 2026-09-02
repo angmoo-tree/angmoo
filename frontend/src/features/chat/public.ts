@@ -21,6 +21,7 @@ export {
   retryWorldChatResponse,
   sendWorldChatMessage,
   streamWorldChatResponse,
+  updateWorldChatThreadModel,
   WorldChatApiError,
 } from "./api/world-chat-client";
 export {
@@ -48,11 +49,13 @@ export type {
   WorldChatGenerationRequestRead,
   WorldChatGenerationState,
   WorldChatLatestRequestRead,
+  WorldChatModelBindingMode,
   WorldChatMessageAcceptRead,
   WorldChatRoleRead,
   WorldChatThreadCreate,
   WorldChatThreadCreateRead,
   WorldChatThreadListRead,
+  WorldChatThreadModelUpdate,
   WorldChatThreadRead,
 } from "./model/world-chat-contract";
 export { MessageThreadClient } from "./ui/message-thread-client";

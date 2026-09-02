@@ -112,6 +112,7 @@ def build_gemini_developer_response_schema(
 
 def build_generate_content_config(
     *,
+    model: str,
     system_prompt: str,
     max_output_tokens: int,
     response_mime_type: str | None,
@@ -130,11 +131,46 @@ def build_generate_content_config(
         config_kwargs["responseJsonSchema"] = response_schema
     elif response_schema is not None:
         config_kwargs["responseSchema"] = response_schema
-    if thinking_level:
-        config_kwargs["thinkingConfig"] = types.ThinkingConfig(
-            thinkingLevel=thinking_level
-        )
+    thinking_config = resolve_gemini_thinking_config(
+        model=model,
+        thinking_level=thinking_level,
+    )
+    if thinking_config is not None:
+        config_kwargs["thinkingConfig"] = thinking_config
     return types.GenerateContentConfig(**config_kwargs)
+
+
+def resolve_gemini_thinking_config(
+    *,
+    model: str,
+    thinking_level: str | None,
+) -> types.ThinkingConfig | None:
+    """Map Angmoo's bounded intent to the selected model family's API.
+
+    Gemini 3 supports ``thinkingLevel`` while Gemini 2.5 uses a numeric
+    ``thinkingBudget``.  Gemma models do not accept Gemini thinking controls.
+    Unknown families fail before provider I/O instead of guessing a config.
+    """
+
+    normalized_model = model.strip().lower()
+    normalized_level = (
+        None if thinking_level is None else thinking_level.strip().lower()
+    )
+    if normalized_model.startswith("gemma-"):
+        return None
+    if normalized_model.startswith("gemini-3."):
+        if not normalized_level:
+            return None
+        return types.ThinkingConfig(thinkingLevel=normalized_level)
+    if normalized_model.startswith("gemini-2.5-"):
+        if not normalized_level:
+            return None
+        if normalized_level != "low":
+            raise ValueError(
+                "gemini_2_5_thinking_level_requires_explicit_budget_policy"
+            )
+        return types.ThinkingConfig(thinkingBudget=0)
+    raise ValueError(f"unsupported_gemini_thinking_model_family:{model}")
 
 
 def _text_from_response(response: Any) -> str:
@@ -180,6 +216,7 @@ def _generate_content_sync(request: ProviderRequest) -> ProviderResponse:
         ),
     )
     config = build_generate_content_config(
+        model=request.model,
         system_prompt=request.system_prompt,
         max_output_tokens=request.max_output_tokens,
         response_mime_type=request.response_mime_type,

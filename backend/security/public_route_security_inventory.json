@@ -552,6 +552,11 @@
       "module": "app.api.v1.routes.worlds",
       "endpoint": "update_world_character_role"
     },
+    "PATCH /api/v1/worlds/{world_id}/chat/threads/{thread_id}/model": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_chat",
+      "endpoint": "update_world_thread_model"
+    },
     "PATCH /api/v1/worlds/{world_id}/owner-character": {
       "access": "owner-only",
       "module": "app.domains.world_characters.api.routes",

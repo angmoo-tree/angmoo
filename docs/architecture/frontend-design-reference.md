@@ -218,6 +218,14 @@ generation, attempt and sequence mismatch events are rejected before UI state
 changes. Only CRG text is streamed; provider/router/planner/database/evidence
 internals remain hidden.
 
+The Chat header also adapts the Local model selection control. `기본 모델 사용`
+means that this World thread follows the current product default; choosing a
+specific supported model creates a thread override. The control is disabled
+during pending, streaming and retry work. An update failure rolls the visible
+selection back and presents `모델을 바꾸지 못했어요.` with an explicit retry;
+it never starts response retry by itself. Provider-family thinking fields and
+the accepted model snapshot remain backend-only diagnostics.
+
 ## Feature-first ownership contract
 
 The existing feature-first boundary remains authoritative:

@@ -650,6 +650,7 @@ def _direct_llm_error_from_provider(
     safe_message: str | None = None,
     provider_error: dict[str, Any] | None,
     provider_error_hint: str | None,
+    provider_diagnostic: dict[str, Any],
 ) -> DirectLlmError:
     error = DirectLlmError(
         (safe_message or redact_secret_text(str(exc)))[:1000]
@@ -658,11 +659,49 @@ def _direct_llm_error_from_provider(
         setattr(error, "provider_error", provider_error)
     if provider_error_hint:
         setattr(error, "provider_error_hint", provider_error_hint)
+    setattr(error, "provider_diagnostic", provider_diagnostic)
     return error
+
+
+def _bounded_provider_diagnostic(
+    *,
+    context: DirectLlmCallContext,
+    failure_class: str,
+    provider_error: dict[str, Any] | None,
+    provider_error_hint: str | None,
+) -> dict[str, Any]:
+    """Return the only durable provider-failure fields Chat may retain."""
+
+    details = provider_error or {}
+    code = details.get("provider_http_status")
+    status = details.get("provider_status")
+    retryable = (
+        failure_class == "timeout"
+        or code in {408, 429, 500, 502, 503, 504}
+        or str(status or "").upper()
+        in {"BAD_GATEWAY", "DEADLINE_EXCEEDED", "RESOURCE_EXHAUSTED", "UNAVAILABLE"}
+    )
+    return {
+        "node": context.node[:96],
+        "provider": context.provider[:64],
+        "model": context.model[:120],
+        "failure_class": failure_class[:64],
+        "provider_status": (
+            None if status is None else str(status)[:120]
+        ),
+        "provider_code": (
+            code if isinstance(code, int) and not isinstance(code, bool) else None
+        ),
+        "provider_error_hint": (
+            None if provider_error_hint is None else provider_error_hint[:120]
+        ),
+        "retryable": retryable,
+    }
 
 
 def _generate_content_config(
     *,
+    model: str,
     system_prompt: str,
     max_output_tokens: int,
     response_mime_type: str | None,
@@ -670,6 +709,7 @@ def _generate_content_config(
     thinking_level: str | None,
 ) -> types.GenerateContentConfig:
     return build_generate_content_config(
+        model=model,
         system_prompt=system_prompt,
         max_output_tokens=max_output_tokens,
         response_mime_type=response_mime_type,
@@ -766,6 +806,12 @@ async def generate_text(
                 else adapter.normalize_error(exc, api_key=api_key)
             )
             safe_message = redact_exact_secret_text(str(safe_exc), api_key)
+            provider_diagnostic = _bounded_provider_diagnostic(
+                context=context,
+                failure_class=failure_class,
+                provider_error=provider_error,
+                provider_error_hint=provider_error_hint,
+            )
             if isinstance(safe_exc, DirectLlmError) and safe_message != str(safe_exc):
                 safe_exc.args = (safe_message,)
             tracker.record_call(
@@ -796,12 +842,14 @@ async def generate_text(
                     setattr(exc, "provider_error", provider_error)
                 if provider_error_hint and not hasattr(exc, "provider_error_hint"):
                     setattr(exc, "provider_error_hint", provider_error_hint)
+                setattr(exc, "provider_diagnostic", provider_diagnostic)
                 raise
             raise _direct_llm_error_from_provider(
                 safe_exc,
                 safe_message=safe_message,
                 provider_error=provider_error,
                 provider_error_hint=provider_error_hint,
+                provider_diagnostic=provider_diagnostic,
             ) from exc
 
     last_error: DirectLlmError | None = None

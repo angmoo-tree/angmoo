@@ -356,6 +356,7 @@ class SqlAlchemyResponseLifecycleRepository:
         reason: ResponseTerminalReason,
         retryable: bool,
         failure_class: str | None = None,
+        failure_diagnostic: dict | None = None,
         call_tracker: dict | None = None,
         now: datetime,
     ) -> ResponseRequestRecord:
@@ -371,12 +372,18 @@ class SqlAlchemyResponseLifecycleRepository:
             "terminal_at": now,
             "updated_at": now,
         }
+        if failure_class is not None or failure_diagnostic is not None:
+            row = self._require(fence.request_id, populate_existing=True)
+            node_state = self._decode_json(row.node_state_json)
         if failure_class is not None:
             if not failure_class or len(failure_class) > 64:
                 raise GenerationContractError("response_failure_class_invalid")
-            row = self._require(fence.request_id, populate_existing=True)
-            node_state = self._decode_json(row.node_state_json)
             node_state["failure_class"] = failure_class
+        if failure_diagnostic is not None:
+            node_state["provider_diagnostic"] = _provider_failure_diagnostic(
+                failure_diagnostic
+            )
+        if failure_class is not None or failure_diagnostic is not None:
             values["node_state_json"] = _json_payload(node_state)
         if call_tracker is not None:
             values["call_tracker_json"] = _json_payload(call_tracker)
@@ -622,6 +629,53 @@ class SqlAlchemyResponseLifecycleRepository:
                 else _as_utc(row.cancel_requested_at)
             ),
         )
+
+
+_PROVIDER_DIAGNOSTIC_KEYS = frozenset(
+    {
+        "node",
+        "provider",
+        "model",
+        "failure_class",
+        "provider_status",
+        "provider_code",
+        "provider_error_hint",
+        "retryable",
+    }
+)
+
+
+def _provider_failure_diagnostic(value: dict) -> dict:
+    """Validate the redacted request-local provider diagnostic allowlist."""
+
+    if set(value) != _PROVIDER_DIAGNOSTIC_KEYS:
+        raise GenerationContractError("response_provider_diagnostic_invalid")
+    bounds = {
+        "node": 96,
+        "provider": 64,
+        "model": 120,
+        "failure_class": 64,
+    }
+    for key, maximum in bounds.items():
+        item = value.get(key)
+        if not isinstance(item, str) or not item or len(item) > maximum:
+            raise GenerationContractError("response_provider_diagnostic_invalid")
+    for key in ("provider_status", "provider_error_hint"):
+        item = value.get(key)
+        if item is not None and (
+            not isinstance(item, str) or not item or len(item) > 120
+        ):
+            raise GenerationContractError("response_provider_diagnostic_invalid")
+    code = value.get("provider_code")
+    if code is not None and (
+        isinstance(code, bool)
+        or not isinstance(code, (int, str))
+        or (isinstance(code, str) and (not code or len(code) > 64))
+    ):
+        raise GenerationContractError("response_provider_diagnostic_invalid")
+    if not isinstance(value.get("retryable"), bool):
+        raise GenerationContractError("response_provider_diagnostic_invalid")
+    return dict(value)
 
 
 __all__ = ["SqlAlchemyResponseLifecycleRepository"]

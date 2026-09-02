@@ -4,6 +4,7 @@ import type {
 } from "./chat-contract";
 
 export type WorldChatControlMode = "autonomous" | "owner_controlled";
+export type WorldChatModelBindingMode = "default" | "thread_override";
 
 export type WorldChatRoleRead = {
   world_character_id: string;
@@ -38,7 +39,9 @@ export type WorldChatThreadRead = {
   world_id: string;
   requester: WorldChatRoleRead;
   responding: WorldChatRoleRead;
-  selected_model: string;
+  selected_model: MessageGoogleGeminiModel;
+  default_model: MessageGoogleGeminiModel;
+  model_binding_mode: WorldChatModelBindingMode;
   last_message_at: string | null;
   created_at: string;
   latest_message: MessageMessageRead | null;
@@ -65,6 +68,13 @@ export type WorldChatThreadCreateRead = {
     | "requester_cardinality_anomaly"
     | null;
 };
+
+export type WorldChatThreadModelUpdate =
+  | { mode: "default" }
+  | {
+      mode: "thread_override";
+      selected_model: MessageGoogleGeminiModel;
+    };
 
 export type WorldChatGenerationState =
   | "accepted"

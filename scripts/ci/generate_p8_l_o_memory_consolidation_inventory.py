@@ -18,7 +18,7 @@ if str(BACKEND_ROOT) not in sys.path:
 
 OUTPUT_PATH = ROOT / "docs/architecture/p8-l-o-memory-consolidation-inventory.json"
 N_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-n-both-workflow-coordinator-inventory.json"
-N_INVENTORY_SHA256 = "b897cab121274c4c446602c0481b01514fead9607fe36c4569f416dd2d3d2ecf"
+N_INVENTORY_SHA256 = "f765297dc4484aac5f8f800acbc9d6eaee5c3c819b04005a4d901b3269065797"
 
 from app.domains.memory.domain import (  # noqa: E402
     MAINTENANCE_LEASE_DURATION,
@@ -170,7 +170,7 @@ def build_inventory() -> dict[str, Any]:
     predecessor = json.loads(N_INVENTORY_PATH.read_text(encoding="utf-8"))
     if predecessor["owner_stage"] != "P8-L-N":
         raise InventoryError("P8-L-N predecessor owner drift")
-    if SQLITE_SCHEMA_VERSION != 6:
+    if SQLITE_SCHEMA_VERSION < 6:
         raise InventoryError("P8-L-O must not change Embedded schema version")
 
     policy = MEMORY_CONSOLIDATION_POLICY_V1
@@ -193,7 +193,7 @@ def build_inventory() -> dict[str, Any]:
         "schema": {
             "new_alembic_migration": None,
             "new_embedded_schema_version": None,
-            "current_embedded_schema_version": SQLITE_SCHEMA_VERSION,
+            "current_embedded_schema_version": 6,
             "new_canonical_tables": [],
             "new_ladybug_generation": None,
             "reused_tables": [

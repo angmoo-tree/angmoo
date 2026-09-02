@@ -26,6 +26,9 @@ from app import models
 from app.domains.chat.infrastructure.world_scope_migration import (
     rebuild_message_threads_v3,
 )
+from app.domains.chat.infrastructure.model_binding_migration import (
+    rebuild_message_threads_v6,
+)
 from app.domains.chat.infrastructure.sqlalchemy_models import (
     drop_response_request_schema,
 )
@@ -61,7 +64,7 @@ from app.runtime.persistence.sqlite_schema import (
 )
 
 
-SUPPORTED_SOURCE_VERSIONS = (1, 2, 3, 4, 5)
+SUPPORTED_SOURCE_VERSIONS = (1, 2, 3, 4, 5, 6)
 PREDECESSOR_BUILD_COMMIT = "1" * 40
 PREDECESSOR_OVERLAY = b"\nANGMOO_SYNTHETIC_SUPPORTED_PREDECESSOR_PAYLOAD\n"
 
@@ -201,6 +204,13 @@ def _seed_supported_predecessor(
         ]
         session.add(owner)
         session.flush()
+        session.add(
+            models.UserMessagePreference(
+                user_id=owner.id,
+                credential_source="message_key",
+                default_model="gemini-3.1-flash-lite",
+            )
+        )
         session.add(
             models.InstallationIdentity(
                 singleton_key="local-installation",
@@ -463,7 +473,7 @@ def _seed_supported_predecessor(
             requester_world_character_id="owner-controlled-supported-v2",
             responding_world_character_id="autonomous-supported-v2-a",
             world_scope_status="resolved",
-            selected_model="fixture-chat-model",
+            selected_model="gemini-2.5-flash-lite",
             last_message_at=datetime(2026, 8, 31, 1, 2, tzinfo=UTC),
             created_at=datetime(2026, 8, 31, 1, 0, tzinfo=UTC),
             updated_at=datetime(2026, 8, 31, 1, 2, tzinfo=UTC),
@@ -473,7 +483,7 @@ def _seed_supported_predecessor(
             requester_id=owner.id,
             character_id=characters[3].id,
             world_scope_status="ambiguous",
-            selected_model="fixture-chat-model",
+            selected_model="gemini-2.5-flash-lite",
             last_message_at=datetime(2026, 8, 31, 2, 2, tzinfo=UTC),
             created_at=datetime(2026, 8, 31, 2, 0, tzinfo=UTC),
             updated_at=datetime(2026, 8, 31, 2, 2, tzinfo=UTC),
@@ -493,7 +503,7 @@ def _seed_supported_predecessor(
                     thread_id=ambiguous_thread.id,
                     role="assistant",
                     content="ambiguous predecessor message must survive",
-                    model="fixture-chat-model",
+                    model="gemini-2.5-flash-lite",
                     status="ok",
                     created_at=datetime(2026, 8, 31, 2, 1, tzinfo=UTC),
                 ),
@@ -569,7 +579,9 @@ def _seed_supported_predecessor(
             sql_connection.exec_driver_sql("PRAGMA foreign_keys = OFF")
             sql_connection.commit()
             with sql_connection.begin():
-                drop_response_request_schema(sql_connection)
+                rebuild_message_threads_v6(sql_connection)
+                if source_version <= 5:
+                    drop_response_request_schema(sql_connection)
                 if source_version <= 4:
                     drop_memory_schema_v1(sql_connection)
                 if source_version <= 3:
@@ -752,6 +764,10 @@ def build_fixture(
             "expected_owner_controlled_world_character_id": (
                 "owner-controlled-supported-v2"
             ),
+            "source_world_chat_selected_models": {
+                "thread-supported-world-resolved": "gemini-2.5-flash-lite",
+                "thread-supported-world-ambiguous": "gemini-2.5-flash-lite",
+            },
             "expected_world_chat_threads": {
                 "thread-supported-world-resolved": {
                     "requester_id": "owner-supported-v2",
@@ -764,7 +780,8 @@ def build_fixture(
                     "responding_world_character_id": (
                         "autonomous-supported-v2-a"
                     ),
-                    "selected_model": "fixture-chat-model",
+                    "selected_model": "gemini-3.1-flash-lite",
+                    "model_binding_mode": "default",
                     "messages": [
                         {
                             "role": "user",
@@ -783,14 +800,15 @@ def build_fixture(
                     "world_id": None,
                     "requester_world_character_id": None,
                     "responding_world_character_id": None,
-                    "selected_model": "fixture-chat-model",
+                    "selected_model": "gemini-2.5-flash-lite",
+                    "model_binding_mode": "thread_override",
                     "messages": [
                         {
                             "role": "assistant",
                             "content": (
                                 "ambiguous predecessor message must survive"
                             ),
-                            "model": "fixture-chat-model",
+                            "model": "gemini-2.5-flash-lite",
                             "status": "ok",
                         }
                     ],

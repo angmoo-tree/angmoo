@@ -1155,6 +1155,9 @@ UI-E PR #209 후속 Hotfix는 사용자 visual에서 발견된 `최근 결과` r
 - `chat-generation-stream.v1`에서 사용자-visible delta는 검증된 Character Response Generator의 `{ text }`뿐이다. request scope·generation·attempt·monotonic sequence가 맞지 않는 event는 적용하지 않는다.
 - response failure는 stable response slot의 semantic danger bubble로 교체한다. latest retryable failure만 `[다시 시도]`를 제공하고 retry 중 spinner와 `다시 시도 중`을 보이며 같은 user message를 복제하지 않는다.
 - credential·provider setting처럼 반복으로 해결되지 않는 failure는 Settings recovery CTA를 사용한다. provider 이름, HTTP status, internal route/query/evidence/reasoning은 표시하지 않는다.
+- Chat header의 모델 selector는 `features/chat`이 소유한다. `기본 모델 사용`은 현재 Local 제품 기본 모델을 따르고, 특정 모델 선택은 World thread override가 된다. browser storage나 표시 문자열로 binding을 추측하지 않는다.
+- pending·streaming·retry·model update 동안 selector를 disable한다. model PATCH 실패 시 이전 선택으로 rollback하고 `모델을 바꾸지 못했어요.`와 명시적 재시도를 표시한다. 모델 변경 자체는 실패 응답을 자동 재생성하지 않는다.
+- accepted request의 모델 snapshot과 Gemini 계열별 thinking config는 backend 진단 계약이며 사용자 화면에 노출하지 않는다.
 - 현재 adapter는 provider 전체 답변을 safety 검증한 뒤 bounded delta로 나누므로 provider-native token streaming을 구현했다고 주장하지 않는다. Memory read/control UI는 후속 P8-L-Q/R 범위다.
 
 따라서 현재 허용되는 판정:
@@ -1174,7 +1177,7 @@ P8-L-B BACKEND CHAT DOMAIN STRUCTURE PARITY MERGED / POST-MERGE 5/5 PASS
 P8-L-C FRONTEND CHAT FEATURE STRUCTURE PARITY MERGED / POST-MERGE 6/6 PASS
 P8-L-D WORLD CHAT IDENTITY·READ-ONLY SLICE MERGED / POST-MERGE 7/7 PASS
 P8-L-E WORLD SOCIAL PROFILE·LETTER CHAT ENTRY MERGED / USER INSTALLATION GATE PASS
-P8-L-P WORLD CHAT MESSAGE·EVIDENCE·CRG-ONLY STREAMING IMPLEMENTED IN WORKTREE / LOCAL·HOSTED·USER·MERGE GATES SEPARATE
+P8-L-P WORLD CHAT MESSAGE·EVIDENCE·CRG-ONLY STREAMING + PR #245 MODEL-BINDING/GEMINI-COMPATIBILITY HOTFIX IMPLEMENTED IN WORKTREE / LOCAL·HOSTED·USER·MERGE GATES SEPARATE
 P8-L CHAT V2·CANONICAL MEMORY PRODUCT RUNTIME PARTIAL / MEMORY READ·OWNER CONTROL·FINAL CAUSAL CLOSEOUT PENDING
 ```
 

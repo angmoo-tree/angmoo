@@ -1,7 +1,7 @@
 {
-  "edge_count": 1659,
-  "external_import_count": 2153,
-  "module_count": 649,
+  "edge_count": 1672,
+  "external_import_count": 2167,
+  "module_count": 653,
   "modules": [
     {
       "external_imports": [],
@@ -976,6 +976,19 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "alembic",
+        "collections.abc",
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.chat.infrastructure.model_binding_migration"
+      ],
+      "module": "app.alembic.versions.20260903_0087_world_chat_model_binding",
+      "path": "backend/app/alembic/versions/20260903_0087_world_chat_model_binding.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.api.v1",
@@ -1888,6 +1901,7 @@
       ],
       "imports": [
         "app.core.profile_ref",
+        "app.domains.chat.domain.model_binding",
         "app.providers.registry"
       ],
       "module": "app.domains.chat.api.schemas",
@@ -2122,6 +2136,7 @@
         "app.domains.chat.domain.call_tracker",
         "app.domains.chat.domain.evidence_bundle",
         "app.domains.chat.domain.generation_lifecycle",
+        "app.domains.chat.domain.model_binding",
         "app.domains.chat.domain.resolved_envelope",
         "app.domains.chat.domain.response_request",
         "app.domains.chat.domain.retrieval_intent",
@@ -2183,6 +2198,15 @@
       "imports": [],
       "module": "app.domains.chat.domain.generation_lifecycle",
       "path": "backend/app/domains/chat/domain/generation_lifecycle.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "enum"
+      ],
+      "imports": [],
+      "module": "app.domains.chat.domain.model_binding",
+      "path": "backend/app/domains/chat/domain/model_binding.py",
       "wildcard_imports": []
     },
     {
@@ -2281,6 +2305,24 @@
     {
       "external_imports": [
         "__future__",
+        "dataclasses",
+        "sqlalchemy",
+        "sqlalchemy.schema",
+        "typing"
+      ],
+      "imports": [
+        "app.core.db",
+        "app.domains.chat.domain.model_binding",
+        "app.domains.chat.domain.policies",
+        "app.domains.chat.infrastructure.world_scope_migration"
+      ],
+      "module": "app.domains.chat.infrastructure.model_binding_migration",
+      "path": "backend/app/domains/chat/infrastructure/model_binding_migration.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "datetime",
         "json",
         "sqlalchemy",
@@ -2309,6 +2351,7 @@
       "imports": [
         "app.core.db",
         "app.domains.chat.domain.generation_lifecycle",
+        "app.domains.chat.domain.model_binding",
         "app.domains.chat.domain.retrieval_intent",
         "app.domains.chat.domain.workflow_recipe"
       ],
@@ -2350,6 +2393,7 @@
     {
       "external_imports": [
         "__future__",
+        "collections.abc",
         "dataclasses",
         "typing"
       ],
@@ -6745,6 +6789,8 @@
         "app.credentials",
         "app.domains.chat.api.schemas",
         "app.domains.chat.domain.errors",
+        "app.domains.chat.domain.generation_lifecycle",
+        "app.domains.chat.domain.model_binding",
         "app.domains.chat.domain.policies",
         "app.integrations.direct_llm",
         "app.runtime.chat.model_bindings",
@@ -7383,6 +7429,7 @@
         "app.runtime.migrations.sqlite_versions.v3_to_v4_world_scoped_chat",
         "app.runtime.migrations.sqlite_versions.v4_to_v5_canonical_memory",
         "app.runtime.migrations.sqlite_versions.v5_to_v6_chat_response_requests",
+        "app.runtime.migrations.sqlite_versions.v6_to_v7_chat_model_binding",
         "app.runtime.persistence.sqlite_schema"
       ],
       "module": "app.runtime.migrations.sqlite_versions.registry",
@@ -7464,6 +7511,21 @@
       ],
       "module": "app.runtime.migrations.sqlite_versions.v5_to_v6_chat_response_requests",
       "path": "backend/app/runtime/migrations/sqlite_versions/v5_to_v6_chat_response_requests.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "sqlalchemy",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.chat.infrastructure.model_binding_migration",
+        "app.runtime.migrations.sqlite_versions.contracts"
+      ],
+      "module": "app.runtime.migrations.sqlite_versions.v6_to_v7_chat_model_binding",
+      "path": "backend/app/runtime/migrations/sqlite_versions/v6_to_v7_chat_model_binding.py",
       "wildcard_imports": []
     },
     {

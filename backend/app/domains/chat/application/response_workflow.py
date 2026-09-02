@@ -460,6 +460,10 @@ class ResponseGenerationWorkflowService:
         if record.state in TERMINAL_STATES:
             return
         failure_class, retryable, reason = _classify_failure(exc)
+        failure_diagnostic = _provider_failure_diagnostic(exc)
+        if failure_diagnostic is not None:
+            failure_diagnostic["failure_class"] = failure_class
+            failure_diagnostic["retryable"] = retryable
         sequence = record.last_emitted_sequence + 1
         event = self._event(
             record,
@@ -480,6 +484,7 @@ class ResponseGenerationWorkflowService:
                 reason=reason,
                 retryable=retryable,
                 failure_class=failure_class,
+                failure_diagnostic=failure_diagnostic,
                 call_tracker=getattr(exc, "call_tracker", None),
                 now=datetime.now(UTC),
             )
@@ -602,6 +607,22 @@ def _classify_failure(
         failure_class = "generation_failed"
         retryable = True
     return failure_class, retryable, reason
+
+
+def _provider_failure_diagnostic(exc: BaseException) -> dict[str, Any] | None:
+    """Copy a bounded safe diagnostic through wrapped adapter exceptions."""
+
+    current: BaseException | None = exc
+    seen: set[int] = set()
+    for _ in range(4):
+        if current is None or id(current) in seen:
+            break
+        seen.add(id(current))
+        diagnostic = getattr(current, "provider_diagnostic", None)
+        if isinstance(diagnostic, dict):
+            return dict(diagnostic)
+        current = current.__cause__ or current.__context__
+    return None
 
 
 def _safe_metrics(value: Any) -> dict[str, Any]:

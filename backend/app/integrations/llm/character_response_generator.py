@@ -57,6 +57,7 @@ class DirectLlmCharacterResponseGenerator:
                 _failure_class(exc),
                 retryable=_retryable(exc),
                 physical_attempt_count=max(1, tracker.call_order_in_run),
+                provider_diagnostic=getattr(exc, "provider_diagnostic", None),
             ) from exc
         text = result.text.strip()
         if not text:

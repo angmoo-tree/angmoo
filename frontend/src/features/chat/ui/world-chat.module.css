@@ -239,6 +239,70 @@
   color: var(--color-text-strong);
 }
 
+.modelControl {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  border-bottom: 1px solid var(--color-border-default);
+  gap: 6px 10px;
+  padding: 10px 16px;
+}
+
+.modelControl label {
+  color: var(--color-text-strong);
+  font-size: 0.7rem;
+  font-weight: 850;
+}
+
+.modelControl select {
+  min-width: 0;
+  min-height: 40px;
+  border: 1px solid var(--color-border-control);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-muted);
+  color: var(--color-text-strong);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 750;
+  padding: 8px 10px;
+}
+
+.modelControl select:disabled {
+  cursor: default;
+  opacity: 0.65;
+}
+
+.modelControl > p {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 0.64rem;
+  line-height: 1.45;
+}
+
+.modelFailure {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--color-state-danger);
+  font-size: 0.68rem;
+  font-weight: 800;
+  gap: 10px;
+}
+
+.modelFailure button {
+  min-height: 36px;
+  border: 1px solid var(--color-state-danger-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-state-danger);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 850;
+  padding: 6px 11px;
+}
+
 .messages {
   display: flex;
   flex-direction: column;
@@ -447,6 +511,8 @@
 
 .composer textarea:focus-visible,
 .composer > button:focus-visible,
+.modelControl select:focus-visible,
+.modelFailure button:focus-visible,
 .failureBubble button:focus-visible,
 .failureBubble a:focus-visible,
 .sendFailure button:focus-visible {

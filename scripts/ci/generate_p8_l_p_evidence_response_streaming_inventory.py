@@ -18,7 +18,7 @@ if str(BACKEND_ROOT) not in sys.path:
 
 OUTPUT_PATH = ROOT / "docs/architecture/p8-l-p-evidence-response-streaming-inventory.json"
 O_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-o-memory-consolidation-inventory.json"
-O_INVENTORY_SHA256 = "3fe3a33e970c0d50b915e93f9cfd1f4d2f78288b54d17ec2dce48aa0e2422f40"
+O_INVENTORY_SHA256 = "0d09d1c6b366c2fa773599abff97584b544d210671a68bfbe2be1d4414a709b1"
 
 from app.domains.chat.domain import CHAT_GENERATION_STREAM_VERSION  # noqa: E402
 from app.domains.chat.domain.evidence_bundle import (  # noqa: E402
@@ -31,6 +31,7 @@ from app.integrations.llm.character_response_generator import (  # noqa: E402
     CHARACTER_RESPONSE_MAX_OUTPUT_TOKENS,
     CHARACTER_RESPONSE_TIMEOUT_SECONDS,
 )
+from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest  # noqa: E402
 from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION  # noqa: E402
 
 
@@ -39,23 +40,37 @@ class InventoryError(RuntimeError):
 
 
 REQUIRED_FILES = (
+    "backend/app/alembic/versions/20260903_0087_world_chat_model_binding.py",
     "backend/app/api/v1/routes/world_chat.py",
     "backend/app/api/v1/routes/world_chat_response.py",
     "backend/app/domains/chat/api/schemas.py",
     "backend/app/domains/chat/application/character_response.py",
     "backend/app/domains/chat/application/evidence_assembly.py",
+    "backend/app/domains/chat/application/generation_lifecycle.py",
     "backend/app/domains/chat/application/response_workflow.py",
     "backend/app/domains/chat/domain/evidence_bundle.py",
+    "backend/app/domains/chat/domain/model_binding.py",
+    "backend/app/domains/chat/infrastructure/model_binding_migration.py",
     "backend/app/domains/chat/infrastructure/response_lifecycle_repository.py",
+    "backend/app/domains/chat/infrastructure/sqlalchemy_models.py",
     "backend/app/domains/chat/ports/character_response_generator.py",
+    "backend/app/domains/chat/ports/response_lifecycle.py",
     "backend/app/domains/chat/ports/response_workflow.py",
     "backend/app/domains/chat/ports/successful_chat_memory.py",
+    "backend/app/integrations/direct_llm.py",
     "backend/app/integrations/llm/character_response_generator.py",
+    "backend/app/providers/gemini.py",
     "backend/app/runtime/chat/memory_producer.py",
+    "backend/app/runtime/chat/sqlalchemy_service.py",
     "backend/app/runtime/chat/world_generation.py",
+    "backend/app/runtime/migrations/sqlite_versions/registry.py",
+    "backend/app/runtime/migrations/sqlite_versions/v6_to_v7_chat_model_binding.py",
+    "backend/app/runtime/migrations/sqlite_versions/manifests/v7.json",
+    "backend/app/runtime/persistence/sqlite_schema.py",
     "backend/app/runtime/memory/sqlalchemy_source_reader.py",
     "backend/tests/test_p8_l_p_evidence_response_streaming.py",
     "backend/tests/test_p8_l_p_frontend_streaming.py",
+    "backend/tests/test_p8_l_p_model_hotfix.py",
     "browser-tests/product-shell.spec.ts",
     "browser-tests/static-product-shell.spec.ts",
     "frontend/DESIGN.md",
@@ -67,7 +82,9 @@ REQUIRED_FILES = (
     "docs/architecture/frontend-design-reference.md",
     "docs/architecture/frontend-product-shell.md",
     "docs/architecture/p8-l-p-evidence-response-streaming.md",
+    "scripts/ci/build_windows_installer_supported_upgrade_fixture.py",
     "scripts/ci/generate_p8_l_p_evidence_response_streaming_inventory.py",
+    "scripts/ci/verify_windows_installer_supported_upgrade_fixture.py",
 )
 
 
@@ -155,6 +172,8 @@ def _boundary_contract() -> dict[str, Any]:
             "다시 보내기",
             "다시 시도 중",
             "답장을 만들지 못했어요.",
+            "기본 모델 사용",
+            "모델을 바꾸지 못했어요.",
             "data-response-slot",
         ),
     )
@@ -165,6 +184,18 @@ def _boundary_contract() -> dict[str, Any]:
             "world_chat_stream_sequence_gap",
             "world_chat_stream_payload_invalid",
         ),
+    )
+    _require_text(
+        "backend/app/providers/gemini.py",
+        ("thinkingLevel", "thinkingBudget", "Gemma"),
+    )
+    _require_text(
+        "backend/app/domains/chat/application/response_workflow.py",
+        ("failure_diagnostic", "_provider_failure_diagnostic"),
+    )
+    _require_text(
+        "backend/app/domains/chat/infrastructure/model_binding_migration.py",
+        ("model_binding_mode", "validate_resolved_default_models"),
     )
     return {
         "chat_owner": "app.domains.chat",
@@ -185,8 +216,9 @@ def build_inventory() -> dict[str, Any]:
     predecessor = json.loads(O_INVENTORY_PATH.read_text(encoding="utf-8"))
     if predecessor["owner_stage"] != "P8-L-O":
         raise InventoryError("P8-L-O predecessor owner drift")
-    if SQLITE_SCHEMA_VERSION != 6:
-        raise InventoryError("P8-L-P must not change Embedded schema version")
+    if SQLITE_SCHEMA_VERSION != 7:
+        raise InventoryError("P8-L-P Hotfix must own Embedded schema v7")
+    manifest = load_sqlite_manifest(SQLITE_SCHEMA_VERSION)
 
     return {
         "schema_version": 1,
@@ -204,10 +236,14 @@ def build_inventory() -> dict[str, Any]:
             "current_tree_owner": "P8-L-P",
         },
         "schema": {
-            "new_alembic_migration": None,
-            "new_embedded_schema_version": None,
+            "new_alembic_migration": "20260903_0087",
+            "new_embedded_schema_version": 7,
             "current_embedded_schema_version": SQLITE_SCHEMA_VERSION,
             "new_canonical_tables": [],
+            "new_canonical_columns": ["message_threads.model_binding_mode"],
+            "canonical_table_count": manifest.canonical_table_count,
+            "source_revision": manifest.source_revision,
+            "source_migration_count": manifest.source_migration_count,
             "new_ladybug_generation": None,
         },
         "domain_boundary": _boundary_contract(),
@@ -254,6 +290,29 @@ def build_inventory() -> dict[str, Any]:
             "idempotent_candidate_per_source": True,
             "producer_failure_rolls_back_chat": False,
         },
+        "model_hotfix": {
+            "binding_modes": ["default", "thread_override"],
+            "accepted_request_model_snapshot_immutable": True,
+            "active_generation_model_update_status": 409,
+            "default_binding_follows_current_product_preference": True,
+            "explicit_retry_resnapshots_current_binding": True,
+            "gemini_3_thinking_field": "thinkingLevel",
+            "gemini_2_5_low_thinking_budget": 0,
+            "gemma_thinking_config": None,
+            "unknown_model_family": "fail_before_provider_io",
+            "durable_provider_diagnostic_fields": [
+                "node",
+                "provider",
+                "model",
+                "failure_class",
+                "provider_status",
+                "provider_code",
+                "provider_error_hint",
+                "retryable",
+            ],
+            "world_scoped_selector": True,
+            "model_update_failure_rolls_back": True,
+        },
         "executable_contract_gates": [
             "all_five_routes_call_caps_and_single_crg",
             "deterministic_bounded_provider_safe_evidence",
@@ -267,6 +326,12 @@ def build_inventory() -> dict[str, Any]:
             "memory_off_and_producer_failure_isolation",
             "typing_delay_and_first_delta_replacement",
             "stale_scope_generation_attempt_sequence_guard",
+            "default_and_override_model_binding",
+            "accepted_request_model_snapshot_and_retry_resnapshot",
+            "provider_family_thinking_compatibility",
+            "safe_durable_provider_failure_diagnostic",
+            "embedded_v6_to_v7_model_binding_upgrade",
+            "model_selector_busy_guard_and_failure_rollback",
         ],
         "required_files": [_record(relative) for relative in REQUIRED_FILES],
         "non_scope": [
@@ -275,7 +340,6 @@ def build_inventory() -> dict[str, Any]:
             "held_out_quality_or_latency_pass",
             "cross_runtime_user_gate",
             "release_or_production",
-            "installer_or_schema_change",
         ],
     }
 

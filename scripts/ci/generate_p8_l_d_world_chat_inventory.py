@@ -51,6 +51,9 @@ REQUIRED_ROUTE_OPERATIONS = (
     "GET /worlds/{world_id}/chat/threads/{thread_id}",
     "POST /worlds/{world_id}/chat/threads",
 )
+ALLOWED_LATER_ROUTE_OPERATIONS = (
+    "PATCH /worlds/{world_id}/chat/threads/{thread_id}/model",
+)
 
 
 class InventoryError(RuntimeError):
@@ -229,10 +232,16 @@ def _thread_contract() -> dict[str, Any]:
 
 def _transport_contract() -> dict[str, Any]:
     operations = _route_operations()
-    if operations != REQUIRED_ROUTE_OPERATIONS:
+    missing = sorted(set(REQUIRED_ROUTE_OPERATIONS) - set(operations))
+    unexpected = sorted(
+        set(operations)
+        - set(REQUIRED_ROUTE_OPERATIONS)
+        - set(ALLOWED_LATER_ROUTE_OPERATIONS)
+    )
+    if missing or unexpected:
         raise InventoryError(
-            f"World Chat route operations drift: expected={REQUIRED_ROUTE_OPERATIONS!r} "
-            f"actual={operations!r}"
+            f"World Chat route operations drift: missing={missing!r} "
+            f"unexpected={unexpected!r}"
         )
     for relative in (
         "backend/app/api/v1/main.py",
@@ -261,7 +270,7 @@ def _transport_contract() -> dict[str, Any]:
         ("worldChatRoute", "worldChatThreadRoute"),
     )
     return {
-        "route_operations": list(operations),
+        "route_operations": list(REQUIRED_ROUTE_OPERATIONS),
         "registered_runtime_routers": ["main", "public"],
         "frontend_contract": "world-scoped",
         "legacy_ambiguous_route_resolution": "explicit-only",

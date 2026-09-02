@@ -120,6 +120,10 @@ def accept_world_message(
     if _active_request(db, thread.id) is not None:
         raise MessageInFlightError("이미 답장을 만들고 있어요.")
 
+    selected_model = sqlalchemy_service.resolve_world_thread_response_model(
+        db, user, thread
+    )
+
     now = datetime.now(UTC)
     message = models.MessageMessage(
         thread_id=thread.id,
@@ -153,7 +157,7 @@ def accept_world_message(
             idempotency_key=idempotency_key,
             generation_id=generation_id,
             attempt_number=1,
-            selected_model=thread.selected_model,
+            selected_model=selected_model,
             deadline_at=now + timedelta(seconds=RESPONSE_REQUEST_DEADLINE_SECONDS),
         )
     )
@@ -222,6 +226,10 @@ def retry_world_response(
     if later_user_message is not None:
         raise MessageValidationError("latest_retryable_response_required")
 
+    selected_model = sqlalchemy_service.resolve_world_thread_response_model(
+        db, user, thread
+    )
+
     now = datetime.now(UTC)
     record = GenerationLifecycleService(
         SqlAlchemyResponseLifecycleRepository(db)
@@ -236,7 +244,7 @@ def retry_world_response(
             generation_id=f"generation-{uuid4().hex}",
             attempt_number=prior.attempt_number + 1,
             retry_of_request_id=prior.request_id,
-            selected_model=thread.selected_model,
+            selected_model=selected_model,
             deadline_at=now + timedelta(seconds=RESPONSE_REQUEST_DEADLINE_SECONDS),
         )
     )
@@ -430,7 +438,16 @@ def _mutation_thread(
     thread_id: str,
 ) -> models.MessageThread:
     sqlalchemy_service._require_world_chat_owner_scope(db, user.id, world_id)
-    thread = sqlalchemy_service._get_owned_world_thread(db, user, world_id, thread_id)
+    # Serialize generation acceptance/retry with the World Chat model PATCH.
+    # The accepted request owns an immutable model snapshot, so both mutations
+    # must observe one unambiguous thread binding order on PostgreSQL.
+    thread = sqlalchemy_service._get_owned_world_thread(
+        db,
+        user,
+        world_id,
+        thread_id,
+        lock_thread=True,
+    )
     sqlalchemy_service._world_thread_read(
         db,
         thread,
