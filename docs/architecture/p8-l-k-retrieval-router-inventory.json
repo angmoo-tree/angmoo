@@ -104,7 +104,7 @@
   },
   "historical_chain": {
     "current_tree_owner": "P8-L-K",
-    "p8_l_j_sha256": "8b38d5e080a23f2b6bb33324c871c033195ce90ea5d9c0b6498fb4c9aa23e803",
+    "p8_l_j_sha256": "e68f4ad4f2d1a1756c01d26b99c89fb145329036d431e680c1ece831f1fee4a5",
     "predecessor_mode": "frozen_digest"
   },
   "metrics": [
@@ -135,7 +135,7 @@
   "owner_stage": "P8-L-K",
   "predecessor": {
     "path": "docs/architecture/p8-l-j-response-generation-inventory.json",
-    "sha256": "8b38d5e080a23f2b6bb33324c871c033195ce90ea5d9c0b6498fb4c9aa23e803",
+    "sha256": "e68f4ad4f2d1a1756c01d26b99c89fb145329036d431e680c1ece831f1fee4a5",
     "size": 10307
   },
   "required_files": [
@@ -176,12 +176,12 @@
     },
     {
       "path": "backend/tests/test_oss_architecture_boundaries.py",
-      "sha256": "4f535c470eb24162dd979eea9db539f0745985b3c44d2ee84cd02a0b05ea558a",
-      "size": 7434
+      "sha256": "854ff5891ed3edae2f965790cf815e60a001dfcc4df25ef36cff27a7920e1f78",
+      "size": 7579
     },
     {
       "path": "backend/tests/test_l4_pr_a_inventory.py",
-      "sha256": "f41a1931f9a62ab9ff6d497c37a238adf9ef861f349f4e836b803c68d6fc6c69",
+      "sha256": "368fe040f9ddfc9e3479d7077749092adb4f7bc87053765753adb16bc92b6076",
       "size": 3767
     },
     {
@@ -191,7 +191,7 @@
     },
     {
       "path": "security/l4_pr_a_inventory.json",
-      "sha256": "f6201f614f4191879705185fd23e9a3571996c000660bb4678327c5962a1b397",
+      "sha256": "fe646c6ba00134af51307b07a0bb9b3d4a213dac4bcd3503dfbdec4911f3f1ef",
       "size": 57517
     }
   ],

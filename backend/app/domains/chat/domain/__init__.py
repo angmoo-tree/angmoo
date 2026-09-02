@@ -25,6 +25,7 @@ from app.domains.chat.domain.resolved_envelope import (
 from app.domains.chat.domain.response_request import (
     CreateResponseRequest,
     DegradedReason,
+    EvidenceCapability,
     ResponseCommitPayload,
     ResponseMetadata,
     ResponseRequestRecord,
@@ -67,11 +68,24 @@ from app.domains.chat.domain.workflow_recipe import (
     WorkflowRecipeSpec,
     select_workflow_recipe,
 )
+from app.domains.chat.domain.evidence_bundle import (
+    EVIDENCE_BUNDLE_VERSION,
+    EvidenceBundle,
+    EvidenceBundleContractError,
+    EvidenceItem,
+    EvidenceKind,
+)
 
 __all__ = [
     "CHAT_GENERATION_STREAM_VERSION",
     "CreateResponseRequest",
     "DegradedReason",
+    "EvidenceCapability",
+    "EVIDENCE_BUNDLE_VERSION",
+    "EvidenceBundle",
+    "EvidenceBundleContractError",
+    "EvidenceItem",
+    "EvidenceKind",
     "GenerationContractError",
     "GenerationEvent",
     "GenerationEventType",

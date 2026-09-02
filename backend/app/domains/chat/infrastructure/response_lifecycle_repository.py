@@ -30,6 +30,7 @@ from app.domains.chat.domain.workflow_recipe import WorkflowRecipe
 from app.domains.chat.infrastructure.sqlalchemy_models import (
     ChatResponseRequest,
     MessageMessage,
+    MessageThread,
 )
 
 
@@ -354,24 +355,36 @@ class SqlAlchemyResponseLifecycleRepository:
         target: ResponseRequestState,
         reason: ResponseTerminalReason,
         retryable: bool,
+        failure_class: str | None = None,
+        call_tracker: dict | None = None,
         now: datetime,
     ) -> ResponseRequestRecord:
         if target not in TERMINAL_STATES or target is ResponseRequestState.COMMITTED:
             raise GenerationContractError("response_terminal_target_invalid")
         validate_transition(fence.expected_prior_state, target)
+        values = {
+            "state": target.value,
+            "terminal_reason": reason.value,
+            "retryable": retryable,
+            "lease_token": None,
+            "lease_expires_at": None,
+            "terminal_at": now,
+            "updated_at": now,
+        }
+        if failure_class is not None:
+            if not failure_class or len(failure_class) > 64:
+                raise GenerationContractError("response_failure_class_invalid")
+            row = self._require(fence.request_id, populate_existing=True)
+            node_state = self._decode_json(row.node_state_json)
+            node_state["failure_class"] = failure_class
+            values["node_state_json"] = _json_payload(node_state)
+        if call_tracker is not None:
+            values["call_tracker_json"] = _json_payload(call_tracker)
         result = self._session.execute(
             update(ChatResponseRequest)
             .execution_options(synchronize_session=False)
             .where(*self._fenced_conditions(fence))
-            .values(
-                state=target.value,
-                terminal_reason=reason.value,
-                retryable=retryable,
-                lease_token=None,
-                lease_expires_at=None,
-                terminal_at=now,
-                updated_at=now,
-            )
+            .values(**values)
         )
         if result.rowcount != 1:
             raise GenerationContractError("response_terminal_fence_conflict")
@@ -426,6 +439,11 @@ class SqlAlchemyResponseLifecycleRepository:
                 )
                 self._session.add(assistant)
                 self._session.flush()
+                self._session.execute(
+                    update(MessageThread)
+                    .where(MessageThread.id == existing.thread_id)
+                    .values(last_message_at=now, updated_at=now)
+                )
                 result = self._session.execute(
                     update(ChatResponseRequest)
                     .execution_options(synchronize_session=False)

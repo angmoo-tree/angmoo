@@ -116,6 +116,8 @@ class GenerationLifecycleService:
         target: ResponseRequestState,
         reason: ResponseTerminalReason,
         retryable: bool,
+        failure_class: str | None = None,
+        call_tracker: dict | None = None,
         now: datetime,
     ) -> ResponseRequestRecord:
         return self._repository.mark_terminal(
@@ -123,6 +125,8 @@ class GenerationLifecycleService:
             target=target,
             reason=reason,
             retryable=retryable,
+            failure_class=failure_class,
+            call_tracker=call_tracker,
             now=now,
         )
 

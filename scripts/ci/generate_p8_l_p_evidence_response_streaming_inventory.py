@@ -1,0 +1,312 @@
+"""Generate or verify the P8-L-P response-streaming inventory."""
+
+from __future__ import annotations
+
+import argparse
+import ast
+import hashlib
+import json
+from pathlib import Path
+import sys
+from typing import Any
+
+
+ROOT = Path(__file__).resolve().parents[2]
+BACKEND_ROOT = ROOT / "backend"
+if str(BACKEND_ROOT) not in sys.path:
+    sys.path.insert(0, str(BACKEND_ROOT))
+
+OUTPUT_PATH = ROOT / "docs/architecture/p8-l-p-evidence-response-streaming-inventory.json"
+O_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-o-memory-consolidation-inventory.json"
+O_INVENTORY_SHA256 = "3fe3a33e970c0d50b915e93f9cfd1f4d2f78288b54d17ec2dce48aa0e2422f40"
+
+from app.domains.chat.domain import CHAT_GENERATION_STREAM_VERSION  # noqa: E402
+from app.domains.chat.domain.evidence_bundle import (  # noqa: E402
+    EVIDENCE_BUNDLE_VERSION,
+    MAX_EVIDENCE_BUNDLE_CHARS,
+    MAX_EVIDENCE_ITEM_CHARS,
+    MAX_EVIDENCE_ITEMS,
+)
+from app.integrations.llm.character_response_generator import (  # noqa: E402
+    CHARACTER_RESPONSE_MAX_OUTPUT_TOKENS,
+    CHARACTER_RESPONSE_TIMEOUT_SECONDS,
+)
+from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION  # noqa: E402
+
+
+class InventoryError(RuntimeError):
+    pass
+
+
+REQUIRED_FILES = (
+    "backend/app/api/v1/routes/world_chat.py",
+    "backend/app/api/v1/routes/world_chat_response.py",
+    "backend/app/domains/chat/api/schemas.py",
+    "backend/app/domains/chat/application/character_response.py",
+    "backend/app/domains/chat/application/evidence_assembly.py",
+    "backend/app/domains/chat/application/response_workflow.py",
+    "backend/app/domains/chat/domain/evidence_bundle.py",
+    "backend/app/domains/chat/infrastructure/response_lifecycle_repository.py",
+    "backend/app/domains/chat/ports/character_response_generator.py",
+    "backend/app/domains/chat/ports/response_workflow.py",
+    "backend/app/domains/chat/ports/successful_chat_memory.py",
+    "backend/app/integrations/llm/character_response_generator.py",
+    "backend/app/runtime/chat/memory_producer.py",
+    "backend/app/runtime/chat/world_generation.py",
+    "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+    "backend/tests/test_p8_l_p_evidence_response_streaming.py",
+    "backend/tests/test_p8_l_p_frontend_streaming.py",
+    "browser-tests/product-shell.spec.ts",
+    "browser-tests/static-product-shell.spec.ts",
+    "frontend/DESIGN.md",
+    "frontend/src/features/chat/api/world-chat-client.ts",
+    "frontend/src/features/chat/model/world-chat-contract.ts",
+    "frontend/src/features/chat/ui/world-chat.module.css",
+    "frontend/src/features/chat/ui/world-chat.tsx",
+    "docs/architecture/backend-domains.md",
+    "docs/architecture/frontend-design-reference.md",
+    "docs/architecture/frontend-product-shell.md",
+    "docs/architecture/p8-l-p-evidence-response-streaming.md",
+    "scripts/ci/generate_p8_l_p_evidence_response_streaming_inventory.py",
+)
+
+
+def _normalized_bytes(path: Path) -> bytes:
+    return path.read_bytes().replace(b"\r\n", b"\n")
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(_normalized_bytes(path)).hexdigest()
+
+
+def _record(relative: str) -> dict[str, Any]:
+    path = ROOT / relative
+    if not path.is_file():
+        raise InventoryError(f"required file is missing: {relative}")
+    data = _normalized_bytes(path)
+    return {
+        "path": relative,
+        "sha256": hashlib.sha256(data).hexdigest(),
+        "size": len(data),
+    }
+
+
+def _require_text(relative: str, values: tuple[str, ...]) -> None:
+    text = (ROOT / relative).read_text(encoding="utf-8")
+    missing = [value for value in values if value not in text]
+    if missing:
+        raise InventoryError(f"{relative}: required contract missing: {missing}")
+
+
+def _forbid_imports(relative: str, prefixes: tuple[str, ...]) -> None:
+    tree = ast.parse((ROOT / relative).read_text(encoding="utf-8"))
+    imports: list[str] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and node.module:
+            imports.append(node.module)
+        elif isinstance(node, ast.Import):
+            imports.extend(alias.name for alias in node.names)
+    forbidden = [
+        module
+        for module in imports
+        if any(module == prefix or module.startswith(f"{prefix}.") for prefix in prefixes)
+    ]
+    if forbidden:
+        raise InventoryError(f"{relative}: forbidden imports: {forbidden}")
+
+
+def _boundary_contract() -> dict[str, Any]:
+    for relative in (
+        "backend/app/domains/chat/domain/evidence_bundle.py",
+        "backend/app/domains/chat/application/character_response.py",
+        "backend/app/domains/chat/application/evidence_assembly.py",
+        "backend/app/domains/chat/application/response_workflow.py",
+        "backend/app/domains/chat/ports/character_response_generator.py",
+        "backend/app/domains/chat/ports/successful_chat_memory.py",
+    ):
+        _forbid_imports(
+            relative,
+            ("app.integrations", "app.runtime", "sqlalchemy", "fastapi"),
+        )
+    _require_text(
+        "backend/app/domains/chat/application/response_workflow.py",
+        (
+            "ResponseRequestState.EVIDENCE_FROZEN",
+            "CharacterResponseGeneratorRequest",
+            'payload={"text": delta}',
+            "self._unit_of_work.checkpoint()",
+            "self._propose_memory_after_commit(command, committed)",
+        ),
+    )
+    _require_text(
+        "backend/app/runtime/chat/memory_producer.py",
+        (
+            "MemorySourceTypeV1.CHAT_MESSAGE",
+            "MemoryKindV1.AUTOBIOGRAPHICAL_EVENT",
+            "self._session.commit()",
+            "self._session.rollback()",
+        ),
+    )
+    _require_text(
+        "frontend/src/features/chat/ui/world-chat.tsx",
+        (
+            "}, 300);",
+            "입력 중",
+            "다시 보내기",
+            "다시 시도 중",
+            "답장을 만들지 못했어요.",
+            "data-response-slot",
+        ),
+    )
+    _require_text(
+        "frontend/src/features/chat/api/world-chat-client.ts",
+        (
+            'Accept: "application/x-ndjson"',
+            "world_chat_stream_sequence_gap",
+            "world_chat_stream_payload_invalid",
+        ),
+    )
+    return {
+        "chat_owner": "app.domains.chat",
+        "memory_owner": "app.domains.memory",
+        "provider_adapter": "app.integrations.llm.character_response_generator",
+        "runtime_composition": "app.runtime.chat.world_generation",
+        "frontend_feature": "frontend/src/features/chat",
+        "domain_application_framework_imports": 0,
+        "raw_sql_or_cypher_from_llm": 0,
+        "router_planner_or_database_public_deltas": 0,
+        "assistant_commit_owner": "code",
+    }
+
+
+def build_inventory() -> dict[str, Any]:
+    if _sha256(O_INVENTORY_PATH) != O_INVENTORY_SHA256:
+        raise InventoryError("frozen P8-L-O predecessor digest drift")
+    predecessor = json.loads(O_INVENTORY_PATH.read_text(encoding="utf-8"))
+    if predecessor["owner_stage"] != "P8-L-O":
+        raise InventoryError("P8-L-O predecessor owner drift")
+    if SQLITE_SCHEMA_VERSION != 6:
+        raise InventoryError("P8-L-P must not change Embedded schema version")
+
+    return {
+        "schema_version": 1,
+        "owner_stage": "P8-L-P",
+        "contract_versions": {
+            "stream": CHAT_GENERATION_STREAM_VERSION,
+            "evidence_bundle": EVIDENCE_BUNDLE_VERSION,
+        },
+        "predecessor": _record(
+            "docs/architecture/p8-l-o-memory-consolidation-inventory.json"
+        ),
+        "historical_chain": {
+            "p8_l_o_sha256": O_INVENTORY_SHA256,
+            "predecessor_mode": "frozen_digest",
+            "current_tree_owner": "P8-L-P",
+        },
+        "schema": {
+            "new_alembic_migration": None,
+            "new_embedded_schema_version": None,
+            "current_embedded_schema_version": SQLITE_SCHEMA_VERSION,
+            "new_canonical_tables": [],
+            "new_ladybug_generation": None,
+        },
+        "domain_boundary": _boundary_contract(),
+        "bounds": {
+            "evidence_items": MAX_EVIDENCE_ITEMS,
+            "evidence_item_characters": MAX_EVIDENCE_ITEM_CHARS,
+            "evidence_bundle_characters": MAX_EVIDENCE_BUNDLE_CHARS,
+            "character_response_output_tokens": CHARACTER_RESPONSE_MAX_OUTPUT_TOKENS,
+            "character_response_timeout_seconds": CHARACTER_RESPONSE_TIMEOUT_SECONDS,
+            "character_response_logical_calls_per_attempt": 1,
+            "request_wide_schema_repairs": 1,
+            "visible_typing_delay_milliseconds": 300,
+            "visible_typing_instances_per_generation": 1,
+        },
+        "route_call_caps": {
+            "CURRENT_CONTEXT": 2,
+            "CANONICAL": 3,
+            "GRAPH": 3,
+            "BOTH": 4,
+            "CLARIFICATION": 2,
+        },
+        "stream_contract": {
+            "transport": "application/x-ndjson",
+            "public_event_types": [
+                "accepted",
+                "delta",
+                "completed",
+                "failed",
+                "cancelled",
+            ],
+            "delta_payload_keys": ["text"],
+            "provider_native_token_stream_claimed": False,
+            "verified_crg_text_chunked_after_generation": True,
+            "monotonic_sequence": True,
+            "scope_generation_attempt_fence": True,
+            "terminal_canonical_rehydrate": True,
+        },
+        "memory_after_commit": {
+            "source_type": "CHAT_MESSAGE",
+            "memory_kind": "AUTOBIOGRAPHICAL_EVENT",
+            "source": "committed_assistant_message",
+            "default_off_writes": 0,
+            "failed_or_partial_writes": 0,
+            "idempotent_candidate_per_source": True,
+            "producer_failure_rolls_back_chat": False,
+        },
+        "executable_contract_gates": [
+            "all_five_routes_call_caps_and_single_crg",
+            "deterministic_bounded_provider_safe_evidence",
+            "crg_only_public_delta",
+            "fenced_atomic_assistant_commit",
+            "terminal_replay_without_regeneration",
+            "typed_retryable_failure_rehydrate",
+            "send_idempotency_and_retry_stable_slot",
+            "partial_assistant_and_memory_candidate_zero",
+            "successful_chat_after_commit_candidate",
+            "memory_off_and_producer_failure_isolation",
+            "typing_delay_and_first_delta_replacement",
+            "stale_scope_generation_attempt_sequence_guard",
+        ],
+        "required_files": [_record(relative) for relative in REQUIRED_FILES],
+        "non_scope": [
+            "memory_read_or_owner_control_ui",
+            "provider_native_token_transport",
+            "held_out_quality_or_latency_pass",
+            "cross_runtime_user_gate",
+            "release_or_production",
+            "installer_or_schema_change",
+        ],
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--write", action="store_true")
+    mode.add_argument("--check", action="store_true")
+    args = parser.parse_args()
+    try:
+        inventory = build_inventory()
+        rendered = json.dumps(inventory, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+        if args.write:
+            OUTPUT_PATH.write_text(rendered, encoding="utf-8", newline="\n")
+            print(f"wrote {OUTPUT_PATH.relative_to(ROOT).as_posix()}")
+            return 0
+        if not OUTPUT_PATH.is_file():
+            raise InventoryError("generated P8-L-P inventory is missing")
+        current = OUTPUT_PATH.read_text(encoding="utf-8").replace("\r\n", "\n")
+        if current != rendered:
+            raise InventoryError(
+                "P8-L-P inventory drift; run python "
+                "scripts/ci/generate_p8_l_p_evidence_response_streaming_inventory.py --write"
+            )
+        print("P8-L-P Evidence/response streaming inventory is current")
+        return 0
+    except (InventoryError, KeyError, OSError, ValueError) as exc:
+        print(f"P8-L-P inventory check failed: {exc}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

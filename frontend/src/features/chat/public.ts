@@ -13,9 +13,14 @@ export {
 } from "./api/chat-client";
 export {
   createOrGetWorldChatThread,
+  getLatestWorldChatResponseRequest,
   getWorldChatEntry,
+  getWorldChatResponseRequest,
   getWorldChatThread,
   listWorldChatThreads,
+  retryWorldChatResponse,
+  sendWorldChatMessage,
+  streamWorldChatResponse,
   WorldChatApiError,
 } from "./api/world-chat-client";
 export {
@@ -39,6 +44,11 @@ export {
 export type {
   WorldChatControlMode,
   WorldChatEntryRead,
+  WorldChatGenerationEvent,
+  WorldChatGenerationRequestRead,
+  WorldChatGenerationState,
+  WorldChatLatestRequestRead,
+  WorldChatMessageAcceptRead,
   WorldChatRoleRead,
   WorldChatThreadCreate,
   WorldChatThreadCreateRead,

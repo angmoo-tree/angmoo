@@ -2450,6 +2450,18 @@ test("P8-L-E static World author profile and letter entry keep exact Tauri route
       });
       return;
     }
+    if (
+      method === "GET" &&
+      url.pathname ===
+        `/api/v1/worlds/${worldId}/chat/threads/${threadId}/requests/latest`
+    ) {
+      await route.fulfill({
+        contentType: "application/json",
+        json: { response_request: null },
+        status: 200,
+      });
+      return;
+    }
     await route.fallback();
   });
 
@@ -2498,6 +2510,11 @@ test("P8-L-E static World author profile and letter entry keep exact Tauri route
     new RegExp(`/worlds/${worldId}/chat/${threadId}/?$`),
   );
   await expect(page.locator('[data-world-chat-surface="thread"]')).toBeVisible();
+  await expect(
+    page.getByRole("textbox", {
+      name: `${responding.display_name}에게 보낼 메시지`,
+    }),
+  ).toBeVisible();
   expect(createCalls).toBe(1);
 });
 

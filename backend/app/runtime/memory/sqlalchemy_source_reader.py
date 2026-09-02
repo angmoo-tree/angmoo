@@ -10,6 +10,10 @@ from typing import Any
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
+from app.domains.chat.infrastructure.sqlalchemy_models import (
+    MessageMessage,
+    MessageThread,
+)
 from app.domains.memory.public import (
     CanonicalMemoryEvidence,
     MemoryScope,
@@ -25,7 +29,6 @@ from app.domains.routines.infrastructure.sqlalchemy_models import (
     JointActivity,
     JointActivityParticipant,
 )
-from app.runtime.chat.model_bindings import MessageMessage, MessageThread
 from app.runtime.social.sqlalchemy_read_repository import (
     social_persistence_models,
 )

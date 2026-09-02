@@ -128,8 +128,8 @@ backend/app/
 | feed and `social` | `app.domains.social.public` | L4 | P5 search, canonical source writes, observation and causal apply are active; concrete SQLite adapters are under `app.runtime.social` |
 | `relationships` graph read and P8 recall | `app.domains.relationships.public` | T2.5/L4/P8-L | canonical API read remains active; P8-L-I adds the closed six-primitive recall facade, canonical/observation revalidation and bounded degraded policy; P8-L-M adds the ID-free Graph Planner port, strict direction-aware plan validator and typed execution over that I boundary while runtime composition stays under `app.runtime.graph_projection` |
 | relationships write and graph projection | domain/runtime public ports | L4 | PR E removes horizontal service/CRUD/model bridges; runtime SQLAlchemy composition is isolated under `app.runtime.relationships` and graph lifecycle under `app.runtime.graph_projection` |
-| Chat entry, thread, message, response request/generation, retry and response commit | `app.domains.chat.public` | P8-L | P8-L-B establishes the public/application/port boundary, P8-L-D adds World-scoped identity and read-only entry, and P8-L-J adds the durable response-attempt row, strict typed retrieval envelopes, fenced lifecycle and route-aware call tracker without enabling live generation |
-| canonical Memory setting, candidate, item, evidence, lifecycle and recall | `app.domains.memory.public` | P8-L | P8-L-F owns the seven-table canonical schema and opt-in scope, P8-L-G owns provider-free write/lifecycle, P8-L-H owns the typed canonical read boundary plus the separate private FTS5 projection under `app.runtime.memory`, and P8-L-L adds the ID-free Canonical Planner port, strict plan validator and typed execution over that H boundary |
+| Chat entry, thread, message, response request/generation, retry and response commit | `app.domains.chat.public` | P8-L | P8-L-B/D establish the domain and World-scoped identity; P8-L-J~N add durable lifecycle, typed Router/Planners and bounded BOTH; P8-L-P connects live send/retry, immutable Evidence Bundle, exactly-once CRG, fenced commit and CRG-only NDJSON transport |
+| canonical Memory setting, candidate, item, evidence, lifecycle and recall | `app.domains.memory.public` | P8-L | P8-L-F owns the seven-table canonical schema and opt-in scope, P8-L-G/H own provider-free write and typed canonical/FTS read, P8-L-L/O add Canonical Planner and background maintenance, and P8-L-P invokes the existing candidate lifecycle only after a successful Chat commit |
 | remaining active legacy or ownerless shim | none | L6 | final removal gate |
 
 P8-L-A freezes the pre-migration Chat baseline in
@@ -720,8 +720,35 @@ source writes or basic Chat.
 The exact thresholds, call/input/lease/retry/drain ceilings and executable
 failure contract are frozen in
 `docs/architecture/p8-l-o-memory-consolidation-hot-brief.md` and its generated
-inventory. Live Chat producer/streaming and Memory UI remain later-stage
-consumers of this backend capability.
+inventory. P8-L-P now consumes this capability through a successful-Chat
+after-commit candidate producer; Memory read/control UI remains later scope.
+
+### P8-L-P Evidence Bundle and Character response streaming
+
+`app.domains.chat` now owns the immutable `evidence-bundle.v1` snapshot,
+deterministic dedupe/sort/caps, five-route response workflow and public
+`chat-generation-stream.v1` event boundary. The existing Router, Canonical
+Planner, Graph Planner and code-owned BOTH coordinator produce only typed,
+canonically revalidated evidence. The Character Response Generator sees the
+frozen provider-safe bundle and may write one response; it cannot reroute,
+replan, query a database or commit a message.
+
+`app.runtime.chat.world_generation` composes the provider adapters and exposes
+idempotent message acceptance, explicit latest-failure retry, request status
+and NDJSON events. Only verified CRG text is emitted as `delta` payload. The
+current direct adapter validates the complete provider answer before splitting
+it into bounded transport deltas, so this stage does not claim provider-native
+token streaming. Assistant message, response metadata and committed request
+are fenced and atomic. A separate provider-free producer then proposes the
+committed assistant message to canonical Memory when that exact responding
+WorldCharacter scope is ON; producer failure cannot roll back Chat.
+
+P8-L-P changes no schema, migration, Embedded SQLite v6 generation or
+LadybugDB generation. The exact bounds, public event allowlist, after-commit
+contract and executable gates are in
+`docs/architecture/p8-l-p-evidence-response-streaming.md` and its generated
+inventory. Memory read/control UI, held-out quality/latency and cross-runtime
+user closeout remain P8-L-Q~S scope.
 
 ## Contributor workflow
 

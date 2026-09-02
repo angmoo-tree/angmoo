@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from app.runtime.chat import sqlalchemy_service
+from app.runtime.chat import world_generation
 
 
 class SqlAlchemyChatRuntime:
@@ -28,6 +29,60 @@ class SqlAlchemyChatRuntime:
     ) -> Any:
         return sqlalchemy_service.create_or_get_world_thread(
             db, user, world_id, data
+        )
+
+    def accept_world_message(
+        self, db: Any, user: Any, world_id: str, thread_id: str, data: Any
+    ) -> Any:
+        return world_generation.accept_world_message(
+            db, user, world_id, thread_id, data
+        )
+
+    def retry_world_response(
+        self, db: Any, user: Any, world_id: str, thread_id: str, data: Any
+    ) -> Any:
+        return world_generation.retry_world_response(
+            db, user, world_id, thread_id, data
+        )
+
+    def get_world_response_request(
+        self,
+        db: Any,
+        user: Any,
+        world_id: str,
+        thread_id: str,
+        request_id: str,
+    ) -> Any:
+        return world_generation.get_world_response_request(
+            db, user, world_id, thread_id, request_id
+        )
+
+    def get_latest_world_response_request(
+        self, db: Any, user: Any, world_id: str, thread_id: str
+    ) -> Any:
+        return world_generation.get_latest_world_response_request(
+            db, user, world_id, thread_id
+        )
+
+    def stream_world_response(
+        self,
+        db: Any,
+        user: Any,
+        world_id: str,
+        thread_id: str,
+        request_id: str,
+        *,
+        memory_recall_service: Any | None,
+        runtime_settings: Any,
+    ) -> Any:
+        return world_generation.stream_world_response(
+            db,
+            user,
+            world_id,
+            thread_id,
+            request_id,
+            memory_recall_service=memory_recall_service,
+            runtime_settings=runtime_settings,
         )
 
     def list_threads(self, db: Any, user: Any) -> Any:

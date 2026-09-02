@@ -10,9 +10,13 @@ from app.integrations.llm.graph_retrieval_planner import (
 from app.integrations.llm.memory_consolidation import (
     DirectLlmMemoryConsolidationProvider,
 )
+from app.integrations.llm.character_response_generator import (
+    DirectLlmCharacterResponseGenerator,
+)
 
 __all__ = [
     "DirectLlmCanonicalRetrievalPlannerProvider",
+    "DirectLlmCharacterResponseGenerator",
     "DirectLlmGraphRetrievalPlannerProvider",
     "DirectLlmMemoryConsolidationProvider",
     "DirectLlmRetrievalRouterProvider",

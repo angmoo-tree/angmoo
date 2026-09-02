@@ -19,7 +19,7 @@ if str(BACKEND_ROOT) not in sys.path:
 OUTPUT_PATH = ROOT / "docs/architecture/p8-l-k-retrieval-router-inventory.json"
 J_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-j-response-generation-inventory.json"
 J_INVENTORY_SHA256 = (
-    "8b38d5e080a23f2b6bb33324c871c033195ce90ea5d9c0b6498fb4c9aa23e803"
+    "e68f4ad4f2d1a1756c01d26b99c89fb145329036d431e680c1ece831f1fee4a5"
 )
 CORPUS_PATH = (
     ROOT / "backend/tests/fixtures/p8_l/retrieval_topology_v1/held_out_ko.jsonl"

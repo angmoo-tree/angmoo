@@ -697,32 +697,32 @@
     {
       "markers": {
         "advisory_lock": [
-          286,
-          469,
-          571
+          287,
+          470,
+          572
         ],
         "driver_or_url": [
-          285,
-          335,
-          345,
-          379,
-          453,
-          561,
-          1137,
-          1230,
-          1232
+          286,
+          336,
+          346,
+          380,
+          454,
+          562,
+          1138,
+          1231,
+          1233
         ],
         "row_lock": [
-          336,
-          352,
-          380,
-          1138
+          337,
+          353,
+          381,
+          1139
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/chat/sqlalchemy_service.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "21cc8e0dd52b62edb949166ccb5364277bc39f4ff594e6f23944e2bd6fa0c871",
+      "source_sha256": "22d4216969fb7bec1d44014a92480feba98a49b8dff4e8c3c4ceaf3d5b4bea63",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

@@ -1,7 +1,7 @@
 {
-  "edge_count": 1589,
-  "external_import_count": 2107,
-  "module_count": 638,
+  "edge_count": 1659,
+  "external_import_count": 2153,
+  "module_count": 649,
   "modules": [
     {
       "external_imports": [],
@@ -1019,6 +1019,7 @@
         "app.api.v1.routes.world_activity_runtime",
         "app.api.v1.routes.world_character_setup",
         "app.api.v1.routes.world_chat",
+        "app.api.v1.routes.world_chat_response",
         "app.api.v1.routes.worlds",
         "app.domains.device_home.public",
         "app.domains.world_characters.api.routes",
@@ -1047,6 +1048,7 @@
         "app.api.v1.routes.world_activity_runtime",
         "app.api.v1.routes.world_character_setup",
         "app.api.v1.routes.world_chat",
+        "app.api.v1.routes.world_chat_response",
         "app.api.v1.routes.worlds",
         "app.domains.device_home.public",
         "app.domains.identity.api.local_routes",
@@ -1292,6 +1294,26 @@
       ],
       "module": "app.api.v1.routes.world_chat",
       "path": "backend/app/api/v1/routes/world_chat.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "collections.abc",
+        "fastapi",
+        "fastapi.responses",
+        "json",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.api.v1.deps",
+        "app.core.browser_session",
+        "app.core.config",
+        "app.domains.chat.public",
+        "app.domains.identity.public",
+        "app.runtime.chat.composition"
+      ],
+      "module": "app.api.v1.routes.world_chat_response",
+      "path": "backend/app/api/v1/routes/world_chat_response.py",
       "wildcard_imports": []
     },
     {
@@ -1878,9 +1900,12 @@
         "app.domains.chat.application.answer_request",
         "app.domains.chat.application.both_retrieval",
         "app.domains.chat.application.canonical_retrieval",
+        "app.domains.chat.application.character_response",
+        "app.domains.chat.application.evidence_assembly",
         "app.domains.chat.application.generation_lifecycle",
         "app.domains.chat.application.graph_retrieval",
         "app.domains.chat.application.messages",
+        "app.domains.chat.application.response_workflow",
         "app.domains.chat.application.retrieval_routing"
       ],
       "module": "app.domains.chat.application",
@@ -1953,6 +1978,43 @@
     {
       "external_imports": [
         "__future__",
+        "collections.abc",
+        "dataclasses",
+        "datetime",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.chat.domain.call_tracker",
+        "app.domains.chat.domain.retrieval_intent",
+        "app.domains.chat.ports.character_response_generator"
+      ],
+      "module": "app.domains.chat.application.character_response",
+      "path": "backend/app/domains/chat/application/character_response.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "datetime"
+      ],
+      "imports": [
+        "app.domains.chat.application.both_retrieval",
+        "app.domains.chat.application.canonical_retrieval",
+        "app.domains.chat.application.graph_retrieval",
+        "app.domains.chat.domain.evidence_bundle",
+        "app.domains.chat.domain.response_request",
+        "app.domains.chat.domain.retrieval_intent",
+        "app.domains.memory.public",
+        "app.domains.relationships.public"
+      ],
+      "module": "app.domains.chat.application.evidence_assembly",
+      "path": "backend/app/domains/chat/application/evidence_assembly.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "datetime"
       ],
       "imports": [
@@ -2003,6 +2065,38 @@
       "external_imports": [
         "__future__",
         "asyncio",
+        "collections.abc",
+        "dataclasses",
+        "datetime",
+        "logging",
+        "typing",
+        "uuid"
+      ],
+      "imports": [
+        "app.domains.chat.application.both_retrieval",
+        "app.domains.chat.application.canonical_retrieval",
+        "app.domains.chat.application.character_response",
+        "app.domains.chat.application.evidence_assembly",
+        "app.domains.chat.application.generation_lifecycle",
+        "app.domains.chat.application.graph_retrieval",
+        "app.domains.chat.application.retrieval_routing",
+        "app.domains.chat.domain.generation_lifecycle",
+        "app.domains.chat.domain.response_request",
+        "app.domains.chat.domain.retrieval_intent",
+        "app.domains.chat.ports.character_response_generator",
+        "app.domains.chat.ports.response_workflow",
+        "app.domains.chat.ports.retrieval_policy",
+        "app.domains.chat.ports.retrieval_router_provider",
+        "app.domains.chat.ports.successful_chat_memory"
+      ],
+      "module": "app.domains.chat.application.response_workflow",
+      "path": "backend/app/domains/chat/application/response_workflow.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "asyncio",
         "dataclasses",
         "datetime",
         "re",
@@ -2026,6 +2120,7 @@
       "external_imports": [],
       "imports": [
         "app.domains.chat.domain.call_tracker",
+        "app.domains.chat.domain.evidence_bundle",
         "app.domains.chat.domain.generation_lifecycle",
         "app.domains.chat.domain.resolved_envelope",
         "app.domains.chat.domain.response_request",
@@ -2058,6 +2153,23 @@
       "imports": [],
       "module": "app.domains.chat.domain.errors",
       "path": "backend/app/domains/chat/domain/errors.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "enum",
+        "hashlib",
+        "json"
+      ],
+      "imports": [
+        "app.domains.chat.domain.response_request",
+        "app.domains.chat.domain.retrieval_intent"
+      ],
+      "module": "app.domains.chat.domain.evidence_bundle",
+      "path": "backend/app/domains/chat/domain/evidence_bundle.py",
       "wildcard_imports": []
     },
     {
@@ -2223,13 +2335,29 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.chat.ports.character_response_generator",
         "app.domains.chat.ports.response_lifecycle",
+        "app.domains.chat.ports.response_workflow",
         "app.domains.chat.ports.retrieval_policy",
         "app.domains.chat.ports.retrieval_router_provider",
-        "app.domains.chat.ports.runtime"
+        "app.domains.chat.ports.runtime",
+        "app.domains.chat.ports.successful_chat_memory"
       ],
       "module": "app.domains.chat.ports",
       "path": "backend/app/domains/chat/ports/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.chat.domain.evidence_bundle"
+      ],
+      "module": "app.domains.chat.ports.character_response_generator",
+      "path": "backend/app/domains/chat/ports/character_response_generator.py",
       "wildcard_imports": []
     },
     {
@@ -2246,6 +2374,16 @@
       ],
       "module": "app.domains.chat.ports.response_lifecycle",
       "path": "backend/app/domains/chat/ports/response_lifecycle.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.chat.ports.response_workflow",
+      "path": "backend/app/domains/chat/ports/response_workflow.py",
       "wildcard_imports": []
     },
     {
@@ -2282,6 +2420,17 @@
       "imports": [],
       "module": "app.domains.chat.ports.runtime",
       "path": "backend/app/domains/chat/ports/runtime.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.chat.ports.successful_chat_memory",
+      "path": "backend/app/domains/chat/ports/successful_chat_memory.py",
       "wildcard_imports": []
     },
     {
@@ -5968,6 +6117,7 @@
       "external_imports": [],
       "imports": [
         "app.integrations.llm.canonical_retrieval_planner",
+        "app.integrations.llm.character_response_generator",
         "app.integrations.llm.graph_retrieval_planner",
         "app.integrations.llm.memory_consolidation",
         "app.integrations.llm.retrieval_router"
@@ -5989,6 +6139,21 @@
       ],
       "module": "app.integrations.llm.canonical_retrieval_planner",
       "path": "backend/app/integrations/llm/canonical_retrieval_planner.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "json"
+      ],
+      "imports": [
+        "app.core.prompt_safety",
+        "app.domains.chat.ports.character_response_generator",
+        "app.domains.identity.public",
+        "app.integrations.direct_llm"
+      ],
+      "module": "app.integrations.llm.character_response_generator",
+      "path": "backend/app/integrations/llm/character_response_generator.py",
       "wildcard_imports": []
     },
     {
@@ -6501,6 +6666,21 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.chat.ports",
+        "app.domains.memory.infrastructure",
+        "app.domains.memory.public",
+        "app.runtime.memory"
+      ],
+      "module": "app.runtime.chat.memory_producer",
+      "path": "backend/app/runtime/chat/memory_producer.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.domains.characters.infrastructure.sqlalchemy_models",
@@ -6541,7 +6721,8 @@
         "typing"
       ],
       "imports": [
-        "app.runtime.chat.sqlalchemy_service"
+        "app.runtime.chat.sqlalchemy_service",
+        "app.runtime.chat.world_generation"
       ],
       "module": "app.runtime.chat.sqlalchemy_adapter",
       "path": "backend/app/runtime/chat/sqlalchemy_adapter.py",
@@ -6571,6 +6752,38 @@
       ],
       "module": "app.runtime.chat.sqlalchemy_service",
       "path": "backend/app/runtime/chat/sqlalchemy_service.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing",
+        "uuid"
+      ],
+      "imports": [
+        "app.core.config",
+        "app.domains.chat.api.schemas",
+        "app.domains.chat.application",
+        "app.domains.chat.domain",
+        "app.domains.chat.domain.errors",
+        "app.domains.chat.infrastructure",
+        "app.domains.chat.ports",
+        "app.domains.identity.public",
+        "app.domains.memory.public",
+        "app.domains.relationships.public",
+        "app.integrations.llm",
+        "app.runtime.chat.memory_producer",
+        "app.runtime.chat.model_bindings",
+        "app.runtime.chat.retrieval_policy",
+        "app.runtime.chat.sqlalchemy_service",
+        "app.runtime.graph_projection.relationship_graph_read"
+      ],
+      "module": "app.runtime.chat.world_generation",
+      "path": "backend/app/runtime/chat/world_generation.py",
       "wildcard_imports": []
     },
     {
@@ -6927,10 +7140,10 @@
         "typing"
       ],
       "imports": [
+        "app.domains.chat.infrastructure.sqlalchemy_models",
         "app.domains.memory.public",
         "app.domains.relationships.infrastructure.sqlalchemy_social_models",
         "app.domains.routines.infrastructure.sqlalchemy_models",
-        "app.runtime.chat.model_bindings",
         "app.runtime.social.sqlalchemy_read_repository"
       ],
       "module": "app.runtime.memory.sqlalchemy_source_reader",

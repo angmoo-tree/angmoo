@@ -77,7 +77,7 @@ def test_canonical_world_chat_route_is_shared_by_next_static_and_tauri_phone() -
     assert "chat(?:\\/[^/?#]+)?" in safe_navigation
 
 
-def test_world_chat_ui_is_read_only_scoped_and_semantic_in_p8_l_d() -> None:
+def test_world_chat_ui_preserves_p8_l_d_scope_under_p8_l_p_successor() -> None:
     world_app = _read("frontend/src/features/world-app/ui/world-app.tsx")
     world_contract = _read(
         "frontend/src/features/world-app/model/world-app-contract.ts"
@@ -99,13 +99,18 @@ def test_world_chat_ui_is_read_only_scoped_and_semantic_in_p8_l_d() -> None:
         "다른 World의 응답은 표시하지 않았습니다.",
     ):
         assert marker in ui
+    for successor_marker in (
+        "sendWorldChatMessage",
+        "retryWorldChatResponse",
+        "TypingPresence",
+        "<textarea",
+        "onSubmit",
+    ):
+        assert successor_marker in ui
     for forbidden in (
         "sendThreadMessage",
         "retryThreadMessage",
         "Character Response Generator",
-        "입력 중",
-        "<textarea",
-        "onSubmit",
     ):
         assert forbidden not in ui
     assert not re.search(r"#[0-9a-fA-F]{3,8}\b", css)

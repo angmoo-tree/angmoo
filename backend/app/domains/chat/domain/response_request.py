@@ -65,6 +65,12 @@ class DegradedReason(StrEnum):
     NO_ACCEPTED_EVIDENCE = "no_accepted_evidence"
 
 
+class EvidenceCapability(StrEnum):
+    NONE = "none"
+    AVAILABLE = "available"
+    DEGRADED = "degraded"
+
+
 @dataclass(frozen=True, slots=True)
 class ResponseMetadata:
     request_id: str
@@ -78,6 +84,9 @@ class ResponseMetadata:
     short_circuited: bool = False
     partial_axes: tuple[RetrievalAxis, ...] = ()
     public_evidence_count: int = 0
+    evidence_bundle_version: str | None = None
+    evidence_hash: str | None = None
+    evidence_capability: EvidenceCapability = EvidenceCapability.NONE
     clarification_slot: str | None = None
     degraded_reason: DegradedReason | None = None
     retry_of_request_id: str | None = None
@@ -105,6 +114,25 @@ class ResponseMetadata:
             raise ValueError("response_metadata_protocol_invalid")
         if not 0 <= self.public_evidence_count <= 100:
             raise ValueError("response_metadata_evidence_count_invalid")
+        if (self.evidence_bundle_version is None) != (self.evidence_hash is None):
+            raise ValueError("response_metadata_evidence_identity_incomplete")
+        if self.evidence_bundle_version is not None and (
+            len(self.evidence_bundle_version) > 64
+            or not self.evidence_bundle_version.strip()
+            or self.evidence_hash is None
+            or len(self.evidence_hash) != 64
+        ):
+            raise ValueError("response_metadata_evidence_identity_invalid")
+        if (
+            self.evidence_capability is not EvidenceCapability.NONE
+            and self.evidence_bundle_version is None
+        ):
+            raise ValueError("response_metadata_evidence_capability_unbound")
+        if (
+            self.evidence_capability is EvidenceCapability.AVAILABLE
+            and self.public_evidence_count == 0
+        ):
+            raise ValueError("response_metadata_evidence_capability_empty")
         if len(set(self.partial_axes)) != len(self.partial_axes):
             raise ValueError("response_metadata_partial_axis_duplicate")
         if len(self.node_diagnostic_refs) > 4 or any(
@@ -139,6 +167,9 @@ class ResponseMetadata:
             "short_circuited": self.short_circuited,
             "partial_axes": [axis.value for axis in self.partial_axes],
             "public_evidence_count": self.public_evidence_count,
+            "evidence_bundle_version": self.evidence_bundle_version,
+            "evidence_hash": self.evidence_hash,
+            "evidence_capability": self.evidence_capability.value,
             "clarification_slot": self.clarification_slot,
             "degraded_reason": (
                 None if self.degraded_reason is None else self.degraded_reason.value
@@ -214,6 +245,7 @@ class ResponseCommitPayload:
 __all__ = [
     "CreateResponseRequest",
     "DegradedReason",
+    "EvidenceCapability",
     "ResponseCommitPayload",
     "ResponseMetadata",
     "ResponseRequestRecord",

@@ -607,7 +607,7 @@ test("World App keeps the requested World boundary and never falls back", async 
   expect(audit.providerCalls).toEqual([]);
 });
 
-test("P8-L-D World Chat list, thread, and resolved legacy entry converge on the scoped read-only route", async ({
+test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converge on the scoped route", async ({
   page,
 }) => {
   const audit = await installBackendFixture(page, {
@@ -677,6 +677,44 @@ test("P8-L-D World Chat list, thread, and resolved legacy entry converge on the 
     ],
   };
   const worldChatCalls: string[] = [];
+  const sentUserMessage = {
+    id: 3,
+    thread_id: threadId,
+    role: "user" as const,
+    content: "오늘 기억나는 일을 말해 줘.",
+    model: null,
+    status: "ok",
+    error_code: null,
+    created_at: "2026-09-02T08:00:00Z",
+  };
+  const generatedAssistantMessage = {
+    id: 4,
+    thread_id: threadId,
+    role: "assistant" as const,
+    content: "오늘은 함께 걷던 길이 가장 또렷하게 기억나.",
+    model: "gemini-2.5-flash-lite",
+    status: "ok",
+    error_code: null,
+    created_at: "2026-09-02T08:00:03Z",
+  };
+  const acceptedRequest = {
+    protocol_version: "chat-generation-stream.v1" as const,
+    request_id: "request-p8-l-p-browser",
+    request_scope_hash: "a".repeat(64),
+    generation_id: "generation-p8-l-p-browser",
+    attempt_number: 1,
+    response_slot_id: "response-p8-l-p-browser",
+    state: "accepted" as const,
+    route: null,
+    retryable: false,
+    failure_class: null,
+    last_accepted_sequence: -1,
+    user_message: sentUserMessage,
+    assistant_message: null,
+    response_metadata: {},
+  };
+  let messageAccepted = false;
+  let responseCommitted = false;
 
   await page.route(`**/api/backend/worlds/${worldId}/chat/**`, async (route) => {
     const request = route.request();
@@ -697,7 +735,101 @@ test("P8-L-D World Chat list, thread, and resolved legacy entry converge on the 
       url.pathname ===
         `/api/backend/worlds/${worldId}/chat/threads/${threadId}`
     ) {
-      return json(route, worldThread);
+      return json(route, {
+        ...worldThread,
+        latest_message: responseCommitted
+          ? generatedAssistantMessage
+          : messageAccepted
+            ? sentUserMessage
+            : worldThread.latest_message,
+        messages: [
+          ...worldThread.messages,
+          ...(messageAccepted ? [sentUserMessage] : []),
+          ...(responseCommitted ? [generatedAssistantMessage] : []),
+        ],
+      });
+    }
+    if (
+      request.method() === "GET" &&
+      url.pathname ===
+        `/api/backend/worlds/${worldId}/chat/threads/${threadId}/requests/latest`
+    ) {
+      return json(route, {
+        response_request: messageAccepted
+          ? {
+              ...acceptedRequest,
+              state: responseCommitted ? "committed" : "accepted",
+              assistant_message: responseCommitted
+                ? generatedAssistantMessage
+                : null,
+              last_accepted_sequence: responseCommitted ? 2 : -1,
+            }
+          : null,
+      });
+    }
+    if (
+      request.method() === "POST" &&
+      url.pathname ===
+        `/api/backend/worlds/${worldId}/chat/threads/${threadId}/messages`
+    ) {
+      expect(request.postDataJSON()).toMatchObject({
+        content: sentUserMessage.content,
+      });
+      messageAccepted = true;
+      return json(route, {
+        outcome: "accepted",
+        user_message: sentUserMessage,
+        response_request: acceptedRequest,
+      });
+    }
+    if (
+      request.method() === "GET" &&
+      url.pathname ===
+        `/api/backend/worlds/${worldId}/chat/threads/${threadId}/requests/${acceptedRequest.request_id}/events`
+    ) {
+      await new Promise((resolve) => setTimeout(resolve, 650));
+      responseCommitted = true;
+      return route.fulfill({
+        body: [
+          {
+            ...acceptedRequest,
+            payload: {},
+            protocol_version: "chat-generation-stream.v1",
+            sequence: 0,
+            type: "accepted",
+          },
+          {
+            ...acceptedRequest,
+            payload: { text: generatedAssistantMessage.content },
+            protocol_version: "chat-generation-stream.v1",
+            sequence: 1,
+            type: "delta",
+          },
+          {
+            ...acceptedRequest,
+            payload: {},
+            protocol_version: "chat-generation-stream.v1",
+            sequence: 2,
+            type: "completed",
+          },
+        ]
+          .map((value) => JSON.stringify(value))
+          .join("\n"),
+        contentType: "application/x-ndjson",
+        status: 200,
+      });
+    }
+    if (
+      request.method() === "GET" &&
+      url.pathname ===
+        `/api/backend/worlds/${worldId}/chat/threads/${threadId}/requests/${acceptedRequest.request_id}`
+    ) {
+      return json(route, {
+        ...acceptedRequest,
+        state: "committed",
+        assistant_message: generatedAssistantMessage,
+        last_accepted_sequence: 2,
+      });
     }
     return json(route, { detail: "unexpected_world_chat_request" }, 404);
   });
@@ -757,22 +889,33 @@ test("P8-L-D World Chat list, thread, and resolved legacy entry converge on the 
   await expect(page.getByText("답하는 앵무", { exact: true })).toBeVisible();
   await expect(page.getByText("여기는 어느 World야?", { exact: true })).toBeVisible();
   await expect(page.getByText("World 경계를 기억하고 있어요.", { exact: true })).toBeVisible();
-  await expect(page.getByText("저장된 World 대화를 안전하게 표시하고 있어요.")).toBeVisible();
-  await expect(page.getByRole("textbox")).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "보내기" })).toHaveCount(0);
+  const composer = page.getByRole("textbox", {
+    name: "친구 앵무에게 보낼 메시지",
+  });
+  await expect(composer).toBeVisible();
+  await composer.fill(sentUserMessage.content);
+  await page.getByRole("button", { name: "메시지 보내기" }).click();
+  await expect(page.getByText(sentUserMessage.content, { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("status", { name: "친구 앵무가 응답을 입력하고 있습니다." }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(generatedAssistantMessage.content, { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText("Canonical Planner", { exact: false })).toHaveCount(0);
+  await expect(page.getByText("Evidence Bundle", { exact: false })).toHaveCount(0);
 
   await page.goto(`/messages/${threadId}`);
   await expect(page).toHaveURL(
     new RegExp(`/worlds/${worldId}/chat/${threadId}$`),
   );
   await expect(page.locator('[data-world-chat-surface="thread"]')).toBeVisible();
-  expect([...new Set(worldChatCalls)].sort()).toEqual(
-    [
-      `GET /api/backend/worlds/${worldId}/chat/threads`,
-      `GET /api/backend/worlds/${worldId}/chat/threads/${threadId}`,
-    ].sort(),
+  expect(worldChatCalls).toContain(
+    `POST /api/backend/worlds/${worldId}/chat/threads/${threadId}/messages`,
   );
-  expect(worldChatCalls.every((call) => call.startsWith("GET "))).toBe(true);
+  expect(worldChatCalls).toContain(
+    `GET /api/backend/worlds/${worldId}/chat/threads/${threadId}/requests/${acceptedRequest.request_id}/events`,
+  );
   expect(audit.writes).toEqual([]);
   expect(audit.providerCalls).toEqual([]);
 });
@@ -954,6 +1097,14 @@ test("P8-L-E World social author profile and letter CTA open one exact World Cha
       url.pathname === `/api/backend/worlds/${worldId}/chat/threads/${threadId}`
     ) {
       await json(route, thread);
+      return;
+    }
+    if (
+      method === "GET" &&
+      url.pathname ===
+        `/api/backend/worlds/${worldId}/chat/threads/${threadId}/requests/latest`
+    ) {
+      await json(route, { response_request: null });
       return;
     }
     await route.fallback();

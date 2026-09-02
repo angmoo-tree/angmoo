@@ -42,6 +42,7 @@ from app.runtime.chat import model_bindings as models
 from app.core import security
 from app.core import prompt_safety
 from app.credentials import (
+    CredentialMaterial,
     CredentialPurpose,
     CredentialResolutionError,
     CredentialResolver,
@@ -1265,6 +1266,14 @@ def _ensure_character_available_for_messages(
 def _resolve_message_credential(
     db: Session, user: models.User
 ) -> tuple[models.LlmCredential, str]:
+    credential, material = resolve_message_credential_material(db, user)
+    return credential, material.reveal()
+
+
+def resolve_message_credential_material(
+    db: Session,
+    user: models.User,
+) -> tuple[models.LlmCredential, CredentialMaterial]:
     preference = ensure_user_preference(db, user)
     credential = (
         _get_agent_source_credential(db, user, preference)
@@ -1277,12 +1286,13 @@ def _resolve_message_credential(
             purpose=CredentialPurpose.MESSAGE_LLM,
             owner_id=user.id,
         )
-        api_key = material.reveal()
     except CredentialResolutionError as exc:
         if not _has_usable_credential(credential):
             raise MessageCredentialRequiredError(API_KEY_MISSING_MESSAGE) from exc
         raise MessageCredentialInvalidError(API_KEY_INVALID_MESSAGE) from exc
-    return credential, api_key
+    if credential is None:
+        raise MessageCredentialRequiredError(API_KEY_MISSING_MESSAGE)
+    return credential, material
 
 
 def _get_message_credential(

@@ -65,7 +65,7 @@
   ],
   "historical_chain": {
     "current_tree_owner": "P8-L-N",
-    "p8_l_m_sha256": "ef4ebadee0507c05dba672c316b5dd139084e6eb9743325d4e02f24699ae5d46",
+    "p8_l_m_sha256": "3cc21bc37b79aef44fceb04866fe90ae667f869d115ec1f2dfc2d0c56a7c8d18",
     "predecessor_mode": "frozen_digest"
   },
   "non_scope": [
@@ -80,7 +80,7 @@
   "owner_stage": "P8-L-N",
   "predecessor": {
     "path": "docs/architecture/p8-l-m-graph-retrieval-planner-inventory.json",
-    "sha256": "ef4ebadee0507c05dba672c316b5dd139084e6eb9743325d4e02f24699ae5d46",
+    "sha256": "3cc21bc37b79aef44fceb04866fe90ae667f869d115ec1f2dfc2d0c56a7c8d18",
     "size": 7014
   },
   "recipe_registry": {
@@ -131,8 +131,8 @@
   "required_files": [
     {
       "path": "backend/app/domains/chat/application/__init__.py",
-      "sha256": "503661aaa2bef18abd831d80a84e4b4cb6102bf66249586e4a3efd9862627316",
-      "size": 1902
+      "sha256": "d4229c185ee1aa69efa3e6dba55faec3e633a761c6f71326a5c3a1bfcd36bace",
+      "size": 2509
     },
     {
       "path": "backend/app/domains/chat/application/both_retrieval.py",
@@ -151,8 +151,8 @@
     },
     {
       "path": "backend/app/domains/chat/domain/__init__.py",
-      "sha256": "c270056513a679ed60833243914bef79d204a58d2385774497320d51cd002f58",
-      "size": 3397
+      "sha256": "97101e62a3d642242339d6b0bac35101509292d9e1f7bf9aedca86ca1df5f9f6",
+      "size": 3749
     },
     {
       "path": "backend/app/domains/chat/domain/call_tracker.py",
@@ -166,8 +166,8 @@
     },
     {
       "path": "backend/app/domains/chat/public.py",
-      "sha256": "a4feb34ef359176084c9c9dfab8ff7f22e8e3b88457347aff7d7e064baa801bb",
-      "size": 6634
+      "sha256": "3c9cda68fa7031b8d6c395d50272470af216cc8664ae4348fda14e9337a4a6d5",
+      "size": 7002
     },
     {
       "path": "backend/tests/test_p8_l_n_both_workflow_coordinator.py",
@@ -176,13 +176,13 @@
     },
     {
       "path": "backend/tests/test_p8_l_n_both_workflow_coordinator_inventory.py",
-      "sha256": "545f991f097ba2819d77753f7020e179f63a846d9974325eb7774f19a582b914",
+      "sha256": "21ccd3afda9578c40e50dde5dd23a16849163eff75ac9af14593fa4ebcf547fc",
       "size": 1894
     },
     {
       "path": "docs/architecture/backend-domains.md",
-      "sha256": "34d9b915d2688ca015d92926c3cf4b1116c00b110255bc773a8f41f7e021d704",
-      "size": 46163
+      "sha256": "5e29457e3dee7bae04fa806c5e1c9b09e102d5fa61c6c4c2f303ed8a814e92e7",
+      "size": 47730
     },
     {
       "path": "docs/architecture/p8-l-n-both-workflow-coordinator.md",
@@ -191,7 +191,7 @@
     },
     {
       "path": "scripts/ci/generate_p8_l_n_both_workflow_coordinator_inventory.py",
-      "sha256": "b75de2268e83215de5106f28ef423ff1799f6544587bb1a33442af40261ed0c1",
+      "sha256": "549c5d50f90c2d6fd621ba88018988597ee10aacd299efec6ea15c9929c521fd",
       "size": 12622
     }
   ],

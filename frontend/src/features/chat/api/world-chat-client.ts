@@ -2,6 +2,10 @@ import { clearStoredUser, notifyAuthChanged } from "@/shared/auth/public";
 import { runtimeFetch } from "@/shared/runtime/public";
 
 import type {
+  WorldChatGenerationEvent,
+  WorldChatGenerationRequestRead,
+  WorldChatLatestRequestRead,
+  WorldChatMessageAcceptRead,
   WorldChatThreadCreate,
   WorldChatThreadCreateRead,
   WorldChatEntryRead,
@@ -108,6 +112,146 @@ export async function createOrGetWorldChatThread(
   return payload;
 }
 
+export async function sendWorldChatMessage(
+  worldId: string,
+  threadId: string,
+  data: { content: string; idempotency_key: string },
+): Promise<WorldChatMessageAcceptRead> {
+  const payload = await requestWorldChatApi<WorldChatMessageAcceptRead>(
+    worldChatApiPath(
+      worldId,
+      `/threads/${encodeURIComponent(threadId)}/messages`,
+    ),
+    { body: data, method: "POST" },
+  );
+  if (!worldChatMessageAcceptMatches(payload, threadId)) {
+    throw new WorldChatApiError(502, "world_chat_generation_scope_mismatch");
+  }
+  return payload;
+}
+
+export async function retryWorldChatResponse(
+  worldId: string,
+  threadId: string,
+  data: { failed_request_id: string; idempotency_key: string },
+): Promise<WorldChatMessageAcceptRead> {
+  const payload = await requestWorldChatApi<WorldChatMessageAcceptRead>(
+    worldChatApiPath(
+      worldId,
+      `/threads/${encodeURIComponent(threadId)}/retry`,
+    ),
+    { body: data, method: "POST" },
+  );
+  if (!worldChatMessageAcceptMatches(payload, threadId)) {
+    throw new WorldChatApiError(502, "world_chat_generation_scope_mismatch");
+  }
+  return payload;
+}
+
+export async function getWorldChatResponseRequest(
+  worldId: string,
+  threadId: string,
+  requestId: string,
+  options: { signal?: AbortSignal } = {},
+): Promise<WorldChatGenerationRequestRead> {
+  const payload = await requestWorldChatApi<WorldChatGenerationRequestRead>(
+    worldChatApiPath(
+      worldId,
+      `/threads/${encodeURIComponent(threadId)}/requests/${encodeURIComponent(requestId)}`,
+    ),
+    { signal: options.signal },
+  );
+  if (!worldChatGenerationRequestMatches(payload, threadId) || payload.request_id !== requestId) {
+    throw new WorldChatApiError(502, "world_chat_generation_scope_mismatch");
+  }
+  return payload;
+}
+
+export async function getLatestWorldChatResponseRequest(
+  worldId: string,
+  threadId: string,
+  options: { signal?: AbortSignal } = {},
+): Promise<WorldChatLatestRequestRead> {
+  const payload = await requestWorldChatApi<WorldChatLatestRequestRead>(
+    worldChatApiPath(
+      worldId,
+      `/threads/${encodeURIComponent(threadId)}/requests/latest`,
+    ),
+    { signal: options.signal },
+  );
+  if (
+    !payload ||
+    typeof payload !== "object" ||
+    !("response_request" in payload) ||
+    (payload.response_request !== null &&
+      !worldChatGenerationRequestMatches(payload.response_request, threadId))
+  ) {
+    throw new WorldChatApiError(502, "world_chat_generation_scope_mismatch");
+  }
+  return payload;
+}
+
+export async function streamWorldChatResponse(
+  worldId: string,
+  threadId: string,
+  expected: WorldChatGenerationRequestRead,
+  onEvent: (event: WorldChatGenerationEvent) => void | Promise<void>,
+  options: { signal?: AbortSignal } = {},
+): Promise<number> {
+  const response = await runtimeFetch(
+    `/api/backend${worldChatApiPath(
+      worldId,
+      `/threads/${encodeURIComponent(threadId)}/requests/${encodeURIComponent(expected.request_id)}/events`,
+    )}`,
+    {
+      cache: "no-store",
+      credentials: "same-origin",
+      headers: { Accept: "application/x-ndjson" },
+      signal: options.signal,
+    },
+  );
+  if (!response.ok) {
+    const payload = (await response.json().catch(() => null)) as unknown;
+    throw new WorldChatApiError(
+      response.status,
+      errorDetail(payload, `http_${response.status}`),
+    );
+  }
+  if (!response.body) {
+    throw new WorldChatApiError(502, "world_chat_stream_missing");
+  }
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let lastSequence = -1;
+  const consumeLine = async (line: string) => {
+    if (!line.trim()) return;
+    let value: unknown;
+    try {
+      value = JSON.parse(line);
+    } catch {
+      throw new WorldChatApiError(502, "world_chat_stream_invalid_json");
+    }
+    const event = parseGenerationEvent(value, expected);
+    if (event.sequence <= lastSequence) return;
+    if (event.sequence !== lastSequence + 1) {
+      throw new WorldChatApiError(502, "world_chat_stream_sequence_gap");
+    }
+    lastSequence = event.sequence;
+    await onEvent(event);
+  };
+  while (true) {
+    const { done, value } = await reader.read();
+    buffer += decoder.decode(value, { stream: !done });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() ?? "";
+    for (const line of lines) await consumeLine(line);
+    if (done) break;
+  }
+  if (buffer.trim()) await consumeLine(buffer);
+  return lastSequence;
+}
+
 function worldChatApiPath(worldId: string, suffix: string) {
   return `/worlds/${encodeURIComponent(worldId)}/chat${suffix}`;
 }
@@ -179,4 +323,85 @@ function worldChatThreadMatchesScope(
     thread.messages.every((message) => message.thread_id === thread.id) &&
     (!thread.latest_message || thread.latest_message.thread_id === thread.id)
   );
+}
+
+function worldChatMessageAcceptMatches(
+  value: unknown,
+  threadId: string,
+): value is WorldChatMessageAcceptRead {
+  if (!value || typeof value !== "object") return false;
+  const result = value as Partial<WorldChatMessageAcceptRead>;
+  return (
+    (result.outcome === "accepted" || result.outcome === "replayed") &&
+    !!result.user_message &&
+    result.user_message.thread_id === threadId &&
+    worldChatGenerationRequestMatches(result.response_request, threadId) &&
+    result.response_request.user_message.id === result.user_message.id
+  );
+}
+
+function worldChatGenerationRequestMatches(
+  value: unknown,
+  threadId: string,
+): value is WorldChatGenerationRequestRead {
+  if (!value || typeof value !== "object") return false;
+  const request = value as Partial<WorldChatGenerationRequestRead>;
+  return (
+    request.protocol_version === "chat-generation-stream.v1" &&
+    typeof request.request_id === "string" &&
+    typeof request.request_scope_hash === "string" &&
+    request.request_scope_hash.length === 64 &&
+    typeof request.generation_id === "string" &&
+    typeof request.attempt_number === "number" &&
+    request.attempt_number >= 1 &&
+    typeof request.response_slot_id === "string" &&
+    typeof request.state === "string" &&
+    typeof request.retryable === "boolean" &&
+    typeof request.last_accepted_sequence === "number" &&
+    !!request.user_message &&
+    request.user_message.thread_id === threadId &&
+    (!request.assistant_message || request.assistant_message.thread_id === threadId)
+  );
+}
+
+function parseGenerationEvent(
+  value: unknown,
+  expected: WorldChatGenerationRequestRead,
+): WorldChatGenerationEvent {
+  if (!value || typeof value !== "object") {
+    throw new WorldChatApiError(502, "world_chat_stream_event_invalid");
+  }
+  const event = value as Partial<WorldChatGenerationEvent>;
+  if (
+    event.protocol_version !== "chat-generation-stream.v1" ||
+    event.request_id !== expected.request_id ||
+    event.request_scope_hash !== expected.request_scope_hash ||
+    event.generation_id !== expected.generation_id ||
+    event.attempt_number !== expected.attempt_number ||
+    !Number.isInteger(event.sequence) ||
+    (event.sequence ?? -1) < 0 ||
+    !["accepted", "delta", "completed", "failed", "cancelled"].includes(
+      event.type ?? "",
+    ) ||
+    !event.payload ||
+    typeof event.payload !== "object"
+  ) {
+    throw new WorldChatApiError(502, "world_chat_stream_event_invalid");
+  }
+  const payload = event.payload as Record<string, unknown>;
+  const keys = Object.keys(payload).sort();
+  if (
+    ((event.type === "accepted" || event.type === "completed") && keys.length !== 0) ||
+    (event.type === "delta" &&
+      (keys.join(",") !== "text" || typeof payload.text !== "string" || !payload.text)) ||
+    (event.type === "failed" &&
+      (keys.join(",") !== "failure_class,retryable" ||
+        typeof payload.failure_class !== "string" ||
+        typeof payload.retryable !== "boolean")) ||
+    (event.type === "cancelled" &&
+      (keys.join(",") !== "reason" || typeof payload.reason !== "string"))
+  ) {
+    throw new WorldChatApiError(502, "world_chat_stream_payload_invalid");
+  }
+  return event as WorldChatGenerationEvent;
 }

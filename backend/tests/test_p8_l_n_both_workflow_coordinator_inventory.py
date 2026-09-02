@@ -37,7 +37,7 @@ def test_p8_l_n_inventory_closes_bounded_code_owned_both_coordination() -> None:
     inventory = _inventory()
     assert inventory["owner_stage"] == "P8-L-N"
     assert inventory["predecessor"]["sha256"] == (
-        "ef4ebadee0507c05dba672c316b5dd139084e6eb9743325d4e02f24699ae5d46"
+        "3cc21bc37b79aef44fceb04866fe90ae667f869d115ec1f2dfc2d0c56a7c8d18"
     )
     assert inventory["schema"]["new_alembic_migration"] is None
     assert set(inventory["recipe_registry"]) == {

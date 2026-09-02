@@ -199,6 +199,25 @@ selector. Tauri same-window back navigation synchronizes popstate URL and the
 desktop route store; a direct profile entry without product history falls back
 only to the current World's Characters directory.
 
+### P8-L-P World Chat generation and streaming adoption
+
+P8-L-P activates the existing World Chat thread composer in Next, static and
+the Phone Tauri route. The user message is displayed only after canonical save
+acceptance. Internal Router, Planner, retrieval and evidence phases map to one
+delayed `입력 중` presence after 300ms; those phase names and payloads never
+appear in the user surface. The first verified Character Response Generator
+delta replaces that presence in the stable response slot.
+
+The hosted composer, pending dots, failure bubble and retry spinner remain
+`ADAPTED` visual anatomy. Their Local meaning is typed World-scoped request,
+generation and retry state: `[다시 보내기]` replays a failed user-message save
+with the same idempotency key, while `[다시 시도]` creates a new generation
+attempt for the latest retryable assistant failure without duplicating the
+user message. Credential/config failures use a Settings recovery CTA. Scope,
+generation, attempt and sequence mismatch events are rejected before UI state
+changes. Only CRG text is streamed; provider/router/planner/database/evidence
+internals remain hidden.
+
 ## Feature-first ownership contract
 
 The existing feature-first boundary remains authoritative:
@@ -222,9 +241,9 @@ capabilities without moving those decisions into neutral `shared/ui`. The
 eleventh is the UI-E `features/characters/public.ts` boundary; it owns the
 Next/static Character dashboard without moving Character policy into neutral
 presentation or legacy compatibility modules.
-The twelfth is the P8-L-C/D/E `features/chat/public.ts` boundary; it owns both
-the legacy Next-only compatibility surface and the World-scoped read-only
-Chat surface plus typed letter entry while keeping route composition outside
+The twelfth is the P8-L-C/D/E/P `features/chat/public.ts` boundary; it owns both
+the legacy Next-only compatibility surface and the World-scoped Chat surface,
+typed letter entry, composer, generation presence and retry while keeping route composition outside
 feature internals. P8-L-E also extends the existing Character boundary with
 the WorldCharacter public profile and directory surface.
 The Character model also owns the pure recent-activity presenter. It consumes

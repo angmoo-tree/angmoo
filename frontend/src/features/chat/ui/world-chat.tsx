@@ -1,8 +1,21 @@
 "use client";
 
-import { ArrowLeft, MessageCircle, RotateCcw } from "lucide-react";
+import {
+  ArrowLeft,
+  LoaderCircle,
+  MessageCircle,
+  RotateCcw,
+  Send,
+  Settings,
+} from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import {
+  type FormEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import {
   worldChatRoute,
@@ -12,11 +25,17 @@ import {
 import { LocalProductLink } from "@/features/device-shell/public";
 import { ProfileAvatar, formatHandle } from "@/shared/ui/public";
 import {
+  getLatestWorldChatResponseRequest,
+  getWorldChatResponseRequest,
   getWorldChatThread,
   listWorldChatThreads,
+  retryWorldChatResponse,
+  sendWorldChatMessage,
+  streamWorldChatResponse,
   WorldChatApiError,
 } from "../api/world-chat-client";
 import type {
+  WorldChatGenerationRequestRead,
   WorldChatThreadListRead,
   WorldChatThreadRead,
 } from "../model/world-chat-contract";
@@ -174,13 +193,274 @@ function WorldChatThread({
   const [state, setState] = useState<LoadState>("loading");
   const [error, setError] = useState<Error | null>(null);
   const [attempt, setAttempt] = useState(0);
+  const [draft, setDraft] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sendFailure, setSendFailure] = useState<{
+    content: string;
+    idempotencyKey: string;
+  } | null>(null);
+  const [generation, setGeneration] = useState<{
+    phase: "pending" | "streaming" | "failed";
+    request: WorldChatGenerationRequestRead;
+    retrying: boolean;
+    text: string;
+    typingVisible: boolean;
+  } | null>(null);
+  const streamControllerRef = useRef<AbortController | null>(null);
+  const activeGenerationRef = useRef<string | null>(null);
+  const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearTypingTimer = useCallback(() => {
+    if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
+    typingTimerRef.current = null;
+  }, []);
+
+  const refreshThread = useCallback(async () => {
+    const result = await getWorldChatThread(worldId, threadId);
+    setThread(result);
+    return result;
+  }, [threadId, worldId]);
+
+  const showTerminalRequest = useCallback(
+    async (request: WorldChatGenerationRequestRead) => {
+      clearTypingTimer();
+      activeGenerationRef.current = null;
+      if (request.state === "committed") {
+        await refreshThread();
+        setGeneration(null);
+        return;
+      }
+      setGeneration({
+        phase: "failed",
+        request,
+        retrying: false,
+        text: "",
+        typingVisible: false,
+      });
+    },
+    [clearTypingTimer, refreshThread],
+  );
+
+  const consumeGeneration = useCallback(
+    async function consume(
+      request: WorldChatGenerationRequestRead,
+      reconnectAttempt = 0,
+    ) {
+      streamControllerRef.current?.abort();
+      const controller = new AbortController();
+      streamControllerRef.current = controller;
+      const scope = generationScope(request);
+      activeGenerationRef.current = scope;
+      clearTypingTimer();
+      setGeneration({
+        phase: "pending",
+        request,
+        retrying: false,
+        text: "",
+        typingVisible: false,
+      });
+      typingTimerRef.current = setTimeout(() => {
+        if (activeGenerationRef.current !== scope) return;
+        setGeneration((current) =>
+          current && generationScope(current.request) === scope
+            ? { ...current, typingVisible: current.phase === "pending" }
+            : current,
+        );
+      }, 300);
+      try {
+        await streamWorldChatResponse(
+          worldId,
+          threadId,
+          request,
+          async (event) => {
+            if (activeGenerationRef.current !== scope) return;
+            if (event.type === "delta") {
+              clearTypingTimer();
+              const text = "text" in event.payload ? event.payload.text : "";
+              setGeneration((current) =>
+                current && generationScope(current.request) === scope
+                  ? {
+                      ...current,
+                      phase: "streaming",
+                      text: current.text + text,
+                      typingVisible: false,
+                    }
+                  : current,
+              );
+              return;
+            }
+            if (event.type === "failed") {
+              clearTypingTimer();
+              const failure = event.payload as {
+                failure_class: string;
+                retryable: boolean;
+              };
+              setGeneration({
+                phase: "failed",
+                request: {
+                  ...request,
+                  failure_class: failure.failure_class,
+                  retryable: failure.retryable,
+                  state: "failed",
+                },
+                retrying: false,
+                text: "",
+                typingVisible: false,
+              });
+              return;
+            }
+            if (event.type === "cancelled") {
+              clearTypingTimer();
+              setGeneration({
+                phase: "failed",
+                request: {
+                  ...request,
+                  failure_class: "cancelled",
+                  retryable: false,
+                  state: "cancelled",
+                },
+                retrying: false,
+                text: "",
+                typingVisible: false,
+              });
+              return;
+            }
+            if (event.type === "completed") {
+              const status = await getWorldChatResponseRequest(
+                worldId,
+                threadId,
+                request.request_id,
+                { signal: controller.signal },
+              );
+              if (activeGenerationRef.current === scope) {
+                await showTerminalRequest(status);
+              }
+            }
+          },
+          { signal: controller.signal },
+        );
+      } catch {
+        if (controller.signal.aborted) return;
+        try {
+          let status = await getWorldChatResponseRequest(
+            worldId,
+            threadId,
+            request.request_id,
+            { signal: controller.signal },
+          );
+          if (activeGenerationRef.current !== scope) return;
+          if (status.state === "accepted" && reconnectAttempt < 1) {
+            await consume(status, reconnectAttempt + 1);
+            return;
+          }
+          setGeneration({
+            phase: "pending",
+            request: status,
+            retrying: false,
+            text: "",
+            typingVisible: true,
+          });
+          while (
+            !controller.signal.aborted &&
+            activeGenerationRef.current === scope &&
+            !isTerminalState(status.state)
+          ) {
+            await waitFor(750, controller.signal);
+            status = await getWorldChatResponseRequest(
+              worldId,
+              threadId,
+              request.request_id,
+              { signal: controller.signal },
+            );
+            if (status.state === "accepted" && reconnectAttempt < 1) {
+              await consume(status, reconnectAttempt + 1);
+              return;
+            }
+          }
+          if (
+            activeGenerationRef.current === scope &&
+            isTerminalState(status.state)
+          ) {
+            await showTerminalRequest(status);
+          }
+        } catch {
+          if (controller.signal.aborted) return;
+          setGeneration({
+            phase: "failed",
+            request: {
+              ...request,
+              failure_class: "stream_interrupted",
+              retryable: true,
+              state: "failed",
+            },
+            retrying: false,
+            text: "",
+            typingVisible: false,
+          });
+        }
+      } finally {
+        clearTypingTimer();
+      }
+    },
+    [clearTypingTimer, showTerminalRequest, threadId, worldId],
+  );
+
+  const hydrateRequest = useCallback(
+    async (request: WorldChatGenerationRequestRead, signal: AbortSignal) => {
+      if (request.state === "accepted") {
+        await consumeGeneration(request);
+        return;
+      }
+      if (isTerminalState(request.state)) {
+        await showTerminalRequest(request);
+        return;
+      }
+      const scope = generationScope(request);
+      activeGenerationRef.current = scope;
+      setGeneration({
+        phase: "pending",
+        request,
+        retrying: false,
+        text: "",
+        typingVisible: true,
+      });
+      while (!signal.aborted && activeGenerationRef.current === scope) {
+        await waitFor(750, signal);
+        if (signal.aborted) return;
+        const status = await getWorldChatResponseRequest(
+          worldId,
+          threadId,
+          request.request_id,
+          { signal },
+        );
+        if (status.state === "accepted") {
+          await consumeGeneration(status);
+          return;
+        }
+        if (isTerminalState(status.state)) {
+          await showTerminalRequest(status);
+          return;
+        }
+      }
+    },
+    [consumeGeneration, showTerminalRequest, threadId, worldId],
+  );
 
   useEffect(() => {
     const controller = new AbortController();
-    void getWorldChatThread(worldId, threadId, { signal: controller.signal })
-      .then((result) => {
+    void Promise.all([
+      getWorldChatThread(worldId, threadId, { signal: controller.signal }),
+      getLatestWorldChatResponseRequest(worldId, threadId, {
+        signal: controller.signal,
+      }),
+    ])
+      .then(async ([result, latest]) => {
+        if (controller.signal.aborted) return;
         setThread(result);
         setState("ready");
+        if (latest.response_request) {
+          await hydrateRequest(latest.response_request, controller.signal);
+        }
       })
       .catch((reason: unknown) => {
         if (reason instanceof DOMException && reason.name === "AbortError") return;
@@ -188,14 +468,88 @@ function WorldChatThread({
         setError(reason instanceof Error ? reason : new Error("world_chat_unavailable"));
         setState("error");
       });
-    return () => controller.abort();
-  }, [attempt, threadId, worldId]);
+    return () => {
+      controller.abort();
+      streamControllerRef.current?.abort();
+      activeGenerationRef.current = null;
+      clearTypingTimer();
+    };
+  }, [attempt, clearTypingTimer, hydrateRequest, threadId, worldId]);
 
   const retry = useCallback(() => {
     setState("loading");
     setError(null);
     setAttempt((value) => value + 1);
   }, []);
+
+  const appendUserMessage = useCallback(
+    (message: WorldChatGenerationRequestRead["user_message"]) => {
+      setThread((current) => {
+        if (!current || current.messages.some((item) => item.id === message.id)) {
+          return current;
+        }
+        return {
+          ...current,
+          last_message_at: message.created_at,
+          latest_message: message,
+          messages: [...current.messages, message],
+        };
+      });
+    },
+    [],
+  );
+
+  const submitMessage = useCallback(
+    async (content: string, idempotencyKey: string) => {
+      setSending(true);
+      setSendFailure(null);
+      try {
+        const accepted = await sendWorldChatMessage(worldId, threadId, {
+          content,
+          idempotency_key: idempotencyKey,
+        });
+        appendUserMessage(accepted.user_message);
+        setDraft("");
+        await hydrateRequest(accepted.response_request, new AbortController().signal);
+      } catch {
+        setSendFailure({ content, idempotencyKey });
+      } finally {
+        setSending(false);
+      }
+    },
+    [appendUserMessage, hydrateRequest, threadId, worldId],
+  );
+
+  const handleSubmit = useCallback(
+    (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      const content = draft.trim();
+      if (!content || sending || (generation && generation.phase !== "failed")) return;
+      void submitMessage(content, newIdempotencyKey("message"));
+    },
+    [draft, generation, sending, submitMessage],
+  );
+
+  const retryResponse = useCallback(async () => {
+    if (!generation || generation.phase !== "failed" || !generation.request.retryable) {
+      return;
+    }
+    const failed = generation.request;
+    setGeneration((current) =>
+      current ? { ...current, retrying: true } : current,
+    );
+    try {
+      const accepted = await retryWorldChatResponse(worldId, threadId, {
+        failed_request_id: failed.request_id,
+        idempotency_key: newIdempotencyKey("retry"),
+      });
+      await consumeGeneration(accepted.response_request);
+    } catch {
+      setGeneration((current) =>
+        current ? { ...current, retrying: false } : current,
+      );
+    }
+  }, [consumeGeneration, generation, threadId, worldId]);
 
   if (state === "loading") {
     return <WorldChatStatus title="대화를 불러오는 중" />;
@@ -255,7 +609,7 @@ function WorldChatThread({
         <strong>{thread.responding.display_name}</strong>
       </div>
 
-      {thread.messages.length === 0 ? (
+      {thread.messages.length === 0 && !generation ? (
         <div className={styles.empty}>
           <MessageCircle aria-hidden="true" size={28} />
           <h3>아직 메시지가 없어요</h3>
@@ -288,13 +642,139 @@ function WorldChatThread({
               </li>
             );
           })}
+          {generation ? (
+            <li
+              className={`${styles.respondingMessage} ${
+                generation.phase === "failed" ? styles.failedMessage : ""
+              }`}
+              data-response-slot={generation.request.response_slot_id}
+              key={generation.request.response_slot_id}
+            >
+              {generation.phase === "pending" && generation.typingVisible ? (
+                <TypingPresence name={thread.responding.display_name} />
+              ) : generation.phase === "streaming" ? (
+                <p className={styles.streamingText} aria-live="polite">
+                  {generation.text}
+                </p>
+              ) : generation.phase === "failed" ? (
+                <GenerationFailure
+                  failureClass={generation.request.failure_class}
+                  onRetry={() => void retryResponse()}
+                  retryable={generation.request.retryable}
+                  retrying={generation.retrying}
+                />
+              ) : null}
+            </li>
+          ) : null}
         </ol>
       )}
 
-      <div className={styles.readOnlyNotice} role="status">
-        저장된 World 대화를 안전하게 표시하고 있어요.
-      </div>
+      <form className={styles.composer} onSubmit={handleSubmit}>
+        <label className={styles.srOnly} htmlFor={`world-chat-${thread.id}`}>
+          {thread.responding.display_name}에게 보낼 메시지
+        </label>
+        <textarea
+          disabled={sending || (!!generation && generation.phase !== "failed")}
+          id={`world-chat-${thread.id}`}
+          maxLength={4000}
+          onChange={(event) => setDraft(event.target.value)}
+          placeholder="메시지를 입력하세요"
+          rows={1}
+          value={draft}
+        />
+        <button
+          aria-label="메시지 보내기"
+          disabled={
+            !draft.trim() ||
+            sending ||
+            (!!generation && generation.phase !== "failed")
+          }
+          type="submit"
+        >
+          {sending ? (
+            <LoaderCircle aria-hidden="true" className={styles.spin} size={19} />
+          ) : (
+            <Send aria-hidden="true" size={19} />
+          )}
+        </button>
+      </form>
+      {sendFailure ? (
+        <div className={styles.sendFailure} role="alert">
+          <span>메시지를 보내지 못했어요.</span>
+          <button
+            disabled={sending}
+            onClick={() =>
+              void submitMessage(
+                sendFailure.content,
+                sendFailure.idempotencyKey,
+              )
+            }
+            type="button"
+          >
+            다시 보내기
+          </button>
+        </div>
+      ) : null}
     </section>
+  );
+}
+
+function TypingPresence({ name }: { name: string }) {
+  return (
+    <div
+      aria-label={`${name}가 응답을 입력하고 있습니다.`}
+      className={styles.typingPresence}
+      role="status"
+    >
+      <span>입력 중</span>
+      <span aria-hidden="true" className={styles.typingDots}>
+        <i />
+        <i />
+        <i />
+      </span>
+    </div>
+  );
+}
+
+function GenerationFailure({
+  failureClass,
+  onRetry,
+  retryable,
+  retrying,
+}: {
+  failureClass: string | null;
+  onRetry: () => void;
+  retryable: boolean;
+  retrying: boolean;
+}) {
+  const settingsRequired = [
+    "credential_required",
+    "credential_invalid",
+    "policy_denied",
+  ].includes(failureClass ?? "");
+  return (
+    <div className={styles.failureBubble} role="alert">
+      <strong>
+        {settingsRequired
+          ? "채팅에 사용할 AI 설정이 필요해요."
+          : "답장을 만들지 못했어요."}
+      </strong>
+      {retryable ? (
+        <button disabled={retrying} onClick={onRetry} type="button">
+          {retrying ? (
+            <LoaderCircle aria-hidden="true" className={styles.spin} size={16} />
+          ) : (
+            <RotateCcw aria-hidden="true" size={16} />
+          )}
+          {retrying ? "다시 시도 중" : "다시 시도"}
+        </button>
+      ) : settingsRequired ? (
+        <Link href="/settings">
+          <Settings aria-hidden="true" size={16} />
+          설정 열기
+        </Link>
+      ) : null}
+    </div>
   );
 }
 
@@ -306,6 +786,52 @@ function WorldChatStatus({ title }: { title: string }) {
       <p>현재 World 경계를 확인하고 있어요.</p>
     </section>
   );
+}
+
+function generationScope(request: WorldChatGenerationRequestRead) {
+  return [
+    request.request_id,
+    request.request_scope_hash,
+    request.generation_id,
+    request.attempt_number,
+  ].join(":");
+}
+
+function isTerminalState(state: WorldChatGenerationRequestRead["state"]) {
+  return [
+    "committed",
+    "rejected",
+    "cancelled",
+    "timed_out",
+    "failed",
+    "orphaned",
+  ].includes(state);
+}
+
+function newIdempotencyKey(prefix: "message" | "retry") {
+  const random =
+    typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  return `${prefix}-${random}`;
+}
+
+function waitFor(milliseconds: number, signal: AbortSignal) {
+  return new Promise<void>((resolve, reject) => {
+    if (signal.aborted) {
+      reject(new DOMException("Aborted", "AbortError"));
+      return;
+    }
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(new DOMException("Aborted", "AbortError"));
+    };
+    const timer = setTimeout(() => {
+      signal.removeEventListener("abort", onAbort);
+      resolve();
+    }, milliseconds);
+    signal.addEventListener("abort", onAbort, { once: true });
+  });
 }
 
 function WorldChatError({

@@ -7,7 +7,7 @@ legacy wire contract; it does not alter legacy request payloads.
 """
 
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -166,3 +166,42 @@ class WorldChatThreadCreateRead(BaseModel):
     resolution_code: Literal[
         "requester_missing", "requester_cardinality_anomaly"
     ] | None = None
+
+
+class WorldChatMessageCreate(BaseModel):
+    content: str = Field(min_length=1, max_length=4000)
+    idempotency_key: str = Field(min_length=16, max_length=160)
+
+
+class WorldChatRetryCreate(BaseModel):
+    failed_request_id: str = Field(min_length=1, max_length=64)
+    idempotency_key: str = Field(min_length=16, max_length=160)
+
+
+class WorldChatGenerationRequestRead(BaseModel):
+    protocol_version: Literal["chat-generation-stream.v1"] = (
+        "chat-generation-stream.v1"
+    )
+    request_id: str
+    request_scope_hash: str
+    generation_id: str
+    attempt_number: int
+    response_slot_id: str
+    state: str
+    route: str | None = None
+    retryable: bool = False
+    failure_class: str | None = None
+    last_accepted_sequence: int = -1
+    user_message: MessageMessageRead
+    assistant_message: MessageMessageRead | None = None
+    response_metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class WorldChatMessageAcceptRead(BaseModel):
+    outcome: Literal["accepted", "replayed"]
+    user_message: MessageMessageRead
+    response_request: WorldChatGenerationRequestRead
+
+
+class WorldChatLatestRequestRead(BaseModel):
+    response_request: WorldChatGenerationRequestRead | None = None

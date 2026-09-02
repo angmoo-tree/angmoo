@@ -86,6 +86,8 @@ class ResponseLifecycleRepositoryPort(Protocol):
         target: ResponseRequestState,
         reason: ResponseTerminalReason,
         retryable: bool,
+        failure_class: str | None = None,
+        call_tracker: dict | None = None,
         now: datetime,
     ) -> ResponseRequestRecord: ...
 
