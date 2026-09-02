@@ -176,12 +176,12 @@
     },
     {
       "path": "backend/tests/test_oss_architecture_boundaries.py",
-      "sha256": "2d6e245f4211a8202b40f1ebd2439c5bcb8de20814dcb02063867b4a960852af",
-      "size": 7231
+      "sha256": "742b72b05fb512b33c61be4bb7e267d79144373f2288b49d00c132ded94dce37",
+      "size": 7300
     },
     {
       "path": "backend/tests/test_l4_pr_a_inventory.py",
-      "sha256": "ca2399cac4a974cb1657016239e70f41f2cd1850c5762d7e3c6fe7ddbd0faa79",
+      "sha256": "b0ae2153d103c8b26e33e7341b75aedbb60a32198864bb692d8161850e9c9f22",
       "size": 3767
     },
     {
@@ -191,7 +191,7 @@
     },
     {
       "path": "security/l4_pr_a_inventory.json",
-      "sha256": "cd56318d2471a646226e5bce059e59f4413c91a934218bc5d70b51c3182debf5",
+      "sha256": "d63676db839a431e62cd50588ff731462f73688044b81cd9e038b96c605c8f95",
       "size": 55860
     }
   ],

@@ -1,7 +1,7 @@
 {
-  "edge_count": 1494,
-  "external_import_count": 2029,
-  "module_count": 617,
+  "edge_count": 1515,
+  "external_import_count": 2048,
+  "module_count": 622,
   "modules": [
     {
       "external_imports": [],
@@ -1876,6 +1876,7 @@
       "external_imports": [],
       "imports": [
         "app.domains.chat.application.answer_request",
+        "app.domains.chat.application.canonical_retrieval",
         "app.domains.chat.application.generation_lifecycle",
         "app.domains.chat.application.messages",
         "app.domains.chat.application.retrieval_routing"
@@ -1900,6 +1901,26 @@
       ],
       "module": "app.domains.chat.application.answer_request",
       "path": "backend/app/domains/chat/application/answer_request.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "asyncio",
+        "collections.abc",
+        "dataclasses",
+        "datetime",
+        "time",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.chat.domain.call_tracker",
+        "app.domains.chat.domain.resolved_envelope",
+        "app.domains.chat.domain.retrieval_intent",
+        "app.domains.memory.public"
+      ],
+      "module": "app.domains.chat.application.canonical_retrieval",
+      "path": "backend/app/domains/chat/application/canonical_retrieval.py",
       "wildcard_imports": []
     },
     {
@@ -2646,12 +2667,30 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.memory.application.canonical_planning",
         "app.domains.memory.application.recall",
         "app.domains.memory.application.scope_control",
         "app.domains.memory.application.write_lifecycle"
       ],
       "module": "app.domains.memory.application",
       "path": "backend/app/domains/memory/application/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime"
+      ],
+      "imports": [
+        "app.domains.memory.application.recall",
+        "app.domains.memory.domain.canonical_retrieval_plan",
+        "app.domains.memory.domain.canonical_retrieval_planner",
+        "app.domains.memory.domain.recall",
+        "app.domains.memory.domain.scope"
+      ],
+      "module": "app.domains.memory.application.canonical_planning",
+      "path": "backend/app/domains/memory/application/canonical_planning.py",
       "wildcard_imports": []
     },
     {
@@ -2703,6 +2742,7 @@
       "external_imports": [],
       "imports": [
         "app.domains.memory.domain.canonical_retrieval_plan",
+        "app.domains.memory.domain.canonical_retrieval_planner",
         "app.domains.memory.domain.errors",
         "app.domains.memory.domain.lifecycle",
         "app.domains.memory.domain.policies",
@@ -2724,6 +2764,21 @@
       "imports": [],
       "module": "app.domains.memory.domain.canonical_retrieval_plan",
       "path": "backend/app/domains/memory/domain/canonical_retrieval_plan.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "re",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.memory.domain.canonical_retrieval_plan",
+        "app.domains.memory.domain.recall"
+      ],
+      "module": "app.domains.memory.domain.canonical_retrieval_planner",
+      "path": "backend/app/domains/memory/domain/canonical_retrieval_planner.py",
       "wildcard_imports": []
     },
     {
@@ -2887,6 +2942,7 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.memory.ports.canonical_planner_provider",
         "app.domains.memory.ports.maintenance_queue",
         "app.domains.memory.ports.recall",
         "app.domains.memory.ports.repository",
@@ -2894,6 +2950,19 @@
       ],
       "module": "app.domains.memory.ports",
       "path": "backend/app/domains/memory/ports/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.memory.domain.canonical_retrieval_plan"
+      ],
+      "module": "app.domains.memory.ports.canonical_planner_provider",
+      "path": "backend/app/domains/memory/ports/canonical_planner_provider.py",
       "wildcard_imports": []
     },
     {
@@ -5659,10 +5728,26 @@
     {
       "external_imports": [],
       "imports": [
+        "app.integrations.llm.canonical_retrieval_planner",
         "app.integrations.llm.retrieval_router"
       ],
       "module": "app.integrations.llm",
       "path": "backend/app/integrations/llm/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "json"
+      ],
+      "imports": [
+        "app.domains.identity.public",
+        "app.domains.memory.domain.canonical_retrieval_planner",
+        "app.domains.memory.ports.canonical_planner_provider",
+        "app.integrations.direct_llm"
+      ],
+      "module": "app.integrations.llm.canonical_retrieval_planner",
+      "path": "backend/app/integrations/llm/canonical_retrieval_planner.py",
       "wildcard_imports": []
     },
     {

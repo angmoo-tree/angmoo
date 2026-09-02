@@ -129,7 +129,7 @@ backend/app/
 | `relationships` graph read and P8 recall | `app.domains.relationships.public` | T2.5/L4/P8-L | canonical API read remains active; P8-L-I adds the closed six-primitive recall facade, canonical/observation revalidation and bounded degraded policy while runtime composition stays under `app.runtime.graph_projection` |
 | relationships write and graph projection | domain/runtime public ports | L4 | PR E removes horizontal service/CRUD/model bridges; runtime SQLAlchemy composition is isolated under `app.runtime.relationships` and graph lifecycle under `app.runtime.graph_projection` |
 | Chat entry, thread, message, response request/generation, retry and response commit | `app.domains.chat.public` | P8-L | P8-L-B establishes the public/application/port boundary, P8-L-D adds World-scoped identity and read-only entry, and P8-L-J adds the durable response-attempt row, strict typed retrieval envelopes, fenced lifecycle and route-aware call tracker without enabling live generation |
-| canonical Memory setting, candidate, item, evidence, lifecycle and recall | `app.domains.memory.public` | P8-L | P8-L-F owns the seven-table canonical schema and opt-in scope, P8-L-G owns provider-free write/lifecycle, and P8-L-H owns the typed canonical read boundary plus the separate private FTS5 projection under `app.runtime.memory` |
+| canonical Memory setting, candidate, item, evidence, lifecycle and recall | `app.domains.memory.public` | P8-L | P8-L-F owns the seven-table canonical schema and opt-in scope, P8-L-G owns provider-free write/lifecycle, P8-L-H owns the typed canonical read boundary plus the separate private FTS5 projection under `app.runtime.memory`, and P8-L-L adds the ID-free Canonical Planner port, strict plan validator and typed execution over that H boundary |
 | remaining active legacy or ownerless shim | none | L6 | final removal gate |
 
 P8-L-A freezes the pre-migration Chat baseline in
@@ -225,6 +225,16 @@ is isolated in `app.integrations.llm`; canonical SQLAlchemy scope resolution is
 composed in `app.runtime.chat`. The Router never owns actual IDs, operation
 primitives or hard caps. See
 `docs/architecture/p8-l-k-retrieval-router.md`.
+
+P8-L-L adds the provider-neutral Canonical Retrieval Planner port and strict
+`canonical-plan.v1` wire contract under `domains/memory`. Chat application
+orchestration binds the K intent and resolved-envelope hashes, while the Memory
+validator and executor accept only H's nine typed canonical operations. Actual
+owner/World/WorldCharacter/thread/time values and hard caps are injected by
+code; the provider receives only semantic intent and opaque refs. Provider SDK
+composition remains under `app.integrations.llm`, and SQLite/FTS5 execution and
+canonical revalidation remain under the existing H Memory boundary. See
+`docs/architecture/p8-l-l-canonical-retrieval-planner.md`.
 
 PR A added the contract and checker but moved **zero product source files**.
 PR B moved only the P7 relationship graph read path. PR C removes only shims
