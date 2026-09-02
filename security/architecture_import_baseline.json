@@ -1,6 +1,6 @@
 {
   "edge_count": 1515,
-  "external_import_count": 2047,
+  "external_import_count": 2048,
   "module_count": 622,
   "modules": [
     {
@@ -1907,6 +1907,7 @@
       "external_imports": [
         "__future__",
         "asyncio",
+        "collections.abc",
         "dataclasses",
         "datetime",
         "time",
