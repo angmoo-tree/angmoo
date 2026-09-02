@@ -43,6 +43,11 @@ from app.domains.memory.domain.canonical_retrieval_plan import (
     CanonicalPlanStep,
     CanonicalRetrievalPlan,
 )
+from app.domains.memory.domain.canonical_retrieval_planner import (
+    MAX_CANONICAL_SEARCH_TEXT_CHARACTERS,
+    canonical_retrieval_plan_response_schema,
+    parse_canonical_retrieval_plan_payload,
+)
 from app.domains.memory.domain.recall import (
     CanonicalRecallOperation,
     CanonicalRecallQuery,
@@ -68,9 +73,12 @@ from app.domains.memory.domain.scope import (
 __all__ = [
     "CANONICAL_PLAN_VERSION",
     "MAX_CANONICAL_PLAN_STEPS",
+    "MAX_CANONICAL_SEARCH_TEXT_CHARACTERS",
     "CanonicalPlanContractError",
     "CanonicalPlanStep",
     "CanonicalRetrievalPlan",
+    "canonical_retrieval_plan_response_schema",
+    "parse_canonical_retrieval_plan_payload",
     "DEFAULT_MEMORY_RETENTION_DAYS",
     "MAX_MEMORY_SUMMARY_LENGTH",
     "MEMORY_WRITE_CONTRACT_VERSION",

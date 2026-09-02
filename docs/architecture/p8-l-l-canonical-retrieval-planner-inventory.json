@@ -1,0 +1,209 @@
+{
+  "call_accounting": {
+    "canonical_normal_full_path_cap": 3,
+    "generic_hidden_json_repair": false,
+    "later_character_response_generator_calls": 1,
+    "logical_and_physical_separate": true,
+    "normal_canonical_planner_calls": 1,
+    "normal_router_calls": 1,
+    "request_wide_schema_repair_max": 1
+  },
+  "code_owned_execution": {
+    "absolute_utc_time_binding": true,
+    "dependency_zero_short_circuit": true,
+    "fts_candidate_canonical_revalidation": true,
+    "memory_off_pre_provider_short_circuit": true,
+    "opaque_entity_to_actual_id_binding": true,
+    "owner_world_responding_subject_scope": true,
+    "row_hard_cap": true,
+    "thread_binding": true
+  },
+  "contract_versions": {
+    "canonical_plan": "canonical-plan.v1",
+    "predecessor_resolved_retrieval": "resolved-retrieval.v1"
+  },
+  "domain_boundary": {
+    "canonical_revalidation": "P8-L-H CanonicalRecallService",
+    "existing_chat_send_path_changed": false,
+    "plan_owner": "domains/memory",
+    "provider_adapter": "app.integrations.llm.canonical_retrieval_planner",
+    "provider_port": "CanonicalPlannerProviderPort",
+    "provider_prompt_canonical_ids": 0,
+    "provider_prompt_graph_catalog_entries": 0,
+    "raw_sql_or_cypher_from_llm": 0,
+    "request_orchestration_owner": "domains/chat",
+    "test_live_provider_calls": 0,
+    "typed_executor": "CanonicalRetrievalPlanExecutor"
+  },
+  "executable_contract_gates": [
+    "canonical_only_exact_key_schema",
+    "cross_catalog_and_actual_id_rejection",
+    "raw_query_and_schema_material_rejection",
+    "resolved_request_version_hash_binding",
+    "opaque_entity_ref_resolution_by_code",
+    "code_owned_scope_time_thread_and_row_cap",
+    "typed_h_recall_and_canonical_revalidation",
+    "prior_step_source_reference_dependency",
+    "zero_dependency_short_circuit",
+    "memory_off_pre_provider_short_circuit",
+    "request_wide_single_repair_shared_with_router",
+    "direct_adapter_no_hidden_json_retry",
+    "held_out_ko_36_operation_complete_execution"
+  ],
+  "held_out_ko_contract": {
+    "case_count": 36,
+    "category_counts": {
+      "accepted_memory": 4,
+      "activity_episode": 4,
+      "character_summary": 4,
+      "event_detail": 4,
+      "post_thread": 4,
+      "private_thread": 4,
+      "relationship_change": 4,
+      "social_event": 4,
+      "world_social": 4
+    },
+    "first_pass_contract_executable": true,
+    "live_model_evaluation_completed": false,
+    "operation_counts": {
+      "canonical_event_details": 4,
+      "get_character_summaries": 4,
+      "get_post_thread": 4,
+      "list_activity_episodes": 4,
+      "list_relationship_changes": 4,
+      "list_social_events": 4,
+      "search_memory_items": 4,
+      "search_posts": 4,
+      "search_thread_messages": 4
+    },
+    "schema_version": "canonical-planner-corpus.v1",
+    "typed_execution_executable": true,
+    "unique_case_count": 36
+  },
+  "historical_chain": {
+    "current_tree_owner": "P8-L-L",
+    "p8_l_k_sha256": "78a46427e53284915e207e0a6fb87cddc5a5e538bf96f193ee13c992253bde1d",
+    "predecessor_mode": "frozen_digest"
+  },
+  "metrics": [
+    "first_pass_valid",
+    "repair_used",
+    "short_circuited",
+    "short_circuit_reason",
+    "planner_logical_calls",
+    "planner_physical_attempts",
+    "executable_step_count",
+    "limit_clamped_step_count",
+    "result_record_count",
+    "provider",
+    "model"
+  ],
+  "non_scope": [
+    "graph_retrieval_planner_provider",
+    "both_dependency_coordinator",
+    "evidence_bundle_merge",
+    "character_response_generator",
+    "world_chat_send_retry_route_integration",
+    "typing_presence_or_streaming_ui",
+    "live_held_out_model_quality_pass",
+    "installer_or_schema_change"
+  ],
+  "owner_stage": "P8-L-L",
+  "predecessor": {
+    "path": "docs/architecture/p8-l-k-retrieval-router-inventory.json",
+    "sha256": "78a46427e53284915e207e0a6fb87cddc5a5e538bf96f193ee13c992253bde1d",
+    "size": 7644
+  },
+  "provider_schema": {
+    "actual_id_fields": 0,
+    "arbitrary_query_fields": 0,
+    "dependency_slot": "prior_step.source_refs",
+    "graph_operations": 0,
+    "max_steps": 6,
+    "operation_count": 9,
+    "operations": [
+      "canonical_event_details",
+      "get_character_summaries",
+      "get_post_thread",
+      "list_activity_episodes",
+      "list_relationship_changes",
+      "list_social_events",
+      "search_memory_items",
+      "search_posts",
+      "search_thread_messages"
+    ],
+    "version": "canonical-plan.v1"
+  },
+  "required_files": [
+    {
+      "path": "backend/app/domains/memory/domain/canonical_retrieval_plan.py",
+      "sha256": "a92ac065ebe3757f5f373a901fdd6d997c475b1070d4c105ae25f315aa185f99",
+      "size": 3324
+    },
+    {
+      "path": "backend/app/domains/memory/domain/canonical_retrieval_planner.py",
+      "sha256": "025366dc2d2f0301d4d40e8bc9ee848a943f98f93bd4c883b6cb1965fbb6ceb9",
+      "size": 12798
+    },
+    {
+      "path": "backend/app/domains/memory/ports/canonical_planner_provider.py",
+      "sha256": "36fbb1222ee80a31144f0ae46c62cc53218c0e67c9efd37ef769d7dcef409243",
+      "size": 4946
+    },
+    {
+      "path": "backend/app/domains/memory/application/canonical_planning.py",
+      "sha256": "037caefd879c4db51bb7c6fbf071c254ceb5209238087e4ed55e6fdc45dd54c0",
+      "size": 11212
+    },
+    {
+      "path": "backend/app/domains/chat/application/canonical_retrieval.py",
+      "sha256": "a62e6007032d5b628499542ac2d714e487e40a8959b5a56db0d85676755ace36",
+      "size": 17114
+    },
+    {
+      "path": "backend/app/domains/chat/domain/call_tracker.py",
+      "sha256": "65077f3e511443b57859ecd1e6de5b7dd421686c01971a91d2808ac29e20b3d2",
+      "size": 5412
+    },
+    {
+      "path": "backend/app/integrations/llm/canonical_retrieval_planner.py",
+      "sha256": "39bc5544839fe465333029c1681c0c881be66b6ff5c92a68de6428a9398e2e21",
+      "size": 8426
+    },
+    {
+      "path": "backend/tests/fixtures/p8_l/canonical_planner_v1/held_out_ko.jsonl",
+      "sha256": "178e3addabab335c1ed88a7de960d598e7f435ed28086ece78f6f835326e396b",
+      "size": 9590
+    },
+    {
+      "path": "backend/tests/test_p8_l_l_canonical_retrieval_planner.py",
+      "sha256": "f1b55246dbc1504f68107bc211e97e352c557a609d7a6d82cc87a6c52bda1141",
+      "size": 23324
+    },
+    {
+      "path": "backend/tests/test_p8_l_l_canonical_retrieval_planner_inventory.py",
+      "sha256": "414013c6633d122a75034e3f6e35c041d92e369b2110a94b51ae6e70bb1db870",
+      "size": 1958
+    },
+    {
+      "path": "docs/architecture/backend-domains.md",
+      "sha256": "37fd586d8f42bec3057e0d1347077cbcb9271f3eb7199bb62354b94832549757",
+      "size": 43151
+    },
+    {
+      "path": "docs/architecture/p8-l-l-canonical-retrieval-planner.md",
+      "sha256": "7909a85301e5d2332e803cf22920bd2e81667992fdd99f96c189c4c64501d93f",
+      "size": 7664
+    }
+  ],
+  "route": "CANONICAL",
+  "schema": {
+    "canonical_table_count": 95,
+    "current_embedded_schema_version": 6,
+    "new_alembic_migration": null,
+    "new_canonical_tables": [],
+    "new_embedded_schema_version": null,
+    "new_ladybug_generation": null
+  },
+  "schema_version": 1
+}

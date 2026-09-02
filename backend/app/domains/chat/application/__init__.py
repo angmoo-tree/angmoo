@@ -16,11 +16,21 @@ from app.domains.chat.application.retrieval_routing import (
     RetrievalRoutingResult,
     RetrievalRoutingService,
 )
+from app.domains.chat.application.canonical_retrieval import (
+    CanonicalPlanningMetrics,
+    CanonicalPlanningResult,
+    CanonicalRetrievalCommand,
+    CanonicalRetrievalPlanningService,
+)
 
 __all__ = [
     "AnswerRequestContractValidator",
     "BoundedFakeAnswerRequestExecutor",
     "ChatService",
+    "CanonicalPlanningMetrics",
+    "CanonicalPlanningResult",
+    "CanonicalRetrievalCommand",
+    "CanonicalRetrievalPlanningService",
     "ClarificationCandidate",
     "ClarificationResolution",
     "FakeAnswerRequestResult",

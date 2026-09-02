@@ -13,13 +13,29 @@ from app.domains.memory.ports.source_reader import (
     CanonicalMemoryEvidence,
     MemorySourceEvidenceReaderPort,
 )
+from app.domains.memory.ports.canonical_planner_provider import (
+    MAX_CANONICAL_PLANNER_MESSAGE_CHARACTERS,
+    CanonicalPlannerEntity,
+    CanonicalPlannerOutputError,
+    CanonicalPlannerProviderPort,
+    CanonicalPlannerProviderResult,
+    CanonicalPlannerRelationship,
+    CanonicalPlannerRequest,
+)
 
 __all__ = [
     "CanonicalMemoryEvidence",
+    "CanonicalPlannerEntity",
+    "CanonicalPlannerOutputError",
+    "CanonicalPlannerProviderPort",
+    "CanonicalPlannerProviderResult",
+    "CanonicalPlannerRelationship",
+    "CanonicalPlannerRequest",
     "CanonicalRecallRepositoryPort",
     "MemoryMaintenanceQueuePort",
     "MemoryMaintenanceWorkItem",
     "MemoryRepositoryPort",
     "MemoryRecallIndexPort",
     "MemorySourceEvidenceReaderPort",
+    "MAX_CANONICAL_PLANNER_MESSAGE_CHARACTERS",
 ]
