@@ -247,6 +247,18 @@ SDK composition remains under `app.integrations.llm`, and LadybugDB execution
 plus SQLite canonical/observation revalidation remain under the existing I
 boundary. See `docs/architecture/p8-l-m-graph-retrieval-planner.md`.
 
+P8-L-N adds the code-owned `BOTH` Workflow Coordinator under `domains/chat`.
+The Router may suggest a recipe, but code selects one of exactly
+`INDEPENDENT_PARALLEL`, `GRAPH_THEN_CANONICAL` and
+`CANONICAL_THEN_GRAPH` from an intent-typed registry. Independent specialist
+Planners share one request tracker and run concurrently; dependent recipes
+bind only capped typed event or WorldCharacter references and short-circuit
+the second Planner on zero dependency or policy denial. Deterministic exact
+join, intersection, ranking and dedupe produce bounded references for P8-L-P.
+There is no coordinator LLM, provider adapter, arbitrary workflow expression,
+schema change or Character response call. See
+`docs/architecture/p8-l-n-both-workflow-coordinator.md`.
+
 PR A added the contract and checker but moved **zero product source files**.
 PR B moved only the P7 relationship graph read path. PR C removes only shims
 proven unused, promotes the stable boundary contract in repository policy, and

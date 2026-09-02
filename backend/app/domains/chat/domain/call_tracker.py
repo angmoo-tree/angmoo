@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import StrEnum
+from collections.abc import Mapping
 from typing import Any
 
 from app.domains.chat.domain.retrieval_intent import RetrievalContractError, RetrievalRoute
@@ -151,8 +152,97 @@ class RouteAwareCallTracker:
         }
 
 
+_CALL_TRACKER_SNAPSHOT_KEYS = frozenset(
+    {
+        "route",
+        "logical_counts",
+        "physical_counts",
+        "logical_total",
+        "physical_total",
+        "normal_full_path_cap",
+        "request_maximum",
+        "repair_node",
+        "cancelled",
+    }
+)
+
+
+def restore_call_tracker_snapshot(
+    snapshot: Mapping[str, Any],
+    *,
+    deadline_at: datetime,
+) -> RouteAwareCallTracker:
+    """Restore one exact tracker snapshot at a trusted Chat boundary.
+
+    Specialist Planners and the BOTH coordinator share this implementation so
+    request-wide repair accounting cannot drift between routes.
+    """
+
+    if set(snapshot) != _CALL_TRACKER_SNAPSHOT_KEYS:
+        raise RetrievalContractError("llm_tracker_snapshot_invalid")
+    try:
+        route = RetrievalRoute(snapshot["route"])
+    except (TypeError, ValueError) as exc:
+        raise RetrievalContractError("llm_tracker_snapshot_invalid") from exc
+
+    logical_counts = _tracker_count_map(snapshot["logical_counts"])
+    physical_counts = _tracker_count_map(snapshot["physical_counts"])
+    repair_value = snapshot["repair_node"]
+    try:
+        repair_node = None if repair_value is None else LlmNode(repair_value)
+    except (TypeError, ValueError) as exc:
+        raise RetrievalContractError("llm_tracker_snapshot_invalid") from exc
+    cancelled = snapshot["cancelled"]
+    if not isinstance(cancelled, bool):
+        raise RetrievalContractError("llm_tracker_snapshot_invalid")
+
+    normal_cap = sum(NORMAL_NODE_BUDGETS[route].values())
+    if (
+        snapshot["logical_total"] != sum(logical_counts.values())
+        or snapshot["physical_total"] != sum(physical_counts.values())
+        or snapshot["normal_full_path_cap"] != normal_cap
+        or snapshot["request_maximum"] != normal_cap + 1
+    ):
+        raise RetrievalContractError("llm_tracker_snapshot_invalid")
+
+    for node in LlmNode:
+        allowed_logical = NORMAL_NODE_BUDGETS[route][node]
+        if node is repair_node:
+            if (
+                node is LlmNode.CHARACTER_RESPONSE_GENERATOR
+                or allowed_logical < 1
+                or logical_counts[node] != allowed_logical + 1
+            ):
+                raise RetrievalContractError("llm_tracker_snapshot_invalid")
+            allowed_logical += 1
+        if logical_counts[node] > allowed_logical:
+            raise RetrievalContractError("llm_tracker_snapshot_invalid")
+        if physical_counts[node] > logical_counts[node] * 2:
+            raise RetrievalContractError("llm_tracker_snapshot_invalid")
+
+    tracker = RouteAwareCallTracker(route=route, deadline_at=deadline_at)
+    tracker.logical_counts = logical_counts
+    tracker.physical_counts = physical_counts
+    tracker.repair_node = repair_node
+    tracker.cancelled = cancelled
+    return tracker
+
+
+def _tracker_count_map(value: Any) -> dict[LlmNode, int]:
+    if not isinstance(value, Mapping) or set(value) != {node.value for node in LlmNode}:
+        raise RetrievalContractError("llm_tracker_snapshot_invalid")
+    counts: dict[LlmNode, int] = {}
+    for node in LlmNode:
+        count = value[node.value]
+        if isinstance(count, bool) or not isinstance(count, int) or count < 0:
+            raise RetrievalContractError("llm_tracker_snapshot_invalid")
+        counts[node] = count
+    return counts
+
+
 __all__ = [
     "LlmNode",
     "NORMAL_NODE_BUDGETS",
     "RouteAwareCallTracker",
+    "restore_call_tracker_snapshot",
 ]

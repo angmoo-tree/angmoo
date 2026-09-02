@@ -20,7 +20,7 @@ OUTPUT_PATH = (
 )
 K_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-k-retrieval-router-inventory.json"
 K_INVENTORY_SHA256 = (
-    "36a9de7dd1542c5fb44ba8550aea99612e524e1cfe641d60af758a14e5315c1a"
+    "3894759293796c1253aedb966b0f32b1d2e937c85c1a893794fc85ef0644bc44"
 )
 CORPUS_PATH = (
     ROOT / "backend/tests/fixtures/p8_l/canonical_planner_v1/held_out_ko.jsonl"
@@ -139,7 +139,7 @@ def _boundary_contract() -> dict[str, Any]:
         "backend/app/domains/chat/application/canonical_retrieval.py",
         (
             "CanonicalRetrievalPlanningService",
-            "_restore_call_tracker_snapshot",
+            "restore_call_tracker_snapshot",
             "canonical_planner_request_wide_repair_exhausted",
             "subject_world_character_id=resolved.responding_world_character_id",
         ),

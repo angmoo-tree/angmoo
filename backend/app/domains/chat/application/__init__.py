@@ -28,10 +28,20 @@ from app.domains.chat.application.graph_retrieval import (
     GraphRetrievalCommand,
     GraphRetrievalPlanningService,
 )
+from app.domains.chat.application.both_retrieval import (
+    BothRetrievalCommand,
+    BothRetrievalResult,
+    BothRetrievalWorkflowCoordinator,
+    CoordinatedRetrievalReference,
+    WorkflowCoordinatorMetrics,
+)
 
 __all__ = [
     "AnswerRequestContractValidator",
     "BoundedFakeAnswerRequestExecutor",
+    "BothRetrievalCommand",
+    "BothRetrievalResult",
+    "BothRetrievalWorkflowCoordinator",
     "ChatService",
     "CanonicalPlanningMetrics",
     "CanonicalPlanningResult",
@@ -39,6 +49,7 @@ __all__ = [
     "CanonicalRetrievalPlanningService",
     "ClarificationCandidate",
     "ClarificationResolution",
+    "CoordinatedRetrievalReference",
     "FakeAnswerRequestResult",
     "GenerationLifecycleService",
     "GraphPlanningMetrics",
@@ -48,4 +59,5 @@ __all__ = [
     "RetrievalRoutingMetrics",
     "RetrievalRoutingResult",
     "RetrievalRoutingService",
+    "WorkflowCoordinatorMetrics",
 ]

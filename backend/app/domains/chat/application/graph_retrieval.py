@@ -10,15 +10,19 @@ from time import monotonic
 from typing import Any
 
 from app.domains.chat.domain.call_tracker import (
-    NORMAL_NODE_BUDGETS,
     LlmNode,
     RouteAwareCallTracker,
+    restore_call_tracker_snapshot,
 )
 from app.domains.chat.domain.resolved_envelope import ResolvedRetrievalEnvelope
 from app.domains.chat.domain.retrieval_intent import (
     RetrievalContractError,
     RetrievalIntentEnvelope,
     RetrievalRoute,
+)
+from app.domains.chat.domain.workflow_recipe import (
+    WorkflowAxis,
+    WorkflowDependencyBinding,
 )
 from app.domains.relationships.public import (
     GraphPlanContractError,
@@ -43,12 +47,18 @@ class GraphRetrievalCommand:
     resolved: ResolvedRetrievalEnvelope
     call_tracker: Mapping[str, Any]
     graph_projection_enabled: bool = True
+    workflow_dependency: WorkflowDependencyBinding | None = None
 
     def __post_init__(self) -> None:
         if not self.user_message.strip() or len(self.user_message) > 4_000:
             raise RetrievalContractError("graph_retrieval_message_invalid")
         if not isinstance(self.graph_projection_enabled, bool):
             raise RetrievalContractError("graph_retrieval_projection_flag_invalid")
+        if self.workflow_dependency is not None and (
+            self.intent.route is not RetrievalRoute.BOTH
+            or self.workflow_dependency.target_axis is not WorkflowAxis.GRAPH
+        ):
+            raise RetrievalContractError("graph_retrieval_workflow_dependency_invalid")
 
 
 @dataclass(frozen=True, slots=True)
@@ -96,17 +106,23 @@ class GraphRetrievalPlanningService:
         *,
         now: datetime,
         deadline_at: datetime,
+        _tracker: RouteAwareCallTracker | None = None,
     ) -> GraphPlanningResult:
         if now.tzinfo is None or deadline_at.tzinfo is None:
             raise RetrievalContractError("graph_retrieval_deadline_timezone_required")
         if now >= deadline_at:
             raise RetrievalContractError("graph_retrieval_deadline_exceeded")
-        self._validate_command(command)
-        tracker = _restore_call_tracker_snapshot(
-            command.call_tracker,
-            deadline_at=deadline_at,
+        coordinator_owned = _tracker is not None
+        self._validate_command(command, allow_both=coordinator_owned)
+        tracker = (
+            _tracker
+            if _tracker is not None
+            else restore_call_tracker_snapshot(
+                command.call_tracker,
+                deadline_at=deadline_at,
+            )
         )
-        if tracker.route is not RetrievalRoute.GRAPH:
+        if tracker.route is not command.intent.route:
             raise RetrievalContractError("graph_retrieval_tracker_route_mismatch")
 
         if not command.resolved.observable:
@@ -213,8 +229,15 @@ class GraphRetrievalPlanningService:
             raise RetrievalContractError("graph_retrieval_deadline_exceeded") from exc
 
     @staticmethod
-    def _validate_command(command: GraphRetrievalCommand) -> None:
-        if command.intent.route is not RetrievalRoute.GRAPH:
+    def _validate_command(
+        command: GraphRetrievalCommand,
+        *,
+        allow_both: bool = False,
+    ) -> None:
+        allowed_routes = {RetrievalRoute.GRAPH}
+        if allow_both:
+            allowed_routes.add(RetrievalRoute.BOTH)
+        if command.intent.route not in allowed_routes:
             raise RetrievalContractError("graph_retrieval_route_invalid")
         if command.intent.envelope_hash != command.resolved.intent_hash:
             raise RetrievalContractError("graph_retrieval_intent_hash_mismatch")
@@ -222,7 +245,10 @@ class GraphRetrievalPlanningService:
         resolved_refs = {binding.ref for binding in command.resolved.entity_bindings}
         if intent_refs != resolved_refs:
             raise RetrievalContractError("graph_retrieval_entity_binding_mismatch")
-        if command.resolved.canonical_operation_allowlist:
+        if (
+            command.intent.route is RetrievalRoute.GRAPH
+            and command.resolved.canonical_operation_allowlist
+        ):
             raise RetrievalContractError(
                 "graph_retrieval_canonical_allowlist_forbidden"
             )
@@ -318,92 +344,6 @@ class GraphRetrievalPlanningService:
             ),
             call_tracker=tracker.snapshot(),
         )
-
-
-_CALL_TRACKER_SNAPSHOT_KEYS = frozenset(
-    {
-        "route",
-        "logical_counts",
-        "physical_counts",
-        "logical_total",
-        "physical_total",
-        "normal_full_path_cap",
-        "request_maximum",
-        "repair_node",
-        "cancelled",
-    }
-)
-
-
-def _restore_call_tracker_snapshot(
-    snapshot: Mapping[str, Any],
-    *,
-    deadline_at: datetime,
-) -> RouteAwareCallTracker:
-    """Restore the frozen P8-L-J tracker without changing its domain contract."""
-
-    if set(snapshot) != _CALL_TRACKER_SNAPSHOT_KEYS:
-        raise RetrievalContractError("graph_retrieval_tracker_snapshot_invalid")
-    try:
-        route = RetrievalRoute(snapshot["route"])
-    except (TypeError, ValueError) as exc:
-        raise RetrievalContractError("graph_retrieval_tracker_snapshot_invalid") from exc
-
-    logical_counts = _tracker_count_map(snapshot["logical_counts"])
-    physical_counts = _tracker_count_map(snapshot["physical_counts"])
-    repair_value = snapshot["repair_node"]
-    try:
-        repair_node = None if repair_value is None else LlmNode(repair_value)
-    except (TypeError, ValueError) as exc:
-        raise RetrievalContractError("graph_retrieval_tracker_snapshot_invalid") from exc
-    cancelled = snapshot["cancelled"]
-    if not isinstance(cancelled, bool):
-        raise RetrievalContractError("graph_retrieval_tracker_snapshot_invalid")
-
-    normal_cap = sum(NORMAL_NODE_BUDGETS[route].values())
-    if (
-        snapshot["logical_total"] != sum(logical_counts.values())
-        or snapshot["physical_total"] != sum(physical_counts.values())
-        or snapshot["normal_full_path_cap"] != normal_cap
-        or snapshot["request_maximum"] != normal_cap + 1
-    ):
-        raise RetrievalContractError("graph_retrieval_tracker_snapshot_invalid")
-
-    for node in LlmNode:
-        allowed_logical = NORMAL_NODE_BUDGETS[route][node]
-        if node is repair_node:
-            if (
-                node is LlmNode.CHARACTER_RESPONSE_GENERATOR
-                or allowed_logical < 1
-                or logical_counts[node] != allowed_logical + 1
-            ):
-                raise RetrievalContractError(
-                    "graph_retrieval_tracker_snapshot_invalid"
-                )
-            allowed_logical += 1
-        if logical_counts[node] > allowed_logical:
-            raise RetrievalContractError("graph_retrieval_tracker_snapshot_invalid")
-        if physical_counts[node] > logical_counts[node] * 2:
-            raise RetrievalContractError("graph_retrieval_tracker_snapshot_invalid")
-
-    tracker = RouteAwareCallTracker(route=route, deadline_at=deadline_at)
-    tracker.logical_counts = logical_counts
-    tracker.physical_counts = physical_counts
-    tracker.repair_node = repair_node
-    tracker.cancelled = cancelled
-    return tracker
-
-
-def _tracker_count_map(value: Any) -> dict[LlmNode, int]:
-    if not isinstance(value, Mapping) or set(value) != {node.value for node in LlmNode}:
-        raise RetrievalContractError("graph_retrieval_tracker_snapshot_invalid")
-    counts: dict[LlmNode, int] = {}
-    for node in LlmNode:
-        count = value[node.value]
-        if isinstance(count, bool) or not isinstance(count, int) or count < 0:
-            raise RetrievalContractError("graph_retrieval_tracker_snapshot_invalid")
-        counts[node] = count
-    return counts
 
 
 __all__ = [

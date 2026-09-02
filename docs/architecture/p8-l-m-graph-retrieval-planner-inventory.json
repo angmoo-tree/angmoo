@@ -80,7 +80,7 @@
   },
   "historical_chain": {
     "current_tree_owner": "P8-L-M",
-    "p8_l_l_sha256": "83fe81ffa41024d84f7fd64e9858d46a9181b6550ff0fa2d7ca4c0170db713be",
+    "p8_l_l_sha256": "ebf5d24866038a8589861c049a975091e981e6eca1a0b336e9855522c2de984e",
     "predecessor_mode": "frozen_digest"
   },
   "metrics": [
@@ -109,7 +109,7 @@
   "owner_stage": "P8-L-M",
   "predecessor": {
     "path": "docs/architecture/p8-l-l-canonical-retrieval-planner-inventory.json",
-    "sha256": "83fe81ffa41024d84f7fd64e9858d46a9181b6550ff0fa2d7ca4c0170db713be",
+    "sha256": "ebf5d24866038a8589861c049a975091e981e6eca1a0b336e9855522c2de984e",
     "size": 7070
   },
   "provider_schema": {
@@ -152,13 +152,13 @@
     },
     {
       "path": "backend/app/domains/chat/application/graph_retrieval.py",
-      "sha256": "5fe9de3726a33697a1218b665f8a972da83a6bcdf99aafdc7159316eec302490",
-      "size": 16007
+      "sha256": "ddeb2521baaacd41167c3498cb9f0ee04b13882ac47603d4babec52bba25e719",
+      "size": 13630
     },
     {
       "path": "backend/app/domains/chat/domain/call_tracker.py",
-      "sha256": "65077f3e511443b57859ecd1e6de5b7dd421686c01971a91d2808ac29e20b3d2",
-      "size": 5412
+      "sha256": "890a0e64992a509f6ae3cf2b85ef46688efa8ea8d9b508f01f9569d6c9f53c63",
+      "size": 8803
     },
     {
       "path": "backend/app/integrations/llm/graph_retrieval_planner.py",
@@ -177,13 +177,13 @@
     },
     {
       "path": "backend/tests/test_p8_l_m_graph_retrieval_planner_inventory.py",
-      "sha256": "84c1ef44a5141ff535db847451a68cd94b8a40c136f76b6cc419e7e1d4ee9ac3",
+      "sha256": "a1801d861ae31b47817289c9570f1d87d9254ac86215c84c152e44afc8f2f560",
       "size": 2011
     },
     {
       "path": "docs/architecture/backend-domains.md",
-      "sha256": "978fee8da25371950d517b8716fb6bd07360c7f2f449cf2c454a8d7cb5966e21",
-      "size": 44020
+      "sha256": "74294ffb7c6201a25b5cdd54ec6a301b54501bafacb397122055d44ad631abde",
+      "size": 44777
     },
     {
       "path": "docs/architecture/p8-l-m-graph-retrieval-planner.md",

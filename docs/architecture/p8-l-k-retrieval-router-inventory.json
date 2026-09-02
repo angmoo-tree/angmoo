@@ -104,7 +104,7 @@
   },
   "historical_chain": {
     "current_tree_owner": "P8-L-K",
-    "p8_l_j_sha256": "7479d1216aeeda010d88faa55fd045b8bcf887a757afc605b8d99526afa9fd45",
+    "p8_l_j_sha256": "8b38d5e080a23f2b6bb33324c871c033195ce90ea5d9c0b6498fb4c9aa23e803",
     "predecessor_mode": "frozen_digest"
   },
   "metrics": [
@@ -135,7 +135,7 @@
   "owner_stage": "P8-L-K",
   "predecessor": {
     "path": "docs/architecture/p8-l-j-response-generation-inventory.json",
-    "sha256": "7479d1216aeeda010d88faa55fd045b8bcf887a757afc605b8d99526afa9fd45",
+    "sha256": "8b38d5e080a23f2b6bb33324c871c033195ce90ea5d9c0b6498fb4c9aa23e803",
     "size": 10307
   },
   "required_files": [
@@ -181,7 +181,7 @@
     },
     {
       "path": "backend/tests/test_l4_pr_a_inventory.py",
-      "sha256": "7aa0c21b13170122b05d56574ee5eff68604ef26b057d307cfab76a7add46a7f",
+      "sha256": "4ae2b338adac4194fbdad8da62f292b797507a39627d5fb6de785a874c87d2da",
       "size": 3767
     },
     {
@@ -191,7 +191,7 @@
     },
     {
       "path": "security/l4_pr_a_inventory.json",
-      "sha256": "fd72866bc0c11af94b19f899155bdba29d1cb72336f3084c21b0cd6f6d859cf7",
+      "sha256": "192f1f907302492b7cbbec52f1979eaa5870bd5a6af211a10713294491df40a4",
       "size": 57517
     }
   ],

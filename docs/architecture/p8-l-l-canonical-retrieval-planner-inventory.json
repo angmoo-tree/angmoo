@@ -82,7 +82,7 @@
   },
   "historical_chain": {
     "current_tree_owner": "P8-L-L",
-    "p8_l_k_sha256": "36a9de7dd1542c5fb44ba8550aea99612e524e1cfe641d60af758a14e5315c1a",
+    "p8_l_k_sha256": "3894759293796c1253aedb966b0f32b1d2e937c85c1a893794fc85ef0644bc44",
     "predecessor_mode": "frozen_digest"
   },
   "metrics": [
@@ -111,7 +111,7 @@
   "owner_stage": "P8-L-L",
   "predecessor": {
     "path": "docs/architecture/p8-l-k-retrieval-router-inventory.json",
-    "sha256": "36a9de7dd1542c5fb44ba8550aea99612e524e1cfe641d60af758a14e5315c1a",
+    "sha256": "3894759293796c1253aedb966b0f32b1d2e937c85c1a893794fc85ef0644bc44",
     "size": 7644
   },
   "provider_schema": {
@@ -157,13 +157,13 @@
     },
     {
       "path": "backend/app/domains/chat/application/canonical_retrieval.py",
-      "sha256": "a62e6007032d5b628499542ac2d714e487e40a8959b5a56db0d85676755ace36",
-      "size": 17114
+      "sha256": "12370cff093e344ff86bc9378aae12258356189da2f92b57ae30bc23f8aa639e",
+      "size": 14661
     },
     {
       "path": "backend/app/domains/chat/domain/call_tracker.py",
-      "sha256": "65077f3e511443b57859ecd1e6de5b7dd421686c01971a91d2808ac29e20b3d2",
-      "size": 5412
+      "sha256": "890a0e64992a509f6ae3cf2b85ef46688efa8ea8d9b508f01f9569d6c9f53c63",
+      "size": 8803
     },
     {
       "path": "backend/app/integrations/llm/canonical_retrieval_planner.py",
@@ -182,13 +182,13 @@
     },
     {
       "path": "backend/tests/test_p8_l_l_canonical_retrieval_planner_inventory.py",
-      "sha256": "e5a689dd3b0d2b4c526eae37b12fcb76c72ddff97347f68e94ffaa55230888b6",
+      "sha256": "bae0c8df812cd9950c6f49800720cf5cf63c2dc9bcb81c3d689e44b81ec28055",
       "size": 1958
     },
     {
       "path": "docs/architecture/backend-domains.md",
-      "sha256": "978fee8da25371950d517b8716fb6bd07360c7f2f449cf2c454a8d7cb5966e21",
-      "size": 44020
+      "sha256": "74294ffb7c6201a25b5cdd54ec6a301b54501bafacb397122055d44ad631abde",
+      "size": 44777
     },
     {
       "path": "docs/architecture/p8-l-l-canonical-retrieval-planner.md",
