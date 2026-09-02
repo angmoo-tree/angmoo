@@ -218,6 +218,14 @@ provider-free fake nodes; live adapters, send/stream/retry transport and UI
 remain later scope. The full boundary is recorded in
 `docs/architecture/p8-l-j-response-generation-lifecycle.md`.
 
+P8-L-K adds the provider-neutral Retrieval Router port, strict untrusted JSON
+parser, deterministic same-World identity/time/policy resolver and safe
+`CLARIFICATION` conversion under `app.domains.chat`. The provider SDK adapter
+is isolated in `app.integrations.llm`; canonical SQLAlchemy scope resolution is
+composed in `app.runtime.chat`. The Router never owns actual IDs, operation
+primitives or hard caps. See
+`docs/architecture/p8-l-k-retrieval-router.md`.
+
 PR A added the contract and checker but moved **zero product source files**.
 PR B moved only the P7 relationship graph read path. PR C removes only shims
 proven unused, promotes the stable boundary contract in repository policy, and
