@@ -145,6 +145,7 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
             "generate_repertoire",
         },
         "integrations/llm/canonical_retrieval_planner.py": {"plan"},
+        "integrations/llm/graph_retrieval_planner.py": {"plan"},
         "integrations/llm/retrieval_router.py": {"route"},
     }
     observed: dict[str, set[str]] = {}

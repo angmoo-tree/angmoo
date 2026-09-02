@@ -7,6 +7,10 @@ from app.domains.relationships.domain.graph_retrieval_plan import (
     GraphPlanStep,
     GraphRetrievalPlan,
 )
+from app.domains.relationships.domain.graph_retrieval_planner import (
+    graph_retrieval_plan_response_schema,
+    parse_graph_retrieval_plan_payload,
+)
 
 __all__ = [
     "GRAPH_PLAN_VERSION",
@@ -14,4 +18,6 @@ __all__ = [
     "GraphPlanContractError",
     "GraphPlanStep",
     "GraphRetrievalPlan",
+    "graph_retrieval_plan_response_schema",
+    "parse_graph_retrieval_plan_payload",
 ]

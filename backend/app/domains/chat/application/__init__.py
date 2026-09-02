@@ -22,6 +22,12 @@ from app.domains.chat.application.canonical_retrieval import (
     CanonicalRetrievalCommand,
     CanonicalRetrievalPlanningService,
 )
+from app.domains.chat.application.graph_retrieval import (
+    GraphPlanningMetrics,
+    GraphPlanningResult,
+    GraphRetrievalCommand,
+    GraphRetrievalPlanningService,
+)
 
 __all__ = [
     "AnswerRequestContractValidator",
@@ -35,6 +41,10 @@ __all__ = [
     "ClarificationResolution",
     "FakeAnswerRequestResult",
     "GenerationLifecycleService",
+    "GraphPlanningMetrics",
+    "GraphPlanningResult",
+    "GraphRetrievalCommand",
+    "GraphRetrievalPlanningService",
     "RetrievalRoutingMetrics",
     "RetrievalRoutingResult",
     "RetrievalRoutingService",

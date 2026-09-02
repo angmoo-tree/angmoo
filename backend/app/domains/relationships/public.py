@@ -2,9 +2,20 @@
 
 from app.domains.relationships.domain import (
     GRAPH_PLAN_VERSION,
+    MAX_GRAPH_PLAN_STEPS,
     GraphPlanContractError,
     GraphPlanStep,
     GraphRetrievalPlan,
+    graph_retrieval_plan_response_schema,
+    parse_graph_retrieval_plan_payload,
+)
+from app.domains.relationships.application import (
+    GraphPlanExecutionContext,
+    GraphPlanExecutionResult,
+    GraphPlanStepExecution,
+    GraphPlanValidationResult,
+    GraphRetrievalPlanExecutor,
+    GraphRetrievalPlanValidator,
 )
 
 from app.domains.relationships.graph_read.errors import (
@@ -53,6 +64,13 @@ from app.domains.relationships.graph_recall import (
     GraphRecallValidator,
 )
 from app.domains.relationships.ports import (
+    MAX_GRAPH_PLANNER_MESSAGE_CHARACTERS,
+    GraphPlannerEntity,
+    GraphPlannerOutputError,
+    GraphPlannerProviderPort,
+    GraphPlannerProviderResult,
+    GraphPlannerRelationship,
+    GraphPlannerRequest,
     OutboxFinalizeStatus,
     OutboxPort,
     ProjectionWorkItem,
@@ -77,8 +95,20 @@ __all__ = [
     "GRAPH_RECALL_PRIMITIVE_REGISTRY",
     "GraphStatus",
     "GraphPlanContractError",
+    "GraphPlanExecutionContext",
+    "GraphPlanExecutionResult",
     "GraphPlanStep",
+    "GraphPlanStepExecution",
+    "GraphPlanValidationResult",
+    "GraphPlannerEntity",
+    "GraphPlannerOutputError",
+    "GraphPlannerProviderPort",
+    "GraphPlannerProviderResult",
+    "GraphPlannerRelationship",
+    "GraphPlannerRequest",
     "GraphRetrievalPlan",
+    "GraphRetrievalPlanExecutor",
+    "GraphRetrievalPlanValidator",
     "GraphProvider",
     "GraphProjectionCounts",
     "GraphRecallDirection",
@@ -102,6 +132,8 @@ __all__ = [
     "MAX_GRAPH_RECALL_EVIDENCE",
     "MAX_GRAPH_RECALL_HOPS",
     "MAX_GRAPH_RECALL_RESULTS",
+    "MAX_GRAPH_PLANNER_MESSAGE_CHARACTERS",
+    "MAX_GRAPH_PLAN_STEPS",
     "NoGraphMutationCommand",
     "OutboxFinalizeStatus",
     "OutboxPort",
@@ -125,5 +157,7 @@ __all__ = [
     "SocialEventProjectionCommand",
     "SourceExclusionProjectionCommand",
     "projection_digest",
+    "graph_retrieval_plan_response_schema",
     "get_owner_relationship_graph",
+    "parse_graph_retrieval_plan_payload",
 ]

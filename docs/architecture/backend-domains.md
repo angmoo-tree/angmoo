@@ -126,7 +126,7 @@ backend/app/
 | `worlds`, `world_characters`, `routines`, `routine_posts`, owner manual social | domain `public.py` contracts plus runtime composition | L3/L4 | P1-P4 are active; routine SQLAlchemy orchestration is under `app.runtime.routine_posts`, and owner writes/Inbox adapters are under `app.runtime.social` |
 | `world_packages` | `app.domains.world_packages.public` | L3.5 | Local export/import active; imported runtime remains inert until local setup and explicit autonomy enable |
 | feed and `social` | `app.domains.social.public` | L4 | P5 search, canonical source writes, observation and causal apply are active; concrete SQLite adapters are under `app.runtime.social` |
-| `relationships` graph read and P8 recall | `app.domains.relationships.public` | T2.5/L4/P8-L | canonical API read remains active; P8-L-I adds the closed six-primitive recall facade, canonical/observation revalidation and bounded degraded policy while runtime composition stays under `app.runtime.graph_projection` |
+| `relationships` graph read and P8 recall | `app.domains.relationships.public` | T2.5/L4/P8-L | canonical API read remains active; P8-L-I adds the closed six-primitive recall facade, canonical/observation revalidation and bounded degraded policy; P8-L-M adds the ID-free Graph Planner port, strict direction-aware plan validator and typed execution over that I boundary while runtime composition stays under `app.runtime.graph_projection` |
 | relationships write and graph projection | domain/runtime public ports | L4 | PR E removes horizontal service/CRUD/model bridges; runtime SQLAlchemy composition is isolated under `app.runtime.relationships` and graph lifecycle under `app.runtime.graph_projection` |
 | Chat entry, thread, message, response request/generation, retry and response commit | `app.domains.chat.public` | P8-L | P8-L-B establishes the public/application/port boundary, P8-L-D adds World-scoped identity and read-only entry, and P8-L-J adds the durable response-attempt row, strict typed retrieval envelopes, fenced lifecycle and route-aware call tracker without enabling live generation |
 | canonical Memory setting, candidate, item, evidence, lifecycle and recall | `app.domains.memory.public` | P8-L | P8-L-F owns the seven-table canonical schema and opt-in scope, P8-L-G owns provider-free write/lifecycle, P8-L-H owns the typed canonical read boundary plus the separate private FTS5 projection under `app.runtime.memory`, and P8-L-L adds the ID-free Canonical Planner port, strict plan validator and typed execution over that H boundary |
@@ -235,6 +235,17 @@ code; the provider receives only semantic intent and opaque refs. Provider SDK
 composition remains under `app.integrations.llm`, and SQLite/FTS5 execution and
 canonical revalidation remain under the existing H Memory boundary. See
 `docs/architecture/p8-l-l-canonical-retrieval-planner.md`.
+
+P8-L-M adds the provider-neutral Graph Retrieval Planner port and strict
+`graph-plan.v1` wire contract under `domains/relationships`. Chat application
+orchestration binds the K intent and resolved-envelope hashes, while the
+Relationships validator and executor accept only I's six typed graph
+operations. Actual owner/World/WorldCharacter values, relationship from/to
+direction and row/hop/fan-out hard caps are injected by code; the provider
+receives only semantic intent and opaque refs and never emits Cypher. Provider
+SDK composition remains under `app.integrations.llm`, and LadybugDB execution
+plus SQLite canonical/observation revalidation remain under the existing I
+boundary. See `docs/architecture/p8-l-m-graph-retrieval-planner.md`.
 
 PR A added the contract and checker but moved **zero product source files**.
 PR B moved only the P7 relationship graph read path. PR C removes only shims

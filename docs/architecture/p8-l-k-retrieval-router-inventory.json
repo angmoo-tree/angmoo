@@ -176,12 +176,12 @@
     },
     {
       "path": "backend/tests/test_oss_architecture_boundaries.py",
-      "sha256": "742b72b05fb512b33c61be4bb7e267d79144373f2288b49d00c132ded94dce37",
-      "size": 7300
+      "sha256": "4455e6f5bb317e2bc9faff312eecb0a79b511d1d9dbc3dccdbf482ec3da77be9",
+      "size": 7365
     },
     {
       "path": "backend/tests/test_l4_pr_a_inventory.py",
-      "sha256": "b0ae2153d103c8b26e33e7341b75aedbb60a32198864bb692d8161850e9c9f22",
+      "sha256": "7aa0c21b13170122b05d56574ee5eff68604ef26b057d307cfab76a7add46a7f",
       "size": 3767
     },
     {
@@ -191,8 +191,8 @@
     },
     {
       "path": "security/l4_pr_a_inventory.json",
-      "sha256": "d63676db839a431e62cd50588ff731462f73688044b81cd9e038b96c605c8f95",
-      "size": 55860
+      "sha256": "fd72866bc0c11af94b19f899155bdba29d1cb72336f3084c21b0cd6f6d859cf7",
+      "size": 57517
     }
   ],
   "routes": [
