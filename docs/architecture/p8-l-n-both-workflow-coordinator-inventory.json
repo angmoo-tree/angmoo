@@ -1,0 +1,206 @@
+{
+  "call_accounting": {
+    "both_normal_full_path_cap": 4,
+    "coordinator_llm_calls": 0,
+    "later_character_response_generator_calls": 1,
+    "normal_canonical_planner_calls": 1,
+    "normal_graph_planner_calls": 1,
+    "normal_router_calls": 1,
+    "request_wide_schema_repair_max": 1,
+    "shared_tracker_for_parallel_planners": true
+  },
+  "contract_versions": {
+    "predecessor_canonical_plan": "canonical-plan.v1",
+    "predecessor_graph_plan": "graph-plan.v1",
+    "workflow": "retrieval-workflow.v1"
+  },
+  "dependency_contract": {
+    "actual_values_bound_by_code": true,
+    "cycles": 0,
+    "fanout_hard_cap": true,
+    "opaque_slots": [
+      "canonical-result.world_character_refs",
+      "graph-result.event_refs"
+    ],
+    "policy_denial_downstream_planner_short_circuit": true,
+    "result_driven_replanning": 0,
+    "unbounded_fanout": 0,
+    "zero_dependency_downstream_planner_short_circuit": true
+  },
+  "deterministic_merge": {
+    "dedupe": true,
+    "dependent_intersection": true,
+    "event_reference_join": true,
+    "evidence_bundle_created": false,
+    "independent_union": true,
+    "resolved_row_cap": true,
+    "stable_ranking": true,
+    "world_character_reference_join": true
+  },
+  "domain_boundary": {
+    "arbitrary_workflow_expressions": 0,
+    "canonical_boundary": "app.domains.memory.public",
+    "coordinator_llm_nodes": 0,
+    "graph_boundary": "app.domains.relationships.public",
+    "owner": "app.domains.chat",
+    "provider_adapter": null,
+    "raw_sql_or_cypher": 0,
+    "runtime_or_persistence_imports": 0,
+    "specialist_provider_actual_dependency_values": 0,
+    "test_live_provider_calls": 0
+  },
+  "executable_contract_gates": [
+    "intent_typed_code_recipe_selection",
+    "incompatible_router_hint_code_override",
+    "independent_specialist_planner_parallel_start",
+    "graph_then_canonical_event_dependency",
+    "canonical_then_graph_world_character_dependency",
+    "opaque_dependency_actual_value_code_binding",
+    "zero_dependency_and_policy_downstream_short_circuit",
+    "deterministic_join_intersection_rank_and_dedupe",
+    "shared_request_wide_single_repair",
+    "both_full_path_cap_four_with_crg_reserved",
+    "coordinator_llm_zero",
+    "specialist_standalone_both_rejection"
+  ],
+  "historical_chain": {
+    "current_tree_owner": "P8-L-N",
+    "p8_l_m_sha256": "cfbb5c987286c35e58d975fd79c3a7086fd103aa00bd7e1f9913ba96e13523f0",
+    "predecessor_mode": "frozen_digest"
+  },
+  "non_scope": [
+    "evidence_bundle_snapshot",
+    "character_response_generator",
+    "assistant_message_commit",
+    "world_chat_send_retry_route_integration",
+    "typing_presence_or_streaming_ui",
+    "live_model_quality_or_latency_pass",
+    "installer_or_schema_change"
+  ],
+  "owner_stage": "P8-L-N",
+  "predecessor": {
+    "path": "docs/architecture/p8-l-m-graph-retrieval-planner-inventory.json",
+    "sha256": "cfbb5c987286c35e58d975fd79c3a7086fd103aa00bd7e1f9913ba96e13523f0",
+    "size": 7014
+  },
+  "recipe_registry": {
+    "CANONICAL_THEN_GRAPH": {
+      "axes": [
+        "canonical",
+        "graph"
+      ],
+      "dependency": "world_character_references",
+      "intents": [
+        "event_aggregation",
+        "historical_recall"
+      ],
+      "merge": "intersection",
+      "normal_planner_call_cap": 2,
+      "parallel": false
+    },
+    "GRAPH_THEN_CANONICAL": {
+      "axes": [
+        "graph",
+        "canonical"
+      ],
+      "dependency": "event_references",
+      "intents": [
+        "relationship_cause",
+        "relationship_path",
+        "relationship_state"
+      ],
+      "merge": "intersection",
+      "normal_planner_call_cap": 2,
+      "parallel": false
+    },
+    "INDEPENDENT_PARALLEL": {
+      "axes": [
+        "canonical",
+        "graph"
+      ],
+      "dependency": null,
+      "intents": [
+        "mixed_evidence",
+        "relationship_comparison"
+      ],
+      "merge": "union",
+      "normal_planner_call_cap": 2,
+      "parallel": true
+    }
+  },
+  "required_files": [
+    {
+      "path": "backend/app/domains/chat/application/__init__.py",
+      "sha256": "503661aaa2bef18abd831d80a84e4b4cb6102bf66249586e4a3efd9862627316",
+      "size": 1902
+    },
+    {
+      "path": "backend/app/domains/chat/application/both_retrieval.py",
+      "sha256": "cc12868c4067c4befff0cdfd10b450e8887bf085e1dd4fa7424414972de94e18",
+      "size": 32031
+    },
+    {
+      "path": "backend/app/domains/chat/application/canonical_retrieval.py",
+      "sha256": "12370cff093e344ff86bc9378aae12258356189da2f92b57ae30bc23f8aa639e",
+      "size": 14661
+    },
+    {
+      "path": "backend/app/domains/chat/application/graph_retrieval.py",
+      "sha256": "ddeb2521baaacd41167c3498cb9f0ee04b13882ac47603d4babec52bba25e719",
+      "size": 13630
+    },
+    {
+      "path": "backend/app/domains/chat/domain/__init__.py",
+      "sha256": "c270056513a679ed60833243914bef79d204a58d2385774497320d51cd002f58",
+      "size": 3397
+    },
+    {
+      "path": "backend/app/domains/chat/domain/call_tracker.py",
+      "sha256": "890a0e64992a509f6ae3cf2b85ef46688efa8ea8d9b508f01f9569d6c9f53c63",
+      "size": 8803
+    },
+    {
+      "path": "backend/app/domains/chat/domain/workflow_recipe.py",
+      "sha256": "2170f66a8cdd7c918e185ec7fdab08650e6b827c3adde0e9f1676e5ae4634c04",
+      "size": 8476
+    },
+    {
+      "path": "backend/app/domains/chat/public.py",
+      "sha256": "a4feb34ef359176084c9c9dfab8ff7f22e8e3b88457347aff7d7e064baa801bb",
+      "size": 6634
+    },
+    {
+      "path": "backend/tests/test_p8_l_n_both_workflow_coordinator.py",
+      "sha256": "8a5c5b016c3b652b839cb5d96ea5e769e17081d451d4516886ff871f9d2a2467",
+      "size": 21440
+    },
+    {
+      "path": "backend/tests/test_p8_l_n_both_workflow_coordinator_inventory.py",
+      "sha256": "093993f3eb61981374cd658e2262e8001ea6111c1b43aad580e8a85690bda61b",
+      "size": 1894
+    },
+    {
+      "path": "docs/architecture/backend-domains.md",
+      "sha256": "74294ffb7c6201a25b5cdd54ec6a301b54501bafacb397122055d44ad631abde",
+      "size": 44777
+    },
+    {
+      "path": "docs/architecture/p8-l-n-both-workflow-coordinator.md",
+      "sha256": "6c4cba7c381829d7a9cc4b648e3684346b69a2ea4b7f4e04238a16ae370f0379",
+      "size": 8746
+    },
+    {
+      "path": "scripts/ci/generate_p8_l_n_both_workflow_coordinator_inventory.py",
+      "sha256": "9cf087d969921ba4b647463c83d85c89da249349ca5c27b1b8789287dfdeebc6",
+      "size": 12622
+    }
+  ],
+  "schema": {
+    "current_embedded_schema_version": 6,
+    "new_alembic_migration": null,
+    "new_canonical_tables": [],
+    "new_embedded_schema_version": null,
+    "new_ladybug_generation": null
+  },
+  "schema_version": 1
+}

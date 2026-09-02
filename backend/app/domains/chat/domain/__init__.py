@@ -57,7 +57,15 @@ from app.domains.chat.domain.retrieval_router import (
 from app.domains.chat.domain.workflow_recipe import (
     RETRIEVAL_WORKFLOW_VERSION,
     RetrievalWorkflow,
+    WORKFLOW_RECIPE_REGISTRY,
+    WorkflowAxis,
+    WorkflowDependencyBinding,
+    WorkflowDependencyKind,
+    WorkflowMergeMode,
     WorkflowRecipe,
+    WorkflowRecipeSelection,
+    WorkflowRecipeSpec,
+    select_workflow_recipe,
 )
 
 __all__ = [
@@ -102,8 +110,16 @@ __all__ = [
     "RouteAwareCallTracker",
     "SequenceOutcome",
     "TERMINAL_STATES",
+    "WORKFLOW_RECIPE_REGISTRY",
+    "WorkflowAxis",
+    "WorkflowDependencyBinding",
+    "WorkflowDependencyKind",
+    "WorkflowMergeMode",
     "WorkflowRecipe",
+    "WorkflowRecipeSelection",
+    "WorkflowRecipeSpec",
     "build_request_scope_hash",
     "parse_retrieval_intent_payload",
     "retrieval_router_response_schema",
+    "select_workflow_recipe",
 ]

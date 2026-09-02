@@ -36,7 +36,7 @@ def test_p8_l_m_inventory_closes_graph_planner_and_typed_execution() -> None:
     inventory = _inventory()
     assert inventory["owner_stage"] == "P8-L-M"
     assert inventory["predecessor"]["sha256"] == (
-        "83fe81ffa41024d84f7fd64e9858d46a9181b6550ff0fa2d7ca4c0170db713be"
+        "ebf5d24866038a8589861c049a975091e981e6eca1a0b336e9855522c2de984e"
     )
     assert inventory["schema"]["new_alembic_migration"] is None
     assert inventory["provider_schema"]["operation_count"] == 6

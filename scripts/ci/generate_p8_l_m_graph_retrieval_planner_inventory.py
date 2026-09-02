@@ -21,7 +21,7 @@ L_INVENTORY_PATH = (
     ROOT / "docs/architecture/p8-l-l-canonical-retrieval-planner-inventory.json"
 )
 L_INVENTORY_SHA256 = (
-    "83fe81ffa41024d84f7fd64e9858d46a9181b6550ff0fa2d7ca4c0170db713be"
+    "ebf5d24866038a8589861c049a975091e981e6eca1a0b336e9855522c2de984e"
 )
 CORPUS_PATH = ROOT / "backend/tests/fixtures/p8_l/graph_planner_v1/held_out_ko.jsonl"
 
@@ -139,7 +139,7 @@ def _boundary_contract() -> dict[str, Any]:
         "backend/app/domains/chat/application/graph_retrieval.py",
         (
             "GraphRetrievalPlanningService",
-            "_restore_call_tracker_snapshot",
+            "restore_call_tracker_snapshot",
             "graph_planner_request_wide_repair_exhausted",
             "subject_world_character_id=resolved.responding_world_character_id",
         ),

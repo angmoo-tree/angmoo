@@ -1,7 +1,7 @@
 {
-  "edge_count": 1535,
-  "external_import_count": 2067,
-  "module_count": 628,
+  "edge_count": 1546,
+  "external_import_count": 2076,
+  "module_count": 629,
   "modules": [
     {
       "external_imports": [],
@@ -1876,6 +1876,7 @@
       "external_imports": [],
       "imports": [
         "app.domains.chat.application.answer_request",
+        "app.domains.chat.application.both_retrieval",
         "app.domains.chat.application.canonical_retrieval",
         "app.domains.chat.application.generation_lifecycle",
         "app.domains.chat.application.graph_retrieval",
@@ -1911,6 +1912,30 @@
         "collections.abc",
         "dataclasses",
         "datetime",
+        "hashlib",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.chat.application.canonical_retrieval",
+        "app.domains.chat.application.graph_retrieval",
+        "app.domains.chat.domain.call_tracker",
+        "app.domains.chat.domain.resolved_envelope",
+        "app.domains.chat.domain.retrieval_intent",
+        "app.domains.chat.domain.workflow_recipe",
+        "app.domains.memory.public",
+        "app.domains.relationships.public"
+      ],
+      "module": "app.domains.chat.application.both_retrieval",
+      "path": "backend/app/domains/chat/application/both_retrieval.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "asyncio",
+        "collections.abc",
+        "dataclasses",
+        "datetime",
         "time",
         "typing"
       ],
@@ -1918,6 +1943,7 @@
         "app.domains.chat.domain.call_tracker",
         "app.domains.chat.domain.resolved_envelope",
         "app.domains.chat.domain.retrieval_intent",
+        "app.domains.chat.domain.workflow_recipe",
         "app.domains.memory.public"
       ],
       "module": "app.domains.chat.application.canonical_retrieval",
@@ -1954,6 +1980,7 @@
         "app.domains.chat.domain.call_tracker",
         "app.domains.chat.domain.resolved_envelope",
         "app.domains.chat.domain.retrieval_intent",
+        "app.domains.chat.domain.workflow_recipe",
         "app.domains.relationships.public"
       ],
       "module": "app.domains.chat.application.graph_retrieval",
@@ -2013,6 +2040,7 @@
     {
       "external_imports": [
         "__future__",
+        "collections.abc",
         "dataclasses",
         "datetime",
         "enum",
@@ -2119,6 +2147,7 @@
         "__future__",
         "dataclasses",
         "enum",
+        "types",
         "typing"
       ],
       "imports": [
