@@ -1,0 +1,204 @@
+{
+  "call_accounting": {
+    "generic_hidden_json_repair": false,
+    "graph_normal_full_path_cap": 3,
+    "later_character_response_generator_calls": 1,
+    "logical_and_physical_separate": true,
+    "normal_graph_planner_calls": 1,
+    "normal_router_calls": 1,
+    "request_wide_schema_repair_max": 1
+  },
+  "code_owned_execution": {
+    "dependency_zero_short_circuit": true,
+    "fanout_hard_cap": true,
+    "hop_hard_cap": true,
+    "ladybug_candidate_canonical_revalidation": true,
+    "memory_off_does_not_disable_graph": true,
+    "opaque_entity_to_actual_id_binding": true,
+    "owner_world_responding_subject_scope": true,
+    "relationship_from_to_direction_binding": true,
+    "row_hard_cap": true,
+    "unobservable_pre_provider_short_circuit": true
+  },
+  "contract_versions": {
+    "graph_plan": "graph-plan.v1",
+    "predecessor_canonical_plan": "canonical-plan.v1"
+  },
+  "domain_boundary": {
+    "canonical_revalidation": "P8-L-I SQLite facts and observation policy",
+    "existing_chat_send_path_changed": false,
+    "graph_query_boundary": "P8-L-I GraphRecallService",
+    "plan_owner": "domains/relationships",
+    "provider_adapter": "app.integrations.llm.graph_retrieval_planner",
+    "provider_port": "GraphPlannerProviderPort",
+    "provider_prompt_canonical_catalog_entries": 0,
+    "provider_prompt_canonical_ids": 0,
+    "raw_sql_or_cypher_from_llm": 0,
+    "request_orchestration_owner": "domains/chat",
+    "test_live_provider_calls": 0,
+    "typed_executor": "GraphRetrievalPlanExecutor"
+  },
+  "executable_contract_gates": [
+    "graph_only_exact_key_schema",
+    "cross_catalog_and_actual_id_rejection",
+    "raw_query_cypher_and_schema_material_rejection",
+    "resolved_request_version_hash_binding",
+    "opaque_entity_ref_resolution_by_code",
+    "code_owned_scope_direction_row_hop_and_fanout_caps",
+    "typed_i_graph_recall_and_canonical_revalidation",
+    "prior_step_world_character_reference_dependency",
+    "zero_dependency_short_circuit",
+    "unobservable_pre_provider_short_circuit",
+    "memory_off_graph_independence",
+    "request_wide_single_repair_shared_with_router",
+    "direct_adapter_no_hidden_json_retry",
+    "held_out_ko_36_operation_complete_execution"
+  ],
+  "held_out_ko_contract": {
+    "case_count": 36,
+    "category_counts": {
+      "direct_relationship": 6,
+      "rank_related_characters": 6,
+      "relationship_evidence": 6,
+      "relationship_neighborhood": 6,
+      "shared_neighbors": 6,
+      "shortest_path": 6
+    },
+    "first_pass_contract_executable": true,
+    "live_model_evaluation_completed": false,
+    "operation_counts": {
+      "direct_relationship": 6,
+      "rank_related_characters": 6,
+      "relationship_evidence": 6,
+      "relationship_neighborhood": 6,
+      "shared_neighbors": 6,
+      "shortest_path": 6
+    },
+    "schema_version": "p8-l-m-held-out-ko.v1",
+    "typed_execution_executable": true,
+    "unique_case_count": 36
+  },
+  "historical_chain": {
+    "current_tree_owner": "P8-L-M",
+    "p8_l_l_sha256": "83fe81ffa41024d84f7fd64e9858d46a9181b6550ff0fa2d7ca4c0170db713be",
+    "predecessor_mode": "frozen_digest"
+  },
+  "metrics": [
+    "first_pass_valid",
+    "repair_used",
+    "short_circuited",
+    "short_circuit_reason",
+    "planner_logical_calls",
+    "planner_physical_attempts",
+    "executable_step_count",
+    "limit_clamped_step_count",
+    "hop_clamped_step_count",
+    "result_count",
+    "provider",
+    "model"
+  ],
+  "non_scope": [
+    "both_dependency_coordinator",
+    "evidence_bundle_merge",
+    "character_response_generator",
+    "world_chat_send_retry_route_integration",
+    "typing_presence_or_streaming_ui",
+    "live_held_out_model_quality_pass",
+    "installer_or_schema_change"
+  ],
+  "owner_stage": "P8-L-M",
+  "predecessor": {
+    "path": "docs/architecture/p8-l-l-canonical-retrieval-planner-inventory.json",
+    "sha256": "83fe81ffa41024d84f7fd64e9858d46a9181b6550ff0fa2d7ca4c0170db713be",
+    "size": 7070
+  },
+  "provider_schema": {
+    "actual_id_fields": 0,
+    "arbitrary_query_fields": 0,
+    "canonical_operations": 0,
+    "dependency_slot": "prior_step.world_character_refs",
+    "max_steps": 3,
+    "operation_count": 6,
+    "operations": [
+      "direct_relationship",
+      "rank_related_characters",
+      "relationship_evidence",
+      "relationship_neighborhood",
+      "shared_neighbors",
+      "shortest_path"
+    ],
+    "version": "graph-plan.v1"
+  },
+  "required_files": [
+    {
+      "path": "backend/app/domains/relationships/domain/graph_retrieval_plan.py",
+      "sha256": "667fd3cafae3b32bc168b5e9c9b597955d3784a8c84c1af8be95a649085d5c31",
+      "size": 3170
+    },
+    {
+      "path": "backend/app/domains/relationships/domain/graph_retrieval_planner.py",
+      "sha256": "67e6f3d4bf26a08d9f9519b1252405dd1850c220b1a28cc2cb9160f95b866b92",
+      "size": 13239
+    },
+    {
+      "path": "backend/app/domains/relationships/ports/graph_planner_provider.py",
+      "sha256": "76f28a1a44925ac10a2ea7067382189fc7eef2a948781b4cfbe49a8b119d04c8",
+      "size": 4648
+    },
+    {
+      "path": "backend/app/domains/relationships/application/graph_planning.py",
+      "sha256": "45d507b038a1fa804406d1544f6885770e7e46fc578abd3466542d1cde85e301",
+      "size": 14751
+    },
+    {
+      "path": "backend/app/domains/chat/application/graph_retrieval.py",
+      "sha256": "5fe9de3726a33697a1218b665f8a972da83a6bcdf99aafdc7159316eec302490",
+      "size": 16007
+    },
+    {
+      "path": "backend/app/domains/chat/domain/call_tracker.py",
+      "sha256": "65077f3e511443b57859ecd1e6de5b7dd421686c01971a91d2808ac29e20b3d2",
+      "size": 5412
+    },
+    {
+      "path": "backend/app/integrations/llm/graph_retrieval_planner.py",
+      "sha256": "c0ce8b2dd52fc6f87560cead3ad0b308697ef1dc2c1e1a386472bf5ef3e4494d",
+      "size": 7704
+    },
+    {
+      "path": "backend/tests/fixtures/p8_l/graph_planner_v1/held_out_ko.jsonl",
+      "sha256": "dc35c8f976d0385c5adb851fa0e14b103f26032ae7fb6de08877229a283837ef",
+      "size": 10922
+    },
+    {
+      "path": "backend/tests/test_p8_l_m_graph_retrieval_planner.py",
+      "sha256": "1463e6a42338f9b40802063b934ed407557fcc7b95d508c0fb3adf682184b804",
+      "size": 21164
+    },
+    {
+      "path": "backend/tests/test_p8_l_m_graph_retrieval_planner_inventory.py",
+      "sha256": "84c1ef44a5141ff535db847451a68cd94b8a40c136f76b6cc419e7e1d4ee9ac3",
+      "size": 2011
+    },
+    {
+      "path": "docs/architecture/backend-domains.md",
+      "sha256": "978fee8da25371950d517b8716fb6bd07360c7f2f449cf2c454a8d7cb5966e21",
+      "size": 44020
+    },
+    {
+      "path": "docs/architecture/p8-l-m-graph-retrieval-planner.md",
+      "sha256": "848c465d312a4558cfaf39ca1e963306ef015f72b014310409b75c2fb1c88718",
+      "size": 8158
+    }
+  ],
+  "route": "GRAPH",
+  "schema": {
+    "canonical_table_count": 95,
+    "current_embedded_schema_version": 6,
+    "new_alembic_migration": null,
+    "new_canonical_tables": [],
+    "new_embedded_schema_version": null,
+    "new_ladybug_generation": null
+  },
+  "schema_version": 1
+}

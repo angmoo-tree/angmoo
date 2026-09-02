@@ -4,8 +4,12 @@ from app.integrations.llm.retrieval_router import DirectLlmRetrievalRouterProvid
 from app.integrations.llm.canonical_retrieval_planner import (
     DirectLlmCanonicalRetrievalPlannerProvider,
 )
+from app.integrations.llm.graph_retrieval_planner import (
+    DirectLlmGraphRetrievalPlannerProvider,
+)
 
 __all__ = [
     "DirectLlmCanonicalRetrievalPlannerProvider",
+    "DirectLlmGraphRetrievalPlannerProvider",
     "DirectLlmRetrievalRouterProvider",
 ]

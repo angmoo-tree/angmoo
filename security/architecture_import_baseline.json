@@ -1,7 +1,7 @@
 {
-  "edge_count": 1515,
-  "external_import_count": 2048,
-  "module_count": 622,
+  "edge_count": 1535,
+  "external_import_count": 2067,
+  "module_count": 628,
   "modules": [
     {
       "external_imports": [],
@@ -1878,6 +1878,7 @@
         "app.domains.chat.application.answer_request",
         "app.domains.chat.application.canonical_retrieval",
         "app.domains.chat.application.generation_lifecycle",
+        "app.domains.chat.application.graph_retrieval",
         "app.domains.chat.application.messages",
         "app.domains.chat.application.retrieval_routing"
       ],
@@ -1937,6 +1938,26 @@
       ],
       "module": "app.domains.chat.application.generation_lifecycle",
       "path": "backend/app/domains/chat/application/generation_lifecycle.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "asyncio",
+        "collections.abc",
+        "dataclasses",
+        "datetime",
+        "time",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.chat.domain.call_tracker",
+        "app.domains.chat.domain.resolved_envelope",
+        "app.domains.chat.domain.retrieval_intent",
+        "app.domains.relationships.public"
+      ],
+      "module": "app.domains.chat.application.graph_retrieval",
+      "path": "backend/app/domains/chat/application/graph_retrieval.py",
       "wildcard_imports": []
     },
     {
@@ -3043,7 +3064,33 @@
     {
       "external_imports": [],
       "imports": [
-        "app.domains.relationships.domain.graph_retrieval_plan"
+        "app.domains.relationships.application.graph_planning"
+      ],
+      "module": "app.domains.relationships.application",
+      "path": "backend/app/domains/relationships/application/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime"
+      ],
+      "imports": [
+        "app.domains.relationships.domain.graph_retrieval_plan",
+        "app.domains.relationships.domain.graph_retrieval_planner",
+        "app.domains.relationships.graph_recall.contracts",
+        "app.domains.relationships.graph_recall.service"
+      ],
+      "module": "app.domains.relationships.application.graph_planning",
+      "path": "backend/app/domains/relationships/application/graph_planning.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.relationships.domain.graph_retrieval_plan",
+        "app.domains.relationships.domain.graph_retrieval_planner"
       ],
       "module": "app.domains.relationships.domain",
       "path": "backend/app/domains/relationships/domain/__init__.py",
@@ -3058,6 +3105,21 @@
       "imports": [],
       "module": "app.domains.relationships.domain.graph_retrieval_plan",
       "path": "backend/app/domains/relationships/domain/graph_retrieval_plan.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "re",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.relationships.domain.graph_retrieval_plan",
+        "app.domains.relationships.graph_recall.contracts"
+      ],
+      "module": "app.domains.relationships.domain.graph_retrieval_planner",
+      "path": "backend/app/domains/relationships/domain/graph_retrieval_planner.py",
       "wildcard_imports": []
     },
     {
@@ -3196,6 +3258,7 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.relationships.ports.graph_planner_provider",
         "app.domains.relationships.ports.outbox",
         "app.domains.relationships.ports.projection",
         "app.domains.relationships.ports.query",
@@ -3203,6 +3266,19 @@
       ],
       "module": "app.domains.relationships.ports",
       "path": "backend/app/domains/relationships/ports/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.relationships.domain.graph_retrieval_plan"
+      ],
+      "module": "app.domains.relationships.ports.graph_planner_provider",
+      "path": "backend/app/domains/relationships/ports/graph_planner_provider.py",
       "wildcard_imports": []
     },
     {
@@ -3289,6 +3365,7 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.relationships.application",
         "app.domains.relationships.domain",
         "app.domains.relationships.graph_read.errors",
         "app.domains.relationships.graph_read.schemas",
@@ -5729,6 +5806,7 @@
       "external_imports": [],
       "imports": [
         "app.integrations.llm.canonical_retrieval_planner",
+        "app.integrations.llm.graph_retrieval_planner",
         "app.integrations.llm.retrieval_router"
       ],
       "module": "app.integrations.llm",
@@ -5748,6 +5826,20 @@
       ],
       "module": "app.integrations.llm.canonical_retrieval_planner",
       "path": "backend/app/integrations/llm/canonical_retrieval_planner.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "json"
+      ],
+      "imports": [
+        "app.domains.identity.public",
+        "app.domains.relationships.public",
+        "app.integrations.direct_llm"
+      ],
+      "module": "app.integrations.llm.graph_retrieval_planner",
+      "path": "backend/app/integrations/llm/graph_retrieval_planner.py",
       "wildcard_imports": []
     },
     {

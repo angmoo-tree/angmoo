@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2048,
-      "internal_edge_count": 1515,
+      "external_import_count": 2067,
+      "internal_edge_count": 1535,
       "legacy_import_exception_count": 0,
-      "module_count": 622,
+      "module_count": 628,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -15,7 +15,25 @@
           },
           {
             "imports": [
-              "app.domains.relationships.domain.graph_retrieval_plan"
+              "app.domains.relationships.application.graph_planning"
+            ],
+            "module": "app.domains.relationships.application",
+            "path": "backend/app/domains/relationships/application/__init__.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.domain.graph_retrieval_plan",
+              "app.domains.relationships.domain.graph_retrieval_planner",
+              "app.domains.relationships.graph_recall.contracts",
+              "app.domains.relationships.graph_recall.service"
+            ],
+            "module": "app.domains.relationships.application.graph_planning",
+            "path": "backend/app/domains/relationships/application/graph_planning.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.domain.graph_retrieval_plan",
+              "app.domains.relationships.domain.graph_retrieval_planner"
             ],
             "module": "app.domains.relationships.domain",
             "path": "backend/app/domains/relationships/domain/__init__.py"
@@ -24,6 +42,14 @@
             "imports": [],
             "module": "app.domains.relationships.domain.graph_retrieval_plan",
             "path": "backend/app/domains/relationships/domain/graph_retrieval_plan.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.domain.graph_retrieval_plan",
+              "app.domains.relationships.graph_recall.contracts"
+            ],
+            "module": "app.domains.relationships.domain.graph_retrieval_planner",
+            "path": "backend/app/domains/relationships/domain/graph_retrieval_planner.py"
           },
           {
             "imports": [],
@@ -98,6 +124,7 @@
           },
           {
             "imports": [
+              "app.domains.relationships.ports.graph_planner_provider",
               "app.domains.relationships.ports.outbox",
               "app.domains.relationships.ports.projection",
               "app.domains.relationships.ports.query",
@@ -105,6 +132,13 @@
             ],
             "module": "app.domains.relationships.ports",
             "path": "backend/app/domains/relationships/ports/__init__.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.domain.graph_retrieval_plan"
+            ],
+            "module": "app.domains.relationships.ports.graph_planner_provider",
+            "path": "backend/app/domains/relationships/ports/graph_planner_provider.py"
           },
           {
             "imports": [
@@ -156,6 +190,7 @@
           },
           {
             "imports": [
+              "app.domains.relationships.application",
               "app.domains.relationships.domain",
               "app.domains.relationships.graph_read.errors",
               "app.domains.relationships.graph_read.schemas",
