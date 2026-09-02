@@ -55,7 +55,7 @@ Package authors retain all rights granted by their respective licenses.
 - `pygments 2.20.0` — BSD-2-Clause
 - `pyjwt 2.13.0` — MIT
 - `pyopenssl 26.4.0` — Apache License, Version 2.0
-- `pypdf 6.15.0` — BSD-3-Clause
+- `pypdf 6.16.1` — BSD-3-Clause
 - `pytest 9.1.1` — MIT
 - `python-dateutil 2.9.0.post0` — Dual License
 - `python-docx 1.2.0` — MIT
