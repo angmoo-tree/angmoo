@@ -427,6 +427,21 @@
       "module": "app.api.v1.routes.world_chat",
       "endpoint": "get_world_thread"
     },
+    "GET /api/v1/worlds/{world_id}/chat/threads/{thread_id}/requests/latest": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_chat_response",
+      "endpoint": "get_latest_world_response_request"
+    },
+    "GET /api/v1/worlds/{world_id}/chat/threads/{thread_id}/requests/{request_id}": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_chat_response",
+      "endpoint": "get_world_response_request"
+    },
+    "GET /api/v1/worlds/{world_id}/chat/threads/{thread_id}/requests/{request_id}/events": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_chat_response",
+      "endpoint": "stream_world_response_events"
+    },
     "GET /api/v1/worlds/{world_id}/creator-context": {
       "access": "owner-only",
       "module": "app.api.v1.routes.worlds",
@@ -831,6 +846,16 @@
       "access": "owner-only",
       "module": "app.api.v1.routes.world_chat",
       "endpoint": "create_or_get_world_thread"
+    },
+    "POST /api/v1/worlds/{world_id}/chat/threads/{thread_id}/messages": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_chat_response",
+      "endpoint": "accept_world_message"
+    },
+    "POST /api/v1/worlds/{world_id}/chat/threads/{thread_id}/retry": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_chat_response",
+      "endpoint": "retry_world_response"
     },
     "POST /api/v1/worlds/{world_id}/manual-social/posts": {
       "access": "owner-only",
