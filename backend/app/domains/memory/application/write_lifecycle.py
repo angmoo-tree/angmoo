@@ -95,6 +95,8 @@ class MemoryWriteLifecycleService:
         candidate_id: str,
         expected_candidate_version: int,
         expected_scope_version: int,
+        summary_proposal: str | None = None,
+        enqueue_maintenance: bool = True,
         now: datetime | None = None,
     ) -> MemoryWriteResult:
         accepted_at = as_utc(now or datetime.now(UTC))
@@ -139,12 +141,17 @@ class MemoryWriteLifecycleService:
             expected_candidate_version=expected_candidate_version,
             evidence=evidence,
             memory_kind=candidate.memory_kind_hint,
-            summary=normalize_memory_summary(evidence.deterministic_summary),
+            summary=normalize_memory_summary(
+                evidence.deterministic_summary
+                if summary_proposal is None
+                else summary_proposal
+            ),
             confidence=confidence,
             salience=salience,
             valid_from=as_utc(evidence.source_created_at),
             valid_until=accepted_at + timedelta(days=setting.retention_days),
             now=accepted_at,
+            enqueue_maintenance=enqueue_maintenance,
         )
         return MemoryWriteResult(
             outcome=(
@@ -154,7 +161,12 @@ class MemoryWriteLifecycleService:
             candidate=stored_candidate,
             item=item,
             writes=(
-                ("memory_candidate", "memory_item", "memory_item_evidence", "maintenance_job")
+                (
+                    "memory_candidate",
+                    "memory_item",
+                    "memory_item_evidence",
+                    *(("maintenance_job",) if enqueue_maintenance else ()),
+                )
                 if created
                 else ()
             ),
@@ -390,25 +402,12 @@ class MemoryWriteLifecycleService:
         source_id: str,
         evidence: CanonicalMemoryEvidence | None,
     ) -> str | None:
-        if evidence is None:
-            return "memory_source_not_found"
-        if evidence.source_type is not source_type or evidence.source_id != source_id:
-            return "memory_source_identity_mismatch"
-        if evidence.source_world_id != scope.world_id:
-            return "memory_world_mismatch"
-        if not evidence.successful:
-            return "memory_source_not_successful"
-        if not evidence.visible:
-            return "memory_source_not_visible"
-        if not evidence.membership_active:
-            return "memory_membership_inactive"
-        if evidence.blocked:
-            return "memory_blocked"
-        if not evidence.observed_by_subject:
-            return "memory_unobserved"
-        validate_source_digest(evidence.source_digest)
-        normalize_memory_summary(evidence.deterministic_summary)
-        return None
+        return memory_evidence_blocked_code(
+            scope=scope,
+            source_type=source_type,
+            source_id=source_id,
+            evidence=evidence,
+        )
 
     @staticmethod
     def _validate_shape(
@@ -442,6 +441,36 @@ def _deterministic_scores(kind: MemoryKindV1) -> tuple[float, float]:
     }[kind]
 
 
+def memory_evidence_blocked_code(
+    *,
+    scope: MemoryScope,
+    source_type: MemorySourceTypeV1,
+    source_id: str,
+    evidence: CanonicalMemoryEvidence | None,
+) -> str | None:
+    """Revalidate canonical evidence before any provider or item write."""
+
+    if evidence is None:
+        return "memory_source_not_found"
+    if evidence.source_type is not source_type or evidence.source_id != source_id:
+        return "memory_source_identity_mismatch"
+    if evidence.source_world_id != scope.world_id:
+        return "memory_world_mismatch"
+    if not evidence.successful:
+        return "memory_source_not_successful"
+    if not evidence.visible:
+        return "memory_source_not_visible"
+    if not evidence.membership_active:
+        return "memory_membership_inactive"
+    if evidence.blocked:
+        return "memory_blocked"
+    if not evidence.observed_by_subject:
+        return "memory_unobserved"
+    validate_source_digest(evidence.source_digest)
+    normalize_memory_summary(evidence.deterministic_summary)
+    return None
+
+
 def _reason_code(value: str) -> str:
     normalized = value.strip()
     if not normalized or len(normalized) > 80:
@@ -449,4 +478,4 @@ def _reason_code(value: str) -> str:
     return normalized
 
 
-__all__ = ["MemoryWriteLifecycleService"]
+__all__ = ["MemoryWriteLifecycleService", "memory_evidence_blocked_code"]

@@ -22,6 +22,19 @@ from app.domains.memory.ports.canonical_planner_provider import (
     CanonicalPlannerRelationship,
     CanonicalPlannerRequest,
 )
+from app.domains.memory.ports.consolidation_provider import (
+    MemoryConsolidationProviderError,
+    MemoryConsolidationProviderPort,
+    MemoryConsolidationProviderRequest,
+    MemoryConsolidationProviderResult,
+    MemoryConsolidationSource,
+)
+from app.domains.memory.ports.consolidation_repository import (
+    MemoryConsolidationRepositoryPort,
+)
+from app.domains.memory.ports.maintenance_unit_of_work import (
+    MemoryMaintenanceUnitOfWorkPort,
+)
 
 __all__ = [
     "CanonicalMemoryEvidence",
@@ -32,7 +45,14 @@ __all__ = [
     "CanonicalPlannerRelationship",
     "CanonicalPlannerRequest",
     "CanonicalRecallRepositoryPort",
+    "MemoryConsolidationProviderError",
+    "MemoryConsolidationProviderPort",
+    "MemoryConsolidationProviderRequest",
+    "MemoryConsolidationProviderResult",
+    "MemoryConsolidationRepositoryPort",
+    "MemoryConsolidationSource",
     "MemoryMaintenanceQueuePort",
+    "MemoryMaintenanceUnitOfWorkPort",
     "MemoryMaintenanceWorkItem",
     "MemoryRepositoryPort",
     "MemoryRecallIndexPort",

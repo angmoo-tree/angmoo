@@ -65,7 +65,7 @@
   ],
   "historical_chain": {
     "current_tree_owner": "P8-L-N",
-    "p8_l_m_sha256": "cfbb5c987286c35e58d975fd79c3a7086fd103aa00bd7e1f9913ba96e13523f0",
+    "p8_l_m_sha256": "ef4ebadee0507c05dba672c316b5dd139084e6eb9743325d4e02f24699ae5d46",
     "predecessor_mode": "frozen_digest"
   },
   "non_scope": [
@@ -80,7 +80,7 @@
   "owner_stage": "P8-L-N",
   "predecessor": {
     "path": "docs/architecture/p8-l-m-graph-retrieval-planner-inventory.json",
-    "sha256": "cfbb5c987286c35e58d975fd79c3a7086fd103aa00bd7e1f9913ba96e13523f0",
+    "sha256": "ef4ebadee0507c05dba672c316b5dd139084e6eb9743325d4e02f24699ae5d46",
     "size": 7014
   },
   "recipe_registry": {
@@ -176,13 +176,13 @@
     },
     {
       "path": "backend/tests/test_p8_l_n_both_workflow_coordinator_inventory.py",
-      "sha256": "093993f3eb61981374cd658e2262e8001ea6111c1b43aad580e8a85690bda61b",
+      "sha256": "545f991f097ba2819d77753f7020e179f63a846d9974325eb7774f19a582b914",
       "size": 1894
     },
     {
       "path": "docs/architecture/backend-domains.md",
-      "sha256": "74294ffb7c6201a25b5cdd54ec6a301b54501bafacb397122055d44ad631abde",
-      "size": 44777
+      "sha256": "34d9b915d2688ca015d92926c3cf4b1116c00b110255bc773a8f41f7e021d704",
+      "size": 46163
     },
     {
       "path": "docs/architecture/p8-l-n-both-workflow-coordinator.md",
@@ -191,7 +191,7 @@
     },
     {
       "path": "scripts/ci/generate_p8_l_n_both_workflow_coordinator_inventory.py",
-      "sha256": "9cf087d969921ba4b647463c83d85c89da249349ca5c27b1b8789287dfdeebc6",
+      "sha256": "b75de2268e83215de5106f28ef423ff1799f6544587bb1a33442af40261ed0c1",
       "size": 12622
     }
   ],

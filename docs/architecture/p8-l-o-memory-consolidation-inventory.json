@@ -1,0 +1,197 @@
+{
+  "bounds": {
+    "candidate_batch": 32,
+    "hot_brief_source_items": 24,
+    "hot_brief_summary_characters": 4000,
+    "lease_seconds": 120,
+    "maintenance_attempts": 3,
+    "provider_calls_per_claimed_batch": 1,
+    "provider_hidden_json_repairs": 0,
+    "provider_hidden_overload_retries": 0,
+    "provider_input_characters": 12000,
+    "shutdown_drain_jobs": 8
+  },
+  "contract_versions": {
+    "consolidation": "memory-consolidation.v1",
+    "hot_brief": "memory-hot-brief.v1",
+    "provider_output": "memory-consolidation-output.v1"
+  },
+  "domain_boundary": {
+    "application_runtime_or_orm_imports": 0,
+    "foreground_route_aware_call_tracker_imports": 0,
+    "optional_provider_adapter": "app.integrations.llm.memory_consolidation",
+    "owner": "app.domains.memory",
+    "provider_actual_canonical_ids": 0,
+    "provider_output": "summary_proposal_only",
+    "provider_raw_private_transcripts": 0,
+    "raw_sql_or_cypher": 0,
+    "test_live_provider_calls": 0
+  },
+  "executable_contract_gates": [
+    "ordinary_pre_threshold_provider_zero",
+    "threshold_idempotent_enqueue",
+    "automatic_batch_provider_max_one",
+    "immediate_lane_separate_provider_max_one",
+    "provider_failure_deterministic_item_and_brief",
+    "memory_off_provider_and_processing_zero",
+    "source_scope_visibility_membership_block_observation_revalidation",
+    "candidate_replay_no_duplicate_item",
+    "hot_brief_generation_and_exact_item_version_fence",
+    "off_invalidates_active_hot_brief",
+    "leased_retry_max_three",
+    "shutdown_drain_deadline_and_cap",
+    "batch_tail_continuation_until_pending_zero",
+    "direct_adapter_hidden_retry_zero"
+  ],
+  "failure_contract": {
+    "bounded_retry": true,
+    "bounded_shutdown_drain": true,
+    "lease_renewal": true,
+    "memory_off_provider_calls": 0,
+    "pre_threshold_provider_calls": 0,
+    "provider_failure_blocks_basic_chat": false,
+    "provider_failure_deletes_canonical_items": false,
+    "provider_failure_deterministic_fallback": true,
+    "same_scope_serialization": true,
+    "source_revalidation_before_item_write": true,
+    "source_revalidation_before_provider": true,
+    "sub_threshold_batch_tail_continuation": true
+  },
+  "historical_chain": {
+    "current_tree_owner": "P8-L-O",
+    "p8_l_n_sha256": "4dedf0711d3387301313c7d76cdad3ee47273e1cc95bdc4b2f1362b6ca41a937",
+    "predecessor_mode": "frozen_digest"
+  },
+  "hot_brief_contract": {
+    "derived_cache": true,
+    "exact_item_version_links": true,
+    "generation_monotonic": true,
+    "off_invalidates_active": true,
+    "rebuildable_from_canonical_items": true,
+    "source_item_high_watermark": true,
+    "source_item_set_digest": true,
+    "source_version_fence": true
+  },
+  "non_scope": [
+    "live_chat_after_commit_candidate_producer",
+    "evidence_bundle_snapshot",
+    "character_response_generator",
+    "typing_presence_or_streaming_ui",
+    "memory_read_or_control_ui",
+    "live_provider_quality_or_latency_pass",
+    "installer_or_schema_change"
+  ],
+  "owner_stage": "P8-L-O",
+  "predecessor": {
+    "path": "docs/architecture/p8-l-n-both-workflow-coordinator-inventory.json",
+    "sha256": "4dedf0711d3387301313c7d76cdad3ee47273e1cc95bdc4b2f1362b6ca41a937",
+    "size": 6625
+  },
+  "required_files": [
+    {
+      "path": "backend/app/domains/memory/application/consolidation.py",
+      "sha256": "cba568ca540f32d731ff5c9893541a410215ad39e8fcbefcd511f23306d8b05c",
+      "size": 22021
+    },
+    {
+      "path": "backend/app/domains/memory/domain/consolidation.py",
+      "sha256": "ffb16c93edcec651c30530a608af2857c11eee0f8741032c3238a295c82ef1be",
+      "size": 9737
+    },
+    {
+      "path": "backend/app/domains/memory/domain/consolidation_provider.py",
+      "sha256": "c1afff71250f6773f53515499ab6faa61b675a0d1629dd3b6fe56fc7e31b7ed8",
+      "size": 3234
+    },
+    {
+      "path": "backend/app/domains/memory/infrastructure/consolidation_repository.py",
+      "sha256": "a8fbe6cd8f984cd54ccacdb7ece16727cc9a6f48065756fd577f443a40754037",
+      "size": 12810
+    },
+    {
+      "path": "backend/app/domains/memory/infrastructure/maintenance_queue.py",
+      "sha256": "10818647401cf52daa0f934403995bc183a0f0689c731098b31c13f00b1dd53c",
+      "size": 8730
+    },
+    {
+      "path": "backend/app/domains/memory/infrastructure/maintenance_unit_of_work.py",
+      "sha256": "d3509fa4d74bcb28568041615c274137c1119c76eeb92163d8ef8770a1219f5f",
+      "size": 459
+    },
+    {
+      "path": "backend/app/domains/memory/ports/consolidation_provider.py",
+      "sha256": "bdef0e5beac8b5f0f524e64dbbf5197a330c9c79415cea163a9a667f2dd62d05",
+      "size": 1647
+    },
+    {
+      "path": "backend/app/domains/memory/ports/consolidation_repository.py",
+      "sha256": "3a0326f0a0512e2e54c53352a802e03952982dbffb1c7b44d569c45bfee050f2",
+      "size": 1252
+    },
+    {
+      "path": "backend/app/domains/memory/ports/maintenance_unit_of_work.py",
+      "sha256": "7a42fe51740c183f58d589c25d5126d5607d5e2637f017a31638e10e0df00a5d",
+      "size": 306
+    },
+    {
+      "path": "backend/app/domains/memory/public.py",
+      "sha256": "5852e34c601f76d91544114e95dcd5202fb706ea08387ec166b149c02bff468f",
+      "size": 7571
+    },
+    {
+      "path": "backend/app/integrations/llm/memory_consolidation.py",
+      "sha256": "ccdc55b3a7deb9131a646e1ba261e00dad85b984012a3b49eda52bd4f0c19f5e",
+      "size": 5216
+    },
+    {
+      "path": "backend/tests/test_p8_l_o_memory_consolidation.py",
+      "sha256": "b7f91faee5e3c548bd00f7a4a9c38435786c78a302ff0103893c2819cf96fd05",
+      "size": 26859
+    },
+    {
+      "path": "backend/tests/test_p8_l_o_memory_consolidation_inventory.py",
+      "sha256": "ff18e5b87c3f7ae43bd892f6f78c05f75f5f5be48840d82e4448911c85183f53",
+      "size": 1891
+    },
+    {
+      "path": "docs/architecture/backend-domains.md",
+      "sha256": "34d9b915d2688ca015d92926c3cf4b1116c00b110255bc773a8f41f7e021d704",
+      "size": 46163
+    },
+    {
+      "path": "docs/architecture/p8-l-o-memory-consolidation-hot-brief.md",
+      "sha256": "2a79b4a84deae4f76b5b23f21282025be3e6e65f46ea4cfe5c3cb91efefefd5a",
+      "size": 7866
+    },
+    {
+      "path": "scripts/ci/generate_p8_l_o_memory_consolidation_inventory.py",
+      "sha256": "21f25b121d6cafe80246c111388e528be3196e105af3847c03ba2e6e3964deb9",
+      "size": 12507
+    }
+  ],
+  "schema": {
+    "current_embedded_schema_version": 6,
+    "new_alembic_migration": null,
+    "new_canonical_tables": [],
+    "new_embedded_schema_version": null,
+    "new_ladybug_generation": null,
+    "reused_tables": [
+      "memory_scope_settings",
+      "memory_candidates",
+      "memory_items",
+      "memory_item_evidence",
+      "memory_hot_briefs",
+      "memory_hot_brief_items",
+      "memory_maintenance_jobs"
+    ]
+  },
+  "schema_version": 1,
+  "threshold_policy": {
+    "active_item_refresh_count": 16,
+    "change_requires_contract_inventory_pr": true,
+    "minimum_interval_seconds": 900,
+    "pending_candidate_count": 8,
+    "pending_summary_characters": 4000,
+    "production_values_hidden_in_environment": false
+  }
+}

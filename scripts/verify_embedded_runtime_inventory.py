@@ -151,6 +151,15 @@ def _line_numbers(text: str, pattern: re.Pattern[str]) -> list[int]:
 
 
 def _postgres_owner(path: str) -> tuple[str, str, str]:
+    if path == (
+        "backend/app/domains/memory/infrastructure/consolidation_repository.py"
+    ):
+        return (
+            "P8-L-O",
+            "P8-L-O consolidation/hot brief",
+            "retain while same-scope maintenance serialization and exact hot-brief "
+            "source-version fencing are required",
+        )
     if path.startswith("backend/app/domains/memory/") or path == (
         "scripts/ci/generate_p8_l_g_memory_write_inventory.py"
     ):

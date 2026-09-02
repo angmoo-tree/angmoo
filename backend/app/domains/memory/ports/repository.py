@@ -78,6 +78,7 @@ class MemoryRepositoryPort(Protocol):
         valid_from: datetime,
         valid_until: datetime | None,
         now: datetime,
+        enqueue_maintenance: bool = True,
     ) -> tuple[MemoryCandidateRecord, MemoryItemRecord, bool]: ...
 
     def correct_item(

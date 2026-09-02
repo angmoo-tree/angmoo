@@ -383,31 +383,44 @@
     {
       "markers": {
         "row_lock": [
+          178,
+          318
+        ]
+      },
+      "owner": "P8-L-O",
+      "path": "backend/app/domains/memory/infrastructure/consolidation_repository.py",
+      "removal_condition": "retain while same-scope maintenance serialization and exact hot-brief source-version fencing are required",
+      "source_sha256": "a8fbe6cd8f984cd54ccacdb7ece16727cc9a6f48065756fd577f443a40754037",
+      "transition_pr": "P8-L-O consolidation/hot brief"
+    },
+    {
+      "markers": {
+        "row_lock": [
           42,
           114,
           121,
-          206
+          224
         ]
       },
       "owner": "P8-L-G",
       "path": "backend/app/domains/memory/infrastructure/maintenance_queue.py",
       "removal_condition": "retain only while cross-provider same-scope serialization or its negative inventory guard is required",
-      "source_sha256": "64340c5d79f2f0f4c8004cf98727157ff6c292b261dd6b6581efe9d53e883aa8",
+      "source_sha256": "10818647401cf52daa0f934403995bc183a0f0689c731098b31c13f00b1dd53c",
       "transition_pr": "P8-L-G memory write/lifecycle"
     },
     {
       "markers": {
         "row_lock": [
-          550,
-          567,
-          611,
-          681
+          555,
+          572,
+          616,
+          686
         ]
       },
       "owner": "P8-L-G",
       "path": "backend/app/domains/memory/infrastructure/repository.py",
       "removal_condition": "retain only while cross-provider same-scope serialization or its negative inventory guard is required",
-      "source_sha256": "d42f0aed44d6ac5ea1b4dad458855ff9dbf587e44fd4c670a80315343072a5ca",
+      "source_sha256": "3c0670bd05496d6fc87cd30007209d9eac7a14977fce5cf2fd1c4c1e66fc332f",
       "transition_pr": "P8-L-G memory write/lifecycle"
     },
     {
@@ -1157,13 +1170,13 @@
       "transition_pr": "P8-L-G memory write/lifecycle"
     }
   ],
-  "entry_count": 73,
+  "entry_count": 74,
   "marker_counts": {
     "advisory_lock": 9,
     "driver_or_url": 47,
     "jsonb": 9,
     "pgvector": 4,
-    "row_lock": 29,
+    "row_lock": 30,
     "skip_locked": 7
   },
   "purpose": "Residual PostgreSQL markers retained only as historical schema evidence, serialized compatibility values, and negative reintroduction guards",
