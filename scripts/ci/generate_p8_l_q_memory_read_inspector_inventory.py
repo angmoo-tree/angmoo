@@ -17,6 +17,8 @@ if str(BACKEND_ROOT) not in sys.path:
     sys.path.insert(0, str(BACKEND_ROOT))
 
 OUTPUT_PATH = ROOT / "docs/architecture/p8-l-q-memory-read-inspector-inventory.json"
+R_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-r-memory-owner-control-inventory.json"
+FROZEN_OUTPUT_SHA256 = "543f8f2457abbc03f50b7e0cace5fa8edffe680c74df53379fa21da588da9611"
 P_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-p-evidence-response-streaming-inventory.json"
 P_INVENTORY_SHA256 = "c802ddb544291cb29b113cb3ab3aad80fdda67fdc96d621eadb820bf3abb8cca"
 
@@ -335,6 +337,11 @@ def main() -> int:
     mode.add_argument("--check", action="store_true")
     args = parser.parse_args()
     try:
+        if R_INVENTORY_PATH.is_file():
+            if _sha256(OUTPUT_PATH) != FROZEN_OUTPUT_SHA256:
+                raise InventoryError("frozen P8-L-Q inventory digest drift")
+            print("P8-L-Q inventory is frozen by the P8-L-R successor")
+            return 0
         inventory = build_inventory()
         rendered = json.dumps(inventory, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
         if args.write:

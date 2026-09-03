@@ -1,11 +1,11 @@
 ---
 name: Angmoo Local
 document: Frontend Design Contract
-version: 1.10
-date: 2026-09-03
-status: CANONICAL DESIGN CONTRACT · SINGLE BRIGHT-CORAL BRAND + THREE USER-APPROVED CONTRAST EXCEPTIONS · UI-A~UI-F FULL PASS/MERGED/POST-MERGE PASS · P8-L-A~P MERGED HISTORY RECORDED · P8-L-Q MEMORY READ/EVIDENCE INSPECTOR IMPLEMENTED IN WORKTREE · LOCAL/CI/USER/MERGE GATES SEPARATE · CURRENT UI CONFORMANCE INCOMPLETE
+version: 1.11
+date: 2026-09-04
+status: CANONICAL DESIGN CONTRACT · SINGLE BRIGHT-CORAL BRAND + THREE USER-APPROVED CONTRAST EXCEPTIONS · UI-A~UI-F FULL PASS/MERGED/POST-MERGE PASS · P8-L-A~P MERGED HISTORY RECORDED · P8-L-Q MERGED · P8-L-R MEMORY OWNER CONTROL UI IMPLEMENTED IN WORKTREE · LOCAL/CI/USER/MERGE GATES SEPARATE · CURRENT UI CONFORMANCE INCOMPLETE
 scope: Device Phone · World App · Creator Studio · Relationship Graph · current L4.5 surfaces · P8-L Chat/Memory target contract
-implementation_phase: L4.5 UI-A through UI-F merged and post-merge closed · P8-L-D/E World-scoped identity, profile and letter entry merged · P8-L-F~O canonical Memory, recall, durable generation, Router/Planners, BOTH and maintenance foundations are historical merged stages · P8-L-P World Chat message acceptance, Evidence Bundle, Character Response Generator, CRG-only NDJSON transport, composer, typing, retry and model Hotfix are merged · P8-L-Q implements the read-only Memory workspace and current-source evidence inspector in the current worktree · local technical, Hosted CI, user, merge and post-merge Gates remain separately recorded · Memory mutation UI remains P8-L-R
+implementation_phase: L4.5 UI-A through UI-F merged and post-merge closed · P8-L-D/E World-scoped identity, profile and letter entry merged · P8-L-F~O canonical Memory, recall, durable generation, Router/Planners, BOTH and maintenance foundations are historical merged stages · P8-L-P World Chat message acceptance, Evidence Bundle, Character Response Generator, CRG-only NDJSON transport, composer, typing, retry and model Hotfix are merged · P8-L-Q read-only Memory workspace and current-source evidence inspector are merged · P8-L-R implements exact-scope ON/OFF, pin/unpin, correction and delete owner control in the current worktree · local technical, Hosted CI, user, merge and post-merge Gates remain separately recorded · installed-runtime causal closeout remains P8-L-S
 hosted_reference_commit: 7f967abd6117381be5c081ed284addb889b06fec
 local_reference_commit: e5e62aed69cb89b16b5870eb0854dd07752dc519
 legacy_reference: audited-internal-snapshot
@@ -1170,6 +1170,16 @@ UI-E PR #209 후속 Hotfix는 사용자 visual에서 발견된 `최근 결과` r
 - evidence Dialog는 current canonical source를 다시 확인한 결과만 보여 준다. stale·deleted·unavailable source는 과거 excerpt와 link를 숨기며 source ID·revision·locator·prompt·query·token·provider error는 UI contract에 포함하지 않는다.
 - loading·empty scope·empty list·forbidden/not-found·transport error·expired/superseded/deleted·degraded evidence를 서로 구분한다. 모든 Q data action은 GET이고 provider call이나 Memory state mutation을 일으키지 않는다.
 
+### 18.12 P8-L-R Memory owner control UI
+
+- R은 Q의 동일한 `/memory` workspace와 `features/memory/public.ts` 경계를 확장한다. 저장된 ON/OFF 상태와 pin/unpin·정정·삭제를 제공하되 별도 Memory 설정 화면이나 병렬 product route를 만들지 않는다.
+- owner mutation은 현재 선택된 `owner + World + subject`의 exact scope, expected version, idempotency key를 사용한다. 한 workspace에는 한 mutation만 pending이고, 진행 중에는 충돌하는 control을 모두 disable한다.
+- OFF에서도 기존 owner 기억은 표시하며 pin/unpin과 삭제를 허용한다. 정정은 새 canonical replacement를 만드는 write이므로 ON에서만 활성화한다.
+- 정정은 본문 내 inline edit가 아니라 shared Dialog에서 확인한다. 성공 시 replacement를 열고 이전 item은 superseded로 남긴다. 삭제는 destructive Dialog를 거쳐 즉시 목록·detail에서 제거한다.
+- transient failure는 같은 request를 보존한 명시적 재시도를 제공한다. version conflict는 stale request를 폐기하고 최신 상태를 다시 불러오며, 다른 scope로 fallback하거나 자동 overwrite하지 않는다.
+- projection 정리는 canonical commit 뒤 자동으로 수행된다. 사용자에게 FTS row·job·retry queue 같은 내부 단계를 노출하거나 별도 정리 버튼을 제공하지 않는다.
+- wide Tauri Memory window는 다중 열을 유지하고, 799px 이하 Browser는 같은 control·Dialog를 단일 열로 reflow한다. raw query·prompt·provider·canonical ID는 계속 표시하지 않는다.
+
 따라서 현재 허용되는 판정:
 
 ```text
@@ -1188,8 +1198,9 @@ P8-L-C FRONTEND CHAT FEATURE STRUCTURE PARITY MERGED / POST-MERGE 6/6 PASS
 P8-L-D WORLD CHAT IDENTITY·READ-ONLY SLICE MERGED / POST-MERGE 7/7 PASS
 P8-L-E WORLD SOCIAL PROFILE·LETTER CHAT ENTRY MERGED / USER INSTALLATION GATE PASS
 P8-L-P WORLD CHAT MESSAGE·EVIDENCE·CRG-ONLY STREAMING + PR #245 MODEL-BINDING/GEMINI-COMPATIBILITY HOTFIX MERGED / POST-MERGE PASS PENDING
-P8-L-Q MEMORY READ SURFACE·CURRENT-SOURCE EVIDENCE INSPECTOR IMPLEMENTED IN WORKTREE / LOCAL·HOSTED·USER·MERGE GATES SEPARATE
-P8-L CHAT V2·CANONICAL MEMORY PRODUCT RUNTIME PARTIAL / MEMORY OWNER CONTROL·FINAL CAUSAL CLOSEOUT PENDING
+P8-L-Q MEMORY READ SURFACE·CURRENT-SOURCE EVIDENCE INSPECTOR MERGED / POST-MERGE ACTIONS STATUS RECORDED SEPARATELY
+P8-L-R MEMORY OWNER CONTROL UI IMPLEMENTED IN WORKTREE / LOCAL·HOSTED·USER·MERGE GATES SEPARATE
+P8-L CHAT V2·CANONICAL MEMORY PRODUCT RUNTIME PARTIAL / FINAL CAUSAL CLOSEOUT PENDING
 ```
 
 token·shell·social core·Local-only surface·visual/runtime Gate와 사용자 승인이 모두 닫혔으므로 현재 함께 허용되는 판정:

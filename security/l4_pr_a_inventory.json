@@ -2,7 +2,7 @@
   "architecture": {
     "backend": {
       "external_import_count": 2186,
-      "internal_edge_count": 1712,
+      "internal_edge_count": 1716,
       "legacy_import_exception_count": 0,
       "module_count": 658,
       "module_cycles": [],
@@ -1006,7 +1006,7 @@
     "oracle_artifacts": [
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "ba5ff3238ddcdc2c3f5e28bb718c78a962dd64cdaa0f284095f11ccc25a41488"
+        "sha256": "047357ac00baf7e60c401eeeb07326aefdcac738b3d44b05a78be0c4dd64e1a2"
       },
       {
         "path": "docs/architecture/l3-er-postgres-neo4j-parity-oracle.json",

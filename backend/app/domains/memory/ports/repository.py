@@ -103,6 +103,18 @@ class MemoryRepositoryPort(Protocol):
         now: datetime,
     ) -> tuple[MemoryCandidateRecord, MemoryItemRecord]: ...
 
+    def correct_item_summary(
+        self,
+        *,
+        setting: MemoryScopeSetting,
+        old_item_id: str,
+        expected_item_version: int,
+        replacement_item_id: str,
+        summary: str,
+        evidences: tuple[CanonicalMemoryEvidence, ...],
+        now: datetime,
+    ) -> tuple[MemoryItemRecord, MemoryItemRecord, bool]: ...
+
     def get_item(
         self,
         *,

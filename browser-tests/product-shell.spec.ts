@@ -1011,7 +1011,7 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
   expect(audit.providerCalls).toEqual([]);
 });
 
-test("P8-L-Q Memory read surface keeps OFF data readable and reflows without mutations", async ({
+test("P8-L-R Memory owner controls save, supersede, delete, retry-safe scope, and narrow reflow", async ({
   page,
 }) => {
   const worldId = WORLD_ALPHA.world_id;
@@ -1034,13 +1034,19 @@ test("P8-L-Q Memory read surface keeps OFF data readable and reflows without mut
     related_character: { display_name: "하루", direction: "incoming" },
     version: 1,
   };
-  const reads: string[] = [];
+  let memoryEnabled = false;
+  let settingVersion = 2;
+  let activeItem = { ...item };
+  let oldItem = { ...item };
+  let deleted = false;
+  const calls: string[] = [];
 
   await page.route(
     `**/api/backend/worlds/${worldId}/world-characters**`,
     async (route) => {
       const url = new URL(route.request().url());
-      reads.push(`${route.request().method()} ${url.pathname}${url.search}`);
+      const method = route.request().method();
+      calls.push(`${method} ${url.pathname}${url.search}`);
       if (
         route.request().method() === "GET" &&
         url.pathname === `/api/backend/worlds/${worldId}/world-characters`
@@ -1068,20 +1074,95 @@ test("P8-L-Q Memory read surface keeps OFF data readable and reflows without mut
         });
       }
       if (url.pathname.endsWith("/memory/settings")) {
+        if (method === "PUT") {
+          const body = route.request().postDataJSON() as { enabled: boolean };
+          memoryEnabled = body.enabled;
+          settingVersion += 1;
+          return json(route, {
+            schema_version: "memory-setting-mutation.v1",
+            outcome: "updated",
+            setting: {
+              schema_version: "memory-setting-read.v1",
+              scope: { world_id: worldId, subject_world_character_id: subjectId },
+              configured: true,
+              enabled: memoryEnabled,
+              retention_days: 180,
+              provider_mode: "none",
+              version: settingVersion,
+              capabilities: { read: "available", mutate: "available" },
+            },
+            projection_cleanup: "automatic_after_commit",
+          });
+        }
         return json(route, {
           schema_version: "memory-setting-read.v1",
           scope: { world_id: worldId, subject_world_character_id: subjectId },
           configured: true,
-          enabled: false,
+          enabled: memoryEnabled,
           retention_days: 180,
           provider_mode: "none",
-          version: 2,
-          capabilities: { read: "available", mutate: "not_available_in_p8_l_q" },
+          version: settingVersion,
+          capabilities: { read: "available", mutate: "available" },
         });
       }
-      if (url.pathname.endsWith(`/memories/${memoryId}`)) {
+      if (url.pathname.endsWith("/pin") && method === "PUT") {
+        const body = route.request().postDataJSON() as { pinned: boolean };
+        activeItem = { ...activeItem, pinned: body.pinned, version: activeItem.version + 1 };
+        if (activeItem.id === oldItem.id) oldItem = { ...activeItem };
         return json(route, {
-          ...item,
+          schema_version: "memory-item-mutation.v1",
+          operation: body.pinned ? "pin" : "unpin",
+          outcome: "updated",
+          scope: { world_id: worldId, subject_world_character_id: subjectId },
+          item: activeItem,
+          replaced_memory_id: null,
+          projection_cleanup: "automatic_after_commit",
+        });
+      }
+      if (url.pathname.endsWith("/corrections") && method === "POST") {
+        const body = route.request().postDataJSON() as { summary: string };
+        const correctedId = `${memoryId}-corrected`;
+        oldItem = {
+          ...oldItem,
+          lifecycle: "superseded",
+          superseded_by_memory_id: correctedId,
+          version: oldItem.version + 1,
+        };
+        activeItem = {
+          ...activeItem,
+          id: correctedId,
+          summary: body.summary,
+          pinned: false,
+          version: 1,
+        };
+        return json(route, {
+          schema_version: "memory-item-mutation.v1",
+          operation: "correct",
+          outcome: "updated",
+          scope: { world_id: worldId, subject_world_character_id: subjectId },
+          item: activeItem,
+          replaced_memory_id: memoryId,
+          projection_cleanup: "automatic_after_commit",
+        });
+      }
+      const requestedMemoryId = decodeURIComponent(url.pathname.split("/memories/")[1] ?? "");
+      if (requestedMemoryId && !requestedMemoryId.includes("/") && method === "DELETE") {
+        deleted = true;
+        activeItem = { ...activeItem, lifecycle: "deleted", version: activeItem.version + 1 };
+        return json(route, {
+          schema_version: "memory-item-mutation.v1",
+          operation: "delete",
+          outcome: "deleted",
+          scope: { world_id: worldId, subject_world_character_id: subjectId },
+          item: activeItem,
+          replaced_memory_id: null,
+          projection_cleanup: "automatic_after_commit",
+        });
+      }
+      if (requestedMemoryId && !requestedMemoryId.includes("/") && method === "GET") {
+        const requested = requestedMemoryId === oldItem.id ? oldItem : activeItem;
+        return json(route, {
+          ...requested,
           schema_version: "memory-item-detail.v1",
           scope: { world_id: worldId, subject_world_character_id: subjectId },
           evidence: [
@@ -1096,17 +1177,17 @@ test("P8-L-Q Memory read surface keeps OFF data readable and reflows without mut
             },
           ],
           provenance_summary: "현재 확인 가능한 근거 1개 / 전체 1개",
-          capabilities: { read: "available", mutate: "not_available_in_p8_l_q" },
+          capabilities: { read: "available", mutate: "available" },
         });
       }
       if (url.pathname.endsWith("/memories")) {
         return json(route, {
           schema_version: "memory-item-list.v1",
           scope: { world_id: worldId, subject_world_character_id: subjectId },
-          memory_enabled: false,
-          items: [item],
+          memory_enabled: memoryEnabled,
+          items: deleted ? [oldItem] : activeItem.id === oldItem.id ? [activeItem] : [activeItem, oldItem],
           next_cursor: null,
-          capabilities: { read: "available", mutate: "not_available_in_p8_l_q" },
+          capabilities: { read: "available", mutate: "available" },
         });
       }
       return json(route, { detail: "unexpected_memory_request" }, 404);
@@ -1123,7 +1204,17 @@ test("P8-L-Q Memory read surface keeps OFF data readable and reflows without mut
     "href",
     `/worlds/${worldId}/chat/thread-p8-l-q`,
   );
-  await expect(page.getByRole("button", { name: /고정|정정|삭제|ON|OFF/ })).toHaveCount(0);
+  await page.getByRole("button", { name: "기억 켜기" }).click();
+  await expect(page.getByText("기억을 켰어요.", { exact: false })).toBeVisible();
+  await page.getByRole("button", { name: "고정", exact: true }).click();
+  await expect(page.getByRole("button", { name: "고정 해제", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "정정", exact: true }).click();
+  await page.getByLabel("정정할 기억 요약").fill("함께 훈련한 약속을 정확히 지킨 기억이야.");
+  await page.getByRole("button", { name: "정정 저장" }).click();
+  await expect(page.getByRole("heading", { name: "함께 훈련한 약속을 정확히 지킨 기억이야." })).toBeVisible();
+  await page.getByRole("button", { name: "삭제", exact: true }).click();
+  await page.getByRole("button", { name: "기억 삭제" }).click();
+  await expect(page.getByText("기억을 삭제했어요.", { exact: false })).toBeVisible();
 
   await page.setViewportSize({ width: 390, height: 844 });
   const workspaceDisplay = await page
@@ -1131,7 +1222,18 @@ test("P8-L-Q Memory read surface keeps OFF data readable and reflows without mut
     .locator("..")
     .evaluate((element) => getComputedStyle(element).display);
   expect(workspaceDisplay).toBe("block");
-  expect(reads.every((entry) => entry.startsWith("GET "))).toBe(true);
+  expect(calls).toContain(
+    `PUT /api/backend/worlds/${worldId}/world-characters/${subjectId}/memory/settings`,
+  );
+  expect(calls).toContain(
+    `PUT /api/backend/worlds/${worldId}/world-characters/${subjectId}/memories/${memoryId}/pin`,
+  );
+  expect(calls).toContain(
+    `POST /api/backend/worlds/${worldId}/world-characters/${subjectId}/memories/${memoryId}/corrections`,
+  );
+  expect(calls).toContain(
+    `DELETE /api/backend/worlds/${worldId}/world-characters/${subjectId}/memories/${memoryId}-corrected`,
+  );
   expect(audit.writes).toEqual([]);
 });
 

@@ -513,6 +513,78 @@ def test_after_commit_projection_tombstones_off_and_ignores_rollback(
     projection.stop()
 
 
+def test_owner_correction_and_delete_refresh_projection_after_commit(
+    runtime_factory: sessionmaker[Session],
+    tmp_path: Path,
+) -> None:
+    scope, _counterpart_id, _thread_id, _message_id, item_id = _accept_chat_memory(
+        runtime_factory
+    )
+    index = SqliteMemoryRecallIndex(StaticRuntimeDataPath(tmp_path / "data"))
+    projection = EmbeddedMemoryRecallProjection(
+        index=index,
+        session_factory=runtime_factory,
+    )
+    projection.start()
+
+    with runtime_factory() as session:
+        repository = SqlAlchemyMemoryRepository(session)
+        setting = repository.get_scope_setting(scope)
+        original = repository.get_item(scope=scope, item_id=item_id)
+        assert setting is not None
+        corrected = MemoryWriteLifecycleService(
+            repository,
+            SqlAlchemyMemorySourceEvidenceReader(session),
+        ).correct_summary(
+            scope=scope,
+            old_item_id=item_id,
+            expected_item_version=original.version,
+            expected_scope_version=setting.version,
+            summary="철수와 함께 폭우 훈련 약속을 끝까지 지켰다.",
+            idempotency_key="owner-correction-projection-1",
+            now=NOW,
+        )
+        assert corrected.item is not None
+        replacement_id = corrected.item.id
+        session.commit()
+
+    corrected_hits = index.search(
+        MemoryRecallSearchQuery(
+            scope=scope,
+            text="끝까지 지켰다",
+            kinds=(RecallDocumentKind.MEMORY_ITEM,),
+            limit=10,
+        )
+    )
+    assert [hit.memory_item_id for hit in corrected_hits] == [replacement_id]
+    assert all(hit.memory_item_id != item_id for hit in corrected_hits)
+
+    with runtime_factory() as session:
+        repository = SqlAlchemyMemoryRepository(session)
+        replacement = repository.get_item(scope=scope, item_id=replacement_id)
+        MemoryWriteLifecycleService(
+            repository,
+            SqlAlchemyMemorySourceEvidenceReader(session),
+        ).delete_item(
+            scope=scope,
+            item_id=replacement_id,
+            expected_version=replacement.version,
+            idempotency_key="owner-delete-projection-1",
+            now=NOW,
+        )
+        session.commit()
+
+    assert not index.search(
+        MemoryRecallSearchQuery(
+            scope=scope,
+            text="끝까지 지켰다",
+            kinds=(RecallDocumentKind.MEMORY_ITEM,),
+            limit=10,
+        )
+    )
+    projection.stop()
+
+
 def test_typed_registry_is_closed_and_validator_rejects_unbounded_input(
     runtime_factory: sessionmaker[Session],
     tmp_path: Path,

@@ -97,6 +97,11 @@
       "module": "app.api.v1.routes.worlds",
       "endpoint": "remove_world_banner"
     },
+    "DELETE /api/v1/worlds/{world_id}/world-characters/{subject_id}/memories/{memory_id}": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.memory",
+      "endpoint": "delete_memory_item"
+    },
     "GET /api/v1/agent-runs/resident-slots": {
       "access": "owner-only",
       "module": "app.api.v1.routes.agent_runs",
@@ -907,6 +912,11 @@
       "module": "app.api.v1.routes.world_chat_response",
       "endpoint": "retry_world_response"
     },
+    "POST /api/v1/worlds/{world_id}/world-characters/{subject_id}/memories/{memory_id}/corrections": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.memory",
+      "endpoint": "correct_memory_item"
+    },
     "POST /api/v1/worlds/{world_id}/manual-social/posts": {
       "access": "owner-only",
       "module": "app.api.v1.routes.manual_social",
@@ -971,6 +981,16 @@
       "access": "owner-only",
       "module": "app.api.v1.routes.agents",
       "endpoint": "update_settings"
+    },
+    "PUT /api/v1/worlds/{world_id}/world-characters/{subject_id}/memories/{memory_id}/pin": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.memory",
+      "endpoint": "update_memory_pin"
+    },
+    "PUT /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/settings": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.memory",
+      "endpoint": "update_memory_setting"
     }
   }
 }

@@ -1,16 +1,22 @@
 export {
+  correctMemoryItem,
+  deleteMemoryItem,
   getMemoryItem,
   getMemorySetting,
   getWorldChatEvidence,
   listMemoryItems,
   MemoryApiError,
+  setMemoryPin,
+  updateMemorySetting,
 } from "./api/memory-client";
 export type {
   MemoryEvidenceRead,
   MemoryItemDetailRead,
   MemoryItemListRead,
+  MemoryItemMutationRead,
   MemoryItemSummaryRead,
   MemorySettingRead,
+  MemorySettingMutationRead,
   WorldChatEvidenceItemRead,
   WorldChatEvidenceRead,
   WorldChatEvidenceSummaryRead,

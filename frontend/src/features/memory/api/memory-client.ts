@@ -4,6 +4,8 @@ import { runtimeFetch } from "@/shared/runtime/public";
 import type {
   MemoryItemDetailRead,
   MemoryItemListRead,
+  MemoryItemMutationRead,
+  MemorySettingMutationRead,
   MemorySettingRead,
   WorldChatEvidenceRead,
 } from "../model/memory-contract";
@@ -35,7 +37,7 @@ export function getMemorySetting(
       !Number.isInteger(read.version) ||
       read.version < 0 ||
       read.capabilities?.read !== "available" ||
-      read.capabilities?.mutate !== "not_available_in_p8_l_q"
+      read.capabilities?.mutate !== "available"
     ) throw new MemoryApiError(502, "memory_setting_scope_mismatch");
     return read;
   });
@@ -60,7 +62,7 @@ export function listMemoryItems(
       read.items.some((item) => !memorySummaryMatches(item)) ||
       (read.next_cursor !== null && typeof read.next_cursor !== "string") ||
       read.capabilities?.read !== "available" ||
-      read.capabilities?.mutate !== "not_available_in_p8_l_q"
+      read.capabilities?.mutate !== "available"
     ) throw new MemoryApiError(502, "memory_list_scope_mismatch");
     return read;
   });
@@ -85,8 +87,109 @@ export function getMemoryItem(
       read.evidence.some((item) => !memoryEvidenceMatches(item, worldId)) ||
       typeof read.provenance_summary !== "string" ||
       read.capabilities?.read !== "available" ||
-      read.capabilities?.mutate !== "not_available_in_p8_l_q"
+      read.capabilities?.mutate !== "available"
     ) throw new MemoryApiError(502, "memory_detail_scope_mismatch");
+    return read;
+  });
+}
+
+export function updateMemorySetting(
+  worldId: string,
+  subjectId: string,
+  data: { expected_version: number; enabled: boolean; idempotency_key: string },
+) {
+  return requestMemoryMutation<MemorySettingMutationRead>(
+    `${scopePath(worldId, subjectId)}/memory/settings`,
+    {
+      method: "PUT",
+      body: JSON.stringify({ schema_version: "memory-setting-update.v1", ...data }),
+    },
+  ).then((read) => {
+    if (
+      read.schema_version !== "memory-setting-mutation.v1" ||
+      !["updated", "reused"].includes(read.outcome) ||
+      read.projection_cleanup !== "automatic_after_commit" ||
+      !matchesScope(read.setting.scope, worldId, subjectId) ||
+      read.setting.enabled !== data.enabled ||
+      read.setting.capabilities?.mutate !== "available"
+    ) throw new MemoryApiError(502, "memory_setting_mutation_scope_mismatch");
+    return read;
+  });
+}
+
+export function setMemoryPin(
+  worldId: string,
+  subjectId: string,
+  memoryId: string,
+  data: { expected_version: number; pinned: boolean; idempotency_key: string },
+) {
+  return requestItemMutation(
+    worldId,
+    subjectId,
+    memoryId,
+    `${scopePath(worldId, subjectId)}/memories/${encodeURIComponent(memoryId)}/pin`,
+    {
+      method: "PUT",
+      body: JSON.stringify({ schema_version: "memory-pin-update.v1", ...data }),
+    },
+    data.pinned ? "pin" : "unpin",
+  ).then((read) => {
+    if (read.item.pinned !== data.pinned) {
+      throw new MemoryApiError(502, "memory_pin_mutation_state_mismatch");
+    }
+    return read;
+  });
+}
+
+export function correctMemoryItem(
+  worldId: string,
+  subjectId: string,
+  memoryId: string,
+  data: {
+    expected_item_version: number;
+    expected_scope_version: number;
+    summary: string;
+    idempotency_key: string;
+  },
+) {
+  return requestItemMutation(
+    worldId,
+    subjectId,
+    memoryId,
+    `${scopePath(worldId, subjectId)}/memories/${encodeURIComponent(memoryId)}/corrections`,
+    {
+      method: "POST",
+      body: JSON.stringify({ schema_version: "memory-correction-create.v1", ...data }),
+    },
+    "correct",
+  ).then((read) => {
+    if (read.item.lifecycle !== "active" || read.item.summary !== data.summary.trim()) {
+      throw new MemoryApiError(502, "memory_correction_mutation_state_mismatch");
+    }
+    return read;
+  });
+}
+
+export function deleteMemoryItem(
+  worldId: string,
+  subjectId: string,
+  memoryId: string,
+  data: { expected_version: number; idempotency_key: string },
+) {
+  return requestItemMutation(
+    worldId,
+    subjectId,
+    memoryId,
+    `${scopePath(worldId, subjectId)}/memories/${encodeURIComponent(memoryId)}`,
+    {
+      method: "DELETE",
+      body: JSON.stringify({ schema_version: "memory-delete.v1", ...data }),
+    },
+    "delete",
+  ).then((read) => {
+    if (read.item.lifecycle !== "deleted") {
+      throw new MemoryApiError(502, "memory_delete_mutation_state_mismatch");
+    }
     return read;
   });
 }
@@ -134,6 +237,58 @@ async function requestMemoryApi<T>(
     throw new MemoryApiError(response.status, errorDetail(payload, `http_${response.status}`));
   }
   return payload as T;
+}
+
+async function requestMemoryMutation<T>(path: string, init: RequestInit): Promise<T> {
+  const response = await runtimeFetch(`/api/backend${path}`, {
+    ...init,
+    cache: "no-store",
+    credentials: "same-origin",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      ...init.headers,
+    },
+  });
+  const payload = (await response.json().catch(() => null)) as unknown;
+  if (!response.ok) {
+    if (response.status === 401) {
+      clearStoredUser();
+      notifyAuthChanged();
+    }
+    throw new MemoryApiError(response.status, errorDetail(payload, `http_${response.status}`));
+  }
+  return payload as T;
+}
+
+function requestItemMutation(
+  worldId: string,
+  subjectId: string,
+  memoryId: string,
+  path: string,
+  init: RequestInit,
+  operation: MemoryItemMutationRead["operation"],
+) {
+  return requestMemoryMutation<MemoryItemMutationRead>(path, init).then((read) => {
+    if (
+      read.schema_version !== "memory-item-mutation.v1" ||
+      read.operation !== operation ||
+      !["updated", "reused", "deleted"].includes(read.outcome) ||
+      !matchesScope(read.scope, worldId, subjectId) ||
+      !memorySummaryMatches(read.item) ||
+      (operation === "correct" && (
+        read.item.id === memoryId ||
+        read.replaced_memory_id !== memoryId ||
+        !["updated", "reused"].includes(read.outcome)
+      )) ||
+      (operation !== "correct" && read.item.id !== memoryId) ||
+      (operation === "delete" && !["deleted", "reused"].includes(read.outcome)) ||
+      (["pin", "unpin"].includes(operation) && !["updated", "reused"].includes(read.outcome)) ||
+      (operation !== "correct" && read.replaced_memory_id !== null) ||
+      read.projection_cleanup !== "automatic_after_commit"
+    ) throw new MemoryApiError(502, "memory_item_mutation_scope_mismatch");
+    return read;
+  });
 }
 
 function scopePath(worldId: string, subjectId: string) {

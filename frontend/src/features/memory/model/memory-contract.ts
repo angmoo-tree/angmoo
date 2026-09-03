@@ -19,7 +19,7 @@ export type MemorySettingRead = {
   retention_days: number;
   provider_mode: "none" | "optional-configured";
   version: number;
-  capabilities: { read: "available"; mutate: "not_available_in_p8_l_q" };
+  capabilities: { read: "available"; mutate: "available" };
 };
 
 export type MemoryItemSummaryRead = {
@@ -43,7 +43,7 @@ export type MemoryItemListRead = {
   memory_enabled: boolean;
   items: MemoryItemSummaryRead[];
   next_cursor: string | null;
-  capabilities: { read: "available"; mutate: "not_available_in_p8_l_q" };
+  capabilities: { read: "available"; mutate: "available" };
 };
 
 export type MemoryEvidenceRead = {
@@ -61,7 +61,24 @@ export type MemoryItemDetailRead = MemoryItemSummaryRead & {
   scope: MemoryScopeRead;
   evidence: MemoryEvidenceRead[];
   provenance_summary: string;
-  capabilities: { read: "available"; mutate: "not_available_in_p8_l_q" };
+  capabilities: { read: "available"; mutate: "available" };
+};
+
+export type MemorySettingMutationRead = {
+  schema_version: "memory-setting-mutation.v1";
+  outcome: "updated" | "reused";
+  setting: MemorySettingRead;
+  projection_cleanup: "automatic_after_commit";
+};
+
+export type MemoryItemMutationRead = {
+  schema_version: "memory-item-mutation.v1";
+  operation: "pin" | "unpin" | "correct" | "delete";
+  outcome: "updated" | "reused" | "deleted";
+  scope: MemoryScopeRead;
+  item: MemoryItemSummaryRead;
+  replaced_memory_id: string | null;
+  projection_cleanup: "automatic_after_commit";
 };
 
 export type WorldChatEvidenceSummaryRead = {

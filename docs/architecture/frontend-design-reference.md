@@ -627,6 +627,24 @@ UI-F's canonical pinned-Noble run passed `36/36` locally after the reviewed PNG
 refresh. Windows 100%, 125%, and 150% display scale, Host Tauri dev, installed
 artifact, Ready, merge, and post-merge checks remain separate exact-SHA Gates.
 
+## P8-L-R Memory owner-control reference
+
+P8-L-R is a Local product behavior, not a new Hosted visual clone. It extends
+the P8-L-Q Memory workspace with the established bright-coral semantic
+primitives: the saved ON/OFF control uses the existing switch language,
+pin/unpin is a bounded neutral action, correction uses the shared standard
+Dialog, and delete uses the shared danger Dialog and destructive button state.
+Loading, pending, success, retry and conflict recovery reuse current Local
+status surfaces instead of introducing Memory-specific colors or overlays.
+
+The canonical layout remains the wide singleton Memory window. The same source
+must reflow at 799px and below for a narrow Browser: controls stack, Dialog
+actions remain reachable, and no horizontal overflow is allowed. This stage
+adds no image, font, icon package or copied Hosted asset. Direct reuse is the Q
+workspace and Local primitives; adaptation is limited to mutation copy and
+state semantics; rejected references are raw database/query/projection details
+and Hosted-only settings behavior.
+
 ## Asset and font provenance
 
 UI-A adds no asset, font, dependency, or copied icon. UI-B likewise adds no

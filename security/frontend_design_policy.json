@@ -584,7 +584,7 @@
       "isWindows ? frontendRoot : standaloneRoot"
     ],
     "frontend/DESIGN.md": [
-      "version: 1.10",
+      "version: 1.11",
       "EXCEPTION-A",
       "EXCEPTION-B",
       "EXCEPTION-C",

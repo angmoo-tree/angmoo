@@ -190,7 +190,7 @@
     },
     {
       "path": "backend/tests/test_l4_pr_a_inventory.py",
-      "sha256": "765254c162a98164aafbf11e7ef1de681e64d58485233d32bd02cbb7d7df5fec",
+      "sha256": "2fd5089fb3d0336848d0e8a7cca41d3fc6776b6a68c77d358cb1acb5f0e736a0",
       "size": 3767
     },
     {
@@ -200,7 +200,7 @@
     },
     {
       "path": "security/l4_pr_a_inventory.json",
-      "sha256": "be7dbaae11f61b15a342ddf2d790ec6e0a279fdc5384006dc662215060b4a6d6",
+      "sha256": "3ae05c018d5b1bb42543ae3e0be44d1a3d4840bf75952cfda570f2e870f678a3",
       "size": 57569
     }
   ],

@@ -34,7 +34,7 @@ def test_memory_feature_is_feature_first_and_shared_by_next_and_static() -> None
     )
 
 
-def test_memory_surface_is_read_only_and_exposes_explicit_states() -> None:
+def test_memory_surface_preserves_q_reads_and_adds_r_owner_control() -> None:
     client = _read("frontend/src/features/memory/api/memory-client.ts")
     workspace = _read("frontend/src/features/memory/ui/memory-workspace.tsx")
     inspector = _read(
@@ -48,12 +48,20 @@ def test_memory_surface_is_read_only_and_exposes_explicit_states() -> None:
         "getWorldChatEvidence",
     ):
         assert f"function {getter}" in client
-    for mutation in ("POST", "PATCH", "PUT", "DELETE", "pinMemory", "deleteMemory"):
-        assert mutation not in client
-    assert 'mutate !== "not_available_in_p8_l_q"' in client
+    for mutation in (
+        "updateMemorySetting",
+        "setMemoryPin",
+        "correctMemoryItem",
+        "deleteMemoryItem",
+    ):
+        assert f"function {mutation}" in client
+    assert 'mutate !== "available"' in client
+    assert "mutationLockRef" in workspace
+    assert "expected_version" in workspace
+    assert "idempotencyKey" in workspace
     for copy in (
         "기억을 불러오는 중",
-        "읽을 수 있는 기억 범위가 없어요",
+        "관리할 수 있는 기억 범위가 없어요",
         "기억을 불러오지 못했어요",
         "아직 저장된 기억이 없어요",
         "근거를 확인하는 중",

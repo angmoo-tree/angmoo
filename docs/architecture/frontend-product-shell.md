@@ -701,3 +701,27 @@ deleted or unvalidated evidence never displays its frozen excerpt or link;
 source IDs, revisions, locators, raw query/prompt and provider details do not
 enter the frontend contract. Viewing Memory or evidence performs GET requests
 only and does not invoke a model or change Memory state.
+
+## P8-L-R Memory owner control
+
+P8-L-R keeps `features/memory/public.ts` as the sole feature-first Memory
+boundary and adds explicit owner actions to the same `MemoryWorkspace` used by
+Next, static and the wide Tauri Memory window. The setting control shows saved
+ON/OFF state; item detail exposes pin/unpin, correction and delete. Existing
+items remain visible and manageable while OFF, but correction is disabled
+until Memory is ON because it creates a new canonical replacement.
+
+Only one owner mutation may be pending in a workspace. Each request carries
+the selected owner+World+subject scope, expected version and an idempotency key.
+Transient failures preserve the same request for explicit retry; version
+conflicts discard the stale request and reload current canonical state.
+Correction and delete use shared accessible confirmation Dialogs, and success
+opens the replacement or removes the deleted item without cross-scope
+fallback. Projection cleanup is automatic after commit and is not presented as
+a second owner action.
+
+The wide Tauri surface stays multi-column while Browser widths at 799px and
+below reflow the same controls and Dialogs into one column. Provider calls,
+raw query/prompt text, canonical IDs and projection internals remain outside
+the UI contract. Installed-runtime user proof and final causal closeout remain
+P8-L-S.
