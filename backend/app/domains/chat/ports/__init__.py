@@ -29,6 +29,7 @@ from app.domains.chat.ports.character_response_generator import (
     CharacterResponseGeneratorResult,
     CharacterResponseProfile,
 )
+from app.domains.chat.ports.today_sns_activity import TodaySnsActivityReaderPort
 
 __all__ = [
     "CanonicalRetrievalScope",
@@ -43,6 +44,7 @@ __all__ = [
     "ResponseWorkflowUnitOfWorkPort",
     "SuccessfulChatMemoryProducerPort",
     "SuccessfulChatMemorySource",
+    "TodaySnsActivityReaderPort",
     "RetrievalEntityCandidate",
     "RetrievalEntityResolution",
     "RetrievalPolicyResolverPort",

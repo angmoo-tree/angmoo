@@ -14,6 +14,7 @@ from app.domains.chat.application.character_response import (
     character_response_deltas,
 )
 from app.domains.chat.application.evidence_assembly import EvidenceBundleAssembler
+from app.domains.chat.application.today_sns_activity import TodaySnsActivityAssembler
 from app.domains.chat.application.response_workflow import (
     ResponseGenerationWorkflowService,
     ResponseWorkflowCommand,
@@ -65,6 +66,7 @@ __all__ = [
     "FakeAnswerRequestResult",
     "GenerationLifecycleService",
     "EvidenceBundleAssembler",
+    "TodaySnsActivityAssembler",
     "GraphPlanningMetrics",
     "GraphPlanningResult",
     "GraphRetrievalCommand",
