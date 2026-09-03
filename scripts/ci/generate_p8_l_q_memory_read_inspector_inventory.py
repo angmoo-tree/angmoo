@@ -99,6 +99,7 @@ REQUIRED_FILES = (
     "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx",
     "frontend/src/shared/desktop/product-window.ts",
     "scripts/ci/check_windows_host_tauri_dev_contract.py",
+    "scripts/ci/check_er6_desktop_supply_chain.py",
     "scripts/ci/generate_p8_l_q_memory_read_inspector_inventory.py",
     "security/architecture_import_baseline.json",
     "security/frontend_architecture_policy.json",

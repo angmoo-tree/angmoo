@@ -399,9 +399,14 @@
       "size": 12897
     },
     {
+      "path": "scripts/ci/check_er6_desktop_supply_chain.py",
+      "sha256": "af697356e7ce7754789e6052a5af6decf061f7513e803a46d685b577b0272e1c",
+      "size": 12058
+    },
+    {
       "path": "scripts/ci/generate_p8_l_q_memory_read_inspector_inventory.py",
-      "sha256": "02e19e1e9de3d0a765de438ca97c48c16df931f8bc30f763aff9a958d8348973",
-      "size": 14961
+      "sha256": "08a0b5dbc5e33361749879d725c76320dc71d54df8ba8989613b728101fceb7c",
+      "size": 15013
     },
     {
       "path": "security/architecture_import_baseline.json",
