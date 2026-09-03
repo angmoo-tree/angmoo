@@ -52,7 +52,7 @@
   ],
   "historical_chain": {
     "current_tree_owner": "P8-L-P",
-    "p8_l_o_sha256": "3a9341c11a12d1c33e4007a3eb641afdd28b0f22545d6ff09d3dd908a6120aed",
+    "p8_l_o_sha256": "ff10df3e8a6c9e222c7a88c206d9dbbdefc7ba49c753a875bcdb721d02d3c055",
     "predecessor_mode": "frozen_digest"
   },
   "memory_after_commit": {
@@ -100,7 +100,7 @@
   "owner_stage": "P8-L-P",
   "predecessor": {
     "path": "docs/architecture/p8-l-o-memory-consolidation-inventory.json",
-    "sha256": "3a9341c11a12d1c33e4007a3eb641afdd28b0f22545d6ff09d3dd908a6120aed",
+    "sha256": "ff10df3e8a6c9e222c7a88c206d9dbbdefc7ba49c753a875bcdb721d02d3c055",
     "size": 7037
   },
   "required_files": [
@@ -291,18 +291,18 @@
     },
     {
       "path": "browser-tests/product-shell.spec.ts",
-      "sha256": "f20e2ac0770ce19fd006599e7091e1f801787ccc4adbfd76eddebf2c7b6e3871",
-      "size": 91455
+      "sha256": "acaeede95b427271cb6886064dc2f7f463c270cc66e8cafe5849b7fab4bbdeb1",
+      "size": 96207
     },
     {
       "path": "browser-tests/static-product-shell.spec.ts",
-      "sha256": "ba5ff3238ddcdc2c3f5e28bb718c78a962dd64cdaa0f284095f11ccc25a41488",
-      "size": 147848
+      "sha256": "047357ac00baf7e60c401eeeb07326aefdcac738b3d44b05a78be0c4dd64e1a2",
+      "size": 153168
     },
     {
       "path": "frontend/DESIGN.md",
-      "sha256": "107c7ef453deeaaec64375a37cce17cabf19b3d9b48b4c4471c05c02a260b9b4",
-      "size": 78138
+      "sha256": "99f1e2ffc6ff1094f76e80f965f9c08c969425b321fafa68ba8355145bbe225f",
+      "size": 79917
     },
     {
       "path": "frontend/src/features/chat/api/world-chat-client.ts",
@@ -326,18 +326,18 @@
     },
     {
       "path": "docs/architecture/backend-domains.md",
-      "sha256": "d8cc90f6444eb2ba573397b447d996e70361d804b2fb48f9985768ca86bfd219",
-      "size": 50791
+      "sha256": "5c2dcf8009803da2977dde7d0fd21a7242c2dd06ba1344da25f3a6cc5db83f4d",
+      "size": 52287
     },
     {
       "path": "docs/architecture/frontend-design-reference.md",
-      "sha256": "a5011b2e3ff0e08e1d3dbaf4b341b40348adadc04e9a525d71edf03914466056",
-      "size": 37665
+      "sha256": "2929e405286eded31a4ef446318cf606b0bc7930ab8b94d271349675d97f9315",
+      "size": 38734
     },
     {
       "path": "docs/architecture/frontend-product-shell.md",
-      "sha256": "a7c7c07417c1f1aaf5cb5751e6daf269ba59c84f6855e73e45f40ea5db74ec9d",
-      "size": 40549
+      "sha256": "39bffad187958866d9c8f2835f1483aa8a78e28a873249e72841651e9b80673e",
+      "size": 41902
     },
     {
       "path": "docs/architecture/p8-l-p-evidence-response-streaming.md",
@@ -351,7 +351,7 @@
     },
     {
       "path": "scripts/ci/generate_p8_l_p_evidence_response_streaming_inventory.py",
-      "sha256": "600b47eec230c98685c1537f94a67e3cfff5883b5245e49194c9edd1f57c8d50",
+      "sha256": "3014a6d52c5713230aaf7cbfda423300cebbdcafa910df41cee7bdc246c71ebe",
       "size": 18082
     },
     {

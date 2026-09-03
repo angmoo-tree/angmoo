@@ -1,0 +1,270 @@
+{
+  "bounds": {
+    "correction_summary_characters": 2000,
+    "narrow_browser_reflow_max_width": 799,
+    "simultaneous_workspace_mutations": 1
+  },
+  "contract_versions": {
+    "memory_read": "memory-read.v1",
+    "memory_write": "memory-write.v1",
+    "owner_control_api": "memory-owner-control.v1"
+  },
+  "domain_boundary": {
+    "actual_identity_scope_owner": "code",
+    "backend_domain_owner": "app.domains.memory",
+    "canonical_mutation_owner": "code",
+    "domain_application_framework_imports": 0,
+    "frontend_feature": "frontend/src/features/memory",
+    "projection_cleanup_owner": "after_commit_code",
+    "raw_sql_or_cypher_in_route": 0
+  },
+  "executable_contract_gates": [
+    "owner_world_subject_scope_isolation",
+    "local_mutation_origin_required",
+    "setting_target_state_idempotency_and_version_conflict",
+    "pin_unpin_while_off_and_replay",
+    "correction_source_revalidation_and_supersession",
+    "delete_immediate_retrieval_block",
+    "after_commit_projection_replacement_and_tombstone",
+    "single_pending_owner_mutation",
+    "same_request_transient_retry",
+    "stale_conflict_reload",
+    "next_static_owner_control_parity",
+    "narrow_browser_reflow"
+  ],
+  "frontend": {
+    "canonical_route": "/memory",
+    "controls": [
+      "on_off",
+      "pin_unpin",
+      "correction",
+      "delete"
+    ],
+    "correction_delete_use_shared_dialog": true,
+    "feature_owner": "features/memory",
+    "next_static_same_feature": true,
+    "raw_projection_details_visible": false,
+    "transient_retry_reuses_request": true,
+    "version_conflict_reloads_canonical_state": true,
+    "wide_window_kind": "memory"
+  },
+  "historical_chain": {
+    "current_tree_owner": "P8-L-R",
+    "p8_l_q_sha256": "543f8f2457abbc03f50b7e0cace5fa8edffe680c74df53379fa21da588da9611",
+    "predecessor_mode": "frozen_digest"
+  },
+  "mutation_contract": {
+    "canonical_commit_rolled_back_on_projection_failure": false,
+    "correction_creates_replacement": true,
+    "correction_revalidates_every_evidence_source": true,
+    "delete_blocks_retrieval_in_canonical_transaction": true,
+    "memory_off_allows_correction": false,
+    "memory_off_allows_pin_unpin_and_delete": true,
+    "memory_off_blocks_new_candidates_writes_and_retrieval": true,
+    "memory_off_keeps_existing_items_readable": true,
+    "optimistic_version_conflict": true,
+    "projection_cleanup": "automatic_after_commit",
+    "provider_calls": 0,
+    "routes": [
+      "PUT /worlds/{world_id}/world-characters/{subject_id}/memory/settings",
+      "PUT /worlds/{world_id}/world-characters/{subject_id}/memories/{memory_id}/pin",
+      "POST /worlds/{world_id}/world-characters/{subject_id}/memories/{memory_id}/corrections",
+      "DELETE /worlds/{world_id}/world-characters/{subject_id}/memories/{memory_id}"
+    ],
+    "superseded_item_is_not_retrievable": true,
+    "target_state_or_key_replay_idempotent": true
+  },
+  "non_scope": [
+    "new_memory_schema_or_migration",
+    "graph_mutation",
+    "provider_or_llm_call",
+    "installed_runtime_user_gate",
+    "held_out_causal_quality_and_latency_closeout",
+    "release_or_production"
+  ],
+  "owner_stage": "P8-L-R",
+  "predecessor": {
+    "path": "docs/architecture/p8-l-q-memory-read-inspector-inventory.json",
+    "sha256": "543f8f2457abbc03f50b7e0cace5fa8edffe680c74df53379fa21da588da9611",
+    "size": 16021
+  },
+  "required_files": [
+    {
+      "path": "backend/app/api/v1/routes/memory.py",
+      "sha256": "b5ae88d45f56ab8a3f29c5619e0b114b5bfbc0a819a56671e83ac09065835e0f",
+      "size": 17531
+    },
+    {
+      "path": "backend/app/domains/memory/api/schemas.py",
+      "sha256": "00f75c7013dbfb20157157dfe11463dbdab2a11ccd3375098aab0faea7d1a1f5",
+      "size": 4515
+    },
+    {
+      "path": "backend/app/domains/memory/application/scope_control.py",
+      "sha256": "d913a260d454cc982fa9fb715550aba5d2348707fd3a64c232635e7796dcff1c",
+      "size": 3406
+    },
+    {
+      "path": "backend/app/domains/memory/application/write_lifecycle.py",
+      "sha256": "531d41e63aad6a339b3f669db225acdc47d1998e18007040ad5df68d7b3467c9",
+      "size": 20777
+    },
+    {
+      "path": "backend/app/domains/memory/domain/lifecycle.py",
+      "sha256": "7fbccf14fee64bf40eae800623ab39c4986339f0df8b896e9a5e49eff8362d90",
+      "size": 6648
+    },
+    {
+      "path": "backend/app/domains/memory/infrastructure/repository.py",
+      "sha256": "df6a48958d2d85a69278a6476e98cfe6043b9e82ca81fbacf650c382cd820981",
+      "size": 38421
+    },
+    {
+      "path": "backend/app/domains/memory/ports/repository.py",
+      "sha256": "a496b92525ead54599a9b579760b6c2b614eff86b99eb4eb2ef7c6bbc2b0be37",
+      "size": 4610
+    },
+    {
+      "path": "backend/app/domains/memory/public.py",
+      "sha256": "f0cf1cffc0e86ba8aa5c6e138722fdad615e987d1250c4ae80ab14b0772c31c8",
+      "size": 8251
+    },
+    {
+      "path": "backend/app/runtime/memory/recall_projection.py",
+      "sha256": "0a64dd7cd24228e44a7a5d4ee5878e37b8f4eced4153fa939c12ab10cfe0b08d",
+      "size": 7343
+    },
+    {
+      "path": "backend/app/runtime/persistence/sqlite_schema.py",
+      "sha256": "ed9d043d4a0206e6cf738f6df490932d0d4bcd54c588404870fea337ceeebe80",
+      "size": 12709
+    },
+    {
+      "path": "backend/security/public_route_security_inventory.json",
+      "sha256": "1d13a4a93206ab5612ce9e8a6580c1881722cf3c45da9c6a7c158485a90164df",
+      "size": 35287
+    },
+    {
+      "path": "backend/security/route_security_inventory.json",
+      "sha256": "3b88336dc0b4f8207f82c845c284decace281bbc441a697947b6bdb8f55594df",
+      "size": 36065
+    },
+    {
+      "path": "backend/tests/test_m3_security_harness.py",
+      "sha256": "3334ea066c95a41f9fcbf3233c7cf926dc5ad1955859e7276b8853ae24b1aee3",
+      "size": 8070
+    },
+    {
+      "path": "backend/tests/test_p8_l_h_canonical_recall.py",
+      "sha256": "f1fe39cfd95032907fbb2a6e3e5c80e09d3c2485b0d07b33fa8ccaaa861da40f",
+      "size": 20496
+    },
+    {
+      "path": "backend/tests/test_p8_l_q_frontend_memory.py",
+      "sha256": "07640db45876354ce59fff9a6e9cca44ef60a36be8843c1dff4f015e0f9f4377",
+      "size": 4347
+    },
+    {
+      "path": "backend/tests/test_p8_l_q_memory_read_inspector.py",
+      "sha256": "1ba9b875f9066ed53952d1f3e631960680fa45b68dc6fa72e57beec65cc9591f",
+      "size": 17606
+    },
+    {
+      "path": "backend/tests/test_p8_l_r_memory_owner_control.py",
+      "sha256": "653a590cfc3ded8337177b55ca58de510bcae8a74515df35c69429359a6201f9",
+      "size": 9701
+    },
+    {
+      "path": "browser-tests/product-shell.spec.ts",
+      "sha256": "acaeede95b427271cb6886064dc2f7f463c270cc66e8cafe5849b7fab4bbdeb1",
+      "size": 96207
+    },
+    {
+      "path": "browser-tests/static-product-shell.spec.ts",
+      "sha256": "047357ac00baf7e60c401eeeb07326aefdcac738b3d44b05a78be0c4dd64e1a2",
+      "size": 153168
+    },
+    {
+      "path": "docs/architecture/backend-domains.md",
+      "sha256": "5c2dcf8009803da2977dde7d0fd21a7242c2dd06ba1344da25f3a6cc5db83f4d",
+      "size": 52287
+    },
+    {
+      "path": "docs/architecture/frontend-design-reference.md",
+      "sha256": "2929e405286eded31a4ef446318cf606b0bc7930ab8b94d271349675d97f9315",
+      "size": 38734
+    },
+    {
+      "path": "docs/architecture/frontend-product-shell.md",
+      "sha256": "39bffad187958866d9c8f2835f1483aa8a78e28a873249e72841651e9b80673e",
+      "size": 41902
+    },
+    {
+      "path": "docs/architecture/p8-l-q-memory-read-inspector-inventory.json",
+      "sha256": "543f8f2457abbc03f50b7e0cace5fa8edffe680c74df53379fa21da588da9611",
+      "size": 16021
+    },
+    {
+      "path": "docs/architecture/p8-l-r-memory-owner-control.md",
+      "sha256": "8ebb79a050d153c3d5ac60a07d0930ec68d858d4288c6506e165f143b78e145e",
+      "size": 7270
+    },
+    {
+      "path": "frontend/DESIGN.md",
+      "sha256": "99f1e2ffc6ff1094f76e80f965f9c08c969425b321fafa68ba8355145bbe225f",
+      "size": 79917
+    },
+    {
+      "path": "frontend/src/features/memory/api/memory-client.ts",
+      "sha256": "629f0d0fc44ace1289cc0cb18017b3cd32e5499f92a495c6d7bb3b2de7ec9941",
+      "size": 12944
+    },
+    {
+      "path": "frontend/src/features/memory/model/memory-contract.ts",
+      "sha256": "d7286f5a2300706e6b45db029ef78589f914cdc694517cab77d3eb147e6c798c",
+      "size": 3141
+    },
+    {
+      "path": "frontend/src/features/memory/public.ts",
+      "sha256": "52320d92f340a5c48db1c78f2d9c064ad57109de5f5c452d179f77aadb392de9",
+      "size": 722
+    },
+    {
+      "path": "frontend/src/features/memory/ui/memory-workspace.module.css",
+      "sha256": "33547ee9fbd36ea7b390192b512eb459e8370b98640206b2971ac2cd49f13dc5",
+      "size": 10147
+    },
+    {
+      "path": "frontend/src/features/memory/ui/memory-workspace.tsx",
+      "sha256": "1daa48774c5ae59f7445dc8fc9c48c53ef028eba8051211f4b1c888974c94b4a",
+      "size": 28909
+    },
+    {
+      "path": "scripts/generate_public_route_inventory.py",
+      "sha256": "762b014104fc7c7dceb47a54c41cb08d0cf6619b74536a586cae08864f628974",
+      "size": 2400
+    },
+    {
+      "path": "scripts/ci/generate_p8_l_q_memory_read_inspector_inventory.py",
+      "sha256": "4c24b3fd68debff7c0eac35fa1f4991797fc1a5244ec39f9a2d5abfc6deab187",
+      "size": 15462
+    },
+    {
+      "path": "scripts/ci/generate_p8_l_r_memory_owner_control_inventory.py",
+      "sha256": "b3b894ca4cbf895e47cc1a049762138ee33126d6db01f2a63ccba33a246791cf",
+      "size": 13430
+    }
+  ],
+  "schema": {
+    "canonical_table_count": 95,
+    "current_embedded_schema_version": 7,
+    "new_alembic_migration": null,
+    "new_canonical_columns": [],
+    "new_canonical_tables": [],
+    "new_embedded_schema_version": null,
+    "new_ladybug_generation": null,
+    "source_migration_count": 86,
+    "source_revision": "20260903_0087"
+  },
+  "schema_version": 1
+}

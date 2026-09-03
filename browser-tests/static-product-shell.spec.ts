@@ -2529,13 +2529,13 @@ test("P8-L-Q static Browser canonicalizes the legacy Memory alias", async ({ pag
   await expect(page.locator('main[data-product-shell="memory"]')).toBeVisible();
 });
 
-test("P8-L-Q static Memory route reads scoped evidence in the wide memory window", async ({
+test("P8-L-R static Memory route controls exact-scope owner state and keeps narrow reflow", async ({
   page,
 }) => {
   const worldId = "world-p8-l-q-static";
   const subjectId = "wc-p8-l-q-static";
   const memoryId = "memory-p8-l-q-static";
-  const methods: string[] = [];
+  const calls: string[] = [];
   const item = {
     id: memoryId,
     memory_kind: "THREAD_SUMMARY",
@@ -2550,11 +2550,20 @@ test("P8-L-Q static Memory route reads scoped evidence in the wide memory window
     related_character: { display_name: "Static 하루", direction: "incoming" },
     version: 1,
   };
+  let memoryEnabled = false;
+  let settingVersion = 3;
+  let activeItem = { ...item };
+  let previousItem = { ...item };
+  let deleted = false;
 
   await page.addInitScript(
     ({ route }) => {
+      const browserRoute = `${window.location.pathname}${window.location.search}`;
       Object.assign(window, {
-        __ANGMOO_DESKTOP_WINDOW__: { kind: "memory", route },
+        __ANGMOO_DESKTOP_WINDOW__: {
+          kind: "memory",
+          route: browserRoute.startsWith("/memory") ? browserRoute : route,
+        },
       });
     },
     { route: `/memory?world=${worldId}&subject=${subjectId}&memory=${memoryId}` },
@@ -2562,7 +2571,8 @@ test("P8-L-Q static Memory route reads scoped evidence in the wide memory window
   await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
     const request = route.request();
     const url = new URL(request.url());
-    methods.push(request.method());
+    const method = request.method();
+    calls.push(`${method} ${url.pathname}`);
     const fulfill = (json: unknown, status = 200) =>
       route.fulfill({ contentType: "application/json", json, status });
     if (url.pathname === "/api/v1/worlds/mine") {
@@ -2612,20 +2622,94 @@ test("P8-L-Q static Memory route reads scoped evidence in the wide memory window
       });
     }
     if (url.pathname.endsWith("/memory/settings")) {
+      if (method === "PUT") {
+        const body = request.postDataJSON() as { enabled: boolean };
+        memoryEnabled = body.enabled;
+        settingVersion += 1;
+        return fulfill({
+          schema_version: "memory-setting-mutation.v1",
+          outcome: "updated",
+          setting: {
+            schema_version: "memory-setting-read.v1",
+            scope: { world_id: worldId, subject_world_character_id: subjectId },
+            configured: true,
+            enabled: memoryEnabled,
+            retention_days: 180,
+            provider_mode: "optional-configured",
+            version: settingVersion,
+            capabilities: { read: "available", mutate: "available" },
+          },
+          projection_cleanup: "automatic_after_commit",
+        });
+      }
       return fulfill({
         schema_version: "memory-setting-read.v1",
         scope: { world_id: worldId, subject_world_character_id: subjectId },
         configured: true,
-        enabled: true,
+        enabled: memoryEnabled,
         retention_days: 180,
         provider_mode: "optional-configured",
-        version: 3,
-        capabilities: { read: "available", mutate: "not_available_in_p8_l_q" },
+        version: settingVersion,
+        capabilities: { read: "available", mutate: "available" },
       });
     }
-    if (url.pathname.endsWith(`/memories/${memoryId}`)) {
+    if (url.pathname.endsWith("/pin") && method === "PUT") {
+      const body = request.postDataJSON() as { pinned: boolean };
+      activeItem = { ...activeItem, pinned: body.pinned, version: activeItem.version + 1 };
+      previousItem = { ...activeItem };
       return fulfill({
-        ...item,
+        schema_version: "memory-item-mutation.v1",
+        operation: body.pinned ? "pin" : "unpin",
+        outcome: "updated",
+        scope: { world_id: worldId, subject_world_character_id: subjectId },
+        item: activeItem,
+        replaced_memory_id: null,
+        projection_cleanup: "automatic_after_commit",
+      });
+    }
+    if (url.pathname.endsWith("/corrections") && method === "POST") {
+      const body = request.postDataJSON() as { summary: string };
+      const replacementId = `${memoryId}-corrected`;
+      previousItem = {
+        ...previousItem,
+        lifecycle: "superseded",
+        superseded_by_memory_id: replacementId,
+        version: previousItem.version + 1,
+      };
+      activeItem = {
+        ...activeItem,
+        id: replacementId,
+        summary: body.summary,
+        version: 1,
+      };
+      return fulfill({
+        schema_version: "memory-item-mutation.v1",
+        operation: "correct",
+        outcome: "updated",
+        scope: { world_id: worldId, subject_world_character_id: subjectId },
+        item: activeItem,
+        replaced_memory_id: memoryId,
+        projection_cleanup: "automatic_after_commit",
+      });
+    }
+    const requestedMemoryId = decodeURIComponent(url.pathname.split("/memories/")[1] ?? "");
+    if (requestedMemoryId && !requestedMemoryId.includes("/") && method === "DELETE") {
+      deleted = true;
+      activeItem = { ...activeItem, lifecycle: "deleted", version: activeItem.version + 1 };
+      return fulfill({
+        schema_version: "memory-item-mutation.v1",
+        operation: "delete",
+        outcome: "deleted",
+        scope: { world_id: worldId, subject_world_character_id: subjectId },
+        item: activeItem,
+        replaced_memory_id: null,
+        projection_cleanup: "automatic_after_commit",
+      });
+    }
+    if (requestedMemoryId && !requestedMemoryId.includes("/") && method === "GET") {
+      const requestedItem = requestedMemoryId === previousItem.id ? previousItem : activeItem;
+      return fulfill({
+        ...requestedItem,
         schema_version: "memory-item-detail.v1",
         scope: { world_id: worldId, subject_world_character_id: subjectId },
         evidence: [
@@ -2640,17 +2724,21 @@ test("P8-L-Q static Memory route reads scoped evidence in the wide memory window
           },
         ],
         provenance_summary: "현재 확인 가능한 근거 1개 / 전체 1개",
-        capabilities: { read: "available", mutate: "not_available_in_p8_l_q" },
+        capabilities: { read: "available", mutate: "available" },
       });
     }
     if (url.pathname.endsWith("/memories")) {
       return fulfill({
         schema_version: "memory-item-list.v1",
         scope: { world_id: worldId, subject_world_character_id: subjectId },
-        memory_enabled: true,
-        items: [item],
+        memory_enabled: memoryEnabled,
+        items: deleted
+          ? [previousItem]
+          : activeItem.id === previousItem.id
+            ? [activeItem]
+            : [activeItem, previousItem],
         next_cursor: null,
-        capabilities: { read: "available", mutate: "not_available_in_p8_l_q" },
+        capabilities: { read: "available", mutate: "available" },
       });
     }
     return route.fallback();
@@ -2665,7 +2753,37 @@ test("P8-L-Q static Memory route reads scoped evidence in the wide memory window
     "href",
     `/worlds/${worldId}/posts/post-p8-l-q-static/`,
   );
-  expect(methods.every((method) => method === "GET")).toBe(true);
+  await expect(page.getByText("기억이 꺼져 있어요", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "기억 켜기" }).click();
+  await page.getByRole("button", { name: "고정", exact: true }).click();
+  await expect(page.getByRole("button", { name: "고정 해제", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "정정", exact: true }).click();
+  await page.getByLabel("정정할 기억 요약").fill("Static에서 정확히 정정한 훈련 기억입니다.");
+  await page.getByRole("button", { name: "정정 저장" }).click();
+  await expect(page.getByRole("heading", { name: "Static에서 정확히 정정한 훈련 기억입니다." })).toBeVisible();
+  await page.getByRole("button", { name: "삭제", exact: true }).click();
+  await page.getByRole("button", { name: "기억 삭제" }).click();
+  await expect(page.getByRole("heading", { name: "기억을 선택해 주세요" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Static에서 정확히 정정한 훈련 기억입니다." })).toHaveCount(0);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  const workspaceDisplay = await page
+    .locator('section[aria-label="저장된 기억 목록"]')
+    .locator("..")
+    .evaluate((element) => getComputedStyle(element).display);
+  expect(workspaceDisplay).toBe("block");
+  expect(calls).toContain(
+    `PUT /api/v1/worlds/${worldId}/world-characters/${subjectId}/memory/settings`,
+  );
+  expect(calls).toContain(
+    `PUT /api/v1/worlds/${worldId}/world-characters/${subjectId}/memories/${memoryId}/pin`,
+  );
+  expect(calls).toContain(
+    `POST /api/v1/worlds/${worldId}/world-characters/${subjectId}/memories/${memoryId}/corrections`,
+  );
+  expect(calls).toContain(
+    `DELETE /api/v1/worlds/${worldId}/world-characters/${subjectId}/memories/${memoryId}-corrected`,
+  );
 });
 
 test("UI-D static World social core keeps compact composition, flat rows, exact detail navigation, and scoped replies", async ({

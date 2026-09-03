@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from sqlalchemy import and_, or_, select, update
@@ -337,6 +337,88 @@ class SqlAlchemyMemoryRepository:
             self._session.flush()
         self._session.refresh(new_item)
         return self._to_candidate(candidate), self._to_item(new_item)
+
+    def correct_item_summary(
+        self,
+        *,
+        setting: MemoryScopeSetting,
+        old_item_id: str,
+        expected_item_version: int,
+        replacement_item_id: str,
+        summary: str,
+        evidences: tuple[CanonicalMemoryEvidence, ...],
+        now: datetime,
+    ) -> tuple[MemoryItemRecord, MemoryItemRecord, bool]:
+        """Supersede one item with an owner-authored, evidence-bound summary.
+
+        ``replacement_item_id`` is derived from the request idempotency key by
+        the domain layer.  A transport retry therefore returns the same item
+        instead of creating a second correction.  The replacement keeps only
+        evidence that the application layer revalidated for the exact scope.
+        """
+
+        setting_row = self._require_setting(setting)
+        existing = self._session.get(MemoryItem, replacement_item_id)
+        if existing is not None:
+            old = self._require_item(setting.scope, old_item_id)
+            if (
+                existing.owner_id != setting.scope.owner_id
+                or existing.world_id != setting.scope.world_id
+                or existing.subject_world_character_id
+                != setting.scope.subject_world_character_id
+                or old.superseded_by_id != existing.id
+                or existing.summary != summary
+            ):
+                raise MemoryConflictError("memory_correction_replay_conflict")
+            return self._to_item(old), self._to_item(existing), False
+        if not evidences:
+            raise MemoryConflictError("memory_correction_evidence_missing")
+
+        old = self._require_item(setting.scope, old_item_id, for_update=True)
+        if (
+            old.status != MemoryItemStatus.ACTIVE.value
+            or old.deleted_at is not None
+            or old.superseded_by_id is not None
+            or old.version != expected_item_version
+        ):
+            raise MemoryConflictError("memory_item_version_conflict")
+
+        with self._session.begin_nested():
+            replacement = MemoryItem(
+                id=replacement_item_id,
+                owner_id=old.owner_id,
+                world_id=old.world_id,
+                subject_world_character_id=old.subject_world_character_id,
+                counterpart_world_character_id=old.counterpart_world_character_id,
+                thread_id=old.thread_id,
+                memory_kind=old.memory_kind,
+                summary=summary,
+                status=MemoryItemStatus.ACTIVE.value,
+                confidence=old.confidence,
+                salience=old.salience,
+                valid_from=old.valid_from,
+                valid_until=now
+                + timedelta(days=setting_row.retention_days),
+                version=1,
+            )
+            self._session.add(replacement)
+            self._session.flush()
+            for evidence in evidences:
+                self._session.add(self._new_evidence(replacement.id, evidence))
+            old.status = MemoryItemStatus.SUPERSEDED.value
+            old.superseded_by_id = replacement.id
+            old.version += 1
+            self._invalidate_hot_briefs(setting.id, now=now)
+            self._enqueue_job(
+                setting.id,
+                reason="memory_item_owner_corrected",
+                idempotency_key=(
+                    f"memory-item:{old.id}:owner-correction:{replacement.id}:v1"
+                ),
+            )
+            self._session.flush()
+        self._session.refresh(replacement)
+        return self._to_item(old), self._to_item(replacement), True
 
     def get_item(
         self,

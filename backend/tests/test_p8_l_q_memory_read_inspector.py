@@ -358,7 +358,7 @@ def test_setting_get_is_side_effect_free_and_defaults_to_off() -> None:
     assert response.status_code == 200
     assert response.json()["configured"] is False
     assert response.json()["enabled"] is False
-    assert response.json()["capabilities"]["mutate"] == "not_available_in_p8_l_q"
+    assert response.json()["capabilities"]["mutate"] == "available"
     with Session(engine) as db:
         after = db.scalar(
             select(func.count()).select_from(models.MemoryScopeSettingModel)

@@ -1,5 +1,5 @@
 {
-  "edge_count": 1712,
+  "edge_count": 1716,
   "external_import_count": 2186,
   "module_count": 658,
   "modules": [
@@ -1222,6 +1222,8 @@
         "app.domains.identity.public",
         "app.domains.memory.api.schemas",
         "app.domains.memory.application.read_surface",
+        "app.domains.memory.application.scope_control",
+        "app.domains.memory.application.write_lifecycle",
         "app.domains.memory.domain.errors",
         "app.domains.memory.domain.provenance",
         "app.domains.memory.domain.retention",
@@ -3055,6 +3057,8 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.memory.domain.errors",
+        "app.domains.memory.domain.lifecycle",
         "app.domains.memory.domain.provenance",
         "app.domains.memory.domain.retention",
         "app.domains.memory.domain.scope",

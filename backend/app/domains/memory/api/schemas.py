@@ -3,7 +3,41 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class MemoryMutationRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+
+class MemorySettingUpdate(MemoryMutationRequest):
+    schema_version: Literal["memory-setting-update.v1"] = "memory-setting-update.v1"
+    expected_version: int = Field(ge=0)
+    enabled: bool
+    idempotency_key: str = Field(min_length=8, max_length=128)
+
+
+class MemoryPinUpdate(MemoryMutationRequest):
+    schema_version: Literal["memory-pin-update.v1"] = "memory-pin-update.v1"
+    expected_version: int = Field(ge=1)
+    pinned: bool
+    idempotency_key: str = Field(min_length=8, max_length=128)
+
+
+class MemoryCorrectionCreate(MemoryMutationRequest):
+    schema_version: Literal["memory-correction-create.v1"] = (
+        "memory-correction-create.v1"
+    )
+    expected_item_version: int = Field(ge=1)
+    expected_scope_version: int = Field(ge=1)
+    summary: str = Field(min_length=1, max_length=2_000)
+    idempotency_key: str = Field(min_length=8, max_length=128)
+
+
+class MemoryDeleteCreate(MemoryMutationRequest):
+    schema_version: Literal["memory-delete.v1"] = "memory-delete.v1"
+    expected_version: int = Field(ge=1)
+    idempotency_key: str = Field(min_length=8, max_length=128)
 
 
 class MemoryScopeRead(BaseModel):
@@ -13,7 +47,7 @@ class MemoryScopeRead(BaseModel):
 
 class MemoryCapabilitiesRead(BaseModel):
     read: Literal["available"] = "available"
-    mutate: Literal["not_available_in_p8_l_q"] = "not_available_in_p8_l_q"
+    mutate: Literal["available"] = "available"
 
 
 class MemorySettingRead(BaseModel):
@@ -80,10 +114,35 @@ class MemoryItemDetailRead(MemoryItemSummaryRead):
     )
 
 
+class MemorySettingMutationRead(BaseModel):
+    schema_version: Literal["memory-setting-mutation.v1"] = (
+        "memory-setting-mutation.v1"
+    )
+    outcome: Literal["updated", "reused"]
+    setting: MemorySettingRead
+    projection_cleanup: Literal["automatic_after_commit"] = "automatic_after_commit"
+
+
+class MemoryItemMutationRead(BaseModel):
+    schema_version: Literal["memory-item-mutation.v1"] = "memory-item-mutation.v1"
+    operation: Literal["pin", "unpin", "correct", "delete"]
+    outcome: Literal["updated", "reused", "deleted"]
+    scope: MemoryScopeRead
+    item: MemoryItemSummaryRead
+    replaced_memory_id: str | None = None
+    projection_cleanup: Literal["automatic_after_commit"] = "automatic_after_commit"
+
+
 __all__ = [
+    "MemoryCorrectionCreate",
+    "MemoryDeleteCreate",
     "MemoryEvidenceRead",
     "MemoryItemDetailRead",
     "MemoryItemListRead",
+    "MemoryItemMutationRead",
     "MemoryItemSummaryRead",
+    "MemoryPinUpdate",
+    "MemorySettingMutationRead",
     "MemorySettingRead",
+    "MemorySettingUpdate",
 ]

@@ -411,16 +411,16 @@
     {
       "markers": {
         "row_lock": [
-          629,
-          646,
-          690,
-          760
+          711,
+          728,
+          772,
+          842
         ]
       },
       "owner": "P8-L-G",
       "path": "backend/app/domains/memory/infrastructure/repository.py",
       "removal_condition": "retain only while cross-provider same-scope serialization or its negative inventory guard is required",
-      "source_sha256": "d77c187667fa9d4bc22148f6de67d902b4aa21eb614499f0254f6ee8bcdf4127",
+      "source_sha256": "df6a48958d2d85a69278a6476e98cfe6043b9e82ca81fbacf650c382cd820981",
       "transition_pr": "P8-L-G memory write/lifecycle"
     },
     {

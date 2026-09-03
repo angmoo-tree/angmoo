@@ -4,13 +4,15 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
-from app.domains.memory.domain.errors import MemoryConflictError
+from app.domains.memory.domain.errors import MemoryConflictError, MemoryNotFoundError
 from app.domains.memory.domain.lifecycle import (
     MemoryItemRecord,
     MemoryWriteOutcome,
     MemoryWriteResult,
     as_utc,
     memory_candidate_idempotency_key,
+    memory_correction_item_id,
+    normalize_memory_idempotency_key,
     normalize_memory_source_id,
     normalize_memory_summary,
     validate_source_digest,
@@ -277,8 +279,11 @@ class MemoryWriteLifecycleService:
         item_id: str,
         expected_version: int,
         pinned: bool,
+        idempotency_key: str | None = None,
         now: datetime | None = None,
     ) -> MemoryWriteResult:
+        if idempotency_key is not None:
+            normalize_memory_idempotency_key(idempotency_key)
         item, changed = self._repository.set_item_pin(
             scope=scope,
             item_id=item_id,
@@ -303,8 +308,11 @@ class MemoryWriteLifecycleService:
         scope: MemoryScope,
         item_id: str,
         expected_version: int,
+        idempotency_key: str | None = None,
         now: datetime | None = None,
     ) -> MemoryWriteResult:
+        if idempotency_key is not None:
+            normalize_memory_idempotency_key(idempotency_key)
         item, changed = self._repository.delete_item(
             scope=scope,
             item_id=item_id,
@@ -316,6 +324,104 @@ class MemoryWriteLifecycleService:
             code="memory_item_deleted" if changed else "memory_item_delete_reused",
             item=item,
             writes=("memory_item", "maintenance_job") if changed else (),
+        )
+
+    def correct_summary(
+        self,
+        *,
+        scope: MemoryScope,
+        old_item_id: str,
+        expected_item_version: int,
+        expected_scope_version: int,
+        summary: str,
+        idempotency_key: str,
+        now: datetime | None = None,
+    ) -> MemoryWriteResult:
+        """Replace an active item with an explicit owner correction.
+
+        The owner text never becomes source evidence by itself.  Every source
+        attached to the old item is re-read and must still be canonical,
+        visible, observed, same-World and digest-identical before the corrected
+        summary can supersede it.
+        """
+
+        corrected_at = as_utc(now or datetime.now(UTC))
+        normalized_summary = normalize_memory_summary(summary)
+        normalized_key = normalize_memory_idempotency_key(idempotency_key)
+        replacement_id = memory_correction_item_id(
+            scope=scope,
+            old_item_id=old_item_id,
+            idempotency_key=normalized_key,
+        )
+        try:
+            replay = self._repository.get_item(
+                scope=scope,
+                item_id=replacement_id,
+            )
+        except MemoryNotFoundError:
+            replay = None
+        if replay is not None:
+            old = self._repository.get_item(scope=scope, item_id=old_item_id)
+            if old.superseded_by_id != replay.id or replay.summary != normalized_summary:
+                raise MemoryConflictError("memory_correction_replay_conflict")
+            return MemoryWriteResult(
+                outcome=MemoryWriteOutcome.REUSED,
+                code="memory_item_correction_reused",
+                item=replay,
+            )
+
+        setting = self._require_enabled_setting(
+            scope=scope,
+            expected_version=expected_scope_version,
+        )
+        old = self._repository.get_item(scope=scope, item_id=old_item_id)
+        if old.version != expected_item_version:
+            raise MemoryConflictError("memory_item_version_conflict")
+        rows = self._repository.list_item_evidence(
+            scope=scope,
+            item_id=old_item_id,
+        )
+        current_evidence: list[CanonicalMemoryEvidence] = []
+        for row in rows:
+            evidence = self._source_reader.read_evidence(
+                scope=scope,
+                source_type=row.source_type,
+                source_id=row.source_id,
+            )
+            blocked = self._evidence_blocked_code(
+                scope=scope,
+                source_type=row.source_type,
+                source_id=row.source_id,
+                evidence=evidence,
+            )
+            if blocked is not None or evidence is None:
+                raise MemoryConflictError("memory_correction_source_unavailable")
+            if validate_source_digest(evidence.source_digest) != row.source_digest:
+                raise MemoryConflictError("memory_source_digest_conflict")
+            current_evidence.append(evidence)
+        if not current_evidence:
+            raise MemoryConflictError("memory_correction_evidence_missing")
+
+        _, replacement, created = self._repository.correct_item_summary(
+            setting=setting,
+            old_item_id=old_item_id,
+            expected_item_version=expected_item_version,
+            replacement_item_id=replacement_id,
+            summary=normalized_summary,
+            evidences=tuple(current_evidence),
+            now=corrected_at,
+        )
+        return MemoryWriteResult(
+            outcome=(MemoryWriteOutcome.UPDATED if created else MemoryWriteOutcome.REUSED),
+            code=(
+                "memory_item_owner_corrected"
+                if created
+                else "memory_item_correction_reused"
+            ),
+            item=replacement,
+            writes=("memory_item", "memory_item_evidence", "maintenance_job")
+            if created
+            else (),
         )
 
     def invalidate_source(

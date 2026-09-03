@@ -21,6 +21,7 @@ from app.domains.memory.domain.scope import MemoryScope
 MEMORY_WRITE_CONTRACT_VERSION = "memory-write.v1"
 MAX_MEMORY_SUMMARY_LENGTH = 2_000
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+_IDEMPOTENCY_KEY_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{7,127}$")
 
 
 class MemoryWriteOutcome(str, Enum):
@@ -170,6 +171,44 @@ def normalize_memory_source_id(value: str) -> str:
     return normalized
 
 
+def normalize_memory_idempotency_key(value: str) -> str:
+    """Validate a retry-safe opaque owner mutation key.
+
+    The key is deliberately restricted to a small ASCII alphabet so it can be
+    hashed into an internal correction item identity without ever becoming
+    user-visible content or provenance.
+    """
+
+    normalized = value.strip()
+    if _IDEMPOTENCY_KEY_RE.fullmatch(normalized) is None:
+        raise MemoryValidationError("memory_idempotency_key_invalid")
+    return normalized
+
+
+def memory_correction_item_id(
+    *,
+    scope: MemoryScope,
+    old_item_id: str,
+    idempotency_key: str,
+) -> str:
+    """Derive the stable internal identity used for correction replay."""
+
+    item_id = normalize_memory_source_id(old_item_id)
+    key = normalize_memory_idempotency_key(idempotency_key)
+    material = "\x1f".join(
+        (
+            MEMORY_WRITE_CONTRACT_VERSION,
+            "owner-correction",
+            scope.owner_id,
+            scope.world_id,
+            scope.subject_world_character_id,
+            item_id,
+            key,
+        )
+    )
+    return f"mcor-{hashlib.sha256(material.encode('utf-8')).hexdigest()[:48]}"
+
+
 def as_utc(value: datetime) -> datetime:
     if value.tzinfo is None:
         return value.replace(tzinfo=UTC)
@@ -185,6 +224,8 @@ __all__ = [
     "MemoryWriteResult",
     "as_utc",
     "memory_candidate_idempotency_key",
+    "memory_correction_item_id",
+    "normalize_memory_idempotency_key",
     "normalize_memory_source_id",
     "normalize_memory_summary",
     "validate_source_digest",

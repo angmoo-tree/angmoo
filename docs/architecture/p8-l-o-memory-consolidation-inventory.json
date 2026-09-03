@@ -59,7 +59,7 @@
   },
   "historical_chain": {
     "current_tree_owner": "P8-L-O",
-    "p8_l_n_sha256": "7b9158f4c6461cf197b5d792ece3ca5bf80453a103534b6398b7868ad2a10b19",
+    "p8_l_n_sha256": "954bcadc40545da66342e4cbfc350b8e476278cac8c2a13fd0fb565cdf143058",
     "predecessor_mode": "frozen_digest"
   },
   "hot_brief_contract": {
@@ -84,7 +84,7 @@
   "owner_stage": "P8-L-O",
   "predecessor": {
     "path": "docs/architecture/p8-l-n-both-workflow-coordinator-inventory.json",
-    "sha256": "7b9158f4c6461cf197b5d792ece3ca5bf80453a103534b6398b7868ad2a10b19",
+    "sha256": "954bcadc40545da66342e4cbfc350b8e476278cac8c2a13fd0fb565cdf143058",
     "size": 6625
   },
   "required_files": [
@@ -135,8 +135,8 @@
     },
     {
       "path": "backend/app/domains/memory/public.py",
-      "sha256": "34532ec1309870c7c7bc5a6cf6d1a468c8734ca9d6c1ebb4fb1cf9b2dd482090",
-      "size": 8109
+      "sha256": "f0cf1cffc0e86ba8aa5c6e138722fdad615e987d1250c4ae80ab14b0772c31c8",
+      "size": 8251
     },
     {
       "path": "backend/app/integrations/llm/memory_consolidation.py",
@@ -150,13 +150,13 @@
     },
     {
       "path": "backend/tests/test_p8_l_o_memory_consolidation_inventory.py",
-      "sha256": "d3bd12f46f57d2ac322063b1e7a698d8c9d423a23b7472a1272229608ab1e9c6",
+      "sha256": "1fb74f1a7eca412b7f956b70ac11f5421cf1c9ef4eaa5735244babd2614355fa",
       "size": 1891
     },
     {
       "path": "docs/architecture/backend-domains.md",
-      "sha256": "d8cc90f6444eb2ba573397b447d996e70361d804b2fb48f9985768ca86bfd219",
-      "size": 50791
+      "sha256": "5c2dcf8009803da2977dde7d0fd21a7242c2dd06ba1344da25f3a6cc5db83f4d",
+      "size": 52287
     },
     {
       "path": "docs/architecture/p8-l-o-memory-consolidation-hot-brief.md",
@@ -165,7 +165,7 @@
     },
     {
       "path": "scripts/ci/generate_p8_l_o_memory_consolidation_inventory.py",
-      "sha256": "7d4d4d94b151f9bb7009be89a44ea44dccab6fb53368c2b213e5884b97db85ee",
+      "sha256": "a44e93e4fc388f333fc367978189a9150b249d1cd04935d5f25c31f5ab49907c",
       "size": 12486
     }
   ],

@@ -15,19 +15,30 @@ from app.api.v1.deps import get_current_user, get_db
 from app.core import browser_session
 from app.domains.identity.public import User
 from app.domains.memory.api.schemas import (
+    MemoryCorrectionCreate,
+    MemoryDeleteCreate,
     MemoryEvidenceRead,
     MemoryItemDetailRead,
     MemoryItemListRead,
+    MemoryItemMutationRead,
     MemoryItemSummaryRead,
+    MemoryPinUpdate,
     MemoryRelatedCharacterRead,
     MemoryScopeRead,
+    MemorySettingMutationRead,
     MemorySettingRead,
+    MemorySettingUpdate,
 )
 from app.domains.memory.application.read_surface import (
     MemoryReadService,
     memory_lifecycle,
 )
+from app.domains.memory.application.scope_control import MemoryScopeService
+from app.domains.memory.application.write_lifecycle import (
+    MemoryWriteLifecycleService,
+)
 from app.domains.memory.domain.errors import (
+    MemoryConflictError,
     MemoryNotFoundError,
     MemoryScopeError,
     MemoryValidationError,
@@ -57,6 +68,17 @@ def _service(db: Session) -> MemoryReadService:
     )
 
 
+def _scope_service(db: Session) -> MemoryScopeService:
+    return MemoryScopeService(SqlAlchemyMemoryRepository(db))
+
+
+def _write_service(db: Session) -> MemoryWriteLifecycleService:
+    return MemoryWriteLifecycleService(
+        SqlAlchemyMemoryRepository(db),
+        SqlAlchemyMemorySourceEvidenceReader(db),
+    )
+
+
 def _scope(user: User, world_id: str, subject_id: str) -> MemoryScope:
     return MemoryScope(
         owner_id=user.id,
@@ -72,6 +94,20 @@ def _raise_memory_read_error(exc: Exception) -> None:
         # The URL never accepts an owner id.  Invalid owner/World/subject
         # combinations are therefore indistinguishable from missing resources.
         code = status.HTTP_404_NOT_FOUND
+    elif isinstance(exc, MemoryValidationError):
+        code = status.HTTP_422_UNPROCESSABLE_ENTITY
+    else:
+        code = status.HTTP_503_SERVICE_UNAVAILABLE
+    raise HTTPException(status_code=code, detail=str(exc)) from exc
+
+
+def _raise_memory_mutation_error(exc: Exception) -> None:
+    if isinstance(exc, MemoryNotFoundError):
+        code = status.HTTP_404_NOT_FOUND
+    elif isinstance(exc, MemoryScopeError):
+        code = status.HTTP_404_NOT_FOUND
+    elif isinstance(exc, MemoryConflictError):
+        code = status.HTTP_409_CONFLICT
     elif isinstance(exc, MemoryValidationError):
         code = status.HTTP_422_UNPROCESSABLE_ENTITY
     else:
@@ -109,6 +145,35 @@ def read_memory_setting(
             else setting.provider_mode.value
         ),
         version=0 if setting is None else setting.version,
+    )
+
+
+@router.put("/memory/settings", response_model=MemorySettingMutationRead)
+def update_memory_setting(
+    world_id: str,
+    subject_id: str,
+    data: MemorySettingUpdate,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> MemorySettingMutationRead:
+    browser_session.require_local_frontend_request(request, mutation=True)
+    scope = _scope(user, world_id, subject_id)
+    try:
+        setting, changed = _scope_service(db).set_enabled(
+            scope,
+            expected_version=data.expected_version,
+            enabled=data.enabled,
+            idempotency_key=data.idempotency_key,
+        )
+        db.commit()
+    except Exception as exc:
+        db.rollback()
+        _raise_memory_mutation_error(exc)
+        raise AssertionError("unreachable")
+    return MemorySettingMutationRead(
+        outcome="updated" if changed else "reused",
+        setting=_setting_read(scope, setting),
     )
 
 
@@ -197,10 +262,154 @@ def read_memory_item(
     )
 
 
+@router.put("/memories/{memory_id}/pin", response_model=MemoryItemMutationRead)
+def update_memory_pin(
+    world_id: str,
+    subject_id: str,
+    memory_id: str,
+    data: MemoryPinUpdate,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> MemoryItemMutationRead:
+    browser_session.require_local_frontend_request(request, mutation=True)
+    scope = _scope(user, world_id, subject_id)
+    try:
+        result = _write_service(db).set_pin(
+            scope=scope,
+            item_id=memory_id,
+            expected_version=data.expected_version,
+            pinned=data.pinned,
+            idempotency_key=data.idempotency_key,
+        )
+        setting = _scope_service(db).get_or_create(scope)
+        assert result.item is not None
+        summary = _item_summary(
+            result.item,
+            scope=scope,
+            character_names=_character_names(db, scope),
+            retention_days=setting.retention_days,
+            now=datetime.now(UTC),
+        )
+        db.commit()
+    except Exception as exc:
+        db.rollback()
+        _raise_memory_mutation_error(exc)
+        raise AssertionError("unreachable")
+    return MemoryItemMutationRead(
+        operation="pin" if data.pinned else "unpin",
+        outcome=result.outcome.value,
+        scope=_scope_read(scope),
+        item=summary,
+    )
+
+
+@router.post(
+    "/memories/{memory_id}/corrections",
+    response_model=MemoryItemMutationRead,
+)
+def correct_memory_item(
+    world_id: str,
+    subject_id: str,
+    memory_id: str,
+    data: MemoryCorrectionCreate,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> MemoryItemMutationRead:
+    browser_session.require_local_frontend_request(request, mutation=True)
+    scope = _scope(user, world_id, subject_id)
+    try:
+        result = _write_service(db).correct_summary(
+            scope=scope,
+            old_item_id=memory_id,
+            expected_item_version=data.expected_item_version,
+            expected_scope_version=data.expected_scope_version,
+            summary=data.summary,
+            idempotency_key=data.idempotency_key,
+        )
+        setting = _scope_service(db).get_or_create(scope)
+        assert result.item is not None
+        summary = _item_summary(
+            result.item,
+            scope=scope,
+            character_names=_character_names(db, scope),
+            retention_days=setting.retention_days,
+            now=datetime.now(UTC),
+        )
+        db.commit()
+    except Exception as exc:
+        db.rollback()
+        _raise_memory_mutation_error(exc)
+        raise AssertionError("unreachable")
+    return MemoryItemMutationRead(
+        operation="correct",
+        outcome=result.outcome.value,
+        scope=_scope_read(scope),
+        item=summary,
+        replaced_memory_id=memory_id,
+    )
+
+
+@router.delete("/memories/{memory_id}", response_model=MemoryItemMutationRead)
+def delete_memory_item(
+    world_id: str,
+    subject_id: str,
+    memory_id: str,
+    data: MemoryDeleteCreate,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> MemoryItemMutationRead:
+    browser_session.require_local_frontend_request(request, mutation=True)
+    scope = _scope(user, world_id, subject_id)
+    try:
+        result = _write_service(db).delete_item(
+            scope=scope,
+            item_id=memory_id,
+            expected_version=data.expected_version,
+            idempotency_key=data.idempotency_key,
+        )
+        setting = _scope_service(db).get_or_create(scope)
+        assert result.item is not None
+        summary = _item_summary(
+            result.item,
+            scope=scope,
+            character_names=_character_names(db, scope),
+            retention_days=setting.retention_days,
+            now=datetime.now(UTC),
+        )
+        db.commit()
+    except Exception as exc:
+        db.rollback()
+        _raise_memory_mutation_error(exc)
+        raise AssertionError("unreachable")
+    return MemoryItemMutationRead(
+        operation="delete",
+        outcome=result.outcome.value,
+        scope=_scope_read(scope),
+        item=summary,
+    )
+
+
 def _scope_read(scope: MemoryScope) -> MemoryScopeRead:
     return MemoryScopeRead(
         world_id=scope.world_id,
         subject_world_character_id=scope.subject_world_character_id,
+    )
+
+
+def _setting_read(
+    scope: MemoryScope,
+    setting,
+) -> MemorySettingRead:
+    return MemorySettingRead(
+        scope=_scope_read(scope),
+        configured=True,
+        enabled=setting.enabled,
+        retention_days=setting.retention_days,
+        provider_mode=setting.provider_mode.value,
+        version=setting.version,
     )
 
 

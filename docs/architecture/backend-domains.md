@@ -795,6 +795,31 @@ version or LadybugDB generation. Full contracts and frozen file evidence are
 in `docs/architecture/p8-l-q-memory-read-inspector.md` and its generated
 inventory. ON/OFF, pin, correction and delete mutations remain P8-L-R.
 
+### P8-L-R Memory owner-control boundary
+
+`app.domains.memory.application.scope_control` owns exact-scope ON/OFF target
+state and optimistic setting-version checks. `write_lifecycle` owns pin,
+correction-supersession and delete lifecycle rules. A correction is not an
+in-place text edit: it revalidates every canonical source, creates a stable
+replacement item with the same typed shape and evidence set, and supersedes
+the prior item. Target-state replays and stable correction keys make repeated
+owner requests idempotent without adding a second mutation model.
+
+`app.api.v1.routes.memory` derives the authenticated owner and exact
+World+subject scope, enforces Local mutation origin, maps typed domain failures
+to bounded HTTP errors and commits the canonical transaction. It does not
+construct SQL, query FTS directly or invoke a model. The concrete repository
+remains below the Memory port; after-commit projection synchronizes FTS5 and a
+projection failure never rolls back a successful canonical mutation. OFF
+blocks new candidates, writes and retrieval while leaving existing owner data
+available for pin/unpin and delete; correction requires the scope to be ON.
+
+The stage adds no migration, SQLite schema-version change, graph mutation or
+provider call. Full contracts, limits and frozen file evidence are in
+`docs/architecture/p8-l-r-memory-owner-control.md` and its generated inventory.
+Installed-runtime causal proof, held-out quality/latency and final user
+closeout remain P8-L-S.
+
 ## Contributor workflow
 
 Before adding a backend feature:

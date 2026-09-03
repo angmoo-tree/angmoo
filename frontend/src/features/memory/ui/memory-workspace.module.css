@@ -69,11 +69,25 @@
 }
 .listPane { border-right: 1px solid var(--color-border-default); background: var(--color-surface); }
 .detailPane { min-width: 0; padding: clamp(20px, 4vw, 44px); }
-.scopeNotice { display: flex; align-items: flex-start; gap: 10px; margin: 18px; border: 1px solid var(--color-border-default); border-radius: 18px; background: var(--color-surface-muted); padding: 14px; }
+.scopeNotice { display: flex; align-items: center; gap: 10px; margin: 18px; border: 1px solid var(--color-border-default); border-radius: 18px; background: var(--color-surface-muted); padding: 14px; }
 .scopeNotice[data-memory-enabled="true"] { border-color: var(--color-state-success-border); background: var(--color-state-success-surface); }
 .scopeNotice svg { flex: 0 0 auto; color: var(--color-brand-accent); }
+.scopeNoticeCopy { min-width: 0; flex: 1; }
 .scopeNotice strong { color: var(--color-text-strong); font-size: .82rem; }
 .scopeNotice p { margin: 4px 0 0; color: var(--color-text-secondary); font-size: .72rem; line-height: 1.5; }
+
+.mutationNotice,
+.mutationError {
+  margin: 0 18px 18px;
+  border-radius: 16px;
+  font-size: .74rem;
+  line-height: 1.55;
+  padding: 12px 14px;
+}
+.mutationNotice { border: 1px solid var(--color-state-success-border); background: var(--color-state-success-surface); color: var(--color-text-default); }
+.mutationError { display: grid; border: 1px solid var(--color-state-danger-border); background: var(--color-state-danger-surface); color: var(--color-state-danger); gap: 10px; }
+.mutationError p { margin: 0; }
+.mutationError button { justify-self: start; }
 
 .memoryList, .evidenceList, .chatEvidence ol { margin: 0; list-style: none; padding: 0; }
 .memoryList li { border-top: 1px solid var(--color-border-default); }
@@ -88,6 +102,9 @@
 
 .detail { max-width: 760px; margin: 0 auto; border: 1px solid var(--color-border-default); border-radius: 28px; background: var(--color-surface); box-shadow: var(--shadow-soft); padding: clamp(22px, 4vw, 38px); }
 .detail h2 { margin: 8px 0 22px; color: var(--color-text-strong); font-size: clamp(1.3rem, 2.4vw, 1.8rem); line-height: 1.45; overflow-wrap: anywhere; }
+.ownerActions { display: flex; flex-wrap: wrap; gap: 8px; margin: -6px 0 20px; }
+.ownerActions button span { display: inline-flex; align-items: center; gap: 6px; }
+.controlHint { margin: -8px 0 20px; border-radius: 14px; background: var(--color-state-warning-surface); color: var(--color-text-secondary); font-size: .72rem; line-height: 1.55; padding: 10px 12px; }
 .facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; }
 .facts > div { border-radius: 16px; background: var(--color-surface-muted); padding: 12px; }
 .facts dt { color: var(--color-text-secondary); font-size: .68rem; font-weight: 800; }
@@ -116,6 +133,7 @@
 .chatEvidence ol { display: grid; gap: 12px; }
 .chatEvidence small { display: block; margin-top: 8px; color: var(--color-text-secondary); }
 .degradedNotice { border-radius: 14px; background: var(--color-state-warning-surface); padding: 10px 12px; }
+.dialogCopy { max-height: 180px; overflow: auto; margin: 0; border-radius: 14px; background: var(--color-surface-muted); color: var(--color-text-default); line-height: 1.65; overflow-wrap: anywhere; padding: 14px; }
 
 .scopeSummary {
   display: flex;
@@ -139,6 +157,10 @@
   .header > div:last-child > p:last-child { display: none; }
   .scopeBar { grid-template-columns: 1fr; padding: 14px 16px; }
   .subjectCard { display: none; }
+  .scopeNotice { align-items: flex-start; flex-wrap: wrap; margin: 14px 16px; }
+  .scopeNoticeCopy { flex-basis: calc(100% - 30px); }
+  .scopeNotice button { margin-left: 28px; }
+  .mutationNotice, .mutationError { margin: 0 16px 14px; }
   .workspace { display: block; min-height: 0; }
   .listPane { border-right: 0; }
   .detailPane { border-top: 1px solid var(--color-border-default); padding: 16px; }
