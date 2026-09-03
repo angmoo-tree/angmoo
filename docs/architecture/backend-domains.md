@@ -850,6 +850,21 @@ migrations, dependency majors, provider configuration, bulk formatting,
 Hosted/Private/Production settings, or unrelated frontend moves into a
 structure-only PR.
 
+## P8-L-R Today SNS working context
+
+Social owns the closed ActionSubjectiveContextV1 and factual Today activity
+contracts, exported through its public surface. Chat owns the L2.5 snapshot,
+sufficiency guard, evidence selection and immutable generation fence.
+Concrete batched reads and successful-action persistence stay in runtime/social;
+provider composition and snapshot revalidation stay in runtime/chat. No
+domain/application module gains SQLAlchemy, runtime or provider imports.
+Existing Router/Planner roles and route call caps remain.
+
+The normalized subjective table is embedded SQLite v8 / Alembic
+20260904_0088, with no inferred legacy backfill or Ladybug schema change.
+Memory OFF does not disable same-day canonical SNS awareness. Details and
+separate Gates are in p8-l-r-today-sns-activity.md.
+
 ## Embedded canonical persistence
 
 SQLite is the sole canonical relational persistence for installed, Docker and

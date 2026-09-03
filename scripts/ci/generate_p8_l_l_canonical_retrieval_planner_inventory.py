@@ -312,6 +312,13 @@ def main() -> int:
     mode.add_argument("--check", action="store_true")
     args = parser.parse_args()
     try:
+        # Today SNS owns current-tree contracts; preserve the exact predecessor
+        # inventory rather than rewriting historical evidence for schema v8.
+        if (ROOT / "docs/architecture/p8-l-r-today-sns-activity-inventory.json").is_file():
+            if _sha256(OUTPUT_PATH) != "9d99c2f72ddb6ca9d0befb027f93746b226243f4f95cbe3d853202cc26aa8e27":
+                raise InventoryError("frozen predecessor inventory digest drift")
+            print("Historical inventory is frozen by the Today SNS successor")
+            return 0
         inventory = build_inventory()
         rendered = json.dumps(
             inventory, ensure_ascii=False, indent=2, sort_keys=True

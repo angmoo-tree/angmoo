@@ -326,9 +326,19 @@ class _Router:
     def __init__(self, route: RetrievalRoute) -> None:
         self.route_name = route
         self.calls = 0
+        self.today_context = None
 
-    async def route(self, command, *, recent_context, now, deadline_at):
+    async def route(
+        self,
+        command,
+        *,
+        recent_context,
+        today_sns_context=None,
+        now,
+        deadline_at,
+    ):
         del recent_context
+        self.today_context = today_sns_context
         self.calls += 1
         intent = _intent(self.route_name)
         tracker = RouteAwareCallTracker(route=self.route_name, deadline_at=deadline_at)
@@ -352,6 +362,8 @@ class _Router:
             clarification=clarification,
             metrics=RetrievalRoutingMetrics(
                 route=self.route_name,
+                router_proposed_route=self.route_name,
+                sufficiency_guard_reason="not_applicable",
                 first_pass_valid=True,
                 repair_used=False,
                 rejected=False,
@@ -378,8 +390,16 @@ class _RejectedRouter:
             physical_attempts=2,
         )
 
-    async def route(self, command, *, recent_context, now, deadline_at):
-        del command, recent_context, now, deadline_at
+    async def route(
+        self,
+        command,
+        *,
+        recent_context,
+        today_sns_context=None,
+        now,
+        deadline_at,
+    ):
+        del command, recent_context, today_sns_context, now, deadline_at
         self.calls += 1
         raise RetrievalRouterRepairExhaustedError(self.diagnostic)
 
@@ -568,6 +588,7 @@ def _workflow(
     *,
     memory_producer=None,
     router=None,
+    today_snapshot_validator=None,
 ):
     lifecycle = GenerationLifecycleService(SqlAlchemyResponseLifecycleRepository(session))
     return ResponseGenerationWorkflowService(
@@ -580,6 +601,7 @@ def _workflow(
         character_response=CharacterResponseGenerationService(generator),
         unit_of_work=_UnitOfWork(session),
         memory_producer=memory_producer,
+        today_snapshot_validator=today_snapshot_validator,
     )
 
 
@@ -687,6 +709,59 @@ def test_all_routes_emit_only_crg_deltas_and_commit_once(
     ]
     assert len(generator.requests) == 1
     assert len(memory_producer.sources) == 1
+
+
+@pytest.mark.parametrize("route, expected_calls", [
+    (RetrievalRoute.CURRENT_CONTEXT, 2), (RetrievalRoute.CANONICAL, 3),
+    (RetrievalRoute.GRAPH, 3), (RetrievalRoute.BOTH, 4),
+    (RetrievalRoute.CLARIFICATION, 2),
+])
+def test_today_snapshot_reaches_both_providers_without_extra_calls(
+    response_session, route, expected_calls,
+):
+    from app.domains.chat.application.today_sns_activity import TodaySnsActivityAssembler
+    from app.domains.chat.domain.retrieval_intent import RetrievalContractError
+    from app.runtime.social.sqlalchemy_today_activity import SqlAlchemyTodaySocialActivityReader
+    from app.runtime.chat.today_sns_activity import SqlAlchemyTodaySnsSnapshotValidator
+
+    now = datetime.now(UTC)
+    response_session.add(models.Post(
+        id="today-workflow-post", author_character_id="p-responding-character",
+        world_id="p-world", author_world_character_id="p-responding",
+        author_name="응답 앵무", title="오늘의 연습", body="오늘 발표 연습을 했어.",
+        search_document="오늘 발표 연습을 했어.", visibility="public",
+        created_at=now, updated_at=now,
+    ))
+    response_session.commit()
+    labels = {"p-responding": "응답 앵무"}
+    snapshot = TodaySnsActivityAssembler(SqlAlchemyTodaySocialActivityReader(response_session)).assemble(
+        owner_id="p-owner", world_id="p-world", subject_world_character_id="p-responding",
+        timezone="Asia/Seoul", character_labels=labels, now=now,
+    )
+    record = _request(response_session, route)
+    response_session.commit()
+    command = replace(_command(record), today_sns_snapshot=snapshot)
+    with pytest.raises(RetrievalContractError, match="today_scope_mismatch"):
+        replace(command, preflight=replace(command.preflight, world_id="other-world"))
+    router, generator = _Router(route), _Generator()
+    workflow = _workflow(
+        response_session, route, generator, router=router,
+        today_snapshot_validator=SqlAlchemyTodaySnsSnapshotValidator(response_session, labels),
+    )
+    events = asyncio.run(_collect(workflow.run(command)))
+    assert events[-1].event_type is GenerationEventType.COMPLETED
+    assert router.today_context["snapshot_hash"] == snapshot.snapshot_hash
+    assert len(generator.requests) == 1
+    manifest = generator.requests[0].today_sns_manifest
+    assert manifest["snapshot_hash"] == snapshot.snapshot_hash
+    assert manifest["counts"]["posts_authored"] == 1
+    if route is not RetrievalRoute.CLARIFICATION:
+        assert any("오늘 발표 연습을 했어." in item.text for item in generator.requests[0].evidence.items)
+        assert manifest["included_detail_counts"]["posts_authored"] == 1
+    committed = SqlAlchemyResponseLifecycleRepository(response_session).get_request(record.request_id)
+    assert committed.call_tracker["logical_total"] == expected_calls
+    # This fixture has no learned Memory rows. Today visibility is independent.
+    assert response_session.scalar(select(func.count(models.MemoryItem.id))) == 0
 
 
 def test_failure_is_durable_retryable_and_partial_assistant_is_not_committed(

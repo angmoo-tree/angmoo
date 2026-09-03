@@ -1,0 +1,442 @@
+{
+  "boundaries": {
+    "framework_imports_in_pure_contracts": 0,
+    "frontend_feature": "features/memory",
+    "query_and_action_transaction_owner": "runtime/social",
+    "snapshot_owner": "domains/chat",
+    "social_contract_owner": "domains/social"
+  },
+  "bounds": {
+    "body_characters": 900,
+    "branch_depth": 8,
+    "query_batch": 512,
+    "router_entries": 12,
+    "router_view_characters": 12000,
+    "snapshot_records": 96,
+    "source_scan": 2048,
+    "subjective_text_characters": 280
+  },
+  "catalog": {
+    "activity_kinds": [
+      "posts_authored",
+      "replies_authored",
+      "replies_received",
+      "mentions_received",
+      "reactions_given",
+      "reactions_received",
+      "reposts",
+      "follows"
+    ],
+    "emotion_labels": [
+      "neutral",
+      "interested",
+      "joyful",
+      "affectionate",
+      "concerned",
+      "surprised",
+      "sad",
+      "angry",
+      "tense",
+      "embarrassed",
+      "proud",
+      "relieved",
+      "mixed",
+      "unspecified"
+    ],
+    "motivation_kinds": [
+      "self_expression",
+      "share_information",
+      "continue_topic",
+      "answer_question",
+      "encourage_counterpart",
+      "empathize",
+      "disagree_or_correct",
+      "relationship_maintenance",
+      "curiosity",
+      "reciprocate",
+      "other_declared"
+    ]
+  },
+  "contract_versions": {
+    "snapshot": "today-sns-activity-snapshot.v1",
+    "subjective_context": "social-action-subjective-context.v1"
+  },
+  "owner_stage": "P8-L-R-TODAY",
+  "predecessor": {
+    "path": "docs/architecture/p8-l-r-memory-owner-control-inventory.json",
+    "sha256": "c02287d0d563582522a58c0ca9fd217b6b6985a59eafafa7b6278b6f8a818520",
+    "size": 9733
+  },
+  "remaining_user_gates": [
+    "installed_post_to_chat",
+    "installed_reply_inbound_reply_to_chat",
+    "installed_declared_motivation_emotion",
+    "installed_memory_off",
+    "held_out_quality_latency",
+    "user_merge",
+    "post_merge_actions"
+  ],
+  "required_files": [
+    {
+      "path": ".github/workflows/windows-installer.yml",
+      "sha256": "ab893c2bbbf97f1c0ef2646a30b2f28c61215517b706ee02559407b8e4165a7c",
+      "size": 59953
+    },
+    {
+      "path": "backend/app/alembic/versions/20260904_0088_social_action_subjective_context.py",
+      "sha256": "59f7cc1cb4d53d7db8132231c969581e460102ff9a2b5c87581ea510055b8643",
+      "size": 679
+    },
+    {
+      "path": "backend/app/domains/chat/api/schemas.py",
+      "sha256": "e0c13613395b718c99d770a6eb5625d928480d577f0e1d61a164e8b28fb4edbe",
+      "size": 8797
+    },
+    {
+      "path": "backend/app/domains/chat/application/evidence_assembly.py",
+      "sha256": "e4cdf69063277a24ddf749d4d263d056a168c0a50fcb313ac6c1b99d1692fc8d",
+      "size": 22829
+    },
+    {
+      "path": "backend/app/domains/chat/application/response_workflow.py",
+      "sha256": "989a344f18c1ab3b1a81d6a63e7386f303464433fce972940ac043fa9d6d3182",
+      "size": 31173
+    },
+    {
+      "path": "backend/app/domains/chat/application/retrieval_routing.py",
+      "sha256": "8029e2bbd95a2244def1f8e541a4a81b3e722aa9d284238beb6528ea75f985b5",
+      "size": 26162
+    },
+    {
+      "path": "backend/app/domains/chat/application/today_sns_activity.py",
+      "sha256": "f5bb9771098d2e6c1c38cc5f0246e361c049ee058552f1ba8452fd69d4be74fe",
+      "size": 7492
+    },
+    {
+      "path": "backend/app/domains/chat/domain/evidence_bundle.py",
+      "sha256": "c5ed1310e44c1c92d2cae0d7caadd53367b8cabaf85aa8f0cdba0cfdca8aaf7e",
+      "size": 10769
+    },
+    {
+      "path": "backend/app/domains/chat/domain/retrieval_intent.py",
+      "sha256": "a17b0f9ac9b17911910f337969d30f74ac5f5a282b9058b78cd92a06625f633c",
+      "size": 7367
+    },
+    {
+      "path": "backend/app/domains/chat/domain/retrieval_router.py",
+      "sha256": "a5f7d875f6e45ab951bcb6ef9edc25a204b13b1012c90f040a375ab08007980d",
+      "size": 24583
+    },
+    {
+      "path": "backend/app/domains/chat/domain/today_sns_activity.py",
+      "sha256": "108fd6e867066fa1cde6c07110c042c3e386d41b896a758912f8e84e6379021c",
+      "size": 10274
+    },
+    {
+      "path": "backend/app/domains/chat/ports/character_response_generator.py",
+      "sha256": "b0efeb37432e3ca119f07023d3fd819b8ef33989f0e41850100a6ef72d7382e4",
+      "size": 4064
+    },
+    {
+      "path": "backend/app/domains/chat/ports/retrieval_router_provider.py",
+      "sha256": "b54fbd041ac6a4a72b859bf0f71c2d75e81d489942b02e753de030e88d314b3c",
+      "size": 5274
+    },
+    {
+      "path": "backend/app/domains/chat/ports/today_sns_activity.py",
+      "sha256": "bd5a3ffda1da5d219d5460ef9bb7b108b2c25016d51fb4a148c7780b32fe6443",
+      "size": 948
+    },
+    {
+      "path": "backend/app/domains/routine_posts/api/schemas.py",
+      "sha256": "b732071685840833b35ac2f493ee1b7e61a0eee2c656eb3b75aaf9aaed0a28d8",
+      "size": 4300
+    },
+    {
+      "path": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+      "sha256": "eeb5b511a6d87c6a960df354bc1d3690b5555e9b53b2577d33ff823d2a5a7e36",
+      "size": 19481
+    },
+    {
+      "path": "backend/app/domains/social/domain/subjective_context.py",
+      "sha256": "806484f680f90d2c25b5793040619aa35ba5532b643038f2399528b1da145ff2",
+      "size": 4408
+    },
+    {
+      "path": "backend/app/domains/social/domain/today_activity.py",
+      "sha256": "45b5115b0282c6bc76076819e8360dba643371de79eb8aebf137eaca5d09ebe8",
+      "size": 2507
+    },
+    {
+      "path": "backend/app/domains/social/infrastructure/sqlalchemy_subjective_context_models.py",
+      "sha256": "9d894a117097abf61c50bb77d8324945a202f78edb629fe0ab73175d47745fe0",
+      "size": 6032
+    },
+    {
+      "path": "backend/app/domains/social/public.py",
+      "sha256": "8c39f0533568c07e4f1ee533fa51dc8886e3e6fc7cc7546631849b572ec3db0a",
+      "size": 3851
+    },
+    {
+      "path": "backend/app/integrations/llm/character_response_generator.py",
+      "sha256": "539e8ef7334902c009f1ea1978d5b113ffa5ef14c42343699a3eb4fe352b3838",
+      "size": 8982
+    },
+    {
+      "path": "backend/app/integrations/llm/retrieval_router.py",
+      "sha256": "2563e31d8339f5444ad8c39a8a0f85a2e0d9c9825a19461f875f928f92819543",
+      "size": 8274
+    },
+    {
+      "path": "backend/app/runtime/chat/today_sns_activity.py",
+      "sha256": "15410e7b58e9be0844ba2e5ed90ece7fd83132d783eb38ef22a48c57ecb34750",
+      "size": 1457
+    },
+    {
+      "path": "backend/app/runtime/chat/world_generation.py",
+      "sha256": "cf92fe25ec96fe9de0f27b8a12db5232bb7ac799221947c4ce50ef97854f3d1b",
+      "size": 39934
+    },
+    {
+      "path": "backend/app/runtime/migrations/sqlite_versions/manifests/v8.json",
+      "sha256": "87a3ae7768d6d2d992427d3d0f05e8e2eadb3b2aee996286c37f22ca4af57db2",
+      "size": 2990
+    },
+    {
+      "path": "backend/app/runtime/migrations/sqlite_versions/v7_to_v8_social_action_subjective_context.py",
+      "sha256": "1fef73f304fc71e06903eb13b74f4e648e1cc378e9c64359fea6b0bc480097d5",
+      "size": 1780
+    },
+    {
+      "path": "backend/app/runtime/persistence/sqlite_schema.py",
+      "sha256": "f98a8b75c0ce0e2990c3e8a529327bd0c39022d007e264cdf516ef12d09bb66e",
+      "size": 14069
+    },
+    {
+      "path": "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+      "sha256": "b688c53f8526ba4c7e36965c5244dc3c2b68b7d4bbc684e5212c5e65ae174d46",
+      "size": 28105
+    },
+    {
+      "path": "backend/app/runtime/social/sqlalchemy_today_activity.py",
+      "sha256": "e689bbf3cf0d4ebf9591de5bacf345bf1826c7f4bd58dbf98bab75f7e7907712",
+      "size": 22819
+    },
+    {
+      "path": "backend/app/runtime/social/sqlalchemy_read_repository.py",
+      "sha256": "a6cf1e879f71386ffef7b787a3a63abf45e7d1ade484cf165b276a1dca92a71f",
+      "size": 10245
+    },
+    {
+      "path": "backend/app/runtime/social/subjective_context.py",
+      "sha256": "5186d8cf66f0b1961a037ce8efb06e5c083b9889c76bc631c6a3e82891429d20",
+      "size": 6376
+    },
+    {
+      "path": "backend/app/schemas/world_feed.py",
+      "sha256": "cc900bdc9359613ef323d852a9af93b40ed052d8ce651f265dfff89e4ee177fc",
+      "size": 7591
+    },
+    {
+      "path": "backend/app/services/feed_reaction_planner.py",
+      "sha256": "ecce50d81f0d1e473802ea7bdbc87285e6c97eed62d12c1ff91a23c6c7f94c9b",
+      "size": 15720
+    },
+    {
+      "path": "backend/app/services/auth.py",
+      "sha256": "22146c2dee090a39d1e7fd2795ced5ebf22c3137093632f45ece8f34170f3bbd",
+      "size": 45152
+    },
+    {
+      "path": "backend/app/services/world_character_setup.py",
+      "sha256": "e47b89eedc5e0eaee120d5f776440b701ac580c66d8f1425bf3ded09ba233d96",
+      "size": 7714
+    },
+    {
+      "path": "backend/app/services/langgraph_resident.py",
+      "sha256": "99471610d46804a54cf28f56e888c5fbbba567b6f0439f9eee22f216393e58ee",
+      "size": 389454
+    },
+    {
+      "path": "backend/app/services/langgraph_social_apply.py",
+      "sha256": "58f1ccdb9e70de531d21fead16ab11f8c407deb45f7d05e4de4b2d0085ce2e40",
+      "size": 21779
+    },
+    {
+      "path": "backend/app/services/world_feed_runtime.py",
+      "sha256": "85a80c2cc39d573cec332822c4c741e04d5d8667bd961f2ca889aba9727e233e",
+      "size": 34226
+    },
+    {
+      "path": "backend/app/services/world_feed_social_apply.py",
+      "sha256": "70b5a536d33a79ae25c7648be0c81a68198893a8acea916eab3db07667d27e16",
+      "size": 7863
+    },
+    {
+      "path": "backend/tests/test_p8_l_r_today_sns_activity.py",
+      "sha256": "6e56dbe42cf08347fe4479611dbe45898c778c6e5aac1846da65d819a4425362",
+      "size": 31456
+    },
+    {
+      "path": "backend/tests/test_p8_l_r_today_sns_activity_inventory.py",
+      "sha256": "e121f5647c62ea9c97e2cc7571f1a0166760dce4b1feb0e974c935b2d1db7d57",
+      "size": 1427
+    },
+    {
+      "path": "backend/tests/test_p8_l_r_today_sns_activity_migration.py",
+      "sha256": "bd8d735f5b1c85fa938ef76c7302e73f9fadc35091108654b9968f820663e7d4",
+      "size": 1487
+    },
+    {
+      "path": "backend/tests/test_p8_l_p_evidence_response_streaming.py",
+      "sha256": "3ef67b1ee2c210e7b4b04f7a4719933e3f09fa4408998562b2ab008db0e5ae1c",
+      "size": 42630
+    },
+    {
+      "path": "backend/security/privacy_deletion_inventory.json",
+      "sha256": "ec1926fc161292b4e8c80d7bb0269fcc3de55eceadb3eb52fedc4b5a1ccca3d5",
+      "size": 6308
+    },
+    {
+      "path": "browser-tests/product-shell.spec.ts",
+      "sha256": "bdb3e9bf31ac9013fc0eb0419c3e596e1c2933cd3eba34e43ec34b08c09d0473",
+      "size": 97013
+    },
+    {
+      "path": "browser-tests/static-product-shell.spec.ts",
+      "sha256": "59fcce64868907a10afe17de8dfdb45c15f55d6d218ab5238fc4c63d365625d6",
+      "size": 153344
+    },
+    {
+      "path": "docs/architecture/backend-domains.md",
+      "sha256": "877b836aeb716eb91535fa6a4d4a90fa4c9868399f706f5d39fcbfac9f6e8b34",
+      "size": 53097
+    },
+    {
+      "path": "docs/architecture/frontend-design-reference.md",
+      "sha256": "8cddf097a7560d357c0cf110f8854984ca64089bf51ebabc8085a8440957bba7",
+      "size": 39306
+    },
+    {
+      "path": "docs/architecture/frontend-product-shell.md",
+      "sha256": "3cc2f8301d29eaaa61e5135ef0e57b5574bd999f4259183090b3a6ccbd57b141",
+      "size": 42722
+    },
+    {
+      "path": "docs/architecture/p8-l-r-today-sns-activity.md",
+      "sha256": "6f9a37f8e2af96cd841223aaae47e1f3380a50b82fa2106569bccdadfc576fe3",
+      "size": 9560
+    },
+    {
+      "path": "frontend/DESIGN.md",
+      "sha256": "f65fbf3b7a1aaf4d59e82669dbab0924b010d3f3ba59dd4ec34bb72599e671f7",
+      "size": 81100
+    },
+    {
+      "path": "frontend/src/features/memory/api/memory-client.ts",
+      "sha256": "b5589e9755311d06dbc5320cdf79881f7b81faaa5d60b653e9b30959fc0f3bdf",
+      "size": 12966
+    },
+    {
+      "path": "frontend/src/features/memory/model/memory-contract.ts",
+      "sha256": "b09d751bea6b2b0981cd3cdf1563e0d691de7be0b52ffe1e8109a050181a6610",
+      "size": 3164
+    },
+    {
+      "path": "frontend/src/features/memory/ui/memory-workspace.tsx",
+      "sha256": "58e98fa47f7de464062ede32c751f2f8fa0ca8d3b2d2c5d211ddbd57b391c24f",
+      "size": 29018
+    },
+    {
+      "path": "scripts/ci/generate_p8_l_r_memory_owner_control_inventory.py",
+      "sha256": "fe5d2070a32478799219df4ac12a05e4b9739917b8fbef35631f09850b6f3877",
+      "size": 13916
+    },
+    {
+      "path": "scripts/ci/generate_p8_l_j_response_generation_inventory.py",
+      "sha256": "ba15a32058f0a23ca8a85daa7c0d4823d504ca3f9b854757b1b560f549cebeed",
+      "size": 13926
+    },
+    {
+      "path": "scripts/ci/generate_p8_l_k_retrieval_router_inventory.py",
+      "sha256": "4678f325d97fd21a5efc46bde9dc5f18af9d52c4f92f64b7f256d22e19df5dfc",
+      "size": 14845
+    },
+    {
+      "path": "scripts/ci/generate_p8_l_l_canonical_retrieval_planner_inventory.py",
+      "sha256": "fe90e871478e6296ae095b1880830877f7e4928abe8970f7666f11b211ab88d6",
+      "size": 13473
+    },
+    {
+      "path": "scripts/ci/generate_p8_l_m_graph_retrieval_planner_inventory.py",
+      "sha256": "fc76fa67185fcc9609256248c33ecd6841f2a28fbe4dfbfcb3f48c535dbae950",
+      "size": 13685
+    },
+    {
+      "path": "scripts/ci/generate_p8_l_n_both_workflow_coordinator_inventory.py",
+      "sha256": "233b07b78aed36041f5b1bdec9925a72c7640e9106a8b2446ec709a1b31a569b",
+      "size": 13139
+    },
+    {
+      "path": "scripts/ci/generate_p8_l_o_memory_consolidation_inventory.py",
+      "sha256": "484ed6a258c94759712817dd03e45246d702161361372df5d4adb97fcff7c0de",
+      "size": 13024
+    },
+    {
+      "path": "scripts/ci/generate_p8_l_p_evidence_response_streaming_inventory.py",
+      "sha256": "9968a24335b248e2e034ec4fdd60284281b84f7103bc1bbf0bd564a86f02fdea",
+      "size": 18620
+    },
+    {
+      "path": "scripts/ci/build_windows_installer_supported_upgrade_fixture.py",
+      "sha256": "cc289ecfc6a10f4ad478620bb5f7ea5a68dbd71779a4f816d2cf27eefb1c4e55",
+      "size": 33856
+    },
+    {
+      "path": "scripts/ci/check_windows_installer_supported_upgrade_matrix.py",
+      "sha256": "8320eae77286ac16c81e41c0f145fbceeec934d84574421052f135280689c8b5",
+      "size": 2104
+    },
+    {
+      "path": "scripts/ci/run_windows_installer_supported_upgrade.ps1",
+      "sha256": "dc66261270e3675952267eccb8d9f15b5d2baee68914c42ac1e208096381e7ce",
+      "size": 14247
+    },
+    {
+      "path": "scripts/ci/generate_p8_l_r_today_sns_activity_inventory.py",
+      "sha256": "0699f21e19b9a0deee79a20fb548fe1274265fc491f39efad31e007c3599485a",
+      "size": 11882
+    }
+  ],
+  "runtime_contract": {
+    "later_activity_inserted_into_active_snapshot": false,
+    "memory_off_allows_today_context": true,
+    "normal_route_calls": {
+      "BOTH": 4,
+      "CANONICAL": 3,
+      "CLARIFICATION": 2,
+      "CURRENT_CONTEXT": 2,
+      "GRAPH": 3
+    },
+    "other_actor_private_motivation": false,
+    "owner_inspector_exact_revision_revalidation": true,
+    "pre_response_and_pre_commit_revalidation": true,
+    "private_other_thread_context": false,
+    "scan_overflow_count_semantics": "lower_bound_with_partial_coverage",
+    "snapshot_mapping_immutable": true,
+    "today_assembler_provider_calls": 0
+  },
+  "schema": {
+    "canonical_table_count": 96,
+    "embedded_schema_version": 8,
+    "ladybug_schema_change": false,
+    "legacy_inferred_backfill": 0,
+    "new_tables": [
+      "social_action_subjective_contexts"
+    ],
+    "schema_digest": "365dddfb427f75d1126478b9b6293f962a20bbf024d4cc2e153b9056c625041d",
+    "source_migration_count": 87,
+    "source_revision": "20260904_0088"
+  },
+  "schema_version": 1
+}

@@ -3495,8 +3495,36 @@ def test_writing_plan_skip_reports_persona_writer_missing_post_text(monkeypatch)
     assert result["repair_succeeded"] is False
 
 
+def _patch_root_post_social_contract(monkeypatch) -> None:
+    monkeypatch.setattr(
+        langgraph_resident.langgraph_social_apply,
+        "active_world_character",
+        lambda *_args, **_kwargs: SimpleNamespace(
+            id="world-character-1",
+            world_id="world-1",
+        ),
+    )
+    monkeypatch.setattr(
+        langgraph_resident.langgraph_social_apply,
+        "apply_successful_root_post",
+        lambda *_args, **_kwargs: SimpleNamespace(
+            event=SimpleNamespace(id="social-event-1")
+        ),
+    )
+    monkeypatch.setattr(
+        langgraph_resident,
+        "record_declared_subjective_context",
+        lambda *_args, **_kwargs: None,
+    )
+
+
+def _fake_writing_db() -> SimpleNamespace:
+    return SimpleNamespace(commit=lambda: None, rollback=lambda: None)
+
+
 def test_writing_plan_with_repaired_text_creates_post(monkeypatch) -> None:
     created: list[object] = []
+    _patch_root_post_social_contract(monkeypatch)
 
     monkeypatch.setattr(
         langgraph_resident,
@@ -3528,8 +3556,10 @@ def test_writing_plan_with_repaired_text_creates_post(monkeypatch) -> None:
         fake_create_post,
     )
     ctx = SimpleNamespace(
-        db=object(),
+        db=_fake_writing_db(),
         session_key="session-1",
+        run_id="run-1",
+        run_started_at=datetime(2026, 9, 4, 1, 0, tzinfo=UTC),
         character=SimpleNamespace(id="char-1"),
     )
 
@@ -3556,6 +3586,7 @@ def test_writing_plan_with_repaired_text_creates_post(monkeypatch) -> None:
 
 def test_owner_feed_cue_writing_consumes_matching_pending_cue(monkeypatch) -> None:
     created: list[dict[str, object]] = []
+    _patch_root_post_social_contract(monkeypatch)
 
     monkeypatch.setattr(
         langgraph_resident,
@@ -3587,8 +3618,10 @@ def test_owner_feed_cue_writing_consumes_matching_pending_cue(monkeypatch) -> No
         fake_create_post,
     )
     ctx = SimpleNamespace(
-        db=object(),
+        db=_fake_writing_db(),
         session_key="session-1",
+        run_id="run-1",
+        run_started_at=datetime(2026, 9, 4, 1, 0, tzinfo=UTC),
         character=SimpleNamespace(id="char-1"),
     )
 
@@ -3622,6 +3655,7 @@ def test_owner_feed_cue_writing_consumes_matching_pending_cue(monkeypatch) -> No
 def test_writing_plan_success_records_lore_metadata_and_usage(monkeypatch) -> None:
     created: list[dict[str, object]] = []
     used_chunk_ids: list[str] = []
+    _patch_root_post_social_contract(monkeypatch)
 
     monkeypatch.setattr(
         langgraph_resident,
@@ -3658,9 +3692,10 @@ def test_writing_plan_success_records_lore_metadata_and_usage(monkeypatch) -> No
         lambda _db, *, chunk_ids: used_chunk_ids.extend(chunk_ids),
     )
     ctx = SimpleNamespace(
-        db=object(),
+        db=_fake_writing_db(),
         session_key="session-1",
         run_id="run-1",
+        run_started_at=datetime(2026, 9, 4, 1, 0, tzinfo=UTC),
         character=SimpleNamespace(id="char-1"),
     )
 
@@ -3755,6 +3790,7 @@ def test_writing_plan_reused_result_does_not_mark_lore_usage(monkeypatch) -> Non
 def test_writing_plan_success_ignores_legacy_topic_arc_progress(monkeypatch) -> None:
     events: list[dict[str, object]] = []
     created: list[dict[str, object]] = []
+    _patch_root_post_social_contract(monkeypatch)
 
     monkeypatch.setattr(
         langgraph_resident,
@@ -3791,7 +3827,7 @@ def test_writing_plan_success_ignores_legacy_topic_arc_progress(monkeypatch) -> 
         fake_create_post,
     )
     ctx = SimpleNamespace(
-        db=object(),
+        db=_fake_writing_db(),
         session_key="session-1",
         character=SimpleNamespace(id="char-1"),
         run_started_at=datetime(2026, 6, 15, 1, 0, tzinfo=UTC),

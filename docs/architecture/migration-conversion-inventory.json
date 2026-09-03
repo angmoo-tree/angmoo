@@ -974,9 +974,20 @@
       "source_sha256": "0b04326b5da9cc3eb2e7dc21c407d910c488283664feca6d02710e60be047195",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260903_0087",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260904_0088_social_action_subjective_context.py",
+      "removal_condition": "preserve immutable historical revision identity; do not execute as the current SQLite runtime chain",
+      "revision": "20260904_0088",
+      "source_sha256": "59f7cc1cb4d53d7db8132231c969581e460102ff9a2b5c87581ea510055b8643",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
     }
   ],
-  "migration_count": 85,
+  "migration_count": 86,
   "purpose": "PostgreSQL-era Alembic provenance retained as immutable historical evidence",
   "schema_version": 1
 }

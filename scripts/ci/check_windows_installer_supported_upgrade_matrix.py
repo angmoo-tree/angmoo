@@ -33,6 +33,16 @@ def main() -> int:
             f"expected={readable_predecessors}:"
             f"actual={tuple(SUPPORTED_SOURCE_VERSIONS)}"
         )
+    workflow = (REPOSITORY_ROOT / ".github/workflows/windows-installer.yml").read_text(encoding="utf-8")
+    runner = (REPOSITORY_ROOT / "scripts/ci/run_windows_installer_supported_upgrade.ps1").read_text(encoding="utf-8")
+    for version in readable_predecessors:
+        if (
+            f"--source-version {version}" not in workflow
+            or f"supported-v{version}.zip" not in workflow
+            or f"-SupportedV{version}FixtureArchive" not in workflow
+            or f"Restore-IsolatedFixture $SupportedV{version}FixtureArchive" not in runner
+        ):
+            raise SystemExit(f"windows_installer_hosted_predecessor_missing:v{version}")
     print(
         "windows_installer_supported_upgrade_matrix_contract_pass:"
         + ",".join(f"v{version}" for version in readable_predecessors)
