@@ -731,13 +731,13 @@
       "markers": {
         "driver_or_url": [
           321,
-          517
+          524
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/chat/world_generation.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "32314a3c3c8f7bb1ad4f8e1ae3813d5b35115e932fcdf28fddf8843d16d7b2bd",
+      "source_sha256": "09d6c1dab27843d4dd4fdb67257fad822fb99d7f4a18defccead555178b58e22",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
