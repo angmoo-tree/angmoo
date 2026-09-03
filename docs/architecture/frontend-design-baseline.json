@@ -1430,17 +1430,17 @@
         {
           "path": "browser-tests/snapshots/ui-f/device-home-centered-1440x1000.png",
           "present": true,
-          "sha256": "5089ee236618eb68ae217be0c3249e49ccc73aec81503d8502fda82615ff63b7"
+          "sha256": "4d02516f58596669511fe6292d165df171e5be68f21c50107478d669652977f0"
         },
         {
           "path": "browser-tests/snapshots/ui-f/device-home-phone-360x800.png",
           "present": true,
-          "sha256": "018a90c65a7e511195bfd2e54e8e3f2aaa5c282e609c74e3b191c287f219e4a5"
+          "sha256": "e5f5330a6e61f7a3537050b9809d7570742f6fe2fd83142f1f43382f03da8db2"
         },
         {
           "path": "browser-tests/snapshots/ui-f/device-home-runtime-offline-390x844.png",
           "present": true,
-          "sha256": "d5baf9d3ef581733bc9e0e7e460d7f3ce012939647e8e41ea43998178d654472"
+          "sha256": "2833a645d8950ff1c8bde0396e7a946a6e845d1c66b68e9257f6d558df5d59c6"
         },
         {
           "path": "browser-tests/snapshots/ui-f/global-feed-media-phone-390x844.png",
