@@ -22,6 +22,11 @@ from app.domains.chat.domain.retrieval_intent import (
     RetrievalRoute,
     RetrievalTimeKind,
 )
+from app.domains.chat.domain.retrieval_router import (
+    RetrievalRouterRepairExhaustedError,
+    RouterFailureDiagnostic,
+    router_validation_is_retryable,
+)
 from app.domains.chat.ports.retrieval_policy import (
     CanonicalRetrievalScope,
     RetrievalEntityResolution,
@@ -70,6 +75,14 @@ class RetrievalRoutingMetrics:
     router_physical_attempts: int
     provider: str
     model: str
+    prompt_token_count: int | None = None
+    output_token_count: int | None = None
+    thought_token_count: int | None = None
+    total_token_count: int | None = None
+    latency_ms: int | None = None
+    thinking_level: str | None = None
+    max_output_tokens: int | None = None
+    finish_reason: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -140,8 +153,18 @@ class RetrievalRoutingService:
                     timeout_seconds=remaining_seconds,
                 )
             except RetrievalRouterOutputError as repaired_exc:
-                raise RetrievalContractError(
-                    "retrieval_router_request_wide_repair_exhausted"
+                terminal_code = repaired_exc.validation_code
+                if not router_validation_is_retryable(exc.validation_code):
+                    terminal_code = exc.validation_code
+                raise RetrievalRouterRepairExhaustedError(
+                    RouterFailureDiagnostic(
+                        router_validation_code=terminal_code,
+                        repair_used=True,
+                        repair_exhausted=True,
+                        physical_attempts=(
+                            first_physical + repaired_exc.physical_attempt_count
+                        ),
+                    )
                 ) from repaired_exc
             repair_physical = provider_result.physical_attempt_count
 
@@ -237,6 +260,14 @@ class RetrievalRoutingService:
             router_physical_attempts=first_physical + repair_physical,
             provider=provider_result.provider,
             model=provider_result.model,
+            prompt_token_count=provider_result.prompt_token_count,
+            output_token_count=provider_result.output_token_count,
+            thought_token_count=provider_result.thought_token_count,
+            total_token_count=provider_result.total_token_count,
+            latency_ms=provider_result.latency_ms,
+            thinking_level=provider_result.thinking_level,
+            max_output_tokens=provider_result.max_output_tokens,
+            finish_reason=provider_result.finish_reason,
         )
         return RetrievalRoutingResult(
             intent=intent,

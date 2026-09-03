@@ -107,6 +107,7 @@ def test_default_message_model_is_gemini25_flash_lite() -> None:
     assert messages.DEFAULT_MESSAGE_MODEL == "gemini-2.5-flash-lite"
     assert "gemini-2.5-flash-lite" in messages.MESSAGE_MODELS
     assert "gemini-2.5-flash" in messages.MESSAGE_MODELS
+    assert "gemini-3.5-flash-lite" in messages.MESSAGE_MODELS
     assert "gemini-3.5-flash" not in messages.MESSAGE_MODELS
 
 

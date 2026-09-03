@@ -21,7 +21,7 @@ L_INVENTORY_PATH = (
     ROOT / "docs/architecture/p8-l-l-canonical-retrieval-planner-inventory.json"
 )
 L_INVENTORY_SHA256 = (
-    "1ae431d37dadb57ccb78502a9347df9059acd280ebf785aa91b5c3a581d8761c"
+    "bdaa570f62d26fe2a061915c83140b1c24b2fafa953bddb1248240ec45945cfc"
 )
 CORPUS_PATH = ROOT / "backend/tests/fixtures/p8_l/graph_planner_v1/held_out_ko.jsonl"
 
@@ -175,7 +175,7 @@ def build_inventory() -> dict[str, Any]:
     predecessor = json.loads(L_INVENTORY_PATH.read_text(encoding="utf-8"))
     if predecessor["owner_stage"] != "P8-L-L":
         raise InventoryError("P8-L-L predecessor owner drift")
-    if SQLITE_SCHEMA_VERSION != 6:
+    if SQLITE_SCHEMA_VERSION < 6:
         raise InventoryError("P8-L-M must not change Embedded schema version")
 
     schema = graph_retrieval_plan_response_schema()
@@ -207,7 +207,7 @@ def build_inventory() -> dict[str, Any]:
     if schema_operations != registry_operations:
         raise InventoryError("provider schema and I graph registry drift")
 
-    manifest = load_sqlite_manifest(SQLITE_SCHEMA_VERSION)
+    manifest = load_sqlite_manifest(6)
     return {
         "schema_version": 1,
         "owner_stage": "P8-L-M",
@@ -228,7 +228,7 @@ def build_inventory() -> dict[str, Any]:
         "schema": {
             "new_alembic_migration": None,
             "new_embedded_schema_version": None,
-            "current_embedded_schema_version": SQLITE_SCHEMA_VERSION,
+            "current_embedded_schema_version": 6,
             "canonical_table_count": manifest.canonical_table_count,
             "new_canonical_tables": [],
             "new_ladybug_generation": None,

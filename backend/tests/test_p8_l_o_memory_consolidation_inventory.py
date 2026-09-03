@@ -36,7 +36,7 @@ def test_p8_l_o_inventory_closes_background_memory_budget() -> None:
     inventory = _inventory()
     assert inventory["owner_stage"] == "P8-L-O"
     assert inventory["predecessor"]["sha256"] == (
-        "4dedf0711d3387301313c7d76cdad3ee47273e1cc95bdc4b2f1362b6ca41a937"
+        "371c8faf2a6811ff0c607ff1a5304138f5db3cf371366c18bc37c49100213243"
     )
     assert inventory["schema"]["new_alembic_migration"] is None
     assert inventory["schema"]["current_embedded_schema_version"] == 6

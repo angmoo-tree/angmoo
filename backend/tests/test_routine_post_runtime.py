@@ -73,6 +73,7 @@ def test_routine_gemini_transport_uses_json_schema_without_openapi_extras(
                 assert_supported(item)
 
     config = build_generate_content_config(
+        model="gemini-3.1-flash-lite",
         system_prompt="system",
         max_output_tokens=2_400,
         response_mime_type="application/json",
@@ -129,6 +130,7 @@ def test_routine_planner_schema_binds_continuation_to_server_evidence() -> None:
     )
 
     config = build_generate_content_config(
+        model="gemini-3.1-flash-lite",
         system_prompt="system",
         max_output_tokens=2_400,
         response_mime_type="application/json",

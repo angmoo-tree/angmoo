@@ -20,7 +20,7 @@ HOST_SHA = "b" * 64
 SIDECAR_SHA = "c" * 64
 
 
-def _manifest(path: Path, *, sqlite=(1, 6, 6), ladybug=(0, 2, 2)) -> Path:
+def _manifest(path: Path, *, sqlite=(1, 7, 7), ladybug=(0, 2, 2)) -> Path:
     identity_source = "\n".join(
         (
             "0.4.0-1",
@@ -87,7 +87,7 @@ def test_installer_preflight_accepts_supported_active_generations(
     )
 
     assert result.sqlite_source_version == 1
-    assert result.sqlite_target_version == 6
+    assert result.sqlite_target_version == 7
     assert result.ladybug_source_version == 0
     assert result.ladybug_target_version == 2
 
@@ -95,7 +95,7 @@ def test_installer_preflight_accepts_supported_active_generations(
 @pytest.mark.parametrize(
     ("sqlite_version", "ladybug_version", "expected"),
     (
-        (7, 1, "installer_sqlite_data_incompatible"),
+        (8, 1, "installer_sqlite_data_incompatible"),
         (2, 3, "installer_ladybug_data_incompatible"),
     ),
 )
@@ -184,7 +184,7 @@ def test_installer_upgrade_mode_creates_current_generations_and_is_idempotent(
     finally:
         writer.close()
     assert second["status"] == "upgraded"
-    assert second["sqlite_source_version"] == 6
+    assert second["sqlite_source_version"] == 7
     assert second["ladybug_source_version"] == 2
     assert (data_root / "canonical" / "current-generation.json").read_bytes() == canonical_marker
     assert (data_root / "graph" / "current-generation.json").read_bytes() == graph_marker
@@ -195,7 +195,7 @@ def test_installer_failure_writes_one_redacted_stable_result(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     data_root = tmp_path / "Angmoo"
-    _marker(data_root / "canonical", 7)
+    _marker(data_root / "canonical", 8)
     _marker(data_root / "graph", 1)
     result_path = data_root / "runtime" / "installer-result.json"
     monkeypatch.setattr(
@@ -284,7 +284,7 @@ def test_installer_upgrade_failure_reports_source_and_unchanged_active_versions(
         "build_commit": BUILD_COMMIT,
         "payload_generation": payload_generation,
         "sqlite_source_version": 2,
-        "sqlite_target_version": 6,
+        "sqlite_target_version": 7,
         "sqlite_active_version": 2,
         "ladybug_source_version": 1,
         "ladybug_target_version": 2,

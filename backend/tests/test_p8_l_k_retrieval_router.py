@@ -14,9 +14,14 @@ from app import models
 from app.core.db import Base
 from app.domains.chat.application import RetrievalRoutingService
 from app.domains.chat.domain import (
+    ROUTER_VALIDATION_CODES,
     RetrievalContractError,
     RetrievalRoute,
+    RetrievalRouterRepairExhaustedError,
+    RouterFailureDiagnostic,
+    normalize_router_validation_code,
     parse_retrieval_intent_payload,
+    retrieval_router_response_schema,
 )
 from app.domains.chat.ports import (
     CanonicalRetrievalScope,
@@ -32,13 +37,19 @@ from app.domains.identity.public import (
     CredentialPurpose,
     LOCAL_INSTALLATION_KEY,
 )
+from app.integrations import direct_llm
 from app.integrations.llm.retrieval_router import DirectLlmRetrievalRouterProvider
+from app.providers.gemini import build_generate_content_config
 from app.runtime.chat.retrieval_policy import SqlAlchemyRetrievalPolicyResolver
 
 
 FIXTURE_PATH = (
     Path(__file__).resolve().parent
     / "fixtures/p8_l/retrieval_topology_v1/held_out_ko.jsonl"
+)
+HOTFIX_FIXTURE_PATH = (
+    Path(__file__).resolve().parent
+    / "fixtures/p8_l/router_hotfix_v1/current_context_ko.jsonl"
 )
 
 
@@ -200,6 +211,104 @@ def test_strict_router_parser_rejects_unknown_identity_and_raw_query_fields() ->
         parse_retrieval_intent_payload(unknown)
 
 
+def test_router_failure_diagnostic_is_closed_bounded_and_never_copies_text() -> None:
+    diagnostic = RouterFailureDiagnostic(
+        router_validation_code="current_context_not_minimal",
+        repair_used=True,
+        repair_exhausted=True,
+        physical_attempts=2,
+    )
+    assert diagnostic.retryable is True
+    assert diagnostic.payload() == {
+        "version": "router-diagnostic.v1",
+        "node": "retrieval_router",
+        "router_validation_code": "current_context_not_minimal",
+        "repair_used": True,
+        "repair_exhausted": True,
+        "physical_attempts": 2,
+    }
+    assert "router_validation_unknown" in ROUTER_VALIDATION_CODES
+    assert normalize_router_validation_code(
+        "invalid because user said secret-message api-key-123"
+    ) == "router_validation_unknown"
+
+    with pytest.raises(RetrievalContractError, match="diagnostic_code_invalid"):
+        RouterFailureDiagnostic(
+            router_validation_code="user supplied arbitrary message",
+            repair_used=True,
+            repair_exhausted=True,
+            physical_attempts=2,
+        )
+    with pytest.raises(RetrievalContractError, match="diagnostic_attempts_invalid"):
+        RouterFailureDiagnostic(
+            router_validation_code="json_decode_failed",
+            repair_used=True,
+            repair_exhausted=True,
+            physical_attempts=1,
+        )
+
+
+def test_provider_schema_matches_parser_shape_and_serializes_for_gemini_families() -> None:
+    schema = retrieval_router_response_schema()
+    assert set(schema["required"]) == set(schema["properties"])
+    assert "additionalProperties" not in schema
+    nested_required = {
+        "entities": {"ref", "mention", "role"},
+        "relationship": {
+            "perspective",
+            "from",
+            "to",
+            "dimension",
+            "requested_polarity",
+        },
+        "time_scope": {"kind", "expression"},
+        "aggregation": {"kind", "target_role"},
+    }
+    for field, expected in nested_required.items():
+        nested = schema["properties"][field]
+        if field == "entities":
+            nested = nested["items"]
+        assert set(nested["required"]) == expected
+        assert "additionalProperties" not in nested
+
+    for model, thinking_key in (
+        ("gemini-3.1-flash-lite", "thinkingLevel"),
+        ("gemini-2.5-flash-lite", "thinkingBudget"),
+    ):
+        config = build_generate_content_config(
+            model=model,
+            system_prompt="router",
+            max_output_tokens=1_024,
+            response_mime_type="application/json",
+            response_schema=schema,
+            thinking_level="low",
+        ).model_dump(by_alias=True, exclude_none=True)
+        assert config["responseJsonSchema"] == schema
+        assert "additionalProperties" not in json.dumps(
+            config["responseJsonSchema"], sort_keys=True
+        )
+        assert thinking_key in config["thinkingConfig"]
+
+
+def test_current_mood_hotfix_fixture_is_minimal_current_context() -> None:
+    rows = [
+        json.loads(line)
+        for line in HOTFIX_FIXTURE_PATH.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    assert len(rows) == 3
+    assert rows[0]["question"] == "안녕 지금 기분이 어때?"
+    for row in rows:
+        intent = parse_retrieval_intent_payload(row["expected"])
+        assert intent.route is RetrievalRoute.CURRENT_CONTEXT
+        assert intent.entities == ()
+        assert intent.relationship is None
+        assert intent.time_scope is None
+        assert intent.aggregation is None
+        assert intent.coordination_hint is None
+        assert intent.clarification_slot is None
+
+
 def test_current_context_routes_once_and_injects_no_retrieval_operations() -> None:
     intent = parse_retrieval_intent_payload(_payload("CURRENT_CONTEXT"))
     router = _FakeRouter(intent)
@@ -285,7 +394,7 @@ def test_ambiguous_or_hidden_identity_becomes_safe_clarification_not_both() -> N
 def test_router_schema_repair_is_request_wide_and_at_most_once() -> None:
     valid = parse_retrieval_intent_payload(_payload("CURRENT_CONTEXT"))
     router = _FakeRouter(
-        RetrievalRouterOutputError("decision_route_mismatch"),
+        RetrievalRouterOutputError("current_context_not_minimal"),
         valid,
     )
     now = datetime(2026, 9, 2, 4, tzinfo=UTC)
@@ -298,19 +407,57 @@ def test_router_schema_repair_is_request_wide_and_at_most_once() -> None:
     assert result.metrics.repair_used is True
     assert result.metrics.router_logical_calls == 2
     assert result.call_tracker["repair_node"] == "retrieval_router"
-    assert router.requests[1].repair_diagnostic == "decision_route_mismatch"
+    assert router.requests[1].repair_diagnostic == "current_context_not_minimal"
 
     failing = _FakeRouter(
-        RetrievalRouterOutputError("first"),
-        RetrievalRouterOutputError("second"),
+        RetrievalRouterOutputError("current_context_not_minimal"),
+        RetrievalRouterOutputError("decision_route_mismatch"),
     )
-    with pytest.raises(RetrievalContractError, match="repair_exhausted"):
+    with pytest.raises(
+        RetrievalRouterRepairExhaustedError, match="repair_exhausted"
+    ) as exc_info:
         asyncio.run(
             RetrievalRoutingService(router=failing, policy=_FakePolicy()).route(
                 _command(), now=now, deadline_at=now + timedelta(seconds=30)
             )
         )
     assert len(failing.requests) == 2
+    diagnostic = exc_info.value.router_diagnostic
+    assert diagnostic.router_validation_code == "decision_route_mismatch"
+    assert diagnostic.repair_used is True
+    assert diagnostic.repair_exhausted is True
+    assert diagnostic.physical_attempts == 2
+    assert diagnostic.retryable is True
+
+    security = _FakeRouter(
+        RetrievalRouterOutputError("forbidden_field"),
+        RetrievalRouterOutputError("raw_query_forbidden"),
+    )
+    with pytest.raises(RetrievalRouterRepairExhaustedError) as security_info:
+        asyncio.run(
+            RetrievalRoutingService(router=security, policy=_FakePolicy()).route(
+                _command(), now=now, deadline_at=now + timedelta(seconds=30)
+            )
+        )
+    assert security_info.value.router_diagnostic.retryable is False
+
+    first_attempt_security = _FakeRouter(
+        RetrievalRouterOutputError("raw_query_forbidden"),
+        RetrievalRouterOutputError("decision_route_mismatch"),
+    )
+    with pytest.raises(RetrievalRouterRepairExhaustedError) as first_security_info:
+        asyncio.run(
+            RetrievalRoutingService(
+                router=first_attempt_security, policy=_FakePolicy()
+            ).route(
+                _command(), now=now, deadline_at=now + timedelta(seconds=30)
+            )
+        )
+    assert (
+        first_security_info.value.router_diagnostic.router_validation_code
+        == "raw_query_forbidden"
+    )
+    assert first_security_info.value.router_diagnostic.retryable is False
 
 
 def test_request_deadline_cancels_router_before_late_result_is_accepted() -> None:
@@ -396,8 +543,13 @@ def test_held_out_ko_315_case_router_contract_is_executable() -> None:
     )
 
 
+@pytest.mark.parametrize(
+    "model",
+    ("gemini-3.1-flash-lite", "gemini-3.5-flash-lite"),
+)
 def test_direct_llm_adapter_exposes_one_logical_call_without_hidden_json_retry(
     monkeypatch,
+    model: str,
 ) -> None:
     captured = {}
 
@@ -413,7 +565,7 @@ def test_direct_llm_adapter_exposes_one_logical_call_without_hidden_json_retry(
     material = CredentialMaterial(
         credential_id="credential-1",
         provider="google",
-        model="fixture-router",
+        model=model,
         fingerprint="fingerprint",
         purpose=CredentialPurpose.MESSAGE_LLM,
         _secret="not-a-real-key",
@@ -426,12 +578,89 @@ def test_direct_llm_adapter_exposes_one_logical_call_without_hidden_json_retry(
     )
     assert result.intent.route is RetrievalRoute.CURRENT_CONTEXT
     assert result.physical_attempt_count == 1
+    assert captured["thinking_level"] == "high"
+    assert captured["max_output_tokens"] == 3_072
+    assert result.thinking_level == "high"
+    assert result.max_output_tokens == 3_072
     assert captured["should_retry_json_error"](None, None, {}, 1) is False
     schema_text = json.dumps(captured["response_schema"], ensure_ascii=False)
     assert "owner_id" not in schema_text
     assert "world_id" not in schema_text
     assert "owner_id" not in captured["user_prompt"]
     assert "not-a-real-key" not in captured["user_prompt"]
+
+
+def test_direct_llm_adapter_maps_domain_failure_to_safe_repair_code(
+    monkeypatch,
+) -> None:
+    captured = {}
+
+    async def fake_generate_json(**kwargs):
+        captured.update(kwargs)
+        kwargs["tracker"].next_call_order()
+        try:
+            raise RetrievalContractError(
+                "retrieval_router_current_context_not_minimal"
+            )
+        except RetrievalContractError as cause:
+            raise direct_llm.DirectLlmJsonError(
+                "raw output must not escape",
+                failure_class="json_parse_failed",
+                parse_error_type="RetrievalContractError",
+                attempt_count=1,
+                last_payload={"conversation": "must-not-persist"},
+            ) from cause
+
+    monkeypatch.setattr(
+        "app.integrations.llm.retrieval_router.direct_llm.generate_json",
+        fake_generate_json,
+    )
+    material = CredentialMaterial(
+        credential_id="credential-1",
+        provider="google",
+        model="gemini-3.1-flash-lite",
+        fingerprint="fingerprint",
+        purpose=CredentialPurpose.MESSAGE_LLM,
+        _secret="not-a-real-key",
+    )
+    with pytest.raises(RetrievalRouterOutputError) as exc_info:
+        asyncio.run(
+            DirectLlmRetrievalRouterProvider(material).route(
+                RetrievalRouterRequest(user_message="안녕 지금 기분이 어때?")
+            )
+        )
+    assert exc_info.value.validation_code == "current_context_not_minimal"
+    assert exc_info.value.diagnostic == "current_context_not_minimal"
+    assert "must-not-persist" not in str(exc_info.value.__dict__)
+    assert captured["thinking_level"] == "high"
+    assert captured["max_output_tokens"] == 3_072
+
+    captured.clear()
+
+    async def fake_repair(**kwargs):
+        captured.update(kwargs)
+        kwargs["tracker"].next_call_order()
+        return kwargs["validator"](_payload("CURRENT_CONTEXT"))
+
+    monkeypatch.setattr(
+        "app.integrations.llm.retrieval_router.direct_llm.generate_json",
+        fake_repair,
+    )
+    asyncio.run(
+        DirectLlmRetrievalRouterProvider(material).route(
+            RetrievalRouterRequest(
+                user_message="안녕 지금 기분이 어때?",
+                repair_diagnostic="current_context_not_minimal",
+            )
+        )
+    )
+    assert '"validation_code":"current_context_not_minimal"' in captured[
+        "user_prompt"
+    ]
+    assert '"diagnostic"' not in captured["user_prompt"]
+    assert "raw output must not escape" not in captured["user_prompt"]
+    assert captured["thinking_level"] == "high"
+    assert captured["max_output_tokens"] == 3_072
 
 
 def _user(user_id: str) -> models.User:

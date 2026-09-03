@@ -38,6 +38,72 @@ class ChatService:
     ) -> Any:
         return self._runtime.create_or_get_world_thread(db, user, world_id, data)
 
+    def update_world_thread_model(
+        self,
+        db: Any,
+        user: Any,
+        world_id: str,
+        thread_id: str,
+        data: Any,
+    ) -> Any:
+        return self._runtime.update_world_thread_model(
+            db, user, world_id, thread_id, data
+        )
+
+    def accept_world_message(
+        self, db: Any, user: Any, world_id: str, thread_id: str, data: Any
+    ) -> Any:
+        return self._runtime.accept_world_message(
+            db, user, world_id, thread_id, data
+        )
+
+    def retry_world_response(
+        self, db: Any, user: Any, world_id: str, thread_id: str, data: Any
+    ) -> Any:
+        return self._runtime.retry_world_response(
+            db, user, world_id, thread_id, data
+        )
+
+    def get_world_response_request(
+        self,
+        db: Any,
+        user: Any,
+        world_id: str,
+        thread_id: str,
+        request_id: str,
+    ) -> Any:
+        return self._runtime.get_world_response_request(
+            db, user, world_id, thread_id, request_id
+        )
+
+    def get_latest_world_response_request(
+        self, db: Any, user: Any, world_id: str, thread_id: str
+    ) -> Any:
+        return self._runtime.get_latest_world_response_request(
+            db, user, world_id, thread_id
+        )
+
+    def stream_world_response(
+        self,
+        db: Any,
+        user: Any,
+        world_id: str,
+        thread_id: str,
+        request_id: str,
+        *,
+        memory_recall_service: Any | None,
+        runtime_settings: Any,
+    ) -> Any:
+        return self._runtime.stream_world_response(
+            db,
+            user,
+            world_id,
+            thread_id,
+            request_id,
+            memory_recall_service=memory_recall_service,
+            runtime_settings=runtime_settings,
+        )
+
     def list_threads(self, db: Any, user: Any) -> Any:
         return self._runtime.list_threads(db, user)
 

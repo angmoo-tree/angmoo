@@ -755,6 +755,7 @@ def test_langgraph_supervisor_thinking_level_is_unused(
 
 def test_generate_content_config_sets_thinking_level() -> None:
     config = direct_llm._generate_content_config(
+        model="gemini-3.1-flash-lite",
         system_prompt="system",
         max_output_tokens=128,
         response_mime_type="application/json",
@@ -768,6 +769,7 @@ def test_generate_content_config_sets_thinking_level() -> None:
 
 def test_generate_content_config_sets_medium_thinking_level() -> None:
     config = direct_llm._generate_content_config(
+        model="gemini-3.1-flash-lite",
         system_prompt="system",
         max_output_tokens=128,
         response_mime_type="application/json",
@@ -781,6 +783,7 @@ def test_generate_content_config_sets_medium_thinking_level() -> None:
 
 def test_generate_content_config_omits_thinking_config_by_default() -> None:
     config = direct_llm._generate_content_config(
+        model="gemini-3.1-flash-lite",
         system_prompt="system",
         max_output_tokens=128,
         response_mime_type="application/json",
@@ -793,6 +796,7 @@ def test_generate_content_config_omits_thinking_config_by_default() -> None:
 
 def test_generate_content_config_omits_sampling_parameters() -> None:
     config = direct_llm._generate_content_config(
+        model="gemini-3.1-flash-lite",
         system_prompt="system",
         max_output_tokens=128,
         response_mime_type="application/json",

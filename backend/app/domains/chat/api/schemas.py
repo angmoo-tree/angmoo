@@ -7,11 +7,12 @@ legacy wire contract; it does not alter legacy request payloads.
 """
 
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.core.profile_ref import ProfileRef
+from app.domains.chat.domain.model_binding import MessageModelBindingMode
 from app.providers.registry import MESSAGE_GOOGLE_MODELS
 
 
@@ -85,6 +86,9 @@ class MessageThreadRead(BaseModel):
     requester: ProfileRef
     character: ProfileRef
     selected_model: str
+    model_binding_mode: MessageModelBindingMode = (
+        MessageModelBindingMode.THREAD_OVERRIDE
+    )
     last_message_at: datetime | None = None
     created_at: datetime
     latest_message: MessageMessageRead | None = None
@@ -147,11 +151,22 @@ class WorldChatThreadRead(BaseModel):
     world_id: str
     requester: WorldChatRoleRead
     responding: WorldChatRoleRead
-    selected_model: str
+    selected_model: MessageGoogleModel
+    default_model: MessageGoogleModel
+    model_binding_mode: MessageModelBindingMode
     last_message_at: datetime | None = None
     created_at: datetime
     latest_message: MessageMessageRead | None = None
     messages: list[MessageMessageRead] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def validate_resolved_model(self) -> "WorldChatThreadRead":
+        if (
+            self.model_binding_mode is MessageModelBindingMode.DEFAULT
+            and self.selected_model != self.default_model
+        ):
+            raise ValueError("default-bound World Chat model is not resolved")
+        return self
 
 
 class WorldChatThreadListRead(BaseModel):
@@ -166,3 +181,57 @@ class WorldChatThreadCreateRead(BaseModel):
     resolution_code: Literal[
         "requester_missing", "requester_cardinality_anomaly"
     ] | None = None
+
+
+class WorldChatThreadModelUpdate(BaseModel):
+    mode: MessageModelBindingMode
+    selected_model: MessageGoogleModel | None = None
+
+    @model_validator(mode="after")
+    def validate_binding(self) -> "WorldChatThreadModelUpdate":
+        if self.mode is MessageModelBindingMode.DEFAULT:
+            if self.selected_model is not None:
+                raise ValueError("default binding cannot include selected_model")
+            return self
+        if self.selected_model is None:
+            raise ValueError("thread_override requires selected_model")
+        return self
+
+
+class WorldChatMessageCreate(BaseModel):
+    content: str = Field(min_length=1, max_length=4000)
+    idempotency_key: str = Field(min_length=16, max_length=160)
+
+
+class WorldChatRetryCreate(BaseModel):
+    failed_request_id: str = Field(min_length=1, max_length=64)
+    idempotency_key: str = Field(min_length=16, max_length=160)
+
+
+class WorldChatGenerationRequestRead(BaseModel):
+    protocol_version: Literal["chat-generation-stream.v1"] = (
+        "chat-generation-stream.v1"
+    )
+    request_id: str
+    request_scope_hash: str
+    generation_id: str
+    attempt_number: int
+    response_slot_id: str
+    state: str
+    route: str | None = None
+    retryable: bool = False
+    failure_class: str | None = None
+    last_accepted_sequence: int = -1
+    user_message: MessageMessageRead
+    assistant_message: MessageMessageRead | None = None
+    response_metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class WorldChatMessageAcceptRead(BaseModel):
+    outcome: Literal["accepted", "replayed"]
+    user_message: MessageMessageRead
+    response_request: WorldChatGenerationRequestRead
+
+
+class WorldChatLatestRequestRead(BaseModel):
+    response_request: WorldChatGenerationRequestRead | None = None

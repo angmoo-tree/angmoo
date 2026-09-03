@@ -8,6 +8,16 @@ from app.domains.chat.application.answer_request import (
 from app.domains.chat.application.generation_lifecycle import (
     GenerationLifecycleService,
 )
+from app.domains.chat.application.character_response import (
+    CharacterResponseGenerationResult,
+    CharacterResponseGenerationService,
+    character_response_deltas,
+)
+from app.domains.chat.application.evidence_assembly import EvidenceBundleAssembler
+from app.domains.chat.application.response_workflow import (
+    ResponseGenerationWorkflowService,
+    ResponseWorkflowCommand,
+)
 from app.domains.chat.application.messages import ChatService
 from app.domains.chat.application.retrieval_routing import (
     ClarificationCandidate,
@@ -43,6 +53,8 @@ __all__ = [
     "BothRetrievalResult",
     "BothRetrievalWorkflowCoordinator",
     "ChatService",
+    "CharacterResponseGenerationResult",
+    "CharacterResponseGenerationService",
     "CanonicalPlanningMetrics",
     "CanonicalPlanningResult",
     "CanonicalRetrievalCommand",
@@ -52,6 +64,7 @@ __all__ = [
     "CoordinatedRetrievalReference",
     "FakeAnswerRequestResult",
     "GenerationLifecycleService",
+    "EvidenceBundleAssembler",
     "GraphPlanningMetrics",
     "GraphPlanningResult",
     "GraphRetrievalCommand",
@@ -59,5 +72,8 @@ __all__ = [
     "RetrievalRoutingMetrics",
     "RetrievalRoutingResult",
     "RetrievalRoutingService",
+    "ResponseGenerationWorkflowService",
+    "ResponseWorkflowCommand",
     "WorkflowCoordinatorMetrics",
+    "character_response_deltas",
 ]

@@ -4,6 +4,7 @@ import type {
 } from "./chat-contract";
 
 export type WorldChatControlMode = "autonomous" | "owner_controlled";
+export type WorldChatModelBindingMode = "default" | "thread_override";
 
 export type WorldChatRoleRead = {
   world_character_id: string;
@@ -38,7 +39,9 @@ export type WorldChatThreadRead = {
   world_id: string;
   requester: WorldChatRoleRead;
   responding: WorldChatRoleRead;
-  selected_model: string;
+  selected_model: MessageGoogleGeminiModel;
+  default_model: MessageGoogleGeminiModel;
+  model_binding_mode: WorldChatModelBindingMode;
   last_message_at: string | null;
   created_at: string;
   latest_message: MessageMessageRead | null;
@@ -64,6 +67,78 @@ export type WorldChatThreadCreateRead = {
     | "requester_missing"
     | "requester_cardinality_anomaly"
     | null;
+};
+
+export type WorldChatThreadModelUpdate =
+  | { mode: "default" }
+  | {
+      mode: "thread_override";
+      selected_model: MessageGoogleGeminiModel;
+    };
+
+export type WorldChatGenerationState =
+  | "accepted"
+  | "lease_acquired"
+  | "preflighted"
+  | "routing"
+  | "resolving"
+  | "current_context_ready"
+  | "canonical_planning"
+  | "graph_planning"
+  | "both_coordinating"
+  | "clarification_prepared"
+  | "optional_retrieving"
+  | "evidence_frozen"
+  | "response_generating"
+  | "response_streaming"
+  | "committing"
+  | "committed"
+  | "rejected"
+  | "cancelled"
+  | "timed_out"
+  | "failed"
+  | "orphaned";
+
+export type WorldChatGenerationRequestRead = {
+  protocol_version: "chat-generation-stream.v1";
+  request_id: string;
+  request_scope_hash: string;
+  generation_id: string;
+  attempt_number: number;
+  response_slot_id: string;
+  state: WorldChatGenerationState;
+  route: "CURRENT_CONTEXT" | "CANONICAL" | "GRAPH" | "BOTH" | "CLARIFICATION" | null;
+  retryable: boolean;
+  failure_class: string | null;
+  last_accepted_sequence: number;
+  user_message: MessageMessageRead;
+  assistant_message: MessageMessageRead | null;
+  response_metadata: Record<string, unknown>;
+};
+
+export type WorldChatMessageAcceptRead = {
+  outcome: "accepted" | "replayed";
+  user_message: MessageMessageRead;
+  response_request: WorldChatGenerationRequestRead;
+};
+
+export type WorldChatLatestRequestRead = {
+  response_request: WorldChatGenerationRequestRead | null;
+};
+
+export type WorldChatGenerationEvent = {
+  protocol_version: "chat-generation-stream.v1";
+  request_id: string;
+  request_scope_hash: string;
+  generation_id: string;
+  attempt_number: number;
+  sequence: number;
+  type: "accepted" | "delta" | "completed" | "failed" | "cancelled";
+  payload:
+    | Record<string, never>
+    | { text: string }
+    | { failure_class: string; retryable: boolean }
+    | { reason: string };
 };
 
 export function resolvedLegacyWorldChatRouteParts(thread: {

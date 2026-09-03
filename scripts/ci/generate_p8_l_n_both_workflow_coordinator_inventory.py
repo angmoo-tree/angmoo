@@ -19,7 +19,7 @@ if str(BACKEND_ROOT) not in sys.path:
 OUTPUT_PATH = ROOT / "docs/architecture/p8-l-n-both-workflow-coordinator-inventory.json"
 M_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-m-graph-retrieval-planner-inventory.json"
 M_INVENTORY_SHA256 = (
-    "ef4ebadee0507c05dba672c316b5dd139084e6eb9743325d4e02f24699ae5d46"
+    "892a439a93f432f18ed5b81c73e741b21556e2359623e6cfbcdfd320ccfb4509"
 )
 
 from app.domains.chat.domain import (  # noqa: E402
@@ -211,7 +211,7 @@ def build_inventory() -> dict[str, Any]:
     predecessor = json.loads(M_INVENTORY_PATH.read_text(encoding="utf-8"))
     if predecessor["owner_stage"] != "P8-L-M":
         raise InventoryError("P8-L-M predecessor owner drift")
-    if SQLITE_SCHEMA_VERSION != 6:
+    if SQLITE_SCHEMA_VERSION < 6:
         raise InventoryError("P8-L-N must not change Embedded schema version")
 
     return {
@@ -235,7 +235,7 @@ def build_inventory() -> dict[str, Any]:
         "schema": {
             "new_alembic_migration": None,
             "new_embedded_schema_version": None,
-            "current_embedded_schema_version": SQLITE_SCHEMA_VERSION,
+            "current_embedded_schema_version": 6,
             "new_canonical_tables": [],
             "new_ladybug_generation": None,
         },

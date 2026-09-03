@@ -229,6 +229,7 @@ def test_gemini_transport_schemas_use_only_fixed_properties() -> None:
 
     for response_schema in (profile_schema, *repertoire_schemas):
         config = build_generate_content_config(
+            model="gemini-3.1-flash-lite",
             system_prompt="system",
             max_output_tokens=128,
             response_mime_type="application/json",

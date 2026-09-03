@@ -75,6 +75,14 @@ class GraphPlanningMetrics:
     result_count: int
     provider: str | None
     model: str | None
+    prompt_token_count: int | None = None
+    output_token_count: int | None = None
+    thought_token_count: int | None = None
+    total_token_count: int | None = None
+    latency_ms: int | None = None
+    thinking_level: str | None = None
+    max_output_tokens: int | None = None
+    finish_reason: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -212,6 +220,14 @@ class GraphRetrievalPlanningService:
                 result_count=len(execution.results),
                 provider=provider_result.provider,
                 model=provider_result.model,
+                prompt_token_count=provider_result.prompt_token_count,
+                output_token_count=provider_result.output_token_count,
+                thought_token_count=provider_result.thought_token_count,
+                total_token_count=provider_result.total_token_count,
+                latency_ms=provider_result.latency_ms,
+                thinking_level=provider_result.thinking_level,
+                max_output_tokens=provider_result.max_output_tokens,
+                finish_reason=provider_result.finish_reason,
             ),
             call_tracker=tracker.snapshot(),
         )

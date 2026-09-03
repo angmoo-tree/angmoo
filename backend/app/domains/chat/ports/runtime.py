@@ -22,6 +22,48 @@ class ChatRuntimePort(Protocol):
         self, db: Any, user: Any, world_id: str, data: Any
     ) -> Any: ...
 
+    def update_world_thread_model(
+        self,
+        db: Any,
+        user: Any,
+        world_id: str,
+        thread_id: str,
+        data: Any,
+    ) -> Any: ...
+
+    def accept_world_message(
+        self, db: Any, user: Any, world_id: str, thread_id: str, data: Any
+    ) -> Any: ...
+
+    def retry_world_response(
+        self, db: Any, user: Any, world_id: str, thread_id: str, data: Any
+    ) -> Any: ...
+
+    def get_world_response_request(
+        self,
+        db: Any,
+        user: Any,
+        world_id: str,
+        thread_id: str,
+        request_id: str,
+    ) -> Any: ...
+
+    def get_latest_world_response_request(
+        self, db: Any, user: Any, world_id: str, thread_id: str
+    ) -> Any: ...
+
+    def stream_world_response(
+        self,
+        db: Any,
+        user: Any,
+        world_id: str,
+        thread_id: str,
+        request_id: str,
+        *,
+        memory_recall_service: Any | None,
+        runtime_settings: Any,
+    ) -> Any: ...
+
     def list_threads(self, db: Any, user: Any) -> Any: ...
 
     def get_thread(self, db: Any, user: Any, thread_id: str) -> Any: ...

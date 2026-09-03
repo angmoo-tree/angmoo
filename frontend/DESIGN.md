@@ -1,11 +1,11 @@
 ---
 name: Angmoo Local
 document: Frontend Design Contract
-version: 1.8
-date: 2026-09-01
-status: CANONICAL DESIGN CONTRACT · SINGLE BRIGHT-CORAL BRAND + THREE USER-APPROVED CONTRAST EXCEPTIONS · UI-A~UI-F FULL PASS/MERGED/POST-MERGE PASS · P8-L-A CONTRACT FROZEN · P8-L-B BACKEND STRUCTURE PARITY MERGED/POST-MERGE PASS · P8-L-C FRONTEND STRUCTURE PARITY MERGED/POST-MERGE 6/6 PASS · P8-L-D WORLD CHAT IDENTITY/READ-ONLY SLICE MERGED/POST-MERGE 7/7 PASS · P8-L-E WORLD SOCIAL PROFILE/LETTER ENTRY PR #221 HOTFIX IMPLEMENTED IN WORKTREE/EXACT-HEAD RECERTIFICATION IN PROGRESS · CURRENT UI CONFORMANCE INCOMPLETE
+version: 1.9
+date: 2026-09-02
+status: CANONICAL DESIGN CONTRACT · SINGLE BRIGHT-CORAL BRAND + THREE USER-APPROVED CONTRAST EXCEPTIONS · UI-A~UI-F FULL PASS/MERGED/POST-MERGE PASS · P8-L-A~O STAGED HISTORY RECORDED · P8-L-P WORLD CHAT COMPOSER/GENERATION/CRG-ONLY STREAMING IMPLEMENTED IN WORKTREE · LOCAL/CI/USER/MERGE GATES SEPARATE · CURRENT UI CONFORMANCE INCOMPLETE
 scope: Device Phone · World App · Creator Studio · Relationship Graph · current L4.5 surfaces · P8-L Chat/Memory target contract
-implementation_phase: L4.5 UI-A through UI-F merged and post-merge closed on exact merge 81e428bc069184edba06caf3c5821bae3cc6bfd7 · P8-L-A freezes Chat/Memory adoption, route, window and state contracts only · P8-L-B backend Chat domain structure parity merged and post-merge closed on exact merge aceaec799ccd816070613aa6037793780606c590 · P8-L-C frontend Chat feature structure parity merged on exact merge 8a83f48ed565992f8c3e7dd1dbe958f33997e7ab and post-merge closed 6/6 · P8-L-D World-scoped identity/read-only list-thread slice merged on exact merge 4359951b34768b16f83dbc0e6c8435b13bfbc821 with user Gate and post-merge Actions 7/7 PASS · P8-L-E Draft PR #221 implements exact World social author profile capability, WorldCharacter public profile, letter CTA and idempotent Chat thread entry; its merge-before follow-up adds current-World four-count/three-tab activity, hidden Phone scrollbar/no gutter, centered directory icon and Tauri-safe back navigation while new exact-head recertification and user/merge Gates remain pending · message write, generation, retrieval and canonical Memory remain unimplemented
+implementation_phase: L4.5 UI-A through UI-F merged and post-merge closed · P8-L-D/E World-scoped identity, profile and letter entry merged · P8-L-F~O canonical Memory, recall, durable generation, Router/Planners, BOTH and maintenance foundations are historical merged stages · P8-L-P connects World Chat message acceptance, Evidence Bundle, exactly-once Character Response Generator, CRG-only NDJSON transport, composer, typing presence and retry in the current worktree · local technical, Hosted CI, user, merge and post-merge Gates remain separately recorded · Memory read/control UI remains unimplemented
 hosted_reference_commit: 7f967abd6117381be5c081ed284addb889b06fec
 local_reference_commit: e5e62aed69cb89b16b5870eb0854dd07752dc519
 legacy_reference: audited-internal-snapshot
@@ -239,14 +239,14 @@ backend payload와 현재 제품 계약에 있는 기능만 interactive하게 �
 | Creator Studio | Workspace | `CreatorStudioFrame` | Wide | `studio` |
 | Relationship Graph | Workspace | `RelationshipGraphFrame` | Wide | `relationship-graph` |
 
-이 표의 Characters는 P8-L-E에서 active same-World WorldCharacter directory와 public profile surface로 활성화됐다. World Chat은 P8-L-D의 explicit requester→responding read-only list/thread 위에 P8-L-E의 profile/letter create-or-get 진입을 추가했지만, composer/send·generation·streaming·retry lifecycle·Memory는 구현되지 않았다. P8-L-A는 Memory의 목표 route `/memory`와 wide logical window kind `memory`를 계약으로 고정했지만 실제 route·window·feature가 구현된 것으로 기록하지 않는다. Diagnostics·Backup도 여전히 후속 단계 전에는 구현된 window kind로 간주하지 않는다.
+이 표의 Characters는 P8-L-E에서 active same-World WorldCharacter directory와 public profile surface로 활성화됐다. World Chat은 P8-L-D/E의 explicit requester→responding list/thread·profile/letter create-or-get 위에 P8-L-P의 composer/send, generation, 단일 `입력 중`, CRG-only delta와 typed retry lifecycle을 추가한다. P8-L-A는 Memory의 목표 route `/memory`와 wide logical window kind `memory`를 계약으로 고정했지만 실제 route·window·feature가 구현된 것으로 기록하지 않는다. Diagnostics·Backup도 여전히 후속 단계 전에는 구현된 window kind로 간주하지 않는다.
 
 P8-L 목표 surface:
 
 | Surface | Product kind | Shell | layout | target Tauri kind | 현재 상태 |
 |---|---|---|---|---|---|
-| World Chat list/thread | World App | `DeviceShell` → `DeviceFrame` | Phone | existing `phone` | P8-L-D read-only identity slice; write/generation absent |
-| WorldCharacter public profile | World App | `DeviceShell` → `DeviceFrame` | Phone | existing `phone` | P8-L-E exact same-World identity·4 metrics·3 activity tabs·letter entry; send/generation absent |
+| World Chat list/thread | World App | `DeviceShell` → `DeviceFrame` | Phone | existing `phone` | P8-L-P composer·canonical send·single typing presence·CRG-only delta·typed retry implemented in worktree |
+| WorldCharacter public profile | World App | `DeviceShell` → `DeviceFrame` | Phone | existing `phone` | P8-L-E exact same-World identity·4 metrics·3 activity tabs·letter entry; Chat generation은 P8-L-P route에서 수행 |
 | owner Memory workspace | Workspace | `MemoryWorkspaceShell` | Wide; narrow Browser single-column | new `memory` | contract only; route·window absent |
 
 ### 4.2 실행 경로별 Device 표현
@@ -1148,6 +1148,18 @@ UI-E PR #209 후속 Hotfix는 사용자 visual에서 발견된 `최근 결과` r
 - requester `zero / one / anomaly`를 typed chat-entry로 확인한다. one만 idempotent active thread create-or-get을 실행하며 zero/anomaly/self/blocked/inactive/cross-World는 fail closed다.
 - letter entry는 navigation origin인 post/reply를 Chat evidence로 자동 주입하지 않는다. composer/send·generation·streaming·retrieval·Memory는 후속 단계에 남는다.
 
+### 18.10 P8-L-P World Chat generation·streaming
+
+- World Chat composer는 user message canonical save가 accepted된 뒤에만 화면 transcript에 반영하고, save 실패는 draft와 같은 idempotency key를 보존한 `[다시 보내기]`로 복구한다.
+- Router·Canonical/Graph Planner·typed retrieval·Evidence assembly는 내부 state로만 추적한다. 300ms 이상 active일 때 Character당 단일 `입력 중` presence를 보이고 first CRG delta·terminal·thread switch에서 제거한다. backend artificial delay는 없다.
+- `chat-generation-stream.v1`에서 사용자-visible delta는 검증된 Character Response Generator의 `{ text }`뿐이다. request scope·generation·attempt·monotonic sequence가 맞지 않는 event는 적용하지 않는다.
+- response failure는 stable response slot의 semantic danger bubble로 교체한다. latest retryable failure만 `[다시 시도]`를 제공하고 retry 중 spinner와 `다시 시도 중`을 보이며 같은 user message를 복제하지 않는다.
+- credential·provider setting처럼 반복으로 해결되지 않는 failure는 Settings recovery CTA를 사용한다. provider 이름, HTTP status, internal route/query/evidence/reasoning은 표시하지 않는다.
+- Chat header의 모델 selector는 `features/chat`이 소유한다. `기본 모델 사용`은 현재 Local 제품 기본 모델을 따르고, 특정 모델 선택은 World thread override가 된다. browser storage나 표시 문자열로 binding을 추측하지 않는다.
+- pending·streaming·retry·model update 동안 selector를 disable한다. model PATCH 실패 시 이전 선택으로 rollback하고 `모델을 바꾸지 못했어요.`와 명시적 재시도를 표시한다. 모델 변경 자체는 실패 응답을 자동 재생성하지 않는다.
+- accepted request의 모델 snapshot과 Gemini 계열별 thinking config는 backend 진단 계약이며 사용자 화면에 노출하지 않는다.
+- 현재 adapter는 provider 전체 답변을 safety 검증한 뒤 bounded delta로 나누므로 provider-native token streaming을 구현했다고 주장하지 않는다. Memory read/control UI는 후속 P8-L-Q/R 범위다.
+
 따라서 현재 허용되는 판정:
 
 ```text
@@ -1164,8 +1176,9 @@ P8-L-A CHAT·MEMORY CONTRACT AND INVENTORY FROZEN / RUNTIME FEATURE NOT IMPLEMEN
 P8-L-B BACKEND CHAT DOMAIN STRUCTURE PARITY MERGED / POST-MERGE 5/5 PASS
 P8-L-C FRONTEND CHAT FEATURE STRUCTURE PARITY MERGED / POST-MERGE 6/6 PASS
 P8-L-D WORLD CHAT IDENTITY·READ-ONLY SLICE MERGED / POST-MERGE 7/7 PASS
-P8-L-E WORLD SOCIAL PROFILE·LETTER CHAT ENTRY PR #221 HOTFIX IMPLEMENTED IN WORKTREE / EXACT-HEAD RECERTIFICATION IN PROGRESS
-P8-L CHAT V2·CANONICAL MEMORY PRODUCT RUNTIME PARTIAL / WRITE·GENERATION·RETRIEVAL·MEMORY NOT STARTED
+P8-L-E WORLD SOCIAL PROFILE·LETTER CHAT ENTRY MERGED / USER INSTALLATION GATE PASS
+P8-L-P WORLD CHAT MESSAGE·EVIDENCE·CRG-ONLY STREAMING + PR #245 MODEL-BINDING/GEMINI-COMPATIBILITY HOTFIX IMPLEMENTED IN WORKTREE / LOCAL·HOSTED·USER·MERGE GATES SEPARATE
+P8-L CHAT V2·CANONICAL MEMORY PRODUCT RUNTIME PARTIAL / MEMORY READ·OWNER CONTROL·FINAL CAUSAL CLOSEOUT PENDING
 ```
 
 token·shell·social core·Local-only surface·visual/runtime Gate와 사용자 승인이 모두 닫혔으므로 현재 함께 허용되는 판정:

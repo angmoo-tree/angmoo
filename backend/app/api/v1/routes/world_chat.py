@@ -76,6 +76,8 @@ def create_or_get_world_thread(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     except chat.MessageThreadLimitError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except chat.MessageInFlightError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except chat.MessageValidationError as exc:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -100,6 +102,36 @@ def get_world_thread(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
     except chat.MessageValidationError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+
+
+@router.patch(
+    "/threads/{thread_id}/model",
+    response_model=chat.WorldChatThreadRead,
+)
+def update_world_thread_model(
+    world_id: str,
+    thread_id: str,
+    data: chat.WorldChatThreadModelUpdate,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> chat.WorldChatThreadRead:
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        return chat_service.update_world_thread_model(
+            db, user, world_id, thread_id, data
+        )
+    except chat.MessageNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except chat.MessageForbiddenError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+    except chat.MessageInFlightError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except chat.MessageValidationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(exc),
+        ) from exc
 
 
 __all__ = ["entry_router", "router"]

@@ -21,6 +21,8 @@ from app.domains.chat.domain.errors import (
     MessageThreadLimitError,
     MessageValidationError,
 )
+from app.domains.chat.domain.generation_lifecycle import TERMINAL_STATES
+from app.domains.chat.domain.model_binding import MessageModelBindingMode
 from app.domains.chat.domain.policies import (
     API_KEY_INVALID_MESSAGE,
     API_KEY_MISSING_MESSAGE,
@@ -42,6 +44,7 @@ from app.runtime.chat import model_bindings as models
 from app.core import security
 from app.core import prompt_safety
 from app.credentials import (
+    CredentialMaterial,
     CredentialPurpose,
     CredentialResolutionError,
     CredentialResolver,
@@ -227,8 +230,19 @@ def create_or_get_world_thread(
     if existing is not None:
         try:
             if data.selected_model:
+                existing = _get_owned_world_thread(
+                    db,
+                    user,
+                    world_id,
+                    existing.id,
+                    lock_thread=True,
+                )
+                _ensure_no_active_world_response_request(db, existing.id)
                 _ensure_supported_model(data.selected_model)
                 existing.selected_model = data.selected_model
+                existing.model_binding_mode = (
+                    MessageModelBindingMode.THREAD_OVERRIDE.value
+                )
                 db.flush()
                 thread_read = _world_thread_read(
                     db, existing, include_messages=True, lock_scope=True
@@ -269,6 +283,11 @@ def create_or_get_world_thread(
             responding_world_character_id=responding.id,
             world_scope_status="resolved",
             selected_model=selected_model,
+            model_binding_mode=(
+                MessageModelBindingMode.THREAD_OVERRIDE.value
+                if data.selected_model is not None
+                else MessageModelBindingMode.DEFAULT.value
+            ),
         )
         db.add(thread)
         db.flush()
@@ -301,6 +320,78 @@ def create_or_get_world_thread(
         outcome="created",
         thread=thread_read,
     )
+
+
+def update_world_thread_model(
+    db: Session,
+    user: models.User,
+    world_id: str,
+    thread_id: str,
+    data: schemas.WorldChatThreadModelUpdate,
+) -> schemas.WorldChatThreadRead:
+    """Change the next-generation model without mutating accepted snapshots."""
+
+    _require_world_chat_owner_scope(db, user.id, world_id)
+    thread = _get_owned_world_thread(
+        db,
+        user,
+        world_id,
+        thread_id,
+        lock_thread=True,
+    )
+    _world_thread_read(db, thread, include_messages=False, lock_scope=True)
+    _ensure_no_active_world_response_request(db, thread.id)
+    if data.mode is MessageModelBindingMode.DEFAULT:
+        thread.model_binding_mode = MessageModelBindingMode.DEFAULT.value
+        resolve_world_thread_response_model(db, user, thread)
+    else:
+        if data.selected_model is None:
+            raise MessageValidationError("고정할 모델을 선택해 주세요.")
+        _ensure_supported_model(data.selected_model)
+        thread.model_binding_mode = MessageModelBindingMode.THREAD_OVERRIDE.value
+        thread.selected_model = data.selected_model
+        db.flush()
+    read = _world_thread_read(db, thread, include_messages=True, lock_scope=True)
+    db.commit()
+    return read
+
+
+def _ensure_no_active_world_response_request(db: Session, thread_id: str) -> None:
+    active = db.scalar(
+        select(models.ChatResponseRequest.request_id)
+        .where(
+            models.ChatResponseRequest.thread_id == thread_id,
+            models.ChatResponseRequest.state.not_in(
+                tuple(state.value for state in TERMINAL_STATES)
+            ),
+        )
+        .limit(1)
+    )
+    if active is not None:
+        raise MessageInFlightError("답장을 만드는 동안에는 모델을 바꿀 수 없습니다.")
+
+
+def resolve_world_thread_response_model(
+    db: Session,
+    user: models.User,
+    thread: models.MessageThread,
+) -> str:
+    """Resolve and persist the model used by the next accepted attempt."""
+
+    if thread.requester_id != user.id or thread.world_scope_status != "resolved":
+        raise MessageValidationError("World Chat 모델 범위를 확인할 수 없습니다.")
+    try:
+        binding = MessageModelBindingMode(thread.model_binding_mode)
+    except ValueError as exc:
+        raise MessageValidationError("World Chat 모델 binding이 올바르지 않습니다.") from exc
+    if binding is MessageModelBindingMode.DEFAULT:
+        preference = ensure_user_preference(db, user, commit_if_created=False)
+        _ensure_supported_model(preference.default_model)
+        thread.selected_model = preference.default_model
+    else:
+        _ensure_supported_model(thread.selected_model)
+    db.flush()
+    return thread.selected_model
 
 
 def _owner_controlled_world_characters(
@@ -550,6 +641,7 @@ def create_or_get_thread(
         character_id=character.id,
         world_scope_status="ambiguous",
         selected_model=selected_model,
+        model_binding_mode=MessageModelBindingMode.THREAD_OVERRIDE.value,
     )
     db.add(thread)
     db.commit()
@@ -579,6 +671,7 @@ def update_thread(
     _ensure_supported_model(data.selected_model)
     thread = _get_owned_legacy_mutable_thread(db, user, thread_id)
     thread.selected_model = data.selected_model
+    thread.model_binding_mode = MessageModelBindingMode.THREAD_OVERRIDE.value
     db.commit()
     db.refresh(thread)
     return _thread_read(db, thread, include_messages=True)
@@ -902,6 +995,16 @@ def update_user_settings(
     if data.default_model is not None:
         _ensure_supported_model(data.default_model)
         preference.default_model = data.default_model
+        db.execute(
+            update(models.MessageThread)
+            .where(
+                models.MessageThread.requester_id == user.id,
+                models.MessageThread.deleted_at.is_(None),
+                models.MessageThread.model_binding_mode
+                == MessageModelBindingMode.DEFAULT.value,
+            )
+            .values(selected_model=data.default_model)
+        )
     if data.credential_source is not None:
         preference.credential_source = data.credential_source
     if data.source_character_id is not None:
@@ -1012,6 +1115,7 @@ def _thread_read(
         requester=_user_ref(thread.requester),
         character=_character_ref(thread.character),
         selected_model=thread.selected_model,
+        model_binding_mode=thread.model_binding_mode,
         last_message_at=thread.last_message_at,
         created_at=thread.created_at,
         latest_message=latest_message,
@@ -1085,12 +1189,24 @@ def _world_thread_read(
         raise MessageForbiddenError("이 Character와는 지금 대화할 수 없습니다.")
     messages = _thread_messages(db, thread.id) if include_messages else []
     latest_message = messages[-1] if messages else _latest_thread_message(db, thread.id)
+    preference = db.get(models.UserMessagePreference, thread.requester_id)
+    default_model = (
+        DEFAULT_MESSAGE_MODEL if preference is None else preference.default_model
+    )
+    _ensure_supported_model(default_model)
+    resolved_model = (
+        default_model
+        if thread.model_binding_mode == MessageModelBindingMode.DEFAULT.value
+        else thread.selected_model
+    )
     return schemas.WorldChatThreadRead(
         id=thread.id,
         world_id=thread.world_id,
         requester=requester,
         responding=responding,
-        selected_model=thread.selected_model,
+        selected_model=resolved_model,
+        default_model=default_model,
+        model_binding_mode=thread.model_binding_mode,
         last_message_at=thread.last_message_at,
         created_at=thread.created_at,
         latest_message=latest_message,
@@ -1202,17 +1318,23 @@ def _get_owned_legacy_mutable_thread(
 
 
 def _get_owned_world_thread(
-    db: Session, user: models.User, world_id: str, thread_id: str
+    db: Session,
+    user: models.User,
+    world_id: str,
+    thread_id: str,
+    *,
+    lock_thread: bool = False,
 ) -> models.MessageThread:
-    thread = db.scalar(
-        select(models.MessageThread).where(
-            models.MessageThread.id == thread_id,
-            models.MessageThread.requester_id == user.id,
-            models.MessageThread.world_id == world_id,
-            models.MessageThread.world_scope_status == "resolved",
-            models.MessageThread.deleted_at.is_(None),
-        )
+    statement = select(models.MessageThread).where(
+        models.MessageThread.id == thread_id,
+        models.MessageThread.requester_id == user.id,
+        models.MessageThread.world_id == world_id,
+        models.MessageThread.world_scope_status == "resolved",
+        models.MessageThread.deleted_at.is_(None),
     )
+    if lock_thread and _is_postgresql_session(db):
+        statement = statement.with_for_update()
+    thread = db.scalar(statement)
     if thread is None:
         raise MessageNotFoundError("World Chat thread를 찾을 수 없습니다.")
     return thread
@@ -1265,6 +1387,14 @@ def _ensure_character_available_for_messages(
 def _resolve_message_credential(
     db: Session, user: models.User
 ) -> tuple[models.LlmCredential, str]:
+    credential, material = resolve_message_credential_material(db, user)
+    return credential, material.reveal()
+
+
+def resolve_message_credential_material(
+    db: Session,
+    user: models.User,
+) -> tuple[models.LlmCredential, CredentialMaterial]:
     preference = ensure_user_preference(db, user)
     credential = (
         _get_agent_source_credential(db, user, preference)
@@ -1277,12 +1407,13 @@ def _resolve_message_credential(
             purpose=CredentialPurpose.MESSAGE_LLM,
             owner_id=user.id,
         )
-        api_key = material.reveal()
     except CredentialResolutionError as exc:
         if not _has_usable_credential(credential):
             raise MessageCredentialRequiredError(API_KEY_MISSING_MESSAGE) from exc
         raise MessageCredentialInvalidError(API_KEY_INVALID_MESSAGE) from exc
-    return credential, api_key
+    if credential is None:
+        raise MessageCredentialRequiredError(API_KEY_MISSING_MESSAGE)
+    return credential, material
 
 
 def _get_message_credential(

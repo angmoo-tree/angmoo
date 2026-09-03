@@ -16,11 +16,33 @@ from app.domains.chat.ports.retrieval_router_provider import (
     RetrievalRouterRequest,
 )
 from app.domains.chat.ports.runtime import ChatRuntimePort
+from app.domains.chat.ports.response_workflow import ResponseWorkflowUnitOfWorkPort
+from app.domains.chat.ports.successful_chat_memory import (
+    SuccessfulChatMemoryProducerPort,
+    SuccessfulChatMemorySource,
+)
+from app.domains.chat.ports.character_response_generator import (
+    CharacterResponseContextMessage,
+    CharacterResponseGeneratorError,
+    CharacterResponseGeneratorPort,
+    CharacterResponseGeneratorRequest,
+    CharacterResponseGeneratorResult,
+    CharacterResponseProfile,
+)
 
 __all__ = [
     "CanonicalRetrievalScope",
+    "CharacterResponseContextMessage",
+    "CharacterResponseGeneratorError",
+    "CharacterResponseGeneratorPort",
+    "CharacterResponseGeneratorRequest",
+    "CharacterResponseGeneratorResult",
+    "CharacterResponseProfile",
     "ChatRuntimePort",
     "ResponseLifecycleRepositoryPort",
+    "ResponseWorkflowUnitOfWorkPort",
+    "SuccessfulChatMemoryProducerPort",
+    "SuccessfulChatMemorySource",
     "RetrievalEntityCandidate",
     "RetrievalEntityResolution",
     "RetrievalPolicyResolverPort",

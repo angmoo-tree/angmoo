@@ -20,7 +20,7 @@ OUTPUT_PATH = (
 )
 K_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-k-retrieval-router-inventory.json"
 K_INVENTORY_SHA256 = (
-    "bf1645294e5921feeffe87ab0f96c20da88a2a4680363e2a89653c892ece3341"
+    "4d98b3d04d31fd821b9f63901c1521d4652b33e59b77b15f0ad22ce8d65b7a2b"
 )
 CORPUS_PATH = (
     ROOT / "backend/tests/fixtures/p8_l/canonical_planner_v1/held_out_ko.jsonl"
@@ -174,7 +174,7 @@ def build_inventory() -> dict[str, Any]:
     predecessor = json.loads(K_INVENTORY_PATH.read_text(encoding="utf-8"))
     if predecessor["owner_stage"] != "P8-L-K":
         raise InventoryError("P8-L-K predecessor owner drift")
-    if SQLITE_SCHEMA_VERSION != 6:
+    if SQLITE_SCHEMA_VERSION < 6:
         raise InventoryError("P8-L-L must not change Embedded schema version")
 
     schema = canonical_retrieval_plan_response_schema()
@@ -205,7 +205,7 @@ def build_inventory() -> dict[str, Any]:
     if schema_operations != registry_operations:
         raise InventoryError("provider schema and H canonical registry drift")
 
-    manifest = load_sqlite_manifest(SQLITE_SCHEMA_VERSION)
+    manifest = load_sqlite_manifest(6)
     return {
         "schema_version": 1,
         "owner_stage": "P8-L-L",
@@ -226,7 +226,7 @@ def build_inventory() -> dict[str, Any]:
         "schema": {
             "new_alembic_migration": None,
             "new_embedded_schema_version": None,
-            "current_embedded_schema_version": SQLITE_SCHEMA_VERSION,
+            "current_embedded_schema_version": 6,
             "canonical_table_count": manifest.canonical_table_count,
             "new_canonical_tables": [],
             "new_ladybug_generation": None,

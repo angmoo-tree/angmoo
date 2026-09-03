@@ -9,6 +9,7 @@ from app.domains.chat.domain.retrieval_intent import (
     RetrievalContractError,
     RetrievalIntentEnvelope,
 )
+from app.domains.chat.domain.retrieval_router import normalize_router_validation_code
 
 
 MAX_ROUTER_CONTEXT_MESSAGES = 20
@@ -21,14 +22,17 @@ class RetrievalRouterOutputError(RetrievalContractError):
 
     def __init__(
         self,
-        diagnostic: str,
+        validation_code: str,
         *,
         physical_attempt_count: int = 1,
     ) -> None:
         if physical_attempt_count < 1 or physical_attempt_count > 2:
             raise RetrievalContractError("retrieval_router_physical_attempt_invalid")
         super().__init__("retrieval_router_output_invalid")
-        self.diagnostic = diagnostic[:160]
+        self.validation_code = normalize_router_validation_code(validation_code)
+        # Compatibility alias for the existing repair request field.  The value
+        # is now always an allowlisted stable code, never arbitrary exception text.
+        self.diagnostic = self.validation_code
         self.physical_attempt_count = physical_attempt_count
 
 
@@ -84,8 +88,12 @@ class RetrievalRouterProviderResult:
     physical_attempt_count: int
     prompt_token_count: int | None = None
     output_token_count: int | None = None
+    thought_token_count: int | None = None
     total_token_count: int | None = None
     latency_ms: int | None = None
+    thinking_level: str | None = None
+    max_output_tokens: int | None = None
+    finish_reason: str | None = None
 
     def __post_init__(self) -> None:
         if self.physical_attempt_count < 1 or self.physical_attempt_count > 2:

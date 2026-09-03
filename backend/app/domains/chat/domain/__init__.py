@@ -25,6 +25,7 @@ from app.domains.chat.domain.resolved_envelope import (
 from app.domains.chat.domain.response_request import (
     CreateResponseRequest,
     DegradedReason,
+    EvidenceCapability,
     ResponseCommitPayload,
     ResponseMetadata,
     ResponseRequestRecord,
@@ -46,13 +47,21 @@ from app.domains.chat.domain.retrieval_intent import (
     RetrievalTimeMeaning,
 )
 from app.domains.chat.domain.retrieval_router import (
+    ROUTER_DIAGNOSTIC_VERSION,
     ROUTER_AGGREGATION_TARGETS,
     ROUTER_CLARIFICATION_SLOTS,
     ROUTER_COORDINATION_HINTS,
     ROUTER_ENTITY_ROLES,
     ROUTER_INTENTS,
+    ROUTER_SECURITY_VALIDATION_CODES,
+    ROUTER_VALIDATION_CODES,
+    RetrievalRouterRepairExhaustedError,
+    RouterFailureDiagnostic,
+    normalize_router_validation_code,
     parse_retrieval_intent_payload,
     retrieval_router_response_schema,
+    router_validation_code_from_exception,
+    router_validation_is_retryable,
 )
 from app.domains.chat.domain.workflow_recipe import (
     RETRIEVAL_WORKFLOW_VERSION,
@@ -67,16 +76,35 @@ from app.domains.chat.domain.workflow_recipe import (
     WorkflowRecipeSpec,
     select_workflow_recipe,
 )
+from app.domains.chat.domain.model_binding import (
+    MESSAGE_MODEL_BINDING_MODES,
+    MessageModelBindingMode,
+)
+from app.domains.chat.domain.evidence_bundle import (
+    EVIDENCE_BUNDLE_VERSION,
+    EvidenceBundle,
+    EvidenceBundleContractError,
+    EvidenceItem,
+    EvidenceKind,
+)
 
 __all__ = [
     "CHAT_GENERATION_STREAM_VERSION",
     "CreateResponseRequest",
     "DegradedReason",
+    "EvidenceCapability",
+    "EVIDENCE_BUNDLE_VERSION",
+    "EvidenceBundle",
+    "EvidenceBundleContractError",
+    "EvidenceItem",
+    "EvidenceKind",
     "GenerationContractError",
     "GenerationEvent",
     "GenerationEventType",
     "GenerationFence",
     "LlmNode",
+    "MESSAGE_MODEL_BINDING_MODES",
+    "MessageModelBindingMode",
     "NORMAL_NODE_BUDGETS",
     "RESOLVED_RETRIEVAL_VERSION",
     "RETRIEVAL_INTENT_VERSION",
@@ -105,8 +133,13 @@ __all__ = [
     "ROUTER_AGGREGATION_TARGETS",
     "ROUTER_CLARIFICATION_SLOTS",
     "ROUTER_COORDINATION_HINTS",
+    "ROUTER_DIAGNOSTIC_VERSION",
     "ROUTER_ENTITY_ROLES",
     "ROUTER_INTENTS",
+    "ROUTER_SECURITY_VALIDATION_CODES",
+    "ROUTER_VALIDATION_CODES",
+    "RetrievalRouterRepairExhaustedError",
+    "RouterFailureDiagnostic",
     "RouteAwareCallTracker",
     "SequenceOutcome",
     "TERMINAL_STATES",
@@ -119,7 +152,10 @@ __all__ = [
     "WorkflowRecipeSelection",
     "WorkflowRecipeSpec",
     "build_request_scope_hash",
+    "normalize_router_validation_code",
     "parse_retrieval_intent_payload",
     "retrieval_router_response_schema",
+    "router_validation_code_from_exception",
+    "router_validation_is_retryable",
     "select_workflow_recipe",
 ]

@@ -82,7 +82,7 @@
   },
   "historical_chain": {
     "current_tree_owner": "P8-L-L",
-    "p8_l_k_sha256": "bf1645294e5921feeffe87ab0f96c20da88a2a4680363e2a89653c892ece3341",
+    "p8_l_k_sha256": "4d98b3d04d31fd821b9f63901c1521d4652b33e59b77b15f0ad22ce8d65b7a2b",
     "predecessor_mode": "frozen_digest"
   },
   "metrics": [
@@ -111,8 +111,8 @@
   "owner_stage": "P8-L-L",
   "predecessor": {
     "path": "docs/architecture/p8-l-k-retrieval-router-inventory.json",
-    "sha256": "bf1645294e5921feeffe87ab0f96c20da88a2a4680363e2a89653c892ece3341",
-    "size": 7644
+    "sha256": "4d98b3d04d31fd821b9f63901c1521d4652b33e59b77b15f0ad22ce8d65b7a2b",
+    "size": 9171
   },
   "provider_schema": {
     "actual_id_fields": 0,
@@ -147,8 +147,8 @@
     },
     {
       "path": "backend/app/domains/memory/ports/canonical_planner_provider.py",
-      "sha256": "36fbb1222ee80a31144f0ae46c62cc53218c0e67c9efd37ef769d7dcef409243",
-      "size": 4946
+      "sha256": "878a9b265545a8e9bc11bb313200ca7e275cd81bce52581bad4ca1cab324a991",
+      "size": 5105
     },
     {
       "path": "backend/app/domains/memory/application/canonical_planning.py",
@@ -157,8 +157,8 @@
     },
     {
       "path": "backend/app/domains/chat/application/canonical_retrieval.py",
-      "sha256": "12370cff093e344ff86bc9378aae12258356189da2f92b57ae30bc23f8aa639e",
-      "size": 14661
+      "sha256": "bc0c7d93b77105d68acb1fe5e5493fee8fb54fb09d06d4b66f6b043cfb88dc3b",
+      "size": 15511
     },
     {
       "path": "backend/app/domains/chat/domain/call_tracker.py",
@@ -167,8 +167,8 @@
     },
     {
       "path": "backend/app/integrations/llm/canonical_retrieval_planner.py",
-      "sha256": "39bc5544839fe465333029c1681c0c881be66b6ff5c92a68de6428a9398e2e21",
-      "size": 8426
+      "sha256": "cf64562e55132044d8f57a2bf0fa0ba6697817ac1dea87a3f470f2182066f58b",
+      "size": 9214
     },
     {
       "path": "backend/tests/fixtures/p8_l/canonical_planner_v1/held_out_ko.jsonl",
@@ -177,18 +177,18 @@
     },
     {
       "path": "backend/tests/test_p8_l_l_canonical_retrieval_planner.py",
-      "sha256": "f1b55246dbc1504f68107bc211e97e352c557a609d7a6d82cc87a6c52bda1141",
-      "size": 23324
+      "sha256": "c18cb34a5b269fa2e18abb23bed58a5fcfd3dd401b7d73a3b6c405100d326023",
+      "size": 23608
     },
     {
       "path": "backend/tests/test_p8_l_l_canonical_retrieval_planner_inventory.py",
-      "sha256": "143cdaf0db07b53dbfa2b22c902b11609aa2f02f7b65f4d9daa7d2056e9c9644",
+      "sha256": "a90bce5f2d92a70d4b9fe9161214cb2b7aa433fce1327e499dd2cced162b49d9",
       "size": 1958
     },
     {
       "path": "docs/architecture/backend-domains.md",
-      "sha256": "34d9b915d2688ca015d92926c3cf4b1116c00b110255bc773a8f41f7e021d704",
-      "size": 46163
+      "sha256": "140ab57802df2eb529b527a88e0d30fcf7a259c8a00827d5d623fed96b743573",
+      "size": 49073
     },
     {
       "path": "docs/architecture/p8-l-l-canonical-retrieval-planner.md",

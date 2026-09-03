@@ -642,3 +642,35 @@ route store before static routing. The WorldCharacter profile back button thus
 returns to the actual Feed or Characters origin; direct entry without prior
 product history uses the current World's Characters directory as its bounded
 fallback.
+
+## P8-L-P World Chat response surface
+
+P8-L-P builds on the P8-L-D/E World identity and entry routes without adding a
+Chat-only Tauri window. `/worlds/{worldId}/chat/{threadId}` now owns a
+feature-first composer, canonical-send acceptance, one stable assistant
+response slot, 300ms delayed `입력 중` presence, verified CRG text deltas,
+typed failure and explicit retry. Next, static and Tauri use the same
+`features/chat` model, API and UI implementation.
+
+The frontend accepts only `chat-generation-stream.v1` NDJSON events whose
+request scope, generation, attempt and monotonic sequence match the active
+request. `delta` has exactly one `text` field. Internal retrieval states do not
+create separate indicators. A committed terminal is hydrated from the server
+without automatic regeneration; late old-generation output is ignored.
+
+Message-save recovery and assistant-response recovery are deliberately
+separate. The former keeps draft content and its idempotency key for `다시
+보내기`; the latter reuses the canonical user message and response slot while
+requesting a new generation for `다시 시도`. Non-retryable credential or
+configuration failures expose an allowed Settings CTA instead of a misleading
+retry. Memory owner/read surfaces remain P8-L-Q/R scope.
+
+The same `features/chat` boundary owns the World-scoped thread model selector.
+Its two durable meanings are `기본 모델 사용`, which follows the current Local
+product setting, and a fixed thread override. The selected and default model
+come from the thread read contract rather than browser storage. The selector is
+disabled while a message, generation, stream or retry is active; a failed model
+PATCH restores the previous value and exposes a bounded retry surface. Changing
+the model after a failed answer does not implicitly regenerate that answer.
+Next, static and Tauri therefore share one binding, rollback and busy-state
+contract.

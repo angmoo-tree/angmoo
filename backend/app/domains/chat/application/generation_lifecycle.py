@@ -17,6 +17,7 @@ from app.domains.chat.domain.response_request import (
     ResponseRequestRecord,
 )
 from app.domains.chat.domain.retrieval_intent import RetrievalRoute
+from app.domains.chat.domain.retrieval_router import RouterFailureDiagnostic
 from app.domains.chat.domain.workflow_recipe import WorkflowRecipe
 from app.domains.chat.ports.response_lifecycle import ResponseLifecycleRepositoryPort
 
@@ -116,6 +117,10 @@ class GenerationLifecycleService:
         target: ResponseRequestState,
         reason: ResponseTerminalReason,
         retryable: bool,
+        failure_class: str | None = None,
+        failure_diagnostic: dict | None = None,
+        router_diagnostic: RouterFailureDiagnostic | None = None,
+        call_tracker: dict | None = None,
         now: datetime,
     ) -> ResponseRequestRecord:
         return self._repository.mark_terminal(
@@ -123,6 +128,10 @@ class GenerationLifecycleService:
             target=target,
             reason=reason,
             retryable=retryable,
+            failure_class=failure_class,
+            failure_diagnostic=failure_diagnostic,
+            router_diagnostic=router_diagnostic,
+            call_tracker=call_tracker,
             now=now,
         )
 

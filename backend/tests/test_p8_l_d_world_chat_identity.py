@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 
 import pytest
@@ -18,6 +18,7 @@ def _create_tables(engine) -> None:
         models.User.__table__,
         models.InstallationIdentity.__table__,
         models.Character.__table__,
+        models.LlmCredential.__table__,
         models.World.__table__,
         models.WorldMembership.__table__,
         models.WorldCharacter.__table__,
@@ -25,6 +26,7 @@ def _create_tables(engine) -> None:
         models.UserMessagePreference.__table__,
         models.MessageThread.__table__,
         models.MessageMessage.__table__,
+        models.ChatResponseRequest.__table__,
     ):
         table.create(engine)
 
@@ -225,7 +227,141 @@ def test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple() -> None:
         assert first.thread.world_id == "world-a"
         assert first.thread.requester.world_character_id == requester.id
         assert first.thread.responding.world_character_id == responding.id
+        assert first.thread.model_binding_mode == "default"
+        assert first.thread.selected_model == first.thread.default_model
         assert db.scalar(select(func.count(models.MessageThread.id))) == 1
+
+
+def test_world_chat_model_binding_follows_default_or_stays_thread_override() -> None:
+    engine = create_engine("sqlite:///:memory:")
+    _create_tables(engine)
+    with Session(engine) as db:
+        owner = _user("owner")
+        responder_owner = _user("responder-owner")
+        requester_character = _character("requester-character", owner.id)
+        responding_character = _character("responding-character", responder_owner.id)
+        db.add_all(
+            [
+                owner,
+                responder_owner,
+                _installation(owner.id),
+                requester_character,
+                responding_character,
+            ]
+        )
+        db.flush()
+        _, responding = _seed_world(
+            db,
+            owner=owner,
+            responder_owner=responder_owner,
+            world_id="world-a",
+            requester_character=requester_character,
+            responding_character=responding_character,
+            suffix="a",
+        )
+        db.commit()
+
+        world_chat.update_user_settings(
+            db,
+            owner,
+            schemas.MessageSettingsUpdate(default_model="gemini-3.5-flash-lite"),
+        )
+        created = world_chat.create_or_get_world_thread(
+            db,
+            owner,
+            "world-a",
+            schemas.WorldChatThreadCreate(
+                responding_world_character_id=responding.id,
+            ),
+        )
+        assert created.thread is not None
+        assert created.thread.model_binding_mode == "default"
+        assert created.thread.selected_model == "gemini-3.5-flash-lite"
+
+        overridden = world_chat.update_world_thread_model(
+            db,
+            owner,
+            "world-a",
+            created.thread.id,
+            schemas.WorldChatThreadModelUpdate(
+                mode="thread_override",
+                selected_model="gemini-2.5-flash",
+            ),
+        )
+        assert overridden.model_binding_mode == "thread_override"
+        assert overridden.selected_model == "gemini-2.5-flash"
+
+        world_chat.update_user_settings(
+            db,
+            owner,
+            schemas.MessageSettingsUpdate(default_model="gemini-2.5-flash-lite"),
+        )
+        persisted = db.get(models.MessageThread, created.thread.id)
+        assert persisted is not None
+        assert persisted.model_binding_mode == "thread_override"
+        assert persisted.selected_model == "gemini-2.5-flash"
+
+        rebound = world_chat.update_world_thread_model(
+            db,
+            owner,
+            "world-a",
+            created.thread.id,
+            schemas.WorldChatThreadModelUpdate(mode="default"),
+        )
+        assert rebound.model_binding_mode == "default"
+        assert rebound.default_model == "gemini-2.5-flash-lite"
+        assert rebound.selected_model == "gemini-2.5-flash-lite"
+
+        source = models.MessageMessage(
+            thread_id=created.thread.id,
+            role="user",
+            content="아직 답장을 만드는 중이야.",
+            status="ok",
+        )
+        db.add(source)
+        db.flush()
+        db.add(
+            models.ChatResponseRequest(
+                request_id="active-model-snapshot",
+                thread_id=created.thread.id,
+                user_message_id=source.id,
+                response_slot_id="active-model-slot",
+                request_scope_hash="a" * 64,
+                idempotency_key="active-model-idempotency",
+                generation_id="active-model-generation",
+                attempt_number=1,
+                selected_model="gemini-2.5-flash-lite",
+                deadline_at=datetime.now(UTC) + timedelta(minutes=2),
+            )
+        )
+        db.commit()
+        with pytest.raises(world_chat.MessageInFlightError):
+            world_chat.update_world_thread_model(
+                db,
+                owner,
+                "world-a",
+                created.thread.id,
+                schemas.WorldChatThreadModelUpdate(
+                    mode="thread_override",
+                    selected_model="gemini-3.1-flash-lite",
+                ),
+            )
+        with pytest.raises(world_chat.MessageInFlightError):
+            world_chat.create_or_get_world_thread(
+                db,
+                owner,
+                "world-a",
+                schemas.WorldChatThreadCreate(
+                    responding_world_character_id=responding.id,
+                    selected_model="gemini-3.1-flash-lite",
+                ),
+            )
+
+        db.expire_all()
+        persisted = db.get(models.MessageThread, created.thread.id)
+        assert persisted is not None
+        assert persisted.model_binding_mode == "default"
+        assert persisted.selected_model == "gemini-2.5-flash-lite"
 
 
 def test_world_chat_requester_zero_and_spoof_fail_closed() -> None:

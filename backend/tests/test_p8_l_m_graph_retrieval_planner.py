@@ -489,7 +489,14 @@ def test_binding_direction_and_unresolved_reference_fail_closed() -> None:
         )
 
 
-def test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids(monkeypatch) -> None:
+@pytest.mark.parametrize(
+    "model",
+    ("gemini-3.1-flash-lite", "gemini-3.5-flash-lite"),
+)
+def test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids(
+    monkeypatch,
+    model: str,
+) -> None:
     captured = {}
     _intent, resolved = _resolved()
 
@@ -505,7 +512,7 @@ def test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids(monkeypatch) ->
     material = CredentialMaterial(
         credential_id="credential-1",
         provider="google",
-        model="fixture-graph-planner",
+        model=model,
         fingerprint="fingerprint",
         purpose=CredentialPurpose.MESSAGE_LLM,
         _secret="not-a-real-key",
@@ -529,6 +536,10 @@ def test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids(monkeypatch) ->
         )
     )
     assert result.physical_attempt_count == 1
+    assert captured["thinking_level"] == "high"
+    assert captured["max_output_tokens"] == 3_072
+    assert result.thinking_level == "high"
+    assert result.max_output_tokens == 3_072
     assert captured["should_retry_json_error"](None, None, {}, 1) is False
     assert "actual-owner-never-in-prompt" not in captured["user_prompt"]
     assert "actual-world-never-in-prompt" not in captured["user_prompt"]
