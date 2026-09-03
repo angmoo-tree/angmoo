@@ -17,6 +17,10 @@ from app.domains.memory.application.canonical_planning import (
     CanonicalRetrievalPlanValidator,
 )
 from app.domains.memory.application.consolidation import MemoryConsolidationService
+from app.domains.memory.application.read_surface import (
+    MemoryReadService,
+    memory_lifecycle,
+)
 
 __all__ = [
     "CANONICAL_PRIMITIVE_REGISTRY",
@@ -31,5 +35,7 @@ __all__ = [
     "CanonicalRetrievalPlanValidator",
     "MemoryConsolidationService",
     "MemoryScopeService",
+    "MemoryReadService",
+    "memory_lifecycle",
     "MemoryWriteLifecycleService",
 ]

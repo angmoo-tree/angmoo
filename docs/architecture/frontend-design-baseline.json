@@ -47,7 +47,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/device-home/ui/device-home.tsx",
-      "sha256": "fd8b2536320644147594c4c53ab60a6471b2b106a6b313110b0ba4b1fad184cf"
+      "sha256": "27dc3597af5a2628ad510e2aa789d71683c04c0753d9c7487bd1b4b7706b45a4"
     },
     {
       "classifications": [
@@ -55,6 +55,13 @@
       ],
       "path": "frontend/src/features/device-shell/ui/device-shell.tsx",
       "sha256": "bb87a2e7795012caea77982ed758c06af579b4b16713114ac70b1af4611b83d0"
+    },
+    {
+      "classifications": [
+        "LOCAL"
+      ],
+      "path": "frontend/src/features/memory/ui/memory-workspace.tsx",
+      "sha256": "bebf1bf7a901989dafa3569aa39630843b27834ebda1d5917d8e0699b8fa002f"
     },
     {
       "classifications": [
@@ -173,7 +180,7 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "88fa1449eb9d0a65a1339b2ff0cabb1fd935dffa08340ffe3508caec22542552"
+        "sha256": "f20e2ac0770ce19fd006599e7091e1f801787ccc4adbfd76eddebf2c7b6e3871"
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",
@@ -189,7 +196,7 @@
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "4bf234292846efd9fbfdb17554c34de17ea07b163d470b1b05466bb8d32e8aec"
+        "sha256": "ba5ff3238ddcdc2c3f5e28bb718c78a962dd64cdaa0f284095f11ccc25a41488"
       },
       {
         "path": "browser-tests/ui-e-local-settings/local-settings.spec.ts",
@@ -218,6 +225,8 @@
       "/posts",
       "/posts/post-static-probe",
       "/settings",
+      "/memory",
+      "/memory-explorer",
       "/login?returnTo=%2F"
     ],
     "visual_script": {
@@ -254,6 +263,8 @@
       "frontend/DESIGN.md",
       "frontend/scripts/serve-production.mjs",
       "frontend/src/app/icon.svg",
+      "frontend/src/app/memory/page.tsx",
+      "frontend/src/app/memory-explorer/page.tsx",
       "frontend/src/app/ui-foundation/page.tsx",
       "frontend/src/components/app-shell.tsx",
       "frontend/src/components/post-detail-client.tsx",
@@ -266,6 +277,11 @@
       "frontend/src/features/device-shell/ui/local-device-navigation.tsx",
       "frontend/src/features/device-shell/ui/local-product-link.module.css",
       "frontend/src/features/device-shell/ui/local-product-link.tsx",
+      "frontend/src/features/memory/public.ts",
+      "frontend/src/features/memory/ui/memory-scope-summary.tsx",
+      "frontend/src/features/memory/ui/memory-workspace.module.css",
+      "frontend/src/features/memory/ui/memory-workspace.tsx",
+      "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx",
       "frontend/src/features/relationships/ui/relationship-graph-frame.tsx",
       "frontend/src/features/social/api/social-feed-client.ts",
       "frontend/src/features/social/api/social-write-client.ts",
@@ -1108,9 +1124,9 @@
   "route_inventory": {
     "known_gap_count": 0,
     "next_static_inventory": "docs/architecture/next-static-compatibility.json",
-    "next_static_inventory_route_count": 42,
-    "next_static_inventory_sha256": "67b47ed97c1299ddfea1917868a8bd633182fce776f884619e04edc9efe3aec5",
-    "reviewed_surface_count": 17
+    "next_static_inventory_route_count": 44,
+    "next_static_inventory_sha256": "6e289e06bf6557f37a4525b172f9227c169601cb5e6e6861e124b836149165a3",
+    "reviewed_surface_count": 18
   },
   "schema_version": 1,
   "semantic_foundation": {
@@ -1145,7 +1161,7 @@
       {
         "path": "frontend/src/composition/static-product-router.tsx",
         "present": true,
-        "sha256": "fd51e8ea254405dcf5ba92ce2571c4cdf5345041a2cecf86fdf534d9d3b5bca6"
+        "sha256": "ce0c4a954a764475e28e87361925e847d9268504866bc3151d592559c4a45fd3"
       },
       {
         "path": "frontend/src/features/ui-foundation/public.ts",
@@ -1414,17 +1430,17 @@
         {
           "path": "browser-tests/snapshots/ui-f/device-home-centered-1440x1000.png",
           "present": true,
-          "sha256": "5089ee236618eb68ae217be0c3249e49ccc73aec81503d8502fda82615ff63b7"
+          "sha256": "4d02516f58596669511fe6292d165df171e5be68f21c50107478d669652977f0"
         },
         {
           "path": "browser-tests/snapshots/ui-f/device-home-phone-360x800.png",
           "present": true,
-          "sha256": "018a90c65a7e511195bfd2e54e8e3f2aaa5c282e609c74e3b191c287f219e4a5"
+          "sha256": "e5f5330a6e61f7a3537050b9809d7570742f6fe2fd83142f1f43382f03da8db2"
         },
         {
           "path": "browser-tests/snapshots/ui-f/device-home-runtime-offline-390x844.png",
           "present": true,
-          "sha256": "d5baf9d3ef581733bc9e0e7e460d7f3ce012939647e8e41ea43998178d654472"
+          "sha256": "2833a645d8950ff1c8bde0396e7a946a6e845d1c66b68e9257f6d558df5d59c6"
         },
         {
           "path": "browser-tests/snapshots/ui-f/global-feed-media-phone-390x844.png",

@@ -52,6 +52,15 @@ class ChatRuntimePort(Protocol):
         self, db: Any, user: Any, world_id: str, thread_id: str
     ) -> Any: ...
 
+    def get_world_response_evidence(
+        self,
+        db: Any,
+        user: Any,
+        world_id: str,
+        thread_id: str,
+        request_id: str,
+    ) -> Any: ...
+
     def stream_world_response(
         self,
         db: Any,

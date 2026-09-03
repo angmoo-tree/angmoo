@@ -1,4 +1,5 @@
 export type AngmooDesktopWindowKind =
+  | "memory"
   | "phone"
   | "studio"
   | "relationship-graph";
@@ -53,6 +54,7 @@ const DESKTOP_WINDOW_KIND_QUERY = "__angmoo_window_kind";
 const DESKTOP_WINDOW_ROUTE_QUERY = "__angmoo_window_route";
 const DESKTOP_ROUTE_HISTORY_INDEX = "__angmooDesktopRouteHistoryIndex";
 const DESKTOP_WINDOW_KINDS = new Set<AngmooDesktopWindowKind>([
+  "memory",
   "phone",
   "studio",
   "relationship-graph",
@@ -122,6 +124,7 @@ export function desktopWindowKindForRoute(
   route: string,
 ): AngmooDesktopWindowKind {
   const pathname = routePathname(canonicalProductRoute(route));
+  if (pathname === "/memory") return "memory";
   if (pathname === "/studio" || pathname.startsWith("/studio/")) {
     return "studio";
   }
@@ -305,7 +308,9 @@ export function canonicalProductRoute(route: string) {
   const normalized = normalizeInternalRoute(route);
   const parsed = new URL(normalized, "http://angmoo.local");
   let pathname = parsed.pathname;
-  if (pathname === "/worlds/new") {
+  if (pathname === "/memory-explorer") {
+    pathname = "/memory";
+  } else if (pathname === "/worlds/new") {
     pathname = "/studio/worlds/new";
   } else {
     const creatorAlias = pathname.match(/^\/worlds\/([^/]+)\/creator$/);

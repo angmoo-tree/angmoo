@@ -122,7 +122,8 @@ def main() -> int:
         "frontend capability must not expose shell or process permissions",
     )
     _require(
-        set(capability["windows"]) == {"main", "studio", "relationship-graph"},
+        set(capability["windows"])
+        == {"main", "studio", "relationship-graph", "memory"},
         "desktop capability window scope drifted",
     )
     _require(

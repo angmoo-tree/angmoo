@@ -2,6 +2,6 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "product-shell",
   "description": "Minimal core capability set for Angmoo product windows; no raw shell or sidecar permission.",
-  "windows": ["main", "studio", "relationship-graph"],
+  "windows": ["main", "memory", "studio", "relationship-graph"],
   "permissions": ["core:default"]
 }

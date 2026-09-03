@@ -97,6 +97,7 @@ def check_repo(*, root: Path = ROOT) -> list[str]:
         capability = capabilities[0]
         if set(capability.get("windows", [])) != {
             "main",
+            "memory",
             "studio",
             "relationship-graph",
         }:

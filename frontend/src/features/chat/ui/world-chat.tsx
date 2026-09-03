@@ -23,6 +23,10 @@ import {
   worldCharacterProfileRoute,
 } from "@/shared/navigation/public";
 import { LocalProductLink } from "@/features/device-shell/public";
+import {
+  MemoryScopeSummary,
+  WorldChatEvidenceInspector,
+} from "@/features/memory/public";
 import { ProfileAvatar, formatHandle } from "@/shared/ui/public";
 import {
   getLatestWorldChatResponseRequest,
@@ -208,6 +212,7 @@ function WorldChatThread({
   const [modelSelection, setModelSelection] = useState<ModelSelection>("default");
   const [modelUpdating, setModelUpdating] = useState(false);
   const [modelFailure, setModelFailure] = useState<ModelSelection | null>(null);
+  const [evidenceRequestId, setEvidenceRequestId] = useState<string | null>(null);
   const [generation, setGeneration] = useState<{
     phase: "pending" | "streaming" | "failed";
     request: WorldChatGenerationRequestRead;
@@ -674,6 +679,11 @@ function WorldChatThread({
         <strong>{thread.responding.display_name}</strong>
       </div>
 
+      <MemoryScopeSummary
+        subjectWorldCharacterId={thread.responding.world_character_id}
+        worldId={worldId}
+      />
+
       <div className={styles.modelControl}>
         <label htmlFor={`world-chat-model-${thread.id}`}>응답 모델</label>
         <select
@@ -719,6 +729,11 @@ function WorldChatThread({
         <ol className={styles.messages} aria-label="대화 메시지">
           {thread.messages.map((message) => {
             const fromRequester = message.role === "user";
+            const evidence = fromRequester
+              ? null
+              : thread.evidence_summaries.find(
+                  (summary) => summary.assistant_message_id === message.id,
+                ) ?? null;
             return (
               <li
                 className={
@@ -739,6 +754,16 @@ function WorldChatThread({
                     ? message.content
                     : "이 응답은 완료되지 않았어요."}
                 </p>
+                {message.status === "ok" && evidence ? (
+                  <button
+                    className={styles.evidenceButton}
+                    data-evidence-capability={evidence.capability}
+                    onClick={() => setEvidenceRequestId(evidence.request_id)}
+                    type="button"
+                  >
+                    근거 {evidence.count}개 보기
+                  </button>
+                ) : null}
               </li>
             );
           })}
@@ -769,6 +794,17 @@ function WorldChatThread({
           ) : null}
         </ol>
       )}
+
+      <WorldChatEvidenceInspector
+        key={evidenceRequestId ?? "closed"}
+        onOpenChange={(open) => {
+          if (!open) setEvidenceRequestId(null);
+        }}
+        open={evidenceRequestId !== null}
+        requestId={evidenceRequestId}
+        threadId={thread.id}
+        worldId={worldId}
+      />
 
       <form className={styles.composer} onSubmit={handleSubmit}>
         <label className={styles.srOnly} htmlFor={`world-chat-${thread.id}`}>

@@ -114,6 +114,29 @@ def get_world_response_request(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
 
 
+@router.get(
+    "/threads/{thread_id}/requests/{request_id}/evidence",
+    response_model=chat.WorldChatEvidenceRead,
+)
+def get_world_response_evidence(
+    world_id: str,
+    thread_id: str,
+    request_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> chat.WorldChatEvidenceRead:
+    browser_session.require_local_frontend_request(request, mutation=False)
+    try:
+        return chat_service.get_world_response_evidence(
+            db, user, world_id, thread_id, request_id
+        )
+    except chat.MessageNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except chat.MessageForbiddenError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+
+
 @router.get("/threads/{thread_id}/requests/{request_id}/events")
 def stream_world_response_events(
     world_id: str,

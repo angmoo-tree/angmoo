@@ -1,7 +1,7 @@
 {
-  "edge_count": 1682,
-  "external_import_count": 2171,
-  "module_count": 653,
+  "edge_count": 1712,
+  "external_import_count": 2186,
+  "module_count": 658,
   "modules": [
     {
       "external_imports": [],
@@ -1027,6 +1027,7 @@
         "app.api.v1.routes.bot",
         "app.api.v1.routes.character_lore",
         "app.api.v1.routes.community",
+        "app.api.v1.routes.memory",
         "app.api.v1.routes.messages",
         "app.api.v1.routes.tree",
         "app.api.v1.routes.world_activity_runtime",
@@ -1055,6 +1056,7 @@
         "app.api.v1.routes.character_lore",
         "app.api.v1.routes.community",
         "app.api.v1.routes.manual_social",
+        "app.api.v1.routes.memory",
         "app.api.v1.routes.messages",
         "app.api.v1.routes.runtime_status",
         "app.api.v1.routes.tree",
@@ -1205,6 +1207,31 @@
       ],
       "module": "app.api.v1.routes.manual_social",
       "path": "backend/app/api/v1/routes/manual_social.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "fastapi",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.api.v1.deps",
+        "app.core.browser_session",
+        "app.domains.identity.public",
+        "app.domains.memory.api.schemas",
+        "app.domains.memory.application.read_surface",
+        "app.domains.memory.domain.errors",
+        "app.domains.memory.domain.provenance",
+        "app.domains.memory.domain.retention",
+        "app.domains.memory.domain.scope",
+        "app.domains.memory.infrastructure.repository",
+        "app.domains.world_characters.public",
+        "app.runtime.memory.sqlalchemy_source_reader"
+      ],
+      "module": "app.api.v1.routes.memory",
+      "path": "backend/app/api/v1/routes/memory.py",
       "wildcard_imports": []
     },
     {
@@ -2920,9 +2947,29 @@
     },
     {
       "external_imports": [],
+      "imports": [],
+      "module": "app.domains.memory.api",
+      "path": "backend/app/domains/memory/api/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.memory.api.schemas",
+      "path": "backend/app/domains/memory/api/schemas.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
       "imports": [
         "app.domains.memory.application.canonical_planning",
         "app.domains.memory.application.consolidation",
+        "app.domains.memory.application.read_surface",
         "app.domains.memory.application.recall",
         "app.domains.memory.application.scope_control",
         "app.domains.memory.application.write_lifecycle"
@@ -2970,6 +3017,24 @@
       ],
       "module": "app.domains.memory.application.consolidation",
       "path": "backend/app/domains/memory/application/consolidation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime"
+      ],
+      "imports": [
+        "app.domains.memory.domain.lifecycle",
+        "app.domains.memory.domain.provenance",
+        "app.domains.memory.domain.read_surface",
+        "app.domains.memory.domain.retention",
+        "app.domains.memory.domain.scope",
+        "app.domains.memory.ports.repository",
+        "app.domains.memory.ports.source_reader"
+      ],
+      "module": "app.domains.memory.application.read_surface",
+      "path": "backend/app/domains/memory/application/read_surface.py",
       "wildcard_imports": []
     },
     {
@@ -3028,6 +3093,7 @@
         "app.domains.memory.domain.lifecycle",
         "app.domains.memory.domain.policies",
         "app.domains.memory.domain.provenance",
+        "app.domains.memory.domain.read_surface",
         "app.domains.memory.domain.recall",
         "app.domains.memory.domain.retention",
         "app.domains.memory.domain.scope"
@@ -3135,6 +3201,21 @@
       "imports": [],
       "module": "app.domains.memory.domain.provenance",
       "path": "backend/app/domains/memory/domain/provenance.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "enum"
+      ],
+      "imports": [
+        "app.domains.memory.domain.lifecycle",
+        "app.domains.memory.domain.provenance"
+      ],
+      "module": "app.domains.memory.domain.read_surface",
+      "path": "backend/app/domains/memory/domain/read_surface.py",
       "wildcard_imports": []
     },
     {
@@ -3258,6 +3339,7 @@
         "app.domains.memory.domain.errors",
         "app.domains.memory.domain.lifecycle",
         "app.domains.memory.domain.provenance",
+        "app.domains.memory.domain.read_surface",
         "app.domains.memory.domain.retention",
         "app.domains.memory.domain.scope",
         "app.domains.memory.infrastructure.sqlalchemy_models",
@@ -3387,6 +3469,7 @@
       "imports": [
         "app.domains.memory.domain.lifecycle",
         "app.domains.memory.domain.provenance",
+        "app.domains.memory.domain.read_surface",
         "app.domains.memory.domain.scope",
         "app.domains.memory.ports.source_reader"
       ],
@@ -6792,6 +6875,7 @@
         "__future__",
         "datetime",
         "hashlib",
+        "json",
         "logging",
         "sqlalchemy",
         "sqlalchemy.exc",
@@ -6834,14 +6918,17 @@
         "app.domains.chat.infrastructure",
         "app.domains.chat.ports",
         "app.domains.identity.public",
+        "app.domains.memory.infrastructure",
         "app.domains.memory.public",
+        "app.domains.relationships.infrastructure.sqlalchemy_social_models",
         "app.domains.relationships.public",
         "app.integrations.llm",
         "app.runtime.chat.memory_producer",
         "app.runtime.chat.model_bindings",
         "app.runtime.chat.retrieval_policy",
         "app.runtime.chat.sqlalchemy_service",
-        "app.runtime.graph_projection.relationship_graph_read"
+        "app.runtime.graph_projection.relationship_graph_read",
+        "app.runtime.memory.sqlalchemy_source_reader"
       ],
       "module": "app.runtime.chat.world_generation",
       "path": "backend/app/runtime/chat/world_generation.py",

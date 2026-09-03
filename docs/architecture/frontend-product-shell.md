@@ -674,3 +674,30 @@ PATCH restores the previous value and exposes a bounded retry surface. Changing
 the model after a failed answer does not implicitly regenerate that answer.
 Next, static and Tauri therefore share one binding, rollback and busy-state
 contract.
+
+## P8-L-Q Memory read surface and answer evidence
+
+P8-L-Q activates `features/memory/public.ts` as the sole feature-first Memory
+presentation boundary. The Next `/memory` page and static product router both
+compose the same `MemoryWorkspace`; `/memory-explorer` is only a hidden
+compatibility redirect. The wide Tauri singleton uses window kind `memory` and
+accepts exactly `/memory` with ordered scope dependencies (`subject` requires
+`world`; `memory` requires `subject`). The Phone allowlist rejects the wide
+route, while a narrow Browser reflows the same workspace to one column.
+
+The workspace selects only launchable owner Worlds and active WorldCharacters,
+then reads setting, bounded list, item lifecycle and currently revalidated
+provenance. A requested scope that is absent never falls back to a different
+World or Character. OFF means no new memory accumulation; it does not hide
+stored items. Loading, no-scope, empty, forbidden/not-found, transport failure,
+expired/superseded/deleted and unavailable evidence have explicit surfaces.
+There are no ON/OFF, pin, correction or delete controls before P8-L-R.
+
+World Chat composes `MemoryScopeSummary` and `WorldChatEvidenceInspector`
+through the Memory public boundary. A committed assistant message gets a
+`근거 N개 보기` action only from the server's deterministic capability/count
+summary. The Phone Dialog then loads the current safe evidence view. Stale,
+deleted or unvalidated evidence never displays its frozen excerpt or link;
+source IDs, revisions, locators, raw query/prompt and provider details do not
+enter the frontend contract. Viewing Memory or evidence performs GET requests
+only and does not invoke a model or change Memory state.

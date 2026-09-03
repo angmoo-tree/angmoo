@@ -31,7 +31,7 @@
   ],
   "current_output_mode": "standalone",
   "purpose": "L3-ER0 Next.js static-export compatibility inventory",
-  "route_count": 42,
+  "route_count": 44,
   "routes": [
     {
       "blockers": [],
@@ -181,6 +181,28 @@
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/login",
       "source_sha256": "74d5aa6245730a8a4ef97aec9064a6066161a65528c9c4b113ad91749ad4596f",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [
+        "redirect"
+      ],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/memory-explorer/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/memory-explorer",
+      "source_sha256": "1a6551565bd461a23d6e99f20bbd4bd81b8a79d8e2a726dd50c7ace8e92c24a2",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "page",
+      "owner": "ER5",
+      "path": "frontend/src/app/memory/page.tsx",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/memory",
+      "source_sha256": "1ee4f962fd675e91501fcc098344df604913f0153a1abfc6d71cbb2b2bbe6eba",
       "transition_pr": "ER5 PR K"
     },
     {

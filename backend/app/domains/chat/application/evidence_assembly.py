@@ -15,6 +15,8 @@ from app.domains.chat.domain.evidence_bundle import (
     EvidenceBundle,
     EvidenceItem,
     EvidenceKind,
+    EvidenceLocator,
+    EvidenceLocatorKind,
     compute_evidence_hash,
     opaque_evidence_reference,
 )
@@ -24,7 +26,11 @@ from app.domains.chat.domain.response_request import (
     RetrievalOutcome,
 )
 from app.domains.chat.domain.retrieval_intent import RetrievalRoute
-from app.domains.memory.public import CanonicalRecallStatus
+from app.domains.memory.public import (
+    CanonicalRecallStatus,
+    MemorySourceTypeV1,
+    SOURCE_KIND_BY_TYPE,
+)
 from app.domains.relationships.public import GraphRecallStatus
 
 
@@ -188,6 +194,7 @@ class EvidenceBundleAssembler:
                         text=text,
                         occurred_at=EvidenceBundleAssembler._aware(record.occurred_at),
                         axes=(RetrievalAxis.CANONICAL,),
+                        locator=_record_locator(record),
                     )
                 )
         return tuple(items)
@@ -234,6 +241,17 @@ class EvidenceBundleAssembler:
                             relationship.updated_at or relationship.last_event_at
                         ),
                         axes=(RetrievalAxis.GRAPH,),
+                        locator=EvidenceLocator(
+                            kind=EvidenceLocatorKind.GRAPH_RELATIONSHIP,
+                            source_id=relationship.relationship_state_id,
+                            source_revision=str(relationship.relationship_version),
+                            actor_world_character_id=(
+                                relationship.actor_world_character_id
+                            ),
+                            target_world_character_id=(
+                                relationship.target_world_character_id
+                            ),
+                        ),
                     )
                 )
             for event in graph_result.evidence:
@@ -254,6 +272,17 @@ class EvidenceBundleAssembler:
                         text=f"{actor}{target_text} 사이에 성공한 {event.event_type} 사건이 있었음.",
                         occurred_at=EvidenceBundleAssembler._aware(event.occurred_at),
                         axes=(RetrievalAxis.GRAPH,),
+                        locator=EvidenceLocator(
+                            kind=EvidenceLocatorKind.CANONICAL_SOURCE,
+                            source_type=MemorySourceTypeV1.SOCIAL_EVENT.value,
+                            source_id=event.event_id,
+                            actor_world_character_id=(
+                                event.actor_world_character_id
+                            ),
+                            target_world_character_id=(
+                                event.target_world_character_id
+                            ),
+                        ),
                     )
                 )
         return tuple(items)
@@ -329,6 +358,7 @@ class EvidenceBundleAssembler:
                 text=existing.text,
                 occurred_at=occurred_at,
                 axes=axes,
+                locator=existing.locator or item.locator,
             )
         ordered = sorted(
             deduplicated.values(),
@@ -365,3 +395,34 @@ class EvidenceBundleAssembler:
 
 
 __all__ = ["EvidenceBundleAssembler"]
+
+
+def _record_source_type(record) -> MemorySourceTypeV1 | None:
+    if record.source_type is not None:
+        return record.source_type
+    return next(
+        (
+            source_type
+            for source_type, kind in SOURCE_KIND_BY_TYPE.items()
+            if kind is record.kind
+        ),
+        None,
+    )
+
+
+def _record_locator(record) -> EvidenceLocator | None:
+    source_type = _record_source_type(record)
+    if source_type is not None:
+        return EvidenceLocator(
+            kind=EvidenceLocatorKind.CANONICAL_SOURCE,
+            source_id=record.canonical_source_id,
+            source_type=source_type.value,
+            source_revision=record.metadata.get("source_digest"),
+        )
+    if record.memory_item_id is not None:
+        return EvidenceLocator(
+            kind=EvidenceLocatorKind.MEMORY_ITEM,
+            source_id=record.memory_item_id,
+            source_revision=record.metadata.get("item_version"),
+        )
+    return None

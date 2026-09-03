@@ -1,6 +1,6 @@
 import { PRODUCT_ROUTES } from "@/shared/navigation/public";
 
-export type ProductWindowCapability = "phone" | "relationship-graph" | "studio";
+export type ProductWindowCapability = "memory" | "phone" | "relationship-graph" | "studio";
 export type ProductRouteExposure =
   | "bottom-navigation"
   | "direct-only"
@@ -24,6 +24,14 @@ export type ProductRouteCapability = {
  * links into the installed product.
  */
 export const LOCAL_PRODUCT_ROUTE_CAPABILITIES = [
+  {
+    exposure: "direct-only",
+    id: "memory",
+    next: "supported",
+    routeFamily: "/memory",
+    static: "supported",
+    window: "memory",
+  },
   {
     exposure: "bottom-navigation",
     id: "home",
@@ -155,6 +163,8 @@ const STATIC_PRODUCT_ROUTE_PATTERNS = [
   /^\/$/,
   /^\/login$/,
   /^\/settings$/,
+  /^\/memory$/,
+  /^\/memory-explorer$/,
   /^\/posts(?:\/[^/]+)?$/,
   /^\/agents(?:\/new|\/[^/]+)?$/,
   /^\/studio$/,

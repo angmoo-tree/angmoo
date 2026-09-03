@@ -347,12 +347,22 @@ function worldChatThreadMatchesScope(
       thread.model_binding_mode !== "thread_override") ||
     (thread.model_binding_mode === "default" &&
       thread.selected_model !== thread.default_model) ||
-    !Array.isArray(thread.messages)
+    !Array.isArray(thread.messages) ||
+    !Array.isArray(thread.evidence_summaries)
   ) {
     return false;
   }
   return (
     thread.messages.every((message) => message.thread_id === thread.id) &&
+    thread.evidence_summaries.every(
+      (summary) =>
+        typeof summary.request_id === "string" &&
+        typeof summary.assistant_message_id === "number" &&
+        (summary.capability === "available" || summary.capability === "degraded") &&
+        Number.isInteger(summary.count) &&
+        summary.count > 0 &&
+        summary.count <= 12,
+    ) &&
     (!thread.latest_message || thread.latest_message.thread_id === thread.id)
   );
 }

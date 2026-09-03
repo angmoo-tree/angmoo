@@ -226,6 +226,30 @@ selection back and presents `모델을 바꾸지 못했어요.` with an explicit
 it never starts response retry by itself. Provider-family thinking fields and
 the accepted model snapshot remain backend-only diagnostics.
 
+### P8-L-Q Memory read and evidence-inspector adoption
+
+P8-L-Q activates the LOCAL Memory target defined in P8-L-A. `/memory` is a
+wide, feature-owned workspace in Browser and Tauri; the same component reflows
+to one column in a narrow Browser. `/memory-explorer` is a hidden redirect, not
+a second navigation destination. The Tauri `memory` singleton has an exact
+route/query allowlist, while the Phone window continues to reject the wide
+route.
+
+The workspace retains the established bright-surface, semantic border,
+rounded-card, focus-ring and explicit-state grammar. It presents only actual
+scope settings, canonical memory rows and currently revalidated evidence.
+Memory OFF remains readable and is explained without rendering a fake switch.
+Pin, correction, deletion and ON/OFF actions are absent until their P8-L-R
+backend capabilities exist.
+
+Chat uses the same feature boundary for a compact Memory status link and an
+answer-level Dialog. The `근거 N개 보기` action appears only for a committed
+assistant message with a deterministic server capability. The Dialog preserves
+Character-chat anatomy while labeling available, deleted and unavailable
+sources; unavailable sources expose neither former text nor navigation. Raw
+Router/Planner/database/provider material and canonical locator IDs are never
+rendered.
+
 ## Feature-first ownership contract
 
 The existing feature-first boundary remains authoritative:

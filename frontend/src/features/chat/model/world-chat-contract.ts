@@ -46,6 +46,12 @@ export type WorldChatThreadRead = {
   created_at: string;
   latest_message: MessageMessageRead | null;
   messages: MessageMessageRead[];
+  evidence_summaries: {
+    request_id: string;
+    assistant_message_id: number;
+    capability: "available" | "degraded";
+    count: number;
+  }[];
 };
 
 export type WorldChatThreadListRead = {

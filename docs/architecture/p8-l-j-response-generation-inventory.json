@@ -198,8 +198,8 @@
     },
     {
       "path": "backend/app/domains/chat/domain/response_request.py",
-      "sha256": "b4c237c08b7ef318589a60d44908a7723795c6fd03af0ef5389285fd4bfa42f5",
-      "size": 9380
+      "sha256": "718976dd1f2e8a400da582f8b39871c56d520b4e488a01f278e997d499548050",
+      "size": 9442
     },
     {
       "path": "backend/app/domains/chat/application/answer_request.py",
@@ -218,8 +218,8 @@
     },
     {
       "path": "backend/app/domains/chat/infrastructure/response_lifecycle_repository.py",
-      "sha256": "068e3bb82fc54fdb2b1c54ec07f5755f20724bce4417b4c93ef734e86e5a39f7",
-      "size": 28772
+      "sha256": "2a59172697cedb83faea217b60202b1f0e1bc7f17cc5ffb59a915e5901efd696",
+      "size": 31219
     },
     {
       "path": "backend/app/domains/memory/domain/canonical_retrieval_plan.py",

@@ -411,16 +411,16 @@
     {
       "markers": {
         "row_lock": [
-          555,
-          572,
-          616,
-          686
+          629,
+          646,
+          690,
+          760
         ]
       },
       "owner": "P8-L-G",
       "path": "backend/app/domains/memory/infrastructure/repository.py",
       "removal_condition": "retain only while cross-provider same-scope serialization or its negative inventory guard is required",
-      "source_sha256": "3c0670bd05496d6fc87cd30007209d9eac7a14977fce5cf2fd1c4c1e66fc332f",
+      "source_sha256": "d77c187667fa9d4bc22148f6de67d902b4aa21eb614499f0254f6ee8bcdf4127",
       "transition_pr": "P8-L-G memory write/lifecycle"
     },
     {
@@ -697,46 +697,47 @@
     {
       "markers": {
         "advisory_lock": [
-          305,
-          560,
-          663
+          306,
+          561,
+          664
         ],
         "driver_or_url": [
-          304,
-          426,
-          436,
-          470,
-          544,
-          653,
-          1253,
-          1335,
-          1352,
-          1354
+          305,
+          427,
+          437,
+          471,
+          545,
+          654,
+          1293,
+          1375,
+          1392,
+          1394
         ],
         "row_lock": [
-          427,
-          443,
-          471,
-          1254,
-          1336
+          428,
+          444,
+          472,
+          1294,
+          1376
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/chat/sqlalchemy_service.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "06cb520ba70fcbf03187ea78d65842237b890c5d51e44f6ba0803eb0f85fbc59",
+      "source_sha256": "25a6e42aafee239b0470dc2ed06ee61f6209f66dc8b04f6fd5e35017b9cd6a06",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
         "driver_or_url": [
-          443
+          321,
+          524
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/chat/world_generation.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "655b90a1aa5ab64ccd454dc530b35000209ac73579bf2266fd4b1b704f23ae33",
+      "source_sha256": "09d6c1dab27843d4dd4fdb67257fad822fb99d7f4a18defccead555178b58e22",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

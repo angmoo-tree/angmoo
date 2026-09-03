@@ -69,6 +69,16 @@ from app.domains.memory.domain.scope import (
     MemoryScope,
     MemoryScopeSetting,
 )
+from app.domains.memory.domain.read_surface import (
+    MAX_MEMORY_READ_PAGE_SIZE,
+    MEMORY_READ_CONTRACT_VERSION,
+    MemoryEvidenceAvailability,
+    MemoryEvidenceRead,
+    MemoryItemDetail,
+    MemoryItemEvidenceRecord,
+    MemoryItemPage,
+    MemoryLifecycle,
+)
 from app.domains.memory.domain.consolidation import (
     MAINTENANCE_LEASE_DURATION,
     MAX_HOT_BRIEF_SOURCE_ITEMS,
@@ -149,6 +159,14 @@ __all__ = [
     "MemoryScope",
     "MemoryScopeError",
     "MemoryScopeSetting",
+    "MAX_MEMORY_READ_PAGE_SIZE",
+    "MEMORY_READ_CONTRACT_VERSION",
+    "MemoryEvidenceAvailability",
+    "MemoryEvidenceRead",
+    "MemoryItemDetail",
+    "MemoryItemEvidenceRecord",
+    "MemoryItemPage",
+    "MemoryLifecycle",
     "MemorySourceTypeV1",
     "MemoryValidationError",
     "MemoryWriteOutcome",

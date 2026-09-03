@@ -1,0 +1,444 @@
+{
+  "bounds": {
+    "chat_evidence_items": 12,
+    "evidence_excerpt_characters": 500,
+    "memory_evidence_items": 50,
+    "memory_page_size": 50
+  },
+  "contract_versions": {
+    "memory_read": "memory-read.v1"
+  },
+  "domain_boundary": {
+    "backend_domain_owner": "app.domains.memory",
+    "chat_inspector_owner": "app.domains.chat",
+    "domain_application_framework_imports": 0,
+    "frontend_feature": "frontend/src/features/memory",
+    "raw_sql_or_cypher_from_llm": 0,
+    "read_surface_mutation_methods": 0,
+    "source_revalidation_owner": "code"
+  },
+  "executable_contract_gates": [
+    "owner_world_subject_scope_isolation",
+    "setting_get_has_zero_implicit_write",
+    "memory_off_keeps_existing_read_surface",
+    "bounded_list_and_detail_lifecycle",
+    "current_canonical_source_revalidation",
+    "deleted_stale_blocked_unobserved_excerpt_zero",
+    "chat_summary_and_phone_dialog_inspector",
+    "private_locator_not_in_normal_response_metadata",
+    "next_static_memory_route_parity",
+    "wide_tauri_memory_window_and_phone_rejection",
+    "legacy_memory_explorer_redirect",
+    "loading_empty_forbidden_not_found_degraded_error_surfaces"
+  ],
+  "frontend": {
+    "canonical_route": "/memory",
+    "feature_owner": "features/memory",
+    "legacy_redirect": "/memory-explorer -> /memory",
+    "memory_mutations": [],
+    "narrow_browser_reflow_max_width": 799,
+    "next_static_same_feature": true,
+    "phone_window_accepts_memory_route": false,
+    "wide_window_kind": "memory",
+    "wide_window_singleton": true
+  },
+  "historical_chain": {
+    "current_tree_owner": "P8-L-Q",
+    "p8_l_p_sha256": "c802ddb544291cb29b113cb3ab3aad80fdda67fdc96d621eadb820bf3abb8cca",
+    "predecessor_mode": "frozen_digest"
+  },
+  "non_scope": [
+    "memory_on_off_mutation",
+    "memory_pin_correction_delete",
+    "actual_installer_user_gate",
+    "held_out_causal_quality_closeout",
+    "release_or_production"
+  ],
+  "owner_stage": "P8-L-Q",
+  "predecessor": {
+    "path": "docs/architecture/p8-l-p-evidence-response-streaming-inventory.json",
+    "sha256": "c802ddb544291cb29b113cb3ab3aad80fdda67fdc96d621eadb820bf3abb8cca",
+    "size": 15601
+  },
+  "read_contract": {
+    "existing_memory_readable_while_off": true,
+    "missing_setting_defaults_enabled": false,
+    "normal_response_metadata_filters_private_keys": true,
+    "private_snapshot_namespace": "_evidence_inspector_v1",
+    "public_prompt_query_token_provider_fields": false,
+    "public_raw_source_id": false,
+    "routes": [
+      "GET /worlds/{world_id}/world-characters/{subject_id}/memory/settings",
+      "GET /worlds/{world_id}/world-characters/{subject_id}/memories",
+      "GET /worlds/{world_id}/world-characters/{subject_id}/memories/{memory_id}",
+      "GET /worlds/{world_id}/chat/threads/{thread_id}/requests/{request_id}/evidence"
+    ],
+    "setting_get_side_effect_free": true,
+    "source_revalidated_at_read": true,
+    "stale_source_excerpt_hidden": true
+  },
+  "required_files": [
+    {
+      "path": "backend/app/api/v1/main.py",
+      "sha256": "fde0965ba66edd0706282f33b9e6f620e767c942fd9025bbe5bc0fb5922686c3",
+      "size": 1859
+    },
+    {
+      "path": "backend/app/api/v1/public.py",
+      "sha256": "746f631b3dc958b4e02eb0a835a5428241509c86cbf73be3fd4760f148e514e2",
+      "size": 2141
+    },
+    {
+      "path": "backend/app/api/v1/routes/memory.py",
+      "sha256": "a7789c35f80611a0f2cb24fe4be94b98f102fa919737f60f03e7edf33927c88a",
+      "size": 10796
+    },
+    {
+      "path": "backend/app/api/v1/routes/world_chat_response.py",
+      "sha256": "3cce7943f3f0555648543c2bdad9dacdfa874f9717355d633c978c485dcf0f95",
+      "size": 7835
+    },
+    {
+      "path": "backend/app/domains/chat/api/schemas.py",
+      "sha256": "c6c003c95a6286af1af62fc9fb02df136780a5cf62feffe11985158537e17742",
+      "size": 8736
+    },
+    {
+      "path": "backend/app/domains/chat/application/evidence_assembly.py",
+      "sha256": "bc6b0993d825420b1bb46610f5b8b1b75f9012ec78a96f1a8b33e0390ce19aa3",
+      "size": 15560
+    },
+    {
+      "path": "backend/app/domains/chat/application/messages.py",
+      "sha256": "b6ad6cf2158c71b05df58812d22b7638009400c69f453d2fcca871db2a73f9c1",
+      "size": 5146
+    },
+    {
+      "path": "backend/app/domains/chat/application/response_workflow.py",
+      "sha256": "2c4850a85d7ea961599c5b98b98d62d28683f02fd65b385ed5532cd1ccb95b2a",
+      "size": 27746
+    },
+    {
+      "path": "backend/app/domains/chat/domain/evidence_bundle.py",
+      "sha256": "b91561e4b8eae183e0bcac5f9c695bcdf51970fe300630e48d8ccf183be12e65",
+      "size": 10723
+    },
+    {
+      "path": "backend/app/domains/chat/domain/response_request.py",
+      "sha256": "718976dd1f2e8a400da582f8b39871c56d520b4e488a01f278e997d499548050",
+      "size": 9442
+    },
+    {
+      "path": "backend/app/domains/chat/infrastructure/response_lifecycle_repository.py",
+      "sha256": "2a59172697cedb83faea217b60202b1f0e1bc7f17cc5ffb59a915e5901efd696",
+      "size": 31219
+    },
+    {
+      "path": "backend/app/domains/chat/ports/runtime.py",
+      "sha256": "04b41026badb89123aa9eb1bfba195d4c65b692332e333572c5cf12a5c3ca072",
+      "size": 2747
+    },
+    {
+      "path": "backend/app/domains/chat/public.py",
+      "sha256": "6c23002ee074e7968e273f9c842cbb578d00309897974f88552a4f019f34dcb2",
+      "size": 7318
+    },
+    {
+      "path": "backend/app/domains/memory/api/schemas.py",
+      "sha256": "e2c2e539f52f37eedac8bbe590ba67e51a804ad4a2ba151dd5cde928e138dd05",
+      "size": 2441
+    },
+    {
+      "path": "backend/app/domains/memory/application/read_surface.py",
+      "sha256": "6272324194a1e75ba4e42b34bc14992339da516b775dc5f7c305e6ff3851107c",
+      "size": 5678
+    },
+    {
+      "path": "backend/app/domains/memory/domain/read_surface.py",
+      "sha256": "445b4e326d57afc40278bff8a109939a65330a8a9b7c42daf8673705280bce70",
+      "size": 2287
+    },
+    {
+      "path": "backend/app/domains/memory/infrastructure/repository.py",
+      "sha256": "d77c187667fa9d4bc22148f6de67d902b4aa21eb614499f0254f6ee8bcdf4127",
+      "size": 34853
+    },
+    {
+      "path": "backend/app/domains/memory/ports/repository.py",
+      "sha256": "34dfb97ab7db361ffb5773ca75dac88edf57f7720df493c24e4ce20aecde5c44",
+      "size": 4258
+    },
+    {
+      "path": "backend/app/domains/memory/public.py",
+      "sha256": "34532ec1309870c7c7bc5a6cf6d1a468c8734ca9d6c1ebb4fb1cf9b2dd482090",
+      "size": 8109
+    },
+    {
+      "path": "backend/app/runtime/chat/sqlalchemy_adapter.py",
+      "sha256": "5b63524aa1bdf30633cd65f3430c1af21c0f901505a754e14262e020cf15567b",
+      "size": 4926
+    },
+    {
+      "path": "backend/app/runtime/chat/sqlalchemy_service.py",
+      "sha256": "25a6e42aafee239b0470dc2ed06ee61f6209f66dc8b04f6fd5e35017b9cd6a06",
+      "size": 60069
+    },
+    {
+      "path": "backend/app/runtime/chat/world_generation.py",
+      "sha256": "09d6c1dab27843d4dd4fdb67257fad822fb99d7f4a18defccead555178b58e22",
+      "size": 36494
+    },
+    {
+      "path": "backend/security/public_route_security_inventory.json",
+      "sha256": "88a613c2644c7613b41bef276cc8d6bc525d6778381aeebe11f376bddca59feb",
+      "size": 34429
+    },
+    {
+      "path": "backend/security/route_security_inventory.json",
+      "sha256": "72e0f6e655f1f0e3683dd1d4aa818f5f977b23a89cbcccd494bdf2aa14121ef6",
+      "size": 35207
+    },
+    {
+      "path": "backend/tests/test_l3_er0_embedded_runtime_inventory.py",
+      "sha256": "9732c8685bbd425a97bb92aa0c7b1c5673d1e1a32d517660a877bb00b0b97b1a",
+      "size": 3254
+    },
+    {
+      "path": "backend/tests/test_l3_er5_tauri_product_shell_contract.py",
+      "sha256": "7f2c0e9ba5f22a1941efbbb15a4ba1322f4332fa6c90f7b5ba414c987361fa1c",
+      "size": 13359
+    },
+    {
+      "path": "backend/tests/test_l4_pr_a_inventory.py",
+      "sha256": "765254c162a98164aafbf11e7ef1de681e64d58485233d32bd02cbb7d7df5fec",
+      "size": 3767
+    },
+    {
+      "path": "backend/tests/test_m4_public_runtime.py",
+      "sha256": "3b8e0288476393658943b389e59aff69d06861a97494911c316abb5670126c1e",
+      "size": 14042
+    },
+    {
+      "path": "backend/tests/test_p8_l_q_frontend_memory.py",
+      "sha256": "dd78678a5c0f7110dadf1453d35b9de50fb2d45db667ddab6d73b125936ab2cd",
+      "size": 4164
+    },
+    {
+      "path": "backend/tests/test_p8_l_q_memory_read_inspector.py",
+      "sha256": "13d65a9154f7d66dd8cff29d1e70241f827cebc3719b457677afde9919f9e976",
+      "size": 17620
+    },
+    {
+      "path": "browser-tests/product-shell.spec.ts",
+      "sha256": "f20e2ac0770ce19fd006599e7091e1f801787ccc4adbfd76eddebf2c7b6e3871",
+      "size": 91455
+    },
+    {
+      "path": "browser-tests/static-product-shell.spec.ts",
+      "sha256": "ba5ff3238ddcdc2c3f5e28bb718c78a962dd64cdaa0f284095f11ccc25a41488",
+      "size": 147848
+    },
+    {
+      "path": "desktop/platform/windows-host-tauri-dev.json",
+      "sha256": "61e6dbee12484dbd0a50507f3cf87ee851666b03ac5323efcbed00a7c61338b8",
+      "size": 2269
+    },
+    {
+      "path": "desktop/src-tauri/capabilities/product-shell.json",
+      "sha256": "ea5dac63b9094b89116b5379b33d50d027071de3b30818b251a63536770c35b1",
+      "size": 299
+    },
+    {
+      "path": "desktop/src-tauri/src/product_windows.rs",
+      "sha256": "e566cde46165cf0caed28e90737bd060df97e1111bc8398bc5c5ec7642ba7bf2",
+      "size": 17648
+    },
+    {
+      "path": "desktop/src-tauri/tauri.contributor-docker.conf.json",
+      "sha256": "134accc82a9a20f278dd757fb3a371ddef52143355e5dbdd8aeee7d356c33bb2",
+      "size": 733
+    },
+    {
+      "path": "docs/architecture/backend-domains.md",
+      "sha256": "d8cc90f6444eb2ba573397b447d996e70361d804b2fb48f9985768ca86bfd219",
+      "size": 50791
+    },
+    {
+      "path": "docs/architecture/frontend-design-baseline.json",
+      "sha256": "9713993c7ff6b26c3ee146c7f2fb5abb6b3e5e8e9fffed1a4a2c1c91aff95b1c",
+      "size": 44810
+    },
+    {
+      "path": "docs/architecture/frontend-design-reference.md",
+      "sha256": "a5011b2e3ff0e08e1d3dbaf4b341b40348adadc04e9a525d71edf03914466056",
+      "size": 37665
+    },
+    {
+      "path": "docs/architecture/frontend-product-shell.md",
+      "sha256": "a7c7c07417c1f1aaf5cb5751e6daf269ba59c84f6855e73e45f40ea5db74ec9d",
+      "size": 40549
+    },
+    {
+      "path": "docs/architecture/migration-conversion-inventory.json",
+      "sha256": "6e1fd5f79360ef5877c6be2dc40c7392cd134896117ba2ec48cdb17be53f919e",
+      "size": 45812
+    },
+    {
+      "path": "docs/architecture/next-static-compatibility.json",
+      "sha256": "6e289e06bf6557f37a4525b172f9227c169601cb5e6e6861e124b836149165a3",
+      "size": 19028
+    },
+    {
+      "path": "docs/architecture/p8-l-q-memory-read-inspector.md",
+      "sha256": "0f6626fbbe0e00023e2ac3afc56e3d2ee0a4b53b9020b08749cc85895ed421c4",
+      "size": 8923
+    },
+    {
+      "path": "docs/architecture/postgres-sql-inventory.json",
+      "sha256": "d0d70a8e833a06f1e2f588c89b3356a311182816ebefa8ce57567cea57389cef",
+      "size": 38974
+    },
+    {
+      "path": "frontend/DESIGN.md",
+      "sha256": "107c7ef453deeaaec64375a37cce17cabf19b3d9b48b4c4471c05c02a260b9b4",
+      "size": 78138
+    },
+    {
+      "path": "frontend/src/app/memory-explorer/page.tsx",
+      "sha256": "1a6551565bd461a23d6e99f20bbd4bd81b8a79d8e2a726dd50c7ace8e92c24a2",
+      "size": 130
+    },
+    {
+      "path": "frontend/src/app/memory/page.tsx",
+      "sha256": "1ee4f962fd675e91501fcc098344df604913f0153a1abfc6d71cbb2b2bbe6eba",
+      "size": 566
+    },
+    {
+      "path": "frontend/src/composition/static-product-router.tsx",
+      "sha256": "ce0c4a954a764475e28e87361925e847d9268504866bc3151d592559c4a45fd3",
+      "size": 13824
+    },
+    {
+      "path": "frontend/src/features/chat/api/world-chat-client.ts",
+      "sha256": "ccb2a47506bffaec54109dca1eec854521e90f3f016d6c212649fb3389b8e54a",
+      "size": 15083
+    },
+    {
+      "path": "frontend/src/features/chat/model/world-chat-contract.ts",
+      "sha256": "0221bd0574d20c0fdf524701c932b26bada6c619d1ab0938039d6c31f3ee73dd",
+      "size": 4544
+    },
+    {
+      "path": "frontend/src/features/chat/ui/world-chat.module.css",
+      "sha256": "c8ac25fd84ee72ffc52258385c2cafc3230f5ab573bcfd2eb051004aebc8abaf",
+      "size": 11867
+    },
+    {
+      "path": "frontend/src/features/chat/ui/world-chat.tsx",
+      "sha256": "efeb8ee1f78d121468b5db6c7fbace200ac7f1117e710f5bcc5f09e3f5d71346",
+      "size": 33466
+    },
+    {
+      "path": "frontend/src/features/device-home/model/device-home-contract.ts",
+      "sha256": "531b4bc5d695bd39aba0306d7cca5c5ca9094cf73c52c051d98ea4da19d8f280",
+      "size": 3740
+    },
+    {
+      "path": "frontend/src/features/device-home/ui/device-home.tsx",
+      "sha256": "27dc3597af5a2628ad510e2aa789d71683c04c0753d9c7487bd1b4b7706b45a4",
+      "size": 7812
+    },
+    {
+      "path": "frontend/src/features/device-shell/model/device-navigation.ts",
+      "sha256": "d52e64a650d1d0f2fd41f3a0cd39b3af58d0b6a7bd3c8089d1d153dad52a3c60",
+      "size": 5911
+    },
+    {
+      "path": "frontend/src/features/memory/api/memory-client.ts",
+      "sha256": "216dcc81af199c2343c64641857c9d930c3e522c2b5c1c314c4301281819b6b4",
+      "size": 8167
+    },
+    {
+      "path": "frontend/src/features/memory/model/memory-contract.ts",
+      "sha256": "f726e0be6e9fbaaf8d74555710f3cf1cb635787743051fa8e250b9e05dc0605c",
+      "size": 2650
+    },
+    {
+      "path": "frontend/src/features/memory/public.ts",
+      "sha256": "4891e9c704ea98d3fbba88450352b939944539a56f2df6e33e6b6ef9997622ca",
+      "size": 587
+    },
+    {
+      "path": "frontend/src/features/memory/ui/memory-scope-summary.tsx",
+      "sha256": "e3dc4099faa7f191abbdd5a782a8865b466216d8d0b01040c21bdd2bc9f496a1",
+      "size": 1602
+    },
+    {
+      "path": "frontend/src/features/memory/ui/memory-workspace.module.css",
+      "sha256": "53880456c0995869d5fc233a715f2b4f45d04cb5c7f2177b7057c73908697bdb",
+      "size": 8729
+    },
+    {
+      "path": "frontend/src/features/memory/ui/memory-workspace.tsx",
+      "sha256": "bebf1bf7a901989dafa3569aa39630843b27834ebda1d5917d8e0699b8fa002f",
+      "size": 16569
+    },
+    {
+      "path": "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx",
+      "sha256": "d911b868f7d5c16b97faee9b1fdd7d84d682a06690d3a2ca9f376b5de7a2725b",
+      "size": 3385
+    },
+    {
+      "path": "frontend/src/shared/desktop/product-window.ts",
+      "sha256": "836b7a4763534c40d3384750857f6f212c7da69a08d4df7aac3450d5d2175e1b",
+      "size": 9983
+    },
+    {
+      "path": "scripts/ci/check_windows_host_tauri_dev_contract.py",
+      "sha256": "5825a50bb049cebf36c672b59d3bdfdc2663da7bd7a8946b7d48e60b4bd928e0",
+      "size": 12897
+    },
+    {
+      "path": "scripts/ci/check_er6_desktop_supply_chain.py",
+      "sha256": "af697356e7ce7754789e6052a5af6decf061f7513e803a46d685b577b0272e1c",
+      "size": 12058
+    },
+    {
+      "path": "scripts/ci/generate_p8_l_q_memory_read_inspector_inventory.py",
+      "sha256": "08a0b5dbc5e33361749879d725c76320dc71d54df8ba8989613b728101fceb7c",
+      "size": 15013
+    },
+    {
+      "path": "security/architecture_import_baseline.json",
+      "sha256": "d4a150ed2df198a82f5018050a6a18ab0f1f382619141df0d2f5fe451b00b65c",
+      "size": 277751
+    },
+    {
+      "path": "security/frontend_architecture_policy.json",
+      "sha256": "41fb4fcb7503f7d3bc64801a246224da1929ac49b7e7b240597af7c737fbea25",
+      "size": 13289
+    },
+    {
+      "path": "security/frontend_design_policy.json",
+      "sha256": "8df69231a5cfa4f9d0ec5271b7b8c9bc5eb82aad62c099a2b1a39ccdf8fbd3b6",
+      "size": 38910
+    },
+    {
+      "path": "security/l4_pr_a_inventory.json",
+      "sha256": "be7dbaae11f61b15a342ddf2d790ec6e0a279fdc5384006dc662215060b4a6d6",
+      "size": 57569
+    }
+  ],
+  "schema": {
+    "canonical_table_count": 95,
+    "current_embedded_schema_version": 7,
+    "new_alembic_migration": null,
+    "new_canonical_columns": [],
+    "new_canonical_tables": [],
+    "new_embedded_schema_version": null,
+    "new_ladybug_generation": null,
+    "source_migration_count": 86,
+    "source_revision": "20260903_0087"
+  },
+  "schema_version": 1
+}

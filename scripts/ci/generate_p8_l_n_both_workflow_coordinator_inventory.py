@@ -19,7 +19,7 @@ if str(BACKEND_ROOT) not in sys.path:
 OUTPUT_PATH = ROOT / "docs/architecture/p8-l-n-both-workflow-coordinator-inventory.json"
 M_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-m-graph-retrieval-planner-inventory.json"
 M_INVENTORY_SHA256 = (
-    "892a439a93f432f18ed5b81c73e741b21556e2359623e6cfbcdfd320ccfb4509"
+    "cb9354ca4441c585be054e49a1ba8d9046227cb4ebecfcbe9ec44f9830b569fe"
 )
 
 from app.domains.chat.domain import (  # noqa: E402

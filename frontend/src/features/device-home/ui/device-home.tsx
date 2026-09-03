@@ -39,14 +39,14 @@ const FIXED_VISUALS = {
   settings: <Cog size={30} strokeWidth={2.2} />,
   studio: <Hammer size={30} strokeWidth={2.2} />,
   "world-import": <Plus size={32} strokeWidth={2.2} />,
-  "memory-explorer": <BrainCircuit size={30} strokeWidth={2.1} />,
+  memory: <BrainCircuit size={30} strokeWidth={2.1} />,
 } as const;
 
 const FIXED_BACKGROUNDS = {
   settings: "var(--color-brand-soft)",
   studio: "var(--color-state-warning-surface)",
   "world-import": "var(--color-state-running-surface)",
-  "memory-explorer": "var(--color-state-degraded-surface)",
+  memory: "var(--color-state-degraded-surface)",
 } as const;
 
 const WORLD_BACKGROUNDS = [

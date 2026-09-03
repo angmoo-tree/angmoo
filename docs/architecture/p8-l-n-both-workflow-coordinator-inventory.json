@@ -65,7 +65,7 @@
   ],
   "historical_chain": {
     "current_tree_owner": "P8-L-N",
-    "p8_l_m_sha256": "892a439a93f432f18ed5b81c73e741b21556e2359623e6cfbcdfd320ccfb4509",
+    "p8_l_m_sha256": "cb9354ca4441c585be054e49a1ba8d9046227cb4ebecfcbe9ec44f9830b569fe",
     "predecessor_mode": "frozen_digest"
   },
   "non_scope": [
@@ -80,7 +80,7 @@
   "owner_stage": "P8-L-N",
   "predecessor": {
     "path": "docs/architecture/p8-l-m-graph-retrieval-planner-inventory.json",
-    "sha256": "892a439a93f432f18ed5b81c73e741b21556e2359623e6cfbcdfd320ccfb4509",
+    "sha256": "cb9354ca4441c585be054e49a1ba8d9046227cb4ebecfcbe9ec44f9830b569fe",
     "size": 7014
   },
   "recipe_registry": {
@@ -166,8 +166,8 @@
     },
     {
       "path": "backend/app/domains/chat/public.py",
-      "sha256": "fcc6923f53df1b3a4a9d829737e888cbe240d938acca1227f7fde6877f8fc8ec",
-      "size": 7128
+      "sha256": "6c23002ee074e7968e273f9c842cbb578d00309897974f88552a4f019f34dcb2",
+      "size": 7318
     },
     {
       "path": "backend/tests/test_p8_l_n_both_workflow_coordinator.py",
@@ -176,13 +176,13 @@
     },
     {
       "path": "backend/tests/test_p8_l_n_both_workflow_coordinator_inventory.py",
-      "sha256": "d28d04b761861a850b0fd369dda436285ceb0acb30ce6f82597c2a0ae76befb6",
+      "sha256": "ddf2a88cc1d09ee5672d0e7616e4f426afe3d694d060f710561aca34a207b402",
       "size": 1894
     },
     {
       "path": "docs/architecture/backend-domains.md",
-      "sha256": "140ab57802df2eb529b527a88e0d30fcf7a259c8a00827d5d623fed96b743573",
-      "size": 49073
+      "sha256": "d8cc90f6444eb2ba573397b447d996e70361d804b2fb48f9985768ca86bfd219",
+      "size": 50791
     },
     {
       "path": "docs/architecture/p8-l-n-both-workflow-coordinator.md",
@@ -191,7 +191,7 @@
     },
     {
       "path": "scripts/ci/generate_p8_l_n_both_workflow_coordinator_inventory.py",
-      "sha256": "d079e4d3bb12bbca4bc6f96912c9ecb9302e343a1c9f12103419fc999bbab811",
+      "sha256": "5fb655224d6679071d71780f57eca62be95096b777e5fbe6604ffa9ce0b45b96",
       "size": 12601
     }
   ],

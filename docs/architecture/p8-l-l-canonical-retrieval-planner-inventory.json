@@ -82,7 +82,7 @@
   },
   "historical_chain": {
     "current_tree_owner": "P8-L-L",
-    "p8_l_k_sha256": "4d98b3d04d31fd821b9f63901c1521d4652b33e59b77b15f0ad22ce8d65b7a2b",
+    "p8_l_k_sha256": "102362e7364cf8494a3bf5a3dbc17ea3c42e87ef2d782499881ff52bcd6d3d1b",
     "predecessor_mode": "frozen_digest"
   },
   "metrics": [
@@ -111,7 +111,7 @@
   "owner_stage": "P8-L-L",
   "predecessor": {
     "path": "docs/architecture/p8-l-k-retrieval-router-inventory.json",
-    "sha256": "4d98b3d04d31fd821b9f63901c1521d4652b33e59b77b15f0ad22ce8d65b7a2b",
+    "sha256": "102362e7364cf8494a3bf5a3dbc17ea3c42e87ef2d782499881ff52bcd6d3d1b",
     "size": 9171
   },
   "provider_schema": {
@@ -182,13 +182,13 @@
     },
     {
       "path": "backend/tests/test_p8_l_l_canonical_retrieval_planner_inventory.py",
-      "sha256": "a90bce5f2d92a70d4b9fe9161214cb2b7aa433fce1327e499dd2cced162b49d9",
+      "sha256": "6fdf27259eb5fca950974e803a70f0f7da7df7919fd40c03a7b80926746cecc6",
       "size": 1958
     },
     {
       "path": "docs/architecture/backend-domains.md",
-      "sha256": "140ab57802df2eb529b527a88e0d30fcf7a259c8a00827d5d623fed96b743573",
-      "size": 49073
+      "sha256": "d8cc90f6444eb2ba573397b447d996e70361d804b2fb48f9985768ca86bfd219",
+      "size": 50791
     },
     {
       "path": "docs/architecture/p8-l-l-canonical-retrieval-planner.md",

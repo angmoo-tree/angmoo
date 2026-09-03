@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from sqlalchemy import select, update
+from sqlalchemy import and_, or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -33,6 +33,11 @@ from app.domains.memory.domain.retention import (
     is_memory_expired,
 )
 from app.domains.memory.domain.scope import MemoryScope, MemoryScopeSetting
+from app.domains.memory.domain.read_surface import (
+    MAX_MEMORY_READ_EVIDENCE_ITEMS,
+    MemoryItemEvidenceRecord,
+    MemoryItemPage,
+)
 from app.domains.memory.infrastructure.sqlalchemy_models import (
     MemoryCandidate,
     MemoryHotBrief,
@@ -376,6 +381,75 @@ class SqlAlchemyMemoryRepository:
             raise MemoryNotFoundError("memory_not_retrievable")
         return self._to_item(row)
 
+    def list_items(
+        self,
+        *,
+        scope: MemoryScope,
+        cursor: str | None,
+        limit: int,
+    ) -> MemoryItemPage:
+        self._validate_scope(scope)
+        statement = select(MemoryItem).where(
+            *self._item_scope_predicates(scope),
+            MemoryItem.status != MemoryItemStatus.DELETED.value,
+        )
+        if cursor:
+            cursor_row = self._require_item(scope, cursor)
+            statement = statement.where(
+                or_(
+                    MemoryItem.updated_at < cursor_row.updated_at,
+                    and_(
+                        MemoryItem.updated_at == cursor_row.updated_at,
+                        MemoryItem.id < cursor_row.id,
+                    ),
+                )
+            )
+        rows = list(
+            self._session.scalars(
+                statement.order_by(MemoryItem.updated_at.desc(), MemoryItem.id.desc())
+                .limit(limit + 1)
+            )
+        )
+        has_more = len(rows) > limit
+        page_rows = rows[:limit]
+        return MemoryItemPage(
+            items=tuple(self._to_item(row) for row in page_rows),
+            next_cursor=page_rows[-1].id if has_more and page_rows else None,
+        )
+
+    def list_item_evidence(
+        self,
+        *,
+        scope: MemoryScope,
+        item_id: str,
+    ) -> tuple[MemoryItemEvidenceRecord, ...]:
+        item = self._require_item(scope, item_id)
+        rows = list(
+            self._session.scalars(
+                select(MemoryItemEvidence)
+                .where(MemoryItemEvidence.memory_item_id == item.id)
+                .order_by(
+                    MemoryItemEvidence.source_created_at.desc(),
+                    MemoryItemEvidence.id,
+                )
+                .limit(MAX_MEMORY_READ_EVIDENCE_ITEMS)
+            )
+        )
+        return tuple(
+            MemoryItemEvidenceRecord(
+                source_type=MemorySourceTypeV1(row.source_type),
+                source_id=row.source_id,
+                source_world_id=row.source_world_id,
+                source_created_at=row.source_created_at,
+                source_digest=row.source_digest,
+                actor_world_character_id=row.actor_world_character_id,
+                target_world_character_id=row.target_world_character_id,
+                counterpart_world_character_id=item.counterpart_world_character_id,
+                thread_id=item.thread_id,
+            )
+            for row in rows
+        )
+
     def set_item_pin(
         self,
         *,
@@ -679,9 +753,9 @@ class SqlAlchemyMemoryRepository:
         for_update: bool = False,
     ) -> MemoryItem:
         statement = select(MemoryItem).where(
-                MemoryItem.id == item_id,
-                *self._item_scope_predicates(scope),
-            )
+            MemoryItem.id == item_id,
+            *self._item_scope_predicates(scope),
+        )
         if for_update:
             statement = statement.with_for_update().execution_options(
                 populate_existing=True

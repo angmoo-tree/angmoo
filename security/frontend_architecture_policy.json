@@ -6,6 +6,7 @@
     "creator-studio",
     "device-home",
     "device-shell",
+    "memory",
     "pwa-shell",
     "relationships",
     "runtime-status",
@@ -40,6 +41,13 @@
       "@/features/chat/public",
       "MessagesClient",
       "dynamic = \"force-dynamic\""
+    ],
+    "frontend/src/app/memory/page.tsx": [
+      "@/features/memory/public",
+      "MemoryWorkspace"
+    ],
+    "frontend/src/app/memory-explorer/page.tsx": [
+      "redirect(\"/memory\")"
     ],
     "frontend/src/app/ui-foundation/page.tsx": [
       "SemanticFoundationFixture",
@@ -88,6 +96,22 @@
     "frontend/src/features/chat/ui/messages-client.tsx": [
       "/messages/",
       "listMessageThreads"
+    ],
+    "frontend/src/features/memory/api/memory-client.ts": [
+      "getMemoryItem",
+      "getMemorySetting",
+      "getWorldChatEvidence",
+      "listMemoryItems"
+    ],
+    "frontend/src/features/memory/public.ts": [
+      "MemoryScopeSummary",
+      "MemoryWorkspace",
+      "WorldChatEvidenceInspector"
+    ],
+    "frontend/src/features/memory/ui/memory-workspace.tsx": [
+      "data-product-shell=\"memory\"",
+      "getMemoryItem",
+      "listMemoryItems"
     ],
     "frontend/src/features/creator-studio/ui/creator-studio-dashboard.tsx": [
       "getLocalWorldSurface(\"creator_studio\"",
@@ -196,6 +220,8 @@
   "required_paths": [
     "frontend/public/sw.js",
     "frontend/src/app/manifest.ts",
+    "frontend/src/app/memory-explorer/page.tsx",
+    "frontend/src/app/memory/page.tsx",
     "frontend/src/app/messages/[threadId]/page.tsx",
     "frontend/src/app/messages/page.tsx",
     "frontend/src/app/ui-foundation/page.tsx",
@@ -231,6 +257,13 @@
     "frontend/src/features/device-shell/ui/local-device-navigation.tsx",
     "frontend/src/features/device-shell/ui/local-product-link.module.css",
     "frontend/src/features/device-shell/ui/local-product-link.tsx",
+    "frontend/src/features/memory/api/memory-client.ts",
+    "frontend/src/features/memory/model/memory-contract.ts",
+    "frontend/src/features/memory/public.ts",
+    "frontend/src/features/memory/ui/memory-scope-summary.tsx",
+    "frontend/src/features/memory/ui/memory-workspace.module.css",
+    "frontend/src/features/memory/ui/memory-workspace.tsx",
+    "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx",
     "frontend/src/features/pwa-shell/public.ts",
     "frontend/src/features/pwa-shell/ui/pwa-service-worker-lifecycle.tsx",
     "frontend/src/features/relationships/api/relationship-graph.ts",

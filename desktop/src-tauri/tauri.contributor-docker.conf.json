@@ -12,7 +12,7 @@
         {
           "identifier": "contributor-docker-bridge",
           "description": "Core window commands for the repository-local Windows Host Tauri dev bridge.",
-          "windows": ["main", "studio", "relationship-graph"],
+          "windows": ["main", "memory", "studio", "relationship-graph"],
           "remote": {
             "urls": ["http://127.0.0.1:3000/*"]
           },

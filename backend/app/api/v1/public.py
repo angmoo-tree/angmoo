@@ -9,6 +9,7 @@ from app.api.v1.routes import bot
 from app.api.v1.routes import character_lore
 from app.api.v1.routes import community
 from app.api.v1.routes import messages
+from app.api.v1.routes import memory
 from app.api.v1.routes.manual_social import router as manual_social_router
 from app.api.v1.routes import runtime_status
 from app.api.v1.routes import tree
@@ -30,6 +31,7 @@ class HostedRouterConfigurationError(RuntimeError):
 PUBLIC_ROUTERS = (
     local_identity_router,
     device_home_router,
+    memory.router,
     world_chat.router,
     world_chat.entry_router,
     world_chat_response.router,

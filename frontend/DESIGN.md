@@ -1,11 +1,11 @@
 ---
 name: Angmoo Local
 document: Frontend Design Contract
-version: 1.9
-date: 2026-09-02
-status: CANONICAL DESIGN CONTRACT · SINGLE BRIGHT-CORAL BRAND + THREE USER-APPROVED CONTRAST EXCEPTIONS · UI-A~UI-F FULL PASS/MERGED/POST-MERGE PASS · P8-L-A~O STAGED HISTORY RECORDED · P8-L-P WORLD CHAT COMPOSER/GENERATION/CRG-ONLY STREAMING IMPLEMENTED IN WORKTREE · LOCAL/CI/USER/MERGE GATES SEPARATE · CURRENT UI CONFORMANCE INCOMPLETE
+version: 1.10
+date: 2026-09-03
+status: CANONICAL DESIGN CONTRACT · SINGLE BRIGHT-CORAL BRAND + THREE USER-APPROVED CONTRAST EXCEPTIONS · UI-A~UI-F FULL PASS/MERGED/POST-MERGE PASS · P8-L-A~P MERGED HISTORY RECORDED · P8-L-Q MEMORY READ/EVIDENCE INSPECTOR IMPLEMENTED IN WORKTREE · LOCAL/CI/USER/MERGE GATES SEPARATE · CURRENT UI CONFORMANCE INCOMPLETE
 scope: Device Phone · World App · Creator Studio · Relationship Graph · current L4.5 surfaces · P8-L Chat/Memory target contract
-implementation_phase: L4.5 UI-A through UI-F merged and post-merge closed · P8-L-D/E World-scoped identity, profile and letter entry merged · P8-L-F~O canonical Memory, recall, durable generation, Router/Planners, BOTH and maintenance foundations are historical merged stages · P8-L-P connects World Chat message acceptance, Evidence Bundle, exactly-once Character Response Generator, CRG-only NDJSON transport, composer, typing presence and retry in the current worktree · local technical, Hosted CI, user, merge and post-merge Gates remain separately recorded · Memory read/control UI remains unimplemented
+implementation_phase: L4.5 UI-A through UI-F merged and post-merge closed · P8-L-D/E World-scoped identity, profile and letter entry merged · P8-L-F~O canonical Memory, recall, durable generation, Router/Planners, BOTH and maintenance foundations are historical merged stages · P8-L-P World Chat message acceptance, Evidence Bundle, Character Response Generator, CRG-only NDJSON transport, composer, typing, retry and model Hotfix are merged · P8-L-Q implements the read-only Memory workspace and current-source evidence inspector in the current worktree · local technical, Hosted CI, user, merge and post-merge Gates remain separately recorded · Memory mutation UI remains P8-L-R
 hosted_reference_commit: 7f967abd6117381be5c081ed284addb889b06fec
 local_reference_commit: e5e62aed69cb89b16b5870eb0854dd07752dc519
 legacy_reference: audited-internal-snapshot
@@ -1160,6 +1160,16 @@ UI-E PR #209 후속 Hotfix는 사용자 visual에서 발견된 `최근 결과` r
 - accepted request의 모델 snapshot과 Gemini 계열별 thinking config는 backend 진단 계약이며 사용자 화면에 노출하지 않는다.
 - 현재 adapter는 provider 전체 답변을 safety 검증한 뒤 bounded delta로 나누므로 provider-native token streaming을 구현했다고 주장하지 않는다. Memory read/control UI는 후속 P8-L-Q/R 범위다.
 
+### 18.11 P8-L-Q Memory read surface·근거 inspector
+
+- `/memory`는 `features/memory/public.ts`가 소유하는 canonical owner Memory route다. Next page와 static product router는 동일한 `MemoryWorkspace`를 조합하며 `/memory-explorer`는 숨은 compatibility redirect일 뿐 별도 product destination이 아니다.
+- Tauri `memory`는 wide singleton window다. exact `/memory` path와 `world → subject → memory` 순서의 안전한 query만 허용하고 Phone window는 `/memory`를 거부한다. Browser는 799px 이하에서 같은 workspace를 단일 열로 reflow한다.
+- workspace는 실제 launchable owner World·active WorldCharacter 범위에서 saved/default-OFF setting, bounded list, lifecycle, provenance와 현재 재검증된 근거만 읽는다. URL의 World·subject가 없으면 다른 scope로 조용히 fallback하지 않는다.
+- Memory OFF는 새 후보·write·retrieval이 꺼진 상태로 설명하되 이미 저장된 owner 기억은 계속 읽을 수 있다. Q에는 ON/OFF switch·pin·correction·delete action을 그리지 않으며 이 mutation은 P8-L-R이 소유한다.
+- Chat의 `MemoryScopeSummary`와 `WorldChatEvidenceInspector`는 같은 Memory public boundary를 사용한다. committed assistant message에 backend가 deterministic evidence capability/count를 준 경우에만 `근거 N개 보기` action을 표시한다.
+- evidence Dialog는 current canonical source를 다시 확인한 결과만 보여 준다. stale·deleted·unavailable source는 과거 excerpt와 link를 숨기며 source ID·revision·locator·prompt·query·token·provider error는 UI contract에 포함하지 않는다.
+- loading·empty scope·empty list·forbidden/not-found·transport error·expired/superseded/deleted·degraded evidence를 서로 구분한다. 모든 Q data action은 GET이고 provider call이나 Memory state mutation을 일으키지 않는다.
+
 따라서 현재 허용되는 판정:
 
 ```text
@@ -1177,8 +1187,9 @@ P8-L-B BACKEND CHAT DOMAIN STRUCTURE PARITY MERGED / POST-MERGE 5/5 PASS
 P8-L-C FRONTEND CHAT FEATURE STRUCTURE PARITY MERGED / POST-MERGE 6/6 PASS
 P8-L-D WORLD CHAT IDENTITY·READ-ONLY SLICE MERGED / POST-MERGE 7/7 PASS
 P8-L-E WORLD SOCIAL PROFILE·LETTER CHAT ENTRY MERGED / USER INSTALLATION GATE PASS
-P8-L-P WORLD CHAT MESSAGE·EVIDENCE·CRG-ONLY STREAMING + PR #245 MODEL-BINDING/GEMINI-COMPATIBILITY HOTFIX IMPLEMENTED IN WORKTREE / LOCAL·HOSTED·USER·MERGE GATES SEPARATE
-P8-L CHAT V2·CANONICAL MEMORY PRODUCT RUNTIME PARTIAL / MEMORY READ·OWNER CONTROL·FINAL CAUSAL CLOSEOUT PENDING
+P8-L-P WORLD CHAT MESSAGE·EVIDENCE·CRG-ONLY STREAMING + PR #245 MODEL-BINDING/GEMINI-COMPATIBILITY HOTFIX MERGED / POST-MERGE PASS PENDING
+P8-L-Q MEMORY READ SURFACE·CURRENT-SOURCE EVIDENCE INSPECTOR IMPLEMENTED IN WORKTREE / LOCAL·HOSTED·USER·MERGE GATES SEPARATE
+P8-L CHAT V2·CANONICAL MEMORY PRODUCT RUNTIME PARTIAL / MEMORY OWNER CONTROL·FINAL CAUSAL CLOSEOUT PENDING
 ```
 
 token·shell·social core·Local-only surface·visual/runtime Gate와 사용자 승인이 모두 닫혔으므로 현재 함께 허용되는 판정:

@@ -767,6 +767,34 @@ executable gates are in
 inventory. Memory read/control UI, held-out quality/latency and cross-runtime
 user closeout remain P8-L-Q~S scope.
 
+### P8-L-Q Memory read and evidence-inspector boundary
+
+`app.domains.memory.domain.read_surface` owns framework-free lifecycle,
+evidence-availability and bounded page/detail contracts.
+`app.domains.memory.application.read_surface` owns side-effect-free setting
+reads, exact owner+World+subject list/detail orchestration and current canonical
+source revalidation through ports. It imports neither FastAPI nor SQLAlchemy.
+The concrete Memory repository and source reader remain below that boundary;
+`app.api.v1.routes.memory` performs HTTP composition instead of making the
+Memory domain depend on runtime adapters.
+
+The Chat domain extends its immutable Evidence Bundle with typed private
+locators and persists an `evidence-inspector.v1` snapshot only at the same
+fenced assistant commit. Normal response DTOs strip its underscore-prefixed
+metadata key. `app.runtime.chat.world_generation` may resolve those locators
+only for the authenticated request's committed thread, then revalidates
+canonical source digest/scope/visibility/observation/membership/block state,
+Memory item lifecycle/version/evidence, or exact directional relationship
+state before presenting a bounded excerpt. Stale, deleted or locator-less
+evidence exposes no former text or canonical link.
+
+The four Q routes are GET-only; setting GET does not create a row, Memory OFF
+does not hide existing owner data, and no read starts a provider, projection,
+candidate or maintenance write. The stage adds no migration, SQLite schema
+version or LadybugDB generation. Full contracts and frozen file evidence are
+in `docs/architecture/p8-l-q-memory-read-inspector.md` and its generated
+inventory. ON/OFF, pin, correction and delete mutations remain P8-L-R.
+
 ## Contributor workflow
 
 Before adding a backend feature:

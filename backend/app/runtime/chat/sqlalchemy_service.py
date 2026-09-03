@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 import hashlib
+import json
 import logging
 from uuid import uuid4
 
@@ -1211,7 +1212,46 @@ def _world_thread_read(
         created_at=thread.created_at,
         latest_message=latest_message,
         messages=messages,
+        evidence_summaries=(
+            _thread_evidence_summaries(db, thread.id) if include_messages else []
+        ),
     )
+
+
+def _thread_evidence_summaries(
+    db: Session,
+    thread_id: str,
+) -> list[schemas.WorldChatEvidenceSummaryRead]:
+    rows = list(
+        db.scalars(
+            select(models.ChatResponseRequest).where(
+                models.ChatResponseRequest.thread_id == thread_id,
+                models.ChatResponseRequest.state == "committed",
+                models.ChatResponseRequest.committed_assistant_message_id.is_not(None),
+            )
+        )
+    )
+    summaries: list[schemas.WorldChatEvidenceSummaryRead] = []
+    for row in rows:
+        try:
+            metadata = json.loads(row.response_metadata_json)
+        except (TypeError, json.JSONDecodeError):
+            continue
+        if not isinstance(metadata, dict):
+            continue
+        capability = metadata.get("evidence_capability")
+        count = metadata.get("public_evidence_count")
+        if capability not in {"available", "degraded"} or not isinstance(count, int) or count < 1:
+            continue
+        summaries.append(
+            schemas.WorldChatEvidenceSummaryRead(
+                request_id=row.request_id,
+                assistant_message_id=row.committed_assistant_message_id,
+                capability=capability,
+                count=count,
+            )
+        )
+    return summaries
 
 
 def _world_chat_role(

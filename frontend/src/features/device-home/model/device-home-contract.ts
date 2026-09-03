@@ -4,7 +4,7 @@ export type DeviceHomeFixedAppId =
   | "settings"
   | "studio"
   | "world-import"
-  | "memory-explorer";
+  | "memory";
 
 export type DeviceHomeFixedApp = {
   id: DeviceHomeFixedAppId;
@@ -85,10 +85,10 @@ export const DEVICE_HOME_FIXED_APPS: readonly DeviceHomeFixedApp[] = [
     availability: "available",
   },
   {
-    id: "memory-explorer",
-    label: "Memory Explorer",
-    href: "/memory-explorer",
-    availability: "planned",
+    id: "memory",
+    label: "Memory",
+    href: "/memory",
+    availability: "available",
   },
 ] as const;
 

@@ -677,6 +677,7 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
         created_at: "2026-09-01T03:04:00Z",
       },
     ],
+    evidence_summaries: [],
   };
   const worldChatCalls: string[] = [];
   const sentUserMessage = {
@@ -770,6 +771,16 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
           ...(messageAccepted ? [sentUserMessage] : []),
           ...(responseCommitted ? [generatedAssistantMessage] : []),
         ],
+        evidence_summaries: responseCommitted
+          ? [
+              {
+                request_id: acceptedRequest.request_id,
+                assistant_message_id: generatedAssistantMessage.id,
+                capability: "available",
+                count: 1,
+              },
+            ]
+          : [],
       });
     }
     if (
@@ -803,6 +814,32 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
         outcome: "accepted",
         user_message: sentUserMessage,
         response_request: acceptedRequest,
+      });
+    }
+    if (
+      request.method() === "GET" &&
+      url.pathname ===
+        `/api/backend/worlds/${worldId}/chat/threads/${threadId}/requests/${acceptedRequest.request_id}/evidence`
+    ) {
+      return json(route, {
+        schema_version: "world-chat-evidence.v1",
+        request_id: acceptedRequest.request_id,
+        route: "CANONICAL",
+        retrieval_outcome: "memory_used",
+        capability: "available",
+        items: [
+          {
+            reference: "evidence-browser-1",
+            kind: "canonical_source",
+            label: "대화",
+            excerpt: "함께 걷던 길을 기억한 검증된 대화입니다.",
+            occurred_at: "2026-09-02T07:30:00Z",
+            availability: "available",
+            related_character: "사용자 앵무",
+            direction: "incoming",
+            canonical_href: `/worlds/${worldId}/chat/${threadId}`,
+          },
+        ],
       });
     }
     if (
@@ -946,6 +983,13 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
     page.getByText(generatedAssistantMessage.content, { exact: true }),
   ).toBeVisible();
   await expect(modelSelect).toBeEnabled();
+  await page.getByRole("button", { name: "근거 1개 보기" }).click();
+  await expect(page.getByRole("dialog", { name: "이 답변의 근거" })).toBeVisible();
+  await expect(
+    page.getByText("함께 걷던 길을 기억한 검증된 대화입니다."),
+  ).toBeVisible();
+  await expect(page.getByText("source_id", { exact: false })).toHaveCount(0);
+  await page.getByRole("button", { name: "닫기" }).click();
   await expect(page.getByText("Canonical Planner", { exact: false })).toHaveCount(0);
   await expect(page.getByText("Evidence Bundle", { exact: false })).toHaveCount(0);
 
@@ -965,6 +1009,130 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
   );
   expect(audit.writes).toEqual([]);
   expect(audit.providerCalls).toEqual([]);
+});
+
+test("P8-L-Q Memory read surface keeps OFF data readable and reflows without mutations", async ({
+  page,
+}) => {
+  const worldId = WORLD_ALPHA.world_id;
+  const subjectId = "wc-p8-l-q-memory";
+  const memoryId = "memory-p8-l-q-browser";
+  const audit = await installBackendFixture(page, {
+    deviceWorlds: [WORLD_ALPHA],
+  });
+  const item = {
+    id: memoryId,
+    memory_kind: "AUTOBIOGRAPHICAL_EVENT",
+    summary: "함께 훈련한 약속을 기억해.",
+    lifecycle: "active",
+    formed_at: "2026-09-03T01:00:00Z",
+    valid_from: "2026-09-03T01:00:00Z",
+    valid_until: null,
+    pinned: false,
+    superseded_by_memory_id: null,
+    retention_days: 180,
+    related_character: { display_name: "하루", direction: "incoming" },
+    version: 1,
+  };
+  const reads: string[] = [];
+
+  await page.route(
+    `**/api/backend/worlds/${worldId}/world-characters**`,
+    async (route) => {
+      const url = new URL(route.request().url());
+      reads.push(`${route.request().method()} ${url.pathname}${url.search}`);
+      if (
+        route.request().method() === "GET" &&
+        url.pathname === `/api/backend/worlds/${worldId}/world-characters`
+      ) {
+        return json(route, {
+          schema_version: "world-character-profile-list-v1",
+          world_id: worldId,
+          items: [
+            {
+              schema_version: "world-character-profile-v1",
+              world_id: worldId,
+              world_character_id: subjectId,
+              character_id: "character-p8-l-q-memory",
+              display_name: "기억하는 앵무",
+              handle: "memory_bird",
+              avatar_url: null,
+              banner_url: null,
+              intro: "검증된 기억만 읽습니다.",
+              role_key: "mentor",
+              control_mode: "autonomous",
+              status: "active",
+              profile_capability: "available",
+            },
+          ],
+        });
+      }
+      if (url.pathname.endsWith("/memory/settings")) {
+        return json(route, {
+          schema_version: "memory-setting-read.v1",
+          scope: { world_id: worldId, subject_world_character_id: subjectId },
+          configured: true,
+          enabled: false,
+          retention_days: 180,
+          provider_mode: "none",
+          version: 2,
+          capabilities: { read: "available", mutate: "not_available_in_p8_l_q" },
+        });
+      }
+      if (url.pathname.endsWith(`/memories/${memoryId}`)) {
+        return json(route, {
+          ...item,
+          schema_version: "memory-item-detail.v1",
+          scope: { world_id: worldId, subject_world_character_id: subjectId },
+          evidence: [
+            {
+              source_kind: "CHAT_MESSAGE",
+              source_label: "대화",
+              source_created_at: "2026-09-03T00:30:00Z",
+              availability: "available",
+              excerpt: "오늘 훈련을 마치고 함께 한 약속을 지켰어.",
+              related_character: { display_name: "하루", direction: "incoming" },
+              canonical_href: `/worlds/${worldId}/chat/thread-p8-l-q`,
+            },
+          ],
+          provenance_summary: "현재 확인 가능한 근거 1개 / 전체 1개",
+          capabilities: { read: "available", mutate: "not_available_in_p8_l_q" },
+        });
+      }
+      if (url.pathname.endsWith("/memories")) {
+        return json(route, {
+          schema_version: "memory-item-list.v1",
+          scope: { world_id: worldId, subject_world_character_id: subjectId },
+          memory_enabled: false,
+          items: [item],
+          next_cursor: null,
+          capabilities: { read: "available", mutate: "not_available_in_p8_l_q" },
+        });
+      }
+      return json(route, { detail: "unexpected_memory_request" }, 404);
+    },
+  );
+
+  await page.setViewportSize({ width: 1180, height: 780 });
+  await page.goto(`/memory?world=${worldId}&subject=${subjectId}&memory=${memoryId}`);
+  await expect(page.getByRole("heading", { name: "기억", exact: true })).toBeVisible();
+  await expect(page.getByText("기억이 꺼져 있어요", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: item.summary })).toBeVisible();
+  await expect(page.getByText("오늘 훈련을 마치고 함께 한 약속을 지켰어.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "대화 원문 열기" })).toHaveAttribute(
+    "href",
+    `/worlds/${worldId}/chat/thread-p8-l-q`,
+  );
+  await expect(page.getByRole("button", { name: /고정|정정|삭제|ON|OFF/ })).toHaveCount(0);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  const workspaceDisplay = await page
+    .locator('section[aria-label="저장된 기억 목록"]')
+    .locator("..")
+    .evaluate((element) => getComputedStyle(element).display);
+  expect(workspaceDisplay).toBe("block");
+  expect(reads.every((entry) => entry.startsWith("GET "))).toBe(true);
+  expect(audit.writes).toEqual([]);
 });
 
 test("P8-L-E World social author profile and letter CTA open one exact World Chat thread", async ({
@@ -1017,6 +1185,7 @@ test("P8-L-E World social author profile and letter CTA open one exact World Cha
     created_at: "2026-09-01T04:00:00Z",
     latest_message: null,
     messages: [],
+    evidence_summaries: [],
   };
   const requests: string[] = [];
   const profileTabs: string[] = [];

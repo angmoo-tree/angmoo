@@ -28,6 +28,7 @@ import { StudioImportRouteClient } from "@/app/studio/import/studio-import-route
 import { StudioRouteClient } from "@/app/studio/studio-route-client";
 import { WorldAppRouteClient } from "@/app/world-app-route-client";
 import { CreatorStudioFrame } from "@/features/creator-studio/public";
+import { MemoryWorkspace } from "@/features/memory/public";
 import { SemanticFoundationFixture } from "@/features/ui-foundation/public";
 import {
   canonicalProductRoute,
@@ -137,6 +138,19 @@ function renderStaticRoute(location: BrowserLocation) {
   const { pathname, search } = location;
   if (pathname === "/ui-foundation") return <SemanticFoundationFixture />;
   if (pathname === "/") return <DeviceHomeRouteClient />;
+  if (pathname === "/memory") {
+    const params = new URLSearchParams(search);
+    return (
+      <MemoryWorkspace
+        initialMemoryId={params.get("memory") ?? undefined}
+        initialSubjectId={params.get("subject") ?? undefined}
+        initialWorldId={params.get("world") ?? undefined}
+      />
+    );
+  }
+  if (pathname === "/memory-explorer") {
+    return <StaticCanonicalRouteRedirect route="/memory" />;
+  }
   if (pathname === "/studio") {
     return (
       <CreatorStudioFrame activeSection="worlds">
