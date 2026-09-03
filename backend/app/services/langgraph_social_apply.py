@@ -44,6 +44,63 @@ class LangGraphSocialApplyResult:
     proposal_result: activity_proposal_runtime.ProposalResponseResult | None
 
 
+def apply_successful_root_post(
+    db: Session,
+    *,
+    actor_character_id: str,
+    post_id: str,
+    execution: models.AgentPublicActionExecution,
+    occurred_at: datetime,
+) -> LangGraphSocialApplyResult:
+    """Attach a LangGraph root post to its World and canonical SocialEvent."""
+
+    actor = active_world_character(db, character_id=actor_character_id)
+    post = db.get(models.Post, post_id)
+    if (
+        post is None
+        or post.author_character_id != actor.character_id
+        or post.reply_to_post_id is not None
+    ):
+        raise LangGraphSocialApplyError("root_post_evidence_invalid")
+    if post.world_id not in {None, actor.world_id} or post.author_world_character_id not in {
+        None,
+        actor.id,
+    }:
+        raise LangGraphSocialApplyError("root_post_world_scope_invalid")
+    post.world_id = actor.world_id
+    post.author_world_character_id = actor.id
+    execution.world_id = actor.world_id
+    execution.actor_world_character_id = actor.id
+    db.flush()
+    event = social_event_runtime.record_successful_social_event(
+        db,
+        world_id=actor.world_id,
+        actor_world_character_id=actor.id,
+        target_world_character_id=None,
+        event_type="post_published",
+        occurred_at=occurred_at,
+        idempotency_key=sha256(
+            f"langgraph|{execution.signature}|post_published".encode("utf-8")
+        ).hexdigest(),
+        evidence=social_event_runtime.EvidenceInput(
+            evidence_kind="post",
+            source_object_type="post",
+            source_object_id=post.id,
+            root_post_id=post.id,
+            source_post_id=post.id,
+            target_post_id=post.id,
+            agent_run_id=execution.run_id,
+            public_action_execution_id=execution.id,
+            source_text="\n".join(part for part in (post.title, post.body) if part),
+            source_visibility_at_event=post.visibility,
+            source_author_id_at_event=actor.id,
+        ),
+    ).event
+    execution.social_event_id = event.id
+    db.flush()
+    return LangGraphSocialApplyResult(event, None)
+
+
 def active_world_character(
     db: Session, *, character_id: str
 ) -> models.WorldCharacter:

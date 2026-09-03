@@ -197,6 +197,7 @@ def apply_successful_world_feed_action(
                 + '"}'
             )
     action_result["social_event_id"] = event.id
+    execution.social_event_id = event.id
     if proposal is not None:
         action_result["proposal_id"] = proposal.id
     db.flush()

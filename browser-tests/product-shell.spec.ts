@@ -777,7 +777,7 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
                 request_id: acceptedRequest.request_id,
                 assistant_message_id: generatedAssistantMessage.id,
                 capability: "available",
-                count: 1,
+                count: 2,
               },
             ]
           : [],
@@ -838,6 +838,17 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
             related_character: "사용자 앵무",
             direction: "incoming",
             canonical_href: `/worlds/${worldId}/chat/${threadId}`,
+          },
+          {
+            reference: "evidence-today-1",
+            kind: "today_sns_activity",
+            label: "오늘 SNS 활동",
+            excerpt: "오늘 작성한 공개 게시글: 발표 연습을 마쳤어.",
+            occurred_at: "2026-09-02T07:30:00Z",
+            availability: "available",
+            related_character: "응답 앵무",
+            direction: null,
+            canonical_href: null,
           },
         ],
       });
@@ -983,11 +994,13 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
     page.getByText(generatedAssistantMessage.content, { exact: true }),
   ).toBeVisible();
   await expect(modelSelect).toBeEnabled();
-  await page.getByRole("button", { name: "근거 1개 보기" }).click();
+  await page.getByRole("button", { name: "근거 2개 보기" }).click();
   await expect(page.getByRole("dialog", { name: "이 답변의 근거" })).toBeVisible();
   await expect(
     page.getByText("함께 걷던 길을 기억한 검증된 대화입니다."),
   ).toBeVisible();
+  await expect(page.getByText("오늘 SNS 활동", { exact: true })).toBeVisible();
+  await expect(page.getByText("오늘 작성한 공개 게시글: 발표 연습을 마쳤어.")).toBeVisible();
   await expect(page.getByText("source_id", { exact: false })).toHaveCount(0);
   await page.getByRole("button", { name: "닫기" }).click();
   await expect(page.getByText("Canonical Planner", { exact: false })).toHaveCount(0);
@@ -1198,6 +1211,7 @@ test("P8-L-R Memory owner controls save, supersede, delete, retry-safe scope, an
   await page.goto(`/memory?world=${worldId}&subject=${subjectId}&memory=${memoryId}`);
   await expect(page.getByRole("heading", { name: "기억", exact: true })).toBeVisible();
   await expect(page.getByText("기억이 꺼져 있어요", { exact: true })).toBeVisible();
+  await expect(page.getByText("현재 대화와 오늘의 World SNS 활동은 대화 연속성을 위해 계속 사용할 수 있습니다.", { exact: false })).toBeVisible();
   await expect(page.getByRole("heading", { name: item.summary })).toBeVisible();
   await expect(page.getByText("오늘 훈련을 마치고 함께 한 약속을 지켰어.")).toBeVisible();
   await expect(page.getByRole("link", { name: "대화 원문 열기" })).toHaveAttribute(

@@ -38,6 +38,8 @@ from app.runtime.social.sqlalchemy_inbox import (
 )
 from app.runtime.social.observations import observe_source
 from app.domains.social.public import SocialObservationError
+from app.domains.social.domain.subjective_context import ActionSubjectiveContextV1
+from app.runtime.social.subjective_context import record_declared_subjective_context
 from app.integrations.direct_llm import (
     DirectLlmDeferred,
     DirectLlmError,
@@ -643,6 +645,27 @@ async def run_routine_post_runtime(
                     ),
                     "opening_post_id": post.opening_post_id,
                 },
+            )
+            subjective_context = None
+            if (
+                generation.plan.motivation_kind is not None
+                and generation.plan.motivation_text is not None
+                and generation.plan.emotion_label is not None
+            ):
+                subjective_context = ActionSubjectiveContextV1(
+                    motivation_kind=generation.plan.motivation_kind,
+                    motivation_text=generation.plan.motivation_text,
+                    emotion_label=generation.plan.emotion_label,
+                    emotion_text=generation.plan.emotion_text,
+                    emotion_intensity=generation.plan.emotion_intensity,
+                )
+            record_declared_subjective_context(
+                db,
+                execution=execution,
+                event=event_result.event,
+                source_post_id=post.id,
+                context=subjective_context,
+                captured_at=resident_context.run_started_at,
             )
         db.commit()
     except Exception as exc:

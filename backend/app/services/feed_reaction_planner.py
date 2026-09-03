@@ -167,6 +167,7 @@ Choose only a candidate index and an action listed in that candidate's allowed_a
 Do not invent ids. Do not choose an action merely because it is available.
 If nothing is genuinely suitable, return NO_ACTION with reason_code=model_abstained.
 For a comment, choose ordinary_comment unless the candidate index is explicitly listed as proposal_eligible. Use joint_activity_proposal only for a concrete invitation the target can accept.
+For a selected action, declare one short public-safe motivation at this decision moment and one honest coarse emotion label. This is not hidden reasoning: do not expose deliberation, private secrets, or chain-of-thought. If no emotion is clear, use unspecified with null emotion detail.
 Return only the requested structured JSON."""
         user_prompt = json.dumps(
             {
@@ -200,6 +201,13 @@ Return only the requested structured JSON."""
                     },
                     "candidate_index_rule": "copy one provided candidate_index exactly",
                     "brief_chars": "1..280 for an action; null for NO_ACTION",
+                    "subjective_context": {
+                        "motivation_kind": "one allowed enum for an action; null for NO_ACTION",
+                        "motivation_text": "1..280 public-safe first-person explanation for an action; null for NO_ACTION",
+                        "emotion_label": "one allowed enum for an action; unspecified when unclear; null for NO_ACTION",
+                        "emotion_text": "optional 1..280 public-safe feeling description; null when unspecified",
+                        "emotion_intensity": "optional integer 0..100; null when unspecified",
+                    },
                 },
             },
             ensure_ascii=False,

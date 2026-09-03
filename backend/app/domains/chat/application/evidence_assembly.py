@@ -26,6 +26,10 @@ from app.domains.chat.domain.response_request import (
     RetrievalOutcome,
 )
 from app.domains.chat.domain.retrieval_intent import RetrievalRoute
+from app.domains.chat.domain.today_sns_activity import (
+    TodaySnsActivityEntry,
+    TodaySnsActivitySnapshot,
+)
 from app.domains.memory.public import (
     CanonicalRecallStatus,
     MemorySourceTypeV1,
@@ -168,6 +172,110 @@ class EvidenceBundleAssembler:
             partial_axes=tuple(partial),
             degraded_reason=degraded,
         )
+
+    def with_today_sns(
+        self,
+        bundle: EvidenceBundle,
+        snapshot: TodaySnsActivitySnapshot | None,
+        *,
+        user_message: str,
+    ) -> EvidenceBundle:
+        """Merge the immutable same-generation Today snapshot into evidence.
+
+        The snapshot contains canonical identifiers for revalidation and the
+        private inspector. Provider payloads continue to expose only bounded
+        prose plus opaque references.
+        """
+
+        if snapshot is None or bundle.route is RetrievalRoute.CLARIFICATION:
+            return bundle
+        available_slots = max(0, MAX_EVIDENCE_ITEMS - len(bundle.items))
+        selected_entries = self._select_today_entries(
+            snapshot.entries,
+            user_message=user_message,
+            limit=available_slots,
+            prefer_full_context=bundle.route is RetrievalRoute.CURRENT_CONTEXT,
+        )
+        today_items = tuple(
+            item
+            for entry in selected_entries
+            if (item := self._today_item(entry)) is not None
+        )
+        if not today_items:
+            return bundle
+        outcome = bundle.retrieval_outcome
+        degraded_reason = bundle.degraded_reason
+        if outcome is RetrievalOutcome.NO_EVIDENCE:
+            outcome = RetrievalOutcome.DEGRADED
+            degraded_reason = (
+                DegradedReason.GRAPH_UNAVAILABLE
+                if bundle.route is RetrievalRoute.GRAPH
+                else DegradedReason.CANONICAL_UNAVAILABLE
+            )
+        return self._bundle(
+            request_id=bundle.request_id,
+            request_scope_hash=bundle.request_scope_hash,
+            route=bundle.route,
+            outcome=outcome,
+            candidates=bundle.items + today_items,
+            partial_axes=bundle.partial_axes,
+            degraded_reason=degraded_reason,
+            clarification_slot=bundle.clarification_slot,
+        )
+
+    @staticmethod
+    def _select_today_entries(
+        entries: tuple[TodaySnsActivityEntry, ...],
+        *,
+        user_message: str,
+        limit: int,
+        prefer_full_context: bool,
+    ) -> tuple[TodaySnsActivityEntry, ...]:
+        if limit <= 0 or not entries:
+            return ()
+        message = " ".join(user_message.casefold().split())
+        kinds: set[str] = set()
+        if any(marker in message for marker in ("게시글", "지저귐", "포스트")):
+            kinds.add("posts_authored")
+        if any(marker in message for marker in ("대꾸", "댓글", "답글", "리플")):
+            kinds.update(("replies_authored", "replies_received", "mentions_received"))
+        if any(marker in message for marker in ("좋아요", "리액션")):
+            kinds.update(("reactions_given", "reactions_received"))
+        if "리포스트" in message:
+            kinds.add("reposts")
+        if "팔로우" in message:
+            kinds.add("follows")
+        asks_subjective = any(
+            marker in message for marker in ("왜", "이유", "동기", "기분", "감정")
+        )
+
+        def score(entry: TodaySnsActivityEntry) -> tuple[int, float, str]:
+            value = 0
+            if not kinds or entry.kind in kinds:
+                value += 8
+            for label, weight in (
+                (entry.counterpart_label, 7),
+                (entry.actor_label, 3),
+            ):
+                if label and label.casefold() in message:
+                    value += weight
+            if asks_subjective and entry.subjective_context is not None:
+                value += 6
+            if any(marker in message for marker in ("방금", "최근", "아까")):
+                value += 1
+            return (
+                value,
+                entry.occurred_at.astimezone(UTC).timestamp(),
+                entry.opaque_reference,
+            )
+
+        ranked = sorted(entries, key=score, reverse=True)
+        if kinds:
+            matched = [entry for entry in ranked if entry.kind in kinds]
+            if matched:
+                ranked = matched
+        contextual_limit = limit if prefer_full_context or kinds else min(limit, 4)
+        return tuple(ranked[:contextual_limit])
 
     @staticmethod
     def _canonical_items(
@@ -384,6 +492,71 @@ class EvidenceBundleAssembler:
         return tuple(output)
 
     @staticmethod
+    def _today_item(entry: TodaySnsActivityEntry) -> EvidenceItem | None:
+        parts = [
+            f"오늘 SNS 활동 종류: {entry.kind}",
+            f"실제 행동: {entry.event_type}",
+            f"행동 주체: {entry.actor_label}",
+        ]
+        if entry.counterpart_label is not None:
+            parts.append(f"상대: {entry.counterpart_label}")
+        if entry.truncated:
+            parts.append("원문 일부만 포함됨: 전문이나 전체 대화로 주장하지 말 것")
+        if entry.root_title:
+            parts.append(f"대화 시작 글 제목: {entry.root_title}")
+        if entry.root_body:
+            parts.append(f"대화 시작 글 일부: {entry.root_body}")
+        if entry.parent_title:
+            parts.append(f"직접 연결된 이전 글 제목: {entry.parent_title}")
+        if entry.parent_body:
+            parts.append(f"직접 연결된 이전 글: {entry.parent_body}")
+        if entry.title:
+            parts.append(f"제목: {entry.title}")
+        if entry.body:
+            parts.append(f"내용: {entry.body}")
+        subjective = entry.subjective_context
+        if subjective is not None:
+            parts.append(
+                "행동 결정 시 직접 선언한 동기: "
+                f"{subjective.motivation_text} ({subjective.motivation_kind})"
+            )
+            if subjective.emotion_label != "unspecified":
+                emotion = subjective.emotion_label
+                if subjective.emotion_text:
+                    emotion = f"{emotion}: {subjective.emotion_text}"
+                if subjective.emotion_intensity is not None:
+                    emotion = f"{emotion} (강도 {subjective.emotion_intensity}/100)"
+                parts.append(f"행동 결정 시 직접 선언한 감정: {emotion}")
+        text = EvidenceBundleAssembler._bounded_text(" | ".join(parts))
+        if not text:
+            return None
+        source_type = (
+            MemorySourceTypeV1.SOCIAL_EVENT
+            if entry.source_type == "social_event"
+            else MemorySourceTypeV1.REPLY
+            if entry.source_post_id is not None
+            and entry.kind
+            in {"replies_authored", "replies_received", "mentions_received"}
+            else MemorySourceTypeV1.POST
+            if entry.source_post_id is not None
+            else MemorySourceTypeV1.SOCIAL_EVENT
+        )
+        source_id = entry.source_id
+        return EvidenceItem(
+            opaque_reference=entry.opaque_reference,
+            kind=EvidenceKind.TODAY_SNS_ACTIVITY,
+            text=text,
+            occurred_at=EvidenceBundleAssembler._aware(entry.occurred_at),
+            axes=(RetrievalAxis.CANONICAL,),
+            locator=EvidenceLocator(
+                kind=EvidenceLocatorKind.CANONICAL_SOURCE,
+                source_type=source_type.value,
+                source_id=source_id,
+                source_revision=entry.source_revision,
+            ),
+        )
+
+    @staticmethod
     def _bounded_text(value: str) -> str:
         return " ".join(value.split())[:MAX_EVIDENCE_ITEM_CHARS].strip()
 
@@ -391,7 +564,11 @@ class EvidenceBundleAssembler:
     def _aware(value: datetime | None) -> datetime | None:
         if value is None:
             return None
-        return value.replace(tzinfo=UTC) if value.tzinfo is None else value.astimezone(UTC)
+        return (
+            value.replace(tzinfo=UTC)
+            if value.tzinfo is None
+            else value.astimezone(UTC)
+        )
 
 
 __all__ = ["EvidenceBundleAssembler"]
@@ -419,6 +596,7 @@ def _record_locator(record) -> EvidenceLocator | None:
             source_type=source_type.value,
             source_revision=record.metadata.get("source_digest"),
         )
+
     if record.memory_item_id is not None:
         return EvidenceLocator(
             kind=EvidenceLocatorKind.MEMORY_ITEM,

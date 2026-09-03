@@ -725,3 +725,16 @@ below reflow the same controls and Dialogs into one column. Provider calls,
 raw query/prompt text, canonical IDs and projection internals remain outside
 the UI contract. Installed-runtime user proof and final causal closeout remain
 P8-L-S.
+
+## P8-L-R additional Today SNS activity context
+
+L2.5 Today SNS context is backend-owned working context, not another product
+destination. The existing features/memory inspector accepts today_sns_activity
+and labels it “오늘 SNS 활동”, distinct from “저장된 기억”. Memory OFF copy
+permits current-thread and today's World SNS facts while learned memory
+read/write behavior remains unchanged. The same workspace and inspector run
+in Next, static and Tauri; normal generation still shows only “입력 중”.
+Stale source/ancestor revisions hide old evidence excerpts and links. Raw
+snapshot, query, source ID, provider state and private counterpart motive are
+not presented. See p8-l-r-today-sns-activity.md for the source and generation
+contract; installed causal proof remains a separate user Gate.

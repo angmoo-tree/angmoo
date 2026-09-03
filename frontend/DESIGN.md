@@ -1180,6 +1180,14 @@ UI-E PR #209 후속 Hotfix는 사용자 visual에서 발견된 `최근 결과` r
 - projection 정리는 canonical commit 뒤 자동으로 수행된다. 사용자에게 FTS row·job·retry queue 같은 내부 단계를 노출하거나 별도 정리 버튼을 제공하지 않는다.
 - wide Tauri Memory window는 다중 열을 유지하고, 799px 이하 Browser는 같은 control·Dialog를 단일 열로 reflow한다. raw query·prompt·provider·canonical ID는 계속 표시하지 않는다.
 
+### 18.13 P8-L-R 추가 Today SNS Activity context
+
+- 기존 Memory workspace와 Chat evidence Dialog를 DIRECT 재사용하며, “오늘 SNS 활동” provenance와 Memory OFF 설명만 ADAPTED한다. 새 route·asset·color·Tauri 전용 UI는 추가하지 않는다.
+- today_sns_activity는 “오늘 SNS 활동”, learned memory item은 “저장된 기억”으로 구분한다. source/ancestor가 정정·삭제·숨김되면 예전 excerpt와 link를 숨긴다.
+- OFF에서도 현재 thread와 오늘 World SNS 활동은 참고할 수 있다. learned memory 후보·write·Hot Brief·recall 중단 의미는 유지하며 Today context를 장기기억으로 표시하지 않는다.
+- 정상 Router·retrieval phase는 계속 단일 “입력 중”이다. 내부 snapshot hash·query·ID·provider 진단·다른 Character의 private 동기·감정은 REJECTED한다.
+- backend source·coverage·generation fence는 docs/architecture/p8-l-r-today-sns-activity.md를 따른다. 이 변경은 설치형 causal 사용자 Gate와 최종 P8-L-S 완료 주장이 아니다.
+
 따라서 현재 허용되는 판정:
 
 ```text
@@ -1200,6 +1208,7 @@ P8-L-E WORLD SOCIAL PROFILE·LETTER CHAT ENTRY MERGED / USER INSTALLATION GATE P
 P8-L-P WORLD CHAT MESSAGE·EVIDENCE·CRG-ONLY STREAMING + PR #245 MODEL-BINDING/GEMINI-COMPATIBILITY HOTFIX MERGED / POST-MERGE PASS PENDING
 P8-L-Q MEMORY READ SURFACE·CURRENT-SOURCE EVIDENCE INSPECTOR MERGED / POST-MERGE ACTIONS STATUS RECORDED SEPARATELY
 P8-L-R MEMORY OWNER CONTROL UI IMPLEMENTED IN WORKTREE / LOCAL·HOSTED·USER·MERGE GATES SEPARATE
+P8-L-R TODAY SNS ACTIVITY CONTEXT IMPLEMENTED IN WORKTREE / CAUSAL·INSTALLER·USER·MERGE GATES SEPARATE
 P8-L CHAT V2·CANONICAL MEMORY PRODUCT RUNTIME PARTIAL / FINAL CAUSAL CLOSEOUT PENDING
 ```
 

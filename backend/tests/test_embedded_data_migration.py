@@ -29,6 +29,9 @@ from app.domains.chat.infrastructure.sqlalchemy_models import (
 from app.domains.memory.infrastructure.sqlalchemy_models import (
     drop_memory_schema_v1,
 )
+from app.domains.social.infrastructure.sqlalchemy_subjective_context_models import (
+    drop_subjective_context_schema,
+)
 from app.runtime.migrations.ladybug_versions import registry as graph_registry
 from app.runtime.migrations.local_app_data import LegacyLocalAppDataMigration
 from app.runtime.migrations.sqlite_versions import registry as sqlite_registry
@@ -359,6 +362,7 @@ def _seed_v2_roleless(
             connection.exec_driver_sql("PRAGMA foreign_keys = OFF")
             connection.commit()
             with connection.begin():
+                drop_subjective_context_schema(connection)
                 drop_response_request_schema(connection)
                 drop_memory_schema_v1(connection)
                 rebuild_message_threads_v3(

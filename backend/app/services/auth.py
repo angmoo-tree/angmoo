@@ -722,6 +722,11 @@ def _scrub_account_data(
 
     from app.services import world_character_setup
 
+    db.execute(
+        delete(models.SocialActionSubjectiveContext).where(
+            models.SocialActionSubjectiveContext.owner_id == user.id
+        )
+    )
     world_character_setup.delete_setup_data_for_characters(
         db, character_ids=character_ids
     )

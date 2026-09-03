@@ -29,7 +29,7 @@ def _script_module(name: str, relative: str) -> ModuleType:
     return module
 
 
-@pytest.mark.parametrize("source_version", (1, 2, 3, 4, 5))
+@pytest.mark.parametrize("source_version", (1, 2, 3, 4, 5, 6, 7))
 def test_supported_installer_builder_freezes_every_readable_predecessor(
     tmp_path: Path,
     source_version: int,
@@ -94,11 +94,12 @@ def test_supported_installer_builder_freezes_every_readable_predecessor(
                 "SELECT name FROM sqlite_master WHERE type = 'table'"
             ).fetchall()
         }
-        if source_version == 5:
+        if source_version >= 5:
             assert "memory_items" in memory_tables
         else:
             assert "memory_items" not in memory_tables
-        assert "chat_response_requests" not in memory_tables
+        assert ("chat_response_requests" in memory_tables) == (source_version >= 6)
+        assert "social_action_subjective_contexts" not in memory_tables
         roleless_count = int(
             source.execute(
                 "SELECT count(*) FROM world_characters "
@@ -131,8 +132,8 @@ def test_supported_installer_builder_freezes_every_readable_predecessor(
             ]
     finally:
         source.close()
-    assert fixture["target_data_version"] == 7
-    assert fixture["target_table_count"] == 95
+    assert fixture["target_data_version"] == 8
+    assert fixture["target_table_count"] == 96
 
 
 def test_v3_installer_fixture_is_legacy_shaped_and_proves_v4_chat_backfill(

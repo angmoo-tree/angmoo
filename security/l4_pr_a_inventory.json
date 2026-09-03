@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2186,
-      "internal_edge_count": 1716,
+      "external_import_count": 2233,
+      "internal_edge_count": 1764,
       "legacy_import_exception_count": 0,
-      "module_count": 658,
+      "module_count": 669,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -275,6 +275,8 @@
               "app.domains.social.domain.observations",
               "app.domains.social.domain.profile_activity",
               "app.domains.social.domain.search_state",
+              "app.domains.social.domain.subjective_context",
+              "app.domains.social.domain.today_activity",
               "app.domains.social.domain.writes"
             ],
             "module": "app.domains.social.domain",
@@ -302,6 +304,16 @@
           },
           {
             "imports": [],
+            "module": "app.domains.social.domain.subjective_context",
+            "path": "backend/app/domains/social/domain/subjective_context.py"
+          },
+          {
+            "imports": [],
+            "module": "app.domains.social.domain.today_activity",
+            "path": "backend/app/domains/social/domain/today_activity.py"
+          },
+          {
+            "imports": [],
             "module": "app.domains.social.domain.writes",
             "path": "backend/app/domains/social/domain/writes.py"
           },
@@ -311,6 +323,14 @@
             ],
             "module": "app.domains.social.infrastructure.sqlalchemy_models",
             "path": "backend/app/domains/social/infrastructure/sqlalchemy_models.py"
+          },
+          {
+            "imports": [
+              "app.core.db",
+              "app.domains.social.domain.subjective_context"
+            ],
+            "module": "app.domains.social.infrastructure.sqlalchemy_subjective_context_models",
+            "path": "backend/app/domains/social/infrastructure/sqlalchemy_subjective_context_models.py"
           },
           {
             "imports": [
@@ -493,10 +513,12 @@
               "app.domains.routine_posts.infrastructure.direct_llm_provider",
               "app.domains.routine_posts.infrastructure.sqlalchemy_context",
               "app.domains.routines.public",
+              "app.domains.social.domain.subjective_context",
               "app.domains.social.public",
               "app.integrations.direct_llm",
               "app.runtime.social.observations",
-              "app.runtime.social.sqlalchemy_inbox"
+              "app.runtime.social.sqlalchemy_inbox",
+              "app.runtime.social.subjective_context"
             ],
             "module": "app.runtime.routine_posts.sqlalchemy_runtime",
             "path": "backend/app/runtime/routine_posts/sqlalchemy_runtime.py"
@@ -546,6 +568,19 @@
           },
           {
             "imports": [
+              "app.domains.relationships.infrastructure.sqlalchemy_social_models",
+              "app.domains.social.domain.subjective_context",
+              "app.domains.social.domain.today_activity",
+              "app.domains.social.infrastructure.sqlalchemy_subjective_context_models",
+              "app.domains.worlds.infrastructure.sqlalchemy_models",
+              "app.runtime.social.sqlalchemy_read_repository",
+              "app.runtime.social.subjective_context"
+            ],
+            "module": "app.runtime.social.sqlalchemy_today_activity",
+            "path": "backend/app/runtime/social/sqlalchemy_today_activity.py"
+          },
+          {
+            "imports": [
               "app.core.ids",
               "app.core.sqlite_concurrency",
               "app.core.unit_of_work",
@@ -559,6 +594,18 @@
             ],
             "module": "app.runtime.social.sqlalchemy_unit_of_work",
             "path": "backend/app/runtime/social/sqlalchemy_unit_of_work.py"
+          },
+          {
+            "imports": [
+              "app.core.ids",
+              "app.domains.relationships.infrastructure.sqlalchemy_social_models",
+              "app.domains.social.domain.subjective_context",
+              "app.domains.social.infrastructure.sqlalchemy_subjective_context_models",
+              "app.domains.worlds.infrastructure.sqlalchemy_models",
+              "app.runtime.social.sqlalchemy_read_repository"
+            ],
+            "module": "app.runtime.social.subjective_context",
+            "path": "backend/app/runtime/social/subjective_context.py"
           }
         ],
         "legacy_horizontal": [
@@ -605,7 +652,9 @@
             "path": "backend/app/schemas/social_memory.py"
           },
           {
-            "imports": [],
+            "imports": [
+              "app.domains.social.domain.subjective_context"
+            ],
             "module": "app.schemas.world_feed",
             "path": "backend/app/schemas/world_feed.py"
           },
@@ -1006,7 +1055,7 @@
     "oracle_artifacts": [
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "047357ac00baf7e60c401eeeb07326aefdcac738b3d44b05a78be0c4dd64e1a2"
+        "sha256": "59fcce64868907a10afe17de8dfdb45c15f55d6d218ab5238fc4c63d365625d6"
       },
       {
         "path": "docs/architecture/l3-er-postgres-neo4j-parity-oracle.json",
@@ -1020,7 +1069,7 @@
     "parity_test_files": [
       {
         "path": "backend/tests/test_embedded_data_migration.py",
-        "sha256": "61c59fad881651c11f74e824ca5e594695b9cf8c9057943928e3a3e233288444"
+        "sha256": "94bd61a6c42c0a42b7ca4e30b93e841ad72f266b62a37af1c3809877643ccff9"
       },
       {
         "path": "backend/tests/test_feed_reaction_intent.py",
@@ -1195,7 +1244,7 @@
       "windows-installer"
     ],
     "workflow": ".github/workflows/windows-installer.yml",
-    "workflow_sha256": "276a12d8fb250a226fd45a9e68627fb4e3b354bfefd10d831059989b7b675aba"
+    "workflow_sha256": "ab893c2bbbf97f1c0ef2646a30b2f28c61215517b706ee02559407b8e4165a7c"
   },
   "policy_id": "angmoo-l4-pr-a-p5-p7-inventory-v1",
   "runtime": {
@@ -1265,7 +1314,7 @@
       ],
       "registry": {
         "path": "backend/app/runtime/migrations/sqlite_versions/registry.py",
-        "sha256": "bc87bd49aec6ceace3218c7774a14a8cec6bf00f92d835553d7b6f4c23a42e1c"
+        "sha256": "b6f10e96a466a235ec383a61ddc74184d68d46689af21be620991ceef277cee3"
       },
       "steps": [
         {

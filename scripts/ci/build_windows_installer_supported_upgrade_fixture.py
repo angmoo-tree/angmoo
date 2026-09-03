@@ -35,6 +35,9 @@ from app.domains.chat.infrastructure.sqlalchemy_models import (
 from app.domains.memory.infrastructure.sqlalchemy_models import (
     drop_memory_schema_v1,
 )
+from app.domains.social.infrastructure.sqlalchemy_subjective_context_models import (
+    drop_subjective_context_schema,
+)
 from app.domains.worlds.domain.reserved_roles import (
     NO_SPECIFIC_ROLE_DESCRIPTION,
     NO_SPECIFIC_ROLE_KEY,
@@ -64,7 +67,7 @@ from app.runtime.persistence.sqlite_schema import (
 )
 
 
-SUPPORTED_SOURCE_VERSIONS = (1, 2, 3, 4, 5, 6)
+SUPPORTED_SOURCE_VERSIONS = (1, 2, 3, 4, 5, 6, 7)
 PREDECESSOR_BUILD_COMMIT = "1" * 40
 PREDECESSOR_OVERLAY = b"\nANGMOO_SYNTHETIC_SUPPORTED_PREDECESSOR_PAYLOAD\n"
 
@@ -473,7 +476,8 @@ def _seed_supported_predecessor(
             requester_world_character_id="owner-controlled-supported-v2",
             responding_world_character_id="autonomous-supported-v2-a",
             world_scope_status="resolved",
-            selected_model="gemini-2.5-flash-lite",
+            selected_model="gemini-3.1-flash-lite" if source_version >= 7 else "gemini-2.5-flash-lite",
+            model_binding_mode="default",
             last_message_at=datetime(2026, 8, 31, 1, 2, tzinfo=UTC),
             created_at=datetime(2026, 8, 31, 1, 0, tzinfo=UTC),
             updated_at=datetime(2026, 8, 31, 1, 2, tzinfo=UTC),
@@ -484,6 +488,10 @@ def _seed_supported_predecessor(
             character_id=characters[3].id,
             world_scope_status="ambiguous",
             selected_model="gemini-2.5-flash-lite",
+            # Seed against the current ORM, then remove v7-only columns when
+            # freezing an older predecessor below. Unresolved threads must
+            # retain an explicit binding while the current constraints apply.
+            model_binding_mode="thread_override",
             last_message_at=datetime(2026, 8, 31, 2, 2, tzinfo=UTC),
             created_at=datetime(2026, 8, 31, 2, 0, tzinfo=UTC),
             updated_at=datetime(2026, 8, 31, 2, 2, tzinfo=UTC),
@@ -566,11 +574,10 @@ def _seed_supported_predecessor(
     database_path = database.database_path
     database.close()
 
-    # Build rich canonical data through the current adapter, then remove the
-    # empty v6 response-request schema from every predecessor.  v1-v4 also
-    # remove the v5 Memory schema, while v1-v3 reconstruct the immutable legacy
-    # MessageThread shape.  The candidate installer therefore proves each real
-    # readable-predecessor chain through v5 -> v6.
+    # Build canonical data through the current adapter, then freeze each
+    # predecessor's exact schema. All predecessors remove v8 declarations;
+    # v1-v6 remove model binding, v1-v5 response requests, v1-v4 Memory, and
+    # v1-v3 World Chat identity. The installer proves every consecutive step.
     predecessor_engine = create_engine(
         URL.create("sqlite+pysqlite", database=str(database_path))
     )
@@ -579,7 +586,10 @@ def _seed_supported_predecessor(
             sql_connection.exec_driver_sql("PRAGMA foreign_keys = OFF")
             sql_connection.commit()
             with sql_connection.begin():
-                rebuild_message_threads_v6(sql_connection)
+                if source_version <= 7:
+                    drop_subjective_context_schema(sql_connection)
+                if source_version <= 6:
+                    rebuild_message_threads_v6(sql_connection)
                 if source_version <= 5:
                     drop_response_request_schema(sql_connection)
                 if source_version <= 4:
@@ -765,7 +775,9 @@ def build_fixture(
                 "owner-controlled-supported-v2"
             ),
             "source_world_chat_selected_models": {
-                "thread-supported-world-resolved": "gemini-2.5-flash-lite",
+                "thread-supported-world-resolved": (
+                    "gemini-3.1-flash-lite" if source_version >= 7 else "gemini-2.5-flash-lite"
+                ),
                 "thread-supported-world-ambiguous": "gemini-2.5-flash-lite",
             },
             "expected_world_chat_threads": {

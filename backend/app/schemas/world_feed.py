@@ -5,6 +5,11 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from app.domains.social.domain.subjective_context import (
+    ActionEmotionLabel,
+    ActionMotivationKind,
+)
+
 
 FeedAction = Literal["like", "comment", "repost", "follow"]
 FeedInteractionIntent = Literal[
@@ -69,6 +74,11 @@ class FeedReactionDecision(WorldFeedSchema):
     comment_purpose: FeedCommentPurpose | None = None
     reason_code: FeedNoActionReason | None = None
     brief: str | None = Field(default=None, max_length=280)
+    motivation_kind: ActionMotivationKind | None = None
+    motivation_text: str | None = Field(default=None, max_length=280)
+    emotion_label: ActionEmotionLabel | None = None
+    emotion_text: str | None = Field(default=None, max_length=280)
+    emotion_intensity: int | None = Field(default=None, ge=0, le=100)
 
     @model_validator(mode="after")
     def _coherent_decision(self) -> "FeedReactionDecision":
@@ -79,8 +89,18 @@ class FeedReactionDecision(WorldFeedSchema):
                 raise ValueError("intent and purpose must be null for NO_ACTION")
             if self.reason_code is None:
                 raise ValueError("NO_ACTION requires a reason code")
-            if self.brief is not None:
-                raise ValueError("brief must be null for NO_ACTION")
+            if any(
+                value is not None
+                for value in (
+                    self.brief,
+                    self.motivation_kind,
+                    self.motivation_text,
+                    self.emotion_label,
+                    self.emotion_text,
+                    self.emotion_intensity,
+                )
+            ):
+                raise ValueError("subjective fields must be null for NO_ACTION")
             return self
         if self.selected_candidate_index is None:
             raise ValueError("selected action requires a candidate index")
@@ -88,6 +108,20 @@ class FeedReactionDecision(WorldFeedSchema):
             raise ValueError("selected action cannot have a NO_ACTION reason")
         if not (self.brief or "").strip():
             raise ValueError("selected action requires a bounded brief")
+        if (self.motivation_kind is None) != (self.motivation_text is None):
+            raise ValueError("motivation kind and text must be supplied together")
+        if self.motivation_text is not None and not self.motivation_text.strip():
+            raise ValueError("motivation text must not be blank")
+        if self.emotion_label is None and (
+            self.emotion_text is not None or self.emotion_intensity is not None
+        ):
+            raise ValueError("emotion detail requires an emotion label")
+        if self.emotion_label is ActionEmotionLabel.UNSPECIFIED and (
+            self.emotion_text is not None or self.emotion_intensity is not None
+        ):
+            raise ValueError("unspecified emotion cannot include detail")
+        if self.emotion_text is not None and not self.emotion_text.strip():
+            raise ValueError("emotion text must not be blank")
         if self.selected_action == "comment":
             if self.interaction_intent not in {
                 "ordinary_comment",

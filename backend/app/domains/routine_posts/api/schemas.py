@@ -4,6 +4,11 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from app.domains.social.public import (
+    ActionEmotionLabel,
+    ActionMotivationKind,
+)
+
 
 RoutineSceneKind = Literal["start", "continue", "conclude"]
 RoutineEventEffectKind = Literal[
@@ -50,6 +55,11 @@ class RoutineBeatPlan(RoutinePostSchema):
     sequence_no: int = Field(ge=1)
     scene_kind: RoutineSceneKind
     scene_brief: str = Field(min_length=1, max_length=800)
+    motivation_kind: ActionMotivationKind | None = None
+    motivation_text: str | None = Field(default=None, min_length=1, max_length=280)
+    emotion_label: ActionEmotionLabel | None = None
+    emotion_text: str | None = Field(default=None, max_length=280)
+    emotion_intensity: int | None = Field(default=None, ge=0, le=100)
     continuity_facts: list[str] = Field(default_factory=list, max_length=6)
     considered_source_event_ids: list[str] = Field(default_factory=list, max_length=8)
     used_source_event_ids: list[str] = Field(default_factory=list, max_length=8)
@@ -60,6 +70,16 @@ class RoutineBeatPlan(RoutinePostSchema):
 
     @model_validator(mode="after")
     def validate_event_sets(self) -> "RoutineBeatPlan":
+        if (self.motivation_kind is None) != (self.motivation_text is None):
+            raise ValueError("motivation kind and text must be declared together")
+        if self.emotion_label is None and (
+            self.emotion_text is not None or self.emotion_intensity is not None
+        ):
+            raise ValueError("emotion detail requires a label")
+        if self.emotion_label is ActionEmotionLabel.UNSPECIFIED and (
+            self.emotion_text is not None or self.emotion_intensity is not None
+        ):
+            raise ValueError("unspecified emotion cannot include detail")
         considered = self.considered_source_event_ids
         used = self.used_source_event_ids
         continuity = self.continuity_facts

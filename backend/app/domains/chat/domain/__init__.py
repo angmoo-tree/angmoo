@@ -87,6 +87,12 @@ from app.domains.chat.domain.evidence_bundle import (
     EvidenceItem,
     EvidenceKind,
 )
+from app.domains.chat.domain.today_sns_activity import (
+    TODAY_SNS_ACTIVITY_SNAPSHOT_VERSION,
+    TodaySnsActivityEntry,
+    TodaySnsActivitySnapshot,
+    TodaySnsSubjectiveContext,
+)
 
 __all__ = [
     "CHAT_GENERATION_STREAM_VERSION",
@@ -143,6 +149,10 @@ __all__ = [
     "RouteAwareCallTracker",
     "SequenceOutcome",
     "TERMINAL_STATES",
+    "TODAY_SNS_ACTIVITY_SNAPSHOT_VERSION",
+    "TodaySnsActivityEntry",
+    "TodaySnsActivitySnapshot",
+    "TodaySnsSubjectiveContext",
     "WORKFLOW_RECIPE_REGISTRY",
     "WorkflowAxis",
     "WorkflowDependencyBinding",

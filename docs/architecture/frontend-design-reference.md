@@ -645,6 +645,16 @@ workspace and Local primitives; adaptation is limited to mutation copy and
 state semantics; rejected references are raw database/query/projection details
 and Hosted-only settings behavior.
 
+## P8-L-R Today SNS context provenance
+
+The existing Memory workspace and Chat evidence Dialog are DIRECT references.
+Only “오늘 SNS 활동” and Memory OFF copy are ADAPTED. Same-day awareness is
+LOCAL semantics, distinct from learned “저장된 기억”. The backend revalidates
+source and ancestor revisions before allowing an old inspector excerpt or
+link. Next, static and Tauri use the same feature implementation. No route,
+color, font, icon or asset is added. Raw query, IDs, provider diagnostics and
+other Characters' private motivation remain REJECTED.
+
 ## Asset and font provenance
 
 UI-A adds no asset, font, dependency, or copied icon. UI-B likewise adds no

@@ -61,7 +61,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/memory/ui/memory-workspace.tsx",
-      "sha256": "1daa48774c5ae59f7445dc8fc9c48c53ef028eba8051211f4b1c888974c94b4a"
+      "sha256": "58e98fa47f7de464062ede32c751f2f8fa0ca8d3b2d2c5d211ddbd57b391c24f"
     },
     {
       "classifications": [
@@ -180,7 +180,7 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "acaeede95b427271cb6886064dc2f7f463c270cc66e8cafe5849b7fab4bbdeb1"
+        "sha256": "bdb3e9bf31ac9013fc0eb0419c3e596e1c2933cd3eba34e43ec34b08c09d0473"
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",
@@ -196,7 +196,7 @@
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "047357ac00baf7e60c401eeeb07326aefdcac738b3d44b05a78be0c4dd64e1a2"
+        "sha256": "59fcce64868907a10afe17de8dfdb45c15f55d6d218ab5238fc4c63d365625d6"
       },
       {
         "path": "browser-tests/ui-e-local-settings/local-settings.spec.ts",

@@ -64,6 +64,8 @@ class ClarificationResolution:
 @dataclass(frozen=True, slots=True)
 class RetrievalRoutingMetrics:
     route: RetrievalRoute
+    router_proposed_route: RetrievalRoute
+    sufficiency_guard_reason: str | None
     first_pass_valid: bool
     repair_used: bool
     rejected: bool
@@ -113,6 +115,7 @@ class RetrievalRoutingService:
         command: RetrievalPreflightCommand,
         *,
         recent_context: tuple[RetrievalRouterContextMessage, ...] = (),
+        today_sns_context: dict | None = None,
         now: datetime,
         deadline_at: datetime,
     ) -> RetrievalRoutingResult:
@@ -129,6 +132,7 @@ class RetrievalRoutingService:
             recent_context=recent_context,
             responding_character_name=scope.responding_character_name,
             world_language=scope.world_language,
+            today_sns_context=today_sns_context,
         )
 
         first_physical = 0
@@ -169,15 +173,19 @@ class RetrievalRoutingService:
             repair_physical = provider_result.physical_attempt_count
 
         original_intent = provider_result.intent
+        intent, sufficiency_guard_reason = _apply_today_sns_sufficiency_guard(
+            original_intent,
+            user_message=command.user_message,
+            today_sns_context=today_sns_context,
+        )
         resolutions = self._policy.resolve_entity_mentions(
             scope,
-            tuple((entity.ref, entity.mention) for entity in original_intent.entities),
+            tuple((entity.ref, entity.mention) for entity in intent.entities),
         )
         resolution_by_ref = {item.ref: item for item in resolutions}
-        if set(resolution_by_ref) != {entity.ref for entity in original_intent.entities}:
+        if set(resolution_by_ref) != {entity.ref for entity in intent.entities}:
             raise RetrievalContractError("retrieval_entity_resolution_set_mismatch")
 
-        intent = original_intent
         clarification = self._clarification_from_scope_or_entities(
             intent=intent,
             scope=scope,
@@ -249,6 +257,8 @@ class RetrievalRoutingService:
 
         metrics = RetrievalRoutingMetrics(
             route=intent.route,
+            router_proposed_route=original_intent.route,
+            sufficiency_guard_reason=sufficiency_guard_reason,
             first_pass_valid=not repair_used,
             repair_used=repair_used,
             rejected=False,
@@ -411,7 +421,10 @@ class RetrievalRoutingService:
         local_now = now.astimezone(zone)
         start: datetime
         end: datetime
-        if meaning.kind is RetrievalTimeKind.RECENT:
+        if meaning.kind is RetrievalTimeKind.CURRENT_DAY:
+            start = datetime.combine(local_now.date(), time.min, tzinfo=zone)
+            end = local_now
+        elif meaning.kind is RetrievalTimeKind.RECENT:
             start, end = local_now - timedelta(days=7), local_now
         elif meaning.kind is RetrievalTimeKind.RELATIVE:
             resolved = _relative_range(meaning.expression or "", local_now)
@@ -512,6 +525,147 @@ def _relative_range(expression: str, local_now: datetime) -> tuple[datetime, dat
 
 def _utc_iso(value: datetime) -> str:
     return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
+
+
+_TODAY_MARKERS = ("오늘", "방금", "아까", "당일", "today")
+_SNS_MARKERS = (
+    "게시글",
+    "글",
+    "지저귐",
+    "대꾸",
+    "댓글",
+    "답글",
+    "좋아요",
+    "리액션",
+    "리포스트",
+    "팔로우",
+    "sns",
+    "활동",
+)
+_RELATIONSHIP_MARKERS = ("관계", "사이", "친밀", "호감", "신뢰", "경로", "연결")
+
+
+def _apply_today_sns_sufficiency_guard(
+    intent: RetrievalIntentEnvelope,
+    *,
+    user_message: str,
+    today_sns_context: dict | None,
+) -> tuple[RetrievalIntentEnvelope, str | None]:
+    """Finalize only Today-context sufficiency with bounded deterministic rules."""
+
+    if intent.route in {
+        RetrievalRoute.CLARIFICATION,
+        RetrievalRoute.GRAPH,
+        RetrievalRoute.BOTH,
+    }:
+        return intent, None
+    normalized = " ".join(user_message.casefold().split())
+    semantic_today = intent.time_scope is not None and intent.time_scope.kind is RetrievalTimeKind.CURRENT_DAY
+    if intent.time_scope is not None and not semantic_today:
+        return intent, None
+    if not (semantic_today or any(marker in normalized for marker in _TODAY_MARKERS)) or not (
+        intent.intent.startswith("today_") or any(marker in normalized for marker in _SNS_MARKERS)
+    ):
+        return intent, None
+    if intent.relationship is not None or any(marker in normalized for marker in _RELATIONSHIP_MARKERS):
+        return intent, None
+    # The guard does not reinterpret another actor's identity or purpose. The
+    # Router may choose CURRENT_CONTEXT with entity focus, but a CANONICAL
+    # choice involving entities remains retrieval until the policy resolver.
+    if intent.route is RetrievalRoute.CANONICAL and intent.entities:
+        return intent, "today_semantic_focus_requires_retrieval"
+    if not isinstance(today_sns_context, dict):
+        return _intent_with_route(intent, RetrievalRoute.CANONICAL), "today_context_unavailable"
+    entries = today_sns_context.get("entries")
+    counts = today_sns_context.get("counts")
+    coverage = today_sns_context.get("coverage")
+    if not isinstance(entries, list) or not isinstance(counts, dict) or not isinstance(
+        coverage, dict
+    ):
+        return _intent_with_route(intent, RetrievalRoute.CANONICAL), "today_context_invalid"
+    relevant_kinds = _relevant_today_kinds(normalized)
+    relevant_entries = [
+        item
+        for item in entries
+        if isinstance(item, dict) and item.get("kind") in relevant_kinds
+    ]
+    known_count = sum(
+        int(counts.get(kind) or 0)
+        for kind in relevant_kinds
+        if not isinstance(counts.get(kind), bool)
+    )
+    incomplete = any(
+        coverage.get(kind) not in {"complete", "unsupported"}
+        for kind in relevant_kinds
+    )
+    exact_requested = any(
+        marker in normalized
+        for marker in ("정확", "원문", "전체", "전부", "그대로", "몇 시")
+    )
+    content_incomplete = any(
+        not bool(item.get("content_complete")) or bool(item.get("truncated"))
+        for item in relevant_entries
+    )
+    omitted = known_count > len(relevant_entries)
+    if incomplete or not today_sns_context.get("counts_exact", True) or omitted or (exact_requested and content_incomplete):
+        return _intent_with_route(intent, RetrievalRoute.CANONICAL), "today_context_incomplete"
+    if known_count == 0:
+        # A complete empty inventory is already a factual answer: there was no
+        # matching activity today. Do not spend another LLM call searching for
+        # something the canonical inventory proved absent.
+        if all(coverage.get(kind) == "complete" for kind in relevant_kinds):
+            return _intent_with_route(intent, RetrievalRoute.CURRENT_CONTEXT), "today_context_complete_empty"
+        return _intent_with_route(intent, RetrievalRoute.CANONICAL), "today_context_missing"
+    if not relevant_entries:
+        return _intent_with_route(intent, RetrievalRoute.CANONICAL), "today_context_missing"
+    return _intent_with_route(intent, RetrievalRoute.CURRENT_CONTEXT), "today_context_sufficient"
+
+
+def _relevant_today_kinds(message: str) -> set[str]:
+    kinds: set[str] = set()
+    if any(marker in message for marker in ("게시글", "지저귐", "글")):
+        kinds.add("posts_authored")
+    if any(marker in message for marker in ("대꾸", "댓글", "답글")):
+        kinds.update(("replies_authored", "replies_received", "mentions_received"))
+    if any(marker in message for marker in ("좋아요", "리액션")):
+        kinds.update(("reactions_given", "reactions_received"))
+    if "리포스트" in message:
+        kinds.add("reposts")
+    if "팔로우" in message:
+        kinds.add("follows")
+    if not kinds or any(marker in message for marker in ("sns", "활동")):
+        kinds.update(
+            {
+                "posts_authored",
+                "replies_authored",
+                "replies_received",
+                "mentions_received",
+                "reactions_given",
+                "reactions_received",
+                "reposts",
+                "follows",
+            }
+        )
+    return kinds
+
+
+def _intent_with_route(
+    intent: RetrievalIntentEnvelope,
+    route: RetrievalRoute,
+) -> RetrievalIntentEnvelope:
+    if route is intent.route:
+        return intent
+    return replace(
+        intent,
+        decision=(
+            RetrievalDecision.CURRENT_CONTEXT
+            if route is RetrievalRoute.CURRENT_CONTEXT
+            else RetrievalDecision.RETRIEVAL
+        ),
+        route=route,
+        coordination_hint=None,
+        clarification_slot=None,
+    )
 
 
 __all__ = [

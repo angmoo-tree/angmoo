@@ -109,6 +109,8 @@ jobs:
           $supportedV3 = Join-Path $root 'supported-v3'
           $supportedV4 = Join-Path $root 'supported-v4'
           $supportedV5 = Join-Path $root 'supported-v5'
+          $supportedV6 = Join-Path $root 'supported-v6'
+          $supportedV7 = Join-Path $root 'supported-v7'
           $conflict = Join-Path $root 'conflicting-v2'
           backend\.venv\Scripts\python.exe `
             scripts\ci\check_windows_installer_supported_upgrade_matrix.py
@@ -144,6 +146,18 @@ jobs:
             --source-version 5
           backend\.venv\Scripts\python.exe `
             scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
+            --output-root $supportedV6 `
+            --host $hostExecutable `
+            --sidecar $sidecar `
+            --source-version 6
+          backend\.venv\Scripts\python.exe `
+            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
+            --output-root $supportedV7 `
+            --host $hostExecutable `
+            --sidecar $sidecar `
+            --source-version 7
+          backend\.venv\Scripts\python.exe `
+            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
             --output-root $conflict `
             --host $hostExecutable `
             --sidecar $sidecar `
@@ -164,6 +178,12 @@ jobs:
           Compress-Archive `
             -Path "$supportedV5\*" `
             -DestinationPath (Join-Path $root 'supported-v5.zip')
+          Compress-Archive `
+            -Path "$supportedV6\*" `
+            -DestinationPath (Join-Path $root 'supported-v6.zip')
+          Compress-Archive `
+            -Path "$supportedV7\*" `
+            -DestinationPath (Join-Path $root 'supported-v7.zip')
           Compress-Archive `
             -Path "$conflict\*" `
             -DestinationPath (Join-Path $root 'conflicting-v2.zip')
@@ -236,6 +256,8 @@ jobs:
             .codex-temp/windows-installer-supported-upgrade/supported-v3.zip
             .codex-temp/windows-installer-supported-upgrade/supported-v4.zip
             .codex-temp/windows-installer-supported-upgrade/supported-v5.zip
+            .codex-temp/windows-installer-supported-upgrade/supported-v6.zip
+            .codex-temp/windows-installer-supported-upgrade/supported-v7.zip
             .codex-temp/windows-installer-supported-upgrade/conflicting-v2.zip
       - name: Attest Windows installers
         if: github.event_name != 'pull_request'
@@ -276,9 +298,13 @@ jobs:
             Select-Object -First 1
           $supportedV5 = Get-ChildItem $root -Filter 'supported-v5.zip' -Recurse |
             Select-Object -First 1
+          $supportedV6 = Get-ChildItem $root -Filter 'supported-v6.zip' -Recurse |
+            Select-Object -First 1
+          $supportedV7 = Get-ChildItem $root -Filter 'supported-v7.zip' -Recurse |
+            Select-Object -First 1
           $conflict = Get-ChildItem $root -Filter 'conflicting-v2.zip' -Recurse |
             Select-Object -First 1
-          if (-not $installer -or -not $supportedV1 -or -not $supportedV2 -or -not $supportedV3 -or -not $supportedV4 -or -not $supportedV5 -or -not $conflict) {
+          if (-not $installer -or -not $supportedV1 -or -not $supportedV2 -or -not $supportedV3 -or -not $supportedV4 -or -not $supportedV5 -or -not $supportedV6 -or -not $supportedV7 -or -not $conflict) {
             throw 'Windows installer supported-upgrade inputs are missing'
           }
           $sentinel = Join-Path $env:RUNNER_TEMP "angmoo-installer-fixture-$($env:GITHUB_RUN_ID)-$($env:SOURCE_SHA)"
@@ -291,6 +317,8 @@ jobs:
             -SupportedV3FixtureArchive $supportedV3.FullName `
             -SupportedV4FixtureArchive $supportedV4.FullName `
             -SupportedV5FixtureArchive $supportedV5.FullName `
+            -SupportedV6FixtureArchive $supportedV6.FullName `
+            -SupportedV7FixtureArchive $supportedV7.FullName `
             -ConflictFixtureArchive $conflict.FullName `
             -Python (Get-Command python).Source `
             -Verifier scripts\ci\verify_windows_installer_supported_upgrade_fixture.py `
@@ -328,9 +356,13 @@ jobs:
             Select-Object -First 1
           $supportedV5 = Get-ChildItem $root -Filter 'supported-v5.zip' -Recurse |
             Select-Object -First 1
+          $supportedV6 = Get-ChildItem $root -Filter 'supported-v6.zip' -Recurse |
+            Select-Object -First 1
+          $supportedV7 = Get-ChildItem $root -Filter 'supported-v7.zip' -Recurse |
+            Select-Object -First 1
           $conflict = Get-ChildItem $root -Filter 'conflicting-v2.zip' -Recurse |
             Select-Object -First 1
-          if (-not $installer -or -not $supportedV1 -or -not $supportedV2 -or -not $supportedV3 -or -not $supportedV4 -or -not $supportedV5 -or -not $conflict) {
+          if (-not $installer -or -not $supportedV1 -or -not $supportedV2 -or -not $supportedV3 -or -not $supportedV4 -or -not $supportedV5 -or -not $supportedV6 -or -not $supportedV7 -or -not $conflict) {
             throw 'Windows installer failure-recovery inputs are missing'
           }
           $sentinel = Join-Path $env:RUNNER_TEMP "angmoo-installer-fixture-$($env:GITHUB_RUN_ID)-$($env:SOURCE_SHA)"
@@ -343,6 +375,8 @@ jobs:
             -SupportedV3FixtureArchive $supportedV3.FullName `
             -SupportedV4FixtureArchive $supportedV4.FullName `
             -SupportedV5FixtureArchive $supportedV5.FullName `
+            -SupportedV6FixtureArchive $supportedV6.FullName `
+            -SupportedV7FixtureArchive $supportedV7.FullName `
             -ConflictFixtureArchive $conflict.FullName `
             -Python (Get-Command python).Source `
             -Verifier scripts\ci\verify_windows_installer_supported_upgrade_fixture.py `

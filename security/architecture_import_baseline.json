@@ -1,7 +1,7 @@
 {
-  "edge_count": 1716,
-  "external_import_count": 2186,
-  "module_count": 658,
+  "edge_count": 1764,
+  "external_import_count": 2233,
+  "module_count": 669,
   "modules": [
     {
       "external_imports": [],
@@ -989,6 +989,18 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "alembic",
+        "collections.abc"
+      ],
+      "imports": [
+        "app.domains.social.infrastructure.sqlalchemy_subjective_context_models"
+      ],
+      "module": "app.alembic.versions.20260904_0088_social_action_subjective_context",
+      "path": "backend/app/alembic/versions/20260904_0088_social_action_subjective_context.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.api.v1",
@@ -1949,7 +1961,8 @@
         "app.domains.chat.application.graph_retrieval",
         "app.domains.chat.application.messages",
         "app.domains.chat.application.response_workflow",
-        "app.domains.chat.application.retrieval_routing"
+        "app.domains.chat.application.retrieval_routing",
+        "app.domains.chat.application.today_sns_activity"
       ],
       "module": "app.domains.chat.application",
       "path": "backend/app/domains/chat/application/__init__.py",
@@ -2048,6 +2061,7 @@
         "app.domains.chat.domain.evidence_bundle",
         "app.domains.chat.domain.response_request",
         "app.domains.chat.domain.retrieval_intent",
+        "app.domains.chat.domain.today_sns_activity",
         "app.domains.memory.public",
         "app.domains.relationships.public"
       ],
@@ -2124,15 +2138,18 @@
         "app.domains.chat.application.generation_lifecycle",
         "app.domains.chat.application.graph_retrieval",
         "app.domains.chat.application.retrieval_routing",
+        "app.domains.chat.domain.evidence_bundle",
         "app.domains.chat.domain.generation_lifecycle",
         "app.domains.chat.domain.response_request",
         "app.domains.chat.domain.retrieval_intent",
         "app.domains.chat.domain.retrieval_router",
+        "app.domains.chat.domain.today_sns_activity",
         "app.domains.chat.ports.character_response_generator",
         "app.domains.chat.ports.response_workflow",
         "app.domains.chat.ports.retrieval_policy",
         "app.domains.chat.ports.retrieval_router_provider",
-        "app.domains.chat.ports.successful_chat_memory"
+        "app.domains.chat.ports.successful_chat_memory",
+        "app.domains.chat.ports.today_sns_activity"
       ],
       "module": "app.domains.chat.application.response_workflow",
       "path": "backend/app/domains/chat/application/response_workflow.py",
@@ -2163,6 +2180,21 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "hashlib",
+        "zoneinfo"
+      ],
+      "imports": [
+        "app.domains.chat.domain.today_sns_activity",
+        "app.domains.chat.ports.today_sns_activity"
+      ],
+      "module": "app.domains.chat.application.today_sns_activity",
+      "path": "backend/app/domains/chat/application/today_sns_activity.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.domains.chat.domain.call_tracker",
@@ -2173,6 +2205,7 @@
         "app.domains.chat.domain.response_request",
         "app.domains.chat.domain.retrieval_intent",
         "app.domains.chat.domain.retrieval_router",
+        "app.domains.chat.domain.today_sns_activity",
         "app.domains.chat.domain.workflow_recipe"
       ],
       "module": "app.domains.chat.domain",
@@ -2318,6 +2351,23 @@
     {
       "external_imports": [
         "__future__",
+        "collections.abc",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "json",
+        "types"
+      ],
+      "imports": [
+        "app.domains.social.public"
+      ],
+      "module": "app.domains.chat.domain.today_sns_activity",
+      "path": "backend/app/domains/chat/domain/today_sns_activity.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "dataclasses",
         "enum",
         "types",
@@ -2422,7 +2472,8 @@
         "app.domains.chat.ports.retrieval_policy",
         "app.domains.chat.ports.retrieval_router_provider",
         "app.domains.chat.ports.runtime",
-        "app.domains.chat.ports.successful_chat_memory"
+        "app.domains.chat.ports.successful_chat_memory",
+        "app.domains.chat.ports.today_sns_activity"
       ],
       "module": "app.domains.chat.ports",
       "path": "backend/app/domains/chat/ports/__init__.py",
@@ -2486,6 +2537,7 @@
       "external_imports": [
         "__future__",
         "dataclasses",
+        "json",
         "typing"
       ],
       "imports": [
@@ -2515,6 +2567,20 @@
       "imports": [],
       "module": "app.domains.chat.ports.successful_chat_memory",
       "path": "backend/app/domains/chat/ports/successful_chat_memory.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.chat.domain.today_sns_activity",
+        "app.domains.social.public"
+      ],
+      "module": "app.domains.chat.ports.today_sns_activity",
+      "path": "backend/app/domains/chat/ports/today_sns_activity.py",
       "wildcard_imports": []
     },
     {
@@ -3851,7 +3917,9 @@
         "pydantic",
         "typing"
       ],
-      "imports": [],
+      "imports": [
+        "app.domains.social.public"
+      ],
       "module": "app.domains.routine_posts.api.schemas",
       "path": "backend/app/domains/routine_posts/api/schemas.py",
       "wildcard_imports": []
@@ -4589,6 +4657,8 @@
         "app.domains.social.domain.observations",
         "app.domains.social.domain.profile_activity",
         "app.domains.social.domain.search_state",
+        "app.domains.social.domain.subjective_context",
+        "app.domains.social.domain.today_activity",
         "app.domains.social.domain.writes"
       ],
       "module": "app.domains.social.domain",
@@ -4644,6 +4714,29 @@
       "external_imports": [
         "__future__",
         "dataclasses",
+        "enum"
+      ],
+      "imports": [],
+      "module": "app.domains.social.domain.subjective_context",
+      "path": "backend/app/domains/social/domain/subjective_context.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "enum"
+      ],
+      "imports": [],
+      "module": "app.domains.social.domain.today_activity",
+      "path": "backend/app/domains/social/domain/today_activity.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
         "datetime",
         "typing"
       ],
@@ -4664,6 +4757,22 @@
       ],
       "module": "app.domains.social.infrastructure.sqlalchemy_models",
       "path": "backend/app/domains/social/infrastructure/sqlalchemy_models.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.engine",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.db",
+        "app.domains.social.domain.subjective_context"
+      ],
+      "module": "app.domains.social.infrastructure.sqlalchemy_subjective_context_models",
+      "path": "backend/app/domains/social/infrastructure/sqlalchemy_subjective_context_models.py",
       "wildcard_imports": []
     },
     {
@@ -6398,6 +6507,7 @@
         "app.domains.relationships.infrastructure.sqlalchemy_social_models",
         "app.domains.runtime.infrastructure",
         "app.domains.social.infrastructure.sqlalchemy_models",
+        "app.domains.social.infrastructure.sqlalchemy_subjective_context_models",
         "app.domains.world_packages.infrastructure.sqlalchemy_models",
         "app.models.admin_ops",
         "app.models.agent_creation_drafts",
@@ -6905,9 +7015,24 @@
     },
     {
       "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.chat.application.today_sns_activity",
+        "app.domains.chat.domain.today_sns_activity",
+        "app.domains.chat.ports.today_sns_activity",
+        "app.runtime.social.sqlalchemy_today_activity"
+      ],
+      "module": "app.runtime.chat.today_sns_activity",
+      "path": "backend/app/runtime/chat/today_sns_activity.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "collections.abc",
         "datetime",
+        "logging",
         "sqlalchemy",
         "sqlalchemy.orm",
         "typing",
@@ -6931,8 +7056,10 @@
         "app.runtime.chat.model_bindings",
         "app.runtime.chat.retrieval_policy",
         "app.runtime.chat.sqlalchemy_service",
+        "app.runtime.chat.today_sns_activity",
         "app.runtime.graph_projection.relationship_graph_read",
-        "app.runtime.memory.sqlalchemy_source_reader"
+        "app.runtime.memory.sqlalchemy_source_reader",
+        "app.runtime.social.sqlalchemy_today_activity"
       ],
       "module": "app.runtime.chat.world_generation",
       "path": "backend/app/runtime/chat/world_generation.py",
@@ -7536,6 +7663,7 @@
         "app.runtime.migrations.sqlite_versions.v4_to_v5_canonical_memory",
         "app.runtime.migrations.sqlite_versions.v5_to_v6_chat_response_requests",
         "app.runtime.migrations.sqlite_versions.v6_to_v7_chat_model_binding",
+        "app.runtime.migrations.sqlite_versions.v7_to_v8_social_action_subjective_context",
         "app.runtime.persistence.sqlite_schema"
       ],
       "module": "app.runtime.migrations.sqlite_versions.registry",
@@ -7632,6 +7760,19 @@
       ],
       "module": "app.runtime.migrations.sqlite_versions.v6_to_v7_chat_model_binding",
       "path": "backend/app/runtime/migrations/sqlite_versions/v6_to_v7_chat_model_binding.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.social.infrastructure.sqlalchemy_subjective_context_models",
+        "app.runtime.migrations.sqlite_versions.contracts"
+      ],
+      "module": "app.runtime.migrations.sqlite_versions.v7_to_v8_social_action_subjective_context",
+      "path": "backend/app/runtime/migrations/sqlite_versions/v7_to_v8_social_action_subjective_context.py",
       "wildcard_imports": []
     },
     {
@@ -7820,10 +7961,12 @@
         "app.domains.routine_posts.infrastructure.direct_llm_provider",
         "app.domains.routine_posts.infrastructure.sqlalchemy_context",
         "app.domains.routines.public",
+        "app.domains.social.domain.subjective_context",
         "app.domains.social.public",
         "app.integrations.direct_llm",
         "app.runtime.social.observations",
-        "app.runtime.social.sqlalchemy_inbox"
+        "app.runtime.social.sqlalchemy_inbox",
+        "app.runtime.social.subjective_context"
       ],
       "module": "app.runtime.routine_posts.sqlalchemy_runtime",
       "path": "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
@@ -8011,6 +8154,29 @@
     {
       "external_imports": [
         "__future__",
+        "collections",
+        "datetime",
+        "hashlib",
+        "json",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.relationships.infrastructure.sqlalchemy_social_models",
+        "app.domains.social.domain.subjective_context",
+        "app.domains.social.domain.today_activity",
+        "app.domains.social.infrastructure.sqlalchemy_subjective_context_models",
+        "app.domains.worlds.infrastructure.sqlalchemy_models",
+        "app.runtime.social.sqlalchemy_read_repository",
+        "app.runtime.social.subjective_context"
+      ],
+      "module": "app.runtime.social.sqlalchemy_today_activity",
+      "path": "backend/app/runtime/social/sqlalchemy_today_activity.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "collections.abc",
         "datetime",
         "hashlib",
@@ -8032,6 +8198,28 @@
       ],
       "module": "app.runtime.social.sqlalchemy_unit_of_work",
       "path": "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "hashlib",
+        "json",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.ids",
+        "app.domains.relationships.infrastructure.sqlalchemy_social_models",
+        "app.domains.social.domain.subjective_context",
+        "app.domains.social.infrastructure.sqlalchemy_subjective_context_models",
+        "app.domains.worlds.infrastructure.sqlalchemy_models",
+        "app.runtime.social.sqlalchemy_read_repository"
+      ],
+      "module": "app.runtime.social.subjective_context",
+      "path": "backend/app/runtime/social/subjective_context.py",
       "wildcard_imports": []
     },
     {
@@ -8222,7 +8410,9 @@
         "pydantic",
         "typing"
       ],
-      "imports": [],
+      "imports": [
+        "app.domains.social.domain.subjective_context"
+      ],
       "module": "app.schemas.world_feed",
       "path": "backend/app/schemas/world_feed.py",
       "wildcard_imports": []
@@ -8816,10 +9006,12 @@
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.social.domain.subjective_context",
         "app.domains.world_characters.domain.runtime_modes",
         "app.models",
         "app.runtime.routine_posts.sqlalchemy_runtime",
         "app.runtime.social.observations",
+        "app.runtime.social.subjective_context",
         "app.schemas",
         "app.services.agent_activity_policy",
         "app.services.character_lore",
@@ -9342,9 +9534,11 @@
       "imports": [
         "app.core.unit_of_work",
         "app.cruds.agent_runs",
+        "app.domains.social.domain.subjective_context",
         "app.domains.social.public",
         "app.models",
         "app.runtime.social.observations",
+        "app.runtime.social.subjective_context",
         "app.schemas",
         "app.services.activity_proposal_runtime",
         "app.services.community",

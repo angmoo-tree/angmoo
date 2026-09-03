@@ -59,6 +59,7 @@ class CharacterResponseGeneratorRequest:
     recent_context: tuple[CharacterResponseContextMessage, ...]
     evidence: EvidenceBundle
     clarification_candidates: tuple[str, ...] = ()
+    today_sns_manifest: dict[str, Any] | None = None
 
     def __post_init__(self) -> None:
         if not self.user_message.strip() or len(self.user_message) > 4_000:
@@ -67,6 +68,15 @@ class CharacterResponseGeneratorRequest:
             raise ValueError("character_response_context_limit_exceeded")
         if len(self.clarification_candidates) > 8:
             raise ValueError("character_response_clarification_limit_exceeded")
+        if self.today_sns_manifest is not None:
+            if (
+                self.today_sns_manifest.get("version")
+                != "today-sns-response-manifest.v1"
+                or not isinstance(self.today_sns_manifest.get("counts"), dict)
+                or not isinstance(self.today_sns_manifest.get("coverage"), dict)
+                or len(str(self.today_sns_manifest.get("snapshot_hash") or "")) != 64
+            ):
+                raise ValueError("character_response_today_manifest_invalid")
 
 
 @dataclass(frozen=True, slots=True)

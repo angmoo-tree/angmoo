@@ -38,6 +38,9 @@ ROUTER_INTENTS = frozenset(
         "relationship_comparison",
         "event_aggregation",
         "mixed_evidence",
+        "today_activity",
+        "today_activity_conversation",
+        "today_activity_motivation",
         "clarification_required",
     }
 )
@@ -476,10 +479,9 @@ def parse_retrieval_intent_payload(payload: Mapping[str, Any]) -> RetrievalInten
         raise RetrievalContractError("retrieval_router_both_coordination_required")
     if route is not RetrievalRoute.BOTH and coordination_hint is not None:
         raise RetrievalContractError("retrieval_router_coordination_route_mismatch")
-    if route is RetrievalRoute.CURRENT_CONTEXT and any(
-        value is not None for value in (relationship, time_scope, aggregation)
-    ):
-        raise RetrievalContractError("retrieval_router_current_context_not_minimal")
+    # CURRENT_CONTEXT describes retrieval sufficiency, not an absence of
+    # semantic focus. Today SNS questions may retain entity, time, relationship
+    # and aggregation meaning while requiring no additional database plan.
     if route is not RetrievalRoute.CLARIFICATION and clarification_slot is not None:
         raise RetrievalContractError("retrieval_router_clarification_route_mismatch")
     return envelope
