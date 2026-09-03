@@ -424,7 +424,7 @@ export function MemoryWorkspace({
               <ShieldCheck aria-hidden="true" size={18} />
               <div className={styles.scopeNoticeCopy}>
                 <strong>{setting?.enabled ? "기억 사용 중" : "기억이 꺼져 있어요"}</strong>
-                <p>{setting?.enabled ? "검증된 새 기억을 만들고 이후 대화에서 회상합니다." : "새 기억 생성과 회상은 중단되지만 기존 기억은 읽고 관리할 수 있습니다."}</p>
+                <p>{setting?.enabled ? "검증된 새 기억을 만들고 이후 대화에서 회상합니다." : "새 장기 기억 생성과 회상은 중단되지만 기존 기억은 관리할 수 있습니다. 현재 대화와 오늘의 World SNS 활동은 대화 연속성을 위해 계속 사용할 수 있습니다."}</p>
               </div>
               <Button aria-pressed={setting?.enabled ?? false} compact disabled={!setting || mutationKind !== null} loading={mutationKind === "setting"} loadingLabel="저장 중" onClick={toggleMemory} variant={setting?.enabled ? "secondary" : "primary"}>
                 {setting?.enabled ? "기억 끄기" : "기억 켜기"}

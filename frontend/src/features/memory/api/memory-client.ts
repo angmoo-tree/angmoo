@@ -341,7 +341,7 @@ function chatEvidenceMatches(value: unknown, worldId: string) {
   const item = value as WorldChatEvidenceRead["items"][number];
   return (
     typeof item.reference === "string" &&
-    ["canonical_source", "graph_relationship", "graph_event"].includes(item.kind) &&
+    ["canonical_source", "graph_relationship", "graph_event", "today_sns_activity"].includes(item.kind) &&
     typeof item.label === "string" &&
     (item.excerpt === null || typeof item.excerpt === "string") &&
     (item.occurred_at === null || typeof item.occurred_at === "string") &&

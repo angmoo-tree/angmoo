@@ -2754,6 +2754,7 @@ test("P8-L-R static Memory route controls exact-scope owner state and keeps narr
     `/worlds/${worldId}/posts/post-p8-l-q-static/`,
   );
   await expect(page.getByText("기억이 꺼져 있어요", { exact: true })).toBeVisible();
+  await expect(page.getByText("현재 대화와 오늘의 World SNS 활동은 대화 연속성을 위해 계속 사용할 수 있습니다.", { exact: false })).toBeVisible();
   await page.getByRole("button", { name: "기억 켜기" }).click();
   await page.getByRole("button", { name: "고정", exact: true }).click();
   await expect(page.getByRole("button", { name: "고정 해제", exact: true })).toBeVisible();

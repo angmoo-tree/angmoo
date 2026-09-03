@@ -90,7 +90,7 @@ export type WorldChatEvidenceSummaryRead = {
 
 export type WorldChatEvidenceItemRead = {
   reference: string;
-  kind: "canonical_source" | "graph_relationship" | "graph_event";
+  kind: "canonical_source" | "graph_relationship" | "graph_event" | "today_sns_activity";
   label: string;
   excerpt: string | null;
   occurred_at: string | null;
