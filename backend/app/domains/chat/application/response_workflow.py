@@ -403,6 +403,7 @@ class ResponseGenerationWorkflowService:
                     content=response.text,
                     model=response.model,
                     metadata=metadata,
+                    evidence_inspector_snapshot=bundle.inspector_snapshot(),
                 ),
                 now=datetime.now(UTC),
             )

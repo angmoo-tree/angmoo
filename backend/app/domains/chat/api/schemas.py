@@ -158,6 +158,9 @@ class WorldChatThreadRead(BaseModel):
     created_at: datetime
     latest_message: MessageMessageRead | None = None
     messages: list[MessageMessageRead] = Field(default_factory=list)
+    evidence_summaries: list["WorldChatEvidenceSummaryRead"] = Field(
+        default_factory=list
+    )
 
     @model_validator(mode="after")
     def validate_resolved_model(self) -> "WorldChatThreadRead":
@@ -225,6 +228,34 @@ class WorldChatGenerationRequestRead(BaseModel):
     user_message: MessageMessageRead
     assistant_message: MessageMessageRead | None = None
     response_metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class WorldChatEvidenceSummaryRead(BaseModel):
+    request_id: str
+    assistant_message_id: int
+    capability: Literal["available", "degraded"]
+    count: int = Field(ge=1, le=12)
+
+
+class WorldChatEvidenceItemRead(BaseModel):
+    reference: str
+    kind: Literal["canonical_source", "graph_relationship", "graph_event"]
+    label: str
+    excerpt: str | None
+    occurred_at: datetime | None
+    availability: Literal["available", "deleted", "unavailable"]
+    related_character: str | None = None
+    direction: Literal["incoming", "outgoing", "contextual"] | None = None
+    canonical_href: str | None = None
+
+
+class WorldChatEvidenceRead(BaseModel):
+    schema_version: Literal["world-chat-evidence.v1"] = "world-chat-evidence.v1"
+    request_id: str
+    route: str
+    retrieval_outcome: str
+    capability: Literal["available", "degraded"]
+    items: list[WorldChatEvidenceItemRead]
 
 
 class WorldChatMessageAcceptRead(BaseModel):

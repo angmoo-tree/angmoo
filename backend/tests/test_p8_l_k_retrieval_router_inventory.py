@@ -36,7 +36,7 @@ def test_p8_l_k_inventory_closes_router_policy_and_clarification() -> None:
     inventory = _inventory()
     assert inventory["owner_stage"] == "P8-L-K"
     assert inventory["predecessor"]["sha256"] == (
-        "6480882c7c2b9f1c6b2c779f7f9c825f8f8586417570b7d905f9ea40311a51ce"
+        "fd039b7f4db5c4ad300b28cc031e1789a79a185ebee67ed23fb16187b5f160da"
     )
     assert inventory["schema"]["new_alembic_migration"] is None
     assert inventory["domain_boundary"]["provider_prompt_canonical_ids"] == 0

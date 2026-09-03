@@ -83,6 +83,18 @@ class ChatService:
             db, user, world_id, thread_id
         )
 
+    def get_world_response_evidence(
+        self,
+        db: Any,
+        user: Any,
+        world_id: str,
+        thread_id: str,
+        request_id: str,
+    ) -> Any:
+        return self._runtime.get_world_response_evidence(
+            db, user, world_id, thread_id, request_id
+        )
+
     def stream_world_response(
         self,
         db: Any,

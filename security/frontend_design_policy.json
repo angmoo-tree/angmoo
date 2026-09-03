@@ -148,6 +148,13 @@
       "scope": "wide World relationship graph workspace"
     },
     {
+      "classification": "LOCAL",
+      "hosted_blob_oid": null,
+      "hosted_source": null,
+      "local_target": "frontend/src/features/memory/ui/memory-workspace.tsx",
+      "scope": "read-only owner Memory workspace, canonical provenance inspector, and narrow Browser reflow"
+    },
+    {
       "classification": "REJECTED",
       "hosted_blob_oid": "568e354ed2bfdf8e4927a1a85e08c7efdfa26916",
       "hosted_source": "frontend/src/components/login-client.tsx",
@@ -244,6 +251,8 @@
     "frontend/DESIGN.md",
     "frontend/scripts/serve-production.mjs",
     "frontend/src/app/icon.svg",
+    "frontend/src/app/memory/page.tsx",
+    "frontend/src/app/memory-explorer/page.tsx",
     "frontend/src/app/ui-foundation/page.tsx",
     "frontend/src/components/app-shell.tsx",
     "frontend/src/components/post-detail-client.tsx",
@@ -256,6 +265,11 @@
     "frontend/src/features/device-shell/ui/local-device-navigation.tsx",
     "frontend/src/features/device-shell/ui/local-product-link.module.css",
     "frontend/src/features/device-shell/ui/local-product-link.tsx",
+    "frontend/src/features/memory/public.ts",
+    "frontend/src/features/memory/ui/memory-scope-summary.tsx",
+    "frontend/src/features/memory/ui/memory-workspace.module.css",
+    "frontend/src/features/memory/ui/memory-workspace.tsx",
+    "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx",
     "frontend/src/features/relationships/ui/relationship-graph-frame.tsx",
     "frontend/src/features/social/api/social-feed-client.ts",
     "frontend/src/features/social/api/social-write-client.ts",
@@ -351,6 +365,7 @@
     },
     "wide_shell_exceptions": [
       "creator-studio",
+      "memory",
       "relationship-graph"
     ]
   },
@@ -398,9 +413,27 @@
       "surface=\"local-phone\""
     ],
     "frontend/src/composition/static-product-router.tsx": [
+      "pathname === \"/memory\"",
+      "pathname === \"/memory-explorer\"",
+      "MemoryWorkspace",
       "StaticCanonicalRouteRedirect",
       "pathname === \"/ui-foundation\"",
       "SemanticFoundationFixture"
+    ],
+    "frontend/src/features/memory/ui/memory-workspace.tsx": [
+      "data-product-shell=\"memory\"",
+      "기억이 꺼져 있어요",
+      "현재 확인 가능한 근거"
+    ],
+    "frontend/src/features/memory/ui/memory-workspace.module.css": [
+      "@media (max-width: 799px)",
+      "--color-surface",
+      "--color-state-warning-surface"
+    ],
+    "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx": [
+      "Dialog",
+      "data-world-chat-evidence-dialog",
+      "이 답변의 근거"
     ],
     "frontend/src/features/characters/model/character-recent-activity-presentation.ts": [
       "presentCharacterRecentActivity",
@@ -537,6 +570,8 @@
     ],
     "frontend/src/shared/desktop/product-window.ts": [
       "canonicalProductRoute",
+      "pathname === \"/memory\"",
+      "pathname === \"/memory-explorer\"",
       "pathname === \"/worlds/new\"",
       "pathname.match(/^\\/worlds\\/([^/]+)\\/creator$/)"
     ],
@@ -549,7 +584,7 @@
       "isWindows ? frontendRoot : standaloneRoot"
     ],
     "frontend/DESIGN.md": [
-      "version: 1.9",
+      "version: 1.10",
       "EXCEPTION-A",
       "EXCEPTION-B",
       "EXCEPTION-C",
@@ -608,6 +643,14 @@
       "shell": "phone",
       "static_support": "declared_and_direct_open_tested",
       "window_kind": "phone"
+    },
+    {
+      "next_route_file": "frontend/src/app/memory/page.tsx",
+      "product_surface": "memory-read",
+      "route_family": "/memory",
+      "shell": "wide_with_narrow_browser_reflow",
+      "static_support": "declared_and_direct_open_tested",
+      "window_kind": "memory"
     },
     {
       "next_route_file": "frontend/src/app/studio/page.tsx",

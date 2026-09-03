@@ -448,7 +448,16 @@ class SqlAlchemyResponseLifecycleRepository:
             != existing.workflow_recipe
         ):
             raise GenerationContractError("response_finalize_metadata_mismatch")
-        metadata_json = _json_payload(metadata.payload())
+        metadata_payload = metadata.payload()
+        if payload.evidence_inspector_snapshot is not None:
+            _validate_evidence_inspector_snapshot(
+                payload.evidence_inspector_snapshot,
+                public_evidence_count=metadata.public_evidence_count,
+            )
+            metadata_payload["_evidence_inspector_v1"] = (
+                payload.evidence_inspector_snapshot
+            )
+        metadata_json = _json_payload(metadata_payload)
         try:
             with self._session.begin_nested():
                 assistant = MessageMessage(
@@ -657,6 +666,57 @@ _PROVIDER_DIAGNOSTIC_KEYS = frozenset(
         "retryable",
     }
 )
+
+
+def _validate_evidence_inspector_snapshot(
+    value: dict,
+    *,
+    public_evidence_count: int,
+) -> None:
+    if set(value) != {"version", "items"} or value.get("version") != "evidence-inspector.v1":
+        raise GenerationContractError("response_evidence_inspector_invalid")
+    items = value.get("items")
+    if not isinstance(items, list) or len(items) != public_evidence_count or len(items) > 12:
+        raise GenerationContractError("response_evidence_inspector_invalid")
+    for item in items:
+        if not isinstance(item, dict) or set(item) != {
+            "ref", "kind", "text", "occurred_at", "axes", "locator"
+        }:
+            raise GenerationContractError("response_evidence_inspector_invalid")
+        if (
+            not isinstance(item.get("ref"), str)
+            or not isinstance(item.get("text"), str)
+            or len(item["text"]) > 2000
+            or not isinstance(item.get("axes"), list)
+        ):
+            raise GenerationContractError("response_evidence_inspector_invalid")
+        locator = item.get("locator")
+        if locator is not None and (
+            not isinstance(locator, dict)
+            or set(locator) != {
+                "kind",
+                "source_type",
+                "source_id",
+                "source_revision",
+                "actor_world_character_id",
+                "target_world_character_id",
+            }
+            or not isinstance(locator.get("source_id"), str)
+            or locator.get("kind") not in {
+                "canonical_source",
+                "graph_relationship",
+                "memory_item",
+            }
+            or (
+                locator.get("source_revision") is not None
+                and (
+                    not isinstance(locator.get("source_revision"), str)
+                    or not locator["source_revision"]
+                    or len(locator["source_revision"]) > 128
+                )
+            )
+        ):
+            raise GenerationContractError("response_evidence_inspector_invalid")
 
 
 def _provider_failure_diagnostic(value: dict) -> dict:

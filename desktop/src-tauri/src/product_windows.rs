@@ -10,6 +10,7 @@ const WINDOW_ROUTE_QUERY: &str = "__angmoo_window_route";
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum ProductWindowKind {
+    Memory,
     Phone,
     Studio,
     RelationshipGraph,
@@ -18,6 +19,7 @@ pub enum ProductWindowKind {
 impl ProductWindowKind {
     pub fn parse(value: &str) -> Result<Self, String> {
         match value {
+            "memory" => Ok(Self::Memory),
             "phone" => Ok(Self::Phone),
             "studio" => Ok(Self::Studio),
             "relationship-graph" => Ok(Self::RelationshipGraph),
@@ -27,6 +29,7 @@ impl ProductWindowKind {
 
     fn label(self) -> &'static str {
         match self {
+            Self::Memory => "memory",
             Self::Phone => "main",
             Self::Studio => "studio",
             Self::RelationshipGraph => "relationship-graph",
@@ -35,6 +38,7 @@ impl ProductWindowKind {
 
     fn title(self) -> &'static str {
         match self {
+            Self::Memory => "Angmoo Memory",
             Self::Phone => "Angmoo",
             Self::Studio => "Angmoo Creator Studio",
             Self::RelationshipGraph => "Angmoo Relationship Graph",
@@ -43,6 +47,7 @@ impl ProductWindowKind {
 
     fn bootstrap_kind(self) -> &'static str {
         match self {
+            Self::Memory => "memory",
             Self::Phone => "phone",
             Self::Studio => "studio",
             Self::RelationshipGraph => "relationship-graph",
@@ -65,12 +70,16 @@ pub fn validate_product_route(kind: ProductWindowKind, route: &str) -> Result<St
         .filter(|segment| !segment.is_empty())
         .collect::<Vec<_>>();
     let path_matches = match kind {
+        ProductWindowKind::Memory => memory_path_matches(&segments),
         ProductWindowKind::Phone => phone_path_matches(&segments),
         ProductWindowKind::Studio => studio_path_matches(&segments),
         ProductWindowKind::RelationshipGraph => relationship_path_matches(&segments),
     };
     if !path_matches {
         return Err("product_route_outside_window_boundary".to_owned());
+    }
+    if kind == ProductWindowKind::Memory && !memory_query_matches(&parsed) {
+        return Err("invalid_memory_query".to_owned());
     }
     if kind == ProductWindowKind::RelationshipGraph {
         for (key, value) in parsed.query_pairs() {
@@ -80,6 +89,28 @@ pub fn validate_product_route(kind: ProductWindowKind, route: &str) -> Result<St
         }
     }
     Ok(route.to_owned())
+}
+
+fn memory_path_matches(segments: &[&str]) -> bool {
+    matches!(segments, ["memory"])
+}
+
+fn memory_query_matches(parsed: &tauri::Url) -> bool {
+    let mut world = false;
+    let mut subject = false;
+    let mut memory = false;
+    for (key, value) in parsed.query_pairs() {
+        if !safe_segment(value.as_ref()) {
+            return false;
+        }
+        match key.as_ref() {
+            "world" if !world => world = true,
+            "subject" if !subject => subject = true,
+            "memory" if !memory => memory = true,
+            _ => return false,
+        }
+    }
+    (!subject || world) && (!memory || subject)
 }
 
 fn phone_path_matches(segments: &[&str]) -> bool {
@@ -193,6 +224,9 @@ fn configure_wide_window(
     kind: ProductWindowKind,
 ) -> WebviewWindowBuilder<'_, tauri::Wry, AppHandle<tauri::Wry>> {
     match kind {
+        ProductWindowKind::Memory => builder
+            .inner_size(1180.0, 780.0)
+            .min_inner_size(900.0, 620.0),
         ProductWindowKind::Studio => builder
             .inner_size(1280.0, 820.0)
             .min_inner_size(980.0, 680.0),
@@ -287,6 +321,14 @@ mod tests {
 
     #[test]
     fn product_routes_stay_inside_their_window_boundaries() {
+        assert!(validate_product_route(ProductWindowKind::Memory, "/memory").is_ok());
+        assert!(
+            validate_product_route(
+                ProductWindowKind::Memory,
+                "/memory?world=world-1&subject=wc-1&memory=memory-1"
+            )
+            .is_ok()
+        );
         assert!(validate_product_route(ProductWindowKind::Phone, "/").is_ok());
         assert!(validate_product_route(ProductWindowKind::Phone, "/agents").is_ok());
         assert!(validate_product_route(ProductWindowKind::Phone, "/worlds/world-1/feed").is_ok());
@@ -326,6 +368,7 @@ mod tests {
             .is_ok()
         );
         assert!(validate_product_route(ProductWindowKind::Phone, "/studio").is_err());
+        assert!(validate_product_route(ProductWindowKind::Phone, "/memory").is_err());
         assert!(validate_product_route(ProductWindowKind::Studio, "/worlds/world-1").is_err());
         assert!(
             validate_product_route(
@@ -341,6 +384,22 @@ mod tests {
             )
             .is_err()
         );
+    }
+
+    #[test]
+    fn memory_window_rejects_unscoped_or_unsafe_query_parameters() {
+        for route in [
+            "/memory?subject=wc-1",
+            "/memory?world=world-1&memory=memory-1",
+            "/memory?world=world-1&debug=true",
+            "/memory?world=world-1&world=world-2",
+            "/memory?world=..%2Fsettings",
+        ] {
+            assert_eq!(
+                validate_product_route(ProductWindowKind::Memory, route),
+                Err("invalid_memory_query".to_owned())
+            );
+        }
     }
 
     #[test]

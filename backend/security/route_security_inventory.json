@@ -447,6 +447,11 @@
       "module": "app.api.v1.routes.world_chat_response",
       "endpoint": "stream_world_response_events"
     },
+    "GET /api/v1/worlds/{world_id}/chat/threads/{thread_id}/requests/{request_id}/evidence": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.world_chat_response",
+      "endpoint": "get_world_response_evidence"
+    },
     "GET /api/v1/worlds/{world_id}/manual-social/feed": {
       "access": "owner-only",
       "module": "app.api.v1.routes.manual_social",
@@ -471,6 +476,21 @@
       "access": "owner-only",
       "module": "app.api.v1.routes.world_chat",
       "endpoint": "get_world_chat_entry"
+    },
+    "GET /api/v1/worlds/{world_id}/world-characters/{subject_id}/memories": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.memory",
+      "endpoint": "list_memory_items"
+    },
+    "GET /api/v1/worlds/{world_id}/world-characters/{subject_id}/memories/{memory_id}": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.memory",
+      "endpoint": "read_memory_item"
+    },
+    "GET /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/settings": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.memory",
+      "endpoint": "read_memory_setting"
     },
     "GET /api/v1/worlds/{world_id}/world-characters/{world_character_id}": {
       "access": "owner-only",

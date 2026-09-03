@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2171,
-      "internal_edge_count": 1682,
+      "external_import_count": 2186,
+      "internal_edge_count": 1712,
       "legacy_import_exception_count": 0,
-      "module_count": 653,
+      "module_count": 658,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -942,6 +942,7 @@
           "frontend/src/features/creator-studio/public.ts",
           "frontend/src/features/device-home/public.ts",
           "frontend/src/features/device-shell/public.ts",
+          "frontend/src/features/memory/public.ts",
           "frontend/src/features/pwa-shell/public.ts",
           "frontend/src/features/relationships/public.ts",
           "frontend/src/features/runtime-status/public.ts",
@@ -1005,7 +1006,7 @@
     "oracle_artifacts": [
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "4bf234292846efd9fbfdb17554c34de17ea07b163d470b1b05466bb8d32e8aec"
+        "sha256": "ba5ff3238ddcdc2c3f5e28bb718c78a962dd64cdaa0f284095f11ccc25a41488"
       },
       {
         "path": "docs/architecture/l3-er-postgres-neo4j-parity-oracle.json",

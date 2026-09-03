@@ -22,6 +22,8 @@ const ROUTES = [
   "/posts",
   "/posts/post-static-probe",
   "/settings",
+  "/memory",
+  "/memory-explorer",
   "/login?returnTo=%2F",
 ] as const;
 
@@ -2302,6 +2304,7 @@ test("P8-L-E static World author profile and letter entry keep exact Tauri route
     created_at: "2026-09-01T04:30:00Z",
     latest_message: null,
     messages: [],
+    evidence_summaries: [],
   };
   let createCalls = 0;
 
@@ -2518,6 +2521,151 @@ test("P8-L-E static World author profile and letter entry keep exact Tauri route
     }),
   ).toBeVisible();
   expect(createCalls).toBe(1);
+});
+
+test("P8-L-Q static Browser canonicalizes the legacy Memory alias", async ({ page }) => {
+  await page.goto("/memory-explorer");
+  await expect(page).toHaveURL(/\/memory\/?$/);
+  await expect(page.locator('main[data-product-shell="memory"]')).toBeVisible();
+});
+
+test("P8-L-Q static Memory route reads scoped evidence in the wide memory window", async ({
+  page,
+}) => {
+  const worldId = "world-p8-l-q-static";
+  const subjectId = "wc-p8-l-q-static";
+  const memoryId = "memory-p8-l-q-static";
+  const methods: string[] = [];
+  const item = {
+    id: memoryId,
+    memory_kind: "THREAD_SUMMARY",
+    summary: "하루와 나눈 훈련 대화를 기억해.",
+    lifecycle: "active",
+    formed_at: "2026-09-03T02:00:00Z",
+    valid_from: "2026-09-03T02:00:00Z",
+    valid_until: null,
+    pinned: false,
+    superseded_by_memory_id: null,
+    retention_days: 180,
+    related_character: { display_name: "Static 하루", direction: "incoming" },
+    version: 1,
+  };
+
+  await page.addInitScript(
+    ({ route }) => {
+      Object.assign(window, {
+        __ANGMOO_DESKTOP_WINDOW__: { kind: "memory", route },
+      });
+    },
+    { route: `/memory?world=${worldId}&subject=${subjectId}&memory=${memoryId}` },
+  );
+  await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+    const request = route.request();
+    const url = new URL(request.url());
+    methods.push(request.method());
+    const fulfill = (json: unknown, status = 200) =>
+      route.fulfill({ contentType: "application/json", json, status });
+    if (url.pathname === "/api/v1/worlds/mine") {
+      return fulfill({
+        schema_version: "local-world-surface-v1",
+        surface: "device_home",
+        items: [
+          {
+            world_id: worldId,
+            name: "Static Memory World",
+            tagline: "Memory read parity",
+            banner_media_id: null,
+            banner_alt_text: "",
+            status: "published",
+            visibility: "private",
+            readiness_status: "publish_ready",
+            membership_role: "owner",
+            updated_at: "2026-09-03T02:00:00Z",
+            launchable: true,
+            launch_block_reason: null,
+          },
+        ],
+        next_cursor: null,
+      });
+    }
+    if (url.pathname === `/api/v1/worlds/${worldId}/world-characters`) {
+      return fulfill({
+        schema_version: "world-character-profile-list-v1",
+        world_id: worldId,
+        items: [
+          {
+            schema_version: "world-character-profile-v1",
+            world_id: worldId,
+            world_character_id: subjectId,
+            character_id: "character-p8-l-q-static",
+            display_name: "Static 기억 앵무",
+            handle: "static_memory_bird",
+            avatar_url: null,
+            banner_url: null,
+            intro: "Static Memory fixture",
+            role_key: "mentor",
+            control_mode: "autonomous",
+            status: "active",
+            profile_capability: "available",
+          },
+        ],
+      });
+    }
+    if (url.pathname.endsWith("/memory/settings")) {
+      return fulfill({
+        schema_version: "memory-setting-read.v1",
+        scope: { world_id: worldId, subject_world_character_id: subjectId },
+        configured: true,
+        enabled: true,
+        retention_days: 180,
+        provider_mode: "optional-configured",
+        version: 3,
+        capabilities: { read: "available", mutate: "not_available_in_p8_l_q" },
+      });
+    }
+    if (url.pathname.endsWith(`/memories/${memoryId}`)) {
+      return fulfill({
+        ...item,
+        schema_version: "memory-item-detail.v1",
+        scope: { world_id: worldId, subject_world_character_id: subjectId },
+        evidence: [
+          {
+            source_kind: "POST",
+            source_label: "지저귀",
+            source_created_at: "2026-09-03T01:45:00Z",
+            availability: "available",
+            excerpt: "Static World에서 확인한 훈련 지저귀입니다.",
+            related_character: null,
+            canonical_href: `/worlds/${worldId}/posts/post-p8-l-q-static`,
+          },
+        ],
+        provenance_summary: "현재 확인 가능한 근거 1개 / 전체 1개",
+        capabilities: { read: "available", mutate: "not_available_in_p8_l_q" },
+      });
+    }
+    if (url.pathname.endsWith("/memories")) {
+      return fulfill({
+        schema_version: "memory-item-list.v1",
+        scope: { world_id: worldId, subject_world_character_id: subjectId },
+        memory_enabled: true,
+        items: [item],
+        next_cursor: null,
+        capabilities: { read: "available", mutate: "not_available_in_p8_l_q" },
+      });
+    }
+    return route.fallback();
+  });
+
+  await page.setViewportSize({ width: 1180, height: 780 });
+  await page.goto(`/memory?world=${worldId}&subject=${subjectId}&memory=${memoryId}`);
+  await expect(page.locator('main[data-product-shell="memory"]')).toBeVisible();
+  await expect(page.getByRole("heading", { name: item.summary })).toBeVisible();
+  await expect(page.getByText("Static World에서 확인한 훈련 지저귀입니다.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "지저귀 원문 열기" })).toHaveAttribute(
+    "href",
+    `/worlds/${worldId}/posts/post-p8-l-q-static/`,
+  );
+  expect(methods.every((method) => method === "GET")).toBe(true);
 });
 
 test("UI-D static World social core keeps compact composition, flat rows, exact detail navigation, and scoped replies", async ({
@@ -3910,10 +4058,21 @@ test("Tauri Phone delegates Studio to a reusable wide product window", async ({ 
     )
     .toEqual(["start_product_window_drag"]);
 
-  await expect(page.getByLabel("Memory Explorer는 후속 단계에서 연결됩니다")).toHaveAttribute(
-    "data-disabled",
-    "true",
-  );
+  await page.getByRole("link", { name: "Memory 열기" }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const desktop = window as unknown as {
+          __ANGMOO_DESKTOP_INVOCATIONS__: unknown[];
+        };
+        return desktop.__ANGMOO_DESKTOP_INVOCATIONS__;
+      }),
+    )
+    .toContainEqual({
+      command: "open_product_window",
+      args: { kind: "memory", route: "/memory" },
+    });
+  await expect(page).toHaveURL(/\/$/);
   await page.getByRole("link", { name: "Creator Studio 열기" }).dispatchEvent("pointerdown", {
     button: 0,
     buttons: 1,

@@ -15,6 +15,10 @@ from app.domains.memory.domain.provenance import (
     MemorySourceTypeV1,
 )
 from app.domains.memory.domain.scope import MemoryScope, MemoryScopeSetting
+from app.domains.memory.domain.read_surface import (
+    MemoryItemEvidenceRecord,
+    MemoryItemPage,
+)
 from app.domains.memory.ports.source_reader import CanonicalMemoryEvidence
 
 
@@ -113,6 +117,21 @@ class MemoryRepositoryPort(Protocol):
         item_id: str,
         now: datetime,
     ) -> MemoryItemRecord: ...
+
+    def list_items(
+        self,
+        *,
+        scope: MemoryScope,
+        cursor: str | None,
+        limit: int,
+    ) -> MemoryItemPage: ...
+
+    def list_item_evidence(
+        self,
+        *,
+        scope: MemoryScope,
+        item_id: str,
+    ) -> tuple[MemoryItemEvidenceRecord, ...]: ...
 
     def set_item_pin(
         self,

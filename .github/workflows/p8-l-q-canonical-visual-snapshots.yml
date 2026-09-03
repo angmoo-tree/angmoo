@@ -1,0 +1,63 @@
+name: P8-L-Q Canonical Visual Snapshot
+
+on:
+  push:
+    branches:
+      - feat/p8-l-q-memory-read-inspector
+
+permissions:
+  contents: read
+
+concurrency:
+  group: p8-l-q-canonical-visual-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  snapshots:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: "11.22.0"
+          run_install: false
+      - name: Install locked frontend dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: frontend
+      - name: Install locked browser-test dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: browser-tests
+      - name: Build Local OSS profile offline
+        env:
+          NEXT_PUBLIC_EXPERIMENTAL_IMAGE_ENABLED: "false"
+        run: pnpm build
+        working-directory: frontend
+      - name: Build Tauri static frontend profile
+        env:
+          NEXT_PUBLIC_EXPERIMENTAL_IMAGE_ENABLED: "false"
+        run: pnpm build:static
+        working-directory: frontend
+      - name: Update canonical snapshots in the pinned Playwright image
+        shell: bash
+        run: |
+          docker run --rm --ipc=host \
+            --mount "type=bind,source=${GITHUB_WORKSPACE},target=/work" \
+            --workdir /work/browser-tests \
+            --env CI=true \
+            mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e \
+            node ./node_modules/@playwright/test/cli.js test \
+              --config=playwright.visual.config.ts \
+              --update-snapshots
+      - name: Upload canonical snapshot corpus
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: p8-l-q-canonical-snapshots-${{ github.sha }}
+          path: browser-tests/snapshots
+          if-no-files-found: error
+          retention-days: 1

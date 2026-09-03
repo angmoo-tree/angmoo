@@ -29,6 +29,36 @@ class EvidenceKind(StrEnum):
     GRAPH_EVENT = "graph_event"
 
 
+class EvidenceLocatorKind(StrEnum):
+    CANONICAL_SOURCE = "canonical_source"
+    GRAPH_RELATIONSHIP = "graph_relationship"
+    MEMORY_ITEM = "memory_item"
+
+
+@dataclass(frozen=True, slots=True)
+class EvidenceLocator:
+    kind: EvidenceLocatorKind
+    source_id: str
+    source_type: str | None = None
+    source_revision: str | None = None
+    actor_world_character_id: str | None = None
+    target_world_character_id: str | None = None
+
+    def __post_init__(self) -> None:
+        if not self.source_id or len(self.source_id) > 128:
+            raise EvidenceBundleContractError("evidence_locator_id_invalid")
+        if self.kind is EvidenceLocatorKind.CANONICAL_SOURCE and not self.source_type:
+            raise EvidenceBundleContractError("evidence_locator_source_type_missing")
+        if self.source_revision is not None and (
+            not self.source_revision or len(self.source_revision) > 128
+        ):
+            raise EvidenceBundleContractError("evidence_locator_revision_invalid")
+        if self.kind is EvidenceLocatorKind.GRAPH_RELATIONSHIP and (
+            not self.actor_world_character_id or not self.target_world_character_id
+        ):
+            raise EvidenceBundleContractError("evidence_locator_relationship_invalid")
+
+
 class EvidenceBundleContractError(ValueError):
     """Stable fail-closed error for unsafe or malformed evidence."""
 
@@ -42,6 +72,7 @@ class EvidenceItem:
     axes: tuple[RetrievalAxis, ...]
     source_succeeded: bool = True
     observable: bool = True
+    locator: EvidenceLocator | None = None
 
     def __post_init__(self) -> None:
         if (
@@ -152,6 +183,48 @@ class EvidenceBundle:
             "clarification_slot": self.clarification_slot,
         }
 
+    def inspector_snapshot(self) -> dict:
+        """Private persistence payload used only by the authenticated inspector.
+
+        Unlike ``provider_payload`` this contains typed locators so the source
+        can be revalidated later.  Callers must never serialize it through a
+        normal generation response DTO.
+        """
+
+        return {
+            "version": "evidence-inspector.v1",
+            "items": [
+                {
+                    "ref": item.opaque_reference,
+                    "kind": item.kind.value,
+                    "text": item.normalized_text,
+                    "occurred_at": (
+                        None
+                        if item.occurred_at is None
+                        else item.occurred_at.astimezone(UTC).isoformat()
+                    ),
+                    "axes": [axis.value for axis in item.axes],
+                    "locator": (
+                        None
+                        if item.locator is None
+                        else {
+                            "kind": item.locator.kind.value,
+                            "source_type": item.locator.source_type,
+                            "source_id": item.locator.source_id,
+                            "source_revision": item.locator.source_revision,
+                            "actor_world_character_id": (
+                                item.locator.actor_world_character_id
+                            ),
+                            "target_world_character_id": (
+                                item.locator.target_world_character_id
+                            ),
+                        }
+                    ),
+                }
+                for item in self.items
+            ],
+        }
+
 
 def compute_evidence_hash(
     *,
@@ -211,6 +284,8 @@ __all__ = [
     "EvidenceBundleContractError",
     "EvidenceItem",
     "EvidenceKind",
+    "EvidenceLocator",
+    "EvidenceLocatorKind",
     "compute_evidence_hash",
     "opaque_evidence_reference",
 ]

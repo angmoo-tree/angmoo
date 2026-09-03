@@ -297,13 +297,15 @@ def test_static_and_next_profiles_share_the_same_window_bridge() -> None:
     assert config["build"]["frontendDist"] == "../../frontend/out"
 
 
-def test_memory_explorer_is_an_explicit_inactive_placeholder() -> None:
+def test_memory_read_surface_replaces_the_inactive_explorer_placeholder() -> None:
     contract = _read(
         "frontend/src/features/device-home/model/device-home-contract.ts"
     )
-    assert 'id: "memory-explorer"' in contract
-    assert 'label: "Memory Explorer"' in contract
-    assert 'availability: "planned"' in contract
+    assert 'id: "memory"' in contract
+    assert 'label: "Memory"' in contract
+    assert 'href: "/memory"' in contract
+    assert 'availability: "available"' in contract
+    assert 'id: "memory-explorer"' not in contract
 
 
 def test_desktop_build_outputs_never_enter_docker_build_context() -> None:

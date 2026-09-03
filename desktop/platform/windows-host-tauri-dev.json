@@ -45,11 +45,13 @@
     "forbidden_installed_data_root": "%LOCALAPPDATA%\\Angmoo",
     "window_labels": {
       "phone": "main",
+      "memory": "memory",
       "studio": "studio",
       "relationship_graph": "relationship-graph"
     },
     "routes": {
       "phone": "/",
+      "memory": "/memory",
       "studio_prefix": "/studio",
       "relationship_graph_pattern": "/characters/{character_id}/worlds/{world_id}/relationship-graph?provider=ladybug"
     }

@@ -18,7 +18,7 @@ if str(BACKEND_ROOT) not in sys.path:
 
 OUTPUT_PATH = ROOT / "docs/architecture/p8-l-p-evidence-response-streaming-inventory.json"
 O_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-o-memory-consolidation-inventory.json"
-O_INVENTORY_SHA256 = "4daaa686a4cececff91873adcf3800bf4fec2fc92fd25c2db82c100b3cec0642"
+O_INVENTORY_SHA256 = "3a9341c11a12d1c33e4007a3eb641afdd28b0f22545d6ff09d3dd908a6120aed"
 
 from app.domains.chat.domain import CHAT_GENERATION_STREAM_VERSION  # noqa: E402
 from app.domains.chat.domain.evidence_bundle import (  # noqa: E402
