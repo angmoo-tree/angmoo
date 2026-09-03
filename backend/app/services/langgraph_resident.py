@@ -35,6 +35,12 @@ from app.domains.world_characters.domain.runtime_modes import (
     AUTONOMOUS_FEED_RUNTIME_MODE,
     LEGACY_FEED_RUNTIME_MODE,
 )
+from app.domains.social.domain.subjective_context import (
+    ActionEmotionLabel,
+    ActionMotivationKind,
+    ActionSubjectiveContextV1,
+)
+from app.runtime.social.subjective_context import record_declared_subjective_context
 from app.runtime.routine_posts.sqlalchemy_runtime import (
     routine_world_character_for_character,
     run_routine_post_runtime,
@@ -128,6 +134,11 @@ class _PlannedAction(BaseModel):
     target_type: Literal["character"] | None = None
     target_id: str | None = Field(default=None, max_length=64)
     brief: str | None = Field(default=None, max_length=600)
+    motivation_kind: ActionMotivationKind | None = None
+    motivation_text: str | None = Field(default=None, max_length=280)
+    emotion_label: ActionEmotionLabel | None = None
+    emotion_text: str | None = Field(default=None, max_length=280)
+    emotion_intensity: int | None = Field(default=None, ge=0, le=100)
     conversation_judgment: Literal[
         "continue_reply",
         "closing_reply",
@@ -184,6 +195,11 @@ class _WritingPlan(BaseModel):
     topic_key: str | None = Field(default=None, max_length=80)
     feed_cue_id: int | None = None
     brief: str | None = Field(default=None, max_length=800)
+    motivation_kind: ActionMotivationKind | None = None
+    motivation_text: str | None = Field(default=None, max_length=280)
+    emotion_label: ActionEmotionLabel | None = None
+    emotion_text: str | None = Field(default=None, max_length=280)
+    emotion_intensity: int | None = Field(default=None, ge=0, le=100)
     topic_arc: _TopicArcDraft | None = None
     active_step: _TopicArcStep | None = None
 
@@ -208,12 +224,22 @@ class _FeedPlannerAction(BaseModel):
     item_index: int = Field(ge=0, le=29)
     action_type: Literal["reply", "like", "repost"]
     brief: str | None = Field(default=None, max_length=600)
+    motivation_kind: ActionMotivationKind | None = None
+    motivation_text: str | None = Field(default=None, max_length=280)
+    emotion_label: ActionEmotionLabel | None = None
+    emotion_text: str | None = Field(default=None, max_length=280)
+    emotion_intensity: int | None = Field(default=None, ge=0, le=100)
 
 
 class _InboxPlannerAction(BaseModel):
     item_index: int = Field(ge=0, le=9)
     action_type: Literal["reply", "like", "follow"]
     brief: str | None = Field(default=None, max_length=600)
+    motivation_kind: ActionMotivationKind | None = None
+    motivation_text: str | None = Field(default=None, max_length=280)
+    emotion_label: ActionEmotionLabel | None = None
+    emotion_text: str | None = Field(default=None, max_length=280)
+    emotion_intensity: int | None = Field(default=None, ge=0, le=100)
 
 
 class _InboxConversationDecision(BaseModel):
@@ -231,6 +257,11 @@ class _FeedPlannerWriting(BaseModel):
     mode: Literal["none", "post_seed"] = "none"
     source_item_index: int | None = Field(default=None, ge=0, le=29)
     brief: str | None = Field(default=None, max_length=800)
+    motivation_kind: ActionMotivationKind | None = None
+    motivation_text: str | None = Field(default=None, max_length=280)
+    emotion_label: ActionEmotionLabel | None = None
+    emotion_text: str | None = Field(default=None, max_length=280)
+    emotion_intensity: int | None = Field(default=None, ge=0, le=100)
     topic_arc: _TopicArcDraft | None = None
 
 
@@ -253,6 +284,11 @@ class _RelationshipActionPlan(BaseModel):
     target_character_id: str | None = Field(default=None, max_length=64)
     reason_tag: str | None = Field(default=None, max_length=80)
     evidence_summary: str | None = Field(default=None, max_length=800)
+    motivation_kind: ActionMotivationKind | None = None
+    motivation_text: str | None = Field(default=None, max_length=280)
+    emotion_label: ActionEmotionLabel | None = None
+    emotion_text: str | None = Field(default=None, max_length=280)
+    emotion_intensity: int | None = Field(default=None, ge=0, le=100)
     relationship_actions: list[_PlannedAction] = Field(
         default_factory=list, max_length=1
     )
@@ -265,6 +301,11 @@ class _IndependentWritingChoice(BaseModel):
     source_mix: Literal["none", "feed_seed", "relationship_point"] = "none"
     mention_target_handle: str | None = Field(default=None, max_length=80)
     brief: str | None = Field(default=None, max_length=800)
+    motivation_kind: ActionMotivationKind | None = None
+    motivation_text: str | None = Field(default=None, max_length=280)
+    emotion_label: ActionEmotionLabel | None = None
+    emotion_text: str | None = Field(default=None, max_length=280)
+    emotion_intensity: int | None = Field(default=None, ge=0, le=100)
     topic_arc: _TopicArcDraft | None = None
 
 
@@ -299,6 +340,11 @@ class _IndependentTopicComposition(BaseModel):
     )
     action_step_count: int = Field(default=1, ge=1, le=3)
     brief: str = Field(min_length=1, max_length=1000)
+    motivation_kind: ActionMotivationKind | None = None
+    motivation_text: str | None = Field(default=None, max_length=280)
+    emotion_label: ActionEmotionLabel | None = None
+    emotion_text: str | None = Field(default=None, max_length=280)
+    emotion_intensity: int | None = Field(default=None, ge=0, le=100)
     use_post_seed: bool = False
     seed_post_id: str | None = Field(default=None, max_length=64)
     mention_target_handle: str | None = Field(default=None, max_length=80)
@@ -2696,6 +2742,7 @@ def _normalize_independent_topic_composition(
             "mention_target_handle": handle,
             "selection_reason": _clip(raw.get("selection_reason"), 600)
             or "relationship point selected",
+            **_subjective_plan_fields(raw),
         }
     if topic_key not in base_topics and base_topics:
         topic_key = next(iter(base_topics))
@@ -2721,6 +2768,21 @@ def _normalize_independent_topic_composition(
         "mention_target_handle": selected_seed.get("author_handle") if use_seed else None,
         "selection_reason": _clip(raw.get("selection_reason"), 600)
         or "base independent topic selected",
+        **_subjective_plan_fields(raw),
+    }
+
+
+def _subjective_plan_fields(value: dict[str, Any]) -> dict[str, Any]:
+    return {
+        key: value.get(key)
+        for key in (
+            "motivation_kind",
+            "motivation_text",
+            "emotion_label",
+            "emotion_text",
+            "emotion_intensity",
+        )
+        if value.get(key) is not None
     }
 
 
@@ -2762,6 +2824,7 @@ def _writing_from_topic_composition(
             "topic_key": None,
             "writing_form": composition.get("writing_form"),
             "action_step_count": composition.get("action_step_count"),
+            **_subjective_plan_fields(composition),
         }
     if source == "relationship_point":
         handle = str(composition.get("mention_target_handle") or "").strip()
@@ -2777,6 +2840,7 @@ def _writing_from_topic_composition(
             "source_body": composition.get("source_body"),
             "writing_form": composition.get("writing_form"),
             "action_step_count": composition.get("action_step_count"),
+            **_subjective_plan_fields(composition),
         }
     writing = {
         "mode": "independent",
@@ -2788,6 +2852,7 @@ def _writing_from_topic_composition(
         "mention_target_handle": None,
         "writing_form": composition.get("writing_form"),
         "action_step_count": composition.get("action_step_count"),
+        **_subjective_plan_fields(composition),
     }
     if composition.get("use_post_seed") and isinstance(selected_feed_seed, dict):
         writing["source_mix"] = "feed_seed"
@@ -6045,6 +6110,7 @@ def _normalize_relationship_action_plan(
                     "target_type": "character",
                     "target_id": target_id,
                     "brief": evidence_summary,
+                    **_subjective_plan_fields(plan),
                 }
             )
     elif decision in {"unfollow_watch", "unfollow"}:
@@ -6069,6 +6135,7 @@ def _normalize_relationship_action_plan(
                     "target_type": "character",
                     "target_id": target_id,
                     "brief": evidence_summary,
+                    **_subjective_plan_fields(plan),
                 }
             )
     if decision == "none" or blocked_reason:
@@ -6165,6 +6232,7 @@ def _normalize_independent_writing_plan(
             "topic_key": writing.get("topic_key"),
             "brief": writing.get("brief"),
             "topic_arc": writing.get("topic_arc"),
+            **_subjective_plan_fields(writing),
         }
     else:
         writing = {
@@ -7064,6 +7132,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
                     "Do not choose an action only because it is available.",
                     "Choose only action_type values listed in each item's available_actions.",
                     "Select actions with item_index and action_type only; the backend resolves target ids.",
+                    "For every selected action, also declare a short public-safe first-person motivation_kind/motivation_text and a coarse emotion_label at this decision moment. These are not hidden reasoning; never include deliberation, secrets, or chain-of-thought. Use unspecified with null emotion detail when unclear.",
                     "Do not decide standalone writing in this node. Feed post seeds are selected by FeedSeedSelector.",
                     "If no feed action fits, return no actions and writing.mode='none'.",
                     "",
@@ -7123,6 +7192,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
                     "Use ack_without_reply when reply would be repetitive but like or follow may still fit.",
                     "Use closing_reply only when a short final reply is more natural than silence; do not open a new topic in that reply.",
                     "Select actions with item_index and action_type only; the backend resolves notification and target ids.",
+                    "For every selected action, also declare a short public-safe first-person motivation_kind/motivation_text and a coarse emotion_label at this decision moment. These are not hidden reasoning; never include deliberation, secrets, or chain-of-thought. Use unspecified with null emotion detail when unclear.",
                     "Do not decide standalone writing in this node.",
                     "If no inbox action fits, return no inbox actions.",
                     "",
@@ -7195,6 +7265,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
                     "For unfollow_watch, require a followed character and strong relationship reconsideration signal.",
                     "For unfollow, require a prior matching unfollow_watch in this same memory_session_key.",
                     "Community tendency notes are character judgment weights, not hard-coded bans.",
+                    "For a selected relationship action, include a public-safe first-person motivation and coarse emotion only; never provide hidden deliberation or chain-of-thought.",
                     "Return JSON only.",
                     "",
                     f"relationship_context: {_format_json_for_prompt(relationship_context, max_chars=9000)}",
@@ -7294,6 +7365,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
                     "For thought, community_observation, and monologue, action_step_count must be 1.",
                     "For action, action_step_count can be 1 to 3. Never exceed 3.",
                     "Do not force explicit time words. Adjust the brief to the current time without requiring the post to say the time.",
+                    "For the selected root-post topic, declare a short public-safe first-person motivation_kind/motivation_text and coarse emotion_label at this decision moment. This is not hidden reasoning. Use unspecified with null emotion detail when unclear.",
                     "",
                     f"mandatory_post_context: {_format_json_for_prompt(mandatory_context, max_chars=10000)}",
                     f"relationship_memory: {_format_json_for_prompt(state.get('relationship_memory', {}), max_chars=4000)}",
@@ -8024,6 +8096,44 @@ def _finish_execution(
     }
 
 
+def _declared_action_subjective_context(
+    _action_type: str,
+    plan: dict[str, Any],
+) -> ActionSubjectiveContextV1 | None:
+    """Convert only decision-time public fields into the persisted contract."""
+
+    motivation_text = _clip(plan.get("motivation_text"), 280)
+    raw_kind = str(plan.get("motivation_kind") or "").strip()
+    if not motivation_text or not raw_kind:
+        return None
+    try:
+        motivation_kind = ActionMotivationKind(raw_kind)
+    except ValueError:
+        return None
+    raw_emotion = str(plan.get("emotion_label") or "unspecified").strip()
+    try:
+        emotion_label = ActionEmotionLabel(raw_emotion)
+    except ValueError:
+        emotion_label = ActionEmotionLabel.UNSPECIFIED
+    emotion_text = _clip(plan.get("emotion_text"), 280) or None
+    raw_intensity = plan.get("emotion_intensity")
+    emotion_intensity = (
+        raw_intensity
+        if isinstance(raw_intensity, int) and not isinstance(raw_intensity, bool)
+        else None
+    )
+    if emotion_label is ActionEmotionLabel.UNSPECIFIED:
+        emotion_text = None
+        emotion_intensity = None
+    return ActionSubjectiveContextV1(
+        motivation_kind=motivation_kind,
+        motivation_text=motivation_text,
+        emotion_label=emotion_label,
+        emotion_text=emotion_text,
+        emotion_intensity=emotion_intensity,
+    )
+
+
 def _normalize_reply_body_for_duplicate(value: str) -> str:
     text = re.sub(r"\s+", " ", value.strip())
     text = re.sub(r"([.!?…~ㅋㅎㅠㅜ])\1+", r"\1", text)
@@ -8380,6 +8490,18 @@ def _execute_planned_action(
             action_result = _finish_execution(
                 ctx, execution, status="succeeded", result=payload
             )
+            record_declared_subjective_context(
+                ctx.db,
+                execution=execution,
+                event=social_result.event,
+                source_post_id=(
+                    str(payload.get("post_id"))
+                    if payload.get("post_id") is not None
+                    else post_id
+                ),
+                context=_declared_action_subjective_context(action_type, action),
+                captured_at=occurred_at,
+            )
             ctx.db.commit()
         action_result["social_event_id"] = social_result.event.id
         if writer_validation is not None:
@@ -8551,52 +8673,80 @@ def _execute_writing_plan(
         return reused
     assert execution is not None
     try:
-        result = community_service.create_agent_tool_post(
+        actor = langgraph_social_apply.active_world_character(
             ctx.db,
-            ctx.session_key,
-            schemas.PostCreate(
-                title=title,
-                body=body,
-                author_character_id=ctx.character.id,
-            ),
-            topic_signature=topic_signature,
-            novelty_basis=_clip(topic_basis, 500) or None,
-            lore_chunk_ids=lore_chunk_ids,
-            retrieval_mode=retrieval_mode,
-            lore_query_mode=lore_query_mode,
-            consume_pending_feed_cue=writing_plan.get("mode") == _OWNER_FEED_CUE_MODE,
-            feed_cue_id=feed_cue_id if isinstance(feed_cue_id, int) else None,
+            character_id=ctx.character.id,
         )
-        image_attempt = (
-            post_image_generation.attach_prepared_post_image(
-                db=ctx.db,
-                post_id=result.id,
-                prepared=prepared_image,
+        with unit_of_work.deferred_commits():
+            result = community_service.create_agent_tool_post(
+                ctx.db,
+                ctx.session_key,
+                schemas.PostCreate(
+                    title=title,
+                    body=body,
+                    author_character_id=ctx.character.id,
+                ),
+                topic_signature=topic_signature,
+                novelty_basis=_clip(topic_basis, 500) or None,
+                lore_chunk_ids=lore_chunk_ids,
+                retrieval_mode=retrieval_mode,
+                lore_query_mode=lore_query_mode,
+                consume_pending_feed_cue=(
+                    writing_plan.get("mode") == _OWNER_FEED_CUE_MODE
+                ),
+                feed_cue_id=(feed_cue_id if isinstance(feed_cue_id, int) else None),
+                world_id=actor.world_id,
+                author_world_character_id=actor.id,
             )
-            if prepared_image is not None
-            else None
-        )
-        execution_result = {
-            "post_id": result.id,
-            "title": result.title,
-            "topic_key": topic_key,
-        }
-        if isinstance(feed_cue_id, int):
-            execution_result["feed_cue_id"] = feed_cue_id
-        if lore_chunk_ids:
-            execution_result["lore_chunk_ids"] = lore_chunk_ids
-        if retrieval_mode:
-            execution_result["retrieval_mode"] = retrieval_mode
-        if lore_query_mode:
-            execution_result["lore_query_mode"] = lore_query_mode
-        if image_attempt is not None:
-            execution_result["image_attempt"] = image_attempt
-        action_result = _finish_execution(
-            ctx,
-            execution,
-            status="succeeded",
-            result=execution_result,
-        )
+            image_attempt = (
+                post_image_generation.attach_prepared_post_image(
+                    db=ctx.db,
+                    post_id=result.id,
+                    prepared=prepared_image,
+                )
+                if prepared_image is not None
+                else None
+            )
+            social_result = langgraph_social_apply.apply_successful_root_post(
+                ctx.db,
+                actor_character_id=ctx.character.id,
+                post_id=result.id,
+                execution=execution,
+                occurred_at=ctx.run_started_at,
+            )
+            execution_result = {
+                "post_id": result.id,
+                "title": result.title,
+                "topic_key": topic_key,
+                "social_event_id": social_result.event.id,
+                "world_id": actor.world_id,
+                "actor_world_character_id": actor.id,
+            }
+            if isinstance(feed_cue_id, int):
+                execution_result["feed_cue_id"] = feed_cue_id
+            if lore_chunk_ids:
+                execution_result["lore_chunk_ids"] = lore_chunk_ids
+            if retrieval_mode:
+                execution_result["retrieval_mode"] = retrieval_mode
+            if lore_query_mode:
+                execution_result["lore_query_mode"] = lore_query_mode
+            if image_attempt is not None:
+                execution_result["image_attempt"] = image_attempt
+            action_result = _finish_execution(
+                ctx,
+                execution,
+                status="succeeded",
+                result=execution_result,
+            )
+            record_declared_subjective_context(
+                ctx.db,
+                execution=execution,
+                event=social_result.event,
+                source_post_id=result.id,
+                context=_declared_action_subjective_context("post", writing_plan),
+                captured_at=ctx.run_started_at,
+            )
+        ctx.db.commit()
         if image_attempt is not None:
             action_result["image_attempt"] = image_attempt
         if topic_key:

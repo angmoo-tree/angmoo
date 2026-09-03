@@ -39,6 +39,16 @@ def delete_setup_data_for_characters(
     if not world_character_ids:
         return
 
+    # Public-safe declarations remain private action state, not public posts.
+    # Remove them before the legacy scrub path removes their executions.
+    db.execute(
+        delete(models.SocialActionSubjectiveContext).where(
+            models.SocialActionSubjectiveContext.actor_world_character_id.in_(
+                world_character_ids
+            )
+        )
+    )
+
     # P5 feed cursors, claims, and blocks are private WorldCharacter runtime
     # state. Break the execution -> observation edge before deleting the
     # observation rows; account/Character deletion later removes the owned

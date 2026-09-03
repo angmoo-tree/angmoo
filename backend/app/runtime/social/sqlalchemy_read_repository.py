@@ -33,6 +33,7 @@ from app.runtime.relationships.sqlalchemy_social_event import (
 class _SocialPersistenceModels:
     """L6-removable ORM mapping exposed only to sibling social adapters."""
 
+    AgentPublicActionExecution = models.AgentPublicActionExecution
     Character = models.Character
     Post = models.Post
     PostLike = models.PostLike

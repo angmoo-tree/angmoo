@@ -107,6 +107,9 @@ from app.domains.social.infrastructure.sqlalchemy_models import (
     OwnerManualInboxCandidate,
     OwnerManualSocialWrite,
 )
+from app.domains.social.infrastructure.sqlalchemy_subjective_context_models import (
+    SocialActionSubjectiveContext,
+)
 from app.domains.world_packages.infrastructure.sqlalchemy_models import (
     WorldPackageExport,
     WorldPackageImport,
@@ -206,6 +209,7 @@ __all__ = [
     "SocialEventEvidence",
     "OwnerManualInboxCandidate",
     "OwnerManualSocialWrite",
+    "SocialActionSubjectiveContext",
     "WorldPackageExport",
     "WorldPackageImport",
     "WorldPackageImportIdMap",

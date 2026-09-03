@@ -13,6 +13,11 @@ from app.runtime.social.observations import observe_source
 from app.core import unit_of_work
 from app.cruds import agent_runs as agent_run_crud
 from app.domains.social.public import SocialObservationError, SocialSearchUnavailable
+from app.domains.social.domain.subjective_context import (
+    ActionEmotionLabel,
+    ActionSubjectiveContextV1,
+)
+from app.runtime.social.subjective_context import record_declared_subjective_context
 from app.services import (
     activity_proposal_runtime,
     community as community_service,
@@ -93,6 +98,25 @@ def _brief_hash(brief: str | None) -> str | None:
     if not brief:
         return None
     return sha256(brief.encode("utf-8")).hexdigest()
+
+
+def _declared_subjective_context(
+    decision: schemas.FeedReactionDecision,
+) -> ActionSubjectiveContextV1 | None:
+    action = decision.selected_action
+    if (
+        action is None
+        or decision.motivation_kind is None
+        or decision.motivation_text is None
+    ):
+        return None
+    return ActionSubjectiveContextV1(
+        motivation_kind=decision.motivation_kind,
+        motivation_text=decision.motivation_text,
+        emotion_label=decision.emotion_label or ActionEmotionLabel.UNSPECIFIED,
+        emotion_text=decision.emotion_text,
+        emotion_intensity=decision.emotion_intensity,
+    )
 
 
 def _safe_result(
@@ -800,6 +824,16 @@ async def run_world_keyword_feed(
                     execution,
                     status="succeeded",
                     result=action_result,
+                )
+                record_declared_subjective_context(
+                    ctx.db,
+                    execution=execution,
+                    event=social_apply.event,
+                    source_post_id=str(
+                        action_result.get("post_id") or candidate.post_id
+                    ),
+                    context=_declared_subjective_context(decision),
+                    captured_at=ctx.run_started_at,
                 )
                 cycle_summary = _summary(
                     ctx=ctx,

@@ -11,10 +11,10 @@ from sqlalchemy import Connection, MetaData, text
 from app.core.db import Base
 
 
-SQLITE_SCHEMA_VERSION = 7
-SOURCE_ALEMBIC_REVISION = "20260903_0087"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 86
-EXPECTED_CANONICAL_TABLE_COUNT = 95
+SQLITE_SCHEMA_VERSION = 8
+SOURCE_ALEMBIC_REVISION = "20260904_0088"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 87
+EXPECTED_CANONICAL_TABLE_COUNT = 96
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 
 SQLITE_V5_SCHEMA_VERSION = 5
@@ -27,6 +27,12 @@ SQLITE_V6_SCHEMA_VERSION = 6
 SQLITE_V6_SOURCE_ALEMBIC_REVISION = "20260831_0086"
 SQLITE_V6_SOURCE_ALEMBIC_MIGRATION_COUNT = 85
 SQLITE_V6_CANONICAL_TABLE_COUNT = 95
+
+SQLITE_V7_SCHEMA_VERSION = 7
+SQLITE_V7_SOURCE_ALEMBIC_REVISION = "20260903_0087"
+SQLITE_V7_SOURCE_ALEMBIC_MIGRATION_COUNT = 86
+SQLITE_V7_CANONICAL_TABLE_COUNT = 95
+SUBJECTIVE_CONTEXT_V8_TABLES = ("social_action_subjective_contexts",)
 
 SQLITE_V4_SCHEMA_VERSION = 4
 SQLITE_V4_SOURCE_ALEMBIC_REVISION = "20260831_0084"
@@ -108,6 +114,7 @@ def build_sqlite_v4_metadata() -> MetaData:
             table_name == "message_threads"
             or table_name in MEMORY_V5_TABLES
             or table_name in RESPONSE_REQUEST_V6_TABLES
+            or table_name in SUBJECTIVE_CONTEXT_V8_TABLES
         ):
             continue
         Base.metadata.tables[table_name].to_metadata(metadata)
@@ -134,6 +141,7 @@ def build_sqlite_v3_metadata() -> MetaData:
             table_name == "message_threads"
             or table_name in MEMORY_V5_TABLES
             or table_name in RESPONSE_REQUEST_V6_TABLES
+            or table_name in SUBJECTIVE_CONTEXT_V8_TABLES
         ):
             continue
         Base.metadata.tables[table_name].to_metadata(metadata)
@@ -159,6 +167,7 @@ def build_sqlite_v5_metadata() -> MetaData:
         if (
             table_name == "message_threads"
             or table_name in RESPONSE_REQUEST_V6_TABLES
+            or table_name in SUBJECTIVE_CONTEXT_V8_TABLES
         ):
             continue
         Base.metadata.tables[table_name].to_metadata(metadata)
@@ -181,7 +190,10 @@ def build_sqlite_v6_metadata() -> MetaData:
 
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
-        if table_name == "message_threads":
+        if (
+            table_name == "message_threads"
+            or table_name in SUBJECTIVE_CONTEXT_V8_TABLES
+        ):
             continue
         Base.metadata.tables[table_name].to_metadata(metadata)
     add_world_scoped_message_threads_v4_table(metadata)
@@ -190,6 +202,23 @@ def build_sqlite_v6_metadata() -> MetaData:
         raise RuntimeError(
             "SQLite v6 table inventory drifted: "
             f"expected {SQLITE_V6_CANONICAL_TABLE_COUNT}, got {len(metadata.tables)}"
+        )
+    return metadata
+
+
+def build_sqlite_v7_metadata() -> MetaData:
+    """Return the immutable pre-subjective-context embedded inventory."""
+
+    metadata = MetaData()
+    for table_name in sorted(Base.metadata.tables):
+        if table_name in SUBJECTIVE_CONTEXT_V8_TABLES:
+            continue
+        Base.metadata.tables[table_name].to_metadata(metadata)
+    _copy_partial_index_predicates(metadata)
+    if len(metadata.tables) != SQLITE_V7_CANONICAL_TABLE_COUNT:
+        raise RuntimeError(
+            "SQLite v7 table inventory drifted: "
+            f"expected {SQLITE_V7_CANONICAL_TABLE_COUNT}, got {len(metadata.tables)}"
         )
     return metadata
 
@@ -349,6 +378,7 @@ __all__ = [
     "EXPECTED_CANONICAL_TABLE_COUNT",
     "MEMORY_V5_TABLES",
     "RESPONSE_REQUEST_V6_TABLES",
+    "SUBJECTIVE_CONTEXT_V8_TABLES",
     "SCHEMA_VERSION_TABLE",
     "SOURCE_ALEMBIC_MIGRATION_COUNT",
     "SOURCE_ALEMBIC_REVISION",
@@ -357,6 +387,10 @@ __all__ = [
     "SQLITE_V6_SCHEMA_VERSION",
     "SQLITE_V6_SOURCE_ALEMBIC_MIGRATION_COUNT",
     "SQLITE_V6_SOURCE_ALEMBIC_REVISION",
+    "SQLITE_V7_CANONICAL_TABLE_COUNT",
+    "SQLITE_V7_SCHEMA_VERSION",
+    "SQLITE_V7_SOURCE_ALEMBIC_MIGRATION_COUNT",
+    "SQLITE_V7_SOURCE_ALEMBIC_REVISION",
     "SQLITE_V5_CANONICAL_TABLE_COUNT",
     "SQLITE_V5_SCHEMA_VERSION",
     "SQLITE_V5_SOURCE_ALEMBIC_MIGRATION_COUNT",
@@ -376,6 +410,7 @@ __all__ = [
     "build_sqlite_v4_metadata",
     "build_sqlite_v5_metadata",
     "build_sqlite_v6_metadata",
+    "build_sqlite_v7_metadata",
     "create_schema_version_table",
     "sqlite_schema_contract_digest",
     "sqlite_schema_digest",
