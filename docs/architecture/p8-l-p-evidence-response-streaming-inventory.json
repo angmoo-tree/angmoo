@@ -43,11 +43,16 @@
     "provider_family_thinking_compatibility",
     "safe_durable_provider_failure_diagnostic",
     "embedded_v6_to_v7_model_binding_upgrade",
-    "model_selector_busy_guard_and_failure_rollback"
+    "model_selector_busy_guard_and_failure_rollback",
+    "router_nested_schema_parser_parity",
+    "router_safe_durable_diagnostic",
+    "current_mood_minimal_current_context",
+    "router_safe_mismatch_explicit_retry",
+    "router_security_rejection_nonretryable"
   ],
   "historical_chain": {
     "current_tree_owner": "P8-L-P",
-    "p8_l_o_sha256": "0d09d1c6b366c2fa773599abff97584b544d210671a68bfbe2be1d4414a709b1",
+    "p8_l_o_sha256": "4f761706f4e24a3f0eb175df563a01efcfbe79e81c795cf1c8120bc65480ee8c",
     "predecessor_mode": "frozen_digest"
   },
   "memory_after_commit": {
@@ -95,7 +100,7 @@
   "owner_stage": "P8-L-P",
   "predecessor": {
     "path": "docs/architecture/p8-l-o-memory-consolidation-inventory.json",
-    "sha256": "0d09d1c6b366c2fa773599abff97584b544d210671a68bfbe2be1d4414a709b1",
+    "sha256": "4f761706f4e24a3f0eb175df563a01efcfbe79e81c795cf1c8120bc65480ee8c",
     "size": 7037
   },
   "required_files": [
@@ -131,13 +136,18 @@
     },
     {
       "path": "backend/app/domains/chat/application/generation_lifecycle.py",
-      "sha256": "93f4237d39bcf1b01979be7dbd68e9306b5243c00d29867dec2baa84998b6433",
-      "size": 4104
+      "sha256": "05de4632f9c531c833c4a7c6171e3772b1b2d9f75f14b7f6f629ccdbfce71b89",
+      "size": 4296
+    },
+    {
+      "path": "backend/app/domains/chat/application/retrieval_routing.py",
+      "sha256": "0c809acc7a3dd14664b194bf4a35bdbac9abb949372382123d2fad3101494951",
+      "size": 19129
     },
     {
       "path": "backend/app/domains/chat/application/response_workflow.py",
-      "sha256": "5a594d0f67cb7fd894c6b673bb7d95a135df9ca5c1bdeb8803932624e1baa059",
-      "size": 25017
+      "sha256": "22e2a1c949fd7cda82480233dcddfebba0fdfd53194dca89b1197ab214d20703",
+      "size": 26052
     },
     {
       "path": "backend/app/domains/chat/domain/evidence_bundle.py",
@@ -150,14 +160,19 @@
       "size": 433
     },
     {
+      "path": "backend/app/domains/chat/domain/retrieval_router.py",
+      "sha256": "7c7a2f8b3ec6521cb9dea8148655455c180761692f5ec6dfea7f937f86577968",
+      "size": 24480
+    },
+    {
       "path": "backend/app/domains/chat/infrastructure/model_binding_migration.py",
       "sha256": "f95595aed5a808bedb616d133e0a043a545d9a7171d26e08c3941e1126661816",
       "size": 7518
     },
     {
       "path": "backend/app/domains/chat/infrastructure/response_lifecycle_repository.py",
-      "sha256": "f6c4a4e84e4a7739f4ea78124195177ca38c56374bf41e07141265008d9f6e54",
-      "size": 28192
+      "sha256": "068e3bb82fc54fdb2b1c54ec07f5755f20724bce4417b4c93ef734e86e5a39f7",
+      "size": 28772
     },
     {
       "path": "backend/app/domains/chat/infrastructure/sqlalchemy_models.py",
@@ -171,8 +186,13 @@
     },
     {
       "path": "backend/app/domains/chat/ports/response_lifecycle.py",
-      "sha256": "22037b108a8ba843e1c143e5592bf5cad417508c7f9f1bf05ebf8ad242ef30c9",
-      "size": 2692
+      "sha256": "a8a854a5602650cdad9ccd512d485642012d0ecd69439755af8ecadde1ed50be",
+      "size": 2835
+    },
+    {
+      "path": "backend/app/domains/chat/ports/retrieval_router_provider.py",
+      "sha256": "a12db8160b1541170ff011ec1f0e4465feccd168cad1b04c5d0b3c28d55ca173",
+      "size": 4379
     },
     {
       "path": "backend/app/domains/chat/ports/response_workflow.py",
@@ -188,6 +208,11 @@
       "path": "backend/app/integrations/direct_llm.py",
       "sha256": "564867cf1d390722c5a8b4748deb3b55a1fc7675632243b25ad2df6194c45fed",
       "size": 40166
+    },
+    {
+      "path": "backend/app/integrations/llm/retrieval_router.py",
+      "sha256": "2e8bfab24512700d9d97486802c21cba613a7db6184480644f71d352f8d64206",
+      "size": 6542
     },
     {
       "path": "backend/app/integrations/llm/character_response_generator.py",
@@ -241,8 +266,8 @@
     },
     {
       "path": "backend/tests/test_p8_l_p_evidence_response_streaming.py",
-      "sha256": "974b0eef6c37f5e56cd3a515ef08c2aa9aee06401a927a221ca06e9a87f83e0a",
-      "size": 33042
+      "sha256": "d131c719d97eb86de06a8c35bbcbd2c455c5bdc823b00c0656b6f96e19ff0e2f",
+      "size": 38457
     },
     {
       "path": "backend/tests/test_p8_l_p_frontend_streaming.py",
@@ -253,6 +278,16 @@
       "path": "backend/tests/test_p8_l_p_model_hotfix.py",
       "sha256": "276f571ce459152adc8928e236ed2102539c48afa61edd75eb0a45ced71296ae",
       "size": 10649
+    },
+    {
+      "path": "backend/tests/test_p8_l_k_retrieval_router.py",
+      "sha256": "2df03bb7e066a44ef125b947e0d2765185501c8704c281d1f4ec004d0c19b609",
+      "size": 31321
+    },
+    {
+      "path": "backend/tests/fixtures/p8_l/router_hotfix_v1/current_context_ko.jsonl",
+      "sha256": "4cc46c170e5fd1e7706a12c71b5f0d7c10366c04697d9f811d0c961e401d4fd1",
+      "size": 1019
     },
     {
       "path": "browser-tests/product-shell.spec.ts",
@@ -306,8 +341,8 @@
     },
     {
       "path": "docs/architecture/p8-l-p-evidence-response-streaming.md",
-      "sha256": "ef51bd6a0a5ee0f64ab46047fe5dd22d456403df53443af325011caa27b27fe9",
-      "size": 9121
+      "sha256": "30c099ca9bb633f808efb172fc3d70e78f6d0f82319ddff300e1ec4873ed09e8",
+      "size": 11263
     },
     {
       "path": "scripts/ci/build_windows_installer_supported_upgrade_fixture.py",
@@ -316,8 +351,8 @@
     },
     {
       "path": "scripts/ci/generate_p8_l_p_evidence_response_streaming_inventory.py",
-      "sha256": "f45f55e611cfbc2206b11dc291558959062d844dba46cfee97e0edb913541095",
-      "size": 15433
+      "sha256": "e3e00a4de1ae1bbddda78eea69797bb92b96b7cd34ccb49e7ecc706202d0cf59",
+      "size": 18082
     },
     {
       "path": "scripts/ci/verify_windows_installer_supported_upgrade_fixture.py",
@@ -331,6 +366,46 @@
     "CLARIFICATION": 2,
     "CURRENT_CONTEXT": 2,
     "GRAPH": 3
+  },
+  "router_hotfix": {
+    "automatic_retry": false,
+    "current_mood_fixture_count": 3,
+    "diagnostic_version": "router-diagnostic.v1",
+    "durable_namespace": "node_state_json.router_diagnostic",
+    "failed_before_route_crg_calls": 0,
+    "new_schema_migration": null,
+    "raw_router_payload_persisted": false,
+    "repair_validation_code_only": true,
+    "safe_mismatch_explicit_retry": true,
+    "security_nonretryable_codes": [
+      "forbidden_field",
+      "raw_query_forbidden"
+    ],
+    "validation_codes": [
+      "aggregation_invalid",
+      "both_coordination_missing",
+      "clarification_route_mismatch",
+      "clarification_slot_missing",
+      "closed_enum_mismatch",
+      "coordination_route_mismatch",
+      "current_context_not_minimal",
+      "decision_route_mismatch",
+      "entities_invalid",
+      "entity_ref_invalid",
+      "forbidden_field",
+      "intent_unknown",
+      "json_decode_failed",
+      "json_not_object",
+      "nullable_shape_invalid",
+      "raw_query_forbidden",
+      "relationship_invalid",
+      "relationship_unbound",
+      "repair_exhausted",
+      "router_validation_unknown",
+      "time_scope_invalid",
+      "top_level_keys_invalid",
+      "version_mismatch"
+    ]
   },
   "schema": {
     "canonical_table_count": 95,

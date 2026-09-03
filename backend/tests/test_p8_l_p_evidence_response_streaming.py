@@ -75,6 +75,10 @@ from app.domains.chat.domain.retrieval_intent import (
     RetrievalIntentEnvelope,
     RetrievalRoute,
 )
+from app.domains.chat.domain.retrieval_router import (
+    RetrievalRouterRepairExhaustedError,
+    RouterFailureDiagnostic,
+)
 from app.domains.chat.domain.workflow_recipe import (
     WorkflowAxis,
     WorkflowRecipe,
@@ -364,6 +368,22 @@ class _Router:
         )
 
 
+class _RejectedRouter:
+    def __init__(self, validation_code: str) -> None:
+        self.calls = 0
+        self.diagnostic = RouterFailureDiagnostic(
+            router_validation_code=validation_code,
+            repair_used=True,
+            repair_exhausted=True,
+            physical_attempts=2,
+        )
+
+    async def route(self, command, *, recent_context, now, deadline_at):
+        del command, recent_context, now, deadline_at
+        self.calls += 1
+        raise RetrievalRouterRepairExhaustedError(self.diagnostic)
+
+
 class _Canonical:
     async def plan_and_execute(self, command, *, now, deadline_at):
         tracker = restore_call_tracker_snapshot(
@@ -539,11 +559,12 @@ def _workflow(
     generator: _Generator,
     *,
     memory_producer=None,
+    router=None,
 ):
     lifecycle = GenerationLifecycleService(SqlAlchemyResponseLifecycleRepository(session))
     return ResponseGenerationWorkflowService(
         lifecycle=lifecycle,
-        router=_Router(route),
+        router=router or _Router(route),
         canonical=_Canonical(),
         graph=_Graph(),
         both=_Both(),
@@ -720,6 +741,141 @@ def test_failure_is_durable_retryable_and_partial_assistant_is_not_committed(
         "retryable": True,
     }
     assert len(generator.requests) == 1
+
+
+def test_router_repair_exhaustion_is_safe_durable_and_explicitly_retryable(
+    response_session: Session,
+) -> None:
+    record = _request(response_session, RetrievalRoute.CURRENT_CONTEXT)
+    response_session.commit()
+    rejected_router = _RejectedRouter("current_context_not_minimal")
+    generator = _Generator()
+    workflow = _workflow(
+        response_session,
+        RetrievalRoute.CURRENT_CONTEXT,
+        generator,
+        router=rejected_router,
+    )
+
+    events = asyncio.run(_collect(workflow.run(_command(record))))
+
+    assert [event.event_type for event in events] == [
+        GenerationEventType.ACCEPTED,
+        GenerationEventType.FAILED,
+    ]
+    assert events[-1].payload == {
+        "failure_class": "router_schema_rejected",
+        "retryable": True,
+    }
+    assert rejected_router.calls == 1
+    assert generator.requests == []
+    repository = SqlAlchemyResponseLifecycleRepository(response_session)
+    failed = repository.get_request(record.request_id)
+    assert failed.retryable is True
+    assert failed.route is None
+    assert failed.node_state == {
+        "failure_class": "router_schema_rejected",
+        "router_diagnostic": {
+            "version": "router-diagnostic.v1",
+            "node": "retrieval_router",
+            "router_validation_code": "current_context_not_minimal",
+            "repair_used": True,
+            "repair_exhausted": True,
+            "physical_attempts": 2,
+        },
+    }
+    serialized = str(failed.node_state)
+    for forbidden in (
+        "오늘은 어땠어?",
+        "prompt",
+        "raw_output",
+        "api_key",
+        "credential",
+        "provider_body",
+    ):
+        assert forbidden not in serialized
+    assert response_session.scalar(
+        select(func.count(models.MessageMessage.id)).where(
+            models.MessageMessage.thread_id == "p-thread",
+            models.MessageMessage.role == "assistant",
+        )
+    ) == 0
+
+    owner = response_session.get(models.User, "p-owner")
+    assert owner is not None
+    retried = retry_world_response(
+        response_session,
+        owner,
+        "p-world",
+        "p-thread",
+        WorldChatRetryCreate(
+            failed_request_id=failed.request_id,
+            idempotency_key="router-hotfix-explicit-retry",
+        ),
+    )
+    assert retried.user_message.id == failed.user_message_id
+    assert retried.response_request.response_slot_id == failed.response_slot_id
+    assert retried.response_request.request_id != failed.request_id
+    assert retried.response_request.generation_id != failed.generation_id
+    assert retried.response_request.attempt_number == failed.attempt_number + 1
+
+    retried_record = repository.get_request(retried.response_request.request_id)
+    successful_router = _Router(RetrievalRoute.CURRENT_CONTEXT)
+    successful_generator = _Generator()
+    retry_events = asyncio.run(
+        _collect(
+            _workflow(
+                response_session,
+                RetrievalRoute.CURRENT_CONTEXT,
+                successful_generator,
+                router=successful_router,
+            ).run(_command(retried_record))
+        )
+    )
+    assert retry_events[-1].event_type is GenerationEventType.COMPLETED
+    assert successful_router.calls == 1
+    assert len(successful_generator.requests) == 1
+    assert response_session.scalar(
+        select(func.count(models.MessageMessage.id)).where(
+            models.MessageMessage.thread_id == "p-thread",
+            models.MessageMessage.role == "user",
+        )
+    ) == 1
+    assert response_session.scalar(
+        select(func.count(models.MessageMessage.id)).where(
+            models.MessageMessage.thread_id == "p-thread",
+            models.MessageMessage.role == "assistant",
+        )
+    ) == 1
+    assert repository.get_request(failed.request_id).node_state == failed.node_state
+
+
+def test_router_security_rejection_stays_nonretryable(
+    response_session: Session,
+) -> None:
+    record = _request(response_session, RetrievalRoute.CURRENT_CONTEXT)
+    response_session.commit()
+    events = asyncio.run(
+        _collect(
+            _workflow(
+                response_session,
+                RetrievalRoute.CURRENT_CONTEXT,
+                _Generator(),
+                router=_RejectedRouter("raw_query_forbidden"),
+            ).run(_command(record))
+        )
+    )
+    assert events[-1].payload == {
+        "failure_class": "router_schema_rejected",
+        "retryable": False,
+    }
+    failed = SqlAlchemyResponseLifecycleRepository(response_session).get_request(
+        record.request_id
+    )
+    assert failed.retryable is False
+    assert failed.node_state["router_diagnostic"][
+        "router_validation_code"
+    ] == "raw_query_forbidden"
 
 
 def test_after_commit_memory_candidate_is_opt_in_idempotent_and_failure_isolated(

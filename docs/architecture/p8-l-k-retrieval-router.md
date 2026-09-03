@@ -127,6 +127,38 @@ attempts, provider and model. It retains the J route-aware tracker contract:
 the `CURRENT_CONTEXT` and `CLARIFICATION` full-path cap is two because the later
 Character Response Generator owns the one remaining user-visible call.
 
+## P8-L-P Router stability correction
+
+The P8-L-P integration correction keeps K's semantic and policy ownership but
+closes the provider-schema gap exposed by an installed World Chat run. The
+provider-facing schema now marks every nested object field as required when the
+nullable object is present. Gemini's supported `responseJsonSchema` contract does
+not receive `additionalProperties`; the domain parser remains the final fail-closed
+authority for exact keys, cross-field rules and forbidden material.
+
+The Router prompt fixes the decision/route matrix and includes a minimal
+`CURRENT_CONTEXT` example for greetings and present-mood questions. In
+particular, `안녕 지금 기분이 어때?` keeps entities empty and relationship,
+time, aggregation, coordination and clarification fields null. A repair prompt
+receives only an allowlisted validation code, never the rejected payload.
+
+If the one request-wide repair is exhausted, the Chat domain creates a typed
+`router-diagnostic.v1` value containing only the node, normalized validation
+code, repair-used/exhausted flags and bounded physical-attempt count. The
+lifecycle stores it under `chat_response_requests.node_state_json` without a
+new migration. Raw Router output, prompt, conversation, persona, credential,
+provider body and stack trace are never persisted or sent on the public stream.
+
+Safe output-variability mismatches such as invalid JSON shape, decision/route
+conflict or non-minimal `CURRENT_CONTEXT` terminate as
+`router_schema_rejected` with `retryable=true`. This enables only the existing
+user-selected retry flow: the same user message and response slot are reused,
+while request, generation and attempt are new and the whole workflow starts at
+the Router. Forbidden fields and raw SQL/Cypher markers remain nonretryable;
+preflight identity, scope and policy rejection is unchanged. There is no
+automatic retry or automatic Character Response Generator call after a Router
+failure.
+
 ## Executable evidence
 
 `test_p8_l_k_retrieval_router.py` proves:

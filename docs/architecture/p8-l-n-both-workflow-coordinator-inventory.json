@@ -65,7 +65,7 @@
   ],
   "historical_chain": {
     "current_tree_owner": "P8-L-N",
-    "p8_l_m_sha256": "3892137811ca4a856ea61a18dd8754cbbad82aba9986f207d885720616044d37",
+    "p8_l_m_sha256": "8091f69f7932626946e90bd6fc4ea1e6f9bf5e458c434866c5d623e29b00b41c",
     "predecessor_mode": "frozen_digest"
   },
   "non_scope": [
@@ -80,7 +80,7 @@
   "owner_stage": "P8-L-N",
   "predecessor": {
     "path": "docs/architecture/p8-l-m-graph-retrieval-planner-inventory.json",
-    "sha256": "3892137811ca4a856ea61a18dd8754cbbad82aba9986f207d885720616044d37",
+    "sha256": "8091f69f7932626946e90bd6fc4ea1e6f9bf5e458c434866c5d623e29b00b41c",
     "size": 7014
   },
   "recipe_registry": {
@@ -151,8 +151,8 @@
     },
     {
       "path": "backend/app/domains/chat/domain/__init__.py",
-      "sha256": "1ca289a7b270a281a90d3bc9ee0804ed6c2c3e16354662ec1f1f93bd182528d2",
-      "size": 3931
+      "sha256": "00aa5078e2d607644dcc5fe07c4fc263a676bb55fc6c2df77aa6e0c2d6b62e7f",
+      "size": 4517
     },
     {
       "path": "backend/app/domains/chat/domain/call_tracker.py",
@@ -176,7 +176,7 @@
     },
     {
       "path": "backend/tests/test_p8_l_n_both_workflow_coordinator_inventory.py",
-      "sha256": "b8695d2c9c2d7f41d2b06189af4011e1063a85456c3ee68a3e9b03b1b328c031",
+      "sha256": "63275810e2a96dc31db54bf7cffb1d8df15603dcfe344e30149cc0e33fa0b4fe",
       "size": 1894
     },
     {
@@ -191,7 +191,7 @@
     },
     {
       "path": "scripts/ci/generate_p8_l_n_both_workflow_coordinator_inventory.py",
-      "sha256": "ca74f95c7e50f12b32c7dc282c4627b4eac22d9896c3d15156aa628613bcc15d",
+      "sha256": "a631f3621fb99dd813ee0712802430ca017cb0d66643a40c7be7faa584db72d0",
       "size": 12601
     }
   ],

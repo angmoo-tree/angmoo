@@ -82,7 +82,7 @@
   },
   "historical_chain": {
     "current_tree_owner": "P8-L-L",
-    "p8_l_k_sha256": "d4046ed68c7d6a0e11f51aa44a11b6b121b2b82dadab2ce9177cf835b562fabf",
+    "p8_l_k_sha256": "c10988bd12d35acb8a1a5607238001d1da551233f25c49a18785d224530aff9f",
     "predecessor_mode": "frozen_digest"
   },
   "metrics": [
@@ -111,8 +111,8 @@
   "owner_stage": "P8-L-L",
   "predecessor": {
     "path": "docs/architecture/p8-l-k-retrieval-router-inventory.json",
-    "sha256": "d4046ed68c7d6a0e11f51aa44a11b6b121b2b82dadab2ce9177cf835b562fabf",
-    "size": 7644
+    "sha256": "c10988bd12d35acb8a1a5607238001d1da551233f25c49a18785d224530aff9f",
+    "size": 9171
   },
   "provider_schema": {
     "actual_id_fields": 0,
@@ -182,7 +182,7 @@
     },
     {
       "path": "backend/tests/test_p8_l_l_canonical_retrieval_planner_inventory.py",
-      "sha256": "aa2a735d7f7dcc22145baa92dd5e562d6acc415aee9a1966a83493d9514a671c",
+      "sha256": "2c32150bfed37d71e71be3902ade1a776454453d34f346ee2a658b18b6941597",
       "size": 1958
     },
     {

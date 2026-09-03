@@ -21,7 +21,7 @@ L_INVENTORY_PATH = (
     ROOT / "docs/architecture/p8-l-l-canonical-retrieval-planner-inventory.json"
 )
 L_INVENTORY_SHA256 = (
-    "46bf7722c6ffc3342efccda7b568e3cbf69aa78325b5b34c2be58f18d6ac3b95"
+    "3c878fce03c67a44b42c0474d4359a1b669a15fd97e90358ea1009686943ff27"
 )
 CORPUS_PATH = ROOT / "backend/tests/fixtures/p8_l/graph_planner_v1/held_out_ko.jsonl"
 

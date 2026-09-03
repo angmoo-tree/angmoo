@@ -208,18 +208,18 @@
     },
     {
       "path": "backend/app/domains/chat/application/generation_lifecycle.py",
-      "sha256": "93f4237d39bcf1b01979be7dbd68e9306b5243c00d29867dec2baa84998b6433",
-      "size": 4104
+      "sha256": "05de4632f9c531c833c4a7c6171e3772b1b2d9f75f14b7f6f629ccdbfce71b89",
+      "size": 4296
     },
     {
       "path": "backend/app/domains/chat/ports/response_lifecycle.py",
-      "sha256": "22037b108a8ba843e1c143e5592bf5cad417508c7f9f1bf05ebf8ad242ef30c9",
-      "size": 2692
+      "sha256": "a8a854a5602650cdad9ccd512d485642012d0ecd69439755af8ecadde1ed50be",
+      "size": 2835
     },
     {
       "path": "backend/app/domains/chat/infrastructure/response_lifecycle_repository.py",
-      "sha256": "f6c4a4e84e4a7739f4ea78124195177ca38c56374bf41e07141265008d9f6e54",
-      "size": 28192
+      "sha256": "068e3bb82fc54fdb2b1c54ec07f5755f20724bce4417b4c93ef734e86e5a39f7",
+      "size": 28772
     },
     {
       "path": "backend/app/domains/memory/domain/canonical_retrieval_plan.py",

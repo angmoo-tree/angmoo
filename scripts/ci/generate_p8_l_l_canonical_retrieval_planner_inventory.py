@@ -20,7 +20,7 @@ OUTPUT_PATH = (
 )
 K_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-k-retrieval-router-inventory.json"
 K_INVENTORY_SHA256 = (
-    "d4046ed68c7d6a0e11f51aa44a11b6b121b2b82dadab2ce9177cf835b562fabf"
+    "c10988bd12d35acb8a1a5607238001d1da551233f25c49a18785d224530aff9f"
 )
 CORPUS_PATH = (
     ROOT / "backend/tests/fixtures/p8_l/canonical_planner_v1/held_out_ko.jsonl"

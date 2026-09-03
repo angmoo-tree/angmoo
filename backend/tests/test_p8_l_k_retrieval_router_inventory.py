@@ -36,7 +36,7 @@ def test_p8_l_k_inventory_closes_router_policy_and_clarification() -> None:
     inventory = _inventory()
     assert inventory["owner_stage"] == "P8-L-K"
     assert inventory["predecessor"]["sha256"] == (
-        "2af4fdb0fc707e4a78a4b95e9e7ca61859278ece07b2ab61cec0f3233440ef9e"
+        "6480882c7c2b9f1c6b2c779f7f9c825f8f8586417570b7d905f9ea40311a51ce"
     )
     assert inventory["schema"]["new_alembic_migration"] is None
     assert inventory["domain_boundary"]["provider_prompt_canonical_ids"] == 0
@@ -49,3 +49,9 @@ def test_p8_l_k_inventory_closes_router_policy_and_clarification() -> None:
     assert inventory["call_accounting"]["generic_hidden_json_repair"] is False
     assert inventory["held_out_ko_contract"]["case_count"] == 315
     assert inventory["held_out_ko_contract"]["live_model_evaluation_completed"] is False
+    correction = inventory["router_stability_correction"]
+    assert correction["diagnostic_version"] == "router-diagnostic.v1"
+    assert correction["raw_router_payload_persisted"] is False
+    assert correction["current_mood_fixture_count"] == 3
+    assert correction["safe_mismatch_explicit_retry"] is True
+    assert correction["automatic_retry"] is False

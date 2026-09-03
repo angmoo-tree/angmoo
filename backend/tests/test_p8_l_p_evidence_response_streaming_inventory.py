@@ -37,7 +37,7 @@ def test_p8_l_p_inventory_closes_streaming_and_after_commit_contract() -> None:
     inventory = _inventory()
     assert inventory["owner_stage"] == "P8-L-P"
     assert inventory["predecessor"]["sha256"] == (
-        "0d09d1c6b366c2fa773599abff97584b544d210671a68bfbe2be1d4414a709b1"
+        "4f761706f4e24a3f0eb175df563a01efcfbe79e81c795cf1c8120bc65480ee8c"
     )
     assert inventory["schema"]["current_embedded_schema_version"] == 7
     assert inventory["schema"]["new_alembic_migration"] == "20260903_0087"
@@ -58,3 +58,13 @@ def test_p8_l_p_inventory_closes_streaming_and_after_commit_contract() -> None:
     assert inventory["memory_after_commit"]["default_off_writes"] == 0
     assert inventory["memory_after_commit"]["producer_failure_rolls_back_chat"] is False
     assert inventory["domain_boundary"]["domain_application_framework_imports"] == 0
+    router_hotfix = inventory["router_hotfix"]
+    assert router_hotfix["diagnostic_version"] == "router-diagnostic.v1"
+    assert router_hotfix["durable_namespace"] == (
+        "node_state_json.router_diagnostic"
+    )
+    assert router_hotfix["raw_router_payload_persisted"] is False
+    assert router_hotfix["safe_mismatch_explicit_retry"] is True
+    assert router_hotfix["automatic_retry"] is False
+    assert router_hotfix["failed_before_route_crg_calls"] == 0
+    assert router_hotfix["new_schema_migration"] is None

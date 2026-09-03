@@ -47,6 +47,7 @@ from app.domains.chat.domain.retrieval_intent import (
     RetrievalContractError,
     RetrievalRoute,
 )
+from app.domains.chat.domain.retrieval_router import RouterFailureDiagnostic
 from app.domains.chat.ports.character_response_generator import (
     CharacterResponseContextMessage,
     CharacterResponseGeneratorError,
@@ -461,6 +462,7 @@ class ResponseGenerationWorkflowService:
             return
         failure_class, retryable, reason = _classify_failure(exc)
         failure_diagnostic = _provider_failure_diagnostic(exc)
+        router_diagnostic = _router_failure_diagnostic(exc)
         if failure_diagnostic is not None:
             failure_diagnostic["failure_class"] = failure_class
             failure_diagnostic["retryable"] = retryable
@@ -485,6 +487,7 @@ class ResponseGenerationWorkflowService:
                 retryable=retryable,
                 failure_class=failure_class,
                 failure_diagnostic=failure_diagnostic,
+                router_diagnostic=router_diagnostic,
                 call_tracker=getattr(exc, "call_tracker", None),
                 now=datetime.now(UTC),
             )
@@ -591,6 +594,13 @@ def _classify_failure(
             exc.retryable,
             ResponseTerminalReason.PROVIDER_FAILURE,
         )
+    router_diagnostic = _router_failure_diagnostic(exc)
+    if router_diagnostic is not None:
+        return (
+            "router_schema_rejected",
+            router_diagnostic.retryable,
+            ResponseTerminalReason.RETRIEVAL_FAILURE,
+        )
     text = str(exc).lower()
     retryable = any(
         marker in text
@@ -621,6 +631,24 @@ def _provider_failure_diagnostic(exc: BaseException) -> dict[str, Any] | None:
         diagnostic = getattr(current, "provider_diagnostic", None)
         if isinstance(diagnostic, dict):
             return dict(diagnostic)
+        current = current.__cause__ or current.__context__
+    return None
+
+
+def _router_failure_diagnostic(
+    exc: BaseException,
+) -> RouterFailureDiagnostic | None:
+    """Copy only the typed domain diagnostic through wrapped exceptions."""
+
+    current: BaseException | None = exc
+    seen: set[int] = set()
+    for _ in range(4):
+        if current is None or id(current) in seen:
+            break
+        seen.add(id(current))
+        diagnostic = getattr(current, "router_diagnostic", None)
+        if isinstance(diagnostic, RouterFailureDiagnostic):
+            return diagnostic
         current = current.__cause__ or current.__context__
     return None
 

@@ -9,6 +9,8 @@ unbounded semantic values before any canonical lookup runs.
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
+import json
 from typing import Any
 
 from app.domains.chat.domain.retrieval_intent import (
@@ -70,6 +72,194 @@ ROUTER_AGGREGATION_TARGETS = frozenset(
         "relationship_states",
     }
 )
+
+ROUTER_DIAGNOSTIC_VERSION = "router-diagnostic.v1"
+ROUTER_VALIDATION_CODES = frozenset(
+    {
+        "json_not_object",
+        "json_decode_failed",
+        "top_level_keys_invalid",
+        "version_mismatch",
+        "decision_route_mismatch",
+        "closed_enum_mismatch",
+        "intent_unknown",
+        "entities_invalid",
+        "entity_ref_invalid",
+        "relationship_invalid",
+        "relationship_unbound",
+        "current_context_not_minimal",
+        "both_coordination_missing",
+        "coordination_route_mismatch",
+        "clarification_slot_missing",
+        "clarification_route_mismatch",
+        "time_scope_invalid",
+        "aggregation_invalid",
+        "nullable_shape_invalid",
+        "forbidden_field",
+        "raw_query_forbidden",
+        "repair_exhausted",
+        "router_validation_unknown",
+    }
+)
+ROUTER_SECURITY_VALIDATION_CODES = frozenset(
+    {"forbidden_field", "raw_query_forbidden"}
+)
+
+_ROUTER_VALIDATION_CODE_MAP = {
+    "JSONDecodeError": "json_decode_failed",
+    "empty_json_response": "json_decode_failed",
+    "json_response_not_object": "json_not_object",
+    "retrieval_router_payload_not_object": "json_not_object",
+    "retrieval_router_payload_keys_invalid": "top_level_keys_invalid",
+    "retrieval_router_key_invalid": "top_level_keys_invalid",
+    "retrieval_router_version_invalid": "version_mismatch",
+    "retrieval_intent_version_mismatch": "version_mismatch",
+    "retrieval_intent_decision_route_mismatch": "decision_route_mismatch",
+    "retrieval_router_intent_invalid": "intent_unknown",
+    "retrieval_router_intent_unknown": "intent_unknown",
+    "retrieval_router_entities_invalid": "entities_invalid",
+    "retrieval_router_entity_limit_exceeded": "entities_invalid",
+    "retrieval_router_entity_invalid": "entities_invalid",
+    "retrieval_router_entity_keys_invalid": "entities_invalid",
+    "retrieval_router_entity_mention_invalid": "entities_invalid",
+    "retrieval_router_entity_role_invalid": "entities_invalid",
+    "retrieval_router_entity_role_unknown": "closed_enum_mismatch",
+    "retrieval_intent_entity_limit_exceeded": "entities_invalid",
+    "retrieval_intent_entity_ref_duplicate": "entities_invalid",
+    "retrieval_router_entity_ref_invalid": "entity_ref_invalid",
+    "retrieval_intent_entity_ref_invalid": "entity_ref_invalid",
+    "retrieval_router_relationship_invalid": "relationship_invalid",
+    "retrieval_router_relationship_keys_invalid": "relationship_invalid",
+    "retrieval_router_perspective_invalid": "relationship_invalid",
+    "retrieval_router_relationship_from_invalid": "relationship_invalid",
+    "retrieval_router_relationship_to_invalid": "relationship_invalid",
+    "retrieval_router_relationship_dimension_invalid": "relationship_invalid",
+    "retrieval_router_relationship_polarity_invalid": "relationship_invalid",
+    "retrieval_intent_relationship_ref_invalid": "relationship_invalid",
+    "retrieval_intent_relationship_self_invalid": "relationship_invalid",
+    "retrieval_intent_relationship_unbound": "relationship_unbound",
+    "retrieval_router_current_context_not_minimal": "current_context_not_minimal",
+    "retrieval_router_both_coordination_required": "both_coordination_missing",
+    "retrieval_router_coordination_route_mismatch": "coordination_route_mismatch",
+    "retrieval_intent_clarification_slot_required": "clarification_slot_missing",
+    "retrieval_router_clarification_route_mismatch": "clarification_route_mismatch",
+    "retrieval_router_time_scope_invalid": "time_scope_invalid",
+    "retrieval_router_time_scope_keys_invalid": "time_scope_invalid",
+    "retrieval_router_time_expression_invalid": "time_scope_invalid",
+    "retrieval_intent_time_expression_invalid": "time_scope_invalid",
+    "retrieval_intent_time_expression_required": "time_scope_invalid",
+    "retrieval_router_aggregation_invalid": "aggregation_invalid",
+    "retrieval_router_aggregation_keys_invalid": "aggregation_invalid",
+    "retrieval_router_aggregation_target_invalid": "aggregation_invalid",
+    "retrieval_intent_aggregation_target_invalid": "aggregation_invalid",
+    "retrieval_router_decision_invalid": "closed_enum_mismatch",
+    "retrieval_router_decision_unknown": "closed_enum_mismatch",
+    "retrieval_router_route_invalid": "closed_enum_mismatch",
+    "retrieval_router_route_unknown": "closed_enum_mismatch",
+    "retrieval_router_relationship_dimension_unknown": "closed_enum_mismatch",
+    "retrieval_router_relationship_polarity_unknown": "closed_enum_mismatch",
+    "retrieval_router_time_kind_invalid": "time_scope_invalid",
+    "retrieval_router_time_kind_unknown": "time_scope_invalid",
+    "retrieval_router_aggregation_kind_invalid": "aggregation_invalid",
+    "retrieval_router_aggregation_kind_unknown": "aggregation_invalid",
+    "retrieval_router_aggregation_target_unknown": "aggregation_invalid",
+    "retrieval_router_coordination_hint_invalid": "closed_enum_mismatch",
+    "retrieval_router_coordination_hint_unknown": "closed_enum_mismatch",
+    "retrieval_router_clarification_slot_invalid": "closed_enum_mismatch",
+    "retrieval_router_clarification_slot_unknown": "closed_enum_mismatch",
+    "retrieval_router_forbidden_field": "forbidden_field",
+    "retrieval_router_raw_query_forbidden": "raw_query_forbidden",
+}
+
+
+def normalize_router_validation_code(value: object) -> str:
+    """Map only known parser outcomes to a bounded public-safe identifier."""
+
+    if not isinstance(value, str):
+        return "router_validation_unknown"
+    if value in ROUTER_VALIDATION_CODES:
+        return value
+    return _ROUTER_VALIDATION_CODE_MAP.get(value, "router_validation_unknown")
+
+
+def router_validation_code_from_exception(exc: BaseException) -> str:
+    """Extract a stable code without copying exception or provider text."""
+
+    current: BaseException | None = exc
+    seen: set[int] = set()
+    for _ in range(6):
+        if current is None or id(current) in seen:
+            break
+        seen.add(id(current))
+        if isinstance(current, json.JSONDecodeError):
+            return "json_decode_failed"
+        code = normalize_router_validation_code(str(current))
+        if code != "router_validation_unknown":
+            return code
+        current = current.__cause__ or current.__context__
+    return normalize_router_validation_code(getattr(exc, "parse_error_type", None))
+
+
+def router_validation_is_retryable(code: str) -> bool:
+    normalized = normalize_router_validation_code(code)
+    return normalized not in ROUTER_SECURITY_VALIDATION_CODES | {
+        "router_validation_unknown"
+    }
+
+
+@dataclass(frozen=True, slots=True)
+class RouterFailureDiagnostic:
+    """Durable allowlisted Router failure metadata; no model text is accepted."""
+
+    router_validation_code: str
+    repair_used: bool
+    repair_exhausted: bool
+    physical_attempts: int
+    version: str = ROUTER_DIAGNOSTIC_VERSION
+    node: str = "retrieval_router"
+
+    def __post_init__(self) -> None:
+        if self.version != ROUTER_DIAGNOSTIC_VERSION or self.node != "retrieval_router":
+            raise RetrievalContractError("retrieval_router_diagnostic_identity_invalid")
+        if self.router_validation_code not in ROUTER_VALIDATION_CODES:
+            raise RetrievalContractError("retrieval_router_diagnostic_code_invalid")
+        if not isinstance(self.repair_used, bool) or not isinstance(
+            self.repair_exhausted, bool
+        ):
+            raise RetrievalContractError("retrieval_router_diagnostic_repair_invalid")
+        if self.repair_exhausted and not self.repair_used:
+            raise RetrievalContractError("retrieval_router_diagnostic_repair_invalid")
+        if (
+            isinstance(self.physical_attempts, bool)
+            or not isinstance(self.physical_attempts, int)
+            or not 1 <= self.physical_attempts <= 4
+        ):
+            raise RetrievalContractError("retrieval_router_diagnostic_attempts_invalid")
+        if self.repair_used and self.physical_attempts < 2:
+            raise RetrievalContractError("retrieval_router_diagnostic_attempts_invalid")
+
+    @property
+    def retryable(self) -> bool:
+        return router_validation_is_retryable(self.router_validation_code)
+
+    def payload(self) -> dict[str, str | bool | int]:
+        return {
+            "version": self.version,
+            "node": self.node,
+            "router_validation_code": self.router_validation_code,
+            "repair_used": self.repair_used,
+            "repair_exhausted": self.repair_exhausted,
+            "physical_attempts": self.physical_attempts,
+        }
+
+
+class RetrievalRouterRepairExhaustedError(RetrievalContractError):
+    """Typed terminal Router mismatch after the single request-wide repair."""
+
+    def __init__(self, diagnostic: RouterFailureDiagnostic) -> None:
+        super().__init__("retrieval_router_request_wide_repair_exhausted")
+        self.router_diagnostic = diagnostic
+        self.retryable = diagnostic.retryable
 
 _TOP_LEVEL_KEYS = frozenset(
     {
@@ -174,6 +364,13 @@ def retrieval_router_response_schema() -> dict[str, Any]:
                         "enum": [*sorted(ROUTER_RELATIONSHIP_POLARITIES), None],
                     },
                 },
+                "required": [
+                    "perspective",
+                    "from",
+                    "to",
+                    "dimension",
+                    "requested_polarity",
+                ],
             },
             "time_scope": {
                 "type": ["object", "null"],
@@ -184,6 +381,7 @@ def retrieval_router_response_schema() -> dict[str, Any]:
                     },
                     "expression": nullable_string,
                 },
+                "required": ["kind", "expression"],
             },
             "aggregation": {
                 "type": ["object", "null"],
@@ -197,6 +395,7 @@ def retrieval_router_response_schema() -> dict[str, Any]:
                         "enum": sorted(ROUTER_AGGREGATION_TARGETS),
                     },
                 },
+                "required": ["kind", "target_role"],
             },
             "coordination_hint": {
                 "type": ["string", "null"],
@@ -423,6 +622,7 @@ def _enum(enum_type, value: Any, field: str):
 
 
 __all__ = [
+    "ROUTER_DIAGNOSTIC_VERSION",
     "ROUTER_AGGREGATION_TARGETS",
     "ROUTER_CLARIFICATION_SLOTS",
     "ROUTER_COORDINATION_HINTS",
@@ -430,6 +630,13 @@ __all__ = [
     "ROUTER_INTENTS",
     "ROUTER_RELATIONSHIP_DIMENSIONS",
     "ROUTER_RELATIONSHIP_POLARITIES",
+    "ROUTER_SECURITY_VALIDATION_CODES",
+    "ROUTER_VALIDATION_CODES",
+    "RetrievalRouterRepairExhaustedError",
+    "RouterFailureDiagnostic",
+    "normalize_router_validation_code",
     "parse_retrieval_intent_payload",
     "retrieval_router_response_schema",
+    "router_validation_code_from_exception",
+    "router_validation_is_retryable",
 ]

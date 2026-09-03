@@ -26,6 +26,7 @@ from app.domains.chat.domain.response_request import (
     ResponseRequestRecord,
 )
 from app.domains.chat.domain.retrieval_intent import RetrievalRoute
+from app.domains.chat.domain.retrieval_router import RouterFailureDiagnostic
 from app.domains.chat.domain.workflow_recipe import WorkflowRecipe
 from app.domains.chat.infrastructure.sqlalchemy_models import (
     ChatResponseRequest,
@@ -357,6 +358,7 @@ class SqlAlchemyResponseLifecycleRepository:
         retryable: bool,
         failure_class: str | None = None,
         failure_diagnostic: dict | None = None,
+        router_diagnostic: RouterFailureDiagnostic | None = None,
         call_tracker: dict | None = None,
         now: datetime,
     ) -> ResponseRequestRecord:
@@ -372,7 +374,11 @@ class SqlAlchemyResponseLifecycleRepository:
             "terminal_at": now,
             "updated_at": now,
         }
-        if failure_class is not None or failure_diagnostic is not None:
+        if (
+            failure_class is not None
+            or failure_diagnostic is not None
+            or router_diagnostic is not None
+        ):
             row = self._require(fence.request_id, populate_existing=True)
             node_state = self._decode_json(row.node_state_json)
         if failure_class is not None:
@@ -383,7 +389,15 @@ class SqlAlchemyResponseLifecycleRepository:
             node_state["provider_diagnostic"] = _provider_failure_diagnostic(
                 failure_diagnostic
             )
-        if failure_class is not None or failure_diagnostic is not None:
+        if router_diagnostic is not None:
+            if not isinstance(router_diagnostic, RouterFailureDiagnostic):
+                raise GenerationContractError("response_router_diagnostic_invalid")
+            node_state["router_diagnostic"] = router_diagnostic.payload()
+        if (
+            failure_class is not None
+            or failure_diagnostic is not None
+            or router_diagnostic is not None
+        ):
             values["node_state_json"] = _json_payload(node_state)
         if call_tracker is not None:
             values["call_tracker_json"] = _json_payload(call_tracker)

@@ -22,6 +22,11 @@ from app.domains.chat.domain.retrieval_intent import (
     RetrievalRoute,
     RetrievalTimeKind,
 )
+from app.domains.chat.domain.retrieval_router import (
+    RetrievalRouterRepairExhaustedError,
+    RouterFailureDiagnostic,
+    router_validation_is_retryable,
+)
 from app.domains.chat.ports.retrieval_policy import (
     CanonicalRetrievalScope,
     RetrievalEntityResolution,
@@ -140,8 +145,18 @@ class RetrievalRoutingService:
                     timeout_seconds=remaining_seconds,
                 )
             except RetrievalRouterOutputError as repaired_exc:
-                raise RetrievalContractError(
-                    "retrieval_router_request_wide_repair_exhausted"
+                terminal_code = repaired_exc.validation_code
+                if not router_validation_is_retryable(exc.validation_code):
+                    terminal_code = exc.validation_code
+                raise RetrievalRouterRepairExhaustedError(
+                    RouterFailureDiagnostic(
+                        router_validation_code=terminal_code,
+                        repair_used=True,
+                        repair_exhausted=True,
+                        physical_attempts=(
+                            first_physical + repaired_exc.physical_attempt_count
+                        ),
+                    )
                 ) from repaired_exc
             repair_physical = provider_result.physical_attempt_count
 

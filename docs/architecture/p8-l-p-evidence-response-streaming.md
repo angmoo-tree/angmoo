@@ -97,6 +97,40 @@ normalized failure class, provider status/code/error hint, retryable 여부의 b
 allowlist만 저장한다. API key, prompt, raw provider body와 stack trace는 저장하거나
 사용자 stream에 노출하지 않는다.
 
+## Retrieval Router safe diagnostic and retry correction
+
+설치형 World Chat에서 route 확정 전에 Router 구조화 응답이 두 번 거부되는 경우도
+이제 generic `retrieval_rejected`로 원인을 잃지 않는다. Chat domain은 closed
+validation-code registry와 `router-diagnostic.v1` value object를 소유하고, request-wide
+repair가 소진된 terminal request의 기존 `node_state_json.router_diagnostic`에 다음 값만
+저장한다.
+
+- `node = retrieval_router`;
+- allowlisted `router_validation_code`;
+- `repair_used`, `repair_exhausted`;
+- bounded `physical_attempts`.
+
+Router 원문 JSON, prompt, 대화·persona, API key·credential·fingerprint, provider body,
+stack trace는 이 diagnostic에 들어가지 않으며 public failed event도 기존
+`failure_class`와 `retryable`만 공개한다. 새 table·column·Embedded migration은 없다.
+
+provider `responseJsonSchema`는 top-level과 entity·relationship·time·aggregation의
+required shape를 parser와 정합화한다. Gemini SDK contract가 지원하지 않는
+`additionalProperties`는 전송하지 않고 exact-key 제한은 strict parser가 소유한다.
+Router prompt는 route/decision 조합표와 `안녕 지금 기분이 어때?`의 최소
+`CURRENT_CONTEXT` envelope를 고정하며, repair에는 rejected payload가 아니라 safe
+validation code만 전달한다. strict parser는 nullable·cross-field·semantic ref와 raw
+query 금지의 최종 authority를 계속 가진다.
+
+JSON shape, closed enum, decision/route, coordination, clarification 또는 최소
+`CURRENT_CONTEXT` mismatch가 단일 repair 뒤에도 남으면
+`router_schema_rejected`, `retryable=true`로 terminal 처리한다. 화면은 내부 code를
+노출하지 않고 기존 실패 bubble의 명시적 `[다시 시도]`만 제공한다. 재시도는 같은
+user message·response slot에서 새 request·generation·attempt로 Router부터 전체
+workflow를 다시 실행한다. forbidden field·raw query와 identity·World·membership·block·
+visibility·scope policy 위반은 계속 nonretryable이며 automatic retry와 실패 attempt의
+CRG 호출은 0이다.
+
 ## Evidence Bundle
 
 `evidence-bundle.v1`은 request ID, scope hash, route, retrieval outcome,

@@ -19,7 +19,7 @@ if str(BACKEND_ROOT) not in sys.path:
 OUTPUT_PATH = ROOT / "docs/architecture/p8-l-k-retrieval-router-inventory.json"
 J_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-j-response-generation-inventory.json"
 J_INVENTORY_SHA256 = (
-    "2af4fdb0fc707e4a78a4b95e9e7ca61859278ece07b2ab61cec0f3233440ef9e"
+    "6480882c7c2b9f1c6b2c779f7f9c825f8f8586417570b7d905f9ea40311a51ce"
 )
 CORPUS_PATH = (
     ROOT / "backend/tests/fixtures/p8_l/retrieval_topology_v1/held_out_ko.jsonl"
@@ -33,11 +33,14 @@ from app.domains.chat.domain import (  # noqa: E402
     retrieval_router_response_schema,
 )
 from app.domains.chat.domain.retrieval_router import (  # noqa: E402
+    ROUTER_DIAGNOSTIC_VERSION,
     ROUTER_AGGREGATION_TARGETS,
     ROUTER_CLARIFICATION_SLOTS,
     ROUTER_COORDINATION_HINTS,
     ROUTER_ENTITY_ROLES,
     ROUTER_INTENTS,
+    ROUTER_SECURITY_VALIDATION_CODES,
+    ROUTER_VALIDATION_CODES,
 )
 from app.domains.memory.public import CANONICAL_PRIMITIVE_REGISTRY  # noqa: E402
 from app.domains.relationships.public import (  # noqa: E402
@@ -61,6 +64,7 @@ REQUIRED_FILES = (
     "backend/app/integrations/llm/retrieval_router.py",
     "backend/app/runtime/chat/retrieval_policy.py",
     "backend/tests/test_p8_l_k_retrieval_router.py",
+    "backend/tests/fixtures/p8_l/router_hotfix_v1/current_context_ko.jsonl",
     "backend/tests/test_oss_architecture_boundaries.py",
     "backend/tests/test_l4_pr_a_inventory.py",
     "docs/architecture/p8-l-k-retrieval-router.md",
@@ -126,6 +130,8 @@ def _boundary_contract() -> dict[str, Any]:
             "retrieval_router_forbidden_field",
             "retrieval_router_raw_query_forbidden",
             "retrieval_router_both_coordination_required",
+            "RouterFailureDiagnostic",
+            "router_validation_code_from_exception",
         ),
     )
     _require_text(
@@ -133,7 +139,7 @@ def _boundary_contract() -> dict[str, Any]:
         (
             "RetrievalRoutingService",
             "RetrievalRouterOutputError",
-            "retrieval_router_request_wide_repair_exhausted",
+            "RetrievalRouterRepairExhaustedError",
             "ClarificationResolution",
             "ResolvedRetrievalEnvelope.bind_intent",
         ),
@@ -145,6 +151,7 @@ def _boundary_contract() -> dict[str, Any]:
             "should_retry_json_error=lambda *_args: False",
             "character_id=None",
             "parse_retrieval_intent_payload",
+            "validation_code",
         ),
     )
     _require_text(
@@ -189,6 +196,28 @@ def build_inventory() -> dict[str, Any]:
     ]
     if forbidden:
         raise InventoryError(f"provider schema contains forbidden fields: {forbidden}")
+    if "additionalproperties" in forbidden_schema_text:
+        raise InventoryError("provider schema contains unsupported additionalProperties")
+    if set(schema["required"]) != set(schema["properties"]):
+        raise InventoryError("provider schema top-level required fields drift")
+    nested_required = {
+        "entities": {"ref", "mention", "role"},
+        "relationship": {
+            "perspective",
+            "from",
+            "to",
+            "dimension",
+            "requested_polarity",
+        },
+        "time_scope": {"kind", "expression"},
+        "aggregation": {"kind", "target_role"},
+    }
+    for field, expected in nested_required.items():
+        nested = schema["properties"][field]
+        if field == "entities":
+            nested = nested["items"]
+        if set(nested["required"]) != expected:
+            raise InventoryError(f"provider schema nested required fields drift: {field}")
     caps = RetrievalHardCaps()
     return {
         "schema_version": 1,
@@ -246,6 +275,18 @@ def build_inventory() -> dict[str, Any]:
             "current_context_full_path_cap": 2,
             "clarification_full_path_cap": 2,
         },
+        "router_stability_correction": {
+            "diagnostic_version": ROUTER_DIAGNOSTIC_VERSION,
+            "validation_codes": sorted(ROUTER_VALIDATION_CODES),
+            "security_nonretryable_codes": sorted(
+                ROUTER_SECURITY_VALIDATION_CODES
+            ),
+            "durable_namespace": "node_state_json.router_diagnostic",
+            "raw_router_payload_persisted": False,
+            "current_mood_fixture_count": 3,
+            "safe_mismatch_explicit_retry": True,
+            "automatic_retry": False,
+        },
         "metrics": [
             "route",
             "first_pass_valid",
@@ -276,6 +317,10 @@ def build_inventory() -> dict[str, Any]:
             "held_out_ko_315_contract_normalization",
             "sqlalchemy_local_owner_world_thread_memory_scope",
             "runtime_boundary_uses_existing_relationship_block_port",
+            "nested_provider_schema_and_parser_parity",
+            "safe_router_diagnostic_without_raw_payload",
+            "current_mood_minimal_current_context",
+            "safe_schema_retryable_security_nonretryable",
         ],
         "required_files": [_record(relative) for relative in REQUIRED_FILES],
         "non_scope": [

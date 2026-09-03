@@ -18,7 +18,7 @@ if str(BACKEND_ROOT) not in sys.path:
 
 OUTPUT_PATH = ROOT / "docs/architecture/p8-l-p-evidence-response-streaming-inventory.json"
 O_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-o-memory-consolidation-inventory.json"
-O_INVENTORY_SHA256 = "0d09d1c6b366c2fa773599abff97584b544d210671a68bfbe2be1d4414a709b1"
+O_INVENTORY_SHA256 = "4f761706f4e24a3f0eb175df563a01efcfbe79e81c795cf1c8120bc65480ee8c"
 
 from app.domains.chat.domain import CHAT_GENERATION_STREAM_VERSION  # noqa: E402
 from app.domains.chat.domain.evidence_bundle import (  # noqa: E402
@@ -26,6 +26,12 @@ from app.domains.chat.domain.evidence_bundle import (  # noqa: E402
     MAX_EVIDENCE_BUNDLE_CHARS,
     MAX_EVIDENCE_ITEM_CHARS,
     MAX_EVIDENCE_ITEMS,
+)
+from app.domains.chat.domain.retrieval_router import (  # noqa: E402
+    ROUTER_DIAGNOSTIC_VERSION,
+    ROUTER_SECURITY_VALIDATION_CODES,
+    ROUTER_VALIDATION_CODES,
+    retrieval_router_response_schema,
 )
 from app.integrations.llm.character_response_generator import (  # noqa: E402
     CHARACTER_RESPONSE_MAX_OUTPUT_TOKENS,
@@ -47,17 +53,21 @@ REQUIRED_FILES = (
     "backend/app/domains/chat/application/character_response.py",
     "backend/app/domains/chat/application/evidence_assembly.py",
     "backend/app/domains/chat/application/generation_lifecycle.py",
+    "backend/app/domains/chat/application/retrieval_routing.py",
     "backend/app/domains/chat/application/response_workflow.py",
     "backend/app/domains/chat/domain/evidence_bundle.py",
     "backend/app/domains/chat/domain/model_binding.py",
+    "backend/app/domains/chat/domain/retrieval_router.py",
     "backend/app/domains/chat/infrastructure/model_binding_migration.py",
     "backend/app/domains/chat/infrastructure/response_lifecycle_repository.py",
     "backend/app/domains/chat/infrastructure/sqlalchemy_models.py",
     "backend/app/domains/chat/ports/character_response_generator.py",
     "backend/app/domains/chat/ports/response_lifecycle.py",
+    "backend/app/domains/chat/ports/retrieval_router_provider.py",
     "backend/app/domains/chat/ports/response_workflow.py",
     "backend/app/domains/chat/ports/successful_chat_memory.py",
     "backend/app/integrations/direct_llm.py",
+    "backend/app/integrations/llm/retrieval_router.py",
     "backend/app/integrations/llm/character_response_generator.py",
     "backend/app/providers/gemini.py",
     "backend/app/runtime/chat/memory_producer.py",
@@ -71,6 +81,8 @@ REQUIRED_FILES = (
     "backend/tests/test_p8_l_p_evidence_response_streaming.py",
     "backend/tests/test_p8_l_p_frontend_streaming.py",
     "backend/tests/test_p8_l_p_model_hotfix.py",
+    "backend/tests/test_p8_l_k_retrieval_router.py",
+    "backend/tests/fixtures/p8_l/router_hotfix_v1/current_context_ko.jsonl",
     "browser-tests/product-shell.spec.ts",
     "browser-tests/static-product-shell.spec.ts",
     "frontend/DESIGN.md",
@@ -191,7 +203,36 @@ def _boundary_contract() -> dict[str, Any]:
     )
     _require_text(
         "backend/app/domains/chat/application/response_workflow.py",
-        ("failure_diagnostic", "_provider_failure_diagnostic"),
+        (
+            "failure_diagnostic",
+            "_provider_failure_diagnostic",
+            "router_diagnostic",
+            "_router_failure_diagnostic",
+            "router_schema_rejected",
+        ),
+    )
+    _require_text(
+        "backend/app/domains/chat/domain/retrieval_router.py",
+        (
+            "RouterFailureDiagnostic",
+            "ROUTER_VALIDATION_CODES",
+            "ROUTER_SECURITY_VALIDATION_CODES",
+            '"required": ["kind", "expression"]',
+        ),
+    )
+    router_schema = retrieval_router_response_schema()
+    router_schema_text = json.dumps(router_schema, sort_keys=True).casefold()
+    if "additionalproperties" in router_schema_text:
+        raise InventoryError("Router provider schema uses unsupported additionalProperties")
+    if set(router_schema["required"]) != set(router_schema["properties"]):
+        raise InventoryError("Router provider schema top-level required fields drift")
+    _require_text(
+        "backend/app/integrations/llm/retrieval_router.py",
+        (
+            "router_validation_code_from_exception",
+            '"validation_code": request.repair_diagnostic',
+            "안녕 지금 기분이 어때?",
+        ),
     )
     _require_text(
         "backend/app/domains/chat/infrastructure/model_binding_migration.py",
@@ -313,6 +354,21 @@ def build_inventory() -> dict[str, Any]:
             "world_scoped_selector": True,
             "model_update_failure_rolls_back": True,
         },
+        "router_hotfix": {
+            "diagnostic_version": ROUTER_DIAGNOSTIC_VERSION,
+            "durable_namespace": "node_state_json.router_diagnostic",
+            "validation_codes": sorted(ROUTER_VALIDATION_CODES),
+            "security_nonretryable_codes": sorted(
+                ROUTER_SECURITY_VALIDATION_CODES
+            ),
+            "raw_router_payload_persisted": False,
+            "repair_validation_code_only": True,
+            "current_mood_fixture_count": 3,
+            "safe_mismatch_explicit_retry": True,
+            "automatic_retry": False,
+            "failed_before_route_crg_calls": 0,
+            "new_schema_migration": None,
+        },
         "executable_contract_gates": [
             "all_five_routes_call_caps_and_single_crg",
             "deterministic_bounded_provider_safe_evidence",
@@ -332,6 +388,11 @@ def build_inventory() -> dict[str, Any]:
             "safe_durable_provider_failure_diagnostic",
             "embedded_v6_to_v7_model_binding_upgrade",
             "model_selector_busy_guard_and_failure_rollback",
+            "router_nested_schema_parser_parity",
+            "router_safe_durable_diagnostic",
+            "current_mood_minimal_current_context",
+            "router_safe_mismatch_explicit_retry",
+            "router_security_rejection_nonretryable",
         ],
         "required_files": [_record(relative) for relative in REQUIRED_FILES],
         "non_scope": [
