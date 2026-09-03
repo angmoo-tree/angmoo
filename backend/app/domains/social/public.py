@@ -16,6 +16,17 @@ from app.domains.social.application import (
     unregister_social_search,
 )
 from app.domains.social.domain import (
+    ACTION_SUBJECTIVE_CONTEXT_VERSION,
+    ActionEmotionLabel,
+    ActionMotivationKind,
+    ActionSubjectiveContextV1,
+    SubjectiveContextContractError,
+    SubjectiveContextProvenance,
+    TodaySocialActivityKind,
+    TodaySocialActivityRead,
+    TodaySocialActivityRecord,
+    TodaySocialCoverageStatus,
+    TodaySocialSubjectiveRecord,
     ObservationLane,
     OwnerPostCommand,
     OwnerReplyCommand,
@@ -55,6 +66,17 @@ apply_validated_autonomous_social_result = apply_validated_autonomous_result
 
 
 __all__ = [
+    "ACTION_SUBJECTIVE_CONTEXT_VERSION",
+    "ActionEmotionLabel",
+    "ActionMotivationKind",
+    "ActionSubjectiveContextV1",
+    "SubjectiveContextContractError",
+    "SubjectiveContextProvenance",
+    "TodaySocialActivityKind",
+    "TodaySocialActivityRead",
+    "TodaySocialActivityRecord",
+    "TodaySocialCoverageStatus",
+    "TodaySocialSubjectiveRecord",
     "KeywordPostLookup",
     "ManualInboxInteractionCandidate",
     "ObservationLane",

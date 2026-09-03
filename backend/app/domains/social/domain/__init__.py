@@ -34,8 +34,27 @@ from app.domains.social.domain.profile_activity import (
     WorldCharacterSocialProfileTab,
     WorldCharacterSocialProfileValidationError,
 )
+from app.domains.social.domain.subjective_context import (
+    ACTION_SUBJECTIVE_CONTEXT_VERSION,
+    ActionEmotionLabel,
+    ActionMotivationKind,
+    ActionSubjectiveContextV1,
+    SubjectiveContextContractError,
+    SubjectiveContextProvenance,
+)
+from app.domains.social.domain.today_activity import (
+    TodaySocialActivityKind,
+    TodaySocialActivityRead,
+    TodaySocialActivityRecord,
+    TodaySocialCoverageStatus,
+    TodaySocialSubjectiveRecord,
+)
 
 __all__ = [
+    "ACTION_SUBJECTIVE_CONTEXT_VERSION",
+    "ActionEmotionLabel",
+    "ActionMotivationKind",
+    "ActionSubjectiveContextV1",
     "OwnerPostCommand",
     "OwnerReplyCommand",
     "ObservationLane",
@@ -52,6 +71,13 @@ __all__ = [
     "SocialWriteNotFoundError",
     "SocialWriteResult",
     "SocialWriteRetryableError",
+    "SubjectiveContextContractError",
+    "SubjectiveContextProvenance",
+    "TodaySocialActivityKind",
+    "TodaySocialActivityRead",
+    "TodaySocialActivityRecord",
+    "TodaySocialCoverageStatus",
+    "TodaySocialSubjectiveRecord",
     "ValidatedAutonomousWriteCommand",
     "WorldCharacterSocialProfileCounts",
     "WorldCharacterSocialProfileError",
