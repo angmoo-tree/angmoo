@@ -5,6 +5,10 @@ from __future__ import annotations
 import json
 
 from app.core import prompt_safety
+from app.domains.chat.domain.policies import (
+    WORLD_CHAT_FOREGROUND_MAX_OUTPUT_TOKENS,
+    resolve_world_chat_model_execution_policy,
+)
 from app.domains.chat.ports.character_response_generator import (
     CharacterResponseGeneratorError,
     CharacterResponseGeneratorRequest,
@@ -14,7 +18,7 @@ from app.domains.identity.public import CredentialMaterial, CredentialPurpose
 from app.integrations import direct_llm
 
 
-CHARACTER_RESPONSE_MAX_OUTPUT_TOKENS = 2_048
+CHARACTER_RESPONSE_MAX_OUTPUT_TOKENS = WORLD_CHAT_FOREGROUND_MAX_OUTPUT_TOKENS
 CHARACTER_RESPONSE_TIMEOUT_SECONDS = 45.0
 
 
@@ -30,6 +34,9 @@ class DirectLlmCharacterResponseGenerator:
         self,
         request: CharacterResponseGeneratorRequest,
     ) -> CharacterResponseGeneratorResult:
+        execution_policy = resolve_world_chat_model_execution_policy(
+            self._material.model
+        )
         tracker = direct_llm.RunLlmTracker(max_calls=2)
         context = direct_llm.DirectLlmCallContext(
             credential_id=self._material.credential_id,
@@ -48,9 +55,9 @@ class DirectLlmCharacterResponseGenerator:
                 tracker=tracker,
                 system_prompt=_system_prompt(request),
                 user_prompt=_user_prompt(request),
-                max_output_tokens=CHARACTER_RESPONSE_MAX_OUTPUT_TOKENS,
+                max_output_tokens=execution_policy.max_output_tokens,
                 timeout_seconds=CHARACTER_RESPONSE_TIMEOUT_SECONDS,
-                thinking_level="low",
+                thinking_level=execution_policy.thinking_level,
             )
         except direct_llm.DirectLlmError as exc:
             raise CharacterResponseGeneratorError(
@@ -73,11 +80,29 @@ class DirectLlmCharacterResponseGenerator:
                 retryable=False,
                 physical_attempt_count=max(1, tracker.call_order_in_run),
             )
+        summary = tracker.summary()
+        durations = [
+            int(item.get("duration_ms") or 0)
+            for item in summary["calls"]
+            if item.get("call_type") == "generate_content"
+        ]
         return CharacterResponseGeneratorResult(
             text=text,
             provider=self._material.provider,
             model=self._material.model,
             physical_attempt_count=max(1, tracker.call_order_in_run),
+            prompt_token_count=int(summary["total_prompt_tokens"]) or None,
+            output_token_count=int(summary["total_output_tokens"]) or None,
+            thought_token_count=int(summary["total_thought_tokens"]) or None,
+            total_token_count=int(summary["total_tokens"]) or None,
+            latency_ms=sum(durations) or None,
+            thinking_level=execution_policy.thinking_level,
+            max_output_tokens=execution_policy.max_output_tokens,
+            finish_reason=(
+                None
+                if result.finish_reason is None
+                else str(result.finish_reason)[:64]
+            ),
         )
 
 

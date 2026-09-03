@@ -173,7 +173,7 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "ec9b29c10aef1bb09675e47178173328fb5b20ffd0ad93b11f0e1e695a16c35b"
+        "sha256": "88fa1449eb9d0a65a1339b2ff0cabb1fd935dffa08340ffe3508caec22542552"
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",

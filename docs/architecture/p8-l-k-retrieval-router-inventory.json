@@ -150,8 +150,8 @@
     },
     {
       "path": "backend/app/domains/chat/ports/retrieval_router_provider.py",
-      "sha256": "a12db8160b1541170ff011ec1f0e4465feccd168cad1b04c5d0b3c28d55ca173",
-      "size": 4379
+      "sha256": "d406b8ac0166a440d302512068feab7a8c012eaaf76ec3390672a6d2956b9f74",
+      "size": 4538
     },
     {
       "path": "backend/app/domains/chat/ports/retrieval_policy.py",
@@ -160,13 +160,13 @@
     },
     {
       "path": "backend/app/domains/chat/application/retrieval_routing.py",
-      "sha256": "0c809acc7a3dd14664b194bf4a35bdbac9abb949372382123d2fad3101494951",
-      "size": 19129
+      "sha256": "3d81e853b39e41bfceade431e589ff70925784d6905ded2524eb2c4c719d83a3",
+      "size": 19947
     },
     {
       "path": "backend/app/integrations/llm/retrieval_router.py",
-      "sha256": "2e8bfab24512700d9d97486802c21cba613a7db6184480644f71d352f8d64206",
-      "size": 6542
+      "sha256": "b7186cc0a426f79b57a0c662e960c63b5fb94772be56a56c13dac26a98775072",
+      "size": 7341
     },
     {
       "path": "backend/app/runtime/chat/retrieval_policy.py",
@@ -175,8 +175,8 @@
     },
     {
       "path": "backend/tests/test_p8_l_k_retrieval_router.py",
-      "sha256": "2df03bb7e066a44ef125b947e0d2765185501c8704c281d1f4ec004d0c19b609",
-      "size": 31321
+      "sha256": "f25869833ad6f5b894a6f2bfa3a3814eef7948c9e04038bfb4eaa4fe8d8c4072",
+      "size": 31805
     },
     {
       "path": "backend/tests/fixtures/p8_l/router_hotfix_v1/current_context_ko.jsonl",
@@ -190,7 +190,7 @@
     },
     {
       "path": "backend/tests/test_l4_pr_a_inventory.py",
-      "sha256": "c569f488822036da98973b8ba61371c544a52167f15863104ef54ffc3af121d3",
+      "sha256": "615b6c0e9800cfee6376c56f03c8641d72b8cc73862797b9672a98cc9e16cb99",
       "size": 3767
     },
     {
@@ -200,7 +200,7 @@
     },
     {
       "path": "security/l4_pr_a_inventory.json",
-      "sha256": "50744fba39b26d09a2bbcad439243caef2be79d58c69b88c083713ae96b9139a",
+      "sha256": "523f7e0ecdd2ff6157c99211c2cc56a05662b28f147bd397811d152838b17352",
       "size": 57517
     }
   ],

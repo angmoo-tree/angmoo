@@ -914,14 +914,14 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
   await expect(page.getByText("World 경계를 기억하고 있어요.", { exact: true })).toBeVisible();
   const modelSelect = page.getByRole("combobox", { name: "응답 모델" });
   await expect(modelSelect).toHaveValue("default");
-  await modelSelect.selectOption("gemini-2.5-flash-lite");
-  await expect(modelSelect).toHaveValue("gemini-2.5-flash-lite");
+  await modelSelect.selectOption("gemini-3.5-flash-lite");
+  await expect(modelSelect).toHaveValue("gemini-3.5-flash-lite");
   await expect(
-    page.getByText("Gemini 2.5 Flash-Lite을 이 대화에서 고정해 사용합니다."),
+    page.getByText("Gemini 3.5 Flash-Lite을 이 대화에서 고정해 사용합니다."),
   ).toBeVisible();
   failNextModelUpdate = true;
   await modelSelect.selectOption("default");
-  await expect(modelSelect).toHaveValue("gemini-2.5-flash-lite");
+  await expect(modelSelect).toHaveValue("gemini-3.5-flash-lite");
   const modelFailure = page.getByRole("alert").filter({
     hasText: "모델을 바꾸지 못했어요.",
   });

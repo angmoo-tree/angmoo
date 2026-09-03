@@ -80,7 +80,7 @@
   },
   "historical_chain": {
     "current_tree_owner": "P8-L-M",
-    "p8_l_l_sha256": "3c878fce03c67a44b42c0474d4359a1b669a15fd97e90358ea1009686943ff27",
+    "p8_l_l_sha256": "bdaa570f62d26fe2a061915c83140b1c24b2fafa953bddb1248240ec45945cfc",
     "predecessor_mode": "frozen_digest"
   },
   "metrics": [
@@ -109,7 +109,7 @@
   "owner_stage": "P8-L-M",
   "predecessor": {
     "path": "docs/architecture/p8-l-l-canonical-retrieval-planner-inventory.json",
-    "sha256": "3c878fce03c67a44b42c0474d4359a1b669a15fd97e90358ea1009686943ff27",
+    "sha256": "bdaa570f62d26fe2a061915c83140b1c24b2fafa953bddb1248240ec45945cfc",
     "size": 7070
   },
   "provider_schema": {
@@ -142,8 +142,8 @@
     },
     {
       "path": "backend/app/domains/relationships/ports/graph_planner_provider.py",
-      "sha256": "76f28a1a44925ac10a2ea7067382189fc7eef2a948781b4cfbe49a8b119d04c8",
-      "size": 4648
+      "sha256": "4818edfa0304862919eb55ffd7c6d9520beccc6cbbc43decd3823c8cd6cf55a9",
+      "size": 4807
     },
     {
       "path": "backend/app/domains/relationships/application/graph_planning.py",
@@ -152,8 +152,8 @@
     },
     {
       "path": "backend/app/domains/chat/application/graph_retrieval.py",
-      "sha256": "ddeb2521baaacd41167c3498cb9f0ee04b13882ac47603d4babec52bba25e719",
-      "size": 13630
+      "sha256": "75364ed98b0c84b08e634ccb173b45955e9a464cd987da778472a89683c66774",
+      "size": 14480
     },
     {
       "path": "backend/app/domains/chat/domain/call_tracker.py",
@@ -162,8 +162,8 @@
     },
     {
       "path": "backend/app/integrations/llm/graph_retrieval_planner.py",
-      "sha256": "c0ce8b2dd52fc6f87560cead3ad0b308697ef1dc2c1e1a386472bf5ef3e4494d",
-      "size": 7704
+      "sha256": "c3f85bc57d72454477818d05a8e1c38f49e8a96c73f2846a301fe084c1c04a2e",
+      "size": 8496
     },
     {
       "path": "backend/tests/fixtures/p8_l/graph_planner_v1/held_out_ko.jsonl",
@@ -172,12 +172,12 @@
     },
     {
       "path": "backend/tests/test_p8_l_m_graph_retrieval_planner.py",
-      "sha256": "1463e6a42338f9b40802063b934ed407557fcc7b95d508c0fb3adf682184b804",
-      "size": 21164
+      "sha256": "c758367fd47fd12dc804107332d19ac636dc65b009ee47157755388997df0c21",
+      "size": 21452
     },
     {
       "path": "backend/tests/test_p8_l_m_graph_retrieval_planner_inventory.py",
-      "sha256": "6b51a9b0b61d163188f10538d94a18c2a18576bf29e590bd41c68103377bfec5",
+      "sha256": "a1d292293102b02ef10ea75269dc00c65ebd76c1852d68f33fa802d10a2021ec",
       "size": 2011
     },
     {

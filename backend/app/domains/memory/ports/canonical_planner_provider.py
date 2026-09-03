@@ -114,8 +114,12 @@ class CanonicalPlannerProviderResult:
     physical_attempt_count: int
     prompt_token_count: int | None = None
     output_token_count: int | None = None
+    thought_token_count: int | None = None
     total_token_count: int | None = None
     latency_ms: int | None = None
+    thinking_level: str | None = None
+    max_output_tokens: int | None = None
+    finish_reason: str | None = None
 
     def __post_init__(self) -> None:
         if self.physical_attempt_count < 1 or self.physical_attempt_count > 2:

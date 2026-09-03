@@ -37,7 +37,7 @@ def test_p8_l_p_inventory_closes_streaming_and_after_commit_contract() -> None:
     inventory = _inventory()
     assert inventory["owner_stage"] == "P8-L-P"
     assert inventory["predecessor"]["sha256"] == (
-        "4f761706f4e24a3f0eb175df563a01efcfbe79e81c795cf1c8120bc65480ee8c"
+        "4daaa686a4cececff91873adcf3800bf4fec2fc92fd25c2db82c100b3cec0642"
     )
     assert inventory["schema"]["current_embedded_schema_version"] == 7
     assert inventory["schema"]["new_alembic_migration"] == "20260903_0087"

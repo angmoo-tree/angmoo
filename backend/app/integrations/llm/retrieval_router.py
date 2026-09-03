@@ -4,6 +4,10 @@ from __future__ import annotations
 
 import json
 
+from app.domains.chat.domain.policies import (
+    WORLD_CHAT_FOREGROUND_MAX_OUTPUT_TOKENS,
+    resolve_world_chat_model_execution_policy,
+)
 from app.domains.chat.domain.retrieval_router import (
     parse_retrieval_intent_payload,
     retrieval_router_response_schema,
@@ -18,7 +22,7 @@ from app.domains.identity.public import CredentialMaterial, CredentialPurpose
 from app.integrations import direct_llm
 
 
-ROUTER_MAX_OUTPUT_TOKENS = 1_024
+ROUTER_MAX_OUTPUT_TOKENS = WORLD_CHAT_FOREGROUND_MAX_OUTPUT_TOKENS
 ROUTER_TIMEOUT_SECONDS = 30.0
 
 
@@ -34,6 +38,9 @@ class DirectLlmRetrievalRouterProvider:
         self,
         request: RetrievalRouterRequest,
     ) -> RetrievalRouterProviderResult:
+        execution_policy = resolve_world_chat_model_execution_policy(
+            self._material.model
+        )
         tracker = direct_llm.RunLlmTracker(max_calls=1)
         context = direct_llm.DirectLlmCallContext(
             credential_id=self._material.credential_id,
@@ -54,9 +61,9 @@ class DirectLlmRetrievalRouterProvider:
                 user_prompt=_router_prompt(request),
                 response_schema=retrieval_router_response_schema(),
                 validator=parse_retrieval_intent_payload,
-                max_output_tokens=ROUTER_MAX_OUTPUT_TOKENS,
+                max_output_tokens=execution_policy.max_output_tokens,
                 timeout_seconds=ROUTER_TIMEOUT_SECONDS,
-                thinking_level="low",
+                thinking_level=execution_policy.thinking_level,
                 # Schema repair belongs to the foreground request-wide budget.
                 # Never let the generic helper hide a second logical Router call.
                 should_retry_json_error=lambda *_args: False,
@@ -73,6 +80,14 @@ class DirectLlmRetrievalRouterProvider:
             for item in summary["calls"]
             if item.get("call_type") == "generate_content"
         ]
+        finish_reason = next(
+            (
+                str(item["finish_reason"])
+                for item in reversed(summary["calls"])
+                if item.get("finish_reason")
+            ),
+            None,
+        )
         return RetrievalRouterProviderResult(
             intent=intent,
             provider=self._material.provider,
@@ -80,8 +95,12 @@ class DirectLlmRetrievalRouterProvider:
             physical_attempt_count=max(1, tracker.call_order_in_run),
             prompt_token_count=int(summary["total_prompt_tokens"]) or None,
             output_token_count=int(summary["total_output_tokens"]) or None,
+            thought_token_count=int(summary["total_thought_tokens"]) or None,
             total_token_count=int(summary["total_tokens"]) or None,
             latency_ms=sum(durations) or None,
+            thinking_level=execution_policy.thinking_level,
+            max_output_tokens=execution_policy.max_output_tokens,
+            finish_reason=finish_reason,
         )
 
 

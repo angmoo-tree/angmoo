@@ -25,6 +25,14 @@ class CharacterResponseGenerationResult:
     provider: str
     model: str
     call_tracker: dict[str, Any]
+    prompt_token_count: int | None = None
+    output_token_count: int | None = None
+    thought_token_count: int | None = None
+    total_token_count: int | None = None
+    latency_ms: int | None = None
+    thinking_level: str | None = None
+    max_output_tokens: int | None = None
+    finish_reason: str | None = None
 
 
 class CharacterResponseGenerationService:
@@ -94,6 +102,14 @@ class CharacterResponseGenerationService:
             provider=result.provider,
             model=result.model,
             call_tracker=tracker.snapshot(),
+            prompt_token_count=result.prompt_token_count,
+            output_token_count=result.output_token_count,
+            thought_token_count=result.thought_token_count,
+            total_token_count=result.total_token_count,
+            latency_ms=result.latency_ms,
+            thinking_level=result.thinking_level,
+            max_output_tokens=result.max_output_tokens,
+            finish_reason=result.finish_reason,
         )
 
 

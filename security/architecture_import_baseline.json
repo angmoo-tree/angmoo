@@ -1,6 +1,6 @@
 {
-  "edge_count": 1678,
-  "external_import_count": 2169,
+  "edge_count": 1682,
+  "external_import_count": 2171,
   "module_count": 653,
   "modules": [
     {
@@ -2213,7 +2213,10 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [],
+      "external_imports": [
+        "__future__",
+        "dataclasses"
+      ],
       "imports": [],
       "module": "app.domains.chat.domain.policies",
       "path": "backend/app/domains/chat/domain/policies.py",
@@ -6184,6 +6187,7 @@
         "json"
       ],
       "imports": [
+        "app.domains.chat.domain.policies",
         "app.domains.identity.public",
         "app.domains.memory.domain.canonical_retrieval_planner",
         "app.domains.memory.ports.canonical_planner_provider",
@@ -6200,6 +6204,7 @@
       ],
       "imports": [
         "app.core.prompt_safety",
+        "app.domains.chat.domain.policies",
         "app.domains.chat.ports.character_response_generator",
         "app.domains.identity.public",
         "app.integrations.direct_llm"
@@ -6214,6 +6219,7 @@
         "json"
       ],
       "imports": [
+        "app.domains.chat.domain.policies",
         "app.domains.identity.public",
         "app.domains.relationships.public",
         "app.integrations.direct_llm"
@@ -6247,6 +6253,7 @@
         "json"
       ],
       "imports": [
+        "app.domains.chat.domain.policies",
         "app.domains.chat.domain.retrieval_router",
         "app.domains.chat.ports.retrieval_router_provider",
         "app.domains.identity.public",

@@ -543,8 +543,13 @@ def test_held_out_ko_315_case_router_contract_is_executable() -> None:
     )
 
 
+@pytest.mark.parametrize(
+    "model",
+    ("gemini-3.1-flash-lite", "gemini-3.5-flash-lite"),
+)
 def test_direct_llm_adapter_exposes_one_logical_call_without_hidden_json_retry(
     monkeypatch,
+    model: str,
 ) -> None:
     captured = {}
 
@@ -560,7 +565,7 @@ def test_direct_llm_adapter_exposes_one_logical_call_without_hidden_json_retry(
     material = CredentialMaterial(
         credential_id="credential-1",
         provider="google",
-        model="fixture-router",
+        model=model,
         fingerprint="fingerprint",
         purpose=CredentialPurpose.MESSAGE_LLM,
         _secret="not-a-real-key",
@@ -573,6 +578,10 @@ def test_direct_llm_adapter_exposes_one_logical_call_without_hidden_json_retry(
     )
     assert result.intent.route is RetrievalRoute.CURRENT_CONTEXT
     assert result.physical_attempt_count == 1
+    assert captured["thinking_level"] == "high"
+    assert captured["max_output_tokens"] == 3_072
+    assert result.thinking_level == "high"
+    assert result.max_output_tokens == 3_072
     assert captured["should_retry_json_error"](None, None, {}, 1) is False
     schema_text = json.dumps(captured["response_schema"], ensure_ascii=False)
     assert "owner_id" not in schema_text
@@ -623,6 +632,8 @@ def test_direct_llm_adapter_maps_domain_failure_to_safe_repair_code(
     assert exc_info.value.validation_code == "current_context_not_minimal"
     assert exc_info.value.diagnostic == "current_context_not_minimal"
     assert "must-not-persist" not in str(exc_info.value.__dict__)
+    assert captured["thinking_level"] == "high"
+    assert captured["max_output_tokens"] == 3_072
 
     captured.clear()
 
@@ -648,6 +659,8 @@ def test_direct_llm_adapter_maps_domain_failure_to_safe_repair_code(
     ]
     assert '"diagnostic"' not in captured["user_prompt"]
     assert "raw output must not escape" not in captured["user_prompt"]
+    assert captured["thinking_level"] == "high"
+    assert captured["max_output_tokens"] == 3_072
 
 
 def _user(user_id: str) -> models.User:

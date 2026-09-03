@@ -1,7 +1,7 @@
 {
   "bounds": {
     "character_response_logical_calls_per_attempt": 1,
-    "character_response_output_tokens": 2048,
+    "character_response_output_tokens": 3072,
     "character_response_timeout_seconds": 45.0,
     "evidence_bundle_characters": 8000,
     "evidence_item_characters": 2000,
@@ -52,7 +52,7 @@
   ],
   "historical_chain": {
     "current_tree_owner": "P8-L-P",
-    "p8_l_o_sha256": "4f761706f4e24a3f0eb175df563a01efcfbe79e81c795cf1c8120bc65480ee8c",
+    "p8_l_o_sha256": "4daaa686a4cececff91873adcf3800bf4fec2fc92fd25c2db82c100b3cec0642",
     "predecessor_mode": "frozen_digest"
   },
   "memory_after_commit": {
@@ -100,7 +100,7 @@
   "owner_stage": "P8-L-P",
   "predecessor": {
     "path": "docs/architecture/p8-l-o-memory-consolidation-inventory.json",
-    "sha256": "4f761706f4e24a3f0eb175df563a01efcfbe79e81c795cf1c8120bc65480ee8c",
+    "sha256": "4daaa686a4cececff91873adcf3800bf4fec2fc92fd25c2db82c100b3cec0642",
     "size": 7037
   },
   "required_files": [
@@ -126,8 +126,8 @@
     },
     {
       "path": "backend/app/domains/chat/application/character_response.py",
-      "sha256": "17aee87fee6c2c5dc791484bda05f986d4e3746dedc7e03e154a0d827d4cd146",
-      "size": 3883
+      "sha256": "3e309f1a652a5af0fb8772e8e3feb5297529cde9db7d728f69260cb40a5d940d",
+      "size": 4629
     },
     {
       "path": "backend/app/domains/chat/application/evidence_assembly.py",
@@ -141,13 +141,13 @@
     },
     {
       "path": "backend/app/domains/chat/application/retrieval_routing.py",
-      "sha256": "0c809acc7a3dd14664b194bf4a35bdbac9abb949372382123d2fad3101494951",
-      "size": 19129
+      "sha256": "3d81e853b39e41bfceade431e589ff70925784d6905ded2524eb2c4c719d83a3",
+      "size": 19947
     },
     {
       "path": "backend/app/domains/chat/application/response_workflow.py",
-      "sha256": "22e2a1c949fd7cda82480233dcddfebba0fdfd53194dca89b1197ab214d20703",
-      "size": 26052
+      "sha256": "7dbda826ed40127529c1a8865841938f8b492697a7cce00330d2daad559aa522",
+      "size": 27669
     },
     {
       "path": "backend/app/domains/chat/domain/evidence_bundle.py",
@@ -181,8 +181,8 @@
     },
     {
       "path": "backend/app/domains/chat/ports/character_response_generator.py",
-      "sha256": "2f0e74eb5b16c90a8086e743eb5615e440d7ddda98d407c337e35c29fb6983cd",
-      "size": 3182
+      "sha256": "34df8bff1b672295f97eefa066f840dfa6bb73e4274479f578ff125835b1b9a8",
+      "size": 3500
     },
     {
       "path": "backend/app/domains/chat/ports/response_lifecycle.py",
@@ -191,8 +191,8 @@
     },
     {
       "path": "backend/app/domains/chat/ports/retrieval_router_provider.py",
-      "sha256": "a12db8160b1541170ff011ec1f0e4465feccd168cad1b04c5d0b3c28d55ca173",
-      "size": 4379
+      "sha256": "d406b8ac0166a440d302512068feab7a8c012eaaf76ec3390672a6d2956b9f74",
+      "size": 4538
     },
     {
       "path": "backend/app/domains/chat/ports/response_workflow.py",
@@ -206,23 +206,23 @@
     },
     {
       "path": "backend/app/integrations/direct_llm.py",
-      "sha256": "564867cf1d390722c5a8b4748deb3b55a1fc7675632243b25ad2df6194c45fed",
-      "size": 40166
+      "sha256": "6da94ef052389eae0f3ff3b04e23e998e493986baac629a57b00bd752cc53267",
+      "size": 40777
     },
     {
       "path": "backend/app/integrations/llm/retrieval_router.py",
-      "sha256": "2e8bfab24512700d9d97486802c21cba613a7db6184480644f71d352f8d64206",
-      "size": 6542
+      "sha256": "b7186cc0a426f79b57a0c662e960c63b5fb94772be56a56c13dac26a98775072",
+      "size": 7341
     },
     {
       "path": "backend/app/integrations/llm/character_response_generator.py",
-      "sha256": "85f8f2a44cd7a9c77d7c2ccbb5c8517c0855552cd61eb5939f41777562eacbe8",
-      "size": 6634
+      "sha256": "38f69f765aff2cc1bf4e8db6a98dc5fb87cade0f83779719bfe5b2397b78fe9a",
+      "size": 7795
     },
     {
       "path": "backend/app/providers/gemini.py",
-      "sha256": "a071a97fb734fc3497a9e71aeba1372126044397324ea74da71b7041f29ef81e",
-      "size": 11331
+      "sha256": "b88e5cc18c00fd81fc1b3357c0295d0eb1867dae1c2d7982ae3e7ac7854b14a3",
+      "size": 11400
     },
     {
       "path": "backend/app/runtime/chat/memory_producer.py",
@@ -266,8 +266,8 @@
     },
     {
       "path": "backend/tests/test_p8_l_p_evidence_response_streaming.py",
-      "sha256": "d131c719d97eb86de06a8c35bbcbd2c455c5bdc823b00c0656b6f96e19ff0e2f",
-      "size": 38457
+      "sha256": "75a15852ae5670924af5a691829e3650c5d0744c7d9b37d37f6c19675910e540",
+      "size": 39125
     },
     {
       "path": "backend/tests/test_p8_l_p_frontend_streaming.py",
@@ -276,13 +276,13 @@
     },
     {
       "path": "backend/tests/test_p8_l_p_model_hotfix.py",
-      "sha256": "276f571ce459152adc8928e236ed2102539c48afa61edd75eb0a45ced71296ae",
-      "size": 10649
+      "sha256": "c048a850db4291aef2bfdf2a86c3983c1051ef5473f6dd9e873979db476cd58e",
+      "size": 10923
     },
     {
       "path": "backend/tests/test_p8_l_k_retrieval_router.py",
-      "sha256": "2df03bb7e066a44ef125b947e0d2765185501c8704c281d1f4ec004d0c19b609",
-      "size": 31321
+      "sha256": "f25869833ad6f5b894a6f2bfa3a3814eef7948c9e04038bfb4eaa4fe8d8c4072",
+      "size": 31805
     },
     {
       "path": "backend/tests/fixtures/p8_l/router_hotfix_v1/current_context_ko.jsonl",
@@ -291,7 +291,7 @@
     },
     {
       "path": "browser-tests/product-shell.spec.ts",
-      "sha256": "ec9b29c10aef1bb09675e47178173328fb5b20ffd0ad93b11f0e1e695a16c35b",
+      "sha256": "88fa1449eb9d0a65a1339b2ff0cabb1fd935dffa08340ffe3508caec22542552",
       "size": 84813
     },
     {
@@ -351,7 +351,7 @@
     },
     {
       "path": "scripts/ci/generate_p8_l_p_evidence_response_streaming_inventory.py",
-      "sha256": "e3e00a4de1ae1bbddda78eea69797bb92b96b7cd34ccb49e7ecc706202d0cf59",
+      "sha256": "63b6f476ec1dd3d2fbb9e2231d7839ff7c8f099191bb71e57332b032ec19fac7",
       "size": 18082
     },
     {

@@ -4,6 +4,10 @@ from __future__ import annotations
 
 import json
 
+from app.domains.chat.domain.policies import (
+    WORLD_CHAT_FOREGROUND_MAX_OUTPUT_TOKENS,
+    resolve_world_chat_model_execution_policy,
+)
 from app.domains.identity.public import CredentialMaterial, CredentialPurpose
 from app.domains.relationships.public import (
     GraphPlannerOutputError,
@@ -15,7 +19,7 @@ from app.domains.relationships.public import (
 from app.integrations import direct_llm
 
 
-GRAPH_PLANNER_MAX_OUTPUT_TOKENS = 1_024
+GRAPH_PLANNER_MAX_OUTPUT_TOKENS = WORLD_CHAT_FOREGROUND_MAX_OUTPUT_TOKENS
 GRAPH_PLANNER_TIMEOUT_SECONDS = 30.0
 
 _GRAPH_CATALOG = (
@@ -64,6 +68,9 @@ class DirectLlmGraphRetrievalPlannerProvider:
         self,
         request: GraphPlannerRequest,
     ) -> GraphPlannerProviderResult:
+        execution_policy = resolve_world_chat_model_execution_policy(
+            self._material.model
+        )
         tracker = direct_llm.RunLlmTracker(max_calls=1)
         context = direct_llm.DirectLlmCallContext(
             credential_id=self._material.credential_id,
@@ -84,9 +91,9 @@ class DirectLlmGraphRetrievalPlannerProvider:
                 user_prompt=_graph_planner_prompt(request),
                 response_schema=graph_retrieval_plan_response_schema(),
                 validator=parse_graph_retrieval_plan_payload,
-                max_output_tokens=GRAPH_PLANNER_MAX_OUTPUT_TOKENS,
+                max_output_tokens=execution_policy.max_output_tokens,
                 timeout_seconds=GRAPH_PLANNER_TIMEOUT_SECONDS,
-                thinking_level="low",
+                thinking_level=execution_policy.thinking_level,
                 # The foreground request owns one explicit repair token. Do not
                 # hide another logical call in the generic JSON helper.
                 should_retry_json_error=lambda *_args: False,
@@ -103,6 +110,14 @@ class DirectLlmGraphRetrievalPlannerProvider:
             for item in summary["calls"]
             if item.get("call_type") == "generate_content"
         ]
+        finish_reason = next(
+            (
+                str(item["finish_reason"])
+                for item in reversed(summary["calls"])
+                if item.get("finish_reason")
+            ),
+            None,
+        )
         return GraphPlannerProviderResult(
             plan=plan,
             provider=self._material.provider,
@@ -110,8 +125,12 @@ class DirectLlmGraphRetrievalPlannerProvider:
             physical_attempt_count=max(1, tracker.call_order_in_run),
             prompt_token_count=int(summary["total_prompt_tokens"]) or None,
             output_token_count=int(summary["total_output_tokens"]) or None,
+            thought_token_count=int(summary["total_thought_tokens"]) or None,
             total_token_count=int(summary["total_tokens"]) or None,
             latency_ms=sum(durations) or None,
+            thinking_level=execution_policy.thinking_level,
+            max_output_tokens=execution_policy.max_output_tokens,
+            finish_reason=finish_reason,
         )
 
 

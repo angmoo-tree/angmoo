@@ -264,7 +264,7 @@ def test_world_chat_model_binding_follows_default_or_stays_thread_override() -> 
         world_chat.update_user_settings(
             db,
             owner,
-            schemas.MessageSettingsUpdate(default_model="gemini-3.1-flash-lite"),
+            schemas.MessageSettingsUpdate(default_model="gemini-3.5-flash-lite"),
         )
         created = world_chat.create_or_get_world_thread(
             db,
@@ -276,7 +276,7 @@ def test_world_chat_model_binding_follows_default_or_stays_thread_override() -> 
         )
         assert created.thread is not None
         assert created.thread.model_binding_mode == "default"
-        assert created.thread.selected_model == "gemini-3.1-flash-lite"
+        assert created.thread.selected_model == "gemini-3.5-flash-lite"
 
         overridden = world_chat.update_world_thread_model(
             db,

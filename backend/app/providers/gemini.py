@@ -195,6 +195,7 @@ def _usage_from_response(response: Any) -> ProviderUsage:
     return ProviderUsage(
         input_tokens=getattr(usage, "prompt_token_count", None),
         output_tokens=getattr(usage, "candidates_token_count", None),
+        thought_tokens=getattr(usage, "thoughts_token_count", None),
         total_tokens=getattr(usage, "total_token_count", None),
         cached_input_tokens=getattr(usage, "cached_content_token_count", None),
     )

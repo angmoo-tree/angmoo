@@ -493,6 +493,14 @@ class _Generator:
             text=f"{request.evidence.route.value}에서 만든 안전한 답변",
             provider="fixture",
             model="fixture-model",
+            prompt_token_count=5,
+            output_token_count=6,
+            thought_token_count=7,
+            total_token_count=18,
+            latency_ms=9,
+            thinking_level="high",
+            max_output_tokens=3_072,
+            finish_reason="STOP",
         )
 
 
@@ -646,6 +654,18 @@ def test_all_routes_emit_only_crg_deltas_and_commit_once(
     assert committed.state is ResponseRequestState.COMMITTED
     assert committed.call_tracker["logical_total"] == expected_calls
     assert committed.call_tracker["logical_counts"]["character_response_generator"] == 1
+    assert committed.node_state["character_response_metrics"] == {
+        "provider": "fixture",
+        "model": "fixture-model",
+        "prompt_token_count": 5,
+        "output_token_count": 6,
+        "thought_token_count": 7,
+        "total_token_count": 18,
+        "latency_ms": 9,
+        "thinking_level": "high",
+        "max_output_tokens": 3_072,
+        "finish_reason": "STOP",
+    }
     assert committed.response_metadata["evidence_bundle_version"] == EVIDENCE_BUNDLE_VERSION
     assert len(committed.response_metadata["evidence_hash"]) == 64
     assert committed.response_metadata["evidence_capability"] == "none"

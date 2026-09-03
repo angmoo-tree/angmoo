@@ -17,6 +17,7 @@ class ProviderCapabilities:
 class ProviderUsage:
     input_tokens: int | None = None
     output_tokens: int | None = None
+    thought_tokens: int | None = None
     total_tokens: int | None = None
     cached_input_tokens: int | None = None
     call_type: str = "generate_content"
@@ -26,6 +27,7 @@ class ProviderUsage:
         return {
             "prompt_token_count": self.input_tokens,
             "candidates_token_count": self.output_tokens,
+            "thoughts_token_count": self.thought_tokens,
             "total_token_count": self.total_tokens,
             "cached_content_token_count": self.cached_input_tokens,
         }

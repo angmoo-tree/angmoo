@@ -18,7 +18,7 @@ if str(BACKEND_ROOT) not in sys.path:
 
 OUTPUT_PATH = ROOT / "docs/architecture/p8-l-o-memory-consolidation-inventory.json"
 N_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-n-both-workflow-coordinator-inventory.json"
-N_INVENTORY_SHA256 = "15d3acd645ca6b63a6ae495259e2b9b20b46049571a38a8d2e068bfa94a805e6"
+N_INVENTORY_SHA256 = "371c8faf2a6811ff0c607ff1a5304138f5db3cf371366c18bc37c49100213243"
 
 from app.domains.memory.domain import (  # noqa: E402
     MAINTENANCE_LEASE_DURATION,

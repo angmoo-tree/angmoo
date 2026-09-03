@@ -65,7 +65,7 @@
   ],
   "historical_chain": {
     "current_tree_owner": "P8-L-N",
-    "p8_l_m_sha256": "8091f69f7932626946e90bd6fc4ea1e6f9bf5e458c434866c5d623e29b00b41c",
+    "p8_l_m_sha256": "892a439a93f432f18ed5b81c73e741b21556e2359623e6cfbcdfd320ccfb4509",
     "predecessor_mode": "frozen_digest"
   },
   "non_scope": [
@@ -80,7 +80,7 @@
   "owner_stage": "P8-L-N",
   "predecessor": {
     "path": "docs/architecture/p8-l-m-graph-retrieval-planner-inventory.json",
-    "sha256": "8091f69f7932626946e90bd6fc4ea1e6f9bf5e458c434866c5d623e29b00b41c",
+    "sha256": "892a439a93f432f18ed5b81c73e741b21556e2359623e6cfbcdfd320ccfb4509",
     "size": 7014
   },
   "recipe_registry": {
@@ -141,13 +141,13 @@
     },
     {
       "path": "backend/app/domains/chat/application/canonical_retrieval.py",
-      "sha256": "12370cff093e344ff86bc9378aae12258356189da2f92b57ae30bc23f8aa639e",
-      "size": 14661
+      "sha256": "bc0c7d93b77105d68acb1fe5e5493fee8fb54fb09d06d4b66f6b043cfb88dc3b",
+      "size": 15511
     },
     {
       "path": "backend/app/domains/chat/application/graph_retrieval.py",
-      "sha256": "ddeb2521baaacd41167c3498cb9f0ee04b13882ac47603d4babec52bba25e719",
-      "size": 13630
+      "sha256": "75364ed98b0c84b08e634ccb173b45955e9a464cd987da778472a89683c66774",
+      "size": 14480
     },
     {
       "path": "backend/app/domains/chat/domain/__init__.py",
@@ -176,7 +176,7 @@
     },
     {
       "path": "backend/tests/test_p8_l_n_both_workflow_coordinator_inventory.py",
-      "sha256": "63275810e2a96dc31db54bf7cffb1d8df15603dcfe344e30149cc0e33fa0b4fe",
+      "sha256": "d28d04b761861a850b0fd369dda436285ceb0acb30ce6f82597c2a0ae76befb6",
       "size": 1894
     },
     {
@@ -191,7 +191,7 @@
     },
     {
       "path": "scripts/ci/generate_p8_l_n_both_workflow_coordinator_inventory.py",
-      "sha256": "a631f3621fb99dd813ee0712802430ca017cb0d66643a40c7be7faa584db72d0",
+      "sha256": "d079e4d3bb12bbca4bc6f96912c9ecb9302e343a1c9f12103419fc999bbab811",
       "size": 12601
     }
   ],

@@ -266,7 +266,23 @@ class ResponseGenerationWorkflowService:
                     record,
                     ResponseRequestState.OPTIONAL_RETRIEVING,
                     workflow_recipe=workflow_recipe,
-                    node_state={"both_metrics": _safe_metrics(result.metrics)},
+                    node_state={
+                        "both_metrics": _safe_metrics(result.metrics),
+                        **(
+                            {
+                                "canonical_metrics": _safe_metrics(
+                                    result.canonical.metrics
+                                )
+                            }
+                            if result.canonical is not None
+                            else {}
+                        ),
+                        **(
+                            {"graph_metrics": _safe_metrics(result.graph.metrics)}
+                            if result.graph is not None
+                            else {}
+                        ),
+                    },
                     call_tracker=result.call_tracker,
                 )
                 bundle = self._evidence.both(
@@ -319,6 +335,11 @@ class ResponseGenerationWorkflowService:
             record = self._transition(
                 record,
                 ResponseRequestState.RESPONSE_STREAMING,
+                node_state={
+                    "character_response_metrics": _character_response_metrics(
+                        response
+                    )
+                },
                 call_tracker=response.call_tracker,
             )
 
@@ -441,12 +462,15 @@ class ResponseGenerationWorkflowService:
         node_state: dict | None = None,
         call_tracker: dict | None = None,
     ) -> ResponseRequestRecord:
+        merged_node_state = dict(record.node_state)
+        if node_state is not None:
+            merged_node_state.update(node_state)
         updated = self._lifecycle.transition(
             self._fence(record),
             target=target,
             route=route,
             workflow_recipe=workflow_recipe,
-            node_state=node_state,
+            node_state=merged_node_state,
             call_tracker=call_tracker,
             now=datetime.now(UTC),
         )
@@ -662,6 +686,23 @@ def _safe_metrics(value: Any) -> dict[str, Any]:
         elif isinstance(item, tuple):
             output[key] = [entry.value if hasattr(entry, "value") else entry for entry in item]
     return output
+
+
+def _character_response_metrics(value: Any) -> dict[str, Any]:
+    """Persist bounded numeric and enum diagnostics, never generated text."""
+
+    return {
+        "provider": value.provider,
+        "model": value.model,
+        "prompt_token_count": value.prompt_token_count,
+        "output_token_count": value.output_token_count,
+        "thought_token_count": value.thought_token_count,
+        "total_token_count": value.total_token_count,
+        "latency_ms": value.latency_ms,
+        "thinking_level": value.thinking_level,
+        "max_output_tokens": value.max_output_tokens,
+        "finish_reason": value.finish_reason,
+    }
 
 
 def _with_sequence(

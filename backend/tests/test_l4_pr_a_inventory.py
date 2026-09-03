@@ -79,8 +79,8 @@ def test_l4_pr_a_architecture_and_parity_oracles_are_exact() -> None:
     behavior = payload["behavior"]
 
     assert backend["module_count"] == 653
-    assert backend["internal_edge_count"] == 1678
-    assert backend["external_import_count"] == 2169
+    assert backend["internal_edge_count"] == 1682
+    assert backend["external_import_count"] == 2171
     assert backend["legacy_import_exception_count"] == 0
     assert backend["policy_allowed_cycle_count"] == 0
     assert backend["module_cycles"] == []

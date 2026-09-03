@@ -151,6 +151,8 @@ class RunLlmTracker:
         provider_error_hint: str | None = None,
         provider_error: dict[str, Any] | None = None,
         thinking_level: str | None = None,
+        max_output_tokens: int | None = None,
+        finish_reason: str | None = None,
     ) -> None:
         payload: dict[str, Any] = {
             "call_type": "generate_content",
@@ -179,6 +181,10 @@ class RunLlmTracker:
             payload["provider_error"] = provider_error
         if thinking_level:
             payload["thinking_level"] = thinking_level
+        if max_output_tokens is not None:
+            payload["max_output_tokens"] = max_output_tokens
+        if finish_reason:
+            payload["finish_reason"] = str(finish_reason)[:64]
         self.calls.append(payload)
 
     def annotate_last_json_postprocess_error(
@@ -227,6 +233,7 @@ class RunLlmTracker:
     def summary(self) -> dict[str, Any]:
         total_prompt_tokens = 0
         total_output_tokens = 0
+        total_thought_tokens = 0
         total_tokens = 0
         generate_call_count = 0
         embedding_call_count = 0
@@ -241,9 +248,10 @@ class RunLlmTracker:
                 continue
             total_prompt_tokens += int(usage.get("prompt_token_count") or 0)
             total_output_tokens += int(usage.get("candidates_token_count") or 0)
+            total_thought_tokens += int(usage.get("thoughts_token_count") or 0)
             total_tokens += int(usage.get("total_token_count") or 0)
         return {
-            "summary_version": 2,
+            "summary_version": 3,
             "call_count": generate_call_count,
             "provider_call_count": len(self.calls),
             "generate_call_count": generate_call_count,
@@ -251,6 +259,7 @@ class RunLlmTracker:
             "max_calls": self.max_calls,
             "total_prompt_tokens": total_prompt_tokens,
             "total_output_tokens": total_output_tokens,
+            "total_thought_tokens": total_thought_tokens,
             "total_tokens": total_tokens,
             "calls": self.calls,
             "rate_limit_waits": self.rate_limit_waits,
@@ -790,6 +799,8 @@ async def generate_text(
                 duration_ms=int((time.perf_counter() - started) * 1000),
                 usage=usage,
                 thinking_level=thinking_level,
+                max_output_tokens=max_output_tokens,
+                finish_reason=response.finish_reason,
             )
             return result
         except Exception as exc:
@@ -824,6 +835,7 @@ async def generate_text(
                 provider_error_hint=provider_error_hint,
                 provider_error=provider_error,
                 thinking_level=thinking_level,
+                max_output_tokens=max_output_tokens,
             )
             logger.warning(
                 "direct_llm_call_failed character_id=%s agent_run_id=%s node=%s lane=%s "

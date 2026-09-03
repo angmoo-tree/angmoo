@@ -59,7 +59,7 @@
   },
   "historical_chain": {
     "current_tree_owner": "P8-L-O",
-    "p8_l_n_sha256": "15d3acd645ca6b63a6ae495259e2b9b20b46049571a38a8d2e068bfa94a805e6",
+    "p8_l_n_sha256": "371c8faf2a6811ff0c607ff1a5304138f5db3cf371366c18bc37c49100213243",
     "predecessor_mode": "frozen_digest"
   },
   "hot_brief_contract": {
@@ -84,7 +84,7 @@
   "owner_stage": "P8-L-O",
   "predecessor": {
     "path": "docs/architecture/p8-l-n-both-workflow-coordinator-inventory.json",
-    "sha256": "15d3acd645ca6b63a6ae495259e2b9b20b46049571a38a8d2e068bfa94a805e6",
+    "sha256": "371c8faf2a6811ff0c607ff1a5304138f5db3cf371366c18bc37c49100213243",
     "size": 6625
   },
   "required_files": [
@@ -150,7 +150,7 @@
     },
     {
       "path": "backend/tests/test_p8_l_o_memory_consolidation_inventory.py",
-      "sha256": "1fb1cbc8a917a32f13587e14eb6d926f1eef1d9a6a10b966cbdc75084c4205c8",
+      "sha256": "ed84f5221732f551c295fecb6940872bf0fc3ed2b8a00891fa67f7afa289f19e",
       "size": 1891
     },
     {
@@ -165,7 +165,7 @@
     },
     {
       "path": "scripts/ci/generate_p8_l_o_memory_consolidation_inventory.py",
-      "sha256": "adc5053df61f83cb0cd73e964ec9a8879dbd819fe521e860b3165b14f727c57a",
+      "sha256": "7a7fd401511ff1ddbf12be6f7b3a81c8afeb3d83af34b5b221cfd561ed3e5a39",
       "size": 12486
     }
   ],

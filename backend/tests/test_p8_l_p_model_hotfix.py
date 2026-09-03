@@ -76,10 +76,16 @@ def test_world_thread_model_update_contract_is_closed() -> None:
         mode="thread_override",
         selected_model="gemini-3.1-flash-lite",
     )
+    high_override = WorldChatThreadModelUpdate(
+        mode="thread_override",
+        selected_model="gemini-3.5-flash-lite",
+    )
     assert default.mode is MessageModelBindingMode.DEFAULT
     assert default.selected_model is None
     assert override.mode is MessageModelBindingMode.THREAD_OVERRIDE
     assert override.selected_model == "gemini-3.1-flash-lite"
+    assert high_override.mode is MessageModelBindingMode.THREAD_OVERRIDE
+    assert high_override.selected_model == "gemini-3.5-flash-lite"
 
     with pytest.raises(ValidationError, match="default binding cannot include"):
         WorldChatThreadModelUpdate(
