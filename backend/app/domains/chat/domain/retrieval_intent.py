@@ -37,6 +37,7 @@ class RetrievalRoute(StrEnum):
 
 
 class RetrievalTimeKind(StrEnum):
+    CURRENT_DAY = "current_day"
     HISTORICAL_UNSPECIFIED = "historical_unspecified"
     RECENT = "recent"
     RELATIVE = "relative"

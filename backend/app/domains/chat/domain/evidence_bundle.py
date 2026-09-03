@@ -27,6 +27,7 @@ class EvidenceKind(StrEnum):
     CANONICAL_SOURCE = "canonical_source"
     GRAPH_RELATIONSHIP = "graph_relationship"
     GRAPH_EVENT = "graph_event"
+    TODAY_SNS_ACTIVITY = "today_sns_activity"
 
 
 class EvidenceLocatorKind(StrEnum):

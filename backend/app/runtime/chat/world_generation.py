@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator
 from datetime import UTC, datetime, timedelta
+import logging
 from typing import Any
 from uuid import uuid4
 
@@ -22,6 +23,7 @@ from app.domains.chat.application import (
     ResponseGenerationWorkflowService,
     ResponseWorkflowCommand,
     RetrievalRoutingService,
+    TodaySnsActivityAssembler,
 )
 from app.domains.chat.domain import (
     CHAT_GENERATION_STREAM_VERSION,
@@ -83,11 +85,18 @@ from app.runtime.memory.sqlalchemy_source_reader import (
 from app.runtime.graph_projection.relationship_graph_read import (
     SqlAlchemyRelationshipGraphReadGateway,
 )
+from app.runtime.social.sqlalchemy_today_activity import (
+    SqlAlchemyTodaySocialActivityReader,
+)
+from app.runtime.chat.today_sns_activity import SqlAlchemyTodaySnsSnapshotValidator
 
 
 RESPONSE_REQUEST_DEADLINE_SECONDS = 180
 RESPONSE_CONTEXT_MESSAGE_LIMIT = 20
 RESPONSE_CONTEXT_CHAR_LIMIT = 8_000
+
+
+logger = logging.getLogger(__name__)
 
 
 class SqlAlchemyResponseWorkflowUnitOfWork:
@@ -470,6 +479,7 @@ async def stream_world_response(
         planner=DirectLlmGraphRetrievalPlannerProvider(material),
         executor=GraphRetrievalPlanExecutor(graph_recall),
     )
+    character_labels = _character_labels(db, world_id)
     workflow = ResponseGenerationWorkflowService(
         lifecycle=lifecycle,
         router=RetrievalRoutingService(
@@ -485,12 +495,37 @@ async def stream_world_response(
         ),
         unit_of_work=SqlAlchemyResponseWorkflowUnitOfWork(db),
         memory_producer=SqlAlchemySuccessfulChatMemoryProducer(db),
+        today_snapshot_validator=SqlAlchemyTodaySnsSnapshotValidator(db, character_labels),
     )
     router_context, response_context = _recent_context(
         db,
         thread.id,
         exclude_message_id=message.id,
     )
+    today_sns_snapshot = None
+    world = db.get(models.World, world_id)
+    if world is not None and thread.responding_world_character_id is not None:
+        try:
+            today_sns_snapshot = TodaySnsActivityAssembler(
+                SqlAlchemyTodaySocialActivityReader(db)
+            ).assemble(
+                owner_id=user.id,
+                world_id=world_id,
+                subject_world_character_id=thread.responding_world_character_id,
+                timezone=world.timezone,
+                character_labels=character_labels,
+                now=datetime.now(UTC),
+            )
+        except Exception as exc:
+            # Today awareness is an optional deterministic L2.5 context. A
+            # scoped read failure must not make ordinary World Chat unusable;
+            # the Router guard upgrades an explicit Today query to canonical
+            # retrieval when this snapshot is unavailable.
+            logger.warning(
+                "p8_l_r_today_sns_snapshot_unavailable request_id=%s failure_type=%s",
+                record.request_id,
+                type(exc).__name__,
+            )
     command = ResponseWorkflowCommand(
         request=record,
         preflight=RetrievalPreflightCommand(
@@ -505,7 +540,8 @@ async def stream_world_response(
         profile=_profile(responding_character),
         router_context=router_context,
         response_context=response_context,
-        character_labels=_character_labels(db, world_id),
+        character_labels=character_labels,
+        today_sns_snapshot=today_sns_snapshot,
         graph_projection_enabled=runtime_settings.graph_projection_enabled,
     )
     async for event in workflow.run(command):
@@ -635,7 +671,12 @@ def _chat_evidence_item(
     source_reader: SqlAlchemyMemorySourceEvidenceReader,
 ) -> schemas.WorldChatEvidenceItemRead:
     kind = raw.get("kind")
-    if kind not in {"canonical_source", "graph_relationship", "graph_event"}:
+    if kind not in {
+        "canonical_source",
+        "graph_relationship",
+        "graph_event",
+        "today_sns_activity",
+    }:
         raise MessageNotFoundError("근거 형식이 올바르지 않습니다.")
     reference = raw.get("ref")
     text = raw.get("text")
@@ -651,6 +692,7 @@ def _chat_evidence_item(
         "canonical_source": "기억 근거",
         "graph_relationship": "현재 관계",
         "graph_event": "관계 사건",
+        "today_sns_activity": "오늘 SNS 활동",
     }[kind]
     if not isinstance(locator, dict):
         return schemas.WorldChatEvidenceItemRead(
@@ -665,7 +707,38 @@ def _chat_evidence_item(
             canonical_href=None,
         )
     locator_kind = locator.get("kind")
-    if locator_kind == "canonical_source":
+    if kind == "today_sns_activity" and locator_kind == "canonical_source":
+        # Today uses its own composite source/ancestry revision, not the
+        # Memory reader digest. An edited or hidden ancestor invalidates the
+        # old inspector excerpt as well as new response context.
+        current = None
+        if occurred_at is not None and isinstance(locator.get("source_id"), str):
+            try:
+                read = SqlAlchemyTodaySocialActivityReader(db).read(
+                    owner_id=scope.owner_id,
+                    world_id=scope.world_id,
+                    subject_world_character_id=scope.subject_world_character_id,
+                    started_at=occurred_at - timedelta(seconds=1),
+                    complete_through=occurred_at + timedelta(seconds=1),
+                )
+                current = next((item for item in read.records
+                    if item.source_id == locator["source_id"]
+                    and item.source_revision == locator.get("source_revision")), None)
+            except Exception:
+                current = None
+        if current is not None:
+            availability = "available"
+            occurred_at = current.occurred_at
+            if current.source_post_id is not None:
+                href = f"/worlds/{scope.world_id}/posts/{current.source_post_id}"
+            related_id, direction = _related_direction(
+                scope.subject_world_character_id,
+                current.actor_world_character_id,
+                current.counterpart_world_character_id,
+                current.counterpart_world_character_id,
+            )
+            related_name = _world_character_name(db, related_id, world_id=scope.world_id)
+    elif locator_kind == "canonical_source":
         try:
             source_type = MemorySourceTypeV1(str(locator.get("source_type")))
         except ValueError:
@@ -695,7 +768,8 @@ def _chat_evidence_item(
         ):
             availability = "available"
             occurred_at = fresh.source_created_at
-            label = _chat_source_label(source_type)
+            if kind != "today_sns_activity":
+                label = _chat_source_label(source_type)
             related_id, direction = _related_direction(
                 scope.subject_world_character_id,
                 fresh.actor_world_character_id,

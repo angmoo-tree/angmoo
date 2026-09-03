@@ -239,7 +239,12 @@ class WorldChatEvidenceSummaryRead(BaseModel):
 
 class WorldChatEvidenceItemRead(BaseModel):
     reference: str
-    kind: Literal["canonical_source", "graph_relationship", "graph_event"]
+    kind: Literal[
+        "canonical_source",
+        "graph_relationship",
+        "graph_event",
+        "today_sns_activity",
+    ]
     label: str
     excerpt: str | None
     occurred_at: datetime | None

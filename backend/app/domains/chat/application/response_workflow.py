@@ -38,6 +38,7 @@ from app.domains.chat.domain.generation_lifecycle import (
     ResponseTerminalReason,
     TERMINAL_STATES,
 )
+from app.domains.chat.domain.evidence_bundle import EvidenceKind
 from app.domains.chat.domain.response_request import (
     ResponseCommitPayload,
     ResponseMetadata,
@@ -48,6 +49,10 @@ from app.domains.chat.domain.retrieval_intent import (
     RetrievalRoute,
 )
 from app.domains.chat.domain.retrieval_router import RouterFailureDiagnostic
+from app.domains.chat.domain.today_sns_activity import TodaySnsActivitySnapshot
+from app.domains.chat.ports.today_sns_activity import (
+    TodaySnsSnapshotChangedError, TodaySnsSnapshotValidatorPort,
+)
 from app.domains.chat.ports.character_response_generator import (
     CharacterResponseContextMessage,
     CharacterResponseGeneratorError,
@@ -74,6 +79,7 @@ class ResponseWorkflowCommand:
     router_context: tuple[RetrievalRouterContextMessage, ...]
     response_context: tuple[CharacterResponseContextMessage, ...]
     character_labels: Mapping[str, str]
+    today_sns_snapshot: TodaySnsActivitySnapshot | None = None
     graph_projection_enabled: bool = True
     lease_seconds: int = 180
 
@@ -82,6 +88,13 @@ class ResponseWorkflowCommand:
             raise RetrievalContractError("response_workflow_request_mismatch")
         if self.request.thread_id != self.preflight.thread_id:
             raise RetrievalContractError("response_workflow_thread_mismatch")
+        if self.today_sns_snapshot is not None and (
+            self.today_sns_snapshot.owner_id != self.preflight.owner_id
+            or self.today_sns_snapshot.world_id != self.preflight.world_id
+            or self.today_sns_snapshot.subject_world_character_id
+            != self.preflight.responding_world_character_id
+        ):
+            raise RetrievalContractError("response_workflow_today_scope_mismatch")
         if not 30 <= self.lease_seconds <= 300:
             raise RetrievalContractError("response_workflow_lease_invalid")
 
@@ -101,6 +114,7 @@ class ResponseGenerationWorkflowService:
         character_response: CharacterResponseGenerationService,
         unit_of_work: ResponseWorkflowUnitOfWorkPort,
         memory_producer: SuccessfulChatMemoryProducerPort | None = None,
+        today_snapshot_validator: TodaySnsSnapshotValidatorPort | None = None,
     ) -> None:
         self._lifecycle = lifecycle
         self._router = router
@@ -111,6 +125,7 @@ class ResponseGenerationWorkflowService:
         self._character_response = character_response
         self._unit_of_work = unit_of_work
         self._memory_producer = memory_producer
+        self._today_snapshot_validator = today_snapshot_validator
 
     async def run(
         self,
@@ -126,6 +141,8 @@ class ResponseGenerationWorkflowService:
 
         lease_token = f"lease-{uuid4().hex}"
         try:
+            if command.today_sns_snapshot is not None and self._today_snapshot_validator is None:
+                raise RetrievalContractError("response_workflow_today_validator_required")
             now = datetime.now(UTC)
             record = self._lifecycle.acquire_lease(
                 request_id=record.request_id,
@@ -148,6 +165,11 @@ class ResponseGenerationWorkflowService:
             routing = await self._router.route(
                 command.preflight,
                 recent_context=command.router_context,
+                today_sns_context=(
+                    None
+                    if command.today_sns_snapshot is None
+                    else command.today_sns_snapshot.router_view()
+                ),
                 now=datetime.now(UTC),
                 deadline_at=record.deadline_at,
             )
@@ -292,6 +314,13 @@ class ResponseGenerationWorkflowService:
                 )
                 tracker = result.call_tracker
 
+            if command.today_sns_snapshot is not None and self._today_snapshot_validator is not None:
+                self._today_snapshot_validator.assert_current(command.today_sns_snapshot)
+            bundle = self._evidence.with_today_sns(
+                bundle,
+                command.today_sns_snapshot,
+                user_message=command.preflight.user_message,
+            )
             record = self._transition(
                 record,
                 ResponseRequestState.EVIDENCE_FROZEN,
@@ -301,6 +330,24 @@ class ResponseGenerationWorkflowService:
                     "evidence_hash": bundle.evidence_hash,
                     "retrieval_outcome": bundle.retrieval_outcome.value,
                     "public_evidence_count": bundle.public_evidence_count,
+                    "today_sns_snapshot": (
+                        None
+                        if command.today_sns_snapshot is None
+                        else {
+                            "version": command.today_sns_snapshot.version,
+                            "snapshot_hash": command.today_sns_snapshot.snapshot_hash,
+                            "complete_through": (
+                                command.today_sns_snapshot.complete_through.isoformat()
+                            ),
+                            "overflow": command.today_sns_snapshot.overflow,
+                            "coverage": {
+                                key: value.value
+                                for key, value in sorted(
+                                    command.today_sns_snapshot.coverage.items()
+                                )
+                            },
+                        }
+                    ),
                 },
                 call_tracker=tracker,
             )
@@ -327,6 +374,16 @@ class ResponseGenerationWorkflowService:
                     recent_context=command.response_context,
                     evidence=bundle,
                     clarification_candidates=candidates,
+                    today_sns_manifest=(
+                        None
+                        if command.today_sns_snapshot is None
+                        else command.today_sns_snapshot.response_manifest(
+                            included_references=tuple(
+                                item.opaque_reference for item in bundle.items
+                                if item.kind is EvidenceKind.TODAY_SNS_ACTIVITY
+                            )
+                        )
+                    ),
                 ),
                 call_tracker=tracker,
                 now=datetime.now(UTC),
@@ -362,6 +419,8 @@ class ResponseGenerationWorkflowService:
                 yield event
                 await asyncio.sleep(0)
 
+            if command.today_sns_snapshot is not None and self._today_snapshot_validator is not None:
+                self._today_snapshot_validator.assert_current(command.today_sns_snapshot)
             record = self._transition(record, ResponseRequestState.COMMITTING)
             sequence = record.last_emitted_sequence + 1
             completed = self._event(
@@ -613,6 +672,8 @@ class ResponseGenerationWorkflowService:
 def _classify_failure(
     exc: Exception,
 ) -> tuple[str, bool, ResponseTerminalReason]:
+    if isinstance(exc, TodaySnsSnapshotChangedError):
+        return "source_context_changed", True, ResponseTerminalReason.RETRIEVAL_FAILURE
     if isinstance(exc, CharacterResponseGeneratorError):
         return (
             exc.failure_class,

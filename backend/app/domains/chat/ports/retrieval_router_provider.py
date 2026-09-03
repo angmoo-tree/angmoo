@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 from typing import Protocol
 
 from app.domains.chat.domain.retrieval_intent import (
@@ -15,6 +16,7 @@ from app.domains.chat.domain.retrieval_router import normalize_router_validation
 MAX_ROUTER_CONTEXT_MESSAGES = 20
 MAX_ROUTER_CONTEXT_CHARACTERS = 12_000
 MAX_ROUTER_MESSAGE_CHARACTERS = 4_000
+MAX_ROUTER_TODAY_CONTEXT_CHARACTERS = 12_000
 
 
 class RetrievalRouterOutputError(RetrievalContractError):
@@ -57,6 +59,7 @@ class RetrievalRouterRequest:
     recent_context: tuple[RetrievalRouterContextMessage, ...] = ()
     responding_character_name: str | None = None
     world_language: str = "ko"
+    today_sns_context: dict | None = None
     repair_diagnostic: str | None = None
 
     def __post_init__(self) -> None:
@@ -74,6 +77,19 @@ class RetrievalRouterRequest:
             raise RetrievalContractError("retrieval_router_character_name_invalid")
         if not self.world_language.strip() or len(self.world_language) > 16:
             raise RetrievalContractError("retrieval_router_language_invalid")
+        if self.today_sns_context is not None:
+            if not isinstance(self.today_sns_context, dict):
+                raise RetrievalContractError("retrieval_router_today_context_invalid")
+            serialized = json.dumps(
+                self.today_sns_context,
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+            )
+            if len(serialized) > MAX_ROUTER_TODAY_CONTEXT_CHARACTERS:
+                raise RetrievalContractError(
+                    "retrieval_router_today_context_size_exceeded"
+                )
         if self.repair_diagnostic is not None and (
             not self.repair_diagnostic.strip() or len(self.repair_diagnostic) > 160
         ):
@@ -111,6 +127,7 @@ __all__ = [
     "MAX_ROUTER_CONTEXT_CHARACTERS",
     "MAX_ROUTER_CONTEXT_MESSAGES",
     "MAX_ROUTER_MESSAGE_CHARACTERS",
+    "MAX_ROUTER_TODAY_CONTEXT_CHARACTERS",
     "RetrievalRouterContextMessage",
     "RetrievalRouterOutputError",
     "RetrievalRouterProviderPort",
