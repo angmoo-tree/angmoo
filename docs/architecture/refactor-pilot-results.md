@@ -27,8 +27,8 @@ AR-1은 제품 scope 없이 검사 지원을 먼저 병합했고, 각 파일럿�
 | --- | --- | --- |
 | AR-0 | COMPLETE — PR #259 병합 | 고정 기준선은 후속 단계에서도 재생성하지 않음 |
 | AR-1 | COMPLETE — PR #259 병합 | 전환 범위별 scope만 각 후속 PR에서 활성화 |
-| AR-B1 | COMPLETE — PR #260 병합 | post-merge 결과를 PR-head와 구분해 추적 |
-| AR-F1 | IMPLEMENTED / LOCAL PASS / PR VALIDATION PENDING | exact-head Hosted·native·installer와 merge 결과 기록 |
+| AR-B1 | COMPLETE — PR #260 병합 | PR-head·post-merge 결과 분리 기록 완료 |
+| AR-F1 | COMPLETE — PR #261 병합 | PR-head·post-merge 결과 분리 기록 완료 |
 
 AR-G의 전역 Base/DB/models/Alembic/logging 최종 이전, 다른 업무·화면 전환, AR-X 최종 동일 commit 검증과 P8-L-S 실제 AI/인과/사용자 품질 closeout은 후속 범위다.
 
@@ -40,16 +40,20 @@ World Package committer는 `service.get_device_home_world`를 직접 사용한�
 
 기존 8개 테스트 node는 `tests/device_home/test_world_surface.py`로 일대일 매핑했다. 내부/HTTP 권한 차이, flush 후 미commit 조회와 rollback, World owner가 아닌 active membership, 같은 시각의 ID cursor, stale readiness, HTTP limit/cursor/local-origin 경계를 추가했다. Device Home 13개와 World Package 직접 소비자 2개가 통과했고, 구조 회귀 65개와 frozen 1,867/current 1,904 node 보존 검사도 통과했다. Backend `device_home` 새 scope를 활성화했으며 legacy alias는 남기지 않았다.
 
-PR #260 exact head `d9c3ed5e8c6c86632988e614171b0d190e622183`에서 Core·Security·Local Smoke·CodeQL·Windows Advisory·Host Tauri와 installer build/clean-install/failure-recovery/supported-upgrade/aggregate를 포함한 23개 체크가 모두 성공했다. 2026-09-05 04:20 KST에 merge commit `a55c521b9adad624ae1342b2a7b270abc2237f79`로 병합했다. merge commit의 post-merge workflow는 이 PR-head 결과와 별도로 기록한다.
+PR #260 exact head `d9c3ed5e8c6c86632988e614171b0d190e622183`에서 Core·Security·Local Smoke·CodeQL·Windows Advisory·Host Tauri와 installer build/clean-install/failure-recovery/supported-upgrade/aggregate를 포함한 23개 체크가 모두 성공했다. 2026-09-05 04:20 KST에 merge commit `a55c521b9adad624ae1342b2a7b270abc2237f79`로 병합했다. 이 merge commit의 post-merge workflow 7개도 재실행 없이 모두 성공했다.
 
 ## 2026-09-05: AR-F1 Frontend Device Home
 
 Next route와 static router가 함께 사용하는 `composition/screens/device-home-screen.tsx`를 만들었다. 이 screen은 인증·runtime 상태·Phone shell을 조립하며, `features/device-home/components/device-home.tsx`는 World 목록과 실행 가능성 표현만 소유한다. runtime 상태와 World 목록은 각각 하나의 effect에서 요청하고, 목록 재시도는 runtime을 다시 요청하지 않는다. `public.ts`는 screen이나 shell을 내보내지 않는다.
 
-Device Home의 `api/components/types/utils`를 목표 역할로 옮기고 runtime transport·navigation·media·AppIcon·Button·class names·semantic CSS의 단일 구현을 `hooks/lib/components/utils`에 배치했다. Creator Studio·Memory·World App의 API/type 소비자 4개는 AR-F2/AR-F3 제거 조건과 함께 한시적 `public.ts` facade를 사용한다. 공용 옛 경로에는 명시적 TypeScript re-export 7개가 남고, 기존 semantic primitive 7개는 새 CSS module을 직접 사용한다. 이 전환 소비자는 AR-F4에서 제거한다.
+Device Home의 `api/components/types/utils`를 목표 역할로 옮기고 runtime transport·navigation·media·AppIcon·Button·class names·semantic CSS의 단일 구현을 `hooks/lib/components/utils`에 배치했다. Creator Studio·Memory·World App의 API/type 소비자 4개는 AR-F2/AR-F3 제거 조건과 함께 한시적 `public.ts` facade를 사용한다. 공용 옛 경로에는 명시적 TypeScript re-export 7개가 남고, 기존 semantic primitive 7개는 새 CSS module을 직접 사용한다. facade 소비자는 AR-F2/AR-F3에서, 공용 TypeScript bridge와 semantic primitive 직접 소비자는 AR-F4에서 제거한다.
 
 로컬 검증은 frontend lint/typecheck, World Package proxy, Next production build 14개 정적 페이지, static export를 통과했다. Home 웹 5개, Local Settings 2개, static Home 5개 시나리오가 성공했다. 여기에는 390px·wide shell, World 0개/여러 개, runtime degraded와 목록 실패 분리, retry/launchability, PWA, static Phone/main bootstrap, 잘못된 wide route 차단, launcher token을 사용한 sidecar media blob URL이 포함된다. 추가 소스 계약과 frontend 경계 테스트 18개, frozen 1,867/current 1,905 node 및 API·ORM preservation contract, frontend architecture/design, L4/P8-L-D/P8-L-E/P8-L-R inventory도 통과했다. Windows에서 visual snapshot을 갱신하지 않았으며 canonical visual은 Hosted 고정 환경에서 확인한다.
 
 `src/testing`은 만들지 않았다. 실제 공용 소비자는 backend 소스 계약, Playwright 전용 fixture, Node proxy 검사에 있고 공유 React runner·mock server 소비자가 아직 없기 때문이다. 새 테스트 지원 계층은 실제 소비자와 실행기 등록이 생길 때 함께 도입한다.
 
-이 기록 시점의 AR-F1은 로컬 구현·검증 단계다. exact-head PR, Hosted visual/Core/Security/CodeQL/Tauri/installer, merge commit과 post-merge 결과는 다음 갱신에서 별도로 기록한다.
+PR #261 exact head `31fd5b052e9b910c8ac48027065753faa0a7ab5b`에서 Core·Security·Local Smoke·CodeQL·Windows Advisory와 installer build/clean-install/failure-recovery/supported-upgrade/aggregate를 포함한 등록 체크 22개가 모두 성공했다. Hosted 고정 환경에서는 제품 shell 21개, UI-E 2개, static direct-open 68개와 canonical visual 36개가 통과했다. 별도 Host Tauri workflow는 변경 경로가 그 workflow의 path filter에 포함되지 않아 생성되지 않았고, Core의 `tauri-windows`와 installer가 영향받는 Windows 경로를 검증했다.
+
+Installer 첫 attempt의 clean-install은 제품 실행 뒤 Windows Defender `Start-MpScan`이 runner 장치 스캔 오류를 반환해 실패했다. 동일 head의 실패 job만 재실행한 attempt 2에서 Defender scan과 개발 runtime 없는 설치·실행이 성공했고 전체 installer matrix가 성공했다. 2026-09-05 05:06 KST에 merge commit `5b83fee1625fdd490051b840790683114d7daaab`로 병합했다. 이로써 §8.1 AR-0·AR-1·AR-B1·AR-F1은 완료됐다.
+
+이 merge commit의 post-merge workflow 6개도 exact main에서 모두 성공했다. Windows Installer의 첫 supported-upgrade attempt는 일곱 지원 버전 검증 뒤 `angmoo-sidecar.exe` 파일 잠금으로 fixture cleanup이 실패했으나, 동일 main SHA의 실패 job만 재실행한 attempt 2에서 supported-upgrade와 최종 aggregate가 성공했다. 제품 검증 실패와 Windows runner의 일시적 정리 실패를 구분해 기록하며, 이 재실행 결과를 다른 commit의 증거로 재사용하지 않는다.
