@@ -185,6 +185,15 @@
         "L0-L4 product URL, privacy UX, provider referer"
       ],
       "path": "frontend/src/lib/seo.ts"
+    },
+    {
+      "markers": [
+        "hosted-extension-type"
+      ],
+      "owner_phases": [
+        "L0-L4 hosted extension compatibility audit"
+      ],
+      "path": "security/refactor_feature_inventory.json"
     }
   ],
   "purpose": "Strings intentionally deferred from T2 without bulk replacement",

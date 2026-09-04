@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 import subprocess
 import sys
@@ -82,7 +83,12 @@ def main() -> int:
                 for line in baseline.read_text(encoding="utf-8").splitlines()
                 if line.strip()
             ]
-            missing = sorted(set(approved) - set(current))
+            path_map = REPO_ROOT / "security/refactor_path_map.json"
+            moves = json.loads(path_map.read_text(encoding="utf-8"))["test_nodes"] if path_map.exists() else {}
+            approved_targets = [moves.get(node, node) for node in approved]
+            if len(set(approved_targets)) != len(approved_targets):
+                raise RuntimeError("approved test-node moves must be one-to-one")
+            missing = sorted(set(approved_targets) - set(current))
             if len(approved) != expected_count or missing:
                 raise RuntimeError(
                     f"profile={profile} approved={len(approved)} "

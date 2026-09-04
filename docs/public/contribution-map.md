@@ -5,6 +5,10 @@ migrations, tests, documentation, and GitHub governance. Contributors work in
 a fork or branch and submit a pull request. The repository owner performs the
 final merge after required checks pass.
 
+## Architecture transition
+
+The target structure is explained by [backend ARCHITECTURE](../../backend/ARCHITECTURE.md) and [frontend ARCHITECTURE](../../frontend/ARCHITECTURE.md). [The preservation map](../architecture/refactor-feature-preservation.md) records the current migration and consumers. Only scopes listed in each architecture policy `refactor` section use the new rules. AR-1 provides checker support with no active product scopes; the pilot activates its own scope in the same change as its code. The existing locations and public/layer rules below remain valid elsewhere.
+
 ## Change locations
 
 | Area | Primary backend | Primary frontend | Validation focus |

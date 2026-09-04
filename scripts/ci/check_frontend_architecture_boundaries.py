@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import posixpath
 from pathlib import Path
 import re
 import sys
@@ -13,8 +14,11 @@ from typing import Any, Iterable
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_POLICY = ROOT / "security/frontend_architecture_policy.json"
 DEFAULT_SOURCE_ROOT = ROOT / "frontend/src"
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from refactor_boundaries import check_frontend_edges, validate_scope  # noqa: E402
+
 IMPORT_PATTERN = re.compile(
-    r"(?:from\s+|import\s*\(|require\s*\()\s*['\"]([^'\"]+)['\"]"
+    r"(?:from\s+|import\s*\(|require\s*\(|import\s+)\s*['\"]([^'\"]+)['\"]"
 )
 
 
@@ -32,6 +36,20 @@ def _relative(path: Path, source_root: Path) -> str:
 def _imports(path: Path) -> list[str]:
     text = path.read_text(encoding="utf-8")
     return sorted(set(IMPORT_PATTERN.findall(text)))
+
+
+def _normalized(path: Path, target: str, source_root: Path) -> str:
+    if target.startswith("@/"):
+        result = target[2:]
+    elif target.startswith("."):
+        result = posixpath.normpath(posixpath.join(path.relative_to(source_root).parent.as_posix(), target))
+    else:
+        return target
+    if result.endswith((".ts", ".tsx")):
+        result = result.rsplit(".", 1)[0]
+    elif (source_root / result).is_dir() and any((source_root / result / name).is_file() for name in ("index.ts", "index.tsx")):
+        result += "/index"
+    return "@/" + result
 
 
 def _feature_for_path(path: Path, source_root: Path) -> str | None:
@@ -107,6 +125,7 @@ def _validate_policy(policy: dict[str, Any]) -> list[str]:
 
 def check_frontend(source_root: Path, policy: dict[str, Any]) -> list[str]:
     errors = _validate_policy(policy)
+    errors.extend(validate_scope(policy.get("refactor", {}), frontend=True))
     if errors:
         return sorted(errors)
 
@@ -136,11 +155,16 @@ def check_frontend(source_root: Path, policy: dict[str, Any]) -> list[str]:
     observed_exceptions: set[tuple[str, str]] = set()
     legacy_prefixes = tuple(policy["legacy_import_prefixes"])
     feature_names = set(policy["feature_names"])
+    refactor = policy.get("refactor", {})
+    moved_features = set(refactor.get("features", []))
+    moved_common = set(refactor.get("common", []))
+    bridges = {(item["importer"], item["target"]) for item in refactor.get("bridges", [])}
+    normalized_edges = []
 
     source_files = sorted(
         path
         for path in source_root.rglob("*")
-        if path.is_file() and path.suffix in {".ts", ".tsx"}
+        if path.is_file() and path.suffix in {".ts", ".tsx", ".css"}
     )
     for path in source_files:
         relative = _relative(path, source_root)
@@ -149,8 +173,16 @@ def check_frontend(source_root: Path, policy: dict[str, Any]) -> list[str]:
             source_root / "app" in path.parents
         )
         is_shared = source_root / "shared" in path.parents
+        source_key = path.relative_to(source_root).as_posix()
+        if path.suffix in {".ts", ".tsx"}:
+            source_key = source_key.rsplit(".", 1)[0]
 
-        for target in _imports(path):
+        for original_target in _imports(path):
+            target = _normalized(path, original_target, source_root)
+            target_key = target[2:] if target.startswith("@/") else target
+            if target.startswith("@/"):
+                normalized_edges.append((source_key, target_key))
+            bridge = (source_key, target_key) in bridges
             target_feature = _feature_for_import(target)
             if target_feature:
                 feature, suffix = target_feature
@@ -158,7 +190,7 @@ def check_frontend(source_root: Path, policy: dict[str, Any]) -> list[str]:
                     errors.append(
                         f"[unknown_feature_import] {relative} -> {target}; docs={documentation}"
                     )
-                if is_route_root and suffix != "public":
+                if is_route_root and suffix != "public" and feature not in moved_features:
                     errors.append(
                         f"[route_deep_feature_import] {relative} -> {target}; "
                         f"allowed_fix=@/features/{feature}/public; docs={documentation}"
@@ -175,9 +207,11 @@ def check_frontend(source_root: Path, policy: dict[str, Any]) -> list[str]:
                     )
 
             if importer_feature and target.startswith(legacy_prefixes):
-                key = (relative, target)
+                key = (relative, original_target)
                 if key in exceptions:
                     observed_exceptions.add(key)
+                elif target_key in moved_common and (importer_feature in moved_features or bridge):
+                    pass
                 else:
                     errors.append(
                         f"[feature_imports_legacy_layer] {relative} -> {target}; "
@@ -185,13 +219,14 @@ def check_frontend(source_root: Path, policy: dict[str, Any]) -> list[str]:
                         f"docs={documentation}"
                     )
 
-            if is_shared and target.startswith(("@/app", "@/components", "@/lib")):
+            if is_shared and target.startswith(("@/app", "@/components", "@/lib")) and not bridge:
                 errors.append(
                     f"[shared_imports_product_layer] {relative} -> {target}; "
                     "allowed_fix=keep shared primitives product-neutral; "
                     f"docs={documentation}"
                 )
 
+    errors.extend(check_frontend_edges(normalized_edges, refactor))
     for key, item in sorted(exceptions.items()):
         if key not in observed_exceptions:
             errors.append(

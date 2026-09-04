@@ -59,3 +59,25 @@ condition = "AND"
 regexTarget = "secret"
 paths = ['''backend/\.env\.example''']
 regexes = ['''replace-with-a-long-local-development-secret''']
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Exact public API and ORM SHA-256 fingerprints in the immutable PR258 refactor baseline; not runtime credentials"
+condition = "AND"
+regexTarget = "line"
+paths = ['''(^|/)security/refactor_source_baseline\.json$''']
+regexes = [
+  '''^\s*"AgentLocalKeyCreateRead": "15b9efe138c19b802cf9429b14356aecfe0250f1a392197ebbf1b1928d541e8b",?\s*$''',
+  '''^\s*"AuthRead": "f825e0832b9e00ad0f57d9c355d60f3a86ed73275fb4896346829784f1d28667",?\s*$''',
+  '''^\s*"CredentialRead": "88bee8a8a42c0530b2b723027827414d9506201c0ea00e64e21dd40ea6d18be2",?\s*$''',
+  '''^\s*"CredentialUpsert": "443c20e3181d3e628bb23ab814b03964a95f10b5bec21e3e9a0733f04307f943",?\s*$''',
+  '''^\s*"DELETE\ /api/v1/agents/\{character_id\}/credential": "5c24613353cbb4960cd231feca31ccac31ba2fe6878a220d07b9ef43ad185b4f",?\s*$''',
+  '''^\s*"DELETE\ /api/v1/agents/\{character_id\}/image\-settings/key": "66aa77475f8e34060c5e9a968788cea4aff5de480ab424da4c51f55116c26c05",?\s*$''',
+  '''^\s*"DELETE\ /api/v1/agents/\{character_id\}/local\-key": "d1eb43cbcb2f019faa3871663386f31f588ca09cbba41f4c2fe567b47d49d729",?\s*$''',
+  '''^\s*"GET\ /api/v1/agents/\{character_id\}/credential": "68089162f0a23331338cb9ce12a1c5962d6651bc233d34d04a62c7f31b4602eb",?\s*$''',
+  '''^\s*"POST\ /api/v1/agents/\{character_id\}/local\-key": "d78fdea308c61d4f962f6b964f27fdea52f7a53fa7844cf38f8d67b7970c9028",?\s*$''',
+  '''^\s*"PUT\ /api/v1/agents/\{character_id\}/credential": "69a66509c773ac84059287ec8edc68a162a70b12dd25b4c9b0f0992c44febed5",?\s*$''',
+  '''^\s*"agent_local_keys": "9e6de93ecdf4afacf26d0b265ecab2ad56285201eee66d02c47d0d02817cb132",?\s*$''',
+  '''^\s*"auth_sessions": "94666084a74d5b8955b487470022245e2226a5801658b5f777da20f70baa176f",?\s*$''',
+  '''^\s*"llm_credentials": "d89fd2ad9978c6962a089be68423154ec64c58a127f9f20cc25dc11ff35c7226",?\s*$''',
+]

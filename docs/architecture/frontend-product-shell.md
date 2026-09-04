@@ -1,5 +1,7 @@
 # Frontend product-shell boundaries
 
+> **Architecture refactor, 2026-09-05:** The target is described in [ARCHITECTURE](../../frontend/ARCHITECTURE.md). This document continues to describe the unmigrated code. The `refactor` section in the architecture policy activates new rules only for listed scopes; it is empty during AR-1 preparation. See [feature preservation](refactor-feature-preservation.md) for baseline, consumer mapping and validation. Existing public/layer rules below apply outside migrated scopes.
+
 This document is the contributor-facing architecture contract for the L2.5
 Angmoo product shell. It is incremental: existing SNS, chat, profile, and
 creator routes remain in their legacy locations until a reviewed migration PR

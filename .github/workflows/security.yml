@@ -150,7 +150,8 @@ jobs:
             tests/test_oss_architecture_boundaries.py \
             tests/test_t2_architecture_inventory.py \
             tests/test_t2_5_architecture_boundaries.py \
-            tests/test_l2_5_frontend_architecture_boundaries.py
+            tests/test_l2_5_frontend_architecture_boundaries.py \
+            tests/test_refactor_architecture_boundaries.py
           uv run --directory backend python -m pytest -q \
             tests/test_l3_er7_windows_host_tauri_dev_contract.py \
             tests/test_l3_5_world_package_v1_contract.py \
@@ -158,3 +159,12 @@ jobs:
             tests/test_l3_5_world_package_closeout.py \
             tests/test_l3_5_world_package_closeout_contract.py \
             tests/test_l4_pr_f_closeout_contract.py
+      - name: Preserve refactor source, API, ORM, and collected tests
+        env:
+          APP_ENV: test
+          DATABASE_URL: "sqlite+pysqlite:///:memory:"
+          GRAPH_PROVIDER: ladybug
+          LOCAL_RUNTIME_COMPONENT_MODE: in_process
+          RESIDENT_TICK_SCHEDULER_ENABLED: "false"
+          POST_IMAGE_JOB_WORKER_ENABLED: "false"
+        run: uv run --project backend python scripts/ci/check_refactor_preservation.py --contracts --nodes

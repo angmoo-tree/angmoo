@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "description": "Reviewed old-to-new paths. The source/test baseline is never regenerated after a move.",
+  "files": {},
+  "test_nodes": {}
+}
