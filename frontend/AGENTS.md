@@ -19,13 +19,16 @@ Before changing user-visible frontend code, read:
 1. `frontend/DESIGN.md`
 2. `docs/architecture/frontend-design-reference.md`
 3. `docs/architecture/frontend-product-shell.md`
+4. `frontend/ARCHITECTURE.md` and `docs/architecture/refactor-feature-preservation.md`
 
 Apply these repository rules:
 
 - Record hosted-reference use as `DIRECT`, `ADAPTED`, `LOCAL`, or `REJECTED`.
-- Keep route wrappers thin and import migrated features through
-  `@/features/<feature>/public`.
-- Put only product-neutral presentation in `shared`; do not move World,
+- Keep route wrappers thin. For scopes activated in the architecture policy,
+  import actual feature files from app/composition and keep feature composition
+  above features. Unmigrated scopes still use their existing public entries.
+- Put product-neutral presentation in the canonical common location described
+  by ARCHITECTURE; `shared` remains for unmigrated code. Do not move World,
   authorization, runtime, or capability decisions into a shared primitive.
 - Reuse one feature component across Next and the static/Tauri router. Do not
   create a Tauri-only visual implementation.

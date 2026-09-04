@@ -14,6 +14,9 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_INVENTORY = ROOT / "security/architecture_import_baseline.json"
 DEFAULT_POLICY = ROOT / "security/architecture_import_policy.json"
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from refactor_boundaries import allowed_backend_entry, check_backend_edges, validate_scope  # noqa: E402
+
 
 def _load(path: Path) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
@@ -294,9 +297,12 @@ def check_inventory(
     modules, errors = _inventory_modules(inventory)
     exceptions, legacy_cycles, policy_errors = _validate_policy(policy)
     errors.extend(policy_errors)
+    errors.extend(validate_scope(policy.get("refactor", {}), frontend=False))
     if errors:
         return sorted(errors)
 
+    refactor = policy.get("refactor", {})
+    errors.extend(check_backend_edges(modules, refactor))
     legacy_prefixes = tuple(policy["legacy_prefixes"])
     pure_layer_forbidden_prefixes = tuple(
         policy["pure_layer_forbidden_external_prefixes"]
@@ -343,7 +349,7 @@ def check_inventory(
             exception = exceptions.get(edge)
             is_legacy = any(
                 _matches_prefix(imported, prefix) for prefix in legacy_prefixes
-            )
+            ) and imported not in refactor.get("globals", [])
             if is_legacy and exception is None:
                 errors.append(
                     _violation(
@@ -437,6 +443,7 @@ def check_inventory(
                     if (
                         imported_domain != importer_domain
                         and imported != imported_domain + ".public"
+                        and not allowed_backend_entry(imported, refactor)
                     ):
                         errors.append(
                             _violation(

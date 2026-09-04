@@ -1,5 +1,7 @@
 # Backend domain map and import contract
 
+> **Architecture refactor, 2026-09-05:** The target is described in [ARCHITECTURE](../../backend/ARCHITECTURE.md). This document continues to describe the unmigrated code. The `refactor` section in the architecture policy activates new rules only for listed scopes; it is empty during AR-1 preparation. See [feature preservation](refactor-feature-preservation.md) for baseline, consumer mapping and validation. Existing public/layer rules below apply outside migrated scopes.
+
 This document is the contributor-facing architecture contract for Angmoo's
 incremental domain-first refactor. It describes the target direction; it does
 not claim that every legacy module has already moved.

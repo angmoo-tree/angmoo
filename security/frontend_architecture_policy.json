@@ -326,5 +326,10 @@
     "frontend/src/shared/ui/status.tsx",
     "frontend/src/shared/ui/surfaces.tsx"
   ],
-  "schema_version": 1
+  "schema_version": 1,
+  "refactor": {
+    "features": [],
+    "common": [],
+    "bridges": []
+  }
 }
