@@ -151,3 +151,16 @@ def test_migrated_common_cannot_add_a_module_cycle(tmp_path):
     f._write(tmp_path, "frontend/src/components/ui/button.tsx", 'import { Icon } from "./icon";')
     f._write(tmp_path, "frontend/src/components/ui/icon.tsx", 'import { Button } from "./button";')
     assert any("refactor_module_cycle" in error for error in f.checker.check_frontend(tmp_path / "frontend/src", policy))
+
+
+def test_unmigrated_feature_needs_an_exact_incoming_compatibility_edge(tmp_path):
+    policy = frontend_policy()
+    f._write(tmp_path, "frontend/src/features/device-home/ui/home.tsx", 'import type { X } from "@/features/new-feature/public";')
+    assert any("refactor_unregistered_legacy_consumer" in error for error in f.checker.check_frontend(tmp_path / "frontend/src", policy))
+    policy["refactor"]["bridges"] = [{"importer": "features/device-home/ui/home", "target": "features/new-feature/public", "owner_stage": "AR-F2", "removal_condition": "Move this existing API/type consumer to composition"}]
+    assert f.checker.check_frontend(tmp_path / "frontend/src", policy) == []
+
+
+def test_new_composition_uses_actual_feature_file_not_legacy_public(tmp_path):
+    f._write(tmp_path, "frontend/src/composition/screens/home.tsx", 'import { X } from "@/features/new-feature/public";')
+    assert any("refactor_composition_imports_legacy_entry" in error for error in f.checker.check_frontend(tmp_path / "frontend/src", frontend_policy()))

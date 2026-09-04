@@ -11,7 +11,7 @@ AR-0은 #258 merge `6e56f0837cc11ff42ccbb520050bbd32c5e9bc14`를 고정했다. �
 | 기준 Home 웹 | 5 passed: compact·wide·runtime degraded·retry/launchability·PWA |
 | 기준 static export | 성공; 별도 static-shell을 frontend/out으로 export |
 | 기준 Home static | 5 passed: 단일 frame·Phone/main bootstrap·잘못된 wide 창 route 거부·sidecar media 인증 |
-| AR-1 검사 지원 | 관련 회귀 63 passed. 전체 수집 1,897개로 기존 1,867개와 새 검사 사례 30개 확인. 상대 경로·타입·directory import·정확한 bridge·모듈 순환·테스트 경유 우회 포함 |
+| AR-1 검사 지원 | 관련 회귀 65 passed. 기존 1,867개에 새 검사 사례 32개를 추가했다. 상대 경로·타입·directory import·정확한 incoming bridge·새 조립의 실제 파일 import·모듈 순환·테스트 경유 우회 포함 |
 | 현재 import/design 검사 | backend 686 modules / 1,846 edges / 기존 exact legacy edges 312; frontend 13 features; design raw colors 1,408 / route gaps 0 — 기존 기준 유지 |
 | GitHub | #258 post-merge 7/7 SUCCESS 확인. 새 준비 PR의 head/merge 검증은 별도 기록 |
 

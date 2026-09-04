@@ -104,6 +104,10 @@ def check_frontend_edges(edges: list[tuple[str, str]], policy: dict) -> list[str
             errors.append(f"[refactor_unmigrated_bridge_target] {source} -> {target}")
     for source, target in observed:
         owner, other = feature(source), feature(target)
+        if owner and other in moved and owner != other and (source, target) not in bridges:
+            errors.append(f"[refactor_unregistered_legacy_consumer] {source} -> {target}")
+        if source.startswith(("app/", "composition/")) and other in moved and target.endswith("/public"):
+            errors.append(f"[refactor_composition_imports_legacy_entry] {source} -> {target}")
         if not is_test_path(source) and is_test_path(target):
             errors.append(f"[refactor_production_imports_test] {source} -> {target}")
         if owner in moved:
