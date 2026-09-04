@@ -223,7 +223,7 @@
       "owner": "ER4",
       "path": "backend/app/runtime/single_backend_components.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "87c62df07d92c3d72a47a0c6afc286ccb40fd4169043f7f7ef30a5ef1fc9bad8",
+      "source_sha256": "1cd8f5e7caeca95f633c3f2f1809623fee3b545bfa4e31930fcb96a931704e1d",
       "transition_pr": "ER4 PR J"
     },
     {
@@ -287,7 +287,7 @@
       "owner": "ER4",
       "path": "backend/app/public_main.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "d9214da6b117d297e7769d372849687031d776f221f361bc7d0aabbb4ae25625",
+      "source_sha256": "48a13dfab161ab4f544d8a26b476e3a9e9727153c74086f5a75ac2424d87f564",
       "transition_pr": "ER4 PR J"
     },
     {

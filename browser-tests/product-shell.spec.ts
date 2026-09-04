@@ -1049,6 +1049,7 @@ test("P8-L-R Memory owner controls save, supersede, delete, retry-safe scope, an
   };
   let memoryEnabled = false;
   let settingVersion = 2;
+  const handleMemoryBatch = memoryBatchFixture(worldId, subjectId, () => memoryEnabled);
   let activeItem = { ...item };
   let oldItem = { ...item };
   let deleted = false;
@@ -1086,6 +1087,7 @@ test("P8-L-R Memory owner controls save, supersede, delete, retry-safe scope, an
           ],
         });
       }
+      if (await handleMemoryBatch(route)) return;
       if (url.pathname.endsWith("/memory/settings")) {
         if (method === "PUT") {
           const body = route.request().postDataJSON() as { enabled: boolean };
@@ -1220,6 +1222,7 @@ test("P8-L-R Memory owner controls save, supersede, delete, retry-safe scope, an
   );
   await page.getByRole("button", { name: "기억 켜기" }).click();
   await expect(page.getByText("기억을 켰어요.", { exact: false })).toBeVisible();
+  await verifyMemoryBatchControls(page);
   await page.getByRole("button", { name: "고정", exact: true }).click();
   await expect(page.getByRole("button", { name: "고정 해제", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "정정", exact: true }).click();
@@ -2700,3 +2703,4 @@ test("legacy Messages keeps list, thread, retry, model, send, and delete parity"
     ).length,
   ).toBeGreaterThanOrEqual(1);
 });
+import { memoryBatchFixture, verifyMemoryBatchControls } from "./memory-batch-fixture";

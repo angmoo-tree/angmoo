@@ -657,6 +657,17 @@ other Characters' private motivation remain REJECTED.
 
 ## Asset and font provenance
 
+### P8-L-R Memory batch and shutdown reference
+
+DIRECT: the existing Memory workspace, shared Field/Input/Select/Button and
+accessible Dialog. ADAPTED: saved status, consent and time-zone copy. LOCAL:
+per-WorldCharacter daily/exit settings, one installation model, explicit paid
+consent, and non-dismissable whole-app closing with a `지금 종료` action.
+REJECTED: Hosted quota/key controls, raw provider errors and database internals.
+No new image/font/icon package, remote asset, color palette or product route is
+introduced. The same feature reflows in narrow Next/static and the wide Tauri
+Memory window; the closing overlay belongs to the shared desktop shell.
+
 UI-A adds no asset, font, dependency, or copied icon. UI-B likewise adds no
 remote or bundled font and no copied hosted asset. Its fixture uses existing
 Local PWA artwork and the already-licensed Lucide dependency.

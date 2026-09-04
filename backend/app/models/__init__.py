@@ -38,6 +38,14 @@ from app.domains.chat.infrastructure.sqlalchemy_models import (
     MessageThread,
     UserMessagePreference,
 )
+from app.domains.memory.infrastructure.batch_models import (
+    MemoryActivationEpoch,
+    MemoryBatchProfile,
+    MemoryBatchRun,
+    MemoryBatchSetting,
+    MemorySelectionDecisionModel,
+    MemorySourceDelivery,
+)
 from app.domains.memory.infrastructure.sqlalchemy_models import (
     MemoryCandidate,
     MemoryHotBrief,
@@ -152,6 +160,12 @@ __all__ = [
     "MessageMessage",
     "MessageThread",
     "MemoryCandidate",
+    "MemoryActivationEpoch",
+    "MemoryBatchProfile",
+    "MemoryBatchRun",
+    "MemoryBatchSetting",
+    "MemorySelectionDecisionModel",
+    "MemorySourceDelivery",
     "MemoryHotBrief",
     "MemoryHotBriefItem",
     "MemoryItem",

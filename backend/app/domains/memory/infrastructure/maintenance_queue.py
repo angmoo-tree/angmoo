@@ -84,6 +84,7 @@ class SqlAlchemyMemoryMaintenanceQueue:
         lease_token: str,
         now: datetime,
         lease_for: timedelta,
+        job_id: str | None = None,
     ) -> MemoryMaintenanceWorkItem | None:
         token = _bounded(lease_token, "memory_job_lease_invalid", maximum=64)
         if lease_for <= timedelta(0) or lease_for > timedelta(minutes=30):
@@ -95,13 +96,14 @@ class SqlAlchemyMemoryMaintenanceQueue:
                     MemoryMaintenanceJob.scope_setting_id,
                 )
                 .where(
+                    MemoryMaintenanceJob.reason != "memory_selection_v2"
+                    if job_id is None
+                    else MemoryMaintenanceJob.id == job_id,
                     or_(
                         MemoryMaintenanceJob.status == MemoryJobStatus.PENDING.value,
-                        (
-                            MemoryMaintenanceJob.status == MemoryJobStatus.RUNNING.value
-                        )
+                        (MemoryMaintenanceJob.status == MemoryJobStatus.RUNNING.value)
                         & (MemoryMaintenanceJob.lease_expires_at <= now),
-                    )
+                    ),
                 )
                 .order_by(MemoryMaintenanceJob.created_at, MemoryMaintenanceJob.id)
                 .limit(50)

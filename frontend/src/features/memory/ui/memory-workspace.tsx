@@ -46,6 +46,7 @@ import type {
   MemorySettingRead,
 } from "../model/memory-contract";
 import styles from "./memory-workspace.module.css";
+import { MemoryBatchControls } from "./memory-batch-controls";
 
 type MemoryWorkspaceProps = {
   initialMemoryId?: string;
@@ -80,7 +81,7 @@ export function MemoryWorkspace({
     initialMemoryId ? "loading" : "idle",
   );
   const [pagePhase, setPagePhase] = useState<"idle" | "loading" | "error">("idle");
-  const [mutationKind, setMutationKind] = useState<OwnerMutation["kind"] | null>(null);
+  const [mutationKind, setMutationKind] = useState<OwnerMutation["kind"] | "batch" | null>(null);
   const [mutationFailure, setMutationFailure] = useState<MutationFailure | null>(null);
   const [mutationNotice, setMutationNotice] = useState<string | null>(null);
   const [correctionOpen, setCorrectionOpen] = useState(false);
@@ -90,6 +91,14 @@ export function MemoryWorkspace({
   const [revision, setRevision] = useState(0);
   const correctionRef = useRef<HTMLTextAreaElement>(null);
   const mutationLockRef = useRef(false);
+  const acquireBatch = useCallback(() => {
+    if (mutationLockRef.current) return false;
+    mutationLockRef.current = true;
+    setMutationKind("batch");
+    return true;
+  }, []);
+  const releaseBatch = useCallback(() => { mutationLockRef.current = false; setMutationKind(null); }, []);
+  const refreshBatchItems = useCallback(() => setRevision((value) => value + 1), []);
 
   const syncRoute = useCallback((nextWorld: string, nextSubject: string, nextMemory = "") => {
     const query = new URLSearchParams();
@@ -431,6 +440,7 @@ export function MemoryWorkspace({
               </Button>
             </div>
             {mutationNotice ? <p className={styles.mutationNotice} role="status">{mutationNotice}</p> : null}
+            <MemoryBatchControls key={`${worldId}:${subjectId}:${setting?.version}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} onCompleted={refreshBatchItems} />
             {mutationFailure ? (
               <div className={styles.mutationError} role="alert">
                 <p>{mutationFailure.message}</p>
@@ -503,7 +513,7 @@ export function MemoryWorkspace({
 function MemoryDetail({ detail, memoryEnabled, mutationKind, onCorrect, onDelete, onSelectMemory, onTogglePin }: {
   detail: MemoryItemDetailRead;
   memoryEnabled: boolean;
-  mutationKind: OwnerMutation["kind"] | null;
+  mutationKind: OwnerMutation["kind"] | "batch" | null;
   onCorrect: () => void;
   onDelete: () => void;
   onSelectMemory: (memoryId: string) => void;

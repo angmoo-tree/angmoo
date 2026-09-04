@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { DesktopShutdownOverlay } from "./desktop-shutdown-overlay";
 
 import {
   getDesktopRuntimeStatus,
@@ -75,7 +76,7 @@ export function DesktopRuntimeGate({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  if (state.kind === "ready" || state.kind === "bypass") return children;
+  if (state.kind === "ready" || state.kind === "bypass") return <>{children}<DesktopShutdownOverlay /></>;
   const crashed =
     state.kind === "waiting" && state.status.phase === "crashed";
   return (
@@ -84,6 +85,7 @@ export function DesktopRuntimeGate({ children }: { children: ReactNode }) {
       aria-live="polite"
       data-desktop-runtime-state={crashed ? "crashed" : "starting"}
     >
+      <DesktopShutdownOverlay />
       <section
         className="min-w-0 text-center"
         style={{ width: "min(24rem, calc(100vw - 4rem))" }}

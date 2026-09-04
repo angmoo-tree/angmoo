@@ -14,6 +14,8 @@ sys.path.insert(0, str(ROOT / "backend"))
 OUTPUT = ROOT / "docs/architecture/p8-l-r-today-sns-activity-inventory.json"
 PREDECESSOR = "docs/architecture/p8-l-r-memory-owner-control-inventory.json"
 PREDECESSOR_SHA256 = "c02287d0d563582522a58c0ca9fd217b6b6985a59eafafa7b6278b6f8a818520"
+BATCH_INVENTORY = ROOT / "docs/architecture/p8-l-r-memory-batch-inventory.json"
+FROZEN_SHA256 = "2120ef3cccb09753119deebd7025f1f9a01d316c518c5d2eda053c5221cbf5ec"
 
 from app.domains.chat.domain.call_tracker import NORMAL_NODE_BUDGETS  # noqa: E402
 from app.domains.chat.domain.today_sns_activity import (  # noqa: E402
@@ -148,6 +150,10 @@ def _boundaries():
 
 
 def build_inventory():
+    if BATCH_INVENTORY.is_file():
+        if _record(OUTPUT.relative_to(ROOT))["sha256"] != FROZEN_SHA256:
+            raise ValueError("frozen Today SNS predecessor drift")
+        return json.loads(OUTPUT.read_text(encoding="utf-8"))
     predecessor = _record(PREDECESSOR)
     if predecessor["sha256"] != PREDECESSOR_SHA256:
         raise ValueError("frozen P8-L-R owner-control predecessor drift")

@@ -7,6 +7,7 @@ the Memory domain itself remains independent from runtime adapters.
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from dataclasses import asdict
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
@@ -53,6 +54,16 @@ from app.domains.world_characters.public import (
 from app.runtime.memory.sqlalchemy_source_reader import (
     SqlAlchemyMemorySourceEvidenceReader,
 )
+from app.domains.memory.api.batch_schemas import (
+    MemoryBatchRetry,
+    MemoryBatchSettingRead,
+    MemoryBatchSettingUpdate,
+)
+from app.domains.memory.infrastructure.batch_repository import (
+    SqlAlchemyMemoryBatchRepository,
+)
+from app.providers.registry import MESSAGE_GOOGLE_MODELS
+from app.runtime.memory_selection_provider import memory_provider
 
 
 router = APIRouter(
@@ -68,8 +79,96 @@ def _service(db: Session) -> MemoryReadService:
     )
 
 
+@router.get("/memory/batch-settings", response_model=MemoryBatchSettingRead)
+def read_memory_batch_setting(
+    world_id: str,
+    subject_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> MemoryBatchSettingRead:
+    browser_session.require_local_frontend_request(request, mutation=False)
+    try:
+        value = SqlAlchemyMemoryBatchRepository(db).settings(
+            _scope(user, world_id, subject_id)
+        )
+        return MemoryBatchSettingRead(
+            **asdict(value),
+            scope={"world_id": world_id, "subject_world_character_id": subject_id},
+            available_models=list(MESSAGE_GOOGLE_MODELS),
+        )
+    except Exception as exc:
+        _raise_memory_read_error(exc)
+        raise AssertionError("unreachable")
+
+
+@router.put("/memory/batch-settings", response_model=MemoryBatchSettingRead)
+def update_memory_batch_setting(
+    world_id: str,
+    subject_id: str,
+    data: MemoryBatchSettingUpdate,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> MemoryBatchSettingRead:
+    browser_session.require_local_frontend_request(request, mutation=True)
+    scope = _scope(user, world_id, subject_id)
+    try:
+        repository = SqlAlchemyMemoryBatchRepository(db)
+        repository.memory.validate_scope(scope)
+        if data.model_id is not None and data.model_id not in MESSAGE_GOOGLE_MODELS:
+            raise MemoryValidationError("memory_selection_model_invalid")
+        if data.ai_enabled:
+            from contextlib import nullcontext
+
+            # Readiness/credential resolution only: never generates on Save.
+            memory_provider(lambda: nullcontext(db), user.id, data.model_id or "")
+        value = repository.save_settings(
+            scope, **data.model_dump(), now=datetime.now(UTC)
+        )
+        db.commit()
+        return MemoryBatchSettingRead(
+            **asdict(value),
+            scope={"world_id": world_id, "subject_world_character_id": subject_id},
+            available_models=list(MESSAGE_GOOGLE_MODELS),
+        )
+    except Exception as exc:
+        db.rollback()
+        _raise_memory_mutation_error(exc)
+        raise AssertionError("unreachable")
+
+
 def _scope_service(db: Session) -> MemoryScopeService:
     return MemoryScopeService(SqlAlchemyMemoryRepository(db))
+
+
+@router.post("/memory/batch-retry", response_model=MemoryBatchSettingRead)
+def retry_memory_batch(
+    world_id: str,
+    subject_id: str,
+    data: MemoryBatchRetry,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> MemoryBatchSettingRead:
+    browser_session.require_local_frontend_request(request, mutation=True)
+    scope = _scope(user, world_id, subject_id)
+    try:
+        repository = SqlAlchemyMemoryBatchRepository(db)
+        repository.memory.validate_scope(scope)
+        repository.retry_failed(
+            scope, idempotency_key=data.idempotency_key, now=datetime.now(UTC)
+        )
+        db.commit()
+        return MemoryBatchSettingRead(
+            **asdict(repository.settings(scope)),
+            scope={"world_id": world_id, "subject_world_character_id": subject_id},
+            available_models=list(MESSAGE_GOOGLE_MODELS),
+        )
+    except Exception as exc:
+        db.rollback()
+        _raise_memory_mutation_error(exc)
+        raise AssertionError("unreachable")
 
 
 def _write_service(db: Session) -> MemoryWriteLifecycleService:
@@ -98,7 +197,12 @@ def _raise_memory_read_error(exc: Exception) -> None:
         code = status.HTTP_422_UNPROCESSABLE_ENTITY
     else:
         code = status.HTTP_503_SERVICE_UNAVAILABLE
-    raise HTTPException(status_code=code, detail=str(exc)) from exc
+    detail = (
+        "memory_service_unavailable"
+        if code == status.HTTP_503_SERVICE_UNAVAILABLE
+        else str(exc)
+    )
+    raise HTTPException(status_code=code, detail=detail) from None
 
 
 def _raise_memory_mutation_error(exc: Exception) -> None:
@@ -112,7 +216,12 @@ def _raise_memory_mutation_error(exc: Exception) -> None:
         code = status.HTTP_422_UNPROCESSABLE_ENTITY
     else:
         code = status.HTTP_503_SERVICE_UNAVAILABLE
-    raise HTTPException(status_code=code, detail=str(exc)) from exc
+    detail = (
+        "memory_service_unavailable"
+        if code == status.HTTP_503_SERVICE_UNAVAILABLE
+        else str(exc)
+    )
+    raise HTTPException(status_code=code, detail=detail) from None
 
 
 @router.get("/memory/settings", response_model=MemorySettingRead)
@@ -135,9 +244,7 @@ def read_memory_setting(
         configured=setting is not None,
         enabled=False if setting is None else setting.enabled,
         retention_days=(
-            DEFAULT_MEMORY_RETENTION_DAYS
-            if setting is None
-            else setting.retention_days
+            DEFAULT_MEMORY_RETENTION_DAYS if setting is None else setting.retention_days
         ),
         provider_mode=(
             MemoryProviderMode.NONE.value
@@ -495,10 +602,7 @@ def _character_names(db: Session, scope: MemoryScope) -> dict[str, str]:
         world_id=scope.world_id,
         current_user_id=scope.owner_id,
     )
-    return {
-        profile.world_character_id: profile.display_name
-        for profile in profiles
-    }
+    return {profile.world_character_id: profile.display_name for profile in profiles}
 
 
 def _canonical_href(scope: MemoryScope, evidence) -> str | None:
@@ -506,10 +610,14 @@ def _canonical_href(scope: MemoryScope, evidence) -> str | None:
         return None
     if evidence.source_type in {MemorySourceTypeV1.POST, MemorySourceTypeV1.REPLY}:
         return f"/worlds/{scope.world_id}/posts/{evidence.source_id}"
-    if evidence.source_type in {
-        MemorySourceTypeV1.CHAT_MESSAGE,
-        MemorySourceTypeV1.OWNER_MEMORY_REQUEST,
-    } and evidence.thread_id:
+    if (
+        evidence.source_type
+        in {
+            MemorySourceTypeV1.CHAT_MESSAGE,
+            MemorySourceTypeV1.OWNER_MEMORY_REQUEST,
+        }
+        and evidence.thread_id
+    ):
         return f"/worlds/{scope.world_id}/chat/{evidence.thread_id}"
     return None
 

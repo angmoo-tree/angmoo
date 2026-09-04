@@ -128,7 +128,7 @@ def test_installer_upgrade_mode_creates_current_generations_and_is_idempotent(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     data_root = tmp_path / "Angmoo"
-    manifest = _manifest(tmp_path / "payload.json")
+    manifest = _manifest(tmp_path / "payload.json", sqlite=(1, 9, 9))
     argv = [
         "angmoo-sidecar",
         "--installer-data-upgrade",
@@ -184,7 +184,7 @@ def test_installer_upgrade_mode_creates_current_generations_and_is_idempotent(
     finally:
         writer.close()
     assert second["status"] == "upgraded"
-    assert second["sqlite_source_version"] == 8
+    assert second["sqlite_source_version"] == 9
     assert second["ladybug_source_version"] == 2
     assert (data_root / "canonical" / "current-generation.json").read_bytes() == canonical_marker
     assert (data_root / "graph" / "current-generation.json").read_bytes() == graph_marker

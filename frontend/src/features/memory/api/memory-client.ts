@@ -1,5 +1,38 @@
 import { clearStoredUser, notifyAuthChanged } from "@/shared/auth/public";
 import { runtimeFetch } from "@/shared/runtime/public";
+import type { MemoryBatchSetting, MemoryBatchUpdate } from "../model/memory-batch-contract";
+
+export function getMemoryBatchSetting(worldId: string, subjectId: string, signal?: AbortSignal) {
+  return requestMemoryApi<MemoryBatchSetting>(`${scopePath(worldId, subjectId)}/memory/batch-settings`, { signal })
+    .then((value) => validateBatchSetting(value, worldId, subjectId));
+}
+
+export function saveMemoryBatchSetting(worldId: string, subjectId: string, data: MemoryBatchUpdate) {
+  return requestMemoryMutation<MemoryBatchSetting>(`${scopePath(worldId, subjectId)}/memory/batch-settings`, { method: "PUT", body: JSON.stringify(data) })
+    .then((value) => validateBatchSetting(value, worldId, subjectId));
+}
+
+export function retryMemoryBatch(worldId: string, subjectId: string, idempotencyKey: string) {
+  return requestMemoryMutation<MemoryBatchSetting>(`${scopePath(worldId, subjectId)}/memory/batch-retry`, { method: "POST", body: JSON.stringify({ idempotency_key: idempotencyKey }) })
+    .then((value) => validateBatchSetting(value, worldId, subjectId));
+}
+
+function validateBatchSetting(value: MemoryBatchSetting, worldId: string, subjectId: string) {
+  if (!value || !matchesScope(value.scope, worldId, subjectId) ||
+    !Number.isInteger(value.version) || value.version < 0 ||
+    !Number.isInteger(value.profile_version) || value.profile_version < 0 ||
+    !Number.isInteger(value.pending_count) || value.pending_count < 0 ||
+    [value.memory_enabled, value.ai_enabled, value.shutdown_enabled, value.schedule_enabled].some((flag) => typeof flag !== "boolean") ||
+    typeof value.local_time !== "string" || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value.local_time) ||
+    typeof value.timezone !== "string" ||
+    !["disabled", "paused", "waiting", "running", "pending", "attention", "completed"].includes(value.status) ||
+    !Array.isArray(value.available_models) || value.available_models.some((model) => typeof model !== "string") ||
+    (value.model_id !== null && !value.available_models.includes(value.model_id)) ||
+    [value.next_due_at, value.last_completed_at].some((time) => time !== null && (typeof time !== "string" || !Number.isFinite(Date.parse(time))))) {
+    throw new MemoryApiError(502, "memory_batch_contract_invalid");
+  }
+  return value;
+}
 
 import type {
   MemoryItemDetailRead,

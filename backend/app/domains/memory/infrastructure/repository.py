@@ -125,6 +125,9 @@ class SqlAlchemyMemoryRepository:
         updated = self._find_scope(scope, populate_existing=True)
         if updated is None:
             raise MemoryConflictError("memory_scope_update_missing")
+        from app.domains.memory.infrastructure.activation import record_activation
+
+        record_activation(self._session, updated)
         if not enabled:
             self._invalidate_hot_briefs(updated.id, now=datetime.now(UTC))
             self._session.flush()
@@ -195,7 +198,10 @@ class SqlAlchemyMemoryRepository:
             if row.reason_code != reason_code:
                 raise MemoryConflictError("memory_candidate_decision_conflict")
             return self._to_candidate(row)
-        if row.status != MemoryCandidateStatus.PENDING.value or row.version != expected_version:
+        if (
+            row.status != MemoryCandidateStatus.PENDING.value
+            or row.version != expected_version
+        ):
             raise MemoryConflictError("memory_candidate_version_conflict")
         row.status = MemoryCandidateStatus.REJECTED.value
         row.reason_code = reason_code
@@ -397,8 +403,7 @@ class SqlAlchemyMemoryRepository:
                 confidence=old.confidence,
                 salience=old.salience,
                 valid_from=old.valid_from,
-                valid_until=now
-                + timedelta(days=setting_row.retention_days),
+                valid_until=now + timedelta(days=setting_row.retention_days),
                 version=1,
             )
             self._session.add(replacement)
@@ -488,8 +493,9 @@ class SqlAlchemyMemoryRepository:
             )
         rows = list(
             self._session.scalars(
-                statement.order_by(MemoryItem.updated_at.desc(), MemoryItem.id.desc())
-                .limit(limit + 1)
+                statement.order_by(
+                    MemoryItem.updated_at.desc(), MemoryItem.id.desc()
+                ).limit(limit + 1)
             )
         )
         has_more = len(rows) > limit
@@ -578,7 +584,10 @@ class SqlAlchemyMemoryRepository:
         row = self._require_item(scope, item_id, for_update=True)
         if row.status == MemoryItemStatus.DELETED.value:
             return self._to_item(row), False
-        if row.status != MemoryItemStatus.ACTIVE.value or row.version != expected_version:
+        if (
+            row.status != MemoryItemStatus.ACTIVE.value
+            or row.version != expected_version
+        ):
             raise MemoryConflictError("memory_item_version_conflict")
         with self._session.begin_nested():
             self._mark_deleted(row, now=now)

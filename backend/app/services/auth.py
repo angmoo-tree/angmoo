@@ -313,7 +313,9 @@ def login_with_google(
         )
     )
     if user is not None:
-        return _google_login_from_auth(issue_auth_session(db, user, auth_method="google"))
+        return _google_login_from_auth(
+            issue_auth_session(db, user, auth_method="google")
+        )
 
     existing_email_user = db.scalar(
         select(models.User).where(
@@ -449,7 +451,9 @@ def link_google_account(
     if email_verified is not True and email_verified != "true":
         raise InvalidGoogleCredentialError("Google email is not verified")
     if normalize_email(user.email or "") != email:
-        raise GoogleLinkEmailMismatchError("Google email does not match current account")
+        raise GoogleLinkEmailMismatchError(
+            "Google email does not match current account"
+        )
     existing_google_user = db.scalar(
         select(models.User).where(
             models.User.google_sub == google_sub,
@@ -666,7 +670,9 @@ def _release_openclaw_profiles_for_account(
                 credential=credential,
             )
         except openclaw_auth_profiles.OpenClawAuthProfileSyncError as exc:
-            raise AccountDeletionCredentialSyncError(redact_secret_text(str(exc))) from exc
+            raise AccountDeletionCredentialSyncError(
+                redact_secret_text(str(exc))
+            ) from exc
         released = True
     if released:
         _reload_openclaw_secrets_sync()
@@ -722,6 +728,9 @@ def _scrub_account_data(
 
     from app.services import world_character_setup
 
+    from app.runtime.memory_privacy import scrub_memory_data
+
+    scrub_memory_data(db, owner_id=user.id)
     db.execute(
         delete(models.SocialActionSubjectiveContext).where(
             models.SocialActionSubjectiveContext.owner_id == user.id
@@ -778,7 +787,9 @@ def _scrub_account_data(
     )
     db.execute(
         delete(models.CharacterMessageSetting).where(
-            character_condition(models.CharacterMessageSetting.character_id, character_ids)
+            character_condition(
+                models.CharacterMessageSetting.character_id, character_ids
+            )
         )
     )
 
@@ -792,7 +803,9 @@ def _scrub_account_data(
         delete(models.CharacterLoreChunk).where(
             or_(
                 models.CharacterLoreChunk.owner_id == user.id,
-                character_condition(models.CharacterLoreChunk.character_id, character_ids),
+                character_condition(
+                    models.CharacterLoreChunk.character_id, character_ids
+                ),
                 models.CharacterLoreChunk.source_id.in_(lore_source_ids),
             )
         )
@@ -801,7 +814,9 @@ def _scrub_account_data(
         delete(models.CharacterLoreSource).where(
             or_(
                 models.CharacterLoreSource.owner_id == user.id,
-                character_condition(models.CharacterLoreSource.character_id, character_ids),
+                character_condition(
+                    models.CharacterLoreSource.character_id, character_ids
+                ),
             )
         )
     )
@@ -810,7 +825,9 @@ def _scrub_account_data(
         delete(models.PostImageGenerationJob).where(
             or_(
                 models.PostImageGenerationJob.user_id == user.id,
-                character_condition(models.PostImageGenerationJob.character_id, character_ids),
+                character_condition(
+                    models.PostImageGenerationJob.character_id, character_ids
+                ),
             )
         )
     )
@@ -866,12 +883,16 @@ def _scrub_account_data(
         delete(models.AgentActivityLog).where(
             or_(
                 models.AgentActivityLog.user_id == user.id,
-                character_condition(models.AgentActivityLog.character_id, character_ids),
+                character_condition(
+                    models.AgentActivityLog.character_id, character_ids
+                ),
             )
         )
     )
     db.execute(
-        delete(models.AgentRun).where(_owned_agent_run_condition(user.id, character_ids))
+        delete(models.AgentRun).where(
+            _owned_agent_run_condition(user.id, character_ids)
+        )
     )
     db.execute(
         delete(models.PostReport).where(models.PostReport.reporter_user_id == user.id)
@@ -914,7 +935,9 @@ def _scrub_account_data(
                 character_condition(
                     models.Notification.recipient_character_id, character_ids
                 ),
-                character_condition(models.Notification.actor_character_id, character_ids),
+                character_condition(
+                    models.Notification.actor_character_id, character_ids
+                ),
             )
         )
     )
@@ -1069,7 +1092,9 @@ def _ensure_policy_agreements(privacy_policy_agreed: bool, terms_agreed: bool) -
 
 
 def _has_policy_agreements(user: models.User) -> bool:
-    return user.privacy_policy_agreed_at is not None and user.terms_agreed_at is not None
+    return (
+        user.privacy_policy_agreed_at is not None and user.terms_agreed_at is not None
+    )
 
 
 def _set_policy_agreements(user: models.User, agreed_at: datetime) -> None:
@@ -1122,8 +1147,7 @@ def _create_pending_google_signup_token(
     now = _utcnow()
     db.execute(
         delete(models.AuthGoogleSignupGrant).where(
-            models.AuthGoogleSignupGrant.expires_at
-            < now - timedelta(hours=24)
+            models.AuthGoogleSignupGrant.expires_at < now - timedelta(hours=24)
         )
     )
     db.add(
@@ -1161,7 +1185,12 @@ def _read_pending_google_signup_token(token: str) -> dict[str, str]:
 
     try:
         payload = json.loads(_b64url_decode(payload_raw).decode("utf-8"))
-    except (binascii.Error, UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
+    except (
+        binascii.Error,
+        UnicodeDecodeError,
+        json.JSONDecodeError,
+        ValueError,
+    ) as exc:
         raise InvalidGoogleSignupTokenError("Invalid pending signup token") from exc
     if not isinstance(payload, dict):
         raise InvalidGoogleSignupTokenError("Invalid pending signup token")
@@ -1200,10 +1229,7 @@ def _lock_pending_google_signup_grant(
 ) -> models.AuthGoogleSignupGrant:
     grant = db.scalar(
         select(models.AuthGoogleSignupGrant)
-        .where(
-            models.AuthGoogleSignupGrant.jti_hash
-            == _pending_signup_jti_hash(jti)
-        )
+        .where(models.AuthGoogleSignupGrant.jti_hash == _pending_signup_jti_hash(jti))
         .with_for_update()
     )
     now = _utcnow()
@@ -1213,10 +1239,7 @@ def _lock_pending_google_signup_grant(
     expires_at = grant.expires_at
     if expires_at.tzinfo is None:
         expires_at = expires_at.replace(tzinfo=timezone.utc)
-    if (
-        grant.consumed_at is not None
-        or expires_at <= now
-    ):
+    if grant.consumed_at is not None or expires_at <= now:
         db.rollback()
         raise InvalidGoogleSignupTokenError("Invalid pending signup token")
     return grant

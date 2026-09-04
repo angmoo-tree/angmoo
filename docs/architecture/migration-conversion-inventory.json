@@ -985,9 +985,20 @@
       "source_sha256": "59f7cc1cb4d53d7db8132231c969581e460102ff9a2b5c87581ea510055b8643",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260904_0088",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/app/alembic/versions/20260904_0089_memory_batch.py",
+      "removal_condition": "preserve immutable historical revision identity; do not execute as the current SQLite runtime chain",
+      "revision": "20260904_0089",
+      "source_sha256": "8da92d09cb608e31e8c8b53062832a985108fde143e4745bd6415f65e8908074",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
     }
   ],
-  "migration_count": 86,
+  "migration_count": 87,
   "purpose": "PostgreSQL-era Alembic provenance retained as immutable historical evidence",
   "schema_version": 1
 }

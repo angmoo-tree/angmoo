@@ -1,0 +1,436 @@
+{
+  "bounds": {
+    "candidates": 2,
+    "durable_attempts": 3,
+    "input_characters": 12000,
+    "input_native_tokenizer": false,
+    "input_normalized_byte_token_bound": 16384,
+    "input_utf8_bytes": 12000,
+    "installation_concurrency": 1,
+    "output_tokens": 2048,
+    "shutdown_batches": 8,
+    "shutdown_seconds": 30
+  },
+  "contract": {
+    "ai_failure_accept_all": false,
+    "app_off_os_wake": false,
+    "canonical_ids_in_provider_contract": false,
+    "chat_router_changed": false,
+    "default_new_paid_consent": false,
+    "legacy_summary_mode_unchanged": true,
+    "per_activity_memory_ai_calls": 0,
+    "shared_maintenance_queue": true
+  },
+  "files": [
+    {
+      "path": ".github/workflows/windows-installer.yml",
+      "sha256": "627fe62581f442507ce4099335c3974921bc012c1a15019fc6c58e69d065c389"
+    },
+    {
+      "path": "backend/app/api/v1/routes/memory.py",
+      "sha256": "c76f1997a20ed510d7d71aef9480fb2831522934977a9ca7deaea86c41a9c4c5"
+    },
+    {
+      "path": "backend/app/domains/memory/__init__.py",
+      "sha256": "6eda6c61fef75cb4a832b68f874489fbcba2d776aa7f6a4ed273aae5544222eb"
+    },
+    {
+      "path": "backend/app/domains/memory/api/__init__.py",
+      "sha256": "a1f2561bd3ffdd36b8942f7f7e441601a1dda05e6dee8ecd4a6655c72dc72f9c"
+    },
+    {
+      "path": "backend/app/domains/memory/api/batch_schemas.py",
+      "sha256": "be33e3baa9776c7f5c2f87c0ab5b443d58ceb4d80f4912f5f2fb10476d236a6e"
+    },
+    {
+      "path": "backend/app/domains/memory/api/schemas.py",
+      "sha256": "00f75c7013dbfb20157157dfe11463dbdab2a11ccd3375098aab0faea7d1a1f5"
+    },
+    {
+      "path": "backend/app/domains/memory/application/__init__.py",
+      "sha256": "1c2b95a836faa62a33baaa8557579024dd38bf01458ca430f28414c6e1babe8c"
+    },
+    {
+      "path": "backend/app/domains/memory/application/batch_selection.py",
+      "sha256": "91ac3548de84ec1c30252f7fb60087d907392644fa91e2884d6b6cc850cfb6a8"
+    },
+    {
+      "path": "backend/app/domains/memory/application/canonical_planning.py",
+      "sha256": "037caefd879c4db51bb7c6fbf071c254ceb5209238087e4ed55e6fdc45dd54c0"
+    },
+    {
+      "path": "backend/app/domains/memory/application/consolidation.py",
+      "sha256": "cba568ca540f32d731ff5c9893541a410215ad39e8fcbefcd511f23306d8b05c"
+    },
+    {
+      "path": "backend/app/domains/memory/application/read_surface.py",
+      "sha256": "6272324194a1e75ba4e42b34bc14992339da516b775dc5f7c305e6ff3851107c"
+    },
+    {
+      "path": "backend/app/domains/memory/application/recall.py",
+      "sha256": "58f0fb13b2616226ebbdeafc96041ca5c290247acacc292efcc136cdb9fc2048"
+    },
+    {
+      "path": "backend/app/domains/memory/application/scope_control.py",
+      "sha256": "d913a260d454cc982fa9fb715550aba5d2348707fd3a64c232635e7796dcff1c"
+    },
+    {
+      "path": "backend/app/domains/memory/application/write_lifecycle.py",
+      "sha256": "531d41e63aad6a339b3f669db225acdc47d1998e18007040ad5df68d7b3467c9"
+    },
+    {
+      "path": "backend/app/domains/memory/domain/__init__.py",
+      "sha256": "2e57442d947bcebbff2edd32d8dee4e4ed30b908bf4be350c9273076f0766881"
+    },
+    {
+      "path": "backend/app/domains/memory/domain/batch_policy.py",
+      "sha256": "1ba83fc8d97546f249e640c14354c64be9f6c4603fefd2223939e3744ad9af51"
+    },
+    {
+      "path": "backend/app/domains/memory/domain/canonical_retrieval_plan.py",
+      "sha256": "a92ac065ebe3757f5f373a901fdd6d997c475b1070d4c105ae25f315aa185f99"
+    },
+    {
+      "path": "backend/app/domains/memory/domain/canonical_retrieval_planner.py",
+      "sha256": "025366dc2d2f0301d4d40e8bc9ee848a943f98f93bd4c883b6cb1965fbb6ceb9"
+    },
+    {
+      "path": "backend/app/domains/memory/domain/consolidation.py",
+      "sha256": "ffb16c93edcec651c30530a608af2857c11eee0f8741032c3238a295c82ef1be"
+    },
+    {
+      "path": "backend/app/domains/memory/domain/consolidation_provider.py",
+      "sha256": "c1afff71250f6773f53515499ab6faa61b675a0d1629dd3b6fe56fc7e31b7ed8"
+    },
+    {
+      "path": "backend/app/domains/memory/domain/errors.py",
+      "sha256": "9bad064fc70b41e76dc47b28349d6b31d122ed2ea63f5211c0fc5e6262e0da44"
+    },
+    {
+      "path": "backend/app/domains/memory/domain/lifecycle.py",
+      "sha256": "7fbccf14fee64bf40eae800623ab39c4986339f0df8b896e9a5e49eff8362d90"
+    },
+    {
+      "path": "backend/app/domains/memory/domain/policies.py",
+      "sha256": "8a905bb6d99124ba2187dde7874038900928ae6e76834bd6e760c01b5dea4ede"
+    },
+    {
+      "path": "backend/app/domains/memory/domain/provenance.py",
+      "sha256": "0f33956478498e430c4c8bac1570723ca0ae86cb621aa566ce634d3f7a4e81a1"
+    },
+    {
+      "path": "backend/app/domains/memory/domain/read_surface.py",
+      "sha256": "445b4e326d57afc40278bff8a109939a65330a8a9b7c42daf8673705280bce70"
+    },
+    {
+      "path": "backend/app/domains/memory/domain/recall.py",
+      "sha256": "d18b1dbe96e0769e131dab383535897da9750f96e8569b295e99160fd78ae97b"
+    },
+    {
+      "path": "backend/app/domains/memory/domain/retention.py",
+      "sha256": "646a60ba5074ee375138c2abee1b7bd49eafff7bc23c9f8c77b73114e66ff9c4"
+    },
+    {
+      "path": "backend/app/domains/memory/domain/scope.py",
+      "sha256": "9cb2973ec6e77011afe5bd91ffa8314d35be65ec7c04bfc543d90b68956f5a90"
+    },
+    {
+      "path": "backend/app/domains/memory/domain/selection.py",
+      "sha256": "143b90f93e54d66503323a3a1d488d89d9ce294b4ed212b413714deb8a46c292"
+    },
+    {
+      "path": "backend/app/domains/memory/infrastructure/__init__.py",
+      "sha256": "c5110c77d069f9d83ed3b82976e222a30fbfb06e76519f010c3c5229fbc8caea"
+    },
+    {
+      "path": "backend/app/domains/memory/infrastructure/activation.py",
+      "sha256": "c93838f33208a890024af78eaacc873b35f47785b60f3933afefac549c0deb6a"
+    },
+    {
+      "path": "backend/app/domains/memory/infrastructure/batch_models.py",
+      "sha256": "adc59fd12e9008f8a62ee2031d7f7bb8a77c9179b35e3d73128f44814cf8ab6e"
+    },
+    {
+      "path": "backend/app/domains/memory/infrastructure/batch_repository.py",
+      "sha256": "5e2ef342d9221130657200d84d92dc0fe18eca12bd15e4f5910d293cd3e88343"
+    },
+    {
+      "path": "backend/app/domains/memory/infrastructure/consolidation_repository.py",
+      "sha256": "a8fbe6cd8f984cd54ccacdb7ece16727cc9a6f48065756fd577f443a40754037"
+    },
+    {
+      "path": "backend/app/domains/memory/infrastructure/maintenance_queue.py",
+      "sha256": "bc0bc53a3e91b668b4c7fa08383f38043e6149ec3248605a9f66b0693170925e"
+    },
+    {
+      "path": "backend/app/domains/memory/infrastructure/maintenance_unit_of_work.py",
+      "sha256": "d3509fa4d74bcb28568041615c274137c1119c76eeb92163d8ef8770a1219f5f"
+    },
+    {
+      "path": "backend/app/domains/memory/infrastructure/repository.py",
+      "sha256": "3136bc28ca01277a717e7e1d4ec55d32951dc956843ecec4370dd9d8d57f256e"
+    },
+    {
+      "path": "backend/app/domains/memory/infrastructure/sqlalchemy_models.py",
+      "sha256": "cf376c34d23e56b0d657e17afe3baa8e229fb4181a8038d143b89149f28251c5"
+    },
+    {
+      "path": "backend/app/domains/memory/ports/__init__.py",
+      "sha256": "688a51e603c19374fe94eb1e404967ba44c524d97ea168225ac123dddbe482cc"
+    },
+    {
+      "path": "backend/app/domains/memory/ports/batch.py",
+      "sha256": "a75f4476ab9403ea19fe3e060c5d73a8159e554b0fe1f3ea1e314bb9d0291f85"
+    },
+    {
+      "path": "backend/app/domains/memory/ports/canonical_planner_provider.py",
+      "sha256": "878a9b265545a8e9bc11bb313200ca7e275cd81bce52581bad4ca1cab324a991"
+    },
+    {
+      "path": "backend/app/domains/memory/ports/consolidation_provider.py",
+      "sha256": "bdef0e5beac8b5f0f524e64dbbf5197a330c9c79415cea163a9a667f2dd62d05"
+    },
+    {
+      "path": "backend/app/domains/memory/ports/consolidation_repository.py",
+      "sha256": "3a0326f0a0512e2e54c53352a802e03952982dbffb1c7b44d569c45bfee050f2"
+    },
+    {
+      "path": "backend/app/domains/memory/ports/maintenance_queue.py",
+      "sha256": "b1ff50c1adaa5529ad628e41abdd11e77bebf5f5d50f0836dce1809f6a3f5e70"
+    },
+    {
+      "path": "backend/app/domains/memory/ports/maintenance_unit_of_work.py",
+      "sha256": "7a42fe51740c183f58d589c25d5126d5607d5e2637f017a31638e10e0df00a5d"
+    },
+    {
+      "path": "backend/app/domains/memory/ports/recall.py",
+      "sha256": "8ca09016cec816860f98ab1e143e3a9a6ff338efb978c73788dfaad31342f495"
+    },
+    {
+      "path": "backend/app/domains/memory/ports/repository.py",
+      "sha256": "a496b92525ead54599a9b579760b6c2b614eff86b99eb4eb2ef7c6bbc2b0be37"
+    },
+    {
+      "path": "backend/app/domains/memory/ports/source_reader.py",
+      "sha256": "2876e6c8f3b84ed01f3647b02fb26b8d8bc11247bad417157740f1d07c275697"
+    },
+    {
+      "path": "backend/app/domains/memory/public.py",
+      "sha256": "f0cf1cffc0e86ba8aa5c6e138722fdad615e987d1250c4ae80ab14b0772c31c8"
+    },
+    {
+      "path": "backend/app/integrations/llm/memory_selection.py",
+      "sha256": "3c1f412a8b709da23a305fc8ebad13f3e885000ed90b8e1db583e89be90a1621"
+    },
+    {
+      "path": "backend/app/public_main.py",
+      "sha256": "48a13dfab161ab4f544d8a26b476e3a9e9727153c74086f5a75ac2424d87f564"
+    },
+    {
+      "path": "backend/app/runtime/desktop_sidecar.py",
+      "sha256": "62d7048116e3eda4b9281408232297ec568a7e19f43f0d7b77d70e6fe4c37fa3"
+    },
+    {
+      "path": "backend/app/runtime/memory/__init__.py",
+      "sha256": "5309a0d31f701f20d70ae6e97d5e625b64e6669a81ed123b339f0424b30d2c24"
+    },
+    {
+      "path": "backend/app/runtime/memory/batch_runtime.py",
+      "sha256": "33d89941888ad71f3c75b0a12bf73f34f37860bd4182023150be59ca00251aed"
+    },
+    {
+      "path": "backend/app/runtime/memory/recall_projection.py",
+      "sha256": "1b0ed5540914a060467e7f935d84680180c0033d2095c8270be39038d659a6ac"
+    },
+    {
+      "path": "backend/app/runtime/memory/shutdown.py",
+      "sha256": "8fbb87a5a388b6558348335332b29fb6d998af374944c1da994a57d14ee99ea9"
+    },
+    {
+      "path": "backend/app/runtime/memory/source_delivery.py",
+      "sha256": "536fd3839a0646c5b3d59f110a525299a3e41b696c96a6a5824c475d1b60dd9d"
+    },
+    {
+      "path": "backend/app/runtime/memory/sqlalchemy_recall.py",
+      "sha256": "cc7b5b7038fb7205baa684a82d7ecee841a79303728c6179e60d2d4ac429862f"
+    },
+    {
+      "path": "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+      "sha256": "69083ca0669961c72cedad111dcfc61e5da3694377e80284dc956da587984e05"
+    },
+    {
+      "path": "backend/app/runtime/memory/sqlite_fts5_recall.py",
+      "sha256": "043d9a289bcd3af48ef6e0e752dbb314ee74c9198aa9ee769a567802a41d3025"
+    },
+    {
+      "path": "backend/app/runtime/memory/subjective_source.py",
+      "sha256": "25907230333d56b12c3f9624c8c032040431f7ece5cd1e642bbd66f7ed3d0193"
+    },
+    {
+      "path": "backend/app/runtime/memory_privacy.py",
+      "sha256": "d9e88163f6a0b92aeeaa2a2db6aac816f3d0c272e34e4bb265cf4778d8ac16bc"
+    },
+    {
+      "path": "backend/app/runtime/memory_selection_provider.py",
+      "sha256": "2b8a3ba20ccd0d938d3941f78bbc5f1c0e26f8af68ce126d811b3b463add07eb"
+    },
+    {
+      "path": "backend/app/runtime/migrations/sqlite_versions/manifests/v9.json",
+      "sha256": "0c560e52ff8c82ed42c9e7cf7b407b5ab47fc9642976ea6debc8dcbddbea4c2e"
+    },
+    {
+      "path": "backend/app/runtime/migrations/sqlite_versions/v8_to_v9_memory_batch.py",
+      "sha256": "23f5727a8663ff52bea384b5579d55cafcad676e835e21fca4b85346a39aed0e"
+    },
+    {
+      "path": "backend/app/runtime/persistence/sqlite_schema.py",
+      "sha256": "591714e32c2758777ddeffd3aee0ee33b3c517f6561b43269cd1d073ec9bb33c"
+    },
+    {
+      "path": "backend/app/runtime/single_backend_components.py",
+      "sha256": "1cd8f5e7caeca95f633c3f2f1809623fee3b545bfa4e31930fcb96a931704e1d"
+    },
+    {
+      "path": "backend/app/services/agents.py",
+      "sha256": "189f0d81b517a4d6cf29845d61c12741db15155c5bde2d8024901d86dd0bcfde"
+    },
+    {
+      "path": "backend/app/services/auth.py",
+      "sha256": "94c9424ef3c5937374d50dc953f0cec6a87f83e8831eca5f0bcdcba9f3957fc3"
+    },
+    {
+      "path": "backend/tests/test_p8_l_r_memory_batch_api.py",
+      "sha256": "944f16c505feb8094f7eb29609f8c362b8199776d9658924d48c0ce370bad921"
+    },
+    {
+      "path": "backend/tests/test_p8_l_r_memory_batch_migration.py",
+      "sha256": "5ab0feef4e73abb4be90670e4ad01eb80946eb1b9a9edd419ee40416e9960e98"
+    },
+    {
+      "path": "backend/tests/test_p8_l_r_memory_batch_policy.py",
+      "sha256": "7926602941c308e4a4ee9eb3cb3097732fd202109653988fcbc9671bae47c6bb"
+    },
+    {
+      "path": "backend/tests/test_p8_l_r_memory_batch_runtime.py",
+      "sha256": "781c47944292b8563ce678f3dd0201f480710a0859421389681314fba731cb8f"
+    },
+    {
+      "path": "backend/tests/test_p8_l_r_memory_batch_safety.py",
+      "sha256": "c74cda77204cd88667c3ae1a737e703a3d59ec4cb7004ee98e71cc098ecbe2ae"
+    },
+    {
+      "path": "browser-tests/memory-batch-fixture.ts",
+      "sha256": "617a0d9cee4bec8939cb890737828c9bceacb2450c28a38cb188ecdfa82d2395"
+    },
+    {
+      "path": "desktop/src-tauri/src/desktop_runtime.rs",
+      "sha256": "be482ec03aa412d502521e27a26edc9d184f842cb2c75bd7ad4149d3763a4daf"
+    },
+    {
+      "path": "desktop/src-tauri/src/lib.rs",
+      "sha256": "1750faa46b39fdbc6dba78119bbeb06c5650c3a4704a795913ad3629edec7d03"
+    },
+    {
+      "path": "desktop/src-tauri/src/shutdown_runtime.rs",
+      "sha256": "488dedaf8dd19a5efbc47fae5d9614627e7ea7a5498a0b08a4b6802bb66a1747"
+    },
+    {
+      "path": "docs/architecture/p8-l-r-memory-batch.md",
+      "sha256": "13783bb4a0513e02f1b088d598e1e830e1e185bf24a125bae15cf58473e31775"
+    },
+    {
+      "path": "frontend/src/features/memory/api/memory-client.ts",
+      "sha256": "9980fd8b3e039c9283075c54c4c3674ad01b3586c4b07d8e18dfdd9e82a2f555"
+    },
+    {
+      "path": "frontend/src/features/memory/model/memory-batch-contract.ts",
+      "sha256": "f78af1e643a60df292dfe0db224022debaa9538a0bbaf0a82c0a17141383c053"
+    },
+    {
+      "path": "frontend/src/features/memory/model/memory-contract.ts",
+      "sha256": "b09d751bea6b2b0981cd3cdf1563e0d691de7be0b52ffe1e8109a050181a6610"
+    },
+    {
+      "path": "frontend/src/features/memory/public.ts",
+      "sha256": "52320d92f340a5c48db1c78f2d9c064ad57109de5f5c452d179f77aadb392de9"
+    },
+    {
+      "path": "frontend/src/features/memory/ui/memory-batch-controls.tsx",
+      "sha256": "c47a72828493208ab84db958fe2f7af8bd9616b9f308f570367f32e268d52dd7"
+    },
+    {
+      "path": "frontend/src/features/memory/ui/memory-scope-summary.tsx",
+      "sha256": "e3dc4099faa7f191abbdd5a782a8865b466216d8d0b01040c21bdd2bc9f496a1"
+    },
+    {
+      "path": "frontend/src/features/memory/ui/memory-workspace.module.css",
+      "sha256": "096df97f7b3b29147cadf262ea8d31b7eeaa0de655371187ec3e32e45ac0a0ae"
+    },
+    {
+      "path": "frontend/src/features/memory/ui/memory-workspace.tsx",
+      "sha256": "c9c4c4a95b349bcb68233815d9b54c7d2cb9271eecff6c3ac99f0db99e7aff13"
+    },
+    {
+      "path": "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx",
+      "sha256": "d911b868f7d5c16b97faee9b1fdd7d84d682a06690d3a2ca9f376b5de7a2725b"
+    },
+    {
+      "path": "frontend/src/shared/desktop/product-window.ts",
+      "sha256": "80202c0ea523be1b19ab7daa14dbab7bd89a7b06dfcfbf96718a59a76119ddf9"
+    },
+    {
+      "path": "frontend/src/shared/runtime/desktop-runtime-gate.tsx",
+      "sha256": "fd963cf8dfd69008c17d39d56fa60bbd807672d3c5c2325d539fef2ba35d3bff"
+    },
+    {
+      "path": "frontend/src/shared/runtime/desktop-shutdown-overlay.tsx",
+      "sha256": "000335d89f394f569d79ed48ae4b276917119b49b99ecb236ab4d6499d235730"
+    },
+    {
+      "path": "scripts/ci/build_windows_installer_supported_upgrade_fixture.py",
+      "sha256": "a94ce8b3f1abf59453178c90f3e429ee9cd65290722e3965fcbe5d269b6c791f"
+    },
+    {
+      "path": "scripts/ci/check_windows_installer_supported_upgrade_matrix.py",
+      "sha256": "8320eae77286ac16c81e41c0f145fbceeec934d84574421052f135280689c8b5"
+    },
+    {
+      "path": "scripts/ci/generate_p8_l_r_memory_batch_inventory.py",
+      "sha256": "90672f4d091e63eeef3b86cf65b2e1437187e2870fa9491137282514bd72af74"
+    },
+    {
+      "path": "scripts/ci/run_windows_installer_supported_upgrade.ps1",
+      "sha256": "eb711ff6b4f894ab5b02bded43197a174d63ce5cbf2fbf616955bc5014bce2f3"
+    },
+    {
+      "path": "scripts/ci/verify_windows_installer_supported_upgrade_fixture.py",
+      "sha256": "8bfd5942652e306eb82977ef49a5116f2517f6c72fca42e9b123d71418b91703"
+    }
+  ],
+  "owner_stage": "P8-L-R-MEMORY-BATCH",
+  "predecessor": {
+    "path": "docs/architecture/p8-l-r-today-sns-activity-inventory.json",
+    "sha256": "2120ef3cccb09753119deebd7025f1f9a01d316c518c5d2eda053c5221cbf5ec"
+  },
+  "schema": {
+    "canonical_table_count": 102,
+    "embedded_schema_version": 9,
+    "new_tables": [
+      "memory_batch_profiles",
+      "memory_batch_settings",
+      "memory_activation_epochs",
+      "memory_source_deliveries",
+      "memory_batch_runs",
+      "memory_selection_decisions"
+    ],
+    "schema_digest": "2ff2384eb2ccff9f93b9ee30dbe92e659feb927aad88ce13e2b55f9290ddfda6",
+    "source_revision": "20260904_0089"
+  },
+  "schema_version": 1,
+  "separate_gates": [
+    "real_provider_selection_quality",
+    "installed_runtime_user_verification",
+    "user_merge_approval",
+    "post_merge_actions"
+  ]
+}

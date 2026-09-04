@@ -1,5 +1,12 @@
 # P8-L-O Memory consolidation·hot brief 계약
 
+> **후속 실행 계약:** 이 문서는 P8-L-O의 legacy v1 service 이력을 보존한다.
+> P8-L-R의 새 자동 실행은 [Memory batch v2](p8-l-r-memory-batch.md)를 따른다.
+> 새 모드는 종료·사용자 예약·승인된 미완료 복구에서 AI retain/skip을 실행하며,
+> v1 threshold/summary-only/provider 실패 deterministic accept를 적용하지 않는다.
+> 같은 maintenance queue를 사용하되 legacy worker는 v2 job을 claim하지 않는다.
+> 새 SQLite v9 additive migration과 별도 유료 동의가 필요하다.
+
 P8-L-O는 foreground Chat과 분리된 canonical Memory maintenance 경계다. 이
 단계는 `memory_candidates`를 bounded batch로 다시 검증해 `memory_items +
 memory_item_evidence`로 확정하고, accepted item에서 재생성 가능한

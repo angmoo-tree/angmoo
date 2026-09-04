@@ -248,6 +248,30 @@ fn response_is_ok(response: &str) -> bool {
         .is_some_and(|line| line.contains(" 200 "))
 }
 
+pub fn memory_shutdown_request(
+    state: &DesktopRuntimeState,
+    method: &str,
+    path: &str,
+) -> Option<serde_json::Value> {
+    let (port, token) = {
+        let runtime = state.0.lock().ok()?;
+        let port = runtime
+            .status
+            .api_base_url
+            .as_deref()?
+            .rsplit(':')
+            .next()?
+            .parse::<u16>()
+            .ok()?;
+        (port, runtime.status.launch_token.clone()?)
+    };
+    let response = http_request(port, method, path, &token).ok()?;
+    if !response_is_ok(&response) {
+        return None;
+    }
+    serde_json::from_str(response.split_once("\r\n\r\n")?.1).ok()
+}
+
 fn drain_sidecar_events(
     receiver: &mut tauri::async_runtime::Receiver<CommandEvent>,
     fatal_code: &mut Option<&'static str>,

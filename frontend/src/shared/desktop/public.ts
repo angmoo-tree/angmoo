@@ -6,6 +6,8 @@ export {
   desktopWindowKindForRoute,
   getDesktopWindowState,
   getDesktopRuntimeStatus,
+  getDesktopShutdownStatus,
+  skipDesktopMemoryShutdown,
   isTauriDesktopRuntime,
   navigateBackCurrentDesktopRoute,
   navigateCurrentDesktopRoute,
@@ -19,5 +21,6 @@ export type {
   AngmooDesktopWindowKind,
   AngmooDesktopWindowState,
   AngmooDesktopRuntimeStatus,
+  DesktopShutdownStatus,
   DesktopProductNavigationResult,
 } from "./product-window";

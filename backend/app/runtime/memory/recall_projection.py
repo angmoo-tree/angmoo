@@ -5,7 +5,7 @@ from __future__ import annotations
 from enum import StrEnum
 import logging
 
-from sqlalchemy import event
+from sqlalchemy import event, select
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.domains.memory.infrastructure import (
@@ -104,11 +104,25 @@ class EmbeddedMemoryRecallProjection:
 
     @staticmethod
     def _do_orm_execute(orm_execute_state: object) -> None:
-        if not getattr(orm_execute_state, "is_update", False):
-            return
         statement = getattr(orm_execute_state, "statement", None)
         table = getattr(statement, "table", None)
-        if getattr(table, "name", None) == MemoryScopeSettingModel.__tablename__:
+        session = getattr(orm_execute_state, "session")
+        if (
+            getattr(orm_execute_state, "is_delete", False)
+            and getattr(table, "name", None) == MemoryItem.__tablename__
+        ):
+            # Account scrubbing uses a scoped bulk delete. Capture affected IDs
+            # before deletion so the after-commit projection removes old text.
+            query = select(MemoryItem.id)
+            if statement.whereclause is not None:
+                query = query.where(statement.whereclause)
+            session.info.setdefault(_PENDING_ITEM_IDS, set()).update(
+                session.connection().execute(query).scalars()
+            )
+        if (
+            getattr(orm_execute_state, "is_update", False)
+            and getattr(table, "name", None) == MemoryScopeSettingModel.__tablename__
+        ):
             getattr(orm_execute_state, "session").info[_PENDING_FULL_SYNC] = True
 
     @staticmethod
@@ -141,9 +155,7 @@ class EmbeddedMemoryRecallProjection:
                     self.index.tombstone_scope(
                         owner_id=scope.owner_id,
                         world_id=scope.world_id,
-                        subject_world_character_id=(
-                            scope.subject_world_character_id
-                        ),
+                        subject_world_character_id=(scope.subject_world_character_id),
                     )
                     continue
                 item_ids.update(self._source.item_ids_for_scope_setting(setting_id))

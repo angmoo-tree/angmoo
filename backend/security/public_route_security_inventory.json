@@ -497,6 +497,11 @@
       "module": "app.api.v1.routes.memory",
       "endpoint": "read_memory_item"
     },
+    "GET /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/batch-settings": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.memory",
+      "endpoint": "read_memory_batch_setting"
+    },
     "GET /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/settings": {
       "access": "owner-only",
       "module": "app.api.v1.routes.memory",
@@ -927,6 +932,11 @@
       "module": "app.api.v1.routes.memory",
       "endpoint": "correct_memory_item"
     },
+    "POST /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/batch-retry": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.memory",
+      "endpoint": "retry_memory_batch"
+    },
     "PUT /api/v1/agents/{character_id}/credential": {
       "access": "owner-only",
       "module": "app.api.v1.routes.agents",
@@ -961,6 +971,11 @@
       "access": "owner-only",
       "module": "app.api.v1.routes.memory",
       "endpoint": "update_memory_pin"
+    },
+    "PUT /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/batch-settings": {
+      "access": "owner-only",
+      "module": "app.api.v1.routes.memory",
+      "endpoint": "update_memory_batch_setting"
     },
     "PUT /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/settings": {
       "access": "owner-only",

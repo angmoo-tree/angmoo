@@ -38,6 +38,19 @@ type TauriInvoke = <T>(
   args?: Record<string, unknown>,
 ) => Promise<T>;
 
+export type DesktopShutdownStatus = { phase: "RUNNING" | "QUIESCING" | "PREPARING" | "CONSOLIDATING" | "FINALIZING" | "EXIT_READY"; deferred: boolean };
+
+export async function getDesktopShutdownStatus(): Promise<DesktopShutdownStatus | null> {
+  if (!isTauriDesktopRuntime()) return null;
+  const value = await window.__TAURI__?.core?.invoke?.<DesktopShutdownStatus>("desktop_shutdown_status");
+  if (!value || !["RUNNING", "QUIESCING", "PREPARING", "CONSOLIDATING", "FINALIZING", "EXIT_READY"].includes(value.phase) || typeof value.deferred !== "boolean") return null;
+  return value;
+}
+
+export async function skipDesktopMemoryShutdown() {
+  if (isTauriDesktopRuntime()) await window.__TAURI__?.core?.invoke?.("skip_memory_shutdown");
+}
+
 declare global {
   interface Window {
     __ANGMOO_DESKTOP_WINDOW__?: AngmooDesktopWindowState;

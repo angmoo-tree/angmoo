@@ -2846,6 +2846,9 @@ def _scrub_agent_data(db: Session, character: models.Character) -> None:
     character_id = character.id
 
     from app.services import world_character_setup
+    from app.runtime.memory_privacy import scrub_memory_data
+
+    scrub_memory_data(db, owner_id=character.owner_id, character_id=character_id)
 
     world_character_setup.delete_setup_data_for_characters(
         db, character_ids=[character_id]

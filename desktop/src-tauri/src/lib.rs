@@ -3,6 +3,7 @@ mod launch_mode;
 mod phone_resize;
 mod product_paths;
 mod product_windows;
+mod shutdown_runtime;
 mod window_policy;
 mod world_package_delivery;
 
@@ -11,6 +12,18 @@ use product_windows::{
 };
 use tauri::{Manager, WebviewWindow, Window};
 use tauri_runtime::ResizeDirection;
+
+#[tauri::command]
+fn desktop_shutdown_status(
+    state: tauri::State<'_, shutdown_runtime::DesktopShutdownState>,
+) -> Result<shutdown_runtime::ShutdownStatus, String> {
+    state.status()
+}
+
+#[tauri::command]
+fn skip_memory_shutdown(state: tauri::State<'_, shutdown_runtime::DesktopShutdownState>) {
+    state.skip();
+}
 
 #[tauri::command]
 fn desktop_runtime_status(
@@ -101,6 +114,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .manage(launch_mode)
         .manage(desktop_runtime::DesktopRuntimeState::default())
+        .manage(shutdown_runtime::DesktopShutdownState::default())
         .manage(world_package_delivery::WorldPackageDestinationState::default())
         .setup(|app| {
             let launch_mode = *app.state::<launch_mode::DesktopLaunchMode>();
@@ -133,6 +147,8 @@ pub fn run() {
             start_product_window_resize,
             desktop_runtime_status,
             retry_desktop_runtime,
+            desktop_shutdown_status,
+            skip_memory_shutdown,
             world_package_delivery::select_world_package_export_destination,
             world_package_delivery::write_world_package_export_destination,
             world_package_delivery::discard_world_package_export_destination,
@@ -140,11 +156,23 @@ pub fn run() {
         .build(tauri::generate_context!())
         .expect("error while building Angmoo Tauri product shell")
         .run(|app, event| {
-            if matches!(
-                event,
-                tauri::RunEvent::ExitRequested { .. } | tauri::RunEvent::Exit
-            ) {
-                desktop_runtime::shutdown(&app.state::<desktop_runtime::DesktopRuntimeState>());
+            let finished = app
+                .state::<shutdown_runtime::DesktopShutdownState>()
+                .finished();
+            match event {
+                tauri::RunEvent::WindowEvent {
+                    label,
+                    event: tauri::WindowEvent::CloseRequested { api, .. },
+                    ..
+                } if label == "main" && !finished => {
+                    api.prevent_close();
+                    shutdown_runtime::request_exit(app.clone());
+                }
+                tauri::RunEvent::ExitRequested { api, .. } if !finished => {
+                    api.prevent_exit();
+                    shutdown_runtime::request_exit(app.clone());
+                }
+                _ => {}
             }
         });
 }
