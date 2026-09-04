@@ -397,30 +397,30 @@
       "markers": {
         "row_lock": [
           42,
-          114,
-          121,
-          224
+          116,
+          123,
+          226
         ]
       },
       "owner": "P8-L-G",
       "path": "backend/app/domains/memory/infrastructure/maintenance_queue.py",
       "removal_condition": "retain only while cross-provider same-scope serialization or its negative inventory guard is required",
-      "source_sha256": "10818647401cf52daa0f934403995bc183a0f0689c731098b31c13f00b1dd53c",
+      "source_sha256": "bc0bc53a3e91b668b4c7fa08383f38043e6149ec3248605a9f66b0693170925e",
       "transition_pr": "P8-L-G memory write/lifecycle"
     },
     {
       "markers": {
         "row_lock": [
-          711,
-          728,
-          772,
-          842
+          720,
+          737,
+          781,
+          851
         ]
       },
       "owner": "P8-L-G",
       "path": "backend/app/domains/memory/infrastructure/repository.py",
       "removal_condition": "retain only while cross-provider same-scope serialization or its negative inventory guard is required",
-      "source_sha256": "df6a48958d2d85a69278a6476e98cfe6043b9e82ca81fbacf650c382cd820981",
+      "source_sha256": "3136bc28ca01277a717e7e1d4ec55d32951dc956843ecec4370dd9d8d57f256e",
       "transition_pr": "P8-L-G memory write/lifecycle"
     },
     {
@@ -807,18 +807,18 @@
     {
       "markers": {
         "driver_or_url": [
-          76,
-          77,
-          79,
-          229,
-          230,
-          232
+          89,
+          90,
+          91,
+          259,
+          260,
+          261
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/persistence/sqlite_schema.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "f98a8b75c0ce0e2990c3e8a529327bd0c39022d007e264cdf516ef12d09bb66e",
+      "source_sha256": "591714e32c2758777ddeffd3aee0ee33b3c517f6561b43269cd1d073ec9bb33c",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -930,29 +930,29 @@
       "markers": {
         "advisory_lock": [
           561,
-          3086
+          3089
         ],
         "driver_or_url": [
           558,
-          3077
+          3080
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/agents.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "ee6efe5a8a8a7c1793a1e4b00f550d75c75321e656f0ddd24b157bb1791d74aa",
+      "source_sha256": "189f0d81b517a4d6cf29845d61c12741db15155c5bde2d8024901d86dd0bcfde",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
         "row_lock": [
-          1207
+          1233
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/auth.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "22146c2dee090a39d1e7fd2795ced5ebf22c3137093632f45ece8f34170f3bbd",
+      "source_sha256": "94c9424ef3c5937374d50dc953f0cec6a87f83e8831eca5f0bcdcba9f3957fc3",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

@@ -148,6 +148,7 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
         "integrations/llm/character_response_generator.py": {"generate"},
         "integrations/llm/graph_retrieval_planner.py": {"plan"},
         "integrations/llm/memory_consolidation.py": {"consolidate"},
+        "integrations/llm/memory_selection.py": {"select"},
         "integrations/llm/retrieval_router.py": {"route"},
         "runtime/chat/world_generation.py": {"stream_world_response"},
     }

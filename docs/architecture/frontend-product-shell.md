@@ -738,3 +738,19 @@ Stale source/ancestor revisions hide old evidence excerpts and links. Raw
 snapshot, query, source ID, provider state and private counterpart motive are
 not presented. See p8-l-r-today-sns-activity.md for the source and generation
 contract; installed causal proof remains a separate user Gate.
+
+## P8-L-R Memory batch settings and whole-app closing
+
+The same Memory workspace adds saved opt-in AI selection, installation-level
+model choice and per-WorldCharacter daily `HH:mm`/exit flags. World timezone,
+next due, pending count, completion and attention/retry are server-owned.
+Memory ON is distinct from paid source-excerpt consent. One mutation lock,
+scope/version/idempotency and stale-response guards cover the new controls.
+No new navigation destination or Hosted-specific credential surface is added.
+
+Only the native whole-app exit workflow shows the shared `끄는 중…` Dialog.
+Its `지금 종료` action abandons bounded Memory preparation; backdrop/Escape do
+not undo native shutdown. Child-window close and browser navigation do not
+trigger it. Keyboard focus, status announcement and reachable actions use the
+existing Dialog primitives. Source/projection/provider details remain hidden.
+See [the runtime contract](p8-l-r-memory-batch.md) for recovery and separate Gates.

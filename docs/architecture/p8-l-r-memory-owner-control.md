@@ -5,6 +5,12 @@ user and merge Gates remain separately recorded.
 
 Issue: `#248`
 
+Follow-up: [Issue #257 Memory batch runtime](p8-l-r-memory-batch.md) adds
+separately consented AI selection, per-WorldCharacter daily/exit settings and
+bounded whole-app shutdown. Basic ON/OFF/pin/correction/delete semantics remain;
+Memory ON alone does not opt into the new paid behavior. Selection/runtime and
+installed causal proof have their own Gates.
+
 Exact predecessor: P8-L-Q merge
 `cb7e32a7d77937f5e117eb8c99b21dd0d77de42d`, tree
 `386fa5efd6e1ad464bca57e9a00d0148297730fd`.

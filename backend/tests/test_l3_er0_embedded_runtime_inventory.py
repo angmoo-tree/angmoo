@@ -30,9 +30,9 @@ def test_all_migrations_are_owned_exactly_once() -> None:
     inventory = _load("migration-conversion-inventory.json")
     entries = inventory["entries"]
     assert inventory["baseline_commit"] == BASELINE
-    assert inventory["migration_count"] == 86
-    assert len(entries) == len({entry["path"] for entry in entries}) == 86
-    assert len(entries) == len({entry["revision"] for entry in entries}) == 86
+    assert inventory["migration_count"] == 87
+    assert len(entries) == len({entry["path"] for entry in entries}) == 87
+    assert len(entries) == len({entry["revision"] for entry in entries}) == 87
     assert all(
         entry["owner"] == "ER2"
         and entry["transition_pr"] == "ER2 PR G"

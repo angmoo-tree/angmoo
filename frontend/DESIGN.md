@@ -1233,6 +1233,13 @@ PRODUCTION
 
 ## 19. 최종 원칙
 
+P8-L-R 후속 Memory batch 설정은 기존 Memory workspace와 shared
+Field/Input/Select/Button을 재사용한다. 캐릭터별 예약·World timezone·별도 AI
+동의·설치 공통 모델을 같은 feature에 표시하며 새 color/asset/route는 추가하지
+않는다. 앱 전체 종료의 `끄는 중…`·`지금 종료`는 shared Dialog로 제공한다.
+child 창 닫기·화면 이동은 종료로 처리하지 않고, 내부 provider 오류는 노출하지
+않는다. 상세 책임과 검증은 `docs/architecture/p8-l-r-memory-batch.md`를 따른다.
+
 > **angmoo.com의 모바일 UI는 버리는 과거 코드가 아니라 검증된 Angmoo 시각 유산이다. Feed·Post·Thread·Profile·Agent의 anatomy는 높은 수준으로 계승한다.**
 
 > **그러나 hosted 서비스의 account·quota·auth·global SNS 의미는 계승 대상이 아니다. Local의 World scope·owner identity·다중 autonomy·runtime 상태·Tauri window 계약이 항상 우선한다.**

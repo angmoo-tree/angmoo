@@ -49,9 +49,9 @@ def _process_start_token(pid: int) -> str | None:
         try:
             # Linux /proc stat field 22 is the process start time in clock ticks.
             # It is stable for the process lifetime and changes when a PID is reused.
-            fields = (Path("/proc") / str(pid) / "stat").read_text(
-                encoding="utf-8"
-            ).split()
+            fields = (
+                (Path("/proc") / str(pid) / "stat").read_text(encoding="utf-8").split()
+            )
             return f"proc:{fields[21]}"
         except (OSError, IndexError, UnicodeError):
             return None
@@ -461,12 +461,8 @@ def _run_installer_mode() -> int:
                 # refuses to roll back the app and fails closed.
                 pass
             else:
-                failure_result["sqlite_active_version"] = (
-                    active.sqlite_source_version
-                )
-                failure_result["ladybug_active_version"] = (
-                    active.ladybug_source_version
-                )
+                failure_result["sqlite_active_version"] = active.sqlite_source_version
+                failure_result["ladybug_active_version"] = active.ladybug_source_version
         _write_installer_result(
             result_path,
             failure_result,
@@ -539,6 +535,7 @@ def main() -> int:
         DesktopLoopbackPolicy,
         DesktopLoopbackSecurityMiddleware,
     )
+
     runtime_app = create_app(runtime_config=runtime_config)
     initialize_local_installation_identity(
         runtime_app.state.runtime_composition.session_factory
@@ -553,6 +550,18 @@ def main() -> int:
         access_log=False,
     )
     server = uvicorn.Server(config)
+
+    @runtime_app.post("/__angmoo/desktop/prepare-shutdown", include_in_schema=False)
+    async def prepare_shutdown() -> dict:
+        return runtime_app.state.memory_shutdown.start()
+
+    @runtime_app.get("/__angmoo/desktop/shutdown-status", include_in_schema=False)
+    async def shutdown_status() -> dict:
+        return runtime_app.state.memory_shutdown.status()
+
+    @runtime_app.post("/__angmoo/desktop/skip-memory-shutdown", include_in_schema=False)
+    async def skip_memory_shutdown() -> dict:
+        return runtime_app.state.memory_shutdown.skip()
 
     @runtime_app.post("/__angmoo/desktop/shutdown", include_in_schema=False)
     async def shutdown() -> dict[str, str]:

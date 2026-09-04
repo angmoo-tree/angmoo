@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from dataclasses import replace
 import hashlib
 import json
 from typing import Any
@@ -82,7 +83,28 @@ class SqlAlchemyMemorySourceEvidenceReader:
             MemorySourceTypeV1.RELATIONSHIP_EVENT: self._read_relationship_event,
             MemorySourceTypeV1.JOINT_COMMITMENT: self._read_joint_commitment,
         }
-        return readers[source_type](scope, source_type, source_id)
+        evidence = readers[source_type](scope, source_type, source_id)
+        if (
+            evidence is None
+            or evidence.actor_world_character_id != scope.subject_world_character_id
+            or not evidence.successful
+        ):
+            return evidence
+        from app.runtime.memory.subjective_source import read_subjective_source
+
+        subjective = read_subjective_source(
+            self._session, scope, source_type=source_type.value, source_id=source_id
+        )
+        if subjective is None:
+            return evidence
+        digest, context = subjective
+        return replace(
+            evidence,
+            source_digest=_digest(
+                {"canonical": evidence.source_digest, "subjective": digest}
+            ),
+            subjective_context=context,
+        )
 
     def _read_chat_message(
         self,
@@ -96,7 +118,10 @@ class SqlAlchemyMemorySourceEvidenceReader:
             return None
         pair = self._session.execute(
             select(models.MessageMessage, models.MessageThread)
-            .join(models.MessageThread, models.MessageThread.id == models.MessageMessage.thread_id)
+            .join(
+                models.MessageThread,
+                models.MessageThread.id == models.MessageMessage.thread_id,
+            )
             .where(models.MessageMessage.id == message_id)
         ).one_or_none()
         if pair is None:
@@ -159,7 +184,9 @@ class SqlAlchemyMemorySourceEvidenceReader:
             return None
         is_reply = post.reply_to_post_id is not None
         source_shape_ok = (
-            source_type is MemorySourceTypeV1.REPLY if is_reply else source_type is MemorySourceTypeV1.POST
+            source_type is MemorySourceTypeV1.REPLY
+            if is_reply
+            else source_type is MemorySourceTypeV1.POST
         )
         target = None
         if post.reply_to_post_id:
@@ -358,8 +385,7 @@ class SqlAlchemyMemorySourceEvidenceReader:
             source_world_id=change.world_id,
             created_at=change.created_at,
             summary=(
-                f"relationship {change.valence}/{change.intensity}: "
-                f"{actor} -> {target}"
+                f"relationship {change.valence}/{change.intensity}: {actor} -> {target}"
             ),
             digest_payload={
                 "id": change.id,
@@ -380,8 +406,7 @@ class SqlAlchemyMemorySourceEvidenceReader:
             ),
             visible=event.invalidated_at is None,
             observed=(
-                scope.subject_world_character_id == actor
-                and observation_id is not None
+                scope.subject_world_character_id == actor and observation_id is not None
             ),
             actor=actor,
             target=target,
@@ -409,7 +434,11 @@ class SqlAlchemyMemorySourceEvidenceReader:
         )
         participant_ids = [row.world_character_id for row in participants]
         counterpart = next(
-            (value for value in participant_ids if value != scope.subject_world_character_id),
+            (
+                value
+                for value in participant_ids
+                if value != scope.subject_world_character_id
+            ),
             None,
         )
         accepted = all(
@@ -538,7 +567,9 @@ class SqlAlchemyMemorySourceEvidenceReader:
         )
         return (None, False) if row is None else (row.id, True)
 
-    def _social_event_observation(self, scope: MemoryScope, event_id: str) -> str | None:
+    def _social_event_observation(
+        self, scope: MemoryScope, event_id: str
+    ) -> str | None:
         source_post_ids = list(
             self._session.scalars(
                 select(models.SocialEventEvidence.source_post_id).where(

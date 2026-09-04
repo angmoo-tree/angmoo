@@ -67,15 +67,11 @@ class HostedBackendExtension:
 
     def __post_init__(self) -> None:
         if not self.name.strip():
-            raise HostedExtensionConfigurationError(
-                "hosted extension name is required"
-            )
+            raise HostedExtensionConfigurationError("hosted extension name is required")
         _reject_duplicates("router", self.routers)
         _reject_duplicates("startup hook", self.startup_hooks)
         _reject_duplicates("shutdown hook", self.shutdown_hooks)
-        if (self.settings_provider is None) != (
-            self.prompt_provider is None
-        ):
+        if (self.settings_provider is None) != (self.prompt_provider is None):
             raise HostedConfigurationRegistrationError(
                 "hosted settings and prompt providers must be configured together"
             )
@@ -116,11 +112,15 @@ def create_lifespan(
     startup_recovery: Callable[[], None] = lambda: None,
     runtime_settings=settings,
     runtime_disposer: Callable[[], None] | None = None,
+    memory_runtime=None,
 ) -> LifespanHandler:
     @asynccontextmanager
-    async def runtime_lifespan(_: FastAPI) -> AsyncIterator[None]:
+    async def runtime_lifespan(runtime_app: FastAPI) -> AsyncIterator[None]:
         configuration_registered = False
         component_manager = component_manager_factory()
+        coordinator = getattr(runtime_app.state, "memory_shutdown", None)
+        if coordinator is not None and component_manager is not None:
+            coordinator.quiesce = getattr(component_manager, "quiesce_scheduler", None)
         if extension is None:
             validate_public_runtime_settings(runtime_settings)
         security_validator()
@@ -156,8 +156,12 @@ def create_lifespan(
         try:
             if component_manager is not None:
                 await component_manager.start()
+            if memory_runtime is not None:
+                await memory_runtime.start()
         except BaseException:
             try:
+                if memory_runtime is not None:
+                    await memory_runtime.stop()
                 if component_manager is not None:
                     await component_manager.stop()
             finally:
@@ -176,6 +180,8 @@ def create_lifespan(
             yield
         finally:
             try:
+                if memory_runtime is not None:
+                    await memory_runtime.stop()
                 if component_manager is not None:
                     await component_manager.stop()
             finally:
@@ -210,8 +216,18 @@ def create_app(
     runtime_settings = settings
     runtime_lifespan = lifespan_handler
     process_settings_snapshot: dict[str, object] | None = None
+    memory_runtime = None
     if runtime_config is not None:
         composition = compose_runtime(runtime_config, base_settings=settings)
+        from app.runtime.memory.batch_runtime import MemoryBatchRuntime
+        from app.runtime.memory_selection_provider import memory_provider
+
+        memory_runtime = MemoryBatchRuntime(
+            composition.session_factory,
+            lambda owner, model: memory_provider(
+                composition.session_factory, owner, model
+            ),
+        )
         runtime_settings = composition.settings
         from app.domains.world_packages.infrastructure.filesystem_import_media import (
             FilesystemWorldPackageImportMedia,
@@ -266,9 +282,7 @@ def create_app(
         if runtime_lifespan is None:
             runtime_lifespan = create_lifespan(
                 extension,
-                security_validator=lambda: validate_startup_security(
-                    runtime_settings
-                ),
+                security_validator=lambda: validate_startup_security(runtime_settings),
                 session_factory=composition.session_factory,
                 component_manager_factory=lambda: (
                     create_single_backend_runtime_components(
@@ -279,15 +293,14 @@ def create_app(
                 startup_recovery=recover_embedded_runtime,
                 runtime_settings=runtime_settings,
                 runtime_disposer=dispose_runtime,
+                memory_runtime=memory_runtime,
             )
     runtime_app = FastAPI(
         title=runtime_settings.project_name,
         lifespan=runtime_lifespan or create_lifespan(extension),
         docs_url="/docs" if runtime_settings.api_docs_enabled else None,
         redoc_url="/redoc" if runtime_settings.api_docs_enabled else None,
-        openapi_url=(
-            "/openapi.json" if runtime_settings.api_docs_enabled else None
-        ),
+        openapi_url=("/openapi.json" if runtime_settings.api_docs_enabled else None),
     )
     runtime_app.add_middleware(RequestBodyLimitMiddleware)
     runtime_app.include_router(
@@ -302,9 +315,19 @@ def create_app(
     runtime_app.state.runtime_settings = runtime_settings
     runtime_app.state.runtime_config = runtime_config
     runtime_app.state.runtime_composition = composition
-    runtime_app.state.world_package_import_committer = (
-        world_package_import_committer
-    )
+    runtime_app.state.memory_batch_runtime = memory_runtime
+    if memory_runtime is not None:
+        from app.runtime.memory.shutdown import (
+            MemoryShutdownCoordinator,
+            MemoryShutdownAdmissionMiddleware,
+        )
+
+        runtime_app.state.memory_shutdown = MemoryShutdownCoordinator(memory_runtime)
+        runtime_app.add_middleware(
+            MemoryShutdownAdmissionMiddleware,
+            coordinator=runtime_app.state.memory_shutdown,
+        )
+    runtime_app.state.world_package_import_committer = world_package_import_committer
     runtime_app.state.restore_process_settings = (
         dispose_runtime if composition is not None else None
     )
@@ -346,9 +369,7 @@ def runtime_health(request: Request) -> dict[str, object]:
             borrow_runtime_graph_client,
         )
 
-        observations = {
-            item.name: item for item in component_observations.snapshot()
-        }
+        observations = {item.name: item for item in component_observations.snapshot()}
         allowed = {
             RuntimeComponentState.READY,
             RuntimeComponentState.RUNNING,
@@ -375,8 +396,7 @@ def runtime_health(request: Request) -> dict[str, object]:
         "persistence": "sqlite",
         "graph": "ladybug",
         "components": {
-            name: observations[name].state.value
-            for name in ("scheduler", "projector")
+            name: observations[name].state.value for name in ("scheduler", "projector")
         },
     }
 

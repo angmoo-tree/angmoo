@@ -67,7 +67,7 @@ from app.runtime.persistence.sqlite_schema import (
 )
 
 
-SUPPORTED_SOURCE_VERSIONS = (1, 2, 3, 4, 5, 6, 7)
+SUPPORTED_SOURCE_VERSIONS = (1, 2, 3, 4, 5, 6, 7, 8)
 PREDECESSOR_BUILD_COMMIT = "1" * 40
 PREDECESSOR_OVERLAY = b"\nANGMOO_SYNTHETIC_SUPPORTED_PREDECESSOR_PAYLOAD\n"
 
@@ -476,7 +476,9 @@ def _seed_supported_predecessor(
             requester_world_character_id="owner-controlled-supported-v2",
             responding_world_character_id="autonomous-supported-v2-a",
             world_scope_status="resolved",
-            selected_model="gemini-3.1-flash-lite" if source_version >= 7 else "gemini-2.5-flash-lite",
+            selected_model="gemini-3.1-flash-lite"
+            if source_version >= 7
+            else "gemini-2.5-flash-lite",
             model_binding_mode="default",
             last_message_at=datetime(2026, 8, 31, 1, 2, tzinfo=UTC),
             created_at=datetime(2026, 8, 31, 1, 0, tzinfo=UTC),
@@ -564,9 +566,7 @@ def _seed_supported_predecessor(
         graph_controller.current_marker,
         {
             "schema_version": 1,
-            "relative_path": graph.database_root.relative_to(
-                root / "graph"
-            ).as_posix(),
+            "relative_path": graph.database_root.relative_to(root / "graph").as_posix(),
             "manifest_sha256": graph_manifest.manifest_sha256,
             "data_version": 1,
         },
@@ -586,6 +586,13 @@ def _seed_supported_predecessor(
             sql_connection.exec_driver_sql("PRAGMA foreign_keys = OFF")
             sql_connection.commit()
             with sql_connection.begin():
+                from app.domains.memory.infrastructure.batch_models import (
+                    MEMORY_BATCH_TABLES,
+                )
+                from app.core.db import Base
+
+                for name in reversed(MEMORY_BATCH_TABLES):
+                    Base.metadata.tables[name].drop(sql_connection, checkfirst=True)
                 if source_version <= 7:
                     drop_subjective_context_schema(sql_connection)
                 if source_version <= 6:
@@ -691,12 +698,10 @@ def build_fixture(
         source_version=source_version,
     )
     _write_json(app_root / "installer-payload.json", payload)
-    database_path, generation, graph_relative_path = (
-        _seed_supported_predecessor(
-            output_root,
-            source_version=source_version,
-            conflict=conflict,
-        )
+    database_path, generation, graph_relative_path = _seed_supported_predecessor(
+        output_root,
+        source_version=source_version,
+        conflict=conflict,
     )
     _write_json(
         output_root / "fixture-manifest.json",
@@ -768,15 +773,15 @@ def build_fixture(
                     "version": 4,
                 },
             },
-            "expected_worlds_without_reserved_role": [
-                "world-supported-v2-noop"
-            ],
+            "expected_worlds_without_reserved_role": ["world-supported-v2-noop"],
             "expected_owner_controlled_world_character_id": (
                 "owner-controlled-supported-v2"
             ),
             "source_world_chat_selected_models": {
                 "thread-supported-world-resolved": (
-                    "gemini-3.1-flash-lite" if source_version >= 7 else "gemini-2.5-flash-lite"
+                    "gemini-3.1-flash-lite"
+                    if source_version >= 7
+                    else "gemini-2.5-flash-lite"
                 ),
                 "thread-supported-world-ambiguous": "gemini-2.5-flash-lite",
             },
@@ -786,20 +791,14 @@ def build_fixture(
                     "character_id": "character-supported-v2-1",
                     "world_scope_status": "resolved",
                     "world_id": "world-supported-v2",
-                    "requester_world_character_id": (
-                        "owner-controlled-supported-v2"
-                    ),
-                    "responding_world_character_id": (
-                        "autonomous-supported-v2-a"
-                    ),
+                    "requester_world_character_id": ("owner-controlled-supported-v2"),
+                    "responding_world_character_id": ("autonomous-supported-v2-a"),
                     "selected_model": "gemini-3.1-flash-lite",
                     "model_binding_mode": "default",
                     "messages": [
                         {
                             "role": "user",
-                            "content": (
-                                "resolved predecessor message must survive"
-                            ),
+                            "content": ("resolved predecessor message must survive"),
                             "model": None,
                             "status": "ok",
                         }
@@ -817,9 +816,7 @@ def build_fixture(
                     "messages": [
                         {
                             "role": "assistant",
-                            "content": (
-                                "ambiguous predecessor message must survive"
-                            ),
+                            "content": ("ambiguous predecessor message must survive"),
                             "model": "gemini-2.5-flash-lite",
                             "status": "ok",
                         }

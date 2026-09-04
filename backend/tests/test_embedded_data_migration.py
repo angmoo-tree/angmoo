@@ -74,13 +74,7 @@ def _seed_v1(
     media = root / "media" / "world-a" / "banner.txt"
     media.parent.mkdir(parents=True)
     media.write_text("keep-media", encoding="utf-8")
-    database = (
-        root
-        / "canonical"
-        / "generations"
-        / generation
-        / "angmoo.sqlite3"
-    )
+    database = root / "canonical" / "generations" / generation / "angmoo.sqlite3"
     database.parent.mkdir(parents=True)
     engine = create_engine(URL.create("sqlite+pysqlite", database=str(database)))
     metadata = build_sqlite_v1_metadata()
@@ -104,7 +98,9 @@ def _seed_v1(
             ),
         )
         connection.execute(
-            metadata.tables["users"].insert().values(
+            metadata.tables["users"]
+            .insert()
+            .values(
                 id="owner-v1",
                 display_name="Existing Owner",
                 display_name_normalized="existing owner",
@@ -362,12 +358,17 @@ def _seed_v2_roleless(
             connection.exec_driver_sql("PRAGMA foreign_keys = OFF")
             connection.commit()
             with connection.begin():
+                from app.domains.memory.infrastructure.batch_models import (
+                    MEMORY_BATCH_TABLES,
+                )
+                from app.core.db import Base
+
+                for name in reversed(MEMORY_BATCH_TABLES):
+                    Base.metadata.tables[name].drop(connection, checkfirst=True)
                 drop_subjective_context_schema(connection)
                 drop_response_request_schema(connection)
                 drop_memory_schema_v1(connection)
-                rebuild_message_threads_v3(
-                    connection, create_legacy_unique_index=False
-                )
+                rebuild_message_threads_v3(connection, create_legacy_unique_index=False)
                 connection.exec_driver_sql(
                     f"UPDATE {SCHEMA_VERSION_TABLE} "
                     "SET schema_version = ?, source_revision = ?, "
@@ -470,19 +471,13 @@ def test_v1_sqlite_is_copied_to_latest_and_existing_data_is_preserved(
     assert set(WORLD_PACKAGE_REGISTRY_TABLES) <= tables
 
     previous = json.loads(
-        (root / "canonical" / "previous-generation.json").read_text(
-            encoding="utf-8"
-        )
+        (root / "canonical" / "previous-generation.json").read_text(encoding="utf-8")
     )
     assert previous["generation"] == GENERATION
     assert previous["data_version"] == 1
 
-    current_before = (
-        root / "canonical" / "current-generation.json"
-    ).read_bytes()
-    graph_current_before = (
-        root / "graph" / "current-generation.json"
-    ).read_bytes()
+    current_before = (root / "canonical" / "current-generation.json").read_bytes()
+    graph_current_before = (root / "graph" / "current-generation.json").read_bytes()
     second = EmbeddedDataUpgradeCoordinator(
         StaticRuntimeDataPath(root),
         fallback_generation=GENERATION,
@@ -539,9 +534,7 @@ def test_supported_v2_roleless_rows_are_promoted_by_exact_expected_delta(
             row.id: row
             for row in session.scalars(
                 select(models.WorldCharacter).where(
-                    models.WorldCharacter.id.in_(
-                        ("autonomous-v2-a", "autonomous-v2-b")
-                    )
+                    models.WorldCharacter.id.in_(("autonomous-v2-a", "autonomous-v2-b"))
                 )
             )
         }
@@ -567,16 +560,12 @@ def test_supported_v2_roleless_rows_are_promoted_by_exact_expected_delta(
     database.close()
 
     previous = json.loads(
-        (root / "canonical" / "previous-generation.json").read_text(
-            encoding="utf-8"
-        )
+        (root / "canonical" / "previous-generation.json").read_text(encoding="utf-8")
     )
     assert previous["generation"] == V2_GENERATION
     assert previous["data_version"] == 2
 
-    marker_before = (
-        root / "canonical" / "current-generation.json"
-    ).read_bytes()
+    marker_before = (root / "canonical" / "current-generation.json").read_bytes()
     second = EmbeddedDataUpgradeCoordinator(
         StaticRuntimeDataPath(root),
         fallback_generation=V2_GENERATION,
@@ -752,8 +741,7 @@ def test_each_consecutive_step_rejects_undeclared_identity_changes(
     def mutate_unowned_table(connection) -> None:
         original(connection)
         connection.exec_driver_sql(
-            "UPDATE users SET display_name = 'Unexpected change' "
-            "WHERE id = 'owner-v1'"
+            "UPDATE users SET display_name = 'Unexpected change' WHERE id = 'owner-v1'"
         )
 
     monkeypatch.setitem(sqlite_registry.MIGRATIONS, 1, mutate_unowned_table)
@@ -831,9 +819,7 @@ def test_graph_version_change_replays_to_staging_and_preserves_previous(
     )
     assert current["relative_path"].startswith("generations/ladybug-v2")
     previous = json.loads(
-        (root / "graph" / "previous-generation.json").read_text(
-            encoding="utf-8"
-        )
+        (root / "graph" / "previous-generation.json").read_text(encoding="utf-8")
     )
     assert previous["relative_path"] == "ladybug"
     assert previous["data_version"] == 0
@@ -854,9 +840,7 @@ def test_graph_rebuild_failure_degrades_without_replacing_previous(
     )
 
     def fail_rebuild(**_kwargs):
-        raise graph_registry.LadybugVersionContractError(
-            "ladybug_rebuild_injected"
-        )
+        raise graph_registry.LadybugVersionContractError("ladybug_rebuild_injected")
 
     monkeypatch.setitem(graph_registry.GRAPH_REBUILDS, 2, fail_rebuild)
     result = EmbeddedDataUpgradeCoordinator(

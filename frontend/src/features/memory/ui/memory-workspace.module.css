@@ -68,6 +68,14 @@
   min-height: calc(100vh - 190px);
 }
 .listPane { border-right: 1px solid var(--color-border-default); background: var(--color-surface); }
+.batchControls { display: grid; min-width: 0; gap: 12px; margin: 18px; padding: 18px; border: 1px solid var(--color-border-default); border-radius: 18px; background: var(--color-surface-muted); }
+.batchControls h2 { margin: 0; color: var(--color-text-strong); font-size: 1rem; }
+.batchControls p { margin: 0; font-size: .8rem; line-height: 1.6; overflow-wrap: anywhere; }
+.batchControls fieldset { display: grid; min-width: 0; gap: 12px; margin: 0; border: 0; padding: 0; }
+.batchControls button { justify-self: start; }
+.batchCheck { display: flex; min-height: 44px; align-items: center; gap: 10px; font-size: .85rem; }
+.batchCheck input { width: 18px; height: 18px; flex: 0 0 auto; accent-color: var(--color-brand-accent); }
+.batchCheck input:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 .detailPane { min-width: 0; padding: clamp(20px, 4vw, 44px); }
 .scopeNotice { display: flex; align-items: center; gap: 10px; margin: 18px; border: 1px solid var(--color-border-default); border-radius: 18px; background: var(--color-surface-muted); padding: 14px; }
 .scopeNotice[data-memory-enabled="true"] { border-color: var(--color-state-success-border); background: var(--color-state-success-surface); }

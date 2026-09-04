@@ -61,6 +61,9 @@ jobs:
       - name: Verify L4 P5-P7 parity and ownership inventory
         run: uv run python ../scripts/ci/generate_l4_pr_a_inventory.py --check
         working-directory: backend
+      - name: Verify Memory batch runtime and frozen predecessor inventory
+        run: uv run python ../scripts/ci/generate_p8_l_r_memory_batch_inventory.py --check
+        working-directory: backend
       - name: Run backend suite
         run: uv run python -m pytest -q tests
         working-directory: backend

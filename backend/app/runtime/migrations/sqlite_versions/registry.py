@@ -52,6 +52,12 @@ from app.runtime.migrations.sqlite_versions.v7_to_v8_social_action_subjective_co
     upgrade_v7_to_v8,
     verify_v7_to_v8_delta,
 )
+from app.runtime.migrations.sqlite_versions.v8_to_v9_memory_batch import (
+    MUTABLE_IDENTITY_TABLES as V8_TO_V9_MUTABLE_TABLES,
+    capture_v8_to_v9_delta,
+    upgrade_v8_to_v9,
+    verify_v8_to_v9_delta,
+)
 from app.runtime.migrations.sqlite_versions.contracts import SqliteMigrationContract
 from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION
 
@@ -100,6 +106,7 @@ MIGRATIONS: dict[int, SqliteMigration] = {
     5: upgrade_v5_to_v6,
     6: upgrade_v6_to_v7,
     7: upgrade_v7_to_v8,
+    8: upgrade_v8_to_v9,
 }
 
 MIGRATION_CONTRACTS: dict[int, SqliteMigrationContract] = {
@@ -158,6 +165,14 @@ MIGRATION_CONTRACTS: dict[int, SqliteMigrationContract] = {
         mutable_identity_tables=V7_TO_V8_MUTABLE_TABLES,
         capture=capture_v7_to_v8_delta,
         verify=verify_v7_to_v8_delta,
+    ),
+    8: SqliteMigrationContract(
+        source_version=8,
+        target_version=9,
+        name="memory_batch",
+        mutable_identity_tables=V8_TO_V9_MUTABLE_TABLES,
+        capture=capture_v8_to_v9_delta,
+        verify=verify_v8_to_v9_delta,
     ),
 }
 

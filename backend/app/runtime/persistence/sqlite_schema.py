@@ -11,11 +11,24 @@ from sqlalchemy import Connection, MetaData, text
 from app.core.db import Base
 
 
-SQLITE_SCHEMA_VERSION = 8
-SOURCE_ALEMBIC_REVISION = "20260904_0088"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 87
-EXPECTED_CANONICAL_TABLE_COUNT = 96
+SQLITE_SCHEMA_VERSION = 9
+SOURCE_ALEMBIC_REVISION = "20260904_0089"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 88
+EXPECTED_CANONICAL_TABLE_COUNT = 102
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
+
+MEMORY_BATCH_V9_TABLES = (
+    "memory_batch_profiles",
+    "memory_batch_settings",
+    "memory_activation_epochs",
+    "memory_source_deliveries",
+    "memory_batch_runs",
+    "memory_selection_decisions",
+)
+SQLITE_V8_SCHEMA_VERSION = 8
+SQLITE_V8_SOURCE_ALEMBIC_REVISION = "20260904_0088"
+SQLITE_V8_SOURCE_ALEMBIC_MIGRATION_COUNT = 87
+SQLITE_V8_CANONICAL_TABLE_COUNT = 96
 
 SQLITE_V5_SCHEMA_VERSION = 5
 SQLITE_V5_SOURCE_ALEMBIC_REVISION = "20260831_0085"
@@ -75,9 +88,7 @@ def build_sqlite_baseline_metadata() -> MetaData:
         for index in table.indexes:
             postgresql_where = index.dialect_options["postgresql"].get("where")
             if postgresql_where is not None:
-                index.dialect_options["sqlite"]["where"] = text(
-                    str(postgresql_where)
-                )
+                index.dialect_options["sqlite"]["where"] = text(str(postgresql_where))
     if len(metadata.tables) != EXPECTED_CANONICAL_TABLE_COUNT:
         raise RuntimeError(
             "canonical table inventory drifted: "
@@ -113,6 +124,7 @@ def build_sqlite_v4_metadata() -> MetaData:
         if (
             table_name == "message_threads"
             or table_name in MEMORY_V5_TABLES
+            or table_name in MEMORY_BATCH_V9_TABLES
             or table_name in RESPONSE_REQUEST_V6_TABLES
             or table_name in SUBJECTIVE_CONTEXT_V8_TABLES
         ):
@@ -140,6 +152,7 @@ def build_sqlite_v3_metadata() -> MetaData:
         if (
             table_name == "message_threads"
             or table_name in MEMORY_V5_TABLES
+            or table_name in MEMORY_BATCH_V9_TABLES
             or table_name in RESPONSE_REQUEST_V6_TABLES
             or table_name in SUBJECTIVE_CONTEXT_V8_TABLES
         ):
@@ -167,6 +180,7 @@ def build_sqlite_v5_metadata() -> MetaData:
         if (
             table_name == "message_threads"
             or table_name in RESPONSE_REQUEST_V6_TABLES
+            or table_name in MEMORY_BATCH_V9_TABLES
             or table_name in SUBJECTIVE_CONTEXT_V8_TABLES
         ):
             continue
@@ -193,6 +207,7 @@ def build_sqlite_v6_metadata() -> MetaData:
         if (
             table_name == "message_threads"
             or table_name in SUBJECTIVE_CONTEXT_V8_TABLES
+            or table_name in MEMORY_BATCH_V9_TABLES
         ):
             continue
         Base.metadata.tables[table_name].to_metadata(metadata)
@@ -211,7 +226,10 @@ def build_sqlite_v7_metadata() -> MetaData:
 
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
-        if table_name in SUBJECTIVE_CONTEXT_V8_TABLES:
+        if (
+            table_name in SUBJECTIVE_CONTEXT_V8_TABLES
+            or table_name in MEMORY_BATCH_V9_TABLES
+        ):
             continue
         Base.metadata.tables[table_name].to_metadata(metadata)
     _copy_partial_index_predicates(metadata)
@@ -223,14 +241,24 @@ def build_sqlite_v7_metadata() -> MetaData:
     return metadata
 
 
+def build_sqlite_v8_metadata() -> MetaData:
+    """Immutable pre-batch settings/admission schema."""
+    metadata = MetaData()
+    for table_name in sorted(Base.metadata.tables):
+        if table_name not in MEMORY_BATCH_V9_TABLES:
+            Base.metadata.tables[table_name].to_metadata(metadata)
+    _copy_partial_index_predicates(metadata)
+    if len(metadata.tables) != SQLITE_V8_CANONICAL_TABLE_COUNT:
+        raise RuntimeError("SQLite v8 table inventory drifted")
+    return metadata
+
+
 def _copy_partial_index_predicates(metadata: MetaData) -> None:
     for table in metadata.tables.values():
         for index in table.indexes:
             postgresql_where = index.dialect_options["postgresql"].get("where")
             if postgresql_where is not None:
-                index.dialect_options["sqlite"]["where"] = text(
-                    str(postgresql_where)
-                )
+                index.dialect_options["sqlite"]["where"] = text(str(postgresql_where))
 
 
 def create_schema_version_table(connection: Connection) -> None:

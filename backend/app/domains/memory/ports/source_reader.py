@@ -29,6 +29,7 @@ class CanonicalMemoryEvidence:
     source_event_id: str | None = None
     counterpart_world_character_id: str | None = None
     thread_id: str | None = None
+    subjective_context: str | None = None
 
 
 class MemorySourceEvidenceReaderPort(Protocol):

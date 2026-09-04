@@ -35,6 +35,12 @@
       "local_bot_action_quota_buckets",
       "local_bot_read_quota_buckets",
       "memory_candidates",
+      "memory_activation_epochs",
+      "memory_batch_profiles",
+      "memory_batch_settings",
+      "memory_batch_runs",
+      "memory_source_deliveries",
+      "memory_selection_decisions",
       "memory_hot_brief_items",
       "memory_hot_briefs",
       "memory_item_evidence",
@@ -112,6 +118,11 @@
   },
   "character_deletion": {
     "delete_private": [
+      "memory_activation_epochs",
+      "memory_batch_settings",
+      "memory_batch_runs",
+      "memory_source_deliveries",
+      "memory_selection_decisions",
       "activity_beats",
       "activity_episodes",
       "activity_event_consumptions",
@@ -190,6 +201,7 @@
       "tree_posts"
     ],
     "unaffected_account_or_operations": [
+      "memory_batch_profiles",
       "admin_audit_logs",
       "agent_creation_drafts",
       "auth_external_verification_reservations",

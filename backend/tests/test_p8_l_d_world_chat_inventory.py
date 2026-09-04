@@ -120,4 +120,4 @@ def test_p8_l_d_requires_real_v3_installer_fixture_in_hosted_matrix() -> None:
         text=True,
     )
     assert result.returncode == 0, result.stdout + result.stderr
-    assert result.stdout.strip().endswith("v1,v2,v3,v4,v5,v6,v7")
+    assert result.stdout.strip().endswith("v1,v2,v3,v4,v5,v6,v7,v8")

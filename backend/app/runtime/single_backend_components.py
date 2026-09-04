@@ -25,9 +25,7 @@ from app.domains.runtime.public import (
 logger = logging.getLogger(__name__)
 
 ComponentStateListener = Callable[[str], None]
-SchedulerRunner = Callable[
-    [asyncio.Event, ComponentStateListener], Awaitable[None]
-]
+SchedulerRunner = Callable[[asyncio.Event, ComponentStateListener], Awaitable[None]]
 ProjectorRunner = Callable[[threading.Event, ComponentStateListener], None]
 
 
@@ -158,6 +156,15 @@ class SingleBackendRuntimeComponents:
         self._projector_task = None
         self._scheduler_stop = None
         self._projector_stop = None
+
+    async def quiesce_scheduler(self) -> None:
+        """Stop new autonomous work while projections and canonical DB live."""
+        if self._scheduler_stop is not None:
+            self._scheduler_stop.set()
+        if self._scheduler_task is not None:
+            done, _ = await asyncio.wait({self._scheduler_task}, timeout=4)
+            if not done:
+                self._scheduler_task.cancel()
 
     async def _wait_started(
         self,

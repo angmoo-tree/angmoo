@@ -982,6 +982,48 @@ test("Tauri Phone reserves titlebar controls above page-owned header actions", a
   );
 });
 
+test("P8-L-R whole-app Memory shutdown keeps an accessible bounded closing surface", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => {
+    const desktop = window as unknown as {
+      __MEMORY_SHUTDOWN__: { phase: string; deferred: boolean; skips: number };
+      __ANGMOO_DESKTOP_WINDOW__: { kind: string; route: string };
+      __TAURI__: { core: { invoke: (command: string) => Promise<unknown> } };
+    };
+    desktop.__MEMORY_SHUTDOWN__ = { phase: "RUNNING", deferred: false, skips: 0 };
+    desktop.__ANGMOO_DESKTOP_WINDOW__ = { kind: "phone", route: "/" };
+    desktop.__TAURI__ = { core: { invoke: async (command) => {
+      if (command === "desktop_runtime_status") return { phase: "ready", apiBaseUrl: "http://127.0.0.1:8080", graphProvider: "ladybug", launchToken: "static-route-probe-token-000000000000" };
+      if (command === "desktop_shutdown_status") return desktop.__MEMORY_SHUTDOWN__;
+      if (command === "skip_memory_shutdown") {
+        desktop.__MEMORY_SHUTDOWN__.deferred = true;
+        desktop.__MEMORY_SHUTDOWN__.skips += 1;
+      }
+      return undefined;
+    } } };
+  });
+  await page.goto("/");
+  const closing = page.getByRole("dialog", { name: "끄는 중…" });
+  await expect(closing).toHaveCount(0);
+  await page.evaluate(() => {
+    (window as unknown as { __MEMORY_SHUTDOWN__: { phase: string } }).__MEMORY_SHUTDOWN__.phase = "CONSOLIDATING";
+  });
+  await expect(closing).toBeVisible();
+  const closingBounds = await closing.boundingBox();
+  expect(closingBounds).not.toBeNull();
+  expect(Math.abs(closingBounds!.x + closingBounds!.width / 2 - 195)).toBeLessThan(2);
+  expect(Math.abs(closingBounds!.y + closingBounds!.height / 2 - 422)).toBeLessThan(2);
+  const skip = closing.getByRole("button", { name: "지금 종료" });
+  await expect(skip).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(closing).toBeVisible();
+  await skip.click();
+  await expect(skip).toBeDisabled();
+  await expect(closing.getByRole("status")).toContainText("다음 실행에서 이어집니다");
+  await expect.poll(() => page.evaluate(() => (window as unknown as { __MEMORY_SHUTDOWN__: { skips: number } }).__MEMORY_SHUTDOWN__.skips)).toBe(1);
+  await expect(closing.getByRole("button")).toHaveCount(1);
+});
+
 test("static Browser canonicalizes legacy World creator aliases", async ({ page }) => {
   await page.goto("/worlds/new?source=legacy&tag=a&tag=b&empty=");
   await expect(page).toHaveURL(
@@ -1609,6 +1651,7 @@ test("Tauri Phone retries Creator Studio return without creating a duplicate Cha
     desktop.__TAURI__ = {
       core: {
         invoke: async (command, args) => {
+          if (command === "desktop_shutdown_status") return { phase: "RUNNING", deferred: false };
           if (command === "desktop_runtime_status") {
             return {
               phase: "ready",
@@ -2552,6 +2595,7 @@ test("P8-L-R static Memory route controls exact-scope owner state and keeps narr
   };
   let memoryEnabled = false;
   let settingVersion = 3;
+  const handleMemoryBatch = memoryBatchFixture(worldId, subjectId, () => memoryEnabled);
   let activeItem = { ...item };
   let previousItem = { ...item };
   let deleted = false;
@@ -2621,6 +2665,7 @@ test("P8-L-R static Memory route controls exact-scope owner state and keeps narr
         ],
       });
     }
+    if (await handleMemoryBatch(route)) return;
     if (url.pathname.endsWith("/memory/settings")) {
       if (method === "PUT") {
         const body = request.postDataJSON() as { enabled: boolean };
@@ -2756,6 +2801,7 @@ test("P8-L-R static Memory route controls exact-scope owner state and keeps narr
   await expect(page.getByText("기억이 꺼져 있어요", { exact: true })).toBeVisible();
   await expect(page.getByText("현재 대화와 오늘의 World SNS 활동은 대화 연속성을 위해 계속 사용할 수 있습니다.", { exact: false })).toBeVisible();
   await page.getByRole("button", { name: "기억 켜기" }).click();
+  await verifyMemoryBatchControls(page);
   await page.getByRole("button", { name: "고정", exact: true }).click();
   await expect(page.getByRole("button", { name: "고정 해제", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "정정", exact: true }).click();
@@ -4010,6 +4056,7 @@ test("Tauri Phone delegates Studio to a reusable wide product window", async ({ 
     desktop.__TAURI__ = {
       core: {
         invoke: async (command, args) => {
+          if (command === "desktop_shutdown_status") return { phase: "RUNNING", deferred: false };
           if (command === "desktop_runtime_status") {
             return {
               phase: "ready",
@@ -4483,3 +4530,4 @@ test("Tauri wide marker opens the shared static Studio route without a server pa
   );
   await expect(page.getByText("지원하지 않는 Angmoo 경로입니다.")).toHaveCount(0);
 });
+import { memoryBatchFixture, verifyMemoryBatchControls } from "./memory-batch-fixture";
