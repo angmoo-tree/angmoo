@@ -1055,7 +1055,7 @@
     "oracle_artifacts": [
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "3e47df5edf2c2b75bbc150f5d3f84d5b133f95f1751731cfb3fece5d82362c16"
+        "sha256": "5a7bca37d1c5569b1ef36d32066d44d61fc9efe284b0d1b05bb72133651d41a7"
       },
       {
         "path": "docs/architecture/l3-er-postgres-neo4j-parity-oracle.json",
