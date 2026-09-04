@@ -14,7 +14,7 @@ import {
 } from "react";
 
 import { classNames } from "./class-names";
-import styles from "./semantic-foundation.module.css";
+import styles from "@/components/ui/semantic-foundation.module.css";
 
 type DataAttributes = {
   [key: `data-${string}`]: string | number | boolean | undefined;

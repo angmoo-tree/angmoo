@@ -4,32 +4,18 @@ import Link from "next/link";
 import { BrainCircuit, Cog, Globe2, Hammer, Plus } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 
-import {
-  getProductRuntimeState,
-  RuntimeStatusSummary,
-  type ProductRuntimeState,
-} from "@/features/runtime-status/public";
-import {
-  safeSameOriginMediaUrl,
-  useRuntimeMediaUrl,
-} from "@/shared/media/public";
-import { PRODUCT_ROUTES, worldAppRoute } from "@/shared/navigation/public";
-import { AppIcon, Button } from "@/shared/ui/public";
+import { useRuntimeMediaUrl } from "@/hooks/use-runtime-media-url";
+import { safeSameOriginMediaUrl } from "@/lib/media/safe-media-url";
+import { PRODUCT_ROUTES, worldAppRoute } from "@/lib/navigation/product-routes";
+import { AppIcon } from "@/components/ui/app-icon";
+import { Button } from "@/components/ui/button";
 
 import { getLocalWorldSurface } from "../api/device-home-client";
-import {
-  DEVICE_HOME_FIXED_APPS,
-  presentWorldLaunchability,
-  type WorldSurfaceItem,
-} from "../model/device-home-contract";
-import { DeviceHomeShell } from "./device-home-shell";
+import type { DeviceHomeAuthStatus, WorldSurfaceItem } from "../types";
+import { DEVICE_HOME_FIXED_APPS, presentWorldLaunchability } from "../utils/device-home-presentation";
 import styles from "./device-home.module.css";
 
 
-export type DeviceHomeAuthStatus =
-  | "checking"
-  | "authenticated"
-  | "unauthenticated";
 
 type DeviceHomeProps = {
   authStatus: DeviceHomeAuthStatus;
@@ -63,8 +49,6 @@ const WORLD_LAUNCH_TONE_CLASSES = {
 } as const;
 
 export function DeviceHome({ authStatus }: DeviceHomeProps) {
-  const [runtimeState, setRuntimeState] =
-    useState<ProductRuntimeState>("stale_state");
   const [worldRequestRevision, setWorldRequestRevision] = useState(0);
   const [worldRead, setWorldRead] = useState<{
     error: string | null;
@@ -102,26 +86,13 @@ export function DeviceHome({ authStatus }: DeviceHomeProps) {
     return () => controller.abort();
   }, [authStatus, worldRequestRevision]);
 
-  useEffect(() => {
-    if (authStatus !== "authenticated") {
-      return;
-    }
-    const controller = new AbortController();
-    getProductRuntimeState({ signal: controller.signal })
-      .then(setRuntimeState)
-      .catch((reason: unknown) => {
-        if (reason instanceof DOMException && reason.name === "AbortError") return;
-        setRuntimeState("stale_state");
-      });
-    return () => controller.abort();
-  }, [authStatus]);
 
   const worldEntries = worlds.map((world) => (
     <WorldAppIcon key={world.world_id} world={world} />
   ));
 
   return (
-    <DeviceHomeShell status={<RuntimeStatusSummary state={runtimeState} />}>
+    <>
       {DEVICE_HOME_FIXED_APPS.map((app) => (
         <AppIcon
           key={app.id}
@@ -173,7 +144,7 @@ export function DeviceHome({ authStatus }: DeviceHomeProps) {
       ) : (
         worldEntries
       )}
-    </DeviceHomeShell>
+    </>
   );
 }
 

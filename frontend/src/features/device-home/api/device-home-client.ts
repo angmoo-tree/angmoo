@@ -1,8 +1,8 @@
 import type {
   LocalWorldSurfaceRead,
   WorldSurface,
-} from "../model/device-home-contract";
-import { runtimeFetch } from "@/shared/runtime/public";
+} from "../types";
+import { runtimeFetch } from "@/lib/runtime/runtime-config";
 
 
 export class DeviceHomeApiError extends Error {

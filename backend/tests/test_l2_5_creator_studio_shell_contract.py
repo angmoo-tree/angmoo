@@ -30,7 +30,7 @@ def test_creator_studio_reads_owner_surface_and_groups_blocked_worlds() -> None:
     dashboard = _read(
         "features/creator-studio/ui/creator-studio-dashboard.tsx"
     )
-    device_contract = _read("features/device-home/model/device-home-contract.ts")
+    device_contract = _read("features/device-home/utils/device-home-presentation.ts")
 
     assert 'getLocalWorldSurface("creator_studio"' in dashboard
     assert '"live" | "draft" | "private" | "archived"' in dashboard

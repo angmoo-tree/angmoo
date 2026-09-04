@@ -30,7 +30,7 @@ def test_world_app_navigation_keeps_world_scope_and_marks_missing_capabilities()
     world_app = _read("features/world-app/ui/world-app.tsx")
     client = _read("features/world-app/api/world-app-client.ts")
 
-    assert "encodeURIComponent(worldId)" in _read("shared/navigation/product-routes.ts")
+    assert "encodeURIComponent(worldId)" in _read("lib/navigation/product-routes.ts")
     for segment in ("feed", "chat", "characters", "relationships"):
         assert f'segment: "{segment}"' in contract
     # P8-L-D makes Chat available as a World-scoped, read-only list/detail
@@ -53,7 +53,7 @@ def test_world_app_navigation_keeps_world_scope_and_marks_missing_capabilities()
 
 def test_legacy_posts_route_remains_the_global_feed() -> None:
     posts_page = _read("app/posts/page.tsx")
-    device_home = _read("features/device-home/ui/device-home.tsx")
+    device_home = _read("features/device-home/components/device-home.tsx")
 
     assert "<FeedPage />" in posts_page
     assert "disabled={!world.launchable}" in device_home

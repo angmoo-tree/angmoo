@@ -1,9 +1,7 @@
 import type { ReactNode } from "react";
 
-import {
-  DeviceShell,
-  LocalDeviceNavigation,
-} from "@/features/device-shell/public";
+import { DeviceShell } from "@/features/device-shell/ui/device-shell";
+import { LocalDeviceNavigation } from "@/features/device-shell/ui/local-device-navigation";
 
 import styles from "./device-home-shell.module.css";
 

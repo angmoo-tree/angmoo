@@ -202,7 +202,7 @@ def _frontend_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "frontend/src/shared/navigation/product-routes.ts",
+        "frontend/src/lib/navigation/product-routes.ts",
         ("worldCharacterProfileRoute", "worldCharacterDirectoryRoute"),
     )
     _require_text(

@@ -1,10 +1,3 @@
 "use client";
 
-import { useAuth } from "@/components/auth-provider";
-import { DeviceHome } from "@/features/device-home/public";
-
-
-export function DeviceHomeRouteClient() {
-  const { status } = useAuth();
-  return <DeviceHome authStatus={status} />;
-}
+export { DeviceHomeScreen as DeviceHomeRouteClient } from "@/composition/screens/device-home-screen";

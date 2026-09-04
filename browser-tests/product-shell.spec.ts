@@ -2430,6 +2430,9 @@ test("UI-E Device Home separates runtime state, World launchability, and retry",
   expect(
     audit.reads.filter((read) => read === "GET /api/backend/worlds/mine?surface=device_home"),
   ).toHaveLength(6);
+  expect(
+    audit.reads.filter((read) => read === "GET /api/backend/runtime/status"),
+  ).toHaveLength(5);
   expect(audit.writes).toEqual([]);
   expect(audit.providerCalls).toEqual([]);
 });

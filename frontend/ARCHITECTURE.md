@@ -2,7 +2,7 @@
 
 Angmoo의 프론트엔드는 **기능별 코드와 공용 코드를 구분하고, 여러 기능을 화면에서 조립하는 구조**를 사용한다. Chat을 고칠 때는 Chat 기능을, 여러 화면의 공통 버튼을 고칠 때는 공용 컴포넌트를 찾을 수 있도록 책임을 나누는 것이 목적이다.
 
-이 문서는 [Bulletproof React의 Next.js App Router 예제](https://github.com/alan2207/bulletproof-react/tree/master/apps/nextjs-app)에 기반한 **구조 전환의 목표 기준**이다. 2026-09-05 AR-0 기준선 확보와 AR-1 검사 지원을 진행했다. 제품 파일럿은 아직 이전 전이다. 현재 적용 범위와 검증은 [보존 지도](../docs/architecture/refactor-feature-preservation.md)가 소유한다. 기존 코드에는 `ui`, `model`, `public.ts`, `shared`가 남아 있다. 현재 파일을 찾는 방법과 기존 검사와의 관계는 [전환 중인 코드 읽기](#전환-중인-코드-읽기)에서 설명한다.
+이 문서는 [Bulletproof React의 Next.js App Router 예제](https://github.com/alan2207/bulletproof-react/tree/master/apps/nextjs-app)에 기반한 **구조 전환의 목표 기준**이다. 2026-09-05 AR-0 기준선과 AR-1 검사 지원을 병합했고, `device-home`을 AR-F1 첫 제품 파일럿으로 옮겨 해당 범위의 새 경계 검사를 활성화했다. Home의 기능 코드는 `features/device-home`, 인증·runtime·Phone shell 조립은 `composition/screens/device-home-screen.tsx`, 공용 구현은 `components/hooks/lib/utils`가 소유한다. 다른 화면에는 `ui`, `model`, `public.ts`, `shared`가 남아 있으므로 [보존 지도](../docs/architecture/refactor-feature-preservation.md)와 [전환 중인 코드 읽기](#전환-중인-코드-읽기)를 함께 확인한다.
 
 ## 목차
 
@@ -226,6 +226,8 @@ CSS module은 소유 컴포넌트와 함께 이동한다. 공통 스타일은 �
 
 작성 시점의 [frontend 의존성](package.json)에는 Vitest·React Testing Library·MSW가 없고 `frontend/e2e`에도 추적된 테스트가 없다. 빈 폴더나 helper 파일이 있다는 이유로 테스트가 실행된다고 판단하지 않는다. 새 도구가 필요한 경우 실제 소비 테스트·설정·명령·CI를 함께 정의한다. 참고 예제의 라이브러리 목록을 그대로 설치하지 않는다.
 
+AR-F1에서도 `src/testing`은 만들지 않았다. Device Home의 공용 검증 소비자는 현재 backend의 소스 계약 테스트, `browser-tests`의 Playwright fixture, frontend의 Node proxy 검사에 이미 연결되어 있다. 여러 기능 테스트가 같은 React 렌더링 helper나 mock server를 실제로 재사용하게 될 때 실행기 등록과 함께 도입한다.
+
 Playwright의 `Page`·`Route`나 Node 서버에 종속된 fixture는 해당 실행 프로젝트에 둔다. 공통화할 수 있는 합성 데이터와 실행기 전용 helper를 구분한다. mock·타이머·구독·공유 상태는 테스트 사이에 정리되어야 한다.
 
 제품의 `app`, `composition`, `features`, 공용 코드는 테스트 전용 지원을 import하지 않는다. 테스트와 지원 코드가 검증 대상이나 provider를 참조하는 방향은 가능하며, 목표 검사기는 그 범위를 제품 코드와 구분한다. 테스트 편의를 위한 경로가 제품 bundle이나 feature 간 우회 연결로 남아서는 안 된다.
@@ -269,7 +271,7 @@ Playwright의 `Page`·`Route`나 Node 서버에 종속된 fixture는 해당 실�
 | 여러 기능을 묶는 `device-shell`, `world-app`, `pwa-shell`의 코드 | 조립은 `composition`, 독립 기능·중립 표현은 실제 책임별 배치 |
 | `app/*-route-client`를 정적 router가 import하는 연결 | 공통 screen을 `composition/screens`로 옮기고 두 진입점이 사용 |
 
-현재 [frontend AGENTS](AGENTS.md), [product-shell 계약](../docs/architecture/frontend-product-shell.md), [경계 정책](../security/frontend_architecture_policy.json)은 이전 `public.ts`·`shared` 경로를 포함한다. 이 문서 작성으로 기존 정책이나 검사기가 이미 바뀐 것은 아니다. 미전환 영역은 기존 규칙을 유지하고, 전환하는 영역은 코드·소비자·정책·설명을 같은 변경에서 맞춘다.
+현재 [frontend AGENTS](AGENTS.md), [product-shell 계약](../docs/architecture/frontend-product-shell.md), [경계 정책](../security/frontend_architecture_policy.json)은 전환된 `device-home`과 미전환 `public.ts`·`shared` 경로를 함께 설명한다. Device Home의 `public.ts`는 Creator Studio·Memory·World App의 네 소비자만 위한 한시적 API/type/presentation facade이며 screen이나 shell을 export하지 않는다. 공용 옛 경로는 새 canonical 구현을 가리키는 명시적 re-export만 남기고 AR-F4에서 소비자를 옮긴 뒤 제거한다. 미전환 영역은 기존 규칙을 유지하고, 전환하는 영역은 코드·소비자·정책·설명을 같은 변경에서 맞춘다.
 
 정상적인 목표 import와 금지된 역참조를 검사할 수 있어야 한다. 광범위한 예외나 검사 비활성화로 경로 변경을 통과시키지 않는다. 문서에 없는 현재 파일도 사용처·테스트·빌드 연결을 확인하며, 필요한 기능을 예시 트리 밖에 있다는 이유로 제거하지 않는다.
 

@@ -11,7 +11,7 @@ import {
 } from "react";
 
 import { classNames } from "./class-names";
-import styles from "./semantic-foundation.module.css";
+import styles from "@/components/ui/semantic-foundation.module.css";
 
 function hasInvalidState(value: unknown): boolean {
   return value === true || value === "true" || value === "grammar" || value === "spelling";

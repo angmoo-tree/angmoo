@@ -4406,11 +4406,13 @@ test("static Device Home authenticates sidecar media before rendering a blob URL
   page,
 }) => {
   const mediaRequests: string[] = [];
+  const apiRequests: string[] = [];
   await page.route("http://127.0.0.1:8080/**", async (route) => {
     expect(route.request().headers()["x-angmoo-launcher-token"]).toBe(
       "static-route-probe-token-000000000000",
     );
     const pathname = new URL(route.request().url()).pathname;
+    apiRequests.push(pathname);
     if (pathname === "/api/v1/auth/me") {
       await route.fulfill({
         contentType: "application/json",
@@ -4490,6 +4492,8 @@ test("static Device Home authenticates sidecar media before rendering a blob URL
 
   await expect(page.getByRole("link", { name: "Media World World 열기" })).toBeVisible();
   await expect(page.locator('img[src^="blob:"]')).toBeVisible();
+  expect(apiRequests.filter((path) => path === "/api/v1/runtime/status")).toHaveLength(1);
+  expect(apiRequests.filter((path) => path === "/api/v1/worlds/mine")).toHaveLength(1);
   expect(mediaRequests).toHaveLength(1);
 });
 
