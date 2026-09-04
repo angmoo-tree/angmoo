@@ -23,7 +23,7 @@ import {
 import { SettingsClient } from "@/components/settings-client";
 import { WorldCharacterAutonomySetupClient } from "@/components/world-character-autonomy-setup-client";
 import { WorldCreatorClient } from "@/components/world-creator-client";
-import { DeviceHomeRouteClient } from "@/app/device-home-route-client";
+import { DeviceHomeScreen } from "@/composition/screens/device-home-screen";
 import { StudioImportRouteClient } from "@/app/studio/import/studio-import-route-client";
 import { StudioRouteClient } from "@/app/studio/studio-route-client";
 import { WorldAppRouteClient } from "@/app/world-app-route-client";
@@ -137,7 +137,7 @@ function StaticWindowRouteMismatch({
 function renderStaticRoute(location: BrowserLocation) {
   const { pathname, search } = location;
   if (pathname === "/ui-foundation") return <SemanticFoundationFixture />;
-  if (pathname === "/") return <DeviceHomeRouteClient />;
+  if (pathname === "/") return <DeviceHomeScreen />;
   if (pathname === "/memory") {
     const params = new URLSearchParams(search);
     return (

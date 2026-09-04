@@ -15,7 +15,7 @@ def _desktop(relative: str) -> str:
 
 
 def test_world_package_import_is_available_from_home_studio_and_static_router() -> None:
-    device = _frontend("features/device-home/model/device-home-contract.ts")
+    device = _frontend("features/device-home/utils/device-home-presentation.ts")
     studio = _frontend("features/creator-studio/model/creator-studio-contract.ts")
     dashboard = _frontend("features/creator-studio/ui/creator-studio-dashboard.tsx")
     static_router = _frontend("composition/static-product-router.tsx")

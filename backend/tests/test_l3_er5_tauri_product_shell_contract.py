@@ -202,7 +202,7 @@ def test_wide_windows_use_explicit_route_boundaries_and_single_labels() -> None:
     assert "desktopWindowKindForRoute" in bridge
     assert "targetKind === currentKind" in bridge
     world_app = _read("frontend/src/features/world-app/ui/world-app.tsx")
-    product_routes = _read("frontend/src/shared/navigation/product-routes.ts")
+    product_routes = _read("frontend/src/lib/navigation/product-routes.ts")
     assert "relationshipGraphRoute(ownerActor.character_id, worldId)" in world_app
     assert "내 조종 앵무 관계망 열기" in world_app
     assert "export function relationshipGraphRoute" in product_routes
@@ -299,7 +299,7 @@ def test_static_and_next_profiles_share_the_same_window_bridge() -> None:
 
 def test_memory_read_surface_replaces_the_inactive_explorer_placeholder() -> None:
     contract = _read(
-        "frontend/src/features/device-home/model/device-home-contract.ts"
+        "frontend/src/features/device-home/utils/device-home-presentation.ts"
     )
     assert 'id: "memory"' in contract
     assert 'label: "Memory"' in contract

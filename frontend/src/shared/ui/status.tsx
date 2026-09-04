@@ -9,7 +9,7 @@ import {
 import type { HTMLAttributes, ReactNode } from "react";
 
 import { classNames } from "./class-names";
-import styles from "./semantic-foundation.module.css";
+import styles from "@/components/ui/semantic-foundation.module.css";
 
 export type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
   children: ReactNode;

@@ -530,14 +530,16 @@
         "backend/app/domains/device_home/schemas.py",
         "backend/app/domains/device_home/service.py",
         "frontend/src/app/device-home-route-client.tsx",
+        "frontend/src/composition/screens/device-home-screen.tsx",
+        "frontend/src/composition/screens/device-home-shell.module.css",
+        "frontend/src/composition/screens/device-home-shell.tsx",
         "frontend/src/composition/static-product-router.tsx",
         "frontend/src/features/device-home/api/device-home-client.ts",
-        "frontend/src/features/device-home/model/device-home-contract.ts",
+        "frontend/src/features/device-home/components/device-home.module.css",
+        "frontend/src/features/device-home/components/device-home.tsx",
         "frontend/src/features/device-home/public.ts",
-        "frontend/src/features/device-home/ui/device-home-shell.module.css",
-        "frontend/src/features/device-home/ui/device-home-shell.tsx",
-        "frontend/src/features/device-home/ui/device-home.module.css",
-        "frontend/src/features/device-home/ui/device-home.tsx"
+        "frontend/src/features/device-home/types/index.ts",
+        "frontend/src/features/device-home/utils/device-home-presentation.ts"
       ],
       "target_paths": [
         "backend/app/domains/device_home/service.py",
@@ -566,12 +568,24 @@
         "backend/app/domains/device_home/schemas.py::world_app_read",
         "backend/app/domains/device_home/service.py::list_local_world_apps",
         "backend/app/domains/device_home/service.py::get_local_world_app",
-        "backend/app/domains/device_home/service.py::get_device_home_world"
+        "backend/app/domains/device_home/service.py::get_device_home_world",
+        "frontend/src/composition/screens/device-home-screen.tsx::DeviceHomeScreen",
+        "frontend/src/composition/screens/device-home-shell.tsx::DeviceHomeShell",
+        "frontend/src/features/device-home/api/device-home-client.ts::getLocalWorldSurface",
+        "frontend/src/features/device-home/components/device-home.tsx::DeviceHome",
+        "frontend/src/features/device-home/utils/device-home-presentation.ts::DEVICE_HOME_FIXED_APPS",
+        "frontend/src/features/device-home/utils/device-home-presentation.ts::presentWorldLaunchability"
       ],
       "consumers": [
         "backend/app/api/v1/main.py",
         "backend/app/api/v1/public.py",
-        "backend/app/domains/world_packages/infrastructure/sqlalchemy_import_commit.py"
+        "backend/app/domains/world_packages/infrastructure/sqlalchemy_import_commit.py",
+        "frontend/src/app/device-home-route-client.tsx",
+        "frontend/src/composition/static-product-router.tsx",
+        "frontend/src/features/creator-studio/ui/creator-studio-dashboard.tsx",
+        "frontend/src/features/memory/ui/memory-workspace.tsx",
+        "frontend/src/features/world-app/api/world-app-client.ts",
+        "frontend/src/features/world-app/ui/world-app.tsx"
       ],
       "test_paths": [
         "backend/tests/test_l2_5_creator_studio_shell_contract.py",
@@ -641,9 +655,10 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "backend": "1845 passed / 22 skipped, source tree unchanged",
-        "item_status": "PARTIAL: backend MOVED; frontend MAPPED",
+        "item_status": "Backend Device Home VERIFIED on merged PR #260; frontend Device Home MOVED with local validation, PR-head Hosted and merge evidence pending.",
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending",
-        "backend_pilot": "AR-B1 code moved; head tests/CI pending. Frontend remains MAPPED until AR-F1."
+        "backend_pilot": "AR-B1 PR #260 head d9c3ed5 passed 23 checks and merged as a55c521b9adad624ae1342b2a7b270abc2237f79.",
+        "frontend_pilot": "AR-F1 code moved; local lint/type/build/proxy, source contracts, and Home web/static scenarios passed. PR-head Hosted and merge evidence pending."
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "The repository is an existing read-only identity/World/membership projection. Service functions share the caller Session; this is not permission for arbitrary cross-domain writes."
@@ -2729,12 +2744,12 @@
         "backend/app/services/service_image_key.py",
         "backend/app/services/world_character_provider.py",
         "frontend/src/components/generated-media-preview-card.tsx",
+        "frontend/src/hooks/use-runtime-media-url.ts",
         "frontend/src/lib/generated-media.ts",
+        "frontend/src/lib/media/safe-media-url.ts",
         "frontend/src/lib/safe-media-url.ts",
         "frontend/src/lib/use-private-media-url.ts",
-        "frontend/src/shared/media/public.ts",
-        "frontend/src/shared/media/safe-media-url.ts",
-        "frontend/src/shared/media/use-runtime-media-url.ts"
+        "frontend/src/shared/media/public.ts"
       ],
       "target_paths": [
         "backend/app/integrations",
@@ -3127,10 +3142,10 @@
         "desktop/src-tauri/tauri.conf.json",
         "desktop/src-tauri/tauri.contributor-docker.conf.json",
         "desktop/src-tauri/wix/product-main.wxs",
+        "frontend/src/lib/runtime/runtime-config.ts",
         "frontend/src/shared/runtime/desktop-runtime-gate.tsx",
         "frontend/src/shared/runtime/desktop-shutdown-overlay.tsx",
         "frontend/src/shared/runtime/public.ts",
-        "frontend/src/shared/runtime/runtime-config.ts",
         "scripts/dev/desktop-dev.ps1",
         "scripts/dev/desktop-preflight.ps1",
         "scripts/dev/windows-host-tauri-utf8.ps1",
@@ -3425,13 +3440,13 @@
         "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
         "frontend/src/lib/angmoo-api-docs.ts",
         "frontend/src/lib/features.ts",
+        "frontend/src/lib/navigation/product-routes.ts",
         "frontend/src/lib/policy-links.ts",
         "frontend/src/lib/seo.ts",
         "frontend/src/shared/desktop/desktop-window-bridge.tsx",
         "frontend/src/shared/desktop/desktop-window-controls.module.css",
         "frontend/src/shared/desktop/product-window.ts",
         "frontend/src/shared/desktop/public.ts",
-        "frontend/src/shared/navigation/product-routes.ts",
         "frontend/src/shared/navigation/public.ts",
         "frontend/src/shared/navigation/runtime-navigation.ts",
         "frontend/src/shared/navigation/static-navigation-bridge.tsx"
@@ -10013,6 +10028,10 @@
         "frontend/src/components/character-activity-client.tsx",
         "frontend/src/components/nest-search-form.tsx",
         "frontend/src/components/right-rail-insights.tsx",
+        "frontend/src/components/ui/app-icon.module.css",
+        "frontend/src/components/ui/app-icon.tsx",
+        "frontend/src/components/ui/button.tsx",
+        "frontend/src/components/ui/semantic-foundation.module.css",
         "frontend/src/lib/backend.ts",
         "frontend/src/lib/safe-navigation.ts",
         "frontend/src/lib/tree.ts",
@@ -10026,11 +10045,7 @@
         "frontend/src/shared/interaction/public.ts",
         "frontend/src/shared/interaction/scroll-viewport.ts",
         "frontend/src/shared/interaction/use-mobile-pull-to-refresh.ts",
-        "frontend/src/shared/ui/app-icon.module.css",
-        "frontend/src/shared/ui/app-icon.tsx",
         "frontend/src/shared/ui/avatar.tsx",
-        "frontend/src/shared/ui/button.tsx",
-        "frontend/src/shared/ui/class-names.ts",
         "frontend/src/shared/ui/device-frame.module.css",
         "frontend/src/shared/ui/device-frame.tsx",
         "frontend/src/shared/ui/dialog.tsx",
@@ -10038,11 +10053,11 @@
         "frontend/src/shared/ui/form-controls.tsx",
         "frontend/src/shared/ui/navigation.tsx",
         "frontend/src/shared/ui/public.ts",
-        "frontend/src/shared/ui/semantic-foundation.module.css",
         "frontend/src/shared/ui/semantic-tokens.css",
         "frontend/src/shared/ui/status-badge.tsx",
         "frontend/src/shared/ui/status.tsx",
-        "frontend/src/shared/ui/surfaces.tsx"
+        "frontend/src/shared/ui/surfaces.tsx",
+        "frontend/src/utils/class-names.ts"
       ],
       "target_paths": [
         "backend/app/runtime",

@@ -15,7 +15,21 @@
     "backend/app/domains/device_home/domain/__init__.py": "backend/app/domains/device_home/__init__.py",
     "backend/app/domains/device_home/infrastructure/__init__.py": "backend/app/domains/device_home/__init__.py",
     "backend/app/domains/device_home/ports/__init__.py": "backend/app/domains/device_home/__init__.py",
-    "backend/tests/test_l2_5_device_home_world_surface.py": "backend/tests/device_home/test_world_surface.py"
+    "backend/tests/test_l2_5_device_home_world_surface.py": "backend/tests/device_home/test_world_surface.py",
+    "frontend/src/shared/runtime/runtime-config.ts": "frontend/src/lib/runtime/runtime-config.ts",
+    "frontend/src/shared/navigation/product-routes.ts": "frontend/src/lib/navigation/product-routes.ts",
+    "frontend/src/shared/media/safe-media-url.ts": "frontend/src/lib/media/safe-media-url.ts",
+    "frontend/src/shared/media/use-runtime-media-url.ts": "frontend/src/hooks/use-runtime-media-url.ts",
+    "frontend/src/shared/ui/app-icon.tsx": "frontend/src/components/ui/app-icon.tsx",
+    "frontend/src/shared/ui/app-icon.module.css": "frontend/src/components/ui/app-icon.module.css",
+    "frontend/src/shared/ui/button.tsx": "frontend/src/components/ui/button.tsx",
+    "frontend/src/shared/ui/class-names.ts": "frontend/src/utils/class-names.ts",
+    "frontend/src/shared/ui/semantic-foundation.module.css": "frontend/src/components/ui/semantic-foundation.module.css",
+    "frontend/src/features/device-home/model/device-home-contract.ts": "frontend/src/features/device-home/types/index.ts",
+    "frontend/src/features/device-home/ui/device-home.tsx": "frontend/src/features/device-home/components/device-home.tsx",
+    "frontend/src/features/device-home/ui/device-home.module.css": "frontend/src/features/device-home/components/device-home.module.css",
+    "frontend/src/features/device-home/ui/device-home-shell.tsx": "frontend/src/composition/screens/device-home-shell.tsx",
+    "frontend/src/features/device-home/ui/device-home-shell.module.css": "frontend/src/composition/screens/device-home-shell.module.css"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -49,6 +63,31 @@
         ]
       },
       "removed_abstractions": "Two one-method use-case classes and the solely SQLAlchemy-backed Protocol are represented by service functions and the concrete repository; no remaining legacy import consumers."
+    },
+    "AR-F1": {
+      "reason": "Move Device Home feature implementation, screen composition, and minimum shared dependencies to the documented layout without changing DOM, requests or runtime contracts.",
+      "compatibility": "Legacy shared modules re-export canonical common implementations. Device Home public.ts temporarily exports API/types/presentation only for four exact unmigrated consumers.",
+      "remaining_consumers": [
+        "features/creator-studio/ui/creator-studio-dashboard",
+        "features/memory/ui/memory-workspace",
+        "features/world-app/api/world-app-client",
+        "features/world-app/ui/world-app"
+      ],
+      "split_files": {
+        "features/device-home/model/device-home-contract.ts": [
+          "features/device-home/types/index.ts",
+          "features/device-home/utils/device-home-presentation.ts"
+        ],
+        "features/device-home/ui/device-home.tsx": [
+          "features/device-home/components/device-home.tsx",
+          "composition/screens/device-home-screen.tsx",
+          "features/device-home/types/index.ts"
+        ],
+        "app/device-home-route-client.tsx": [
+          "app/device-home-route-client.tsx",
+          "composition/screens/device-home-screen.tsx"
+        ]
+      }
     }
   }
 }

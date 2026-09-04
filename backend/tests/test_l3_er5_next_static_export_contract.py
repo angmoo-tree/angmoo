@@ -12,6 +12,30 @@ def _read(relative: str) -> str:
     return (ROOT / relative).read_text(encoding="utf-8")
 
 
+def test_next_and_static_home_share_one_screen_and_request_owner() -> None:
+    next_entry = _read("frontend/src/app/device-home-route-client.tsx")
+    static_router = _read("frontend/src/composition/static-product-router.tsx")
+    screen = _read("frontend/src/composition/screens/device-home-screen.tsx")
+    home = _read(
+        "frontend/src/features/device-home/components/device-home.tsx"
+    )
+    public_entry = _read("frontend/src/features/device-home/public.ts")
+
+    shared_screen = "@/composition/screens/device-home-screen"
+    assert (
+        f'export {{ DeviceHomeScreen as DeviceHomeRouteClient }} from "{shared_screen}";'
+        in next_entry
+    )
+    assert f'import {{ DeviceHomeScreen }} from "{shared_screen}";' in static_router
+    assert 'if (pathname === "/") return <DeviceHomeScreen />;' in static_router
+
+    assert "getProductRuntimeState" in screen
+    assert "getLocalWorldSurface" not in screen
+    assert "getLocalWorldSurface" in home
+    assert "getProductRuntimeState" not in home
+    assert "DeviceHomeScreen" not in public_entry
+
+
 def test_static_profile_reuses_product_source_and_has_no_server_hooks() -> None:
     config = _read("frontend/static-shell/next.config.ts")
     router = _read(
@@ -23,7 +47,7 @@ def test_static_profile_reuses_product_source_and_has_no_server_hooks() -> None:
     assert "redirects()" not in config
     assert "rewrites()" not in config
     for marker in (
-        "DeviceHomeRouteClient",
+        "DeviceHomeScreen",
         "StudioRouteClient",
         "WorldAppRouteClient",
         "WorldCreatorClient",
@@ -38,7 +62,7 @@ def test_static_profile_reuses_product_source_and_has_no_server_hooks() -> None:
 
 
 def test_runtime_adapter_restricts_injection_to_loopback_and_maps_proxy_paths() -> None:
-    runtime = _read("frontend/src/shared/runtime/runtime-config.ts")
+    runtime = _read("frontend/src/lib/runtime/runtime-config.ts")
     auth_provider = _read("frontend/src/shared/auth/auth-provider.tsx")
     assert 'new Set(["127.0.0.1", "localhost", "[::1]"])' in runtime
     assert 'parsed.protocol !== "http:"' in runtime
@@ -73,7 +97,7 @@ def test_static_product_waits_for_packaged_runtime_and_exposes_only_retry() -> N
 
 
 def test_static_media_uses_authenticated_fetch_and_blob_urls() -> None:
-    media_hook = _read("frontend/src/shared/media/use-runtime-media-url.ts")
+    media_hook = _read("frontend/src/hooks/use-runtime-media-url.ts")
     assert "runtimeFetch(resolvedSource" in media_hook
     assert 'cache: "no-store"' in media_hook
     assert "URL.createObjectURL(blob)" in media_hook
@@ -82,7 +106,7 @@ def test_static_media_uses_authenticated_fetch_and_blob_urls() -> None:
         "frontend/src/shared/ui/profile-avatar.tsx",
         "frontend/src/features/social/ui/post-media-grid.tsx",
         "frontend/src/components/world-creator-client.tsx",
-        "frontend/src/features/device-home/ui/device-home.tsx",
+        "frontend/src/features/device-home/components/device-home.tsx",
     ):
         assert "useRuntimeMediaUrl" in _read(relative)
 

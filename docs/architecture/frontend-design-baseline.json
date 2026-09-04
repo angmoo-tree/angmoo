@@ -46,8 +46,8 @@
       "classifications": [
         "LOCAL"
       ],
-      "path": "frontend/src/features/device-home/ui/device-home.tsx",
-      "sha256": "27dc3597af5a2628ad510e2aa789d71683c04c0753d9c7487bd1b4b7706b45a4"
+      "path": "frontend/src/features/device-home/components/device-home.tsx",
+      "sha256": "231832d14345c2ead9bbb5b4d6dc273255c29d9eb3cc1b63868bd9903c9bc14d"
     },
     {
       "classifications": [
@@ -180,7 +180,7 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "fb07ba8afc501877ec23918a31a982b21914d18c5fc3912630be7ed99600ae37"
+        "sha256": "204fc14a448d523d16b712236e800a84123762f60ba41755fff94fd4810d6ad6"
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",
@@ -196,7 +196,7 @@
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "5a7bca37d1c5569b1ef36d32066d44d61fc9efe284b0d1b05bb72133651d41a7"
+        "sha256": "715f1e9e00c2dc844ea0bb67b228d6431adda159f000a6adec6f9d3bdf043226"
       },
       {
         "path": "browser-tests/ui-e-local-settings/local-settings.spec.ts",
@@ -1159,9 +1159,19 @@
         "sha256": "c8055c910553d7fb51a8a07fa3aa86e5f2c61c06740d589fbbf22dc460ff887f"
       },
       {
+        "path": "frontend/src/components/ui/button.tsx",
+        "present": true,
+        "sha256": "8952f381f1b3df1f034fe63a48eaa952da9cb9379d0cd62c2289db5c2c72bb25"
+      },
+      {
+        "path": "frontend/src/components/ui/semantic-foundation.module.css",
+        "present": true,
+        "sha256": "ea62dda6824ed42011de5d4f4693de81f86decb6ae6fc1653422e9b45d2d1e23"
+      },
+      {
         "path": "frontend/src/composition/static-product-router.tsx",
         "present": true,
-        "sha256": "ce0c4a954a764475e28e87361925e847d9268504866bc3151d592559c4a45fd3"
+        "sha256": "2930da844ffa4be3f0fcf1d7f9faee48fa2bc75cc1dfef318dd3d38b6e96385a"
       },
       {
         "path": "frontend/src/features/ui-foundation/public.ts",
@@ -1186,37 +1196,27 @@
       {
         "path": "frontend/src/shared/ui/avatar.tsx",
         "present": true,
-        "sha256": "4cdfbf8dd2a2681f360f44caf161a9ecec36fa7b4f540161a2c1a4775717faf4"
-      },
-      {
-        "path": "frontend/src/shared/ui/button.tsx",
-        "present": true,
-        "sha256": "5173240e5e97451cf1bd716c466cdc7fc7d8a411d11a418b08284b8e0868f3f4"
-      },
-      {
-        "path": "frontend/src/shared/ui/class-names.ts",
-        "present": true,
-        "sha256": "1ace811987495757099ccbcb0cff314b271b54ea2fadce50db999a165d47f1c9"
+        "sha256": "bd91bf38213e1e06243e1f05d7610da09f9b650b55cd72ece1f7283e83608ee4"
       },
       {
         "path": "frontend/src/shared/ui/dialog.tsx",
         "present": true,
-        "sha256": "4b5f54816272435ae02c140d8b179e770bca3552027d0599ecafaf1a08a734f7"
+        "sha256": "0968d0638e2d98db9340d8199e5e53ef9632737c255e846ef115039b8fbd9994"
       },
       {
         "path": "frontend/src/shared/ui/feedback.tsx",
         "present": true,
-        "sha256": "0e5c35afef6c4c58d61b1042798030fbecf8ea7e0d8b977be90c0b754bf43bba"
+        "sha256": "7ace9c20fd7bc4177a37ce5ec2dcb43e1a9580747f62f1f47d6bdd250dd88664"
       },
       {
         "path": "frontend/src/shared/ui/form-controls.tsx",
         "present": true,
-        "sha256": "13299e1ed7762100b3cfb54927a429220453b0b0533bdf74cf56623b734c52ff"
+        "sha256": "623dd198c906c428d84dc80e56ef16d8e5fb7fdfabba86a832cd6493e08d2f88"
       },
       {
         "path": "frontend/src/shared/ui/navigation.tsx",
         "present": true,
-        "sha256": "db9cf4377c757f0f19201aad188d9066ea923f3cdf07be84c85bd7a4bf970aa4"
+        "sha256": "3027104d26d3678b2f76feb1446fb9628f4e8d8844ad86afdddb52388b866a8e"
       },
       {
         "path": "frontend/src/shared/ui/profile-avatar.tsx",
@@ -1227,11 +1227,6 @@
         "path": "frontend/src/shared/ui/public.ts",
         "present": true,
         "sha256": "fc162b6a3427eb2d1eb5d94d7ccabde45487386ffbd0ef0dbdb147b9f141e368"
-      },
-      {
-        "path": "frontend/src/shared/ui/semantic-foundation.module.css",
-        "present": true,
-        "sha256": "ea62dda6824ed42011de5d4f4693de81f86decb6ae6fc1653422e9b45d2d1e23"
       },
       {
         "path": "frontend/src/shared/ui/semantic-tokens.css",
@@ -1246,12 +1241,17 @@
       {
         "path": "frontend/src/shared/ui/status.tsx",
         "present": true,
-        "sha256": "8b5a39b8bf237fa3b5bdaf39f75c44dc61de85bb93c66066373def69e6111b4c"
+        "sha256": "e8fe4b77b27c403cba360b0622b3b3a736dad9cfe44b2efeacc44e3bf3577ff8"
       },
       {
         "path": "frontend/src/shared/ui/surfaces.tsx",
         "present": true,
-        "sha256": "84ecc081bdcbb71af2353034e35c4df09eca279055d45e6170aea17b95aba291"
+        "sha256": "524a7348fe749f10507a31097d1e058fcf08c2e856e0394d30a2fee29b9772a6"
+      },
+      {
+        "path": "frontend/src/utils/class-names.ts",
+        "present": true,
+        "sha256": "1ace811987495757099ccbcb0cff314b271b54ea2fadce50db999a165d47f1c9"
       }
     ],
     "fixture_exposure": "unlinked_noindex_test_harness",

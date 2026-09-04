@@ -123,7 +123,7 @@
       "classification": "LOCAL",
       "hosted_blob_oid": null,
       "hosted_source": null,
-      "local_target": "frontend/src/features/device-home/ui/device-home.tsx",
+      "local_target": "frontend/src/features/device-home/components/device-home.tsx",
       "scope": "Device launcher and Local runtime entry"
     },
     {
@@ -862,16 +862,16 @@
       "scope": "global_alias_remap_only_not_full_consumer_conformance"
     },
     "primitive_sources": [
+      "frontend/src/components/ui/button.tsx",
+      "frontend/src/components/ui/semantic-foundation.module.css",
       "frontend/src/shared/ui/avatar.tsx",
-      "frontend/src/shared/ui/button.tsx",
-      "frontend/src/shared/ui/class-names.ts",
       "frontend/src/shared/ui/dialog.tsx",
       "frontend/src/shared/ui/feedback.tsx",
       "frontend/src/shared/ui/form-controls.tsx",
       "frontend/src/shared/ui/navigation.tsx",
-      "frontend/src/shared/ui/semantic-foundation.module.css",
       "frontend/src/shared/ui/status.tsx",
-      "frontend/src/shared/ui/surfaces.tsx"
+      "frontend/src/shared/ui/surfaces.tsx",
+      "frontend/src/utils/class-names.ts"
     ],
     "public_export": "frontend/src/shared/ui/public.ts",
     "direct_product_consumers": [

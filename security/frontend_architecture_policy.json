@@ -118,16 +118,9 @@
       "studioWorldRoute(world.world_id)",
       "worldAppRoute(world.world_id)"
     ],
-    "frontend/src/features/device-home/model/device-home-contract.ts": [
-      "bezelWidthPx: 3",
-      "cornerRadiusPx: 34",
-      "frameStyle: \"thin-uniform-flat\"",
-      "iconStyle: \"squircle-grid\"",
-      "maxWidthPx: 436"
-    ],
     "frontend/src/features/device-home/public.ts": [
-      "DEVICE_HOME_FIXED_APPS",
-      "DeviceHomeShell"
+      "WorldSurfaceItem",
+      "getLocalWorldSurface"
     ],
     "frontend/src/features/device-shell/model/device-navigation.ts": [
       "LOCAL_DEVICE_NAVIGATION",
@@ -215,6 +208,18 @@
       "<StatusChip",
       "export function StatusBadge",
       "import { StatusChip, type StatusChipTone } from \"./status\";"
+    ],
+    "frontend/src/features/device-home/utils/device-home-presentation.ts": [
+      "bezelWidthPx: 3",
+      "cornerRadiusPx: 34",
+      "frameStyle: \"thin-uniform-flat\"",
+      "iconStyle: \"squircle-grid\"",
+      "maxWidthPx: 436"
+    ],
+    "frontend/src/composition/screens/device-home-screen.tsx": [
+      "<DeviceHome authStatus={status} />",
+      "<DeviceHomeShell status={<RuntimeStatusSummary state={runtimeState} />}>",
+      "getProductRuntimeState"
     ]
   },
   "required_paths": [
@@ -226,6 +231,10 @@
     "frontend/src/app/messages/page.tsx",
     "frontend/src/app/ui-foundation/page.tsx",
     "frontend/src/app/worlds/[worldId]/characters/[worldCharacterId]/page.tsx",
+    "frontend/src/components/ui/app-icon.tsx",
+    "frontend/src/components/ui/button.tsx",
+    "frontend/src/components/ui/semantic-foundation.module.css",
+    "frontend/src/composition/screens/device-home-screen.tsx",
     "frontend/src/features/characters/api/character-dashboard-client.ts",
     "frontend/src/features/characters/api/world-character-profile-client.ts",
     "frontend/src/features/characters/model/character-dashboard-contract.ts",
@@ -250,6 +259,7 @@
     "frontend/src/features/creator-studio/ui/creator-studio-dashboard.tsx",
     "frontend/src/features/creator-studio/ui/creator-studio-frame.tsx",
     "frontend/src/features/device-home/public.ts",
+    "frontend/src/features/device-home/utils/device-home-presentation.ts",
     "frontend/src/features/device-shell/model/device-navigation.ts",
     "frontend/src/features/device-shell/public.ts",
     "frontend/src/features/device-shell/ui/device-shell.module.css",
@@ -308,10 +318,7 @@
     "frontend/src/shared/interaction/scroll-viewport.ts",
     "frontend/src/shared/interaction/use-mobile-pull-to-refresh.ts",
     "frontend/src/shared/navigation/public.ts",
-    "frontend/src/shared/ui/app-icon.tsx",
     "frontend/src/shared/ui/avatar.tsx",
-    "frontend/src/shared/ui/button.tsx",
-    "frontend/src/shared/ui/class-names.ts",
     "frontend/src/shared/ui/device-frame.tsx",
     "frontend/src/shared/ui/dialog.tsx",
     "frontend/src/shared/ui/feedback.tsx",
@@ -320,16 +327,137 @@
     "frontend/src/shared/ui/profile-avatar.tsx",
     "frontend/src/shared/ui/profile-presentation.ts",
     "frontend/src/shared/ui/public.ts",
-    "frontend/src/shared/ui/semantic-foundation.module.css",
     "frontend/src/shared/ui/semantic-tokens.css",
     "frontend/src/shared/ui/status-badge.tsx",
     "frontend/src/shared/ui/status.tsx",
-    "frontend/src/shared/ui/surfaces.tsx"
+    "frontend/src/shared/ui/surfaces.tsx",
+    "frontend/src/utils/class-names.ts"
   ],
   "schema_version": 1,
   "refactor": {
-    "features": [],
-    "common": [],
-    "bridges": []
+    "features": [
+      "device-home"
+    ],
+    "common": [
+      "components/ui/app-icon",
+      "components/ui/app-icon.module.css",
+      "components/ui/button",
+      "components/ui/semantic-foundation.module.css",
+      "hooks/use-runtime-media-url",
+      "lib/media/safe-media-url",
+      "lib/navigation/product-routes",
+      "lib/runtime/runtime-config",
+      "utils/class-names"
+    ],
+    "bridges": [
+      {
+        "importer": "features/creator-studio/ui/creator-studio-dashboard",
+        "target": "features/device-home/public",
+        "owner_stage": "AR-F2",
+        "removal_condition": "Move the named existing consumer to the target layout; canonical implementation already lives in the new path."
+      },
+      {
+        "importer": "features/memory/ui/memory-workspace",
+        "target": "features/device-home/public",
+        "owner_stage": "AR-F2",
+        "removal_condition": "Move the named existing consumer to the target layout; canonical implementation already lives in the new path."
+      },
+      {
+        "importer": "features/world-app/api/world-app-client",
+        "target": "features/device-home/public",
+        "owner_stage": "AR-F3",
+        "removal_condition": "Move the named existing consumer to the target layout; canonical implementation already lives in the new path."
+      },
+      {
+        "importer": "features/world-app/ui/world-app",
+        "target": "features/device-home/public",
+        "owner_stage": "AR-F3",
+        "removal_condition": "Move the named existing consumer to the target layout; canonical implementation already lives in the new path."
+      },
+      {
+        "importer": "shared/media/safe-media-url",
+        "target": "lib/media/safe-media-url",
+        "owner_stage": "AR-F4",
+        "removal_condition": "Move the named existing consumer to the target layout; canonical implementation already lives in the new path."
+      },
+      {
+        "importer": "shared/media/use-runtime-media-url",
+        "target": "hooks/use-runtime-media-url",
+        "owner_stage": "AR-F4",
+        "removal_condition": "Move the named existing consumer to the target layout; canonical implementation already lives in the new path."
+      },
+      {
+        "importer": "shared/navigation/product-routes",
+        "target": "lib/navigation/product-routes",
+        "owner_stage": "AR-F4",
+        "removal_condition": "Move the named existing consumer to the target layout; canonical implementation already lives in the new path."
+      },
+      {
+        "importer": "shared/runtime/runtime-config",
+        "target": "lib/runtime/runtime-config",
+        "owner_stage": "AR-F4",
+        "removal_condition": "Move the named existing consumer to the target layout; canonical implementation already lives in the new path."
+      },
+      {
+        "importer": "shared/ui/app-icon",
+        "target": "components/ui/app-icon",
+        "owner_stage": "AR-F4",
+        "removal_condition": "Move the named existing consumer to the target layout; canonical implementation already lives in the new path."
+      },
+      {
+        "importer": "shared/ui/avatar",
+        "target": "components/ui/semantic-foundation.module.css",
+        "owner_stage": "AR-F4",
+        "removal_condition": "Move the named existing consumer to the target layout; canonical implementation already lives in the new path."
+      },
+      {
+        "importer": "shared/ui/button",
+        "target": "components/ui/button",
+        "owner_stage": "AR-F4",
+        "removal_condition": "Move the named existing consumer to the target layout; canonical implementation already lives in the new path."
+      },
+      {
+        "importer": "shared/ui/class-names",
+        "target": "utils/class-names",
+        "owner_stage": "AR-F4",
+        "removal_condition": "Move the named existing consumer to the target layout; canonical implementation already lives in the new path."
+      },
+      {
+        "importer": "shared/ui/dialog",
+        "target": "components/ui/semantic-foundation.module.css",
+        "owner_stage": "AR-F4",
+        "removal_condition": "Move the named existing consumer to the target layout; canonical implementation already lives in the new path."
+      },
+      {
+        "importer": "shared/ui/feedback",
+        "target": "components/ui/semantic-foundation.module.css",
+        "owner_stage": "AR-F4",
+        "removal_condition": "Move the named existing consumer to the target layout; canonical implementation already lives in the new path."
+      },
+      {
+        "importer": "shared/ui/form-controls",
+        "target": "components/ui/semantic-foundation.module.css",
+        "owner_stage": "AR-F4",
+        "removal_condition": "Move the named existing consumer to the target layout; canonical implementation already lives in the new path."
+      },
+      {
+        "importer": "shared/ui/navigation",
+        "target": "components/ui/semantic-foundation.module.css",
+        "owner_stage": "AR-F4",
+        "removal_condition": "Move the named existing consumer to the target layout; canonical implementation already lives in the new path."
+      },
+      {
+        "importer": "shared/ui/status",
+        "target": "components/ui/semantic-foundation.module.css",
+        "owner_stage": "AR-F4",
+        "removal_condition": "Move the named existing consumer to the target layout; canonical implementation already lives in the new path."
+      },
+      {
+        "importer": "shared/ui/surfaces",
+        "target": "components/ui/semantic-foundation.module.css",
+        "owner_stage": "AR-F4",
+        "removal_condition": "Move the named existing consumer to the target layout; canonical implementation already lives in the new path."
+      }
+    ]
   }
 }

@@ -51,7 +51,7 @@ def test_canonical_world_chat_route_is_shared_by_next_static_and_tauri_phone() -
     )
     route_client = _read("frontend/src/app/world-app-route-client.tsx")
     static_router = _read("frontend/src/composition/static-product-router.tsx")
-    product_routes = _read("frontend/src/shared/navigation/product-routes.ts")
+    product_routes = _read("frontend/src/lib/navigation/product-routes.ts")
     capability = _read(
         "frontend/src/features/device-shell/model/device-navigation.ts"
     )

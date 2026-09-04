@@ -14,7 +14,7 @@ The target structure is explained by [backend ARCHITECTURE](../../backend/ARCHIT
 | Area | Primary backend | Primary frontend | Validation focus |
 |---|---|---|---|
 | Local identity and agents | `backend/app/api`, `backend/app/services` | `frontend/src/app/agents` | ownership, sessions, limits |
-| World and Studio | World routes/services/models | `features/device-home`, `features/creator-studio`, `features/world-app` public entries plus legacy World routes | schema, migration, package boundary |
+| World and Studio | `app/domains/device_home` role files plus remaining World routes/services/models | `features/device-home/{api,components,types,utils}`, `composition/screens/device-home-screen.tsx`, remaining Creator Studio/World App public entries and legacy World routes | schema, migration, package boundary, Next/static shared screen |
 | Routine runtime | `app.domains.routine_posts.public` contracts + `app.runtime.routine_posts` SQLAlchemy orchestration | agent activity surfaces | deterministic tick, duplicate write |
 | SNS and Inbox | `app.domains.social.public` contracts + `app.runtime.social` SQLAlchemy read/write/Inbox adapters | `features/social/public.ts` | event ordering, observation receipt, relationship direction |
 | Relationship graph | `app.domains.relationships.public` + domain-owned ORM definitions + `app.runtime.relationships` SQLAlchemy composition + `app.runtime.graph_projection`; LadybugDB remains the replayable adapter | `features/relationships/public.ts` | read parity, replay, outage, World isolation |
@@ -22,10 +22,13 @@ The target structure is explained by [backend ARCHITECTURE](../../backend/ARCHIT
 | Local Bot | bot route/schema | `frontend/src/app/angmoo-api` | quota and response contracts |
 
 Legacy frontend API calls remain behind `frontend/src/lib` only for surfaces
-that have not moved yet. New product-shell
-work belongs to `frontend/src/features/<feature>` and exposes only `public.ts`;
-feature-local API clients stay under that feature instead of inventing backend
-contracts in route components. See `docs/architecture/frontend-product-shell.md`.
+that have not moved yet. New product-shell work belongs to
+`frontend/src/features/<feature>` and consumers import the concrete role file.
+Feature-local API clients stay under that feature instead of inventing backend
+contracts in route components. A temporary `public.ts` is allowed only for
+named unmigrated consumers with a removal stage; Device Home currently keeps
+four such API/type consumers and does not export its composition screen. See
+`docs/architecture/frontend-product-shell.md`.
 
 ## Responsibility boundaries
 
