@@ -519,7 +519,7 @@
       "title": "Device Home·Phone·World 목록",
       "owner": "device_home / device-home / composition",
       "stage": "AR-B1 / AR-F1",
-      "status": "MOVED",
+      "status": "VERIFIED",
       "current_paths": [
         "backend/app/domains/device_home/__init__.py",
         "backend/app/domains/device_home/contracts.py",
@@ -655,10 +655,10 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "backend": "1845 passed / 22 skipped, source tree unchanged",
-        "item_status": "Backend Device Home VERIFIED on merged PR #260; frontend Device Home MOVED with local validation, PR-head Hosted and merge evidence pending.",
-        "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending",
+        "item_status": "Backend Device Home VERIFIED on merged PR #260; frontend Device Home VERIFIED on merged PR #261.",
+        "remaining": "AR-0/AR-1 and the Device Home pilots are complete; AR-G, AR-B2+, AR-F2+, AR-X, and P8-L-S remain pending.",
         "backend_pilot": "AR-B1 PR #260 head d9c3ed5 passed 23 checks and merged as a55c521b9adad624ae1342b2a7b270abc2237f79.",
-        "frontend_pilot": "AR-F1 code moved; local lint/type/build/proxy, source contracts, and Home web/static scenarios passed. PR-head Hosted and merge evidence pending."
+        "frontend_pilot": "AR-F1 PR #261 head 31fd5b052e9b910c8ac48027065753faa0a7ab5b passed local lint/type/build/proxy, source contracts, Home web/static scenarios, and all 22 registered Hosted checks; merged as 5b83fee1625fdd490051b840790683114d7daaab."
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "The repository is an existing read-only identity/World/membership projection. Service functions share the caller Session; this is not permission for arbitrary cross-domain writes."
