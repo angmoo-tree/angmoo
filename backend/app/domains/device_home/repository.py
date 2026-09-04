@@ -1,3 +1,4 @@
+"""Read-only identity/World/membership projection using the caller Session."""
 from __future__ import annotations
 
 import base64
@@ -9,20 +10,18 @@ from typing import cast
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.domains.device_home.domain.world_surface_policy import (
+from app.domains.device_home.contracts import (
     WorldMembershipRole,
     WorldSurface,
     WorldSurfaceItem,
     WorldSurfacePage,
-    launchability,
 )
+
+from app.domains.device_home.exceptions import InvalidWorldSurfaceCursorError
+from app.domains.device_home.policies import launchability
 
 
 LOCAL_INSTALLATION_KEY = "local-installation"
-
-
-class InvalidWorldSurfaceCursorError(ValueError):
-    reason_code = "invalid_world_surface_cursor"
 
 
 class SqlAlchemyWorldSurfaceRepository:

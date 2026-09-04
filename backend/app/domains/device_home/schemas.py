@@ -5,11 +5,12 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.domains.device_home.domain.world_surface_policy import (
+from app.domains.device_home.contracts import (
     WorldLaunchBlockReason,
     WorldMembershipRole,
     WorldSurface,
     WorldSurfacePage,
+    WorldSurfaceItem,
 )
 
 

@@ -27,7 +27,15 @@ AR-1 실제 정책의 새 scope 목록은 비어 있다. 검사 지원을 먼저
 | --- | --- | --- |
 | AR-0 | 기준선·매핑·로컬 기준 검증 완료 | 준비 PR head/merge 결과 기록 |
 | AR-1 | 검사 지원·문서 연결 구현, 로컬 검증 | 준비 PR 필수 CI 및 병합 |
-| AR-B1 | NOT STARTED | Device Home backend 역할별 이동·직접 소비자·API/transaction/수집 보존 |
+| AR-B1 | IMPLEMENTED / PR VALIDATION PENDING | 역할별 이동·직접 소비자·API/transaction/수집 보존 로컬 검증 완료 |
 | AR-F1 | NOT STARTED | Home 화면 조립·최소 공용 이동·Next/static·호환 소비자 검증 |
 
 AR-G의 전역 Base/DB/models/Alembic/logging 최종 이전, 다른 업무·화면 전환, AR-X 최종 동일 commit 검증과 P8-L-S 실제 AI/인과/사용자 품질 closeout은 후속 범위다.
+
+## 2026-09-05: AR-B1 Backend Device Home
+
+`api/application/domain/infrastructure/ports/public`에 나뉘었던 Device Home 조회를 `router.py`, `schemas.py`, `service.py`, `repository.py`, `contracts.py`, `policies.py`, `exceptions.py`로 옮겼다. 자체 ORM 모델은 만들지 않았고 기존 Base·DB·Alembic·route 순서·OpenAPI·196개 public operation·102개 ORM table은 바꾸지 않았다.
+
+World Package committer는 `service.get_device_home_world`를 직접 사용한다. 이 내부 projection은 호출자의 Session과 미완료 transaction을 유지하고 active membership의 draft/차단 World도 반환한다. HTTP service는 claimed installation owner와 launchability를 계속 검사하고 외부에는 같은 403/404를 반환한다.
+
+기존 8개 테스트 node는 `tests/device_home/test_world_surface.py`로 일대일 매핑했다. 내부/HTTP 권한 차이, flush 후 미commit 조회와 rollback, World owner가 아닌 active membership, 같은 시각의 ID cursor, stale readiness, HTTP limit/cursor/local-origin 경계를 추가했다. Device Home 13개와 World Package 직접 소비자 2개가 통과했고, 구조 회귀 65개와 frozen 1,867개 node 보존 검사도 통과했다. Backend `device_home` 새 scope를 활성화했으며 legacy alias는 남기지 않았다. PR-head와 merge 검증은 PR 생성 후 이 절에 추가한다.

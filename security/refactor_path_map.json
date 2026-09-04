@@ -1,6 +1,54 @@
 {
   "schema_version": 1,
   "description": "Reviewed old-to-new paths. The source/test baseline is never regenerated after a move.",
-  "files": {},
-  "test_nodes": {}
+  "files": {
+    "backend/app/domains/device_home/api/routes.py": "backend/app/domains/device_home/router.py",
+    "backend/app/domains/device_home/api/device_home_schemas.py": "backend/app/domains/device_home/schemas.py",
+    "backend/app/domains/device_home/application/list_local_world_apps.py": "backend/app/domains/device_home/service.py",
+    "backend/app/domains/device_home/application/get_local_world_app.py": "backend/app/domains/device_home/service.py",
+    "backend/app/domains/device_home/domain/world_surface_policy.py": "backend/app/domains/device_home/contracts.py",
+    "backend/app/domains/device_home/infrastructure/sqlalchemy_world_surface_repository.py": "backend/app/domains/device_home/repository.py",
+    "backend/app/domains/device_home/ports/world_surface_repository.py": "backend/app/domains/device_home/repository.py",
+    "backend/app/domains/device_home/public.py": "backend/app/domains/device_home/service.py",
+    "backend/app/domains/device_home/api/__init__.py": "backend/app/domains/device_home/__init__.py",
+    "backend/app/domains/device_home/application/__init__.py": "backend/app/domains/device_home/__init__.py",
+    "backend/app/domains/device_home/domain/__init__.py": "backend/app/domains/device_home/__init__.py",
+    "backend/app/domains/device_home/infrastructure/__init__.py": "backend/app/domains/device_home/__init__.py",
+    "backend/app/domains/device_home/ports/__init__.py": "backend/app/domains/device_home/__init__.py",
+    "backend/tests/test_l2_5_device_home_world_surface.py": "backend/tests/device_home/test_world_surface.py"
+  },
+  "test_nodes": {
+    "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
+    "tests/test_l2_5_device_home_world_surface.py::test_device_home_surface_is_owner_scoped_filtered_and_deterministic": "tests/device_home/test_world_surface.py::test_device_home_surface_is_owner_scoped_filtered_and_deterministic",
+    "tests/test_l2_5_device_home_world_surface.py::test_surface_read_is_bounded_cursor_safe_and_write_free": "tests/device_home/test_world_surface.py::test_surface_read_is_bounded_cursor_safe_and_write_free",
+    "tests/test_l2_5_device_home_world_surface.py::test_surface_requires_session_and_claimed_installation_owner": "tests/device_home/test_world_surface.py::test_surface_requires_session_and_claimed_installation_owner",
+    "tests/test_l2_5_device_home_world_surface.py::test_world_app_read_fails_closed_for_foreign_and_blocked_worlds": "tests/device_home/test_world_surface.py::test_world_app_read_fails_closed_for_foreign_and_blocked_worlds",
+    "tests/test_l2_5_device_home_world_surface.py::test_world_app_read_has_zero_writes_and_zero_provider_calls": "tests/device_home/test_world_surface.py::test_world_app_read_has_zero_writes_and_zero_provider_calls",
+    "tests/test_l2_5_device_home_world_surface.py::test_world_app_read_is_exact_owner_scoped_and_launchable": "tests/device_home/test_world_surface.py::test_world_app_read_is_exact_owner_scoped_and_launchable",
+    "tests/test_l2_5_device_home_world_surface.py::test_world_app_read_requires_owner_and_active_membership": "tests/device_home/test_world_surface.py::test_world_app_read_requires_owner_and_active_membership"
+  },
+  "details": {
+    "AR-B1": {
+      "reason": "Flatten Device Home without API/schema/transaction changes. Empty package markers collapse into the existing domain package.",
+      "split_files": {
+        "domain/world_surface_policy.py": [
+          "contracts.py",
+          "policies.py"
+        ],
+        "application/get_local_world_app.py": [
+          "service.py",
+          "exceptions.py"
+        ],
+        "application/list_local_world_apps.py": [
+          "service.py",
+          "exceptions.py"
+        ],
+        "infrastructure/sqlalchemy_world_surface_repository.py": [
+          "repository.py",
+          "exceptions.py"
+        ]
+      },
+      "removed_abstractions": "Two one-method use-case classes and the solely SQLAlchemy-backed Protocol are represented by service functions and the concrete repository; no remaining legacy import consumers."
+    }
+  }
 }

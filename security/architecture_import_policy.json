@@ -1341,7 +1341,9 @@
   "purpose": "Freeze pre-T2.5 horizontal imports while enforcing domain-first boundaries for new code.",
   "schema_version": 1,
   "refactor": {
-    "domains": [],
+    "domains": [
+      "device_home"
+    ],
     "globals": []
   }
 }
