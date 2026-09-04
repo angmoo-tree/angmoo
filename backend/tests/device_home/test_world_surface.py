@@ -11,7 +11,7 @@ from sqlalchemy.pool import StaticPool
 from app import models
 from app.api.v1.deps import get_current_user
 from app.core.db import Base, get_db
-from app.domains.device_home.api.routes import router
+from app.domains.device_home.router import router
 from app.providers import registry as provider_registry
 
 
@@ -360,3 +360,119 @@ def test_world_app_read_has_zero_writes_and_zero_provider_calls(
     assert response.status_code == 200
     assert writes == []
     assert provider_calls == []
+
+
+def test_internal_world_lookup_preserves_internal_read_contract() -> None:
+    from app.domains.device_home.service import get_device_home_world
+
+    client, engine, principal = _fixture()
+    owner, outsider = _seed(engine, principal)
+    with Session(engine) as db:
+        launchable = get_device_home_world(db, owner_user_id=owner.id, world_id="home-new")
+        assert launchable is not None and launchable.launchable
+        private = get_device_home_world(db, owner_user_id=owner.id, world_id="private")
+        assert private is not None and private.launch_block_reason == "world_private"
+        assert get_device_home_world(db, owner_user_id=owner.id, world_id="missing") is None
+        foreign = get_device_home_world(db, owner_user_id=outsider.id, world_id="foreign")
+        assert foreign is not None and foreign.world_id == "foreign"
+    assert client.get("/api/v1/worlds/mine/private").status_code == 404
+    principal["user"] = outsider
+    assert client.get("/api/v1/worlds/mine/foreign").json() == {"detail": "local_owner_required"}
+
+
+def test_internal_world_lookup_participates_in_caller_transaction(tmp_path, monkeypatch) -> None:
+    from app.domains.device_home.service import get_device_home_world
+
+    # A file DB gives a separate Session a separate connection: a replacement
+    # Session cannot accidentally see the caller's uncommitted writes.
+    engine = create_engine(f"sqlite:///{(tmp_path / 'caller.sqlite3').as_posix()}")
+    Base.metadata.create_all(engine)
+    now = datetime(2026, 9, 5, tzinfo=UTC)
+    with Session(engine) as setup:
+        setup.add(_user("transaction-owner"))
+        setup.commit()
+    with Session(engine) as db:
+        db.add(_world("pending", owner_user_id="transaction-owner", status_value="draft", updated_at=now))
+        db.flush()
+        db.add(_membership("pending-member", world_id="pending", user_id="transaction-owner"))
+        db.flush()
+        writes: list[str] = []
+        boundaries: list[str] = []
+
+        def capture(_conn, _cursor, statement, _parameters, _context, _many):
+            operation = statement.lstrip().split(None, 1)[0].upper()
+            if operation in {"INSERT", "UPDATE", "DELETE"}:
+                writes.append(operation)
+
+        def forbidden(*_args, **_kwargs):
+            raise AssertionError("Internal projection must not call a provider")
+
+        monkeypatch.setattr(provider_registry, "get_provider_adapter", forbidden)
+        monkeypatch.setattr(provider_registry, "get_embedding_adapter", forbidden)
+        event.listen(engine, "before_cursor_execute", capture)
+        event.listen(db, "after_commit", lambda _db: boundaries.append("commit"))
+        event.listen(db, "after_rollback", lambda _db: boundaries.append("rollback"))
+        transaction = db.get_transaction()
+        result = get_device_home_world(db, owner_user_id="transaction-owner", world_id="pending")
+        assert result is not None and result.world_id == "pending"
+        assert result.launch_block_reason == "world_not_published"
+        assert db.get_transaction() is transaction and transaction.is_active
+        assert boundaries == [] and writes == []
+        event.remove(engine, "before_cursor_execute", capture)
+        db.rollback()
+    with Session(engine) as check:
+        assert check.get(models.World, "pending") is None
+        assert check.get(models.WorldMembership, "pending-member") is None
+    engine.dispose()
+
+
+def test_membership_scope_and_equal_timestamp_cursor_are_preserved() -> None:
+    client, engine, principal = _fixture()
+    owner, outsider = _seed(engine, principal)
+    now = datetime(2026, 9, 5, tzinfo=UTC)
+    with Session(engine) as db:
+        db.add_all([_world(name, owner_user_id=outsider.id, updated_at=now) for name in ("tie-a", "tie-b")])
+        db.flush()
+        db.add_all([
+            _membership("tie-a-member", world_id="tie-a", user_id=owner.id, role="editor"),
+            _membership("tie-b-member", world_id="tie-b", user_id=owner.id, role="member"),
+        ])
+        db.commit()
+    first = client.get("/api/v1/worlds/mine", params={"surface": "device_home", "limit": 1}).json()
+    assert [item["world_id"] for item in first["items"]] == ["tie-a"]
+    second = client.get("/api/v1/worlds/mine", params={"surface": "device_home", "limit": 1, "cursor": first["next_cursor"]}).json()
+    assert [item["world_id"] for item in second["items"]] == ["tie-b"]
+    studio = client.get("/api/v1/worlds/mine?surface=creator_studio").json()
+    ids = {item["world_id"] for item in studio["items"]}
+    assert "tie-a" in ids and "tie-b" not in ids
+    assert client.get("/api/v1/worlds/mine/tie-b").status_code == 200
+
+
+def test_stale_readiness_remains_hidden_from_home_and_explained_in_studio() -> None:
+    client, engine, principal = _fixture()
+    _seed(engine, principal)
+    with Session(engine) as db:
+        db.get(models.World, "home-new").readiness_status = "stale"
+        db.commit()
+    home = client.get("/api/v1/worlds/mine?surface=device_home").json()
+    assert "home-new" not in {item["world_id"] for item in home["items"]}
+    studio = client.get("/api/v1/worlds/mine?surface=creator_studio").json()
+    world = next(item for item in studio["items"] if item["world_id"] == "home-new")
+    assert not world["launchable"] and world["launch_block_reason"] == "world_not_ready"
+    assert client.get("/api/v1/worlds/mine/home-new").json() == {"detail": "world_app_unavailable"}
+
+
+def test_surface_http_bounds_and_local_frontend_origin_remain_enforced() -> None:
+    from app.core.browser_session import LOCAL_FRONTEND_ORIGIN_HEADER
+
+    client, engine, principal = _fixture()
+    _seed(engine, principal)
+    for value in (0, 51):
+        assert client.get("/api/v1/worlds/mine", params={"surface": "device_home", "limit": value}).status_code == 422
+    too_long = client.get("/api/v1/worlds/mine", params={"surface": "device_home", "cursor": "x" * 513})
+    assert too_long.status_code == 422 and isinstance(too_long.json()["detail"], list)
+    for path in ("/api/v1/worlds/mine?surface=device_home", "/api/v1/worlds/mine/home-new"):
+        assert client.get(path, headers={"host": "outside.example"}).status_code == 403
+        assert client.get(path, headers={LOCAL_FRONTEND_ORIGIN_HEADER: "https://outside.example"}).status_code == 403
+        duplicate = [(LOCAL_FRONTEND_ORIGIN_HEADER, "http://127.0.0.1:3000")] * 2
+        assert client.get(path, headers=duplicate).status_code == 403

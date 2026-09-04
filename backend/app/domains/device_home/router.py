@@ -9,24 +9,18 @@ from sqlalchemy.orm import Session
 from app.api.v1.deps import get_current_user
 from app.core import browser_session
 from app.core.db import get_db
-from app.domains.device_home.api.device_home_schemas import (
+from app.domains.device_home import service as device_home_service
+from app.domains.device_home.contracts import WorldSurface
+from app.domains.device_home.exceptions import (
+    InvalidWorldSurfaceCursorError,
+    LocalOwnerRequiredError,
+    WorldAppUnavailableError,
+)
+from app.domains.device_home.schemas import (
     LocalWorldAppRead,
     LocalWorldSurfaceRead,
     world_app_read,
     world_surface_read,
-)
-from app.domains.device_home.application.get_local_world_app import (
-    GetLocalWorldApp,
-    WorldAppUnavailableError,
-)
-from app.domains.device_home.application.list_local_world_apps import (
-    ListLocalWorldApps,
-    LocalOwnerRequiredError,
-)
-from app.domains.device_home.domain.world_surface_policy import WorldSurface
-from app.domains.device_home.infrastructure.sqlalchemy_world_surface_repository import (
-    InvalidWorldSurfaceCursorError,
-    SqlAlchemyWorldSurfaceRepository,
 )
 
 
@@ -45,7 +39,8 @@ def list_local_world_apps(
 ) -> LocalWorldSurfaceRead:
     browser_session.require_local_frontend_request(request, mutation=False)
     try:
-        page = ListLocalWorldApps(SqlAlchemyWorldSurfaceRepository(db)).execute(
+        page = device_home_service.list_local_world_apps(
+            db,
             current_user_id=current_user.id,
             surface=surface,
             limit=limit,
@@ -73,7 +68,8 @@ def get_local_world_app(
 ) -> LocalWorldAppRead:
     browser_session.require_local_frontend_request(request, mutation=False)
     try:
-        world = GetLocalWorldApp(SqlAlchemyWorldSurfaceRepository(db)).execute(
+        world = device_home_service.get_local_world_app(
+            db,
             current_user_id=current_user.id,
             world_id=world_id,
         )

@@ -389,12 +389,12 @@
     },
     "GET /api/v1/worlds/mine": {
       "access": "owner-only",
-      "module": "app.domains.device_home.api.routes",
+      "module": "app.domains.device_home.router",
       "endpoint": "list_local_world_apps"
     },
     "GET /api/v1/worlds/mine/{world_id}": {
       "access": "owner-only",
-      "module": "app.domains.device_home.api.routes",
+      "module": "app.domains.device_home.router",
       "endpoint": "get_local_world_app"
     },
     "GET /api/v1/worlds/{world_id}": {

@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.core.ids import uuid7_string
 from app.domains.characters.public import Character
-from app.domains.device_home.public import get_device_home_world
+from app.domains.device_home.service import get_device_home_world
 from app.domains.world_characters.public import WorldCharacter
 from app.domains.world_packages.domain.errors import (
     WorldPackageContractError,
