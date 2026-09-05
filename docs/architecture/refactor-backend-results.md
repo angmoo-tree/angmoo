@@ -1375,3 +1375,22 @@ C7-F 최종 검증은 **80 passed / 기존 경고2 / 19.63초**이다. 경계792
 
 
 B4 C7-D/E/F의 원래 signed 최초 도입 3개 source archive를 순서대로 append했다. 실제 새 source 17개와 새 테스트 4노드의 첫 도입을 Git history에서 확인했으며 원래 production provenance 검증을 통과했다. 기존 main 64개 및 직전 86개 기록은 불변 prefix이고 ledger는 **86 → 89 records**다. frozen checkpoint와 source baseline은 바꾸지 않았다.
+## AR-B4 Writer — 작성 정책과 provider·업무 조립의 실제 소유
+
+원래 `services/agent_writing.py`의 29개 함수·클래스 및 5개 상수·타입·logger 정의를 모두 대응했다. 그중 함수·클래스 28개는 Routines의 실제 prompt/result/error 역할과 runtime의 provider·다중 업무 조립으로 이전했다. Memory 이벤트 저장 1개는 이미 고정된 B7 source의 중복 구현을 만들지 않기 위해 원래 파일에 같은 본문으로 남겼다. 정확한 남은 함수·소비자·종료 조건은 소유 지도에 기록했다. 공통 logger 이름, 서울 시간대, 모델·사용량·토큰 제한과 provider 호출 조건을 변경하지 않았다.
+
+원래 34개 정의의 전체 AST를 비교했으며, 실제 동일 nullable 조회 소유 경로와 명시적 문맥 읽기 인자만 복원하면 모두 동일하다. 기존 테스트 4개 파일의 모든 assertion과 suppression도 그대로다. 새 테스트 8노드는 1회 provider 호출, 실행 중 event loop 거절, 같은 Run/Session의 사용량 commit, JSON 검증 전 사용량 기록, Social 게시·답글 저장 뒤 Memory 기록, 원래 Daypart의 날짜·source IDs·단일 commit을 확인한다.
+
+첫 확대 검사에서 신규 fixture가 읽기 전용 Settings property에 대입하여 2개가 실패했다. 제품 코드는 바꾸지 않고 실제 설정 필드 `OPENCLAW_GATEWAY_TOKEN`과 SecretStr를 사용하도록 fixture를 수정했다. 이후 기존 79개와 신규 8개를 함께 실행한 결과는 **87 passed / 2 warnings / 13.34초**다. 현재 경계는 **812 modules / 2833 edges / 200 exact legacy edges**다. 다음 원본 source·assertion·API/ORM·node 보존 검사를 별도로 확인하며, 현재 source 준비 결과를 GitHub 또는 전체 B4 완료로 표현하지 않는다.
+
+이 작업트리는 `cf142ac`에서 분기했으므로 후속 통합의 구조 경로 회귀 2개 수정 `70b238c`를 포함하지 않는다. G07의 실제 tendency test 경로 수정은 같은 값으로 반영하며 원래 test node를 재기준화하지 않는다. 원본 checkpoint·기존 additions 86개는 수정하지 않고 최초 source commit의 archive를 통합 후 순서대로 수집한다.
+
+
+Writer 최종 고정 tree의 원래 6개 보존 진단은 source·split·assertion·suppression·API/ORM·node 모두 **0 errors**다. 기존 보호 2293 / 현재 2301로 기존 손실 없이 신규 8개가 수집된다. 이 읽기 진단은 source introduction metadata를 만들지 않으며, source commit 뒤 원래 archive를 append한 stock 통합 gate와 구분한다.
+
+
+### B4 후속 통합 — Writer 실제 정책·provider 조립
+
+원래 signed Writer 3c398f3를 C7-F까지 포함한 tree에 합류했다. C7의 greeting/tendency 상수·오류와 Writer 상수·오류를 각각 보존했고, tendency 테스트는 두 실제 owner의 import를 함께 사용한다. 기존 테스트 4파일의 assertion·suppression과 원문 Writer34 정의 AST를 합류 후 재확인했다. 서로 다른 Community query/service의 정확 legacy edge 두 개가 같은 표시 id를 사용하던 metadata 충돌은 각 full module 이름으로 구분해 해결했으며 edge·소유·종료조건은 바꾸지 않았다.
+
+Writer8신규·credential2·tendency2 및 기존 activity/Daypart/구조경로/OSS를 함께 실행한 결과는 **167 passed / 4 warnings / 20.03초**다. 이전 전체 검사에서 실패했던 L3 실제 LG 경로와 local-capacity 실제 source 묶음 2개 검사도 포함해 통과했다. 현재 경계는 827 modules / 2920 edges / 202 exact legacy edges다. Writer 원본 Git archive2301nodes는 수집했으며 신규 source4파일/testfile1/8nodes의 ledger append와 다음 stock 전체 gate를 별도로 수행한다.

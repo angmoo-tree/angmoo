@@ -425,3 +425,18 @@ FIRST_GREETING_SESSION_MARKER = ":first-greeting:"
 FIRST_GREETING_WRITER_OUTPUT_TOKENS = 5000
 
 TENDENCY_LLM_TOOLS_ALLOW = ["angmoo_list_feed"]
+
+# Time labels and no-tool gateway admission for the brief writer.
+
+WRITING_TIMEZONE = ZoneInfo("Asia/Seoul")
+WRITING_KOREAN_WEEKDAYS = (
+    "월요일",
+    "화요일",
+    "수요일",
+    "목요일",
+    "금요일",
+    "토요일",
+    "일요일",
+)
+
+WRITING_TOOLS_ALLOWED = ["angmoo_list_feed"]

@@ -815,3 +815,10 @@ Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 S
 ### 캐릭터의 자격 증명 관리
 
 키·모델 변경, metadata 조회와 삭제의 실제 규칙은 `identity/service/credential_management.py`가 담당합니다. `/agents/{id}/credential`은 Character 리소스 HTTP이며 이 서비스를 typed workflow와 함께 직접 호출합니다. World membership과 WorldCharacter 범위 조회는 각 소유 repository가, 활동 슬롯과 설정은 Routines가 담당합니다. 모든 협력은 기존 Session과 붙어 있는 객체를 사용합니다. 슬롯 실행 중 거절, profile 연결/해제, commit=False와 최종 commit/rollback의 순서는 해당 서비스의 계약입니다. 성공 응답에는 기존 CredentialRead만 포함합니다.
+### Brief 기반 작성의 정책과 실행
+
+`domains/routines/service/writing_prompts.py`는 캐릭터 말투·현재 시간·활동 문맥·최종 brief를 조합하는 실제 작성 규칙을 담습니다. 다른 업무의 답글 문맥과 Lore는 `contracts/writing.py`의 명시적인 읽기 협력으로 전달합니다. 문맥은 기존 조건과 순서에서 읽으며, 사용하지 않는 Lore나 최근 활동을 미리 조회하지 않습니다.
+
+`service/writing_results.py`는 준비된 brief 해석, 생성 결과와 사용량 정제, 같은 Session에서 Run의 작성 사용량을 저장하는 업무를 담당합니다. `runtime/resident/writing.py`는 Social 권한 확인과 실제 게시·답글 저장, provider 호출, Lore 사용 기록과 Memory 저장을 연결합니다. 원래의 생성기 호출 횟수, 사용량 기록 후 JSON 검증 순서와 게시 완료 후 Memory 저장 순서를 유지합니다.
+
+현재 B4 source에서 옛 `services/agent_writing.py`에 남은 실제 함수는 Daypart 이벤트 저장 하나입니다. 이미 별도 B7 source에 구현된 Memory 서비스가 통합되면 이 기존 구현을 그 서비스로 연결하고 제거합니다. Identity credential, Social 및 Lore의 기존 협력도 해당 소유 source와 순차 통합하며, 새 작성 정책을 옛 서비스로 추가하지 않습니다. 두 legacy 작성 진입 함수는 이 source에서 활성 제품 호출자가 없지만 기존 구현과 계약을 보존합니다.

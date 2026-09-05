@@ -5,7 +5,8 @@ from types import SimpleNamespace
 import pytest
 from google.genai import errors as google_errors
 
-from app.services import agent_runs, agent_writing, direct_llm
+from app.services import agent_runs, direct_llm
+from app.domains.routines.service import writing_results as agent_writing
 
 
 

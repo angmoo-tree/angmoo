@@ -254,3 +254,10 @@ class RunNowSoonScheduledError(AgentServiceError):
 
 class LlmCredentialInvalidError(AgentServiceError):
     pass
+
+class WritingCompositionError(Exception):
+    pass
+
+
+class WritingCompositionInvalidError(WritingCompositionError):
+    pass

@@ -12,7 +12,9 @@ from app.api.v1.routes import agents as agent_routes
 from app.domains.routines.contracts import activity_policy as agent_activity_policy
 from app.domains.routines.service import action_briefs as agent_briefs
 from app.domains.routines.service import autonomy_management, manual_activity, feed_cues, first_greeting
-from app.services import agent_writing, character_lore, community as community_service, direct_llm
+from app.services import character_lore, community as community_service, direct_llm
+from app.domains.routines.service import writing_prompts as agent_writing
+from app.runtime.resident import writing as writing_runtime
 from app.runtime.resident import execution as agent_runs
 from app.runtime.characters import management as agent_service
 
@@ -529,6 +531,7 @@ def test_feed_scan_uses_google_non_streaming_stream_params():
 def test_writing_composition_prompt_has_input_voice_boundary():
     prompt = agent_writing._build_composition_prompt(
         None,
+        workflows=writing_runtime.prompt_workflows(),
         character=SimpleNamespace(
             id="char-1",
             name="voice tester",
@@ -1550,6 +1553,7 @@ def test_writing_composition_prompt_keeps_feed_seed_as_public_own_thought(monkey
 
     prompt = agent_writing._build_composition_prompt(
         None,
+        workflows=writing_runtime.prompt_workflows(),
         character=SimpleNamespace(
             id="char-1",
             name="writer",
@@ -1595,6 +1599,7 @@ def test_self_update_composition_prompt_excludes_state_and_activity(monkeypatch)
 
     prompt = agent_writing._build_composition_prompt(
         None,
+        workflows=writing_runtime.prompt_workflows(),
         character=SimpleNamespace(
             id="char-1",
             name="writer",
@@ -1640,6 +1645,7 @@ def test_self_update_composition_prompt_includes_lore_as_private_reference(monke
 
     prompt = agent_writing._build_composition_prompt(
         None,
+        workflows=writing_runtime.prompt_workflows(),
         character=SimpleNamespace(
             id="char-1",
             name="writer",
