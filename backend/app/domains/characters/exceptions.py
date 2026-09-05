@@ -77,3 +77,7 @@ class AgentPrivateMediaNotFoundError(AgentCreationDraftError):
 
 class AgentCreationDraftParseError(AgentCreationDraftError):
     pass
+
+
+class AgentActiveHoursInvalidError(AgentServiceError):
+    pass

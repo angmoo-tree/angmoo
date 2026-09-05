@@ -243,3 +243,17 @@ Character 소유 `AgentCreationDraft`, `ProfileImageCandidate`, `ProfileImageQuo
 
 
 최종 source 준비 상태의 보존 검사는 **#258 1,867 / #263 1,907 / 보호 계보 2,030 / 현재 2,059 nodes**였다. API·OpenAPI·ORM 계약, 기존 assertion·skip 상태, split symbol·대응표의 오류는 0개였고, 선행 고정 source의 아직 합류하지 않은 introduction metadata만 source 17개·test 23개로 보고됐다. 승인 public **604 / current 2,059 / new 1,485 PASS**이며 승인 목록과 고정 checkpoint는 바꾸지 않았다. 최종 경계 검사와 diff whitespace 검사도 통과했다. root의 G1/G2 통합에서는 두 새 runtime 파일의 `core.config`·SQLite error import를 이미 확정된 `app.config`·`app.exceptions` 경로와 맞춘 뒤 검증한다.
+
+### AR-B2-B3 — Character HTTP와 같은 Session의 업무 연결
+
+Character 목록·생성·단건 조회·프로필·페르소나·홍보 동의 6개 endpoint는 `app.domains.characters.router`와 `dependencies`를 사용한다. `service.management`는 소유자 조회, 목록 선택/정렬, Character mutation과 후속 호출 순서를 소유한다. `CharacterManagementWorkflows`는 앱 생성 시 연결되며, 활동 설정·credential·활동 기록·상세 DTO 조립만 `runtime.characters.management`가 수행한다. 원래의 여러 commit을 하나로 합치지 않으며, 모든 callback은 동일 Session과 부착된 Character/owner를 받는다.
+
+`api/v1/routes/agents.py`는 미전환 API와 6개 canonical APIRoute를 원래 순서에 조립한다. `/drafts/...`가 `/{character_id}`보다 먼저 매칭되는 순서, URL, operationID, HTTP 오류와 인증 dependency 객체를 유지한다. 실제 중복 endpoint 구현은 없다. 목록/일반 조립의 최근 활동 기본 한도는 20개, 단일 상세 조회는 기존 상수에 따라 200개이다.
+
+`AgentDetailRead`/이미지 설정 읽기 DTO는 Character schemas, credential 읽기 DTO는 Identity schemas, 활동·slot 요약 DTO 6개는 Runtime schemas의 정확한 선행 추출이다. 각 이전 aggregate는 같은 class 객체를 내보낸다. Runtime 전체 실행 로직이 전환 완료된 것으로 보지 않는다.
+
+- 현재 검증: Characters/Creator/promotion/demo lock/activity/L4 **144 passed, 3 warnings (27.87s)**. 신규 4개 노드는 `tests/characters/test_character_http_workflows.py`에 있다.
+- 실제 HTTP에서 공통 인증/DB override, drafts 우선순위, 동일 APIRoute를 검증했다. 두 앱 factory 등록, 미등록 오류, 같은 Session과 기존 commit 순서, foreign owner 차단, schema identity와 detail 한도를 검증했다.
+- 경계 검사: **610 modules / 1943 edges / legacy exact 282**. 공개 route inventory **196 operations**. 원래 6개 entry의 module 필드만 변경했고 public generator를 갱신했다.
+- 남은 B2 책임: Creator draft CRUD/검증/완료와 파일·provider callback 분리. 프로필 이미지 저장·후처리 B3, 활동/성향/자율실행 B4, LocalBot와 복합 삭제 조립 B8을 이 Character HTTP slice의 완료로 간주하지 않는다.
+- 통합 보존 검사에서 #258 1,867 / #263 1,907 노드, 현재 2,103 노드가 수집됐고 API/OpenAPI/ORM·assertion·suppression 차이는 없었다. 이후 분할 지도의 원래 source 기준 symbol/consumer를 보정해 split evidence 단독 검사 PASS를 확인했다. 아직 병합하지 않은 Identity/Character source 도입 증거에 대한 append-only 오류는 root의 선형 capture 대상이며, 이 상태를 전체 보존 검사 PASS로 기록하지 않는다.

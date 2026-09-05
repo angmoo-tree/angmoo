@@ -1,4 +1,12 @@
 """Character identity/state and owner-facing profile/creation inputs."""
+from app.domains.identity.schemas import CredentialRead
+from app.domains.runtime.schemas import (
+    AgentActivitySettingRead,
+    AgentActivitySummaryRead,
+    AgentActivityProfileReadinessRead,
+    AgentActivityLogRead,
+    AgentSlotRead,
+)
 from datetime import datetime
 from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -8,6 +16,7 @@ from app.providers.registry import AGENT_GOOGLE_MODELS
 
 AgentGoogleModel = Literal[*AGENT_GOOGLE_MODELS]
 AgentExecutionMode = Literal["llm", "local"]
+ImageKeyMode = Literal["service", "user", "disabled"]
 
 class CharacterRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -249,3 +258,44 @@ class AgentPromotionUsageRead(UtcInstantResponseModel):
     promotion_usage_agreed_at: datetime | None = None
     promotion_usage_revoked_at: datetime | None = None
     promotion_usage_policy_version: str | None = None
+
+
+class AgentImageGenerationSettingRead(UtcInstantResponseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    character_id: str
+    image_key_mode: ImageKeyMode
+    image_generation_enabled: bool
+    max_images_per_day: int
+    pollinations_image_model: str
+    seed_image_url: str | None = None
+    key_fingerprint: str | None = None
+    has_pollinations_api_key: bool = False
+    replicate_key_fingerprint: str | None = None
+    has_replicate_api_key: bool = False
+    visual_identity_prompt_available: bool = False
+    visual_identity_prompt: str | None = None
+    visual_identity_mode: Literal["manual", "auto", "none"] = "none"
+    visual_identity_source_hash: str | None = None
+    service_image_available: bool = False
+    service_image_model: str = ""
+    service_image_model_label: str = ""
+    service_free_quota_limit: int = 0
+    service_free_quota_used: int = 0
+    service_free_quota_remaining: int = 0
+    service_free_quota_date: str | None = None
+    updated_at: datetime
+
+
+
+class AgentDetailRead(BaseModel):
+    character: CharacterRead
+    state: CharacterStateRead | None = None
+    credential: CredentialRead | None
+    settings: AgentActivitySettingRead
+    image_settings: AgentImageGenerationSettingRead
+    promotion_usage: AgentPromotionUsageRead
+    assigned_slot: AgentSlotRead | None = None
+    activity_profile_readiness: AgentActivityProfileReadinessRead
+    activity_summary: AgentActivitySummaryRead
+    recent_activity: list[AgentActivityLogRead]

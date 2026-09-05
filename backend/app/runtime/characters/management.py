@@ -1,3 +1,15 @@
+from __future__ import annotations
+
+from app.domains.characters.contracts import CharacterManagementWorkflows
+from app.domains.characters.service import management as character_management
+from app.domains.characters.service.management import (
+    _agent_list_sort_key,
+)
+
+from app.domains.characters.exceptions import (
+    AgentActiveHoursInvalidError,
+)
+
 from app.domains.characters.service import mutations as character_mutations
 from datetime import UTC, datetime, timedelta
 import hashlib
@@ -316,8 +328,6 @@ class AgentFeedCueUnavailableError(AgentServiceError):
     pass
 
 
-class AgentActiveHoursInvalidError(AgentServiceError):
-    pass
 
 
 class AgentDeleteConfirmationError(AgentServiceError):
@@ -371,11 +381,9 @@ class RunNowSoonScheduledError(AgentServiceError):
 
 
 def list_agents(db: Session, user: models.User) -> list[schemas.AgentDetailRead]:
-    agents = [
-        _build_agent_detail(db, character)
-        for character in character_profile.list_characters_for_user(db, user.id)
-    ]
-    return sorted(agents, key=_agent_list_sort_key)
+    return character_management.list_agents(db, user, workflows=build_character_management_workflows())
+
+
 
 
 def llm_credential_error_message(exc: Exception) -> str | None:
@@ -432,8 +440,10 @@ def _ensure_tendency_prompt_safety(
 def create_agent(
     db: Session, user: models.User, data: schemas.AgentCreate
 ) -> schemas.AgentDetailRead:
-    _validate_initial_activity_settings(data)
-    character = character_mutations.create_owned_character(db, user, data)
+    return character_management.create_agent(db, user, data, workflows=build_character_management_workflows())
+
+
+def _after_character_created(db, user, character, data) -> schemas.AgentDetailRead:
     setting = agent_crud.ensure_setting(db, character.id)
     _apply_initial_activity_settings(db, setting, data)
     _ensure_initial_image_settings(db, character.id)
@@ -571,10 +581,9 @@ def _log_autonomy_activation_rejection(
 
 
 def get_agent(db: Session, user: models.User, character_id: str) -> schemas.AgentDetailRead:
-    character = _get_owned_character(db, user, character_id)
-    return _build_agent_detail(
-        db, character, recent_activity_limit=AGENT_DETAIL_ACTIVITY_LIMIT
-    )
+    return character_management.get_agent(db, user, character_id, workflows=build_character_management_workflows())
+
+
 
 
 def get_local_connection(
@@ -941,7 +950,10 @@ def update_profile(
     character_id: str,
     data: schemas.AgentProfileUpdate,
 ) -> schemas.AgentDetailRead:
-    character, media_changed = character_mutations.update_owned_profile(db, user, character_id, data)
+    return character_management.update_profile(db, user, character_id, data, workflows=build_character_management_workflows())
+
+
+def _after_character_profile_updated(db, user, character, media_changed) -> schemas.AgentDetailRead:
     if media_changed:
         _invalidate_image_visual_identity_if_present(db, character.id)
     agent_crud.log_activity(
@@ -963,8 +975,9 @@ def update_promotion_usage(
     character_id: str,
     data: schemas.AgentPromotionUsageUpdate,
 ) -> schemas.AgentDetailRead:
-    character = character_mutations.update_owned_promotion(db, user, character_id, data)
-    return _build_agent_detail(db, character)
+    return character_management.update_promotion_usage(db, user, character_id, data, workflows=build_character_management_workflows())
+
+
 
 
 def update_persona(
@@ -973,7 +986,10 @@ def update_persona(
     character_id: str,
     data: schemas.AgentPersonaUpdate,
 ) -> schemas.AgentDetailRead:
-    character = character_mutations.update_owned_persona(db, user, character_id, data)
+    return character_management.update_persona(db, user, character_id, data, workflows=build_character_management_workflows())
+
+
+def _after_character_persona_updated(db, user, character) -> schemas.AgentDetailRead:
     setting = agent_crud.ensure_setting(db, character.id)
     _clear_tendency_analysis(setting)
     db.commit()
@@ -3174,26 +3190,6 @@ def _invalidate_image_visual_identity_if_present(db: Session, character_id: str)
     setting.visual_identity_source_hash = None
 
 
-def _agent_list_sort_key(
-    agent: schemas.AgentDetailRead,
-) -> tuple[int, float, str, str]:
-    is_running = agent.assigned_slot is not None and agent.assigned_slot.status == "running"
-    recency_candidates = [
-        value
-        for value in (
-            agent.assigned_slot.last_run_at if agent.assigned_slot else None,
-            agent.activity_summary.last_activity_at,
-        )
-        if value is not None
-    ]
-    latest = max(recency_candidates) if recency_candidates else None
-    latest_timestamp = latest.timestamp() if latest else 0.0
-    return (
-        0 if is_running else 1,
-        -latest_timestamp,
-        agent.character.name.casefold(),
-        agent.character.id,
-    )
 
 
 def _activity_log_read(
@@ -3236,3 +3232,19 @@ def _activity_log_target_profile(
         "target_profile_handle": None,
         "target_profile_avatar_url": None,
     }
+
+
+def build_character_management_workflows() -> CharacterManagementWorkflows:
+    """Bind the current runtime callbacks (also honoring caller/test overrides)."""
+    return CharacterManagementWorkflows(
+        validate_initial_activity=_validate_initial_activity_settings,
+        after_create=_after_character_created,
+        build_detail=_build_agent_detail,
+        build_full_detail=_build_full_character_detail,
+        after_profile=_after_character_profile_updated,
+        after_persona=_after_character_persona_updated,
+    )
+
+
+def _build_full_character_detail(db: Session, character: character_models.Character) -> schemas.AgentDetailRead:
+    return _build_agent_detail(db, character, recent_activity_limit=AGENT_DETAIL_ACTIVITY_LIMIT)

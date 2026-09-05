@@ -109,7 +109,7 @@
     },
     "GET /api/v1/agents": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "list_agents"
     },
     "GET /api/v1/agents/drafts/{draft_id}": {
@@ -134,7 +134,7 @@
     },
     "GET /api/v1/agents/{character_id}": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "get_agent"
     },
     "GET /api/v1/agents/{character_id}/feed-cue": {
@@ -599,7 +599,7 @@
     },
     "POST /api/v1/agents": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "create_agent"
     },
     "POST /api/v1/agents/drafts": {
@@ -979,17 +979,17 @@
     },
     "PUT /api/v1/agents/{character_id}/persona": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "update_persona"
     },
     "PUT /api/v1/agents/{character_id}/profile": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "update_profile"
     },
     "PUT /api/v1/agents/{character_id}/promotion-usage": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "update_promotion_usage"
     },
     "PUT /api/v1/agents/{character_id}/settings": {

@@ -1,3 +1,12 @@
+from app.domains.characters.router import (
+    list_agents,
+    create_agent,
+    get_agent,
+    update_profile,
+    update_persona,
+    update_promotion_usage,
+    router as character_router,
+)
 from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
@@ -16,6 +25,7 @@ from app.services.runtime_boundary import OpenClawGatewayAuthError, OpenClawGate
 
 
 router = APIRouter(prefix="/agents", tags=["agents"])
+_character_routes = {route.name: route for route in character_router.routes}
 TENDENCY_ANALYSIS_RETRY_DETAIL = (
     "성향 분석 결과를 정리하지 못했습니다. 잠시 후 다시 시도해주세요."
 )
@@ -25,29 +35,10 @@ def _raise_demo_account_locked(exc: Exception) -> None:
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
 
 
-@router.get("", response_model=list[schemas.AgentDetailRead])
-def list_agents(
-    db: Session = Depends(get_db), user: models.User = Depends(get_current_user)
-) -> list[schemas.AgentDetailRead]:
-    return agent_service.list_agents(db, user)
+router.routes.append(_character_routes["list_agents"])
 
 
-@router.post("", response_model=schemas.AgentDetailRead, status_code=status.HTTP_201_CREATED)
-def create_agent(
-    data: schemas.AgentCreate,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentDetailRead:
-    try:
-        return agent_service.create_agent(db, user, data)
-    except agent_service.AgentHandleConflictError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.AgentHandleInvalidError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
-    except agent_service.AgentActiveHoursInvalidError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
-    except agent_service.PromptInjectionDetectedError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+router.routes.append(_character_routes["create_agent"])
 
 
 @router.post(
@@ -333,16 +324,7 @@ def complete_agent_draft(
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
 
 
-@router.get("/{character_id}", response_model=schemas.AgentDetailRead)
-def get_agent(
-    character_id: str,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentDetailRead:
-    try:
-        return agent_service.get_agent(db, user, character_id)
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
+router.routes.append(_character_routes["get_agent"])
 
 
 @router.delete("/{character_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -476,57 +458,13 @@ def give_feed_cue(
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
 
 
-@router.put("/{character_id}/profile", response_model=schemas.AgentDetailRead)
-def update_profile(
-    character_id: str,
-    data: schemas.AgentProfileUpdate,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentDetailRead:
-    try:
-        return agent_service.update_profile(db, user, character_id, data)
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.DemoAccountLockedError as exc:
-        _raise_demo_account_locked(exc)
-    except agent_service.AgentProfileNameInvalidError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
-    except agent_service.AgentHandleConflictError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.AgentHandleInvalidError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+router.routes.append(_character_routes["update_profile"])
 
 
-@router.put("/{character_id}/persona", response_model=schemas.AgentDetailRead)
-def update_persona(
-    character_id: str,
-    data: schemas.AgentPersonaUpdate,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentDetailRead:
-    try:
-        return agent_service.update_persona(db, user, character_id, data)
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.DemoAccountLockedError as exc:
-        _raise_demo_account_locked(exc)
-    except agent_service.PromptInjectionDetectedError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+router.routes.append(_character_routes["update_persona"])
 
 
-@router.put("/{character_id}/promotion-usage", response_model=schemas.AgentDetailRead)
-def update_promotion_usage(
-    character_id: str,
-    data: schemas.AgentPromotionUsageUpdate,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentDetailRead:
-    try:
-        return agent_service.update_promotion_usage(db, user, character_id, data)
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.DemoAccountLockedError as exc:
-        _raise_demo_account_locked(exc)
+router.routes.append(_character_routes["update_promotion_usage"])
 
 
 @router.post("/{character_id}/media", response_model=schemas.AgentDetailRead)

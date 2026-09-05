@@ -224,7 +224,7 @@
     },
     {
       "path": "backend/app/public_main.py",
-      "sha256": "8c882f4cf692ca1d2f7cd479f8d93fc53d7a803f0d22c97cdbd4a174880f8d72"
+      "sha256": "3ada5d7df1b45e11d431521b7229004e7a2b98544fa1f8bebed1052b9ed20df0"
     },
     {
       "path": "backend/app/runtime/account_deletion.py",
@@ -232,7 +232,7 @@
     },
     {
       "path": "backend/app/runtime/characters/management.py",
-      "sha256": "58fd4ff66730a61b482b3869c510822ed78966fd3067f8aa6bbd1c76642a9306"
+      "sha256": "701ece03039b89823c4c38b4f8cd6b75c3c39c49de2cb40d984bb6dc566a77a4"
     },
     {
       "path": "backend/app/runtime/desktop_sidecar.py",
