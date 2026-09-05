@@ -1394,3 +1394,6 @@ Writer 최종 고정 tree의 원래 6개 보존 진단은 source·split·asserti
 원래 signed Writer 3c398f3를 C7-F까지 포함한 tree에 합류했다. C7의 greeting/tendency 상수·오류와 Writer 상수·오류를 각각 보존했고, tendency 테스트는 두 실제 owner의 import를 함께 사용한다. 기존 테스트 4파일의 assertion·suppression과 원문 Writer34 정의 AST를 합류 후 재확인했다. 서로 다른 Community query/service의 정확 legacy edge 두 개가 같은 표시 id를 사용하던 metadata 충돌은 각 full module 이름으로 구분해 해결했으며 edge·소유·종료조건은 바꾸지 않았다.
 
 Writer8신규·credential2·tendency2 및 기존 activity/Daypart/구조경로/OSS를 함께 실행한 결과는 **167 passed / 4 warnings / 20.03초**다. 이전 전체 검사에서 실패했던 L3 실제 LG 경로와 local-capacity 실제 source 묶음 2개 검사도 포함해 통과했다. 현재 경계는 827 modules / 2920 edges / 202 exact legacy edges다. Writer 원본 Git archive2301nodes는 수집했으며 신규 source4파일/testfile1/8nodes의 ledger append와 다음 stock 전체 gate를 별도로 수행한다.
+
+
+Writer 원래 signed 최초 도입의 5파일/8노드를 순서대로 append하여 ledger는 **89 → 90 records**다. 기존 main64·직전89 불변 prefix 및 원래 provenance checker를 모두 통과했다. 현재 후보의 최종 C7 HTTP/상세 응답 후속은 아직 준비 중이며 전체 backend·최종 stock·GitHub CI는 모두 합류한 exact head에서 진행한다.

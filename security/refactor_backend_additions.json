@@ -4765,6 +4765,98 @@
       "test_suppressions": {
         "tests/identity/test_character_credential_transaction.py": {}
       }
+    },
+    {
+      "commit": "3c398f3cf9c71cc1e6328cbfb4122cbf7c5df74e",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor: give writer policy and provider execution actual owners",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/writing.py": "6a293624aeaea23cd416a154e5e5c243be38339d",
+        "backend/app/domains/routines/service/writing_prompts.py": "60c0e31573775e687c259469f4536fc9079ab8e8",
+        "backend/app/domains/routines/service/writing_results.py": "6ab83049b411f5ff56ba12d5ef56468da1748674",
+        "backend/app/runtime/resident/writing.py": "e1dcccffb700b8f543e473e2ff62ed0f30c94428",
+        "backend/tests/routines/test_writing_composition.py": "5a3cc2573a557a05e6923fa18934b53a3ed11cba"
+      },
+      "test_nodes": [
+        "tests/routines/test_writing_composition.py::test_composition_records_provider_usage_before_response_validation[not JSON]",
+        "tests/routines/test_writing_composition.py::test_composition_records_provider_usage_before_response_validation[{\"reply\":{\"body\":\"hello\"}}]",
+        "tests/routines/test_writing_composition.py::test_existing_daypart_writer_keeps_event_identity_and_single_commit",
+        "tests/routines/test_writing_composition.py::test_gateway_writer_keeps_single_call_scratch_identity_and_no_tool_contract",
+        "tests/routines/test_writing_composition.py::test_gateway_writer_rejects_active_event_loop_before_provider_call",
+        "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[create_post]",
+        "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[reply]",
+        "tests/routines/test_writing_composition.py::test_writing_lane_preserves_other_run_state_and_commits_same_session_once"
+      ],
+      "test_assertions": {
+        "tests/routines/test_writing_composition.py": {
+          "_gateway_inputs": [],
+          "test_gateway_writer_keeps_single_call_scratch_identity_and_no_tool_contract": [
+            "assert result == {'status': 'completed', 'text': '{\"body\":\"hello\"}'}",
+            "assert [name for name, _ in calls] == ['client', 'run']",
+            "assert request['session_key'] == f'daypart-memory:scratch:writing-composition-create_post:run-1:{brief_hash}'",
+            "assert request['idempotency_key'] == f'run-1-writing-composition-create_post-{brief_hash}'",
+            "assert request['tool_auth_key'] == 'tool-auth-test'",
+            "assert request['tool_choice'] == 'none'",
+            "assert request['tools_allow'] == ['angmoo_list_feed']",
+            "assert request['auth_profile_id'] == 'profile-1'",
+            "assert request['extra_system_prompt'] == 'original prompt'",
+            "assert request['stream_params'] == {}"
+          ],
+          "test_gateway_writer_rejects_active_event_loop_before_provider_call": [
+            "assert provider_calls == []",
+            "pytest.raises(WritingCompositionError, match='active event loop')"
+          ],
+          "test_writing_lane_preserves_other_run_state_and_commits_same_session_once": [
+            "assert calls == [('get', models.AgentRun, 'run-1'), ('commit',)]",
+            "assert run.gateway_result['session_context'] == {'memory_session_key': 'memory-1'}",
+            "assert run.gateway_result['writing_composition_lanes'][0] == {'status': 'completed', 'kind': 'reply'}",
+            "assert lane['kind'] == 'create_post'",
+            "assert lane['runId'] == 'gateway-run'",
+            "assert lane['llmUsage']['providerCallCount'] == 1",
+            "assert lane['llmUsage']['failedProviderCallCount'] == 0",
+            "assert lane['llmUsage']['totalTokens'] == 42"
+          ],
+          "test_composition_records_provider_usage_before_response_validation": [
+            "assert events == ['character', 'credential', 'setting', 'state', 'prompt', 'provider', 'record']",
+            "assert session is db",
+            "assert session is db and actual_run is run",
+            "assert session is db",
+            "assert session is db",
+            "assert session is db",
+            "assert session is db",
+            "pytest.raises(WritingCompositionInvalidError, match='composition did not return JSON')",
+            "assert payload == {'body': 'hello'}",
+            "assert usage == {'providerCallCount': 1}",
+            "assert lore is None"
+          ],
+          "test_writer_admits_before_composition_and_records_memory_after_social_write": [
+            "assert result['status'] == 'ok'",
+            "assert result['kind'] == kind",
+            "assert result['post'] is post",
+            "assert result['action_memory']['source_post'] == ('target-post' if kind == 'reply' else None)",
+            "assert session is db",
+            "assert action_memory['post_id'] == 'created-post'",
+            "assert events == ['run', 'user', 'gate', 'compose', 'social', 'lore', 'memory']",
+            "assert events == ['run', 'user', 'gate', 'target', 'thread', 'compose', 'social', 'memory']",
+            "assert session is db"
+          ],
+          "test_existing_daypart_writer_keeps_event_identity_and_single_commit": [
+            "assert event.character_id == 'character-1'",
+            "assert event.run_id == 'run-1'",
+            "assert event.source_post_id == 'target-1'",
+            "assert event.event_type == 'action_reply'",
+            "assert event.memory_session_key == 'memory-1'",
+            "assert event.daypart_start_date.isoformat() == '2026-09-04'",
+            "assert event.activity_daypart == 'evening'",
+            "assert event.payload is payload",
+            "assert event.summary == 'Saved result'",
+            "assert committed == 'commit'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_writing_composition.py": {}
+      }
     }
   ]
 }
