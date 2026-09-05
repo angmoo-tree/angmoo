@@ -1175,6 +1175,7 @@
       "app.domains.social.schemas.feed",
       "app.domains.social.schemas.manual",
       "app.domains.social.service",
+      "app.domains.social.service.joint_posts",
       "app.domains.social.service.media_storage",
       "app.domains.social.service.notifications",
       "app.domains.social.service.posts",
@@ -1278,6 +1279,7 @@
       "app.domains.social.schemas.community",
       "app.domains.social.schemas.feed",
       "app.domains.social.schemas.manual",
+      "app.domains.social.service.joint_posts",
       "app.domains.social.service.media_storage",
       "app.domains.social.service.notifications",
       "app.domains.social.service.posts",
@@ -2358,6 +2360,14 @@
         "owner_stage": "AR-B5 / AR-B8-A",
         "reason": "The actual Social read/response/error or nullable Identity lookup now has one owner; this named legacy consumer uses the same object while its workflow transition remains pending.",
         "removal_condition": "Switch the exact legacy Community consumer to its canonical service and remove this bridge; no new owner imports the legacy aggregate.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.joint_activity_runtime",
+        "target": "app.domains.social.service.joint_posts",
+        "owner_stage": "AR-B5 / AR-B4",
+        "reason": "Existing joint transaction delegates each original Post link assignment to its Social owner.",
+        "removal_condition": "AR-B4 replaces the legacy joint runtime consumer with typed same-Session collaboration.",
         "review_date": "2026-09-05"
       }
     ]

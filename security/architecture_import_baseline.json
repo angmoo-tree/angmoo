@@ -1,7 +1,7 @@
 {
-  "edge_count": 2129,
+  "edge_count": 2131,
   "external_import_count": 2100,
-  "module_count": 658,
+  "module_count": 659,
   "modules": [
     {
       "external_imports": [],
@@ -4592,6 +4592,15 @@
       "imports": [],
       "module": "app.domains.social.service",
       "path": "backend/app/domains/social/service/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.social.models.posts"
+      ],
+      "module": "app.domains.social.service.joint_posts",
+      "path": "backend/app/domains/social/service/joint_posts.py",
       "wildcard_imports": []
     },
     {
@@ -9277,6 +9286,7 @@
       ],
       "imports": [
         "app.core.ids",
+        "app.domains.social.service.joint_posts",
         "app.models",
         "app.runtime.relationships.sqlalchemy_social_event"
       ],

@@ -2,9 +2,9 @@
   "architecture": {
     "backend": {
       "external_import_count": 2100,
-      "internal_edge_count": 2129,
+      "internal_edge_count": 2131,
       "legacy_import_exception_count": 0,
-      "module_count": 658,
+      "module_count": 659,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -477,6 +477,13 @@
             "imports": [],
             "module": "app.domains.social.service",
             "path": "backend/app/domains/social/service/__init__.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.models.posts"
+            ],
+            "module": "app.domains.social.service.joint_posts",
+            "path": "backend/app/domains/social/service/joint_posts.py"
           },
           {
             "imports": [

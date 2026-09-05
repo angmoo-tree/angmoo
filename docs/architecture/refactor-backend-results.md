@@ -629,3 +629,10 @@ M6 고정 후보에서 `--contracts --nodes`는 현재 **2,151 nodes**를 수집
 최종 집중 검증은 **107 passed / 1 existing warning / 21.68s**다. #258/#263 API·schema·ORM 차이 0, 변경 기존 테스트 1개 파일의 assertion 계약 PASS, 전체 split evidence PASS다. Media/Package 통합 후 기존 B2 split evidence 27개의 Package 테스트 경로만 이미 승인된 exact node map의 현재 목적지로 연결했다. 보호 원본 node, 기준선, 검사 규칙은 변경하지 않았다. Architecture는 **658 modules / 2,129 edges / 247 exact legacy edges**, L4 inventory는 **658 modules / parity 97**, ER0는 **Postgres 78 files / historical migration subset 87 / Neo4j 24 / Next 44 / parity 7**로 통과했다.
 
 Social 쓰기·프로필·Inbox·agent 도구·미디어 job, Relationships 및 projection은 B5 잔여 구현이다. 이번 source 고정과 새 nodes 도입은 root가 선형 capture·통합 Actions·PR/merge로 이어가며 이 기록은 전체 B5 완료를 주장하지 않는다.
+
+
+## AR-B5-B3 — 공동 활동의 Post 필드 변경 협력
+
+기존 `apply_joint_post`의 Post `joint_activity_id` 1곳과 `opening_post_id` 2곳 대입을 `social/service/joint_posts.py`의 두 한정 함수가 소유한다. 한 함수당 원래 필드 대입만 수행하며 호출 위치는 같다. 공동 활동 validation 전에 joint ID가 기록되는 원래 순서와 이후 opening 분기, 기존 caller의 flush·commit·rollback 책임을 보존한다. Routines의 Joint 자체 필드와 participant/claim 변경은 그대로 Routines 소유에 남는다.
+
+신규 **1 node**는 `tests/social/test_joint_post_links.py::test_joint_links_keep_assignment_stages_and_caller_rollback`이다. 실제 Session의 attached Post에서 두 단계 사이 opening 값이 유지되고 자동 flush·commit이 없으며 caller rollback으로 두 값이 복구되는지 검사한다. 기존 proposal/opening 회귀와 합쳐 **6 passed / 7.58s**다. 초기 신규 fixture는 존재하지 않는 content 인자를 사용해 실패했으며 실제 Post의 body/author_name 필드로 고쳤다. 기존 제품 assertion은 바꾸지 않았다. B4의 실제 joint 서비스가 합류하면 동일 helper를 runtime의 typed collaborator로 연결하고 이 legacy consumer bridge를 종료한다.
