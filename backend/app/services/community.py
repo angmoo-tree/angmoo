@@ -1,3 +1,50 @@
+from app.domains.routines.service.feed_history_values import (
+    _safe_feed_history_post_id,
+    _feed_history_sanitize_skeleton_item,
+    _format_feed_history_sanitize_task_items,
+    format_feed_history_sanitize_skeleton_for_prompt,
+    _clean_feed_history_summary,
+    _safe_feed_history_warnings,
+    _sanitize_feed_history_item,
+    _feed_history_items_by_post_id,
+    _feed_history_metadata_only_summary,
+    _merge_feed_history_sanitize_group,
+    _feed_history_sanitize_skeleton_has_items,
+    _merge_feed_history_sanitize_payload,
+    _format_sanitized_feed_history_items,
+    _feed_history_payload_json,
+    format_feed_history_sanitize_payload_for_prompt,
+)
+from app.domains.routines.constants import FEED_HISTORY_SANITIZED_CONSUMED_LIMIT, RECENT_FEED_INTEREST_HISTORY_LIMIT, RECENT_OWN_ROOT_TOPIC_HISTORY_LIMIT, FEED_HISTORY_STYLE_MARKER_RE
+from app.domains.social.repository.resident_affordances import (
+    _character_already_liked_post,
+    _character_already_reposted_post,
+    _thread_reply_post_ids,
+)
+from app.domains.social.service.resident_affordances import (
+    _character_already_following_profile,
+    _character_can_follow_profile_for_resident_scan,
+    _character_can_reply_to_post_for_resident_scan,
+    _post_has_resident_feed_action,
+    resident_feed_action_affordance,
+    resident_inbox_action_affordance,
+    _notification_has_resident_inbox_action,
+    _notification_source_is_public_context_visible,
+    list_resident_actionable_inbox_notifications,
+    _ensure_agent_can_reply_to_thread,
+    _is_direct_reply_to_character_post,
+    _thread_root_post_id,
+    _candidate_target_parts,
+)
+from app.domains.social.service.agent_presentation import (
+    _neutralize_post_reference_for_agent,
+    _neutralize_post_summary_for_agent,
+    _neutralize_post_detail_for_agent,
+    _neutralize_post_thread_for_agent,
+    _neutralize_feed_page_for_agent,
+    _clip_agent_context_text,
+    _compact_agent_notification_read,
+)
 from app.runtime.social.profile_activity import profile_activity_service
 get_character_activity = profile_activity_service.get_character_activity
 from app.domains.social.service.feed import list_today_popular_posts, _today_start_utc, _post_reaction_score
@@ -133,11 +180,8 @@ FEED_SEED_CONSUMED_ACTION_TYPE = "feed_seed_consumed"
 FEED_HISTORY_SANITIZED_ACTION_TYPE = "feed_history_sanitized"
 FEED_SEED_CONSUMED_LOOKBACK_DAYS = 7
 FEED_SEED_CONSUMED_LIMIT = 20
-FEED_HISTORY_SANITIZED_CONSUMED_LIMIT = 8
-RECENT_FEED_INTEREST_HISTORY_LIMIT = 5
 RECENT_FEED_INTEREST_LOG_SCAN_LIMIT = 20
 RECENT_OWN_ROOT_TOPIC_HISTORY_HOURS = 48
-RECENT_OWN_ROOT_TOPIC_HISTORY_LIMIT = 5
 RECENT_OWN_ROOT_TOPIC_SCAN_LIMIT = 20
 from app.domains.social.constants import FEED_SCAN_BODY_PREVIEW_CHARS
 
@@ -166,10 +210,6 @@ def _feed_history_sanitize_payload_bytes(
 
 def _elapsed_ms(started_at: float) -> int:
     return int((time_module.monotonic() - started_at) * 1000)
-FEED_HISTORY_STYLE_MARKER_RE = re.compile(
-    r"(냐하하|푸훽|ㅋㅋ+|ㅎㅎ+|하하하?|헤헤|히히|후훗|우효|앗싸)",
-    re.IGNORECASE,
-)
 
 
 
@@ -222,8 +262,6 @@ def _json_object(value: str | None) -> dict[str, object]:
 
 
 
-def _safe_feed_history_post_id(value: object) -> str:
-    return _clip_text(neutralize_context_text(str(value or "")).strip(), 64)
 
 
 
@@ -610,30 +648,6 @@ def format_recent_own_root_topic_history_for_prompt(
     return "\n".join(lines) if lines else "- none"
 
 
-def _feed_history_sanitize_skeleton_item(
-    *,
-    post_id: object,
-    topic_signature: object,
-    novelty_basis: object,
-    source_title: object,
-    summary_source: object,
-    timestamp_label: str | None = None,
-    timestamp_value: datetime | None = None,
-) -> dict[str, str]:
-    item = {
-        "post_id": _safe_feed_history_post_id(post_id),
-        "topic_signature": _safe_topic_text(topic_signature, 300),
-        "novelty_basis": _safe_topic_text(novelty_basis, 500),
-        "source_title": _clip_text(
-            neutralize_context_text(str(source_title or "")), 160
-        ),
-        "summary_source": _clip_text(
-            neutralize_context_text(str(summary_source or "")), 500
-        ),
-    }
-    if timestamp_label and timestamp_value is not None:
-        item[timestamp_label] = timestamp_value.isoformat()
-    return item
 
 
 def _build_consumed_sources_sanitize_skeleton(
@@ -786,298 +800,30 @@ def build_feed_history_sanitize_skeleton(
     }
 
 
-def _format_feed_history_sanitize_task_items(items: list[dict[str, str]]) -> str:
-    if not items:
-        return "- none"
-    lines: list[str] = []
-    for item in items:
-        timestamp_lines = [
-            f"  {key}: {item[key]}"
-            for key in ("consumed_at", "interested_at", "created_at")
-            if item.get(key)
-        ]
-        lines.append(
-            "\n".join(
-                [
-                    f"- post_id: {item.get('post_id') or '-'}",
-                    *timestamp_lines,
-                    f"  locked_topic_signature: {item.get('topic_signature') or '-'}",
-                    f"  locked_novelty_basis: {item.get('novelty_basis') or '-'}",
-                    f"  locked_source_title: {item.get('source_title') or '-'}",
-                    f"  text_to_sanitize: {item.get('summary_source') or '-'}",
-                ]
-            )
-        )
-    return "\n".join(lines)
 
 
-def format_feed_history_sanitize_skeleton_for_prompt(
-    skeleton: dict[str, list[dict[str, str]]] | None,
-) -> dict[str, str]:
-    source = skeleton if isinstance(skeleton, dict) else {}
-    return {
-        "consumed_seed_sources": _format_feed_history_sanitize_task_items(
-            source.get("consumed_sources") or []
-        ),
-        "recent_feed_interest_history": _format_feed_history_sanitize_task_items(
-            source.get("recent_feed_interests") or []
-        ),
-        "recent_own_root_topic_history": _format_feed_history_sanitize_task_items(
-            source.get("recent_own_root_topics") or []
-        ),
-    }
 
 
-def _clean_feed_history_summary(
-    value: str | None, *, limit: int = 240
-) -> tuple[str, list[str]]:
-    text = neutralize_context_text(str(value or ""))
-    warnings: list[str] = []
-    if FEED_HISTORY_STYLE_MARKER_RE.search(text):
-        warnings.append("style_marker_removed")
-        text = FEED_HISTORY_STYLE_MARKER_RE.sub("", text)
-    text = re.sub(r"\s*([!?~])\s*", " ", text)
-    text = re.sub(r"\s{2,}", " ", text).strip(" -:;,.!?~")
-    return _clip_text(text, limit), warnings
 
 
-def _safe_feed_history_warnings(value: list[str]) -> list[str]:
-    result: list[str] = []
-    for item in value:
-        warning = _clip_text(neutralize_context_text(str(item or "")), 80)
-        if warning and warning not in result:
-            result.append(warning)
-        if len(result) >= 5:
-            break
-    return result
 
 
-def _sanitize_feed_history_item(
-    item: schemas.AgentFeedHistorySanitizeItem,
-) -> dict[str, object]:
-    warnings = _safe_feed_history_warnings(item.warnings)
-    cleaned: dict[str, object] = {
-        "topic_signature": _safe_topic_text(item.topic_signature, 300),
-        "novelty_basis": _safe_topic_text(item.novelty_basis, 500),
-        "source_title": _clip_text(neutralize_context_text(item.source_title), 160),
-        "seed_semantic_summary": "",
-        "own_root_semantic_summary": "",
-        "interest_reason_summary": "",
-        "warnings": warnings,
-    }
-    post_id = _safe_feed_history_post_id(item.post_id)
-    if post_id:
-        cleaned["post_id"] = post_id
-    for key in (
-        "seed_semantic_summary",
-        "own_root_semantic_summary",
-        "interest_reason_summary",
-    ):
-        value, found_warnings = _clean_feed_history_summary(
-            getattr(item, key), limit=500
-        )
-        cleaned[key] = value
-        for warning in found_warnings:
-            if warning not in warnings:
-                warnings.append(warning)
-    cleaned["warnings"] = warnings[:5]
-    return cleaned
 
 
-def _feed_history_items_by_post_id(
-    items: list[schemas.AgentFeedHistorySanitizeItem],
-) -> dict[str, schemas.AgentFeedHistorySanitizeItem]:
-    result: dict[str, schemas.AgentFeedHistorySanitizeItem] = {}
-    for item in items:
-        post_id = _safe_feed_history_post_id(item.post_id)
-        if post_id and post_id not in result:
-            result[post_id] = item
-    return result
 
 
-def _feed_history_metadata_only_summary(item: dict[str, str]) -> str:
-    return _clip_text(
-        " / ".join(
-            value
-            for value in [
-                item.get("topic_signature") or "",
-                item.get("novelty_basis") or "",
-                item.get("source_title") or "",
-            ]
-            if value
-        ),
-        500,
-    )
 
 
-def _merge_feed_history_sanitize_group(
-    *,
-    skeleton_items: list[dict[str, str]],
-    llm_items: list[schemas.AgentFeedHistorySanitizeItem],
-    summary_key: str,
-    limit: int,
-) -> list[dict[str, object]]:
-    llm_by_post_id = _feed_history_items_by_post_id(llm_items)
-    result: list[dict[str, object]] = []
-    for skeleton_item in skeleton_items[:limit]:
-        post_id = _safe_feed_history_post_id(skeleton_item.get("post_id"))
-        llm_item = llm_by_post_id.get(post_id)
-        summary = (
-            str(getattr(llm_item, summary_key) or "") if llm_item is not None else ""
-        )
-        if not summary:
-            summary = _feed_history_metadata_only_summary(skeleton_item)
-        warnings = llm_item.warnings if llm_item is not None else []
-        merged_item = schemas.AgentFeedHistorySanitizeItem(
-            post_id=post_id,
-            topic_signature=skeleton_item.get("topic_signature") or "",
-            novelty_basis=skeleton_item.get("novelty_basis") or "",
-            source_title=skeleton_item.get("source_title") or "",
-            seed_semantic_summary=(
-                summary if summary_key == "seed_semantic_summary" else None
-            ),
-            own_root_semantic_summary=(
-                summary if summary_key == "own_root_semantic_summary" else None
-            ),
-            interest_reason_summary=(
-                summary if summary_key == "interest_reason_summary" else None
-            ),
-            warnings=warnings,
-        )
-        result.append(_sanitize_feed_history_item(merged_item))
-    return result
 
 
-def _feed_history_sanitize_skeleton_has_items(
-    skeleton: dict[str, list[dict[str, str]]] | None,
-) -> bool:
-    if not isinstance(skeleton, dict):
-        return False
-    return any(
-        bool(skeleton.get(key))
-        for key in (
-            "consumed_sources",
-            "recent_feed_interests",
-            "recent_own_root_topics",
-        )
-    )
 
 
-def _merge_feed_history_sanitize_payload(
-    *,
-    skeleton: dict[str, list[dict[str, str]]],
-    data: schemas.AgentFeedHistorySanitizeCreate,
-) -> dict[str, list[dict[str, object]]]:
-    return {
-        "consumed_sources": _merge_feed_history_sanitize_group(
-            skeleton_items=skeleton.get("consumed_sources") or [],
-            llm_items=data.consumed_sources,
-            summary_key="seed_semantic_summary",
-            limit=FEED_HISTORY_SANITIZED_CONSUMED_LIMIT,
-        ),
-        "recent_feed_interests": _merge_feed_history_sanitize_group(
-            skeleton_items=skeleton.get("recent_feed_interests") or [],
-            llm_items=data.recent_feed_interests,
-            summary_key="interest_reason_summary",
-            limit=RECENT_FEED_INTEREST_HISTORY_LIMIT,
-        ),
-        "recent_own_root_topics": _merge_feed_history_sanitize_group(
-            skeleton_items=skeleton.get("recent_own_root_topics") or [],
-            llm_items=data.recent_own_root_topics,
-            summary_key="own_root_semantic_summary",
-            limit=RECENT_OWN_ROOT_TOPIC_HISTORY_LIMIT,
-        ),
-    }
 
 
-def _format_sanitized_feed_history_items(
-    items: list[dict[str, object]], *, summary_key: str
-) -> str:
-    if not items:
-        return "- none"
-    lines: list[str] = []
-    for item in items:
-        summary = _clip_text(
-            neutralize_context_text(str(item.get(summary_key) or "")), 500
-        )
-        warnings = item.get("warnings")
-        warning_text = (
-            ", ".join(str(value) for value in warnings)
-            if isinstance(warnings, list) and warnings
-            else "-"
-        )
-        post_id = _safe_feed_history_post_id(item.get("post_id"))
-        if post_id:
-            item_lines = [
-                f"- post_id: {post_id}",
-                f"  topic_signature: {item.get('topic_signature') or '-'}",
-                f"  novelty_basis: {item.get('novelty_basis') or '-'}",
-                f"  source_title: {item.get('source_title') or '-'}",
-                f"  semantic_summary: {summary or '-'}",
-                f"  warnings: {warning_text}",
-            ]
-        else:
-            item_lines = [
-                f"- topic_signature: {item.get('topic_signature') or '-'}",
-                f"  novelty_basis: {item.get('novelty_basis') or '-'}",
-                f"  source_title: {item.get('source_title') or '-'}",
-                f"  semantic_summary: {summary or '-'}",
-                f"  warnings: {warning_text}",
-            ]
-        lines.append(
-            "\n".join(item_lines)
-        )
-    return "\n".join(lines)
 
 
-def _feed_history_payload_json(payload: dict[str, list[dict[str, object]]]) -> str:
-    compact = {
-        "consumed_sources": list(payload.get("consumed_sources") or []),
-        "recent_feed_interests": list(payload.get("recent_feed_interests") or []),
-        "recent_own_root_topics": list(payload.get("recent_own_root_topics") or []),
-    }
-    result = json.dumps(compact, ensure_ascii=False)
-    while len(result) > 3800 and (
-        compact["consumed_sources"]
-        or compact["recent_feed_interests"]
-        or compact["recent_own_root_topics"]
-    ):
-        if compact["consumed_sources"]:
-            compact["consumed_sources"].pop()
-        elif compact["recent_feed_interests"]:
-            compact["recent_feed_interests"].pop()
-        else:
-            compact["recent_own_root_topics"].pop()
-        result = json.dumps(compact, ensure_ascii=False)
-    return result
 
 
-def format_feed_history_sanitize_payload_for_prompt(
-    payload: dict[str, Any] | None,
-) -> dict[str, str]:
-    if not isinstance(payload, dict):
-        return {
-            "consumed_seed_sources": "- none",
-            "recent_feed_interest_history": "- none",
-            "recent_own_root_topic_history": "- none",
-        }
-    consumed_sources = payload.get("consumed_sources")
-    recent_feed_interests = payload.get("recent_feed_interests")
-    recent_own_root_topics = payload.get("recent_own_root_topics")
-    return {
-        "consumed_seed_sources": _format_sanitized_feed_history_items(
-            consumed_sources if isinstance(consumed_sources, list) else [],
-            summary_key="seed_semantic_summary",
-        ),
-        "recent_feed_interest_history": _format_sanitized_feed_history_items(
-            recent_feed_interests if isinstance(recent_feed_interests, list) else [],
-            summary_key="interest_reason_summary",
-        ),
-        "recent_own_root_topic_history": _format_sanitized_feed_history_items(
-            recent_own_root_topics if isinstance(recent_own_root_topics, list) else [],
-            summary_key="own_root_semantic_summary",
-        ),
-    }
 
 
 def format_feed_history_metadata_fallback_for_prompt(
@@ -1393,13 +1139,6 @@ def _agent_tool_scratch_lane(session_key: str) -> str | None:
     return lane or None
 
 
-def _clip_agent_context_text(value: str | None, max_chars: int) -> str | None:
-    if value is None:
-        return None
-    text = neutralize_context_text(value).strip()
-    if len(text) <= max_chars:
-        return text
-    return text[: max(0, max_chars - 3)].rstrip() + "..."
 
 
 def _raise_agent_tool_authorization_error(
@@ -1665,220 +1404,18 @@ def list_agent_tool_feed(
     )
 
 
-def _character_already_liked_post(
-    db: Session, *, character_id: str, post_id: str
-) -> bool:
-    return (
-        db.scalar(
-            select(models.PostLike.id)
-            .where(
-                models.PostLike.post_id == post_id,
-                models.PostLike.character_id == character_id,
-            )
-            .limit(1)
-        )
-        is not None
-    )
 
 
-def _character_already_reposted_post(
-    db: Session, *, character_id: str, post_id: str
-) -> bool:
-    return (
-        db.scalar(
-            select(models.PostRepost.id)
-            .where(
-                models.PostRepost.post_id == post_id,
-                models.PostRepost.character_id == character_id,
-            )
-            .limit(1)
-        )
-        is not None
-    )
 
 
-def _character_already_following_profile(
-    db: Session, *, character_id: str, target_type: str, target_id: str
-) -> bool:
-    follower_character = community_crud.get_character(db, character_id)
-    target_user, target_character = _resolve_target_profile(db, target_type, target_id)
-    return community_crud.profile_follow_exists(
-        db,
-        follower_user=None,
-        follower_character=follower_character,
-        target_user=target_user,
-        target_character=target_character,
-    )
 
 
-def _character_can_follow_profile_for_resident_scan(
-    db: Session, *, character_id: str, target_type: str | None, target_id: str | None
-) -> bool:
-    if target_type is None or target_id is None:
-        return False
-    if target_type == "character":
-        if target_id == character_id:
-            return False
-        target_character = community_crud.get_character(db, target_id)
-        if target_character is None or target_character.deleted_at is not None:
-            return False
-        existing_follow_id = db.scalar(
-            select(models.ProfileFollow.id)
-            .where(
-                models.ProfileFollow.follower_character_id == character_id,
-                models.ProfileFollow.target_character_id == target_id,
-            )
-            .limit(1)
-        )
-        return existing_follow_id is None
-    return False
 
 
-def _character_can_reply_to_post_for_resident_scan(
-    db: Session, *, character_id: str, post_id: str
-) -> bool:
-    post = community_crud.get_post(db, post_id)
-    if (
-        post is None
-        or post.author_character_id == character_id
-        or not _is_post_public_context_visible(db, post)
-    ):
-        return False
-    try:
-        root_post_id = _thread_root_post_id(db, post_id)
-    except PostNotFoundError:
-        return False
-    reply_ids = _thread_reply_post_ids(db, root_post_id)
-    if not reply_ids:
-        return True
-    existing_own_reply_id = db.scalar(
-        select(models.Post.id)
-        .where(
-            models.Post.id.in_(reply_ids),
-            models.Post.author_character_id == character_id,
-            models.Post.deleted_at.is_(None),
-            models.Post.report_hidden_at.is_(None),
-        )
-        .limit(1)
-    )
-    if existing_own_reply_id is None:
-        return True
-    return _is_direct_reply_to_character_post(
-        db, post_id=post_id, character_id=character_id
-    )
 
 
-def _post_has_resident_feed_action(
-    db: Session,
-    *,
-    post: models.Post,
-    character_id: str,
-    allowed_actions: set[str],
-) -> bool:
-    author_target_type = "character" if post.author_character_id else None
-    author_target_id = post.author_character_id
-    self_authored = post.author_character_id == character_id
-    if (
-        "like" in allowed_actions
-        and not self_authored
-        and not _character_already_liked_post(
-            db, character_id=character_id, post_id=post.id
-        )
-    ):
-        return True
-    if "reply" in allowed_actions and _character_can_reply_to_post_for_resident_scan(
-        db, character_id=character_id, post_id=post.id
-    ):
-        return True
-    if (
-        "repost" in allowed_actions
-        and not self_authored
-        and not _character_already_reposted_post(
-            db, character_id=character_id, post_id=post.id
-        )
-    ):
-        return True
-    if (
-        "follow" in allowed_actions
-        and _character_can_follow_profile_for_resident_scan(
-            db,
-            character_id=character_id,
-            target_type=author_target_type,
-            target_id=author_target_id,
-        )
-    ):
-        return True
-    return False
 
 
-def resident_feed_action_affordance(
-    db: Session,
-    *,
-    post: models.Post,
-    character_id: str,
-    allowed_actions: tuple[str, ...] | set[str],
-) -> dict[str, object]:
-    allowed = set(allowed_actions)
-    available: list[str] = []
-    blocked: dict[str, str] = {}
-    targets: dict[str, dict[str, str]] = {}
-    author_target_type = "character" if post.author_character_id else None
-    author_target_id = post.author_character_id
-    self_authored = post.author_character_id == character_id
-
-    if "like" not in allowed:
-        blocked["like"] = "policy_disabled"
-    elif self_authored:
-        blocked["like"] = "self_authored"
-    elif _character_already_liked_post(db, character_id=character_id, post_id=post.id):
-        blocked["like"] = "already_liked"
-    else:
-        available.append("like")
-        targets["like"] = {"post_id": post.id}
-
-    if "reply" not in allowed:
-        blocked["reply"] = "policy_disabled"
-    elif _character_can_reply_to_post_for_resident_scan(
-        db, character_id=character_id, post_id=post.id
-    ):
-        available.append("reply")
-        targets["reply"] = {"post_id": post.id}
-    else:
-        blocked["reply"] = "reply_not_available"
-
-    if "repost" not in allowed:
-        blocked["repost"] = "policy_disabled"
-    elif self_authored:
-        blocked["repost"] = "self_authored"
-    elif _character_already_reposted_post(
-        db, character_id=character_id, post_id=post.id
-    ):
-        blocked["repost"] = "already_reposted"
-    else:
-        available.append("repost")
-        targets["repost"] = {"post_id": post.id}
-
-    if "follow" not in allowed:
-        blocked["follow"] = "policy_disabled"
-    elif _character_can_follow_profile_for_resident_scan(
-        db,
-        character_id=character_id,
-        target_type=author_target_type,
-        target_id=author_target_id,
-    ):
-        available.append("follow")
-        targets["follow"] = {
-            "target_type": author_target_type or "",
-            "target_id": author_target_id or "",
-        }
-    else:
-        blocked["follow"] = "follow_not_available"
-
-    return {
-        "available_actions": available,
-        "blocked_actions": blocked,
-        "action_targets": targets,
-    }
 
 
 def _list_resident_feed_scan_page(
@@ -1924,169 +1461,12 @@ def _list_resident_feed_scan_page(
     )
 
 
-def resident_inbox_action_affordance(
-    db: Session,
-    *,
-    notification: models.Notification,
-    character_id: str,
-    allowed_actions: tuple[str, ...] | set[str],
-) -> dict[str, object]:
-    inbox_allowed = set(allowed_actions) - {"post", "repost", "unfollow", "observe"}
-    source_post_id = notification.source_post_id or notification.post_id
-    source = community_crud.get_post(db, source_post_id) if source_post_id else None
-    actor_target_type, actor_target_id = _candidate_target_parts(
-        user_id=notification.actor_user_id,
-        character_id=notification.actor_character_id,
-    )
-    available: list[str] = []
-    blocked: dict[str, str] = {}
-    targets: dict[str, dict[str, str]] = {}
-
-    if source is None or not _is_post_public_context_visible(db, source):
-        return {
-            "available_actions": [],
-            "blocked_actions": {
-                "like": "source_post_not_available",
-                "reply": "source_post_not_available",
-                "follow": "source_post_not_available",
-            },
-            "action_targets": {},
-        }
-
-    self_authored = source.author_character_id == character_id
-    if "like" not in inbox_allowed:
-        blocked["like"] = "policy_disabled"
-    elif self_authored:
-        blocked["like"] = "self_authored"
-    elif _character_already_liked_post(
-        db, character_id=character_id, post_id=source.id
-    ):
-        blocked["like"] = "already_liked"
-    else:
-        available.append("like")
-        targets["like"] = {"post_id": source.id}
-
-    if "reply" not in inbox_allowed:
-        blocked["reply"] = "policy_disabled"
-    elif _character_can_reply_to_post_for_resident_scan(
-        db, character_id=character_id, post_id=source.id
-    ):
-        available.append("reply")
-        targets["reply"] = {"post_id": source.id}
-    else:
-        blocked["reply"] = "reply_not_available"
-
-    if "follow" not in inbox_allowed:
-        blocked["follow"] = "policy_disabled"
-    elif _character_can_follow_profile_for_resident_scan(
-        db,
-        character_id=character_id,
-        target_type=actor_target_type,
-        target_id=actor_target_id,
-    ):
-        available.append("follow")
-        targets["follow"] = {
-            "target_type": actor_target_type or "",
-            "target_id": actor_target_id or "",
-        }
-    else:
-        blocked["follow"] = "follow_not_available"
-
-    return {
-        "available_actions": available,
-        "blocked_actions": blocked,
-        "action_targets": targets,
-    }
 
 
-def _notification_has_resident_inbox_action(
-    db: Session,
-    *,
-    notification: models.Notification,
-    character_id: str,
-    allowed_actions: set[str],
-) -> bool:
-    source_post_id = notification.source_post_id or notification.post_id
-    if source_post_id is None:
-        return False
-    source = community_crud.get_post(db, source_post_id)
-    if source is None or not _is_post_public_context_visible(db, source):
-        return False
-    actor_target_type, actor_target_id = _candidate_target_parts(
-        user_id=notification.actor_user_id,
-        character_id=notification.actor_character_id,
-    )
-    self_authored = source.author_character_id == character_id
-    if (
-        "like" in allowed_actions
-        and not self_authored
-        and not _character_already_liked_post(
-            db, character_id=character_id, post_id=source.id
-        )
-    ):
-        return True
-    if "reply" in allowed_actions and _character_can_reply_to_post_for_resident_scan(
-        db, character_id=character_id, post_id=source.id
-    ):
-        return True
-    if (
-        "follow" in allowed_actions
-        and _character_can_follow_profile_for_resident_scan(
-            db,
-            character_id=character_id,
-            target_type=actor_target_type,
-            target_id=actor_target_id,
-        )
-    ):
-        return True
-    return False
 
 
-def _notification_source_is_public_context_visible(
-    db: Session, notification: models.Notification
-) -> bool:
-    source_post_id = notification.source_post_id or notification.post_id
-    if source_post_id is None:
-        return False
-    source = community_crud.get_post(db, source_post_id)
-    return source is not None and _is_post_public_context_visible(db, source)
 
 
-def list_resident_actionable_inbox_notifications(
-    db: Session,
-    *,
-    character_id: str,
-    allowed_actions: tuple[str, ...],
-    limit: int = 10,
-) -> list[models.Notification]:
-    inbox_allowed = set(allowed_actions) - {"post", "repost", "unfollow", "observe"}
-    candidates: list[models.Notification] = []
-    per_type_limit = min(5, max(1, limit))
-    scan_limit = max(10, min(per_type_limit * 5, 50))
-    for notification_type in ("reply", "mention", "joint_activity_started"):
-        notifications = community_crud.list_unread_notifications_for_character(
-            db,
-            character_id=character_id,
-            notification_type=notification_type,
-            limit=scan_limit,
-        )
-        added = 0
-        for notification in notifications:
-            if _notification_has_resident_inbox_action(
-                db,
-                notification=notification,
-                character_id=character_id,
-                allowed_actions=inbox_allowed,
-            ):
-                candidates.append(notification)
-                added += 1
-                if added >= per_type_limit:
-                    break
-    candidates.sort(
-        key=lambda notification: (notification.created_at, notification.id),
-        reverse=True,
-    )
-    return candidates[:limit]
 
 
 def list_agent_tool_following_feed(
@@ -2115,57 +1495,14 @@ def list_agent_tool_following_feed(
     )
 
 
-def _neutralize_post_reference_for_agent(
-    post: schemas.PostReference | None,
-) -> schemas.PostReference | None:
-    if post is None:
-        return None
-    return post.model_copy(
-        update={
-            "title": neutralize_context_text(post.title),
-            "body": neutralize_context_text(post.body),
-        }
-    )
 
 
-def _neutralize_post_summary_for_agent(
-    post: schemas.PostSummary,
-) -> schemas.PostSummary:
-    return post.model_copy(
-        update={
-            "title": neutralize_context_text(post.title),
-            "body": neutralize_context_text(post.body),
-            "quoted_post": _neutralize_post_reference_for_agent(post.quoted_post),
-            "reposted_post": _neutralize_post_reference_for_agent(post.reposted_post),
-        }
-    )
 
 
-def _neutralize_post_detail_for_agent(post: schemas.PostDetail) -> schemas.PostDetail:
-    return post.model_copy(
-        update={
-            "title": neutralize_context_text(post.title),
-            "body": neutralize_context_text(post.body),
-            "quoted_post": _neutralize_post_reference_for_agent(post.quoted_post),
-            "reposted_post": _neutralize_post_reference_for_agent(post.reposted_post),
-        }
-    )
 
 
-def _neutralize_post_thread_for_agent(
-    thread: schemas.PostThreadRead,
-) -> schemas.PostThreadRead:
-    return schemas.PostThreadRead(
-        post=_neutralize_post_detail_for_agent(thread.post),
-        replies=[_neutralize_post_summary_for_agent(reply) for reply in thread.replies],
-    )
 
 
-def _neutralize_feed_page_for_agent(page: schemas.FeedPage) -> schemas.FeedPage:
-    return schemas.FeedPage(
-        items=[_neutralize_post_summary_for_agent(item) for item in page.items],
-        next_cursor=page.next_cursor,
-    )
 
 
 def _agent_feed_post_summary(
@@ -2246,80 +1583,12 @@ def quote_agent_tool_post(
     raise AgentRunAuthorizationError("Quote is disabled for agent activity")
 
 
-def _ensure_agent_can_reply_to_thread(
-    db: Session, *, post_id: str, character_id: str
-) -> None:
-    root_post_id = _thread_root_post_id(db, post_id)
-    reply_ids = _thread_reply_post_ids(db, root_post_id)
-    if not reply_ids:
-        return
-
-    existing_own_reply_id = db.scalar(
-        select(models.Post.id)
-        .where(
-            models.Post.id.in_(reply_ids),
-            models.Post.author_character_id == character_id,
-            models.Post.deleted_at.is_(None),
-            models.Post.report_hidden_at.is_(None),
-        )
-        .order_by(models.Post.created_at.asc(), models.Post.id.asc())
-        .limit(1)
-    )
-    if existing_own_reply_id is None:
-        return
-    if _is_direct_reply_to_character_post(db, post_id=post_id, character_id=character_id):
-        return
-
-    raise AgentRunAuthorizationError(
-        "이미 이 스레드에 대꾸를 남겼습니다. 직접 받은 새 대꾸는 inbox lane에서만 다시 검토합니다."
-    )
 
 
-def _is_direct_reply_to_character_post(
-    db: Session, *, post_id: str, character_id: str
-) -> bool:
-    post = community_crud.get_post(db, post_id)
-    if post is None or post.reply_to_post_id is None:
-        return False
-    parent = community_crud.get_post(db, post.reply_to_post_id)
-    return parent is not None and parent.author_character_id == character_id
 
 
-def _thread_root_post_id(db: Session, post_id: str) -> str:
-    post = community_crud.get_post(db, post_id)
-    if post is None:
-        raise PostNotFoundError(post_id)
-    seen = {post.id}
-    while post.reply_to_post_id is not None:
-        parent = community_crud.get_post(db, post.reply_to_post_id)
-        if parent is None or parent.id in seen:
-            break
-        post = parent
-        seen.add(post.id)
-    return post.id
 
 
-def _thread_reply_post_ids(db: Session, root_post_id: str) -> list[str]:
-    seen = {root_post_id}
-    reply_ids: list[str] = []
-    frontier = [root_post_id]
-    while frontier:
-        children = list(
-            db.scalars(
-                select(models.Post.id).where(
-                    models.Post.reply_to_post_id.in_(frontier),
-                    models.Post.deleted_at.is_(None),
-                    models.Post.report_hidden_at.is_(None),
-                )
-            )
-        )
-        next_frontier = [post_id for post_id in children if post_id not in seen]
-        if not next_frontier:
-            break
-        seen.update(next_frontier)
-        reply_ids.extend(next_frontier)
-        frontier = next_frontier
-    return reply_ids
 
 
 def unlike_agent_tool_post(
@@ -3043,12 +2312,6 @@ def _resident_action_candidate_id(
     return f"cand_{action_type}_{digest}"
 
 
-def _candidate_target_parts(
-    *, user_id: str | None, character_id: str | None
-) -> tuple[str | None, str | None]:
-    if character_id:
-        return "character", character_id
-    return None, None
 
 
 def _put_candidate_action(
@@ -4060,41 +3323,3 @@ def _ensure_tick_action_allowed(
             requested_post_id=run.post_id,
             requested_character_id=run.character_id,
         )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def _compact_agent_notification_read(
-    notification: schemas.NotificationRead,
-) -> schemas.NotificationRead:
-    return notification.model_copy(
-        update={
-            "post_title": _clip_agent_context_text(notification.post_title, 120),
-            "post_body": _clip_agent_context_text(notification.post_body, 500),
-            "source_post_title": _clip_agent_context_text(
-                notification.source_post_title, 120
-            ),
-            "source_post_body": _clip_agent_context_text(
-                notification.source_post_body, 500
-            ),
-            "data": _clip_agent_context_text(notification.data, 500),
-        }
-    )

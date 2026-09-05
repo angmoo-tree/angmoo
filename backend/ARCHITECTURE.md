@@ -899,3 +899,17 @@ LocalBot의 Social 게시물·반응·follow, Routines 활동 이력, Character 
 공통 HTTP Authorization 문법은 `app/api/authorization.py`에서 해석합니다. Identity와 LocalBot의 권한 정책은 각자의 서비스에 남아 있습니다. 다른 업무의 실제 오류 클래스를 처리할 때는 검사 정책에 정확한 `exceptions` 모듈을 공개 entry로 등록할 수 있습니다. 이것은 하위 모듈·router·models·repository 접근을 허용하지 않으며, 오류 모듈의 DB·프레임워크 의존도 계속 금지합니다.
 
 Bot 쓰기에서 할당량 잠금, 지연 commit 구간, 성공 기록과 실패 rollback의 순서는 업무 계약입니다. 이미지 생성 요청은 원래 게시 성공 후 위치를 유지합니다. 상태 저장은 일일 사용량을 늘리지 않고 마지막 성공 시각으로 재호출 간격을 제한합니다. 반환 DTO는 소유자 id·토큰·private persona를 포함하지 않습니다.
+
+
+Resident가 Feed·Inbox에서 시도할 수 있는 Social 행동과 차단 이유는 `social/service/resident_affordances.py`에서 판단한다. 원래 좋아요·리포스트 존재와 visible reply 탐색 SQL은 `repository/resident_affordances.py`, agent 문맥용 응답 복사·텍스트 정제는 `service/agent_presentation.py`가 소유한다. 다른 캐릭터 조회는 기존 Character profile service의 같은 nullable 조회를 사용한다. 활성 정책이 이미 정한 allowed_actions를 받아 Social의 self/기존 반응/target/visibility 규칙만 적용하며 Routines의 정책을 중복 구현하지 않는다. Community의 다른 기능은 전환 중이고, 이 23개 함수에 대해서만 동일 함수 import로 협력한다.
+
+
+활동 계획에 제공할 Feed 이력의 정제·서버 확정 메타데이터 병합·경고·길이/개수 제한과 prompt 문자열은 `routines/service/feed_history_values.py`가 소유한다. 입력 형식 2개는 `routines/schemas/feed_history.py`의 실제 Pydantic class이고, Social의 이전 schema 표면은 전환 중 같은 class를 import한다. 두 업무에서 쓰는 단순 bounded neutral text 변환은 `core/bounded_text.py`에 한 번만 정의한다. Routines 값 정책이 Social service에 역의존하거나 AI 결과가 원본 메타데이터를 바꿀 수 있도록 처리하지 않는다. DB/활동 로그/HTTP 연결의 남은 Community 업무는 별도로 전환한다.
+
+World Feed 검색의 준비 상태, 공개·차단 조건, 순위, 관찰 claim과 다음 키워드 결정은 `social/service/world_feed.py`에 있다. `repository/world_feed.py`는 Social cursor/observation/reaction/block 조회를 맡는다. 다른 업무의 활성 WorldCharacter·membership·World·프로필과 결합 조회는 `runtime/social/world_feed_queries.py`가 호출자의 같은 Session으로 제공한다. `contracts/world_feed.py`의 읽기 계약은 실제 연결된 객체를 그대로 받으며 복사된 ORM이나 다른 Session을 만들지 않는다. `policies/world_feed.py`는 DB 조회 없이 행동 허용 여부와 시간 표시를 계산한다. FTS 후보 조회는 `service/keyword_feed.py`, 프로세스의 실제 검색 인덱스 등록과 단일 lock/state는 `runtime/search/binding.py`가 맡는다. 커서 및 관찰 변경의 commit/rollback은 원래 호출자의 트랜잭션에 남는다.
+
+
+World Feed의 실행 판단은 `social/service/feed_cycle.py`가 소유한다. 관찰을 LLM 계획 전에 저장하는 순서, NO_ACTION·중복 실행·대상 재검증·재시도와 공개 성공 트랜잭션은 이곳에서 결정한다. 주기 ID/결과 값은 `feed_cycle_values.py`, 단일 Social 행동 선택/반환은 `feed_cycle_publishing.py`, 서버 후보·작성 근거 검증은 `feed_reaction_validation.py`의 실제 정책이다. `runtime/social/feed_cycle.py`는 같은 resident context/Session/attached 결과를 보존하면서 다른 업무와 provider를 연결한다. 구성 객체를 만들 때 SQL·provider·commit을 미리 실행하지 않는다. 원래 max3 LLM 제한과 관찰/공개 성공의 서로 다른 저장 시점을 유지한다.
+
+
+World Feed의 bounded prompt와 서버 후보/의도/공개 근거 지침은 `social/service/feed_reaction_prompts.py`의 실제 정책이다. `runtime/social/feed_reaction_provider.py`는 기존 credential resolver·Gemini 응답 schema·DirectLlm transport·trace context를 연결한다. prompt를 이동하면서 문자열·후보 목록·중립화/길이 제한·응답 계약을 바꾸지 않으며, 실제 네트워크나 자격 증명 해석을 service의 import/구성 단계에서 실행하지 않는다.

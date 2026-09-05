@@ -25,7 +25,7 @@ from app.domains.device_home.repository import (
     SqlAlchemyWorldSurfaceRepository,
 )
 from app.domains.runtime.contracts.search import SearchIndexHit
-from app.domains.social.public import SocialSearchState
+from app.domains.social.contracts.search_state import SocialSearchState
 from app.domains.world_packages.router import router
 from app.domains.world_packages.schemas.content import (
     AssetIndexDocument,
@@ -74,7 +74,7 @@ from app.services import (
 )
 from app.domains.world_characters.service import autonomous_setup as world_character_setup
 from app.runtime.resident.context import LangGraphResidentContext
-from app.services.world_feed_runtime import run_world_keyword_feed
+from app.runtime.social.feed_cycle import run_world_keyword_feed
 
 
 FIXTURE_ROOT = (

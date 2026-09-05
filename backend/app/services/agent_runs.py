@@ -3,6 +3,8 @@ from app.domains.memory.service.daypart import (
     event_exists as _daypart_memory_event_exists,
     record_memory_event as _record_daypart_memory_event,
 )
+from app.domains.routines.service import feed_history_values
+from app.domains.social.service import resident_affordances
 from app.domains.memory.service.daypart_observations import (
     filter_daypart_duplicate_feed_interest as _filter_daypart_duplicate_feed_interest,
     filter_daypart_duplicate_inbox_candidates as _filter_daypart_duplicate_inbox_candidates,
@@ -42,7 +44,7 @@ from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
 from app.runtime.routine_posts import routine_world_character_for_character
 from app.domains.routines.service.lifecycle import reconcile_all_elapsed_routines
-from app.domains.social.public import current_social_search
+from app.runtime.search.binding import current_social_search
 from app.domains.world_characters.public import (
     is_owner_controlled_character,
     owner_controlled_character_ids,
@@ -579,7 +581,7 @@ def _collect_v6_inbox_candidates(
     allowed_actions: tuple[str, ...],
     limit: int = 10,
 ) -> list[dict[str, Any]]:
-    notifications = community_service.list_resident_actionable_inbox_notifications(
+    notifications = resident_affordances.list_resident_actionable_inbox_notifications(
         db,
         character_id=character_id,
         allowed_actions=allowed_actions,
@@ -6012,7 +6014,7 @@ async def _run_resident_individual_tool_flow(
         )
     )
     feed_history_sanitize_task_sections = (
-        community_service.format_feed_history_sanitize_skeleton_for_prompt(
+        feed_history_values.format_feed_history_sanitize_skeleton_for_prompt(
             feed_history_sanitize_skeleton
         )
     )
@@ -6169,7 +6171,7 @@ async def _run_resident_individual_tool_flow(
         )
     else:
         feed_history_sections = (
-            community_service.format_feed_history_sanitize_payload_for_prompt(
+            feed_history_values.format_feed_history_sanitize_payload_for_prompt(
                 feed_history_sanitize_payload
             )
         )

@@ -17,6 +17,8 @@ from app.domains.memory.policies.daypart import (
 )
 
 
+from app.domains.social.service import resident_affordances
+
 import asyncio
 import hashlib
 import json
@@ -83,7 +85,7 @@ from app.services.direct_llm import (
 from app.core.context_text import neutralize_context_text
 from app.runtime.resident.context import LangGraphResidentContext
 from app.domains.routines.contracts.resident import ResidentGraphState as _ResidentGraphState
-from app.services.world_feed_runtime import run_world_keyword_feed
+from app.runtime.social.feed_cycle import run_world_keyword_feed
 
 
 logger = logging.getLogger(__name__)
@@ -6311,7 +6313,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
             if topic and topic not in topics:
                 topics.append(topic)
             affordance = (
-                community_service.resident_feed_action_affordance(
+                resident_affordances.resident_feed_action_affordance(
                     ctx.db,
                     post=post,
                     character_id=ctx.character.id,
@@ -6579,7 +6581,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
                 ctx.db.commit()
             observed_notification_ids.append(notification.id)
             affordance = (
-                community_service.resident_inbox_action_affordance(
+                resident_affordances.resident_inbox_action_affordance(
                     ctx.db,
                     notification=raw_notification,
                     character_id=ctx.character.id,

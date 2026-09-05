@@ -85,3 +85,27 @@ class WorldFeedSocialApplyError(Exception):
     def __init__(self, reason_code: str) -> None:
         super().__init__(reason_code)
         self.reason_code = reason_code
+
+class WorldFeedError(Exception):
+    pass
+
+
+
+class WorldFeedReadinessError(WorldFeedError):
+    def __init__(self, reason_code: str):
+        self.reason_code = reason_code
+        super().__init__(reason_code)
+
+
+
+class WorldFeedStatusNotFoundError(WorldFeedError):
+    pass
+
+
+
+class WorldFeedStatusForbiddenError(WorldFeedError):
+    pass
+
+
+class FeedReactionValidationError(ValueError):
+    pass

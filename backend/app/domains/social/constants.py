@@ -129,3 +129,22 @@ _POST_EVENT_TYPES = {
     "post_published", "reply_created", "comment_created", "mention_created",
     "joint_proposed",
 }
+
+
+from datetime import timedelta
+
+KEYWORDS_PER_CYCLE = 2
+KEYWORD_COUNT = 8
+MIN_KEYWORD_LENGTH = 2
+KEYWORD_OFFSETS = (0, 2, 4, 6)
+PER_KEYWORD_FETCH_LIMIT = 24
+RAW_MERGE_LIMIT = 48
+PLANNER_CANDIDATE_LIMIT = 8
+AUTHOR_CANDIDATE_LIMIT = 2
+OBSERVATION_LEASE = timedelta(minutes=10)
+
+
+WORLD_FEED_RUNTIME_VERSION = "world-keyword-feed-runtime-v1"
+
+
+FEED_REACTION_CONTRACT_VERSION = "world-keyword-feed-intent-v1"

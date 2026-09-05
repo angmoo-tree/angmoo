@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2652,
-      "internal_edge_count": 3227,
+      "external_import_count": 2684,
+      "internal_edge_count": 3325,
       "legacy_import_exception_count": 0,
-      "module_count": 928,
+      "module_count": 945,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -586,21 +586,12 @@
           },
           {
             "imports": [
-              "app.domains.social.application.keyword_feed",
               "app.domains.social.application.observations",
-              "app.domains.social.application.search_runtime",
-              "app.domains.social.application.writes"
+              "app.domains.social.application.writes",
+              "app.domains.social.service.keyword_feed"
             ],
             "module": "app.domains.social.application",
             "path": "backend/app/domains/social/application/__init__.py"
-          },
-          {
-            "imports": [
-              "app.domains.social.contracts",
-              "app.domains.social.ports"
-            ],
-            "module": "app.domains.social.application.keyword_feed",
-            "path": "backend/app/domains/social/application/keyword_feed.py"
           },
           {
             "imports": [
@@ -609,14 +600,6 @@
             ],
             "module": "app.domains.social.application.observations",
             "path": "backend/app/domains/social/application/observations.py"
-          },
-          {
-            "imports": [
-              "app.domains.social.contracts",
-              "app.domains.social.ports"
-            ],
-            "module": "app.domains.social.application.search_runtime",
-            "path": "backend/app/domains/social/application/search_runtime.py"
           },
           {
             "imports": [
@@ -669,6 +652,21 @@
             ],
             "module": "app.domains.social.contracts.discovery",
             "path": "backend/app/domains/social/contracts/discovery.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.contracts.action_scope",
+              "app.domains.social.contracts.observations",
+              "app.domains.social.contracts.search_index",
+              "app.domains.social.contracts.search_state",
+              "app.domains.social.contracts.subjective_context",
+              "app.domains.social.contracts.subjective_persistence",
+              "app.domains.social.contracts.world_feed",
+              "app.domains.social.schemas.community",
+              "app.domains.social.schemas.feed"
+            ],
+            "module": "app.domains.social.contracts.feed_execution",
+            "path": "backend/app/domains/social/contracts/feed_execution.py"
           },
           {
             "imports": [
@@ -732,6 +730,11 @@
           },
           {
             "imports": [],
+            "module": "app.domains.social.contracts.search_index",
+            "path": "backend/app/domains/social/contracts/search_index.py"
+          },
+          {
+            "imports": [],
             "module": "app.domains.social.contracts.search_state",
             "path": "backend/app/domains/social/contracts/search_state.py"
           },
@@ -773,6 +776,15 @@
             ],
             "module": "app.domains.social.contracts.today_references",
             "path": "backend/app/domains/social/contracts/today_references.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.models.feed",
+              "app.domains.social.models.posts",
+              "app.domains.social.schemas.feed"
+            ],
+            "module": "app.domains.social.contracts.world_feed",
+            "path": "backend/app/domains/social/contracts/world_feed.py"
           },
           {
             "imports": [
@@ -849,9 +861,17 @@
           },
           {
             "imports": [
+              "app.domains.social.contracts.world_feed",
+              "app.domains.social.schemas.feed"
+            ],
+            "module": "app.domains.social.policies.world_feed",
+            "path": "backend/app/domains/social/policies/world_feed.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.contracts.search_index",
               "app.domains.social.contracts.write_execution",
-              "app.domains.social.ports.observation_unit_of_work",
-              "app.domains.social.ports.search_index"
+              "app.domains.social.ports.observation_unit_of_work"
             ],
             "module": "app.domains.social.ports",
             "path": "backend/app/domains/social/ports/__init__.py"
@@ -865,17 +885,12 @@
           },
           {
             "imports": [
-              "app.domains.runtime.contracts.search"
-            ],
-            "module": "app.domains.social.ports.search_index",
-            "path": "backend/app/domains/social/ports/search_index.py"
-          },
-          {
-            "imports": [
               "app.domains.social.application",
               "app.domains.social.contracts",
               "app.domains.social.contracts.inbox",
-              "app.domains.social.ports"
+              "app.domains.social.contracts.search_index",
+              "app.domains.social.ports",
+              "app.domains.social.service.keyword_feed"
             ],
             "module": "app.domains.social.public",
             "path": "backend/app/domains/social/public.py"
@@ -975,6 +990,13 @@
           },
           {
             "imports": [
+              "app.domains.social.models.posts"
+            ],
+            "module": "app.domains.social.repository.resident_affordances",
+            "path": "backend/app/domains/social/repository/resident_affordances.py"
+          },
+          {
+            "imports": [
               "app.domains.social.models.posts",
               "app.domains.social.models.subjective_context"
             ],
@@ -990,6 +1012,15 @@
             ],
             "module": "app.domains.social.repository.today_activity",
             "path": "backend/app/domains/social/repository/today_activity.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.contracts.world_feed",
+              "app.domains.social.models.feed",
+              "app.domains.social.models.posts"
+            ],
+            "module": "app.domains.social.repository.world_feed",
+            "path": "backend/app/domains/social/repository/world_feed.py"
           },
           {
             "imports": [
@@ -1043,7 +1074,8 @@
           },
           {
             "imports": [
-              "app.core.profile_ref"
+              "app.core.profile_ref",
+              "app.domains.routines.schemas.feed_history"
             ],
             "module": "app.domains.social.schemas.community",
             "path": "backend/app/domains/social/schemas/community.py"
@@ -1104,11 +1136,20 @@
           },
           {
             "imports": [
+              "app.core.bounded_text",
               "app.core.context_text",
               "app.domains.social.constants"
             ],
             "module": "app.domains.social.service.activity_results",
             "path": "backend/app/domains/social/service/activity_results.py"
+          },
+          {
+            "imports": [
+              "app.core.context_text",
+              "app.domains.social.schemas.community"
+            ],
+            "module": "app.domains.social.service.agent_presentation",
+            "path": "backend/app/domains/social/service/agent_presentation.py"
           },
           {
             "imports": [
@@ -1139,6 +1180,62 @@
             ],
             "module": "app.domains.social.service.feed",
             "path": "backend/app/domains/social/service/feed.py"
+          },
+          {
+            "imports": [
+              "app.core.unit_of_work",
+              "app.domains.social.contracts.feed_execution",
+              "app.domains.social.contracts.observations",
+              "app.domains.social.contracts.search_state",
+              "app.domains.social.exceptions",
+              "app.domains.social.repository.world_feed",
+              "app.domains.social.schemas.feed",
+              "app.domains.social.service.feed_cycle_publishing",
+              "app.domains.social.service.feed_cycle_values",
+              "app.domains.social.service.feed_reaction_validation",
+              "app.domains.social.service.world_feed"
+            ],
+            "module": "app.domains.social.service.feed_cycle",
+            "path": "backend/app/domains/social/service/feed_cycle.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.contracts.feed_execution",
+              "app.domains.social.exceptions",
+              "app.domains.social.schemas.community",
+              "app.domains.social.schemas.feed"
+            ],
+            "module": "app.domains.social.service.feed_cycle_publishing",
+            "path": "backend/app/domains/social/service/feed_cycle_publishing.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.constants",
+              "app.domains.social.contracts.feed_execution",
+              "app.domains.social.contracts.subjective_context",
+              "app.domains.social.contracts.world_feed",
+              "app.domains.social.schemas.feed"
+            ],
+            "module": "app.domains.social.service.feed_cycle_values",
+            "path": "backend/app/domains/social/service/feed_cycle_values.py"
+          },
+          {
+            "imports": [
+              "app.core.context_text",
+              "app.domains.social.constants",
+              "app.domains.social.contracts.world_feed",
+              "app.domains.social.schemas.feed"
+            ],
+            "module": "app.domains.social.service.feed_reaction_prompts",
+            "path": "backend/app/domains/social/service/feed_reaction_prompts.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.exceptions",
+              "app.domains.social.schemas.feed"
+            ],
+            "module": "app.domains.social.service.feed_reaction_validation",
+            "path": "backend/app/domains/social/service/feed_reaction_validation.py"
           },
           {
             "imports": [
@@ -1254,6 +1351,14 @@
           },
           {
             "imports": [
+              "app.domains.social.contracts.search_index",
+              "app.domains.social.contracts.search_state"
+            ],
+            "module": "app.domains.social.service.keyword_feed",
+            "path": "backend/app/domains/social/service/keyword_feed.py"
+          },
+          {
+            "imports": [
               "app.domains.social.contracts.actors",
               "app.domains.social.contracts.manual_feed",
               "app.domains.social.contracts.writes",
@@ -1361,6 +1466,21 @@
           },
           {
             "imports": [
+              "app.domains.characters.service.profile",
+              "app.domains.social.exceptions",
+              "app.domains.social.models.posts",
+              "app.domains.social.repository.inbox",
+              "app.domains.social.repository.posts",
+              "app.domains.social.repository.profiles",
+              "app.domains.social.repository.resident_affordances",
+              "app.domains.social.service.profiles",
+              "app.domains.social.service.visibility"
+            ],
+            "module": "app.domains.social.service.resident_affordances",
+            "path": "backend/app/domains/social/service/resident_affordances.py"
+          },
+          {
+            "imports": [
               "app.core.search_text",
               "app.core.unit_of_work",
               "app.domains.social.contracts.actors",
@@ -1451,6 +1571,26 @@
             ],
             "module": "app.domains.social.service.visibility",
             "path": "backend/app/domains/social/service/visibility.py"
+          },
+          {
+            "imports": [
+              "app.core.search_text",
+              "app.domains.social.constants",
+              "app.domains.social.contracts.search_index",
+              "app.domains.social.contracts.search_state",
+              "app.domains.social.contracts.world_feed",
+              "app.domains.social.exceptions",
+              "app.domains.social.models.feed",
+              "app.domains.social.models.posts",
+              "app.domains.social.policies.world_feed",
+              "app.domains.social.repository.world_feed",
+              "app.domains.social.schemas.feed",
+              "app.domains.social.service.keyword_feed",
+              "app.domains.world_characters.contracts.runtime_modes",
+              "app.domains.world_characters.schemas.setup"
+            ],
+            "module": "app.domains.social.service.world_feed",
+            "path": "backend/app/domains/social/service/world_feed.py"
           },
           {
             "imports": [
@@ -1735,6 +1875,41 @@
           },
           {
             "imports": [
+              "app.cruds.agent_runs",
+              "app.domains.social.contracts.feed_execution",
+              "app.domains.social.service.feed_cycle",
+              "app.domains.world_characters.models",
+              "app.integrations.direct_llm",
+              "app.runtime.activity_proposals.composition",
+              "app.runtime.resident.context",
+              "app.runtime.social.feed_reaction_provider",
+              "app.runtime.social.observations",
+              "app.runtime.social.subjective_composition",
+              "app.runtime.social.world_feed_actions",
+              "app.runtime.social.world_feed_queries",
+              "app.services.community"
+            ],
+            "module": "app.runtime.social.feed_cycle",
+            "path": "backend/app/runtime/social/feed_cycle.py"
+          },
+          {
+            "imports": [
+              "app.credentials",
+              "app.domains.social.contracts.feed_execution",
+              "app.domains.social.contracts.world_feed",
+              "app.domains.social.exceptions",
+              "app.domains.social.schemas.feed",
+              "app.domains.social.service.feed_reaction_prompts",
+              "app.domains.social.service.feed_reaction_validation",
+              "app.integrations.direct_llm",
+              "app.providers.gemini",
+              "app.runtime.resident.context"
+            ],
+            "module": "app.runtime.social.feed_reaction_provider",
+            "path": "backend/app/runtime/social/feed_reaction_provider.py"
+          },
+          {
+            "imports": [
               "app.config",
               "app.core.image_prompt_safety",
               "app.credentials",
@@ -1976,6 +2151,33 @@
             ],
             "module": "app.runtime.social.world_feed_actions",
             "path": "backend/app/runtime/social/world_feed_actions.py"
+          },
+          {
+            "imports": [
+              "app.domains.characters.models",
+              "app.domains.characters.service.profile",
+              "app.domains.social.models.feed",
+              "app.domains.social.models.posts",
+              "app.domains.world_characters.models",
+              "app.domains.world_characters.service.setup_validation",
+              "app.domains.world_packages.models",
+              "app.domains.worlds.models"
+            ],
+            "module": "app.runtime.social.world_feed_queries",
+            "path": "backend/app/runtime/social/world_feed_queries.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.contracts.search_index",
+              "app.domains.social.contracts.search_state",
+              "app.domains.social.contracts.world_feed",
+              "app.domains.social.models.posts",
+              "app.domains.social.schemas.feed",
+              "app.domains.social.service.world_feed",
+              "app.runtime.social.world_feed_queries"
+            ],
+            "module": "app.runtime.social.world_feed_search",
+            "path": "backend/app/runtime/social/world_feed_search.py"
           }
         ],
         "legacy_horizontal": [
@@ -2019,19 +2221,6 @@
             ],
             "module": "app.schemas.social_memory",
             "path": "backend/app/schemas/social_memory.py"
-          },
-          {
-            "imports": [
-              "app.core.context_text",
-              "app.credentials",
-              "app.providers.gemini",
-              "app.runtime.resident.context",
-              "app.schemas",
-              "app.services.direct_llm",
-              "app.services.world_feed_search"
-            ],
-            "module": "app.services.feed_reaction_planner",
-            "path": "backend/app/services/feed_reaction_planner.py"
           },
           {
             "imports": [
@@ -2435,7 +2624,7 @@
       },
       {
         "path": "backend/tests/test_feed_reaction_intent.py",
-        "sha256": "3ea5fd8851d01fc5df13a9ba2177242af85bb8e8760e4a4503deefd07093aeb8"
+        "sha256": "f3139611ecbd398542b1d63d94973dd596393fae8d9c1abc0860b3af808d3209"
       },
       {
         "path": "backend/tests/relationships/test_projection_replay.py",
@@ -2451,7 +2640,7 @@
       },
       {
         "path": "backend/tests/world_packages/test_import_commit.py",
-        "sha256": "3498026f08e79c7c51c05b83fbc2aef98ad44e368581c745f64cd05a9356b312"
+        "sha256": "0fac56b7da1351f3a5668d9a4b2c566ece167300bb9a4da8627290138ef5c94a"
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",
@@ -2463,7 +2652,7 @@
       },
       {
         "path": "backend/tests/test_l4_social_search_projection.py",
-        "sha256": "a5f01b3473c7b05806df1661c98c104b6632fe58dc59bb06716b056dc0bc1b19"
+        "sha256": "02f8d39e9922cb720b81fe994176991464c1bf78ece3cd05b14b4cf30a07c07d"
       },
       {
         "path": "backend/tests/test_relationship_graph_api.py",
@@ -2487,10 +2676,10 @@
       },
       {
         "path": "backend/tests/test_world_feed_search.py",
-        "sha256": "75c3b9d9f1f5d7ad7b80b9c161606bb2aff6ba2c41efeabfe82e0c64ec44ce4e"
+        "sha256": "953a2d07824108154409f3247cb7ef162a0ebd9ee98d7eab458db8a82a3ddeb6"
       }
     ],
-    "parity_test_node_count": 97,
+    "parity_test_node_count": 99,
     "parity_test_nodes": [
       "backend/tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
       "backend/tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
@@ -2569,8 +2758,10 @@
       "backend/tests/test_world_feed_search.py::test_blocked_author_is_not_a_candidate",
       "backend/tests/test_world_feed_search.py::test_character_privacy_cleanup_removes_p5_runtime_state",
       "backend/tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+      "backend/tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions",
       "backend/tests/test_world_feed_search.py::test_profile_accepts_two_character_keyword_with_world_bounded_search",
       "backend/tests/test_world_feed_search.py::test_profile_requires_eight_searchable_keywords",
+      "backend/tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
       "backend/tests/test_world_feed_search.py::test_search_text_normalization_is_deterministic",
       "backend/tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
       "backend/tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media",

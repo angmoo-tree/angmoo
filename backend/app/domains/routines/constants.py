@@ -88,3 +88,17 @@ POLICY_SESSION_MARKER = ":resident-tick:"
 
 
 MANUAL_POLICY_SESSION_MARKER = ":resident-manual:"
+
+
+import re
+
+FEED_HISTORY_SANITIZED_CONSUMED_LIMIT = 8
+
+RECENT_FEED_INTEREST_HISTORY_LIMIT = 5
+
+RECENT_OWN_ROOT_TOPIC_HISTORY_LIMIT = 5
+
+FEED_HISTORY_STYLE_MARKER_RE = re.compile(
+    r"(냐하하|푸훽|ㅋㅋ+|ㅎㅎ+|하하하?|헤헤|히히|후훗|우효|앗싸)",
+    re.IGNORECASE,
+)

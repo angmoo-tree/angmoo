@@ -11,19 +11,13 @@ from app import models
 from app.core.db import Base
 from app.core.search_text import build_post_search_document, normalize_search_text
 from app.domains.runtime.contracts.search import SearchIndexHit
-from app.domains.social.public import SocialSearchState
+from app.domains.social.contracts.search_state import SocialSearchState
 from app.runtime.search import CallbackSearchIndexAdapter
 from app.services import world_character_contracts
 from app.runtime.world_characters import cleanup as world_character_setup
-from app.services.world_feed_search import (
-    WorldFeedReadinessError,
-    claim_cycle_keywords,
-    claim_feed_observations,
-    finalize_feed_cycle,
-    load_ready_search_profile,
-    search_world_feed_candidates,
-    world_feed_cycle_status,
-)
+from app.domains.social.exceptions import WorldFeedReadinessError
+from app.domains.social.service.world_feed import claim_cycle_keywords, claim_feed_observations, finalize_feed_cycle
+from app.runtime.social.world_feed_search import load_ready_search_profile, search_world_feed_candidates, world_feed_cycle_status
 
 
 KEYWORDS = [
@@ -300,6 +294,69 @@ def test_search_text_normalization_is_deterministic() -> None:
     ) == (
         "alchemy\nnew potion\nlab"
     )
+
+
+def test_search_facts_keep_attached_identity_and_caller_rollback() -> None:
+    from sqlalchemy import inspect
+    from app.runtime.social.world_feed_queries import WorldFeedQueries
+
+    engine = _engine()
+    with Session(engine, expire_on_commit=False) as db:
+        world, _user_row, actor, actor_wc = _seed_actor(db)
+        db.commit()
+        statements = []
+        event.listen(engine, "before_cursor_execute", lambda *args: statements.append(args[2]))
+        queries = WorldFeedQueries(db)
+        assert statements == []
+        profile = load_ready_search_profile(db, world_character_id=actor_wc.id)
+        assert profile.world is world
+        assert profile.character is actor
+        assert profile.world_character is actor_wc
+        assert inspect(profile.membership).session is db
+        assert inspect(profile.profile).session is db
+        query_count = len(statements)
+        queries.candidate_rows(profile)
+        assert len(statements) == query_count
+        claim = claim_cycle_keywords(db, profile=profile, cycle_key="rollback", run_id="rollback")
+        assert claim.duplicate_cycle is False
+        assert db.get(models.WorldCharacterFeedCursor, actor_wc.id) is not None
+        actor_id = actor_wc.id
+        db.rollback()
+        assert db.get(models.WorldCharacterFeedCursor, actor_id) is None
+    engine.dispose()
+
+
+def test_hidden_candidate_stops_foreign_reads_and_actions(monkeypatch) -> None:
+    from app.domains.social.service.world_feed import revalidate_candidate_actions
+    from app.runtime.social.world_feed_queries import WorldFeedQueries
+
+    engine = _engine()
+    with Session(engine, expire_on_commit=False) as db:
+        world, _user_row, actor, actor_wc = _seed_actor(db)
+        _author_user, author, author_wc = _add_world_character(db, world=world, suffix="guard-author")
+        now = datetime(2026, 8, 1, tzinfo=UTC)
+        post = _post(db, suffix="guard", author=author, world_character=author_wc,
+                     title="Alchemy", body="Library note", topic_signature="alchemy", created_at=now)
+        db.commit()
+        profile = load_ready_search_profile(db, world_character_id=actor_wc.id)
+        result = search_world_feed_candidates(
+            db, profile=profile, keywords=("alchemy", "library"), allowed_policy_actions=("like",),
+            now=now, search_index=_search_index(db), search_state=SocialSearchState.READY,
+        )
+        assert len(result.candidates) == 1
+        references = WorldFeedQueries(db)
+        foreign_reads = []
+        monkeypatch.setattr(references, "world_character", lambda identity: foreign_reads.append(identity))
+        post.report_hidden_at = now
+        result = revalidate_candidate_actions(
+            db, profile=profile, candidate=result.candidates[0], allowed_policy_actions=("like",),
+            references=references,
+        )
+        assert result is None
+        assert foreign_reads == []
+        db.rollback()
+        assert db.get(models.Post, post.id).report_hidden_at is None
+    engine.dispose()
 
 
 @pytest.mark.parametrize(

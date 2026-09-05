@@ -8,7 +8,8 @@ from sqlalchemy.pool import StaticPool
 
 from app import models
 from app.core.db import Base
-from app.domains.social.public import SocialSearchState, current_social_search
+from app.domains.social.contracts.search_state import SocialSearchState
+from app.runtime.search.binding import current_social_search
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
 from app.runtime.search import EmbeddedSocialSearchProjection, SqliteFts5SearchIndex
 
@@ -98,12 +99,16 @@ def test_embedded_projection_rebuilds_and_tracks_committed_post_changes(
 
 
 def test_production_p5_has_no_canonical_contains_fallback() -> None:
-    source = (
-        __import__("pathlib").Path(__file__).parents[1]
-        / "app"
-        / "services"
-        / "world_feed_search.py"
-    ).read_text(encoding="utf-8")
+    source = "\n".join(
+        (__import__("pathlib").Path(__file__).parents[1] / "app" / relative).read_text(
+            encoding="utf-8"
+        )
+        for relative in (
+            "domains/social/service/world_feed.py",
+            "domains/social/repository/world_feed.py",
+            "runtime/social/world_feed_queries.py",
+        )
+    )
     assert "search_document.contains" not in source
     assert ".like(" not in source
 
