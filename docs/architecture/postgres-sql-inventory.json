@@ -682,6 +682,18 @@
     {
       "markers": {
         "driver_or_url": [
+          22
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/runtime/service/sqlite_lease.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "a529e3220db7144aa2f845f2b2152de76bf5d8d5ce0bb01425af75c2c0b4741e",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
           22,
           25
         ],
@@ -999,18 +1011,6 @@
       "path": "backend/app/runtime/persistence/sqlite_codecs.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "d1ad4a897ce41fc80e988fcdf1db8314d378fa21ef431541a700c9575e634c52",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
-    },
-    {
-      "markers": {
-        "driver_or_url": [
-          32
-        ]
-      },
-      "owner": "ER2-ER7 legacy evidence",
-      "path": "backend/app/runtime/persistence/sqlite_scheduler_lease.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "84d5c91e3dc1c002377fe7609335e4efd4e67de4d4f1c47fb04ab729ccdf7043",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

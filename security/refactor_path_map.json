@@ -33530,9 +33530,9 @@
           "old": "backend/app/domains/runtime/domain/scheduler_lease.py::SCHEDULER_SINGLETON_KEY",
           "new": "backend/app/domains/runtime/constants.py::SCHEDULER_SINGLETON_KEY",
           "direct_consumers": [
-            "backend/app/runtime/persistence/sqlite_scheduler_lease.py",
             "backend/app/domains/runtime/service/scheduler_lease.py",
-            "backend/app/domains/runtime/repository/scheduler_lease.py"
+            "backend/app/domains/runtime/repository/scheduler_lease.py",
+            "backend/app/domains/runtime/repository/sqlite_lease.py"
           ],
           "test_nodes": [
             "tests/routines/test_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates",
@@ -33544,8 +33544,9 @@
           "new": "backend/app/domains/runtime/contracts/lease.py::SchedulerLeaseState",
           "direct_consumers": [
             "backend/app/domains/runtime/public.py",
-            "backend/app/runtime/persistence/sqlite_scheduler_lease.py",
-            "backend/app/domains/runtime/service/scheduler_lease.py"
+            "backend/app/domains/runtime/service/scheduler_lease.py",
+            "backend/app/domains/runtime/service/sqlite_lease.py",
+            "backend/app/domains/runtime/repository/sqlite_lease.py"
           ],
           "test_nodes": [
             "tests/routines/test_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates",
@@ -33559,9 +33560,9 @@
             "backend/app/domains/runtime/application/manage_scheduler_lease.py",
             "backend/app/domains/runtime/contracts/lease_store.py",
             "backend/app/domains/runtime/public.py",
-            "backend/app/runtime/persistence/sqlite_scheduler_lease.py",
             "backend/tests/test_l3_er2_sqlite_concurrency.py",
-            "backend/app/domains/runtime/service/scheduler_lease.py"
+            "backend/app/domains/runtime/service/scheduler_lease.py",
+            "backend/app/domains/runtime/service/sqlite_lease.py"
           ],
           "test_nodes": [
             "tests/routines/test_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates",
@@ -33584,9 +33585,9 @@
           "new": "backend/app/domains/runtime/exceptions.py::SchedulerLeaseHeldError",
           "direct_consumers": [
             "backend/app/domains/runtime/public.py",
-            "backend/app/runtime/persistence/sqlite_scheduler_lease.py",
             "backend/tests/test_l3_er2_sqlite_concurrency.py",
-            "backend/app/domains/runtime/service/scheduler_lease.py"
+            "backend/app/domains/runtime/service/scheduler_lease.py",
+            "backend/app/domains/runtime/service/sqlite_lease.py"
           ],
           "test_nodes": [
             "tests/routines/test_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates",
@@ -33598,10 +33599,10 @@
           "new": "backend/app/domains/runtime/exceptions.py::SchedulerLeaseLostError",
           "direct_consumers": [
             "backend/app/domains/runtime/public.py",
-            "backend/app/runtime/persistence/sqlite_scheduler_lease.py",
             "backend/tests/test_l3_er2_sqlite_concurrency.py",
             "backend/app/domains/runtime/service/scheduler_lease.py",
-            "backend/app/domains/runtime/repository/scheduler_lease.py"
+            "backend/app/domains/runtime/repository/scheduler_lease.py",
+            "backend/app/domains/runtime/service/sqlite_lease.py"
           ],
           "test_nodes": [
             "tests/routines/test_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates",
@@ -33627,8 +33628,8 @@
             "backend/app/domains/runtime/application/manage_scheduler_lease.py",
             "backend/app/domains/runtime/contracts/lease_store.py",
             "backend/app/domains/runtime/public.py",
-            "backend/app/runtime/persistence/sqlite_scheduler_lease.py",
-            "backend/app/domains/runtime/service/scheduler_lease.py"
+            "backend/app/domains/runtime/service/scheduler_lease.py",
+            "backend/app/domains/runtime/service/sqlite_lease.py"
           ],
           "test_nodes": [
             "tests/routines/test_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates",
@@ -33643,8 +33644,8 @@
             "backend/app/domains/runtime/contracts/lease_store.py",
             "backend/app/domains/runtime/policies/lease.py",
             "backend/app/domains/runtime/public.py",
-            "backend/app/runtime/persistence/sqlite_scheduler_lease.py",
-            "backend/app/domains/runtime/service/scheduler_lease.py"
+            "backend/app/domains/runtime/service/scheduler_lease.py",
+            "backend/app/domains/runtime/service/sqlite_lease.py"
           ],
           "test_nodes": [
             "tests/routines/test_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates",
@@ -33655,9 +33656,10 @@
           "old": "backend/app/domains/runtime/domain/scheduler_lease.py::aware_utc",
           "new": "backend/app/domains/runtime/policies/lease.py::aware_utc",
           "direct_consumers": [
-            "backend/app/runtime/persistence/sqlite_scheduler_lease.py",
             "backend/app/domains/runtime/service/scheduler_lease.py",
-            "backend/app/domains/runtime/repository/scheduler_lease.py"
+            "backend/app/domains/runtime/repository/scheduler_lease.py",
+            "backend/app/runtime/persistence/sqlite_scheduler_lease.py",
+            "backend/app/domains/runtime/service/sqlite_lease.py"
           ],
           "test_nodes": [
             "tests/routines/test_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates",
@@ -33680,8 +33682,8 @@
           "new": "backend/app/domains/runtime/policies/lease.py::decide_tick_window",
           "direct_consumers": [
             "backend/app/domains/runtime/public.py",
-            "backend/app/runtime/persistence/sqlite_scheduler_lease.py",
-            "backend/app/domains/runtime/service/scheduler_lease.py"
+            "backend/app/domains/runtime/service/scheduler_lease.py",
+            "backend/app/domains/runtime/service/sqlite_lease.py"
           ],
           "test_nodes": [
             "tests/routines/test_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates",
@@ -34120,7 +34122,7 @@
       ]
     },
     "AR-B8-RUNTIME-A3": {
-      "status": "SOURCE PREPARATION; original16 definitions and actual query AST match; focused63 PASS/1 existing PG skip; original source/split/assertion/suppression/APIORM/nodes diagnostic0; ER0 source generation PASS but historical physical marker count assertion FAIL at82; NOT merge-ready; sequential source introductions pending",
+      "status": "SOURCE PREPARATION; original16 definitions/query AST match; focused63 PASS/1 existing PG skip; original6 preservation diagnostics0; ER0 old physical-count failure corrected by fcf14e8 historical snapshot + complete current source comparison,20PASS; sequential source introductions pending",
       "split_files": {
         "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py": [
           "backend/app/domains/runtime/models.py",
@@ -34323,6 +34325,176 @@
       ],
       "preserved": "Same Session factory, Identity row lock, advisory lock, database clock, singleton query order, fencing epoch, commit/refresh/rollback, context token reset and before-commit denial.",
       "remaining": "SQLite CAS actual policy/query ownership and Runtime HTTP/aggregates; G5 singleBase registration and final migration/installer integration."
+    },
+    "AR-B8-RUNTIME-A4": {
+      "status": "SOURCE PREPARATION; original16 workflow/helper/executor AST preserved after actual query expansion; exact constructor/read/clock/Identity bindings; focused42 PASS/37.13s; boundary737/2458/legacy222; original6 source/split/assertion/suppression/APIORM/node diagnostics0; sequential source introductions pending",
+      "split_files": {
+        "backend/app/runtime/persistence/sqlite_scheduler_lease.py": [
+          "backend/app/runtime/persistence/sqlite_scheduler_lease.py",
+          "backend/app/domains/runtime/service/sqlite_lease.py",
+          "backend/app/domains/runtime/repository/sqlite_lease.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::SqliteSchedulerLeaseRepository",
+          "new": "backend/app/domains/runtime/service/sqlite_lease.py::SqliteSchedulerLeaseService",
+          "direct_consumers": [
+            "backend/app/runtime/persistence/sqlite_scheduler_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::SqliteSchedulerLeaseRepository",
+          "new": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::SqliteSchedulerLeaseRepository",
+          "direct_consumers": [
+            "backend/app/runtime/resident/scheduler.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::SqliteSchedulerLeaseRepository",
+          "new": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::read_installation_id",
+          "direct_consumers": [
+            "backend/app/runtime/persistence/sqlite_scheduler_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::_lease_matches",
+          "new": "backend/app/domains/runtime/service/sqlite_lease.py::_lease_matches",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/sqlite_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::_snapshot",
+          "new": "backend/app/domains/runtime/service/sqlite_lease.py::_snapshot",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/sqlite_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::_optional_datetime",
+          "new": "backend/app/domains/runtime/service/sqlite_lease.py::_optional_datetime",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/sqlite_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::_optional_str",
+          "new": "backend/app/domains/runtime/service/sqlite_lease.py::_optional_str",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/sqlite_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::Clock",
+          "new": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::Clock",
+          "direct_consumers": [
+            "backend/app/runtime/persistence/sqlite_scheduler_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ],
+          "consumer_note": "Existing module type annotation or explicit export list remains with the runtime binding."
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::__all__",
+          "new": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::__all__",
+          "direct_consumers": [
+            "backend/app/runtime/persistence/sqlite_scheduler_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ],
+          "consumer_note": "Existing module type annotation or explicit export list remains with the runtime binding."
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::SqliteSchedulerLeaseRepository",
+          "new": "backend/app/domains/runtime/repository/sqlite_lease.py::current_row",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/sqlite_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::SqliteSchedulerLeaseRepository",
+          "new": "backend/app/domains/runtime/repository/sqlite_lease.py::insert_lease",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/sqlite_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::SqliteSchedulerLeaseRepository",
+          "new": "backend/app/domains/runtime/repository/sqlite_lease.py::acquire_existing",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/sqlite_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::SqliteSchedulerLeaseRepository",
+          "new": "backend/app/domains/runtime/repository/sqlite_lease.py::release_current",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/sqlite_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::SqliteSchedulerLeaseRepository",
+          "new": "backend/app/domains/runtime/repository/sqlite_lease.py::cas_current",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/sqlite_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        }
+      ],
+      "preserved": "Original owner/TTL validation, BEGIN IMMEDIATE retry executor, same connection Identity lookup, CAS predicates/rowcount errors, clock sample order, callbacks and read snapshot.",
+      "remaining": "Runtime HTTP and old aggregate removal; G5 single Base/DB/registry; G06 final compatibility removal."
     }
   }
 }

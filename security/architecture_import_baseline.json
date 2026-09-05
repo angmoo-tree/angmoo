@@ -1,7 +1,7 @@
 {
-  "edge_count": 2454,
-  "external_import_count": 2289,
-  "module_count": 735,
+  "edge_count": 2458,
+  "external_import_count": 2297,
+  "module_count": 737,
   "modules": [
     {
       "external_imports": [],
@@ -4897,6 +4897,22 @@
         "__future__",
         "datetime",
         "sqlalchemy",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.runtime.constants",
+        "app.domains.runtime.contracts.lease",
+        "app.domains.runtime.models"
+      ],
+      "module": "app.domains.runtime.repository.sqlite_lease",
+      "path": "backend/app/domains/runtime/repository/sqlite_lease.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
         "sqlalchemy.orm",
         "typing"
       ],
@@ -4957,6 +4973,23 @@
       ],
       "module": "app.domains.runtime.service.scheduler_lease",
       "path": "backend/app/domains/runtime/service/scheduler_lease.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "datetime",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.runtime.contracts.lease",
+        "app.domains.runtime.exceptions",
+        "app.domains.runtime.policies.lease",
+        "app.domains.runtime.repository.sqlite_lease"
+      ],
+      "module": "app.domains.runtime.service.sqlite_lease",
+      "path": "backend/app/domains/runtime/service/sqlite_lease.py",
       "wildcard_imports": []
     },
     {
@@ -9306,11 +9339,8 @@
       "imports": [
         "app.core.sqlite_concurrency",
         "app.domains.identity.public",
-        "app.domains.runtime.constants",
-        "app.domains.runtime.contracts.lease",
-        "app.domains.runtime.exceptions",
-        "app.domains.runtime.models",
-        "app.domains.runtime.policies.lease"
+        "app.domains.runtime.policies.lease",
+        "app.domains.runtime.service.sqlite_lease"
       ],
       "module": "app.runtime.persistence.sqlite_scheduler_lease",
       "path": "backend/app/runtime/persistence/sqlite_scheduler_lease.py",
