@@ -1067,3 +1067,12 @@ LG-B2 최종 고정 후보: **376 passed / 기존 warnings2 / 225.61초**, 원�
 기존 monkeypatch 준비7곳만 실제 조회/선별 모듈로 연결하며 assertion·skip 계약과 수집 노드를 바꾸지 않는다. 실제 행위 판단을 옮긴 것이며 전체 ActionPlan/Writer/Graph 전환 완료나 부모 도입 ledger 완료를 뜻하지 않는다.
 
 LG-B3a 최종 후보 검증: **376 passed / 기존 warnings2 / 168.59초**. 원래6보존진단 모두0(protected2139/current2261), 경계746/2489/206legacy, L4 746/14/97, deferred22 PASS. 신규 파일은 실제 `service/independent_topics.py`·`repository/independent_topics.py` 두 개이며 새 수집노드0. 기존 테스트7곳은 monkeypatch 준비 대상만 실제 소유자로 바꾸고 assertion·suppression 전체 동등을 확인했다. 부모의 최초 source 도입 증거 캡처와 다른 owner source 최종 합류는 별도이다.
+
+
+## AR-B4 LG-B3b — 실제 행동 계획·쓰기 의도·예산
+
+원래25함수(1359줄)와 상수3개를 action_plans/writing_plans/action_budgets 실제 서비스로 옮겼다. 원문 AST는 좁은 context 타입과 명시 clip/read 협력 인자만 복원하면 같다. 관찰 항목 선택·필수 글 복원·관계 행동의 증거 판단·unfollow 충돌·하루 글/댓글 제한·멘션/알림 우선순위와 bucket 한도는 그대로다. 기존 LangGraph **186 passed / 6.64초**를 확인했다.
+
+설정 callback은 실제 Routines activity_settings로 연결하고 원래 테스트8개 mock 대상만 해당 모듈로 바꾼다. source/Memory 읽기는 기존 same-Session runtime 협력이며 부모 B5/B7에서 정확히 합류한다. 새 회귀2개는 같은 Session/시각/설정→count 순서, 무제한 count 생략, 추가 commit0을 검사한다. graph/provider 실행은 아직 LG-C의 남은 실제 소유 책임이다.
+
+LG-B3b 최종 고정 후보 검증: **378 passed / 기존 warnings2 / 176.55초**. 원래6보존진단 sources/split/assertions/suppressions/API·ORM/missing-nodes 모두0(protected2139/current2263), 경계750/2507/206legacy, L4 750/14/97, deferred22 PASS. 실제 서비스3개·협력 계약1개와 회귀1파일이 최초 도입되며 새 노드는2개다. 기존 assertion·suppression은 그대로이고 mock 준비 대상8곳만 실제 설정 소유자로 연결했다. 부모의 source 도입 증거 캡처와 B5/B7/runtime 최종 합류는 별도이다.

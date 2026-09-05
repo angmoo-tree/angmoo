@@ -1010,6 +1010,7 @@
       "app.domains.routine_posts.utils.text",
       "app.domains.routines.constants",
       "app.domains.routines.contracts",
+      "app.domains.routines.contracts.action_planning",
       "app.domains.routines.contracts.activity",
       "app.domains.routines.contracts.activity_policy",
       "app.domains.routines.contracts.activity_scope",
@@ -1058,6 +1059,8 @@
       "app.domains.routines.schemas.runs",
       "app.domains.routines.service",
       "app.domains.routines.service.action_briefs",
+      "app.domains.routines.service.action_budgets",
+      "app.domains.routines.service.action_plans",
       "app.domains.routines.service.action_prompts",
       "app.domains.routines.service.activity_evidence",
       "app.domains.routines.service.activity_logs",
@@ -1095,6 +1098,7 @@
       "app.domains.routines.service.state_prompts",
       "app.domains.routines.service.tick_schedule",
       "app.domains.routines.service.topic_arcs",
+      "app.domains.routines.service.writing_plans",
       "app.domains.routines.utils",
       "app.domains.routines.utils.activity_actions",
       "app.domains.routines.utils.clock",
@@ -1233,6 +1237,7 @@
       "app.domains.routine_posts.service.evidence",
       "app.domains.routine_posts.service.generation",
       "app.domains.routines.contracts",
+      "app.domains.routines.contracts.action_planning",
       "app.domains.routines.contracts.activity",
       "app.domains.routines.contracts.activity_policy",
       "app.domains.routines.contracts.clock",
@@ -1250,6 +1255,8 @@
       "app.domains.routines.schemas.runs",
       "app.domains.routines.service",
       "app.domains.routines.service.action_briefs",
+      "app.domains.routines.service.action_budgets",
+      "app.domains.routines.service.action_plans",
       "app.domains.routines.service.action_prompts",
       "app.domains.routines.service.activity_evidence",
       "app.domains.routines.service.activity_logs",
@@ -1286,6 +1293,7 @@
       "app.domains.routines.service.state_prompts",
       "app.domains.routines.service.tick_schedule",
       "app.domains.routines.service.topic_arcs",
+      "app.domains.routines.service.writing_plans",
       "app.domains.runtime.contracts",
       "app.domains.social.contracts",
       "app.domains.social.contracts.actors",
@@ -2978,6 +2986,46 @@
         "owner_stage": "AR-B4-LG-C",
         "reason": "Existing resident execution reads canonical own-topic queries and binds the actual initiative service; no copied decision or new transaction.",
         "removal_condition": "Move remaining graph workflow into runtime in LG-C and close this exact legacy consumer.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.contracts.action_planning",
+        "owner_stage": "AR-B4-LG-C",
+        "reason": "Existing resident graph binds actual action/budget/writing services and their existing same-Session collaborators; no duplicate business body.",
+        "removal_condition": "Move remaining graph/runtime workflow in LG-C; parent B5/B7 integration replaces only exact foreign read callbacks at their original call sites.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.service.action_budgets",
+        "owner_stage": "AR-B4-LG-C",
+        "reason": "Existing resident graph binds actual action/budget/writing services and their existing same-Session collaborators; no duplicate business body.",
+        "removal_condition": "Move remaining graph/runtime workflow in LG-C; parent B5/B7 integration replaces only exact foreign read callbacks at their original call sites.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.service.action_plans",
+        "owner_stage": "AR-B4-LG-C",
+        "reason": "Existing resident graph binds actual action/budget/writing services and their existing same-Session collaborators; no duplicate business body.",
+        "removal_condition": "Move remaining graph/runtime workflow in LG-C; parent B5/B7 integration replaces only exact foreign read callbacks at their original call sites.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.service.activity_settings",
+        "owner_stage": "AR-B4-LG-C",
+        "reason": "Existing resident graph binds actual action/budget/writing services and their existing same-Session collaborators; no duplicate business body.",
+        "removal_condition": "Move remaining graph/runtime workflow in LG-C; parent B5/B7 integration replaces only exact foreign read callbacks at their original call sites.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.service.writing_plans",
+        "owner_stage": "AR-B4-LG-C",
+        "reason": "Existing resident graph binds actual action/budget/writing services and their existing same-Session collaborators; no duplicate business body.",
+        "removal_condition": "Move remaining graph/runtime workflow in LG-C; parent B5/B7 integration replaces only exact foreign read callbacks at their original call sites.",
         "review_date": "2026-09-06"
       }
     ]

@@ -1,7 +1,7 @@
 {
-  "edge_count": 2489,
-  "external_import_count": 2344,
-  "module_count": 746,
+  "edge_count": 2507,
+  "external_import_count": 2356,
+  "module_count": 750,
   "modules": [
     {
       "external_imports": [],
@@ -3669,6 +3669,22 @@
     },
     {
       "external_imports": [
+        "__future__",
+        "collections.abc",
+        "dataclasses",
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.planning_context"
+      ],
+      "module": "app.domains.routines.contracts.action_planning",
+      "path": "backend/app/domains/routines/contracts/action_planning.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "typing"
       ],
       "imports": [],
@@ -4284,6 +4300,38 @@
       ],
       "module": "app.domains.routines.service.action_briefs",
       "path": "backend/app/domains/routines/service/action_briefs.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.action_planning",
+        "app.domains.routines.contracts.planning_context",
+        "app.domains.routines.policies.action_matching",
+        "app.domains.routines.policies.writing_contract"
+      ],
+      "module": "app.domains.routines.service.action_budgets",
+      "path": "backend/app/domains/routines/service/action_budgets.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.action_planning",
+        "app.domains.routines.contracts.planning_context",
+        "app.domains.routines.policies.action_matching",
+        "app.domains.routines.policies.handoff_coverage",
+        "app.domains.routines.policies.writing_contract",
+        "app.domains.routines.repository.independent_topics"
+      ],
+      "module": "app.domains.routines.service.action_plans",
+      "path": "backend/app/domains/routines/service/action_plans.py",
       "wildcard_imports": []
     },
     {
@@ -4908,6 +4956,19 @@
       ],
       "module": "app.domains.routines.service.topic_arcs",
       "path": "backend/app/domains/routines/service/topic_arcs.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.planning_context",
+        "app.domains.routines.policies.writing_contract"
+      ],
+      "module": "app.domains.routines.service.writing_plans",
+      "path": "backend/app/domains/routines/service/writing_plans.py",
       "wildcard_imports": []
     },
     {
@@ -10760,6 +10821,7 @@
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.routines.contracts.action_planning",
         "app.domains.routines.contracts.resident",
         "app.domains.routines.contracts.topic_arcs",
         "app.domains.routines.policies.action_matching",
@@ -10772,9 +10834,13 @@
         "app.domains.routines.repository.independent_topics",
         "app.domains.routines.repository.public_action_executions",
         "app.domains.routines.schemas.resident_planning",
+        "app.domains.routines.service.action_budgets",
+        "app.domains.routines.service.action_plans",
+        "app.domains.routines.service.activity_settings",
         "app.domains.routines.service.independent_topics",
         "app.domains.routines.service.public_action_executions",
         "app.domains.routines.service.topic_arcs",
+        "app.domains.routines.service.writing_plans",
         "app.domains.social.contracts.subjective_context",
         "app.domains.world_characters.contracts.runtime_modes",
         "app.models",

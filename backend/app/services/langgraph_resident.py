@@ -1,4 +1,11 @@
 from __future__ import annotations
+from app.domains.routines.contracts.action_planning import ActionPlanningWorkflows, ActionBudgetWorkflows
+from app.domains.routines.service import activity_settings
+from app.domains.routines.service import action_plans as action_plans_service
+from app.domains.routines.service import writing_plans as writing_plans_service
+from app.domains.routines.service import action_budgets as action_budgets_service
+from app.domains.routines.service.action_plans import _INBOX_CONVERSATION_JUDGMENTS
+from app.domains.routines.service.action_budgets import _REPLY_WRITER_MAX_TASKS_PER_RUN, _REPLY_WRITER_BUCKET_MAX_TASKS
 from app.domains.routines.service import independent_topics as independent_topic_service
 from app.domains.routines.repository import independent_topics as independent_topic_queries
 from app.domains.routines.policies.resident_clock import _today_kst_window, _yesterday_kst_window
@@ -180,20 +187,12 @@ logger = logging.getLogger(__name__)
 
 _PUBLIC_ACTIONS = {"post", "reply", "like", "repost", "follow", "unfollow"}
 _GRAPH_SEMAPHORE = asyncio.Semaphore(settings.langgraph_max_concurrent_graphs)
-_REPLY_WRITER_MAX_TASKS_PER_RUN = 9
-_REPLY_WRITER_BUCKET_MAX_TASKS = 3
 _REPLY_TARGET_ALREADY_ANSWERED = "reply_target_already_answered_by_character"
 _MANDATORY_POST_ALLOWED_SKIP_REASONS = {
     "action_budget_trimmed",
     "feed_cue_pending_post_blocked",
 }
 _TOPIC_ARC_LOOKBACK = timedelta(hours=48)
-_INBOX_CONVERSATION_JUDGMENTS = {
-    "continue_reply",
-    "closing_reply",
-    "ack_without_reply",
-    "no_action_closed",
-}
 _INBOX_CONVERSATION_TURN_LIMIT = 6
 _INBOX_DIRECT_EXCHANGE_TURN_LIMIT = 6
 
@@ -214,6 +213,45 @@ def _clip(value: Any, max_chars: int) -> str:
     if len(text) <= max_chars:
         return text
     return text[: max(0, max_chars - 3)].rstrip() + "..."
+
+
+_action_planning_workflows = ActionPlanningWorkflows(
+    clip=_clip,
+    target_following=lambda ctx, target_id: _target_character_following(ctx, target_id),
+    has_unfollow_watch=lambda ctx, **kwargs: _has_unfollow_watch(ctx, **kwargs),
+    yesterday_handoff=lambda ctx: _yesterday_handoff_context(ctx),
+)
+_action_budget_workflows = ActionBudgetWorkflows(
+    ensure_setting=lambda db, character_id: activity_settings.ensure_setting(db, character_id),
+    count_today=lambda db, **kwargs: agent_activity_policy.count_action_today(db, **kwargs),
+    get_post=lambda db, post_id: community_crud.get_post(db, post_id),
+    reply_task_id=lambda **kwargs: _reply_task_id(**kwargs),
+)
+_filter_action_plan = partial(action_plans_service._filter_action_plan, workflows=_action_planning_workflows)
+_normalize_feed_action_plan = partial(action_plans_service._normalize_feed_action_plan, workflows=_action_planning_workflows)
+_normalized_inbox_conversation_decisions = partial(action_plans_service._normalized_inbox_conversation_decisions, workflows=_action_planning_workflows)
+_inbox_actions_with_conversation_decisions = action_plans_service._inbox_actions_with_conversation_decisions
+_normalize_inbox_action_plan = partial(action_plans_service._normalize_inbox_action_plan, workflows=_action_planning_workflows)
+_normalize_relationship_action_plan = partial(action_plans_service._normalize_relationship_action_plan, workflows=_action_planning_workflows)
+_normalize_independent_writing_plan = partial(action_plans_service._normalize_independent_writing_plan, workflows=_action_planning_workflows)
+_empty_action_plan = action_plans_service._empty_action_plan
+_empty_relationship_plan = action_plans_service._empty_relationship_plan
+_independent_writing_skip_reason = action_plans_service._independent_writing_skip_reason
+_owner_feed_cue_writing = partial(action_plans_service._owner_feed_cue_writing, workflows=_action_planning_workflows)
+_compose_action_bundle = partial(action_plans_service._compose_action_bundle, workflows=_action_planning_workflows)
+_independent_topic_prompt_text = partial(action_plans_service._independent_topic_prompt_text, workflows=_action_planning_workflows)
+_covered_handoff_matches_independent_writing = partial(action_plans_service._covered_handoff_matches_independent_writing, workflows=_action_planning_workflows)
+_feed_seed_candidates = writing_plans_service._feed_seed_candidates
+_normalize_feed_seed_selection = partial(writing_plans_service._normalize_feed_seed_selection, clip=_clip)
+_normalize_independent_topic_composition = partial(writing_plans_service._normalize_independent_topic_composition, clip=_clip)
+_writing_from_topic_composition = partial(writing_plans_service._writing_from_topic_composition, clip=_clip)
+_mandatory_root_writing_from_composition = partial(writing_plans_service._mandatory_root_writing_from_composition, clip=_clip)
+_restore_mandatory_root_writing = partial(writing_plans_service._restore_mandatory_root_writing, clip=_clip)
+_daily_action_budgets = partial(action_budgets_service._daily_action_budgets, workflows=_action_budget_workflows)
+_post_author_character_id = partial(action_budgets_service._post_author_character_id, workflows=_action_budget_workflows)
+_action_conflicts_with_unfollow_target = partial(action_budgets_service._action_conflicts_with_unfollow_target, workflows=_action_budget_workflows)
+_apply_unfollow_conflict_suppression = partial(action_budgets_service._apply_unfollow_conflict_suppression, workflows=_action_budget_workflows)
+_trim_action_plan_to_budget = partial(action_budgets_service._trim_action_plan_to_budget, workflows=_action_budget_workflows)
 
 
 _planner_tendency_profile = independent_topic_service._planner_tendency_profile
@@ -1512,45 +1550,8 @@ def _pending_relationship_points_for_state(
     return result
 
 
-def _feed_seed_candidates(feed_observation: dict[str, Any]) -> list[dict[str, Any]]:
-    raw = feed_observation.get("seed_candidates")
-    candidates = raw if isinstance(raw, list) else []
-    return [
-        item
-        for item in candidates
-        if isinstance(item, dict)
-        and item.get("author_character_id")
-        and item.get("post_id")
-        and not item.get("is_self")
-    ][:30]
 
 
-def _normalize_feed_seed_selection(
-    selection: dict[str, Any],
-    *,
-    candidates: list[dict[str, Any]],
-) -> dict[str, Any]:
-    candidate_by_post_id = {str(item.get("post_id")): item for item in candidates}
-    post_id = str(selection.get("post_id") or "").strip()
-    candidate = candidate_by_post_id.get(post_id)
-    if selection.get("mode") != "use_seed" or candidate is None:
-        return {"mode": "none", "mention_required": False}
-    author_character_id = str(candidate.get("author_character_id") or "").strip()
-    author_handle = str(candidate.get("author_handle") or "").strip()
-    if not author_character_id or not author_handle:
-        return {"mode": "none", "mention_required": False}
-    return {
-        "mode": "use_seed",
-        "post_id": post_id,
-        "author_character_id": author_character_id,
-        "author_handle": author_handle,
-        "author_name": _clip(candidate.get("author_name"), 120) or None,
-        "seed_brief": _clip(selection.get("seed_brief") or candidate.get("body_summary"), 800)
-        or None,
-        "source_body": _clip(candidate.get("source_body"), 1000) or None,
-        "use_reason": _clip(selection.get("use_reason"), 500) or None,
-        "mention_required": True,
-    }
 
 
 def _record_feed_seed_selected(
@@ -1606,107 +1607,6 @@ def _mandatory_post_context(
     }
 
 
-def _normalize_independent_topic_composition(
-    ctx: LangGraphResidentContext,
-    raw: dict[str, Any],
-    *,
-    mandatory_context: dict[str, Any],
-) -> dict[str, Any]:
-    owner_cue = mandatory_context.get("owner_feed_cue")
-    if isinstance(owner_cue, dict) and _clip(owner_cue.get("topic"), 800):
-        return {
-            "source": "owner_feed_cue",
-            "feed_cue_id": owner_cue.get("id"),
-            "topic_key": None,
-            "relationship_point_id": None,
-            "writing_form": "thought",
-            "action_step_count": 1,
-            "brief": _clip(owner_cue.get("topic"), 1000),
-            "use_post_seed": False,
-            "seed_post_id": None,
-            "mention_target_handle": None,
-            "selection_reason": "owner_feed_cue_highest_priority",
-        }
-    if not mandatory_context.get("post_required"):
-        return {
-            "source": "base_topic",
-            "topic_key": None,
-            "relationship_point_id": None,
-            "writing_form": "thought",
-            "action_step_count": 1,
-            "brief": mandatory_context.get("blocked_reason") or "post not required",
-            "use_post_seed": False,
-            "seed_post_id": None,
-            "mention_target_handle": None,
-            "selection_reason": "post_not_required",
-            "skip_reason": mandatory_context.get("blocked_reason"),
-        }
-    base_topics = {
-        str(topic.get("key") or ""): topic
-        for topic in mandatory_context.get("base_topic_candidates", [])
-        if isinstance(topic, dict)
-    }
-    relationship_points = {
-        int(point["id"]): point
-        for point in mandatory_context.get("relationship_point_candidates", [])
-        if isinstance(point, dict) and isinstance(point.get("id"), int)
-    }
-    source = str(raw.get("source") or "").strip()
-    relationship_point_id = raw.get("relationship_point_id")
-    if isinstance(relationship_point_id, bool):
-        relationship_point_id = None
-    try:
-        relationship_point_id = int(relationship_point_id)
-    except (TypeError, ValueError):
-        relationship_point_id = None
-    topic_key = str(raw.get("topic_key") or "").strip()
-    if source == "relationship_point" and relationship_point_id in relationship_points:
-        point = relationship_points[relationship_point_id]
-        brief = _clip(raw.get("brief") or point.get("topic_brief"), 1000)
-        handle = str(point.get("source_handle") or "").strip()
-        return {
-            "source": "relationship_point",
-            "topic_key": None,
-            "relationship_point_id": relationship_point_id,
-            "writing_form": _coerce_writing_form(raw.get("writing_form")),
-            "action_step_count": _coerce_action_step_count(raw.get("action_step_count")),
-            "brief": brief
-            or f"@{handle}와 이어진 대화에서 생긴 생각을 지금의 시점에 맞게 쓴다.",
-            "use_post_seed": False,
-            "seed_post_id": None,
-            "source_post_id": point.get("source_post_id"),
-            "source_body": point.get("source_post_body"),
-            "mention_target_handle": handle,
-            "selection_reason": _clip(raw.get("selection_reason"), 600)
-            or "relationship point selected",
-            **_subjective_plan_fields(raw),
-        }
-    if topic_key not in base_topics and base_topics:
-        topic_key = next(iter(base_topics))
-    topic = base_topics.get(topic_key) if topic_key else None
-    brief = _clip(raw.get("brief"), 1000)
-    if not brief and isinstance(topic, dict):
-        brief = _clip(topic.get("prompt") or topic.get("label"), 1000)
-    selected_seed = mandatory_context.get("selected_feed_seed")
-    use_seed = (
-        bool(raw.get("use_post_seed"))
-        and isinstance(selected_seed, dict)
-        and selected_seed.get("mode") == "use_seed"
-    )
-    return {
-        "source": "base_topic",
-        "topic_key": topic_key or None,
-        "relationship_point_id": None,
-        "writing_form": _coerce_writing_form(raw.get("writing_form")),
-        "action_step_count": _coerce_action_step_count(raw.get("action_step_count")),
-        "brief": brief or "캐릭터의 평소 독립 주제에서 지금 쓸 만한 글감을 고른다.",
-        "use_post_seed": use_seed,
-        "seed_post_id": selected_seed.get("post_id") if use_seed else None,
-        "mention_target_handle": selected_seed.get("author_handle") if use_seed else None,
-        "selection_reason": _clip(raw.get("selection_reason"), 600)
-        or "base independent topic selected",
-        **_subjective_plan_fields(raw),
-    }
 
 
 
@@ -1715,129 +1615,12 @@ def _normalize_independent_topic_composition(
 
 
 
-def _writing_from_topic_composition(
-    composition: dict[str, Any],
-    *,
-    selected_feed_seed: dict[str, Any] | None,
-) -> dict[str, Any]:
-    source = composition.get("source")
-    brief = _clip(composition.get("brief"), 1000)
-    if composition.get("skip_reason"):
-        return {
-            "mode": "none",
-            "brief": None,
-            "source_post_id": None,
-            "skip_reason": composition.get("skip_reason"),
-        }
-    if source == "owner_feed_cue":
-        return {
-            "mode": _OWNER_FEED_CUE_MODE,
-            "feed_cue_id": composition.get("feed_cue_id"),
-            "brief": brief,
-            "source_post_id": None,
-            "topic_key": None,
-            "writing_form": composition.get("writing_form"),
-            "action_step_count": composition.get("action_step_count"),
-            **_subjective_plan_fields(composition),
-        }
-    if source == "relationship_point":
-        handle = str(composition.get("mention_target_handle") or "").strip()
-        return {
-            "mode": _RELATIONSHIP_POINT_MODE,
-            "relationship_point_id": composition.get("relationship_point_id"),
-            "brief": brief,
-            "source_post_id": composition.get("source_post_id"),
-            "topic_key": None,
-            "source_mix": "relationship_point",
-            "mention_required": bool(handle),
-            "mention_target_handle": handle,
-            "source_body": composition.get("source_body"),
-            "writing_form": composition.get("writing_form"),
-            "action_step_count": composition.get("action_step_count"),
-            **_subjective_plan_fields(composition),
-        }
-    writing = {
-        "mode": "independent",
-        "brief": brief,
-        "source_post_id": None,
-        "topic_key": composition.get("topic_key"),
-        "source_mix": "none",
-        "mention_required": False,
-        "mention_target_handle": None,
-        "writing_form": composition.get("writing_form"),
-        "action_step_count": composition.get("action_step_count"),
-        **_subjective_plan_fields(composition),
-    }
-    if composition.get("use_post_seed") and isinstance(selected_feed_seed, dict):
-        writing["source_mix"] = "feed_seed"
-        writing["source_post_id"] = selected_feed_seed.get("post_id")
-        writing["selected_feed_seed"] = selected_feed_seed
-        writing["mention_required"] = bool(selected_feed_seed.get("mention_required"))
-        writing["mention_target_handle"] = selected_feed_seed.get("author_handle")
-        writing["mention_target_character_id"] = selected_feed_seed.get(
-            "author_character_id"
-        )
-    return writing
 
 
 
 
-def _mandatory_root_writing_from_composition(
-    ctx: LangGraphResidentContext,
-    *,
-    mandatory_context: dict[str, Any],
-    composition: dict[str, Any] | None,
-    selected_feed_seed: dict[str, Any] | None,
-) -> dict[str, Any] | None:
-    if not _mandatory_post_required(mandatory_context):
-        return None
-    if not isinstance(composition, dict):
-        composition = _normalize_independent_topic_composition(
-            ctx,
-            {"source": "base_topic"},
-            mandatory_context=mandatory_context,
-        )
-    writing = _writing_from_topic_composition(
-        composition,
-        selected_feed_seed=selected_feed_seed,
-    )
-    if not isinstance(writing, dict) or writing.get("mode") == "none":
-        return None
-    return writing
 
 
-def _restore_mandatory_root_writing(
-    ctx: LangGraphResidentContext,
-    plan: dict[str, Any],
-    *,
-    mandatory_context: dict[str, Any],
-    composition: dict[str, Any] | None,
-    selected_feed_seed: dict[str, Any] | None,
-) -> dict[str, Any]:
-    if not _mandatory_post_required(mandatory_context):
-        return plan
-    writing = plan.get("writing") if isinstance(plan, dict) else None
-    if isinstance(writing, dict) and writing.get("mode") != "none":
-        return plan
-    restored = _mandatory_root_writing_from_composition(
-        ctx,
-        mandatory_context=mandatory_context,
-        composition=composition,
-        selected_feed_seed=selected_feed_seed,
-    )
-    if restored is None:
-        return plan
-    restored = dict(restored)
-    original_skip_reason = (
-        writing.get("skip_reason") if isinstance(writing, dict) else None
-    )
-    if original_skip_reason:
-        restored["restored_from_skip_reason"] = original_skip_reason
-    restored["mandatory_backend_selected"] = True
-    updated = dict(plan)
-    updated["writing"] = restored
-    updated["mandatory_root_post_enforced"] = True
-    return updated
 
 
 def _seen_daypart_feed_post_ids(ctx: LangGraphResidentContext) -> set[str]:
@@ -3654,733 +3437,18 @@ def _suppress_already_answered_reply_affordance(
     return updated, True
 
 
-def _filter_action_plan(
-    plan: dict[str, Any],
-    ctx: LangGraphResidentContext,
-    *,
-    feed_observation: dict[str, Any],
-    inbox_observation: dict[str, Any],
-    independent_post_roll: dict[str, Any] | None = None,
-    active_topic_arc: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    allowed = set(ctx.activity_policy.allowed_actions)
-
-    def _normalize(action: dict[str, Any], scope: str) -> dict[str, Any] | None:
-        if action.get("scope") != scope:
-            action["scope"] = scope
-        if _action_name_for_policy(str(action.get("action_type"))) not in allowed:
-            return None
-        observation = feed_observation if scope == "feed" else inbox_observation
-        return _normalize_planned_action(action, scope=scope, observation=observation)
-
-    def _normalized_actions(key: str, scope: str) -> list[dict[str, Any]]:
-        normalized_actions: list[dict[str, Any]] = []
-        seen: set[tuple[Any, ...]] = set()
-        max_actions = 6 if scope == "inbox" else 4
-        raw_actions = plan.get(key, [])
-        if not isinstance(raw_actions, list):
-            return normalized_actions
-        for item in raw_actions:
-            if not isinstance(item, dict):
-                continue
-            normalized = _normalize(item, scope)
-            if normalized is None:
-                continue
-            dedupe_key = (
-                normalized.get("scope"),
-                normalized.get("action_type"),
-                normalized.get("post_id"),
-                normalized.get("notification_id"),
-                normalized.get("target_type"),
-                normalized.get("target_id"),
-            )
-            if dedupe_key in seen:
-                continue
-            seen.add(dedupe_key)
-            normalized_actions.append(normalized)
-            if len(normalized_actions) >= max_actions:
-                break
-        return normalized_actions
-
-    def _normalized_relationship_actions() -> list[dict[str, Any]]:
-        raw_actions = plan.get("relationship_actions", [])
-        if not isinstance(raw_actions, list):
-            return []
-        normalized_actions: list[dict[str, Any]] = []
-        allowed_relationship = set(_relationship_allowed_actions(ctx))
-        for item in raw_actions:
-            if not isinstance(item, dict):
-                continue
-            action_type = str(item.get("action_type") or "").strip()
-            if action_type not in {"follow", "unfollow"}:
-                continue
-            if action_type not in allowed_relationship:
-                continue
-            target_id = str(item.get("target_id") or "").strip()
-            if item.get("target_type") != "character" or not target_id:
-                continue
-            normalized = dict(item)
-            normalized["scope"] = "relationship"
-            normalized["target_type"] = "character"
-            normalized["target_id"] = target_id
-            normalized_actions.append(normalized)
-            break
-        return normalized_actions
-
-    feed_actions = _normalized_actions("feed_actions", "feed")
-    inbox_actions = _normalized_actions("inbox_actions", "inbox")
-    relationship_actions = _normalized_relationship_actions()
-    writing = plan.get("writing")
-    if not isinstance(writing, dict):
-        writing = {"mode": "none"}
-    else:
-        writing = dict(writing)
-    if writing.get("mode") == "post_seed":
-        source_item_index = _coerce_item_index(writing.get("source_item_index"))
-        if source_item_index is not None:
-            feed_items = _observation_items(feed_observation, scope="feed")
-            if source_item_index < len(feed_items) and isinstance(
-                feed_items[source_item_index], dict
-            ):
-                source_post_id = str(
-                    feed_items[source_item_index].get("post_id") or ""
-                ).strip()
-                writing["source_post_id"] = source_post_id or None
-            else:
-                writing = {
-                    "mode": "none",
-                    "brief": None,
-                    "source_post_id": None,
-                    "skip_reason": "post_seed_source_item_not_found",
-                }
-        if writing.get("mode") == "post_seed" and not str(
-            writing.get("brief") or ""
-        ).strip():
-            writing = {
-                "mode": "none",
-                "brief": None,
-                "source_post_id": writing.get("source_post_id"),
-                "skip_reason": "post_seed_brief_missing",
-            }
-        if writing.get("mode") == "post_seed":
-            writing.pop("topic_arc", None)
-        if isinstance(writing, dict):
-            writing.pop("source_item_index", None)
-    if writing.get("mode") != "none" and "post" not in allowed:
-        writing = {
-            "mode": "none",
-            "brief": None,
-            "source_post_id": None,
-            "skip_reason": "post_not_allowed",
-        }
-    elif writing.get("mode") == "independent":
-        roll = independent_post_roll or {}
-        topics = roll.get("topics") if isinstance(roll, dict) else None
-        mandatory_root_post = bool(
-            isinstance(roll, dict)
-            and roll.get("mandatory")
-            and roll.get("passed")
-            and not roll.get("blocked_reason")
-        )
-        ordered_topic_keys = [
-            str(topic.get("key"))
-            for topic in topics
-            if isinstance(topic, dict) and topic.get("key")
-        ] if isinstance(topics, list) else []
-        valid_topic_keys = set(ordered_topic_keys)
-
-        def _fallback_topic_key() -> str | None:
-            used_today = independent_topic_queries._today_independent_topic_keys(ctx)
-            for candidate in ordered_topic_keys:
-                if candidate not in used_today:
-                    return candidate
-            return ordered_topic_keys[0] if ordered_topic_keys else None
-
-        if not str(writing.get("brief") or "").strip():
-            fallback_key = _fallback_topic_key()
-            fallback_topic = next(
-                (
-                    topic
-                    for topic in topics or []
-                    if isinstance(topic, dict)
-                    and str(topic.get("key") or "") == str(fallback_key or "")
-                ),
-                None,
-            )
-            fallback_brief = _clip(
-                fallback_topic.get("prompt") if isinstance(fallback_topic, dict) else None,
-                800,
-            ) or _clip(
-                fallback_topic.get("label") if isinstance(fallback_topic, dict) else None,
-                800,
-            )
-            if mandatory_root_post and fallback_brief:
-                writing = dict(writing)
-                writing["brief"] = fallback_brief
-                if fallback_key:
-                    writing["topic_key"] = fallback_key
-                writing["mandatory_brief_fallback"] = True
-            else:
-                writing = {
-                    "mode": "none",
-                    "brief": None,
-                    "source_post_id": None,
-                    "skip_reason": "independent_brief_missing",
-                }
-        elif not str(writing.get("topic_key") or "").strip():
-            fallback_key = _fallback_topic_key()
-            if mandatory_root_post:
-                writing = dict(writing)
-                if fallback_key:
-                    writing["topic_key"] = fallback_key
-                    writing["mandatory_topic_fallback"] = "missing_topic"
-            else:
-                writing = {
-                    "mode": "none",
-                    "brief": None,
-                    "source_post_id": None,
-                    "skip_reason": "independent_topic_missing",
-                }
-        elif not roll.get("passed") or not isinstance(topics, list) or not topics:
-            if mandatory_root_post:
-                writing = dict(writing)
-            else:
-                writing = {
-                    "mode": "none",
-                    "brief": None,
-                    "source_post_id": None,
-                    "skip_reason": roll.get("blocked_reason") or "roll_failed",
-                }
-        else:
-            writing = dict(writing)
-            topic_key = str(writing.get("topic_key") or "").strip()
-            if topic_key in independent_topic_queries._today_independent_topic_keys(ctx):
-                fallback_key = _fallback_topic_key()
-                if mandatory_root_post and fallback_key:
-                    writing["topic_key"] = fallback_key
-                    writing["mandatory_topic_fallback"] = "topic_used_today"
-                elif mandatory_root_post:
-                    writing["mandatory_topic_fallback"] = "topic_used_today"
-                else:
-                    writing = {
-                        "mode": "none",
-                        "brief": None,
-                        "source_post_id": None,
-                        "skip_reason": "independent_topic_used_today",
-                        "topic_key": topic_key,
-                    }
-            elif writing.get("topic_key") not in valid_topic_keys:
-                fallback_key = _fallback_topic_key()
-                if mandatory_root_post:
-                    if fallback_key:
-                        writing["topic_key"] = fallback_key
-                    else:
-                        writing.pop("topic_key", None)
-                    writing["mandatory_topic_fallback"] = "invalid_topic"
-                else:
-                    writing = {
-                        "mode": "none",
-                        "brief": None,
-                        "source_post_id": None,
-                        "skip_reason": "independent_topic_invalid",
-                    }
-            else:
-                covered_handoff = _covered_handoff_matches_independent_writing(
-                    writing,
-                    roll,
-                    _yesterday_handoff_context(ctx),
-                )
-                if covered_handoff is not None and not mandatory_root_post:
-                    writing = {
-                        "mode": "none",
-                        "brief": None,
-                        "source_post_id": None,
-                        "skip_reason": "independent_handoff_already_covered_today",
-                        "covered_handoff_id": covered_handoff.get("handoff_id"),
-                        "covered_by_recent_post_id": covered_handoff.get(
-                            "covered_by_recent_post_id"
-                        ),
-                    }
-                else:
-                    writing["source_post_id"] = None
-                    writing.pop("topic_arc", None)
-    elif writing.get("mode") == _RELATIONSHIP_POINT_MODE:
-        if not str(writing.get("brief") or "").strip():
-            writing = {
-                "mode": "none",
-                "brief": None,
-                "source_post_id": None,
-                "skip_reason": "relationship_point_brief_missing",
-                "relationship_point_id": writing.get("relationship_point_id"),
-            }
-        elif not writing.get("relationship_point_id"):
-            writing = {
-                "mode": "none",
-                "brief": None,
-                "source_post_id": None,
-                "skip_reason": "relationship_point_missing",
-            }
-        else:
-            writing = dict(writing)
-            writing["source_post_id"] = (
-                str(writing.get("source_post_id") or "").strip() or None
-            )
-            writing.pop("topic_arc", None)
-    elif writing.get("mode") == "arc_continuation":
-        writing = {
-            "mode": "none",
-            "brief": None,
-            "source_post_id": None,
-            "skip_reason": "topic_arc_disabled_v8",
-        }
-    return {
-        **plan,
-        "feed_actions": feed_actions,
-        "inbox_actions": inbox_actions,
-        "relationship_actions": relationship_actions,
-        "writing": writing,
-    }
 
 
-def _daily_action_budgets(ctx: LangGraphResidentContext) -> dict[str, dict[str, Any]]:
-    setting = agent_crud.ensure_setting(ctx.db, ctx.character.id)
-    raw_limits: dict[str, int | None] = {
-        "reply": setting.max_comments_per_day if setting.allow_reply else 0,
-        "post": setting.max_posts_per_day if setting.allow_post else 0,
-    }
-    allowed = set(ctx.activity_policy.allowed_actions)
-    budgets: dict[str, dict[str, Any]] = {}
-    for action, limit in raw_limits.items():
-        cooldown_seconds = 0
-        if action not in allowed:
-            limit = 0
-        cooldown_blocked_until = None
-        if limit is None:
-            budgets[action] = {
-                "limit": None,
-                "used_today": None,
-                "remaining_before_plan": None,
-                "remaining_after_trim": None,
-                "cooldown_seconds": cooldown_seconds,
-                "cooldown_blocked_until": (
-                    cooldown_blocked_until.isoformat()
-                    if cooldown_blocked_until is not None
-                    else None
-                ),
-            }
-            continue
-        used_today = agent_activity_policy.count_action_today(
-            ctx.db,
-            character_id=ctx.character.id,
-            action=action,
-            now=ctx.run_started_at,
-        )
-        remaining = max(0, int(limit) - int(used_today))
-        budgets[action] = {
-            "limit": int(limit),
-            "used_today": int(used_today),
-            "remaining_before_plan": remaining,
-            "remaining_after_trim": remaining,
-            "cooldown_seconds": cooldown_seconds,
-            "cooldown_blocked_until": (
-                cooldown_blocked_until.isoformat()
-                if cooldown_blocked_until is not None
-                else None
-            ),
-            "cooldown_kept_in_run": 0,
-        }
-    return budgets
 
 
-def _post_author_character_id(ctx: LangGraphResidentContext, post_id: str | None) -> str | None:
-    source_post_id = str(post_id or "").strip()
-    if not source_post_id:
-        return None
-    post = community_crud.get_post(ctx.db, source_post_id)
-    return getattr(post, "author_character_id", None) if post is not None else None
 
 
-def _action_conflicts_with_unfollow_target(
-    ctx: LangGraphResidentContext,
-    *,
-    action: dict[str, Any],
-    target_character_id: str,
-    scope: str,
-) -> bool:
-    if str(action.get("target_id") or "") == target_character_id:
-        return True
-    if str(action.get("target_type") or "") == "character" and str(
-        action.get("target_id") or ""
-    ) == target_character_id:
-        return True
-    post_author_id = _post_author_character_id(ctx, action.get("post_id"))
-    if post_author_id == target_character_id:
-        return True
-    if scope == "inbox":
-        actor_id = str(action.get("actor_character_id") or "").strip()
-        if actor_id == target_character_id:
-            return True
-    return False
 
 
-def _apply_unfollow_conflict_suppression(
-    ctx: LangGraphResidentContext, action_plan: dict[str, Any]
-) -> dict[str, Any]:
-    relationship_actions = action_plan.get("relationship_actions")
-    if not isinstance(relationship_actions, list):
-        return {"applied": False, "suppressed_actions": []}
-    unfollow_action = next(
-        (
-            action
-            for action in relationship_actions
-            if isinstance(action, dict) and action.get("action_type") == "unfollow"
-        ),
-        None,
-    )
-    if not isinstance(unfollow_action, dict):
-        return {"applied": False, "suppressed_actions": []}
-    target_id = str(unfollow_action.get("target_id") or "").strip()
-    if not target_id:
-        return {"applied": False, "suppressed_actions": []}
-    suppressed: list[dict[str, Any]] = []
-    for scope, key in (("feed", "feed_actions"), ("inbox", "inbox_actions")):
-        actions = action_plan.get(key, [])
-        if not isinstance(actions, list):
-            action_plan[key] = []
-            continue
-        kept: list[dict[str, Any]] = []
-        for index, action in enumerate(actions):
-            if isinstance(action, dict) and _action_conflicts_with_unfollow_target(
-                ctx, action=action, target_character_id=target_id, scope=scope
-            ):
-                suppressed.append(
-                    {
-                        "scope": scope,
-                        "index": index,
-                        "action_type": action.get("action_type"),
-                        "post_id": action.get("post_id"),
-                        "target_id": action.get("target_id"),
-                        "reason": "unfollow_target_conflict",
-                    }
-                )
-                continue
-            kept.append(action)
-        action_plan[key] = kept
-    writing = action_plan.get("writing")
-    if isinstance(writing, dict) and writing.get("mode") == "post_seed":
-        source_post_id = str(writing.get("source_post_id") or "").strip()
-        if _post_author_character_id(ctx, source_post_id) == target_id:
-            suppressed.append(
-                {
-                    "scope": "writing",
-                    "index": 0,
-                    "action_type": "post",
-                    "post_id": source_post_id,
-                    "target_id": target_id,
-                    "reason": "unfollow_target_post_seed_conflict",
-                }
-            )
-            action_plan["writing"] = {
-                "mode": "none",
-                "brief": None,
-                "source_post_id": source_post_id,
-                "skip_reason": "unfollow_target_conflict",
-            }
-    review = action_plan.get("relationship_review")
-    if isinstance(review, dict):
-        review["suppressed_conflicts"] = suppressed
-        action_plan["relationship_review"] = review
-    return {
-        "applied": True,
-        "target_character_id": target_id,
-        "suppressed_actions": suppressed,
-    }
 
 
-def _trim_action_plan_to_budget(
-    ctx: LangGraphResidentContext, action_plan: dict[str, Any]
-) -> tuple[dict[str, Any], dict[str, Any]]:
-    if not isinstance(action_plan, dict):
-        return action_plan, {"actions": {}, "trimmed_actions": []}
-    budgets = _daily_action_budgets(ctx)
-    planned_counts: dict[str, int] = {}
-    kept_counts: dict[str, int] = {}
-    trimmed_actions: list[dict[str, Any]] = []
-
-    def _append_trimmed_action(
-        action: dict[str, Any],
-        *,
-        scope: str,
-        index: int,
-        action_type: str,
-        reason: str,
-        task_id: str | None = None,
-        reply_bucket: str | None = None,
-    ) -> None:
-        item = {
-            "scope": scope,
-            "index": index,
-            "action_type": action_type,
-            "post_id": action.get("post_id"),
-            "notification_id": action.get("notification_id"),
-            "notification_type": action.get("notification_type"),
-            "target_type": action.get("target_type"),
-            "target_id": action.get("target_id"),
-            "reason": reason,
-        }
-        if task_id:
-            item["task_id"] = task_id
-        if reply_bucket:
-            item["reply_bucket"] = reply_bucket
-        trimmed_actions.append(item)
-
-    def _keep_action(action: dict[str, Any], *, scope: str, index: int) -> bool:
-        action_type = _action_name_for_policy(str(action.get("action_type") or ""))
-        planned_counts[action_type] = planned_counts.get(action_type, 0) + 1
-        budget = budgets.get(action_type)
-        if budget is None or budget.get("remaining_after_trim") is None:
-            kept_counts[action_type] = kept_counts.get(action_type, 0) + 1
-            return True
-        remaining = int(budget.get("remaining_after_trim") or 0)
-        if remaining > 0:
-            budget["remaining_after_trim"] = remaining - 1
-            kept_counts[action_type] = kept_counts.get(action_type, 0) + 1
-            return True
-        _append_trimmed_action(
-            action,
-            scope=scope,
-            index=index,
-            action_type=action_type,
-            reason="action_budget_exhausted",
-        )
-        return False
-
-    def _reply_bucket(scope: str, action: dict[str, Any]) -> str:
-        if scope == "feed":
-            return "feed_reply"
-        if action.get("notification_type") == "mention":
-            return "mention_notification"
-        return "reply_notification"
-
-    def _reply_entry(scope: str, index: int, action: dict[str, Any]) -> dict[str, Any]:
-        post_id = str(action.get("post_id") or "").strip()
-        bucket = _reply_bucket(scope, action)
-        return {
-            "scope": scope,
-            "index": index,
-            "action": action,
-            "bucket": bucket,
-            "task_id": _reply_task_id(scope=scope, index=index, post_id=post_id),
-        }
-
-    def _keep_reply_action(entry: dict[str, Any]) -> bool:
-        action = entry["action"]
-        budget = budgets.get("reply")
-        if budget is None or budget.get("remaining_after_trim") is None:
-            kept_counts["reply"] = kept_counts.get("reply", 0) + 1
-            return True
-        remaining = int(budget.get("remaining_after_trim") or 0)
-        if remaining > 0:
-            budget["remaining_after_trim"] = remaining - 1
-            kept_counts["reply"] = kept_counts.get("reply", 0) + 1
-            return True
-        _append_trimmed_action(
-            action,
-            scope=entry["scope"],
-            index=entry["index"],
-            action_type="reply",
-            reason="action_budget_exhausted",
-            task_id=entry["task_id"],
-            reply_bucket=entry["bucket"],
-        )
-        return False
-
-    trimmed_plan = dict(action_plan)
-    kept_action_keys: set[tuple[str, int]] = set()
-    reply_entries: list[dict[str, Any]] = []
-    for scope, key in (("feed", "feed_actions"), ("inbox", "inbox_actions")):
-        actions = action_plan.get(key, [])
-        if not isinstance(actions, list):
-            trimmed_plan[key] = []
-            continue
-        for index, action in enumerate(actions):
-            if not isinstance(action, dict):
-                continue
-            action_type = _action_name_for_policy(str(action.get("action_type") or ""))
-            if action_type == "reply":
-                reply_entries.append(_reply_entry(scope, index, action))
-            elif _keep_action(action, scope=scope, index=index):
-                kept_action_keys.add((scope, index))
-
-    reply_cap_summary: dict[str, Any] = {
-        "limit": _REPLY_WRITER_MAX_TASKS_PER_RUN,
-        "bucket_limits": {
-            "feed_reply": _REPLY_WRITER_BUCKET_MAX_TASKS,
-            "reply_notification": _REPLY_WRITER_BUCKET_MAX_TASKS,
-            "mention_notification": _REPLY_WRITER_BUCKET_MAX_TASKS,
-        },
-        "planned": 0,
-        "kept": 0,
-        "trimmed": 0,
-        "bucket_trimmed": 0,
-        "budget_trimmed": 0,
-        "planned_buckets": {},
-        "kept_buckets": {},
-        "trimmed_task_ids": [],
-    }
-    planned_buckets: dict[str, int] = {}
-    kept_buckets: dict[str, int] = {}
-    bucket_entries: dict[str, list[dict[str, Any]]] = {
-        "feed_reply": [],
-        "reply_notification": [],
-        "mention_notification": [],
-    }
-    for entry in reply_entries:
-        bucket = str(entry["bucket"])
-        planned_buckets[bucket] = planned_buckets.get(bucket, 0) + 1
-        bucket_entries.setdefault(bucket, []).append(entry)
-    planned_counts["reply"] = len(reply_entries)
-
-    reply_cap_summary["planned"] = len(reply_entries)
-    reply_cap_summary["planned_buckets"] = planned_buckets
-    kept_reply_entries_by_bucket: dict[str, list[dict[str, Any]]] = {}
-    cap_trimmed_count = 0
-    for bucket, entries in bucket_entries.items():
-        kept_for_bucket = entries[:_REPLY_WRITER_BUCKET_MAX_TASKS]
-        kept_reply_entries_by_bucket[bucket] = kept_for_bucket
-        for entry in entries[_REPLY_WRITER_BUCKET_MAX_TASKS:]:
-            _append_trimmed_action(
-                entry["action"],
-                scope=entry["scope"],
-                index=entry["index"],
-                action_type="reply",
-                reason="reply_bucket_cap_trimmed",
-                task_id=entry["task_id"],
-                reply_bucket=bucket,
-            )
-            reply_cap_summary["trimmed_task_ids"].append(entry["task_id"])
-            cap_trimmed_count += 1
-
-    for bucket in ("mention_notification", "reply_notification", "feed_reply"):
-        for entry in kept_reply_entries_by_bucket.get(bucket, []):
-            if _keep_reply_action(entry):
-                kept_action_keys.add((entry["scope"], entry["index"]))
-                kept_buckets[bucket] = kept_buckets.get(bucket, 0) + 1
-            else:
-                reply_cap_summary["trimmed_task_ids"].append(entry["task_id"])
-
-    budget_trimmed_count = len(
-        [
-            item
-            for item in trimmed_actions
-            if item.get("action_type") == "reply"
-            and item.get("reason") == "action_budget_exhausted"
-        ]
-    )
-    reply_cap_summary.update(
-        {
-            "kept": kept_counts.get("reply", 0),
-            "trimmed": max(0, len(reply_entries) - kept_counts.get("reply", 0)),
-            "bucket_trimmed": cap_trimmed_count,
-            "budget_trimmed": budget_trimmed_count,
-            "kept_buckets": kept_buckets,
-        }
-    )
-
-    for scope, key in (("feed", "feed_actions"), ("inbox", "inbox_actions")):
-        actions = action_plan.get(key, [])
-        if not isinstance(actions, list):
-            trimmed_plan[key] = []
-            continue
-        trimmed_plan[key] = [
-            action
-            for index, action in enumerate(actions)
-            if isinstance(action, dict) and (scope, index) in kept_action_keys
-        ]
-
-    relationship_actions = action_plan.get("relationship_actions", [])
-    if not isinstance(relationship_actions, list):
-        relationship_actions = []
-    kept_relationship: list[dict[str, Any]] = []
-    for index, action in enumerate(relationship_actions[:1]):
-        if isinstance(action, dict) and _keep_action(
-            action, scope="relationship", index=index
-        ):
-            kept_relationship.append(action)
-    trimmed_plan["relationship_actions"] = kept_relationship
-
-    writing = action_plan.get("writing")
-    if isinstance(writing, dict) and writing.get("mode") != "none":
-        action_type = "post"
-        planned_counts[action_type] = planned_counts.get(action_type, 0) + 1
-        budget = budgets.get(action_type)
-        if budget is None or budget.get("remaining_after_trim") is None:
-            kept_counts[action_type] = kept_counts.get(action_type, 0) + 1
-        else:
-            remaining = int(budget.get("remaining_after_trim") or 0)
-            if remaining > 0:
-                budget["remaining_after_trim"] = remaining - 1
-                kept_counts[action_type] = kept_counts.get(action_type, 0) + 1
-            else:
-                trimmed_actions.append(
-                    {
-                        "scope": "writing",
-                        "index": 0,
-                        "action_type": "post",
-                        "post_id": writing.get("source_post_id"),
-                        "notification_id": None,
-                        "target_type": None,
-                        "target_id": None,
-                        "reason": "action_budget_exhausted",
-                    }
-                )
-                trimmed_plan["writing"] = {
-                    "mode": "none",
-                    "brief": None,
-                    "source_post_id": writing.get("source_post_id"),
-                    "feed_cue_id": writing.get("feed_cue_id"),
-                    "skip_reason": (
-                        "feed_cue_pending_post_blocked"
-                        if writing.get("mode") == _OWNER_FEED_CUE_MODE
-                        else "action_budget_trimmed"
-                    ),
-                }
-
-    suppression_summary = _apply_unfollow_conflict_suppression(ctx, trimmed_plan)
-
-    action_summary: dict[str, Any] = {}
-    for action_type in sorted(set(planned_counts) | set(kept_counts) | set(budgets)):
-        budget = budgets.get(action_type, {})
-        planned = planned_counts.get(action_type, 0)
-        kept = kept_counts.get(action_type, 0)
-        action_summary[action_type] = {
-            "planned": planned,
-            "kept": kept,
-            "trimmed": max(0, planned - kept),
-            "limit": budget.get("limit"),
-            "used_today": budget.get("used_today"),
-            "remaining_before_plan": budget.get("remaining_before_plan"),
-            "remaining_after_trim": budget.get("remaining_after_trim"),
-            "cooldown_seconds": budget.get("cooldown_seconds"),
-            "cooldown_blocked_until": budget.get("cooldown_blocked_until"),
-        }
-    return trimmed_plan, {
-        "actions": action_summary,
-        "trimmed_actions": trimmed_actions,
-        "reply_task_cap": reply_cap_summary,
-        "reply_task_cap_trimmed": reply_cap_summary["bucket_trimmed"],
-        "relationship_conflict_suppression": suppression_summary,
-    }
 
 
-def _empty_action_plan(selection_reason: str) -> dict[str, Any]:
-    return {
-        "selection_reason": selection_reason,
-        "feed_actions": [],
-        "inbox_actions": [],
-        "relationship_actions": [],
-        "writing": {"mode": "none", "brief": None, "source_post_id": None},
-    }
 
 
 def _planner_error_payload(
@@ -4413,117 +3481,12 @@ def _planner_json_failed_plan(
     return plan
 
 
-def _normalize_feed_action_plan(
-    plan: dict[str, Any],
-    ctx: LangGraphResidentContext,
-    *,
-    feed_observation: dict[str, Any],
-    active_topic_arc: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    normalized_plan = {
-        "selection_reason": plan.get("selection_reason")
-        or "feed action planner completed",
-        "feed_actions": plan.get("feed_actions", []),
-        "inbox_actions": [],
-        "writing": {"mode": "none", "skip_reason": "feed_writing_moved_to_seed_selector"},
-    }
-    if isinstance(plan.get("planner_error"), dict):
-        normalized_plan["planner_error"] = plan["planner_error"]
-    return _filter_action_plan(
-        normalized_plan,
-        ctx,
-        feed_observation=feed_observation,
-        inbox_observation={"items": []},
-        active_topic_arc=active_topic_arc,
-    )
 
 
-def _normalized_inbox_conversation_decisions(raw: Any) -> list[dict[str, Any]]:
-    if not isinstance(raw, list):
-        return []
-    decisions: list[dict[str, Any]] = []
-    seen: set[int] = set()
-    for item in raw:
-        if not isinstance(item, dict):
-            continue
-        item_index = _coerce_item_index(item.get("item_index"))
-        if item_index is None or item_index > 9 or item_index in seen:
-            continue
-        judgment = str(item.get("conversation_judgment") or "").strip()
-        if judgment not in _INBOX_CONVERSATION_JUDGMENTS:
-            continue
-        seen.add(item_index)
-        decisions.append(
-            {
-                "item_index": item_index,
-                "conversation_judgment": judgment,
-                "conversation_reason": _clip(item.get("conversation_reason"), 500)
-                or None,
-            }
-        )
-    return decisions
 
 
-def _inbox_actions_with_conversation_decisions(
-    actions: Any, decisions: list[dict[str, Any]]
-) -> list[Any]:
-    if not isinstance(actions, list):
-        return []
-    decisions_by_index = {
-        int(decision["item_index"]): decision
-        for decision in decisions
-        if isinstance(decision.get("item_index"), int)
-    }
-    result: list[Any] = []
-    for action in actions:
-        if not isinstance(action, dict):
-            result.append(action)
-            continue
-        updated = dict(action)
-        item_index = _coerce_item_index(updated.get("item_index"))
-        decision = (
-            decisions_by_index.get(item_index)
-            if item_index is not None
-            else None
-        )
-        if decision is not None:
-            updated["conversation_judgment"] = decision["conversation_judgment"]
-            if decision.get("conversation_reason"):
-                updated["conversation_reason"] = decision["conversation_reason"]
-        elif updated.get("action_type") == "reply":
-            updated["conversation_judgment"] = "continue_reply"
-        result.append(updated)
-    return result
 
 
-def _normalize_inbox_action_plan(
-    plan: dict[str, Any],
-    ctx: LangGraphResidentContext,
-    *,
-    inbox_observation: dict[str, Any],
-) -> dict[str, Any]:
-    conversation_decisions = _normalized_inbox_conversation_decisions(
-        plan.get("conversation_decisions")
-    )
-    normalized_plan = {
-        "selection_reason": plan.get("selection_reason")
-        or "inbox action planner completed",
-        "feed_actions": [],
-        "inbox_actions": _inbox_actions_with_conversation_decisions(
-            plan.get("inbox_actions", []),
-            conversation_decisions,
-        ),
-        "conversation_decisions": conversation_decisions,
-        "writing": {"mode": "none"},
-    }
-    if isinstance(plan.get("planner_error"), dict):
-        normalized_plan["planner_error"] = plan["planner_error"]
-    return _filter_action_plan(
-        normalized_plan,
-        ctx,
-        feed_observation={"selected_posts": []},
-        inbox_observation=inbox_observation,
-    )
 
 
 
@@ -4547,304 +3510,20 @@ def _has_unfollow_watch(
     return False
 
 
-def _empty_relationship_plan(reason: str) -> dict[str, Any]:
-    return {
-        "selection_reason": reason,
-        "decision": "none",
-        "relationship_actions": [],
-        "relationship_review": {
-            "decision": "none",
-            "blocked_reason": reason,
-            "relationship_actions": [],
-        },
-    }
 
 
-def _normalize_relationship_action_plan(
-    plan: dict[str, Any],
-    ctx: LangGraphResidentContext,
-    *,
-    candidates: list[dict[str, Any]],
-    allowed_relationship_actions: list[str],
-) -> dict[str, Any]:
-    allowed = set(allowed_relationship_actions)
-    decision = str(plan.get("decision") or "none").strip()
-    if decision not in {"none", "follow", "unfollow_watch", "unfollow"}:
-        decision = "none"
-    target_id = str(plan.get("target_character_id") or "").strip()
-    reason_tag = _clip(plan.get("reason_tag"), 80) or None
-    evidence_summary = _clip(plan.get("evidence_summary"), 800) or None
-    blocked_reason = None
-    actions: list[dict[str, Any]] = []
-    counts = _relationship_candidate_counts(candidates)
-
-    if decision == "follow":
-        candidate = _matching_relationship_candidate(
-            candidates, action_type="follow", target_id=target_id
-        )
-        if "follow" not in allowed:
-            blocked_reason = "follow_not_allowed"
-        elif candidate is None:
-            blocked_reason = "follow_candidate_missing"
-        elif counts.get(("follow", target_id), 0) < 2:
-            blocked_reason = "follow_evidence_insufficient"
-        elif _target_character_following(ctx, target_id):
-            blocked_reason = "already_following"
-        else:
-            actions.append(
-                {
-                    "scope": "relationship",
-                    "action_type": "follow",
-                    "target_type": "character",
-                    "target_id": target_id,
-                    "brief": evidence_summary,
-                    **_subjective_plan_fields(plan),
-                }
-            )
-    elif decision in {"unfollow_watch", "unfollow"}:
-        candidate = _matching_relationship_candidate(
-            candidates, action_type="unfollow_watch", target_id=target_id
-        )
-        if decision not in allowed:
-            blocked_reason = "unfollow_not_allowed"
-        elif candidate is None:
-            blocked_reason = "unfollow_candidate_missing"
-        elif not _target_character_following(ctx, target_id):
-            blocked_reason = "not_following"
-        elif decision == "unfollow" and not _has_unfollow_watch(
-            ctx, target_id=target_id, reason_tag=reason_tag
-        ):
-            decision = "unfollow_watch"
-        elif decision == "unfollow":
-            actions.append(
-                {
-                    "scope": "relationship",
-                    "action_type": "unfollow",
-                    "target_type": "character",
-                    "target_id": target_id,
-                    "brief": evidence_summary,
-                    **_subjective_plan_fields(plan),
-                }
-            )
-    if decision == "none" or blocked_reason:
-        decision = "none" if blocked_reason else decision
-        actions = []
-
-    review = {
-        "decision": decision,
-        "target_character_id": target_id or None,
-        "reason_tag": reason_tag,
-        "evidence_summary": evidence_summary,
-        "evidence_count": counts.get(("follow", target_id), 0)
-        if target_id
-        else 0,
-        "allowed_relationship_actions": allowed_relationship_actions,
-        "blocked_reason": blocked_reason,
-        "relationship_actions": actions,
-        "candidate_count": len(candidates),
-    }
-    normalized = {
-        "selection_reason": plan.get("selection_reason")
-        or "relationship planner completed",
-        "decision": decision,
-        "target_character_id": target_id or None,
-        "reason_tag": reason_tag,
-        "evidence_summary": evidence_summary,
-        "relationship_actions": actions[:1],
-        "relationship_review": review,
-    }
-    if isinstance(plan.get("planner_error"), dict):
-        normalized["planner_error"] = plan["planner_error"]
-        normalized["relationship_review"]["planner_error"] = plan["planner_error"]
-    return normalized
 
 
-def _independent_writing_skip_reason(independent_post_roll: dict[str, Any]) -> str | None:
-    if not independent_post_roll.get("passed"):
-        return str(independent_post_roll.get("blocked_reason") or "roll_failed")
-    topics = independent_post_roll.get("topics")
-    if not isinstance(topics, list) or not topics:
-        return "independent_post_topics_missing"
-    return None
 
 
-def _independent_topic_prompt_text(
-    writing: dict[str, Any], independent_post_roll: dict[str, Any]
-) -> str:
-    topic_key = str(writing.get("topic_key") or "").strip()
-    parts = [_clip(writing.get("brief"), 800)]
-    topics = independent_post_roll.get("topics")
-    if isinstance(topics, list):
-        for topic in topics:
-            if not isinstance(topic, dict):
-                continue
-            if str(topic.get("key") or "").strip() != topic_key:
-                continue
-            parts.append(_clip(topic.get("label"), 200))
-            parts.append(_clip(topic.get("prompt"), 500))
-            break
-    return " ".join(part for part in parts if part)
 
 
-def _covered_handoff_matches_independent_writing(
-    writing: dict[str, Any],
-    independent_post_roll: dict[str, Any],
-    handoffs: list[dict[str, Any]],
-) -> dict[str, Any] | None:
-    writing_text = _independent_topic_prompt_text(writing, independent_post_roll)
-    if not writing_text:
-        return None
-    for handoff in handoffs:
-        if not isinstance(handoff, dict) or not handoff.get("already_covered_today"):
-            continue
-        summary = _clip(handoff.get("summary"), 500)
-        if summary and _handoff_covered_by_today_post(summary, writing_text):
-            return handoff
-    return None
 
 
-def _normalize_independent_writing_plan(
-    plan: dict[str, Any],
-    ctx: LangGraphResidentContext,
-    *,
-    independent_post_roll: dict[str, Any],
-    active_topic_arc: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    writing = plan.get("writing") if isinstance(plan, dict) else None
-    if not isinstance(writing, dict):
-        writing = {"mode": "none"}
-    if writing.get("mode") == "independent":
-        writing = {
-            "mode": "independent",
-            "source_post_id": None,
-            "topic_key": writing.get("topic_key"),
-            "brief": writing.get("brief"),
-            "topic_arc": writing.get("topic_arc"),
-            **_subjective_plan_fields(writing),
-        }
-    else:
-        writing = {
-            "mode": "none",
-            "brief": None,
-            "source_post_id": None,
-            "skip_reason": writing.get("skip_reason") or "planner_skipped",
-        }
-    normalized_plan = {
-        "selection_reason": plan.get("selection_reason")
-        or "independent writing planner completed",
-        "feed_actions": [],
-        "inbox_actions": [],
-        "writing": writing,
-    }
-    if isinstance(plan.get("planner_error"), dict):
-        normalized_plan["planner_error"] = plan["planner_error"]
-    return _filter_action_plan(
-        normalized_plan,
-        ctx,
-        feed_observation={"selected_posts": []},
-        inbox_observation={"items": []},
-        independent_post_roll=independent_post_roll,
-        active_topic_arc=active_topic_arc,
-    )
 
 
-def _owner_feed_cue_writing(feed_cue: Any) -> dict[str, Any] | None:
-    if feed_cue is None:
-        return None
-    topic = _clip(getattr(feed_cue, "topic", ""), 800)
-    if not topic:
-        return None
-    return {
-        "mode": _OWNER_FEED_CUE_MODE,
-        "feed_cue_id": getattr(feed_cue, "id", None),
-        "brief": topic,
-        "source_post_id": None,
-        "topic_key": None,
-    }
 
 
-def _compose_action_bundle(
-    *,
-    feed_action_plan: dict[str, Any],
-    inbox_action_plan: dict[str, Any],
-    independent_writing_plan: dict[str, Any],
-    relationship_action_plan: dict[str, Any] | None = None,
-    owner_feed_cue: Any = None,
-) -> dict[str, Any]:
-    if relationship_action_plan is None:
-        relationship_action_plan = {}
-    post_seed_writing = (
-        feed_action_plan.get("writing") if isinstance(feed_action_plan, dict) else None
-    )
-    independent_writing = (
-        independent_writing_plan.get("writing")
-        if isinstance(independent_writing_plan, dict)
-        else None
-    )
-    writing: dict[str, Any]
-    owner_feed_cue_writing = _owner_feed_cue_writing(owner_feed_cue)
-    if owner_feed_cue_writing is not None:
-        writing = owner_feed_cue_writing
-    elif (
-        isinstance(independent_writing, dict)
-        and independent_writing.get("mode") == "arc_continuation"
-    ):
-        writing = dict(independent_writing)
-    elif (
-        isinstance(independent_writing, dict)
-        and independent_writing.get("mode") == "independent"
-    ):
-        writing = dict(independent_writing)
-    elif (
-        isinstance(independent_writing, dict)
-        and independent_writing.get("mode") == _RELATIONSHIP_POINT_MODE
-    ):
-        writing = dict(independent_writing)
-    elif (
-        isinstance(post_seed_writing, dict)
-        and post_seed_writing.get("mode") == "post_seed"
-    ):
-        writing = dict(post_seed_writing)
-    else:
-        writing = {"mode": "none", "brief": None, "source_post_id": None}
-
-    return {
-        "selection_reason": "feed, inbox, and writing planners composed independently",
-        "feed_actions": list(feed_action_plan.get("feed_actions", []))
-        if isinstance(feed_action_plan, dict)
-        else [],
-        "inbox_actions": list(inbox_action_plan.get("inbox_actions", []))
-        if isinstance(inbox_action_plan, dict)
-        else [],
-        "relationship_actions": list(
-            relationship_action_plan.get("relationship_actions", [])
-        )
-        if isinstance(relationship_action_plan, dict)
-        else [],
-        "relationship_review": relationship_action_plan.get("relationship_review", {})
-        if isinstance(relationship_action_plan, dict)
-        else {},
-        "writing": writing,
-        "component_selection_reasons": {
-            "feed": feed_action_plan.get("selection_reason")
-            if isinstance(feed_action_plan, dict)
-            else None,
-            "inbox": inbox_action_plan.get("selection_reason")
-            if isinstance(inbox_action_plan, dict)
-            else None,
-            "relationship": relationship_action_plan.get("selection_reason")
-            if isinstance(relationship_action_plan, dict)
-            else None,
-            "independent_writing": independent_writing_plan.get("selection_reason")
-            if isinstance(independent_writing_plan, dict)
-            else None,
-            "owner_feed_cue": (
-                f"pending owner feed cue {getattr(owner_feed_cue, 'id', '-')}"
-                if owner_feed_cue_writing is not None
-                else None
-            ),
-        },
-    }
 
 
 def _independent_post_decision_meta(

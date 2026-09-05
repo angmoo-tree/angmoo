@@ -2254,7 +2254,7 @@ def test_action_budget_trim_keeps_reply_notification_before_feed_replies(
     )
 
     monkeypatch.setattr(
-        langgraph_resident.agent_crud,
+        langgraph_resident.activity_settings,
         "ensure_setting",
         lambda *_args, **_kwargs: setting,
     )
@@ -2312,7 +2312,7 @@ def test_action_budget_trim_preserves_mentions_then_reply_notifications_then_fee
     )
 
     monkeypatch.setattr(
-        langgraph_resident.agent_crud,
+        langgraph_resident.activity_settings,
         "ensure_setting",
         lambda *_args, **_kwargs: setting,
     )
@@ -2398,7 +2398,7 @@ def test_reply_task_cap_trims_feed_reply_and_notification_buckets_to_three(
     )
 
     monkeypatch.setattr(
-        langgraph_resident.agent_crud,
+        langgraph_resident.activity_settings,
         "ensure_setting",
         lambda *_args, **_kwargs: setting,
     )
@@ -2497,7 +2497,7 @@ def test_reply_task_cap_limits_feed_replies_to_three(monkeypatch) -> None:
     )
 
     monkeypatch.setattr(
-        langgraph_resident.agent_crud,
+        langgraph_resident.activity_settings,
         "ensure_setting",
         lambda *_args, **_kwargs: setting,
     )
@@ -2555,7 +2555,7 @@ def test_action_budget_trim_does_not_cap_same_run_reposts(monkeypatch) -> None:
     )
 
     monkeypatch.setattr(
-        langgraph_resident.agent_crud,
+        langgraph_resident.activity_settings,
         "ensure_setting",
         lambda *_args, **_kwargs: setting,
     )
@@ -2611,7 +2611,7 @@ def test_action_budget_trim_does_not_apply_repost_cooldown(
     )
 
     monkeypatch.setattr(
-        langgraph_resident.agent_crud,
+        langgraph_resident.activity_settings,
         "ensure_setting",
         lambda *_args, **_kwargs: setting,
     )
@@ -7014,7 +7014,7 @@ def test_action_budget_trim_blocks_owner_feed_cue_when_post_budget_exhausted(
     )
 
     monkeypatch.setattr(
-        langgraph_resident.agent_crud,
+        langgraph_resident.activity_settings,
         "ensure_setting",
         lambda *_args, **_kwargs: setting,
     )
@@ -7072,7 +7072,7 @@ def test_action_budget_trim_keeps_root_post_when_optional_reply_cap_exhausted(
     )
 
     monkeypatch.setattr(
-        langgraph_resident.agent_crud,
+        langgraph_resident.activity_settings,
         "ensure_setting",
         lambda *_args, **_kwargs: setting,
     )

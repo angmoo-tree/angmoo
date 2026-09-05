@@ -684,3 +684,10 @@ Routines 서비스의 `prompt_context.py`는 전달받은 값의 공통 문맥�
 ### 자율 글쓰기의 주제와 확률
 
 `routines/service/independent_topics.py`는 저장된 persona의 관심 기준·주제 목록·자율 글쓰기 확률을 읽어, 오늘 사용한 주제를 제외하고 같은 실행 id에 같은 선택을 만듭니다. 최근 성공 글의 주제와 오늘 성공 글의 주제를 읽는 실제 SQL은 `repository/independent_topics.py`가 소유합니다. 조회는 원래 caller의 Session으로 수행하며 Character 범위, 성공 상태, 정렬, 개수, 오늘의 시각 경계를 유지합니다. 시각 경계 계산은 `policies/resident_clock.py`, 공통 텍스트 정제는 실행 시 연결되는 같은 함수가 담당합니다.
+
+
+### 행동 계획과 실행 전 예산
+
+`routines/service/action_plans.py`는 관찰한 항목에 맞게 feed·inbox·관계 행동을 정규화하고 하나의 계획으로 묶습니다. `writing_plans.py`는 유효한 글감과 필수 독립 글의 의도를 유지하고, `action_budgets.py`는 하루 한도·답글 묶음 한도·멘션/알림 우선순위와 unfollow 충돌을 적용합니다. 이곳에 실제 판단 본문이 있으며 실행부는 서비스를 호출할 협력만 구성합니다.
+
+설정은 기존 `activity_settings.ensure_setting`을 사용하며 그 함수의 원래 저장 계약을 바꾸지 않습니다. World 시각을 사용하는 실제 사용량 계산, nullable 게시자 조회, 기억의 unfollow 관찰은 원래 Session과 호출 순서로 연결합니다. 도메인은 외부 업무 ORM을 조회하지 않고 필요한 값만 받습니다. 설정이 무제한이면 해당 count를 호출하지 않는 조건, 전체 글쓰기 제한과 답글 bucket의 우선순위를 새 구조를 이유로 통합하거나 바꾸지 않습니다.
