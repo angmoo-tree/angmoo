@@ -355,7 +355,8 @@
     "backend/tests/test_l2_scheduler_singleton.py": "backend/tests/routines/test_scheduler_singleton.py",
     "backend/app/schemas/agent_runs.py": "backend/app/domains/routines/schemas/runs.py",
     "backend/app/services/agent_activity_policy.py": "backend/app/domains/routines/service/activity_policy.py",
-    "backend/app/services/agent_briefs.py": "backend/app/domains/routines/service/action_briefs.py"
+    "backend/app/services/agent_briefs.py": "backend/app/domains/routines/service/action_briefs.py",
+    "backend/tests/test_tendency_note_action_selection.py": "backend/tests/routines/test_tendency.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -839,7 +840,55 @@
     "tests/test_daypart_persistent_session.py::test_night_daypart_keeps_start_date_across_midnight": "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
     "tests/test_tendency_note_action_selection.py::test_v6_action_menu_exposes_create_post_only_with_prepared_brief": "tests/routines/test_action_menu.py::test_v6_action_menu_exposes_create_post_only_with_prepared_brief",
     "tests/test_tendency_note_action_selection.py::test_v6_action_menu_keeps_feed_actions_without_post_seed": "tests/routines/test_action_menu.py::test_v6_action_menu_keeps_feed_actions_without_post_seed",
-    "tests/test_langgraph_resident_engine.py::test_agent_run_readiness_requires_hidden_feed_seed_criteria": "tests/routines/test_execution_readiness.py::test_agent_run_readiness_requires_hidden_feed_seed_criteria"
+    "tests/test_langgraph_resident_engine.py::test_agent_run_readiness_requires_hidden_feed_seed_criteria": "tests/routines/test_execution_readiness.py::test_agent_run_readiness_requires_hidden_feed_seed_criteria",
+    "tests/test_tendency_note_action_selection.py::test_activity_policy_prompt_uses_notes_without_ranges_or_observe_tendency": "tests/routines/test_tendency.py::test_activity_policy_prompt_uses_notes_without_ranges_or_observe_tendency",
+    "tests/test_tendency_note_action_selection.py::test_activity_setting_read_excludes_internal_planner_tendency_profile": "tests/routines/test_tendency.py::test_activity_setting_read_excludes_internal_planner_tendency_profile",
+    "tests/test_tendency_note_action_selection.py::test_agent_service_tendency_readiness_requires_hidden_feed_seed_criteria": "tests/routines/test_tendency.py::test_agent_service_tendency_readiness_requires_hidden_feed_seed_criteria",
+    "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness": "tests/routines/test_tendency.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness",
+    "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_require_tendency_readiness": "tests/routines/test_tendency.py::test_public_activity_entrypoints_require_tendency_readiness",
+    "tests/test_tendency_note_action_selection.py::test_tendency_payload_normalizes_internal_independent_post_profile": "tests/routines/test_tendency.py::test_tendency_payload_normalizes_internal_independent_post_profile",
+    "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_30_internal_independent_post_topics[29]": "tests/routines/test_tendency.py::test_tendency_payload_requires_30_internal_independent_post_topics[29]",
+    "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_30_internal_independent_post_topics[31]": "tests/routines/test_tendency.py::test_tendency_payload_requires_30_internal_independent_post_topics[31]",
+    "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_internal_planner_tendency_profile": "tests/routines/test_tendency.py::test_tendency_payload_requires_internal_planner_tendency_profile",
+    "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_hidden_feed_seed_interest_criteria": "tests/routines/test_tendency.py::test_tendency_payload_requires_hidden_feed_seed_interest_criteria",
+    "tests/test_tendency_note_action_selection.py::test_tendency_payload_rejects_prompt_injection_before_save": "tests/routines/test_tendency.py::test_tendency_payload_rejects_prompt_injection_before_save",
+    "tests/test_tendency_note_action_selection.py::test_tendency_payload_rejects_hidden_feed_seed_interest_injection": "tests/routines/test_tendency.py::test_tendency_payload_rejects_hidden_feed_seed_interest_injection",
+    "tests/test_tendency_note_action_selection.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term": "tests/routines/test_tendency.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term",
+    "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget": "tests/routines/test_tendency.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget",
+    "tests/test_tendency_note_action_selection.py::test_tendency_analysis_route_hides_json_parse_details[exc0]": "tests/routines/test_tendency.py::test_tendency_analysis_route_hides_json_parse_details[exc0]",
+    "tests/test_tendency_note_action_selection.py::test_tendency_analysis_route_hides_json_parse_details[exc1]": "tests/routines/test_tendency.py::test_tendency_analysis_route_hides_json_parse_details[exc1]",
+    "tests/test_tendency_note_action_selection.py::test_tendency_analysis_route_maps_prompt_injection_to_422": "tests/routines/test_tendency.py::test_tendency_analysis_route_maps_prompt_injection_to_422",
+    "tests/test_tendency_note_action_selection.py::test_tendency_analysis_route_keeps_non_json_errors[exc0-409-Agent credential is required]": "tests/routines/test_tendency.py::test_tendency_analysis_route_keeps_non_json_errors[exc0-409-Agent credential is required]",
+    "tests/test_tendency_note_action_selection.py::test_tendency_analysis_route_keeps_non_json_errors[exc1-400-Google API key is invalid]": "tests/routines/test_tendency.py::test_tendency_analysis_route_keeps_non_json_errors[exc1-400-Google API key is invalid]",
+    "tests/test_tendency_note_action_selection.py::test_tendency_analysis_route_keeps_non_json_errors[exc2-502-Gateway failed]": "tests/routines/test_tendency.py::test_tendency_analysis_route_keeps_non_json_errors[exc2-502-Gateway failed]",
+    "tests/test_tendency_note_action_selection.py::test_normalize_angmoo_terms_in_tendency_text_changes_persona_only": "tests/routines/test_tendency.py::test_normalize_angmoo_terms_in_tendency_text_changes_persona_only",
+    "tests/test_tendency_note_action_selection.py::test_feed_scan_create_post_brief_requires_seed_or_owner_cue": "tests/routines/test_tendency.py::test_feed_scan_create_post_brief_requires_seed_or_owner_cue",
+    "tests/test_tendency_note_action_selection.py::test_feed_history_sanitize_uses_google_non_streaming_stream_params": "tests/routines/test_tendency.py::test_feed_history_sanitize_uses_google_non_streaming_stream_params",
+    "tests/test_tendency_note_action_selection.py::test_feed_scan_uses_google_non_streaming_stream_params": "tests/routines/test_tendency.py::test_feed_scan_uses_google_non_streaming_stream_params",
+    "tests/test_tendency_note_action_selection.py::test_writing_composition_prompt_has_input_voice_boundary": "tests/routines/test_tendency.py::test_writing_composition_prompt_has_input_voice_boundary",
+    "tests/test_tendency_note_action_selection.py::test_recent_feed_interest_history_formatter_limits_and_filters": "tests/routines/test_tendency.py::test_recent_feed_interest_history_formatter_limits_and_filters",
+    "tests/test_tendency_note_action_selection.py::test_agent_feed_post_summary_uses_topic_and_preview": "tests/routines/test_tendency.py::test_agent_feed_post_summary_uses_topic_and_preview",
+    "tests/test_tendency_note_action_selection.py::test_agent_feed_post_summary_prefers_post_topic_columns": "tests/routines/test_tendency.py::test_agent_feed_post_summary_prefers_post_topic_columns",
+    "tests/test_tendency_note_action_selection.py::test_post_topic_signature_falls_back_to_activity_log_metadata": "tests/routines/test_tendency.py::test_post_topic_signature_falls_back_to_activity_log_metadata",
+    "tests/test_tendency_note_action_selection.py::test_note_agent_tool_feed_interests_stores_topic_metadata": "tests/routines/test_tendency.py::test_note_agent_tool_feed_interests_stores_topic_metadata",
+    "tests/test_tendency_note_action_selection.py::test_note_agent_tool_feed_interests_marks_legacy_reaction_seed_not_writable": "tests/routines/test_tendency.py::test_note_agent_tool_feed_interests_marks_legacy_reaction_seed_not_writable",
+    "tests/test_tendency_note_action_selection.py::test_note_agent_tool_feed_interests_drops_seed_without_interest": "tests/routines/test_tendency.py::test_note_agent_tool_feed_interests_drops_seed_without_interest",
+    "tests/test_tendency_note_action_selection.py::test_note_agent_tool_feed_interests_keeps_interest_without_seed": "tests/routines/test_tendency.py::test_note_agent_tool_feed_interests_keeps_interest_without_seed",
+    "tests/test_tendency_note_action_selection.py::test_note_agent_tool_feed_history_sanitize_removes_style_marker": "tests/routines/test_tendency.py::test_note_agent_tool_feed_history_sanitize_removes_style_marker",
+    "tests/test_tendency_note_action_selection.py::test_note_agent_tool_feed_history_sanitize_merges_backend_skeleton": "tests/routines/test_tendency.py::test_note_agent_tool_feed_history_sanitize_merges_backend_skeleton",
+    "tests/test_tendency_note_action_selection.py::test_note_agent_tool_feed_history_sanitize_fills_missing_llm_items_from_metadata": "tests/routines/test_tendency.py::test_note_agent_tool_feed_history_sanitize_fills_missing_llm_items_from_metadata",
+    "tests/test_tendency_note_action_selection.py::test_note_agent_tool_feed_history_sanitize_logs_endpoint_timing_without_raw_payload": "tests/routines/test_tendency.py::test_note_agent_tool_feed_history_sanitize_logs_endpoint_timing_without_raw_payload",
+    "tests/test_tendency_note_action_selection.py::test_note_agent_tool_feed_history_sanitize_logs_authorization_error": "tests/routines/test_tendency.py::test_note_agent_tool_feed_history_sanitize_logs_authorization_error",
+    "tests/test_tendency_note_action_selection.py::test_feed_history_metadata_fallback_excludes_raw_seed": "tests/routines/test_tendency.py::test_feed_history_metadata_fallback_excludes_raw_seed",
+    "tests/test_tendency_note_action_selection.py::test_note_agent_tool_feed_interests_drops_seed_for_recent_own_topic": "tests/routines/test_tendency.py::test_note_agent_tool_feed_interests_drops_seed_for_recent_own_topic",
+    "tests/test_tendency_note_action_selection.py::test_post_created_activity_result_stores_topic_metadata": "tests/routines/test_tendency.py::test_post_created_activity_result_stores_topic_metadata",
+    "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_stores_post_topic_metadata": "tests/routines/test_tendency.py::test_create_agent_tool_post_stores_post_topic_metadata",
+    "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested": "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested",
+    "tests/test_tendency_note_action_selection.py::test_recent_own_root_topic_exists_uses_post_topic_columns": "tests/routines/test_tendency.py::test_recent_own_root_topic_exists_uses_post_topic_columns",
+    "tests/test_tendency_note_action_selection.py::test_v6_final_action_prompt_requires_menu_note_and_scan_match": "tests/routines/test_tendency.py::test_v6_final_action_prompt_requires_menu_note_and_scan_match",
+    "tests/test_tendency_note_action_selection.py::test_writing_composition_prompt_keeps_feed_seed_as_public_own_thought": "tests/routines/test_tendency.py::test_writing_composition_prompt_keeps_feed_seed_as_public_own_thought",
+    "tests/test_tendency_note_action_selection.py::test_self_update_composition_prompt_excludes_state_and_activity": "tests/routines/test_tendency.py::test_self_update_composition_prompt_excludes_state_and_activity",
+    "tests/test_tendency_note_action_selection.py::test_self_update_composition_prompt_includes_lore_as_private_reference": "tests/routines/test_tendency.py::test_self_update_composition_prompt_includes_lore_as_private_reference"
   },
   "details": {
     "AR-B1": {
@@ -6975,7 +7024,7 @@
             "backend/app/schemas/__init__.py"
           ],
           "test_nodes": [
-            "tests/test_tendency_note_action_selection.py::test_activity_setting_read_excludes_internal_planner_tendency_profile"
+            "tests/routines/test_tendency.py::test_activity_setting_read_excludes_internal_planner_tendency_profile"
           ]
         },
         {
@@ -6985,7 +7034,7 @@
             "backend/app/schemas/__init__.py"
           ],
           "test_nodes": [
-            "tests/test_tendency_note_action_selection.py::test_activity_setting_read_excludes_internal_planner_tendency_profile"
+            "tests/routines/test_tendency.py::test_activity_setting_read_excludes_internal_planner_tendency_profile"
           ]
         },
         {
@@ -7193,6 +7242,13 @@
           "backend/app/domains/characters/service/mutations.py",
           "backend/app/domains/characters/service/persona.py",
           "backend/app/domains/characters/service/promotion.py",
+          "backend/app/domains/routines/constants.py",
+          "backend/app/domains/routines/exceptions.py",
+          "backend/app/domains/routines/schemas/tendency.py",
+          "backend/app/domains/routines/service/activity_management.py",
+          "backend/app/domains/routines/service/tendency.py",
+          "backend/app/domains/routines/service/tendency_settings.py",
+          "backend/app/exceptions.py",
           "backend/app/runtime/characters/management.py"
         ],
         "backend/app/services/agent_creation_drafts.py": [
@@ -7438,58 +7494,63 @@
         },
         {
           "old": "backend/app/services/agents.py::TENDENCY_ACTION_KEYS",
-          "new": "backend/app/runtime/characters/management.py::TENDENCY_ACTION_KEYS",
+          "new": "backend/app/domains/routines/constants.py::TENDENCY_ACTION_KEYS",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_tendency_note_action_selection.py::test_tendency_payload_normalizes_internal_independent_post_profile",
-            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_30_internal_independent_post_topics",
-            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_internal_planner_tendency_profile"
-          ]
+            "tests/routines/test_tendency.py::test_tendency_payload_normalizes_internal_independent_post_profile",
+            "tests/routines/test_tendency.py::test_tendency_payload_requires_30_internal_independent_post_topics",
+            "tests/routines/test_tendency.py::test_tendency_payload_requires_internal_planner_tendency_profile"
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::TENDENCY_INDEPENDENT_TOPIC_COUNT",
-          "new": "backend/app/runtime/characters/management.py::TENDENCY_INDEPENDENT_TOPIC_COUNT",
+          "new": "backend/app/domains/routines/constants.py::TENDENCY_INDEPENDENT_TOPIC_COUNT",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_tendency_note_action_selection.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term"
-          ]
+            "tests/routines/test_tendency.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term"
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::TENDENCY_ANALYSIS_MAX_OUTPUT_TOKENS",
-          "new": "backend/app/runtime/characters/management.py::TENDENCY_ANALYSIS_MAX_OUTPUT_TOKENS",
+          "new": "backend/app/domains/routines/constants.py::TENDENCY_ANALYSIS_MAX_OUTPUT_TOKENS",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
-            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
-          ]
+            "tests/routines/test_tendency.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::FEED_SEED_INTEREST_CRITERIA_MAX_LENGTH",
-          "new": "backend/app/runtime/characters/management.py::FEED_SEED_INTEREST_CRITERIA_MAX_LENGTH",
+          "new": "backend/app/domains/routines/constants.py::FEED_SEED_INTEREST_CRITERIA_MAX_LENGTH",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::TENDENCY_ACTION_DEFAULTS",
-          "new": "backend/app/runtime/characters/management.py::TENDENCY_ACTION_DEFAULTS",
+          "new": "backend/app/domains/routines/constants.py::TENDENCY_ACTION_DEFAULTS",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_tendency_note_action_selection.py::test_tendency_payload_normalizes_internal_independent_post_profile",
-            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_30_internal_independent_post_topics",
-            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_internal_planner_tendency_profile"
-          ]
+            "tests/routines/test_tendency.py::test_tendency_payload_normalizes_internal_independent_post_profile",
+            "tests/routines/test_tendency.py::test_tendency_payload_requires_30_internal_independent_post_topics",
+            "tests/routines/test_tendency.py::test_tendency_payload_requires_internal_planner_tendency_profile"
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::TENDENCY_LLM_TOOLS_ALLOW",
@@ -7499,7 +7560,7 @@
           ],
           "test_nodes": [
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
-            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
+            "tests/routines/test_tendency.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
         },
         {
@@ -7537,64 +7598,70 @@
         },
         {
           "old": "backend/app/services/agents.py::_TendencyRangePayload",
-          "new": "backend/app/runtime/characters/management.py::_TendencyRangePayload",
+          "new": "backend/app/domains/routines/schemas/tendency.py::_TendencyRangePayload",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::_TendencyActionRangesPayload",
-          "new": "backend/app/runtime/characters/management.py::_TendencyActionRangesPayload",
+          "new": "backend/app/domains/routines/schemas/tendency.py::_TendencyActionRangesPayload",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::_IndependentPostInitiativePayload",
-          "new": "backend/app/runtime/characters/management.py::_IndependentPostInitiativePayload",
+          "new": "backend/app/domains/routines/schemas/tendency.py::_IndependentPostInitiativePayload",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::_IndependentPostTopicPayload",
-          "new": "backend/app/runtime/characters/management.py::_IndependentPostTopicPayload",
+          "new": "backend/app/domains/routines/schemas/tendency.py::_IndependentPostTopicPayload",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::_PlannerTendencyProfilePayload",
-          "new": "backend/app/runtime/characters/management.py::_PlannerTendencyProfilePayload",
+          "new": "backend/app/domains/routines/schemas/tendency.py::_PlannerTendencyProfilePayload",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::_TendencyAnalysisPayload",
-          "new": "backend/app/runtime/characters/management.py::_TendencyAnalysisPayload",
+          "new": "backend/app/domains/routines/schemas/tendency.py::_TendencyAnalysisPayload",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
-            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
-          ]
+            "tests/routines/test_tendency.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::_FirstGreetingWriterPayload",
@@ -7608,37 +7675,40 @@
         },
         {
           "old": "backend/app/services/agents.py::INDEPENDENT_POST_PROBABILITY_RANGES",
-          "new": "backend/app/runtime/characters/management.py::INDEPENDENT_POST_PROBABILITY_RANGES",
+          "new": "backend/app/domains/routines/constants.py::INDEPENDENT_POST_PROBABILITY_RANGES",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::TENDENCY_CONTENT_CHARACTER_PHRASES",
-          "new": "backend/app/runtime/characters/management.py::TENDENCY_CONTENT_CHARACTER_PHRASES",
+          "new": "backend/app/domains/routines/constants.py::TENDENCY_CONTENT_CHARACTER_PHRASES",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_tendency_note_action_selection.py::test_normalize_angmoo_terms_in_tendency_text_changes_persona_only"
-          ]
+            "tests/routines/test_tendency.py::test_normalize_angmoo_terms_in_tendency_text_changes_persona_only"
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::TENDENCY_PERSONA_CHARACTER_PATTERN",
-          "new": "backend/app/runtime/characters/management.py::TENDENCY_PERSONA_CHARACTER_PATTERN",
+          "new": "backend/app/domains/routines/constants.py::TENDENCY_PERSONA_CHARACTER_PATTERN",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_tendency_note_action_selection.py::test_normalize_angmoo_terms_in_tendency_text_changes_persona_only"
-          ]
+            "tests/routines/test_tendency.py::test_normalize_angmoo_terms_in_tendency_text_changes_persona_only"
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::AgentServiceError",
-          "new": "backend/app/domains/characters/exceptions.py::AgentServiceError",
+          "new": "backend/app/exceptions.py::AgentServiceError",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
@@ -7646,7 +7716,8 @@
             "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
             "tests/routines/test_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving",
             "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::DemoAccountLockedError",
@@ -7674,7 +7745,7 @@
         },
         {
           "old": "backend/app/services/agents.py::AgentAutonomyCapacityError",
-          "new": "backend/app/runtime/characters/management.py::AgentAutonomyCapacityError",
+          "new": "backend/app/domains/routines/exceptions.py::AgentAutonomyCapacityError",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
@@ -7682,11 +7753,12 @@
             "tests/routines/test_activity_limits.py::test_update_settings_rejects_invalid_active_hours",
             "tests/routines/test_activity_limits.py::test_update_settings_normalizes_observe_to_internal_enabled",
             "tests/routines/test_activity_limits.py::test_update_settings_rejects_direct_server_llm_auto_enabled_change"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::AgentAutonomyRetryableError",
-          "new": "backend/app/runtime/characters/management.py::AgentAutonomyRetryableError",
+          "new": "backend/app/domains/routines/exceptions.py::AgentAutonomyRetryableError",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
@@ -7694,7 +7766,8 @@
             "tests/routines/test_activity_limits.py::test_activate_agent_rejects_when_server_llm_autonomy_capacity_is_full",
             "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
             "tests/routines/test_activity_limits.py::test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomically"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::AgentHandleConflictError",
@@ -7795,8 +7868,8 @@
           ],
           "test_nodes": [
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
-            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget",
-            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_route_keeps_non_json_errors"
+            "tests/routines/test_tendency.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget",
+            "tests/routines/test_tendency.py::test_tendency_analysis_route_keeps_non_json_errors"
           ]
         },
         {
@@ -7819,37 +7892,39 @@
           ],
           "test_nodes": [
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
-            "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness",
-            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
+            "tests/routines/test_tendency.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness",
+            "tests/routines/test_tendency.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
         },
         {
           "old": "backend/app/services/agents.py::TendencyAnalysisParseError",
-          "new": "backend/app/runtime/characters/management.py::TendencyAnalysisParseError",
+          "new": "backend/app/domains/routines/exceptions.py::TendencyAnalysisParseError",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_tendency_note_action_selection.py::test_tendency_payload_normalizes_internal_independent_post_profile",
-            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_30_internal_independent_post_topics",
-            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_internal_planner_tendency_profile"
-          ]
+            "tests/routines/test_tendency.py::test_tendency_payload_normalizes_internal_independent_post_profile",
+            "tests/routines/test_tendency.py::test_tendency_payload_requires_30_internal_independent_post_topics",
+            "tests/routines/test_tendency.py::test_tendency_payload_requires_internal_planner_tendency_profile"
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::TendencyPromptInjectionDetectedError",
-          "new": "backend/app/runtime/characters/management.py::TendencyPromptInjectionDetectedError",
+          "new": "backend/app/domains/routines/exceptions.py::TendencyPromptInjectionDetectedError",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_tendency_note_action_selection.py::test_tendency_payload_rejects_prompt_injection_before_save",
-            "tests/test_tendency_note_action_selection.py::test_tendency_payload_rejects_hidden_feed_seed_interest_injection",
-            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_route_maps_prompt_injection_to_422"
-          ]
+            "tests/routines/test_tendency.py::test_tendency_payload_rejects_prompt_injection_before_save",
+            "tests/routines/test_tendency.py::test_tendency_payload_rejects_hidden_feed_seed_interest_injection",
+            "tests/routines/test_tendency.py::test_tendency_analysis_route_maps_prompt_injection_to_422"
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::TendencyAnalysisRequiredError",
-          "new": "backend/app/runtime/characters/management.py::TendencyAnalysisRequiredError",
+          "new": "backend/app/domains/routines/exceptions.py::TendencyAnalysisRequiredError",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
@@ -7857,11 +7932,12 @@
             "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
             "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
             "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::ActivityProfileRequiredError",
-          "new": "backend/app/runtime/characters/management.py::ActivityProfileRequiredError",
+          "new": "backend/app/domains/routines/exceptions.py::ActivityProfileRequiredError",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
@@ -7869,31 +7945,34 @@
             "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
             "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
             "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::AgentFeedCueConflictError",
-          "new": "backend/app/runtime/characters/management.py::AgentFeedCueConflictError",
+          "new": "backend/app/domains/routines/exceptions.py::AgentFeedCueConflictError",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
-            "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
-          ]
+            "tests/routines/test_tendency.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::AgentFeedCueUnavailableError",
-          "new": "backend/app/runtime/characters/management.py::AgentFeedCueUnavailableError",
+          "new": "backend/app/domains/routines/exceptions.py::AgentFeedCueUnavailableError",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
-            "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
-          ]
+            "tests/routines/test_tendency.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::AgentExecutionModeError",
@@ -7961,7 +8040,7 @@
         },
         {
           "old": "backend/app/services/agents.py::RunNowCooldownError",
-          "new": "backend/app/runtime/characters/management.py::RunNowCooldownError",
+          "new": "backend/app/domains/routines/exceptions.py::RunNowCooldownError",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
@@ -7969,11 +8048,12 @@
             "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
             "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
             "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::FirstGreetingCooldownError",
-          "new": "backend/app/runtime/characters/management.py::FirstGreetingCooldownError",
+          "new": "backend/app/domains/routines/exceptions.py::FirstGreetingCooldownError",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
@@ -7981,11 +8061,12 @@
             "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::FirstGreetingUnavailableError",
-          "new": "backend/app/runtime/characters/management.py::FirstGreetingUnavailableError",
+          "new": "backend/app/domains/routines/exceptions.py::FirstGreetingUnavailableError",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
@@ -7993,11 +8074,12 @@
             "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::RunNowSlotUnavailableError",
-          "new": "backend/app/runtime/characters/management.py::RunNowSlotUnavailableError",
+          "new": "backend/app/domains/routines/exceptions.py::RunNowSlotUnavailableError",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
@@ -8005,11 +8087,12 @@
             "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
             "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
             "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::RunNowSlotBusyError",
-          "new": "backend/app/runtime/characters/management.py::RunNowSlotBusyError",
+          "new": "backend/app/domains/routines/exceptions.py::RunNowSlotBusyError",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
@@ -8017,28 +8100,31 @@
             "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
             "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
             "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::RunNowSchedulerBusyError",
-          "new": "backend/app/runtime/characters/management.py::RunNowSchedulerBusyError",
+          "new": "backend/app/domains/routines/exceptions.py::RunNowSchedulerBusyError",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_run_now_rejects_when_capacity_has_three_live_running_slots",
             "tests/routines/test_activity_limits.py::test_run_now_single_flight_rejects_one_live_running_slot"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::RunNowSoonScheduledError",
-          "new": "backend/app/runtime/characters/management.py::RunNowSoonScheduledError",
+          "new": "backend/app/domains/routines/exceptions.py::RunNowSoonScheduledError",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_run_now_rejects_target_soon_scheduled_slot"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::list_agents",
@@ -8059,7 +8145,7 @@
           ],
           "test_nodes": [
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
-            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
+            "tests/routines/test_tendency.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
         },
         {
@@ -8083,20 +8169,21 @@
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
-            "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
+            "tests/routines/test_tendency.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
           ]
         },
         {
           "old": "backend/app/services/agents.py::_ensure_tendency_prompt_safety",
-          "new": "backend/app/runtime/characters/management.py::_ensure_tendency_prompt_safety",
+          "new": "backend/app/domains/routines/service/tendency.py::_ensure_tendency_prompt_safety",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_tendency_note_action_selection.py::test_tendency_payload_normalizes_internal_independent_post_profile",
-            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_30_internal_independent_post_topics",
-            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_internal_planner_tendency_profile"
-          ]
+            "tests/routines/test_tendency.py::test_tendency_payload_normalizes_internal_independent_post_profile",
+            "tests/routines/test_tendency.py::test_tendency_payload_requires_30_internal_independent_post_topics",
+            "tests/routines/test_tendency.py::test_tendency_payload_requires_internal_planner_tendency_profile"
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::_field_value",
@@ -8123,7 +8210,7 @@
         },
         {
           "old": "backend/app/services/agents.py::_validate_initial_activity_settings",
-          "new": "backend/app/runtime/characters/management.py::_validate_initial_activity_settings",
+          "new": "backend/app/domains/routines/service/activity_management.py::_validate_initial_activity_settings",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
@@ -8131,11 +8218,12 @@
             "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
             "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings",
             "tests/routines/test_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::_apply_initial_activity_settings",
-          "new": "backend/app/runtime/characters/management.py::_apply_initial_activity_settings",
+          "new": "backend/app/domains/routines/service/activity_management.py::_apply_initial_activity_settings",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
@@ -8143,7 +8231,8 @@
             "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
             "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings",
             "tests/routines/test_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::_ensure_initial_image_settings",
@@ -8164,7 +8253,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
+            "tests/routines/test_tendency.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
           ]
         },
         {
@@ -8174,7 +8263,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
+            "tests/routines/test_tendency.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
           ]
         },
         {
@@ -8184,7 +8273,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
+            "tests/routines/test_tendency.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
           ]
         },
         {
@@ -8194,7 +8283,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
+            "tests/routines/test_tendency.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
           ]
         },
         {
@@ -8269,7 +8358,7 @@
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
-            "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
+            "tests/routines/test_tendency.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
           ]
         },
         {
@@ -8452,17 +8541,18 @@
         },
         {
           "old": "backend/app/services/agents.py::get_settings",
-          "new": "backend/app/runtime/characters/management.py::get_settings",
+          "new": "backend/app/domains/routines/service/activity_management.py::get_settings",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::update_settings",
-          "new": "backend/app/runtime/characters/management.py::update_settings",
+          "new": "backend/app/domains/routines/service/activity_management.py::update_settings",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
@@ -8470,7 +8560,8 @@
             "tests/routines/test_activity_limits.py::test_update_settings_rejects_invalid_active_hours",
             "tests/routines/test_activity_limits.py::test_update_settings_normalizes_observe_to_internal_enabled",
             "tests/routines/test_activity_limits.py::test_update_settings_rejects_direct_server_llm_auto_enabled_change"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::analyze_tendency",
@@ -8480,7 +8571,7 @@
           ],
           "test_nodes": [
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
-            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
+            "tests/routines/test_tendency.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
         },
         {
@@ -8540,130 +8631,141 @@
         },
         {
           "old": "backend/app/services/agents.py::_build_tendency_analysis_prompt",
-          "new": "backend/app/runtime/characters/management.py::_build_tendency_analysis_prompt",
+          "new": "backend/app/domains/routines/service/tendency.py::_build_tendency_analysis_prompt",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
-            "tests/test_tendency_note_action_selection.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term",
-            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
-          ]
+            "tests/routines/test_tendency.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term",
+            "tests/routines/test_tendency.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::_extract_gateway_result_text",
-          "new": "backend/app/runtime/characters/management.py::_extract_gateway_result_text",
+          "new": "backend/app/domains/routines/service/tendency.py::_extract_gateway_result_text",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
-            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
-          ]
+            "tests/routines/test_tendency.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::_parse_tendency_json",
-          "new": "backend/app/runtime/characters/management.py::_parse_tendency_json",
+          "new": "backend/app/domains/routines/service/tendency.py::_parse_tendency_json",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
-            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
-          ]
+            "tests/routines/test_tendency.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::_normalize_tendency_payload",
-          "new": "backend/app/runtime/characters/management.py::_normalize_tendency_payload",
+          "new": "backend/app/domains/routines/service/tendency.py::_normalize_tendency_payload",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
-            "tests/test_tendency_note_action_selection.py::test_tendency_payload_normalizes_internal_independent_post_profile",
-            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_30_internal_independent_post_topics"
-          ]
+            "tests/routines/test_tendency.py::test_tendency_payload_normalizes_internal_independent_post_profile",
+            "tests/routines/test_tendency.py::test_tendency_payload_requires_30_internal_independent_post_topics"
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::_normalize_planner_tendency_profile",
-          "new": "backend/app/runtime/characters/management.py::_normalize_planner_tendency_profile",
+          "new": "backend/app/domains/routines/service/tendency.py::_normalize_planner_tendency_profile",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_tendency_note_action_selection.py::test_tendency_payload_normalizes_internal_independent_post_profile",
-            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_30_internal_independent_post_topics",
-            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_internal_planner_tendency_profile"
-          ]
+            "tests/routines/test_tendency.py::test_tendency_payload_normalizes_internal_independent_post_profile",
+            "tests/routines/test_tendency.py::test_tendency_payload_requires_30_internal_independent_post_topics",
+            "tests/routines/test_tendency.py::test_tendency_payload_requires_internal_planner_tendency_profile"
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::_calibrated_independent_post_probability",
-          "new": "backend/app/runtime/characters/management.py::_calibrated_independent_post_probability",
+          "new": "backend/app/domains/routines/service/tendency.py::_calibrated_independent_post_probability",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::_slug_tendency_topic_key",
-          "new": "backend/app/runtime/characters/management.py::_slug_tendency_topic_key",
+          "new": "backend/app/domains/routines/service/tendency.py::_slug_tendency_topic_key",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::normalize_angmoo_terms_in_tendency_text",
-          "new": "backend/app/runtime/characters/management.py::normalize_angmoo_terms_in_tendency_text",
+          "new": "backend/app/domains/routines/service/tendency.py::normalize_angmoo_terms_in_tendency_text",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_tendency_note_action_selection.py::test_normalize_angmoo_terms_in_tendency_text_changes_persona_only"
-          ]
+            "tests/routines/test_tendency.py::test_normalize_angmoo_terms_in_tendency_text_changes_persona_only"
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::_safe_tendency_text",
-          "new": "backend/app/runtime/characters/management.py::_safe_tendency_text",
+          "new": "backend/app/domains/routines/service/tendency.py::_safe_tendency_text",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_tendency_note_action_selection.py::test_tendency_payload_normalizes_internal_independent_post_profile",
-            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_30_internal_independent_post_topics",
-            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_internal_planner_tendency_profile"
-          ]
+            "tests/routines/test_tendency.py::test_tendency_payload_normalizes_internal_independent_post_profile",
+            "tests/routines/test_tendency.py::test_tendency_payload_requires_30_internal_independent_post_topics",
+            "tests/routines/test_tendency.py::test_tendency_payload_requires_internal_planner_tendency_profile"
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::_clamped_tendency_int",
-          "new": "backend/app/runtime/characters/management.py::_clamped_tendency_int",
+          "new": "backend/app/domains/routines/service/tendency.py::_clamped_tendency_int",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_tendency_note_action_selection.py::test_tendency_payload_normalizes_internal_independent_post_profile",
-            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_30_internal_independent_post_topics",
-            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_internal_planner_tendency_profile"
-          ]
+            "tests/routines/test_tendency.py::test_tendency_payload_normalizes_internal_independent_post_profile",
+            "tests/routines/test_tendency.py::test_tendency_payload_requires_30_internal_independent_post_topics",
+            "tests/routines/test_tendency.py::test_tendency_payload_requires_internal_planner_tendency_profile"
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::_mark_tendency_error",
-          "new": "backend/app/runtime/characters/management.py::_mark_tendency_error",
+          "new": "backend/app/domains/routines/service/tendency_settings.py::_mark_tendency_error",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
-            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
-          ]
+            "tests/routines/test_tendency.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::_has_tendency_analysis",
-          "new": "backend/app/runtime/characters/management.py::_has_tendency_analysis",
+          "new": "backend/app/domains/routines/service/tendency_settings.py::_has_tendency_analysis",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
@@ -8671,11 +8773,12 @@
             "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/routines/test_execution_readiness.py::test_agent_run_readiness_requires_hidden_feed_seed_criteria"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::_ensure_tendency_analysis_ready",
-          "new": "backend/app/runtime/characters/management.py::_ensure_tendency_analysis_ready",
+          "new": "backend/app/domains/routines/service/tendency_settings.py::_ensure_tendency_analysis_ready",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
@@ -8683,7 +8786,8 @@
             "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::_activity_profile_readiness",
@@ -8711,13 +8815,14 @@
         },
         {
           "old": "backend/app/services/agents.py::_clear_tendency_analysis",
-          "new": "backend/app/runtime/characters/management.py::_clear_tendency_analysis",
+          "new": "backend/app/domains/routines/service/tendency_settings.py::_clear_tendency_analysis",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving"
-          ]
+          ],
+          "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
         {
           "old": "backend/app/services/agents.py::_resident_openclaw_sync_enabled",
@@ -25527,7 +25632,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ]
         },
         {
@@ -25547,7 +25652,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ]
         },
         {
@@ -25567,7 +25672,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ]
         },
         {
@@ -26008,7 +26113,7 @@
             "backend/app/schemas/__init__.py"
           ],
           "test_nodes": [
-            "tests/test_tendency_note_action_selection.py::test_activity_setting_read_excludes_internal_planner_tendency_profile"
+            "tests/routines/test_tendency.py::test_activity_setting_read_excludes_internal_planner_tendency_profile"
           ]
         },
         {
@@ -26018,7 +26123,7 @@
             "backend/app/schemas/__init__.py"
           ],
           "test_nodes": [
-            "tests/test_tendency_note_action_selection.py::test_activity_setting_read_excludes_internal_planner_tendency_profile"
+            "tests/routines/test_tendency.py::test_activity_setting_read_excludes_internal_planner_tendency_profile"
           ]
         },
         {
@@ -28358,7 +28463,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ]
         },
         {
@@ -28378,7 +28483,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ]
         },
         {
@@ -28398,7 +28503,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ]
         },
         {
@@ -28509,7 +28614,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -28849,7 +28954,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -28890,7 +28995,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -28906,7 +29011,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -28922,7 +29027,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -28939,7 +29044,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -28956,7 +29061,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -28973,7 +29078,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -29144,7 +29249,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -29159,7 +29264,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -29174,7 +29279,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -29189,7 +29294,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -29204,7 +29309,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -29219,7 +29324,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -29863,7 +29968,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ]
         },
         {
@@ -29883,7 +29988,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ]
         },
         {
@@ -29903,7 +30008,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ]
         },
         {
@@ -30014,7 +30119,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -30354,7 +30459,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -30395,7 +30500,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -30411,7 +30516,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -30427,7 +30532,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -30444,7 +30549,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -30461,7 +30566,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -30478,7 +30583,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -30649,7 +30754,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -30664,7 +30769,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -30679,7 +30784,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -30694,7 +30799,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -30709,7 +30814,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -30724,7 +30829,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -31370,7 +31475,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ]
         },
         {
@@ -31390,7 +31495,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ]
         },
         {
@@ -31410,7 +31515,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ]
         },
         {
@@ -31521,7 +31626,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -31861,7 +31966,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -31902,7 +32007,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -31918,7 +32023,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -31934,7 +32039,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -31951,7 +32056,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -31968,7 +32073,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -31985,7 +32090,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -32156,7 +32261,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -32171,7 +32276,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -32186,7 +32291,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -32201,7 +32306,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -32216,7 +32321,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -32231,7 +32336,7 @@
             "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
             "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
             "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
-            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+            "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
         },
@@ -33130,9 +33235,129 @@
         "inventories": "L4 766/14/97; ER0 85/87/24/44/7; Memorybatch current",
         "preservation": "read-only original6checks zero errors; protected2139/current2286. Exact signed foundation2path supplement only, stock root linear introduction gate remains pending."
       }
+    },
+    "AR-B4-C7-A-activity-settings-tendency": {
+      "status": "IMPLEMENTED — focused155PASS/6existingwarnings; exactAST49; readonly6checks0; root stock introduction/CI pending",
+      "actual_paths": [
+        "backend/app/domains/routines/constants.py",
+        "backend/app/domains/routines/contracts/activity_management.py",
+        "backend/app/domains/routines/exceptions.py",
+        "backend/app/domains/routines/schemas/tendency.py",
+        "backend/app/domains/routines/service/activity_management.py",
+        "backend/app/domains/routines/service/tendency.py",
+        "backend/app/domains/routines/service/tendency_settings.py",
+        "backend/app/exceptions.py",
+        "backend/tests/routines/test_tendency.py",
+        "backend/tests/routines/test_activity_management.py"
+      ],
+      "preservation": "Original48 definitions/constants and shared AgentServiceError1 AST exactly match after narrow parameter/type binding restoration. Original15 subclasses retain their common base identity. Initial activity writes retain commit/refresh only when changed. Settings update retains owner/demo checks, initial ensure_setting, commit=False update, slot schedule update then commit/refresh.",
+      "remaining": "Existing management get/update wrappers only bind same-Session references until actual C7 HTTP dependency is connected. analyze_tendency provider/slot/release remains runtime; result state setters are actual Routines. Activation/first-greeting/run-now/credential owner workflows follow C7-B/C.",
+      "test_nodes": [
+        "tests/routines/test_tendency.py::test_activity_policy_prompt_uses_notes_without_ranges_or_observe_tendency",
+        "tests/routines/test_tendency.py::test_activity_setting_read_excludes_internal_planner_tendency_profile",
+        "tests/routines/test_tendency.py::test_agent_feed_post_summary_prefers_post_topic_columns",
+        "tests/routines/test_tendency.py::test_agent_feed_post_summary_uses_topic_and_preview",
+        "tests/routines/test_tendency.py::test_agent_service_tendency_readiness_requires_hidden_feed_seed_criteria",
+        "tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested",
+        "tests/routines/test_tendency.py::test_create_agent_tool_post_stores_post_topic_metadata",
+        "tests/routines/test_tendency.py::test_feed_history_metadata_fallback_excludes_raw_seed",
+        "tests/routines/test_tendency.py::test_feed_history_sanitize_uses_google_non_streaming_stream_params",
+        "tests/routines/test_tendency.py::test_feed_scan_create_post_brief_requires_seed_or_owner_cue",
+        "tests/routines/test_tendency.py::test_feed_scan_uses_google_non_streaming_stream_params",
+        "tests/routines/test_tendency.py::test_normalize_angmoo_terms_in_tendency_text_changes_persona_only",
+        "tests/routines/test_tendency.py::test_note_agent_tool_feed_history_sanitize_fills_missing_llm_items_from_metadata",
+        "tests/routines/test_tendency.py::test_note_agent_tool_feed_history_sanitize_logs_authorization_error",
+        "tests/routines/test_tendency.py::test_note_agent_tool_feed_history_sanitize_logs_endpoint_timing_without_raw_payload",
+        "tests/routines/test_tendency.py::test_note_agent_tool_feed_history_sanitize_merges_backend_skeleton",
+        "tests/routines/test_tendency.py::test_note_agent_tool_feed_history_sanitize_removes_style_marker",
+        "tests/routines/test_tendency.py::test_note_agent_tool_feed_interests_drops_seed_for_recent_own_topic",
+        "tests/routines/test_tendency.py::test_note_agent_tool_feed_interests_drops_seed_without_interest",
+        "tests/routines/test_tendency.py::test_note_agent_tool_feed_interests_keeps_interest_without_seed",
+        "tests/routines/test_tendency.py::test_note_agent_tool_feed_interests_marks_legacy_reaction_seed_not_writable",
+        "tests/routines/test_tendency.py::test_note_agent_tool_feed_interests_stores_topic_metadata",
+        "tests/routines/test_tendency.py::test_post_created_activity_result_stores_topic_metadata",
+        "tests/routines/test_tendency.py::test_post_topic_signature_falls_back_to_activity_log_metadata",
+        "tests/routines/test_tendency.py::test_public_activity_entrypoints_require_tendency_readiness",
+        "tests/routines/test_tendency.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness",
+        "tests/routines/test_tendency.py::test_recent_feed_interest_history_formatter_limits_and_filters",
+        "tests/routines/test_tendency.py::test_recent_own_root_topic_exists_uses_post_topic_columns",
+        "tests/routines/test_tendency.py::test_self_update_composition_prompt_excludes_state_and_activity",
+        "tests/routines/test_tendency.py::test_self_update_composition_prompt_includes_lore_as_private_reference",
+        "tests/routines/test_tendency.py::test_tendency_analysis_route_hides_json_parse_details[exc0]",
+        "tests/routines/test_tendency.py::test_tendency_analysis_route_hides_json_parse_details[exc1]",
+        "tests/routines/test_tendency.py::test_tendency_analysis_route_keeps_non_json_errors[exc0-409-Agent credential is required]",
+        "tests/routines/test_tendency.py::test_tendency_analysis_route_keeps_non_json_errors[exc1-400-Google API key is invalid]",
+        "tests/routines/test_tendency.py::test_tendency_analysis_route_keeps_non_json_errors[exc2-502-Gateway failed]",
+        "tests/routines/test_tendency.py::test_tendency_analysis_route_maps_prompt_injection_to_422",
+        "tests/routines/test_tendency.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget",
+        "tests/routines/test_tendency.py::test_tendency_payload_normalizes_internal_independent_post_profile",
+        "tests/routines/test_tendency.py::test_tendency_payload_rejects_hidden_feed_seed_interest_injection",
+        "tests/routines/test_tendency.py::test_tendency_payload_rejects_prompt_injection_before_save",
+        "tests/routines/test_tendency.py::test_tendency_payload_requires_30_internal_independent_post_topics[29]",
+        "tests/routines/test_tendency.py::test_tendency_payload_requires_30_internal_independent_post_topics[31]",
+        "tests/routines/test_tendency.py::test_tendency_payload_requires_hidden_feed_seed_interest_criteria",
+        "tests/routines/test_tendency.py::test_tendency_payload_requires_internal_planner_tendency_profile",
+        "tests/routines/test_tendency.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term",
+        "tests/routines/test_tendency.py::test_v6_final_action_prompt_requires_menu_note_and_scan_match",
+        "tests/routines/test_tendency.py::test_writing_composition_prompt_has_input_voice_boundary",
+        "tests/routines/test_tendency.py::test_writing_composition_prompt_keeps_feed_seed_as_public_own_thought",
+        "tests/routines/test_activity_management.py::test_activity_setting_owner_preserves_pending_schedule_transaction_and_error_identity"
+      ],
+      "validation": {
+        "boundary": "771 modules / 2636 edges / exactlegacy202 / cycle0",
+        "inventories": "L4 771/14/97; ER0 85/87/24/44/7; Memorybatch current",
+        "preservation": "read-only source/split/assertion/suppression/APIORM/nodes all zero errors; protected2139/current2287. Exact signed foundation2path supplement only; root linear stock introduction pending."
+      }
     }
   },
   "test_symbols": {
-    "backend/tests/test_langgraph_resident_engine.py::_agent_run_for_overload_test": "backend/tests/routines/test_run_backoff.py::_agent_run_for_overload_test"
+    "backend/tests/test_langgraph_resident_engine.py::_agent_run_for_overload_test": "backend/tests/routines/test_run_backoff.py::_agent_run_for_overload_test",
+    "backend/tests/test_tendency_note_action_selection.py::_activity_policy": "backend/tests/routines/test_tendency.py::_activity_policy",
+    "backend/tests/test_tendency_note_action_selection.py::test_activity_policy_prompt_uses_notes_without_ranges_or_observe_tendency": "backend/tests/routines/test_tendency.py::test_activity_policy_prompt_uses_notes_without_ranges_or_observe_tendency",
+    "backend/tests/test_tendency_note_action_selection.py::test_activity_setting_read_excludes_internal_planner_tendency_profile": "backend/tests/routines/test_tendency.py::test_activity_setting_read_excludes_internal_planner_tendency_profile",
+    "backend/tests/test_tendency_note_action_selection.py::_tendency_setting_with_profile": "backend/tests/routines/test_tendency.py::_tendency_setting_with_profile",
+    "backend/tests/test_tendency_note_action_selection.py::test_agent_service_tendency_readiness_requires_hidden_feed_seed_criteria": "backend/tests/routines/test_tendency.py::test_agent_service_tendency_readiness_requires_hidden_feed_seed_criteria",
+    "backend/tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness": "backend/tests/routines/test_tendency.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness",
+    "backend/tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_require_tendency_readiness": "backend/tests/routines/test_tendency.py::test_public_activity_entrypoints_require_tendency_readiness",
+    "backend/tests/test_tendency_note_action_selection.py::test_tendency_payload_normalizes_internal_independent_post_profile": "backend/tests/routines/test_tendency.py::test_tendency_payload_normalizes_internal_independent_post_profile",
+    "backend/tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_30_internal_independent_post_topics": "backend/tests/routines/test_tendency.py::test_tendency_payload_requires_30_internal_independent_post_topics",
+    "backend/tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_internal_planner_tendency_profile": "backend/tests/routines/test_tendency.py::test_tendency_payload_requires_internal_planner_tendency_profile",
+    "backend/tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_hidden_feed_seed_interest_criteria": "backend/tests/routines/test_tendency.py::test_tendency_payload_requires_hidden_feed_seed_interest_criteria",
+    "backend/tests/test_tendency_note_action_selection.py::test_tendency_payload_rejects_prompt_injection_before_save": "backend/tests/routines/test_tendency.py::test_tendency_payload_rejects_prompt_injection_before_save",
+    "backend/tests/test_tendency_note_action_selection.py::test_tendency_payload_rejects_hidden_feed_seed_interest_injection": "backend/tests/routines/test_tendency.py::test_tendency_payload_rejects_hidden_feed_seed_interest_injection",
+    "backend/tests/test_tendency_note_action_selection.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term": "backend/tests/routines/test_tendency.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term",
+    "backend/tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget": "backend/tests/routines/test_tendency.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget",
+    "backend/tests/test_tendency_note_action_selection.py::_run_tendency_analysis_route_with_error": "backend/tests/routines/test_tendency.py::_run_tendency_analysis_route_with_error",
+    "backend/tests/test_tendency_note_action_selection.py::test_tendency_analysis_route_hides_json_parse_details": "backend/tests/routines/test_tendency.py::test_tendency_analysis_route_hides_json_parse_details",
+    "backend/tests/test_tendency_note_action_selection.py::test_tendency_analysis_route_maps_prompt_injection_to_422": "backend/tests/routines/test_tendency.py::test_tendency_analysis_route_maps_prompt_injection_to_422",
+    "backend/tests/test_tendency_note_action_selection.py::test_tendency_analysis_route_keeps_non_json_errors": "backend/tests/routines/test_tendency.py::test_tendency_analysis_route_keeps_non_json_errors",
+    "backend/tests/test_tendency_note_action_selection.py::test_normalize_angmoo_terms_in_tendency_text_changes_persona_only": "backend/tests/routines/test_tendency.py::test_normalize_angmoo_terms_in_tendency_text_changes_persona_only",
+    "backend/tests/test_tendency_note_action_selection.py::test_feed_scan_create_post_brief_requires_seed_or_owner_cue": "backend/tests/routines/test_tendency.py::test_feed_scan_create_post_brief_requires_seed_or_owner_cue",
+    "backend/tests/test_tendency_note_action_selection.py::test_feed_history_sanitize_uses_google_non_streaming_stream_params": "backend/tests/routines/test_tendency.py::test_feed_history_sanitize_uses_google_non_streaming_stream_params",
+    "backend/tests/test_tendency_note_action_selection.py::test_feed_scan_uses_google_non_streaming_stream_params": "backend/tests/routines/test_tendency.py::test_feed_scan_uses_google_non_streaming_stream_params",
+    "backend/tests/test_tendency_note_action_selection.py::test_writing_composition_prompt_has_input_voice_boundary": "backend/tests/routines/test_tendency.py::test_writing_composition_prompt_has_input_voice_boundary",
+    "backend/tests/test_tendency_note_action_selection.py::test_recent_feed_interest_history_formatter_limits_and_filters": "backend/tests/routines/test_tendency.py::test_recent_feed_interest_history_formatter_limits_and_filters",
+    "backend/tests/test_tendency_note_action_selection.py::test_agent_feed_post_summary_uses_topic_and_preview": "backend/tests/routines/test_tendency.py::test_agent_feed_post_summary_uses_topic_and_preview",
+    "backend/tests/test_tendency_note_action_selection.py::test_agent_feed_post_summary_prefers_post_topic_columns": "backend/tests/routines/test_tendency.py::test_agent_feed_post_summary_prefers_post_topic_columns",
+    "backend/tests/test_tendency_note_action_selection.py::test_post_topic_signature_falls_back_to_activity_log_metadata": "backend/tests/routines/test_tendency.py::test_post_topic_signature_falls_back_to_activity_log_metadata",
+    "backend/tests/test_tendency_note_action_selection.py::test_note_agent_tool_feed_interests_stores_topic_metadata": "backend/tests/routines/test_tendency.py::test_note_agent_tool_feed_interests_stores_topic_metadata",
+    "backend/tests/test_tendency_note_action_selection.py::test_note_agent_tool_feed_interests_marks_legacy_reaction_seed_not_writable": "backend/tests/routines/test_tendency.py::test_note_agent_tool_feed_interests_marks_legacy_reaction_seed_not_writable",
+    "backend/tests/test_tendency_note_action_selection.py::test_note_agent_tool_feed_interests_drops_seed_without_interest": "backend/tests/routines/test_tendency.py::test_note_agent_tool_feed_interests_drops_seed_without_interest",
+    "backend/tests/test_tendency_note_action_selection.py::test_note_agent_tool_feed_interests_keeps_interest_without_seed": "backend/tests/routines/test_tendency.py::test_note_agent_tool_feed_interests_keeps_interest_without_seed",
+    "backend/tests/test_tendency_note_action_selection.py::test_note_agent_tool_feed_history_sanitize_removes_style_marker": "backend/tests/routines/test_tendency.py::test_note_agent_tool_feed_history_sanitize_removes_style_marker",
+    "backend/tests/test_tendency_note_action_selection.py::test_note_agent_tool_feed_history_sanitize_merges_backend_skeleton": "backend/tests/routines/test_tendency.py::test_note_agent_tool_feed_history_sanitize_merges_backend_skeleton",
+    "backend/tests/test_tendency_note_action_selection.py::test_note_agent_tool_feed_history_sanitize_fills_missing_llm_items_from_metadata": "backend/tests/routines/test_tendency.py::test_note_agent_tool_feed_history_sanitize_fills_missing_llm_items_from_metadata",
+    "backend/tests/test_tendency_note_action_selection.py::test_note_agent_tool_feed_history_sanitize_logs_endpoint_timing_without_raw_payload": "backend/tests/routines/test_tendency.py::test_note_agent_tool_feed_history_sanitize_logs_endpoint_timing_without_raw_payload",
+    "backend/tests/test_tendency_note_action_selection.py::test_note_agent_tool_feed_history_sanitize_logs_authorization_error": "backend/tests/routines/test_tendency.py::test_note_agent_tool_feed_history_sanitize_logs_authorization_error",
+    "backend/tests/test_tendency_note_action_selection.py::test_feed_history_metadata_fallback_excludes_raw_seed": "backend/tests/routines/test_tendency.py::test_feed_history_metadata_fallback_excludes_raw_seed",
+    "backend/tests/test_tendency_note_action_selection.py::test_note_agent_tool_feed_interests_drops_seed_for_recent_own_topic": "backend/tests/routines/test_tendency.py::test_note_agent_tool_feed_interests_drops_seed_for_recent_own_topic",
+    "backend/tests/test_tendency_note_action_selection.py::test_post_created_activity_result_stores_topic_metadata": "backend/tests/routines/test_tendency.py::test_post_created_activity_result_stores_topic_metadata",
+    "backend/tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_stores_post_topic_metadata": "backend/tests/routines/test_tendency.py::test_create_agent_tool_post_stores_post_topic_metadata",
+    "backend/tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested": "backend/tests/routines/test_tendency.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested",
+    "backend/tests/test_tendency_note_action_selection.py::test_recent_own_root_topic_exists_uses_post_topic_columns": "backend/tests/routines/test_tendency.py::test_recent_own_root_topic_exists_uses_post_topic_columns",
+    "backend/tests/test_tendency_note_action_selection.py::test_v6_final_action_prompt_requires_menu_note_and_scan_match": "backend/tests/routines/test_tendency.py::test_v6_final_action_prompt_requires_menu_note_and_scan_match",
+    "backend/tests/test_tendency_note_action_selection.py::test_writing_composition_prompt_keeps_feed_seed_as_public_own_thought": "backend/tests/routines/test_tendency.py::test_writing_composition_prompt_keeps_feed_seed_as_public_own_thought",
+    "backend/tests/test_tendency_note_action_selection.py::test_self_update_composition_prompt_excludes_state_and_activity": "backend/tests/routines/test_tendency.py::test_self_update_composition_prompt_excludes_state_and_activity",
+    "backend/tests/test_tendency_note_action_selection.py::test_self_update_composition_prompt_includes_lore_as_private_reference": "backend/tests/routines/test_tendency.py::test_self_update_composition_prompt_includes_lore_as_private_reference"
   }
 }

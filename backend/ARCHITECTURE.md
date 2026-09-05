@@ -719,3 +719,10 @@ Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 S
 `runtime/resident/execution.py`는 수동 실행, 슬롯별 실행, 전체 tick의 실제 비동기 실행을 조립합니다. provider 호출, lease 수명, 실행 기록 생성 시점과 실패 보상이 이곳에서 연결됩니다. 오류 처리에서 사용하는 `run_created` 같은 상태는 원래 저장 성공 직후에 바뀌어야 하므로 별도 전달 계층으로 감추지 않습니다. Scheduler는 만료 루틴을 정리하는 실제 lifecycle 서비스를 직접 호출한 뒤 실행을 시작합니다.
 
 현재 원래 `services/agent_runs.py`에는 B7 소유 Memory 함수와 별도 정리 대상인 원래 미호출 함수만 남습니다. 순차 통합 전까지 실행이 참조하는 Memory 함수는 기존 구현 자체입니다. 같은 함수를 새 파일에 복사하지 않으며, Memory 소유 전환이 합류할 때 실제 서비스로 연결합니다.
+
+
+### 활동 설정과 성향 분석
+
+`routines/service/activity_management.py`는 활동 시간 입력과 활동 설정 저장, 슬롯의 다음 실행 시각 변경을 담당합니다. Character 소유권과 Identity의 demo 변경 제한은 같은 Session에서 기존 소유 기능을 호출합니다. 최초 설정의 commit 시점과 설정 변경 후 slot 갱신 순서를 유지하며, 외부 값을 미리 읽지 않습니다.
+
+성향 분석의 provider 출력 형식은 `schemas/tendency.py`, 프롬프트·문자열 정제·범위와 주제 검증은 `service/tendency.py`, 저장된 성향의 준비 상태와 변경은 `service/tendency_settings.py`에 있습니다. provider 통신과 슬롯 해제는 runtime이 조립합니다. Character와 Routines에서 기존에 함께 사용하던 `AgentServiceError` 기반은 `app/exceptions.py`의 하나의 클래스이며, 기존 Character 이름도 같은 객체를 가리킵니다.

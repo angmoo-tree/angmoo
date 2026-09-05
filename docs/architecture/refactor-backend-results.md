@@ -1118,10 +1118,19 @@ C6d4a 최종 고정 tree **480 passed /기존 PostgreSQL1 skipped/기존warnings
 
 ## AR-B4-C6 — 슬롯 요청 정책·Resident 실행 연결
 
-슬롯 요청 2개의 원래 업무 판단을 Routines 서비스로 옮겼다. 런타임은 같은 Session에서 원래 유지보수 제한 → 캐릭터·credential 검증 → 설정 저장 → 최초 시각 → 슬롯 lock 순서를 지연 평가로 연결한다. 신규 SQLite 2개는 commit=False/True 각각 pending 행, observer 가시성, clock/lock 호출 시점, 임시 claim과 rollback을 검사한다.
+슬롯 요청 2개의 원래 업무 판단을 Routines 서비스로 옮겼다. 런타임은 같은 Session에서 원래 유지보수 제한 → 캐릭터·credential 검증 → 설정 저장 → 최초 시각 → 슬롯 lock 순서를 지연 평가로 연결한다. 신규 SQLite 2개는 commit=False/True 각각 pending 행, observer 가시성, clock/lock 호출 시점과 rollback을 검사한다. 임시 claim의 원래 정책 본문은 AST 대조와 기존 회귀로 확인한다.
 
 Resident 실행 10개 함수는 실제 provider·lease·run_created·보상 순서를 그대로 `runtime/resident/execution.py`로 옮겼다. Scheduler의 lifecycle 연결은 원래 실제 서비스를 직접 참조한다. HTTP의 실행 오류는 동일 Routines 오류 클래스를 사용한다. 기존 소스 경계 검사는 execution/post_selection/scheduler의 정확한 세 파일을 모두 검사하고 원래 positive/forbidden assertion을 유지한다. 보안 소스 검사는 새 실행과 기존 Memory 잔여를 모두 포함한다. 초기 집중 152개 통과 뒤 mock 대상 2개와 실제 scheduler 연결을 수정했고, 해당 3개 재검사는 통과했다. 최종 확대 검증은 아래에 별도로 기록한다.
 
 B7 Memory 7개 실제 정의와 원래 미호출/검사용 5개 정의는 아직 제거하지 않았다. Social·Memory·Identity·Operations·Runtime·LangGraph의 독립 source 합류까지 필요한 기존 구현 연결은 정확한 7개 edge와 제거 조건으로 기록한다. 이는 해당 후속 단계나 전체 B4 완료 주장이 아니다.
 
 최종 고정 대상 검증은 **490 passed, 1 skipped, 4 warnings / 209.73초**이다. skip은 기존 PostgreSQL 환경 표식이며 경고도 기존 항목이다. 경계는 766 modules / 2609 edges / exact legacy 202 / cycle 0, L4 766/14/97, ER0 85/87/24/44/7 및 Memory batch current이다. 읽기 전용 원래 6개 검사는 오류 0, 보호 2139개·현재 2286개 노드로 확인했다. 선행 source 최초 도입 원장 합류 전이므로 이 진단은 stock 보존 gate나 Hosted CI 통과를 대신하지 않는다.
+
+
+## AR-B4-C7-A — 활동 설정·성향 분석의 실제 소유
+
+원래 management에 있던 성향 schema 6개, 프롬프트·정규화 11개, 상태 4개, 활동 설정 4개, 오류 15개와 상수 8개를 역할별 Routines 코드로 이전했다. 공유 `AgentServiceError` 원래 클래스 1개는 공통 오류 기반으로 옮기고 기존 Character 경로는 같은 객체를 제공한다. 원래 48개 정의/상수와 공유 기반 1개의 AST는 정확한 type/callback 복원 뒤 동일하다. 초기 관련 153개 통과 후 실제 schedule 구현 위치로 mock 1곳만 전환했으며 해당 1개 재검사는 통과했다. 기존 tendency 검사 파일 전체는 Routines 소유 경로로 옮기고 assertion·fixture·parametrize를 유지한다. 후속 관리 실행/HTTP/credential owner 전환은 남아 있다.
+
+최종 집중 검증은 **155 passed / 기존 경고 6개 / 12.96초**이다. 신규 실제 SQLite 검사는 같은 Session의 pending Character/Setting/Slot을 유지하며, schedule callback 시점의 다른 Session에는 이전 값이 보이고 최종 commit 뒤 새 값이 보이는 것을 확인한다. 공통 기반으로 이동한 오류는 기존 Character catch에서 같은 동작과 오류 필드를 유지한다.
+
+최종 소스 경계는 771 modules / 2636 edges / exact legacy 202 / cycle 0이다. L4 771/14/97, ER0 85/87/24/44/7과 Memory batch가 현재 코드와 일치한다. 최초 진단에서 남은 generic parametrized 테스트 경로 9개를 실제 이전 경로로 고쳤고, 최종 원래 6개 읽기 전용 검사는 모두 오류 0(보호 2139개 / 현재 2287개)이다. assertion, suppression, API/ORM 및 원래 노드는 모두 보존했다. 선행 최초 도입 원장이 합류하기 전의 진단이며 stock gate·Hosted CI와 구분한다.

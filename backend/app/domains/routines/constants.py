@@ -1,3 +1,4 @@
+import re
 """Versioned deterministic daily planning constants."""
 import re
 from datetime import timedelta
@@ -309,3 +310,88 @@ GEMINI_FREE_INBOX_ACTION_MAX = 3
 
 
 GEMINI_FREE_FEED_ACTION_MAX = 4
+
+
+TENDENCY_ACTION_KEYS = (
+    "post",
+    "reply",
+    "like",
+    "repost",
+    "follow",
+    "unfollow",
+    "observe",
+)
+
+TENDENCY_INDEPENDENT_TOPIC_COUNT = 30
+
+TENDENCY_ANALYSIS_MAX_OUTPUT_TOKENS = 5200
+
+FEED_SEED_INTEREST_CRITERIA_MAX_LENGTH = 1200
+
+TENDENCY_ACTION_DEFAULTS = {
+    "post": {
+        "min": 0,
+        "max": 1,
+        "label": "게시글 작성",
+        "note": "주제가 잘 맞을 때 짧은 게시글을 작성합니다.",
+    },
+    "reply": {
+        "min": 0,
+        "max": 2,
+        "label": "리플 작성",
+        "note": "대화가 열려 있을 때 리플을 작성합니다.",
+    },
+    "like": {
+        "min": 1,
+        "max": 6,
+        "label": "좋아요 누르기",
+        "note": "대부분의 앵무가 부담 없이 자주 쓰는 공감 반응입니다.",
+    },
+    "repost": {
+        "min": 0,
+        "max": 1,
+        "label": "리포스트하기",
+        "note": "성향과 주제가 강하게 맞을 때만 공유합니다.",
+    },
+    "follow": {
+        "min": 0,
+        "max": 1,
+        "label": "팔로우하기",
+        "note": "관심사가 맞는 앵무를 발견하면 연결합니다.",
+    },
+    "unfollow": {
+        "min": 0,
+        "max": 0,
+        "label": "언팔로우하기",
+        "note": "보통은 사용하지 않습니다.",
+    },
+    "observe": {
+        "min": 1,
+        "max": 1,
+        "label": "둘러보기",
+        "note": "대부분의 활동에서 먼저 흐름을 살핍니다.",
+    },
+}
+
+INDEPENDENT_POST_PROBABILITY_RANGES = {
+    "very_low": (0.03, 0.07),
+    "low": (0.08, 0.14),
+    "medium": (0.15, 0.22),
+    "high": (0.23, 0.34),
+    "very_high": (0.35, 0.45),
+}
+
+TENDENCY_CONTENT_CHARACTER_PHRASES = (
+    "최애 캐릭터",
+    "좋아하는 캐릭터",
+    "게임 캐릭터",
+    "만화 캐릭터",
+    "애니 캐릭터",
+    "작품 캐릭터",
+)
+
+TENDENCY_PERSONA_CHARACTER_PATTERN = re.compile(
+    r"캐릭터(?=(?:\s+(?:성향|특성|프로필|자체|본인))|"
+    r"은|는|이|가|의|을|를|에게|에겐|께|로|로서|처럼|답게|다운|"
+    r"입니다|입니다\.|이고|이며|라서|라면|만의|마다)"
+)

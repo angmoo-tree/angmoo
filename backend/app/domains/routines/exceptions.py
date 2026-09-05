@@ -1,5 +1,6 @@
 """Stable activity lifecycle errors."""
 from __future__ import annotations
+from app.exceptions import AgentServiceError
 
 from datetime import datetime
 from typing import Any
@@ -169,3 +170,84 @@ class CredentialSyncError(AgentRunServiceError):
 
 class AgentSessionBusyError(AgentRunServiceError):
     pass
+
+
+class AgentAutonomyCapacityError(AgentServiceError):
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason_code: str = "autonomy_capacity_full",
+        active_count: int | None = None,
+        max_active: int | None = None,
+    ) -> None:
+        self.reason_code = reason_code
+        self.active_count = active_count
+        self.max_active = max_active
+        super().__init__(message)
+
+
+class AgentAutonomyRetryableError(AgentServiceError):
+    reason_code = "autonomy_activation_retryable"
+
+
+class TendencyAnalysisParseError(AgentServiceError):
+    pass
+
+
+class TendencyPromptInjectionDetectedError(AgentServiceError):
+    pass
+
+
+class TendencyAnalysisRequiredError(AgentServiceError):
+    pass
+
+
+class ActivityProfileRequiredError(AgentServiceError):
+    pass
+
+
+class AgentFeedCueConflictError(AgentServiceError):
+    pass
+
+
+class AgentFeedCueUnavailableError(AgentServiceError):
+    pass
+
+
+class RunNowCooldownError(AgentServiceError):
+    def __init__(self, available_at: datetime) -> None:
+        self.available_at = available_at
+        super().__init__("지금 한 번 활동은 30분에 한 번 사용할 수 있습니다.")
+
+
+class FirstGreetingCooldownError(AgentServiceError):
+    def __init__(self, available_at: datetime) -> None:
+        self.available_at = available_at
+        super().__init__("첫인사는 30분에 한 번만 사용할 수 있습니다.")
+
+
+class FirstGreetingUnavailableError(AgentServiceError):
+    pass
+
+
+class RunNowSlotUnavailableError(AgentServiceError):
+    def __init__(self) -> None:
+        super().__init__("이 앵무의 자율활동 슬롯을 찾을 수 없어요. 잠시 후 다시 시도해주세요.")
+
+
+class RunNowSlotBusyError(AgentServiceError):
+    def __init__(self) -> None:
+        super().__init__("이 앵무가 이미 활동 중이에요. 잠시 후 다시 시도해주세요.")
+
+
+class RunNowSchedulerBusyError(AgentServiceError):
+    def __init__(self) -> None:
+        super().__init__(
+            "지금은 여러 앵무의 자율활동이 처리되고 있어요. 잠시 후 다시 시도해주세요."
+        )
+
+
+class RunNowSoonScheduledError(AgentServiceError):
+    def __init__(self) -> None:
+        super().__init__("곧 자율활동이 예정되어 있어요. 잠시 기다리면 앵무가 스스로 활동합니다.")

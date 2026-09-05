@@ -1,7 +1,7 @@
 {
-  "edge_count": 2609,
-  "external_import_count": 2366,
-  "module_count": 766,
+  "edge_count": 2636,
+  "external_import_count": 2381,
+  "module_count": 771,
   "modules": [
     {
       "external_imports": [],
@@ -881,7 +881,8 @@
         "datetime"
       ],
       "imports": [
-        "app.domains.characters.schemas"
+        "app.domains.characters.schemas",
+        "app.exceptions"
       ],
       "module": "app.domains.characters.exceptions",
       "path": "backend/app/domains/characters/exceptions.py",
@@ -3690,6 +3691,20 @@
     },
     {
       "external_imports": [
+        "__future__",
+        "dataclasses",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.activity_policy"
+      ],
+      "module": "app.domains.routines.contracts.activity_management",
+      "path": "backend/app/domains/routines/contracts/activity_management.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "dataclasses",
         "datetime",
         "typing",
@@ -3896,7 +3911,9 @@
         "datetime",
         "typing"
       ],
-      "imports": [],
+      "imports": [
+        "app.exceptions"
+      ],
       "module": "app.domains.routines.exceptions",
       "path": "backend/app/domains/routines/exceptions.py",
       "wildcard_imports": []
@@ -4204,6 +4221,18 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.constants"
+      ],
+      "module": "app.domains.routines.schemas.tendency",
+      "path": "backend/app/domains/routines/schemas/tendency.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.domains.routines.policies.activity_state"
@@ -4319,6 +4348,28 @@
       ],
       "module": "app.domains.routines.service.activity_logs",
       "path": "backend/app/domains/routines/service/activity_logs.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.active_hours",
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.activity_management",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.models",
+        "app.domains.routines.repository.slots",
+        "app.domains.routines.schemas",
+        "app.domains.routines.service.activity_policy",
+        "app.domains.routines.service.activity_settings",
+        "app.domains.routines.service.tick_schedule"
+      ],
+      "module": "app.domains.routines.service.activity_management",
+      "path": "backend/app/domains/routines/service/activity_management.py",
       "wildcard_imports": []
     },
     {
@@ -5022,6 +5073,36 @@
       ],
       "module": "app.domains.routines.service.state_prompts",
       "path": "backend/app/domains/routines/service/state_prompts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "json",
+        "re",
+        "typing"
+      ],
+      "imports": [
+        "app.core.prompt_safety",
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.activity_management",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.schemas.tendency"
+      ],
+      "module": "app.domains.routines.service.tendency",
+      "path": "backend/app/domains/routines/service/tendency.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.exceptions",
+        "app.domains.routines.models"
+      ],
+      "module": "app.domains.routines.service.tendency_settings",
+      "path": "backend/app/domains/routines/service/tendency_settings.py",
       "wildcard_imports": []
     },
     {
@@ -8400,6 +8481,7 @@
       "external_imports": [
         "__future__",
         "datetime",
+        "functools",
         "hashlib",
         "json",
         "pydantic",
@@ -8435,13 +8517,19 @@
         "app.domains.characters.service.promotion",
         "app.domains.identity.service.demo_access",
         "app.domains.routines.constants",
+        "app.domains.routines.contracts.activity_management",
+        "app.domains.routines.exceptions",
         "app.domains.routines.repository.feed_cues",
         "app.domains.routines.repository.runs",
         "app.domains.routines.repository.slots",
+        "app.domains.routines.schemas.tendency",
+        "app.domains.routines.service.activity_management",
         "app.domains.routines.service.feed_cues",
         "app.domains.routines.service.runs",
         "app.domains.routines.service.slot_assignments",
         "app.domains.routines.service.slot_pool",
+        "app.domains.routines.service.tendency",
+        "app.domains.routines.service.tendency_settings",
         "app.domains.world_characters.public",
         "app.domains.world_characters.service.readiness",
         "app.exceptions",

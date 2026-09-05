@@ -1941,8 +1941,9 @@ def test_enabled_idle_slot_reschedules_immediately_after_activity_window_change(
             slot_id="angmoo-1",
         )
         db.commit()
+        from app.domains.routines.service import activity_management
         monkeypatch.setattr(
-            agent_activity_policy,
+            activity_management,
             "build_activity_policy",
             lambda *_args, **_kwargs: SimpleNamespace(next_tick_at=expected),
         )
