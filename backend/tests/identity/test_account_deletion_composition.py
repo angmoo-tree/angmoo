@@ -13,7 +13,10 @@ from app.domains.identity.service import auth
 from app.runtime import account_deletion
 
 
-@pytest.mark.parametrize("factory", [main.create_app, public_main.create_app])
+# Keep the two original case IDs when the public factory becomes a partial.
+@pytest.mark.parametrize(
+    "factory", [main.create_app, public_main.create_app], ids=["create_app0", "create_app1"]
+)
 def test_app_factory_supplies_the_runtime_account_deletion_workflow(factory) -> None:
     application = factory()
     request = Request({"type": "http", "app": application})

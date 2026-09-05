@@ -225,14 +225,6 @@
           "importer": "app.models.world_feed"
         },
         {
-          "imported": "app.cruds.community",
-          "importer": "app.public_main"
-        },
-        {
-          "imported": "app.services.hosted_configuration",
-          "importer": "app.public_main"
-        },
-        {
           "imported": "app.cruds.agent_runs",
           "importer": "app.runtime.characters.creator"
         },

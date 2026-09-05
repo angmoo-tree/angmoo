@@ -637,3 +637,18 @@ HTTP Request 기반 service 주입·두 앱 factory와 standalone route 테스�
 | chat/infrastructure의 model alias와 migration helpers | 과거 Alembic/embedded migration과 baseline rebuild의 실제 소비가 있다. G5/B8의 정확한 등록/역사적 helper 승계와 별개이며 파일명 정리 때문에 migration 본문/DDL을 바꾸지 않는다. |
 
 이 source는 Chat 자체의 역할 이전과 HTTP 연결을 준비한 상태다. B4/B5/B7 합류·G5·G06·B8 호환 제거·Hosted CI·신규 installer·설치 데이터 업그레이드 및 전체 백엔드 종료는 완료로 표시하지 않는다.
+
+
+## AR-B8-G06-A1 — 단일 앱 생성과 지원 profile 호환
+
+Chat HTTP source `74f6c06f9e5501ab3556fed1f3cbd4d5d5546217`에서 독립 준비했다. `main.py`의 실제 `create_app`·`create_lifespan`에 public의 typed RuntimeConfig·같은 Session override·설정 복원·World Package 복구·Memory 시작/종료·readiness를 통합했다. `full`/`public`은 원래 `/health`의 operation ID·응답 schema와 미구성 component 기본값 차이를 명시한다. `public_main.py`에는 같은 class/function과 public profile partial/app을 제공하는 단방향 export만 남긴다.
+
+기존 public의 오류·dataclass·검증·health·CLI 실제 정의와 lifecycle 본문, dispose/recovery/DB dependency의 **13개 AST 비교가 PASS**다. factory는 새 profile 인자·설명·입장 검사와 선택 분기를 원래 public 값으로 복원하고 같은 from-import 이름 순서를 정렬하면 전체 AST가 동일하다. 모델 등록 전 upgrade, 요청 Session·환경 설정·rollback/복구·provider 실행은 기존 runtime 연결을 그대로 사용한다.
+
+기존 ER4/ER7·공개 runtime·M3 보안·logging·설정·Identity/Character/Chat HTTP와 신규 회귀는 **152 passed / 기존 1 skipped / 1 warning / 62.84초**다. 새 6 nodes는 두 health 계약과 동일 type/factory, public의 기본 component 없음, Memory 시작 실패를 포함한 복구→extension→component→Memory→역순 정리, cold import의 DB/미디어/로그 부작용 없음과 명시적 media 준비를 검증한다. M3의 실제 health module을 public_main으로 바꾸던 옛 정규화 helper만 실제 main 소유에 맞춰 제거했고 기존 assertion/node는 유지했다. 새 공통 factory에는 HTTP/API 정책을 복제하지 않았다.
+
+현재 source 지도는 public_main 실제 구현 전체를 main으로 대응하고 G06 bridge의 소유·종료 단계를 명시한다. CLI ASGI 문자열·sidecar/contributor의 동적 모델 등록 import·검사별 full/public 참조는 다음 source에서 전환하며, G5와 최신 B4/B5/B7 callback 합류는 root의 순차 통합 범위다. 불변 baseline/checkpoint와 append-only additions는 변경하지 않는다. B8-B 호환 제거·삭제 후 실행·CI/패키징/설치 및 G06 완료는 미완료다.
+
+고정 전 전체 보존 검사에서 public factory가 partial로 바뀌며 Identity factory 검사의 자동 생성 case ID 두 개가 달라진 것을 확인했다. 원래 두 case의 `create_app0`·`create_app1` ID를 명시해 같은 입력·assertion·수집 node를 보존했다. source/split/assertion/억제 표시/API/ORM 계약에는 오류가 없으며 보호 **2,129 / 현재 2,189**다. 선행 committed source/node의 append-only capture는 아직 root 순차 통합에 남아 있어 명령 전체는 exit 1이다. 현재 경계 **656 modules / 2,158 edges / exact legacy 263 PASS**, L4 parity **97**, ER0 **78/87/24/44/7**, Memory batch current, public **196**을 확인했다. 같은 설정·logging·복구 consumer를 main으로 대응했고 더 이상 존재하지 않는 public_main의 실제 업무 import 예외 두 개를 제거했다. 독립 읽기 리뷰에서도 profile·같은 Session·partial·단방향 export에 추가 차단 문제를 발견하지 못했다.
+
+최종 재검사에서 원래 node ID를 포함한 source/split/assertion/억제 표시/API/ORM/기존 node 오류 **0**, 보호 **2,129 / 현재 2,189**를 확인했다. 미캡처된 선행 source **51개 / nodes 54개**만 전체 명령의 exit 1 원인이며, ID 보정 후 관련 실제 회귀도 **9 passed / 23.25초**다. 이번 첫 도입은 `backend/tests/runtime/test_app_factory_ownership.py` 한 파일·6 nodes이며 source commit에서 원본을 고정한다.
