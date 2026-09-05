@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from app.core import security  # compatibility hook for existing image tests
-from app.core.config import settings
+from app.config import settings
 from app.core.image_generation import (
     REPLICATE_IMAGE_MODEL_PRUNA_EDIT,
     REPLICATE_IMAGE_MODEL_ZIMAGE_TURBO_LORA,

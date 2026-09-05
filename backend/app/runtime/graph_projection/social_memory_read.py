@@ -12,7 +12,7 @@ from app.runtime.graph_projection import sqlalchemy_state as graph_projection_cr
 from app.runtime.graph_projection.relationship_graph_read import (
     SqlAlchemyRelationshipGraphReadGateway,
 )
-from app.core.config import Settings, settings
+from app.config import Settings, settings
 from app.runtime.relationships import (
     sqlalchemy_social_read_repository as social_memory_crud,
 )

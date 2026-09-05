@@ -224,7 +224,7 @@
     },
     {
       "path": "backend/app/public_main.py",
-      "sha256": "86064d150bd320a8b750694b4be4c2d6a8dc6de5c601482458e82bf5ea17ba1c"
+      "sha256": "1e6d8acbb9534fe004ebe0e31e35c10827cc60a8d3a791a30545036739c8904b"
     },
     {
       "path": "backend/app/runtime/desktop_sidecar.py",
@@ -288,15 +288,15 @@
     },
     {
       "path": "backend/app/runtime/single_backend_components.py",
-      "sha256": "1cd8f5e7caeca95f633c3f2f1809623fee3b545bfa4e31930fcb96a931704e1d"
+      "sha256": "8da1ec46358cc86f07709458a33ed98234e643e6b0e903d5fcd7e71ed160bf08"
     },
     {
       "path": "backend/app/services/agents.py",
-      "sha256": "189f0d81b517a4d6cf29845d61c12741db15155c5bde2d8024901d86dd0bcfde"
+      "sha256": "ac3847bb3a1bd0715ec4f7c04c3f07847be9b46ac4eac08e84ba67264712db44"
     },
     {
       "path": "backend/app/services/auth.py",
-      "sha256": "94c9424ef3c5937374d50dc953f0cec6a87f83e8831eca5f0bcdcba9f3957fc3"
+      "sha256": "34eeca3ddcd136f331d3a89418c2a05cab4803a1fd5b90469fa62b08b2dd5537"
     },
     {
       "path": "backend/tests/test_p8_l_r_memory_batch_api.py",

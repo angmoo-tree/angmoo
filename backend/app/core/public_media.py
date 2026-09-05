@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from app.core.config import Settings, settings
+from app.config import Settings, settings
 
 
 PUBLIC_MEDIA_DIRECTORIES = ("characters", "posts", "world-package-imports")

@@ -27,11 +27,11 @@
     },
     {
       "path": "backend/app/main.py",
-      "sha256": "f326f6832a0c7c307b12c6daab9edca59fb60c17e030c6e1a7f1242bba8b678e"
+      "sha256": "1e5388f75c4d7be751731c465be95ef3319264ebc08caf0103dca75ee442d221"
     },
     {
       "path": "backend/app/services/resident_tick_scheduler.py",
-      "sha256": "645bf6b21505c733fa2aa51428e56580d4667699292bc95a2037f9e984a06eb0"
+      "sha256": "1f4946d31434206eea782918244033d0e18e9354b503627964abdb40bb01ff3b"
     },
     {
       "path": "backend/app/runtime/graph_projection/worker.py",
@@ -223,7 +223,7 @@
       "owner": "ER4",
       "path": "backend/app/runtime/single_backend_components.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "1cd8f5e7caeca95f633c3f2f1809623fee3b545bfa4e31930fcb96a931704e1d",
+      "source_sha256": "8da1ec46358cc86f07709458a33ed98234e643e6b0e903d5fcd7e71ed160bf08",
       "transition_pr": "ER4 PR J"
     },
     {
@@ -237,7 +237,7 @@
       "owner": "ER4",
       "path": "backend/app/services/resident_tick_scheduler.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "645bf6b21505c733fa2aa51428e56580d4667699292bc95a2037f9e984a06eb0",
+      "source_sha256": "1f4946d31434206eea782918244033d0e18e9354b503627964abdb40bb01ff3b",
       "transition_pr": "ER4 PR J"
     },
     {
@@ -274,7 +274,7 @@
       "owner": "ER4",
       "path": "backend/app/runtime/graph_projection/process_client.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "7fb975159013af2d8dfdeba0ebb0ce7366b0f5e93d2f6e5ccb4d9a20d2d841c8",
+      "source_sha256": "35b1eeda4b5722a29d5b25d1dabe617212ee32fd6d27c6bdd34d2da031e70035",
       "transition_pr": "ER4 PR J"
     },
     {
@@ -287,7 +287,7 @@
       "owner": "ER4",
       "path": "backend/app/public_main.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "86064d150bd320a8b750694b4be4c2d6a8dc6de5c601482458e82bf5ea17ba1c",
+      "source_sha256": "1e6d8acbb9534fe004ebe0e31e35c10827cc60a8d3a791a30545036739c8904b",
       "transition_pr": "ER4 PR J"
     },
     {

@@ -13,7 +13,7 @@ from app.core.browser_session import (
     set_bootstrap_challenge_cookie,
     set_session_cookie,
 )
-from app.core.config import Settings
+from app.config import Settings
 from app.core.desktop_loopback import (
     DesktopLoopbackPolicy,
     DesktopLoopbackSecurityMiddleware,

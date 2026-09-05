@@ -11,7 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import models, schemas
-from app.core.config import settings
+from app.config import settings
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud

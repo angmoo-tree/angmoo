@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field, ValidationError
 from sqlalchemy.orm import Session
 
 from app import models, schemas
-from app.core.config import settings
+from app.config import settings
 from app.core import security  # compatibility hook for existing image tests
 from app.core.image_generation import (
     POLLINATIONS_IMAGE_MODEL_FLUX_KLEIN,

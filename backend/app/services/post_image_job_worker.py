@@ -5,7 +5,7 @@ from datetime import UTC, datetime, timedelta
 import logging
 
 from app import models
-from app.core.config import settings
+from app.config import settings
 from app.core.db import SessionLocal
 from app.cruds import community as community_crud
 from app.services import post_image_generation

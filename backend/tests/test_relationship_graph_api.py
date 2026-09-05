@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from sqlalchemy.orm import Session
 
-from app.core.config import Settings
+from app.config import Settings
 from app.domains.relationships import public as relationships
 from app.runtime.graph_projection.relationship_graph_read import (
     get_owner_relationship_graph,
