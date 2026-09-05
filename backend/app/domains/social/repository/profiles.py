@@ -1,3 +1,5 @@
+from app.core import unit_of_work
+from app.domains.social.contracts.actors import SocialUser, SocialCharacter
 """Social-owned SQL; original caller transaction/flush/finish_write behavior is preserved."""
 
 from sqlalchemy import and_, func, or_, select, text
@@ -263,3 +265,84 @@ def count_profile_likes(
             models.PostLike.character_id.is_(None),
         )
     return db.scalar(query) or 0
+
+
+def create_follow(
+    db: Session,
+    *,
+    follower_user: SocialUser | None,
+    follower_character: SocialCharacter | None,
+    target_user: SocialUser | None,
+    target_character: SocialCharacter | None,
+) -> tuple[models.ProfileFollow, bool]:
+    query = select(models.ProfileFollow).where(
+        models.ProfileFollow.follower_user_id
+        == (follower_user.id if follower_user else None),
+        models.ProfileFollow.follower_character_id
+        == (follower_character.id if follower_character else None),
+        models.ProfileFollow.target_user_id == (target_user.id if target_user else None),
+        models.ProfileFollow.target_character_id
+        == (target_character.id if target_character else None),
+    )
+    existing = db.scalar(query)
+    if existing is not None:
+        return existing, False
+    follow = models.ProfileFollow(
+        follower_user_id=follower_user.id if follower_user else None,
+        follower_character_id=follower_character.id if follower_character else None,
+        target_user_id=target_user.id if target_user else None,
+        target_character_id=target_character.id if target_character else None,
+    )
+    db.add(follow)
+    unit_of_work.finish_write(db, follow)
+    return follow, True
+
+
+def profile_follow_exists(
+    db: Session,
+    *,
+    follower_user: SocialUser | None,
+    follower_character: SocialCharacter | None,
+    target_user: SocialUser | None,
+    target_character: SocialCharacter | None,
+) -> bool:
+    return (
+        db.scalar(
+            select(models.ProfileFollow.id).where(
+                models.ProfileFollow.follower_user_id
+                == (follower_user.id if follower_user else None),
+                models.ProfileFollow.follower_character_id
+                == (follower_character.id if follower_character else None),
+                models.ProfileFollow.target_user_id == (target_user.id if target_user else None),
+                models.ProfileFollow.target_character_id
+                == (target_character.id if target_character else None),
+            )
+        )
+        is not None
+    )
+
+
+def delete_follow(
+    db: Session,
+    *,
+    follower_user: SocialUser | None,
+    follower_character: SocialCharacter | None,
+    target_user: SocialUser | None,
+    target_character: SocialCharacter | None,
+) -> bool:
+    follow = db.scalar(
+        select(models.ProfileFollow).where(
+            models.ProfileFollow.follower_user_id
+            == (follower_user.id if follower_user else None),
+            models.ProfileFollow.follower_character_id
+            == (follower_character.id if follower_character else None),
+            models.ProfileFollow.target_user_id == (target_user.id if target_user else None),
+            models.ProfileFollow.target_character_id
+            == (target_character.id if target_character else None),
+        )
+    )
+    if follow is None:
+        return False
+    db.delete(follow)
+    unit_of_work.finish_write(db)
+    return True

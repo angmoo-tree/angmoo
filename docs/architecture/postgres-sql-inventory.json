@@ -1044,26 +1044,26 @@
     {
       "markers": {
         "row_lock": [
-          63,
-          327,
-          338,
-          345,
-          583,
-          696,
-          731,
-          786,
-          817,
-          846,
-          970
+          64,
+          328,
+          339,
+          346,
+          584,
+          697,
+          732,
+          787,
+          818,
+          847,
+          955
         ],
         "skip_locked": [
-          970
+          955
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/joint_activity_runtime.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "034611677430b3e4f8f1542569e9bca035c54c1e6ff573c74043f0b200a586e6",
+      "source_sha256": "773ee60b7176021fd694291b981faf1235417cb102b0756b3fa58a48044422f0",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

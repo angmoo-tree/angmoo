@@ -643,3 +643,12 @@ Social 쓰기·프로필·Inbox·agent 도구·미디어 job, Relationships 및 
 `service/notifications.py::ensure_joint_started_notification`은 원래 notification type/joint/recipient의 정확한 조회와 없는 경우 add만 수행한다. 일반 `create_notification`의 finish_write에 합치지 않았다. Routines가 다른 참여자와 actor WC를 같은 순서로 검사한 뒤 원래 ID를 전달하고 마지막 flush를 계속 소유한다. JSON 정렬·구분자·event/Post/World/Character 필드는 동일하다.
 
 새 **1 node**는 `tests/social/test_joint_notifications.py::test_joint_notification_keeps_exact_dedupe_payload_and_caller_write_boundary`다. add-only·정확 중복 기준·기존 event 보존·다른 수신자 분리·caller rollback·원래 JSON을 실제 SQLite로 검증한다. 공동 활동 회귀와 합쳐 **7 passed / 7.42s**다. 원래 성공 source event/claim/participant/plan 상태와 알림의 같은 Session·최종 flush를 유지한다.
+
+
+## AR-B5-B4 — 원본 게시물·반응·팔로우 저장 책임
+
+기존 CRUD의 13개 실제 함수 본문을 Social `service/source_posts.py`, `repository/reactions.py`, `repository/profiles.py`로 옮겼다. 글 생성의 정제·검색 문서·작성자 표시 이름, 반응의 잠금/중복·신고 경쟁 복구, 팔로우 exact 조건과 모든 flush/commit/refresh 순서는 그대로다. 원래 13개 함수 body AST가 동일함을 확인했다. 다른 도메인의 ORM type을 직접 참조하던 annotation은 `contracts/actors.py`의 읽기 값으로 바뀌며 실제 객체를 복제하거나 새 조회를 추가하지 않는다. 남은 기존 caller에는 동일 함수 객체의 임시 import만 남긴다.
+
+새 **3 nodes**는 `tests/social/test_source_write_boundaries.py`에 있다. 실제 SQLite에서 User/Character 테이블 없이 이미 확인된 actor 값만으로 게시물·반응·팔로우가 동작하는지, dedupe·부드러운 삭제와 caller의 deferred commit/rollback이 보존되는지 확인한다. 예외적으로 기존 low-level legacy comment 함수의 명시적 commit도 같은 의미로 보존한다. 신규 팔로우 검증은 첫 이전에서 빠진 `unit_of_work` import를 찾아내어 이를 보완했다. 기존 일반 회귀만으로 놓친 이 실제 소비 경로를 새 테스트로 보호한다.
+
+최종 집중 회귀는 **63 passed / 1 existing warning / 22.93s**다. Architecture는 **662 modules / 2,147 edges / 247 exact legacy edges**, L4는 **662 modules / parity 97**, #258/#263 API/schema/ORM과 전체 split 근거는 동일했다. 신규 joint fixture 2개도 현재 complete ORM 등록을 명시했으며 각각 단독 실행 1 PASS를 확인했다. 제품 DDL이나 기존 assertion을 바꾸지 않았고 테스트 실행 순서에 의존하던 setup만 보완했다. 이 단계는 전체 B5 완료가 아니며 외부 mutation workflow·프로필/Inbox/agent·Relationships/projection은 다음 구현 범위다.

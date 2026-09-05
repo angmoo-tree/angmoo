@@ -17,6 +17,8 @@ Angmoo 백엔드는 **업무별 도메인 안에 HTTP 처리, 업무 흐름, 데
 
 > **AR-B5-B1/B2 Social 읽기 적용 범위:** `repository/{posts,profiles,media,inbox}.py`는 Social 테이블의 실제 SQL을 소유하고, `service/notifications.py`는 수신자·자기 알림 판단을 수행합니다. `service/posts.py`는 게시물·스레드 읽기, `service/visibility.py`는 삭제·신고·인용·조상 게시물 공개 판단, `service/presentation.py`는 응답 조립을 담당합니다. User와 Character 조회는 각 소유 도메인의 service를 같은 Session으로 호출합니다. 멘션 조회의 한 번의 SQL, 입력 순서·삭제/정지 필터와 nullable 조회를 유지하며, 조회 협력은 flush/commit을 추가하지 않습니다. 기존 `services/community.py`의 쓰기·프로필·Inbox·agent 동작은 아직 실제 남은 구현이며 이어지는 B5에서 이전합니다.
 
+> **Social 저장과 협력:** `service/source_posts.py`는 원본 글·타임라인 글 생성, `repository/reactions.py`는 반응·신고 저장, `repository/profiles.py`는 팔로우 저장을 소유합니다. 이미 검증된 actor의 id/name/display_name을 읽는 협력은 외부 ORM 조회를 대신하는 우회 저장소가 아닙니다. `service/joint_posts.py`의 각 필드 대입과 `notifications.ensure_joint_started_notification`의 query/add는 기존 공동 활동 caller의 Session과 저장 순서를 유지합니다.
+
 Social의 SQL은 `repository/posts.py`, `profiles.py`, `inbox.py`, `media.py`에서 읽습니다. 다른 업무 ORM을 사용하는 복합 조회는 아직 남은 runtime 전환 범위입니다. `service/notifications.py`는 수신자 없음·자기 자신 알림 제외와 실제 저장 순서를 함께 소유하고, `utils/text.py`·`cursors.py`는 IO 없는 변환만 담당합니다. 기존 SQL helper가 호출하는 `finish_write`는 caller의 지연 commit 구간에서 flush만 하므로, 새 위치를 이유로 commit을 추가하거나 제거하지 않습니다. Community/World Feed의 HTTP DTO는 `schemas/community.py`·`feed.py`에 있습니다. `cruds/community.py`에는 아직 이전하지 않은 여러 업무 조회와 정확한 같은 함수 export가 남으며 B5/B4/G5에서 각 실제 소비자를 전환합니다.
 
 ## 목차

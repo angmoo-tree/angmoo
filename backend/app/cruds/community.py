@@ -1,3 +1,22 @@
+from app.domains.social.service.source_posts import (
+    create_post,
+    create_timeline_post,
+    create_comment,
+)
+from app.domains.social.repository.reactions import (
+    create_post_report,
+    like_post,
+    unlike_post,
+    create_repost,
+    get_timeline_repost,
+    delete_repost,
+    delete_timeline_reposts,
+)
+from app.domains.social.repository.profiles import (
+    create_follow,
+    profile_follow_exists,
+    delete_follow,
+)
 from app.domains.identity.service.profile import get_user
 from app.domains.social.service.notifications import create_notification
 from app.domains.social.repository.inbox import (
@@ -233,35 +252,6 @@ PUBLIC_ACTIVITY_SUMMARIES = {
 
 
 
-def create_post_report(
-    db: Session,
-    *,
-    post: models.Post,
-    reporter_user: models.User,
-    data: schemas.PostReportCreate,
-) -> tuple[models.PostReport, bool]:
-    existing = get_post_report(db, post_id=post.id, reporter_user_id=reporter_user.id)
-    if existing is not None:
-        return existing, False
-    report = models.PostReport(
-        post_id=post.id,
-        reporter_user_id=reporter_user.id,
-        reason=data.reason,
-        details=(data.details.strip() or None) if data.details else None,
-    )
-    db.add(report)
-    try:
-        db.flush()
-    except IntegrityError:
-        db.rollback()
-        existing = get_post_report(
-            db, post_id=post.id, reporter_user_id=reporter_user.id
-        )
-        if existing is not None:
-            return existing, False
-        raise
-    db.refresh(report)
-    return report, True
 
 
 
@@ -352,257 +342,6 @@ def search_characters(
 
 
 
-def create_post(
-    db: Session,
-    *,
-    post_id: str,
-    user: models.User,
-    character: models.Character | None,
-    data: schemas.PostCreate,
-    post_info: schemas.PostInfoMetadata | None = None,
-    world_id: str | None = None,
-    author_world_character_id: str | None = None,
-) -> models.Post:
-    title = sanitize_visible_post_title(data.title)
-    body = sanitize_visible_post_body(data.body)
-    post = models.Post(
-        id=post_id,
-        author_user_id=user.id,
-        author_character_id=character.id if character else None,
-        world_id=world_id,
-        author_world_character_id=author_world_character_id,
-        author_name=character.name if character else user.display_name,
-        title=title,
-        body=body,
-        search_document=build_post_search_document(
-            title=title, body=body, topic_signature=None
-        ),
-        info_kind=post_info.info_kind if post_info else None,
-        source_name=post_info.source_name if post_info else None,
-        source_url=post_info.source_url if post_info else None,
-        observed_at=post_info.observed_at if post_info else None,
-        location_label=post_info.location_label if post_info else None,
-    )
-    db.add(post)
-    unit_of_work.finish_write(db, post)
-    return post
-
-
-def create_timeline_post(
-    db: Session,
-    *,
-    post_id: str,
-    user: models.User,
-    character: models.Character | None,
-    title: str,
-    body: str,
-    post_type: str,
-    reply_to_post_id: str | None = None,
-    quote_post_id: str | None = None,
-    repost_of_post_id: str | None = None,
-    world_id: str | None = None,
-    author_world_character_id: str | None = None,
-) -> models.Post:
-    safe_title = sanitize_visible_post_title(title)
-    safe_body = sanitize_visible_post_body(body)
-    post = models.Post(
-        id=post_id,
-        author_user_id=user.id,
-        author_character_id=character.id if character else None,
-        author_name=character.name if character else user.display_name,
-        world_id=world_id,
-        author_world_character_id=author_world_character_id,
-        title=safe_title,
-        body=safe_body,
-        search_document=build_post_search_document(
-            title=safe_title, body=safe_body, topic_signature=None
-        ),
-        post_type=post_type,
-        reply_to_post_id=reply_to_post_id,
-        quote_post_id=quote_post_id,
-        repost_of_post_id=repost_of_post_id,
-    )
-    db.add(post)
-    unit_of_work.finish_write(db, post)
-    return post
-
-
-def create_comment(
-    db: Session, post: models.Post, character: models.Character, data: schemas.CommentCreate
-) -> models.Comment:
-    comment = models.Comment(
-        post_id=post.id,
-        author_character_id=character.id,
-        content=data.content,
-    )
-    db.add(comment)
-    db.commit()
-    db.refresh(comment)
-    return comment
-
-
-def like_post(
-    db: Session,
-    *,
-    post: models.Post,
-    user: models.User,
-    character: models.Character | None,
-) -> tuple[models.PostLike, bool]:
-    if character is None:
-        _lock_direct_user_like(db, post_id=post.id, user_id=user.id)
-    query = select(models.PostLike).where(models.PostLike.post_id == post.id)
-    if character is None:
-        query = query.where(
-            models.PostLike.user_id == user.id,
-            models.PostLike.character_id.is_(None),
-        )
-    else:
-        query = query.where(models.PostLike.character_id == character.id)
-    existing = db.scalar(query)
-    if existing is not None:
-        return existing, False
-    like = models.PostLike(
-        post_id=post.id,
-        user_id=user.id,
-        character_id=character.id if character else None,
-    )
-    db.add(like)
-    try:
-        unit_of_work.finish_write(db, like)
-    except IntegrityError:
-        db.rollback()
-        existing = db.scalar(query)
-        if existing is not None:
-            return existing, False
-        raise
-    return like, True
-
-
-
-
-def unlike_post(
-    db: Session,
-    *,
-    post: models.Post,
-    user: models.User,
-    character: models.Character | None,
-) -> bool:
-    query = select(models.PostLike).where(models.PostLike.post_id == post.id)
-    if character is None:
-        query = query.where(
-            models.PostLike.user_id == user.id,
-            models.PostLike.character_id.is_(None),
-        )
-    else:
-        query = query.where(models.PostLike.character_id == character.id)
-    like = db.scalar(query)
-    if like is None:
-        return False
-    db.delete(like)
-    unit_of_work.finish_write(db)
-    return True
-
-
-def create_repost(
-    db: Session,
-    *,
-    post: models.Post,
-    user: models.User,
-    character: models.Character | None,
-) -> tuple[models.PostRepost, bool]:
-    query = select(models.PostRepost).where(models.PostRepost.post_id == post.id)
-    if character is None:
-        query = query.where(
-            models.PostRepost.user_id == user.id,
-            models.PostRepost.character_id.is_(None),
-        )
-    else:
-        query = query.where(models.PostRepost.character_id == character.id)
-    existing = db.scalar(query)
-    if existing is not None:
-        return existing, False
-    repost = models.PostRepost(
-        post_id=post.id,
-        user_id=user.id if character is None else None,
-        character_id=character.id if character else None,
-    )
-    db.add(repost)
-    unit_of_work.finish_write(db, repost)
-    return repost, True
-
-
-def get_timeline_repost(
-    db: Session,
-    *,
-    post: models.Post,
-    user: models.User,
-    character: models.Character | None,
-) -> models.Post | None:
-    query = select(models.Post).where(
-        models.Post.deleted_at.is_(None),
-        models.Post.report_hidden_at.is_(None),
-        models.Post.post_type == "repost",
-        models.Post.repost_of_post_id == post.id,
-    )
-    if character is None:
-        query = query.where(
-            models.Post.author_user_id == user.id,
-            models.Post.author_character_id.is_(None),
-        )
-    else:
-        query = query.where(models.Post.author_character_id == character.id)
-    return db.scalar(query.order_by(models.Post.created_at.desc(), models.Post.id.asc()).limit(1))
-
-
-def delete_repost(
-    db: Session,
-    *,
-    post: models.Post,
-    user: models.User,
-    character: models.Character | None,
-) -> bool:
-    query = select(models.PostRepost).where(models.PostRepost.post_id == post.id)
-    if character is None:
-        query = query.where(
-            models.PostRepost.user_id == user.id,
-            models.PostRepost.character_id.is_(None),
-        )
-    else:
-        query = query.where(models.PostRepost.character_id == character.id)
-    repost = db.scalar(query)
-    if repost is None:
-        return False
-    db.delete(repost)
-    unit_of_work.finish_write(db)
-    return True
-
-
-def delete_timeline_reposts(
-    db: Session,
-    *,
-    post: models.Post,
-    user: models.User,
-    character: models.Character | None,
-) -> int:
-    query = select(models.Post).where(
-        models.Post.deleted_at.is_(None),
-        models.Post.post_type == "repost",
-        models.Post.repost_of_post_id == post.id,
-    )
-    if character is None:
-        query = query.where(
-            models.Post.author_user_id == user.id,
-            models.Post.author_character_id.is_(None),
-        )
-    else:
-        query = query.where(models.Post.author_character_id == character.id)
-    rows = list(db.scalars(query))
-    now = datetime.now(timezone.utc)
-    for row in rows:
-        row.deleted_at = now
-    if rows:
-        unit_of_work.finish_write(db)
-    return len(rows)
 
 
 
@@ -619,85 +358,28 @@ def delete_timeline_reposts(
 
 
 
-def create_follow(
-    db: Session,
-    *,
-    follower_user: models.User | None,
-    follower_character: models.Character | None,
-    target_user: models.User | None,
-    target_character: models.Character | None,
-) -> tuple[models.ProfileFollow, bool]:
-    query = select(models.ProfileFollow).where(
-        models.ProfileFollow.follower_user_id
-        == (follower_user.id if follower_user else None),
-        models.ProfileFollow.follower_character_id
-        == (follower_character.id if follower_character else None),
-        models.ProfileFollow.target_user_id == (target_user.id if target_user else None),
-        models.ProfileFollow.target_character_id
-        == (target_character.id if target_character else None),
-    )
-    existing = db.scalar(query)
-    if existing is not None:
-        return existing, False
-    follow = models.ProfileFollow(
-        follower_user_id=follower_user.id if follower_user else None,
-        follower_character_id=follower_character.id if follower_character else None,
-        target_user_id=target_user.id if target_user else None,
-        target_character_id=target_character.id if target_character else None,
-    )
-    db.add(follow)
-    unit_of_work.finish_write(db, follow)
-    return follow, True
 
 
-def profile_follow_exists(
-    db: Session,
-    *,
-    follower_user: models.User | None,
-    follower_character: models.Character | None,
-    target_user: models.User | None,
-    target_character: models.Character | None,
-) -> bool:
-    return (
-        db.scalar(
-            select(models.ProfileFollow.id).where(
-                models.ProfileFollow.follower_user_id
-                == (follower_user.id if follower_user else None),
-                models.ProfileFollow.follower_character_id
-                == (follower_character.id if follower_character else None),
-                models.ProfileFollow.target_user_id == (target_user.id if target_user else None),
-                models.ProfileFollow.target_character_id
-                == (target_character.id if target_character else None),
-            )
-        )
-        is not None
-    )
 
 
-def delete_follow(
-    db: Session,
-    *,
-    follower_user: models.User | None,
-    follower_character: models.Character | None,
-    target_user: models.User | None,
-    target_character: models.Character | None,
-) -> bool:
-    follow = db.scalar(
-        select(models.ProfileFollow).where(
-            models.ProfileFollow.follower_user_id
-            == (follower_user.id if follower_user else None),
-            models.ProfileFollow.follower_character_id
-            == (follower_character.id if follower_character else None),
-            models.ProfileFollow.target_user_id == (target_user.id if target_user else None),
-            models.ProfileFollow.target_character_id
-            == (target_character.id if target_character else None),
-        )
-    )
-    if follow is None:
-        return False
-    db.delete(follow)
-    unit_of_work.finish_write(db)
-    return True
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

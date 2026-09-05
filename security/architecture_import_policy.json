@@ -1152,6 +1152,7 @@
       "app.domains.runtime.schemas",
       "app.domains.social.constants",
       "app.domains.social.contracts",
+      "app.domains.social.contracts.actors",
       "app.domains.social.contracts.inbox",
       "app.domains.social.contracts.observations",
       "app.domains.social.contracts.profile_activity",
@@ -1170,6 +1171,7 @@
       "app.domains.social.repository.media",
       "app.domains.social.repository.posts",
       "app.domains.social.repository.profiles",
+      "app.domains.social.repository.reactions",
       "app.domains.social.schemas",
       "app.domains.social.schemas.community",
       "app.domains.social.schemas.feed",
@@ -1180,6 +1182,7 @@
       "app.domains.social.service.notifications",
       "app.domains.social.service.posts",
       "app.domains.social.service.presentation",
+      "app.domains.social.service.source_posts",
       "app.domains.social.service.visibility",
       "app.domains.social.utils",
       "app.domains.social.utils.cursors",
@@ -1268,6 +1271,7 @@
       "app.domains.runtime.contracts",
       "app.domains.runtime.schemas",
       "app.domains.social.contracts",
+      "app.domains.social.contracts.actors",
       "app.domains.social.contracts.inbox",
       "app.domains.social.contracts.observations",
       "app.domains.social.contracts.profile_activity",
@@ -1284,6 +1288,7 @@
       "app.domains.social.service.notifications",
       "app.domains.social.service.posts",
       "app.domains.social.service.presentation",
+      "app.domains.social.service.source_posts",
       "app.domains.social.service.visibility",
       "app.domains.world_characters.contracts",
       "app.domains.world_characters.contracts.lifecycle",
@@ -2376,6 +2381,22 @@
         "owner_stage": "AR-B5 / AR-B4",
         "reason": "Joint transaction invokes Social-owned exact notification lookup/add, retaining its own final flush.",
         "removal_condition": "AR-B4 replaces the legacy joint runtime consumer with typed same-Session collaboration.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.social.repository.reactions",
+        "owner_stage": "AR-B5 / AR-B8-A",
+        "reason": "Temporary same-object alias exposes the actual owned Social source/reaction persistence to remaining named callers.",
+        "removal_condition": "Migrate the remaining canonical consumers and remove the old Community CRUD aggregate.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.social.service.source_posts",
+        "owner_stage": "AR-B5 / AR-B8-A",
+        "reason": "Temporary same-object alias exposes the actual owned Social source/reaction persistence to remaining named callers.",
+        "removal_condition": "Migrate the remaining canonical consumers and remove the old Community CRUD aggregate.",
         "review_date": "2026-09-05"
       }
     ]

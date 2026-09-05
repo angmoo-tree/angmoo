@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2100,
-      "internal_edge_count": 2131,
+      "external_import_count": 2109,
+      "internal_edge_count": 2147,
       "legacy_import_exception_count": 0,
-      "module_count": 659,
+      "module_count": 662,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -282,6 +282,11 @@
           },
           {
             "imports": [],
+            "module": "app.domains.social.contracts.actors",
+            "path": "backend/app/domains/social/contracts/actors.py"
+          },
+          {
+            "imports": [],
             "module": "app.domains.social.contracts.inbox",
             "path": "backend/app/domains/social/contracts/inbox.py"
           },
@@ -440,12 +445,25 @@
           },
           {
             "imports": [
+              "app.core.unit_of_work",
+              "app.domains.social.contracts.actors",
               "app.domains.social.models.posts",
               "app.domains.social.repository.posts",
               "app.domains.social.utils.cursors"
             ],
             "module": "app.domains.social.repository.profiles",
             "path": "backend/app/domains/social/repository/profiles.py"
+          },
+          {
+            "imports": [
+              "app.core.unit_of_work",
+              "app.domains.social.contracts.actors",
+              "app.domains.social.models.posts",
+              "app.domains.social.repository.posts",
+              "app.domains.social.schemas.community"
+            ],
+            "module": "app.domains.social.repository.reactions",
+            "path": "backend/app/domains/social/repository/reactions.py"
           },
           {
             "imports": [],
@@ -527,6 +545,18 @@
             ],
             "module": "app.domains.social.service.presentation",
             "path": "backend/app/domains/social/service/presentation.py"
+          },
+          {
+            "imports": [
+              "app.core.search_text",
+              "app.core.unit_of_work",
+              "app.domains.social.contracts.actors",
+              "app.domains.social.models.posts",
+              "app.domains.social.schemas.community",
+              "app.domains.social.utils.text"
+            ],
+            "module": "app.domains.social.service.source_posts",
+            "path": "backend/app/domains/social/service/source_posts.py"
           },
           {
             "imports": [
@@ -801,7 +831,9 @@
               "app.domains.social.repository.media",
               "app.domains.social.repository.posts",
               "app.domains.social.repository.profiles",
+              "app.domains.social.repository.reactions",
               "app.domains.social.service.notifications",
+              "app.domains.social.service.source_posts",
               "app.domains.social.utils.cursors",
               "app.domains.social.utils.text",
               "app.models",

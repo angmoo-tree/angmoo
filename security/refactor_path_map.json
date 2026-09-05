@@ -5245,14 +5245,16 @@
           "backend/app/domains/characters/exceptions.py",
           "backend/app/domains/characters/service/profile.py",
           "backend/app/domains/characters/service/state.py",
+          "backend/app/domains/identity/service/profile.py",
           "backend/app/domains/social/repository/inbox.py",
           "backend/app/domains/social/repository/media.py",
           "backend/app/domains/social/repository/posts.py",
           "backend/app/domains/social/repository/profiles.py",
+          "backend/app/domains/social/repository/reactions.py",
           "backend/app/domains/social/service/notifications.py",
+          "backend/app/domains/social/service/source_posts.py",
           "backend/app/domains/social/utils/cursors.py",
-          "backend/app/domains/social/utils/text.py",
-          "backend/app/domains/identity/service/profile.py"
+          "backend/app/domains/social/utils/text.py"
         ],
         "backend/app/schemas/characters.py": [
           "backend/app/domains/characters/schemas.py",
@@ -5687,12 +5689,12 @@
         },
         {
           "old": "backend/app/cruds/community.py::create_post_report",
-          "new": "backend/app/cruds/community.py::create_post_report",
+          "new": "backend/app/domains/social/repository/reactions.py::create_post_report",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/test_community_abuse_boundaries.py::test_three_reports_do_not_automatically_hide_post"
           ]
         },
         {
@@ -5916,46 +5918,42 @@
         },
         {
           "old": "backend/app/cruds/community.py::create_post",
-          "new": "backend/app/cruds/community.py::create_post",
+          "new": "backend/app/domains/social/service/source_posts.py::create_post",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_failed_domain_write_rolls_back_without_consuming_quota",
-            "tests/test_local_bot_response_contract.py::test_bot_create_post_does_not_store_metadata",
-            "tests/test_local_bot_response_contract.py::test_bot_create_post_queues_image_request"
+            "tests/social/test_source_write_boundaries.py::test_source_and_reactions_use_actor_values_and_keep_deferred_transaction"
           ]
         },
         {
           "old": "backend/app/cruds/community.py::create_timeline_post",
-          "new": "backend/app/cruds/community.py::create_timeline_post",
+          "new": "backend/app/domains/social/service/source_posts.py::create_timeline_post",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/test_visible_post_text_sanitizer.py::test_create_timeline_post_sanitizes_reply_and_quote_body_boundary"
+            "tests/social/test_source_write_boundaries.py::test_source_and_reactions_use_actor_values_and_keep_deferred_transaction"
           ]
         },
         {
           "old": "backend/app/cruds/community.py::create_comment",
-          "new": "backend/app/cruds/community.py::create_comment",
+          "new": "backend/app/domains/social/service/source_posts.py::create_comment",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/social/test_source_write_boundaries.py::test_legacy_comment_retains_its_original_explicit_commit_boundary"
           ]
         },
         {
           "old": "backend/app/cruds/community.py::like_post",
-          "new": "backend/app/cruds/community.py::like_post",
+          "new": "backend/app/domains/social/repository/reactions.py::like_post",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/test_direct_user_like_uniqueness.py::test_direct_user_like_is_idempotent_with_database_unique_boundary",
-            "tests/test_local_bot_atomic_quota.py::test_noop_like_commits_without_consuming_quota",
-            "tests/test_postgres_security_concurrency.py::test_direct_user_like_is_unique_across_postgres_sessions"
+            "tests/social/test_source_write_boundaries.py::test_source_and_reactions_use_actor_values_and_keep_deferred_transaction"
           ]
         },
         {
@@ -5972,52 +5970,52 @@
         },
         {
           "old": "backend/app/cruds/community.py::unlike_post",
-          "new": "backend/app/cruds/community.py::unlike_post",
+          "new": "backend/app/domains/social/repository/reactions.py::unlike_post",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/social/test_source_write_boundaries.py::test_source_and_reactions_use_actor_values_and_keep_deferred_transaction"
           ]
         },
         {
           "old": "backend/app/cruds/community.py::create_repost",
-          "new": "backend/app/cruds/community.py::create_repost",
+          "new": "backend/app/domains/social/repository/reactions.py::create_repost",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/social/test_source_write_boundaries.py::test_source_and_reactions_use_actor_values_and_keep_deferred_transaction"
           ]
         },
         {
           "old": "backend/app/cruds/community.py::get_timeline_repost",
-          "new": "backend/app/cruds/community.py::get_timeline_repost",
+          "new": "backend/app/domains/social/repository/reactions.py::get_timeline_repost",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/social/test_source_write_boundaries.py::test_source_and_reactions_use_actor_values_and_keep_deferred_transaction"
           ]
         },
         {
           "old": "backend/app/cruds/community.py::delete_repost",
-          "new": "backend/app/cruds/community.py::delete_repost",
+          "new": "backend/app/domains/social/repository/reactions.py::delete_repost",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/social/test_source_write_boundaries.py::test_source_and_reactions_use_actor_values_and_keep_deferred_transaction"
           ]
         },
         {
           "old": "backend/app/cruds/community.py::delete_timeline_reposts",
-          "new": "backend/app/cruds/community.py::delete_timeline_reposts",
+          "new": "backend/app/domains/social/repository/reactions.py::delete_timeline_reposts",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/social/test_source_write_boundaries.py::test_source_and_reactions_use_actor_values_and_keep_deferred_transaction"
           ]
         },
         {
@@ -6093,32 +6091,32 @@
         },
         {
           "old": "backend/app/cruds/community.py::create_follow",
-          "new": "backend/app/cruds/community.py::create_follow",
+          "new": "backend/app/domains/social/repository/profiles.py::create_follow",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/social/test_source_write_boundaries.py::test_follow_values_dedupe_without_foreign_queries_and_keep_caller_rollback"
           ]
         },
         {
           "old": "backend/app/cruds/community.py::profile_follow_exists",
-          "new": "backend/app/cruds/community.py::profile_follow_exists",
+          "new": "backend/app/domains/social/repository/profiles.py::profile_follow_exists",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/social/test_source_write_boundaries.py::test_follow_values_dedupe_without_foreign_queries_and_keep_caller_rollback"
           ]
         },
         {
           "old": "backend/app/cruds/community.py::delete_follow",
-          "new": "backend/app/cruds/community.py::delete_follow",
+          "new": "backend/app/domains/social/repository/profiles.py::delete_follow",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/social/test_source_write_boundaries.py::test_follow_values_dedupe_without_foreign_queries_and_keep_caller_rollback"
           ]
         },
         {
@@ -18445,6 +18443,20 @@
           ]
         }
       ]
+    },
+    "AR-B5-B4": {
+      "status": "IMPLEMENTED; focused63 PASS; original13 body AST unchanged; exact API/ORM/split PASS before final metadata check",
+      "scope": "Actual13 Social source/reaction/follow functions retain their original bodies; foreign ORM type annotations become read-only actor values. Profiles/reaction queries do not query foreign actor tables.",
+      "source_split_owners": [
+        "AR-B2-B1 full103 original CRUD symbols retains all evidence"
+      ],
+      "new_contract": "backend/app/domains/social/contracts/actors.py: read-only id/name/display_name protocols for existing attached values; no object conversion",
+      "tests": [
+        "tests/social/test_source_write_boundaries.py::test_source_and_reactions_use_actor_values_and_keep_deferred_transaction",
+        "tests/social/test_source_write_boundaries.py::test_follow_values_dedupe_without_foreign_queries_and_keep_caller_rollback",
+        "tests/social/test_source_write_boundaries.py::test_legacy_comment_retains_its_original_explicit_commit_boundary"
+      ],
+      "remaining": "Outer community mutation workflows, profile/inbox/agent services and Relationships/projection migration."
     }
   }
 }
