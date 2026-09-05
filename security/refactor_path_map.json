@@ -23625,8 +23625,10 @@
         "backend/app/cruds/agents.py": [
           "backend/app/cruds/agents.py",
           "backend/app/domains/routines/constants.py",
+          "backend/app/domains/routines/repository/feed_cues.py",
           "backend/app/domains/routines/service/activity_logs.py",
-          "backend/app/domains/routines/service/activity_settings.py"
+          "backend/app/domains/routines/service/activity_settings.py",
+          "backend/app/domains/routines/service/feed_cues.py"
         ],
         "backend/app/schemas/agents.py": [
           "backend/app/domains/characters/schemas.py",
@@ -24106,9 +24108,11 @@
         },
         {
           "old": "backend/app/cruds/agents.py::get_pending_feed_cue",
-          "new": "backend/app/cruds/agents.py::get_pending_feed_cue",
+          "new": "backend/app/domains/routines/repository/feed_cues.py::get_pending_feed_cue",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
+            "backend/app/runtime/characters/management.py",
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/community.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
@@ -24116,13 +24120,17 @@
             "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
             "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
             "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
-          ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
+            "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
+            "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
+            "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
+            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+          ]
         },
         {
           "old": "backend/app/cruds/agents.py::create_feed_cue",
-          "new": "backend/app/cruds/agents.py::create_feed_cue",
+          "new": "backend/app/domains/routines/service/feed_cues.py::create_feed_cue",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
@@ -24132,15 +24140,19 @@
             "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
             "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
             "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
-          ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
+            "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
+            "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
+            "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
+            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+          ]
         },
         {
           "old": "backend/app/cruds/agents.py::mark_pending_feed_cue_used",
-          "new": "backend/app/cruds/agents.py::mark_pending_feed_cue_used",
+          "new": "backend/app/domains/routines/service/feed_cues.py::mark_pending_feed_cue_used",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
+            "backend/app/services/community.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
@@ -24148,9 +24160,13 @@
             "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
             "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
             "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
-          ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
+            "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
+            "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
+            "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
+            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+          ]
         },
         {
           "old": "backend/app/cruds/agents.py::log_activity",
@@ -26543,6 +26559,1419 @@
       "ownership": "Actual timezone fallback/import activation decisions live in routines/service/activity_scope. Cross-domain nullable get and original two scalar/join expressions are same-Session runtime/resident/activity_scope. Runtime activity_policy constructs this collaboration; all direct consumers are switched and the old service is deleted. Constant-only consumers use actual tick_schedule and ActivityPolicy-only consumers use the same contract.",
       "preservation": "Four decision ASTs and two SQL ASTs match after exact collaborator/parameter substitution. An enabled WorldCharacter causes no inspect/query/transaction. Import lookup order, absent registry fallback, two distinct active/no-active branches, selected-world character check, ZoneInfo fallback and original Session autoflush are unchanged. No new flush/commit/provider call.",
       "remaining": "Resident AgentRun/slot/feed cue/graph actual execution, ownership-specific writes and mixed HTTP remain named B4-C followups. This ends only the old activity policy path and its exact legacy edges; no full B4 completion claim."
+    },
+    "AR-B4-C4a-run-feedcue-persistence": {
+      "status": "IMPLEMENTED — 481 focused passed, existing PG skip1; actual17 AST unchanged; boundary707/2368/211; read-only source/split/assertion/suppression/APIORM/node diagnostics errors0; root linear introductions and stock integration gate pending",
+      "split_files": {
+        "backend/app/cruds/agent_runs.py": [
+          "backend/app/cruds/agent_runs.py",
+          "backend/app/domains/routines/constants.py",
+          "backend/app/domains/routines/exceptions.py",
+          "backend/app/domains/routines/repository/public_action_executions.py",
+          "backend/app/domains/routines/repository/runs.py",
+          "backend/app/domains/routines/service/public_action_executions.py",
+          "backend/app/domains/routines/service/runs.py"
+        ],
+        "backend/app/cruds/agents.py": [
+          "backend/app/cruds/agents.py",
+          "backend/app/domains/routines/constants.py",
+          "backend/app/domains/routines/repository/feed_cues.py",
+          "backend/app/domains/routines/service/activity_logs.py",
+          "backend/app/domains/routines/service/activity_settings.py",
+          "backend/app/domains/routines/service/feed_cues.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/cruds/agents.py::HIDDEN_ACTIVITY_ACTION_TYPES",
+          "new": "backend/app/domains/routines/constants.py::HIDDEN_ACTIVITY_ACTION_TYPES",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/activity_logs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agents.py::STATE_SAVE_DEDUPE_WINDOW",
+          "new": "backend/app/domains/routines/constants.py::STATE_SAVE_DEDUPE_WINDOW",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/activity_logs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agents.py::default_auth_profile_id",
+          "new": "backend/app/cruds/agents.py::default_auth_profile_id",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::default_credential_model",
+          "new": "backend/app/cruds/agents.py::default_credential_model",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::get_setting",
+          "new": "backend/app/domains/routines/service/activity_settings.py::get_setting",
+          "direct_consumers": [
+            "backend/app/cruds/agents.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agents.py::ensure_setting",
+          "new": "backend/app/domains/routines/service/activity_settings.py::ensure_setting",
+          "direct_consumers": [
+            "backend/app/cruds/agents.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agents.py::update_setting",
+          "new": "backend/app/domains/routines/service/activity_settings.py::update_setting",
+          "direct_consumers": [
+            "backend/app/cruds/agents.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agents.py::get_image_generation_setting",
+          "new": "backend/app/cruds/agents.py::get_image_generation_setting",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py",
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::ensure_image_generation_setting",
+          "new": "backend/app/cruds/agents.py::ensure_image_generation_setting",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::_image_secret_scope",
+          "new": "backend/app/cruds/agents.py::_image_secret_scope",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::update_image_generation_setting",
+          "new": "backend/app/cruds/agents.py::update_image_generation_setting",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::clear_image_visual_identity",
+          "new": "backend/app/cruds/agents.py::clear_image_visual_identity",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::get_character_credential",
+          "new": "backend/app/cruds/agents.py::get_character_credential",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py",
+            "backend/app/services/character_lore.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::get_active_local_key",
+          "new": "backend/app/cruds/agents.py::get_active_local_key",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::get_active_local_key_by_hash",
+          "new": "backend/app/cruds/agents.py::get_active_local_key_by_hash",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::get_latest_local_key",
+          "new": "backend/app/cruds/agents.py::get_latest_local_key",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::create_local_key",
+          "new": "backend/app/cruds/agents.py::create_local_key",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::revoke_active_local_key",
+          "new": "backend/app/cruds/agents.py::revoke_active_local_key",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::mark_local_key_used",
+          "new": "backend/app/cruds/agents.py::mark_local_key_used",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::upsert_credential",
+          "new": "backend/app/cruds/agents.py::upsert_credential",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::filter_visible_activity_logs",
+          "new": "backend/app/domains/routines/service/activity_logs.py::filter_visible_activity_logs",
+          "direct_consumers": [
+            "backend/app/cruds/agents.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agents.py::list_recent_activity",
+          "new": "backend/app/domains/routines/service/activity_logs.py::list_recent_activity",
+          "direct_consumers": [
+            "backend/app/cruds/agents.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agents.py::get_pending_feed_cue",
+          "new": "backend/app/domains/routines/repository/feed_cues.py::get_pending_feed_cue",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py",
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
+            "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
+            "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
+            "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
+            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agents.py::create_feed_cue",
+          "new": "backend/app/domains/routines/service/feed_cues.py::create_feed_cue",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
+            "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
+            "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
+            "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
+            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agents.py::mark_pending_feed_cue_used",
+          "new": "backend/app/domains/routines/service/feed_cues.py::mark_pending_feed_cue_used",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
+            "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
+            "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
+            "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
+            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agents.py::log_activity",
+          "new": "backend/app/domains/routines/service/activity_logs.py::log_activity",
+          "direct_consumers": [
+            "backend/app/cruds/agents.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agents.py::get_assigned_slot",
+          "new": "backend/app/cruds/agents.py::get_assigned_slot",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::set_character_status",
+          "new": "backend/app/cruds/agents.py::set_character_status",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::disable_other_active_settings",
+          "new": "backend/app/cruds/agents.py::disable_other_active_settings",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::list_other_active_settings",
+          "new": "backend/app/cruds/agents.py::list_other_active_settings",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::count_effective_active_server_llm_autonomy_agents",
+          "new": "backend/app/cruds/agents.py::count_effective_active_server_llm_autonomy_agents",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::ACTIVE_RUN_STATUSES",
+          "new": "backend/app/domains/routines/constants.py::ACTIVE_RUN_STATUSES",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
+            "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
+            "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
+            "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
+            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+          ],
+          "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::LAST_ERROR_MAX_LENGTH",
+          "new": "backend/app/cruds/agent_runs.py::LAST_ERROR_MAX_LENGTH",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_EMPTY",
+          "new": "backend/app/cruds/agent_runs.py::SLOT_STATUS_EMPTY",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_IDLE",
+          "new": "backend/app/cruds/agent_runs.py::SLOT_STATUS_IDLE",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_BUSY",
+          "new": "backend/app/cruds/agent_runs.py::SLOT_STATUS_BUSY",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_ASSIGNED_IDLE",
+          "new": "backend/app/cruds/agent_runs.py::SLOT_STATUS_ASSIGNED_IDLE",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_RUNNING",
+          "new": "backend/app/cruds/agent_runs.py::SLOT_STATUS_RUNNING",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_COOLDOWN",
+          "new": "backend/app/cruds/agent_runs.py::SLOT_STATUS_COOLDOWN",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_UNHEALTHY",
+          "new": "backend/app/cruds/agent_runs.py::SLOT_STATUS_UNHEALTHY",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::FREE_SLOT_STATUSES",
+          "new": "backend/app/cruds/agent_runs.py::FREE_SLOT_STATUSES",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::DUE_SLOT_STATUSES",
+          "new": "backend/app/cruds/agent_runs.py::DUE_SLOT_STATUSES",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::ORPHANED_RESIDENT_RUN_ERROR",
+          "new": "backend/app/cruds/agent_runs.py::ORPHANED_RESIDENT_RUN_ERROR",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::TEMPORARY_MANUAL_SLOT_RELEASED_ERROR",
+          "new": "backend/app/cruds/agent_runs.py::TEMPORARY_MANUAL_SLOT_RELEASED_ERROR",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_KINDS",
+          "new": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_KINDS",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle",
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_consumed_survives_later_state_recorder_rollback"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_PENDING",
+          "new": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_PENDING",
+          "direct_consumers": [
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle",
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_consumed_survives_later_state_recorder_rollback"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_SELECTED",
+          "new": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_SELECTED",
+          "direct_consumers": [
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle",
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_consumed_survives_later_state_recorder_rollback"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_CONSUMED",
+          "new": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_CONSUMED",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle",
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_consumed_survives_later_state_recorder_rollback"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_EXPIRED",
+          "new": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_EXPIRED",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle",
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_consumed_survives_later_state_recorder_rollback"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_FAILED",
+          "new": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_FAILED",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle",
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_consumed_survives_later_state_recorder_rollback"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_ACTIVE_STATUSES",
+          "new": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_ACTIVE_STATUSES",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle",
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_consumed_survives_later_state_recorder_rollback"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::AgentRunConflictError",
+          "new": "backend/app/domains/routines/exceptions.py::AgentRunConflictError",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
+            "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
+            "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
+            "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
+            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+          ],
+          "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::get_credential",
+          "new": "backend/app/cruds/agent_runs.py::get_credential",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/agent_writing.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::get_default_credential",
+          "new": "backend/app/cruds/agent_runs.py::get_default_credential",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::create_agent_run",
+          "new": "backend/app/domains/routines/service/runs.py::create_agent_run",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py",
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
+            "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
+            "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
+            "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
+            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+          ],
+          "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::mark_agent_run_finished",
+          "new": "backend/app/domains/routines/service/runs.py::mark_agent_run_finished",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py",
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
+            "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
+            "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
+            "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
+            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+          ],
+          "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::set_agent_run_post_id",
+          "new": "backend/app/domains/routines/service/runs.py::set_agent_run_post_id",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py",
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
+            "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
+            "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
+            "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
+            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+          ],
+          "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::get_public_action_execution_by_signature",
+          "new": "backend/app/domains/routines/repository/public_action_executions.py::get_public_action_execution_by_signature",
+          "direct_consumers": [
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
+            "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
+            "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
+            "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
+            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+          ],
+          "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::create_public_action_execution",
+          "new": "backend/app/domains/routines/service/public_action_executions.py::create_public_action_execution",
+          "direct_consumers": [
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
+            "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
+            "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
+            "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
+            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+          ],
+          "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::mark_public_action_execution_finished",
+          "new": "backend/app/domains/routines/service/public_action_executions.py::mark_public_action_execution_finished",
+          "direct_consumers": [
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
+            "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
+            "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
+            "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
+            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+          ],
+          "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::relationship_point_pair_key",
+          "new": "backend/app/cruds/agent_runs.py::relationship_point_pair_key",
+          "direct_consumers": [
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle",
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_consumed_survives_later_state_recorder_rollback"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::relationship_point_source_signature",
+          "new": "backend/app/cruds/agent_runs.py::relationship_point_source_signature",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle",
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_consumed_survives_later_state_recorder_rollback"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::relationship_point_chain_id",
+          "new": "backend/app/cruds/agent_runs.py::relationship_point_chain_id",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle",
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_consumed_survives_later_state_recorder_rollback"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::_relationship_point_payload",
+          "new": "backend/app/cruds/agent_runs.py::_relationship_point_payload",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle",
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_consumed_survives_later_state_recorder_rollback"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::create_relationship_point",
+          "new": "backend/app/cruds/agent_runs.py::create_relationship_point",
+          "direct_consumers": [
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle",
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_consumed_survives_later_state_recorder_rollback"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::count_relationship_points_for_pair_since",
+          "new": "backend/app/cruds/agent_runs.py::count_relationship_points_for_pair_since",
+          "direct_consumers": [
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle",
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_consumed_survives_later_state_recorder_rollback"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::expire_relationship_points",
+          "new": "backend/app/cruds/agent_runs.py::expire_relationship_points",
+          "direct_consumers": [
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle",
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_consumed_survives_later_state_recorder_rollback"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::list_pending_relationship_points",
+          "new": "backend/app/cruds/agent_runs.py::list_pending_relationship_points",
+          "direct_consumers": [
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle",
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_consumed_survives_later_state_recorder_rollback"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_selected",
+          "new": "backend/app/cruds/agent_runs.py::mark_relationship_point_selected",
+          "direct_consumers": [
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle",
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_consumed_survives_later_state_recorder_rollback"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::release_relationship_point_selection",
+          "new": "backend/app/cruds/agent_runs.py::release_relationship_point_selection",
+          "direct_consumers": [
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle",
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_consumed_survives_later_state_recorder_rollback"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_consumed",
+          "new": "backend/app/cruds/agent_runs.py::mark_relationship_point_consumed",
+          "direct_consumers": [
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle",
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_consumed_survives_later_state_recorder_rollback"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_replied",
+          "new": "backend/app/cruds/agent_runs.py::mark_relationship_point_replied",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle",
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_consumed_survives_later_state_recorder_rollback"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_failed",
+          "new": "backend/app/cruds/agent_runs.py::mark_relationship_point_failed",
+          "direct_consumers": [
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle",
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_consumed_survives_later_state_recorder_rollback"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::get_active_run_for_session",
+          "new": "backend/app/domains/routines/repository/runs.py::get_active_run_for_session",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
+            "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
+            "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
+            "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
+            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+          ],
+          "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::get_active_run_for_tool_auth_key",
+          "new": "backend/app/domains/routines/repository/runs.py::get_active_run_for_tool_auth_key",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
+            "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
+            "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
+            "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
+            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+          ],
+          "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::get_latest_run_for_session",
+          "new": "backend/app/domains/routines/repository/runs.py::get_latest_run_for_session",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
+            "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
+            "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
+            "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
+            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+          ],
+          "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::get_latest_run_for_tool_auth_key",
+          "new": "backend/app/domains/routines/repository/runs.py::get_latest_run_for_tool_auth_key",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
+            "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
+            "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
+            "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
+            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+          ],
+          "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::get_latest_manual_run_for_user",
+          "new": "backend/app/domains/routines/repository/runs.py::get_latest_manual_run_for_user",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
+            "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
+            "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
+            "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
+            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+          ],
+          "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::get_latest_first_greeting_run_for_user",
+          "new": "backend/app/domains/routines/repository/runs.py::get_latest_first_greeting_run_for_user",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
+            "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
+            "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
+            "tests/test_langgraph_resident_engine.py::test_public_action_exactly_once_reuses_succeeded_signature",
+            "tests/test_tendency_note_action_selection.py::test_create_agent_tool_post_consumes_feed_cue_only_when_requested"
+          ],
+          "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::ensure_agent_slots",
+          "new": "backend/app/cruds/agent_runs.py::ensure_agent_slots",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::claim_agent_slot",
+          "new": "backend/app/cruds/agent_runs.py::claim_agent_slot",
+          "direct_consumers": [
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::release_agent_slot",
+          "new": "backend/app/cruds/agent_runs.py::release_agent_slot",
+          "direct_consumers": [
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::list_agent_slots",
+          "new": "backend/app/cruds/agent_runs.py::list_agent_slots",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py",
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::recover_expired_resident_slot_runs",
+          "new": "backend/app/cruds/agent_runs.py::recover_expired_resident_slot_runs",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::_clear_resident_slot",
+          "new": "backend/app/cruds/agent_runs.py::_clear_resident_slot",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::assign_resident_slot",
+          "new": "backend/app/cruds/agent_runs.py::assign_resident_slot",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::claim_temporary_resident_slot_assignment",
+          "new": "backend/app/cruds/agent_runs.py::claim_temporary_resident_slot_assignment",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::release_temporary_resident_slot_assignment",
+          "new": "backend/app/cruds/agent_runs.py::release_temporary_resident_slot_assignment",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::release_resident_slot_assignment",
+          "new": "backend/app/cruds/agent_runs.py::release_resident_slot_assignment",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::claim_resident_slot_assignment",
+          "new": "backend/app/cruds/agent_runs.py::claim_resident_slot_assignment",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::claim_due_resident_slots",
+          "new": "backend/app/cruds/agent_runs.py::claim_due_resident_slots",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::has_active_resident_slot_run",
+          "new": "backend/app/cruds/agent_runs.py::has_active_resident_slot_run",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::set_resident_slot_run_id",
+          "new": "backend/app/cruds/agent_runs.py::set_resident_slot_run_id",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::extend_resident_slot_lease",
+          "new": "backend/app/cruds/agent_runs.py::extend_resident_slot_lease",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::complete_resident_slot_run",
+          "new": "backend/app/cruds/agent_runs.py::complete_resident_slot_run",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ],
+          "remaining_owner": "Unchanged actual implementation: slots/claim/recovery go to B4-C4b, Identity credential and Character/media helpers to their named owner; Relationships candidate policy goes to B5. No alias is claimed as an implementation."
+        }
+      ],
+      "ownership": "Run creation/completion/post association, public execution creation/completion, FeedCue creation/consumption are actual owner services. Six Run reads, signature lookup and pending FeedCue SQL are repositories. The same original Run error/active constant have one canonical definition.",
+      "preservation": "17 actual function/class/value ASTs are unchanged after the two FeedCue identity-only annotations are restored. Immediate run/feed commits and deferred public finish_write are intentionally different. Existing11 monkeypatch targets point to exact new owners while every assertion and callback body remains unchanged.",
+      "remaining": "Actual slot ensure/assignment/claim/recovery/completion and Character lock composition continue C4b. Identity/media helpers and B5 Relationship points remain their real original implementations until owner source integration. Social42f0366 get_execution/set_social_event_id are disjoint same-service additions combined by root. Old Run/FeedCue functions were removed after direct consumers switched; no new forwarding wrapper."
     }
   }
 }

@@ -1,4 +1,6 @@
 from __future__ import annotations
+from app.domains.routines.repository import public_action_executions as public_action_queries
+from app.domains.routines.service import public_action_executions as public_action_executions
 
 from datetime import UTC, datetime
 from hashlib import sha256
@@ -719,7 +721,7 @@ async def run_world_keyword_feed(
         decision=decision,
         cycle_key=cycle_key,
     )
-    existing_execution = agent_run_crud.get_public_action_execution_by_signature(
+    existing_execution = public_action_queries.get_public_action_execution_by_signature(
         ctx.db, signature
     )
     if existing_execution is not None and existing_execution.status == "succeeded":
@@ -762,7 +764,7 @@ async def run_world_keyword_feed(
     else:
         try:
             with unit_of_work.deferred_commits():
-                execution = agent_run_crud.create_public_action_execution(
+                execution = public_action_executions.create_public_action_execution(
                     ctx.db,
                     run_id=ctx.run_id,
                     character_id=ctx.character.id,
@@ -819,7 +821,7 @@ async def run_world_keyword_feed(
                         ),
                     }
                 )
-                agent_run_crud.mark_public_action_execution_finished(
+                public_action_executions.mark_public_action_execution_finished(
                     ctx.db,
                     execution,
                     status="succeeded",

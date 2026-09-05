@@ -127,12 +127,12 @@ def test_agent_tool_auth_rejects_daypart_session_key(monkeypatch) -> None:
         raise AssertionError("daypart session key must not fall back to session lookup")
 
     monkeypatch.setattr(
-        community.agent_run_crud,
+        community.routine_run_queries,
         "get_active_run_for_tool_auth_key",
         lambda db, key: None,
     )
     monkeypatch.setattr(
-        community.agent_run_crud,
+        community.routine_run_queries,
         "get_active_run_for_session",
         fail_session_lookup,
     )
@@ -157,12 +157,12 @@ def test_agent_tool_auth_keeps_run_scoped_session_fallback(monkeypatch) -> None:
     )
 
     monkeypatch.setattr(
-        community.agent_run_crud,
+        community.routine_run_queries,
         "get_active_run_for_tool_auth_key",
         lambda db, key: None,
     )
     monkeypatch.setattr(
-        community.agent_run_crud,
+        community.routine_run_queries,
         "get_active_run_for_session",
         lambda db, key: run if key == "agent:angmoo-8:resident-tick:user-a:char-a:run-1" else None,
     )

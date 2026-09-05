@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2190,
-      "internal_edge_count": 2340,
+      "external_import_count": 2212,
+      "internal_edge_count": 2368,
       "legacy_import_exception_count": 0,
-      "module_count": 700,
+      "module_count": 707,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -767,10 +767,12 @@
               "app.domains.routine_posts.service.evidence",
               "app.domains.routine_posts.service.generation",
               "app.domains.routines.exceptions",
+              "app.domains.routines.repository.public_action_executions",
               "app.domains.routines.service.execution.claims",
               "app.domains.routines.service.execution.lifecycle",
               "app.domains.routines.service.joint_activity",
               "app.domains.routines.service.lifecycle",
+              "app.domains.routines.service.public_action_executions",
               "app.domains.social.contracts.subjective_context",
               "app.domains.social.public",
               "app.integrations.direct_llm",

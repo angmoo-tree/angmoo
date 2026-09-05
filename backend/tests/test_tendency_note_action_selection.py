@@ -1958,7 +1958,7 @@ def test_create_agent_tool_post_stores_post_topic_metadata(monkeypatch):
             return SimpleNamespace(id="user-1")
 
     monkeypatch.setattr(
-        community_service.agent_run_crud,
+        community_service.routine_run_queries,
         "get_active_run_for_session",
         lambda *args, **kwargs: run,
     )
@@ -1992,7 +1992,7 @@ def test_create_agent_tool_post_stores_post_topic_metadata(monkeypatch):
         lambda *args, **kwargs: None,
     )
     monkeypatch.setattr(
-        community_service.agent_crud,
+        community_service.feed_cues,
         "mark_pending_feed_cue_used",
         lambda *args, **kwargs: None,
     )
@@ -2025,7 +2025,7 @@ def test_create_agent_tool_post_consumes_feed_cue_only_when_requested(monkeypatc
             return SimpleNamespace(id="user-1")
 
     monkeypatch.setattr(
-        community_service.agent_run_crud,
+        community_service.routine_run_queries,
         "get_active_run_for_session",
         lambda *args, **kwargs: run,
     )
@@ -2059,12 +2059,12 @@ def test_create_agent_tool_post_consumes_feed_cue_only_when_requested(monkeypatc
         lambda *args, **kwargs: None,
     )
     monkeypatch.setattr(
-        community_service.agent_crud,
+        community_service.feed_cue_queries,
         "get_pending_feed_cue",
         lambda *args, **kwargs: SimpleNamespace(id=77),
     )
     monkeypatch.setattr(
-        community_service.agent_crud,
+        community_service.feed_cues,
         "mark_pending_feed_cue_used",
         lambda *args, **kwargs: consumed.append(kwargs),
     )

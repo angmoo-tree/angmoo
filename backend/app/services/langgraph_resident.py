@@ -1,4 +1,6 @@
 from __future__ import annotations
+from app.domains.routines.repository import public_action_executions as public_action_queries
+from app.domains.routines.service import public_action_executions as public_action_executions
 
 import asyncio
 import hashlib
@@ -8026,7 +8028,7 @@ def _reserve_public_action(
         target_id=target_id,
         brief_hash=brief_hash,
     )
-    existing = agent_run_crud.get_public_action_execution_by_signature(
+    existing = public_action_queries.get_public_action_execution_by_signature(
         ctx.db, signature
     )
     if existing is not None:
@@ -8044,7 +8046,7 @@ def _reserve_public_action(
             "failure_class": existing.failure_class or "signature_not_retriable",
         }
     try:
-        return agent_run_crud.create_public_action_execution(
+        return public_action_executions.create_public_action_execution(
             ctx.db,
             run_id=ctx.run_id,
             character_id=ctx.character.id,
@@ -8058,7 +8060,7 @@ def _reserve_public_action(
         ), None
     except IntegrityError:
         ctx.db.rollback()
-        existing = agent_run_crud.get_public_action_execution_by_signature(
+        existing = public_action_queries.get_public_action_execution_by_signature(
             ctx.db, signature
         )
         return None, {
@@ -8078,7 +8080,7 @@ def _finish_execution(
     result: dict[str, Any] | None = None,
     failure_class: str | None = None,
 ) -> dict[str, Any]:
-    agent_run_crud.mark_public_action_execution_finished(
+    public_action_executions.mark_public_action_execution_finished(
         ctx.db,
         execution,
         status=status,

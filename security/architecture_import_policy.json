@@ -1034,6 +1034,7 @@
       "app.domains.routines.contracts.activity_policy",
       "app.domains.routines.contracts.activity_scope",
       "app.domains.routines.contracts.clock",
+      "app.domains.routines.contracts.feed_cues",
       "app.domains.routines.contracts.joint_activity",
       "app.domains.routines.contracts.lifecycle",
       "app.domains.routines.contracts.plans",
@@ -1048,7 +1049,10 @@
       "app.domains.routines.policies.planning",
       "app.domains.routines.repository",
       "app.domains.routines.repository.activity_counts",
+      "app.domains.routines.repository.feed_cues",
       "app.domains.routines.repository.plans",
+      "app.domains.routines.repository.public_action_executions",
+      "app.domains.routines.repository.runs",
       "app.domains.routines.router",
       "app.domains.routines.schemas",
       "app.domains.routines.schemas.plans",
@@ -1063,6 +1067,7 @@
       "app.domains.routines.service.execution",
       "app.domains.routines.service.execution.claims",
       "app.domains.routines.service.execution.lifecycle",
+      "app.domains.routines.service.feed_cues",
       "app.domains.routines.service.joint_activity",
       "app.domains.routines.service.joint_activity.eligibility",
       "app.domains.routines.service.joint_activity.execution",
@@ -1071,6 +1076,8 @@
       "app.domains.routines.service.joint_scheduling",
       "app.domains.routines.service.lifecycle",
       "app.domains.routines.service.plans",
+      "app.domains.routines.service.public_action_executions",
+      "app.domains.routines.service.runs",
       "app.domains.routines.service.scheduling",
       "app.domains.routines.service.tick_schedule",
       "app.domains.routines.utils",
@@ -1230,6 +1237,7 @@
       "app.domains.routines.service.execution",
       "app.domains.routines.service.execution.claims",
       "app.domains.routines.service.execution.lifecycle",
+      "app.domains.routines.service.feed_cues",
       "app.domains.routines.service.joint_activity",
       "app.domains.routines.service.joint_activity.eligibility",
       "app.domains.routines.service.joint_activity.execution",
@@ -1238,6 +1246,8 @@
       "app.domains.routines.service.joint_scheduling",
       "app.domains.routines.service.lifecycle",
       "app.domains.routines.service.plans",
+      "app.domains.routines.service.public_action_executions",
+      "app.domains.routines.service.runs",
       "app.domains.routines.service.scheduling",
       "app.domains.routines.service.tick_schedule",
       "app.domains.runtime.contracts",
@@ -2620,6 +2630,94 @@
         "owner_stage": "AR-B4-C",
         "reason": "Existing constant-only caller imports the same canonical APP_TIMEZONE object after the old mixed activity-policy module is removed. No policy/runtime lookup occurs here.",
         "removal_condition": "Retire this precise legacy consumer edge when the Bot/media actual owner moves by B8-A; canonical clock contract remains supported.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agent_runs",
+        "target": "app.domains.routines.constants",
+        "owner_stage": "AR-B4-C",
+        "reason": "Exact active legacy Run/Social caller now invokes the same canonical persistence/query implementation with the original Session and commit mode.",
+        "removal_condition": "Retire each precise old caller in B4-C slot/AgentRun/graph or B5 Social actual workflow transition; remaining mixed legacy owner closures are mandatory before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agent_runs",
+        "target": "app.domains.routines.exceptions",
+        "owner_stage": "AR-B4-C",
+        "reason": "Exact active legacy Run/Social caller now invokes the same canonical persistence/query implementation with the original Session and commit mode.",
+        "removal_condition": "Retire each precise old caller in B4-C slot/AgentRun/graph or B5 Social actual workflow transition; remaining mixed legacy owner closures are mandatory before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.repository.feed_cues",
+        "owner_stage": "AR-B4-C",
+        "reason": "Exact active legacy Run/Social caller now invokes the same canonical persistence/query implementation with the original Session and commit mode.",
+        "removal_condition": "Retire each precise old caller in B4-C slot/AgentRun/graph or B5 Social actual workflow transition; remaining mixed legacy owner closures are mandatory before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.runs",
+        "owner_stage": "AR-B4-C",
+        "reason": "Exact active legacy Run/Social caller now invokes the same canonical persistence/query implementation with the original Session and commit mode.",
+        "removal_condition": "Retire each precise old caller in B4-C slot/AgentRun/graph or B5 Social actual workflow transition; remaining mixed legacy owner closures are mandatory before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.routines.repository.feed_cues",
+        "owner_stage": "AR-B4-C",
+        "reason": "Exact active legacy Run/Social caller now invokes the same canonical persistence/query implementation with the original Session and commit mode.",
+        "removal_condition": "Retire each precise old caller in B4-C slot/AgentRun/graph or B5 Social actual workflow transition; remaining mixed legacy owner closures are mandatory before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.routines.repository.runs",
+        "owner_stage": "AR-B4-C",
+        "reason": "Exact active legacy Run/Social caller now invokes the same canonical persistence/query implementation with the original Session and commit mode.",
+        "removal_condition": "Retire each precise old caller in B4-C slot/AgentRun/graph or B5 Social actual workflow transition; remaining mixed legacy owner closures are mandatory before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.routines.service.feed_cues",
+        "owner_stage": "AR-B4-C",
+        "reason": "Exact active legacy Run/Social caller now invokes the same canonical persistence/query implementation with the original Session and commit mode.",
+        "removal_condition": "Retire each precise old caller in B4-C slot/AgentRun/graph or B5 Social actual workflow transition; remaining mixed legacy owner closures are mandatory before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.repository.public_action_executions",
+        "owner_stage": "AR-B4-C",
+        "reason": "Exact active legacy Run/Social caller now invokes the same canonical persistence/query implementation with the original Session and commit mode.",
+        "removal_condition": "Retire each precise old caller in B4-C slot/AgentRun/graph or B5 Social actual workflow transition; remaining mixed legacy owner closures are mandatory before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.service.public_action_executions",
+        "owner_stage": "AR-B4-C",
+        "reason": "Exact active legacy Run/Social caller now invokes the same canonical persistence/query implementation with the original Session and commit mode.",
+        "removal_condition": "Retire each precise old caller in B4-C slot/AgentRun/graph or B5 Social actual workflow transition; remaining mixed legacy owner closures are mandatory before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.world_feed_runtime",
+        "target": "app.domains.routines.repository.public_action_executions",
+        "owner_stage": "AR-B4-C",
+        "reason": "Exact active legacy Run/Social caller now invokes the same canonical persistence/query implementation with the original Session and commit mode.",
+        "removal_condition": "Retire each precise old caller in B4-C slot/AgentRun/graph or B5 Social actual workflow transition; remaining mixed legacy owner closures are mandatory before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.world_feed_runtime",
+        "target": "app.domains.routines.service.public_action_executions",
+        "owner_stage": "AR-B4-C",
+        "reason": "Exact active legacy Run/Social caller now invokes the same canonical persistence/query implementation with the original Session and commit mode.",
+        "removal_condition": "Retire each precise old caller in B4-C slot/AgentRun/graph or B5 Social actual workflow transition; remaining mixed legacy owner closures are mandatory before B8-A.",
         "review_date": "2026-09-06"
       }
     ]

@@ -1,7 +1,7 @@
 {
-  "edge_count": 2340,
-  "external_import_count": 2190,
-  "module_count": 700,
+  "edge_count": 2368,
+  "external_import_count": 2212,
+  "module_count": 707,
   "modules": [
     {
       "external_imports": [],
@@ -756,6 +756,8 @@
       ],
       "imports": [
         "app.core.unit_of_work",
+        "app.domains.routines.constants",
+        "app.domains.routines.exceptions",
         "app.domains.routines.service.tick_schedule",
         "app.models"
       ],
@@ -3701,6 +3703,15 @@
     },
     {
       "external_imports": [
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.routines.contracts.feed_cues",
+      "path": "backend/app/domains/routines/contracts/feed_cues.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "dataclasses",
         "datetime",
@@ -3892,6 +3903,19 @@
     },
     {
       "external_imports": [
+        "__future__",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.models"
+      ],
+      "module": "app.domains.routines.repository.feed_cues",
+      "path": "backend/app/domains/routines/repository/feed_cues.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "datetime",
         "sqlalchemy",
         "sqlalchemy.orm"
@@ -3902,6 +3926,33 @@
       ],
       "module": "app.domains.routines.repository.plans",
       "path": "backend/app/domains/routines/repository/plans.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.models"
+      ],
+      "module": "app.domains.routines.repository.public_action_executions",
+      "path": "backend/app/domains/routines/repository/public_action_executions.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.models"
+      ],
+      "module": "app.domains.routines.repository.runs",
+      "path": "backend/app/domains/routines/repository/runs.py",
       "wildcard_imports": []
     },
     {
@@ -4111,6 +4162,21 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.feed_cues",
+        "app.domains.routines.models",
+        "app.domains.routines.repository.feed_cues"
+      ],
+      "module": "app.domains.routines.service.feed_cues",
+      "path": "backend/app/domains/routines/service/feed_cues.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.domains.routines.constants",
@@ -4270,6 +4336,37 @@
       ],
       "module": "app.domains.routines.service.plans",
       "path": "backend/app/domains/routines/service/plans.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.core.unit_of_work",
+        "app.domains.routines.models"
+      ],
+      "module": "app.domains.routines.service.public_action_executions",
+      "path": "backend/app/domains/routines/service/public_action_executions.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.exceptions",
+        "app.domains.routines.models"
+      ],
+      "module": "app.domains.routines.service.runs",
+      "path": "backend/app/domains/routines/service/runs.py",
       "wildcard_imports": []
     },
     {
@@ -7658,6 +7755,10 @@
         "app.domains.characters.service.profile",
         "app.domains.characters.service.promotion",
         "app.domains.identity.service.demo_access",
+        "app.domains.routines.repository.feed_cues",
+        "app.domains.routines.repository.runs",
+        "app.domains.routines.service.feed_cues",
+        "app.domains.routines.service.runs",
         "app.domains.world_characters.public",
         "app.domains.world_characters.service.readiness",
         "app.exceptions",
@@ -8996,10 +9097,12 @@
         "app.domains.routine_posts.service.evidence",
         "app.domains.routine_posts.service.generation",
         "app.domains.routines.exceptions",
+        "app.domains.routines.repository.public_action_executions",
         "app.domains.routines.service.execution.claims",
         "app.domains.routines.service.execution.lifecycle",
         "app.domains.routines.service.joint_activity",
         "app.domains.routines.service.lifecycle",
+        "app.domains.routines.service.public_action_executions",
         "app.domains.social.contracts.subjective_context",
         "app.domains.social.public",
         "app.integrations.direct_llm",
@@ -9824,7 +9927,9 @@
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.routines.repository.feed_cues",
         "app.domains.routines.service.lifecycle",
+        "app.domains.routines.service.runs",
         "app.domains.routines.service.tick_schedule",
         "app.domains.runtime.contracts",
         "app.domains.social.public",
@@ -9941,6 +10046,9 @@
         "app.cruds.community",
         "app.domains.characters.exceptions",
         "app.domains.characters.service.state",
+        "app.domains.routines.repository.feed_cues",
+        "app.domains.routines.repository.runs",
+        "app.domains.routines.service.feed_cues",
         "app.domains.social.constants",
         "app.domains.social.exceptions",
         "app.domains.social.service.activity_results",
@@ -10070,6 +10178,8 @@
         "app.cruds.agents",
         "app.cruds.community",
         "app.domains.routines.contracts.resident",
+        "app.domains.routines.repository.public_action_executions",
+        "app.domains.routines.service.public_action_executions",
         "app.domains.social.contracts.subjective_context",
         "app.domains.world_characters.contracts.runtime_modes",
         "app.models",
@@ -10394,6 +10504,8 @@
       "imports": [
         "app.core.unit_of_work",
         "app.cruds.agent_runs",
+        "app.domains.routines.repository.public_action_executions",
+        "app.domains.routines.service.public_action_executions",
         "app.domains.social.contracts.subjective_context",
         "app.domains.social.public",
         "app.models",

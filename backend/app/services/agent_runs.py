@@ -1,3 +1,5 @@
+from app.domains.routines.repository import feed_cues as feed_cue_queries
+from app.domains.routines.service import runs as routine_runs
 from app.domains.runtime.contracts import (
     AgentRunServiceError,
     AgentSlotUnavailableError,
@@ -5702,7 +5704,7 @@ async def run_community_once(
         if enforce_activity_policy
         else None
     )
-    feed_cue = agent_crud.get_pending_feed_cue(db, character.id)
+    feed_cue = feed_cue_queries.get_pending_feed_cue(db, character.id)
     inbox_threads, has_inbox = _format_inbox_threads(
         db,
         run_id=run_id,
@@ -5767,7 +5769,7 @@ async def run_community_once(
 
     profile_ready = False
     try:
-        agent_run_crud.create_agent_run(
+        routine_runs.create_agent_run(
             db,
             run_id=run_id,
             user_id=user_id,
@@ -5833,7 +5835,7 @@ async def run_community_once(
                     "retry_at": exc.retry_at.isoformat(),
                     "wait_seconds": round(exc.wait_seconds, 3),
                 }
-                agent_run_crud.mark_agent_run_finished(
+                routine_runs.mark_agent_run_finished(
                     db,
                     run_id,
                     "deferred",
@@ -5885,7 +5887,7 @@ async def run_community_once(
                         db, character_id=character.id, since=run_started_at
                     ),
                 )
-            agent_run_crud.mark_agent_run_finished(
+            routine_runs.mark_agent_run_finished(
                 db,
                 run_id,
                 status,
@@ -6048,7 +6050,7 @@ async def run_community_once(
             f"session {session_key} already has a running agent run"
         ) from exc
     except Exception:
-        agent_run_crud.mark_agent_run_finished(db, run_id, "failed")
+        routine_runs.mark_agent_run_finished(db, run_id, "failed")
         agent_run_crud.release_agent_slot(
             db,
             agent_id=agent_id,
@@ -6073,7 +6075,7 @@ async def run_community_once(
                 )
         raise
 
-    agent_run_crud.mark_agent_run_finished(
+    routine_runs.mark_agent_run_finished(
         db,
         run_id,
         str(gateway_result.get("status", "completed")),
@@ -6854,7 +6856,7 @@ async def _run_resident_slot_once(
         )
         if cooldown_until is not None and cooldown_until > now:
             summary = "모델 사용 제한으로 cooldown 이후 재시도합니다."
-            agent_run_crud.create_agent_run(
+            routine_runs.create_agent_run(
                 db,
                 run_id=run_id,
                 user_id=slot.assigned_user_id,
@@ -6871,7 +6873,7 @@ async def _run_resident_slot_once(
                 "reason": summary,
                 "cooldown_until": cooldown_until.isoformat(),
             }
-            agent_run_crud.mark_agent_run_finished(
+            routine_runs.mark_agent_run_finished(
                 db,
                 run_id,
                 "deferred",
@@ -6926,7 +6928,7 @@ async def _run_resident_slot_once(
                 if uses_world_profile
                 else "커뮤니티 성향 분석을 먼저 실행해주세요."
             )
-            agent_run_crud.create_agent_run(
+            routine_runs.create_agent_run(
                 db,
                 run_id=run_id,
                 user_id=slot.assigned_user_id,
@@ -6948,7 +6950,7 @@ async def _run_resident_slot_once(
                     readiness.source if readiness is not None else None
                 ),
             }
-            agent_run_crud.mark_agent_run_finished(
+            routine_runs.mark_agent_run_finished(
                 db,
                 run_id,
                 "skipped",
@@ -6995,7 +6997,7 @@ async def _run_resident_slot_once(
             if enforce_activity_policy
             else None
         )
-        feed_cue = agent_crud.get_pending_feed_cue(db, character.id)
+        feed_cue = feed_cue_queries.get_pending_feed_cue(db, character.id)
         inbox_threads, has_inbox = _format_inbox_threads(
             db,
             run_id=run_id,
@@ -7091,7 +7093,7 @@ async def _run_resident_slot_once(
                 if allow_thread_tool
                 else TOOLS_ALLOW_COMPLETE_TICK
             )
-        agent_run_crud.create_agent_run(
+        routine_runs.create_agent_run(
             db,
             run_id=run_id,
             user_id=slot.assigned_user_id,
@@ -7157,7 +7159,7 @@ async def _run_resident_slot_once(
                     "retry_at": exc.retry_at.isoformat(),
                     "wait_seconds": round(exc.wait_seconds, 3),
                 }
-                agent_run_crud.mark_agent_run_finished(
+                routine_runs.mark_agent_run_finished(
                     db,
                     run_id,
                     "deferred",
@@ -7199,7 +7201,7 @@ async def _run_resident_slot_once(
                 selected_post_id = _combined_runtime_evidence_post_id(
                     gateway_result
                 )
-                agent_run_crud.set_agent_run_post_id(
+                routine_runs.set_agent_run_post_id(
                     db, run_id, selected_post_id
                 )
 
@@ -7230,7 +7232,7 @@ async def _run_resident_slot_once(
                         db, character_id=character.id, since=run_started_at
                     ),
                 )
-            agent_run_crud.mark_agent_run_finished(
+            routine_runs.mark_agent_run_finished(
                 db,
                 run_id,
                 status,
@@ -7431,7 +7433,7 @@ async def _run_resident_slot_once(
         cancelled_at = datetime.now(UTC)
         try:
             if run_created:
-                agent_run_crud.mark_agent_run_finished(
+                routine_runs.mark_agent_run_finished(
                     db,
                     run_id,
                     "cancelled",
@@ -7478,7 +7480,7 @@ async def _run_resident_slot_once(
         )
         gateway_payload = exc.gateway_result
         if run_created:
-            agent_run_crud.mark_agent_run_finished(
+            routine_runs.mark_agent_run_finished(
                 db,
                 run_id,
                 "deferred",
@@ -7621,7 +7623,7 @@ async def _run_resident_slot_once(
                     "repeated_overload": runtime_backoff.repeated_overload,
                     "error": redact_secret_text(str(exc))[:1500],
                 }
-            agent_run_crud.mark_agent_run_finished(
+            routine_runs.mark_agent_run_finished(
                 db,
                 run_id,
                 finished_status,
@@ -7905,7 +7907,7 @@ async def _run_resident_slot_once(
             )
     if activity_policy is not None:
         gateway_result["activity_policy"] = activity_policy.to_result()
-    agent_run_crud.mark_agent_run_finished(
+    routine_runs.mark_agent_run_finished(
         db,
         run_id,
         status,

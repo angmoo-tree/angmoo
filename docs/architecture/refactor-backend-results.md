@@ -938,3 +938,14 @@ World timezone의 fallback과 imported activation 판단은 `routines/service/ac
 C3c 최종 확장 검증은 **544 passed / 기존 PG 1 skip / 기존 warnings 5 / 421.71초**다. 경계 **700 modules / 2,340 edges / exact legacy 211 / cycle 0**, L4 parity 97·ER0 81/87/24/44/7·Memory batch 현재 inventory도 통과했다. 읽기 전용 보존 진단에서 split/assertion/suppression/API·ORM/node는 각각 오류 0(보호 2,139 / 현재 2,239)이었고, source 검사는 삭제된 옛 activity-policy 파일의 대표 목적지 한 항목 누락을 잡았다. 전체 symbol 분할 증거는 이미 모두 존재하므로 대표 file map을 실제 canonical activity-policy 서비스로 연결했다. 제품 코드·테스트·frozen 자료·검사 predicate는 수정하지 않았다.
 
 대표 file map 정정 후 영향을 받는 원래 source/assertion/suppression 함수만 다시 실행하여 **각각 오류 0**을 확인했다. 직전 동일 코드의 split/API·ORM/node 오류 0과 함께 C3c 지역 보존 진단을 닫는다. 부모의 선형 source introduction append 후 stock 전체 보존 검사·Actions·installer는 여전히 별도 완료 조건이다.
+
+
+## AR-B4-C4a — Run·PublicAction·FeedCue 실제 저장 책임
+
+Run create/finish/post 연결 및 public execution create/finish, FeedCue create/consume를 각각 자기 service로 이전했다. 실제 Run 조회 6개·signature 조회·pending cue 조회는 repository가 소유한다. 원래 AgentRunConflictError와 active status 값도 한 정의로 옮겼다. FeedCue의 외부 객체는 identity-only Protocol을 통해 같은 attached 객체를 그대로 읽으며 별도 domain ORM 의존이나 값 복제를 만들지 않는다. 기존 실제 함수·class·값 **17개 AST 차이 0**이며 FeedCue의 두 타입 표기만 원문으로 복원해 비교했다.
+
+기존 직접 소비자와 11개 monkeypatch의 대상 모듈을 실제 역할에 연결하고 원래 CRUD 함수 본문은 제거했다. 테스트의 callback/assertion/parameter/skip은 그대로다. 첫 집중 검증은 **382 passed / 기존 PG 1 skip / 기존 warnings 4 / 28.14초**다. 새 실제 SQLite 3 nodes는 run 생성 commit/중복 실패 rollback·원래 error cause, public execution 생성/완료의 deferred flush/observer 격리·rollback, FeedCue 생성·소비의 commit와 미존재 no-write를 검증한다. 새 검증과 기존 영향 node 묶음은 **12 passed / 12.60초**다.
+
+Slot Character row lock·claim·nested transaction·만료 복구는 C4b, Relationships 후보와 Daypart Memory는 각 소유 source와 별도로 합류한다. Social의 get_execution/set_social_event_id는 같은 서비스의 겹치지 않는 두 함수로 parent 통합 때 보존한다. 현재 단계는 actual persistence 전환이며 전체 resident 실행이나 B4 완료를 표시하지 않는다.
+
+C4a 최종 후보는 **481 passed / 기존 PG 1 skip / 기존 warnings 5 / 151.53초**다. 경계 **707 modules / 2,368 edges / exact legacy 211 / cycle 0**, L4 parity 97·ER0 81/87/24/44/7·Memory batch 현재 inventory도 통과했다. 원래 보존 함수의 읽기 전용 진단은 **source/split/assertion/suppression/API·ORM/node 각각 오류 0**, 기존 보호 **2,139 / 현재 2,242 nodes**다. 동일한 선행 signed 두 경로만 메모리에 보충했으며 tracked source additions/checkpoint/frozen 자료와 검사 구현은 변경하지 않았다. 부모 선형 도입 append 후 stock 전체 보존 및 통합 Actions·installer는 여전히 별도 조건이다.

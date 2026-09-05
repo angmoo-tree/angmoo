@@ -88,3 +88,6 @@ POLICY_SESSION_MARKER = ":resident-tick:"
 
 
 MANUAL_POLICY_SESSION_MARKER = ":resident-manual:"
+
+
+ACTIVE_RUN_STATUSES = {"running"}

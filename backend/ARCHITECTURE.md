@@ -621,3 +621,10 @@ Resident Context는 Character/CharacterState, LlmCredential, AgentFeedCue와 Act
 `routines/service/activity_policy.py`가 실제 활동 시간·허용 행동·일일 제한·cooldown·수동 세션의 예외를 판단하고, `repository/activity_counts.py`가 같은 Session에서 자기 ActivityLog의 횟수와 최근 시각을 조회합니다. `ActivityTimezoneReader`는 설정 확보 뒤 원래 위치에서 현재 World 시간을 읽는 협력입니다. 시간을 먼저 읽거나 새로운 Session을 만들지 않습니다.
 
 기존 설정이 없으면 ensure_setting의 원래 commit/refresh가 유지되고, 이미 있는 설정을 caller가 수정한 경우에는 정책 조회가 새 commit을 만들지 않습니다. World 선택에 따른 시간대와 가져온 World의 활성화 여부는 `routines/service/activity_scope.py`가 판단합니다. `runtime/resident/activity_scope.py`는 동일 Session에서 실제 World/Character/Package 조회만 수행하며, `runtime/resident/activity_policy.py`가 두 역할을 연결합니다. Inspector도 첫 table check에 만들어 활동이 허용된 캐릭터의 조회 이전 반환을 유지합니다. 예전 `services/agent_activity_policy.py`는 직접 소비자 전환 후 제거했습니다.
+
+
+### 실행 기록과 FeedCue의 저장 시점
+
+`routines/service/runs.py`와 `service/feed_cues.py`는 기존 실행 생성·종료 및 FeedCue 소비의 commit/refresh를 소유합니다. 각 조회 SQL은 `repository/runs.py`, `repository/feed_cues.py`에 있습니다. `service/public_action_executions.py`는 공개 행동의 생성·완료를 기록하고 `repository/public_action_executions.py`는 중복 signature를 조회합니다. 공개 행동의 finish_write는 deferred UoW 안에서 flush/refresh만 수행하므로 호출자의 Social 변경과 함께 rollback할 수 있습니다. 이 차이를 동일한 저장 방식으로 합치지 않습니다.
+
+FeedCue 입력의 identity 계약은 user/character의 id만 읽으며 호출자는 원래 attached 객체를 전달합니다. Slot 배정·lease·복구와 여러 업무를 잇는 실행 그래프는 별도 책임입니다. 저장 함수만 옮겼다는 이유로 실행 전체가 전환됐다고 보지 않습니다.

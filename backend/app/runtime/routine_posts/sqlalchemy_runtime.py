@@ -1,4 +1,6 @@
 from __future__ import annotations
+from app.domains.routines.repository import public_action_executions as public_action_queries
+from app.domains.routines.service import public_action_executions as public_action_executions
 
 from app.runtime.routines.joint_references import SqlAlchemyJointReferences
 
@@ -417,7 +419,7 @@ async def run_routine_post_runtime(
     execution_signature = _execution_signature(
         world_character_id=world_character.id, beat_id=beat.id
     )
-    existing_execution = agent_run_crud.get_public_action_execution_by_signature(
+    existing_execution = public_action_queries.get_public_action_execution_by_signature(
         db, execution_signature
     )
     if existing_execution is not None and existing_execution.status == "succeeded":
@@ -535,7 +537,7 @@ async def run_routine_post_runtime(
 
     try:
         with unit_of_work.deferred_commits():
-            execution = agent_run_crud.create_public_action_execution(
+            execution = public_action_executions.create_public_action_execution(
                 db,
                 run_id=resident_context.run_id,
                 character_id=resident_context.character.id,
@@ -633,7 +635,7 @@ async def run_routine_post_runtime(
                 commit=False,
             )
             execution.target_post_id = post.id
-            agent_run_crud.mark_public_action_execution_finished(
+            public_action_executions.mark_public_action_execution_finished(
                 db,
                 execution,
                 status="succeeded",

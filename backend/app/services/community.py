@@ -1,3 +1,6 @@
+from app.domains.routines.repository import feed_cues as feed_cue_queries
+from app.domains.routines.repository import runs as routine_run_queries
+from app.domains.routines.service import feed_cues as feed_cues
 from app.domains.social.service.activity_results import _clip_text, _safe_topic_text, _body_preview, _fallback_topic_signature, build_post_created_activity_result
 from app.domains.social.service.notifications import _notify_post_owner, _notify_mentioned_characters
 from app.domains.social.service.timeline import _resolve_author_character, _can_delete_post, _reply_title, _quote_title, _timeline_world_scope, create_comment
@@ -1949,9 +1952,9 @@ def create_agent_tool_post(
     author_world_character_id: str | None = None,
 ) -> schemas.PostDetail:
     lookup_session_key = _agent_tool_lookup_session_key(session_key)
-    run = agent_run_crud.get_active_run_for_session(db, lookup_session_key)
+    run = routine_run_queries.get_active_run_for_session(db, lookup_session_key)
     if run is None:
-        latest_run = agent_run_crud.get_latest_run_for_session(db, lookup_session_key)
+        latest_run = routine_run_queries.get_latest_run_for_session(db, lookup_session_key)
         _raise_agent_tool_authorization_error(
             action="post",
             reason="no_active_run",
@@ -2021,9 +2024,9 @@ def create_agent_tool_post(
         db, run=run, created_post_id=post.id
     )
     if consume_pending_feed_cue:
-        cue = agent_crud.get_pending_feed_cue(db, run.character_id)
+        cue = feed_cue_queries.get_pending_feed_cue(db, run.character_id)
         if feed_cue_id is None or (cue is not None and cue.id == feed_cue_id):
-            agent_crud.mark_pending_feed_cue_used(
+            feed_cues.mark_pending_feed_cue_used(
                 db, character_id=run.character_id, run_id=run.id, post_id=post.id
             )
     return post
@@ -3958,7 +3961,7 @@ def complete_agent_tool_tick(
             run=run,
             message="relationship review ticks can only observe or unfollow.",
         )
-    pending_cue = agent_crud.get_pending_feed_cue(db, run.character_id)
+    pending_cue = feed_cue_queries.get_pending_feed_cue(db, run.character_id)
     if pending_cue is not None and action_types != ["create_post"]:
         _reject_complete_tick(
             db,
@@ -4418,7 +4421,7 @@ def _get_agent_tool_run(
     requested_post_id: str | None = None,
     requested_character_id: str | None = None,
 ) -> models.AgentRun:
-    run = agent_run_crud.get_active_run_for_tool_auth_key(db, session_key)
+    run = routine_run_queries.get_active_run_for_tool_auth_key(db, session_key)
     if run is not None:
         return run
     if _is_daypart_memory_session_key(session_key):
@@ -4431,11 +4434,11 @@ def _get_agent_tool_run(
             requested_character_id=requested_character_id,
         )
     lookup_session_key = _agent_tool_lookup_session_key(session_key)
-    run = agent_run_crud.get_active_run_for_session(db, lookup_session_key)
+    run = routine_run_queries.get_active_run_for_session(db, lookup_session_key)
     if run is None:
         latest_run = (
-            agent_run_crud.get_latest_run_for_tool_auth_key(db, session_key)
-            or agent_run_crud.get_latest_run_for_session(db, lookup_session_key)
+            routine_run_queries.get_latest_run_for_tool_auth_key(db, session_key)
+            or routine_run_queries.get_latest_run_for_session(db, lookup_session_key)
         )
         _raise_agent_tool_authorization_error(
             action=action,

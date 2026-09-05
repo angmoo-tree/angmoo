@@ -1,3 +1,5 @@
+from app.domains.routines.constants import ACTIVE_RUN_STATUSES
+from app.domains.routines.exceptions import AgentRunConflictError
 import hashlib
 from datetime import UTC, datetime, timedelta
 from typing import Any, Callable
@@ -11,7 +13,6 @@ from app.domains.routines.service import tick_schedule as agent_activity_schedul
 from app.core import unit_of_work
 
 
-ACTIVE_RUN_STATUSES = {"running"}
 LAST_ERROR_MAX_LENGTH = 2000
 SLOT_STATUS_EMPTY = "empty"
 SLOT_STATUS_IDLE = "idle"
@@ -38,10 +39,6 @@ RELATIONSHIP_POINT_ACTIVE_STATUSES = {
 }
 
 
-class AgentRunConflictError(Exception):
-    pass
-
-
 def get_credential(db: Session, credential_id: str) -> models.LlmCredential | None:
     return db.get(models.LlmCredential, credential_id)
 
@@ -58,129 +55,6 @@ def get_default_credential(
     return db.scalar(
         query.order_by(models.LlmCredential.created_at.asc(), models.LlmCredential.id.asc())
     )
-
-
-def create_agent_run(
-    db: Session,
-    *,
-    run_id: str,
-    user_id: str,
-    character_id: str,
-    post_id: str | None,
-    credential_id: str | None,
-    agent_id: str,
-    session_key: str,
-    tool_auth_key: str | None = None,
-) -> models.AgentRun:
-    run = models.AgentRun(
-        id=run_id,
-        user_id=user_id,
-        character_id=character_id,
-        post_id=post_id,
-        credential_id=credential_id,
-        agent_id=agent_id,
-        session_key=session_key,
-        tool_auth_key=tool_auth_key,
-        status="running",
-    )
-    db.add(run)
-    try:
-        db.commit()
-    except IntegrityError as exc:
-        db.rollback()
-        raise AgentRunConflictError("An active agent run already exists") from exc
-    db.refresh(run)
-    return run
-
-
-def mark_agent_run_finished(
-    db: Session,
-    run_id: str,
-    status: str,
-    gateway_result: dict[str, Any] | None = None,
-) -> None:
-    run = db.get(models.AgentRun, run_id)
-    if run is None:
-        return
-    run.status = status
-    run.completed_at = datetime.now(UTC)
-    if gateway_result is not None:
-        run.gateway_result = gateway_result
-    db.commit()
-
-
-def set_agent_run_post_id(db: Session, run_id: str, post_id: str | None) -> None:
-    run = db.get(models.AgentRun, run_id)
-    if run is None:
-        return
-    run.post_id = post_id
-    db.commit()
-
-
-def get_public_action_execution_by_signature(
-    db: Session, signature: str
-) -> models.AgentPublicActionExecution | None:
-    return db.scalar(
-        select(models.AgentPublicActionExecution).where(
-            models.AgentPublicActionExecution.signature == signature
-        )
-    )
-
-
-def create_public_action_execution(
-    db: Session,
-    *,
-    run_id: str,
-    character_id: str,
-    signature: str,
-    scope: str,
-    action_type: str,
-    target_post_id: str | None = None,
-    target_profile_type: str | None = None,
-    target_profile_id: str | None = None,
-    brief_hash: str | None = None,
-    world_id: str | None = None,
-    actor_world_character_id: str | None = None,
-    feed_observation_id: str | None = None,
-    interaction_intent: str | None = None,
-    comment_purpose: str | None = None,
-) -> models.AgentPublicActionExecution:
-    execution = models.AgentPublicActionExecution(
-        run_id=run_id,
-        character_id=character_id,
-        signature=signature,
-        scope=scope,
-        action_type=action_type,
-        target_post_id=target_post_id,
-        target_profile_type=target_profile_type,
-        target_profile_id=target_profile_id,
-        brief_hash=brief_hash,
-        world_id=world_id,
-        actor_world_character_id=actor_world_character_id,
-        feed_observation_id=feed_observation_id,
-        interaction_intent=interaction_intent,
-        comment_purpose=comment_purpose,
-        status="pending",
-    )
-    db.add(execution)
-    unit_of_work.finish_write(db, execution)
-    return execution
-
-
-def mark_public_action_execution_finished(
-    db: Session,
-    execution: models.AgentPublicActionExecution,
-    *,
-    status: str,
-    result: dict[str, Any] | None = None,
-    failure_class: str | None = None,
-) -> models.AgentPublicActionExecution:
-    execution.status = status
-    execution.result = result
-    execution.failure_class = failure_class
-    execution.completed_at = datetime.now(UTC)
-    unit_of_work.finish_write(db, execution)
-    return execution
 
 
 def relationship_point_pair_key(
@@ -426,78 +300,6 @@ def mark_relationship_point_failed(
     db.commit()
     db.refresh(point)
     return point
-
-
-def get_active_run_for_session(
-    db: Session, session_key: str
-) -> models.AgentRun | None:
-    return db.scalar(
-        select(models.AgentRun)
-        .where(
-            models.AgentRun.session_key == session_key,
-            models.AgentRun.status.in_(ACTIVE_RUN_STATUSES),
-        )
-        .order_by(models.AgentRun.created_at.desc(), models.AgentRun.id.desc())
-    )
-
-
-def get_active_run_for_tool_auth_key(
-    db: Session, tool_auth_key: str
-) -> models.AgentRun | None:
-    return db.scalar(
-        select(models.AgentRun)
-        .where(
-            models.AgentRun.tool_auth_key == tool_auth_key,
-            models.AgentRun.status.in_(ACTIVE_RUN_STATUSES),
-        )
-        .order_by(models.AgentRun.created_at.desc(), models.AgentRun.id.desc())
-    )
-
-
-def get_latest_run_for_session(
-    db: Session, session_key: str
-) -> models.AgentRun | None:
-    return db.scalar(
-        select(models.AgentRun)
-        .where(models.AgentRun.session_key == session_key)
-        .order_by(models.AgentRun.created_at.desc(), models.AgentRun.id.desc())
-    )
-
-
-def get_latest_run_for_tool_auth_key(
-    db: Session, tool_auth_key: str
-) -> models.AgentRun | None:
-    return db.scalar(
-        select(models.AgentRun)
-        .where(models.AgentRun.tool_auth_key == tool_auth_key)
-        .order_by(models.AgentRun.created_at.desc(), models.AgentRun.id.desc())
-    )
-
-
-def get_latest_manual_run_for_user(
-    db: Session, user_id: str
-) -> models.AgentRun | None:
-    return db.scalar(
-        select(models.AgentRun)
-        .where(
-            models.AgentRun.user_id == user_id,
-            models.AgentRun.session_key.contains(":resident-manual:"),
-        )
-        .order_by(models.AgentRun.created_at.desc(), models.AgentRun.id.desc())
-    )
-
-
-def get_latest_first_greeting_run_for_user(
-    db: Session, user_id: str
-) -> models.AgentRun | None:
-    return db.scalar(
-        select(models.AgentRun)
-        .where(
-            models.AgentRun.user_id == user_id,
-            models.AgentRun.session_key.contains(":first-greeting:"),
-        )
-        .order_by(models.AgentRun.created_at.desc(), models.AgentRun.id.desc())
-    )
 
 
 def ensure_agent_slots(

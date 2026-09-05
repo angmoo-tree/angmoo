@@ -1,4 +1,8 @@
 from __future__ import annotations
+from app.domains.routines.repository import feed_cues as feed_cue_queries
+from app.domains.routines.repository import runs as routine_run_queries
+from app.domains.routines.service import feed_cues as feed_cues
+from app.domains.routines.service import runs as routine_runs
 
 from app.runtime.world_characters.queries import count_enabled_autonomous_world_characters
 from app.domains.characters.service import media as media_service
@@ -631,7 +635,7 @@ def get_feed_cue(
 ) -> schemas.AgentFeedCueRead | None:
     character = _get_owned_character(db, user, character_id)
     _ensure_llm_mode(character)
-    cue = agent_crud.get_pending_feed_cue(db, character.id)
+    cue = feed_cue_queries.get_pending_feed_cue(db, character.id)
     return schemas.AgentFeedCueRead.model_validate(cue) if cue else None
 
 
@@ -659,10 +663,10 @@ def give_feed_cue(
         raise AgentFeedCueUnavailableError(
             f"지금은 글쓰기 제한 때문에 모이를 받을 수 없습니다: {reason}"
         )
-    if agent_crud.get_pending_feed_cue(db, character.id) is not None:
+    if feed_cue_queries.get_pending_feed_cue(db, character.id) is not None:
         raise AgentFeedCueConflictError("이미 다음 활동을 기다리는 모이가 있습니다.")
     _ensure_feed_cue_prompt_safety(data.topic)
-    cue = agent_crud.create_feed_cue(
+    cue = feed_cues.create_feed_cue(
         db, user=user, character=character, topic=data.topic
     )
     return schemas.AgentFeedCueRead.model_validate(cue)
@@ -745,7 +749,7 @@ async def run_first_greeting(
             ),
             log_manual_activity=False,
         )
-        agent_run_crud.set_agent_run_post_id(db, run_id, post.id)
+        routine_runs.set_agent_run_post_id(db, run_id, post.id)
         agent_crud.log_activity(
             db,
             user_id=user.id,
@@ -783,7 +787,7 @@ async def run_first_greeting(
             "llm_usage_summary": tracker.summary(),
             "image_attempt": image_attempt,
         }
-        agent_run_crud.mark_agent_run_finished(
+        routine_runs.mark_agent_run_finished(
             db, run_id, "completed", gateway_result=gateway_result
         )
         return schemas.AgentFirstGreetingRead(
@@ -806,7 +810,7 @@ async def run_first_greeting(
             "wait_seconds": round(exc.wait_seconds, 3),
             "llm_usage_summary": tracker.summary(),
         }
-        agent_run_crud.mark_agent_run_finished(
+        routine_runs.mark_agent_run_finished(
             db, run_id, "deferred", gateway_result=gateway_result
         )
         raise
@@ -819,7 +823,7 @@ async def run_first_greeting(
             "error": redact_secret_text(str(exc))[:1000],
             "llm_usage_summary": tracker.summary(),
         }
-        agent_run_crud.mark_agent_run_finished(
+        routine_runs.mark_agent_run_finished(
             db, run_id, "failed", gateway_result=gateway_result
         )
         raise
@@ -2928,7 +2932,7 @@ def _deleted_character_handle(db: Session, character_id: str) -> str:
 
 
 def _manual_run_available_at(db: Session, user_id: str) -> datetime | None:
-    latest_manual_run = agent_run_crud.get_latest_manual_run_for_user(db, user_id)
+    latest_manual_run = routine_run_queries.get_latest_manual_run_for_user(db, user_id)
     if latest_manual_run is None:
         return None
     created_at = latest_manual_run.created_at
@@ -2938,7 +2942,7 @@ def _manual_run_available_at(db: Session, user_id: str) -> datetime | None:
 
 
 def _first_greeting_available_at(db: Session, user_id: str) -> datetime | None:
-    latest_run = agent_run_crud.get_latest_first_greeting_run_for_user(db, user_id)
+    latest_run = routine_run_queries.get_latest_first_greeting_run_for_user(db, user_id)
     if latest_run is None:
         return None
     created_at = latest_run.created_at
@@ -2977,7 +2981,7 @@ def _claim_first_greeting_run(
     available_at = _first_greeting_available_at(db, user.id)
     if available_at is not None and available_at > current:
         raise FirstGreetingCooldownError(available_at)
-    return agent_run_crud.create_agent_run(
+    return routine_runs.create_agent_run(
         db,
         run_id=run_id,
         user_id=user.id,

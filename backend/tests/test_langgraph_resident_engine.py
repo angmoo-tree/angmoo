@@ -4180,7 +4180,7 @@ def test_public_action_exactly_once_reuses_succeeded_signature(monkeypatch) -> N
     )
 
     monkeypatch.setattr(
-        langgraph_resident.agent_run_crud,
+        langgraph_resident.public_action_queries,
         "get_public_action_execution_by_signature",
         lambda *_args, **_kwargs: existing,
     )
@@ -4189,7 +4189,7 @@ def test_public_action_exactly_once_reuses_succeeded_signature(monkeypatch) -> N
         raise AssertionError("duplicate public action should not be created")
 
     monkeypatch.setattr(
-        langgraph_resident.agent_run_crud,
+        langgraph_resident.public_action_executions,
         "create_public_action_execution",
         fail_create,
     )

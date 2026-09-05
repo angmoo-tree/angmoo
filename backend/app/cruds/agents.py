@@ -14,8 +14,6 @@ from app.core import active_hours
 from app.core import unit_of_work
 
 
-
-
 def default_auth_profile_id(provider: str, character_id: str) -> str:
     safe_character_id = "".join(
         char if char.isalnum() or char in {"-", "_"} else "-" for char in character_id
@@ -25,12 +23,6 @@ def default_auth_profile_id(provider: str, character_id: str) -> str:
 
 def default_credential_model() -> str:
     return "gemini-3.1-flash-lite"
-
-
-
-
-
-
 
 
 def get_image_generation_setting(
@@ -305,54 +297,6 @@ def upsert_credential(
     else:
         db.flush()
     return credential
-
-
-
-
-
-
-def get_pending_feed_cue(db: Session, character_id: str) -> models.AgentFeedCue | None:
-    return db.scalar(
-        select(models.AgentFeedCue)
-        .where(
-            models.AgentFeedCue.character_id == character_id,
-            models.AgentFeedCue.status == "pending",
-        )
-        .order_by(models.AgentFeedCue.created_at.asc(), models.AgentFeedCue.id.asc())
-        .limit(1)
-    )
-
-
-def create_feed_cue(
-    db: Session, *, user: models.User, character: models.Character, topic: str
-) -> models.AgentFeedCue:
-    cue = models.AgentFeedCue(
-        user_id=user.id,
-        character_id=character.id,
-        topic=topic.strip(),
-        status="pending",
-    )
-    db.add(cue)
-    db.commit()
-    db.refresh(cue)
-    return cue
-
-
-def mark_pending_feed_cue_used(
-    db: Session, *, character_id: str, run_id: str | None, post_id: str
-) -> models.AgentFeedCue | None:
-    cue = get_pending_feed_cue(db, character_id)
-    if cue is None:
-        return None
-    cue.status = "used"
-    cue.consumed_run_id = run_id
-    cue.consumed_post_id = post_id
-    cue.consumed_at = datetime.now(UTC)
-    db.commit()
-    db.refresh(cue)
-    return cue
-
-
 
 
 def get_assigned_slot(

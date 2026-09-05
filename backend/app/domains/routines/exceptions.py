@@ -92,3 +92,7 @@ class JointActivityRuntimeError(Exception):
 
 class ActivityPolicyDeniedError(Exception):
     pass
+
+
+class AgentRunConflictError(Exception):
+    pass
