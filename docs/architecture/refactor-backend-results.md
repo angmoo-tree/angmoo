@@ -228,3 +228,11 @@ G0~G4를 합친 후보에서 보존 검사 **#258 1,867 / #263 1,907 / protected
 ### Identity PR의 현재 소스 inventory 보완
 
 PR #270의 OSS 검사는 deferred runtime inventory에 동일한 4개 경로가 각각 세 번 들어간 불일치를 거부했다. 병합 충돌의 Git index 세 stage가 남은 시점에 생성한 것이 원인이며, 해결·stage된 현재 추적 파일로 다시 수집했다. 30개 행은 서로 다른 실제 경로 22개가 되고 marker·owner·경로 내용은 그대로다. Git index가 해결된 뒤 생성하고 `--check`하는 순서를 후속 통합에도 적용한다. 같은 PR의 전체 backend 실패 2개는 G4 Alembic 그래프가 과거 pgvector import를 실제로 읽으면서 드러난 개발 의존성 누락이며 G4 소유 수정으로 통합한다.
+
+### Identity PR의 토큰 HMAC 경고와 호환 검증
+
+G4 선행 main merge `d01787b`까지 병합 후 전체 post-merge가 통과했다. Installer `33967365530`의 build·clean·지원 버전 직접 업데이트·실패 복구·aggregate가 모두 SUCCESS이며 22:22:02 KST 종료했다. Identity PR #270의 G4 계보 후보 `86d372e`는 일반 회귀를 통과했지만 CodeQL check `101310868679`가 가입 토큰의 HMAC을 비밀번호용 SHA256 해시로 표시했다. 원래 #263 `app/services/auth.py`와 이동 후보의 key 생성·서명·검증·JTI digest 함수 네 개 AST는 동일하다.
+
+실제 데이터는 서버 app_secret에서 context를 분리한 MAC key와 Google sub/email/만료/random JTI이며 사용자 비밀번호 저장은 `core/security.py`의 PBKDF2를 유지한다. 경고를 무시하거나 검사 설정을 줄이지 않았다. 네 one-shot HMAC을 Python 공식 동등 API인 `hmac.digest(key, message, "sha256")`와 필요 시 `.hex()`로 명시하여 목적을 분명히 했다. [Python HMAC 문서](https://docs.python.org/3/library/hmac.html#hmac.digest). 기존 토큰 일회성 소비 테스트에는 이전 HMAC 생성 API로 독립 계산한 key·서명·JTI digest 바이트의 일치도 추가했다. 기존 assertion을 제거하지 않았다.
+
+고정 source `bac98ec321e854c866fa842522b82bbbbb346346`에서 정책/Google 가입·browser cookie 보안 **19 passed / 5.23초**, 전체 보존 **2,085 protected/current nodes / items37 PASS**다. 서명 형식·compare_digest·만료·일회성 grant·DB/KDF 계약은 유지하며 새 CodeQL 및 전체 PR-head CI 결과는 별도로 확인한다. 문법 변경이 검사 통과를 보장한다고 미리 판정하지 않는다.
