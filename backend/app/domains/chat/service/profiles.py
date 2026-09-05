@@ -52,3 +52,18 @@ def _character_ref(character: ChatCharacter) -> schemas.ProfileRef:
         avatar_url=character.avatar_url,
         banner_url=character.banner_url,
     )
+
+
+from app.domains.chat.contracts import CharacterResponseProfile
+
+def _response_profile(character: ChatCharacter) -> CharacterResponseProfile:
+    return CharacterResponseProfile(
+        name=character.name,
+        handle=character.handle,
+        one_liner=character.one_liner,
+        personality=character.personality,
+        speech_style=character.speech_style,
+        worldview=character.worldview,
+        topic_preferences=character.topic_preferences,
+        safety_rules=character.safety_rules,
+    )

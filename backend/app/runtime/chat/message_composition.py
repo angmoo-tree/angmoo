@@ -5,7 +5,7 @@ from app.domains.chat.service.generation import GenerationService
 from app.domains.chat.service.messages import MessageService
 from app.domains.chat.service.settings import MessageSettingsService
 from app.domains.chat.service.threads import ThreadService
-from app.runtime.chat import evidence_reads, scope_queries
+from app.runtime.chat import evidence_reads, generation_workflows, scope_queries
 from app.runtime.relationships.sqlalchemy_social_event import (
     world_character_pair_is_blocked,
 )
@@ -17,6 +17,8 @@ thread_service = ThreadService(
 message_service = MessageService(thread_service, settings_service)
 
 
-generation_service = GenerationService(thread_service)
+generation_service = GenerationService(
+    thread_service, settings_service, generation_workflows
+)
 
 evidence_service = EvidenceService(thread_service, evidence_reads)

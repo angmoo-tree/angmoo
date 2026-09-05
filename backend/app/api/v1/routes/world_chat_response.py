@@ -13,7 +13,7 @@ from app.domains.identity import browser_session
 from app.config import settings
 from app.domains.chat import public as chat
 from app.domains.identity.public import User
-from app.runtime.chat import world_generation as chat_service
+from app.runtime.chat import world_generation as chat_service  # Historical A2 inspection alias; retire in B8.
 from app.runtime.chat.message_composition import evidence_service, generation_service
 
 
@@ -170,7 +170,7 @@ def stream_world_response_events(
     runtime_settings = settings if composition is None else composition.settings
 
     async def encoded() -> AsyncIterator[bytes]:
-        events = chat_service.stream_world_response(
+        events = generation_service.stream_world_response(
             db,
             user,
             world_id,

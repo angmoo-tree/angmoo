@@ -549,3 +549,11 @@ World 대화 생성의 tuple/quota lock, preference 생성의 flush-only 경로,
 `service/evidence.py`의 `EvidenceService`는 저장된 근거 snapshot을 현재 원본과 대조합니다. World·원본 revision·성공 여부·공개 여부·주체의 관찰·참여·차단 상태가 맞아야 과거 본문을 최대 500자로 보여줍니다. Today SNS는 원본과 조상 내용을 포함한 revision을, 저장된 Memory는 활성 상태와 현재 evidence를, 관계 근거는 방향·version·참여자 및 차단 상태를 다시 확인합니다. 삭제·변경된 근거의 옛 본문을 그대로 반환하지 않습니다.
 
 `contracts/evidence_reads.py`는 이 판단에 필요한 같은 Session의 읽기 형식을 명시합니다. `runtime/chat/evidence_reads.py`는 기존 Memory/Today reader를 조립하고 nullable Relationship 조회와 World 범위의 이름 join을 수행합니다. 공개 가능 여부나 오류 정책을 다시 구현하지 않으며 commit을 추가하지 않습니다. HTTP의 근거 조회는 실제 EvidenceService에 연결됩니다.
+
+### Streaming과 provider 실행 조립
+
+`GenerationService.stream_world_response`는 현재 요청의 thread·기한·상태, 사용자 메시지와 응답 Character, 로컬 Memory 실행 가능 여부, credential 오류를 확인합니다. 허용된 요청의 모델 snapshot을 credential에 적용한 뒤 실행 조립에 전달하며 실패 종류·재시도 가능 여부·이벤트와 저장 순서는 이 서비스에 있습니다. Character와 World는 소유 서비스의 nullable 조회를 같은 Session으로 사용합니다.
+
+`contracts/execution.py`는 실제 실행 조립 결과와 입력을 명시합니다. `runtime/chat/generation_workflows.py`는 기존 canonical provider/executor, graph gateway/provider/executor, World 이름 목록, router·응답·UoW·성공 Memory 후보·Today validator를 그 순서로 연결합니다. 조립은 새로운 provider 호출이나 권한 판단을 추가하지 않습니다. 서비스는 이어서 기존 20개/8,000자 recent-context 규칙과 optional Today snapshot 실패 처리를 적용하고 실제 response workflow를 실행합니다. recent-context SQL은 repository, 선택·본문 한도와 요청 구성은 서비스에 있습니다.
+
+`runtime/chat/world_generation.py`는 이제 기존 테스트·계약을 위한 동일 인스턴스 이름만 남았습니다. 새 HTTP 동작은 실제 generation/evidence 서비스에 연결됩니다. A2 구조 확인 테스트가 보는 module attribute는 B8의 명시적 퇴역 대상이며 제품 동작의 호출 체인에 포함되지 않습니다. canonical preflight/entity resolution 및 Today snapshot 검증의 남은 소유 이전과 Request 기반 HTTP 의존성은 후속 B6 범위입니다.

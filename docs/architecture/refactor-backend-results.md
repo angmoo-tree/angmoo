@@ -590,3 +590,15 @@ B2A `f4a5ddc74eb7651d91a100272a21dc26cb41543c` 뒤 근거 inspector의 실제 �
 전체 보존 검사는 source/split/assertion/억제 표시/API/ORM/기존 node 오류 0, 보호 **2,129 / 현재 2,173**이다. 선행 committed source 38개·node 39개의 append-only capture가 남아 명령 전체는 exit 1이다. 이번 신규 5 nodes의 첫 도입 파일은 `tests/chat/test_evidence_ownership.py`이며 실제 service/contracts/runtime 읽기 3개 파일과 함께 source SHA별로 root에서 캡처한다. Live architecture **646 modules / 2,133 edges / exact legacy 265 PASS**, ER0 **78/87/24/44/7 PASS**, L4 **97**, Memory batch current, public **196**이다.
 
 남은 provider/Memory/graph/Today 생성 조립, recent-context SQL과 실제 streaming 입장 판단은 B2C에서 이어간다. 전체 B6·B5 합류·CI·설치 완료는 별개다.
+
+## AR-B6-B2C — 실제 stream 입장 판단과 순서를 보존한 실행 조립
+
+B2B `4694b5dc6eaa81e3c01ddb41ea01e5732cbe636c` 뒤 stream의 실제 요청·상태·기한·context·로컬 runtime·credential/model 판단과 최종 command 생성을 GenerationService로 이전했다. Character/World nullable 조회는 해당 소유 서비스의 같은 `db.get` 구현을 사용한다. recent-context SQL은 repository로, 같은 20개/8,000자 선택 정책은 생성 서비스로, Character 응답 profile 변환은 기존 Chat profiles 파일로 옮겼다.
+
+`contracts/execution.py`의 실제 입력/결과 형식을 통해 runtime의 `generation_workflows.py`가 기존 canonical provider/executor → graph gateway/provider/executor → World 이름 목록 → router/CRG/UoW/Memory/Today 객체를 원래 순서로 만든다. 원래 생성 블록과 UoW는 **AST 동일**하고 서비스의 stream은 명시된 소유 조회 및 실행 조립을 원래 표현으로 펼치면 **전체 AST 동일**하다. 최근 context 선택도 SQL 이전을 제외한 본문은 동일하다. Provider 호출·budget·credential reveal 횟수를 늘리지 않았다.
+
+새 회귀 2개는 실제 builder의 provider 생성 순서·동일 material/Session/lifecycle/label과, Memory 실행이 불가능한 경우 실제 repository에 accepted→failed와 retryable 상태를 저장하고 provider builder를 호출하지 않는 경로를 검증한다. 첫 집중 묶음 **62 passed / 1 failed**는 A2 구조 전용 테스트의 옛 module attribute가 제거되어 발생했다. 해당 attribute는 같은 기존 module을 가리키는 검사 전용 alias로 B8까지 보존했으며 실제 HTTP 동작은 실제 service instance를 직접 호출한다. 기존 assertion을 약화하지 않았다. 신규·서비스 소유 회귀 **10 passed / 5.07초**, 최종 고정 tree 확장 묶음은 **209 passed / 기존 4 warnings / 34.47초**다.
+
+전체 보존 검사는 source/split/assertion/억제 표시/API/ORM/기존 node 오류 0, 보호 **2,129 / 현재 2,175**이다. 선행 source 42개·node 44개 append-only capture가 남아 명령 전체는 exit 1이다. 이번 신규 파일 `contracts/execution.py`, `runtime/chat/generation_workflows.py`, `tests/chat/test_generation_composition.py`와 신규 2 nodes는 이 source의 첫 SHA로 root에서 캡처한다. Live architecture **648 modules / 2,148 edges / exact legacy 265 PASS**, ER0 **78/87/24/44/7 PASS**, L4 **97**, Memory batch current, public **196**이다.
+
+남은 실제 canonical preflight/entity resolution과 Today snapshot hash 판단을 소유 service로 이어서 이전하고, 그 뒤 Request→app.state 기반 service 주입·두 factory 등록·동일 standalone router 테스트 구성을 통해 HTTP owner를 마무리한다. runtime Memory 성공 후보는 실제 after-commit UoW 협력이며 원래 한 번의 제안·commit/rollback 의미를 유지한다. 전체 B6·B5 통합·CI·설치 완료로 표시하지 않는다.

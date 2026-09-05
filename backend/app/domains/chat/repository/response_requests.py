@@ -36,3 +36,25 @@ def _latest_request_row(
         )
         .limit(1)
     )
+
+
+def recent_context_messages(
+    db: Session, thread_id: str, *, exclude_message_id: int, limit: int
+) -> list[models.MessageMessage]:
+    return list(
+        reversed(
+            db.scalars(
+                select(models.MessageMessage)
+                .where(
+                    models.MessageMessage.thread_id == thread_id,
+                    models.MessageMessage.status == "ok",
+                    models.MessageMessage.id != exclude_message_id,
+                )
+                .order_by(
+                    models.MessageMessage.created_at.desc(),
+                    models.MessageMessage.id.desc(),
+                )
+                .limit(limit)
+            ).all()
+        )
+    )

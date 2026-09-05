@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from collections.abc import AsyncIterator
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
@@ -9,20 +10,30 @@ from uuid import uuid4
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.config import Settings, settings
+from app.domains.characters.service.profile import (
+    get_character as get_responding_character,
+)
 from app.domains.chat import models, schemas
 from app.domains.chat.contracts import (
     CHAT_GENERATION_STREAM_VERSION,
     TERMINAL_STATES,
+    CharacterResponseContextMessage,
     CreateResponseRequest,
     GenerationEvent,
     GenerationEventType,
     GenerationFence,
     ResponseRequestState,
     ResponseTerminalReason,
+    RetrievalPreflightCommand,
+    RetrievalRouterContextMessage,
     build_request_scope_hash,
 )
 from app.domains.chat.contracts.context import ChatUser
+from app.domains.chat.contracts.execution import GenerationWorkflows
 from app.domains.chat.exceptions import (
+    MessageCredentialInvalidError,
+    MessageCredentialRequiredError,
     MessageInFlightError,
     MessageNotFoundError,
     MessageValidationError,
@@ -31,14 +42,32 @@ from app.domains.chat.repository import response_requests as request_repository
 from app.domains.chat.repository.response_lifecycle import (
     SqlAlchemyResponseLifecycleRepository,
 )
+from app.domains.chat.service import profiles
+from app.domains.chat.service.response_workflow import ResponseWorkflowCommand
+from app.domains.chat.service.settings import MessageSettingsService
 from app.domains.chat.service.threads import ThreadService
+from app.domains.chat.service.today_sns_activity import TodaySnsActivityAssembler
+from app.domains.identity.contracts import CredentialMaterial
+from app.domains.memory.public import CanonicalRecallService
+from app.domains.worlds.service.character_entry import get_character_entry_world
 
 RESPONSE_REQUEST_DEADLINE_SECONDS = 180
+RESPONSE_CONTEXT_MESSAGE_LIMIT = 20
+RESPONSE_CONTEXT_CHAR_LIMIT = 8_000
+
+logger = logging.getLogger(__name__)
 
 
 class GenerationService:
-    def __init__(self, thread_service: ThreadService) -> None:
+    def __init__(
+        self,
+        thread_service: ThreadService,
+        settings_service: MessageSettingsService,
+        workflows: GenerationWorkflows,
+    ) -> None:
         self.thread_service = thread_service
+        self.settings_service = settings_service
+        self.workflows = workflows
 
     def accept_world_message(
         self,
@@ -391,3 +420,169 @@ class GenerationService:
             payload=payload or {},
             protocol_version=CHAT_GENERATION_STREAM_VERSION,
         )
+
+    async def stream_world_response(
+        self,
+        db: Session,
+        user: ChatUser,
+        world_id: str,
+        thread_id: str,
+        request_id: str,
+        *,
+        memory_recall_service: CanonicalRecallService | None,
+        runtime_settings: Settings = settings,
+    ) -> AsyncIterator[GenerationEvent]:
+        thread = self._mutation_thread(db, user, world_id, thread_id)
+        repository = SqlAlchemyResponseLifecycleRepository(db)
+        record = repository.get_request(request_id)
+        if record.thread_id != thread.id:
+            raise MessageNotFoundError("응답 요청을 찾을 수 없습니다.")
+        record = self._recover_if_expired(db, record)
+        if record.state in TERMINAL_STATES:
+            yield self._terminal_event(record)
+            return
+        if record.state is not ResponseRequestState.ACCEPTED:
+            raise MessageInFlightError("이 응답은 이미 처리 중입니다.")
+        message = db.get(models.MessageMessage, record.user_message_id)
+        responding_character = get_responding_character(db, thread.character_id)
+        if message is None or message.role != "user" or responding_character is None:
+            async for event in self._fail_before_workflow(
+                db,
+                record,
+                failure_class="canonical_context_missing",
+                retryable=False,
+                reason=ResponseTerminalReason.CONTRACT_INVALID,
+            ):
+                yield event
+            return
+        if memory_recall_service is None:
+            async for event in self._fail_before_workflow(
+                db,
+                record,
+                failure_class="local_runtime_unavailable",
+                retryable=True,
+                reason=ResponseTerminalReason.RETRIEVAL_FAILURE,
+            ):
+                yield event
+            return
+        try:
+            _credential, base_material = (
+                self.settings_service.resolve_message_credential_material(db, user)
+            )
+        except MessageCredentialRequiredError:
+            async for event in self._fail_before_workflow(
+                db,
+                record,
+                failure_class="credential_required",
+                retryable=False,
+                reason=ResponseTerminalReason.POLICY_DENIED,
+            ):
+                yield event
+            return
+        except MessageCredentialInvalidError:
+            async for event in self._fail_before_workflow(
+                db,
+                record,
+                failure_class="credential_invalid",
+                retryable=False,
+                reason=ResponseTerminalReason.POLICY_DENIED,
+            ):
+                yield event
+            return
+        material = CredentialMaterial(
+            credential_id=base_material.credential_id,
+            provider=base_material.provider,
+            model=record.selected_model,
+            fingerprint=base_material.fingerprint,
+            purpose=base_material.purpose,
+            _secret=base_material.reveal(),
+        )
+        execution = self.workflows.build(
+            db,
+            material,
+            memory_recall_service=memory_recall_service,
+            runtime_settings=runtime_settings,
+            lifecycle=repository,
+            world_id=world_id,
+        )
+        character_labels = execution.character_labels
+        workflow = execution.workflow
+        router_context, response_context = _recent_context(
+            db, thread.id, exclude_message_id=message.id
+        )
+        today_sns_snapshot = None
+        world = get_character_entry_world(db, world_id)
+        if world is not None and thread.responding_world_character_id is not None:
+            try:
+                today_sns_snapshot = TodaySnsActivityAssembler(
+                    self.workflows.today_reader(db)
+                ).assemble(
+                    owner_id=user.id,
+                    world_id=world_id,
+                    subject_world_character_id=thread.responding_world_character_id,
+                    timezone=world.timezone,
+                    character_labels=character_labels,
+                    now=datetime.now(UTC),
+                )
+            except Exception as exc:
+                logger.warning(
+                    "p8_l_r_today_sns_snapshot_unavailable request_id=%s failure_type=%s",
+                    record.request_id,
+                    type(exc).__name__,
+                )
+        command = ResponseWorkflowCommand(
+            request=record,
+            preflight=RetrievalPreflightCommand(
+                request_id=record.request_id,
+                owner_id=user.id,
+                world_id=world_id,
+                thread_id=thread.id,
+                requester_world_character_id=thread.requester_world_character_id or "",
+                responding_world_character_id=thread.responding_world_character_id
+                or "",
+                user_message=message.content,
+            ),
+            profile=profiles._response_profile(responding_character),
+            router_context=router_context,
+            response_context=response_context,
+            character_labels=character_labels,
+            today_sns_snapshot=today_sns_snapshot,
+            graph_projection_enabled=runtime_settings.graph_projection_enabled,
+        )
+        async for event in workflow.run(command):
+            yield event
+
+
+def _recent_context(
+    db: Session, thread_id: str, *, exclude_message_id: int
+) -> tuple[
+    tuple[RetrievalRouterContextMessage, ...],
+    tuple[CharacterResponseContextMessage, ...],
+]:
+    rows = request_repository.recent_context_messages(
+        db,
+        thread_id,
+        exclude_message_id=exclude_message_id,
+        limit=RESPONSE_CONTEXT_MESSAGE_LIMIT,
+    )
+    selected: list[models.MessageMessage] = []
+    chars = 0
+    for row in reversed(rows):
+        if chars + len(row.content) > RESPONSE_CONTEXT_CHAR_LIMIT:
+            continue
+        selected.append(row)
+        chars += len(row.content)
+    selected.reverse()
+    router = tuple(
+        (
+            RetrievalRouterContextMessage(role=row.role, content=row.content)
+            for row in selected
+        )
+    )
+    response = tuple(
+        (
+            CharacterResponseContextMessage(role=row.role, content=row.content)
+            for row in selected
+        )
+    )
+    return (router, response)
