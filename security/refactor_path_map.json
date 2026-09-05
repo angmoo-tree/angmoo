@@ -10918,6 +10918,7 @@
           "backend/app/domains/routines/service/prompt_context.py",
           "backend/app/domains/routines/service/retry_schedule.py",
           "backend/app/domains/routines/service/run_backoff.py",
+          "backend/app/domains/routines/service/run_identity.py",
           "backend/app/domains/routines/service/run_results.py",
           "backend/app/domains/routines/service/session_keys.py",
           "backend/app/domains/routines/service/slot_status.py",
@@ -10928,6 +10929,7 @@
           "backend/app/domains/routines/utils/context_text.py",
           "backend/app/domains/runtime/contracts.py",
           "backend/app/domains/social/repository/resident_context.py",
+          "backend/app/runtime/resident/credential_profiles.py",
           "backend/app/runtime/resident/decision_lanes.py",
           "backend/app/runtime/resident/gateway_results.py",
           "backend/app/runtime/resident/read_only_lanes.py",
@@ -13586,32 +13588,47 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_validate_character_and_credential",
-          "new": "backend/app/services/agent_runs.py::_validate_character_and_credential",
+          "new": "backend/app/domains/routines/service/run_identity.py::_validate_character_and_credential",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_run_identity.py::test_run_identity_reads_attached_pending_values_without_committing",
+            "tests/routines/test_run_identity.py::test_run_identity_preserves_error_precedence_and_stops_before_credential_read",
+            "tests/routines/test_slot_auth_profiles.py::test_slot_auth_avoids_reveal_for_match_and_preserves_bind_reload_release_order",
+            "tests/routines/test_slot_auth_profiles.py::test_slot_auth_failure_stops_at_original_stage_and_redacts_secret",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies",
+            "tests/test_oss_architecture_boundaries.py::test_plaintext_credential_reveal_calls_are_explicitly_allowlisted"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_ensure_slot_auth_profile",
-          "new": "backend/app/services/agent_runs.py::_ensure_slot_auth_profile",
+          "new": "backend/app/runtime/resident/credential_profiles.py::_ensure_slot_auth_profile",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_run_identity.py::test_run_identity_reads_attached_pending_values_without_committing",
+            "tests/routines/test_run_identity.py::test_run_identity_preserves_error_precedence_and_stops_before_credential_read",
+            "tests/routines/test_slot_auth_profiles.py::test_slot_auth_avoids_reveal_for_match_and_preserves_bind_reload_release_order",
+            "tests/routines/test_slot_auth_profiles.py::test_slot_auth_failure_stops_at_original_stage_and_redacts_secret",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies",
+            "tests/test_oss_architecture_boundaries.py::test_plaintext_credential_reveal_calls_are_explicitly_allowlisted"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_release_slot_auth_profile",
-          "new": "backend/app/services/agent_runs.py::_release_slot_auth_profile",
+          "new": "backend/app/runtime/resident/credential_profiles.py::_release_slot_auth_profile",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_run_identity.py::test_run_identity_reads_attached_pending_values_without_committing",
+            "tests/routines/test_run_identity.py::test_run_identity_preserves_error_precedence_and_stops_before_credential_read",
+            "tests/routines/test_slot_auth_profiles.py::test_slot_auth_avoids_reveal_for_match_and_preserves_bind_reload_release_order",
+            "tests/routines/test_slot_auth_profiles.py::test_slot_auth_failure_stops_at_original_stage_and_redacts_secret",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies",
+            "tests/test_oss_architecture_boundaries.py::test_plaintext_credential_reveal_calls_are_explicitly_allowlisted"
           ]
         },
         {
@@ -32728,6 +32745,26 @@
       "ownership": "Routines slot_status owns existing Slot view/filter and due checks; retry_schedule owns original early return/ensure/retry timing. The existing timezone reader is injected at the exact original conditional point. Slot listing route calls the actual owner directly.",
       "preservation": "Original four functions and every remaining AgentRun body are AST-exact after only timezone callback restoration. Original due6 parameter nodes and readiness1 node preserve whole decorated test bodies; LG owner agreed to the exact readiness split. Public route body/decorator and response classes are unchanged. New SQLite verifies original pending/ensure commit distinction, early read-free returns and slot owner/public-response filtering.",
       "remaining": "HTTP file itself remains pending C7 route relocation. Credential validation and auth-profile wiring plus actual execution placement remain C6d2+, with Memory Daypart/B5/root Operations owners unchanged. Existing management readiness is independently owned C7 and is not unified merely by name."
+    },
+    "AR-B4-C6d2-resident-identity-auth-profiles": {
+      "status": "SOURCE READY — 476 passed / existing PostgreSQL 1 skipped; read-only original six checks 0, root linear introduction gate pending",
+      "actual_paths": [
+        "backend/app/domains/routines/contracts/run_identity.py",
+        "backend/app/domains/routines/service/run_identity.py",
+        "backend/app/runtime/resident/credential_profiles.py",
+        "backend/app/runtime/resident/identity_references.py"
+      ],
+      "test_nodes": [
+        "tests/routines/test_run_identity.py::test_run_identity_reads_attached_pending_values_without_committing",
+        "tests/routines/test_run_identity.py::test_run_identity_preserves_error_precedence_and_stops_before_credential_read",
+        "tests/routines/test_slot_auth_profiles.py::test_slot_auth_avoids_reveal_for_match_and_preserves_bind_reload_release_order",
+        "tests/routines/test_slot_auth_profiles.py::test_slot_auth_failure_stops_at_original_stage_and_redacts_secret",
+        "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies",
+        "tests/test_oss_architecture_boundaries.py::test_plaintext_credential_reveal_calls_are_explicitly_allowlisted"
+      ],
+      "ownership": "Routines run_identity owns exact Character/credential authorization precedence. Runtime binds nullable owner queries in the same Session and the registered profiles proxy without eager reads. Runtime credential_profiles owns external inspect/resolve/reveal/bind/reload/inspect and release/reload IO.",
+      "preservation": "All original three function bodies and remaining AgentRun functions are AST-identical after exact callback/proxy/type restoration. Existing Social CharacterNotFoundError identity, deletion-before-credential-read, attached objects, optional shared credential and original errors are preserved. New SQLite2 and auth5 parameterized regressions verify rollback/observer, original auth failure precedence, no reveal on existing match, exact IO order and redacted failures. Plaintext allowlist moved only the exact defining path/function pair.",
+      "remaining": "Current credential_lookup binding comes from existing caller CRUD; root Identity source c2cd2a64b18a42320292a68db37ba1f0c9d78f69 supplies the canonical same query on integration. Root Runtime owns registered-adapter contracts. Actual AgentRun composition remains C6d, management/HTTP C7; no future ancestry merged."
     }
   },
   "test_symbols": {

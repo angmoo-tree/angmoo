@@ -1090,3 +1090,11 @@ C6c2 최종 고정 tree **458 passed /기존 PostgreSQL1 skipped/기존warnings4
 
 
 C6d1 최종 고정 tree **461 passed /기존 PostgreSQL1 skipped/기존warnings4/176.92초**. 경계 **754modules/2556edges/exact legacy205/cycle0**, L4 **754/14/97**, ER0 **85/87/24/44/7**, Memory batch 현재 inventory PASS. 읽기 전용 원래6검사는 오류0, **보호2139/current2273**다. 최초 signed869bae의2경로만 메모리에서 보충했고 frozen/checkpoint/additions 불변이다. Stock 전체 게이트는 root의 순차 최초도입 원장 연결 이후 별도로 확인한다.
+
+
+## AR-B4-C6d2 — 실행 권한·인증 프로필 연결
+
+원래3함수의 실제 책임을 Routines 실행 권한과 Runtime 인증 IO로 나눴다. 캐릭터 missing/deleted·ownership 뒤에만 credential을 읽고 기존 Social CharacterNotFoundError class를 유지한다. 등록 proxy는 호출자가 같은 객체를 전달하므로 추가 registry lookup이 없다. Match이면 reveal0, 아니면 resolve/reveal→bind→reload→inspect와 release→reload가 원래 순서다. 원래3함수 및 전체남은AgentRun본문 AST는 한정주입/타입만 복원하면 정확 같다. 초기85PASS/기존warnings2/23.39초. 신규SQLite2+auth5는 attached객체·pending/rollback·오류순서와실패단계·비밀정제를 검증한다. Reveal allowlist는 실제 정의 경로/함수 pair만 옮겼으며 기존 assertion을 유지했다. Identity c2cd2a6의 실제 query는 parent 후속통합 시 현재typed lookup에 연결한다.
+
+
+C6d2 최종 고정 tree **476 passed /기존 PostgreSQL1 skipped/기존warnings4/192.06초**. 경계 **758modules/2570edges/exact legacy205/cycle0**, L4 **758/14/97**, ER0 **85/87/24/44/7**, Memory batch 현재 inventory PASS. 읽기 전용 원래6검사는 오류0, **보호2139/current2280**다. 최초 signed869bae의2경로만 메모리에서 보충했고 frozen/checkpoint/additions는 수정하지 않았다. Stock 전체 게이트는 root의 순차 최초도입 원장 연결 뒤 별도로 확인한다.

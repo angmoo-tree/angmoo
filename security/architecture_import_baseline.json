@@ -1,7 +1,7 @@
 {
-  "edge_count": 2556,
-  "external_import_count": 2348,
-  "module_count": 754,
+  "edge_count": 2570,
+  "external_import_count": 2355,
+  "module_count": 758,
   "modules": [
     {
       "external_imports": [],
@@ -3822,6 +3822,16 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.routines.contracts.run_identity",
+      "path": "backend/app/domains/routines/contracts/run_identity.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "datetime",
         "sqlalchemy.sql.elements",
@@ -4720,6 +4730,18 @@
       ],
       "module": "app.domains.routines.service.run_backoff",
       "path": "backend/app/domains/routines/service/run_backoff.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.run_identity",
+        "app.domains.routines.exceptions"
+      ],
+      "module": "app.domains.routines.service.run_identity",
+      "path": "backend/app/domains/routines/service/run_identity.py",
       "wildcard_imports": []
     },
     {
@@ -9629,6 +9651,23 @@
       ],
       "imports": [
         "app.core.redaction",
+        "app.credentials",
+        "app.domains.characters.models",
+        "app.domains.identity.models",
+        "app.domains.routines.exceptions",
+        "app.domains.runtime.contracts"
+      ],
+      "module": "app.runtime.resident.credential_profiles",
+      "path": "backend/app/runtime/resident/credential_profiles.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [
+        "app.core.redaction",
         "app.domains.routines.constants",
         "app.domains.routines.contracts.activity_policy",
         "app.domains.routines.contracts.decision_lanes",
@@ -9674,6 +9713,21 @@
       "imports": [],
       "module": "app.runtime.resident.gateway_results",
       "path": "backend/app/runtime/resident/gateway_results.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "collections.abc",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.characters.models",
+        "app.domains.characters.service.profile",
+        "app.domains.identity.models",
+        "app.domains.social.exceptions"
+      ],
+      "module": "app.runtime.resident.identity_references",
+      "path": "backend/app/runtime/resident/identity_references.py",
       "wildcard_imports": []
     },
     {
@@ -10627,7 +10681,6 @@
         "app.core.context_text",
         "app.core.db",
         "app.core.redaction",
-        "app.credentials",
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
@@ -10650,6 +10703,7 @@
         "app.domains.routines.service.prompt_context",
         "app.domains.routines.service.retry_schedule",
         "app.domains.routines.service.run_backoff",
+        "app.domains.routines.service.run_identity",
         "app.domains.routines.service.run_results",
         "app.domains.routines.service.runs",
         "app.domains.routines.service.session_keys",
@@ -10670,9 +10724,11 @@
         "app.models",
         "app.runtime.resident.activity_policy",
         "app.runtime.resident.context_references",
+        "app.runtime.resident.credential_profiles",
         "app.runtime.resident.decision_lanes",
         "app.runtime.resident.feed_context_references",
         "app.runtime.resident.gateway_results",
+        "app.runtime.resident.identity_references",
         "app.runtime.resident.read_only_lanes",
         "app.runtime.resident.request_options",
         "app.runtime.resident.slots",

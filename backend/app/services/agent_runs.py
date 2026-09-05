@@ -1,3 +1,6 @@
+from app.domains.routines.service.run_identity import _validate_character_and_credential
+from app.runtime.resident.identity_references import SqlAlchemyRunIdentityReferences
+from app.runtime.resident.credential_profiles import _ensure_slot_auth_profile, _release_slot_auth_profile
 from app.domains.routines.service.slot_status import list_resident_slots
 from app.domains.routines.service.slot_status import _resident_slot_is_due
 from app.domains.routines.service.retry_schedule import _scheduled_retry_next_tick_at
@@ -171,11 +174,6 @@ from app.domains.routines.service import tick_schedule as agent_activity_schedul
 from app.config import settings
 from app.core.redaction import redact_secret_text
 from app.core.db import SessionLocal
-from app.credentials import (
-    CredentialPurpose,
-    CredentialResolutionError,
-    CredentialResolver,
-)
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
@@ -828,111 +826,10 @@ def _v6_possible_post_actions(
 
 
 
-def _validate_character_and_credential(
-    db: Session,
-    *,
-    user_id: str,
-    character_id: str,
-    credential_id: str,
-) -> tuple[models.Character, models.LlmCredential]:
-    character = community_crud.get_character(db, character_id)
-    if character is None or character.deleted_at is not None:
-        raise community_service.CharacterNotFoundError(character_id)
-    if character.owner_id != user_id:
-        raise CharacterOwnershipError(
-            f"user {user_id} cannot run character {character.id}"
-        )
-
-    credential = agent_run_crud.get_credential(db, credential_id)
-    if credential is None:
-        raise CredentialNotFoundError(credential_id)
-    if credential.owner_id != user_id:
-        raise CredentialOwnershipError(
-            f"user {user_id} cannot use credential {credential_id}"
-        )
-    if credential.character_id is not None and credential.character_id != character.id:
-        raise CredentialOwnershipError(
-            f"credential {credential_id} is not assigned to character {character.id}"
-        )
-    if not credential.enabled:
-        raise CredentialDisabledError(credential_id)
-
-    return character, credential
 
 
-async def _ensure_slot_auth_profile(
-    *,
-    client: OpenClawGatewayClient,
-    agent_id: str,
-    user_id: str,
-    character: models.Character,
-    credential: models.LlmCredential,
-) -> bool:
-    try:
-        profile = openclaw_auth_profiles.inspect_credential_slot(
-            agent_id=agent_id,
-            user_id=user_id,
-            character_id=character.id,
-            credential=credential,
-        )
-    except openclaw_auth_profiles.OpenClawAuthProfileSyncError as exc:
-        raise CredentialSyncError(redact_secret_text(str(exc))) from exc
-    if profile.get("matches") is True:
-        return True
-    try:
-        material = CredentialResolver.resolve_llm_credential(
-            credential,
-            purpose=CredentialPurpose.PRIVATE_OPENCLAW,
-            owner_id=user_id,
-            character_id=character.id,
-        )
-        api_key = material.reveal()
-    except CredentialResolutionError as exc:
-        raise CredentialRequiredError("Agent credential key cannot be decrypted") from exc
-    try:
-        openclaw_auth_profiles.bind_credential_to_slot(
-            agent_id=agent_id,
-            user_id=user_id,
-            character_id=character.id,
-            credential=credential,
-            api_key=api_key,
-        )
-        await client.reload_secrets()
-        profile = openclaw_auth_profiles.inspect_credential_slot(
-            agent_id=agent_id,
-            user_id=user_id,
-            character_id=character.id,
-            credential=credential,
-        )
-    except openclaw_auth_profiles.OpenClawAuthProfileSyncError as exc:
-        raise CredentialSyncError(redact_secret_text(str(exc))) from exc
-    except OpenClawGatewayError as exc:
-        raise CredentialSyncError(redact_secret_text(str(exc))) from exc
-    if profile.get("matches") is not True:
-        raise CredentialSyncError("OpenClaw auth profile preflight failed")
-    return True
 
 
-async def _release_slot_auth_profile(
-    *,
-    client: OpenClawGatewayClient,
-    agent_id: str,
-    user_id: str,
-    character_id: str,
-    credential: models.LlmCredential,
-) -> None:
-    try:
-        openclaw_auth_profiles.release_credential_from_slot(
-            agent_id=agent_id,
-            user_id=user_id,
-            character_id=character_id,
-            credential=credential,
-        )
-        await client.reload_secrets()
-    except openclaw_auth_profiles.OpenClawAuthProfileSyncError as exc:
-        raise CredentialSyncError(redact_secret_text(str(exc))) from exc
-    except OpenClawGatewayError as exc:
-        raise CredentialSyncError(redact_secret_text(str(exc))) from exc
 
 
 
@@ -951,7 +848,7 @@ def assign_resident_slot(
 ) -> schemas.AgentSlotRead:
     maintenance_service.ensure_auto_ticks_available(db)
     _validate_character_and_credential(
-        db,
+        SqlAlchemyRunIdentityReferences(db, credential_lookup=agent_run_crud.get_credential),
         user_id=user_id,
         character_id=character_id,
         credential_id=credential_id,
@@ -995,7 +892,7 @@ def claim_temporary_resident_slot(
 ) -> models.AgentSlot:
     maintenance_service.ensure_run_now_available(db)
     _validate_character_and_credential(
-        db,
+        SqlAlchemyRunIdentityReferences(db, credential_lookup=agent_run_crud.get_credential),
         user_id=user_id,
         character_id=character_id,
         credential_id=credential_id,
@@ -1333,6 +1230,7 @@ async def run_community_once(
             timeout_seconds=timeout_seconds,
         )
         profile_ready = await _ensure_slot_auth_profile(
+            openclaw_auth_profiles=openclaw_auth_profiles,
             client=client,
             agent_id=agent_id,
             user_id=user_id,
@@ -1483,6 +1381,7 @@ async def run_community_once(
         if profile_ready and credential is not None:
             try:
                 await _release_slot_auth_profile(
+                    openclaw_auth_profiles=openclaw_auth_profiles,
                     client=client,
                     agent_id=agent_id,
                     user_id=user_id,
@@ -1508,6 +1407,7 @@ async def run_community_once(
     if profile_ready and credential is not None:
         try:
             await _release_slot_auth_profile(
+                openclaw_auth_profiles=openclaw_auth_profiles,
                 client=client,
                 agent_id=agent_id,
                 user_id=user_id,
@@ -2253,7 +2153,7 @@ async def _run_resident_slot_once(
     selected_post_id = post_id
     try:
         character, credential = _validate_character_and_credential(
-            db,
+            SqlAlchemyRunIdentityReferences(db, credential_lookup=agent_run_crud.get_credential),
             user_id=slot.assigned_user_id,
             character_id=slot.assigned_character_id,
             credential_id=slot.assigned_credential_id,
@@ -2693,6 +2593,7 @@ async def _run_resident_slot_once(
             timeout_seconds=effective_timeout_seconds,
         )
         await _ensure_slot_auth_profile(
+            openclaw_auth_profiles=openclaw_auth_profiles,
             client=client,
             agent_id=slot.agent_id,
             user_id=slot.assigned_user_id,

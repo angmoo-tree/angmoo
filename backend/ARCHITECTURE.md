@@ -695,3 +695,8 @@ Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 S
 ### 슬롯 상태와 실행 준비 확인
 
 `routines/service/slot_status.py`는 슬롯 목록의 공개 응답·소유자 필터와 UTC 실행시각 비교를 담당합니다. AgentRun의 기존 성향 helper는 제품 호출 없이 원래 테스트만 소비하므로 B8-A 검토 대상으로 보존하며, 실제 관리 흐름의 readiness 업무는 C7에서 별도로 이전합니다. `retry_schedule.py`는 수동 실행 시각과 재시도 시각의 우선순위를 정하고, 필요한 경우에만 기존 ActivityTimezoneReader로 World 시간을 읽습니다. 설정이 이미 주어졌을 때의 no-commit과 설정을 처음 만드는 ensure 경로의 원래 commit을 구분합니다. 슬롯 목록 HTTP도 이 실제 서비스와 같은 기존 응답 모델을 사용합니다.
+
+
+### Resident 실행 권한과 슬롯 인증 연결
+
+`routines/service/run_identity.py`는 캐릭터 삭제·소유자와 자격 증명 소유자·배정·활성 상태를 원래 순서로 판단합니다. `runtime/resident/identity_references.py`는 동일 Session의 소유 도메인 조회를 연결하며, 캐릭터 오류가 나면 자격 증명을 미리 읽지 않습니다. `runtime/resident/credential_profiles.py`는 등록된 인증 어댑터를 통해 검사·키 해석·연결·새로고침을 수행합니다. 이미 일치하면 키를 해석하지 않으며, 실패는 기존 오류 유형과 비밀 정제를 유지합니다. 이 런타임 연결에 SDK나 다른 업무의 권한 판단을 다시 작성하지 않습니다.
