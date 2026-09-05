@@ -8,7 +8,7 @@ from enum import Enum
 import hashlib
 import re
 
-from app.domains.memory.domain.errors import MemoryValidationError
+from app.domains.memory.exceptions import MemoryValidationError
 from app.domains.memory.domain.provenance import (
     MemoryCandidateStatus,
     MemoryItemStatus,

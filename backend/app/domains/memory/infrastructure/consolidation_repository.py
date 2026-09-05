@@ -17,7 +17,7 @@ from app.domains.memory.domain.consolidation import (
     memory_item_high_watermark,
     memory_item_set_digest,
 )
-from app.domains.memory.domain.errors import (
+from app.domains.memory.exceptions import (
     MemoryConflictError,
     MemoryNotFoundError,
 )

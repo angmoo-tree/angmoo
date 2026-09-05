@@ -7,7 +7,7 @@ import re
 import unicodedata
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from app.domains.memory.domain.errors import MemoryValidationError
+from app.domains.memory.exceptions import MemoryValidationError
 from app.domains.memory.domain.lifecycle import as_utc
 
 

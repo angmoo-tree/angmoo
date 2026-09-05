@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
-from app.domains.memory.domain.errors import MemoryConflictError, MemoryNotFoundError
+from app.domains.memory.exceptions import MemoryConflictError, MemoryNotFoundError
 from app.domains.memory.domain.lifecycle import (
     MemoryItemRecord,
     MemoryWriteOutcome,

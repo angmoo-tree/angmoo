@@ -18,7 +18,7 @@ from app.domains.memory.domain.batch_policy import (
     schedule_timezone,
 )
 from app.domains.memory.domain.consolidation import MAINTENANCE_LEASE_DURATION
-from app.domains.memory.domain.errors import (
+from app.domains.memory.exceptions import (
     MemoryConflictError,
     MemoryDomainError,
     MemoryValidationError,

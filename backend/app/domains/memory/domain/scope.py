@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 
-from app.domains.memory.domain.errors import MemoryValidationError
+from app.domains.memory.exceptions import MemoryValidationError
 from app.domains.memory.domain.provenance import MemoryProviderMode
 from app.domains.memory.domain.retention import validate_retention_days
 

@@ -1,6 +1,6 @@
 """Framework-free memory domain contracts."""
 
-from app.domains.memory.domain.errors import (
+from app.domains.memory.exceptions import (
     MemoryConflictError,
     MemoryDomainError,
     MemoryNotFoundError,

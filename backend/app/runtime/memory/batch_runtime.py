@@ -22,7 +22,7 @@ from app.domains.memory.domain.consolidation import (
 from app.domains.memory.domain.lifecycle import as_utc
 from app.domains.memory.domain.provenance import MemoryKindV1, MemorySourceTypeV1
 from app.domains.memory.domain.scope import MemoryScope
-from app.domains.memory.domain.errors import MemoryDomainError
+from app.domains.memory.exceptions import MemoryDomainError
 from app.domains.memory.application.batch_selection import MemoryBatchSelectionService
 from app.domains.memory.application.write_lifecycle import (
     MemoryWriteLifecycleService,

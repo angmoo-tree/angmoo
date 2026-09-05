@@ -10,7 +10,7 @@ from app.domains.memory.domain.batch_policy import (
     MAX_SELECTION_SUMMARY_CHARACTERS,
     MEMORY_SELECTION_VERSION,
 )
-from app.domains.memory.domain.errors import MemoryValidationError
+from app.domains.memory.exceptions import MemoryValidationError
 
 
 RETAIN_REASONS = (

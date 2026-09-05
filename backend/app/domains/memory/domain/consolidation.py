@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 import hashlib
 
-from app.domains.memory.domain.errors import MemoryValidationError
+from app.domains.memory.exceptions import MemoryValidationError
 from app.domains.memory.domain.lifecycle import (
     MemoryCandidateRecord,
     MemoryItemRecord,

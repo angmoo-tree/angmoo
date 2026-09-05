@@ -11,7 +11,7 @@ from app.domains.memory.domain.consolidation_provider import (
     memory_consolidation_response_schema,
     parse_memory_consolidation_payload,
 )
-from app.domains.memory.domain.errors import MemoryDomainError
+from app.domains.memory.exceptions import MemoryDomainError
 from app.domains.memory.ports.consolidation_provider import (
     MemoryConsolidationProviderError,
     MemoryConsolidationProviderRequest,

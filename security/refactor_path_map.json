@@ -289,7 +289,10 @@
     "backend/app/services/world_character_setup.py": "backend/app/runtime/world_characters/cleanup.py",
     "backend/app/services/worlds.py": "backend/app/domains/world_characters/service/membership.py",
     "backend/app/services/activity_profile_readiness.py": "backend/app/domains/world_characters/service/readiness.py",
-    "backend/app/domains/world_characters/schemas/readiness.py": "backend/app/domains/characters/schemas.py"
+    "backend/app/domains/world_characters/schemas/readiness.py": "backend/app/domains/characters/schemas.py",
+    "backend/app/domains/memory/api/schemas.py": "backend/app/domains/memory/schemas/__init__.py",
+    "backend/app/domains/memory/api/batch_schemas.py": "backend/app/domains/memory/schemas/batch.py",
+    "backend/app/domains/memory/domain/errors.py": "backend/app/domains/memory/exceptions.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -17735,6 +17738,23 @@
     "AR-B2-WC-readiness-owner": {
       "reason": "The Character detail HTTP response owns its readiness DTO. WC policy consumes that same class; removing the unused Runtime alias and WC schema fragment breaks the reverse package dependency without a policy exception.",
       "source_owner": "AR-B2"
+    },
+    "AR-B7-A0": {
+      "status": "SOURCE PREPARATION; focused validation and sequential B7 integration pending",
+      "scope": "Existing 15 HTTP schema classes, three batch input/output classes and five privacy-safe error classes only. No Memory SQL, actual write/recall/consolidation/selection services, batch admission, provider, scheduler or HTTP handler ownership transition is claimed.",
+      "preserved": "Exact class bodies and error identities; HTTP field validation/extra-forbid, owner and World scope response contracts, no migration or data changes.",
+      "moved_files": {
+        "backend/app/domains/memory/api/schemas.py": "backend/app/domains/memory/schemas/__init__.py",
+        "backend/app/domains/memory/api/batch_schemas.py": "backend/app/domains/memory/schemas/batch.py",
+        "backend/app/domains/memory/domain/errors.py": "backend/app/domains/memory/exceptions.py"
+      },
+      "remaining_owners": {
+        "app.domains.memory.application": "B7 actual write/recall/consolidation/selection/scope service transition",
+        "app.domains.memory.infrastructure": "B7 owned models/repositories/queue/FTS read model; frozen migration imports preserved",
+        "app.domains.memory.domain": "B7 pure policies/contracts and current exact error export",
+        "app.domains.memory.public": "B7 actual external callers; remove obsolete exports only after their consumers transition",
+        "app.api.v1.routes.memory": "B7 HTTP ownership after actual service and dependency composition transition"
+      }
     }
   }
 }

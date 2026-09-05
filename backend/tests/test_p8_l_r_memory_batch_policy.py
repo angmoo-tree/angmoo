@@ -7,7 +7,7 @@ from app.domains.memory.domain.batch_policy import (
     next_daily_slot,
     schedule_time,
 )
-from app.domains.memory.domain.errors import MemoryValidationError
+from app.domains.memory.exceptions import MemoryValidationError
 from app.domains.memory.domain.selection import MemorySelectionSource, parse_selection
 
 

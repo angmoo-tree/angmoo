@@ -14,7 +14,7 @@ from app.domains.memory.domain.batch_policy import (
     MAX_SELECTION_INPUT_TOKEN_BOUND,
     memory_token_upper_bound,
 )
-from app.domains.memory.domain.errors import MemoryValidationError
+from app.domains.memory.exceptions import MemoryValidationError
 from app.domains.memory.domain.selection import MemorySelectionSource
 from app.domains.memory.infrastructure.batch_models import (
     MemoryBatchSetting,

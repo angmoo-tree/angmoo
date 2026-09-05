@@ -18,7 +18,7 @@ from app.domains.identity.dependencies import get_current_user
 from app.core.db import get_db
 from app.domains.identity import browser_session
 from app.domains.identity.public import User
-from app.domains.memory.api.schemas import (
+from app.domains.memory.schemas import (
     MemoryCorrectionCreate,
     MemoryDeleteCreate,
     MemoryEvidenceRead,
@@ -41,7 +41,7 @@ from app.domains.memory.application.scope_control import MemoryScopeService
 from app.domains.memory.application.write_lifecycle import (
     MemoryWriteLifecycleService,
 )
-from app.domains.memory.domain.errors import (
+from app.domains.memory.exceptions import (
     MemoryConflictError,
     MemoryNotFoundError,
     MemoryScopeError,
@@ -54,7 +54,7 @@ from app.domains.memory.infrastructure.repository import SqlAlchemyMemoryReposit
 from app.runtime.memory.sqlalchemy_source_reader import (
     SqlAlchemyMemorySourceEvidenceReader,
 )
-from app.domains.memory.api.batch_schemas import (
+from app.domains.memory.schemas.batch import (
     MemoryBatchRetry,
     MemoryBatchSettingRead,
     MemoryBatchSettingUpdate,

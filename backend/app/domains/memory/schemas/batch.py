@@ -3,7 +3,7 @@
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
-from app.domains.memory.api.schemas import MemoryScopeRead
+from app.domains.memory.schemas import MemoryScopeRead
 
 
 class MemoryBatchSettingUpdate(BaseModel):

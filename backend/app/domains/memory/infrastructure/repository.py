@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.db import Base
-from app.domains.memory.domain.errors import (
+from app.domains.memory.exceptions import (
     MemoryConflictError,
     MemoryNotFoundError,
     MemoryScopeError,

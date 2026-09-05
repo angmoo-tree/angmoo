@@ -30,7 +30,7 @@ from app.domains.memory.domain.consolidation import (
     evaluate_memory_consolidation,
     validate_consolidation_summary,
 )
-from app.domains.memory.domain.errors import MemoryConflictError, MemoryDomainError
+from app.domains.memory.exceptions import MemoryConflictError, MemoryDomainError
 from app.domains.memory.domain.lifecycle import (
     as_utc,
     validate_source_digest,

@@ -592,3 +592,11 @@ M1 뒤 남아 있던 기존 credential privacy 테스트의 monkeypatch 위치 �
 공개 media mount는 기존 characters/posts/world-package-imports만 유지한다. World/draft/candidate를 anonymous 정적 경로에 추가하지 않았다. 관련 권한/비공개 검증의 통과를 실제 Installer/real-provider 검증으로 확대하지 않는다. 현재 Media M1~M6의 새 nodes는 26개이며 source introduction·통합 Actions·순차 merge는 root가 관리한다.
 
 M6 고정 후보에서 `--contracts --nodes`는 현재 **2,151 nodes**를 수집했다. 보호 계보 2,125개 대비 API/ORM·기존 assertion/suppression·누락 node·source split 오류는 없었다. 실패 목록은 M1~M5의 root 선형 capture를 기다리는 source 12개·test 21개뿐이며 M6 새 5개는 이 검사 당시 미커밋 도입이었다. source 고정 후 root가 M1~M6의 각 첫 도입 SHA에서 append-only 증거를 추가한다.
+
+### AR-B7-A0 Memory 입출력·오류 기반 준비
+
+기존 Memory 입출력 schema는 `schemas/__init__.py`, 배치 설정 입출력은 `schemas/batch.py`, 다섯 오류 class는 `exceptions.py`로 이전했다. 세 파일의 class 본문 AST는 import 경로를 제외하고 그대로이며 28개 실제 소비자를 연결했다. 기존 domain aggregate는 같은 오류 class를 제공한다. 입출력 검증, 버전·owner/World scope, batch consent/model/일정 필드와 extra-forbid 설정은 바꾸지 않는다.
+
+전체 Memory 완료를 선언하지 않고 세 실제 역할 module만 partial scope로 추가했다. 미전환 Memory 서비스·repository·policy·HTTP의 정확 bridge 18개를 기록했다. Schema 두 module만 외부 entry이며 예외를 임의의 service entry로 올리지 않았다. 현재 architecture **640 modules / 2,087 internal edges / exact legacy 256 PASS**, L4 parity97 및 current Memory batch inventory를 갱신했다. Frozen predecessor inventory와 SQLite migration은 유지한다.
+
+실제 write/recall/consolidation/selection 정책과 SQL·FTS·maintenance queue, batch admission·예약·종료·provider 및 HTTP 서비스 소유권은 다음 B7 범위다. 이 기반 source의 집중 검증·원본 도입 계보 통합·순차 PR/merge는 별도로 기록하며 기존 구현 전체가 이전됐다는 의미가 아니다.

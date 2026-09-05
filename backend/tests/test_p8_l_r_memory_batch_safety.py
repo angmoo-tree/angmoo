@@ -10,7 +10,7 @@ from app import models
 from app.domains.memory.application.batch_selection import MemoryBatchSelectionService
 from app.domains.memory.application.scope_control import MemoryScopeService
 from app.domains.memory.domain.batch_policy import MEMORY_CONSENT_VERSION
-from app.domains.memory.domain.errors import MemoryConflictError
+from app.domains.memory.exceptions import MemoryConflictError
 from app.domains.memory.infrastructure.batch_models import (
     MemoryActivationEpoch,
     MemoryBatchRun,
@@ -426,7 +426,7 @@ def test_oversized_request_fails_before_physical_call_reservation(memory_session
     _, repo, job, provider, service = batch_stack(memory_session)
 
     def reject(_sources):
-        from app.domains.memory.domain.errors import MemoryValidationError
+        from app.domains.memory.exceptions import MemoryValidationError
 
         raise MemoryValidationError("memory_selection_input_budget_exceeded")
 

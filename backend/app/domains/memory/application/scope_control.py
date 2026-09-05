@@ -1,6 +1,6 @@
 """Use cases for opt-in memory scope settings."""
 
-from app.domains.memory.domain.errors import MemoryConflictError
+from app.domains.memory.exceptions import MemoryConflictError
 from app.domains.memory.domain.lifecycle import normalize_memory_idempotency_key
 from app.domains.memory.domain.provenance import MemoryProviderMode
 from app.domains.memory.domain.retention import validate_retention_days

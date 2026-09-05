@@ -9,7 +9,7 @@ from app.domains.memory.domain.consolidation import (
     MAX_MAINTENANCE_BATCH_CANDIDATES,
     validate_consolidation_summary,
 )
-from app.domains.memory.domain.errors import MemoryValidationError
+from app.domains.memory.exceptions import MemoryValidationError
 
 
 MEMORY_CONSOLIDATION_PROVIDER_OUTPUT_VERSION = "memory-consolidation-output.v1"
