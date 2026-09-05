@@ -1101,3 +1101,9 @@ Source `904be5193f671590c51c061e0206cb312ed05459`는 RuntimeSchedulerLease 실�
 중복 실행·stale commit 거부·lease heartbeat·SQLite 경쟁·단일 backend·migration/installer 계약은 **63 PASS/기존 PostgreSQL skip1/49.19초**다. 실제 새 SQL 함수/인수/Identity callback을 펼쳐 원본 모델·메서드·helper·hook **16개 전체 AST**가 동일함을 확인했다. 현재 source/split/assertion/억제/APIORM/node 읽기 진단0(protected2201/current2248), 경계735/2454/legacy222와 L4 parity97 PASS다. 분리 후 A1 소비자10개가 삭제된 구현을 가리키던 지도는 실제 읽는 symbol을 기준으로 새 소비자에 연결했다.
 
 ER0 generator의 실제 scheduler coupling 참조를 service로 바꿔 생성/일치 검사는 PASS다. 다만 기존 ER0 pytest는 **3 PASS/1 FAIL**이다. 업무/SQL 분리로 PostgreSQL marker를 포함한 물리 파일이81→82가 되어 옛 `entry_count < 82` assertion에 걸렸다. SQL 추가나 driver 활성화가 아니며 원문 SQL은 동일하다. 이를 숨기려고 marker/대상을 제외하거나 frozen assertion을 완화하지 않았다. 물리 파일 수에 묶인 기존 구조 검증을 올바른 소유/잔재 기준으로 전환하는 작업을 B8 통합 전 해결해야 한다. 이 source 준비를 전체/merge PASS로 기록하지 않는다. SQLite 실제 CAS 책임 전환·Runtime HTTP/집합 export 제거·G5 등록·G06 삭제 및 순차 도입 원장 합류는 남아 있다.
+
+### AR-B8 ER0 물리 파일 수 검사 보완
+
+위 ER0 실패는 과거 물리 파일 수 조건을 고정 checkpoint `d7037625a19071eb279ad2ea35c3ace6fe5b5289`의 원본 Git inventory에 적용하여 보존하고, 현재 inventory는 별도 실제 전체 source scan과 entries/entry_count/각 marker·줄·hash·owner·조건이 모두 일치하도록 검증해 해결했다. 현재 entry_count82를 축소하거나 제외하지 않는다. 고정 API/ORM/실행 계약은 바꾸지 않았다.
+
+새4개 negative nodes는 실제 임시 source와 대조하여 잘못된 count, 누락한 entry, 조작 hash, 나중에 추가된 marker source를 모두 거부한다. 원래 ER7 driver 의존성·poisoned environment·실행 검사와 함께 **20 PASS/1 warning/28.68초**다. 원래 source/split/assertion/억제/APIORM/node 보존 진단도0오류(protected2201/current2252)다. 과거 threshold를 현재 검증으로 오인하지 않도록 test helper·주석에 구분을 명시했다. 전체 stock source/node 원장은 선행 단계 순차 합류가 여전히 필요하다.
