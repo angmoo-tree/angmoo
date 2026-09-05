@@ -19,7 +19,7 @@ from app.domains.chat.contracts.response_request import (
 from app.domains.chat.contracts.retrieval_intent import RetrievalRoute
 from app.domains.chat.contracts.retrieval_router import RouterFailureDiagnostic
 from app.domains.chat.contracts.workflow_recipe import WorkflowRecipe
-from app.domains.chat.ports.response_lifecycle import ResponseLifecycleRepositoryPort
+from app.domains.chat.contracts.response_lifecycle import ResponseLifecycleRepositoryPort
 
 
 class GenerationLifecycleService:

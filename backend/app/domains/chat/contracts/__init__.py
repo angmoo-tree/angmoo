@@ -177,3 +177,60 @@ from app.domains.chat.contracts.model_binding import (
 )
 
 __all__ += ["MESSAGE_MODEL_BINDING_MODES", "MessageModelBindingMode"]
+
+
+# Typed collaborators implemented by providers, persistence and runtime.
+
+from app.domains.chat.contracts.response_lifecycle import ResponseLifecycleRepositoryPort
+from app.domains.chat.contracts.retrieval_policy import (
+    CanonicalRetrievalScope,
+    RetrievalEntityCandidate,
+    RetrievalEntityResolution,
+    RetrievalPolicyResolverPort,
+    RetrievalPreflightCommand,
+)
+from app.domains.chat.contracts.retrieval_router_provider import (
+    RetrievalRouterContextMessage,
+    RetrievalRouterOutputError,
+    RetrievalRouterProviderPort,
+    RetrievalRouterProviderResult,
+    RetrievalRouterRequest,
+)
+from app.domains.chat.contracts.response_workflow import ResponseWorkflowUnitOfWorkPort
+from app.domains.chat.contracts.successful_chat_memory import (
+    SuccessfulChatMemoryProducerPort,
+    SuccessfulChatMemorySource,
+)
+from app.domains.chat.contracts.character_response_generator import (
+    CharacterResponseContextMessage,
+    CharacterResponseGeneratorError,
+    CharacterResponseGeneratorPort,
+    CharacterResponseGeneratorRequest,
+    CharacterResponseGeneratorResult,
+    CharacterResponseProfile,
+)
+from app.domains.chat.contracts.today_sns_activity import TodaySnsActivityReaderPort
+
+__all__ += [
+    "CanonicalRetrievalScope",
+    "CharacterResponseContextMessage",
+    "CharacterResponseGeneratorError",
+    "CharacterResponseGeneratorPort",
+    "CharacterResponseGeneratorRequest",
+    "CharacterResponseGeneratorResult",
+    "CharacterResponseProfile",
+    "ResponseLifecycleRepositoryPort",
+    "ResponseWorkflowUnitOfWorkPort",
+    "SuccessfulChatMemoryProducerPort",
+    "SuccessfulChatMemorySource",
+    "TodaySnsActivityReaderPort",
+    "RetrievalEntityCandidate",
+    "RetrievalEntityResolution",
+    "RetrievalPolicyResolverPort",
+    "RetrievalPreflightCommand",
+    "RetrievalRouterContextMessage",
+    "RetrievalRouterOutputError",
+    "RetrievalRouterProviderPort",
+    "RetrievalRouterProviderResult",
+    "RetrievalRouterRequest",
+]

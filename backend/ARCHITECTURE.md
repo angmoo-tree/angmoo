@@ -529,3 +529,11 @@ Chat 요청은 이제 역할이 있는 실제 서비스로 들어갑니다. `ser
 World 대화 생성의 tuple/quota lock, preference 생성의 flush-only 경로, 저장 직전 scope 재검증, 충돌 시 한 번의 재시도는 그대로입니다. 기존 쪽지는 user message commit 뒤 provider를 부르고, 재시도에서는 기존 실패 assistant 행 하나를 수정합니다. 새로운 공통 transaction 규칙으로 이 차이를 합치지 않습니다.
 
 과거 `ChatService → ChatRuntimePort → SqlAlchemyChatRuntime` 전달 체인은 HTTP 호출 경로에서 제거했습니다. 과거 구조 자체를 검증하는 승인 테스트 하나 때문에 이전 forwarder와 Protocol만 `app/compatibility/chat_service.py`·`chat_runtime_contract.py`에 임시 보존합니다. 이들은 신규 기능의 진입점이 아니며 B8에서 원래 node/assertion과 실제 서비스 회귀의 대응을 확인하고 퇴역합니다. `runtime/chat/sqlalchemy_service.py`에는 현재 generation·Memory 소비자가 쓰는 동일 인스턴스 메서드 alias만 남았으며, generation/retrieval 구현 자체는 뒤이은 B6-B/C 전환 범위입니다.
+
+### Chat 검색·응답 생성과 저장 책임
+
+검색 경로 선택, canonical/graph/both 계획 실행, 근거 조립과 응답 생성은 `chat/service/`의 역할별 모듈에 있습니다. `contracts/`는 요청·값·불변 Today SNS snapshot과 실제 provider/저장/Memory 협력의 형식을 설명합니다. 모든 서비스에 새로운 전달 계층을 추가하지 않습니다.
+
+`repository/response_lifecycle.py`는 응답 요청의 lease·상태 전이·sequence·최종 답변의 원자적 저장을 담당합니다. `accept`와 `finalize`는 원래 `create_request`와 `finalize_response`의 동일 함수 이름이며 추가 저장 정책이 아닙니다. 실행 경로는 이 저장소를 직접 사용하므로 단순 전달만 하던 `GenerationLifecycleService` 인스턴스를 생성하지 않습니다. 오래된 fence의 거부, 완료 응답 재실행 시 중복 방지, 부분 delta 비저장, 성공 이후 Memory 후보 생성 순서는 유지합니다.
+
+이전 생성 클래스는 기존 공개 계약과 승인 테스트를 보존하기 위해 `compatibility/chat_generation_lifecycle.py` 한 곳에 남습니다. 새 기능의 진입점으로 사용하지 않으며 B8에서 원래 테스트와 실제 저장소 회귀의 대응을 확인한 뒤 제거합니다. `runtime/chat/world_generation.py`의 HTTP 요청 조립과 여러 업무를 함께 읽는 실제 코드는 다음 B6 전환 범위이며, 이 단계만으로 Chat 전체 전환이 완료된 것은 아닙니다.

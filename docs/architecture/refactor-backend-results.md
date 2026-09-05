@@ -554,3 +554,15 @@ A1 `2f36a6af` 및 보존 보완 `abbf2647` 뒤 실제 runtime SQL 업무 57개�
 최종 고정 tree의 Chat·World Chat·generation·Today SNS·credential/deletion 집중 묶음은 **170 passed / 기존 4 warnings / 38.56초**, 보존/부분 scope 회귀는 **149 passed / 0.97초**였다. 전체 보존 `--contracts --nodes`는 source 목적지·분리 symbol/소비자·assertion·억제 표시·API·ORM·기존 node에서 오류 0이며 보호 **2,129 / 현재 2,166**을 확인했다. 선행 Media/WC/A1의 아직 capture되지 않은 source 29개·node 29개 때문에 명령은 exit 1이다. 이번 미커밋 slice의 신규 node 8개와 helper/서비스 파일은 이 source의 첫 introduction SHA로 root에서 추가 증거를 남긴다.
 
 Live architecture **645 modules / 2,103 edges / exact legacy 265 PASS**, ER0 **79/87/24/44/7 PASS**, L4 parity **97**, Memory batch current, 공개 route inventory **196**이다. Root의 독립 읽기 리뷰에서도 query의 owner/World/WC/membership 조건·limit 2/FOR UPDATE·nullable 반환과 같은 Session, credential flush-only·clear/envelope 경계에서 추가 문제는 발견되지 않았다. 이 결과를 generation/retrieval 전체 전환이나 Hosted CI·설치 Gate 완료로 확대하지 않는다.
+
+## AR-B6-B1 — 검색·근거·응답 실행 서비스와 실제 lifecycle 저장소
+
+A2 `57528d22072f7541e7f1f1b982071afd5c1d537c` 뒤 실제 검색 계획·근거 조립·답변 생성 업무를 `service/`로, 실제 provider/UoW/Memory 협력 형식을 `contracts/`로, lease·CAS·최종 저장 구현을 `repository/response_lifecycle.py`로 이전했다. 이전 경로 21개의 명시적 대응을 남겼으며 Today SNS snapshot과 reader/validator가 같은 이름의 파일로 합쳐질 때 기존 snapshot 검증·hash·serialization을 모두 보존했다.
+
+기존 함수/class 본문은 **76개 AST 동일**하다. 나머지 3개 class 차이는 workflow 생성자 annotation 1개와 repository/Protocol에 같은 함수 alias를 추가한 2개다. runtime의 accept/retry/stream/expired recovery/사전 실패 처리 5개 함수는 원래 `GenerationLifecycleService(...)` 외부 전달 생성자만 제거하면 AST가 동일하다. 실행은 실제 repository를 직접 사용하며 원래 wrapper는 기존 공개 계약과 streaming 테스트 helper `_request`·`_workflow` 때문에 compatibility 한 곳에 보존한다. 이 승인 테스트의 실제 workflow 검증을 없애지 않고 B8에서 원래 assertion과 새 실제 저장소 경로 대응을 확인한다.
+
+새 회귀 2개는 옛 wrapper 생성 시 실패하도록 막은 실제 accept/replay 경로와 같은 SQLite 메시지·요청 한 건, 오래된 lease fence 거부, 최종 assistant 한 건과 재실행 중복 방지를 검증한다. 고정 tree 집중 검사는 **187 passed / 기존 4 warnings / 23.77초**다. 신규 검사 최초 실행도 **2 passed / 3.86초**였다.
+
+전체 `--contracts --nodes` 검사에서 source 목적지·분리 symbol/소비자·assertion·억제 표시·API·ORM·기존 node 오류는 0이었다. 보호 계보 **2,129 / 현재 2,168**이며 선행 Media/WC 및 A1/A2의 아직 캡처되지 않은 committed source 36개·node 37개 때문에 명령 전체는 exit 1이다. 이번 source의 신규 2 nodes와 실제 소유 파일의 첫 도입 SHA는 root가 선형 통합에서 캡처한다. Frozen 원본·checkpoint·승인 node는 바꾸지 않았다.
+
+Live architecture **641 modules / 2,094 edges / exact legacy 265 PASS**, ER0 **79/87/24/44/7 PASS**, L4 parity **97**, Memory batch current, 공개 route inventory **196**이다. 후속 B6-B2/C에서 runtime의 generation admission·evidence 읽기·provider/다중 업무 조립과 HTTP 진입점을 이어서 정리한다. B5 합류·전체 Chat 완료·Hosted CI·설치 Gate 완료를 의미하지 않는다.

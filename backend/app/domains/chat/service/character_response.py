@@ -12,7 +12,7 @@ from app.domains.chat.contracts.call_tracker import (
     restore_call_tracker_snapshot,
 )
 from app.domains.chat.contracts.retrieval_intent import RetrievalContractError
-from app.domains.chat.ports.character_response_generator import (
+from app.domains.chat.contracts.character_response_generator import (
     CharacterResponseGeneratorError,
     CharacterResponseGeneratorPort,
     CharacterResponseGeneratorRequest,

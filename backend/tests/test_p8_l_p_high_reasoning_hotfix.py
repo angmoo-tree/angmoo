@@ -16,7 +16,7 @@ from app.domains.chat.policies import (
 )
 from app.domains.chat.contracts.response_request import RetrievalOutcome
 from app.domains.chat.contracts.retrieval_intent import RetrievalRoute
-from app.domains.chat.ports.character_response_generator import (
+from app.domains.chat.contracts.character_response_generator import (
     CharacterResponseGeneratorRequest,
     CharacterResponseProfile,
 )

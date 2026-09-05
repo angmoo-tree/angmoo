@@ -13,12 +13,11 @@ from sqlalchemy.orm import Session
 
 from app.config import Settings, settings
 from app.domains.chat import schemas
-from app.domains.chat.application import (
+from app.domains.chat.service import (
     BothRetrievalWorkflowCoordinator,
     CanonicalRetrievalPlanningService,
     CharacterResponseGenerationService,
     EvidenceBundleAssembler,
-    GenerationLifecycleService,
     GraphRetrievalPlanningService,
     ResponseGenerationWorkflowService,
     ResponseWorkflowCommand,
@@ -44,8 +43,8 @@ from app.domains.chat.exceptions import (
     MessageNotFoundError,
     MessageValidationError,
 )
-from app.domains.chat.infrastructure import SqlAlchemyResponseLifecycleRepository
-from app.domains.chat.ports import (
+from app.domains.chat.repository import SqlAlchemyResponseLifecycleRepository
+from app.domains.chat.contracts import (
     CharacterResponseContextMessage,
     CharacterResponseProfile,
     RetrievalPreflightCommand,
@@ -170,7 +169,7 @@ def accept_world_message(
         requester_world_character_id=thread.requester_world_character_id or "",
         responding_world_character_id=thread.responding_world_character_id or "",
     )
-    lifecycle = GenerationLifecycleService(SqlAlchemyResponseLifecycleRepository(db))
+    lifecycle = SqlAlchemyResponseLifecycleRepository(db)
     record = lifecycle.accept(
         CreateResponseRequest(
             request_id=request_id,
@@ -255,9 +254,7 @@ def retry_world_response(
     )
 
     now = datetime.now(UTC)
-    record = GenerationLifecycleService(
-        SqlAlchemyResponseLifecycleRepository(db)
-    ).accept(
+    record = SqlAlchemyResponseLifecycleRepository(db).accept(
         CreateResponseRequest(
             request_id=f"request-{uuid4().hex}",
             thread_id=thread.id,
@@ -463,7 +460,7 @@ async def stream_world_response(
         purpose=base_material.purpose,
         _secret=base_material.reveal(),
     )
-    lifecycle = GenerationLifecycleService(repository)
+    lifecycle = repository
     canonical = CanonicalRetrievalPlanningService(
         planner=DirectLlmCanonicalRetrievalPlannerProvider(material),
         executor=CanonicalRetrievalPlanExecutor(memory_recall_service),
@@ -608,7 +605,7 @@ def _recover_if_expired(db: Session, record):
     if record.state in TERMINAL_STATES or record.deadline_at > now:
         return record
     repository = SqlAlchemyResponseLifecycleRepository(db)
-    GenerationLifecycleService(repository).recover_expired_requests(
+    repository.recover_expired_requests(
         now=now,
         limit=100,
     )
@@ -1010,7 +1007,7 @@ async def _fail_before_workflow(
     retryable: bool,
     reason: ResponseTerminalReason,
 ) -> AsyncIterator[GenerationEvent]:
-    lifecycle = GenerationLifecycleService(SqlAlchemyResponseLifecycleRepository(db))
+    lifecycle = SqlAlchemyResponseLifecycleRepository(db)
     now = datetime.now(UTC)
     record = lifecycle.acquire_lease(
         request_id=record.request_id,

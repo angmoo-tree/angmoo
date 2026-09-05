@@ -58,9 +58,9 @@ class InventoryError(RuntimeError):
 
 REQUIRED_FILES = (
     "backend/app/domains/chat/contracts/retrieval_router.py",
-    "backend/app/domains/chat/ports/retrieval_router_provider.py",
-    "backend/app/domains/chat/ports/retrieval_policy.py",
-    "backend/app/domains/chat/application/retrieval_routing.py",
+    "backend/app/domains/chat/contracts/retrieval_router_provider.py",
+    "backend/app/domains/chat/contracts/retrieval_policy.py",
+    "backend/app/domains/chat/service/retrieval_routing.py",
     "backend/app/integrations/llm/retrieval_router.py",
     "backend/app/runtime/chat/retrieval_policy.py",
     "backend/tests/test_p8_l_k_retrieval_router.py",
@@ -135,7 +135,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/domains/chat/application/retrieval_routing.py",
+        "backend/app/domains/chat/service/retrieval_routing.py",
         (
             "RetrievalRoutingService",
             "RetrievalRouterOutputError",

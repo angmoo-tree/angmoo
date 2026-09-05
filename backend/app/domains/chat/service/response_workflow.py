@@ -10,25 +10,25 @@ import logging
 from typing import Any
 from uuid import uuid4
 
-from app.domains.chat.application.both_retrieval import (
+from app.domains.chat.service.both_retrieval import (
     BothRetrievalCommand,
     BothRetrievalWorkflowCoordinator,
 )
-from app.domains.chat.application.canonical_retrieval import (
+from app.domains.chat.service.canonical_retrieval import (
     CanonicalRetrievalCommand,
     CanonicalRetrievalPlanningService,
 )
-from app.domains.chat.application.character_response import (
+from app.domains.chat.service.character_response import (
     CharacterResponseGenerationService,
     character_response_deltas,
 )
-from app.domains.chat.application.evidence_assembly import EvidenceBundleAssembler
-from app.domains.chat.application.generation_lifecycle import GenerationLifecycleService
-from app.domains.chat.application.graph_retrieval import (
+from app.domains.chat.service.evidence_assembly import EvidenceBundleAssembler
+from app.domains.chat.contracts.response_lifecycle import ResponseLifecycleRepositoryPort
+from app.domains.chat.service.graph_retrieval import (
     GraphRetrievalCommand,
     GraphRetrievalPlanningService,
 )
-from app.domains.chat.application.retrieval_routing import RetrievalRoutingService
+from app.domains.chat.service.retrieval_routing import RetrievalRoutingService
 from app.domains.chat.contracts.generation_lifecycle import (
     GenerationContractError,
     GenerationEvent,
@@ -50,22 +50,22 @@ from app.domains.chat.contracts.retrieval_intent import (
 )
 from app.domains.chat.contracts.retrieval_router import RouterFailureDiagnostic
 from app.domains.chat.contracts.today_sns_activity import TodaySnsActivitySnapshot
-from app.domains.chat.ports.today_sns_activity import (
+from app.domains.chat.contracts.today_sns_activity import (
     TodaySnsSnapshotChangedError, TodaySnsSnapshotValidatorPort,
 )
-from app.domains.chat.ports.character_response_generator import (
+from app.domains.chat.contracts.character_response_generator import (
     CharacterResponseContextMessage,
     CharacterResponseGeneratorError,
     CharacterResponseGeneratorRequest,
     CharacterResponseProfile,
 )
-from app.domains.chat.ports.response_workflow import ResponseWorkflowUnitOfWorkPort
-from app.domains.chat.ports.successful_chat_memory import (
+from app.domains.chat.contracts.response_workflow import ResponseWorkflowUnitOfWorkPort
+from app.domains.chat.contracts.successful_chat_memory import (
     SuccessfulChatMemoryProducerPort,
     SuccessfulChatMemorySource,
 )
-from app.domains.chat.ports.retrieval_policy import RetrievalPreflightCommand
-from app.domains.chat.ports.retrieval_router_provider import RetrievalRouterContextMessage
+from app.domains.chat.contracts.retrieval_policy import RetrievalPreflightCommand
+from app.domains.chat.contracts.retrieval_router_provider import RetrievalRouterContextMessage
 
 
 logger = logging.getLogger(__name__)
@@ -105,7 +105,7 @@ class ResponseGenerationWorkflowService:
     def __init__(
         self,
         *,
-        lifecycle: GenerationLifecycleService,
+        lifecycle: ResponseLifecycleRepositoryPort,
         router: RetrievalRoutingService,
         canonical: CanonicalRetrievalPlanningService,
         graph: GraphRetrievalPlanningService,

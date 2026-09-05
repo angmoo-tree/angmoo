@@ -48,7 +48,7 @@ REQUIRED_FILES = (
     "backend/app/domains/memory/domain/canonical_retrieval_planner.py",
     "backend/app/domains/memory/ports/canonical_planner_provider.py",
     "backend/app/domains/memory/application/canonical_planning.py",
-    "backend/app/domains/chat/application/canonical_retrieval.py",
+    "backend/app/domains/chat/service/canonical_retrieval.py",
     "backend/app/domains/chat/contracts/call_tracker.py",
     "backend/app/integrations/llm/canonical_retrieval_planner.py",
     "backend/tests/fixtures/p8_l/canonical_planner_v1/held_out_ko.jsonl",
@@ -136,7 +136,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/domains/chat/application/canonical_retrieval.py",
+        "backend/app/domains/chat/service/canonical_retrieval.py",
         (
             "CanonicalRetrievalPlanningService",
             "restore_call_tracker_snapshot",

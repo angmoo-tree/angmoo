@@ -8,8 +8,9 @@ import hashlib
 import json
 from collections.abc import Mapping
 from types import MappingProxyType
+from typing import Protocol
 
-from app.domains.social.public import TodaySocialCoverageStatus
+from app.domains.social.public import TodaySocialActivityRead, TodaySocialCoverageStatus
 
 
 TODAY_SNS_ACTIVITY_SNAPSHOT_VERSION = "today-sns-activity-snapshot.v1"
@@ -278,4 +279,29 @@ __all__ = [
     "TodaySnsSubjectiveContext",
     "build_today_sns_hash",
     "compute_today_sns_hash",
+]
+
+
+class TodaySnsSnapshotChangedError(ValueError):
+    """A source changed after the immutable generation snapshot was built."""
+
+
+class TodaySnsActivityReaderPort(Protocol):
+    def read(
+        self,
+        *,
+        owner_id: str,
+        world_id: str,
+        subject_world_character_id: str,
+        started_at: datetime,
+        complete_through: datetime,
+    ) -> TodaySocialActivityRead: ...
+
+
+class TodaySnsSnapshotValidatorPort(Protocol):
+    def assert_current(self, snapshot: TodaySnsActivitySnapshot) -> None: ...
+
+__all__ += [
+    "TodaySnsActivityReaderPort", "TodaySnsSnapshotChangedError",
+    "TodaySnsSnapshotValidatorPort",
 ]

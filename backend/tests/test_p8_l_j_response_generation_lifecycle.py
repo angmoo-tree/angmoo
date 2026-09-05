@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.core.db import Base
-from app.domains.chat.application import BoundedFakeAnswerRequestExecutor
+from app.domains.chat.service import BoundedFakeAnswerRequestExecutor
 from app.domains.chat.contracts import (
     CreateResponseRequest,
     GenerationContractError,
@@ -35,7 +35,7 @@ from app.domains.chat.contracts import (
     WorkflowRecipe,
     build_request_scope_hash,
 )
-from app.domains.chat.infrastructure import SqlAlchemyResponseLifecycleRepository
+from app.domains.chat.repository import SqlAlchemyResponseLifecycleRepository
 from app.domains.memory.public import (
     CANONICAL_PRIMITIVE_REGISTRY,
     CanonicalPlanStep,

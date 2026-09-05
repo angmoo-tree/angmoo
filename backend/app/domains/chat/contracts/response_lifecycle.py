@@ -102,5 +102,9 @@ class ResponseLifecycleRepositoryPort(Protocol):
         now: datetime,
     ) -> ResponseRequestRecord: ...
 
+    # Established command names refer to the same fenced persistence methods.
+    accept = create_request
+    finalize = finalize_response
+
 
 __all__ = ["ResponseLifecycleRepositoryPort"]

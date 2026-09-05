@@ -13,7 +13,7 @@ from app.domains.chat.contracts.retrieval_router import (
     retrieval_router_response_schema,
     router_validation_code_from_exception,
 )
-from app.domains.chat.ports.retrieval_router_provider import (
+from app.domains.chat.contracts.retrieval_router_provider import (
     RetrievalRouterOutputError,
     RetrievalRouterProviderResult,
     RetrievalRouterRequest,

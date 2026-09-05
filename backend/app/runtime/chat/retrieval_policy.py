@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.domains.characters.models import Character
 from app.domains.chat.contracts.retrieval_intent import RetrievalContractError
 from app.domains.chat.models import MessageThread
-from app.domains.chat.ports.retrieval_policy import (
+from app.domains.chat.contracts.retrieval_policy import (
     CanonicalRetrievalScope,
     RetrievalEntityCandidate,
     RetrievalEntityResolution,

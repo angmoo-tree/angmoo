@@ -42,12 +42,12 @@ REQUIRED_FILES = (
     "backend/app/api/v1/routes/memory.py",
     "backend/app/api/v1/routes/world_chat_response.py",
     "backend/app/domains/chat/api/schemas.py",
-    "backend/app/domains/chat/application/evidence_assembly.py",
+    "backend/app/domains/chat/service/evidence_assembly.py",
     "backend/app/compatibility/chat_service.py",
-    "backend/app/domains/chat/application/response_workflow.py",
+    "backend/app/domains/chat/service/response_workflow.py",
     "backend/app/domains/chat/contracts/evidence_bundle.py",
     "backend/app/domains/chat/contracts/response_request.py",
-    "backend/app/domains/chat/infrastructure/response_lifecycle_repository.py",
+    "backend/app/domains/chat/repository/response_lifecycle.py",
     "backend/app/compatibility/chat_runtime_contract.py",
     "backend/app/domains/chat/public.py",
     "backend/app/domains/memory/api/schemas.py",
@@ -196,7 +196,7 @@ def _boundary_contract() -> dict[str, Any]:
         ("@router.post", "@router.patch", "@router.put", "@router.delete"),
     )
     _require_text(
-        "backend/app/domains/chat/infrastructure/response_lifecycle_repository.py",
+        "backend/app/domains/chat/repository/response_lifecycle.py",
         ('metadata_payload["_evidence_inspector_v1"]', "len(items) > 12"),
     )
     _require_text(

@@ -9,7 +9,7 @@ from app.domains.chat.policies import (
     WORLD_CHAT_FOREGROUND_MAX_OUTPUT_TOKENS,
     resolve_world_chat_model_execution_policy,
 )
-from app.domains.chat.ports.character_response_generator import (
+from app.domains.chat.contracts.character_response_generator import (
     CharacterResponseGeneratorError,
     CharacterResponseGeneratorRequest,
     CharacterResponseGeneratorResult,

@@ -9,12 +9,12 @@ from datetime import datetime
 import hashlib
 from typing import Any
 
-from app.domains.chat.application.canonical_retrieval import (
+from app.domains.chat.service.canonical_retrieval import (
     CanonicalPlanningResult,
     CanonicalRetrievalCommand,
     CanonicalRetrievalPlanningService,
 )
-from app.domains.chat.application.graph_retrieval import (
+from app.domains.chat.service.graph_retrieval import (
     GraphPlanningResult,
     GraphRetrievalCommand,
     GraphRetrievalPlanningService,

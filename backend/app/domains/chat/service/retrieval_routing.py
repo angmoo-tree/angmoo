@@ -27,13 +27,13 @@ from app.domains.chat.contracts.retrieval_router import (
     RouterFailureDiagnostic,
     router_validation_is_retryable,
 )
-from app.domains.chat.ports.retrieval_policy import (
+from app.domains.chat.contracts.retrieval_policy import (
     CanonicalRetrievalScope,
     RetrievalEntityResolution,
     RetrievalPolicyResolverPort,
     RetrievalPreflightCommand,
 )
-from app.domains.chat.ports.retrieval_router_provider import (
+from app.domains.chat.contracts.retrieval_router_provider import (
     RetrievalRouterContextMessage,
     RetrievalRouterOutputError,
     RetrievalRouterProviderPort,

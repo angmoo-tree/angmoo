@@ -5,9 +5,9 @@ from __future__ import annotations
 from collections.abc import Mapping
 from datetime import UTC, datetime
 
-from app.domains.chat.application.both_retrieval import BothRetrievalResult
-from app.domains.chat.application.canonical_retrieval import CanonicalPlanningResult
-from app.domains.chat.application.graph_retrieval import GraphPlanningResult
+from app.domains.chat.service.both_retrieval import BothRetrievalResult
+from app.domains.chat.service.canonical_retrieval import CanonicalPlanningResult
+from app.domains.chat.service.graph_retrieval import GraphPlanningResult
 from app.domains.chat.contracts.evidence_bundle import (
     MAX_EVIDENCE_BUNDLE_CHARS,
     MAX_EVIDENCE_ITEM_CHARS,

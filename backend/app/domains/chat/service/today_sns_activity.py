@@ -13,7 +13,7 @@ from app.domains.chat.contracts.today_sns_activity import (
     TodaySnsSubjectiveContext,
     build_today_sns_hash,
 )
-from app.domains.chat.ports.today_sns_activity import TodaySnsActivityReaderPort
+from app.domains.chat.contracts.today_sns_activity import TodaySnsActivityReaderPort
 
 
 class TodaySnsActivityAssembler:

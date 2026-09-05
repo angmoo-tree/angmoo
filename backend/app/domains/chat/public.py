@@ -1,5 +1,7 @@
 """Supported backend boundary for Chat consumers."""
 
+from app.compatibility.chat_service import ChatService
+from app.compatibility.chat_generation_lifecycle import GenerationLifecycleService
 from app.domains.chat.schemas import (
     CharacterMessageSettingRead,
     CharacterMessageSettingUpdate,
@@ -29,7 +31,7 @@ from app.domains.chat.schemas import (
     WorldChatThreadModelUpdate,
     WorldChatThreadRead,
 )
-from app.domains.chat.application import (
+from app.domains.chat.service import (
     AnswerRequestContractValidator,
     BoundedFakeAnswerRequestExecutor,
     BothRetrievalCommand,
@@ -39,11 +41,9 @@ from app.domains.chat.application import (
     CanonicalPlanningResult,
     CanonicalRetrievalCommand,
     CanonicalRetrievalPlanningService,
-    ChatService,
     ClarificationCandidate,
     ClarificationResolution,
     CoordinatedRetrievalReference,
-    GenerationLifecycleService,
     GraphPlanningMetrics,
     GraphPlanningResult,
     GraphRetrievalCommand,
@@ -101,7 +101,7 @@ from app.domains.chat.contracts import (
     retrieval_router_response_schema,
     select_workflow_recipe,
 )
-from app.domains.chat.ports import (
+from app.domains.chat.contracts import (
     CanonicalRetrievalScope,
     RetrievalEntityCandidate,
     RetrievalEntityResolution,

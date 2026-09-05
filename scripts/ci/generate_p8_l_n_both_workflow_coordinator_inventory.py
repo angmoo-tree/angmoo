@@ -38,10 +38,10 @@ class InventoryError(RuntimeError):
 
 
 REQUIRED_FILES = (
-    "backend/app/domains/chat/application/__init__.py",
-    "backend/app/domains/chat/application/both_retrieval.py",
-    "backend/app/domains/chat/application/canonical_retrieval.py",
-    "backend/app/domains/chat/application/graph_retrieval.py",
+    "backend/app/domains/chat/service/__init__.py",
+    "backend/app/domains/chat/service/both_retrieval.py",
+    "backend/app/domains/chat/service/canonical_retrieval.py",
+    "backend/app/domains/chat/service/graph_retrieval.py",
     "backend/app/domains/chat/contracts/__init__.py",
     "backend/app/domains/chat/contracts/call_tracker.py",
     "backend/app/domains/chat/contracts/workflow_recipe.py",
@@ -162,7 +162,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/domains/chat/application/both_retrieval.py",
+        "backend/app/domains/chat/service/both_retrieval.py",
         (
             "BothRetrievalWorkflowCoordinator",
             "asyncio.gather",
@@ -174,15 +174,15 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/domains/chat/application/canonical_retrieval.py",
+        "backend/app/domains/chat/service/canonical_retrieval.py",
         ("allow_both=coordinator_owned", "workflow_dependency"),
     )
     _require_text(
-        "backend/app/domains/chat/application/graph_retrieval.py",
+        "backend/app/domains/chat/service/graph_retrieval.py",
         ("allow_both=coordinator_owned", "workflow_dependency"),
     )
     _forbid_imports(
-        "backend/app/domains/chat/application/both_retrieval.py",
+        "backend/app/domains/chat/service/both_retrieval.py",
         (
             "app.integrations",
             "app.runtime",

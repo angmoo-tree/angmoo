@@ -69,10 +69,10 @@ REQUIRED_FILES = (
     "backend/app/domains/chat/contracts/call_tracker.py",
     "backend/app/domains/chat/contracts/generation_lifecycle.py",
     "backend/app/domains/chat/contracts/response_request.py",
-    "backend/app/domains/chat/application/answer_request.py",
-    "backend/app/domains/chat/application/generation_lifecycle.py",
-    "backend/app/domains/chat/ports/response_lifecycle.py",
-    "backend/app/domains/chat/infrastructure/response_lifecycle_repository.py",
+    "backend/app/domains/chat/service/answer_request.py",
+    "backend/app/compatibility/chat_generation_lifecycle.py",
+    "backend/app/domains/chat/contracts/response_lifecycle.py",
+    "backend/app/domains/chat/repository/response_lifecycle.py",
     "backend/app/domains/memory/domain/canonical_retrieval_plan.py",
     "backend/app/domains/relationships/domain/graph_retrieval_plan.py",
     "backend/app/alembic/versions/20260831_0086_chat_response_request_lifecycle.py",
@@ -118,7 +118,7 @@ def _require_text(relative: str, values: tuple[str, ...]) -> None:
 
 def _boundary_contract() -> dict[str, Any]:
     _require_text(
-        "backend/app/domains/chat/application/answer_request.py",
+        "backend/app/domains/chat/service/answer_request.py",
         (
             "AnswerRequestContractValidator",
             "BoundedFakeAnswerRequestExecutor",
@@ -128,7 +128,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/domains/chat/infrastructure/response_lifecycle_repository.py",
+        "backend/app/domains/chat/repository/response_lifecycle.py",
         (
             "lease_generation=ChatResponseRequest.lease_generation + 1",
             "last_emitted_sequence",

@@ -47,7 +47,7 @@ REQUIRED_FILES = (
     "backend/app/domains/relationships/domain/graph_retrieval_planner.py",
     "backend/app/domains/relationships/ports/graph_planner_provider.py",
     "backend/app/domains/relationships/application/graph_planning.py",
-    "backend/app/domains/chat/application/graph_retrieval.py",
+    "backend/app/domains/chat/service/graph_retrieval.py",
     "backend/app/domains/chat/contracts/call_tracker.py",
     "backend/app/integrations/llm/graph_retrieval_planner.py",
     "backend/tests/fixtures/p8_l/graph_planner_v1/held_out_ko.jsonl",
@@ -136,7 +136,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/domains/chat/application/graph_retrieval.py",
+        "backend/app/domains/chat/service/graph_retrieval.py",
         (
             "GraphRetrievalPlanningService",
             "restore_call_tracker_snapshot",
