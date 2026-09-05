@@ -2673,6 +2673,7 @@
         "backend/tests/test_l3_5_world_package_ui_contract.py",
         "backend/tests/test_l3_5_world_package_uow_registry.py",
         "backend/tests/test_l3_5_world_package_v1_contract.py",
+        "backend/tests/world_packages/test_seed_replay_race.py",
         "frontend/scripts/test-world-package-proxy.mjs"
       ],
       "test_nodes": [
@@ -2784,7 +2785,8 @@
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
       "backend_status": "MAPPED",
-      "frontend_status": "MAPPED"
+      "frontend_status": "MAPPED",
+      "seed_uow_replay_hotfix": "Exact world_slug_unavailable after concurrent completed import: rollback then a distinct Session reads same-owner/key registry and uses the existing package/version/digest replay resolver. No completed record or any other validation rethrows without retry. Deterministic race and negative scope coverage run in local-smoke."
     },
     {
       "id": "K11",
@@ -7226,13 +7228,10 @@
         "backend/tests/test_l3_er6_release_candidate.py",
         "backend/tests/test_l3_er7_runtime_composition.py",
         "backend/tests/test_l3_er7_windows_host_tauri_dev_contract.py",
-        "backend/tests/world_characters/test_owner_identity.py",
         "backend/tests/test_l3_owner_manual_social_inbox.py",
         "backend/tests/test_l4_5_ui_c_landmark_contract.py",
         "backend/tests/test_l4_pr_a_inventory.py",
         "backend/tests/test_l4_pr_f_closeout_contract.py",
-        "backend/tests/world_characters/test_lifecycle.py",
-        "backend/tests/world_characters/test_runtime_mode_repair.py",
         "backend/tests/test_l4_social_search_projection.py",
         "backend/tests/test_l4_social_write_uow.py",
         "backend/tests/test_langgraph_resident_engine.py",
@@ -7337,10 +7336,14 @@
         "backend/tests/test_tendency_note_action_selection.py",
         "backend/tests/test_visible_post_text_sanitizer.py",
         "backend/tests/test_windows_installer_supported_upgrade_verifier.py",
-        "backend/tests/world_characters/test_setup_service.py",
         "backend/tests/test_world_feed_search.py",
         "backend/tests/test_world_foundation.py",
+        "backend/tests/world_characters/test_lifecycle.py",
+        "backend/tests/world_characters/test_owner_identity.py",
+        "backend/tests/world_characters/test_runtime_mode_repair.py",
         "backend/tests/world_characters/test_setup_contracts.py",
+        "backend/tests/world_characters/test_setup_service.py",
+        "backend/tests/world_packages/test_seed_replay_race.py",
         "backend/tests/worlds/test_creator_routes.py",
         "backend/tests/worlds/test_definition_contract.py",
         "browser-tests/memory-batch-fixture.ts",
