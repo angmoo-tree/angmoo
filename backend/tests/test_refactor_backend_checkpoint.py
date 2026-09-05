@@ -390,3 +390,21 @@ def test_literal_path_anchor_rejects_local_rebinding_syntax(rebind):
               "    root = BASE / 'domains' / 'world_packages'\n"
               "    " + rebind + "\n")
     assert "root" not in p.literal_path_roots(source, "backend/tests/test_old.py").get("test_contract", {})
+
+
+def test_exact_windows_file_literal_uses_the_same_reviewed_move():
+    literals = p.path_literals({"backend/tests/test_old.py": "backend/tests/world_packages/test_new.py"})
+    before = "assert " + repr("tests\\test_old.py") + " in workflow"
+    after = "assert " + repr("tests\\world_packages\\test_new.py") + " in workflow"
+    assert p.normalized_assertion(before, literals) == p.normalized_assertion(after, literals)
+    for value in ("other\\tests\\test_old.py", "tests\\test_old.py.backup", " tests\\test_old.py "):
+        fragment = "assert " + repr(value) + " in workflow"
+        assert p.normalized_assertion(fragment, literals) == p.normalized_assertion(fragment, [])
+
+
+def test_file_move_to_initializer_uses_the_canonical_package_import():
+    literals = p.path_literals({
+        "backend/app/domains/world_packages/public.py": "backend/app/domains/world_packages/contracts/__init__.py",
+    })
+    assert p.normalized_assertion("assert 'app.domains.world_packages.public' in text", literals) == p.normalized_assertion("assert 'app.domains.world_packages.contracts' in text", literals)
+    assert p.normalized_assertion("assert 'from app.domains.world_packages.public import WorldPackagePolicy' in text", literals) == p.normalized_assertion("assert 'from app.domains.world_packages.contracts import WorldPackagePolicy' in text", literals)

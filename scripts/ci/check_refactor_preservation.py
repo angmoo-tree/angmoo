@@ -191,7 +191,13 @@ def path_literals(files: dict[str, str]) -> list[tuple[str, str]]:
         if old.startswith("backend/") and new.startswith("backend/"):
             pairs.append((old.removeprefix("backend/"), new.removeprefix("backend/")))
         if old.startswith("backend/app/") and new.startswith("backend/app/") and old.endswith(".py") and new.endswith(".py"):
-            pairs.append((old.removeprefix("backend/")[:-3].replace("/", "."), new.removeprefix("backend/")[:-3].replace("/", ".")))
+            old_module = old.removeprefix("backend/")[:-3].replace("/", ".")
+            new_module = new.removeprefix("backend/")[:-3].replace("/", ".").removesuffix(".__init__")
+            pairs.append((old_module, new_module))
+    # A Windows test literal uses the same exact file map. No basename or
+    # directory-prefix substitution is inferred from a separator conversion.
+    pairs.extend((old.replace("/", "\\"), new.replace("/", "\\"))
+                 for old, new in tuple(pairs) if "/" in old and "/" in new)
     return sorted(pairs, key=lambda pair: -len(pair[0]))
 
 
@@ -297,7 +303,9 @@ def _compiled_path_literals(literals: tuple[tuple[str, str], ...]):
     """Reuse patterns for this complete ordered map; never cache source facts."""
     compiled = []
     for old, new in literals:
-        compiled.append((re.compile(r"(?<![\w./])" + re.escape(old) + r"(?![\w])"), new))
+        expression = (r"\A" + re.escape(old) + r"\Z" if "\\" in old
+                      else r"(?<![\w./])" + re.escape(old) + r"(?![\w])")
+        compiled.append((re.compile(expression), new))
         if old.startswith("app.") and old.endswith(".__init__"):
             package = old.removesuffix(".__init__")
             target = new.removesuffix(".__init__")
