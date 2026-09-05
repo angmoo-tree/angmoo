@@ -3,6 +3,14 @@ title = "Angmoo public secret scanning"
 [extend]
 useDefault = true
 
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Exact public synthetic G2 cursor compatibility vector fixture, source b5dcdd80; never a runtime credential; reviewed 2026-09-05"
+condition = "AND"
+regexTarget = "line"
+paths = ['''(^|/)backend/tests/common/test_errors_pagination\.py$''']
+regexes = ['''^\s*monkeypatch\.setattr\(social, "settings", SimpleNamespace\(app_secret="g2-synthetic-cursor-secret"\)\)\s*$''']
+
 [[rules]]
 id = "angmoo-local-bot-token"
 description = "Angmoo Local Bot bearer token"
