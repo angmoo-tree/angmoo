@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 from app import models, schemas
 from app.domains.identity.dependencies import get_current_user
 from app.core.db import get_db
-from app.services import agent_creation_drafts as draft_service
-from app.services import agents as agent_service
+from app.runtime.characters import creator as draft_service
+from app.runtime.characters import management as agent_service
 from app.services import agent_runs as agent_run_service
 from app.services import community as community_service
 from app.services import maintenance as maintenance_service

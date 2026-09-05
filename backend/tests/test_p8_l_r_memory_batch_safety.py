@@ -501,7 +501,7 @@ def test_account_scrub_removes_private_memory_batches_not_other_owner(memory_ses
 def test_character_scrub_removes_its_batches_and_preserves_other_character(
     memory_session,
 ):
-    from app.services.agents import _scrub_agent_data
+    from app.runtime.characters.management import _scrub_agent_data
     from app.domains.memory.infrastructure.batch_models import MemoryBatchProfile
     from app.domains.memory.domain.scope import MemoryScope
 

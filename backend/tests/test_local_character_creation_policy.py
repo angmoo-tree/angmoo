@@ -7,8 +7,8 @@ from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import Session
 
 from app import models, schemas
-from app.services import agent_creation_drafts as draft_service
-from app.services import agents as agent_service
+from app.runtime.characters import creator as draft_service
+from app.runtime.characters import management as agent_service
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -175,8 +175,8 @@ def test_public_runtime_source_has_no_hosted_saved_count_quota_contract() -> Non
     sources = {
         relative: (REPO_ROOT / relative).read_text(encoding="utf-8")
         for relative in (
-            "backend/app/services/agents.py",
-            "backend/app/services/agent_creation_drafts.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/characters/creator.py",
             "backend/app/api/v1/routes/agents.py",
             "backend/app/cruds/community.py",
         )
@@ -198,8 +198,8 @@ def test_public_runtime_source_has_no_hosted_saved_count_quota_contract() -> Non
         assert forbidden not in combined
 
     assert "AgentAutonomyCapacityError" in sources[
-        "backend/app/services/agents.py"
+        "backend/app/runtime/characters/management.py"
     ]
     assert "settings.server_llm_autonomy_max_active_agents" in sources[
-        "backend/app/services/agents.py"
+        "backend/app/runtime/characters/management.py"
     ]

@@ -97,6 +97,12 @@
       "removal_condition": null
     },
     {
+      "disposition": "keep",
+      "module": "app.core.response_schemas",
+      "owner_stage": "AR-B2-B",
+      "removal_condition": null
+    },
+    {
       "disposition": "migrate",
       "module": "app.core.search_text",
       "owner_stage": "L4",

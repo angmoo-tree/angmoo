@@ -3,6 +3,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Protocol
+
+
+class CharacterOwner(Protocol):
+    """The owner identifier required by Character creation in the caller session."""
+
+    id: str
 
 
 @dataclass(frozen=True, slots=True)

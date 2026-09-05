@@ -1,5 +1,47 @@
 from __future__ import annotations
 
+from app.domains.characters.service.creator import (
+    DRAFT_TTL,
+    DRAFT_COOLDOWN,
+    PROFILE_IMAGE_CANDIDATE_TTL,
+    _draft_read,
+    _build_persona_enhance_prompt,
+    _parse_json_object,
+    _safe_payload_text,
+    _clean_text,
+    _ensure_not_in_cooldown,
+    _ensure_draft_persona_prompt_safety,
+    _ensure_draft_prompt_safety,
+)
+
+from app.domains.characters.service.image_quota import (
+    PROFILE_IMAGE_DAILY_LIMIT,
+    PROFILE_IMAGE_USED_STATUSES,
+    _profile_image_usage_read,
+    _profile_image_usage_status,
+    _reserve_profile_image_quota,
+    _finalize_profile_image_quota,
+    _profile_image_bucket,
+    _profile_image_quota_date,
+    _profile_image_reset_at,
+    _lock_profile_image_quota,
+)
+
+from app.domains.characters.exceptions import (
+    AgentCreationDraftError,
+    AgentCreationDraftNotFoundError,
+    AgentCreationDraftExpiredError,
+    AgentCreationDraftCooldownError,
+    AgentCreationDraftValidationError,
+    AgentCreationDraftHandleConflictError,
+    AgentCreationDraftMediaError,
+    AgentProfileImageQuotaExceededError,
+    AgentProfileImageCandidateNotFoundError,
+    AgentProfileImageCandidateExpiredError,
+    AgentPrivateMediaNotFoundError,
+    AgentCreationDraftParseError,
+)
+
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 import json
@@ -16,15 +58,16 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app import models, schemas
+from app.domains.characters import models as character_models
+from app.domains.characters.service import profile as character_profile
 from app.core import security
 from app.config import settings
 from app.core.redaction import redact_exact_secret_text
 from app.credentials import CredentialResolutionError, CredentialResolver
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
-from app.cruds import community as community_crud
 from app.policies import name_policy
-from app.services import agents as agent_service
+from app.runtime.characters import management as agent_service
 from app.services import agent_activity_policy
 from app.services import agent_runs as agent_run_service
 from app.domains.identity.service import demo_access as demo_lock
@@ -32,7 +75,7 @@ from app.services.direct_llm import DirectLlmCallContext, RunLlmTracker, generat
 from app.services import operation_settings
 from app.services import image_provider
 from app.services import pollinations_image
-from app.services import prompt_safety
+from app.core import prompt_safety
 from app.services import profile_media
 from app.integrations import bounded_http
 from app.services import provider_http
@@ -46,11 +89,6 @@ from app.services.runtime_boundary import (
 
 
 logger = logging.getLogger(__name__)
-DRAFT_TTL = timedelta(hours=1)
-DRAFT_COOLDOWN = timedelta(seconds=60)
-PROFILE_IMAGE_CANDIDATE_TTL = timedelta(hours=1)
-PROFILE_IMAGE_DAILY_LIMIT = 1
-PROFILE_IMAGE_USED_STATUSES = ("reserved", "generated", "applied")
 POLLINATIONS_MAX_SEED = 2_147_483_647
 POLLINATIONS_MODELS_URL = "https://gen.pollinations.ai/image/models"
 POLLINATIONS_IMAGE_URL = "https://gen.pollinations.ai/image"
@@ -75,58 +113,6 @@ TRANSLATION_CACHE_MAX = 256
 _POLLINATIONS_MODEL_CHECKED_AT: dict[str, datetime] = {}
 _TRANSLATION_CACHE: dict[str, str] = {}
 _TRANSLATION_USAGE_LOCK = Lock()
-
-
-class AgentCreationDraftError(Exception):
-    pass
-
-
-class AgentCreationDraftNotFoundError(AgentCreationDraftError):
-    pass
-
-
-class AgentCreationDraftExpiredError(AgentCreationDraftNotFoundError):
-    pass
-
-
-class AgentCreationDraftCooldownError(AgentCreationDraftError):
-    def __init__(self, available_at: datetime) -> None:
-        super().__init__("Please wait before trying again")
-        self.available_at = available_at
-
-
-class AgentCreationDraftValidationError(AgentCreationDraftError):
-    pass
-
-
-class AgentCreationDraftHandleConflictError(AgentCreationDraftValidationError):
-    pass
-
-
-class AgentCreationDraftMediaError(AgentCreationDraftError):
-    pass
-
-
-class AgentProfileImageQuotaExceededError(AgentCreationDraftMediaError):
-    def __init__(self, usage_status: schemas.AgentProfileImageUsageStatusRead) -> None:
-        super().__init__("profile_image_daily_limit_exceeded")
-        self.usage_status = usage_status
-
-
-class AgentProfileImageCandidateNotFoundError(AgentCreationDraftError):
-    pass
-
-
-class AgentProfileImageCandidateExpiredError(AgentProfileImageCandidateNotFoundError):
-    pass
-
-
-class AgentPrivateMediaNotFoundError(AgentCreationDraftError):
-    pass
-
-
-class AgentCreationDraftParseError(AgentCreationDraftError):
-    pass
 
 
 @dataclass
@@ -156,7 +142,7 @@ async def create_draft(
             'Return only {"ok": true}. Do not call tools.'
         ),
     )
-    draft = models.AgentCreationDraft(
+    draft = character_models.AgentCreationDraft(
         id=draft_id,
         user_id=user.id,
         provider=data.provider,
@@ -249,7 +235,7 @@ def get_profile_candidate_content(
     character_id: str,
     candidate_id: str,
 ):
-    character = community_crud.get_character(db, character_id)
+    character = character_profile.get_character(db, character_id)
     if (
         character is None
         or character.owner_id != user.id
@@ -288,12 +274,12 @@ def update_draft(
             if name_policy.is_blocked_name(str(value)):
                 raise AgentCreationDraftValidationError("사용할 수 없는 핸들입니다.")
             try:
-                draft.handle = community_crud.validate_character_handle_for_create(
+                draft.handle = character_profile.validate_character_handle_for_create(
                     db, str(value)
                 )
-            except community_crud.CharacterHandleConflictError as exc:
+            except character_profile.CharacterHandleConflictError as exc:
                 raise AgentCreationDraftHandleConflictError(str(exc)) from exc
-            except community_crud.InvalidCharacterHandleError as exc:
+            except character_profile.InvalidCharacterHandleError as exc:
                 raise AgentCreationDraftValidationError(str(exc)) from exc
         elif value is None and field in {"avatar_temp_url", "banner_temp_url"}:
             setattr(draft, field, None)
@@ -491,7 +477,7 @@ async def generate_profile_media(
     character_id: str,
     data: schemas.AgentProfileMediaGenerateCreate,
 ) -> schemas.AgentProfileMediaGenerationRead:
-    character = community_crud.get_character(db, character_id)
+    character = character_profile.get_character(db, character_id)
     if (
         character is None
         or character.owner_id != user.id
@@ -591,7 +577,7 @@ def get_draft_profile_image_usage(
 def get_agent_profile_image_usage(
     db: Session, user: models.User, character_id: str
 ) -> schemas.AgentProfileImageUsageRead:
-    character = community_crud.get_character(db, character_id)
+    character = character_profile.get_character(db, character_id)
     if (
         character is None
         or character.owner_id != user.id
@@ -648,7 +634,7 @@ def apply_profile_media_candidate(
     character_id: str,
     candidate_id: str,
 ) -> schemas.AgentDetailRead:
-    character = community_crud.get_character(db, character_id)
+    character = character_profile.get_character(db, character_id)
     if (
         character is None
         or character.owner_id != user.id
@@ -723,7 +709,7 @@ def discard_profile_media_candidate(
     character_id: str,
     candidate_id: str,
 ) -> None:
-    character = community_crud.get_character(db, character_id)
+    character = character_profile.get_character(db, character_id)
     if (
         character is None
         or character.owner_id != user.id
@@ -789,7 +775,7 @@ def complete_draft(
         promotion_usage_allowed=data.promotion_usage_allowed,
     )
     detail = agent_service.create_agent(db, user, create_data)
-    character = db.get(models.Character, detail.character.id)
+    character = db.get(character_models.Character, detail.character.id)
     if character is not None:
         if draft.avatar_temp_url:
             character.avatar_url = profile_media.promote_draft_profile_media(
@@ -811,28 +797,11 @@ def complete_draft(
     return agent_service.get_agent(db, user, detail.character.id)
 
 
-def _ensure_draft_persona_prompt_safety(values: dict[str, str]) -> None:
-    for field, value in values.items():
-        if field in agent_service.PERSONA_PROMPT_SAFETY_FIELDS:
-            _ensure_draft_prompt_safety(value, field_name=field)
-
-
-def _ensure_draft_prompt_safety(value: str, *, field_name: str) -> None:
-    try:
-        prompt_safety.ensure_no_prompt_injection_text(
-            value,
-            field_name=field_name,
-            field_kind="persona",
-        )
-    except prompt_safety.PromptSafetyError as exc:
-        raise AgentCreationDraftValidationError("prompt_injection_detected") from exc
-
-
 def _get_owned_draft(
     db: Session, user: models.User, draft_id: str
-) -> models.AgentCreationDraft:
+) -> character_models.AgentCreationDraft:
     _cleanup_expired_drafts(db)
-    draft = db.get(models.AgentCreationDraft, draft_id)
+    draft = db.get(character_models.AgentCreationDraft, draft_id)
     if draft is None or draft.user_id != user.id:
         raise AgentCreationDraftNotFoundError(draft_id)
     expires_at = draft.expires_at
@@ -847,30 +816,12 @@ def _get_owned_draft(
     return draft
 
 
-def _draft_read(draft: models.AgentCreationDraft) -> schemas.AgentCreationDraftRead:
-    result = schemas.AgentCreationDraftRead.model_validate(draft)
-    return result.model_copy(
-        update={
-            "avatar_temp_url": (
-                f"/api/v1/agents/drafts/{draft.id}/media/avatar"
-                if draft.avatar_temp_url
-                else None
-            ),
-            "banner_temp_url": (
-                f"/api/v1/agents/drafts/{draft.id}/media/banner"
-                if draft.banner_temp_url
-                else None
-            ),
-        }
-    )
-
-
 def _cleanup_expired_drafts(db: Session) -> None:
     now = datetime.now(UTC)
     expired = list(
         db.scalars(
-            select(models.AgentCreationDraft)
-            .where(models.AgentCreationDraft.expires_at <= now)
+            select(character_models.AgentCreationDraft)
+            .where(character_models.AgentCreationDraft.expires_at <= now)
             .limit(20)
         )
     )
@@ -891,12 +842,12 @@ def _cleanup_expired_drafts(db: Session) -> None:
 
 
 def _delete_profile_image_candidates_for_draft(
-    db: Session, draft: models.AgentCreationDraft
+    db: Session, draft: character_models.AgentCreationDraft
 ) -> None:
     candidates = list(
         db.scalars(
-            select(models.ProfileImageCandidate).where(
-                models.ProfileImageCandidate.draft_id == draft.id
+            select(character_models.ProfileImageCandidate).where(
+                character_models.ProfileImageCandidate.draft_id == draft.id
             )
         )
     )
@@ -1047,78 +998,13 @@ def _extract_gateway_result_text(gateway_result: dict[str, Any]) -> str:
     raise AgentCreationDraftParseError("LLM 응답을 읽지 못했습니다.")
 
 
-def _build_persona_enhance_prompt(draft: models.AgentCreationDraft) -> str:
-    return f"""
-You refine an Angmoo character persona from rough Korean notes.
-Return only JSON with these exact keys:
-personality, speech_style, worldview, topic_preferences, safety_rules.
-Every value must be a Korean string, not an array or object.
-
-Rules:
-- Write Korean.
-- Keep the user's intent and do not overwrite the character.
-- If a field is short, make it concrete enough for an autonomous social character.
-- Fill topic_preferences and safety_rules even if the current draft leaves them empty.
-- Do not add sexual content, illegal instructions, private data, or real-person claims.
-- Each value must be concise and directly usable in the Angmoo character form.
-
-Current draft:
-- name: {draft.name}
-- one_liner: {draft.one_liner}
-- personality: {draft.personality}
-- speech_style: {draft.speech_style}
-- worldview: {draft.worldview}
-- topic_preferences: {draft.topic_preferences}
-- safety_rules: {draft.safety_rules}
-""".strip()
-
-
-def _parse_json_object(text: str) -> dict[str, Any]:
-    raw = text.strip()
-    if raw.startswith("```"):
-        raw = re.sub(r"^```(?:json)?\s*", "", raw)
-        raw = re.sub(r"\s*```$", "", raw)
-    match = re.search(r"\{.*\}", raw, re.DOTALL)
-    if match:
-        raw = match.group(0)
-    try:
-        payload = json.loads(raw)
-    except json.JSONDecodeError as exc:
-        raise AgentCreationDraftParseError("페르소나 보강 결과를 읽지 못했습니다.") from exc
-    if not isinstance(payload, dict):
-        raise AgentCreationDraftParseError("페르소나 보강 결과 형식이 올바르지 않습니다.")
-    return payload
-
-
-def _safe_payload_text(value: Any, max_length: int) -> str:
-    if not isinstance(value, str):
-        if isinstance(value, list):
-            value = "\n".join(
-                str(item).strip()
-                for item in value
-                if isinstance(item, (str, int, float)) and str(item).strip()
-            )
-        else:
-            return ""
-    return value.strip()[:max_length]
-
-
-def _clean_text(value: Any) -> Any:
-    return value.strip() if isinstance(value, str) else value
-
-
-def _decrypt_draft_api_key(draft: models.AgentCreationDraft) -> str:
+def _decrypt_draft_api_key(draft: character_models.AgentCreationDraft) -> str:
     try:
         return CredentialResolver.resolve_draft_credential(draft).reveal()
     except CredentialResolutionError as exc:
         raise agent_service.CredentialRequiredError(
             "Agent draft credential key cannot be decrypted"
         ) from exc
-
-
-def _ensure_not_in_cooldown(available_at: datetime | None) -> None:
-    if available_at is not None and available_at > datetime.now(UTC):
-        raise AgentCreationDraftCooldownError(available_at)
 
 
 async def _generate_profile_image_candidate(
@@ -1133,7 +1019,7 @@ async def _generate_profile_image_candidate(
     route_mode: str,
     draft_id: str | None,
     character_id: str | None,
-) -> tuple[models.ProfileImageCandidate, schemas.AgentProfileImageUsageStatusRead]:
+) -> tuple[character_models.ProfileImageCandidate, schemas.AgentProfileImageUsageStatusRead]:
     api_key = (
         service_image_key.get_replicate_image_api_key()
         if image_provider.is_replicate_model(model)
@@ -1178,7 +1064,7 @@ async def _generate_profile_image_candidate(
             content_type=generated.content_type,
             content=generated.content,
         )
-        candidate = models.ProfileImageCandidate(
+        candidate = character_models.ProfileImageCandidate(
             id=candidate_id,
             user_id=user.id,
             draft_id=draft_id,
@@ -1237,126 +1123,6 @@ async def _generate_profile_image_candidate(
         raise AgentCreationDraftMediaError("candidate_storage_failed") from exc
 
 
-def _profile_image_usage_read(
-    db: Session, *, user: models.User, scope: str
-) -> schemas.AgentProfileImageUsageRead:
-    media_types = ("avatar", "banner")
-    return schemas.AgentProfileImageUsageRead(
-        items=[
-            _profile_image_usage_status(
-                db,
-                user=user,
-                scope=scope,
-                media_type=media_type,
-            )
-            for media_type in media_types
-        ]
-    )
-
-
-def _profile_image_usage_status(
-    db: Session,
-    *,
-    user: models.User,
-    scope: str,
-    media_type: str,
-    at: datetime | None = None,
-) -> schemas.AgentProfileImageUsageStatusRead:
-    current = at or datetime.now(UTC)
-    quota_date = _profile_image_quota_date(current)
-    bucket = _profile_image_bucket(scope, media_type)
-    used = int(
-        db.scalar(
-            select(func.count(models.ProfileImageQuotaReservation.id)).where(
-                models.ProfileImageQuotaReservation.user_id == user.id,
-                models.ProfileImageQuotaReservation.quota_date == quota_date,
-                models.ProfileImageQuotaReservation.bucket == bucket,
-                models.ProfileImageQuotaReservation.status.in_(
-                    PROFILE_IMAGE_USED_STATUSES
-                ),
-            )
-        )
-        or 0
-    )
-    remaining = max(0, PROFILE_IMAGE_DAILY_LIMIT - used)
-    reset_at = _profile_image_reset_at(current)
-    return schemas.AgentProfileImageUsageStatusRead(
-        bucket=bucket,  # type: ignore[arg-type]
-        scope=scope,  # type: ignore[arg-type]
-        media_type=media_type,  # type: ignore[arg-type]
-        used_today=used,
-        remaining=remaining,
-        limit=PROFILE_IMAGE_DAILY_LIMIT,
-        reset_at=reset_at,
-        next_available_at=reset_at if remaining <= 0 else None,
-    )
-
-
-def _reserve_profile_image_quota(
-    db: Session,
-    *,
-    user: models.User,
-    scope: str,
-    media_type: str,
-    model: str,
-    route_mode: str,
-) -> models.ProfileImageQuotaReservation:
-    now = datetime.now(UTC)
-    status = _profile_image_usage_status(
-        db,
-        user=user,
-        scope=scope,
-        media_type=media_type,
-        at=now,
-    )
-    if status.remaining <= 0:
-        raise AgentProfileImageQuotaExceededError(status)
-    quota_date = _profile_image_quota_date(now)
-    _lock_profile_image_quota(db, user_id=user.id, quota_date=quota_date, bucket=status.bucket)
-    status = _profile_image_usage_status(
-        db,
-        user=user,
-        scope=scope,
-        media_type=media_type,
-        at=now,
-    )
-    if status.remaining <= 0:
-        raise AgentProfileImageQuotaExceededError(status)
-    reservation = models.ProfileImageQuotaReservation(
-        user_id=user.id,
-        quota_date=quota_date,
-        bucket=status.bucket,
-        scope=scope,
-        media_type=media_type,
-        status="reserved",
-        model=model,
-        route_mode=route_mode,
-    )
-    db.add(reservation)
-    db.commit()
-    db.refresh(reservation)
-    return reservation
-
-
-def _finalize_profile_image_quota(
-    db: Session,
-    *,
-    reservation_id: int | None,
-    status: str,
-    candidate_id: str | None,
-) -> None:
-    if reservation_id is None:
-        return
-    reservation = db.get(models.ProfileImageQuotaReservation, reservation_id)
-    if reservation is None:
-        return
-    reservation.status = status
-    if candidate_id is not None:
-        reservation.candidate_id = candidate_id
-    reservation.finalized_at = datetime.now(UTC)
-    db.flush()
-
-
 def _get_owned_profile_image_candidate(
     db: Session,
     *,
@@ -1365,8 +1131,8 @@ def _get_owned_profile_image_candidate(
     scope: str,
     draft_id: str | None,
     character_id: str | None,
-) -> models.ProfileImageCandidate:
-    candidate = db.get(models.ProfileImageCandidate, candidate_id)
+) -> character_models.ProfileImageCandidate:
+    candidate = db.get(character_models.ProfileImageCandidate, candidate_id)
     if (
         candidate is None
         or candidate.user_id != user.id
@@ -1389,48 +1155,13 @@ def _get_owned_profile_image_candidate(
     return candidate
 
 
-def _profile_image_bucket(scope: str, media_type: str) -> str:
-    if scope not in {"create", "profile"}:
-        raise AgentCreationDraftMediaError("invalid_profile_image_scope")
-    if media_type not in {"avatar", "banner"}:
-        raise AgentCreationDraftMediaError("invalid_profile_image_media_type")
-    return f"{scope}_{media_type}"
-
-
-def _profile_image_quota_date(at: datetime) -> date:
-    local_at = (
-        at.astimezone(agent_activity_policy.APP_TIMEZONE)
-        if at.tzinfo
-        else at.replace(tzinfo=UTC).astimezone(agent_activity_policy.APP_TIMEZONE)
-    )
-    return local_at.date()
-
-
-def _profile_image_reset_at(at: datetime) -> datetime:
-    local_at = (
-        at.astimezone(agent_activity_policy.APP_TIMEZONE)
-        if at.tzinfo
-        else at.replace(tzinfo=UTC).astimezone(agent_activity_policy.APP_TIMEZONE)
-    )
-    return local_at.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
-
-
-def _lock_profile_image_quota(
-    db: Session, *, user_id: str, quota_date: date, bucket: str
-) -> None:
-    if db.bind is None or db.bind.dialect.name != "postgresql":
-        return
-    lock_key = f"profile_image_quota:{user_id}:{quota_date.isoformat()}:{bucket}"
-    db.execute(select(func.pg_advisory_xact_lock(func.hashtext(lock_key))))
-
-
 def _cleanup_expired_profile_image_candidates(db: Session, user_id: str) -> None:
     now = datetime.now(UTC)
     candidates = list(
         db.scalars(
-            select(models.ProfileImageCandidate)
-            .where(models.ProfileImageCandidate.user_id == user_id)
-            .where(models.ProfileImageCandidate.expires_at < now)
+            select(character_models.ProfileImageCandidate)
+            .where(character_models.ProfileImageCandidate.user_id == user_id)
+            .where(character_models.ProfileImageCandidate.expires_at < now)
             .limit(50)
         )
     )
