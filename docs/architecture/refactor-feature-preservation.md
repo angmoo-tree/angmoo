@@ -82,6 +82,8 @@
 
 공통 기반의 최종 이전은 AR-G다. AR-B1은 기존 Base/DB를 사용하며 G02/G05 완료를 주장하지 않는다. `runtime`, `integrations`, `providers`, `credentials`도 역할과 소비자가 있으므로 유지한다.
 
+AR-G2는 공통 오류 4개와 cursor byte encoding을 실제 전역 파일에 추출했다. SQLite retry·queue, request-body middleware, Device Home/Social의 payload·암호화·query는 기존 파일에 남으며, 전체 원본 파일을 이동한 것으로 처리하지 않는다. `refactor_path_map.json`의 `details.AR-G2`는 남은 심볼과 추출 심볼의 실제 소비자·행위 테스트를 모두 기록한다. 기존 request-body 테스트는 `backend/tests/common/test_request_body_limits.py`로 이동했고 승인 node map에 연결했다. 새 회귀와 구현의 commit별 증거는 [백엔드 전환 결과](refactor-backend-results.md)에 기록한다.
+
 ## 실행 경로와 테스트 소유권
 
 | 경로 | 확인할 책임 |

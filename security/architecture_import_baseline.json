@@ -1,7 +1,7 @@
 {
-  "edge_count": 1837,
-  "external_import_count": 2288,
-  "module_count": 680,
+  "edge_count": 1844,
+  "external_import_count": 2287,
+  "module_count": 682,
   "modules": [
     {
       "external_imports": [],
@@ -1657,7 +1657,9 @@
         "starlette.types",
         "typing"
       ],
-      "imports": [],
+      "imports": [
+        "app.exceptions"
+      ],
       "module": "app.core.request_limits",
       "path": "backend/app/core/request_limits.py",
       "wildcard_imports": []
@@ -1714,7 +1716,9 @@
         "time",
         "typing"
       ],
-      "imports": [],
+      "imports": [
+        "app.exceptions"
+      ],
       "module": "app.core.sqlite_concurrency",
       "path": "backend/app/core/sqlite_concurrency.py",
       "wildcard_imports": []
@@ -2656,7 +2660,6 @@
     {
       "external_imports": [
         "__future__",
-        "base64",
         "binascii",
         "datetime",
         "json",
@@ -2667,7 +2670,8 @@
       "imports": [
         "app.domains.device_home.contracts",
         "app.domains.device_home.exceptions",
-        "app.domains.device_home.policies"
+        "app.domains.device_home.policies",
+        "app.pagination"
       ],
       "module": "app.domains.device_home.repository",
       "path": "backend/app/domains/device_home/repository.py",
@@ -6392,6 +6396,13 @@
     {
       "external_imports": [],
       "imports": [],
+      "module": "app.exceptions",
+      "path": "backend/app/exceptions.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
       "module": "app.integrations",
       "path": "backend/app/integrations/__init__.py",
       "wildcard_imports": []
@@ -6870,6 +6881,15 @@
       ],
       "module": "app.models.worlds",
       "path": "backend/app/models/worlds.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "base64"
+      ],
+      "imports": [],
+      "module": "app.pagination",
+      "path": "backend/app/pagination.py",
       "wildcard_imports": []
     },
     {
@@ -8007,6 +8027,7 @@
       "external_imports": [],
       "imports": [
         "app.core.sqlite_concurrency",
+        "app.exceptions",
         "app.runtime.persistence.runtime_data_path",
         "app.runtime.persistence.sqlalchemy_unit_of_work",
         "app.runtime.persistence.sqlite_database",
@@ -8338,7 +8359,6 @@
     {
       "external_imports": [
         "__future__",
-        "base64",
         "binascii",
         "collections",
         "cryptography.exceptions",
@@ -8356,6 +8376,7 @@
         "app.core.config",
         "app.domains.social.public",
         "app.domains.world_characters.public",
+        "app.pagination",
         "app.runtime.social.sqlalchemy_read_repository"
       ],
       "module": "app.runtime.social.sqlalchemy_profile_repository",
@@ -8420,6 +8441,7 @@
         "app.domains.social.domain.writes",
         "app.domains.social.infrastructure.sqlalchemy_models",
         "app.domains.world_characters.public",
+        "app.exceptions",
         "app.models",
         "app.schemas.community",
         "app.services.community"
@@ -8900,6 +8922,7 @@
         "app.cruds.agents",
         "app.cruds.community",
         "app.domains.world_characters.public",
+        "app.exceptions",
         "app.models",
         "app.policies.name_policy",
         "app.runtime.memory_privacy",

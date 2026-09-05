@@ -43,10 +43,10 @@ from app.domains.world_characters.public import (
     SqlAlchemyOwnerControlledIdentityRepository,
 )
 from app.core.sqlite_concurrency import (
-    SqliteBusyRetryExhausted,
     SqliteRetryPolicy,
     run_sqlite_session_immediate,
 )
+from app.exceptions import SqliteBusyRetryExhausted
 from app.schemas.community import PostCreate, TimelineReplyCreate
 from app.services import community as community_service
 

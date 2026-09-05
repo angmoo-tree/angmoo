@@ -6,6 +6,8 @@ Angmoo 백엔드는 **업무별 도메인 안에 HTTP 처리, 업무 흐름, 데
 
 > **적용 상태 — 2026-09-05:** AR-0 기준선과 AR-1 검사 지원은 PR #259에서 병합됐습니다. `device_home` 첫 backend 파일럿은 PR #260, merge commit `a55c521b9adad624ae1342b2a7b270abc2237f79`로 병합됐고 역할별 파일과 새 경계 검사를 사용합니다. §8.2는 #263 기준의 AR-G0 후속 보존·부분 전환 검사 지원부터 진행 중입니다. 다른 도메인과 전역 기반은 아직 기존 경로와 규칙을 사용합니다. 실제 범위와 검증은 [보존 지도](../docs/architecture/refactor-feature-preservation.md)와 [백엔드 전환 결과](../docs/architecture/refactor-backend-results.md)에 기록합니다.
 
+> **AR-G2 적용 범위:** 공통 오류 4개는 `app/exceptions.py`, Device Home·Social profile이 함께 사용하는 cursor bytes 변환은 `app/pagination.py`가 소유합니다. 기존 core 모듈은 동시성·middleware 구현과 동일 오류 객체의 export를 유지합니다. 다른 업무 오류·cursor payload·query·실행 계약은 기존 소유 모듈에서 계속 관리합니다. 병합 및 통합 검증 상태는 위 실행 결과 문서에서 구분합니다.
+
 ## 목차
 
 1. [프로젝트 구조](#1-프로젝트-구조)
@@ -250,6 +252,10 @@ class TextInput(BaseModel):
 ORM과 응답 schema는 같은 객체가 아닙니다. ORM의 내부 필드·암호문·credential이 응답으로 나가지 않도록 기존 응답 계약을 유지합니다. Pydantic 응답 모델과 FastAPI `response_model`을 함께 쓰는 것은 유효한 방식입니다. 새 코드의 모델 직렬화는 Pydantic v2 API를 기준으로 하되, 공통 serializer를 도입하며 기존 필드·시간 형식·nullable 의미를 일괄 변경하지 않습니다. [FastAPI 응답 모델](https://fastapi.tiangolo.com/tutorial/response-model/)
 
 업무 오류는 안정된 code와 의미를 가지고, HTTP 상태·응답 body로 바꾸는 처리는 router 또는 공통 HTTP 경계가 맡습니다. Provider 원문·stack trace·비밀을 그대로 사용자에게 전달하지 않습니다. `pagination.py`는 공유 가능한 cursor·limit 도구를 제공하며, API마다 다른 정렬·scope·기본값은 소유 도메인에서 보존합니다.
+
+현재 [`app/exceptions.py`](app/exceptions.py)는 SQLite 동시성 오류 3개와 요청 body 크기 초과 오류를 정의합니다. DB retry·queue와 ASGI middleware는 오류를 발생시키고 처리하는 실행 코드입니다. 이 코드를 오류 선언 파일에 합치지 않습니다. 같은 SQLite busy라도 Social은 HTTP 503, 자율활동 설정은 기존 업무 오류를 거쳐 HTTP 409를 반환하므로 공통 class의 존재가 동일 HTTP 응답을 뜻하지 않습니다.
+
+[`app/pagination.py`](app/pagination.py)의 `encode_cursor_bytes`·`decode_cursor_bytes`는 bytes와 URL-safe Base64 문자열만 변환합니다. Device Home은 JSON cursor를, Social profile은 AESGCM으로 인증·암호화한 cursor를 이 도구에 전달합니다. 암호화 key·version·World/캐릭터/tab scope·timestamp·정렬·limit·업무별 오류는 각 소유 모듈에 남습니다. 따라서 같은 보조 함수를 쓴다는 이유로 두 cursor 형식을 서로 바꿔 사용할 수 없습니다.
 
 ### `async def`는 호출하는 도구에 맞춥니다
 
