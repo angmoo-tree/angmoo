@@ -270,3 +270,7 @@ Character 소유 `AgentCreationDraft`, `ProfileImageCandidate`, `ProfileImageQuo
 
 
 최종 source 준비 상태의 보존 검사는 **#258 1,867 / #263 1,907 / 보호 계보 2,030 / 현재 2,059 nodes**였다. API·OpenAPI·ORM 계약, 기존 assertion·skip 상태, split symbol·대응표의 오류는 0개였고, 선행 고정 source의 아직 합류하지 않은 introduction metadata만 source 17개·test 23개로 보고됐다. 승인 public **604 / current 2,059 / new 1,485 PASS**이며 승인 목록과 고정 checkpoint는 바꾸지 않았다. 최종 경계 검사와 diff whitespace 검사도 통과했다. root의 G1/G2 통합에서는 두 새 runtime 파일의 `core.config`·SQLite error import를 이미 확정된 `app.config`·`app.exceptions` 경로와 맞춘 뒤 검증한다.
+
+### Characters 선행 기반 통합 전체 검증
+
+고정 후보 `6f18f63`에서 전체 backend suite는 **2,077 passed / 기존 22 skipped / 26 warnings, 492.55초**였다. 실행 중 source·test·metadata는 수정하지 않았다. 별도 보존 검사는 G2의 SQLite 공통 오류 소비자 하나가 삭제된 `services/agents.py`를 가리킨다고 거부했다. 동일 오류를 실제로 import·catch하는 `runtime/characters/management.py`로 그 소비자 기록만 전환하고 재검증한다. 선행 Identity CI에서 발견된 deferred inventory 중복과 G4의 역사 migration 개발 의존성은 해당 소유 PR에서 수정한 뒤 통합한다. 전체 테스트 통과를 PR·설치·머지 완료로 표시하지 않는다.

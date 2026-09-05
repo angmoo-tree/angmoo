@@ -7717,7 +7717,7 @@
             "backend/app/core/sqlite_concurrency.py",
             "backend/app/runtime/persistence/__init__.py",
             "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
-            "backend/app/services/agents.py",
+            "backend/app/runtime/characters/management.py",
             "backend/tests/test_l3_er2_sqlite_concurrency.py"
           ],
           "test_nodes": [
