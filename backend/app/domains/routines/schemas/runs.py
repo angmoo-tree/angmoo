@@ -1,4 +1,4 @@
-from app.domains.routines.schemas import (
+from app.domains.routines.schemas.resident import (
     AgentActivityLogRead,
     AgentSlotRead,
 )

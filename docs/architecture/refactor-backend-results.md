@@ -905,3 +905,12 @@ ActivityPolicy 값과 agent-run 실행은 아직 후속 C3+ 소유 전환 대상
 C2 최종 후보는 **196 passed / 기존 PG 1 skip / 기존 warnings 3 / 125.17초**다. 실제 클래스/함수/상수 **30개 AST가 원문과 동일**하며 경계는 **692 modules / 2,309 edges / exact legacy 227 / cycle 0**으로 통과했다. L4·ER0·Memory batch 현재 inventory도 통과했다. 기존 mixed Context의 models/ActivityPolicy 및 scheduler의 schemas/AgentRun 네 import는 원래 body와 함께 실제 runtime caller로 옮긴 정확한 임시 edge이며, 새로운 대상/범위/실행 동작은 없다. C3+/G5의 실제 소유 전환 때 각 edge를 제거한다.
 
 읽기 전용 보존 진단에서 source/assertion/suppression/API·ORM/node는 각각 오류 0이었다(보호 2,139, 현재 2,233). 같은 진단의 split 검사는 current map 갱신 과정에서 AR-B1/AR-F1의 옛 파일럿 형식 7개를 잘못 다시 계산한 것을 잡았다. 두 detail을 직전 source의 원문으로 복원하고 새 split_symbols 형식만 갱신하도록 수정했다. 복원 후 원래 split 검사도 **오류 0**이다. 이 정정은 현재 경로 지도만 다루며 frozen baseline/checkpoint/additions는 변경하지 않는다. 부모의 선형 도입 append 후 stock 전체 보존 검사를 통과해야 한다.
+
+
+## AR-B4-C3a — Run 응답·정책 값·세션 규칙 실제 소유
+
+기존 agent_runs schema의 다섯 실제 DTO를 `routines/schemas/runs.py`로 이전하고 global aggregate 및 직접 소비자들을 같은 class로 연결했다. ActivityPolicy의 immutable 결과/should_skip_llm/prompt/result 본문과 tendency prompt, 세션 두 판정 함수, 다섯 상수 및 동일 denied error를 역할 파일로 옮겼다. Runtime Context는 Character/Identity/Routines의 동일 실제 타입을 import하고 scheduler는 canonical Tick DTO를 사용한다. C2 임시 네 edge 중 models/ActivityPolicy/schemas 세 edge를 제거했다. 실제 정책 build/assert/count 및 World/import scope SQL은 C3b에서 계속 이전한다.
+
+C3a 최초 집중 검증은 **200 passed / 기존 PG 1 skip / 기존 warnings 5 / 41.77초**, inventory 갱신 후 최종 후보의 광역 검증은 **268 passed / 기존 PG 1 skip / 기존 warnings 5 / 121.75초**다. 원래 정책의 33개 정의와 Run DTO 5개 정의는 AST 차이 0이며, 런타임 Context의 **21개 resolved type이 전부 같은 실제 객체**다. 경계는 **694 modules / 2,318 edges / exact legacy 222 / cycle 0**, L4·ER0·Memory batch 현재 inventory는 통과했다.
+
+선행 signed 두 경로 blob만 메모리에 보충한 원래 검사 함수의 읽기 전용 진단도 **source/split/assertion/suppression/API·ORM/node 각각 오류 0**, 기존 보호 **2,139 / 현재 2,233 nodes**다. Source introduction metadata는 부모가 선형 append하며 stock 전체 보존·Actions·installer·최종 B4 완료는 별도로 남아 있다. 기존 테스트의 assertion/parametrize/skip 및 frozen 자료를 수정하지 않았다.

@@ -51,3 +51,40 @@ HIDDEN_ACTIVITY_ACTION_TYPES = (
 )
 
 STATE_SAVE_DEDUPE_WINDOW = timedelta(seconds=90)
+
+
+PUBLIC_ACTION_TYPES = {
+    "comment": ("commented", "replied"),
+    "reply": ("commented", "replied"),
+    "post": ("post_created",),
+    "quote": ("quoted",),
+    "like": ("liked",),
+    "repost": ("reposted",),
+    "follow": ("followed",),
+    "unfollow": ("unfollowed",),
+}
+
+
+
+POLICY_ACTION_NAMES = (
+    "post",
+    "reply",
+    "quote",
+    "like",
+    "repost",
+    "follow",
+    "unfollow",
+    "observe",
+)
+
+
+
+TENDENCY_PUBLIC_ACTION_NAMES = ("post", "reply", "like", "repost", "follow", "unfollow")
+
+
+
+POLICY_SESSION_MARKER = ":resident-tick:"
+
+
+
+MANUAL_POLICY_SESSION_MARKER = ":resident-manual:"

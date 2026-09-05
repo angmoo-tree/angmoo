@@ -321,10 +321,6 @@
           "importer": "app.runtime.world_characters.lifecycle"
         },
         {
-          "imported": "app.schemas.agent_runs",
-          "importer": "app.schemas"
-        },
-        {
           "imported": "app.schemas.agents",
           "importer": "app.schemas"
         },
@@ -359,10 +355,6 @@
         {
           "imported": "app.schemas.worlds",
           "importer": "app.schemas"
-        },
-        {
-          "imported": "app.schemas.agent_runs",
-          "importer": "app.schemas.agents"
         },
         {
           "imported": "app.schemas.characters",
@@ -965,18 +957,6 @@
       "review_date": "2026-09-06",
       "edges": [
         {
-          "importer": "app.runtime.resident.context",
-          "imported": "app.models"
-        },
-        {
-          "importer": "app.runtime.resident.context",
-          "imported": "app.services.agent_activity_policy"
-        },
-        {
-          "importer": "app.runtime.resident.scheduler",
-          "imported": "app.schemas"
-        },
-        {
           "importer": "app.runtime.resident.scheduler",
           "imported": "app.services.agent_runs"
         }
@@ -1095,6 +1075,7 @@
       "app.domains.routines.constants",
       "app.domains.routines.contracts",
       "app.domains.routines.contracts.activity",
+      "app.domains.routines.contracts.activity_policy",
       "app.domains.routines.contracts.clock",
       "app.domains.routines.contracts.joint_activity",
       "app.domains.routines.contracts.lifecycle",
@@ -1114,8 +1095,10 @@
       "app.domains.routines.schemas",
       "app.domains.routines.schemas.plans",
       "app.domains.routines.schemas.resident",
+      "app.domains.routines.schemas.runs",
       "app.domains.routines.service",
       "app.domains.routines.service.activity_logs",
+      "app.domains.routines.service.activity_sessions",
       "app.domains.routines.service.activity_settings",
       "app.domains.routines.service.execution",
       "app.domains.routines.service.execution.claims",
@@ -1267,6 +1250,7 @@
       "app.domains.routine_posts.service.generation",
       "app.domains.routines.contracts",
       "app.domains.routines.contracts.activity",
+      "app.domains.routines.contracts.activity_policy",
       "app.domains.routines.contracts.clock",
       "app.domains.routines.contracts.joint_activity",
       "app.domains.routines.contracts.lifecycle",
@@ -1275,8 +1259,10 @@
       "app.domains.routines.schemas",
       "app.domains.routines.schemas.plans",
       "app.domains.routines.schemas.resident",
+      "app.domains.routines.schemas.runs",
       "app.domains.routines.service",
       "app.domains.routines.service.activity_logs",
+      "app.domains.routines.service.activity_sessions",
       "app.domains.routines.service.activity_settings",
       "app.domains.routines.service.execution",
       "app.domains.routines.service.execution.claims",
@@ -2602,14 +2588,6 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.schemas.agent_runs",
-        "target": "app.domains.routines.schemas",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
-        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.schemas.agents",
         "target": "app.domains.routines.schemas",
         "owner_stage": "AR-B4-C",
@@ -2647,6 +2625,54 @@
         "owner_stage": "AR-B4-C",
         "reason": "Existing not-yet-migrated activity runtime/CRUD uses the identical owner clock or pure graph-state contract. All policy is in the canonical module; no new legacy body is introduced.",
         "removal_condition": "Switch remaining agent-run/LLM graph/activity CRUD roles in later B4-C slices and remove this exact legacy consumer edge.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.routines.schemas.runs",
+        "owner_stage": "AR-G5",
+        "reason": "Exact existing mixed consumer now imports the same actual Run/policy value and session rule owner, with no new legacy implementation.",
+        "removal_condition": "Move remaining activity policy/runtime in C3b+ and global schema aggregate in G5; remove this exact edge when its source owner transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas.agents",
+        "target": "app.domains.routines.schemas.runs",
+        "owner_stage": "AR-G5",
+        "reason": "Exact existing mixed consumer now imports the same actual Run/policy value and session rule owner, with no new legacy implementation.",
+        "removal_condition": "Move remaining activity policy/runtime in C3b+ and global schema aggregate in G5; remove this exact edge when its source owner transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_activity_policy",
+        "target": "app.domains.routines.constants",
+        "owner_stage": "AR-B4-C",
+        "reason": "Exact existing mixed consumer now imports the same actual Run/policy value and session rule owner, with no new legacy implementation.",
+        "removal_condition": "Move remaining activity policy/runtime in C3b+ and global schema aggregate in G5; remove this exact edge when its source owner transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_activity_policy",
+        "target": "app.domains.routines.contracts.activity_policy",
+        "owner_stage": "AR-B4-C",
+        "reason": "Exact existing mixed consumer now imports the same actual Run/policy value and session rule owner, with no new legacy implementation.",
+        "removal_condition": "Move remaining activity policy/runtime in C3b+ and global schema aggregate in G5; remove this exact edge when its source owner transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_activity_policy",
+        "target": "app.domains.routines.exceptions",
+        "owner_stage": "AR-B4-C",
+        "reason": "Exact existing mixed consumer now imports the same actual Run/policy value and session rule owner, with no new legacy implementation.",
+        "removal_condition": "Move remaining activity policy/runtime in C3b+ and global schema aggregate in G5; remove this exact edge when its source owner transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_activity_policy",
+        "target": "app.domains.routines.service.activity_sessions",
+        "owner_stage": "AR-B4-C",
+        "reason": "Exact existing mixed consumer now imports the same actual Run/policy value and session rule owner, with no new legacy implementation.",
+        "removal_condition": "Move remaining activity policy/runtime in C3b+ and global schema aggregate in G5; remove this exact edge when its source owner transitions.",
         "review_date": "2026-09-06"
       }
     ]

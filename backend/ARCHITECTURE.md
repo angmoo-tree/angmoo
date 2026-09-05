@@ -607,3 +607,10 @@ AR-B4-C1의 적용은 이 실제 모델/입력/저장 범위입니다. AgentRela
 Routines의 `service/tick_schedule.py`는 active hours·다음 실행·재시도·재개 시각과 deterministic jitter를 계산합니다. World timezone과 Character image quota도 이 같은 시간 값을 사용합니다. `runtime/resident/scheduler.py`는 파일 잠금·DB lease·fencing epoch·heartbeat·취소와 종료 대기를 담당하고 앱의 기존 component worker가 한 번 연결합니다. 별도 scheduler 실행 프로세스를 만들지 않습니다.
 
 그래프 단계가 전달하는 순수 값은 `routines/contracts/resident.py::ResidentGraphState`, 실행 중 같은 Session과 attached 객체를 묶는 context는 `runtime/resident/context.py::LangGraphResidentContext`입니다. Context는 저장소·트랜잭션을 새로 열지 않으며 원래 생성자가 전달한 객체와 callback을 유지합니다. C2는 이 역할만 이전했으며 실제 agent-run 흐름·활동 정책·provider/graph·활동 HTTP와 남은 호환은 후속 C 단계입니다.
+
+
+### 실행 응답과 활동 허용 값
+
+`routines/schemas/runs.py`는 기존 Run/Slot/Tick 입출력 다섯 형식을 소유합니다. `contracts/activity_policy.py`의 ActivityPolicy는 한 tick에서 허용/차단한 행동과 다음 시각을 담고 기존 prompt 표현을 제공합니다. `service/activity_sessions.py`는 예약 실행과 소유자 수동 실행의 기존 세션 표시를 구별합니다. 실제 허용 판단/횟수 조회/World 활성화 검증은 다음 C3b에서 각각 업무와 runtime 협력으로 이전합니다.
+
+Resident Context는 Character/CharacterState, LlmCredential, AgentFeedCue와 ActivityPolicy의 실제 소유 타입을 그대로 참조합니다. Scheduler도 같은 Routines Tick 응답을 사용하며 별도 DTO나 ORM class를 만들지 않습니다. 이전의 공통 모델/스키마 및 legacy 정책 값 import 세 개는 제거했습니다.

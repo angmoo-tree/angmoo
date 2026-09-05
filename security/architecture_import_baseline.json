@@ -1,7 +1,7 @@
 {
-  "edge_count": 2309,
-  "external_import_count": 2174,
-  "module_count": 692,
+  "edge_count": 2318,
+  "external_import_count": 2175,
+  "module_count": 694,
   "modules": [
     {
       "external_imports": [],
@@ -3666,6 +3666,18 @@
     },
     {
       "external_imports": [
+        "dataclasses",
+        "datetime"
+      ],
+      "imports": [
+        "app.domains.routines.constants"
+      ],
+      "module": "app.domains.routines.contracts.activity_policy",
+      "path": "backend/app/domains/routines/contracts/activity_policy.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "datetime",
         "typing"
@@ -3886,7 +3898,8 @@
       "external_imports": [],
       "imports": [
         "app.domains.routines.schemas.plans",
-        "app.domains.routines.schemas.resident"
+        "app.domains.routines.schemas.resident",
+        "app.domains.routines.schemas.runs"
       ],
       "module": "app.domains.routines.schemas",
       "path": "backend/app/domains/routines/schemas/__init__.py",
@@ -3919,6 +3932,20 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.core.response_schemas",
+        "app.domains.routines.schemas.resident"
+      ],
+      "module": "app.domains.routines.schemas.runs",
+      "path": "backend/app/domains/routines/schemas/runs.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.domains.routines.policies.activity_state"
@@ -3940,6 +3967,15 @@
       ],
       "module": "app.domains.routines.service.activity_logs",
       "path": "backend/app/domains/routines/service/activity_logs.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.routines.constants"
+      ],
+      "module": "app.domains.routines.service.activity_sessions",
+      "path": "backend/app/domains/routines/service/activity_sessions.py",
       "wildcard_imports": []
     },
     {
@@ -8764,9 +8800,11 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.domains.social.public",
-        "app.models",
-        "app.services.agent_activity_policy"
+        "app.domains.characters.models",
+        "app.domains.identity.models",
+        "app.domains.routines.contracts.activity_policy",
+        "app.domains.routines.models",
+        "app.domains.social.public"
       ],
       "module": "app.runtime.resident.context",
       "path": "backend/app/runtime/resident/context.py",
@@ -8789,9 +8827,9 @@
       "imports": [
         "app.config",
         "app.core.db",
+        "app.domains.routines.schemas",
         "app.domains.runtime.public",
         "app.runtime.routines.lifecycle_references",
-        "app.schemas",
         "app.services.agent_runs"
       ],
       "module": "app.runtime.resident.scheduler",
@@ -9454,9 +9492,9 @@
         "app.domains.identity.schemas",
         "app.domains.relationships.graph_read.schemas",
         "app.domains.routine_posts.schemas",
+        "app.domains.routines.schemas.runs",
         "app.domains.social.schemas.community",
         "app.domains.social.schemas.feed",
-        "app.schemas.agent_runs",
         "app.schemas.agents",
         "app.schemas.character_lore",
         "app.schemas.characters",
@@ -9478,27 +9516,13 @@
         "typing"
       ],
       "imports": [
-        "app.core.response_schemas",
-        "app.domains.routines.schemas"
-      ],
-      "module": "app.schemas.agent_runs",
-      "path": "backend/app/schemas/agent_runs.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "datetime",
-        "pydantic",
-        "typing"
-      ],
-      "imports": [
         "app.core.image_generation",
         "app.domains.characters.schemas",
         "app.domains.identity.schemas",
         "app.domains.routines.schemas",
+        "app.domains.routines.schemas.runs",
         "app.domains.social.schemas.community",
         "app.providers.registry",
-        "app.schemas.agent_runs",
         "app.schemas.characters",
         "app.schemas.media_security"
       ],
@@ -9657,7 +9681,6 @@
     },
     {
       "external_imports": [
-        "dataclasses",
         "datetime",
         "sqlalchemy",
         "sqlalchemy.orm",
@@ -9665,6 +9688,10 @@
       ],
       "imports": [
         "app.cruds.agents",
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.activity_policy",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.service.activity_sessions",
         "app.domains.routines.service.tick_schedule",
         "app.models"
       ],

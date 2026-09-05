@@ -9,7 +9,7 @@ from types import TracebackType
 from typing import Awaitable, Callable, Any
 from uuid import uuid4
 
-from app import schemas
+from app.domains.routines import schemas
 from app.runtime.routines.lifecycle_references import SqlAlchemyLifecycleReferences
 
 from app.config import Settings, settings

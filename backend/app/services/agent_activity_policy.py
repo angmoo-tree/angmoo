@@ -1,4 +1,8 @@
-from dataclasses import dataclass
+from app.domains.routines.constants import (PUBLIC_ACTION_TYPES, POLICY_ACTION_NAMES, TENDENCY_PUBLIC_ACTION_NAMES, POLICY_SESSION_MARKER, MANUAL_POLICY_SESSION_MARKER)
+from app.domains.routines.exceptions import ActivityPolicyDeniedError
+from app.domains.routines.contracts.activity_policy import ActivityPolicy, _format_tendency_prompt
+from app.domains.routines.service.activity_sessions import is_policy_enforced_session, is_manual_policy_session
+
 from datetime import UTC, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
@@ -19,88 +23,10 @@ retry_tick_schedule = agent_activity_schedule.retry_tick_schedule
 recovery_tick_schedule = agent_activity_schedule.recovery_tick_schedule
 _is_within_active_hours = agent_activity_schedule.is_within_active_hours
 _aware_utc = agent_activity_schedule.aware_utc
-PUBLIC_ACTION_TYPES = {
-    "comment": ("commented", "replied"),
-    "reply": ("commented", "replied"),
-    "post": ("post_created",),
-    "quote": ("quoted",),
-    "like": ("liked",),
-    "repost": ("reposted",),
-    "follow": ("followed",),
-    "unfollow": ("unfollowed",),
-}
-POLICY_ACTION_NAMES = (
-    "post",
-    "reply",
-    "quote",
-    "like",
-    "repost",
-    "follow",
-    "unfollow",
-    "observe",
-)
-TENDENCY_PUBLIC_ACTION_NAMES = ("post", "reply", "like", "repost", "follow", "unfollow")
-POLICY_SESSION_MARKER = ":resident-tick:"
-MANUAL_POLICY_SESSION_MARKER = ":resident-manual:"
 
 
-class ActivityPolicyDeniedError(Exception):
-    pass
 
 
-@dataclass(frozen=True)
-class ActivityPolicy:
-    within_active_hours: bool
-    allowed_actions: tuple[str, ...]
-    blocked_reasons: dict[str, str]
-    next_tick_at: datetime
-    summary: str
-    target_interval_seconds: int = 0
-    schedule_spread_seconds: int = 0
-    schedule_spread_reason: str = ""
-    tendency_summary: str = ""
-    tendency_action_ranges: dict[str, object] | None = None
-    planner_tendency_profile: dict[str, object] | None = None
-
-    @property
-    def should_skip_llm(self) -> bool:
-        return not self.within_active_hours or not any(
-            action != "observe" for action in self.allowed_actions
-        )
-
-    def to_prompt(self) -> str:
-        allowed = ", ".join(self.allowed_actions) if self.allowed_actions else "none"
-        blocked = (
-            "\n".join(f"  - {action}: {reason}" for action, reason in self.blocked_reasons.items())
-            if self.blocked_reasons
-            else "  - none"
-        )
-        tendency = _format_tendency_prompt(
-            self.tendency_summary, self.tendency_action_ranges
-        )
-        return f"""Backend activity policy for this tick:
-- Allowed actions: {allowed}
-- Blocked actions:
-{blocked}
-- Persona public-action tendency notes:
-{tendency}
-- If a public action is not listed as allowed, do not call its tool.
-- Observe is not a tendency action. If no public action fits and observe is allowed, finish without public writes so the backend can record an observed fallback.
-- Next scheduled tick after this run: {self.next_tick_at.isoformat()}"""
-
-    def to_result(self) -> dict[str, object]:
-        return {
-            "within_active_hours": self.within_active_hours,
-            "allowed_actions": list(self.allowed_actions),
-            "blocked_reasons": self.blocked_reasons,
-            "next_tick_at": self.next_tick_at.isoformat(),
-            "target_interval_seconds": self.target_interval_seconds,
-            "schedule_spread_seconds": self.schedule_spread_seconds,
-            "schedule_spread_reason": self.schedule_spread_reason,
-            "summary": self.summary,
-            "tendency_summary": self.tendency_summary,
-            "tendency_action_ranges": self.tendency_action_ranges or {},
-        }
 
 
 def activity_timezone(db: Session, *, character_id: str) -> ZoneInfo:
@@ -132,15 +58,8 @@ def activity_timezone_name(db: Session, *, character_id: str) -> str:
     return activity_timezone(db, character_id=character_id).key
 
 
-def is_policy_enforced_session(session_key: str) -> bool:
-    return (
-        POLICY_SESSION_MARKER in session_key
-        or MANUAL_POLICY_SESSION_MARKER in session_key
-    )
 
 
-def is_manual_policy_session(session_key: str) -> bool:
-    return MANUAL_POLICY_SESSION_MARKER in session_key
 
 
 def is_imported_world_runtime_locked(
@@ -216,21 +135,6 @@ def is_imported_world_runtime_locked_for_character(
     )
 
 
-def _format_tendency_prompt(
-    tendency_summary: str, action_ranges: dict[str, object] | None
-) -> str:
-    lines: list[str] = []
-    if tendency_summary.strip():
-        lines.append(f"  - summary: {tendency_summary.strip()}")
-    if action_ranges:
-        for action in TENDENCY_PUBLIC_ACTION_NAMES:
-            raw = action_ranges.get(action)
-            if not isinstance(raw, dict):
-                continue
-            note = raw.get("note")
-            if isinstance(note, str) and note.strip():
-                lines.append(f"  - {action}: {note.strip()}")
-    return "\n".join(lines) if lines else "  - none saved yet"
 
 
 def build_activity_policy(

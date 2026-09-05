@@ -42,7 +42,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 from app.core.image_generation import IMAGE_MODEL_OPTIONS, MAX_IMAGES_PER_DAY
 from app.providers.registry import AGENT_GOOGLE_MODELS
-from app.schemas.agent_runs import (
+from app.domains.routines.schemas.runs import (
     AgentActivityLogRead,
     AgentSlotRead,
     UtcInstantResponseModel,

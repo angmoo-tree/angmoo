@@ -1,4 +1,4 @@
-from app.schemas.agent_runs import (
+from app.domains.routines.schemas.runs import (
     AgentActivityLogRead,
     AgentSlotPublicRead,
     AgentSlotRead,

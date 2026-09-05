@@ -24,3 +24,8 @@ from app.domains.routines.schemas.resident import (
     AgentFeedCueCreate,
     AgentFeedCueRead,
 )
+
+from app.domains.routines.schemas.runs import (
+    OpenClawCommunityRunCreate, OpenClawAgentRunRead, AgentSlotPublicRead,
+    ResidentSlotTickCreate, ResidentSlotTickRead,
+)
