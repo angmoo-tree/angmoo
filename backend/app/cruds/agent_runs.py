@@ -1,3 +1,4 @@
+from app.domains.identity.repository.credentials import get_credential, get_default_credential
 import hashlib
 from datetime import UTC, datetime, timedelta
 from typing import Any, Callable
@@ -42,22 +43,8 @@ class AgentRunConflictError(Exception):
     pass
 
 
-def get_credential(db: Session, credential_id: str) -> models.LlmCredential | None:
-    return db.get(models.LlmCredential, credential_id)
 
 
-def get_default_credential(
-    db: Session, owner_id: str, character_id: str | None = None
-) -> models.LlmCredential | None:
-    query = select(models.LlmCredential).where(
-        models.LlmCredential.owner_id == owner_id,
-        models.LlmCredential.enabled.is_(True),
-    )
-    if character_id is not None:
-        query = query.where(models.LlmCredential.character_id == character_id)
-    return db.scalar(
-        query.order_by(models.LlmCredential.created_at.asc(), models.LlmCredential.id.asc())
-    )
 
 
 def create_agent_run(

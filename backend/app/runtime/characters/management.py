@@ -1,4 +1,6 @@
 from __future__ import annotations
+from app.domains.identity.repository import credentials as credential_repository
+from app.domains.identity.service import character_credentials as character_credential_service
 from app.domains.characters.service import image_settings_owner
 from app.domains.characters.exceptions import ImageSettingsInvalidError, UnsafeImagePromptError
 from app.domains.characters.repository import image_settings as image_setting_repository
@@ -101,7 +103,7 @@ from app.core import prompt_safety
 from app.domains.characters.service import media_storage as profile_media
 from app.integrations.media import files as media_files
 from app.integrations.media import images as media_images
-from app.services import service_image_key
+from app.credentials import service_images as service_image_key
 from app.domains.operations.service import settings as operation_settings
 from app.services.direct_llm import (
     DirectLlmCallContext,
@@ -438,7 +440,7 @@ def _after_character_created(db, user, character, data) -> schemas.AgentDetailRe
     if data.execution_mode == "llm":
         if data.api_key is None:
             raise CredentialRequiredError("Agent credential is required")
-        agent_crud.upsert_credential(
+        character_credential_service.upsert_credential(
             db,
             user=user,
             character=character,
@@ -688,7 +690,7 @@ async def run_first_greeting(
     available_at = _first_greeting_available_at(db, user.id)
     if available_at is not None and available_at > datetime.now(UTC):
         raise FirstGreetingCooldownError(available_at)
-    credential = agent_crud.get_character_credential(db, character.id)
+    credential = credential_repository.get_character_credential(db, character.id)
     try:
         material = CredentialResolver.resolve_llm_credential(
             credential,
@@ -1038,7 +1040,7 @@ def update_credential(
         )
     try:
         if data.api_key is not None:
-            credential = agent_crud.upsert_credential(
+            credential = character_credential_service.upsert_credential(
                 db,
                 user=user,
                 character=character,
@@ -1061,7 +1063,7 @@ def update_credential(
                 db.commit()
                 db.refresh(credential)
         else:
-            credential = agent_crud.get_character_credential(db, character.id)
+            credential = credential_repository.get_character_credential(db, character.id)
             if credential is None or not credential.encrypted_api_key:
                 raise CredentialRequiredError(
                     "Agent credential key is required before changing the model"
@@ -1106,7 +1108,7 @@ def get_credential_metadata(
         character=character,
         world_id=world_id,
     )
-    credential = agent_crud.get_character_credential(db, character.id)
+    credential = credential_repository.get_character_credential(db, character.id)
     if credential is None:
         return None
     if credential.owner_id != user.id:
@@ -1130,7 +1132,7 @@ def delete_credential(
         character=character,
         world_id=world_id,
     )
-    credential = agent_crud.get_character_credential(db, character.id)
+    credential = credential_repository.get_character_credential(db, character.id)
     if credential is None or (
         not credential.enabled
         and credential.encrypted_api_key is None
@@ -1287,7 +1289,7 @@ async def analyze_tendency(
     _ensure_llm_mode(character)
     _ensure_imported_world_runtime_enabled(db, character=character)
     setting = agent_crud.ensure_setting(db, character.id)
-    credential = agent_crud.get_character_credential(db, character.id)
+    credential = credential_repository.get_character_credential(db, character.id)
     if credential is None or not credential.enabled:
         _mark_tendency_error(
             db, setting, "Agent credential is required before tendency analysis"
@@ -1541,7 +1543,7 @@ def _activate_agent_uow(
         character=character,
         setting=current_setting,
     )
-    credential = agent_crud.get_character_credential(db, character.id)
+    credential = credential_repository.get_character_credential(db, character.id)
     if credential is None or not credential.enabled:
         raise CredentialRequiredError("Agent credential is required before activation")
 
@@ -1695,7 +1697,7 @@ def deactivate_agent(
         raise ActiveSlotBusyError(
             f"agent {character.id}가 지금 실행 중이라 끌 수 없습니다. 잠시 뒤 다시 시도해주세요."
         )
-    credential = agent_crud.get_character_credential(db, character.id)
+    credential = credential_repository.get_character_credential(db, character.id)
     if (
         assigned_slot is not None
         and credential is not None
@@ -2375,7 +2377,7 @@ async def run_agent_now(
     available_at = _manual_run_available_at(db, user.id)
     if available_at is not None and available_at > datetime.now(UTC):
         raise RunNowCooldownError(available_at)
-    credential = agent_crud.get_character_credential(db, character.id)
+    credential = credential_repository.get_character_credential(db, character.id)
     if credential is None:
         raise CredentialRequiredError("Agent credential is required before running")
     run_message = (
@@ -2898,7 +2900,7 @@ def _build_agent_detail(
     db: Session, character: character_models.Character, *, recent_activity_limit: int = 20
 ) -> schemas.AgentDetailRead:
     setting = agent_crud.ensure_setting(db, character.id)
-    credential = agent_crud.get_character_credential(db, character.id)
+    credential = credential_repository.get_character_credential(db, character.id)
     slot = agent_crud.get_assigned_slot(db, character.id)
     recent_activity = agent_crud.list_recent_activity(
         db, character.id, limit=recent_activity_limit

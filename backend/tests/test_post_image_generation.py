@@ -28,7 +28,8 @@ from app.core.image_generation import (
 from app.config import settings
 from app.cruds import agents as agent_crud
 from app.core import image_prompt_safety
-from app.services import post_image_generation, profile_media, service_image_key
+from app.credentials import service_images as service_image_key
+from app.services import post_image_generation, profile_media
 from app.integrations import pollinations_image
 from app.runtime.characters import management as agent_service
 

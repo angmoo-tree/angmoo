@@ -98,3 +98,10 @@ class AccountDeletionWorkflow(Protocol):
     """An application-provided multi-domain transaction using the caller session."""
 
     def __call__(self, db: Session, user: User) -> None: ...
+
+
+class CredentialCharacter(Protocol):
+    """Character identity required to label and scope its stored credential."""
+
+    id: str
+    name: str

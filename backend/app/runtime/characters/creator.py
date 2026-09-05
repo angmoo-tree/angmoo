@@ -105,7 +105,7 @@ from app.integrations.azure_translation import (
     _TRANSLATION_USAGE_LOCK,
 )
 from app.integrations import replicate_image
-from app.services import service_image_key
+from app.credentials import service_images as service_image_key
 from app.services.runtime_boundary import (
     OpenClawGatewayClient,
     OpenClawGatewayError,

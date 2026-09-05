@@ -274,34 +274,34 @@
     {
       "markers": {
         "row_lock": [
-          562,
-          624,
-          713,
+          549,
+          611,
+          700,
+          718,
           731,
-          744,
-          761,
-          815,
-          824,
-          840,
-          886,
-          940,
-          986,
-          1039
+          748,
+          802,
+          811,
+          827,
+          873,
+          927,
+          973,
+          1026
         ],
         "skip_locked": [
-          562,
-          624,
-          744,
-          840,
-          940,
-          986,
-          1039
+          549,
+          611,
+          731,
+          827,
+          927,
+          973,
+          1026
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/cruds/agent_runs.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "97397ad378e689e86c7b417ebd3d48506ed71fe621262f9e4b7200e07b4e5a61",
+      "source_sha256": "1a12dabe6b27bb23cc1abc8826af28da46c0998367ad60901f37edbf81972ecc",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -920,18 +920,18 @@
     {
       "markers": {
         "advisory_lock": [
-          506,
-          2870
+          508,
+          2872
         ],
         "driver_or_url": [
-          503,
-          2861
+          505,
+          2863
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/characters/management.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "aefd758b0f95fbcab5385b1fe2483089f3302c2ad1b938baa7c85c311a557314",
+      "source_sha256": "4583cb1cf0df222b96acc542eb990b68e5ab7dbad43324f1b5f9761e745ba3ea",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

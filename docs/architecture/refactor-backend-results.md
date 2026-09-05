@@ -1171,3 +1171,12 @@ protected2201/current2255이며 선행 sourceintro 통합/전체 stock gate는 �
 최종69 PASS/2기존 deprecation warnings/9.23초, boundary758/2514/legacy180, L4/ER0 PASS다. 새3nodes는 실제 HTTP+SQLite+임시PNG/WebP를 통해 수동/자동 외형 설명의 보존·초기화, 생성 파일의 삭제와 저장 상태, 업로드/삭제 각각의 단일 commit, 같은 Session quota read, 미소유/누락 key 거절을 확인한다. 기존 assertion/suppression을 바꾸지 않았다. 첫 집중 실행의 잘못 적은 파일명과 이동 import가 같은 줄의 다른 서비스까지 core로 바꾼 collection 오류는 실제 경로/단일 모듈 import로 수정한 뒤 기존66개 및 최종69개를 재실행했다.
 
 처음 지도 진단은 중간 runtime 경로를 frozen 원본처럼 기재한 점과 나중에 추가된 route bookkeeping 이름을 frozen 심벌로 기재한 점을 거부했다. 실제 최초 `services/agents.py`의 기존 전체 소유 지도에 새 목적지를 반영하고 이후 생성된 bookkeeping을 그 frozen 목록에서 제외했다. 원래6진단은 모두0오류(protected2201/current2258), API/ORM/노드/기존assertion·억제는 보존된다. 원장은 선행 B4~B8 합류 뒤 각 최초 signed source에서 추가한다. B8 통합/G5/G06 완료로 표시하지 않는다.
+
+
+### AR-B8 Identity credential 실제 저장·공용 이미지 키
+
+Identity repository/credentials.py는 원래 nullable id 조회, 소유자/활성/선택적 character/order를 유지한 기본 조회, purpose=agent의 캐릭터 조회를 소유한다. service/character_credentials.py는 profile/model 기본값, SecretScope, 암호화·fingerprint·label·enabled 갱신을 결정하고 repository는 원래 add/commit-refresh 또는 flush를 수행한다. 실제 Character/Lore runtime은 이 소유 구현을 호출한다. 원래 CRUD의 미전환 호출은 같은 객체 export만 남으며 B4/B8 통합에서 종료한다.
+
+공통 이미지 키의 실제7함수·캐시2개는 `credentials/service_images.py`로 이동했고 원래 services/service_image_key.py를 제거했다. 모든 현재 제품/테스트 소비자가 한 모듈을 공유하여 캐시나 비밀 해석을 복제하지 않는다. 기존 OSS secret-reveal 허용 목록의 파일 경로만 실제 소유자로 전환했다.
+
+원래244개 함수·값 전체 AST를 비교했고 owner save 호출을 원문으로 펼친 동작이 같다. 처음 Lore import를 module docstring/future import보다 앞에 넣어 collection SyntaxError가 발생한 것은 import 순서를 수정했다. 최종 Identity/이미지/credential privacy/OSS 검사는217 PASS/16기존 warnings/29.80초다. 새 test node는 없으며 원래6보존진단0오류(protected2201/current2258), boundary761/2525/legacy177 및 L4/ER0 PASS다. 실제 owner HTTP 및 runtime slot·World 협력, LocalBot, G5/G06/B8 최종종료는 계속 진행 중이다.

@@ -41,7 +41,7 @@ from app.integrations.media import files as media_files
 from app.services import agent_activity_policy
 from app.core import image_prompt_safety
 from app.domains.operations.service import settings as operation_settings
-from app.services import service_image_key
+from app.credentials import service_images as service_image_key
 from app.services.direct_llm import (
     DirectLlmCallContext,
     DirectLlmError,

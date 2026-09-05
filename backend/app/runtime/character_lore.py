@@ -1,6 +1,7 @@
 """Compose Lore foreign lookups and the existing credential/provider transport."""
 
 from __future__ import annotations
+from app.domains.identity.repository import credentials as credential_repository
 
 import asyncio
 import time
@@ -31,7 +32,7 @@ from app.services import community as community_service
 def _google_embedding_credential_for_character(
     db: Session, character_id: str
 ) -> _GoogleEmbeddingCredential:
-    credential = agent_crud.get_character_credential(db, character_id)
+    credential = credential_repository.get_character_credential(db, character_id)
     try:
         material = CredentialResolver.resolve_llm_credential(
             credential,
@@ -54,7 +55,7 @@ def _google_embedding_credential_for_character(
 
 
 def _google_api_key_for_character(db: Session, character_id: str) -> str:
-    credential = agent_crud.get_character_credential(db, character_id)
+    credential = credential_repository.get_character_credential(db, character_id)
     try:
         material = CredentialResolver.resolve_llm_credential(
             credential,

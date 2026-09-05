@@ -137,7 +137,7 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
             "_image_key_for_source",
         },
         "domains/routine_posts/client.py": {"_api_key"},
-        "services/service_image_key.py": {
+        "credentials/service_images.py": {
             "get_service_image_api_key",
             "get_replicate_image_api_key",
             "get_profile_image_api_key",
