@@ -64,3 +64,32 @@ class WorldCharacterContractError(ValueError):
         self.reason_code = reason_code
         self.details = dict(details or {})
         super().__init__(reason_code)
+
+
+class WorldCharacterSetupError(Exception):
+    reason_code = "world_character_setup_error"
+
+
+class WorldCharacterSetupNotFoundError(WorldCharacterSetupError):
+    reason_code = "world_character_not_found"
+
+
+class WorldCharacterSetupForbiddenError(WorldCharacterSetupError):
+    reason_code = "character_not_owned"
+
+
+class WorldCharacterSetupConflictError(WorldCharacterSetupError):
+    reason_code = "setup_in_progress"
+
+    def __init__(self, reason_code: str | None = None) -> None:
+        if reason_code is not None:
+            self.reason_code = reason_code
+        super().__init__(self.reason_code)
+
+
+class WorldCharacterSetupValidationError(WorldCharacterSetupError):
+    reason_code = "world_character_ineligible"
+
+    def __init__(self, reason_code: str) -> None:
+        self.reason_code = reason_code
+        super().__init__(reason_code)

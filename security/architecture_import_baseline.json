@@ -1,7 +1,7 @@
 {
-  "edge_count": 1934,
-  "external_import_count": 2037,
-  "module_count": 617,
+  "edge_count": 1946,
+  "external_import_count": 2044,
+  "module_count": 619,
   "modules": [
     {
       "external_imports": [],
@@ -2233,6 +2233,18 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.identity.models"
+      ],
+      "module": "app.domains.identity.service.world_character_credentials",
+      "path": "backend/app/domains/identity/service/world_character_credentials.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.domains.media",
@@ -4402,70 +4414,10 @@
     {
       "external_imports": [],
       "imports": [
-        "app.domains.characters.public",
-        "app.domains.identity.public",
-        "app.domains.world_characters.models",
-        "app.domains.worlds.public"
-      ],
-      "module": "app.domains.world_characters.infrastructure.autonomous_setup_models",
-      "path": "backend/app/domains/world_characters/infrastructure/autonomous_setup_models.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "dataclasses",
-        "datetime",
-        "sqlalchemy",
-        "sqlalchemy.exc",
-        "sqlalchemy.orm",
-        "typing"
-      ],
-      "imports": [
-        "app.core.ids",
-        "app.domains.identity.public",
-        "app.domains.world_characters.client",
-        "app.domains.world_characters.contracts.runtime_modes",
-        "app.domains.world_characters.infrastructure.autonomous_setup_models",
-        "app.domains.world_characters.infrastructure.sqlalchemy_runtime_modes",
-        "app.domains.world_characters.schemas.setup",
-        "app.domains.world_characters.service.setup_validation",
-        "app.domains.worlds.public",
-        "app.integrations.direct_llm",
-        "app.providers.registry"
-      ],
-      "module": "app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup",
-      "path": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
         "app.domains.world_characters.models"
       ],
       "module": "app.domains.world_characters.infrastructure.sqlalchemy_models",
       "path": "backend/app/domains/world_characters/infrastructure/sqlalchemy_models.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "collections",
-        "collections.abc",
-        "dataclasses",
-        "datetime",
-        "sqlalchemy",
-        "sqlalchemy.orm",
-        "typing"
-      ],
-      "imports": [
-        "app.core.sqlite_concurrency",
-        "app.domains.world_characters.contracts.runtime_modes",
-        "app.domains.world_characters.infrastructure.autonomous_setup_models",
-        "app.domains.world_characters.service.setup_validation"
-      ],
-      "module": "app.domains.world_characters.infrastructure.sqlalchemy_runtime_modes",
-      "path": "backend/app/domains/world_characters/infrastructure/sqlalchemy_runtime_modes.py",
       "wildcard_imports": []
     },
     {
@@ -4501,10 +4453,10 @@
         "app.domains.world_characters.contracts.runtime_modes",
         "app.domains.world_characters.contracts.seed",
         "app.domains.world_characters.contracts.studio_lifecycle",
-        "app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup",
-        "app.domains.world_characters.infrastructure.sqlalchemy_runtime_modes",
         "app.domains.world_characters.models",
+        "app.domains.world_characters.service.autonomous_setup",
         "app.domains.world_characters.service.owner_identity",
+        "app.domains.world_characters.service.runtime_modes",
         "app.domains.world_characters.service.seed",
         "app.domains.world_characters.service.setup_validation"
       ],
@@ -4590,6 +4542,40 @@
     {
       "external_imports": [
         "__future__",
+        "dataclasses",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.core.ids",
+        "app.domains.characters.contracts",
+        "app.domains.characters.service.profile",
+        "app.domains.identity.contracts",
+        "app.domains.identity.service.credential_resolution",
+        "app.domains.identity.service.world_character_credentials",
+        "app.domains.world_characters.client",
+        "app.domains.world_characters.contracts.runtime_modes",
+        "app.domains.world_characters.exceptions",
+        "app.domains.world_characters.models",
+        "app.domains.world_characters.schemas.setup",
+        "app.domains.world_characters.service.runtime_modes",
+        "app.domains.world_characters.service.setup_validation",
+        "app.domains.worlds.contracts",
+        "app.domains.worlds.service",
+        "app.domains.worlds.service.character_entry",
+        "app.integrations.direct_llm",
+        "app.providers.registry"
+      ],
+      "module": "app.domains.world_characters.service.autonomous_setup",
+      "path": "backend/app/domains/world_characters/service/autonomous_setup.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "datetime",
         "sqlalchemy",
         "sqlalchemy.orm"
@@ -4641,6 +4627,27 @@
       ],
       "module": "app.domains.world_characters.service.public_profile",
       "path": "backend/app/domains/world_characters/service/public_profile.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections",
+        "collections.abc",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.characters.service.profile",
+        "app.domains.world_characters.contracts.runtime_modes",
+        "app.domains.world_characters.models",
+        "app.domains.world_characters.service.setup_validation",
+        "app.domains.worlds.service.character_entry"
+      ],
+      "module": "app.domains.world_characters.service.runtime_modes",
+      "path": "backend/app/domains/world_characters/service/runtime_modes.py",
       "wildcard_imports": []
     },
     {
@@ -5619,6 +5626,21 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.ids",
+        "app.domains.worlds.models",
+        "app.domains.worlds.service.definition"
+      ],
+      "module": "app.domains.worlds.service.character_entry",
+      "path": "backend/app/domains/worlds/service/character_entry.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "dataclasses",
         "datetime",
@@ -6343,7 +6365,6 @@
         "app.core.request_limits",
         "app.cruds.community",
         "app.domains.runtime.public",
-        "app.domains.world_characters.public",
         "app.domains.world_packages.infrastructure.filesystem_import_media",
         "app.domains.world_packages.infrastructure.sqlalchemy_import_commit",
         "app.runtime.account_deletion",
@@ -6355,6 +6376,7 @@
         "app.runtime.memory_selection_provider",
         "app.runtime.single_backend_components",
         "app.runtime.startup_security",
+        "app.runtime.world_characters.recovery",
         "app.services.hosted_configuration"
       ],
       "module": "app.public_main",
@@ -6496,6 +6518,7 @@
         "app.models",
         "app.policies.name_policy",
         "app.runtime.memory_privacy",
+        "app.runtime.world_characters.queries",
         "app.schemas",
         "app.services.activity_profile_readiness",
         "app.services.agent_activity_policy",
@@ -8011,7 +8034,8 @@
     },
     {
       "external_imports": [
-        "sqlalchemy"
+        "sqlalchemy",
+        "sqlalchemy.orm"
       ],
       "imports": [
         "app.domains.characters.models",
@@ -8020,6 +8044,20 @@
       ],
       "module": "app.runtime.world_characters.queries",
       "path": "backend/app/runtime/world_characters/queries.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "collections.abc",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.sqlite_concurrency",
+        "app.domains.world_characters.contracts.runtime_modes",
+        "app.domains.world_characters.service.runtime_modes"
+      ],
+      "module": "app.runtime.world_characters.recovery",
+      "path": "backend/app/runtime/world_characters/recovery.py",
       "wildcard_imports": []
     },
     {

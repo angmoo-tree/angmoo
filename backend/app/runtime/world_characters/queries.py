@@ -4,7 +4,8 @@ Join multiplicity, SQL ordering and filtering are preserved. Access checks and
 profile/state interpretation run in the WorldCharacter services before/after
 these reads; this module neither grants access nor commits writes.
 """
-from sqlalchemy import and_, select
+from sqlalchemy import and_, func, select
+from sqlalchemy.orm import Session
 from app.domains.characters.models import Character
 from app.domains.world_characters.models import WorldCharacter
 from app.domains.worlds.models import WorldMembership
@@ -68,3 +69,34 @@ class SqlAlchemyWorldCharacterQueries:
             )
             .order_by(Character.name.asc(), Character.id.asc())
         ).all()
+
+
+def count_enabled_autonomous_world_characters(
+    db: Session,
+    *,
+    world_id: str,
+    exclude_character_ids: set[str] | None = None,
+) -> int:
+    """Count runnable autonomous identities for the canonical World limit."""
+
+    excluded = exclude_character_ids or set()
+    statement = (
+        select(func.count(WorldCharacter.id))
+        .join(
+            Character,
+            Character.id == WorldCharacter.character_id,
+        )
+        .where(
+            WorldCharacter.world_id == world_id,
+            WorldCharacter.control_mode == "autonomous",
+            WorldCharacter.status == "active",
+            WorldCharacter.autonomous_enabled.is_(True),
+            Character.deleted_at.is_(None),
+            Character.moderation_status != "suspended",
+        )
+    )
+    if excluded:
+        statement = statement.where(
+            WorldCharacter.character_id.not_in(excluded)
+        )
+    return int(db.scalar(statement) or 0)

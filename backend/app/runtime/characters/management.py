@@ -1,3 +1,4 @@
+from app.runtime.world_characters.queries import count_enabled_autonomous_world_characters
 from app.domains.characters.service import mutations as character_mutations
 from datetime import UTC, datetime, timedelta
 import hashlib
@@ -86,7 +87,6 @@ from app.services.runtime_boundary import (
     openclaw_auth_profiles,
 )
 from app.domains.world_characters.public import (
-    count_enabled_autonomous_world_characters,
     is_owner_controlled_character,
     lock_world_autonomy_capacity,
     selected_autonomous_world_character,

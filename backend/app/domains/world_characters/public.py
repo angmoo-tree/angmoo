@@ -31,7 +31,7 @@ from app.domains.world_characters.models import (
     WorldActivityRepertoire,
     WorldCommunityProfile,
 )
-from app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup import (
+from app.domains.world_characters.service.autonomous_setup import (
     OWNER_REGENERATION_LIMIT_24H,
     PROFILE_REGENERATION_LIMIT_24H,
     WorldCharacterSetupConflictError,
@@ -40,7 +40,6 @@ from app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup imp
     WorldCharacterSetupNotFoundError,
     WorldCharacterSetupValidationError,
     approve_setup,
-    count_enabled_autonomous_world_characters,
     enter_world,
     generate_setup,
     get_setup,
@@ -64,9 +63,8 @@ from app.domains.world_characters.contracts.studio_lifecycle import (
 from app.domains.world_characters.service.seed import (
     seed_autonomous_world_character,
 )
-from app.domains.world_characters.infrastructure.sqlalchemy_runtime_modes import (
+from app.domains.world_characters.service.runtime_modes import (
     AutonomousRuntimeModeRepairResult,
-    reconcile_local_autonomous_runtime_modes,
 )
 
 
@@ -106,7 +104,6 @@ __all__ = [
     "OwnerControlledIdentityService",
     "approve_setup",
     "character_contract_hash",
-    "count_enabled_autonomous_world_characters",
     "enter_world",
     "generate_setup",
     "get_setup",
@@ -116,7 +113,6 @@ __all__ = [
     "lock_world_autonomy_capacity",
     "owner_controlled_character_ids",
     "preflight_setup",
-    "reconcile_local_autonomous_runtime_modes",
     "reject_setup",
     "retry_setup",
     "selected_autonomous_world_character",

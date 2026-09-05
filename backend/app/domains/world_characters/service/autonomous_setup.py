@@ -9,11 +9,13 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.ids import uuid7_string
-from app.domains.identity.public import (
-    CredentialMaterial,
-    CredentialPurpose,
-    CredentialResolutionError,
-    CredentialResolver,
+from app.domains.identity.contracts import CredentialMaterial, CredentialPurpose
+from app.domains.identity.service.credential_resolution import CredentialResolutionError, CredentialResolver
+from app.domains.identity.service.world_character_credentials import find_world_character_credential
+from app.domains.characters.service.profile import get_character
+from app.domains.characters.contracts import CharacterOwner
+from app.domains.world_characters.exceptions import (
+    WorldCharacterSetupError, WorldCharacterSetupNotFoundError, WorldCharacterSetupForbiddenError, WorldCharacterSetupConflictError, WorldCharacterSetupValidationError,
 )
 from app.domains.world_characters.schemas import setup as schemas
 from app.domains.world_characters.contracts.runtime_modes import (
@@ -21,18 +23,18 @@ from app.domains.world_characters.contracts.runtime_modes import (
     AUTONOMOUS_FEED_RUNTIME_MODE,
 )
 from app.domains.world_characters.service import setup_validation as world_character_contracts
-from app.domains.world_characters.infrastructure import autonomous_setup_models as models
+from app.domains.world_characters import models
 from app.domains.world_characters import client as world_character_provider
-from app.domains.world_characters.infrastructure.sqlalchemy_runtime_modes import (
+from app.domains.world_characters.service.runtime_modes import (
     repair_local_autonomous_runtime_mode,
 )
-from app.domains.worlds.public import (
-    NO_SPECIFIC_ROLE_KEY,
+from app.domains.worlds.contracts import NO_SPECIFIC_ROLE_KEY
+from app.domains.worlds.service import (
     ReservedWorldRoleConflictError,
     build_world_generation_context,
     ensure_no_specific_role,
-    refresh_world_contract,
 )
+from app.domains.worlds.service import character_entry as world_entry
 from app.integrations import direct_llm
 from app.providers.registry import get_model_spec
 
@@ -41,41 +43,12 @@ PROFILE_REGENERATION_LIMIT_24H = 2
 OWNER_REGENERATION_LIMIT_24H = 5
 
 
-class WorldCharacterSetupError(Exception):
-    reason_code = "world_character_setup_error"
-
-
-class WorldCharacterSetupNotFoundError(WorldCharacterSetupError):
-    reason_code = "world_character_not_found"
-
-
-class WorldCharacterSetupForbiddenError(WorldCharacterSetupError):
-    reason_code = "character_not_owned"
-
-
-class WorldCharacterSetupConflictError(WorldCharacterSetupError):
-    reason_code = "setup_in_progress"
-
-    def __init__(self, reason_code: str | None = None) -> None:
-        if reason_code is not None:
-            self.reason_code = reason_code
-        super().__init__(self.reason_code)
-
-
-class WorldCharacterSetupValidationError(WorldCharacterSetupError):
-    reason_code = "world_character_ineligible"
-
-    def __init__(self, reason_code: str) -> None:
-        self.reason_code = reason_code
-        super().__init__(reason_code)
-
-
 @dataclass(frozen=True)
 class SetupScope:
-    world: models.World
-    membership: models.WorldMembership
+    world: Any
+    membership: Any
     world_character: models.WorldCharacter
-    character: models.Character
+    character: Any
 
 
 def selected_autonomous_world_character(
@@ -115,37 +88,6 @@ def lock_world_autonomy_capacity(db: Session, *, world_id: str) -> None:
     )
 
 
-def count_enabled_autonomous_world_characters(
-    db: Session,
-    *,
-    world_id: str,
-    exclude_character_ids: set[str] | None = None,
-) -> int:
-    """Count runnable autonomous identities for the canonical World limit."""
-
-    excluded = exclude_character_ids or set()
-    statement = (
-        select(func.count(models.WorldCharacter.id))
-        .join(
-            models.Character,
-            models.Character.id == models.WorldCharacter.character_id,
-        )
-        .where(
-            models.WorldCharacter.world_id == world_id,
-            models.WorldCharacter.control_mode == "autonomous",
-            models.WorldCharacter.status == "active",
-            models.WorldCharacter.autonomous_enabled.is_(True),
-            models.Character.deleted_at.is_(None),
-            models.Character.moderation_status != "suspended",
-        )
-    )
-    if excluded:
-        statement = statement.where(
-            models.WorldCharacter.character_id.not_in(excluded)
-        )
-    return int(db.scalar(statement) or 0)
-
-
 def set_active_world_character_autonomy(
     db: Session,
     *,
@@ -176,15 +118,15 @@ def enter_world(
     db: Session,
     *,
     world_id: str,
-    user: models.User,
+    user: CharacterOwner,
     data: schemas.WorldCharacterEntryCreate,
 ) -> schemas.WorldCharacterEntryRead:
-    world = db.get(models.World, world_id)
+    world = world_entry.get_character_entry_world(db, world_id)
     if world is None:
         raise WorldCharacterSetupNotFoundError(world_id)
     if world.status != "published" or world.readiness_status != "publish_ready":
         raise WorldCharacterSetupValidationError("world_not_published")
-    character = db.get(models.Character, data.character_id)
+    character = get_character(db, data.character_id)
     if (
         character is None
         or character.deleted_at is not None
@@ -194,36 +136,15 @@ def enter_world(
     if character.moderation_status != "active":
         raise WorldCharacterSetupValidationError("world_character_ineligible")
 
-    membership = db.scalar(
-        select(models.WorldMembership).where(
-            models.WorldMembership.world_id == world_id,
-            models.WorldMembership.user_id == user.id,
-        )
-    )
+    membership = world_entry.find_character_entry_membership(db, world_id=world_id, user_id=user.id)
     if membership is None:
         if world.join_policy != "open":
             raise WorldCharacterSetupValidationError("membership_inactive")
-        membership = models.WorldMembership(
-            id=uuid7_string(),
-            world_id=world_id,
-            user_id=user.id,
-            role="member",
-            status="active",
-            requested_by_user_id=user.id,
-            approved_by_user_id=user.id,
-            joined_at=datetime.now(UTC),
-        )
-        db.add(membership)
-        db.flush()
+        membership = world_entry.seed_open_character_membership(db, world_id=world_id, user_id=user.id)
     elif membership.status != "active":
         raise WorldCharacterSetupValidationError("membership_inactive")
 
-    role_statement = select(models.WorldRole).where(
-        models.WorldRole.world_id == world_id,
-        models.WorldRole.status == "enabled",
-        models.WorldRole.autonomous_allowed.is_(True),
-    )
-    roles = list(db.scalars(role_statement))
+    roles = world_entry.list_autonomous_entry_roles(db, world_id=world_id)
     if data.role_key is None:
         raise WorldCharacterSetupValidationError("role_required")
     if data.role_key == NO_SPECIFIC_ROLE_KEY:
@@ -233,9 +154,7 @@ def enter_world(
             raise WorldCharacterSetupValidationError(
                 "world_reference_invalid"
             ) from exc
-        if refresh_world_contract(db, world):
-            world.definition_version += 1
-            world.row_version += 1
+        world_entry.refresh_entry_world_contract(db, world)
         db.flush()
     else:
         role = next((item for item in roles if item.role_key == data.role_key), None)
@@ -344,9 +263,9 @@ def get_world_entry(
     *,
     world_id: str,
     character_id: str,
-    user: models.User,
+    user: CharacterOwner,
 ) -> schemas.WorldCharacterEntryRead:
-    character = db.get(models.Character, character_id)
+    character = get_character(db, character_id)
     if character is None or character.deleted_at is not None:
         raise WorldCharacterSetupNotFoundError(character_id)
     if character.owner_id != user.id:
@@ -374,10 +293,10 @@ def update_world_character_role(
     *,
     world_id: str,
     character_id: str,
-    user: models.User,
+    user: CharacterOwner,
     data: schemas.WorldCharacterRoleUpdate,
 ) -> schemas.WorldCharacterEntryRead:
-    character = db.get(models.Character, character_id)
+    character = get_character(db, character_id)
     if character is None or character.deleted_at is not None:
         raise WorldCharacterSetupNotFoundError(character_id)
     if character.owner_id != user.id:
@@ -398,7 +317,7 @@ def update_world_character_role(
         )
     if world_character.version != data.version:
         raise WorldCharacterSetupConflictError("row_version_conflict")
-    world = db.get(models.World, world_id)
+    world = world_entry.get_character_entry_world(db, world_id)
     if world is None:
         raise WorldCharacterSetupNotFoundError(world_id)
     if data.role_key == NO_SPECIFIC_ROLE_KEY:
@@ -408,18 +327,9 @@ def update_world_character_role(
             raise WorldCharacterSetupValidationError(
                 "world_reference_invalid"
             ) from exc
-        if refresh_world_contract(db, world):
-            world.definition_version += 1
-            world.row_version += 1
+        world_entry.refresh_entry_world_contract(db, world)
     else:
-        role = db.scalar(
-            select(models.WorldRole).where(
-                models.WorldRole.world_id == world_id,
-                models.WorldRole.role_key == data.role_key,
-                models.WorldRole.status == "enabled",
-                models.WorldRole.autonomous_allowed.is_(True),
-            )
-        )
+        role = world_entry.find_autonomous_entry_role(db, world_id=world_id, role_key=data.role_key)
         if role is None:
             raise WorldCharacterSetupValidationError("world_reference_invalid")
     if world_character.role_key != role.role_key:
@@ -448,17 +358,10 @@ def update_world_character_role(
     return _entry_read(world_character, reused=False)
 
 
-def _require_autonomous_role(db: Session, scope: SetupScope) -> models.WorldRole:
+def _require_autonomous_role(db: Session, scope: SetupScope) -> Any:
     if scope.world_character.role_key is None:
         raise WorldCharacterSetupValidationError("role_required")
-    role = db.scalar(
-        select(models.WorldRole).where(
-            models.WorldRole.world_id == scope.world.id,
-            models.WorldRole.role_key == scope.world_character.role_key,
-            models.WorldRole.status == "enabled",
-            models.WorldRole.autonomous_allowed.is_(True),
-        )
-    )
+    role = world_entry.find_autonomous_entry_role(db, world_id=scope.world.id, role_key=scope.world_character.role_key)
     if role is None:
         raise WorldCharacterSetupValidationError("world_reference_invalid")
     return role
@@ -468,7 +371,7 @@ def _load_scope(
     db: Session,
     *,
     world_character_id: str,
-    user: models.User,
+    user: CharacterOwner,
     lock_for_update: bool = False,
 ) -> SetupScope:
     statement = select(models.WorldCharacter).where(
@@ -479,7 +382,7 @@ def _load_scope(
     world_character = db.scalar(statement)
     if world_character is None:
         raise WorldCharacterSetupNotFoundError(world_character_id)
-    character = db.get(models.Character, world_character.character_id)
+    character = get_character(db, world_character.character_id)
     if character is None or character.deleted_at is not None:
         raise WorldCharacterSetupNotFoundError(world_character_id)
     if character.owner_id != user.id:
@@ -488,7 +391,7 @@ def _load_scope(
         raise WorldCharacterSetupValidationError(
             "owner_controlled_automation_disabled"
         )
-    membership = db.get(models.WorldMembership, world_character.membership_id)
+    membership = world_entry.get_character_entry_membership(db, world_character.membership_id)
     if (
         membership is None
         or membership.world_id != world_character.world_id
@@ -496,7 +399,7 @@ def _load_scope(
         or membership.status != "active"
     ):
         raise WorldCharacterSetupValidationError("membership_inactive")
-    world = db.get(models.World, world_character.world_id)
+    world = world_entry.get_character_entry_world(db, world_character.world_id)
     if world is None:
         raise WorldCharacterSetupNotFoundError(world_character_id)
     if world.status != "published" or world.readiness_status != "publish_ready":
@@ -540,17 +443,11 @@ def _select_active_world_character(
 
 
 def _resolve_material(db: Session, scope: SetupScope) -> CredentialMaterial:
-    credential = db.scalar(
-        select(models.LlmCredential)
-        .where(models.LlmCredential.character_id == scope.character.id)
-        .where(models.LlmCredential.purpose == "agent")
-    )
+    credential = find_world_character_credential(db, character_id=scope.character.id)
     try:
         material = CredentialResolver.resolve_llm_credential(
-            credential,
-            purpose=CredentialPurpose.WORLD_CHARACTER_SETUP_LLM,
-            owner_id=scope.character.owner_id,
-            character_id=scope.character.id,
+            credential, purpose=CredentialPurpose.WORLD_CHARACTER_SETUP_LLM,
+            owner_id=scope.character.owner_id, character_id=scope.character.id,
         )
         get_model_spec(material.provider, material.model)
     except (CredentialResolutionError, ValueError) as exc:
@@ -569,7 +466,7 @@ def preflight_setup(
     db: Session,
     *,
     world_character_id: str,
-    user: models.User,
+    user: CharacterOwner,
 ) -> schemas.WorldCharacterSetupPreflightRead:
     scope = _load_scope(db, world_character_id=world_character_id, user=user)
     _require_autonomous_role(db, scope)
@@ -608,7 +505,7 @@ async def generate_setup(
     db: Session,
     *,
     world_character_id: str,
-    user: models.User,
+    user: CharacterOwner,
     data: schemas.WorldCharacterSetupGenerateCreate,
     provider: world_character_provider.WorldCharacterSetupProvider | None = None,
 ) -> schemas.WorldCharacterSetupRead:
@@ -725,7 +622,7 @@ async def retry_setup(
     db: Session,
     *,
     world_character_id: str,
-    user: models.User,
+    user: CharacterOwner,
     data: schemas.WorldCharacterSetupRetryCreate,
     provider: world_character_provider.WorldCharacterSetupProvider | None = None,
 ) -> schemas.WorldCharacterSetupRead:
@@ -797,7 +694,7 @@ async def _generate_repertoire_stage(
     db: Session,
     *,
     scope: SetupScope,
-    user: models.User,
+    user: CharacterOwner,
     data: schemas.WorldCharacterSetupGenerateCreate,
     material: CredentialMaterial,
     stage_provider: world_character_provider.WorldCharacterSetupProvider,
@@ -879,7 +776,7 @@ def approve_setup(
     db: Session,
     *,
     world_character_id: str,
-    user: models.User,
+    user: CharacterOwner,
     data: schemas.WorldCharacterSetupApproveCreate,
 ) -> schemas.WorldCharacterSetupRead:
     scope = _load_scope(
@@ -1049,7 +946,7 @@ def reject_setup(
     db: Session,
     *,
     world_character_id: str,
-    user: models.User,
+    user: CharacterOwner,
     data: schemas.WorldCharacterSetupRejectCreate,
 ) -> schemas.WorldCharacterSetupRead:
     scope = _load_scope(db, world_character_id=world_character_id, user=user)
@@ -1112,7 +1009,7 @@ def get_setup(
     db: Session,
     *,
     world_character_id: str,
-    user: models.User,
+    user: CharacterOwner,
     reused: bool = False,
 ) -> schemas.WorldCharacterSetupRead:
     scope = _load_scope(db, world_character_id=world_character_id, user=user)
@@ -1378,7 +1275,7 @@ def _reload_and_assert_hashes(
     db: Session,
     *,
     scope: SetupScope,
-    user: models.User,
+    user: CharacterOwner,
     character_hash: str,
     world_hash: str,
 ) -> SetupScope:
