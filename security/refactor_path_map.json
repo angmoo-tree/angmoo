@@ -177,7 +177,21 @@
     "backend/tests/test_world_definition_contract.py": "backend/tests/worlds/test_definition_contract.py",
     "backend/app/services/world_definitions.py": "backend/app/domains/worlds/service/definition.py",
     "backend/app/services/world_generation_context.py": "backend/app/domains/worlds/service/generation_context.py",
-    "backend/app/domains/worlds/api/__init__.py": "backend/app/domains/worlds/__init__.py"
+    "backend/app/domains/worlds/api/__init__.py": "backend/app/domains/worlds/__init__.py",
+    "backend/app/domains/world_characters/infrastructure/sqlalchemy_models.py": "backend/app/domains/world_characters/models.py",
+    "backend/app/domains/world_characters/infrastructure/sqlalchemy_setup_models.py": "backend/app/domains/world_characters/models.py",
+    "backend/app/domains/world_characters/api/schemas.py": "backend/app/domains/world_characters/schemas/identity.py",
+    "backend/app/domains/world_characters/api/setup_schemas.py": "backend/app/domains/world_characters/schemas/setup.py",
+    "backend/app/domains/world_characters/domain/owner_controlled_identity.py": "backend/app/domains/world_characters/contracts/owner_identity.py",
+    "backend/app/domains/world_characters/domain/public_profile.py": "backend/app/domains/world_characters/contracts/public_profile.py",
+    "backend/app/domains/world_characters/domain/studio_lifecycle.py": "backend/app/domains/world_characters/contracts/studio_lifecycle.py",
+    "backend/app/domains/world_characters/domain/studio_surface.py": "backend/app/domains/world_characters/contracts/studio_surface.py",
+    "backend/app/domains/world_characters/domain/seed.py": "backend/app/domains/world_characters/contracts/seed.py",
+    "backend/app/domains/world_characters/domain/runtime_modes.py": "backend/app/domains/world_characters/contracts/runtime_modes.py",
+    "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py": "backend/app/domains/world_characters/service/setup_validation.py",
+    "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py": "backend/app/domains/world_characters/client.py",
+    "backend/app/domains/world_characters/infrastructure/sqlalchemy_seed.py": "backend/app/domains/world_characters/service/seed.py",
+    "backend/tests/test_world_character_contracts.py": "backend/tests/world_characters/test_setup_contracts.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -359,7 +373,17 @@
     "tests/test_world_definition_contract.py::test_generation_context_excludes_owner_media_and_workflow_fields": "tests/worlds/test_definition_contract.py::test_generation_context_excludes_owner_media_and_workflow_fields",
     "tests/test_world_definition_contract.py::test_name_only_draft_is_saved_but_not_publish_ready": "tests/worlds/test_definition_contract.py::test_name_only_draft_is_saved_but_not_publish_ready",
     "tests/test_world_definition_contract.py::test_optional_catalog_is_versioned_archived_and_hash_stable_by_order": "tests/worlds/test_definition_contract.py::test_optional_catalog_is_versioned_archived_and_hash_stable_by_order",
-    "tests/test_world_definition_contract.py::test_semantic_change_updates_hash_but_banner_and_visibility_do_not": "tests/worlds/test_definition_contract.py::test_semantic_change_updates_hash_but_banner_and_visibility_do_not"
+    "tests/test_world_definition_contract.py::test_semantic_change_updates_hash_but_banner_and_visibility_do_not": "tests/worlds/test_definition_contract.py::test_semantic_change_updates_hash_but_banner_and_visibility_do_not",
+    "tests/test_world_character_contracts.py::test_character_contract_hash_is_stable_and_excludes_unrelated_fields": "tests/world_characters/test_setup_contracts.py::test_character_contract_hash_is_stable_and_excludes_unrelated_fields",
+    "tests/test_world_character_contracts.py::test_community_profile_contract_normalizes_and_requires_exact_keys": "tests/world_characters/test_setup_contracts.py::test_community_profile_contract_normalizes_and_requires_exact_keys",
+    "tests/test_world_character_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties": "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
+    "tests/test_world_character_contracts.py::test_generation_input_contains_only_same_world_safe_context": "tests/world_characters/test_setup_contracts.py::test_generation_input_contains_only_same_world_safe_context",
+    "tests/test_world_character_contracts.py::test_repertoire_contract_accepts_exact_4_by_10": "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+    "tests/test_world_character_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references": "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references",
+    "tests/test_world_character_contracts.py::test_repertoire_contract_rejects_exact_and_near_duplicates": "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_exact_and_near_duplicates",
+    "tests/test_world_character_contracts.py::test_repertoire_contract_rejects_wrong_total[39]": "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_wrong_total[39]",
+    "tests/test_world_character_contracts.py::test_repertoire_contract_rejects_wrong_total[41]": "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_wrong_total[41]",
+    "tests/test_world_character_contracts.py::test_repertoire_transport_uses_domain_keys_and_server_enforces_text_bounds": "tests/world_characters/test_setup_contracts.py::test_repertoire_transport_uses_domain_keys_and_server_enforces_text_bounds"
   },
   "details": {
     "AR-B1": {
@@ -4210,6 +4234,760 @@
         "contracts": "API/ORM/assertions/split unchanged; overall checker exit 1 solely pending identity introduction evidence: 9 sources, 5 nodes",
         "new_transition_nodes": 7
       }
+    },
+    "AR-B2-WC-foundation": {
+      "status": "IMPLEMENTED; focused setup35 + identity/runtime/embedded34 PASS (overlapping); public604/current2094 PASS; contract/assertion/split/node no regression, prior Identity/Worlds source introduction capture pending",
+      "scope": "Only models6, typed schemas/contracts/errors, provider client/Protocol, setup validation and flush-only seed. Real owner/setup/profile/studio/entry/lifecycle services remain in the following WC slice.",
+      "split_files": {
+        "backend/app/domains/world_characters/domain/owner_controlled_identity.py": [
+          "backend/app/domains/world_characters/contracts/owner_identity.py",
+          "backend/app/domains/world_characters/exceptions.py"
+        ],
+        "backend/app/domains/world_characters/domain/public_profile.py": [
+          "backend/app/domains/world_characters/contracts/public_profile.py",
+          "backend/app/domains/world_characters/exceptions.py"
+        ],
+        "backend/app/domains/world_characters/domain/studio_lifecycle.py": [
+          "backend/app/domains/world_characters/contracts/studio_lifecycle.py",
+          "backend/app/domains/world_characters/exceptions.py"
+        ],
+        "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py": [
+          "backend/app/domains/world_characters/service/setup_validation.py",
+          "backend/app/domains/world_characters/contracts/setup.py",
+          "backend/app/domains/world_characters/exceptions.py"
+        ],
+        "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py": [
+          "backend/app/domains/world_characters/client.py",
+          "backend/app/domains/world_characters/contracts/provider.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/domains/world_characters/domain/owner_controlled_identity.py::LocalOwnerRequiredError",
+          "new": "backend/app/domains/world_characters/exceptions.py::LocalOwnerRequiredError",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_owner_controlled_world_character.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/domain/owner_controlled_identity.py::OwnerControlledIdentityConflictError",
+          "new": "backend/app/domains/world_characters/exceptions.py::OwnerControlledIdentityConflictError",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_owner_controlled_world_character.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/domain/owner_controlled_identity.py::OwnerControlledIdentityError",
+          "new": "backend/app/domains/world_characters/exceptions.py::OwnerControlledIdentityError",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_owner_controlled_world_character.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/domain/owner_controlled_identity.py::OwnerControlledIdentityNotFoundError",
+          "new": "backend/app/domains/world_characters/exceptions.py::OwnerControlledIdentityNotFoundError",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_owner_controlled_world_character.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/domain/owner_controlled_identity.py::OwnerControlledIdentitySnapshot",
+          "new": "backend/app/domains/world_characters/contracts/owner_identity.py::OwnerControlledIdentitySnapshot",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_owner_controlled_world_character.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/domain/owner_controlled_identity.py::OwnerControlledProfile",
+          "new": "backend/app/domains/world_characters/contracts/owner_identity.py::OwnerControlledProfile",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_owner_controlled_world_character.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/domain/owner_controlled_identity.py::OwnerControlledRoleInvalidError",
+          "new": "backend/app/domains/world_characters/exceptions.py::OwnerControlledRoleInvalidError",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_owner_controlled_world_character.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/domain/owner_controlled_identity.py::OwnerWorldRequiredError",
+          "new": "backend/app/domains/world_characters/exceptions.py::OwnerWorldRequiredError",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_owner_controlled_world_character.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/domain/owner_controlled_identity.py::__all__",
+          "new": "backend/app/domains/world_characters/contracts/owner_identity.py::__all__",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_owner_controlled_world_character.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/domain/public_profile.py::WorldCharacterControlMode",
+          "new": "backend/app/domains/world_characters/contracts/public_profile.py::WorldCharacterControlMode",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_public_profile.py",
+            "backend/app/domains/world_characters/schemas/identity.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_owner_controlled_world_character.py::test_creator_studio_lists_existing_world_characters_without_writes"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/domain/public_profile.py::WorldCharacterProfileError",
+          "new": "backend/app/domains/world_characters/exceptions.py::WorldCharacterProfileError",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_public_profile.py",
+            "backend/app/domains/world_characters/schemas/identity.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_owner_controlled_world_character.py::test_creator_studio_lists_existing_world_characters_without_writes"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/domain/public_profile.py::WorldCharacterProfileForbiddenError",
+          "new": "backend/app/domains/world_characters/exceptions.py::WorldCharacterProfileForbiddenError",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_public_profile.py",
+            "backend/app/domains/world_characters/schemas/identity.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_owner_controlled_world_character.py::test_creator_studio_lists_existing_world_characters_without_writes"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/domain/public_profile.py::WorldCharacterProfileNotFoundError",
+          "new": "backend/app/domains/world_characters/exceptions.py::WorldCharacterProfileNotFoundError",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_public_profile.py",
+            "backend/app/domains/world_characters/schemas/identity.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_owner_controlled_world_character.py::test_creator_studio_lists_existing_world_characters_without_writes"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/domain/public_profile.py::WorldCharacterPublicProfile",
+          "new": "backend/app/domains/world_characters/contracts/public_profile.py::WorldCharacterPublicProfile",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_public_profile.py",
+            "backend/app/domains/world_characters/schemas/identity.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_owner_controlled_world_character.py::test_creator_studio_lists_existing_world_characters_without_writes"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/domain/public_profile.py::__all__",
+          "new": "backend/app/domains/world_characters/contracts/public_profile.py::__all__",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_public_profile.py",
+            "backend/app/domains/world_characters/schemas/identity.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_owner_controlled_world_character.py::test_creator_studio_lists_existing_world_characters_without_writes"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/domain/studio_lifecycle.py::CandidateReason",
+          "new": "backend/app/domains/world_characters/contracts/studio_lifecycle.py::CandidateReason",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py"
+          ],
+          "test_nodes": [
+            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/domain/studio_lifecycle.py::StudioCharacterCandidate",
+          "new": "backend/app/domains/world_characters/contracts/studio_lifecycle.py::StudioCharacterCandidate",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py"
+          ],
+          "test_nodes": [
+            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/domain/studio_lifecycle.py::StudioWorldCharacterBusyError",
+          "new": "backend/app/domains/world_characters/exceptions.py::StudioWorldCharacterBusyError",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py"
+          ],
+          "test_nodes": [
+            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/domain/studio_lifecycle.py::StudioWorldCharacterConflictError",
+          "new": "backend/app/domains/world_characters/exceptions.py::StudioWorldCharacterConflictError",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py"
+          ],
+          "test_nodes": [
+            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/domain/studio_lifecycle.py::StudioWorldCharacterForbiddenError",
+          "new": "backend/app/domains/world_characters/exceptions.py::StudioWorldCharacterForbiddenError",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py"
+          ],
+          "test_nodes": [
+            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/domain/studio_lifecycle.py::StudioWorldCharacterLifecycleError",
+          "new": "backend/app/domains/world_characters/exceptions.py::StudioWorldCharacterLifecycleError",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py"
+          ],
+          "test_nodes": [
+            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/domain/studio_lifecycle.py::StudioWorldCharacterNotFoundError",
+          "new": "backend/app/domains/world_characters/exceptions.py::StudioWorldCharacterNotFoundError",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py"
+          ],
+          "test_nodes": [
+            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/domain/studio_lifecycle.py::StudioWorldCharacterValidationError",
+          "new": "backend/app/domains/world_characters/exceptions.py::StudioWorldCharacterValidationError",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py"
+          ],
+          "test_nodes": [
+            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/domain/studio_lifecycle.py::WorldCharacterLeaveResult",
+          "new": "backend/app/domains/world_characters/contracts/studio_lifecycle.py::WorldCharacterLeaveResult",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py"
+          ],
+          "test_nodes": [
+            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/domain/studio_lifecycle.py::__all__",
+          "new": "backend/app/domains/world_characters/contracts/studio_lifecycle.py::__all__",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py"
+          ],
+          "test_nodes": [
+            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::CHARACTER_CONTRACT_VERSION",
+          "new": "backend/app/domains/world_characters/service/setup_validation.py::CHARACTER_CONTRACT_VERSION",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+            "backend/app/domains/world_characters/client.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::DAYPARTS",
+          "new": "backend/app/domains/world_characters/service/setup_validation.py::DAYPARTS",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+            "backend/app/domains/world_characters/client.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::NEAR_DUPLICATE_JACCARD_THRESHOLD",
+          "new": "backend/app/domains/world_characters/service/setup_validation.py::NEAR_DUPLICATE_JACCARD_THRESHOLD",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+            "backend/app/domains/world_characters/client.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::REPERTOIRE_SCHEMA_VERSION",
+          "new": "backend/app/domains/world_characters/service/setup_validation.py::REPERTOIRE_SCHEMA_VERSION",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+            "backend/app/domains/world_characters/client.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::ValidatedActivityCandidate",
+          "new": "backend/app/domains/world_characters/contracts/setup.py::ValidatedActivityCandidate",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/setup_validation.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::ValidatedActivityRepertoire",
+          "new": "backend/app/domains/world_characters/contracts/setup.py::ValidatedActivityRepertoire",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/setup_validation.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::WORLD_CHARACTER_GENERATOR_VERSION",
+          "new": "backend/app/domains/world_characters/service/setup_validation.py::WORLD_CHARACTER_GENERATOR_VERSION",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+            "backend/app/domains/world_characters/client.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::WorldCharacterContractError",
+          "new": "backend/app/domains/world_characters/exceptions.py::WorldCharacterContractError",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/setup_validation.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::_NON_WORD",
+          "new": "backend/app/domains/world_characters/service/setup_validation.py::_NON_WORD",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/setup_validation.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::_candidate_cluster",
+          "new": "backend/app/domains/world_characters/service/setup_validation.py::_candidate_cluster",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/setup_validation.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::_candidate_comparison_document",
+          "new": "backend/app/domains/world_characters/service/setup_validation.py::_candidate_comparison_document",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/setup_validation.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::_canonical_json",
+          "new": "backend/app/domains/world_characters/service/setup_validation.py::_canonical_json",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/setup_validation.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::_canonical_text",
+          "new": "backend/app/domains/world_characters/service/setup_validation.py::_canonical_text",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/setup_validation.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::_canonicalize_local_profile",
+          "new": "backend/app/domains/world_characters/service/setup_validation.py::_canonicalize_local_profile",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/setup_validation.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::_character_ngram_jaccard",
+          "new": "backend/app/domains/world_characters/service/setup_validation.py::_character_ngram_jaccard",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/setup_validation.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::_character_ngrams",
+          "new": "backend/app/domains/world_characters/service/setup_validation.py::_character_ngrams",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/setup_validation.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::_comparison_text",
+          "new": "backend/app/domains/world_characters/service/setup_validation.py::_comparison_text",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/setup_validation.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::_validate_world_references",
+          "new": "backend/app/domains/world_characters/service/setup_validation.py::_validate_world_references",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/setup_validation.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::build_character_contract",
+          "new": "backend/app/domains/world_characters/service/setup_validation.py::build_character_contract",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+            "backend/app/domains/world_characters/client.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::build_world_character_generation_input",
+          "new": "backend/app/domains/world_characters/service/setup_validation.py::build_world_character_generation_input",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+            "backend/app/domains/world_characters/client.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::canonical_candidate_signature",
+          "new": "backend/app/domains/world_characters/service/setup_validation.py::canonical_candidate_signature",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+            "backend/app/domains/world_characters/client.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::canonical_sha256",
+          "new": "backend/app/domains/world_characters/service/setup_validation.py::canonical_sha256",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+            "backend/app/domains/world_characters/client.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::character_contract_hash",
+          "new": "backend/app/domains/world_characters/service/setup_validation.py::character_contract_hash",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+            "backend/app/domains/world_characters/client.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::validate_activity_repertoire",
+          "new": "backend/app/domains/world_characters/service/setup_validation.py::validate_activity_repertoire",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+            "backend/app/domains/world_characters/client.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::validate_community_profile",
+          "new": "backend/app/domains/world_characters/service/setup_validation.py::validate_community_profile",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+            "backend/app/domains/world_characters/client.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
+            "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_daypart_and_cross_world_references"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py::DirectLlmWorldCharacterSetupProvider",
+          "new": "backend/app/domains/world_characters/client.py::DirectLlmWorldCharacterSetupProvider",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
+            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py::GEMINI_PROFILE_RESPONSE_SCHEMA",
+          "new": "backend/app/domains/world_characters/client.py::GEMINI_PROFILE_RESPONSE_SCHEMA",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
+            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py::GEMINI_REPERTOIRE_RESPONSE_SCHEMAS",
+          "new": "backend/app/domains/world_characters/client.py::GEMINI_REPERTOIRE_RESPONSE_SCHEMAS",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
+            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py::PROFILE_MAX_OUTPUT_TOKENS",
+          "new": "backend/app/domains/world_characters/client.py::PROFILE_MAX_OUTPUT_TOKENS",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
+            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py::REPERTOIRE_DAYPART_BATCHES",
+          "new": "backend/app/domains/world_characters/client.py::REPERTOIRE_DAYPART_BATCHES",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
+            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py::REPERTOIRE_MAX_OUTPUT_TOKENS",
+          "new": "backend/app/domains/world_characters/client.py::REPERTOIRE_MAX_OUTPUT_TOKENS",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
+            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py::WorldCharacterProviderResult",
+          "new": "backend/app/domains/world_characters/contracts/provider.py::WorldCharacterProviderResult",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/client.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
+            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py::WorldCharacterSetupProvider",
+          "new": "backend/app/domains/world_characters/contracts/provider.py::WorldCharacterSetupProvider",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/client.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
+            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py::_PROFILE_SYSTEM_PROMPT",
+          "new": "backend/app/domains/world_characters/client.py::_PROFILE_SYSTEM_PROMPT",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/client.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
+            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py::_REPERTOIRE_SYSTEM_PROMPT",
+          "new": "backend/app/domains/world_characters/client.py::_REPERTOIRE_SYSTEM_PROMPT",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/client.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
+            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py::_REPERTOIRE_TRANSPORT_FIELDS",
+          "new": "backend/app/domains/world_characters/client.py::_REPERTOIRE_TRANSPORT_FIELDS",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/client.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
+            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py::_context",
+          "new": "backend/app/domains/world_characters/client.py::_context",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/client.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
+            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py::_data_prompt",
+          "new": "backend/app/domains/world_characters/client.py::_data_prompt",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/client.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
+            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py::_expand_repertoire_transport",
+          "new": "backend/app/domains/world_characters/client.py::_expand_repertoire_transport",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/client.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
+            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py::_result",
+          "new": "backend/app/domains/world_characters/client.py::_result",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/client.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
+            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py::build_gemini_repertoire_response_schema",
+          "new": "backend/app/domains/world_characters/client.py::build_gemini_repertoire_response_schema",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
+            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        }
+      ],
+      "test_ownership": {
+        "backend/tests/test_world_character_contracts.py": "backend/tests/world_characters/test_setup_contracts.py"
+      },
+      "model_merge": "A single WorldCharacter models.py retains all six exact table definitions and the single shared JSON variant. Both frozen v2->v3 model imports alias the same class objects.",
+      "provider": "Move the same two logical stages/three normal physical requests, limits, wire grammar, counters and validator bodies. Provider result/Protocol are structural contracts; CharacterGenerationRecord contains only fields already used by the existing safe-generation hash.",
+      "retired_legacy_edges": []
     }
   }
 }

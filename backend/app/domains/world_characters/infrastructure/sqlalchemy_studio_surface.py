@@ -4,12 +4,12 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.domains.characters.public import Character
-from app.domains.world_characters.domain.studio_surface import StudioWorldCharacter
-from app.domains.world_characters.infrastructure.sqlalchemy_models import (
+from app.domains.world_characters.contracts.studio_surface import StudioWorldCharacter
+from app.domains.world_characters.models import (
     CharacterActiveWorld,
     WorldCharacter,
 )
-from app.domains.world_characters.infrastructure.sqlalchemy_setup_models import (
+from app.domains.world_characters.models import (
     WorldActivityRepertoire,
     WorldCommunityProfile,
 )

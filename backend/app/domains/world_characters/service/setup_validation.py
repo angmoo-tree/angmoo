@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from collections import Counter
-from dataclasses import dataclass
 import hashlib
 import json
 import re
@@ -10,9 +9,15 @@ import unicodedata
 
 from pydantic import ValidationError
 
-from app.domains.characters.public import Character
-from app.domains.world_characters.api import setup_schemas as schemas
-from app.domains.world_characters.infrastructure.sqlalchemy_models import WorldCharacter
+from app.domains.world_characters.contracts.setup import (
+    CharacterGenerationRecord as Character,
+    ValidatedActivityCandidate,
+    ValidatedActivityRepertoire,
+)
+from app.domains.world_characters.exceptions import WorldCharacterContractError
+from app.domains.world_characters.schemas import setup as schemas
+from app.domains.world_characters import models
+from app.domains.world_characters.models import WorldCharacter
 
 
 CHARACTER_CONTRACT_VERSION = "p2-character-contract-v1"
@@ -22,32 +27,6 @@ NEAR_DUPLICATE_JACCARD_THRESHOLD = 0.88
 DAYPARTS = ("dawn", "morning", "afternoon", "evening")
 
 _NON_WORD = re.compile(r"[^\w\s-]+", flags=re.UNICODE)
-
-
-class WorldCharacterContractError(ValueError):
-    def __init__(
-        self,
-        reason_code: str,
-        *,
-        details: Mapping[str, int | str] | None = None,
-    ) -> None:
-        self.reason_code = reason_code
-        self.details = dict(details or {})
-        super().__init__(reason_code)
-
-
-@dataclass(frozen=True)
-class ValidatedActivityCandidate:
-    payload: schemas.WorldActivityCandidatePayload
-    ordinal: int
-    canonical_signature: str
-
-
-@dataclass(frozen=True)
-class ValidatedActivityRepertoire:
-    candidates: tuple[ValidatedActivityCandidate, ...]
-    daypart_counts: dict[str, int]
-    near_duplicate_pair_count: int
 
 
 def _canonical_text(value: str | None) -> str:

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from app.domains.world_characters.domain.public_profile import (
+from app.domains.world_characters.contracts.public_profile import (
     WorldCharacterPublicProfile,
 )
 

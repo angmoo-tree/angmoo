@@ -12,16 +12,14 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.sqlite_concurrency import run_sqlite_session_immediate
-from app.domains.world_characters.domain.runtime_modes import (
+from app.domains.world_characters.contracts.runtime_modes import (
     AUTONOMOUS_ACTIVITY_RUNTIME_MODE,
     AUTONOMOUS_FEED_RUNTIME_MODE,
     LEGACY_FEED_RUNTIME_MODE,
     is_affected_local_entry_runtime_pair,
 )
-from app.domains.world_characters.infrastructure import (
-    autonomous_setup_contracts as world_character_contracts,
-    autonomous_setup_models as models,
-)
+from app.domains.world_characters.service import setup_validation as world_character_contracts
+from app.domains.world_characters.infrastructure import autonomous_setup_models as models
 @dataclass(frozen=True, slots=True)
 class AutonomousRuntimeModeRepairResult:
     scanned_count: int

@@ -10,6 +10,9 @@ Angmoo 백엔드는 **업무별 도메인 안에 HTTP 처리, 업무 흐름, 데
 
 > **AR-B2 Worlds 적용 범위:** World 정의·readiness·생성·배너와 10개 HTTP 경로는 `worlds/models.py`, `schemas.py`, `contracts.py`, `exceptions.py`, `storage.py`, `service/`, `router.py`가 소유합니다. WorldCharacter의 4개 기존 HTTP 경로와 setup/lifecycle은 다음 B2 PR 범위입니다. Worlds 전체를 완료 scope로 올리지 않고 실제 새 역할 12개 module만 검사합니다. `worlds.public` 및 frozen SQLite v2→v3가 사용하는 옛 경로 4개는 같은 객체를 제공하는 추적된 호환 경로입니다.
 
+> **AR-B2 WorldCharacter 기반 적용 범위:** 6개 ORM은 `world_characters/models.py`, 입출력은 `schemas/identity.py`·`schemas/setup.py`, 순수 업무 계약은 `contracts/`, 오류는 `exceptions.py`가 소유합니다. 생성기 통신은 `client.py`, 응답 검증은 `service/setup_validation.py`, Package용 seed는 `service/seed.py`에 있습니다. 소유자·입장·승인·Studio 실행 흐름의 실제 이전은 다음 slice이며, 현재 기존 workflow가 새 기반을 소비하는 정확한 bridge만 허용합니다. immutable SQLite migration이 사용하는 옛 ORM 경로 두 개는 같은 class 객체의 alias로 유지합니다.
+
+
 ## 목차
 
 1. [프로젝트 구조](#1-프로젝트-구조)

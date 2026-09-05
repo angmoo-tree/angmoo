@@ -3,7 +3,7 @@
 from app.domains.world_characters.infrastructure.sqlalchemy_owner_controlled_identity import (
     SqlAlchemyOwnerControlledIdentityRepository,
 )
-from app.domains.world_characters.domain.public_profile import (
+from app.domains.world_characters.contracts.public_profile import (
     WorldCharacterProfileError,
     WorldCharacterProfileForbiddenError,
     WorldCharacterProfileNotFoundError,
@@ -12,24 +12,24 @@ from app.domains.world_characters.domain.public_profile import (
 from app.domains.world_characters.infrastructure.sqlalchemy_public_profile import (
     SqlAlchemyWorldCharacterPublicProfileReader,
 )
-from app.domains.world_characters.domain.owner_controlled_identity import (
+from app.domains.world_characters.contracts.owner_identity import (
     OwnerControlledIdentityError,
 )
-from app.domains.world_characters.domain.seed import (
+from app.domains.world_characters.contracts.seed import (
     AutonomousWorldCharacterSeedData,
 )
-from app.domains.world_characters.domain.runtime_modes import (
+from app.domains.world_characters.contracts.runtime_modes import (
     AUTONOMOUS_ACTIVITY_RUNTIME_MODE,
     AUTONOMOUS_FEED_RUNTIME_MODE,
     AUTONOMOUS_RUNTIME_MODE_PAIR,
     AutonomousRuntimeModePair,
     is_expected_autonomous_runtime_pair,
 )
-from app.domains.world_characters.infrastructure.autonomous_setup_contracts import (
+from app.domains.world_characters.service.setup_validation import (
     character_contract_hash,
 )
-from app.domains.world_characters.infrastructure.sqlalchemy_models import WorldCharacter
-from app.domains.world_characters.infrastructure.sqlalchemy_setup_models import (
+from app.domains.world_characters.models import WorldCharacter
+from app.domains.world_characters.models import (
     WorldActivityCandidate,
     WorldActivityRepertoire,
     WorldCommunityProfile,
@@ -60,7 +60,7 @@ from app.domains.world_characters.application.studio_lifecycle import (
     leave_studio_world_character,
     list_studio_character_candidates,
 )
-from app.domains.world_characters.domain.studio_lifecycle import (
+from app.domains.world_characters.contracts.studio_lifecycle import (
     StudioWorldCharacterBusyError,
     StudioWorldCharacterConflictError,
     StudioWorldCharacterForbiddenError,
@@ -71,7 +71,7 @@ from app.domains.world_characters.domain.studio_lifecycle import (
 from app.domains.world_characters.infrastructure.sqlalchemy_studio_lifecycle import (
     SqlAlchemyStudioWorldCharacterLifecycle,
 )
-from app.domains.world_characters.infrastructure.sqlalchemy_seed import (
+from app.domains.world_characters.service.seed import (
     seed_autonomous_world_character,
 )
 from app.domains.world_characters.infrastructure.sqlalchemy_runtime_modes import (

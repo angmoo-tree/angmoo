@@ -116,3 +116,6 @@ AR-B2의 identity 구현은 15개 소유 테스트 파일·기존 133 nodes와 �
 AR-B2 Worlds는 정의·생성·readiness·배너를 12개 실제 역할 module로 이전한다. 기존 Creator 테스트 2파일·11 nodes는 `tests/worlds/`로 옮기며 local-smoke·ER0·L4의 실제 실행 경로도 연결한다. Mixed Worlds router의 14개 endpoint 중 World 10개는 새 router로, WorldCharacter 4개와 leave runtime guard는 기존 경로에 남긴다. 두 앱의 router 순서와 WC에서 전달된 World 오류의 HTTP 변환도 보존한다.
 
 Worlds 부분 전환은 K03 전체 또는 WC·Package·활동·frontend 완료가 아니다. Package seed의 flush-only, 기존 World mutation의 commit, 이전 배너 정리, timezone 재예약의 같은 Session을 유지한다. `worlds.public`의 미전환 ORM 소비자와 immutable v2→v3 import 호환 4개는 정확한 bridge·후속 종료 조건으로 관리한다. 새 서비스에서 ORM 클래스를 export해 다른 업무의 저장 접근을 위장하지 않는다. 원본 3파일을 분리한 63개 symbol에는 실제 목적지·소비자·검증 node가 있으며, frozen migration과 기준선 본문은 바꾸지 않는다.
+
+
+AR-B2 WorldCharacter 기반 slice는 6개 ORM과 두 schema 묶음, 입력 계약·오류, 생성기 client, 응답 검증 및 flush-only seed를 새 역할 경로로 옮긴다. 기존 setup contract 테스트는 `tests/world_characters/test_setup_contracts.py`로 이동하며 test node·symbol map이 원본 assertion을 계속 보호한다. provider monkeypatch 호환은 같은 module 객체로 유지하고, frozen v2→v3의 옛 ORM import 두 개도 새 class와 동일한 객체다. 원본 5파일의 66개 symbol 분리를 기록했으며 setup·entry·owner·Studio workflow는 아직 후속 slice다.

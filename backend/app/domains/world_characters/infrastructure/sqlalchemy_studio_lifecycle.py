@@ -6,7 +6,7 @@ from sqlalchemy import and_, select
 from sqlalchemy.orm import Session
 
 from app.domains.characters.public import Character
-from app.domains.world_characters.domain.studio_lifecycle import (
+from app.domains.world_characters.contracts.studio_lifecycle import (
     CandidateReason,
     StudioCharacterCandidate,
     StudioWorldCharacterConflictError,
@@ -15,7 +15,7 @@ from app.domains.world_characters.domain.studio_lifecycle import (
     StudioWorldCharacterValidationError,
     WorldCharacterLeaveResult,
 )
-from app.domains.world_characters.infrastructure.sqlalchemy_models import (
+from app.domains.world_characters.models import (
     CharacterActiveWorld,
     WorldCharacter,
 )

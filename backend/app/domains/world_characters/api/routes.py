@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.api.identity_dependencies import get_current_user
 from app.api.identity_dependencies import browser_session
 from app.core.db import get_db
-from app.domains.world_characters.api.schemas import (
+from app.domains.world_characters.schemas.identity import (
     OwnerControlledIdentityRead,
     OwnerControlledProfileWrite,
     StudioCharacterCandidateListRead,
@@ -34,7 +34,7 @@ from app.domains.world_characters.application.public_profile import (
     get_world_character_profile,
     list_world_character_profiles,
 )
-from app.domains.world_characters.domain.owner_controlled_identity import (
+from app.domains.world_characters.contracts.owner_identity import (
     LocalOwnerRequiredError,
     OwnerControlledIdentityConflictError,
     OwnerControlledIdentityError,
@@ -51,7 +51,7 @@ from app.domains.world_characters.infrastructure.sqlalchemy_studio_surface impor
 from app.domains.world_characters.infrastructure.sqlalchemy_studio_lifecycle import (
     SqlAlchemyStudioWorldCharacterLifecycle,
 )
-from app.domains.world_characters.domain.public_profile import (
+from app.domains.world_characters.contracts.public_profile import (
     WorldCharacterProfileNotFoundError,
 )
 from app.domains.world_characters.infrastructure.sqlalchemy_public_profile import (

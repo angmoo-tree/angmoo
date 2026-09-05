@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.domains.world_characters.domain.owner_controlled_identity import (
+from app.domains.world_characters.contracts.owner_identity import (
     OwnerControlledIdentitySnapshot,
     OwnerControlledProfile,
 )

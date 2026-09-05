@@ -6,15 +6,15 @@ from urllib.parse import urlsplit
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from app.domains.world_characters.domain.owner_controlled_identity import (
+from app.domains.world_characters.contracts.owner_identity import (
     OwnerControlledIdentitySnapshot,
     OwnerControlledProfile,
 )
-from app.domains.world_characters.domain.public_profile import (
+from app.domains.world_characters.contracts.public_profile import (
     WorldCharacterPublicProfile,
 )
-from app.domains.world_characters.domain.studio_surface import StudioWorldCharacter
-from app.domains.world_characters.domain.studio_lifecycle import (
+from app.domains.world_characters.contracts.studio_surface import StudioWorldCharacter
+from app.domains.world_characters.contracts.studio_lifecycle import (
     StudioCharacterCandidate,
 )
 

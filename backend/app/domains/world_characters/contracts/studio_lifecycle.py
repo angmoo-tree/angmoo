@@ -1,5 +1,13 @@
 from __future__ import annotations
 
+from app.domains.world_characters.exceptions import (
+    StudioWorldCharacterLifecycleError,
+    StudioWorldCharacterNotFoundError,
+    StudioWorldCharacterForbiddenError,
+    StudioWorldCharacterConflictError,
+    StudioWorldCharacterValidationError,
+    StudioWorldCharacterBusyError,
+)
 from dataclasses import dataclass
 from typing import Literal
 
@@ -35,35 +43,6 @@ class WorldCharacterLeaveResult:
     scheduler_assignment_released: bool
     history_preserved: Literal[True]
     replayed: bool
-
-
-class StudioWorldCharacterLifecycleError(Exception):
-    reason_code = "studio_world_character_lifecycle_error"
-
-    def __init__(self, reason_code: str | None = None) -> None:
-        if reason_code is not None:
-            self.reason_code = reason_code
-        super().__init__(self.reason_code)
-
-
-class StudioWorldCharacterNotFoundError(StudioWorldCharacterLifecycleError):
-    reason_code = "world_character_not_found"
-
-
-class StudioWorldCharacterForbiddenError(StudioWorldCharacterLifecycleError):
-    reason_code = "character_not_owned"
-
-
-class StudioWorldCharacterConflictError(StudioWorldCharacterLifecycleError):
-    reason_code = "stale_world_character_version"
-
-
-class StudioWorldCharacterValidationError(StudioWorldCharacterLifecycleError):
-    reason_code = "world_character_ineligible"
-
-
-class StudioWorldCharacterBusyError(StudioWorldCharacterConflictError):
-    reason_code = "world_character_run_in_progress"
 
 
 __all__ = [

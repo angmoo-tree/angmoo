@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.core.ids import uuid7_string
 from app.domains.characters.public import Character
 from app.domains.identity.public import InstallationIdentity, LOCAL_INSTALLATION_KEY
-from app.domains.world_characters.domain.owner_controlled_identity import (
+from app.domains.world_characters.contracts.owner_identity import (
     LocalOwnerRequiredError,
     OwnerControlledIdentityConflictError,
     OwnerControlledIdentityNotFoundError,
@@ -18,7 +18,7 @@ from app.domains.world_characters.domain.owner_controlled_identity import (
     OwnerControlledRoleInvalidError,
     OwnerWorldRequiredError,
 )
-from app.domains.world_characters.infrastructure.sqlalchemy_models import (
+from app.domains.world_characters.models import (
     CharacterActiveWorld,
     WorldCharacter,
 )
