@@ -785,3 +785,9 @@ Social 쓰기·프로필·Inbox·agent 도구·미디어 job, Relationships 및 
 A3c `ac57f1e`에서 B5 source `f8d173d`의 실제 ancestry를 연결했다. 각 factory의 Package·routines·Character management/media·Creator/image generation 등록을 모두 보존하고, 겹친 Package 등록만 같은 한 번의 호출로 정리했다. Post evidence 조회와 그 실제 Session 테스트는 `social.models.posts.Post`로 연결해 A3b의 한시적 legacy Post read edge를 제거했다. 선행 Package replay hotfix와 canonical `runtime/world_packages/seed_uow.py`, Media·WC·Social 계약도 함께 유지한다.
 
 routines·proposal·routine 게시·Social joint 링크·Package seed 경합 집중 검증은 **57 passed / 1 기존 PostgreSQL skip / 56.24초**다. 현재 경계는 **669 modules / 2,192 edges / legacy exact 244 PASS**, ER0 **80/87/24/44/7**, L4 parity **97**이다. JSON 지도 병합은 원본 `old`와 실제 `new` 쌍을 함께 식별하여 하나의 원본 함수가 여러 책임으로 나뉜 증거를 잃지 않게 했다. frozen source와 기존 introduction 기록은 재작성하지 않고 합류한 기록을 보존한다. Notification의 add-only 후속 협력 source를 연결한 뒤 A3d 실제 소유 전환·최종 통합 보존 검증을 이어간다.
+
+### AR-B5-B3 후속 — 공동 활동 알림의 조회·add 책임
+
+`service/notifications.py::ensure_joint_started_notification`은 원래 notification type/joint/recipient의 정확한 조회와 없는 경우 add만 수행한다. 일반 `create_notification`의 finish_write에 합치지 않았다. Routines가 다른 참여자와 actor WC를 같은 순서로 검사한 뒤 원래 ID를 전달하고 마지막 flush를 계속 소유한다. JSON 정렬·구분자·event/Post/World/Character 필드는 동일하다.
+
+새 **1 node**는 `tests/social/test_joint_notifications.py::test_joint_notification_keeps_exact_dedupe_payload_and_caller_write_boundary`다. add-only·정확 중복 기준·기존 event 보존·다른 수신자 분리·caller rollback·원래 JSON을 실제 SQLite로 검증한다. 공동 활동 회귀와 합쳐 **7 passed / 7.42s**다. 원래 성공 source event/claim/participant/plan 상태와 알림의 같은 Session·최종 flush를 유지한다.

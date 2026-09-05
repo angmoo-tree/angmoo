@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.core.ids import uuid7_string
-from app.domains.social.service import joint_posts
+from app.domains.social.service import joint_posts, notifications
 from app.runtime.relationships import (
     sqlalchemy_social_event as social_event_runtime,
 )
@@ -925,33 +925,17 @@ def apply_joint_post(
     actor_wc = db.get(models.WorldCharacter, author_world_character_id)
     if other_wc is None or actor_wc is None:
         raise JointActivityRuntimeError("joint_activity_participant_invalid")
-    existing_notification = db.scalar(
-        select(models.Notification).where(
-            models.Notification.notification_type == "joint_activity_started",
-            models.Notification.source_joint_activity_id == joint.id,
-            models.Notification.recipient_world_character_id == other.world_character_id,
-        )
+    notifications.ensure_joint_started_notification(
+        db,
+        joint_activity_id=joint.id,
+        world_id=joint.world_id,
+        recipient_world_character_id=other.world_character_id,
+        actor_world_character_id=author_world_character_id,
+        recipient_character_id=other_wc.character_id,
+        actor_character_id=actor_wc.character_id,
+        source_social_event_id=started.id,
+        post_id=post.id,
     )
-    if existing_notification is None:
-        db.add(
-            models.Notification(
-                recipient_character_id=other_wc.character_id,
-                actor_character_id=actor_wc.character_id,
-                world_id=joint.world_id,
-                recipient_world_character_id=other.world_character_id,
-                actor_world_character_id=author_world_character_id,
-                source_social_event_id=started.id,
-                source_joint_activity_id=joint.id,
-                notification_type="joint_activity_started",
-                post_id=post.id,
-                source_post_id=post.id,
-                data=json.dumps(
-                    {"joint_activity_id": joint.id, "opening_post_id": post.id},
-                    sort_keys=True,
-                    separators=(",", ":"),
-                ),
-            )
-        )
     db.flush()
     return started
 

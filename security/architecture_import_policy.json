@@ -2401,6 +2401,14 @@
         "review_date": "2026-09-05"
       },
       {
+        "importer": "app.services.joint_activity_runtime",
+        "target": "app.domains.social.service.notifications",
+        "owner_stage": "AR-B5 / AR-B4",
+        "reason": "Joint transaction invokes Social-owned exact notification lookup/add, retaining its own final flush.",
+        "removal_condition": "AR-B4 replaces the legacy joint runtime consumer with typed same-Session collaboration.",
+        "review_date": "2026-09-05"
+      },
+      {
         "importer": "app.domains.routines.public",
         "target": "app.domains.routines.constants",
         "owner_stage": "AR-B4-A3 / AR-B4-C / AR-G5",

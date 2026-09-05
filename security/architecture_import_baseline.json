@@ -1,6 +1,6 @@
 {
-  "edge_count": 2192,
-  "external_import_count": 2118,
+  "edge_count": 2193,
+  "external_import_count": 2120,
   "module_count": 669,
   "modules": [
     {
@@ -4751,6 +4751,8 @@
     },
     {
       "external_imports": [
+        "json",
+        "sqlalchemy",
         "sqlalchemy.orm"
       ],
       "imports": [
@@ -9469,6 +9471,7 @@
       "imports": [
         "app.core.ids",
         "app.domains.social.service.joint_posts",
+        "app.domains.social.service.notifications",
         "app.models",
         "app.runtime.relationships.sqlalchemy_social_event"
       ],
