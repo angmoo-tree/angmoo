@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 from pathlib import Path
 import subprocess
 import sys
+
+import pytest
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -13,6 +16,44 @@ BASELINE = "db1c32510f66cee20a3e64a01e85c5ea8753d77e"
 
 def _load(name: str) -> dict[str, object]:
     return json.loads((ARCHITECTURE / name).read_text(encoding="utf-8"))
+
+
+def _checkpoint_postgres_inventory() -> dict[str, object]:
+    """Keep the pre-refactor physical-file threshold tied to its Git snapshot."""
+    source = subprocess.check_output(
+        [
+            "git", "show",
+            "d7037625a19071eb279ad2ea35c3ace6fe5b5289:docs/architecture/postgres-sql-inventory.json",
+        ],
+        cwd=ROOT,
+    )
+    return json.loads(source)
+
+
+def _postgres_generator(source_root: Path = ROOT):
+    spec = importlib.util.spec_from_file_location(
+        "angmoo_er0_current_postgres_inventory",
+        ROOT / "scripts/verify_embedded_runtime_inventory.py",
+    )
+    assert spec is not None and spec.loader is not None
+    generator = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(generator)
+    generator.ROOT = source_root
+    return generator
+
+
+def _assert_current_postgres_inventory(inventory: dict, *, source_root: Path = ROOT) -> None:
+    """Every live marker, path, line and hash must match an unfiltered source scan."""
+    source = _postgres_generator(source_root).build_postgres_inventory()
+    assert inventory == source
+    assert inventory["entry_count"] == len(inventory["entries"])
+    assert len({entry["path"] for entry in inventory["entries"]}) == inventory["entry_count"]
+    assert "historical schema evidence" in inventory["purpose"]
+    assert "reintroduction guards" in inventory["purpose"]
+    assert all(
+        entry["markers"] and entry["owner"] and entry["transition_pr"] and entry["removal_condition"]
+        for entry in inventory["entries"]
+    )
 
 
 def test_generated_embedded_runtime_inventory_is_current() -> None:
@@ -42,7 +83,11 @@ def test_all_migrations_are_owned_exactly_once() -> None:
 
 
 def test_storage_frontend_runtime_and_parity_corpora_are_complete() -> None:
-    postgres = _load("postgres-sql-inventory.json")
+    # Splitting one original file into owned SQL and runtime queries changes
+    # the physical total. Keep the old threshold on its immutable checkpoint;
+    # validate every current entry against actual source independently.
+    postgres = _checkpoint_postgres_inventory()
+    _assert_current_postgres_inventory(_load("postgres-sql-inventory.json"))
     graph = _load("neo4j-query-corpus.json")
     frontend = _load("next-static-compatibility.json")
     runtime = _load("embedded-runtime-inventory.json")
@@ -80,3 +125,22 @@ def test_er0_records_behavior_zero_and_privacy_safe_resource_evidence() -> None:
     serialized = json.dumps(resources, ensure_ascii=False).lower()
     assert "app_secret" not in serialized
     assert "d:\\" not in serialized
+
+
+@pytest.mark.parametrize("change", ["count", "omission", "hash", "new_source"])
+def test_live_postgres_inventory_rejects_stale_or_incomplete_scan(tmp_path: Path, change: str) -> None:
+    app = tmp_path / "backend/app"
+    app.mkdir(parents=True)
+    (app / "existing.py").write_text("query.with_for_update()\n", encoding="utf-8")
+    inventory = _postgres_generator(tmp_path).build_postgres_inventory()
+    if change == "count":
+        inventory["entry_count"] += 1
+    elif change == "omission":
+        inventory["entries"] = []
+        inventory["entry_count"] = 0
+    elif change == "hash":
+        inventory["entries"][0]["source_sha256"] = "0" * 64
+    else:
+        (app / "new.py").write_text("pg_advisory_lock(1)\n", encoding="utf-8")
+    with pytest.raises(AssertionError):
+        _assert_current_postgres_inventory(inventory, source_root=tmp_path)
