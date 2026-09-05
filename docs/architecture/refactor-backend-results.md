@@ -176,3 +176,7 @@ G13은 물리 경로 이전까지 적용했으며 최종 완료가 아니다. AR
 Gitleaks의 기존 공개 World 고정 marker 허용에 새 `0072` revision 경로 하나를 추가했다. 옛 경로는 history 검사를 위해 유지했고 marker 값·검사 rule 범위는 넓히지 않았다. 실제 Gitleaks 8.30.1의 새 Alembic 디렉터리 `--redact` 검사는 **0 findings**였다. 작업 디렉터리 전체 scan의 66건은 G4 base에 남아 있는 G0 체크포인트 hash 오탐 65건과 생성된 테스트 pyc fixture 1건이었다. 이 결과를 전체 보안 검사 PASS로 표시하지 않으며, G0 수정 통합 후 추적 source·PR history 검사에서 다시 확인한다.
 
 G0~G3를 합친 고정 merge commit `381ef66`에서 migration layout·logging·설정·인증·World Package UoW·P8-A 검사는 **75 passed / 기존 1 skipped, 40.11초**였다. source commit `960fd4685179c2c48958f18eaa5a9a93d855064c`의 새 회귀 파일 1개·node 8개를 도입 증거에 추가했다. 통합 경계는 **594 modules / 1,838 internal edges / legacy exact edges 311**로 통과했다. `env.py`는 G1의 실제 `app.config`를 소비하며 Docker는 logging 자원과 루트 Alembic 양쪽을 포함한다.
+
+### G4의 잠금 파일 기반 migration 검증 환경
+
+PR #270의 clean CI에서 역사 revision `20260604_0037`이 import하는 `pgvector.sqlalchemy.Vector`가 없어 실제 Alembic 그래프 검사 두 개가 실패했다. 로컬 공용 venv에는 해당 패키지가 이미 있어 선행 집중 검증만으로 누락을 발견하지 못했다. 기존 revision 본문·그래프·검사는 그대로 두고, 역사 migration 도구와 검증에 필요한 `pgvector==0.5.0`을 개발 의존성 및 lock에 명시했다. 새 G4 전용 venv에서 `uv sync --locked --group dev` 후 migration 회귀 **8 passed, 29.73초**였다. 기존 runtime dependencies의 버전과 Local SQLite migration 경로는 변하지 않는다. 이후 PR의 전체 CI는 동일 lock으로 검증한다.
