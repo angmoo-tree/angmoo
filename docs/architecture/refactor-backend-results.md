@@ -475,3 +475,9 @@ Character·Account 삭제가 함께 사용하는 여러 업무 SQL은 `runtime/w
 ### WC 최종 통합의 응답 소유권 정정
 
 WC 최종 source와 Character HTTP source를 합친 첫 고정 후보의 집중 회귀는 215 passed였지만 package 경계 검사에서 Character→WC→Character 및 Runtime alias가 포함된 순환을 발견했다. 위 최초 WC 응답 위치 기록은 이 통합 전에 해당한다. 최종 배치에서는 Character 상세 API의 `AgentActivityProfileReadinessRead` 정의를 동일 본문 그대로 `characters/schemas.py`로 옮기고 WC readiness 정책이 같은 class를 소비한다. 기존 aggregate도 이 실제 class를 가리킨다. 생산 소비자가 없는 Runtime alias와 WC schema 조각을 제거하고 source map과 실제 소비자를 갱신했다. 경계 예외를 추가하지 않았으며 준비 상태 판단 정책과 HTTP schema는 변경하지 않는다. 이 수정 전 진행 중이던 전체 보존 검사는 중단했으며 PASS로 기록하지 않는다.
+
+### WC 최종 후보의 보존·경계 검증 완료
+
+응답 소유권을 수정한 source `77081dcd3e4e9c284ef415622b69d9004d9815fe`에서 readiness·Character HTTP·Agent 한도·M3 권한/비밀 보호 집중 **96 passed / 3 warnings / 14.03초**를 통과했다. 기존 split 증거의 목적지도 실제 Character schema로 연결한 `4f95df7`에서 stock `check_refactor_preservation.py --contracts --nodes`가 **2,139 protected/current nodes / items37 PASS**로 종료했다. API·OpenAPI·ORM, 원본 assertion/suppression, source와 새 test의 최초 도입 commit 계보를 모두 유지한다. 수정 전 검사의 stale split destination 실패는 이 조정과 재검증으로 닫았으며 기준선·기대 결과를 재생성하지 않았다.
+
+동일 코드의 문서 통합 후보 `aa4f51e`에서 CI 계약 7개와 architecture **630 modules / 2,019 edges / exact legacy 272**, current inventory/public196을 확인했다. 추적 archive **19.17MB** 및 HEAD의 전체 조상 **360 commits / 21.33MB** Gitleaks는 findings0이다. 이 기록 뒤의 변경은 결과 문서뿐이다. PR #277 뒤의 순차 PR·merge·post-merge 및 실제 Installer 검증을 별도로 확인한다. WC의 미전환 외부 aggregate/ORM 소비자와 frozen migration용 동일 객체 alias는 B4~B8/G5의 명시된 범위에 남으며 이 로컬 결과를 B2 전체 완료로 확대하지 않는다.
