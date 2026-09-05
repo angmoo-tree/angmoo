@@ -8,9 +8,10 @@ from __future__ import annotations
 import argparse
 import ast
 from collections import Counter
+from functools import lru_cache
 import hashlib
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import re
 import subprocess
 import sys
@@ -190,31 +191,172 @@ def path_literals(files: dict[str, str]) -> list[tuple[str, str]]:
         if old.startswith("backend/") and new.startswith("backend/"):
             pairs.append((old.removeprefix("backend/"), new.removeprefix("backend/")))
         if old.startswith("backend/app/") and new.startswith("backend/app/") and old.endswith(".py") and new.endswith(".py"):
-            pairs.append((old.removeprefix("backend/")[:-3].replace("/", "."), new.removeprefix("backend/")[:-3].replace("/", ".")))
+            old_module = old.removeprefix("backend/")[:-3].replace("/", ".")
+            new_module = new.removeprefix("backend/")[:-3].replace("/", ".").removesuffix(".__init__")
+            pairs.append((old_module, new_module))
+    # A Windows test literal uses the same exact file map. No basename or
+    # directory-prefix substitution is inferred from a separator conversion.
+    pairs.extend((old.replace("/", "\\"), new.replace("/", "\\"))
+                 for old, new in tuple(pairs) if "/" in old and "/" in new)
     return sorted(pairs, key=lambda pair: -len(pair[0]))
 
 
-def normalized_assertion(fragment: str, literals: list[tuple[str, str]]) -> str:
+def _scope_binding_counts(body: list[ast.stmt]) -> Counter:
+    """Include non-Name binding syntax without entering another lexical scope."""
+    counts = Counter()
+    def visit(node):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            counts[node.name] += 1
+            return
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            for alias in node.names:
+                counts[alias.asname or (alias.name.split(".")[0] if isinstance(node, ast.Import) else alias.name)] += 1
+            return
+        if isinstance(node, ast.ExceptHandler) and node.name:
+            counts[node.name] += 1
+        if isinstance(node, (ast.MatchAs, ast.MatchStar)) and node.name:
+            counts[node.name] += 1
+        if isinstance(node, ast.MatchMapping) and node.rest:
+            counts[node.rest] += 1
+        if isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)):
+            counts[node.id] += 1
+        for child in ast.iter_child_nodes(node):
+            visit(child)
+    for item in body:
+        visit(item)
+    return counts
+
+
+def literal_path_roots(source: str, source_path: str) -> dict[str, dict[str, str]]:
+    """Resolve only single-assignment, literal paths anchored to this test file.
+
+    No filesystem calls or evaluated Python enter the comparison. Unsupported
+    expressions, shadowed names and reassignments cannot authorize a path move.
+    """
+    tree = ast.parse(source)
+    path_imported = any(isinstance(n, ast.ImportFrom) and n.module == "pathlib"
+                        and any(a.name == "Path" and a.asname is None for a in n.names)
+                        for n in tree.body)
+    module_bindings = _scope_binding_counts(tree.body)
+    if not path_imported or module_bindings["Path"] != 1 or module_bindings["__file__"] or module_bindings["*"]:
+        return {}
+
+    def resolve(node: ast.AST, env: dict[str, PurePosixPath]):
+        if isinstance(node, ast.Name):
+            return env.get(node.id)
+        if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+                and node.func.id == "Path" and len(node.args) == 1 and not node.keywords
+                and isinstance(node.args[0], ast.Name) and node.args[0].id == "__file__"):
+            return PurePosixPath(source_path)
+        if isinstance(node, ast.Call) and not node.args and not node.keywords and isinstance(node.func, ast.Attribute) and node.func.attr == "resolve":
+            return resolve(node.func.value, env)
+        if isinstance(node, ast.Attribute) and node.attr == "parent":
+            value = resolve(node.value, env)
+            return value.parent if value is not None else None
+        if (isinstance(node, ast.Subscript) and isinstance(node.value, ast.Attribute)
+                and node.value.attr == "parents" and isinstance(node.slice, ast.Constant)
+                and type(node.slice.value) is int and node.slice.value >= 0):
+            value = resolve(node.value.value, env)
+            if value is not None and node.slice.value < len(value.parents):
+                return value.parents[node.slice.value]
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div) and isinstance(node.right, ast.Constant):
+            value, segment = resolve(node.left, env), node.right.value
+            if value is not None and isinstance(segment, str) and segment not in {"", ".", ".."} and "/" not in segment and "\\" not in segment:
+                return value / segment
+        return None
+
+    def bindings(body: list[ast.stmt], inherited: dict[str, PurePosixPath], parameters=()):
+        stores = _scope_binding_counts(body)
+        env = {name: value for name, value in inherited.items() if name not in stores and name not in parameters}
+        for item in body:
+            targets = item.targets if isinstance(item, ast.Assign) else [item.target] if isinstance(item, ast.AnnAssign) else []
+            if len(targets) != 1 or not isinstance(targets[0], ast.Name) or stores[targets[0].id] != 1:
+                continue
+            name = targets[0].id
+            value = resolve(item.value, env) if item.value is not None else None
+            if value is not None:
+                env[name] = value
+        return env
+
+    global_env = bindings(tree.body, {})
+    result = {}
+
+    def visit(body, parents=()):
+        for node in body:
+            if isinstance(node, ast.ClassDef):
+                visit(node.body, (*parents, node.name))
+            elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                params = {arg.arg for arg in (*node.args.posonlyargs, *node.args.args, *node.args.kwonlyargs)}
+                params.update(arg.arg for arg in (node.args.vararg, node.args.kwarg) if arg is not None)
+                local_stores = set(_scope_binding_counts(node.body))
+                if (params | local_stores) & {"Path", "__file__", "*"}:
+                    continue
+                result["::".join((*parents, node.name))] = {
+                    name: value.as_posix() for name, value in bindings(node.body, global_env, params).items()
+                }
+    visit(tree.body)
+    return result
+
+
+@lru_cache(maxsize=8)
+def _compiled_path_literals(literals: tuple[tuple[str, str], ...]):
+    """Reuse patterns for this complete ordered map; never cache source facts."""
+    compiled = []
+    for old, new in literals:
+        expression = (r"\A" + re.escape(old) + r"\Z" if "\\" in old
+                      else r"(?<![\w./])" + re.escape(old) + r"(?![\w])")
+        compiled.append((re.compile(expression), new))
+        if old.startswith("app.") and old.endswith(".__init__"):
+            package = old.removesuffix(".__init__")
+            target = new.removesuffix(".__init__")
+            compiled.append((re.compile(r"(?<![\w./])" + re.escape(package) + r"(?![\w./])"), target))
+    return tuple(compiled)
+
+
+def normalized_assertion(fragment: str, literals: list[tuple[str, str]], *, roots: dict[str, str] | None = None) -> str:
+    roots = roots or {}
+    compiled_literals = _compiled_path_literals(tuple(literals))
+    exact_paths = {old: new for old, new in literals if old.startswith("backend/") and new.startswith("backend/")}
+    destinations = set(exact_paths.values())
+
     class Paths(ast.NodeTransformer):
+        def visit_BinOp(self, node):
+            if not isinstance(node.op, ast.Div):
+                return self.generic_visit(node)
+            segments, base = [], node
+            while isinstance(base, ast.BinOp) and isinstance(base.op, ast.Div):
+                if not isinstance(base.right, ast.Constant) or not isinstance(base.right.value, str):
+                    return node
+                segment = base.right.value
+                if segment in {"", ".", ".."} or "/" in segment or "\\" in segment:
+                    return node
+                segments.append(segment)
+                base = base.left
+            if not isinstance(base, ast.Name) or base.id not in roots:
+                return node
+            full = PurePosixPath(roots[base.id]).joinpath(*reversed(segments)).as_posix()
+            if full not in exact_paths and full not in destinations:
+                return node
+            mapped, seen = full, set()
+            while mapped in exact_paths and mapped not in seen:
+                seen.add(mapped)
+                mapped = exact_paths[mapped]
+            # Retain the exact root binding name and predicate surrounding this
+            # one mapped file. Partial prefixes, arbitrary calls and other roots
+            # do not normalize; no change to an exists/is_file/negation check.
+            return ast.Call(func=ast.Name(id="__preserved_literal_file__", ctx=ast.Load()),
+                            args=[ast.Constant(base.id), ast.Constant(mapped)], keywords=[])
+
+
         def visit_Constant(self, node):
             if isinstance(node.value, str):
                 original = node.value
-                for old, new in literals:
-                    # Match the exact mapped path/module, including a literal
-                    # import statement used by source-contract tests. No numeric
-                    # expectations, predicates, or other text is exempted.
-                    original = re.sub(r"(?<![\w./])" + re.escape(old) + r"(?![\w])", lambda _: new, original)
-                    if old.startswith("app.") and old.endswith(".__init__"):
-                        # A mapped package initializer also has this exact import
-                        # spelling. Do not extend the map to sibling modules or
-                        # arbitrary directory-prefix descendants.
-                        package = old.removesuffix(".__init__")
-                        target = new.removesuffix(".__init__")
-                        original = re.sub(
-                            r"(?<![\w./])" + re.escape(package) + r"(?![\w./])",
-                            lambda _: target,
-                            original,
-                        )
+                # The complete ordered literal map is the cache key. Compiling
+                # once avoids re's small global cache thrashing as moves grow;
+                # replacement order, exact boundaries and all source facts stay
+                # identical to the uncached check.
+                for pattern, replacement in compiled_literals:
+                    original = pattern.sub(lambda _, value=replacement: value, original)
                 node.value = original
             return node
 
@@ -224,6 +366,7 @@ def normalized_assertion(fragment: str, literals: list[tuple[str, str]]) -> str:
 def check_assertions(snapshots: list[dict], targets: dict[str, str], files: dict[str, str], root: Path = ROOT,
                      symbols: dict[str, str] | None = None) -> list[str]:
     errors, cache, checked = [], {}, set()
+    root_cache, frozen_root_cache = {}, {}
     literals = path_literals(files)
     symbols = symbols or {}
     for snapshot in snapshots:
@@ -257,16 +400,25 @@ def check_assertions(snapshots: list[dict], targets: dict[str, str], files: dict
                 if not source.is_relative_to((root / "backend/tests").resolve()) or not source.is_file():
                     cache[new_path] = {}
                 else:
-                    cache[new_path] = assertion_contracts(source.read_text(encoding="utf-8-sig"))
+                    source_text = source.read_text(encoding="utf-8-sig")
+                    cache[new_path] = assertion_contracts(source_text)
+                    root_cache[new_path] = literal_path_roots(source_text, "backend/" + new_path)
             actual = cache[new_path].get(new_function)
             if actual is None:
                 errors.append(f"missing test/helper function: {node} -> {new_path}::{new_function}")
                 continue
-            required = Counter(normalized_assertion(value, literals) for value in expected)
+            record = snapshot.get("tracked_files", {}).get("backend/" + old_path)
+            blob = record.get("git_blob") if isinstance(record, dict) else record
+            if blob and (old_path, blob) not in frozen_root_cache:
+                text = git_bytes("cat-file", "blob", blob, root=root).decode("utf-8-sig")
+                frozen_root_cache[(old_path, blob)] = literal_path_roots(text, "backend/" + old_path)
+            old_roots = frozen_root_cache.get((old_path, blob), {}).get(old_function, {})
+            new_roots = root_cache.get(new_path, {}).get(new_function, {})
+            required = Counter(normalized_assertion(value, literals, roots=old_roots) for value in expected)
             # An unchanged synthetic legacy-path fixture and a migrated real
             # path assertion are equivalent under the same exact move map.
             # Normalize both sides; behavior predicates remain mandatory.
-            found = Counter(normalized_assertion(value, literals) for value in actual)
+            found = Counter(normalized_assertion(value, literals, roots=new_roots) for value in actual)
             if required - found:
                 errors.append(f"preserved assertion/exception expectation missing or changed: {node} -> {new_path}::{new_function}")
     return errors

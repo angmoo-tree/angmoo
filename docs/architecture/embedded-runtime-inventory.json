@@ -132,7 +132,7 @@
         "phase": "P2",
         "tests": [
           "backend/tests/world_characters/test_setup_contracts.py",
-          "backend/tests/test_world_character_setup_service.py",
+          "backend/tests/world_characters/test_setup_service.py",
           "backend/tests/world_characters/test_owner_identity.py"
         ]
       },
@@ -287,7 +287,7 @@
       "owner": "ER4",
       "path": "backend/app/public_main.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "474dfbcb65b61a46d3d6b86ae52a1c7f579587e74c0dbb5e22330c78bc14a380",
+      "source_sha256": "fc391d871e05d553882d822f661e084b5bbf08be0c0df355ebe43ccbbd066624",
       "transition_pr": "ER4 PR J"
     },
     {

@@ -9,11 +9,11 @@
 | 단계 | 상태 | 범위 |
 | --- | --- | --- |
 | AR-G0 | PR #265 MERGED · PR CI/POST-MERGE PASS | 후속 체크포인트·부분 scope·단계/소유권·Actions 연결 |
-| AR-G1 | PR #266 MERGED · PR CI PASS · POST-MERGE IN PROGRESS | 설정·개발 환경 경로 |
-| AR-G2 | LOCAL VERIFIED · PR/MERGE PENDING | 공통 오류 4개·cursor bytes helper 2개·소비자/테스트 이전 |
-| AR-G3 | IMPLEMENTED · LOCAL VERIFICATION · PR/CI PENDING | logging.ini·초기화·배포 자원 연결 |
-| AR-G4 | LOCAL VERIFIED · PR PENDING | Alembic 물리 경로·역사 본문 보존; G5 최종 모델 등록 연결 대기 |
-| AR-B2 | IDENTITY IMPLEMENTED · FULL BACKEND PASS · PR PREPARATION | identity 역할 이전; characters→worlds→world_characters 후속 |
+| AR-G1 | PR #266 MERGED · PR CI/POST-MERGE PASS | 설정·개발 환경 경로 |
+| AR-G2 | PR #267 및 보안 Hotfix #272 MERGED · Hotfix POST-MERGE PASS | 원래 Security 실패는 역사로 유지하며 후속 수정 검증 완료 |
+| AR-G3 | PR #268 MERGED · PR CI/POST-MERGE PASS | logging.ini·초기화·배포 자원 연결 |
+| AR-G4 | PR #269 CI 진행 | Alembic 물리 경로·역사 본문 보존; G5 최종 모델 등록 연결 대기 |
+| AR-B2 | #270~#276 순차 PR CI · WC workflow LOCAL VERIFIED | Identity·Characters·Worlds·WC 기반 후 profile/setup/lifecycle 통합 및 기존 Package race 수정 |
 | AR-B3 | NOT STARTED | World Package→media |
 | AR-B4 | NOT STARTED | routines→routine_posts→활동 조립 |
 | AR-B5 | NOT STARTED | social→relationships→projection |
@@ -420,3 +420,56 @@ Live architecture는 **618 modules / 1,937 edges / legacy exact 281 PASS**, ER0 
 Foundation source `64537c7694819f5840aab9106f969f80c6c82d53`의 신규 파일 7개·회귀 2개, owner source `cb9b18d67daf42fd8c9d93c68108e27a7cbc08e1`의 신규 파일 3개·회귀 2개를 선행 Character/Worlds 뒤에 캡처했다. 고정 후보 `81724a5`에서 WorldCharacter owner/setup, Package import/UoW, runtime-mode repair, 권한/삭제 검사는 **63 passed / 2 warnings, 39.83초**였다. 전체 보존 검사는 **2,129 protected/current nodes / items 37 PASS**이며 API/OpenAPI/ORM·기존 assertion·suppression·source split도 유지했다. 검사 중 source·test·metadata는 수정하지 않았다.
 
 공통 CI 계약 7개, architecture **625 modules / 1,993 edges / exact legacy 281**, deferred 22, L4 parity 97, ER0 **76/87/24/44/7**, P8-R 및 public **196 operations**가 통과했다. 실제 Gitleaks 추적 archive **19.06MB**와 전체 **341 ancestor commits / 21.13MB**도 findings 0이었다. 이후 선행 Worlds PR의 결과를 통합한 차이는 문서 한 파일이다. Profile/Studio/setup workflow·entry/readiness HTTP는 다음 독립 범위이며, PR-head CI·설치·순차 merge/post-merge를 확인하기 전 전체 B2 완료로 표시하지 않는다.
+
+### AR-B2 WC profile·Studio·lifecycle와 동일 SQL 조회 조립
+
+공개 profile/Studio/candidate의 기존 SQL join은 `runtime/world_characters/queries.py`로, 권한 확인·snapshot·typed candidate 이유 및 leave의 row version/state/replay/commit 정책은 WC 서비스로 분리했다. API/runtime에서 조회 collaborator를 주입하며 domain→runtime 또는 외부 ORM deep import를 만들지 않았다. 같은 Session과 attached 객체를 유지하고 selected-World leave의 Character 상태 쓰기도 해당 Character 서비스가 소유한다. 7개 기존 HTTP 경로를 `router/profile.py`로 옮겼으며 operation/schema 계약은 같다. 모든 남은 application forwarder와 repository Protocol을 실제 소비자 전환 후 제거했다. Runtime leave guard의 실제 Protocol은 `contracts/lifecycle.py`에 유지한다.
+
+- WC·owner/manual Social·Memory owner control: **35 passed / 기존 2 warnings / 9.83초**. 새 joined-read 회귀는 4종 read 각각 SQL 1회, 동일 이름 정렬의 tie-break, suspended/pending 필터 차이, outer join의 미연결 null 행, owner scope, 같은 Session/class identity 및 비활성 membership 제외를 검증한다. 첫 fixture는 DB에서 허용하지 않는 membership `inactive` 값을 넣어 실패했으며 기존 제약을 바꾸지 않고 실제 `left` 값으로 수정했다.
+- P8-E/R 현재 경로 계약·기존 architecture/partial scope 회귀: **80 passed / 2.16초**. P8-E의 현재 backend path 검사만 새 router로 연결했고 frozen JSON은 바꾸지 않았다.
+- Public 승인 **604 유지 / current 2,111 PASS**; 현재 API·OpenAPI·ORM 및 전체 split evidence **PASS**. 이 호출은 immutable Git blob 읽기를 memoize하여 동일 검사 중복 I/O를 줄였으며 검사 규칙/기준선을 바꾸지 않았다. 신규 source introduction capture 및 전체 assertion/node 통합 검사는 root의 선형 증거 절차에서 이어진다.
+- Live architecture **617 modules / 1,934 internal edges / exact legacy 281 PASS**, ER0 **75/87/24/44/7 PASS**, L4 parity **97**, Memory batch current. 기존 lifecycle test 3개 node를 WC 소유 경로로 옮기고 local-smoke·ER0·L4 실행 경로도 갱신했다.
+
+이 slice 뒤에도 autonomous setup/entry, runtime mode recovery, readiness, mixed cleanup과 잔여 호환 소비자 종료가 남는다. B2 전체·PR·merge·설치 검증 완료로 확대하지 않는다.
+
+
+### AR-B2 WC autonomous setup·입장·runtime repair 실제 구현
+
+1,699줄의 기존 setup 구현을 canonical service로 이전하고 동일 오류 계층을 `exceptions.py`로 옮겼다. 전환 전후 서비스 함수 본문 **42개 중 36개 AST가 동일**하며 generate/retry/approve/reject, 두 provider 단계, quota/attempt/실패 기록은 그대로다. 변경한 6개 함수는 Character 조회, World/membership/role 조회·membership seed·contract version 쓰기, Identity credential 조회를 실제 소유 서비스로 호출한다. nullable `db.get`과 scalar 차이, query 실행과 오류 변환 try 경계, 기존 flush/commit 위치를 유지했다. 외부 ORM aggregate는 삭제했다.
+
+runtime mode repair 정책은 WC service, 시작 시 session_factory/SQLite immediate 조립은 runtime으로 분리했다. imported World 제외·source marker·hash/profile/repertoire/daypart 검사 및 실패 사유 순서는 유지한다. cross-owner capacity count SQL은 runtime의 같은 query 경로로 이전했다. 첫 회귀에서 Character runtime의 새 count import 누락을 기존 capacity/활성화 테스트 5개가 잡았으며 연결을 수정한 뒤 같은 전체 묶음을 다시 통과했다.
+
+Setup·runtime repair·Agent capacity/동시 활성화·Package UoW는 **101 passed / 기존 3 warnings / 22.44초**였다. 기존 setup/runtime repair 테스트 두 파일을 `tests/world_characters/`로 옮겼고 assertion을 유지한다. 4개 정확한 module을 scope에 추가하고 실제 사라진 bridge를 제거했다. 현재 architecture **619 modules / 1,946 edges / exact legacy 281 PASS**, ER0 **75/87/24/44/7 PASS**, L4 parity **97**, Memory batch current이다. 잔여 setup/entry HTTP, readiness와 여러 업무 cleanup의 최종 소유 전환은 다음 slice다.
+
+Setup slice의 최종 현재 API·ORM 및 전체 split evidence 검사도 PASS였다. immutable Git blob 읽기 memoization만 사용했고 frozen source/checkpoint 내용은 변경하지 않았다.
+
+
+### AR-B2 WC 통합 중 발견한 Package seed replay 경합 Hotfix
+
+기존 `test_concurrent_same_idempotency_key_commits_one_import`가 간헐적으로 World slug validation 오류를 냈다. Seed UoW의 registry 조회와 World idempotency 조회가 모두 miss한 뒤 `_available_slug`가 후보를 고르고, 그 직후 다른 스레드가 같은 요청의 import를 commit하면 마지막 slug 재조회가 `world_slug_unavailable`을 발생시킨다. 기존 UoW는 IntegrityError/OperationalError만 replay 복구해 이 validation 오류를 놓쳤다.
+
+이 경로는 구조 이전으로 추가된 동작이 아니다. Frozen PR #263 `d7037625a19071eb279ad2ea35c3ace6fe5b5289`의 `worlds/infrastructure/sqlalchemy_world_creator.py`에서 `_available_slug`와 `seed_world`의 전체 함수 AST가 현재 `worlds/service/creator.py`와 동일하며, 수정 전 Package seed UoW 전체 모듈 AST도 해당 checkpoint와 동일하다.
+
+수정은 `WorldDefinitionValidationError` 중 `args == ("world_slug_unavailable",)`인 경우로 제한한다. 이 class의 reason_code는 범용 `world_definition_incomplete`라 reason_code만으로 분류하지 않는다. 원래 Session을 rollback/종료한 뒤 별도 Session으로 같은 local_owner_id/idempotency_key의 registry를 조회한다. 실제 원자 commit으로 보이는 완료 기록이 있을 때만 기존 replay resolver가 package id/version/content digest를 검증해 결과를 돌려준다. 기록이 없으면 원래 validation 오류를 다시 내며 재시도하지 않는다. 다른 validation과 비슷한 문자열도 원래 오류 객체를 그대로 전달한다. 기존 DB 충돌 retry 한도·delay·resolver와 World seed 본문은 유지한다.
+
+결정적 회귀는 실제 file-backed SQLite에서 slug 후보 조회 직후 다른 스레드의 commit을 완료시킨다. 수정 전 **4 failed / 2 passed / 18.49초**로 실패를 재현했다. 수정 후 새 6개 사례와 기존 Package UoW/Import Commit은 **26 passed / 기존 1 warning / 37.76초**였다. 새 사례는 rollback→별도 observer 순서, 한 번의 실행, 동일 replay 결과, digest 충돌, 다른 owner/key의 기록 배제, 다른 validation의 미복구를 검증한다. ASCII 이름을 사용해 fallback UUID 시간 구간과 무관하게 동일 slug 경합이 발생한다.
+
+`local-smoke`에 기존 UoW 전체 파일과 새 결정적 회귀를 명시적으로 연결했다. World API·ORM·historical migration·기존 assertion은 수정하지 않았다. 이 hotfix는 seed UoW의 한 경로이며 `BEGIN IMMEDIATE`를 사용하는 media import commit 흐름의 트랜잭션 설계는 바꾸지 않는다. 후속 Package runtime UoW로 파일이 옮겨질 때도 같은 수정이 유지되어야 한다. Source introduction capture 및 PR/merge 검증은 root의 선형 통합 단계가 담당한다.
+
+최종 고정 구현·CI 목록·현재 inventory에서 새 경합 6개, 기존 UoW/Import Commit/Preview, World 정의·Creator API, CI policy를 함께 실행한 결과는 **60 passed / 기존 2 warnings / 42.29초**다. 현재 경계 검사는 **626 modules / 2,003 internal edges / exact legacy 281 PASS**, L4 parity **97**이다.
+### WC workflow 통합 검증과 보존 검사 성능
+
+고정 제품 source `0c9deff`에서 WC·World·Package replay/UoW·활동 회귀 **178 passed / 6 warnings / 53.93초**를 통과했다. API module inventory의 기존 profile 7개도 실제 canonical module로 연결했으며 권한과 HTTP 계약은 유지했다. CI 계약 7개 및 architecture **626/2003/legacy281**, source archive Gitleaks **19.14MB**, 전체 HEAD 조상 **353 commits/21.27MB**는 PASS/findings0이다.
+
+전체 보존 검사 중 명시적 경로 쌍이 526개로 늘면서 Python 정규식 캐시 한도를 넘겨 같은 표현식을 반복 컴파일하는 CPU 병목을 확인했다. 진행 중이던 검사는 중단했고 완료로 기록하지 않았다. `_compiled_path_literals`는 완전한 순서 있는 경로 튜플만 키로 사용해 정규식 컴파일을 최대 8종 재사용한다. 실제 source·assertion·테스트 수집·Git 증거는 캐시하지 않고 경계식·치환 순서·예외·기준선은 그대로 유지한다. 실제 frozen assertion 64개와 순서/부분 경로/숫자/오류 24개 비교는 AST가 모두 같았고 3.885초→0.099초였다. 기존 guard 회귀 **149 passed / 1.74초**를 통과했다. 신규 파일/test node는 없으며 전체 계보 검증은 이 수정이 포함된 고정 후보로 다시 실행한다.
+### WC workflow 고정 후보 보존 완료
+
+source `36fd4748cb55744d3effbcfb9d18eb921e0fd8d9`의 기본 전체 검사 `check_refactor_preservation.py --contracts --nodes`가 **protected/current 2,137 / items37 PASS**로 종료했다. #258/#263 API·OpenAPI·ORM·frozen source·assertion/suppression 및 원본 commit별 신규 source/node 계보를 그대로 검사했다. 앞선 오래 실행한 미완료 검사는 이 고정 후보의 stock 검사 결과로 대체하며, 결과 캐시나 검사 생략은 없다. 실제 WC entry/setup HTTP·readiness·혼합 cleanup 종료는 다음 최종 slice이며 workflow의 로컬 PASS를 AR-B2 전체 완료로 확대하지 않는다.
+
+### WC workflow Hosted CI의 현재 구조 검사 정합성 수정
+
+첫 PR #277의 Core/architecture/Local autonomy 검사가 기존 경로를 계속 기대하던 세 테스트를 발견했다. 비밀 키 reveal 위치는 WC `client.py`, 실제 setup 함수는 `service/autonomous_setup.py`, Local Smoke 필수 실행 파일은 WC 소유 setup/owner identity 테스트로 맞췄다. allowlist 함수 집합·실제 함수 존재·필수 suite 존재 assertion을 유지한다. 해당 실패는 기능 검사 삭제로 해결하지 않았다.
+
+경로 결합식 assertion도 같은 원본/목적 파일임을 확인하도록 후속 Package에서 이미 검토한 strict literal-path 검사 구현을 기존 checker 파일에 먼저 반영했다. 원본 constructor·단일 binding·shadowing·전체 파일 경로만 인정하며 부분 prefix나 임의 호출을 허용하지 않는다. 검사 구현은 Package `cc95b50` Git blob과 동일하고 CRLF만 정규화하여 대조했다. 기존 guard와 위 current 검사 **168 passed / 10.69초**, 같은 checker의 Package 고정 테스트 source에서 literal/path/initializer 관련 **33 passed / 34 deselected / 0.30초**다. 신규 회귀의 최초 도입 source/node 계보는 원래 순서인 Package PR에 유지하고 앞선 기록에 삽입하지 않았다.
+
+고정 source `f88c2af55f27be8777e7624208ff2e42e654c10a`의 stock 전체 보존은 **2,137 protected/current nodes / items37 PASS**다. 기존 checkpoint·source·assertion·API/ORM을 유지하고 현재 경로만 바로잡았다. 새 PR-head CI·Installer 결과를 다시 확인한다.

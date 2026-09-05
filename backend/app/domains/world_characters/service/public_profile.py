@@ -2,17 +2,15 @@
 
 from __future__ import annotations
 
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.domains.characters.public import Character
+from app.domains.world_characters.contracts.queries import CharacterProfileRecord, WorldCharacterQueries
 from app.domains.world_characters.contracts.public_profile import (
     WorldCharacterProfileNotFoundError,
     WorldCharacterPublicProfile,
 )
 from app.domains.world_characters.models import WorldCharacter
-from app.domains.worlds import public as world_service
-from app.domains.worlds.public import WorldMembership
+from app.domains.worlds import service as world_service
 
 
 class _CurrentUser:
@@ -20,9 +18,10 @@ class _CurrentUser:
         self.id = user_id
 
 
-class SqlAlchemyWorldCharacterPublicProfileReader:
-    def __init__(self, db: Session) -> None:
+class WorldCharacterProfileService:
+    def __init__(self, db: Session, *, queries: WorldCharacterQueries) -> None:
         self.db = db
+        self.queries = queries
 
     def list_for_world(
         self,
@@ -31,7 +30,7 @@ class SqlAlchemyWorldCharacterPublicProfileReader:
         current_user_id: str,
     ) -> tuple[WorldCharacterPublicProfile, ...]:
         self._require_world_access(world_id, current_user_id)
-        rows = self.db.execute(self._active_profile_statement(world_id)).all()
+        rows = self.queries.public_profile_rows(self.db, world_id)
         return tuple(self._snapshot(world_character, character) for world_character, character in rows)
 
     def get_for_world(
@@ -42,11 +41,7 @@ class SqlAlchemyWorldCharacterPublicProfileReader:
         current_user_id: str,
     ) -> WorldCharacterPublicProfile:
         self._require_world_access(world_id, current_user_id)
-        row = self.db.execute(
-            self._active_profile_statement(world_id).where(
-                WorldCharacter.id == world_character_id
-            )
-        ).one_or_none()
+        row = self.queries.public_profile_row(self.db, world_id, world_character_id)
         if row is None:
             raise WorldCharacterProfileNotFoundError()
         return self._snapshot(row[0], row[1])
@@ -59,32 +54,9 @@ class SqlAlchemyWorldCharacterPublicProfileReader:
         )
 
     @staticmethod
-    def _active_profile_statement(world_id: str):
-        return (
-            select(WorldCharacter, Character)
-            .join(
-                Character,
-                Character.id == WorldCharacter.character_id,
-            )
-            .join(
-                WorldMembership,
-                (WorldMembership.id == WorldCharacter.membership_id)
-                & (WorldMembership.world_id == WorldCharacter.world_id),
-            )
-            .where(
-                WorldCharacter.world_id == world_id,
-                WorldCharacter.status == "active",
-                WorldMembership.status == "active",
-                Character.deleted_at.is_(None),
-                Character.moderation_status == "active",
-            )
-            .order_by(Character.name.asc(), WorldCharacter.id.asc())
-        )
-
-    @staticmethod
     def _snapshot(
         world_character: WorldCharacter,
-        character: Character,
+        character: CharacterProfileRecord,
     ) -> WorldCharacterPublicProfile:
         local_profile = world_character.local_profile or {}
         display_name = str(local_profile.get("display_name") or character.name)
@@ -105,4 +77,4 @@ class SqlAlchemyWorldCharacterPublicProfileReader:
         )
 
 
-__all__ = ["SqlAlchemyWorldCharacterPublicProfileReader"]
+__all__ = ["WorldCharacterProfileService"]

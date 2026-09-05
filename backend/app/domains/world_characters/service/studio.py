@@ -3,7 +3,7 @@ from __future__ import annotations
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.domains.characters.public import Character
+from app.domains.world_characters.contracts.queries import CharacterProfileRecord, WorldCharacterQueries
 from app.domains.world_characters.contracts.studio_surface import StudioWorldCharacter
 from app.domains.world_characters.models import (
     CharacterActiveWorld,
@@ -13,7 +13,7 @@ from app.domains.world_characters.models import (
     WorldActivityRepertoire,
     WorldCommunityProfile,
 )
-from app.domains.worlds.public import require_creator_access
+from app.domains.worlds.service import require_creator_access
 
 
 class _CurrentUser:
@@ -21,9 +21,10 @@ class _CurrentUser:
         self.id = user_id
 
 
-class SqlAlchemyStudioWorldCharacterReader:
-    def __init__(self, db: Session) -> None:
+class WorldCharacterStudioService:
+    def __init__(self, db: Session, *, queries: WorldCharacterQueries) -> None:
         self.db = db
+        self.queries = queries
 
     def list_for_creator(
         self,
@@ -36,15 +37,7 @@ class SqlAlchemyStudioWorldCharacterReader:
             world_id=world_id,
             user=_CurrentUser(current_user_id),
         )
-        rows = self.db.execute(
-            select(WorldCharacter, Character)
-            .join(Character, Character.id == WorldCharacter.character_id)
-            .where(
-                WorldCharacter.world_id == world_id,
-                WorldCharacter.status.in_(("pending", "inactive", "active")),
-            )
-            .order_by(Character.name.asc(), WorldCharacter.id.asc())
-        ).all()
+        rows = self.queries.studio_rows(self.db, world_id)
         ids = [world_character.id for world_character, _character in rows]
         setup_status = self._setup_status(ids)
         selected_ids = self._selected_world_character_ids(ids)
@@ -113,7 +106,7 @@ class SqlAlchemyStudioWorldCharacterReader:
     @staticmethod
     def _snapshot(
         world_character: WorldCharacter,
-        character: Character,
+        character: CharacterProfileRecord,
         statuses: tuple[str | None, str | None],
         *,
         selected_active_world: bool,
@@ -146,4 +139,4 @@ class SqlAlchemyStudioWorldCharacterReader:
         )
 
 
-__all__ = ["SqlAlchemyStudioWorldCharacterReader"]
+__all__ = ["WorldCharacterStudioService"]

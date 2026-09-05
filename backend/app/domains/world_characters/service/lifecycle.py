@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from sqlalchemy import and_, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.domains.characters.public import Character
+from app.domains.characters.service.profile import get_character
+from app.domains.characters.service.world_lifecycle import deactivate_for_world_leave
+from app.domains.world_characters.contracts.queries import CharacterProfileRecord, WorldCharacterQueries
 from app.domains.world_characters.contracts.studio_lifecycle import (
     CandidateReason,
     StudioCharacterCandidate,
@@ -19,10 +21,10 @@ from app.domains.world_characters.models import (
     CharacterActiveWorld,
     WorldCharacter,
 )
-from app.domains.world_characters.ports.studio_lifecycle import (
+from app.domains.world_characters.contracts.lifecycle import (
     WorldCharacterLeaveRuntimeGuard,
 )
-from app.domains.worlds.public import require_creator_access
+from app.domains.worlds.service import require_creator_access
 
 
 class _CurrentUser:
@@ -30,15 +32,17 @@ class _CurrentUser:
         self.id = user_id
 
 
-class SqlAlchemyStudioWorldCharacterLifecycle:
+class WorldCharacterLifecycleService:
     def __init__(
         self,
         db: Session,
         *,
         runtime_guard: WorldCharacterLeaveRuntimeGuard | None = None,
+        queries: WorldCharacterQueries,
     ) -> None:
         self.db = db
         self.runtime_guard = runtime_guard
+        self.queries = queries
 
     def list_candidates(
         self,
@@ -51,21 +55,7 @@ class SqlAlchemyStudioWorldCharacterLifecycle:
             world_id=world_id,
             user=_CurrentUser(current_user_id),
         )
-        rows = self.db.execute(
-            select(Character, WorldCharacter)
-            .outerjoin(
-                WorldCharacter,
-                and_(
-                    WorldCharacter.character_id == Character.id,
-                    WorldCharacter.world_id == world_id,
-                ),
-            )
-            .where(
-                Character.owner_id == current_user_id,
-                Character.deleted_at.is_(None),
-            )
-            .order_by(Character.name.asc(), Character.id.asc())
-        ).all()
+        rows = self.queries.candidate_rows(self.db, world_id, current_user_id)
         return tuple(
             self._candidate(character, world_character)
             for character, world_character in rows
@@ -73,7 +63,7 @@ class SqlAlchemyStudioWorldCharacterLifecycle:
 
     @staticmethod
     def _candidate(
-        character: Character,
+        character: CharacterProfileRecord,
         world_character: WorldCharacter | None,
     ) -> StudioCharacterCandidate:
         reason: CandidateReason | None = None
@@ -127,7 +117,7 @@ class SqlAlchemyStudioWorldCharacterLifecycle:
         )
         if world_character is None:
             raise StudioWorldCharacterNotFoundError()
-        character = self.db.get(Character, character_id)
+        character = get_character(self.db, character_id)
         if character is None or character.deleted_at is not None:
             raise StudioWorldCharacterNotFoundError()
         if character.owner_id != current_user_id:
@@ -172,7 +162,7 @@ class SqlAlchemyStudioWorldCharacterLifecycle:
 
         if selected_active_world and active_world is not None:
             self.db.delete(active_world)
-            character.status = "inactive"
+            deactivate_for_world_leave(character)
         local_profile.update(
             {
                 "leave_idempotency_key": idempotency_key,
@@ -211,4 +201,4 @@ class SqlAlchemyStudioWorldCharacterLifecycle:
         )
 
 
-__all__ = ["SqlAlchemyStudioWorldCharacterLifecycle"]
+__all__ = ["WorldCharacterLifecycleService"]

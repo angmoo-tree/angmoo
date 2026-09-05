@@ -65,3 +65,10 @@ __all__ = [
     "is_affected_local_entry_runtime_pair",
     "is_expected_autonomous_runtime_pair",
 ]
+
+
+@dataclass(frozen=True, slots=True)
+class AutonomousRuntimeModeRepairResult:
+    scanned_count: int
+    repaired_count: int
+    skipped_reasons: tuple[tuple[str, int], ...]

@@ -20,7 +20,7 @@ USER_GUIDE = REPO_ROOT / "docs" / "public" / "l3-local-vertical-loop.md"
 def test_l3_representative_suites_are_required_by_local_smoke() -> None:
     workflow = WORKFLOW.read_text(encoding="utf-8")
     for test_file in (
-        "tests/test_world_character_setup_service.py",
+        "tests/world_characters/test_setup_service.py",
         "tests/test_daily_activity_runtime.py",
         "tests/test_routine_post_runtime.py",
         "tests/world_characters/test_owner_identity.py",

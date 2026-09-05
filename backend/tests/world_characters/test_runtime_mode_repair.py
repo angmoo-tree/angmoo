@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from app.runtime.world_characters.recovery import reconcile_local_autonomous_runtime_modes
+
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -12,11 +14,8 @@ from app.domains.world_characters.schemas.setup import WorldCharacterEntryCreate
 from app.domains.world_characters.service.setup_validation import (
     character_contract_hash,
 )
-from app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup import (
+from app.domains.world_characters.service.autonomous_setup import (
     enter_world,
-)
-from app.domains.world_characters.infrastructure.sqlalchemy_runtime_modes import (
-    reconcile_local_autonomous_runtime_modes,
 )
 
 

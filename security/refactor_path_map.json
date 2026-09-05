@@ -205,7 +205,26 @@
     "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py": "backend/app/domains/world_characters/service/owner_identity.py",
     "backend/app/domains/world_characters/application/owner_controlled_identity.py": "backend/app/domains/world_characters/service/owner_identity.py",
     "backend/app/domains/world_characters/ports/owner_controlled_identity.py": "backend/app/domains/world_characters/service/owner_identity.py",
-    "backend/tests/test_l3_owner_controlled_world_character.py": "backend/tests/world_characters/test_owner_identity.py"
+    "backend/tests/test_l3_owner_controlled_world_character.py": "backend/tests/world_characters/test_owner_identity.py",
+    "backend/app/domains/world_characters/api/routes.py": "backend/app/domains/world_characters/router/profile.py",
+    "backend/app/domains/world_characters/api/__init__.py": "backend/app/domains/world_characters/router/__init__.py",
+    "backend/app/domains/world_characters/application/__init__.py": "backend/app/domains/world_characters/service/__init__.py",
+    "backend/app/domains/world_characters/ports/__init__.py": "backend/app/domains/world_characters/contracts/__init__.py",
+    "backend/tests/test_l4_pr_g_character_fixture_lifecycle.py": "backend/tests/world_characters/test_lifecycle.py",
+    "backend/app/domains/world_characters/infrastructure/sqlalchemy_public_profile.py": "backend/app/domains/world_characters/service/public_profile.py",
+    "backend/app/domains/world_characters/application/public_profile.py": "backend/app/domains/world_characters/service/public_profile.py",
+    "backend/app/domains/world_characters/ports/public_profile.py": "backend/app/domains/world_characters/service/public_profile.py",
+    "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_surface.py": "backend/app/domains/world_characters/service/studio.py",
+    "backend/app/domains/world_characters/application/studio_surface.py": "backend/app/domains/world_characters/service/studio.py",
+    "backend/app/domains/world_characters/ports/studio_surface.py": "backend/app/domains/world_characters/service/studio.py",
+    "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py": "backend/app/domains/world_characters/service/lifecycle.py",
+    "backend/app/domains/world_characters/application/studio_lifecycle.py": "backend/app/domains/world_characters/service/lifecycle.py",
+    "backend/app/domains/world_characters/ports/studio_lifecycle.py": "backend/app/domains/world_characters/service/lifecycle.py",
+    "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py": "backend/app/domains/world_characters/service/autonomous_setup.py",
+    "backend/app/domains/world_characters/infrastructure/sqlalchemy_runtime_modes.py": "backend/app/domains/world_characters/service/runtime_modes.py",
+    "backend/app/domains/world_characters/infrastructure/autonomous_setup_models.py": "backend/app/domains/world_characters/models.py",
+    "backend/tests/test_world_character_setup_service.py": "backend/tests/world_characters/test_setup_service.py",
+    "backend/tests/test_l4_pr_g_runtime_mode_repair.py": "backend/tests/world_characters/test_runtime_mode_repair.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -403,7 +422,26 @@
     "tests/test_l3_owner_controlled_world_character.py::test_owner_controlled_migration_refuses_provenance_losing_downgrade": "tests/world_characters/test_owner_identity.py::test_owner_controlled_migration_refuses_provenance_losing_downgrade",
     "tests/test_l3_owner_controlled_world_character.py::test_owner_identity_create_update_reentry_is_private_and_write_bounded": "tests/world_characters/test_owner_identity.py::test_owner_identity_create_update_reentry_is_private_and_write_bounded",
     "tests/test_l3_owner_controlled_world_character.py::test_owner_identity_rejects_cross_owner_and_cross_world_role": "tests/world_characters/test_owner_identity.py::test_owner_identity_rejects_cross_owner_and_cross_world_role",
-    "tests/test_l3_owner_controlled_world_character.py::test_scheduler_claim_excludes_owner_controlled_but_keeps_autonomous": "tests/world_characters/test_owner_identity.py::test_scheduler_claim_excludes_owner_controlled_but_keeps_autonomous"
+    "tests/test_l3_owner_controlled_world_character.py::test_scheduler_claim_excludes_owner_controlled_but_keeps_autonomous": "tests/world_characters/test_owner_identity.py::test_scheduler_claim_excludes_owner_controlled_but_keeps_autonomous",
+    "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_candidate_read_is_owner_scoped_and_returns_typed_reasons": "tests/world_characters/test_lifecycle.py::test_candidate_read_is_owner_scoped_and_returns_typed_reasons",
+    "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history": "tests/world_characters/test_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history",
+    "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_rejects_stale_busy_autonomy_and_owner_controlled_targets": "tests/world_characters/test_lifecycle.py::test_leave_rejects_stale_busy_autonomy_and_owner_controlled_targets",
+    "tests/test_l4_pr_g_runtime_mode_repair.py::test_file_backed_repair_is_bounded_idempotent_and_preserves_evidence": "tests/world_characters/test_runtime_mode_repair.py::test_file_backed_repair_is_bounded_idempotent_and_preserves_evidence",
+    "tests/test_world_character_setup_service.py::test_approval_activates_contract_but_not_autonomous_execution": "tests/world_characters/test_setup_service.py::test_approval_activates_contract_but_not_autonomous_execution",
+    "tests/test_world_character_setup_service.py::test_approval_rejects_stored_candidate_signature_drift": "tests/world_characters/test_setup_service.py::test_approval_rejects_stored_candidate_signature_drift",
+    "tests/test_world_character_setup_service.py::test_character_privacy_cleanup_removes_setup_outputs_only": "tests/world_characters/test_setup_service.py::test_character_privacy_cleanup_removes_setup_outputs_only",
+    "tests/test_world_character_setup_service.py::test_credential_deletion_preserves_approved_setup_and_zero_call_reentry": "tests/world_characters/test_setup_service.py::test_credential_deletion_preserves_approved_setup_and_zero_call_reentry",
+    "tests/test_world_character_setup_service.py::test_existing_world_character_role_can_be_changed_to_explicit_no_role": "tests/world_characters/test_setup_service.py::test_existing_world_character_role_can_be_changed_to_explicit_no_role",
+    "tests/test_world_character_setup_service.py::test_feed_status_distinguishes_runtime_lane_states": "tests/world_characters/test_setup_service.py::test_feed_status_distinguishes_runtime_lane_states",
+    "tests/test_world_character_setup_service.py::test_owner_controlled_identity_is_rejected_before_provider_or_writes": "tests/world_characters/test_setup_service.py::test_owner_controlled_identity_is_rejected_before_provider_or_writes",
+    "tests/test_world_character_setup_service.py::test_ready_same_hash_pair_is_reused_without_provider_calls": "tests/world_characters/test_setup_service.py::test_ready_same_hash_pair_is_reused_without_provider_calls",
+    "tests/test_world_character_setup_service.py::test_repertoire_failure_preserves_profile_and_retry_calls_only_repertoire": "tests/world_characters/test_setup_service.py::test_repertoire_failure_preserves_profile_and_retry_calls_only_repertoire",
+    "tests/test_world_character_setup_service.py::test_routes_expose_preflight_generate_and_approve_without_enabling_autonomy": "tests/world_characters/test_setup_service.py::test_routes_expose_preflight_generate_and_approve_without_enabling_autonomy",
+    "tests/test_world_character_setup_service.py::test_routes_hide_missing_and_foreign_world_characters": "tests/world_characters/test_setup_service.py::test_routes_hide_missing_and_foreign_world_characters",
+    "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates": "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates",
+    "tests/test_world_character_setup_service.py::test_v2_to_v3_normalizes_existing_autonomous_null_role_idempotently": "tests/world_characters/test_setup_service.py::test_v2_to_v3_normalizes_existing_autonomous_null_role_idempotently",
+    "tests/test_world_character_setup_service.py::test_world_entry_creates_pending_world_character_without_provider_or_autonomy": "tests/world_characters/test_setup_service.py::test_world_entry_creates_pending_world_character_without_provider_or_autonomy",
+    "tests/test_world_character_setup_service.py::test_world_entry_requires_explicit_no_specific_role_selection": "tests/world_characters/test_setup_service.py::test_world_entry_requires_explicit_no_specific_role_selection"
   },
   "details": {
     "AR-B1": {
@@ -4040,7 +4078,7 @@
           ],
           "test_nodes": [
             "tests/worlds/test_transition_contracts.py::test_split_router_preserves_all_fourteen_world_and_resident_endpoints",
-            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+            "tests/world_characters/test_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
           ]
         },
         {
@@ -4051,7 +4089,7 @@
           ],
           "test_nodes": [
             "tests/worlds/test_transition_contracts.py::test_split_router_preserves_all_fourteen_world_and_resident_endpoints",
-            "tests/test_world_character_setup_service.py::test_world_entry_creates_pending_world_character_without_provider_or_autonomy"
+            "tests/world_characters/test_setup_service.py::test_world_entry_creates_pending_world_character_without_provider_or_autonomy"
           ]
         },
         {
@@ -4062,7 +4100,7 @@
           ],
           "test_nodes": [
             "tests/worlds/test_transition_contracts.py::test_split_router_preserves_all_fourteen_world_and_resident_endpoints",
-            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+            "tests/world_characters/test_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
           ]
         },
         {
@@ -4105,7 +4143,7 @@
           ],
           "test_nodes": [
             "tests/worlds/test_transition_contracts.py::test_split_router_preserves_all_fourteen_world_and_resident_endpoints",
-            "tests/test_world_character_setup_service.py::test_world_entry_creates_pending_world_character_without_provider_or_autonomy"
+            "tests/world_characters/test_setup_service.py::test_world_entry_creates_pending_world_character_without_provider_or_autonomy"
           ]
         },
         {
@@ -4126,7 +4164,7 @@
           ],
           "test_nodes": [
             "tests/worlds/test_transition_contracts.py::test_split_router_preserves_all_fourteen_world_and_resident_endpoints",
-            "tests/test_world_character_setup_service.py::test_world_entry_creates_pending_world_character_without_provider_or_autonomy"
+            "tests/world_characters/test_setup_service.py::test_world_entry_creates_pending_world_character_without_provider_or_autonomy"
           ]
         },
         {
@@ -4157,7 +4195,7 @@
           ],
           "test_nodes": [
             "tests/worlds/test_transition_contracts.py::test_split_router_preserves_all_fourteen_world_and_resident_endpoints",
-            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+            "tests/world_characters/test_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
           ]
         },
         {
@@ -4189,7 +4227,7 @@
           ],
           "test_nodes": [
             "tests/worlds/test_transition_contracts.py::test_split_router_preserves_all_fourteen_world_and_resident_endpoints",
-            "tests/test_world_character_setup_service.py::test_world_entry_creates_pending_world_character_without_provider_or_autonomy"
+            "tests/world_characters/test_setup_service.py::test_world_entry_creates_pending_world_character_without_provider_or_autonomy"
           ]
         },
         {
@@ -4210,7 +4248,7 @@
           ],
           "test_nodes": [
             "tests/worlds/test_transition_contracts.py::test_split_router_preserves_all_fourteen_world_and_resident_endpoints",
-            "tests/test_world_character_setup_service.py::test_world_entry_creates_pending_world_character_without_provider_or_autonomy"
+            "tests/world_characters/test_setup_service.py::test_world_entry_creates_pending_world_character_without_provider_or_autonomy"
           ]
         },
         {
@@ -4376,7 +4414,7 @@
           "old": "backend/app/domains/world_characters/domain/public_profile.py::WorldCharacterControlMode",
           "new": "backend/app/domains/world_characters/contracts/public_profile.py::WorldCharacterControlMode",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_public_profile.py",
+            "backend/app/domains/world_characters/service/public_profile.py",
             "backend/app/domains/world_characters/schemas/identity.py"
           ],
           "test_nodes": [
@@ -4387,7 +4425,7 @@
           "old": "backend/app/domains/world_characters/domain/public_profile.py::WorldCharacterProfileError",
           "new": "backend/app/domains/world_characters/exceptions.py::WorldCharacterProfileError",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_public_profile.py",
+            "backend/app/domains/world_characters/service/public_profile.py",
             "backend/app/domains/world_characters/schemas/identity.py"
           ],
           "test_nodes": [
@@ -4398,7 +4436,7 @@
           "old": "backend/app/domains/world_characters/domain/public_profile.py::WorldCharacterProfileForbiddenError",
           "new": "backend/app/domains/world_characters/exceptions.py::WorldCharacterProfileForbiddenError",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_public_profile.py",
+            "backend/app/domains/world_characters/service/public_profile.py",
             "backend/app/domains/world_characters/schemas/identity.py"
           ],
           "test_nodes": [
@@ -4409,7 +4447,7 @@
           "old": "backend/app/domains/world_characters/domain/public_profile.py::WorldCharacterProfileNotFoundError",
           "new": "backend/app/domains/world_characters/exceptions.py::WorldCharacterProfileNotFoundError",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_public_profile.py",
+            "backend/app/domains/world_characters/service/public_profile.py",
             "backend/app/domains/world_characters/schemas/identity.py"
           ],
           "test_nodes": [
@@ -4420,7 +4458,7 @@
           "old": "backend/app/domains/world_characters/domain/public_profile.py::WorldCharacterPublicProfile",
           "new": "backend/app/domains/world_characters/contracts/public_profile.py::WorldCharacterPublicProfile",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_public_profile.py",
+            "backend/app/domains/world_characters/service/public_profile.py",
             "backend/app/domains/world_characters/schemas/identity.py"
           ],
           "test_nodes": [
@@ -4431,7 +4469,7 @@
           "old": "backend/app/domains/world_characters/domain/public_profile.py::__all__",
           "new": "backend/app/domains/world_characters/contracts/public_profile.py::__all__",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_public_profile.py",
+            "backend/app/domains/world_characters/service/public_profile.py",
             "backend/app/domains/world_characters/schemas/identity.py"
           ],
           "test_nodes": [
@@ -4442,107 +4480,107 @@
           "old": "backend/app/domains/world_characters/domain/studio_lifecycle.py::CandidateReason",
           "new": "backend/app/domains/world_characters/contracts/studio_lifecycle.py::CandidateReason",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py"
+            "backend/app/domains/world_characters/service/lifecycle.py"
           ],
           "test_nodes": [
-            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+            "tests/world_characters/test_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
           ]
         },
         {
           "old": "backend/app/domains/world_characters/domain/studio_lifecycle.py::StudioCharacterCandidate",
           "new": "backend/app/domains/world_characters/contracts/studio_lifecycle.py::StudioCharacterCandidate",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py"
+            "backend/app/domains/world_characters/service/lifecycle.py"
           ],
           "test_nodes": [
-            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+            "tests/world_characters/test_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
           ]
         },
         {
           "old": "backend/app/domains/world_characters/domain/studio_lifecycle.py::StudioWorldCharacterBusyError",
           "new": "backend/app/domains/world_characters/exceptions.py::StudioWorldCharacterBusyError",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py"
+            "backend/app/domains/world_characters/service/lifecycle.py"
           ],
           "test_nodes": [
-            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+            "tests/world_characters/test_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
           ]
         },
         {
           "old": "backend/app/domains/world_characters/domain/studio_lifecycle.py::StudioWorldCharacterConflictError",
           "new": "backend/app/domains/world_characters/exceptions.py::StudioWorldCharacterConflictError",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py"
+            "backend/app/domains/world_characters/service/lifecycle.py"
           ],
           "test_nodes": [
-            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+            "tests/world_characters/test_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
           ]
         },
         {
           "old": "backend/app/domains/world_characters/domain/studio_lifecycle.py::StudioWorldCharacterForbiddenError",
           "new": "backend/app/domains/world_characters/exceptions.py::StudioWorldCharacterForbiddenError",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py"
+            "backend/app/domains/world_characters/service/lifecycle.py"
           ],
           "test_nodes": [
-            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+            "tests/world_characters/test_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
           ]
         },
         {
           "old": "backend/app/domains/world_characters/domain/studio_lifecycle.py::StudioWorldCharacterLifecycleError",
           "new": "backend/app/domains/world_characters/exceptions.py::StudioWorldCharacterLifecycleError",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py"
+            "backend/app/domains/world_characters/service/lifecycle.py"
           ],
           "test_nodes": [
-            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+            "tests/world_characters/test_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
           ]
         },
         {
           "old": "backend/app/domains/world_characters/domain/studio_lifecycle.py::StudioWorldCharacterNotFoundError",
           "new": "backend/app/domains/world_characters/exceptions.py::StudioWorldCharacterNotFoundError",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py"
+            "backend/app/domains/world_characters/service/lifecycle.py"
           ],
           "test_nodes": [
-            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+            "tests/world_characters/test_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
           ]
         },
         {
           "old": "backend/app/domains/world_characters/domain/studio_lifecycle.py::StudioWorldCharacterValidationError",
           "new": "backend/app/domains/world_characters/exceptions.py::StudioWorldCharacterValidationError",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py"
+            "backend/app/domains/world_characters/service/lifecycle.py"
           ],
           "test_nodes": [
-            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+            "tests/world_characters/test_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
           ]
         },
         {
           "old": "backend/app/domains/world_characters/domain/studio_lifecycle.py::WorldCharacterLeaveResult",
           "new": "backend/app/domains/world_characters/contracts/studio_lifecycle.py::WorldCharacterLeaveResult",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py"
+            "backend/app/domains/world_characters/service/lifecycle.py"
           ],
           "test_nodes": [
-            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+            "tests/world_characters/test_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
           ]
         },
         {
           "old": "backend/app/domains/world_characters/domain/studio_lifecycle.py::__all__",
           "new": "backend/app/domains/world_characters/contracts/studio_lifecycle.py::__all__",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py"
+            "backend/app/domains/world_characters/service/lifecycle.py"
           ],
           "test_nodes": [
-            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+            "tests/world_characters/test_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
           ]
         },
         {
           "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::CHARACTER_CONTRACT_VERSION",
           "new": "backend/app/domains/world_characters/service/setup_validation.py::CHARACTER_CONTRACT_VERSION",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py",
             "backend/app/domains/world_characters/client.py"
           ],
           "test_nodes": [
@@ -4554,7 +4592,7 @@
           "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::DAYPARTS",
           "new": "backend/app/domains/world_characters/service/setup_validation.py::DAYPARTS",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py",
             "backend/app/domains/world_characters/client.py"
           ],
           "test_nodes": [
@@ -4566,7 +4604,7 @@
           "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::NEAR_DUPLICATE_JACCARD_THRESHOLD",
           "new": "backend/app/domains/world_characters/service/setup_validation.py::NEAR_DUPLICATE_JACCARD_THRESHOLD",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py",
             "backend/app/domains/world_characters/client.py"
           ],
           "test_nodes": [
@@ -4578,7 +4616,7 @@
           "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::REPERTOIRE_SCHEMA_VERSION",
           "new": "backend/app/domains/world_characters/service/setup_validation.py::REPERTOIRE_SCHEMA_VERSION",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py",
             "backend/app/domains/world_characters/client.py"
           ],
           "test_nodes": [
@@ -4612,7 +4650,7 @@
           "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::WORLD_CHARACTER_GENERATOR_VERSION",
           "new": "backend/app/domains/world_characters/service/setup_validation.py::WORLD_CHARACTER_GENERATOR_VERSION",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py",
             "backend/app/domains/world_characters/client.py"
           ],
           "test_nodes": [
@@ -4745,7 +4783,7 @@
           "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::build_character_contract",
           "new": "backend/app/domains/world_characters/service/setup_validation.py::build_character_contract",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py",
             "backend/app/domains/world_characters/client.py"
           ],
           "test_nodes": [
@@ -4757,7 +4795,7 @@
           "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::build_world_character_generation_input",
           "new": "backend/app/domains/world_characters/service/setup_validation.py::build_world_character_generation_input",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py",
             "backend/app/domains/world_characters/client.py"
           ],
           "test_nodes": [
@@ -4769,7 +4807,7 @@
           "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::canonical_candidate_signature",
           "new": "backend/app/domains/world_characters/service/setup_validation.py::canonical_candidate_signature",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py",
             "backend/app/domains/world_characters/client.py"
           ],
           "test_nodes": [
@@ -4781,7 +4819,7 @@
           "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::canonical_sha256",
           "new": "backend/app/domains/world_characters/service/setup_validation.py::canonical_sha256",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py",
             "backend/app/domains/world_characters/client.py"
           ],
           "test_nodes": [
@@ -4793,7 +4831,7 @@
           "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::character_contract_hash",
           "new": "backend/app/domains/world_characters/service/setup_validation.py::character_contract_hash",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py",
             "backend/app/domains/world_characters/client.py"
           ],
           "test_nodes": [
@@ -4805,7 +4843,7 @@
           "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::validate_activity_repertoire",
           "new": "backend/app/domains/world_characters/service/setup_validation.py::validate_activity_repertoire",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py",
             "backend/app/domains/world_characters/client.py"
           ],
           "test_nodes": [
@@ -4817,7 +4855,7 @@
           "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::validate_community_profile",
           "new": "backend/app/domains/world_characters/service/setup_validation.py::validate_community_profile",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py",
             "backend/app/domains/world_characters/client.py"
           ],
           "test_nodes": [
@@ -4829,66 +4867,66 @@
           "old": "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py::DirectLlmWorldCharacterSetupProvider",
           "new": "backend/app/domains/world_characters/client.py::DirectLlmWorldCharacterSetupProvider",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py"
+            "backend/app/domains/world_characters/service/autonomous_setup.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
-            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
           ]
         },
         {
           "old": "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py::GEMINI_PROFILE_RESPONSE_SCHEMA",
           "new": "backend/app/domains/world_characters/client.py::GEMINI_PROFILE_RESPONSE_SCHEMA",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py"
+            "backend/app/domains/world_characters/service/autonomous_setup.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
-            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
           ]
         },
         {
           "old": "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py::GEMINI_REPERTOIRE_RESPONSE_SCHEMAS",
           "new": "backend/app/domains/world_characters/client.py::GEMINI_REPERTOIRE_RESPONSE_SCHEMAS",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py"
+            "backend/app/domains/world_characters/service/autonomous_setup.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
-            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
           ]
         },
         {
           "old": "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py::PROFILE_MAX_OUTPUT_TOKENS",
           "new": "backend/app/domains/world_characters/client.py::PROFILE_MAX_OUTPUT_TOKENS",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py"
+            "backend/app/domains/world_characters/service/autonomous_setup.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
-            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
           ]
         },
         {
           "old": "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py::REPERTOIRE_DAYPART_BATCHES",
           "new": "backend/app/domains/world_characters/client.py::REPERTOIRE_DAYPART_BATCHES",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py"
+            "backend/app/domains/world_characters/service/autonomous_setup.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
-            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
           ]
         },
         {
           "old": "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py::REPERTOIRE_MAX_OUTPUT_TOKENS",
           "new": "backend/app/domains/world_characters/client.py::REPERTOIRE_MAX_OUTPUT_TOKENS",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py"
+            "backend/app/domains/world_characters/service/autonomous_setup.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
-            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
           ]
         },
         {
@@ -4899,7 +4937,7 @@
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
-            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
           ]
         },
         {
@@ -4910,7 +4948,7 @@
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
-            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
           ]
         },
         {
@@ -4921,7 +4959,7 @@
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
-            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
           ]
         },
         {
@@ -4932,7 +4970,7 @@
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
-            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
           ]
         },
         {
@@ -4943,7 +4981,7 @@
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
-            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
           ]
         },
         {
@@ -4954,7 +4992,7 @@
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
-            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
           ]
         },
         {
@@ -4965,7 +5003,7 @@
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
-            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
           ]
         },
         {
@@ -4976,7 +5014,7 @@
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
-            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
           ]
         },
         {
@@ -4987,18 +5025,18 @@
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
-            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
           ]
         },
         {
           "old": "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py::build_gemini_repertoire_response_schema",
           "new": "backend/app/domains/world_characters/client.py::build_gemini_repertoire_response_schema",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py"
+            "backend/app/domains/world_characters/service/autonomous_setup.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
-            "tests/test_world_character_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
           ]
         }
       ],
@@ -9799,7 +9837,7 @@
           "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py::SqlAlchemyOwnerControlledIdentityRepository",
           "new": "backend/app/domains/world_characters/service/owner_identity.py::OwnerControlledIdentityService",
           "direct_consumers": [
-            "backend/app/domains/world_characters/api/routes.py"
+            "backend/app/domains/world_characters/router/profile.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_owner_identity.py::test_owner_identity_create_update_reentry_is_private_and_write_bounded"
@@ -9809,7 +9847,7 @@
           "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py::_profile_document",
           "new": "backend/app/domains/world_characters/service/owner_identity.py::_profile_document",
           "direct_consumers": [
-            "backend/app/domains/world_characters/api/routes.py"
+            "backend/app/domains/world_characters/router/profile.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_owner_identity.py::test_owner_identity_create_update_reentry_is_private_and_write_bounded"
@@ -9819,7 +9857,7 @@
           "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py::_snapshot",
           "new": "backend/app/domains/world_characters/service/owner_identity.py::_snapshot",
           "direct_consumers": [
-            "backend/app/domains/world_characters/api/routes.py"
+            "backend/app/domains/world_characters/router/profile.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_owner_identity.py::test_owner_identity_create_update_reentry_is_private_and_write_bounded"
@@ -9829,7 +9867,7 @@
           "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py::__all__",
           "new": "backend/app/domains/world_characters/service/owner_identity.py::__all__",
           "direct_consumers": [
-            "backend/app/domains/world_characters/api/routes.py"
+            "backend/app/domains/world_characters/router/profile.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_owner_identity.py::test_owner_identity_create_update_reentry_is_private_and_write_bounded"
@@ -15687,6 +15725,860 @@
           ]
         }
       ]
+    },
+    "AR-B2-WC-profiles": {
+      "status": "IMPLEMENTED; WC/Social/Memory35 PASS; inventory+boundary80 PASS; public604/current2111 PASS; current API/ORM+complete split evidence PASS",
+      "split_files": {
+        "backend/app/domains/world_characters/infrastructure/sqlalchemy_public_profile.py": [
+          "backend/app/domains/world_characters/service/public_profile.py",
+          "backend/app/runtime/world_characters/queries.py"
+        ],
+        "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_surface.py": [
+          "backend/app/domains/world_characters/service/studio.py",
+          "backend/app/runtime/world_characters/queries.py"
+        ],
+        "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py": [
+          "backend/app/domains/world_characters/service/lifecycle.py",
+          "backend/app/runtime/world_characters/queries.py",
+          "backend/app/domains/characters/service/world_lifecycle.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_public_profile.py::_CurrentUser",
+          "new": "backend/app/domains/world_characters/service/public_profile.py::_CurrentUser",
+          "direct_consumers": [
+            "backend/app/runtime/world_characters/composition.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_owner_identity.py::test_creator_studio_lists_existing_world_characters_without_writes"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_public_profile.py::SqlAlchemyWorldCharacterPublicProfileReader",
+          "new": "backend/app/domains/world_characters/service/public_profile.py::WorldCharacterProfileService",
+          "direct_consumers": [
+            "backend/app/runtime/world_characters/composition.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_owner_identity.py::test_creator_studio_lists_existing_world_characters_without_writes"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_public_profile.py::__all__",
+          "new": "backend/app/domains/world_characters/service/public_profile.py::__all__",
+          "direct_consumers": [
+            "backend/app/runtime/world_characters/composition.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_owner_identity.py::test_creator_studio_lists_existing_world_characters_without_writes"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_public_profile.py::SqlAlchemyWorldCharacterPublicProfileReader",
+          "new": "backend/app/runtime/world_characters/queries.py::SqlAlchemyWorldCharacterQueries",
+          "source_member": "_active_profile_statement/list_for_world/get_for_world",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/public_profile.py",
+            "backend/app/runtime/world_characters/composition.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_joined_reads.py::test_joined_read_adapter_retains_filters_order_null_rows_and_one_query_each"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_surface.py::_CurrentUser",
+          "new": "backend/app/domains/world_characters/service/studio.py::_CurrentUser",
+          "direct_consumers": [
+            "backend/app/runtime/world_characters/composition.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_owner_identity.py::test_creator_studio_lists_existing_world_characters_without_writes"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_surface.py::SqlAlchemyStudioWorldCharacterReader",
+          "new": "backend/app/domains/world_characters/service/studio.py::WorldCharacterStudioService",
+          "direct_consumers": [
+            "backend/app/runtime/world_characters/composition.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_owner_identity.py::test_creator_studio_lists_existing_world_characters_without_writes"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_surface.py::__all__",
+          "new": "backend/app/domains/world_characters/service/studio.py::__all__",
+          "direct_consumers": [
+            "backend/app/runtime/world_characters/composition.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_owner_identity.py::test_creator_studio_lists_existing_world_characters_without_writes"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_surface.py::SqlAlchemyStudioWorldCharacterReader",
+          "new": "backend/app/runtime/world_characters/queries.py::SqlAlchemyWorldCharacterQueries",
+          "source_member": "list_for_creator SQL",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/studio.py",
+            "backend/app/runtime/world_characters/composition.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_joined_reads.py::test_joined_read_adapter_retains_filters_order_null_rows_and_one_query_each"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py::_CurrentUser",
+          "new": "backend/app/domains/world_characters/service/lifecycle.py::_CurrentUser",
+          "direct_consumers": [
+            "backend/app/runtime/world_characters/composition.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py::SqlAlchemyStudioWorldCharacterLifecycle",
+          "new": "backend/app/domains/world_characters/service/lifecycle.py::WorldCharacterLifecycleService",
+          "direct_consumers": [
+            "backend/app/runtime/world_characters/composition.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py::__all__",
+          "new": "backend/app/domains/world_characters/service/lifecycle.py::__all__",
+          "direct_consumers": [
+            "backend/app/runtime/world_characters/composition.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py::SqlAlchemyStudioWorldCharacterLifecycle",
+          "new": "backend/app/runtime/world_characters/queries.py::SqlAlchemyWorldCharacterQueries",
+          "source_member": "list_candidates SQL",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/lifecycle.py",
+            "backend/app/runtime/world_characters/composition.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_joined_reads.py::test_joined_read_adapter_retains_filters_order_null_rows_and_one_query_each"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py::SqlAlchemyStudioWorldCharacterLifecycle",
+          "new": "backend/app/domains/characters/service/world_lifecycle.py::deactivate_for_world_leave",
+          "source_member": "leave selected-active Character.status mutation",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/lifecycle.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+          ]
+        }
+      ],
+      "test_ownership": {
+        "tests/test_l4_pr_g_character_fixture_lifecycle.py": "tests/world_characters/test_lifecycle.py"
+      },
+      "composition": "World access/state/profile decisions remain in WC services; runtime query adapter owns exactly the original cross-owner joins and is injected at API/runtime composition. Same Session, one query per joined read, row multiplicity and DB sorting preserved. No domain imports runtime or exports foreign ORM classes.",
+      "removed_forwarders": "All remaining application forwarding readers and repository protocols removed. Runtime leave guard Protocol is the actual external workflow contract in contracts/lifecycle.py.",
+      "http": "Move the seven original profile/Studio/owner routes to router/profile.py without route/status/schema/tag/order changes. Entry/setup routes remain next slice."
+    },
+    "AR-B2-WC-setup": {
+      "status": "IMPLEMENTED; setup/runtime/capacity/Package101 PASS; 36/42 original function bodies identical; current API/ORM and complete split evidence PASS",
+      "split_files": {
+        "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py": [
+          "backend/app/domains/world_characters/service/autonomous_setup.py",
+          "backend/app/domains/world_characters/exceptions.py",
+          "backend/app/domains/worlds/service/character_entry.py",
+          "backend/app/domains/identity/service/world_character_credentials.py",
+          "backend/app/runtime/world_characters/queries.py"
+        ],
+        "backend/app/domains/world_characters/infrastructure/sqlalchemy_runtime_modes.py": [
+          "backend/app/domains/world_characters/service/runtime_modes.py",
+          "backend/app/runtime/world_characters/recovery.py",
+          "backend/app/domains/world_characters/contracts/runtime_modes.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::PROFILE_REGENERATION_LIMIT_24H",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::PROFILE_REGENERATION_LIMIT_24H",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::OWNER_REGENERATION_LIMIT_24H",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::OWNER_REGENERATION_LIMIT_24H",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::WorldCharacterSetupError",
+          "new": "backend/app/domains/world_characters/exceptions.py::WorldCharacterSetupError",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/autonomous_setup.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::WorldCharacterSetupNotFoundError",
+          "new": "backend/app/domains/world_characters/exceptions.py::WorldCharacterSetupNotFoundError",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/autonomous_setup.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::WorldCharacterSetupForbiddenError",
+          "new": "backend/app/domains/world_characters/exceptions.py::WorldCharacterSetupForbiddenError",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/autonomous_setup.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::WorldCharacterSetupConflictError",
+          "new": "backend/app/domains/world_characters/exceptions.py::WorldCharacterSetupConflictError",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/autonomous_setup.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::WorldCharacterSetupValidationError",
+          "new": "backend/app/domains/world_characters/exceptions.py::WorldCharacterSetupValidationError",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/autonomous_setup.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::SetupScope",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::SetupScope",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::selected_autonomous_world_character",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::selected_autonomous_world_character",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::lock_world_autonomy_capacity",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::lock_world_autonomy_capacity",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::count_enabled_autonomous_world_characters",
+          "new": "backend/app/runtime/world_characters/queries.py::count_enabled_autonomous_world_characters",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::set_active_world_character_autonomy",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::set_active_world_character_autonomy",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::enter_world",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::enter_world",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_entry_read",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_entry_read",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::get_world_entry",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::get_world_entry",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::update_world_character_role",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::update_world_character_role",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_require_autonomous_role",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_require_autonomous_role",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_load_scope",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_load_scope",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_select_active_world_character",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_select_active_world_character",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_resolve_material",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_resolve_material",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::preflight_setup",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::preflight_setup",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::generate_setup",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::generate_setup",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::retry_setup",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::retry_setup",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_generate_repertoire_stage",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_generate_repertoire_stage",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::approve_setup",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::approve_setup",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::reject_setup",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::reject_setup",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::get_setup",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::get_setup",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_assert_regeneration_quota",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_assert_regeneration_quota",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_begin_attempt",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_begin_attempt",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_finish_attempt_success",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_finish_attempt_success",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_finish_attempt_failure",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_finish_attempt_failure",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_safe_error_code",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_safe_error_code",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_physical_request_count",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_physical_request_count",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_public_stage_error",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_public_stage_error",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_require_profile_result",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_require_profile_result",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_require_repertoire_result",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_require_repertoire_result",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_reload_and_assert_hashes",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_reload_and_assert_hashes",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_save_profile_draft",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_save_profile_draft",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_save_repertoire_draft",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_save_repertoire_draft",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_ready_pair",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_ready_pair",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_matching_profile",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_matching_profile",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_matching_repertoire",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_matching_repertoire",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_latest_profile",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_latest_profile",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_latest_repertoire",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_latest_repertoire",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_candidate_rows",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_candidate_rows",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_recent_candidate_signatures",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_recent_candidate_signatures",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_profile_payload",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_profile_payload",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_candidate_payload",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_candidate_payload",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_profile_read",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_profile_read",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_repertoire_read",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_repertoire_read",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_daypart_counts",
+          "new": "backend/app/domains/world_characters/service/autonomous_setup.py::_daypart_counts",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_runtime_modes.py::AutonomousRuntimeModeRepairResult",
+          "new": "backend/app/domains/world_characters/contracts/runtime_modes.py::AutonomousRuntimeModeRepairResult",
+          "direct_consumers": [
+            "backend/app/runtime/world_characters/recovery.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_runtime_mode_repair.py::test_file_backed_repair_is_bounded_idempotent_and_preserves_evidence"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_runtime_modes.py::reconcile_local_autonomous_runtime_modes",
+          "new": "backend/app/runtime/world_characters/recovery.py::reconcile_local_autonomous_runtime_modes",
+          "direct_consumers": [
+            "backend/app/public_main.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_runtime_mode_repair.py::test_file_backed_repair_is_bounded_idempotent_and_preserves_evidence"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_runtime_modes.py::repair_affected_local_autonomous_runtime_modes",
+          "new": "backend/app/domains/world_characters/service/runtime_modes.py::repair_affected_local_autonomous_runtime_modes",
+          "direct_consumers": [
+            "backend/app/runtime/world_characters/recovery.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_runtime_mode_repair.py::test_file_backed_repair_is_bounded_idempotent_and_preserves_evidence"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_runtime_modes.py::repair_local_autonomous_runtime_mode",
+          "new": "backend/app/domains/world_characters/service/runtime_modes.py::repair_local_autonomous_runtime_mode",
+          "direct_consumers": [
+            "backend/app/runtime/world_characters/recovery.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_runtime_mode_repair.py::test_file_backed_repair_is_bounded_idempotent_and_preserves_evidence"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_runtime_modes.py::_repair_ineligibility_reason",
+          "new": "backend/app/domains/world_characters/service/runtime_modes.py::_repair_ineligibility_reason",
+          "direct_consumers": [
+            "backend/app/runtime/world_characters/recovery.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_runtime_mode_repair.py::test_file_backed_repair_is_bounded_idempotent_and_preserves_evidence"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_runtime_modes.py::__all__",
+          "new": "backend/app/domains/world_characters/service/runtime_modes.py::__all__",
+          "direct_consumers": [
+            "backend/app/runtime/world_characters/recovery.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_runtime_mode_repair.py::test_file_backed_repair_is_bounded_idempotent_and_preserves_evidence"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::enter_world",
+          "new": "backend/app/domains/worlds/service/character_entry.py::find_character_entry_membership",
+          "source_member": "membership scalar query",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/autonomous_setup.py",
+            "backend/app/domains/world_characters/service/runtime_modes.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::enter_world",
+          "new": "backend/app/domains/worlds/service/character_entry.py::seed_open_character_membership",
+          "source_member": "new active member add/flush",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/autonomous_setup.py",
+            "backend/app/domains/world_characters/service/runtime_modes.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::enter_world",
+          "new": "backend/app/domains/worlds/service/character_entry.py::list_autonomous_entry_roles",
+          "source_member": "enabled autonomous role scalar query",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/autonomous_setup.py",
+            "backend/app/domains/world_characters/service/runtime_modes.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_load_scope",
+          "new": "backend/app/domains/worlds/service/character_entry.py::get_character_entry_world",
+          "source_member": "nullable db.get World",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/autonomous_setup.py",
+            "backend/app/domains/world_characters/service/runtime_modes.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_load_scope",
+          "new": "backend/app/domains/worlds/service/character_entry.py::get_character_entry_membership",
+          "source_member": "nullable db.get membership",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/autonomous_setup.py",
+            "backend/app/domains/world_characters/service/runtime_modes.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_require_autonomous_role",
+          "new": "backend/app/domains/worlds/service/character_entry.py::find_autonomous_entry_role",
+          "source_member": "single enabled role query",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/autonomous_setup.py",
+            "backend/app/domains/world_characters/service/runtime_modes.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::update_world_character_role",
+          "new": "backend/app/domains/worlds/service/character_entry.py::refresh_entry_world_contract",
+          "source_member": "same conditional World definition/row version increments",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/autonomous_setup.py",
+            "backend/app/domains/world_characters/service/runtime_modes.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py::_resolve_material",
+          "new": "backend/app/domains/identity/service/world_character_credentials.py::find_world_character_credential",
+          "source_member": "scalar BYOK query before existing resolver exception boundary",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/autonomous_setup.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_two_logical_calls_create_profile_and_exact_forty_candidates"
+          ]
+        }
+      ],
+      "test_ownership": {
+        "tests/test_world_character_setup_service.py": "tests/world_characters/test_setup_service.py",
+        "tests/test_l4_pr_g_runtime_mode_repair.py": "tests/world_characters/test_runtime_mode_repair.py"
+      },
+      "preserved_flow": "Original preflight/generate/retry/approve/reject and exact error hierarchy, logical/physical provider counters, reload hashes, quota/locks, transaction/commit order retained. World entry lookups preserve db.get vs scalar. Identity query stays before the resolver try boundary.",
+      "runtime_split": "Only cross-owner capacity SQL and startup session_factory/SQLite immediate wrapper move runtime. Same-Session repair policy remains WC; imported-world exclusions and fail-closed reasons retained.",
+      "removed_aggregate": "autonomous_setup_models foreign ORM aggregation is removed. WC models are owned locally; Character profile and bounded World/Identity services perform actual cooperating lookups/writes. No service exports foreign ORM classes."
     }
   }
 }

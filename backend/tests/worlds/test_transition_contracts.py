@@ -192,7 +192,9 @@ def test_resident_leave_still_translates_errors_from_the_world_service(world_ses
         invoked.append(arguments)
         raise service.WorldNotFoundError(arguments["world_id"])
 
-    monkeypatch.setattr(resident_routes.world_character_setup, "leave_studio_world_character", absent_world)
+    from app.domains.world_characters.service.lifecycle import WorldCharacterLifecycleService
+
+    monkeypatch.setattr(WorldCharacterLifecycleService, "leave", absent_world)
     with TestClient(application, base_url="http://127.0.0.1:3000") as client:
         response = client.post(
             f"/api/v1/worlds/{world_id}/characters/resident-a/leave",

@@ -58,8 +58,8 @@ def test_l3_current_entrypoints_track_completed_and_pending_migrations() -> None
         APP_ROOT
         / "domains"
         / "world_characters"
-        / "infrastructure"
-        / "sqlalchemy_autonomous_setup.py": {
+        / "service"
+        / "autonomous_setup.py": {
             "enter_world",
             "preflight_setup",
             "generate_setup",

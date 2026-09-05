@@ -9,9 +9,6 @@ from app.domains.world_characters.contracts.public_profile import (
     WorldCharacterProfileNotFoundError,
     WorldCharacterPublicProfile,
 )
-from app.domains.world_characters.infrastructure.sqlalchemy_public_profile import (
-    SqlAlchemyWorldCharacterPublicProfileReader,
-)
 from app.domains.world_characters.contracts.owner_identity import (
     OwnerControlledIdentityError,
 )
@@ -34,7 +31,7 @@ from app.domains.world_characters.models import (
     WorldActivityRepertoire,
     WorldCommunityProfile,
 )
-from app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup import (
+from app.domains.world_characters.service.autonomous_setup import (
     OWNER_REGENERATION_LIMIT_24H,
     PROFILE_REGENERATION_LIMIT_24H,
     WorldCharacterSetupConflictError,
@@ -43,7 +40,6 @@ from app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup imp
     WorldCharacterSetupNotFoundError,
     WorldCharacterSetupValidationError,
     approve_setup,
-    count_enabled_autonomous_world_characters,
     enter_world,
     generate_setup,
     get_setup,
@@ -56,10 +52,6 @@ from app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup imp
     set_active_world_character_autonomy,
     update_world_character_role,
 )
-from app.domains.world_characters.application.studio_lifecycle import (
-    leave_studio_world_character,
-    list_studio_character_candidates,
-)
 from app.domains.world_characters.contracts.studio_lifecycle import (
     StudioWorldCharacterBusyError,
     StudioWorldCharacterConflictError,
@@ -68,15 +60,11 @@ from app.domains.world_characters.contracts.studio_lifecycle import (
     StudioWorldCharacterNotFoundError,
     StudioWorldCharacterValidationError,
 )
-from app.domains.world_characters.infrastructure.sqlalchemy_studio_lifecycle import (
-    SqlAlchemyStudioWorldCharacterLifecycle,
-)
 from app.domains.world_characters.service.seed import (
     seed_autonomous_world_character,
 )
-from app.domains.world_characters.infrastructure.sqlalchemy_runtime_modes import (
+from app.domains.world_characters.service.runtime_modes import (
     AutonomousRuntimeModeRepairResult,
-    reconcile_local_autonomous_runtime_modes,
 )
 
 
@@ -105,7 +93,6 @@ __all__ = [
     "StudioWorldCharacterLifecycleError",
     "StudioWorldCharacterNotFoundError",
     "StudioWorldCharacterValidationError",
-    "SqlAlchemyStudioWorldCharacterLifecycle",
     "WorldActivityCandidate",
     "WorldActivityRepertoire",
     "WorldCharacter",
@@ -114,23 +101,18 @@ __all__ = [
     "WorldCharacterProfileForbiddenError",
     "WorldCharacterProfileNotFoundError",
     "WorldCharacterPublicProfile",
-    "SqlAlchemyWorldCharacterPublicProfileReader",
     "OwnerControlledIdentityService",
     "approve_setup",
     "character_contract_hash",
-    "count_enabled_autonomous_world_characters",
     "enter_world",
     "generate_setup",
     "get_setup",
     "get_world_entry",
     "is_owner_controlled_character",
     "is_expected_autonomous_runtime_pair",
-    "leave_studio_world_character",
-    "list_studio_character_candidates",
     "lock_world_autonomy_capacity",
     "owner_controlled_character_ids",
     "preflight_setup",
-    "reconcile_local_autonomous_runtime_modes",
     "reject_setup",
     "retry_setup",
     "selected_autonomous_world_character",

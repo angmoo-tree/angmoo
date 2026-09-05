@@ -460,3 +460,11 @@ Character/Creator 기본 HTTP 11개와 owner state API 1개가 Character router�
 순수 state admission/쓰기/응답은 Character 서비스가 소유한다. 기존 Social tool 소비자에게는 Community 오류 타입을 유지하는 호환 wrapper만 남는다. 활동/World readiness/미디어/Local Bot/복합 삭제와 공개 Social profile/search는 각각 해당 실제 업무의 후속 단계에 속하며, 기본 Character 완료를 이유로 섞어 옮기지 않는다. 자세한 종료 경계와 bridge 소비자는 `docs/architecture/refactor-backend-results.md`의 B2 Character 감사표를 따른다.
 
 WorldCharacter의 소유자 identity는 `service/owner_identity.py`의 실제 조회·생성·수정 서비스가 담당합니다. 설치 소유자 확인은 Identity의 `service/owner_context.py`, 특수 Character seed·프로필 쓰기는 Character의 `service/owner_controlled.py`에 요청합니다. 일반 create/update의 commit/rollback/refresh는 WC 서비스가 유지하고 Package seed는 같은 Session에서 flush만 합니다. 이전 application forwarding 함수와 repository Protocol은 실제 호출 전환 후 제거했습니다.
+
+
+WorldCharacter의 공개 프로필·Studio·후보 조회와 퇴장 정책은 `service/public_profile.py`, `service/studio.py`, `service/lifecycle.py`에 있습니다. World 권한 확인·프로필 표현·퇴장 버전 및 상태 판단은 이 서비스가 소유합니다. Character/WorldMembership을 함께 읽는 기존 SQL은 `runtime/world_characters/queries.py`가 같은 Session에서 실행하며 `contracts/queries.py` 계약으로 주입됩니다. API와 다른 runtime 소비자는 `runtime/world_characters/composition.py` 또는 공통 HTTP 연결 `app/api/world_character_dependencies.py`에서 조립합니다. 서비스가 runtime을 역으로 import하지 않으며 row 개수·DB 정렬·조회 횟수를 바꾸지 않습니다.
+
+기존 프로필·Studio·소유자 HTTP 7개 경로는 `router/profile.py`에 있습니다. 단순 application forwarding 함수와 repository Protocol은 실제 호출을 옮긴 뒤 제거했으며, 퇴장 runtime guard는 `contracts/lifecycle.py`에 실제 협력 계약으로 남습니다. 선택된 World에서 퇴장할 때 Character의 비활성화도 Character 서비스의 같은 attached 객체 쓰기로 연결하고 commit/rollback은 원래 WC 트랜잭션이 수행합니다.
+
+
+WorldCharacter의 생성·재시도·승인·거절·입장 정책은 `service/autonomous_setup.py`에 있습니다. Character 조회, nullable World/membership 조회·입장 membership seed·World contract version 쓰기, agent-purpose credential 조회는 각 소유 서비스와 같은 Session으로 협력합니다. `infrastructure/autonomous_setup_models.py`의 외부 ORM 집합은 제거했습니다. Provider budget·쿼터·실패 상태 기록과 commit 경계는 WC 서비스에 유지합니다. Runtime mode의 실제 repair 정책은 `service/runtime_modes.py`, 시작 시 Session factory·SQLite immediate 실행은 `runtime/world_characters/recovery.py`가 소유합니다. Runtime의 capacity query는 원래 WC/Character join을 그대로 유지합니다.

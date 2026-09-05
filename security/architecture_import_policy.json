@@ -1309,7 +1309,19 @@
       "app.domains.characters.service.management",
       "app.domains.media.contracts",
       "app.domains.runtime.contracts",
-      "app.domains.runtime.schemas"
+      "app.domains.runtime.schemas",
+      "app.domains.characters.service.world_lifecycle",
+      "app.domains.identity.service.world_character_credentials",
+      "app.domains.world_characters.contracts.lifecycle",
+      "app.domains.world_characters.contracts.queries",
+      "app.domains.world_characters.router",
+      "app.domains.world_characters.router.profile",
+      "app.domains.world_characters.service.autonomous_setup",
+      "app.domains.world_characters.service.lifecycle",
+      "app.domains.world_characters.service.public_profile",
+      "app.domains.world_characters.service.runtime_modes",
+      "app.domains.world_characters.service.studio",
+      "app.domains.worlds.service.character_entry"
     ],
     "entries": [
       "app.domains.characters.contracts",
@@ -1359,7 +1371,18 @@
       "app.domains.characters.service.management",
       "app.domains.media.contracts",
       "app.domains.runtime.contracts",
-      "app.domains.runtime.schemas"
+      "app.domains.runtime.schemas",
+      "app.domains.characters.service.world_lifecycle",
+      "app.domains.identity.service.world_character_credentials",
+      "app.domains.world_characters.contracts.lifecycle",
+      "app.domains.world_characters.contracts.queries",
+      "app.domains.world_characters.service",
+      "app.domains.world_characters.service.autonomous_setup",
+      "app.domains.world_characters.service.lifecycle",
+      "app.domains.world_characters.service.public_profile",
+      "app.domains.world_characters.service.runtime_modes",
+      "app.domains.world_characters.service.studio",
+      "app.domains.worlds.service.character_entry"
     ],
     "bridges": [
       {
@@ -1459,104 +1482,8 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.domains.world_characters.api.routes",
-        "target": "app.domains.world_characters.contracts.owner_identity",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_characters.api.routes",
-        "target": "app.domains.world_characters.contracts.public_profile",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_characters.api.routes",
-        "target": "app.domains.world_characters.schemas.identity",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_characters.api.routes",
-        "target": "app.domains.world_characters.service.owner_identity",
-        "owner_stage": "AR-B2",
-        "removal_condition": "Move this exact remaining WC HTTP/public consumer in its workflow slice; scheduler legacy bridge closes in AR-B4.",
-        "reason": "Existing owner identity collaboration now calls the actual canonical service with the same Session.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_characters.application.public_profile",
-        "target": "app.domains.world_characters.contracts.public_profile",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_characters.application.studio_lifecycle",
-        "target": "app.domains.world_characters.contracts.studio_lifecycle",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_characters.application.studio_surface",
-        "target": "app.domains.world_characters.contracts.studio_surface",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.domains.world_characters.infrastructure",
         "target": "app.domains.world_characters.models",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_characters.infrastructure.autonomous_setup_models",
-        "target": "app.domains.world_characters.models",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup",
-        "target": "app.domains.world_characters.client",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup",
-        "target": "app.domains.world_characters.contracts.runtime_modes",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup",
-        "target": "app.domains.world_characters.schemas.setup",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup",
-        "target": "app.domains.world_characters.service.setup_validation",
         "owner_stage": "AR-B2",
         "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
         "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
@@ -1571,99 +1498,11 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.domains.world_characters.infrastructure.sqlalchemy_public_profile",
-        "target": "app.domains.world_characters.contracts.public_profile",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_characters.infrastructure.sqlalchemy_public_profile",
-        "target": "app.domains.world_characters.models",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_characters.infrastructure.sqlalchemy_runtime_modes",
-        "target": "app.domains.world_characters.contracts.runtime_modes",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_characters.infrastructure.sqlalchemy_runtime_modes",
-        "target": "app.domains.world_characters.service.setup_validation",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.domains.world_characters.infrastructure.sqlalchemy_setup_models",
         "target": "app.domains.world_characters.models",
         "owner_stage": "AR-B8-A",
         "reason": "Immutable v2->v3 import retains the identical model object.",
         "removal_condition": "Preserve supported frozen migration loading until a verified compatibility resolver replaces this path.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_characters.infrastructure.sqlalchemy_studio_lifecycle",
-        "target": "app.domains.world_characters.contracts.studio_lifecycle",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_characters.infrastructure.sqlalchemy_studio_lifecycle",
-        "target": "app.domains.world_characters.models",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_characters.infrastructure.sqlalchemy_studio_surface",
-        "target": "app.domains.world_characters.contracts.studio_surface",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_characters.infrastructure.sqlalchemy_studio_surface",
-        "target": "app.domains.world_characters.models",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_characters.ports.public_profile",
-        "target": "app.domains.world_characters.contracts.public_profile",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_characters.ports.studio_lifecycle",
-        "target": "app.domains.world_characters.contracts.studio_lifecycle",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_characters.ports.studio_surface",
-        "target": "app.domains.world_characters.contracts.studio_surface",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
         "review_date": "2026-09-05"
       },
       {
@@ -2232,6 +2071,22 @@
         "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A",
         "reason": "State admission/writes are canonical Character work; old Community consumers retain their same error type and HTTP assembly keeps the same APIRoute.",
         "removal_condition": "Retire Community state wrappers after Social/tool consumers call Character service directly; keep HTTP assembly only while mixed routes migrate.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.world_characters.public",
+        "target": "app.domains.world_characters.service.autonomous_setup",
+        "owner_stage": "AR-B2",
+        "removal_condition": "Switch the remaining exact mixed setup API/cleanup facade to its final owner in the next WC slice.",
+        "reason": "Existing consumers now reach canonical setup/repair implementation; no new canonical module calls this compatibility surface.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.world_characters.public",
+        "target": "app.domains.world_characters.service.runtime_modes",
+        "owner_stage": "AR-B2",
+        "removal_condition": "Switch the remaining exact mixed setup API/cleanup facade to its final owner in the next WC slice.",
+        "reason": "Existing consumers now reach canonical setup/repair implementation; no new canonical module calls this compatibility surface.",
         "review_date": "2026-09-05"
       }
     ]

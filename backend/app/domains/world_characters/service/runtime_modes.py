@@ -4,14 +4,12 @@ from __future__ import annotations
 
 from collections import Counter
 from collections.abc import Callable, Collection
-from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.core.sqlite_concurrency import run_sqlite_session_immediate
 from app.domains.world_characters.contracts.runtime_modes import (
     AUTONOMOUS_ACTIVITY_RUNTIME_MODE,
     AUTONOMOUS_FEED_RUNTIME_MODE,
@@ -19,29 +17,10 @@ from app.domains.world_characters.contracts.runtime_modes import (
     is_affected_local_entry_runtime_pair,
 )
 from app.domains.world_characters.service import setup_validation as world_character_contracts
-from app.domains.world_characters.infrastructure import autonomous_setup_models as models
-@dataclass(frozen=True, slots=True)
-class AutonomousRuntimeModeRepairResult:
-    scanned_count: int
-    repaired_count: int
-    skipped_reasons: tuple[tuple[str, int], ...]
-
-
-def reconcile_local_autonomous_runtime_modes(
-    session_factory: Callable[[], Session],
-    *,
-    excluded_world_ids: Collection[str] = (),
-) -> AutonomousRuntimeModeRepairResult:
-    """Repair only proven PR G local rows before embedded workers start."""
-
-    with session_factory() as db:
-        return run_sqlite_session_immediate(
-            db,
-            lambda: repair_affected_local_autonomous_runtime_modes(
-                db,
-                excluded_world_ids=excluded_world_ids,
-            ),
-        )
+from app.domains.world_characters import models
+from app.domains.characters.service.profile import get_character
+from app.domains.worlds.service import character_entry as world_entry
+from app.domains.world_characters.contracts.runtime_modes import AutonomousRuntimeModeRepairResult
 
 
 def repair_affected_local_autonomous_runtime_modes(
@@ -129,9 +108,9 @@ def _repair_ineligibility_reason(
         local_profile=world_character.local_profile,
     ):
         return "source_marker_missing"
-    character = db.get(models.Character, world_character.character_id)
-    membership = db.get(models.WorldMembership, world_character.membership_id)
-    world = db.get(models.World, world_character.world_id)
+    character = get_character(db, world_character.character_id)
+    membership = world_entry.get_character_entry_membership(db, world_character.membership_id)
+    world = world_entry.get_character_entry_world(db, world_character.world_id)
     if (
         character is None
         or character.deleted_at is not None
@@ -153,13 +132,8 @@ def _repair_ineligibility_reason(
         return "world_ineligible"
     if world_character.world_id in excluded_world_ids:
         return "imported_world"
-    role = db.scalar(
-        select(models.WorldRole).where(
-            models.WorldRole.world_id == world_character.world_id,
-            models.WorldRole.role_key == world_character.role_key,
-            models.WorldRole.status == "enabled",
-            models.WorldRole.autonomous_allowed.is_(True),
-        )
+    role = world_entry.find_autonomous_entry_role(
+        db, world_id=world_character.world_id, role_key=world_character.role_key,
     )
     if role is None:
         return "role_ineligible"
@@ -216,7 +190,18 @@ def _repair_ineligibility_reason(
 
 __all__ = [
     "AutonomousRuntimeModeRepairResult",
-    "reconcile_local_autonomous_runtime_modes",
     "repair_local_autonomous_runtime_mode",
     "repair_affected_local_autonomous_runtime_modes",
 ]
+
+
+def set_activity_runtime_mode(
+    world_character: models.WorldCharacter, *, activity_runtime_mode: str,
+) -> None:
+    """Apply the caller-validated mode/version write in the caller transaction.
+
+    The activity-plan command owns its existing authorization/readiness checks
+    and commit. This collaboration neither flushes nor adds another validation.
+    """
+    world_character.activity_runtime_mode = activity_runtime_mode
+    world_character.version += 1

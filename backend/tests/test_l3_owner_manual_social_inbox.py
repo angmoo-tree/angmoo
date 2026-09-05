@@ -18,7 +18,7 @@ from app.domains.identity.dependencies import get_current_user
 from app.core.db import Base, get_db
 from app.domains.social.api.schemas import ManualSocialPostRead
 from app.api.v1.routes.manual_social import router as manual_social_router
-from app.domains.world_characters.api.routes import router as owner_identity_router
+from app.domains.world_characters.router.profile import router as owner_identity_router
 from app.runtime.social.sqlalchemy_read_repository import list_owner_world_feed
 from app.services import world_character_contracts
 

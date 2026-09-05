@@ -51,7 +51,7 @@ def _require_text(relative: str, values: tuple[str, ...]) -> None:
 
 def _backend_contract() -> dict[str, Any]:
     _require_text(
-        "backend/app/domains/world_characters/api/routes.py",
+        "backend/app/domains/world_characters/router/profile.py",
         (
             '"/{world_id}/world-characters"',
             '"/{world_id}/world-characters/{world_character_id}"',
