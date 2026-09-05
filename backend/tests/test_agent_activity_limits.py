@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app import models, schemas
 from app.core import active_hours, agent_activity_schedule
-from app.core.config import settings
+from app.config import settings
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.domains.worlds import public as world_service

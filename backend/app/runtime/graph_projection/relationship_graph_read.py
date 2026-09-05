@@ -11,7 +11,7 @@ from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app import models
-from app.core.config import Settings, settings
+from app.config import Settings, settings
 from app.runtime.graph_projection import sqlalchemy_state as graph_projection_crud
 from app.domains.relationships import public as relationships
 from app.domains.relationships.graph_read import schemas

@@ -47,13 +47,11 @@ from app import models, schemas
 from app.domains.characters import models as character_models
 from app.domains.characters.service import profile as character_profile
 from app.core import active_hours, security, unit_of_work
-from app.core.config import settings
+from app.config import settings
 from app.core.image_generation import USER_IMAGE_MODEL_OPTIONS
 from app.core.redaction import redact_secret_text
-from app.core.sqlite_concurrency import (
-    SqliteBusyRetryExhausted,
-    run_sqlite_session_immediate,
-)
+from app.core.sqlite_concurrency import run_sqlite_session_immediate
+from app.exceptions import SqliteBusyRetryExhausted
 from app.credentials import (
     CredentialPurpose,
     CredentialResolutionError,

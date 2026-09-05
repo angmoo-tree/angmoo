@@ -12,7 +12,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode
 from urllib.request import Request
 
-from app.core.config import settings
+from app.config import settings
 from app.integrations import bounded_http
 from app.services import provider_http
 

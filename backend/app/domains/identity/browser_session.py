@@ -7,7 +7,7 @@ from urllib.parse import urlsplit
 
 from fastapi import HTTPException, Request, Response, status
 
-from app.core.config import Settings, settings
+from app.config import Settings, settings
 from app.core.desktop_loopback import LAUNCH_TOKEN_HEADER
 
 

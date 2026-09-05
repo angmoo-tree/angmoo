@@ -1233,7 +1233,11 @@
     "domains": [
       "device_home"
     ],
-    "globals": [],
+    "globals": [
+      "app.config",
+      "app.exceptions",
+      "app.pagination"
+    ],
     "modules": [
       "app.domains.characters.contracts",
       "app.domains.characters.exceptions",

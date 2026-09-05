@@ -3,7 +3,7 @@ from __future__ import annotations
 import threading
 from typing import Any, Protocol
 
-from app.core.config import Settings, settings
+from app.config import Settings, settings
 from app.domains.relationships.ports.projection import (
     RelationshipProjectionBackendError,
     RelationshipProjectionPort,

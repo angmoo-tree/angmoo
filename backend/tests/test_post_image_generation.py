@@ -22,7 +22,7 @@ from app.core.image_generation import (
     REPLICATE_IMAGE_MODEL_PRUNA_EDIT,
     REPLICATE_IMAGE_MODEL_ZIMAGE_TURBO_LORA,
 )
-from app.core.config import settings
+from app.config import settings
 from app.cruds import agents as agent_crud
 from app.services import (image_prompt_safety, pollinations_image, post_image_generation, profile_media, service_image_key)
 from app.runtime.characters import management as agent_service

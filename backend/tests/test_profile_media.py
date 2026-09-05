@@ -3,7 +3,7 @@ from io import BytesIO
 import pytest
 from PIL import Image
 
-from app.core.config import settings
+from app.config import settings
 from app.services import profile_media
 
 

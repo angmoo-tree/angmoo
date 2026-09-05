@@ -13,7 +13,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from app.domains.identity import models, schemas
 from app.core import security
-from app.core.config import settings
+from app.config import settings
 
 
 from app.policies import name_policy

@@ -1,42 +1,157 @@
 {
   "canonical_commands": {
-    "contributor_start": ["docker", "compose", "-f", "compose.yml", "-f", "compose.dev.yml", "up", "--watch"],
-    "stop": ["docker", "compose", "down"],
-    "user_start": ["docker", "compose", "up", "-d"]
+    "contributor_start": [
+      "docker",
+      "compose",
+      "-f",
+      "compose.yml",
+      "-f",
+      "compose.dev.yml",
+      "up",
+      "--watch"
+    ],
+    "stop": [
+      "docker",
+      "compose",
+      "down"
+    ],
+    "user_start": [
+      "docker",
+      "compose",
+      "up",
+      "-d"
+    ]
   },
   "contract_id": "angmoo-l0-docker-runtime-v1",
   "core_modules": [
-    {"disposition": "migrate", "module": "app.core.active_hours", "owner_stage": "L3", "removal_condition": "Move active-hour policy behind the activities domain public API."},
-    {"disposition": "migrate", "module": "app.core.agent_activity_schedule", "owner_stage": "L4", "removal_condition": "Move autonomous tick scheduling behind the runtime domain public API."},
-    {"disposition": "migrate", "module": "app.core.agent_activity_limits", "owner_stage": "L2", "removal_condition": "Move scheduler and resident quota policy behind runtime public ports."},
-    {"disposition": "keep", "module": "app.core.config", "owner_stage": "L0", "removal_condition": null},
-    {"disposition": "keep", "module": "app.core.db", "owner_stage": "L0", "removal_condition": null},
-    {"disposition": "keep", "module": "app.core.desktop_loopback", "owner_stage": "L3-ER5", "removal_condition": null},
-    {"disposition": "keep", "module": "app.core.ids", "owner_stage": "L0", "removal_condition": null},
-    {"disposition": "migrate", "module": "app.core.image_generation", "owner_stage": "L6", "removal_condition": "Move media generation policy behind the media domain public API."},
-    {"disposition": "keep", "module": "app.core.profile_ref", "owner_stage": "P8-L-B", "removal_condition": null},
-    {"disposition": "keep", "module": "app.core.prompt_safety", "owner_stage": "P8-L-B", "removal_condition": null},
-    {"disposition": "migrate", "module": "app.core.public_media", "owner_stage": "L6", "removal_condition": "Move public media mounting behind the media domain composition API."},
-    {"disposition": "keep", "module": "app.core.redaction", "owner_stage": "L0", "removal_condition": null},
-    {"disposition": "keep", "module": "app.core.request_limits", "owner_stage": "L0", "removal_condition": null},
-    {"disposition": "keep", "module": "app.core.response_schemas", "owner_stage": "AR-B2-B", "removal_condition": null},
-    {"disposition": "migrate", "module": "app.core.search_text", "owner_stage": "L4", "removal_condition": "Move search normalization behind the social feed domain public API."},
-    {"disposition": "keep", "module": "app.core.security", "owner_stage": "L1", "removal_condition": null},
-    {"disposition": "keep", "module": "app.core.sqlite_concurrency", "owner_stage": "L0", "removal_condition": null},
-    {"disposition": "keep", "module": "app.core.unit_of_work", "owner_stage": "L0", "removal_condition": null}
+    {
+      "disposition": "migrate",
+      "module": "app.core.active_hours",
+      "owner_stage": "L3",
+      "removal_condition": "Move active-hour policy behind the activities domain public API."
+    },
+    {
+      "disposition": "migrate",
+      "module": "app.core.agent_activity_schedule",
+      "owner_stage": "L4",
+      "removal_condition": "Move autonomous tick scheduling behind the runtime domain public API."
+    },
+    {
+      "disposition": "migrate",
+      "module": "app.core.agent_activity_limits",
+      "owner_stage": "L2",
+      "removal_condition": "Move scheduler and resident quota policy behind runtime public ports."
+    },
+    {
+      "disposition": "keep",
+      "module": "app.core.db",
+      "owner_stage": "L0",
+      "removal_condition": null
+    },
+    {
+      "disposition": "keep",
+      "module": "app.core.desktop_loopback",
+      "owner_stage": "L3-ER5",
+      "removal_condition": null
+    },
+    {
+      "disposition": "keep",
+      "module": "app.core.ids",
+      "owner_stage": "L0",
+      "removal_condition": null
+    },
+    {
+      "disposition": "migrate",
+      "module": "app.core.image_generation",
+      "owner_stage": "L6",
+      "removal_condition": "Move media generation policy behind the media domain public API."
+    },
+    {
+      "disposition": "keep",
+      "module": "app.core.profile_ref",
+      "owner_stage": "P8-L-B",
+      "removal_condition": null
+    },
+    {
+      "disposition": "keep",
+      "module": "app.core.prompt_safety",
+      "owner_stage": "P8-L-B",
+      "removal_condition": null
+    },
+    {
+      "disposition": "migrate",
+      "module": "app.core.public_media",
+      "owner_stage": "L6",
+      "removal_condition": "Move public media mounting behind the media domain composition API."
+    },
+    {
+      "disposition": "keep",
+      "module": "app.core.redaction",
+      "owner_stage": "L0",
+      "removal_condition": null
+    },
+    {
+      "disposition": "keep",
+      "module": "app.core.request_limits",
+      "owner_stage": "L0",
+      "removal_condition": null
+    },
+    {
+      "disposition": "keep",
+      "module": "app.core.response_schemas",
+      "owner_stage": "AR-B2-B",
+      "removal_condition": null
+    },
+    {
+      "disposition": "migrate",
+      "module": "app.core.search_text",
+      "owner_stage": "L4",
+      "removal_condition": "Move search normalization behind the social feed domain public API."
+    },
+    {
+      "disposition": "keep",
+      "module": "app.core.security",
+      "owner_stage": "L1",
+      "removal_condition": null
+    },
+    {
+      "disposition": "keep",
+      "module": "app.core.sqlite_concurrency",
+      "owner_stage": "L0",
+      "removal_condition": null
+    },
+    {
+      "disposition": "keep",
+      "module": "app.core.unit_of_work",
+      "owner_stage": "L0",
+      "removal_condition": null
+    }
   ],
   "embedded_storage": {
     "canonical": "sqlite",
     "graph": "ladybug",
     "search": "fts5"
   },
-  "default_services": ["backend", "frontend"],
+  "default_services": [
+    "backend",
+    "frontend"
+  ],
   "error_codes": [
-    "container_engine_unavailable", "data_path_unwritable", "database_unavailable",
-    "graph_unavailable", "image_build_failed", "image_pull_failed", "migration_mismatch",
-    "not_implemented_until_L5", "port_conflict", "projector_backlog",
-    "provider_not_configured", "runtime_state_stale", "secret_mismatch",
-    "secret_missing", "unsupported_tool_version"
+    "container_engine_unavailable",
+    "data_path_unwritable",
+    "database_unavailable",
+    "graph_unavailable",
+    "image_build_failed",
+    "image_pull_failed",
+    "migration_mismatch",
+    "not_implemented_until_L5",
+    "port_conflict",
+    "projector_backlog",
+    "provider_not_configured",
+    "runtime_state_stale",
+    "secret_mismatch",
+    "secret_missing",
+    "unsupported_tool_version"
   ],
   "followup_owners": {
     "device_home": "L2.5",
@@ -44,18 +159,31 @@
     "world_package": "L3.5"
   },
   "host_publications": {
-    "frontend": {"address": "127.0.0.1", "default_port": 3000, "port_environment": "ANGMOO_PORT"}
+    "frontend": {
+      "address": "127.0.0.1",
+      "default_port": 3000,
+      "port_environment": "ANGMOO_PORT"
+    }
   },
   "issue": "https://github.com/angmoo-tree/angmoo/issues/36",
   "network": {
     "backend": "http://backend:8080"
   },
   "reduced_modes": {
-    "core": ["backend", "frontend"]
+    "core": [
+      "backend",
+      "frontend"
+    ]
   },
   "runtime_images": {
-    "backend": {"python": "3.13", "uv": "0.12.5"},
-    "frontend": {"node": "22", "pnpm": "11.22.0"}
+    "backend": {
+      "python": "3.13",
+      "uv": "0.12.5"
+    },
+    "frontend": {
+      "node": "22",
+      "pnpm": "11.22.0"
+    }
   },
   "release_images": {
     "backend": {
@@ -68,13 +196,29 @@
     }
   },
   "schema_version": 1,
-  "states": ["blocked", "degraded", "healthy", "stale_state", "starting", "stopped", "stopping"],
+  "states": [
+    "blocked",
+    "degraded",
+    "healthy",
+    "stale_state",
+    "starting",
+    "stopped",
+    "stopping"
+  ],
   "support": {
-    "best_effort": ["macOS"],
+    "best_effort": [
+      "macOS"
+    ],
     "compose_minimum": "2.22.0",
     "engine_contract": "capability_based",
-    "tier_1": ["Windows 11", "PowerShell 5.1", "PowerShell 7"],
-    "tier_2": ["latest Ubuntu LTS"],
+    "tier_1": [
+      "Windows 11",
+      "PowerShell 5.1",
+      "PowerShell 7"
+    ],
+    "tier_2": [
+      "latest Ubuntu LTS"
+    ],
     "validated_baseline": {
       "compose": "5.3.0",
       "docker_engine": "29.6.1",

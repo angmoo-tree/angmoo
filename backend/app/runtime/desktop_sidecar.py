@@ -479,6 +479,9 @@ def _run_installer_mode() -> int:
 
 
 def main() -> int:
+    from app.runtime.logging_config import configure_application_logging
+
+    configure_application_logging()
     if _is_installer_mode():
         return _run_installer_mode()
     args = _parse_args()

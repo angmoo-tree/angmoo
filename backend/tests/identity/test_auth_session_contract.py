@@ -16,7 +16,7 @@ from app.domains.identity.router import auth as auth_routes
 from app.domains.identity import browser_session
 from app.core import security
 from app.core.desktop_loopback import DESKTOP_WEBVIEW_AUTHENTICATED_SCOPE_KEY
-from app.core.config import settings
+from app.config import settings
 from app.domains.identity.service import auth as auth_service
 
 

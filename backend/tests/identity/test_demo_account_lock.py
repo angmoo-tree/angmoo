@@ -9,7 +9,7 @@ from app import models, schemas
 from app.domains.identity import dependencies as api_deps
 from app.api.v1.routes import agents as agent_routes
 from app.domains.identity.router import auth as auth_routes
-from app.core.config import settings
+from app.config import settings
 from app.cruds import agents as agent_crud
 from app.runtime.characters import management as agent_service
 from app.domains.identity.service import auth as auth_service

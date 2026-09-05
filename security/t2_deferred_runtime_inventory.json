@@ -29,6 +29,24 @@
     },
     {
       "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "backend/app/services/pollinations_image.py"
+    },
+    {
+      "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "backend/app/services/pollinations_image.py"
+    },
+    {
+      "markers": [
         "privacy-contact",
         "product-host"
       ],
@@ -45,7 +63,61 @@
       "owner_phases": [
         "L0-L4 product URL, privacy UX, provider referer"
       ],
-      "path": "backend/tests/test_browser_session_security.py"
+      "path": "backend/tests/config/test_startup_security.py"
+    },
+    {
+      "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "backend/tests/config/test_startup_security.py"
+    },
+    {
+      "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "backend/tests/config/test_startup_security.py"
+    },
+    {
+      "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "backend/tests/identity/test_browser_session_security.py"
+    },
+    {
+      "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "backend/tests/identity/test_browser_session_security.py"
+    },
+    {
+      "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "backend/tests/identity/test_browser_session_security.py"
+    },
+    {
+      "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "backend/tests/identity/test_public_signup_policy.py"
     },
     {
       "markers": [
@@ -83,15 +155,6 @@
       "owner_phases": [
         "L0-L4 product URL, privacy UX, provider referer"
       ],
-      "path": "backend/tests/test_public_signup_policy.py"
-    },
-    {
-      "markers": [
-        "product-host"
-      ],
-      "owner_phases": [
-        "L0-L4 product URL, privacy UX, provider referer"
-      ],
       "path": "backend/tests/test_replicate_image.py"
     },
     {
@@ -104,15 +167,6 @@
         "L0-L4 product URL, privacy UX, provider referer"
       ],
       "path": "backend/tests/test_security_secret_scan.py"
-    },
-    {
-      "markers": [
-        "product-host"
-      ],
-      "owner_phases": [
-        "L0-L4 product URL, privacy UX, provider referer"
-      ],
-      "path": "backend/tests/test_startup_security.py"
     },
     {
       "markers": [
@@ -196,6 +250,24 @@
         "L0-L4 product URL, privacy UX, provider referer"
       ],
       "path": "security/refactor_backend_checkpoint.json"
+    },
+    {
+      "markers": [
+        "hosted-extension-type"
+      ],
+      "owner_phases": [
+        "L0-L4 hosted extension compatibility audit"
+      ],
+      "path": "security/refactor_feature_inventory.json"
+    },
+    {
+      "markers": [
+        "hosted-extension-type"
+      ],
+      "owner_phases": [
+        "L0-L4 hosted extension compatibility audit"
+      ],
+      "path": "security/refactor_feature_inventory.json"
     },
     {
       "markers": [

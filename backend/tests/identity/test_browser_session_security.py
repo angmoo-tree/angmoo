@@ -15,7 +15,7 @@ from app.domains.identity import dependencies as api_deps
 from app.domains.identity.router import auth as auth_routes
 from app.domains.identity import browser_session
 from app.core import security
-from app.core.config import Settings, settings
+from app.config import Settings, settings
 from app.runtime.startup_security import StartupSecurityError, validate_startup_security
 from app.domains.identity.service import auth as auth_service
 

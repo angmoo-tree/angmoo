@@ -14,7 +14,7 @@ from sqlalchemy.pool import NullPool
 
 from app import models, schemas
 from app.domains.chat.api import schemas as chat_schemas
-from app.core.config import settings
+from app.config import settings
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import community as community_crud
 from app.runtime.characters import management as agent_service

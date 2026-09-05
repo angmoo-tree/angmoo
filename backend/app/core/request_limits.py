@@ -5,6 +5,7 @@ from typing import Any
 from starlette.responses import JSONResponse
 from starlette.types import Message, Receive, Scope, Send
 
+from app.exceptions import RequestBodyTooLargeError
 
 DEFAULT_REQUEST_BODY_MAX_BYTES = 1024 * 1024
 LORE_UPLOAD_REQUEST_BODY_MAX_BYTES = 10 * 1024 * 1024 + 256 * 1024
@@ -20,10 +21,6 @@ _IMAGE_SEED_PATH = re.compile(
 _WORLD_PACKAGE_STAGE_PATH = re.compile(
     r"^/api/v1/world-package-imports/stage/?$"
 )
-
-
-class RequestBodyTooLargeError(Exception):
-    pass
 
 
 class RequestBodyLimitMiddleware:

@@ -61,7 +61,7 @@ from app import models, schemas
 from app.domains.characters import models as character_models
 from app.domains.characters.service import profile as character_profile
 from app.core import security
-from app.core.config import settings
+from app.config import settings
 from app.core.redaction import redact_exact_secret_text
 from app.credentials import CredentialResolutionError, CredentialResolver
 from app.cruds import agent_runs as agent_run_crud

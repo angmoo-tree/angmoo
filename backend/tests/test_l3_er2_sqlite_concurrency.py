@@ -24,11 +24,10 @@ from app.runtime.graph_projection import SqliteProjectionOutbox
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
 from app.core.sqlite_concurrency import (
     SqliteBoundedTaskQueue,
-    SqliteBusyRetryExhausted,
     SqliteRetryPolicy,
-    SqliteTaskQueueFull,
     run_sqlite_immediate,
 )
+from app.exceptions import SqliteBusyRetryExhausted, SqliteTaskQueueFull
 from app.runtime.persistence.sqlite_database import (
     SqliteCanonicalDatabase,
     SqliteCanonicalSettings,

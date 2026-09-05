@@ -12,7 +12,7 @@ import re
 import time
 from typing import Any
 
-from app.core.config import settings
+from app.config import settings
 from app.core.redaction import (
     redact_exact_secret_text,
     redact_exact_secrets,

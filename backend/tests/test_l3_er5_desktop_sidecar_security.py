@@ -11,7 +11,7 @@ from app.domains.identity.browser_session import allowed_origins
 from app.domains.identity.browser_session import require_local_frontend_request
 from app.domains.identity.browser_session import set_bootstrap_challenge_cookie
 from app.domains.identity.browser_session import set_session_cookie
-from app.core.config import Settings
+from app.config import Settings
 from app.core.desktop_loopback import (
     DesktopLoopbackPolicy,
     DesktopLoopbackSecurityMiddleware,

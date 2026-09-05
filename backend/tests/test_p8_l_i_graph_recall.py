@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 import pytest
 from sqlalchemy.orm import Session
 
-from app.core.config import Settings
+from app.config import Settings
 from app.domains.relationships import public as relationships
 from app.domains.relationships.graph_read.errors import GraphReadBackendError
 from app.domains.relationships.graph_read.repository import (
