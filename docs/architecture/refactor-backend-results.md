@@ -434,6 +434,20 @@ Setup·runtime repair·Agent capacity/동시 활성화·Package UoW는 **101 pas
 Setup slice의 최종 현재 API·ORM 및 전체 split evidence 검사도 PASS였다. immutable Git blob 읽기 memoization만 사용했고 frozen source/checkpoint 내용은 변경하지 않았다.
 
 
+### AR-B2 WC 통합 중 발견한 Package seed replay 경합 Hotfix
+
+기존 `test_concurrent_same_idempotency_key_commits_one_import`가 간헐적으로 World slug validation 오류를 냈다. Seed UoW의 registry 조회와 World idempotency 조회가 모두 miss한 뒤 `_available_slug`가 후보를 고르고, 그 직후 다른 스레드가 같은 요청의 import를 commit하면 마지막 slug 재조회가 `world_slug_unavailable`을 발생시킨다. 기존 UoW는 IntegrityError/OperationalError만 replay 복구해 이 validation 오류를 놓쳤다.
+
+이 경로는 구조 이전으로 추가된 동작이 아니다. Frozen PR #263 `d7037625a19071eb279ad2ea35c3ace6fe5b5289`의 `worlds/infrastructure/sqlalchemy_world_creator.py`에서 `_available_slug`와 `seed_world`의 전체 함수 AST가 현재 `worlds/service/creator.py`와 동일하며, 수정 전 Package seed UoW 전체 모듈 AST도 해당 checkpoint와 동일하다.
+
+수정은 `WorldDefinitionValidationError` 중 `args == ("world_slug_unavailable",)`인 경우로 제한한다. 이 class의 reason_code는 범용 `world_definition_incomplete`라 reason_code만으로 분류하지 않는다. 원래 Session을 rollback/종료한 뒤 별도 Session으로 같은 local_owner_id/idempotency_key의 registry를 조회한다. 실제 원자 commit으로 보이는 완료 기록이 있을 때만 기존 replay resolver가 package id/version/content digest를 검증해 결과를 돌려준다. 기록이 없으면 원래 validation 오류를 다시 내며 재시도하지 않는다. 다른 validation과 비슷한 문자열도 원래 오류 객체를 그대로 전달한다. 기존 DB 충돌 retry 한도·delay·resolver와 World seed 본문은 유지한다.
+
+결정적 회귀는 실제 file-backed SQLite에서 slug 후보 조회 직후 다른 스레드의 commit을 완료시킨다. 수정 전 **4 failed / 2 passed / 18.49초**로 실패를 재현했다. 수정 후 새 6개 사례와 기존 Package UoW/Import Commit은 **26 passed / 기존 1 warning / 37.76초**였다. 새 사례는 rollback→별도 observer 순서, 한 번의 실행, 동일 replay 결과, digest 충돌, 다른 owner/key의 기록 배제, 다른 validation의 미복구를 검증한다. ASCII 이름을 사용해 fallback UUID 시간 구간과 무관하게 동일 slug 경합이 발생한다.
+
+`local-smoke`에 기존 UoW 전체 파일과 새 결정적 회귀를 명시적으로 연결했다. World API·ORM·historical migration·기존 assertion은 수정하지 않았다. 이 hotfix는 seed UoW의 한 경로이며 `BEGIN IMMEDIATE`를 사용하는 media import commit 흐름의 트랜잭션 설계는 바꾸지 않는다. 후속 Package runtime UoW로 파일이 옮겨질 때도 같은 수정이 유지되어야 한다. Source introduction capture 및 PR/merge 검증은 root의 선형 통합 단계가 담당한다.
+
+최종 고정 구현·CI 목록·현재 inventory에서 새 경합 6개, 기존 UoW/Import Commit/Preview, World 정의·Creator API, CI policy를 함께 실행한 결과는 **60 passed / 기존 2 warnings / 42.29초**다. 현재 경계 검사는 **626 modules / 2,003 internal edges / exact legacy 281 PASS**, L4 parity **97**이다.
+
 ### AR-B2 WC entry/setup HTTP·readiness·혼합 삭제 소유권 종료
 
 `router/entry.py`에 입장·역할·퇴장 4개 HTTP를, `router/setup.py`에 설정 6개 HTTP를 이전했다. 기존 setup route는 피드 상태 1개만 계속 소유하고, main/public route 조립은 feed→setup 순서와 WC entry→World Creator의 기존 순서를 보존한다. World 접근 오류의 변환 구현은 `app/api/world_errors.py` 한 곳에 두며 두 도메인 router가 소비한다. Scheduler/AgentRun/Slot/setup busy 판단은 runtime guard로 같은 Session에서 조립한다.

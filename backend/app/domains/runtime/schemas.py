@@ -7,6 +7,7 @@ from datetime import datetime
 from typing import Literal
 from pydantic import BaseModel, ConfigDict
 from app.core.response_schemas import UtcInstantResponseModel
+from app.domains.world_characters.schemas.readiness import AgentActivityProfileReadinessRead
 WritingRepetitionLevel = Literal["off", "light", "normal", "strong"]
 
 
@@ -66,7 +67,6 @@ class AgentActivitySummaryRead(UtcInstantResponseModel):
 
 
 
-from app.domains.world_characters.schemas.readiness import AgentActivityProfileReadinessRead
 
 
 class AgentActivityLogRead(UtcInstantResponseModel):
