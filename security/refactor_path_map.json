@@ -201,7 +201,11 @@
     "backend/app/services/agents.py": "backend/app/runtime/characters/management.py",
     "backend/app/services/agent_creation_drafts.py": "backend/app/runtime/characters/creator.py",
     "backend/app/models/agent_creation_drafts.py": "backend/app/domains/characters/models.py",
-    "backend/app/models/profile_images.py": "backend/app/domains/characters/models.py"
+    "backend/app/models/profile_images.py": "backend/app/domains/characters/models.py",
+    "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py": "backend/app/domains/world_characters/service/owner_identity.py",
+    "backend/app/domains/world_characters/application/owner_controlled_identity.py": "backend/app/domains/world_characters/service/owner_identity.py",
+    "backend/app/domains/world_characters/ports/owner_controlled_identity.py": "backend/app/domains/world_characters/service/owner_identity.py",
+    "backend/tests/test_l3_owner_controlled_world_character.py": "backend/tests/world_characters/test_owner_identity.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -393,7 +397,13 @@
     "tests/test_world_character_contracts.py::test_repertoire_contract_rejects_exact_and_near_duplicates": "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_exact_and_near_duplicates",
     "tests/test_world_character_contracts.py::test_repertoire_contract_rejects_wrong_total[39]": "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_wrong_total[39]",
     "tests/test_world_character_contracts.py::test_repertoire_contract_rejects_wrong_total[41]": "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_rejects_wrong_total[41]",
-    "tests/test_world_character_contracts.py::test_repertoire_transport_uses_domain_keys_and_server_enforces_text_bounds": "tests/world_characters/test_setup_contracts.py::test_repertoire_transport_uses_domain_keys_and_server_enforces_text_bounds"
+    "tests/test_world_character_contracts.py::test_repertoire_transport_uses_domain_keys_and_server_enforces_text_bounds": "tests/world_characters/test_setup_contracts.py::test_repertoire_transport_uses_domain_keys_and_server_enforces_text_bounds",
+    "tests/test_l3_owner_controlled_world_character.py::test_creator_studio_lists_existing_world_characters_without_writes": "tests/world_characters/test_owner_identity.py::test_creator_studio_lists_existing_world_characters_without_writes",
+    "tests/test_l3_owner_controlled_world_character.py::test_owner_controlled_execution_preflight_blocks_run_now_and_provider": "tests/world_characters/test_owner_identity.py::test_owner_controlled_execution_preflight_blocks_run_now_and_provider",
+    "tests/test_l3_owner_controlled_world_character.py::test_owner_controlled_migration_refuses_provenance_losing_downgrade": "tests/world_characters/test_owner_identity.py::test_owner_controlled_migration_refuses_provenance_losing_downgrade",
+    "tests/test_l3_owner_controlled_world_character.py::test_owner_identity_create_update_reentry_is_private_and_write_bounded": "tests/world_characters/test_owner_identity.py::test_owner_identity_create_update_reentry_is_private_and_write_bounded",
+    "tests/test_l3_owner_controlled_world_character.py::test_owner_identity_rejects_cross_owner_and_cross_world_role": "tests/world_characters/test_owner_identity.py::test_owner_identity_rejects_cross_owner_and_cross_world_role",
+    "tests/test_l3_owner_controlled_world_character.py::test_scheduler_claim_excludes_owner_controlled_but_keeps_autonomous": "tests/world_characters/test_owner_identity.py::test_scheduler_claim_excludes_owner_controlled_but_keeps_autonomous"
   },
   "details": {
     "AR-B1": {
@@ -575,7 +585,7 @@
             "backend/app/core/sqlite_concurrency.py",
             "backend/app/runtime/persistence/__init__.py",
             "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
-            "backend/app/services/agents.py",
+            "backend/app/runtime/characters/management.py",
             "backend/tests/test_l3_er2_sqlite_concurrency.py"
           ],
           "test_nodes": [
@@ -4276,90 +4286,90 @@
           "old": "backend/app/domains/world_characters/domain/owner_controlled_identity.py::LocalOwnerRequiredError",
           "new": "backend/app/domains/world_characters/exceptions.py::LocalOwnerRequiredError",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py"
+            "backend/app/domains/world_characters/service/owner_identity.py"
           ],
           "test_nodes": [
-            "tests/test_l3_owner_controlled_world_character.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
+            "tests/world_characters/test_owner_identity.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
           ]
         },
         {
           "old": "backend/app/domains/world_characters/domain/owner_controlled_identity.py::OwnerControlledIdentityConflictError",
           "new": "backend/app/domains/world_characters/exceptions.py::OwnerControlledIdentityConflictError",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py"
+            "backend/app/domains/world_characters/service/owner_identity.py"
           ],
           "test_nodes": [
-            "tests/test_l3_owner_controlled_world_character.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
+            "tests/world_characters/test_owner_identity.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
           ]
         },
         {
           "old": "backend/app/domains/world_characters/domain/owner_controlled_identity.py::OwnerControlledIdentityError",
           "new": "backend/app/domains/world_characters/exceptions.py::OwnerControlledIdentityError",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py"
+            "backend/app/domains/world_characters/service/owner_identity.py"
           ],
           "test_nodes": [
-            "tests/test_l3_owner_controlled_world_character.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
+            "tests/world_characters/test_owner_identity.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
           ]
         },
         {
           "old": "backend/app/domains/world_characters/domain/owner_controlled_identity.py::OwnerControlledIdentityNotFoundError",
           "new": "backend/app/domains/world_characters/exceptions.py::OwnerControlledIdentityNotFoundError",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py"
+            "backend/app/domains/world_characters/service/owner_identity.py"
           ],
           "test_nodes": [
-            "tests/test_l3_owner_controlled_world_character.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
+            "tests/world_characters/test_owner_identity.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
           ]
         },
         {
           "old": "backend/app/domains/world_characters/domain/owner_controlled_identity.py::OwnerControlledIdentitySnapshot",
           "new": "backend/app/domains/world_characters/contracts/owner_identity.py::OwnerControlledIdentitySnapshot",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py"
+            "backend/app/domains/world_characters/service/owner_identity.py"
           ],
           "test_nodes": [
-            "tests/test_l3_owner_controlled_world_character.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
+            "tests/world_characters/test_owner_identity.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
           ]
         },
         {
           "old": "backend/app/domains/world_characters/domain/owner_controlled_identity.py::OwnerControlledProfile",
           "new": "backend/app/domains/world_characters/contracts/owner_identity.py::OwnerControlledProfile",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py"
+            "backend/app/domains/world_characters/service/owner_identity.py"
           ],
           "test_nodes": [
-            "tests/test_l3_owner_controlled_world_character.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
+            "tests/world_characters/test_owner_identity.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
           ]
         },
         {
           "old": "backend/app/domains/world_characters/domain/owner_controlled_identity.py::OwnerControlledRoleInvalidError",
           "new": "backend/app/domains/world_characters/exceptions.py::OwnerControlledRoleInvalidError",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py"
+            "backend/app/domains/world_characters/service/owner_identity.py"
           ],
           "test_nodes": [
-            "tests/test_l3_owner_controlled_world_character.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
+            "tests/world_characters/test_owner_identity.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
           ]
         },
         {
           "old": "backend/app/domains/world_characters/domain/owner_controlled_identity.py::OwnerWorldRequiredError",
           "new": "backend/app/domains/world_characters/exceptions.py::OwnerWorldRequiredError",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py"
+            "backend/app/domains/world_characters/service/owner_identity.py"
           ],
           "test_nodes": [
-            "tests/test_l3_owner_controlled_world_character.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
+            "tests/world_characters/test_owner_identity.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
           ]
         },
         {
           "old": "backend/app/domains/world_characters/domain/owner_controlled_identity.py::__all__",
           "new": "backend/app/domains/world_characters/contracts/owner_identity.py::__all__",
           "direct_consumers": [
-            "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py"
+            "backend/app/domains/world_characters/service/owner_identity.py"
           ],
           "test_nodes": [
-            "tests/test_l3_owner_controlled_world_character.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
+            "tests/world_characters/test_owner_identity.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
           ]
         },
         {
@@ -4370,7 +4380,7 @@
             "backend/app/domains/world_characters/schemas/identity.py"
           ],
           "test_nodes": [
-            "tests/test_l3_owner_controlled_world_character.py::test_creator_studio_lists_existing_world_characters_without_writes"
+            "tests/world_characters/test_owner_identity.py::test_creator_studio_lists_existing_world_characters_without_writes"
           ]
         },
         {
@@ -4381,7 +4391,7 @@
             "backend/app/domains/world_characters/schemas/identity.py"
           ],
           "test_nodes": [
-            "tests/test_l3_owner_controlled_world_character.py::test_creator_studio_lists_existing_world_characters_without_writes"
+            "tests/world_characters/test_owner_identity.py::test_creator_studio_lists_existing_world_characters_without_writes"
           ]
         },
         {
@@ -4392,7 +4402,7 @@
             "backend/app/domains/world_characters/schemas/identity.py"
           ],
           "test_nodes": [
-            "tests/test_l3_owner_controlled_world_character.py::test_creator_studio_lists_existing_world_characters_without_writes"
+            "tests/world_characters/test_owner_identity.py::test_creator_studio_lists_existing_world_characters_without_writes"
           ]
         },
         {
@@ -4403,7 +4413,7 @@
             "backend/app/domains/world_characters/schemas/identity.py"
           ],
           "test_nodes": [
-            "tests/test_l3_owner_controlled_world_character.py::test_creator_studio_lists_existing_world_characters_without_writes"
+            "tests/world_characters/test_owner_identity.py::test_creator_studio_lists_existing_world_characters_without_writes"
           ]
         },
         {
@@ -4414,7 +4424,7 @@
             "backend/app/domains/world_characters/schemas/identity.py"
           ],
           "test_nodes": [
-            "tests/test_l3_owner_controlled_world_character.py::test_creator_studio_lists_existing_world_characters_without_writes"
+            "tests/world_characters/test_owner_identity.py::test_creator_studio_lists_existing_world_characters_without_writes"
           ]
         },
         {
@@ -4425,7 +4435,7 @@
             "backend/app/domains/world_characters/schemas/identity.py"
           ],
           "test_nodes": [
-            "tests/test_l3_owner_controlled_world_character.py::test_creator_studio_lists_existing_world_characters_without_writes"
+            "tests/world_characters/test_owner_identity.py::test_creator_studio_lists_existing_world_characters_without_writes"
           ]
         },
         {
@@ -9718,6 +9728,100 @@
       "new_test_files": [
         "backend/tests/characters/test_creator_policies.py"
       ]
+    },
+    "AR-B2-WC-owner": {
+      "status": "IMPLEMENTED; owner/UoW/Package/Social focused24 PASS; current API/ORM same; precise split evidence verified after remapping Character merged consumer",
+      "split_files": {
+        "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py": [
+          "backend/app/domains/world_characters/service/owner_identity.py",
+          "backend/app/domains/characters/service/owner_controlled.py",
+          "backend/app/domains/identity/service/owner_context.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py::SqlAlchemyOwnerControlledIdentityRepository",
+          "new": "backend/app/domains/world_characters/service/owner_identity.py::OwnerControlledIdentityService",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/api/routes.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_owner_identity.py::test_owner_identity_create_update_reentry_is_private_and_write_bounded"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py::_profile_document",
+          "new": "backend/app/domains/world_characters/service/owner_identity.py::_profile_document",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/api/routes.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_owner_identity.py::test_owner_identity_create_update_reentry_is_private_and_write_bounded"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py::_snapshot",
+          "new": "backend/app/domains/world_characters/service/owner_identity.py::_snapshot",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/api/routes.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_owner_identity.py::test_owner_identity_create_update_reentry_is_private_and_write_bounded"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py::__all__",
+          "new": "backend/app/domains/world_characters/service/owner_identity.py::__all__",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/api/routes.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_owner_identity.py::test_owner_identity_create_update_reentry_is_private_and_write_bounded"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py::SqlAlchemyOwnerControlledIdentityRepository",
+          "new": "backend/app/domains/characters/service/owner_controlled.py::seed_owner_controlled_character",
+          "source_member": "seed_create",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/owner_identity.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_owner_character_uow.py::test_owner_character_seed_flushes_once_and_rollback_removes_the_attached_row"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py::SqlAlchemyOwnerControlledIdentityRepository",
+          "new": "backend/app/domains/characters/service/owner_controlled.py::update_owner_controlled_character",
+          "source_member": "update",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/owner_identity.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_owner_character_uow.py::test_owner_character_update_defers_flush_and_preserves_unrelated_fields"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py::SqlAlchemyOwnerControlledIdentityRepository",
+          "new": "backend/app/domains/identity/service/owner_context.py::is_claimed_local_owner",
+          "source_member": "_require_local_owner",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/owner_identity.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_owner_identity.py::test_owner_identity_rejects_cross_owner_and_cross_world_role"
+          ]
+        }
+      ],
+      "retired_legacy_edges": [],
+      "test_ownership": {
+        "tests/test_l3_owner_controlled_world_character.py": "tests/world_characters/test_owner_identity.py"
+      },
+      "removed_forwarders": {
+        "application.owner_controlled_identity": "get/create/update wrapper bodies replaced by the same service get/create/update methods at HTTP callsites",
+        "ports.owner_controlled_identity": "unused structural repository protocol removed; service owns actual get/create/update transaction semantics"
+      },
+      "transactions": "seed Character then WC and active-world each flush in the same caller Session; ordinary create commit/IntegrityError rollback/refresh and update commit/refresh unchanged; Character update itself adds no flush/commit"
     }
   }
 }

@@ -1,7 +1,7 @@
 """Stable public surface for WorldCharacter execution policy."""
 
-from app.domains.world_characters.infrastructure.sqlalchemy_owner_controlled_identity import (
-    SqlAlchemyOwnerControlledIdentityRepository,
+from app.domains.world_characters.service.owner_identity import (
+    OwnerControlledIdentityService,
 )
 from app.domains.world_characters.contracts.public_profile import (
     WorldCharacterProfileError,
@@ -80,18 +80,9 @@ from app.domains.world_characters.infrastructure.sqlalchemy_runtime_modes import
 )
 
 
-def is_owner_controlled_character(db, character_id: str) -> bool:
-    return SqlAlchemyOwnerControlledIdentityRepository(
-        db
-    ).is_owner_controlled_character(character_id)
-
-
-def owner_controlled_character_ids(
-    db, character_ids: set[str]
-) -> set[str]:
-    return SqlAlchemyOwnerControlledIdentityRepository(
-        db
-    ).owner_controlled_character_ids(character_ids)
+from app.domains.world_characters.service.owner_identity import (
+    is_owner_controlled_character, owner_controlled_character_ids,
+)
 
 __all__ = [
     "OWNER_REGENERATION_LIMIT_24H",
@@ -124,7 +115,7 @@ __all__ = [
     "WorldCharacterProfileNotFoundError",
     "WorldCharacterPublicProfile",
     "SqlAlchemyWorldCharacterPublicProfileReader",
-    "SqlAlchemyOwnerControlledIdentityRepository",
+    "OwnerControlledIdentityService",
     "approve_setup",
     "character_contract_hash",
     "count_enabled_autonomous_world_characters",

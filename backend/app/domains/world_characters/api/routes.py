@@ -19,11 +19,6 @@ from app.domains.world_characters.schemas.identity import (
     WorldCharacterProfileRead,
     identity_read,
 )
-from app.domains.world_characters.application.owner_controlled_identity import (
-    create_owner_controlled_identity,
-    get_owner_controlled_identity,
-    update_owner_controlled_identity,
-)
 from app.domains.world_characters.application.studio_surface import (
     list_studio_world_characters,
 )
@@ -42,8 +37,8 @@ from app.domains.world_characters.contracts.owner_identity import (
     OwnerControlledRoleInvalidError,
     OwnerWorldRequiredError,
 )
-from app.domains.world_characters.infrastructure.sqlalchemy_owner_controlled_identity import (
-    SqlAlchemyOwnerControlledIdentityRepository,
+from app.domains.world_characters.service.owner_identity import (
+    OwnerControlledIdentityService,
 )
 from app.domains.world_characters.infrastructure.sqlalchemy_studio_surface import (
     SqlAlchemyStudioWorldCharacterReader,
@@ -234,8 +229,7 @@ def read_owner_character(
     browser_session.require_local_frontend_request(request, mutation=False)
     try:
         return identity_read(
-            get_owner_controlled_identity(
-                SqlAlchemyOwnerControlledIdentityRepository(db),
+            OwnerControlledIdentityService(db).get(
                 world_id=world_id,
                 current_user_id=current_user.id,
             )
@@ -260,8 +254,7 @@ def create_owner_character(
     browser_session.require_local_frontend_request(request, mutation=True)
     try:
         return identity_read(
-            create_owner_controlled_identity(
-                SqlAlchemyOwnerControlledIdentityRepository(db),
+            OwnerControlledIdentityService(db).create(
                 world_id=world_id,
                 current_user_id=current_user.id,
                 profile=data.domain_profile(),
@@ -286,8 +279,7 @@ def update_owner_character(
     browser_session.require_local_frontend_request(request, mutation=True)
     try:
         return identity_read(
-            update_owner_controlled_identity(
-                SqlAlchemyOwnerControlledIdentityRepository(db),
+            OwnerControlledIdentityService(db).update(
                 world_id=world_id,
                 current_user_id=current_user.id,
                 profile=data.domain_profile(),
