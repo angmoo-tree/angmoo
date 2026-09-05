@@ -1333,3 +1333,9 @@ C7-C 현재 경계는 777 modules / 2691 edges / exact legacy 202 / cycle0이다
 `a93e724`까지 들어온 원래 signed 소스 22개를 각각 독립 Git archive에서 기존 `committed_snapshot`으로 수집했다. 저장한 commit과 tree ID를 대조하고 기존 main `0e50e0c`의 원장 64개를 불변 prefix로 유지한 채, 원래 **91개 파일과 33개 추가 노드**의 증거를 최초 도입 순서대로 기록해 원장을 **64→86개**로 확장했다. 추가 노드의 함수가 처음 정의된 source SHA도 각 기록과 일치했다. 임시 중간 목적지가 뒤의 split 원본이 되는 경우도 그 첫 blob을 기록했다.
 
 원장 쓰기 전 변경 없는 production `checkpoint_errors`와 `addition_errors`가 원래 blob·단언·suppression·첫 source 도입·append-only 이력을 검증해 통과했다. 기준 baseline/checkpoint는 변경하지 않았다. 이후 현재 코드의 전체 stock 보존·전체 backend 및 남은 C7 실제 HTTP/실행 조립 검증은 별도 진행 상태다. DCO·CI 정책·OSS 경계·비밀 예외 metadata25개·컨테이너/launcher/설치/Tauri 개발 계약도 이 통합본에서 통과했다.
+
+### 전체 C7-C 통합 검사에서 확인한 경로 보완
+
+`cf142ac` 전체 backend 실행은 **2269 passed / 22 skipped / 27 warnings / 2 failed / 685.81초**였다. 두 실패는 실제 실행 기능이 아니라 이동된 소스에 대한 검사 연결이었다. L3 경계 검사는 삭제한 `services/langgraph_resident.py` 대신 실제 `runtime/resident/langgraph.py`를 읽는다. 저장 개수 제한 부재 검사는 management의 실제 분리 소유인 `routines/service/autonomy_management.py`도 명시 source group으로 읽어 원래 검사 범위를 유지한다. 실제 파일 내용만 읽으며 원래 금지 문자열·capacity 설정 단언은 모두 그대로다. 수정 후 두 검사 파일은 **11 passed / 7.06초**다.
+
+첫 stock 전체 검사는 보호/current **2293/2293**으로 source/split/단언/suppression/API·ORM/node 손실이 없었으나, G07.test_paths의 옛 tendency 파일 참조 한 건으로 실패했다. 이 한 항목을 이미 검증된 file/node map의 `tests/routines/test_tendency.py`로 연결했다. 원본 node 목록·frozen/checkpoint·원장 내용은 바꾸지 않았다. stock 재검사와 최종 C7/작성 경로 합류 뒤 전체 backend 재실행은 별도 게이트로 남긴다.

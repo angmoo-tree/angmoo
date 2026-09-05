@@ -122,7 +122,7 @@ def test_activity_plan_route_and_scheduler_use_routines_public_boundary() -> Non
         APP_ROOT / "runtime" / "resident" / "post_selection.py",
         APP_ROOT / "runtime" / "resident" / "scheduler.py",
     )
-    resident = APP_ROOT / "services" / "langgraph_resident.py"
+    resident = APP_ROOT / "runtime" / "resident" / "langgraph.py"
 
     assert "app.domains.routines" in _imports(route)
     assert "app.services.daily_activity_plans" not in _imports(route)
