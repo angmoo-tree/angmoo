@@ -121,8 +121,8 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
         "runtime/characters/creator.py": {"_decrypt_draft_api_key"},
         "runtime/resident/credential_profiles.py": {"_ensure_slot_auth_profile"},
         "runtime/resident/first_greeting.py": {"resolve_first_greeting_key"},
+        "runtime/resident/tendency_analysis.py": {"analyze_tendency"},
         "runtime/characters/management.py": {
-            "analyze_tendency",
             "_bind_slot_auth_profile",
         },
         "services/character_lore.py": {
