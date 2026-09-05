@@ -1,7 +1,7 @@
 {
-  "edge_count": 1867,
-  "external_import_count": 2014,
-  "module_count": 600,
+  "edge_count": 1874,
+  "external_import_count": 2018,
+  "module_count": 602,
   "modules": [
     {
       "external_imports": [],
@@ -3202,6 +3202,13 @@
     {
       "external_imports": [],
       "imports": [],
+      "module": "app.domains.routines.constants",
+      "path": "backend/app/domains/routines/constants.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
       "module": "app.domains.routines.contracts",
       "path": "backend/app/domains/routines/contracts/__init__.py",
       "wildcard_imports": []
@@ -3254,20 +3261,22 @@
     {
       "external_imports": [
         "__future__",
-        "collections",
         "dataclasses",
         "datetime",
         "hashlib",
         "sqlalchemy",
         "sqlalchemy.exc",
-        "sqlalchemy.orm",
-        "zoneinfo"
+        "sqlalchemy.orm"
       ],
       "imports": [
         "app.core.ids",
+        "app.domains.routines.constants",
+        "app.domains.routines.exceptions",
         "app.domains.routines.infrastructure.sqlalchemy_daily_plan_models",
-        "app.domains.routines.infrastructure.sqlalchemy_joint_reservations",
+        "app.domains.routines.policies.planning",
         "app.domains.routines.schemas",
+        "app.domains.routines.service.joint_reservations",
+        "app.domains.routines.service.scheduling",
         "app.domains.world_characters.public"
       ],
       "module": "app.domains.routines.infrastructure.sqlalchemy_daily_activity_plans",
@@ -3299,22 +3308,6 @@
       ],
       "module": "app.domains.routines.infrastructure.sqlalchemy_daily_plan_repository",
       "path": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_plan_repository.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "datetime",
-        "hashlib",
-        "sqlalchemy",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.core.ids",
-        "app.domains.routines.models"
-      ],
-      "module": "app.domains.routines.infrastructure.sqlalchemy_joint_reservations",
-      "path": "backend/app/domains/routines/infrastructure/sqlalchemy_joint_reservations.py",
       "wildcard_imports": []
     },
     {
@@ -3369,6 +3362,24 @@
       "imports": [],
       "module": "app.domains.routines.policies.activity_state",
       "path": "backend/app/domains/routines/policies/activity_state.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections",
+        "datetime",
+        "hashlib",
+        "typing",
+        "zoneinfo"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.service.scheduling"
+      ],
+      "module": "app.domains.routines.policies.planning",
+      "path": "backend/app/domains/routines/policies/planning.py",
       "wildcard_imports": []
     },
     {
@@ -3441,6 +3452,22 @@
       "imports": [],
       "module": "app.domains.routines.service",
       "path": "backend/app/domains/routines/service/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "hashlib",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.ids",
+        "app.domains.routines.models"
+      ],
+      "module": "app.domains.routines.service.joint_reservations",
+      "path": "backend/app/domains/routines/service/joint_reservations.py",
       "wildcard_imports": []
     },
     {

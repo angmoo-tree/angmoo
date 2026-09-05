@@ -1284,6 +1284,7 @@
       "app.domains.identity.service.external_verification",
       "app.domains.identity.service.local_owner",
       "app.domains.identity.service.login_throttle",
+      "app.domains.routines.constants",
       "app.domains.routines.contracts",
       "app.domains.routines.contracts.clock",
       "app.domains.routines.contracts.lifecycle",
@@ -1291,8 +1292,10 @@
       "app.domains.routines.models",
       "app.domains.routines.policies",
       "app.domains.routines.policies.activity_state",
+      "app.domains.routines.policies.planning",
       "app.domains.routines.schemas",
       "app.domains.routines.service",
+      "app.domains.routines.service.joint_reservations",
       "app.domains.routines.service.scheduling",
       "app.domains.routines.utils",
       "app.domains.routines.utils.clock"
@@ -1313,6 +1316,7 @@
       "app.domains.routines.contracts.lifecycle",
       "app.domains.routines.schemas",
       "app.domains.routines.service",
+      "app.domains.routines.service.joint_reservations",
       "app.domains.routines.service.scheduling",
       "app.domains.world_packages.contracts",
       "app.domains.world_packages.contracts.export",
@@ -1410,6 +1414,30 @@
       },
       {
         "importer": "app.domains.routines.infrastructure.sqlalchemy_daily_activity_plans",
+        "target": "app.domains.routines.constants",
+        "owner_stage": "AR-B4-A2b / AR-B4-A3",
+        "removal_condition": "Move this exact scoped plan/lifecycle implementation to owned service/repository with same-Session owner references; remove its old source after consumers and assertions move.",
+        "reason": "A2a already owns the original deterministic decision or routines-only reservation implementation; the old caller still preserves its original scoped transaction until A2b/A3.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.infrastructure.sqlalchemy_daily_activity_plans",
+        "target": "app.domains.routines.exceptions",
+        "owner_stage": "AR-B4-A2b / AR-B4-A3",
+        "removal_condition": "Move this exact scoped plan/lifecycle implementation to owned service/repository with same-Session owner references; remove its old source after consumers and assertions move.",
+        "reason": "A2a already owns the original deterministic decision or routines-only reservation implementation; the old caller still preserves its original scoped transaction until A2b/A3.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.infrastructure.sqlalchemy_daily_activity_plans",
+        "target": "app.domains.routines.policies.planning",
+        "owner_stage": "AR-B4-A2b / AR-B4-A3",
+        "removal_condition": "Move this exact scoped plan/lifecycle implementation to owned service/repository with same-Session owner references; remove its old source after consumers and assertions move.",
+        "reason": "A2a already owns the original deterministic decision or routines-only reservation implementation; the old caller still preserves its original scoped transaction until A2b/A3.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.infrastructure.sqlalchemy_daily_activity_plans",
         "target": "app.domains.routines.schemas",
         "owner_stage": "AR-B4-A2 / AR-B4-A3",
         "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
@@ -1417,15 +1445,23 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.domains.routines.infrastructure.sqlalchemy_daily_plan_models",
-        "target": "app.domains.routines.models",
-        "owner_stage": "AR-B4-A2 / AR-B4-A3",
-        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
-        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "importer": "app.domains.routines.infrastructure.sqlalchemy_daily_activity_plans",
+        "target": "app.domains.routines.service.joint_reservations",
+        "owner_stage": "AR-B4-A2b / AR-B4-A3",
+        "removal_condition": "Move this exact scoped plan/lifecycle implementation to owned service/repository with same-Session owner references; remove its old source after consumers and assertions move.",
+        "reason": "A2a already owns the original deterministic decision or routines-only reservation implementation; the old caller still preserves its original scoped transaction until A2b/A3.",
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.domains.routines.infrastructure.sqlalchemy_joint_reservations",
+        "importer": "app.domains.routines.infrastructure.sqlalchemy_daily_activity_plans",
+        "target": "app.domains.routines.service.scheduling",
+        "owner_stage": "AR-B4-A2b / AR-B4-A3",
+        "removal_condition": "Move this exact scoped plan/lifecycle implementation to owned service/repository with same-Session owner references; remove its old source after consumers and assertions move.",
+        "reason": "A2a already owns the original deterministic decision or routines-only reservation implementation; the old caller still preserves its original scoped transaction until A2b/A3.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.infrastructure.sqlalchemy_daily_plan_models",
         "target": "app.domains.routines.models",
         "owner_stage": "AR-B4-A2 / AR-B4-A3",
         "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",

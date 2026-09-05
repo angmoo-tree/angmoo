@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from collections import Counter
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, time, timedelta
 from hashlib import sha256
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -13,54 +11,12 @@ from sqlalchemy.orm import Session
 from app.core.ids import uuid7_string
 from app.domains.routines import schemas
 from app.domains.routines.infrastructure import sqlalchemy_daily_plan_models as models
-from app.domains.routines.infrastructure import sqlalchemy_joint_reservations
+from app.domains.routines.service import joint_reservations as sqlalchemy_joint_reservations
 from app.domains.world_characters.public import character_contract_hash
-
-
-DAYPARTS = ("dawn", "morning", "afternoon", "evening")
-DAYPART_START_HOURS = (0, 6, 12, 18)
-SELECTION_CONTRACT_VERSION = "daily-activity-selection-v1"
-TIMEZONE_CONTRACT_VERSION = "world-local-dayparts-v1"
-EVENT_CONSUMPTION_NAMESPACE = "next_activity_beat"
-RECENT_EXACT_DAYS = 3
-USAGE_WINDOW_DAYS = 7
-
-INITIAL_STATE = {
-    "mood": "neutral",
-    "mood_intensity": 0,
-    "energy": 50,
-    "social_energy": 50,
-    "action_note": "",
-}
-
-
-class DailyActivityPlanError(Exception):
-    reason_code = "daily_activity_plan_error"
-
-
-class DailyActivityPlanNotFoundError(DailyActivityPlanError):
-    reason_code = "activity_plan_not_found"
-
-
-class DailyActivityPlanForbiddenError(DailyActivityPlanError):
-    reason_code = "character_not_owned"
-
-
-class DailyActivityPlanConflictError(DailyActivityPlanError):
-    reason_code = "activity_plan_conflict"
-
-    def __init__(self, reason_code: str | None = None) -> None:
-        if reason_code is not None:
-            self.reason_code = reason_code
-        super().__init__(self.reason_code)
-
-
-class DailyActivityPlanValidationError(DailyActivityPlanError):
-    reason_code = "activity_plan_invalid"
-
-    def __init__(self, reason_code: str) -> None:
-        self.reason_code = reason_code
-        super().__init__(reason_code)
+from app.domains.routines.constants import DAYPARTS, DAYPART_START_HOURS, SELECTION_CONTRACT_VERSION, TIMEZONE_CONTRACT_VERSION, EVENT_CONSUMPTION_NAMESPACE, RECENT_EXACT_DAYS, USAGE_WINDOW_DAYS, INITIAL_STATE
+from app.domains.routines.exceptions import DailyActivityPlanError, DailyActivityPlanNotFoundError, DailyActivityPlanForbiddenError, DailyActivityPlanConflictError, DailyActivityPlanValidationError
+from app.domains.routines.policies.planning import _zone, _resolve_local_boundary, daypart_windows, local_activity_date, _select_candidate, _snapshot
+from app.domains.routines.service.scheduling import aware_utc as _aware_utc
 
 
 @dataclass(frozen=True)
@@ -69,12 +25,6 @@ class PlanScope:
     membership: models.WorldMembership
     world_character: models.WorldCharacter
     character: models.Character
-
-
-def _aware_utc(value: datetime) -> datetime:
-    if value.tzinfo is None:
-        return value.replace(tzinfo=UTC)
-    return value.astimezone(UTC)
 
 
 def _load_scope(
@@ -117,57 +67,6 @@ def _load_scope(
     if world is None:
         raise DailyActivityPlanNotFoundError(world_id)
     return PlanScope(world, membership, world_character, character)
-
-
-def _zone(timezone_name: str) -> ZoneInfo:
-    try:
-        return ZoneInfo(timezone_name)
-    except ZoneInfoNotFoundError as exc:
-        raise DailyActivityPlanValidationError("world_timezone_invalid") from exc
-
-
-def _resolve_local_boundary(local_naive: datetime, zone: ZoneInfo) -> datetime:
-    probe = local_naive
-    for _ in range(181):
-        candidates: list[datetime] = []
-        for fold in (0, 1):
-            aware = probe.replace(tzinfo=zone, fold=fold)
-            instant = aware.astimezone(UTC)
-            round_trip = instant.astimezone(zone).replace(tzinfo=None)
-            if round_trip == probe:
-                candidates.append(instant)
-        if candidates:
-            return min(candidates)
-        probe += timedelta(minutes=1)
-    raise DailyActivityPlanValidationError("world_timezone_invalid")
-
-
-def daypart_windows(
-    local_date: date,
-    timezone_name: str,
-) -> dict[str, tuple[datetime, datetime]]:
-    zone = _zone(timezone_name)
-    local_boundaries = [
-        datetime.combine(local_date, time(hour=hour))
-        for hour in DAYPART_START_HOURS
-    ]
-    local_boundaries.append(datetime.combine(local_date + timedelta(days=1), time()))
-    utc_boundaries = [
-        _resolve_local_boundary(boundary, zone) for boundary in local_boundaries
-    ]
-    if any(
-        current >= following
-        for current, following in zip(utc_boundaries, utc_boundaries[1:])
-    ):
-        raise DailyActivityPlanValidationError("world_timezone_invalid")
-    return {
-        daypart: (utc_boundaries[index], utc_boundaries[index + 1])
-        for index, daypart in enumerate(DAYPARTS)
-    }
-
-
-def local_activity_date(now: datetime, timezone_name: str) -> date:
-    return _aware_utc(now).astimezone(_zone(timezone_name)).date()
 
 
 def _ready_repertoire(
@@ -241,86 +140,6 @@ def _selection_history(
         )
     )
     return [(item, history_date) for item, history_date in rows]
-
-
-def _select_candidate(
-    *,
-    world_character_id: str,
-    local_date: date,
-    daypart: str,
-    repertoire: models.WorldActivityRepertoire,
-    candidates: list[models.WorldActivityCandidate],
-    history: list[tuple[models.DailyActivityPlanItem, date]],
-) -> models.WorldActivityCandidate:
-    options = [candidate for candidate in candidates if candidate.daypart == daypart]
-    recent_cutoff = local_date - timedelta(days=RECENT_EXACT_DAYS)
-    recent_signatures = {
-        item.candidate_signature
-        for item, history_date in history
-        if item.daypart == daypart and history_date >= recent_cutoff
-    }
-    unused = [
-        candidate
-        for candidate in options
-        if candidate.canonical_signature not in recent_signatures
-    ]
-    pool = unused or options
-    usage = Counter(
-        item.candidate_signature
-        for item, _history_date in history
-        if item.daypart == daypart
-    )
-    minimum_usage = min(usage[candidate.canonical_signature] for candidate in pool)
-    pool = [
-        candidate
-        for candidate in pool
-        if usage[candidate.canonical_signature] == minimum_usage
-    ]
-    previous_kind = next(
-        (
-            item.activity_kind
-            for item, history_date in history
-            if item.daypart == daypart
-            and history_date == local_date - timedelta(days=1)
-        ),
-        None,
-    )
-    different_kind = [
-        candidate for candidate in pool if candidate.activity_kind != previous_kind
-    ]
-    if different_kind:
-        pool = different_kind
-
-    base_seed = "|".join(
-        (
-            world_character_id,
-            local_date.isoformat(),
-            daypart,
-            repertoire.id,
-            f"p2-repertoire-v{repertoire.schema_version}",
-            SELECTION_CONTRACT_VERSION,
-        )
-    )
-    return min(
-        pool,
-        key=lambda candidate: sha256(
-            f"{base_seed}|{candidate.canonical_signature}".encode("utf-8")
-        ).hexdigest(),
-    )
-
-
-def _snapshot(candidate: models.WorldActivityCandidate) -> dict[str, object]:
-    return {
-        "candidate_id": candidate.id,
-        "candidate_signature": candidate.canonical_signature,
-        "candidate_ordinal": candidate.ordinal,
-        "daypart": candidate.daypart,
-        "activity_kind": candidate.activity_kind,
-        "title": candidate.title,
-        "activity_seed": candidate.activity_seed,
-        "social_mode": candidate.social_mode,
-        "place_key": candidate.place_key,
-    }
 
 
 def prepare_activity_plan(

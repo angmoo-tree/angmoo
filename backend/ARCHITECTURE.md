@@ -438,3 +438,5 @@ Portable ref/profile 변환은 `service/export_projection.py`, 로컬 export 근
 AR-B4-A1에서 일일 활동의 입출력은 `domains/routines/schemas.py`, 아홉 ORM은 `models.py`가 소유합니다. 모델은 기존과 같은 Base·table·column·index·FK를 사용합니다. `policies/activity_state.py`는 mood/energy 등의 상태 범위와 delta를 검증하고, `service/scheduling.py`는 이미 지난 tick을 무더기로 재실행하지 않고 가장 최근 due tick과 건너뛴 횟수를 계산합니다. 안정적인 오류는 `exceptions.py`, immutable 결과와 clock 계약은 `contracts/`, 실제 SystemClock/FrozenClock은 `utils/clock.py`에 있습니다.
 
 계획 생성·권한 scope·공동 예약·claim 회복의 실제 service/repository 전환은 뒤의 AR-B4-A2/A3 범위입니다. 현재 domain lifecycle과 전역 activity runtime의 같은 이름 함수는 manual 제외·선택적 now·오류/commit 의미가 달라 단순 별칭으로 통합하지 않습니다. provider/result 실행은 AR-B4-B, resident·lease·worker는 AR-B4-C에서 이어갑니다. 이 부분 전환의 정확한 기존 소비자와 제거 시점은 경계 검사 policy와 보존 지도에 기록합니다.
+
+AR-B4-A2a에서는 version/daypart/history 상수를 `constants.py`, 실제 DST boundary·후보 선택·snapshot 규칙을 `policies/planning.py`에 두고, routines ORM만 다루는 공동 예약 query와 materialization을 `service/joint_reservations.py`로 옮겼습니다. 현재 기존 계획 파일에 남은 scope·다른 도메인 read·prepare/get/update transaction은 다음 A2b의 책임입니다. WorldCharacter mode 변경은 WC 소유 mutation을 같은 Session에서 호출하도록 연결하며, runtime 조립에 새로운 외부 ORM 수정 구현을 만들지 않습니다.

@@ -240,3 +240,15 @@ Package 고정 source `a61a0ae`에서 별도 준비한 첫 routines 소스 단�
 이 기록은 foundation의 로컬 source 검증이다. 실제 plan/lifecycle transaction 분리, B4-B provider·결과와 B4-C scheduler/resident, 실제 파일 SQLite 재시작, 통합 전체 backend/Hosted/installer/merge는 남은 작업이다. 새 source/node의 introduction metadata는 source commit 뒤 parent의 선형 capture로 추가하며 frozen baseline/checkpoint를 바꾸지 않는다.
 
 추가 직접 소비자 검증은 domain boundary map·L3 closeout·현재 L4 inventory·embedded LocalAppData migration **29 passed / 31.80초**다. API/ORM·기존 assertion·split-symbol·node 보존 검사에서 계약 차이는 없었고, 보호 node 2,080/현재 node 2,121을 확인했다. 전체 guard의 exit 1은 별도 source branch가 아직 parent introduction metadata를 포함하지 않은 항목으로 남았다. 기존 PR258 1,867/PR263 1,907 기준선은 유지했다.
+
+## AR-B4-A2a — 일일 계획 결정과 공동 예약 소유권
+
+A1 source `36298ae`에서 다음 원자 단위로 분리했다. 여섯 pure 함수의 실행 body와 공동 예약 파일의 전체 AST는 원문과 같다. 상수 8개와 오류 5개의 이름/값/계층도 유지했다. 기존 계획 파일에는 scope 조회·readiness·plan transaction을 남겼으며 실제로 이전한 symbol과 남긴 symbol을 split 지도에서 모두 명시했다.
+
+- daily/proposal/routine post 회귀: **42 passed, 1 skipped / 12.15초**. PostgreSQL 환경 조건의 기존 skip이며 새로 제외한 테스트는 없다.
+- 경계 검사 **602 modules / 1,874 edges / legacy exact 288 PASS**. routines partial role 15개로 확장하고 이전된 joint 구현의 legacy bridge는 제거했다.
+- L4 parity 97, ER0 75 PostgreSQL/87 migration/24 Neo4j/44 Next route/7 workload를 유지했다. frozen 자료는 변경하지 않았다.
+
+다음 A2b는 plan references와 HTTP 의존성·기존 동일 Session commit을 연결한다. WC 담당의 `service.runtime_modes.set_activity_runtime_mode`는 attached 객체의 mode와 version만 변경하고 flush/commit하지 않는 선행 협력 함수다. 그 source가 합류하기 전 중복 mutation이나 임시 fallback을 만들지 않았다. A3 lifecycle·B4-B/C와 통합 runtime/Hosted/installer/merge 검증은 남아 있다.
+
+추가 L4 현재 inventory·domain boundary 회귀 **15 passed / 17.58초**. 전체 보존 guard는 API/ORM·기존 assertion·split·node 차이 없이 PR258 1,867/PR263 1,907/보호 2,080/현재 2,121을 확인했다. exit 1의 남은 항목은 parent가 source 뒤에 추가할 introduction metadata이며 상세 로그는 작업 산출물 `routines-a2a-preservation.log`에 있다.

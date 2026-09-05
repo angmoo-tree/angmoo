@@ -495,29 +495,13 @@
     {
       "markers": {
         "row_lock": [
-          99
+          49
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "5073f0b69dcb1ebbd29e3332aee67020c8a0bf27fcad306dfe878bd09f7f3142",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
-    },
-    {
-      "markers": {
-        "row_lock": [
-          41,
-          129,
-          140,
-          147,
-          267
-        ]
-      },
-      "owner": "ER2-ER7 legacy evidence",
-      "path": "backend/app/domains/routines/infrastructure/sqlalchemy_joint_reservations.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "f3618913a24ad4a1b2720a8190cd67450ddae87d77be6890ed6e99fb4ef89088",
+      "source_sha256": "b330a0abeca419cc8c902e36d435eee71eee850ffaa3de1f755c7f29b6a2e2dc",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -564,6 +548,22 @@
       "path": "backend/app/domains/routines/models.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "3d23addf62be3b19ce94b3077f94d2628eb6029b06ff1b4cb7700817fb50aa34",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          41,
+          129,
+          140,
+          147,
+          267
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/routines/service/joint_reservations.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "f3618913a24ad4a1b2720a8190cd67450ddae87d77be6890ed6e99fb4ef89088",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
