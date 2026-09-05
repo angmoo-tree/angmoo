@@ -1,7 +1,7 @@
 {
-  "edge_count": 2474,
-  "external_import_count": 2251,
-  "module_count": 728,
+  "edge_count": 2500,
+  "external_import_count": 2259,
+  "module_count": 734,
   "modules": [
     {
       "external_imports": [],
@@ -3525,16 +3525,35 @@
     {
       "external_imports": [
         "datetime",
+        "hashlib",
         "sqlalchemy.orm",
         "typing"
       ],
       "imports": [
+        "app.core.ids",
+        "app.domains.relationships.constants",
+        "app.domains.relationships.contracts.events",
+        "app.domains.relationships.exceptions",
+        "app.domains.relationships.models",
         "app.domains.relationships.policies.events",
         "app.domains.relationships.repository.events",
-        "app.domains.relationships.service.projection_events"
+        "app.domains.relationships.service.evidence",
+        "app.domains.relationships.service.projection_events",
+        "app.domains.relationships.service.state"
       ],
       "module": "app.domains.relationships.service.events",
       "path": "backend/app/domains/relationships/service/events.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.relationships.contracts.events",
+        "app.domains.relationships.exceptions",
+        "app.domains.relationships.policies.events"
+      ],
+      "module": "app.domains.relationships.service.evidence",
+      "path": "backend/app/domains/relationships/service/evidence.py",
       "wildcard_imports": []
     },
     {
@@ -4090,6 +4109,17 @@
       "imports": [],
       "module": "app.domains.routines.repository",
       "path": "backend/app/domains/routines/repository/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.models"
+      ],
+      "module": "app.domains.routines.repository.event_evidence",
+      "path": "backend/app/domains/routines/repository/event_evidence.py",
       "wildcard_imports": []
     },
     {
@@ -5244,6 +5274,29 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.domains.social.models.feed"
+      ],
+      "module": "app.domains.social.repository.blocks",
+      "path": "backend/app/domains/social/repository/blocks.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.social.models.posts"
+      ],
+      "module": "app.domains.social.repository.event_evidence",
+      "path": "backend/app/domains/social/repository/event_evidence.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
         "app.domains.social.models.posts",
         "app.domains.social.utils.cursors"
       ],
@@ -6063,6 +6116,20 @@
       ],
       "module": "app.domains.world_characters.service.autonomous_setup",
       "path": "backend/app/domains/world_characters/service/autonomous_setup.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.world_characters.exceptions",
+        "app.domains.world_characters.models",
+        "app.domains.worlds.service.character_entry"
+      ],
+      "module": "app.domains.world_characters.service.event_scope",
+      "path": "backend/app/domains/world_characters/service/event_scope.py",
       "wildcard_imports": []
     },
     {
@@ -9201,12 +9268,32 @@
     },
     {
       "external_imports": [
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.relationships.contracts.events",
+        "app.domains.relationships.exceptions",
+        "app.domains.routines.models",
+        "app.domains.routines.repository.event_evidence",
+        "app.domains.routines.service.public_action_executions",
+        "app.domains.social.repository.blocks",
+        "app.domains.social.repository.event_evidence",
+        "app.domains.world_characters.exceptions",
+        "app.domains.world_characters.service.event_scope",
+        "app.domains.worlds.service.character_entry"
+      ],
+      "module": "app.runtime.relationships.event_references",
+      "path": "backend/app/runtime/relationships/event_references.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "dataclasses",
         "datetime",
         "hashlib",
         "json",
-        "sqlalchemy",
         "sqlalchemy.orm",
         "typing",
         "zoneinfo"
@@ -9221,8 +9308,8 @@
         "app.domains.relationships.service.events",
         "app.domains.relationships.service.projection_events",
         "app.domains.relationships.service.state",
-        "app.domains.routines.service.public_action_executions",
-        "app.models"
+        "app.domains.social.repository.blocks",
+        "app.runtime.relationships.event_references"
       ],
       "module": "app.runtime.relationships.sqlalchemy_social_event",
       "path": "backend/app/runtime/relationships/sqlalchemy_social_event.py",

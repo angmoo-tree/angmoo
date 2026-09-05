@@ -886,10 +886,6 @@
         },
         {
           "imported": "app.models",
-          "importer": "app.runtime.relationships.sqlalchemy_social_event"
-        },
-        {
-          "imported": "app.models",
           "importer": "app.runtime.relationships.sqlalchemy_social_read_repository"
         }
       ],
@@ -1073,6 +1069,7 @@
       "app.domains.relationships.schemas",
       "app.domains.relationships.service",
       "app.domains.relationships.service.events",
+      "app.domains.relationships.service.evidence",
       "app.domains.relationships.service.graph_planning",
       "app.domains.relationships.service.graph_read",
       "app.domains.relationships.service.graph_recall",
@@ -1115,6 +1112,7 @@
       "app.domains.routines.policies.activity_state",
       "app.domains.routines.policies.planning",
       "app.domains.routines.repository",
+      "app.domains.routines.repository.event_evidence",
       "app.domains.routines.repository.plans",
       "app.domains.routines.router",
       "app.domains.routines.schemas",
@@ -1165,6 +1163,8 @@
       "app.domains.social.models.subjective_context",
       "app.domains.social.repository",
       "app.domains.social.repository.activity",
+      "app.domains.social.repository.blocks",
+      "app.domains.social.repository.event_evidence",
       "app.domains.social.repository.inbox",
       "app.domains.social.repository.media",
       "app.domains.social.repository.posts",
@@ -1219,6 +1219,7 @@
       "app.domains.world_characters.schemas.setup",
       "app.domains.world_characters.service",
       "app.domains.world_characters.service.autonomous_setup",
+      "app.domains.world_characters.service.event_scope",
       "app.domains.world_characters.service.lifecycle",
       "app.domains.world_characters.service.membership",
       "app.domains.world_characters.service.owner_identity",
@@ -1389,6 +1390,7 @@
       "app.domains.world_characters.schemas.setup",
       "app.domains.world_characters.service",
       "app.domains.world_characters.service.autonomous_setup",
+      "app.domains.world_characters.service.event_scope",
       "app.domains.world_characters.service.lifecycle",
       "app.domains.world_characters.service.membership",
       "app.domains.world_characters.service.owner_identity",

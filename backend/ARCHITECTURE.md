@@ -655,3 +655,6 @@ Resident Context는 Character/CharacterState, LlmCredential, AgentFeedCue와 Act
 
 
 관계 이벤트가 활동 실행을 연결할 때 Routines의 `service/public_action_executions.py`는 같은 Session의 nullable 조회와 같은 객체의 `social_event_id` 대입만 소유한다. 이벤트 오류 판정·최종 flush와 commit 책임은 호출 workflow에 남으므로 이 helper는 자체 commit이나 flush를 하지 않는다.
+
+
+성공한 Social source가 관계 이벤트를 만들 때 `relationships/service/events.py`가 재실행 확인·근거 적격성·변화량·상태·outbox의 순서를 소유한다. 근거 조회는 각 실제 소유자의 조회 함수에 요청하고 runtime의 `event_references.py`가 원래 Session을 연결한다. Actor의 잠금과 WorldCharacter/member 상태 판단은 WorldCharacter 서비스에 남고, evidence의 공개 여부 판단은 Relationships가 원래 시점에 수행한다. 이 흐름은 commit하지 않으므로 게시/실행/event/evidence/outbox는 caller의 하나의 transaction으로 함께 저장하거나 되돌린다.

@@ -27156,8 +27156,11 @@
           "backend/app/domains/relationships/repository/events.py",
           "backend/app/domains/relationships/repository/state.py",
           "backend/app/domains/relationships/service/events.py",
+          "backend/app/domains/relationships/service/evidence.py",
           "backend/app/domains/relationships/service/projection_events.py",
           "backend/app/domains/relationships/service/state.py",
+          "backend/app/domains/social/repository/blocks.py",
+          "backend/app/domains/world_characters/service/event_scope.py",
           "backend/app/runtime/relationships/sqlalchemy_social_event.py"
         ],
         "backend/app/domains/relationships/infrastructure/sqlalchemy_social_models.py": [
@@ -27348,9 +27351,9 @@
         },
         {
           "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_validate_world_character",
-          "new": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_validate_world_character",
+          "new": "backend/app/domains/world_characters/service/event_scope.py::validate_event_scope",
           "direct_consumers": [
-            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+            "backend/app/runtime/relationships/event_references.py"
           ],
           "test_nodes": [
             "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
@@ -27360,9 +27363,10 @@
         },
         {
           "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::world_character_pair_is_blocked",
-          "new": "backend/app/runtime/relationships/sqlalchemy_social_event.py::world_character_pair_is_blocked",
+          "new": "backend/app/domains/social/repository/blocks.py::world_character_pair_is_blocked",
           "direct_consumers": [
-            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py",
+            "backend/app/runtime/relationships/event_references.py"
           ],
           "test_nodes": [
             "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
@@ -27372,9 +27376,9 @@
         },
         {
           "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_validate_live_public_post",
-          "new": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_validate_live_public_post",
+          "new": "backend/app/domains/relationships/policies/events.py::_validate_live_public_post",
           "direct_consumers": [
-            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+            "backend/app/domains/relationships/service/evidence.py"
           ],
           "test_nodes": [
             "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
@@ -27384,9 +27388,9 @@
         },
         {
           "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_validate_evidence_source",
-          "new": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_validate_evidence_source",
+          "new": "backend/app/domains/relationships/service/evidence.py::_validate_evidence_source",
           "direct_consumers": [
-            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+            "backend/app/domains/relationships/service/events.py"
           ],
           "test_nodes": [
             "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
@@ -27456,7 +27460,7 @@
         },
         {
           "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::record_successful_social_event",
-          "new": "backend/app/runtime/relationships/sqlalchemy_social_event.py::record_successful_social_event",
+          "new": "backend/app/domains/relationships/service/events.py::record_successful_social_event",
           "direct_consumers": [
             "backend/app/runtime/relationships/sqlalchemy_social_event.py"
           ],
@@ -27647,6 +27651,16 @@
             "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
             "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
           ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::record_successful_social_event",
+          "new": "backend/app/runtime/relationships/sqlalchemy_social_event.py::record_successful_social_event",
+          "direct_consumers": [
+            "backend/app/runtime/social/timeline.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once"
+          ]
         }
       ],
       "new_tests": []
@@ -27663,10 +27677,13 @@
           "backend/app/domains/relationships/repository/events.py",
           "backend/app/domains/relationships/repository/state.py",
           "backend/app/domains/relationships/service/events.py",
+          "backend/app/domains/relationships/service/evidence.py",
           "backend/app/domains/relationships/service/projection_events.py",
           "backend/app/domains/relationships/service/state.py",
-          "backend/app/runtime/relationships/sqlalchemy_social_event.py",
-          "backend/app/domains/routines/service/public_action_executions.py"
+          "backend/app/domains/routines/service/public_action_executions.py",
+          "backend/app/domains/social/repository/blocks.py",
+          "backend/app/domains/world_characters/service/event_scope.py",
+          "backend/app/runtime/relationships/sqlalchemy_social_event.py"
         ]
       },
       "split_symbols": [
@@ -27852,9 +27869,9 @@
         },
         {
           "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_validate_world_character",
-          "new": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_validate_world_character",
+          "new": "backend/app/domains/world_characters/service/event_scope.py::validate_event_scope",
           "direct_consumers": [
-            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+            "backend/app/runtime/relationships/event_references.py"
           ],
           "test_nodes": [
             "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
@@ -27864,9 +27881,10 @@
         },
         {
           "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::world_character_pair_is_blocked",
-          "new": "backend/app/runtime/relationships/sqlalchemy_social_event.py::world_character_pair_is_blocked",
+          "new": "backend/app/domains/social/repository/blocks.py::world_character_pair_is_blocked",
           "direct_consumers": [
-            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py",
+            "backend/app/runtime/relationships/event_references.py"
           ],
           "test_nodes": [
             "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
@@ -27876,9 +27894,9 @@
         },
         {
           "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_validate_live_public_post",
-          "new": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_validate_live_public_post",
+          "new": "backend/app/domains/relationships/policies/events.py::_validate_live_public_post",
           "direct_consumers": [
-            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+            "backend/app/domains/relationships/service/evidence.py"
           ],
           "test_nodes": [
             "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
@@ -27888,9 +27906,9 @@
         },
         {
           "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_validate_evidence_source",
-          "new": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_validate_evidence_source",
+          "new": "backend/app/domains/relationships/service/evidence.py::_validate_evidence_source",
           "direct_consumers": [
-            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+            "backend/app/domains/relationships/service/events.py"
           ],
           "test_nodes": [
             "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
@@ -27960,7 +27978,7 @@
         },
         {
           "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::record_successful_social_event",
-          "new": "backend/app/runtime/relationships/sqlalchemy_social_event.py::record_successful_social_event",
+          "new": "backend/app/domains/relationships/service/events.py::record_successful_social_event",
           "direct_consumers": [
             "backend/app/runtime/relationships/sqlalchemy_social_event.py"
           ],
@@ -28052,7 +28070,7 @@
           "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::record_successful_social_event",
           "new": "backend/app/domains/routines/service/public_action_executions.py::get_execution",
           "direct_consumers": [
-            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+            "backend/app/runtime/relationships/event_references.py"
           ],
           "test_nodes": [
             "tests/relationships/test_execution_evidence_transaction.py::test_execution_link_stays_in_the_event_transaction[False]",
@@ -28063,17 +28081,524 @@
           "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::record_successful_social_event",
           "new": "backend/app/domains/routines/service/public_action_executions.py::set_social_event_id",
           "direct_consumers": [
-            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+            "backend/app/runtime/relationships/event_references.py"
           ],
           "test_nodes": [
             "tests/relationships/test_execution_evidence_transaction.py::test_execution_link_stays_in_the_event_transaction[False]",
             "tests/relationships/test_execution_evidence_transaction.py::test_execution_link_stays_in_the_event_transaction[True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::record_successful_social_event",
+          "new": "backend/app/runtime/relationships/sqlalchemy_social_event.py::record_successful_social_event",
+          "direct_consumers": [
+            "backend/app/runtime/social/timeline.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once"
           ]
         }
       ],
       "new_tests": [
         "tests/relationships/test_execution_evidence_transaction.py::test_execution_link_stays_in_the_event_transaction[False]",
         "tests/relationships/test_execution_evidence_transaction.py::test_execution_link_stays_in_the_event_transaction[True]"
+      ]
+    },
+    "AR-B5-C3-B": {
+      "status": "IMPLEMENTED; focused29 PASS; 8 exact body/query contracts PASS; source introduction pending",
+      "scope": "Actual successful-event workflow and replay SQL are Relationships-owned; World/WC/Social/Routines collaborate in the same caller Session.",
+      "split_files": {
+        "backend/app/runtime/relationships/sqlalchemy_social_event.py": [
+          "backend/app/domains/relationships/constants.py",
+          "backend/app/domains/relationships/contracts/events.py",
+          "backend/app/domains/relationships/exceptions.py",
+          "backend/app/domains/relationships/policies/events.py",
+          "backend/app/domains/relationships/repository/events.py",
+          "backend/app/domains/relationships/repository/state.py",
+          "backend/app/domains/relationships/service/events.py",
+          "backend/app/domains/relationships/service/evidence.py",
+          "backend/app/domains/relationships/service/projection_events.py",
+          "backend/app/domains/relationships/service/state.py",
+          "backend/app/domains/routines/repository/event_evidence.py",
+          "backend/app/domains/social/repository/blocks.py",
+          "backend/app/domains/social/repository/event_evidence.py",
+          "backend/app/domains/world_characters/service/event_scope.py",
+          "backend/app/runtime/relationships/event_references.py",
+          "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::SOCIAL_EVENT_SCHEMA_VERSION",
+          "new": "backend/app/domains/relationships/constants.py::SOCIAL_EVENT_SCHEMA_VERSION",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::GRAPH_PAYLOAD_VERSION",
+          "new": "backend/app/domains/relationships/constants.py::GRAPH_PAYLOAD_VERSION",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::SOURCE_EXCLUSION_PAYLOAD_VERSION",
+          "new": "backend/app/domains/relationships/constants.py::SOURCE_EXCLUSION_PAYLOAD_VERSION",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::SocialEventRuntimeError",
+          "new": "backend/app/domains/relationships/exceptions.py::SocialEventRuntimeError",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::EvidenceInput",
+          "new": "backend/app/domains/relationships/contracts/events.py::EvidenceInput",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::EventApplyResult",
+          "new": "backend/app/domains/relationships/contracts/events.py::EventApplyResult",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_Delta",
+          "new": "backend/app/domains/relationships/contracts/events.py::_Delta",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_RELATION_EVENT_TYPES",
+          "new": "backend/app/domains/relationships/constants.py::_RELATION_EVENT_TYPES",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_aware_utc",
+          "new": "backend/app/domains/relationships/policies/events.py::_aware_utc",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_world_zone",
+          "new": "backend/app/domains/relationships/policies/events.py::_world_zone",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_local_day_bounds",
+          "new": "backend/app/domains/relationships/policies/events.py::_local_day_bounds",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_snapshot",
+          "new": "backend/app/domains/relationships/policies/events.py::_snapshot",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_clamp",
+          "new": "backend/app/domains/relationships/policies/events.py::_clamp",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_purpose_delta",
+          "new": "backend/app/domains/relationships/policies/events.py::_purpose_delta",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_delta",
+          "new": "backend/app/domains/relationships/policies/events.py::_delta",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_validate_world_character",
+          "new": "backend/app/domains/world_characters/service/event_scope.py::validate_event_scope",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/event_references.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::world_character_pair_is_blocked",
+          "new": "backend/app/domains/social/repository/blocks.py::world_character_pair_is_blocked",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py",
+            "backend/app/runtime/relationships/event_references.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_validate_live_public_post",
+          "new": "backend/app/domains/relationships/policies/events.py::_validate_live_public_post",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/evidence.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_validate_evidence_source",
+          "new": "backend/app/domains/relationships/service/evidence.py::_validate_evidence_source",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/events.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_relationship_state",
+          "new": "backend/app/domains/relationships/service/state.py::_relationship_state",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_delta_is_capped",
+          "new": "backend/app/domains/relationships/service/state.py::_delta_is_capped",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_enqueue_outbox",
+          "new": "backend/app/domains/relationships/service/projection_events.py::_enqueue_outbox",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_enqueue_source_exclusion_outbox",
+          "new": "backend/app/domains/relationships/service/projection_events.py::_enqueue_source_exclusion_outbox",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::exclude_events_for_posts",
+          "new": "backend/app/domains/relationships/service/events.py::exclude_events_for_posts",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::record_successful_social_event",
+          "new": "backend/app/domains/relationships/service/events.py::record_successful_social_event",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_relationship_state",
+          "new": "backend/app/domains/relationships/repository/state.py::find_direction_for_update",
+          "source_member": "Exact original query expression; same Session, predicate order, locks and invocation position.",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/state.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_delta_is_capped",
+          "new": "backend/app/domains/relationships/repository/state.py::daily_comment_change_count",
+          "source_member": "Exact original query expression; same Session, predicate order, locks and invocation position.",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/state.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_delta_is_capped",
+          "new": "backend/app/domains/relationships/repository/state.py::prior_post_reaction_change",
+          "source_member": "Exact original query expression; same Session, predicate order, locks and invocation position.",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/state.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_enqueue_outbox",
+          "new": "backend/app/domains/relationships/repository/events.py::find_outbox_by_dedupe",
+          "source_member": "Exact original query expression; same Session, predicate order, locks and invocation position.",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/projection_events.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::exclude_events_for_posts",
+          "new": "backend/app/domains/relationships/repository/events.py::source_event_ids",
+          "source_member": "Exact original query expression; same Session, predicate order, locks and invocation position.",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/events.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::exclude_events_for_posts",
+          "new": "backend/app/domains/relationships/repository/events.py::find_event_for_update",
+          "source_member": "Exact original query expression; same Session, predicate order, locks and invocation position.",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/events.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_validate_evidence_source",
+          "new": "backend/app/domains/social/repository/event_evidence.py::get_post",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/event_references.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_event_owner_collaboration.py::test_replay_checks_current_membership_before_skipping_source_reads",
+            "tests/relationships/test_event_owner_collaboration.py::test_actor_validation_locks_before_target_or_evidence_queries"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_validate_evidence_source",
+          "new": "backend/app/domains/social/repository/event_evidence.py::get_numeric_source",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/event_references.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_event_owner_collaboration.py::test_replay_checks_current_membership_before_skipping_source_reads",
+            "tests/relationships/test_event_owner_collaboration.py::test_actor_validation_locks_before_target_or_evidence_queries"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::_validate_evidence_source",
+          "new": "backend/app/domains/routines/repository/event_evidence.py::get_joint_activity",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/event_references.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_event_owner_collaboration.py::test_replay_checks_current_membership_before_skipping_source_reads",
+            "tests/relationships/test_event_owner_collaboration.py::test_actor_validation_locks_before_target_or_evidence_queries"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::record_successful_social_event",
+          "new": "backend/app/runtime/relationships/event_references.py::SqlAlchemyEventReferences",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_event_owner_collaboration.py::test_replay_checks_current_membership_before_skipping_source_reads",
+            "tests/relationships/test_event_owner_collaboration.py::test_actor_validation_locks_before_target_or_evidence_queries"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::record_successful_social_event",
+          "new": "backend/app/runtime/relationships/sqlalchemy_social_event.py::record_successful_social_event",
+          "direct_consumers": [
+            "backend/app/runtime/social/timeline.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_event_owner_collaboration.py::test_replay_checks_current_membership_before_skipping_source_reads",
+            "tests/relationships/test_event_owner_collaboration.py::test_actor_validation_locks_before_target_or_evidence_queries"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::record_successful_social_event",
+          "new": "backend/app/domains/relationships/repository/events.py::find_event_by_idempotency",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/events.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_event_owner_collaboration.py::test_replay_checks_current_membership_before_skipping_source_reads",
+            "tests/relationships/test_event_owner_collaboration.py::test_actor_validation_locks_before_target_or_evidence_queries"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::record_successful_social_event",
+          "new": "backend/app/domains/relationships/repository/events.py::find_replay_state",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/events.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_event_owner_collaboration.py::test_replay_checks_current_membership_before_skipping_source_reads",
+            "tests/relationships/test_event_owner_collaboration.py::test_actor_validation_locks_before_target_or_evidence_queries"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_event.py::record_successful_social_event",
+          "new": "backend/app/domains/relationships/repository/events.py::find_replay_change",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/events.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_event_owner_collaboration.py::test_replay_checks_current_membership_before_skipping_source_reads",
+            "tests/relationships/test_event_owner_collaboration.py::test_actor_validation_locks_before_target_or_evidence_queries"
+          ]
+        }
+      ],
+      "new_tests": [
+        "tests/relationships/test_event_owner_collaboration.py::test_replay_checks_current_membership_before_skipping_source_reads",
+        "tests/relationships/test_event_owner_collaboration.py::test_actor_validation_locks_before_target_or_evidence_queries"
       ]
     }
   }

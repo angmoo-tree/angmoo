@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2251,
-      "internal_edge_count": 2474,
+      "external_import_count": 2259,
+      "internal_edge_count": 2500,
       "legacy_import_exception_count": 0,
-      "module_count": 728,
+      "module_count": 734,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -238,12 +238,28 @@
           },
           {
             "imports": [
+              "app.core.ids",
+              "app.domains.relationships.constants",
+              "app.domains.relationships.contracts.events",
+              "app.domains.relationships.exceptions",
+              "app.domains.relationships.models",
               "app.domains.relationships.policies.events",
               "app.domains.relationships.repository.events",
-              "app.domains.relationships.service.projection_events"
+              "app.domains.relationships.service.evidence",
+              "app.domains.relationships.service.projection_events",
+              "app.domains.relationships.service.state"
             ],
             "module": "app.domains.relationships.service.events",
             "path": "backend/app/domains/relationships/service/events.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.contracts.events",
+              "app.domains.relationships.exceptions",
+              "app.domains.relationships.policies.events"
+            ],
+            "module": "app.domains.relationships.service.evidence",
+            "path": "backend/app/domains/relationships/service/evidence.py"
           },
           {
             "imports": [
@@ -589,6 +605,20 @@
             ],
             "module": "app.domains.social.repository.activity",
             "path": "backend/app/domains/social/repository/activity.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.models.feed"
+            ],
+            "module": "app.domains.social.repository.blocks",
+            "path": "backend/app/domains/social/repository/blocks.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.models.posts"
+            ],
+            "module": "app.domains.social.repository.event_evidence",
+            "path": "backend/app/domains/social/repository/event_evidence.py"
           },
           {
             "imports": [

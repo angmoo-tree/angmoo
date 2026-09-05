@@ -1,7 +1,7 @@
 """Deterministic event deltas and snapshots without database or provider access."""
 from datetime import UTC, datetime, time, timedelta
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
-from app.domains.relationships.contracts.events import _Delta, EventWorld, RelationshipStateValues
+from app.domains.relationships.contracts.events import _Delta, EventWorld, RelationshipStateValues, EventPost
 from app.domains.relationships.exceptions import SocialEventRuntimeError
 
 
@@ -90,3 +90,12 @@ def _delta(event_type: str, purpose: str | None) -> _Delta:
             intensity="medium",
         ),
     }.get(event_type, _Delta())
+
+
+def _validate_live_public_post(post: EventPost | None, *, world_id: str) -> None:
+    if post is None or post.world_id != world_id:
+        raise SocialEventRuntimeError("evidence_post_world_mismatch")
+    if post.deleted_at is not None:
+        raise SocialEventRuntimeError("evidence_source_deleted")
+    if post.report_hidden_at is not None or post.visibility != "public":
+        raise SocialEventRuntimeError("evidence_source_hidden")

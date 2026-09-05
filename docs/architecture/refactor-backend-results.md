@@ -1009,3 +1009,14 @@ Signed Social `2761e35`에 Routines `6beec5d`를 합쳤다. 활동 로그·기�
 `routines/service/public_action_executions.py`가 기존 nullable `Session.get`와 `social_event_id` 한 필드 대입을 실제 소유한다. Relationships runtime은 기존 오류 판정과 마지막 flush를 계속 담당한다. 추가 검증·commit·flush·값 복사 없이 원래 attached 객체를 전달하며 이후 이벤트 workflow 이전에서 이 계약을 재사용한다. 기존 signature/create/finish는 B4-C4 소유로 별도 전환한다.
 
 집중 검증 **14 passed / 13.15초**. 신규 2개 parameter node는 실제 SQLite와 두 Session으로 정상/조회 실패 주입을 검사한다. 기존 성공 실행 ID를 FK evidence로 유지하고 reader가 없는 레코드를 읽도록 제한적으로 주입하여 원래 `execution_evidence_invalid` 분기를 검증한다. 대입 함수는 SQL을 추가하지 않고, 외부 Session에서는 미커밋 event/link를 볼 수 없으며 caller rollback 뒤 event/evidence/outbox/link가 전부 되돌아간다. 기존 12개 SocialEvent 회귀의 assertion은 변경하지 않았다. Source 도입 capture는 부모의 선형 통합 단계에서 진행한다.
+
+
+## AR-B5-C3-B — 성공 이벤트의 실제 업무 흐름과 소유별 근거 조회
+
+`relationships/service/events.py`가 event admission·idempotency replay·evidence·상태 변화·outbox·실행 연결의 원래 순서를 소유한다. 재실행 3개 SQL은 자체 repository, 근거의 존재/범위 조회 흐름은 service/evidence, 순수 공개 판단은 policies/events로 분리했다. WorldCharacter 서비스는 기존 active/member 검사와 actor FOR UPDATE를 소유하며, World의 기존 nullable 조회와 Social의 unfiltered Post/숫자 source/상호 차단 및 Routines의 Joint/Execution 조회를 runtime의 같은 Session collaborator가 연결한다. 기존 runtime entry는 이 Session 조립만 담당한다.
+
+기존 event 함수와 replay SQL 3개·상호 차단 SQL·WC 검증/잠금·공개 근거 판단·source 분기 등 **8개 AST 계약**은 정확한 소유 함수 호출만 원래 표현으로 확장했을 때 동일하다. 기존 성공 source/관찰/NO_ACTION·delta 상한·원본 삭제·projection replay·수동 요청·공동 활동의 집중 검증은 **57 passed / 기존 warning 1 / 34.76초**다. 신규 owner 협력 2개 node는 재실행도 현재 membership을 먼저 검사하며 actor만 잠그고, 이후 동일 idempotency가 확인된 경우에만 evidence 읽기를 생략한다는 순서를 실제 SQLite에서 검증한다. 첫 collection의 타입 import 누락을 수정했고, 테스트 경로 오타로 1회 no-tests 종료 후 확인한 실제 파일 목록으로 실행했다.
+
+API·응답 스키마·ORM는 PR258/263과 동일하고 기존 보호 테스트의 assertion은 변경하지 않았다. 실제 composition wrapper를 유지한 두 이전 split 기록의 목적지를 보완했다. Root가 별도로 발견한 Memory fixture의 Post+관찰 동시 add 문제도 production constructor를 감사했다. 현재 유일한 `claim_feed_observations`는 기존 관찰 SELECT 다음 `begin_nested()`의 선행 flush 뒤 observation을 add/flush하며, Post+observation 동시 add_all을 하지 않는다. 모델/FK/transaction 의미를 변경하지 않고 fixture가 이 선행 조건을 표현하도록 root에서 검증한다. Source capture·Hosted CI·전체 B5 종료는 후속 통합에서 수행한다.
+
+C3-B 최종 구조 검사는 **734 modules / 2,500 edges / exact legacy 217**, 변경된 event split 기록 3개와 L4·ER0 current inventory가 통과했다. 다른 full split 기록은 직전 검사에서 오류가 없었고 이번 정정은 이 3개 기록에 한정된다.

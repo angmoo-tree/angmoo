@@ -492,7 +492,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/relationships/repository/events.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "1a5875d0c67108396d5051e5d3f0dfd974504f732f2c5cfa3c5c9aac68e7d2a8",
+      "source_sha256": "6d82f5d6172422c1f97710246d2241349f4a71e5542d552aa74cf47b48682952",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -820,6 +820,18 @@
     {
       "markers": {
         "row_lock": [
+          20
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/world_characters/service/event_scope.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "d2f6e2a660fa547144a591bcbd720dd15066a14fba512b380299107b874bd2b6",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "row_lock": [
           116
         ]
       },
@@ -1042,18 +1054,6 @@
       "path": "backend/app/runtime/persistence/sqlite_schema.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "591714e32c2758777ddeffd3aee0ee33b3c517f6561b43269cd1d073ec9bb33c",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
-    },
-    {
-      "markers": {
-        "row_lock": [
-          68
-        ]
-      },
-      "owner": "ER2-ER7 legacy evidence",
-      "path": "backend/app/runtime/relationships/sqlalchemy_social_event.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "c7d576fe6d647b1fb0c08aa3b730f6254265d6c95c5d250ae94caf36b9f53e0c",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
