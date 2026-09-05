@@ -602,3 +602,14 @@ B2B `4694b5dc6eaa81e3c01ddb41ea01e5732cbe636c` 뒤 stream의 실제 요청·상�
 전체 보존 검사는 source/split/assertion/억제 표시/API/ORM/기존 node 오류 0, 보호 **2,129 / 현재 2,175**이다. 선행 source 42개·node 44개 append-only capture가 남아 명령 전체는 exit 1이다. 이번 신규 파일 `contracts/execution.py`, `runtime/chat/generation_workflows.py`, `tests/chat/test_generation_composition.py`와 신규 2 nodes는 이 source의 첫 SHA로 root에서 캡처한다. Live architecture **648 modules / 2,148 edges / exact legacy 265 PASS**, ER0 **78/87/24/44/7 PASS**, L4 **97**, Memory batch current, public **196**이다.
 
 남은 실제 canonical preflight/entity resolution과 Today snapshot hash 판단을 소유 service로 이어서 이전하고, 그 뒤 Request→app.state 기반 service 주입·두 factory 등록·동일 standalone router 테스트 구성을 통해 HTTP owner를 마무리한다. runtime Memory 성공 후보는 실제 after-commit UoW 협력이며 원래 한 번의 제안·commit/rollback 의미를 유지한다. 전체 B6·B5 통합·CI·설치 완료로 표시하지 않는다.
+
+
+## AR-B6-B2D — 검색 사전 정책·Unicode 재확인·Today snapshot 소유
+
+Source `4d1f0f4836e913251f7fa92c091e93d8b1ce3409`에서 preflight의 실제 거부 순서와 entity 후보 판단을 `service/retrieval_policy.py`로 이전했다. 같은 Session의 교차 업무 SQL 5개는 `runtime/chat/retrieval_queries.py`, Chat thread 조회는 자체 repository에 있다. `contracts/retrieval_reads.py`는 필요한 값과 read 계약이다. Today snapshot의 complete-through/hash 검증은 기존 Today 서비스의 실제 validator가 수행하고 runtime은 같은 reader를 구성한다.
+
+사전 판단 3개 메서드는 명시된 읽기 협력을 원래 표현으로 펼치면 전체 AST 동일하다. 새 교차 SQL 5개와 Chat thread 조회의 표현 AST도 원래 query와 동일하며 Today assert_current 본문은 변경하지 않았다. Unicode casefold 재확인, 활성·공개·차단 후보의 observable 조건, 소유자→World→thread→역할→차단→Memory 조회 순서와 오류를 보존한다. 새 회귀 3개는 잘못된 설치 소유자에서 후속 조회가 실행되지 않는 두 경우와 Unicode/차단 후보의 실제 정책을 검증한다.
+
+고정 tree 확장 검증 **212 passed / 기존 4 warnings / 22.49초**. 전체 보존은 source/split/assertion/억제 표시/API/ORM/기존 node의 실질 오류 0, 보호 **2,129 / 현재 2,178**이며 선행 source/node introduction은 root의 선형 capture 전까지 미완료다. Live architecture **651 modules / 2,155 edges / exact legacy 265 PASS**, ER0 **78/87/24/44/7**, L4 **97**, Memory batch current, public **196**이다. 신규 실제 contract/service/runtime queries와 `tests/chat/test_retrieval_policy_ownership.py`의 첫 도입 SHA는 위 source commit이다.
+
+HTTP Request 기반 service 주입·두 앱 factory와 standalone route 테스트 구성은 다음 B6-C 범위다. B5/B7 합류 시 새 Social/Memory reader·models·factory로 정확히 연결하고, 이전 constructor 이름과 구조 검사용 alias는 B8 종료 대상으로 추적한다. 전체 B6/CI/설치 완료로 승격하지 않는다.
