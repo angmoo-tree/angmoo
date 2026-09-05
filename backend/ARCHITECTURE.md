@@ -469,6 +469,8 @@ AR-B4-A2에서는 version/daypart/history 상수를 `constants.py`, 실제 DST b
 실행기가 기존 admission을 확인한 뒤 사용하는 beat/소비 기록 처리는 `service/execution/claims.py`가 소유합니다. claim·재시도·실패·성공 저장의 실제 SQL과 규칙이 이곳에 있으며, `execution/lifecycle.py`는 그 실행 경로의 기존 회복·종료·중단 계약을 유지합니다. 위의 guarded lifecycle과 검사 조건이 다르므로 호출 경로에 맞는 함수를 사용합니다. `execution/__init__.py`는 같은 함수 객체를 공개하는 package 입구이며 별도 유스케이스나 실행 전달 계층이 아닙니다.
 
 게시 결과를 확인할 때의 Post·WorldCharacter와 중단 시 membership 조회는 `runtime/routines/activity_references.py`가 같은 Session으로 수행합니다. `contracts/activity.py`는 그 실제 조회 계약입니다. 먼저 episode, 다음 beat를 잠그던 순서와 claim commit은 유지하며, 성공 처리의 `commit=False`는 flush만 수행합니다. 호출자가 게시물과 beat/episode의 성공 상태를 함께 commit하거나 rollback합니다. 소비 namespace는 `contracts/lifecycle.py`의 공통 계약을 사용합니다. 의미가 같음을 확인한 UTC/due 계산과 open-claim 종료 helper만 공유하고, 서로 다른 admission 규칙을 삭제하지 않습니다.
+
+승인된 공동 활동의 기존 exact/window 예약과 대표 게시 claim은 `service/joint_scheduling.py`에 있습니다. stable scheduling 오류는 `exceptions.py`, 고유한 허용 daypart와 예약 불가 상태 값은 `constants.py`에 있습니다. 이 계약은 active membership 안의 pending/inactive/active 캐릭터를 허용하며, 이미 active인 계획 항목에는 새 예약을 넣지 않습니다. 기존 proposal opening 실행기는 active 캐릭터만 허용하는 별도 계약이므로 이름이 비슷하다는 이유로 이 서비스와 합치지 않습니다. 참여자 조회도 `ActivityReferences`를 통해 caller Session을 공유하고, 양쪽 계획·revision·대표 claim의 commit/rollback은 이 서비스가 그대로 소유합니다.
 ### Character/Creator 전환의 현재 위치
 
 Character 입력과 상태·Creator 모델은 `characters/models.py`, `schemas.py`, `contracts.py`에서 찾는다. 생성·표시 프로필·페르소나·동의의 실제 변경은 `service/mutations.py`가 담당하고, `access.py`·`persona.py`·`promotion.py`가 해당 판단을 공유한다. Caller-owned World seed는 `service/seed.py`의 flush-only 계약을 따르며 일반 생성의 기존 commit을 합치지 않는다.

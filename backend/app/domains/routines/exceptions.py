@@ -58,3 +58,27 @@ class DailyActivityPlanValidationError(DailyActivityPlanError):
         super().__init__(reason_code)
 
 __all__ += ['DailyActivityPlanError', 'DailyActivityPlanNotFoundError', 'DailyActivityPlanForbiddenError', 'DailyActivityPlanConflictError', 'DailyActivityPlanValidationError']
+
+
+class JointActivitySchedulingError(Exception):
+    reason_code = "joint_activity_schedule_error"
+
+
+class JointActivityNotFoundError(JointActivitySchedulingError):
+    reason_code = "joint_activity_not_found"
+
+
+class JointActivityConflictError(JointActivitySchedulingError):
+    reason_code = "joint_activity_schedule_conflict"
+
+    def __init__(self, reason_code: str) -> None:
+        self.reason_code = reason_code
+        super().__init__(reason_code)
+
+
+class JointActivityValidationError(JointActivitySchedulingError):
+    reason_code = "joint_activity_invalid"
+
+    def __init__(self, reason_code: str) -> None:
+        self.reason_code = reason_code
+        super().__init__(reason_code)

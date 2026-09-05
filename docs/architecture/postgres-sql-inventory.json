@@ -593,6 +593,28 @@
     {
       "markers": {
         "row_lock": [
+          52,
+          143,
+          184,
+          194,
+          296,
+          323,
+          375,
+          406
+        ],
+        "skip_locked": [
+          406
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/routines/service/joint_scheduling.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "586acf96ad63a59a82e6481467a27ef891c6a5b19371be423017639b02adb7b7",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "row_lock": [
           48,
           65,
           103,
@@ -1060,28 +1082,6 @@
       "path": "backend/app/services/joint_activity_runtime.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "034611677430b3e4f8f1542569e9bca035c54c1e6ff573c74043f0b200a586e6",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
-    },
-    {
-      "markers": {
-        "row_lock": [
-          79,
-          169,
-          210,
-          220,
-          321,
-          348,
-          400,
-          431
-        ],
-        "skip_locked": [
-          431
-        ]
-      },
-      "owner": "ER2-ER7 legacy evidence",
-      "path": "backend/app/services/joint_activity_scheduling.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "041a9b9ac03f661dbc98b9e7e3e4559dc6ae8c25cc3ec657347a05edc2374154",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

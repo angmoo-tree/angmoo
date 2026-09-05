@@ -533,3 +533,19 @@ A3a source `0945889` 이후 `services/activity_runtime.py`의 실제 beat/consum
 최종 focused 묶음은 **152 passed / 1 기존 PostgreSQL skip / 3 기존 warnings / 81.87초**다. 실제 이전된 15개 함수/class의 AST는 추가 조회 인자와 정확한 기존 read 추출만 되돌려 비교했을 때 원문과 차이가 없다. claim/완료/실패와 실행기 lifecycle의 원래 상태 전이·오류·트랜잭션 순서를 유지한다.
 
 전체 보존 검사도 PR258 **1,867** / PR263 **1,907** / 보호 계보 **2,129** / 현재 **2,175** node를 대조했으며 API·ORM·원본 assertion/exception·suppression·split·기존 node 손실이 없다. exit 1의 나머지는 선형 통합 시 root가 연결할 source/test 도입 metadata다. 상세 로그는 `routines-a3b-preservation.log`이며 이 준비 source를 merge/전체 backend/Hosted/installer 완료로 표시하지 않는다.
+
+### AR-B4-A3c — 기존 공동 예약·대표 게시 claim 계약
+
+실행 claim source `8ef7166` 이후 `services/joint_activity_scheduling.py`를 실제 `routines/service/joint_scheduling.py`로 옮겼다. 네 오류 class는 exceptions, 기존 daypart·active 포함 terminal 상태 값은 이름을 구분한 constants가 소유한다. nullable WorldCharacter/membership 조회는 이미 검증한 동일 Session의 `ActivityReferences`로 전달하고, 나머지 SQL·상태 변경·오류·commit/rollback은 원래 서비스 순서를 유지한다. 별도 전달 facade를 남기지 않고 기존 소비 테스트를 실제 소유 서비스로 연결했다.
+
+이 API는 `accepted_unscheduled` 활동의 exact/window 예약과 representation claim을 처리하며 pending/inactive/active 참여자 및 active membership이라는 기존 조건을 유지한다. 실제 proposal opening의 active-only 입장 조건과 오류 계층이 다르므로 두 서비스를 같은 함수로 합치지 않았다. 현재 제품은 proposal opening 경로를 쓰지만, 이 기존 지원 계약의 행동과 테스트를 임의로 삭제하지 않는다.
+
+- 기존 일일 계획·공동 예약·재시작·proposal·routine 게시 focused 검증 **50 passed / 1 기존 PostgreSQL skip / 39.23초**.
+- 조회 인자와 정확한 read extraction을 되돌린 원문 비교에서 scheduling·오류·결과의 **13개 함수/class AST 차이 0**. 양측 예약, 실패 시 부분 변경 금지, claim 충돌·복구의 기존 assertion을 그대로 유지했다.
+- 현재 경계 **637 modules / 2,072 edges / legacy exact 279 PASS**, routines의 실제 partial role **27개**. ER0 **78/87/24/44/7**, L4 parity **97**, Memory batch inventory를 갱신했다. 원본 baseline/checkpoint·migration은 변경하지 않았다.
+
+제품 joint opening·publication·completion은 다음 A3d이며, Proposal 실구현의 Relationships 소유 전환은 B5 담당과 협의했다. Social의 Post joint 필드 및 notification은 owner 서비스의 같은 Session 함수로 연결하고 원래 대입·검증·flush·commit 순서를 보존한다.
+
+추가 경계·L4·ER7·OSS 검사에서 **34 passed / 1 failed**를 확인했다. 실패는 선행 WorldCharacter client 이전 뒤 plaintext reveal allowlist가 옛 provider 파일을 가리키던 1개 exact 경로였다. 허용 함수 `generate_community_profile`·`generate_repertoire`와 equality 검사를 그대로 두고 실제 `domains/world_characters/client.py`로 연결한 뒤 해당 회귀 **1 passed / 1.71초**를 확인했다. B4 claim/scheduling에는 credential reveal 이동이나 허용 범위 추가가 없다.
+
+전체 보존 검사는 PR258 **1,867** / PR263 **1,907** / 보호 **2,129** / 현재 **2,175** node를 확인했다. API·ORM·원본 assertion/exception·suppression·split·기존 node 손실이 없으며, exit 1의 남은 항목은 선형 통합에서 root가 연결할 source/test introduction metadata다. `routines-a3c-preservation.log`에 결과를 보존했다.

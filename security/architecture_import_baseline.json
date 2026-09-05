@@ -1,5 +1,5 @@
 {
-  "edge_count": 2068,
+  "edge_count": 2072,
   "external_import_count": 2075,
   "module_count": 637,
   "modules": [
@@ -3766,6 +3766,28 @@
       ],
       "module": "app.domains.routines.service.joint_reservations",
       "path": "backend/app/domains/routines/service/joint_reservations.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.ids",
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.activity",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.models",
+        "app.domains.routines.service.scheduling"
+      ],
+      "module": "app.domains.routines.service.joint_scheduling",
+      "path": "backend/app/domains/routines/service/joint_scheduling.py",
       "wildcard_imports": []
     },
     {
@@ -8925,24 +8947,6 @@
       ],
       "module": "app.services.joint_activity_runtime",
       "path": "backend/app/services/joint_activity_runtime.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "dataclasses",
-        "datetime",
-        "hashlib",
-        "sqlalchemy",
-        "sqlalchemy.exc",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.core.ids",
-        "app.models"
-      ],
-      "module": "app.services.joint_activity_scheduling",
-      "path": "backend/app/services/joint_activity_scheduling.py",
       "wildcard_imports": []
     },
     {

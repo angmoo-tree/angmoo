@@ -17,3 +17,8 @@ INITIAL_STATE = {
 
 BEAT_TRIGGER_KINDS = frozenset({"scheduled", "comment_influenced", "joint_activity"})
 TERMINAL_ITEM_STATUSES = frozenset({"completed", "skipped", "interrupted", "cancelled"})
+
+JOINT_SCHEDULING_DAYPARTS = frozenset({"dawn", "morning", "afternoon", "evening"})
+JOINT_SCHEDULING_TERMINAL_ITEM_STATUSES = frozenset(
+    {"active", "completed", "skipped", "interrupted", "cancelled"}
+)

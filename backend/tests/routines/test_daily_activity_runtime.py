@@ -24,7 +24,7 @@ from app.domains.routines.service import execution as activity_runtime
 from app.runtime.routines.activity_references import SqlAlchemyActivityReferences
 from app.services import activity_state_contracts
 from app.services import daily_activity_plans
-from app.services import joint_activity_scheduling
+from app.domains.routines.service import joint_scheduling as joint_activity_scheduling
 from app.services import routine_post_runtime
 from app.services import world_character_setup
 from app.services import world_character_contracts
@@ -1021,6 +1021,7 @@ def test_character_scrub_removes_shared_joint_activity_without_orphaning_peer_pl
         db.commit()
         scheduled = joint_activity_scheduling.schedule_joint_activity(
             db,
+            references=SqlAlchemyActivityReferences(db),
             joint_activity_id=joint.id,
             local_date=date(2026, 8, 9),
             daypart="evening",
@@ -1182,6 +1183,7 @@ def test_joint_schedule_links_both_participants_and_claim_has_no_consumption() -
 
         scheduled = joint_activity_scheduling.schedule_joint_activity(
             db,
+            references=SqlAlchemyActivityReferences(db),
             joint_activity_id=joint.id,
             local_date=date(2026, 8, 9),
             daypart="evening",
@@ -1211,6 +1213,7 @@ def test_joint_schedule_links_both_participants_and_claim_has_no_consumption() -
 
         first_claim = joint_activity_scheduling.claim_representation(
             db,
+            references=SqlAlchemyActivityReferences(db),
             joint_activity_id=joint.id,
             claimant_world_character_id=first.world_character.id,
             claim_expires_at=now + timedelta(minutes=5),
@@ -1223,6 +1226,7 @@ def test_joint_schedule_links_both_participants_and_claim_has_no_consumption() -
         ):
             joint_activity_scheduling.claim_representation(
                 db,
+                references=SqlAlchemyActivityReferences(db),
                 joint_activity_id=joint.id,
                 claimant_world_character_id=second.world_character.id,
                 claim_expires_at=now + timedelta(minutes=5),
@@ -1247,6 +1251,7 @@ def test_joint_schedule_links_both_participants_and_claim_has_no_consumption() -
         )
         second_claim = joint_activity_scheduling.claim_representation(
             restarted,
+            references=SqlAlchemyActivityReferences(restarted),
             joint_activity_id="joint-a",
             claimant_world_character_id="world-character-b",
             claim_expires_at=now + timedelta(minutes=12),
@@ -1302,6 +1307,7 @@ def test_joint_schedule_conflict_never_links_only_one_participant() -> None:
         ):
             joint_activity_scheduling.schedule_joint_activity(
                 db,
+                references=SqlAlchemyActivityReferences(db),
                 joint_activity_id=joint.id,
                 local_date=date(2026, 8, 9),
                 daypart="morning",

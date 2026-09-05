@@ -685,10 +685,6 @@
           "importer": "app.services.joint_activity_runtime"
         },
         {
-          "imported": "app.models",
-          "importer": "app.services.joint_activity_scheduling"
-        },
-        {
           "imported": "app.cruds.agent_runs",
           "importer": "app.services.langgraph_resident"
         },
@@ -1306,6 +1302,7 @@
       "app.domains.routines.service.execution.claims",
       "app.domains.routines.service.execution.lifecycle",
       "app.domains.routines.service.joint_reservations",
+      "app.domains.routines.service.joint_scheduling",
       "app.domains.routines.service.lifecycle",
       "app.domains.routines.service.plans",
       "app.domains.routines.service.scheduling",
@@ -1396,6 +1393,7 @@
       "app.domains.routines.service.execution.claims",
       "app.domains.routines.service.execution.lifecycle",
       "app.domains.routines.service.joint_reservations",
+      "app.domains.routines.service.joint_scheduling",
       "app.domains.routines.service.lifecycle",
       "app.domains.routines.service.plans",
       "app.domains.routines.service.scheduling",

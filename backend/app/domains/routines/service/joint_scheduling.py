@@ -1,3 +1,4 @@
+"""Accepted joint scheduling and representation claims with their original contract."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -8,38 +9,15 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app import models
 from app.core.ids import uuid7_string
-
-
-DAYPARTS = frozenset({"dawn", "morning", "afternoon", "evening"})
-TERMINAL_ITEM_STATUSES = frozenset(
-    {"active", "completed", "skipped", "interrupted", "cancelled"}
+from app.domains.routines import models
+from app.domains.routines.constants import (
+    JOINT_SCHEDULING_DAYPARTS as DAYPARTS,
+    JOINT_SCHEDULING_TERMINAL_ITEM_STATUSES as TERMINAL_ITEM_STATUSES,
 )
-
-
-class JointActivitySchedulingError(Exception):
-    reason_code = "joint_activity_schedule_error"
-
-
-class JointActivityNotFoundError(JointActivitySchedulingError):
-    reason_code = "joint_activity_not_found"
-
-
-class JointActivityConflictError(JointActivitySchedulingError):
-    reason_code = "joint_activity_schedule_conflict"
-
-    def __init__(self, reason_code: str) -> None:
-        self.reason_code = reason_code
-        super().__init__(reason_code)
-
-
-class JointActivityValidationError(JointActivitySchedulingError):
-    reason_code = "joint_activity_invalid"
-
-    def __init__(self, reason_code: str) -> None:
-        self.reason_code = reason_code
-        super().__init__(reason_code)
+from app.domains.routines.contracts.activity import ActivityReferences
+from app.domains.routines.exceptions import JointActivitySchedulingError, JointActivityNotFoundError, JointActivityConflictError, JointActivityValidationError
+from app.domains.routines.service.scheduling import aware_utc as _aware_utc
 
 
 @dataclass(frozen=True)
@@ -56,15 +34,10 @@ class RepresentationClaimResult:
     reused: bool
 
 
-def _aware_utc(value: datetime) -> datetime:
-    if value.tzinfo is None:
-        return value.replace(tzinfo=UTC)
-    return value.astimezone(UTC)
-
-
 def _participants(
     db: Session,
     *,
+    references: ActivityReferences,
     joint_activity: models.JointActivity,
     lock_for_update: bool,
 ) -> list[models.JointActivityParticipant]:
@@ -89,14 +62,14 @@ def _participants(
             not in {"accepted", "scheduled"}
         ):
             raise JointActivityValidationError("cross_world_reference")
-        world_character = db.get(models.WorldCharacter, participant.world_character_id)
+        world_character = references.get_world_character(participant.world_character_id)
         if (
             world_character is None
             or world_character.world_id != joint_activity.world_id
             or world_character.status not in {"pending", "inactive", "active"}
         ):
             raise JointActivityValidationError("joint_activity_participant_invalid")
-        membership = db.get(models.WorldMembership, world_character.membership_id)
+        membership = references.get_membership(world_character.membership_id)
         if (
             membership is None
             or membership.world_id != joint_activity.world_id
@@ -154,6 +127,7 @@ def _item_snapshot(item: models.DailyActivityPlanItem) -> dict[str, object]:
 def schedule_joint_activity(
     db: Session,
     *,
+    references: ActivityReferences,
     joint_activity_id: str,
     local_date: date,
     daypart: str,
@@ -171,7 +145,7 @@ def schedule_joint_activity(
     if joint_activity is None:
         raise JointActivityNotFoundError(joint_activity_id)
     participants = _participants(
-        db, joint_activity=joint_activity, lock_for_update=True
+        db, references=references, joint_activity=joint_activity, lock_for_update=True
     )
     linked = tuple(
         participant.linked_daily_activity_plan_item_id
@@ -306,6 +280,7 @@ def schedule_joint_activity(
 def claim_representation(
     db: Session,
     *,
+    references: ActivityReferences,
     joint_activity_id: str,
     claimant_world_character_id: str,
     claim_expires_at: datetime,
@@ -327,7 +302,7 @@ def claim_representation(
     if joint_activity.status not in {"scheduled", "ready"}:
         raise JointActivityConflictError("joint_activity_accepted_unscheduled")
     participants = _participants(
-        db, joint_activity=joint_activity, lock_for_update=True
+        db, references=references, joint_activity=joint_activity, lock_for_update=True
     )
     if claimant_world_character_id not in {
         participant.world_character_id for participant in participants
