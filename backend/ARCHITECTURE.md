@@ -736,3 +736,6 @@ Today SNS의 범위·권한·차단·조상 게시물·성공 근거·명시적 
 
 
 Resident가 Feed·Inbox에서 시도할 수 있는 Social 행동과 차단 이유는 `social/service/resident_affordances.py`에서 판단한다. 원래 좋아요·리포스트 존재와 visible reply 탐색 SQL은 `repository/resident_affordances.py`, agent 문맥용 응답 복사·텍스트 정제는 `service/agent_presentation.py`가 소유한다. 다른 캐릭터 조회는 기존 Character profile service의 같은 nullable 조회를 사용한다. 활성 정책이 이미 정한 allowed_actions를 받아 Social의 self/기존 반응/target/visibility 규칙만 적용하며 Routines의 정책을 중복 구현하지 않는다. Community의 다른 기능은 전환 중이고, 이 23개 함수에 대해서만 동일 함수 import로 협력한다.
+
+
+활동 계획에 제공할 Feed 이력의 정제·서버 확정 메타데이터 병합·경고·길이/개수 제한과 prompt 문자열은 `routines/service/feed_history_values.py`가 소유한다. 입력 형식 2개는 `routines/schemas/feed_history.py`의 실제 Pydantic class이고, Social의 이전 schema 표면은 전환 중 같은 class를 import한다. 두 업무에서 쓰는 단순 bounded neutral text 변환은 `core/bounded_text.py`에 한 번만 정의한다. Routines 값 정책이 Social service에 역의존하거나 AI 결과가 원본 메타데이터를 바꿀 수 있도록 처리하지 않는다. DB/활동 로그/HTTP 연결의 남은 Community 업무는 별도로 전환한다.

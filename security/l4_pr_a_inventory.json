@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2410,
-      "internal_edge_count": 2828,
+      "external_import_count": 2416,
+      "internal_edge_count": 2838,
       "legacy_import_exception_count": 0,
-      "module_count": 810,
+      "module_count": 813,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -1050,7 +1050,8 @@
           },
           {
             "imports": [
-              "app.core.profile_ref"
+              "app.core.profile_ref",
+              "app.domains.routines.schemas.feed_history"
             ],
             "module": "app.domains.social.schemas.community",
             "path": "backend/app/domains/social/schemas/community.py"
@@ -1111,6 +1112,7 @@
           },
           {
             "imports": [
+              "app.core.bounded_text",
               "app.core.context_text",
               "app.domains.social.constants"
             ],

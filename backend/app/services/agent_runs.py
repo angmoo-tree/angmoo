@@ -1,3 +1,4 @@
+from app.domains.routines.service import feed_history_values
 from app.domains.social.service import resident_affordances
 from app.domains.runtime.contracts import (
     AgentRunServiceError,
@@ -6245,7 +6246,7 @@ async def _run_resident_individual_tool_flow(
         )
     )
     feed_history_sanitize_task_sections = (
-        community_service.format_feed_history_sanitize_skeleton_for_prompt(
+        feed_history_values.format_feed_history_sanitize_skeleton_for_prompt(
             feed_history_sanitize_skeleton
         )
     )
@@ -6402,7 +6403,7 @@ async def _run_resident_individual_tool_flow(
         )
     else:
         feed_history_sections = (
-            community_service.format_feed_history_sanitize_payload_for_prompt(
+            feed_history_values.format_feed_history_sanitize_payload_for_prompt(
                 feed_history_sanitize_payload
             )
         )

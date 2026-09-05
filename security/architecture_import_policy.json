@@ -1030,6 +1030,7 @@
       "app.domains.routines.repository.plans",
       "app.domains.routines.router",
       "app.domains.routines.schemas",
+      "app.domains.routines.schemas.feed_history",
       "app.domains.routines.schemas.plans",
       "app.domains.routines.schemas.resident",
       "app.domains.routines.schemas.runs",
@@ -1040,6 +1041,7 @@
       "app.domains.routines.service.execution",
       "app.domains.routines.service.execution.claims",
       "app.domains.routines.service.execution.lifecycle",
+      "app.domains.routines.service.feed_history_values",
       "app.domains.routines.service.joint_activity",
       "app.domains.routines.service.joint_activity.eligibility",
       "app.domains.routines.service.joint_activity.execution",
@@ -1291,6 +1293,7 @@
       "app.domains.routines.contracts.plans",
       "app.domains.routines.contracts.resident",
       "app.domains.routines.schemas",
+      "app.domains.routines.schemas.feed_history",
       "app.domains.routines.schemas.plans",
       "app.domains.routines.schemas.resident",
       "app.domains.routines.schemas.runs",
@@ -1301,6 +1304,7 @@
       "app.domains.routines.service.execution",
       "app.domains.routines.service.execution.claims",
       "app.domains.routines.service.execution.lifecycle",
+      "app.domains.routines.service.feed_history_values",
       "app.domains.routines.service.joint_activity",
       "app.domains.routines.service.joint_activity.eligibility",
       "app.domains.routines.service.joint_activity.execution",
@@ -3081,6 +3085,30 @@
         "owner_stage": "AR-B5 / AR-B4",
         "reason": "Exact pre-existing resident/agent tool functions now resolve to their actual Social owner; no new business policy is added to the old consumer.",
         "removal_condition": "Move the remaining Community/AgentRun/LangGraph/writing orchestration to actual owner/runtime modules and remove these exact same-function consumer imports.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.routines.service.feed_history_values",
+        "owner_stage": "AR-B5 / AR-B4",
+        "reason": "Existing resident history caller consumes actual Routines policy and original limits; no implementation remains in this old import surface for these symbols.",
+        "removal_condition": "Finish Community/AgentRun runtime ownership and remove exact old consumer imports while retaining the actual Routines service/constant call.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.feed_history_values",
+        "owner_stage": "AR-B5 / AR-B4",
+        "reason": "Existing resident history caller consumes actual Routines policy and original limits; no implementation remains in this old import surface for these symbols.",
+        "removal_condition": "Finish Community/AgentRun runtime ownership and remove exact old consumer imports while retaining the actual Routines service/constant call.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.routines.constants",
+        "owner_stage": "AR-B5 / AR-B4",
+        "reason": "Existing resident history caller consumes actual Routines policy and original limits; no implementation remains in this old import surface for these symbols.",
+        "removal_condition": "Finish Community/AgentRun runtime ownership and remove exact old consumer imports while retaining the actual Routines service/constant call.",
         "review_date": "2026-09-06"
       }
     ]

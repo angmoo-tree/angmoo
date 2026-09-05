@@ -1249,3 +1249,12 @@ Community 원래 함수 23개를 Social repository/service로 이전했다. 반�
 직접 관련 기존 회귀와 새 SQLite 1개는 **228 PASS / 12.27초**다. 신규 검증은 allowed_actions 비활성 SQL0, 같은 Session의 pending like가 원래 autoflush를 거쳐 already_liked에 반영됨, 새 commit 없음, rollback 후 원래 행동 가능 상태 회복을 확인한다. Community 나머지 102개 actual 함수와 G07·full B5·capture/Hosted 통합은 후속 범위로 남는다.
 
 C16 확대 Social·Relationships·LangGraph·WorldFeed·follow/public activity 검증은 **298 PASS / 67.60초 / 기존 Starlette warning 1개**다. 원래 23개 body와 남은 102개 정의의 AST는 동일하고 PR #258/#263 API/schema/ORM 및 전체 split evidence도 통과했다. 최초 split 검사에서는 기존 Community의 retained/이전 소유 정의 행이 빠져 1개 metadata 오류가 발생했고, 원래 AR-B2-B6의 236개 추적 행을 동일하게 승계해 전체 원본을 포함했다. 구조/검사/보호 assertion을 완화하지 않았고 최종 경계는 **810 module / 2828 edge / legacy189**, L4/ER0도 통과했다.
+
+
+## AR-B5-C17 — Resident Feed 이력 값 정책·입력 소유 전환
+
+원래 history 정제/metadata merge/경고/길이·개수 제한/format15 함수와4 상수·regex는 Routines에, 원래 입력2 class는 Routines schemas에 두었다. Social와 공유하는 bounded neutral text2 함수는 core의 같은 함수로 연결해 package cycle 없이 재사용한다. DB·provider 호출은 추가하지 않았고 기존 Community/AgentRun caller는 실제 함수를 호출한다.
+
+직접 관련 기존 history/tendency/LangGraph/daypart/WorldFeed 회귀는 **281 PASS / 6.14초 / 기존 Starlette 422 warning 2개**다. 신규 assertion/node를 만들거나 기존 assertion을 바꾸지 않았고, 입력 schema class identity와 API 계약을 별도 확인한다. Parent Search 감사가 찾은 옛 `runtime/relationships/sqlalchemy_social_read_repository.py` source map 누락은 실제 `domains/relationships/repository/diagnostics.py`로 정확히 연결했다. Community의 나머지87 actual 함수, G07, full B5·Hosted·capture 종료는 후속 범위다.
+
+C17의 원래 history15/input2/common2/constant4 AST가 동일하며, 입력2 class의 Routines·Social·기존 aggregate import가 같은 객체임을 확인했다. PR #258/#263 API/schema/ORM·보호 assertion·전체 split evidence가 통과했고, 경계 **813 module / 2838 edge / legacy189** 및 L4/ER0 현재 inventory가 통과했다.

@@ -1,7 +1,7 @@
 {
-  "edge_count": 2828,
-  "external_import_count": 2410,
-  "module_count": 810,
+  "edge_count": 2838,
+  "external_import_count": 2416,
+  "module_count": 813,
   "modules": [
     {
       "external_imports": [],
@@ -469,6 +469,15 @@
       "imports": [],
       "module": "app.core.active_hours",
       "path": "backend/app/core/active_hours.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.core.context_text"
+      ],
+      "module": "app.core.bounded_text",
+      "path": "backend/app/core/bounded_text.py",
       "wildcard_imports": []
     },
     {
@@ -4241,7 +4250,8 @@
     },
     {
       "external_imports": [
-        "datetime"
+        "datetime",
+        "re"
       ],
       "imports": [
         "app.domains.routines.contracts.lifecycle"
@@ -4534,6 +4544,15 @@
     },
     {
       "external_imports": [
+        "pydantic"
+      ],
+      "imports": [],
+      "module": "app.domains.routines.schemas.feed_history",
+      "path": "backend/app/domains/routines/schemas/feed_history.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "datetime",
         "pydantic",
@@ -4675,6 +4694,23 @@
       ],
       "module": "app.domains.routines.service.execution.lifecycle",
       "path": "backend/app/domains/routines/service/execution/lifecycle.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "json",
+        "re",
+        "typing"
+      ],
+      "imports": [
+        "app.core.bounded_text",
+        "app.core.context_text",
+        "app.domains.routines.constants",
+        "app.domains.routines.schemas.feed_history"
+      ],
+      "module": "app.domains.routines.service.feed_history_values",
+      "path": "backend/app/domains/routines/service/feed_history_values.py",
       "wildcard_imports": []
     },
     {
@@ -5985,7 +6021,8 @@
         "typing"
       ],
       "imports": [
-        "app.core.profile_ref"
+        "app.core.profile_ref",
+        "app.domains.routines.schemas.feed_history"
       ],
       "module": "app.domains.social.schemas.community",
       "path": "backend/app/domains/social/schemas/community.py",
@@ -6086,6 +6123,7 @@
         "typing"
       ],
       "imports": [
+        "app.core.bounded_text",
         "app.core.context_text",
         "app.domains.social.constants"
       ],
@@ -11588,6 +11626,7 @@
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.routines.service.feed_history_values",
         "app.domains.routines.service.lifecycle",
         "app.domains.routines.service.tick_schedule",
         "app.domains.runtime.contracts",
@@ -11707,6 +11746,8 @@
         "app.cruds.community",
         "app.domains.characters.exceptions",
         "app.domains.characters.service.state",
+        "app.domains.routines.constants",
+        "app.domains.routines.service.feed_history_values",
         "app.domains.social.constants",
         "app.domains.social.exceptions",
         "app.domains.social.repository.resident_affordances",
