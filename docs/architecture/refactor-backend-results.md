@@ -447,3 +447,8 @@ Setup slice의 최종 현재 API·ORM 및 전체 split evidence 검사도 PASS�
 `local-smoke`에 기존 UoW 전체 파일과 새 결정적 회귀를 명시적으로 연결했다. World API·ORM·historical migration·기존 assertion은 수정하지 않았다. 이 hotfix는 seed UoW의 한 경로이며 `BEGIN IMMEDIATE`를 사용하는 media import commit 흐름의 트랜잭션 설계는 바꾸지 않는다. 후속 Package runtime UoW로 파일이 옮겨질 때도 같은 수정이 유지되어야 한다. Source introduction capture 및 PR/merge 검증은 root의 선형 통합 단계가 담당한다.
 
 최종 고정 구현·CI 목록·현재 inventory에서 새 경합 6개, 기존 UoW/Import Commit/Preview, World 정의·Creator API, CI policy를 함께 실행한 결과는 **60 passed / 기존 2 warnings / 42.29초**다. 현재 경계 검사는 **626 modules / 2,003 internal edges / exact legacy 281 PASS**, L4 parity **97**이다.
+### WC workflow 통합 검증과 보존 검사 성능
+
+고정 제품 source `0c9deff`에서 WC·World·Package replay/UoW·활동 회귀 **178 passed / 6 warnings / 53.93초**를 통과했다. API module inventory의 기존 profile 7개도 실제 canonical module로 연결했으며 권한과 HTTP 계약은 유지했다. CI 계약 7개 및 architecture **626/2003/legacy281**, source archive Gitleaks **19.14MB**, 전체 HEAD 조상 **353 commits/21.27MB**는 PASS/findings0이다.
+
+전체 보존 검사 중 명시적 경로 쌍이 526개로 늘면서 Python 정규식 캐시 한도를 넘겨 같은 표현식을 반복 컴파일하는 CPU 병목을 확인했다. 진행 중이던 검사는 중단했고 완료로 기록하지 않았다. `_compiled_path_literals`는 완전한 순서 있는 경로 튜플만 키로 사용해 정규식 컴파일을 최대 8종 재사용한다. 실제 source·assertion·테스트 수집·Git 증거는 캐시하지 않고 경계식·치환 순서·예외·기준선은 그대로 유지한다. 실제 frozen assertion 64개와 순서/부분 경로/숫자/오류 24개 비교는 AST가 모두 같았고 3.885초→0.099초였다. 기존 guard 회귀 **149 passed / 1.74초**를 통과했다. 신규 파일/test node는 없으며 전체 계보 검증은 이 수정이 포함된 고정 후보로 다시 실행한다.
