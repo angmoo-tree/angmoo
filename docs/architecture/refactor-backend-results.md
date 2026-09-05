@@ -676,3 +676,16 @@ Source `17854b02cb5103e9c5a685be982159babe6758a9`에서 Memory HTTP10개는 `rou
 기존 HTTP의 10개 업무 본문을 명시적 DI/오류 변환 분리만 정규화하여 비교했고, parameter·decorator·response AST 및 presentation7함수 AST가 같다. API 집중20 PASS 뒤, 관련 profile 읽기가 실패하면 pin이 rollback되는 새 회귀1개를 포함해 **218 passed / 1,988 deselected / 2 warnings / 129.05초**를 확인했다. 경계가 처음 잡은 잘못된 직접 인증 import와 Chat/Memory package cycle은 기존 공통 HTTP 연결 및 패키지 위의 실제 조립으로 해소했으며 **650 modules / 2,122 edges / legacy256 PASS**다. L4 parity97, ER0 76/87/24/44/7, current batch inventory도 통과했다.
 
 전체 보존 검사에서 API/ORM·원본 assertion·skip·split·node 손실은 없고 **기존 protected2,201/current2,206**이다. 검사 exit1은 앞선 A4에서 새로 commit한 source4개/node4개의 introduction capture를 B4~B6 순차 통합 뒤로 남긴 결과다. A5의 새 역할 파일과 새1node도 고정 source의 도입 기록으로 후속 capture하며 guard를 완화하지 않는다. 새 batch/provider 호출·기능 삭제·schema version 변경은 없다. Worker·source/projection·Daypart Memory와 마지막 public/aggregate 정리는 다음 범위다.
+
+
+### AR-B7-A6 Memory source admission 저장
+
+Source `8fa9871f81b8b2b534bdd77baae6243326e0a7c6`에서 실제 ON epoch 동기화 및 delivery 저장 두 함수는 `repository/delivery.py`로 옮겼다. 두 함수의 전체 AST와 동일 Connection·SQL·version/시간·dedupe를 유지한다. Runtime은 Social/Chat 이벤트를 해석하여 해당 저장을 호출하는 SQLAlchemy hook 조립을 담당한다. 기존 commit/rollback과 provider 호출은 추가하지 않았다.
+
+배치 runtime·안전·owner 제어 **33 passed / 1 warning / 14.30초**, 경계 **651/2124/legacy256**, L4 parity97, ER0 76/87/24/44/7 및 current Memory batch inventory PASS다. 새 source1개는 이 고정 commit을 기준으로 후속 순차 capture한다.
+
+### AR-B7-A7 Memory candidate 전달·배치 준비·brief 재생성
+
+Source `e9f881ae4fea642c6c7b4a754fcfe71ac2ba3b7c`에서 `deliver_candidates`, `enqueue_scope`, `rebuild_briefs`의 실제 실행 본문은 `service/batch_preparation.py`가 소유한다. 같은 Session의 저장/원본 근거 조회 네 협력을 명시적으로 받아 기존 candidate 검증, thread별 묶음, byte/candidate 예산, queue 등록, hot brief의 현재 근거 검증과 dirty flag/commit 흐름을 유지한다. Worker는 실행·중지와 실제 협력 연결을 맡는다. 테스트의 기존 직접 호출은 test 지원 모듈에서 실제 runtime builder를 partial로 연결하며 원래 assertion은 유지한다.
+
+세 실제 업무 본문은 명시 factory 주입만 역변환하면 원문 AST와 같다. 배치 runtime·안전·API·owner 제어 **41 passed / 2 warnings / 15.19초**, 경계 **654/2142/legacy256**, L4 parity97·ER0 76/87/24/44/7·current batch inventory PASS다. 새 역할 source와 test 지원 파일은 후속 선형 capture 대상으로 남기며 보호 기준을 재생성하지 않는다. 예약/종료 정책·외부 World join, source reconciliation·canonical recall·Daypart Memory의 실제 책임과 마지막 legacy bridge는 다음 범위다.
