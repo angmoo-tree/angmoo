@@ -25995,7 +25995,10 @@
         "backend/app/runtime/memory/batch_runtime.py": [
           "backend/app/runtime/memory/batch_runtime.py",
           "backend/app/domains/memory/service/batch_preparation.py",
-          "backend/app/domains/memory/service/batch_scheduling.py"
+          "backend/app/domains/memory/service/batch_scheduling.py",
+          "backend/app/domains/memory/service/reconciliation.py",
+          "backend/app/domains/memory/repository/reconciliation.py",
+          "backend/app/runtime/memory/source_catalogs.py"
         ]
       },
       "split_symbols": [
@@ -26071,7 +26074,7 @@
         },
         {
           "old": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
-          "new": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
+          "new": "backend/app/domains/memory/service/reconciliation.py::reconcile_sources",
           "direct_consumers": [
             "backend/app/public_main.py"
           ],
@@ -26095,6 +26098,56 @@
             "tests/test_p8_l_r_memory_batch_runtime.py::test_provider_failure_never_falls_back_to_accept_all",
             "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai",
             "tests/test_p8_l_r_memory_batch_runtime.py::test_saved_schedule_does_not_generate_or_trigger_past_time"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
+          "new": "backend/app/domains/memory/repository/reconciliation.py::open_missing_epochs",
+          "direct_consumers": [
+            "backend/app/domains/memory/service/reconciliation.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_safety.py::test_marker_failure_does_not_roll_back_successful_post"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
+          "new": "backend/app/domains/memory/repository/reconciliation.py::scan_enabled_epochs",
+          "direct_consumers": [
+            "backend/app/domains/memory/service/reconciliation.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_safety.py::test_marker_failure_does_not_roll_back_successful_post"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
+          "new": "backend/app/domains/memory/repository/reconciliation.py::get_epoch_setting",
+          "direct_consumers": [
+            "backend/app/domains/memory/service/reconciliation.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_safety.py::test_marker_failure_does_not_roll_back_successful_post"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
+          "new": "backend/app/domains/memory/repository/reconciliation.py::recover_catalog",
+          "direct_consumers": [
+            "backend/app/domains/memory/service/reconciliation.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_safety.py::test_marker_failure_does_not_roll_back_successful_post"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
+          "new": "backend/app/runtime/memory/source_catalogs.py::build_source_catalogs",
+          "direct_consumers": [
+            "backend/app/runtime/memory/batch_preparation.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_safety.py::test_marker_failure_does_not_roll_back_successful_post"
           ]
         }
       ],
@@ -26110,7 +26163,10 @@
         "backend/app/runtime/memory/batch_runtime.py": [
           "backend/app/runtime/memory/batch_runtime.py",
           "backend/app/domains/memory/service/batch_preparation.py",
-          "backend/app/domains/memory/service/batch_scheduling.py"
+          "backend/app/domains/memory/service/batch_scheduling.py",
+          "backend/app/domains/memory/service/reconciliation.py",
+          "backend/app/domains/memory/repository/reconciliation.py",
+          "backend/app/runtime/memory/source_catalogs.py"
         ]
       },
       "split_symbols": [
@@ -26186,7 +26242,7 @@
         },
         {
           "old": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
-          "new": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
+          "new": "backend/app/domains/memory/service/reconciliation.py::reconcile_sources",
           "direct_consumers": [
             "backend/app/public_main.py"
           ],
@@ -26210,6 +26266,56 @@
             "tests/test_p8_l_r_memory_batch_runtime.py::test_provider_failure_never_falls_back_to_accept_all",
             "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai",
             "tests/test_p8_l_r_memory_batch_runtime.py::test_saved_schedule_does_not_generate_or_trigger_past_time"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
+          "new": "backend/app/domains/memory/repository/reconciliation.py::open_missing_epochs",
+          "direct_consumers": [
+            "backend/app/domains/memory/service/reconciliation.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_safety.py::test_marker_failure_does_not_roll_back_successful_post"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
+          "new": "backend/app/domains/memory/repository/reconciliation.py::scan_enabled_epochs",
+          "direct_consumers": [
+            "backend/app/domains/memory/service/reconciliation.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_safety.py::test_marker_failure_does_not_roll_back_successful_post"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
+          "new": "backend/app/domains/memory/repository/reconciliation.py::get_epoch_setting",
+          "direct_consumers": [
+            "backend/app/domains/memory/service/reconciliation.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_safety.py::test_marker_failure_does_not_roll_back_successful_post"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
+          "new": "backend/app/domains/memory/repository/reconciliation.py::recover_catalog",
+          "direct_consumers": [
+            "backend/app/domains/memory/service/reconciliation.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_safety.py::test_marker_failure_does_not_roll_back_successful_post"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
+          "new": "backend/app/runtime/memory/source_catalogs.py::build_source_catalogs",
+          "direct_consumers": [
+            "backend/app/runtime/memory/batch_preparation.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_safety.py::test_marker_failure_does_not_roll_back_successful_post"
           ]
         }
       ],
@@ -32037,6 +32143,172 @@
       "scope": "Memory source service owns success/visibility/observation/subjective/digest/membership decisions. Runtime source queries keep exact original foreign SQL/results in the same Session. Existing raw row shapes stay local to this read collaboration.",
       "preserved": "Same lazy source lookup, early-return paths, SQL/result consumption order, digest JSON/summary truncation, source types/IDs and no new provider/commit/rollback. Subjective multi-owner read remains lazy runtime composition.",
       "remaining": "Daypart Memory is prepared independently; runtime source reconciliation and final old aggregates/compatibility cleanup remain."
+    },
+    "AR-B7-A11": {
+      "status": "SOURCE PREPARATION; final formatted original workflow/repository SQL/catalog AST preserved; focused37 PASS/2 warnings/14.97s; complete split0 errors; boundary726/2442/legacy222; sequential introduction capture/integration pending",
+      "scope": "Memory service owns consent-epoch recovery order, scan advancement and original single commit. Its repository owns actual anti-join/delivery SQL; runtime supplies unchanged foreign source catalogs.",
+      "preserved": "Same 32 missing epoch cap, 16 rotated scopes, five source catalogs/order, per-source32 cap, half-open epoch timestamps, actual late-row anti-join recovery, single caller Session/commit and no provider.",
+      "split_files": {
+        "backend/app/runtime/memory/batch_runtime.py": [
+          "backend/app/runtime/memory/batch_runtime.py",
+          "backend/app/domains/memory/service/batch_preparation.py",
+          "backend/app/domains/memory/service/batch_scheduling.py",
+          "backend/app/domains/memory/service/reconciliation.py",
+          "backend/app/domains/memory/repository/reconciliation.py",
+          "backend/app/runtime/memory/source_catalogs.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::MemoryBatchRuntime",
+          "new": "backend/app/runtime/memory/batch_runtime.py::MemoryBatchRuntime",
+          "direct_consumers": [
+            "backend/app/public_main.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_skip_is_success_not_failed_or_repeated",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_provider_failure_never_falls_back_to_accept_all",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_saved_schedule_does_not_generate_or_trigger_past_time"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::deliver_candidates",
+          "new": "backend/app/domains/memory/service/batch_preparation.py::deliver_candidates",
+          "direct_consumers": [
+            "backend/app/runtime/memory/batch_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_skip_is_success_not_failed_or_repeated",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_provider_failure_never_falls_back_to_accept_all",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_saved_schedule_does_not_generate_or_trigger_past_time"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::enqueue_scope",
+          "new": "backend/app/domains/memory/service/batch_preparation.py::enqueue_scope",
+          "direct_consumers": [
+            "backend/app/runtime/memory/batch_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_skip_is_success_not_failed_or_repeated",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_provider_failure_never_falls_back_to_accept_all",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_saved_schedule_does_not_generate_or_trigger_past_time"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::logger",
+          "new": "backend/app/runtime/memory/batch_runtime.py::logger",
+          "direct_consumers": [
+            "backend/app/public_main.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_skip_is_success_not_failed_or_repeated",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_provider_failure_never_falls_back_to_accept_all",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_saved_schedule_does_not_generate_or_trigger_past_time"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::rebuild_briefs",
+          "new": "backend/app/domains/memory/service/batch_preparation.py::rebuild_briefs",
+          "direct_consumers": [
+            "backend/app/runtime/memory/batch_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_skip_is_success_not_failed_or_repeated",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_provider_failure_never_falls_back_to_accept_all",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_saved_schedule_does_not_generate_or_trigger_past_time"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
+          "new": "backend/app/domains/memory/service/reconciliation.py::reconcile_sources",
+          "direct_consumers": [
+            "backend/app/public_main.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_skip_is_success_not_failed_or_repeated",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_provider_failure_never_falls_back_to_accept_all",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_saved_schedule_does_not_generate_or_trigger_past_time"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::schedule_batches",
+          "new": "backend/app/domains/memory/service/batch_scheduling.py::schedule_batches",
+          "direct_consumers": [
+            "backend/app/public_main.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_skip_is_success_not_failed_or_repeated",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_provider_failure_never_falls_back_to_accept_all",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_saved_schedule_does_not_generate_or_trigger_past_time"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
+          "new": "backend/app/domains/memory/repository/reconciliation.py::open_missing_epochs",
+          "direct_consumers": [
+            "backend/app/domains/memory/service/reconciliation.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_safety.py::test_marker_failure_does_not_roll_back_successful_post"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
+          "new": "backend/app/domains/memory/repository/reconciliation.py::scan_enabled_epochs",
+          "direct_consumers": [
+            "backend/app/domains/memory/service/reconciliation.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_safety.py::test_marker_failure_does_not_roll_back_successful_post"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
+          "new": "backend/app/domains/memory/repository/reconciliation.py::get_epoch_setting",
+          "direct_consumers": [
+            "backend/app/domains/memory/service/reconciliation.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_safety.py::test_marker_failure_does_not_roll_back_successful_post"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
+          "new": "backend/app/domains/memory/repository/reconciliation.py::recover_catalog",
+          "direct_consumers": [
+            "backend/app/domains/memory/service/reconciliation.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_safety.py::test_marker_failure_does_not_roll_back_successful_post"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
+          "new": "backend/app/runtime/memory/source_catalogs.py::build_source_catalogs",
+          "direct_consumers": [
+            "backend/app/runtime/memory/batch_preparation.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_safety.py::test_marker_failure_does_not_roll_back_successful_post"
+          ]
+        }
+      ],
+      "remaining": "Final old aggregates/compatibility and sequential B4-B6 integration/capture remain."
     }
   }
 }

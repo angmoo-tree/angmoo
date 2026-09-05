@@ -1,7 +1,7 @@
 {
-  "edge_count": 2433,
-  "external_import_count": 2246,
-  "module_count": 723,
+  "edge_count": 2442,
+  "external_import_count": 2249,
+  "module_count": 726,
   "modules": [
     {
       "external_imports": [],
@@ -2452,6 +2452,7 @@
       "imports": [
         "app.domains.memory.contracts.source_evidence",
         "app.domains.memory.models.batch",
+        "app.domains.memory.models.items",
         "app.domains.memory.repository.batch",
         "app.domains.memory.repository.consolidation",
         "app.domains.memory.repository.items"
@@ -3148,6 +3149,19 @@
     },
     {
       "external_imports": [
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.memory.models.batch",
+        "app.domains.memory.models.items",
+        "app.domains.memory.repository.delivery"
+      ],
+      "module": "app.domains.memory.repository.reconciliation",
+      "path": "backend/app/domains/memory/repository/reconciliation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "fastapi",
         "sqlalchemy.orm"
@@ -3414,6 +3428,18 @@
       ],
       "module": "app.domains.memory.service.recall",
       "path": "backend/app/domains/memory/service/recall.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime"
+      ],
+      "imports": [
+        "app.domains.memory.contracts.batch_preparation",
+        "app.domains.memory.repository.reconciliation"
+      ],
+      "module": "app.domains.memory.service.reconciliation",
+      "path": "backend/app/domains/memory/service/reconciliation.py",
       "wildcard_imports": []
     },
     {
@@ -8460,6 +8486,7 @@
         "app.domains.memory.contracts.batch_preparation",
         "app.runtime.memory.composition",
         "app.runtime.memory.scope_queries",
+        "app.runtime.memory.source_catalogs",
         "app.runtime.memory.source_composition"
       ],
       "module": "app.runtime.memory.batch_preparation",
@@ -8490,6 +8517,7 @@
         "app.domains.memory.service.batch_scheduling",
         "app.domains.memory.service.batch_selection",
         "app.domains.memory.service.items",
+        "app.domains.memory.service.reconciliation",
         "app.runtime.memory.batch_preparation",
         "app.runtime.memory.composition",
         "app.runtime.memory.source_composition",
@@ -8586,6 +8614,17 @@
       ],
       "module": "app.runtime.memory.shutdown",
       "path": "backend/app/runtime/memory/shutdown.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.runtime.memory.source_catalogs",
+      "path": "backend/app/runtime/memory/source_catalogs.py",
       "wildcard_imports": []
     },
     {

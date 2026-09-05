@@ -1078,6 +1078,7 @@
       "app.domains.memory.contracts.scope",
       "app.domains.memory.contracts.scope_references",
       "app.domains.memory.contracts.source_evidence",
+      "app.domains.memory.contracts.source_queries",
       "app.domains.memory.dependencies",
       "app.domains.memory.exceptions",
       "app.domains.memory.models.batch",
@@ -1100,6 +1101,7 @@
       "app.domains.memory.repository.queue",
       "app.domains.memory.repository.recall",
       "app.domains.memory.repository.recall_records",
+      "app.domains.memory.repository.reconciliation",
       "app.domains.memory.router",
       "app.domains.memory.schemas",
       "app.domains.memory.schemas.batch",
@@ -1115,8 +1117,10 @@
       "app.domains.memory.service.management",
       "app.domains.memory.service.presentation",
       "app.domains.memory.service.recall",
+      "app.domains.memory.service.reconciliation",
       "app.domains.memory.service.retrieval_plan",
       "app.domains.memory.service.scope",
+      "app.domains.memory.service.source_evidence",
       "app.domains.routine_posts.client",
       "app.domains.routine_posts.constants",
       "app.domains.routine_posts.contracts",
@@ -1262,9 +1266,7 @@
       "app.domains.worlds.service.generation_context",
       "app.domains.worlds.service.reserved_roles",
       "app.domains.worlds.service.scheduling",
-      "app.domains.worlds.storage",
-      "app.domains.memory.contracts.source_queries",
-      "app.domains.memory.service.source_evidence"
+      "app.domains.worlds.storage"
     ],
     "entries": [
       "app.domains.characters.contracts",
@@ -1321,6 +1323,7 @@
       "app.domains.memory.contracts.scope",
       "app.domains.memory.contracts.scope_references",
       "app.domains.memory.contracts.source_evidence",
+      "app.domains.memory.contracts.source_queries",
       "app.domains.memory.schemas",
       "app.domains.memory.schemas.batch",
       "app.domains.memory.service",
@@ -1335,8 +1338,10 @@
       "app.domains.memory.service.management",
       "app.domains.memory.service.presentation",
       "app.domains.memory.service.recall",
+      "app.domains.memory.service.reconciliation",
       "app.domains.memory.service.retrieval_plan",
       "app.domains.memory.service.scope",
+      "app.domains.memory.service.source_evidence",
       "app.domains.routine_posts.contracts",
       "app.domains.routine_posts.contracts.context",
       "app.domains.routine_posts.contracts.generation",
@@ -1451,9 +1456,7 @@
       "app.domains.worlds.schemas",
       "app.domains.worlds.service",
       "app.domains.worlds.service.character_entry",
-      "app.domains.worlds.service.definition",
-      "app.domains.memory.contracts.source_queries",
-      "app.domains.memory.service.source_evidence"
+      "app.domains.worlds.service.definition"
     ],
     "bridges": [
       {

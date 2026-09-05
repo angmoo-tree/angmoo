@@ -3,6 +3,7 @@
 import asyncio
 from app.domains.memory.service.batch_preparation import deliver_candidates, rebuild_briefs
 from app.domains.memory.service.batch_scheduling import schedule_batches
+from app.domains.memory.service.reconciliation import reconcile_sources
 from app.runtime.memory.batch_preparation import build_preparation_dependencies
 from collections import defaultdict
 from datetime import UTC, date, datetime
@@ -60,177 +61,6 @@ from app.runtime.memory.source_composition import source_evidence_reader as SqlA
 logger = logging.getLogger(__name__)
 
 
-def reconcile_sources(session, *, now: datetime) -> None:
-    """Per-source anti-join retains holes; persisted scan order rotates scopes.
-
-    Only source timestamps inside a recorded ON epoch are recoverable. The
-    transactional normal path uses commit-time admission, not display time.
-    Upgrade opens an epoch now, never retroactively assumes old consent.
-    """
-    epochs = MemoryActivationEpoch.__table__
-    missing_epoch = ~exists(
-        select(epochs.c.id).where(
-            epochs.c.scope_setting_id == MemoryScopeSettingModel.id,
-            epochs.c.scope_version == MemoryScopeSettingModel.version,
-        )
-    )
-    for setting in session.scalars(
-        select(MemoryScopeSettingModel)
-        .where(MemoryScopeSettingModel.enabled.is_(True), missing_epoch)
-        .limit(32)
-    ):
-        sync_epoch(session.connection(), setting.id, now=now)
-    scanned = session.scalars(
-        select(MemoryActivationEpoch)
-        .join(
-            MemoryScopeSettingModel,
-            MemoryScopeSettingModel.id == MemoryActivationEpoch.scope_setting_id,
-        )
-        .where(MemoryScopeSettingModel.enabled.is_(True))
-        .order_by(
-            MemoryActivationEpoch.last_scanned_at.asc().nullsfirst(),
-            MemoryActivationEpoch.id,
-        )
-        .limit(16)
-    ).all()
-    tables = Base.metadata.tables
-    for epoch in scanned:
-        setting = session.get(MemoryScopeSettingModel, epoch.scope_setting_id)
-        subject = setting.subject_world_character_id
-        posts, likes, events = (
-            tables["posts"],
-            tables["post_likes"],
-            tables["social_events"],
-        )
-        messages, threads, observations = (
-            tables["message_messages"],
-            tables["message_threads"],
-            tables["world_character_feed_observations"],
-        )
-        catalogs = [
-            (
-                posts,
-                posts.c.created_at,
-                posts.c.id,
-                ("POST", "REPLY"),
-                [
-                    posts.c.world_id == setting.world_id,
-                    posts.c.author_world_character_id == subject,
-                ],
-                posts,
-            ),
-            (
-                likes,
-                likes.c.created_at,
-                likes.c.id,
-                ("REACTION",),
-                [
-                    likes.c.world_id == setting.world_id,
-                    likes.c.actor_world_character_id == subject,
-                ],
-                likes,
-            ),
-            (
-                events,
-                events.c.created_at,
-                events.c.id,
-                ("SOCIAL_EVENT",),
-                [
-                    events.c.world_id == setting.world_id,
-                    or_(
-                        events.c.actor_world_character_id == subject,
-                        events.c.target_world_character_id == subject,
-                    ),
-                    ~events.c.event_type.in_(
-                        (
-                            "post_published",
-                            "reply_created",
-                            "comment_created",
-                            "like_added",
-                        )
-                    ),
-                ],
-                events,
-            ),
-            (
-                messages.join(threads, threads.c.id == messages.c.thread_id),
-                messages.c.created_at,
-                messages.c.id,
-                ("CHAT_MESSAGE",),
-                [
-                    threads.c.world_id == setting.world_id,
-                    threads.c.responding_world_character_id == subject,
-                    messages.c.role == "assistant",
-                    messages.c.status == "ok",
-                    threads.c.world_scope_status == "resolved",
-                ],
-                messages,
-            ),
-            (
-                observations.join(posts, posts.c.id == observations.c.post_id),
-                observations.c.observed_at,
-                posts.c.id,
-                ("POST", "REPLY"),
-                [
-                    observations.c.world_id == setting.world_id,
-                    observations.c.observer_world_character_id == subject,
-                    observations.c.status == "observed",
-                ],
-                posts,
-            ),
-        ]
-        for source, captured, identity, kinds, predicates, content in catalogs:
-            delivery = MemorySourceDelivery.__table__
-            missing = ~exists(
-                select(delivery.c.sequence).where(
-                    delivery.c.scope_setting_id == setting.id,
-                    delivery.c.source_type.in_(kinds),
-                    delivery.c.source_id == identity.cast(delivery.c.source_id.type),
-                )
-            )
-            predicates += [captured >= epoch.opened_at, missing]
-            if epoch.closed_at is not None:
-                predicates.append(captured < epoch.closed_at)
-            rows = (
-                session.execute(
-                    select(content, captured.label("admitted_at"))
-                    .select_from(source)
-                    .where(*predicates)
-                    .order_by(captured, identity)
-                    .limit(32)
-                )
-                .mappings()
-                .all()
-            )
-            for row in rows:
-                kind = (
-                    ("REPLY" if row["reply_to_post_id"] else "POST")
-                    if kinds == ("POST", "REPLY")
-                    else kinds[0]
-                )
-                # Invalid sources also receive terminal entries via revalidation.
-                if (
-                    session.scalar(
-                        select(delivery.c.sequence).where(
-                            delivery.c.scope_setting_id == setting.id,
-                            delivery.c.source_type == kind,
-                            delivery.c.source_id == str(row["id"]),
-                        )
-                    )
-                    is None
-                ):
-                    session.execute(
-                        insert(delivery).values(
-                            scope_setting_id=setting.id,
-                            epoch_id=epoch.id,
-                            source_type=kind,
-                            source_id=str(row["id"]),
-                            state="pending",
-                            captured_at=row["admitted_at"],
-                        )
-                    )
-        epoch.last_scanned_at = now
-    session.commit()
 
 
 
@@ -269,7 +99,7 @@ class MemoryBatchRuntime:
     def prepare(self, *, shutdown: bool = False) -> None:
         with self.session_factory() as db:
             now = datetime.now(UTC)
-            reconcile_sources(db, now=now)
+            reconcile_sources(db, now=now, dependencies=build_preparation_dependencies())
             deliver_candidates(db, dependencies=build_preparation_dependencies())
             schedule_batches(db, now=now, shutdown=shutdown, dependencies=build_preparation_dependencies())
         try:
