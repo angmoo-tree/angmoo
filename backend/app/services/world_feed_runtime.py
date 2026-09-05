@@ -19,7 +19,7 @@ from app.domains.social.contracts.subjective_context import (
     ActionEmotionLabel,
     ActionSubjectiveContextV1,
 )
-from app.runtime.social.subjective_context import record_declared_subjective_context
+from app.runtime.social.subjective_composition import record_declared_subjective_context
 from app.services import community as community_service, world_feed_social_apply
 from app.services.direct_llm import (
     DirectLlmDeferred,

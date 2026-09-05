@@ -31,7 +31,7 @@ from app.domains.social.contracts.today_activity import (
     TodaySocialActivityKind, TodaySocialActivityRead, TodaySocialActivityRecord,
     TodaySocialCoverageStatus, TodaySocialSubjectiveRecord,
 )
-from app.runtime.social.subjective_context import subjective_context_digest
+from app.domains.social.service.subjective_context import subjective_context_digest
 
 
 MAX_TODAY_SOCIAL_RECORDS = 96

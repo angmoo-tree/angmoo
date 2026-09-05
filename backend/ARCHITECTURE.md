@@ -721,3 +721,6 @@ World 캐릭터의 게시물·대꾸·좋아요 프로필은 `social/service/wor
 
 
 수동 World 피드·스레드·게시·답글·캐릭터 Social 프로필의 HTTP 5개는 `social/router.py::manual_router`가 소유한다. 공통 API는 원래 위치에서 그 router를 포함한다. `dependencies.py`는 요청의 같은 Session을 사용하여 프로필 서비스, 수동 피드 조회 협력, source 쓰기 실행기를 얻고, `runtime/social/composition.py`가 실제 factory를 연결한다. 구성은 DB·provider IO를 하지 않으며 프런트엔드 요청 검증 뒤에 업무가 실행된다. SQLite 즉시 트랜잭션·재시도·commit은 기존 실행기에 남고 service의 판단을 복제하지 않는다. 트랜잭션 실행 계약은 `contracts/write_execution.py`에 있다.
+
+
+성공한 행동에서 명시한 동기·감정의 저장은 `social/service/subjective_context.py`가 소유한다. 실행/event/scope/evidence/source 일치, digest·중복 충돌과 검증된 row 저장 순서를 이곳에서 판단한다. `repository/subjective_context.py`는 Social source·기존 declaration을 조회하고 `runtime/social/subjective_references.py`는 같은 Session의 World/WC/Relationship 사실을 제공한다. 상위 행동 트랜잭션은 `subjective_composition.py`를 통해 연결하며 서비스는 원래 flush만 수행한다. 명시하지 않은 감정을 추론하거나 실패한 행동에 활성 declaration을 남기지 않는다.

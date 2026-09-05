@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2376,
-      "internal_edge_count": 2739,
+      "external_import_count": 2383,
+      "internal_edge_count": 2750,
       "legacy_import_exception_count": 0,
-      "module_count": 790,
+      "module_count": 794,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -724,6 +724,13 @@
             "path": "backend/app/domains/social/contracts/subjective_context.py"
           },
           {
+            "imports": [
+              "app.domains.social.contracts.source_writes"
+            ],
+            "module": "app.domains.social.contracts.subjective_persistence",
+            "path": "backend/app/domains/social/contracts/subjective_persistence.py"
+          },
+          {
             "imports": [],
             "module": "app.domains.social.contracts.timeline",
             "path": "backend/app/domains/social/contracts/timeline.py"
@@ -931,6 +938,14 @@
             ],
             "module": "app.domains.social.repository.reactions",
             "path": "backend/app/domains/social/repository/reactions.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.models.posts",
+              "app.domains.social.models.subjective_context"
+            ],
+            "module": "app.domains.social.repository.subjective_context",
+            "path": "backend/app/domains/social/repository/subjective_context.py"
           },
           {
             "imports": [
@@ -1303,6 +1318,18 @@
           },
           {
             "imports": [
+              "app.core.ids",
+              "app.domains.social.contracts.subjective_context",
+              "app.domains.social.contracts.subjective_persistence",
+              "app.domains.social.exceptions",
+              "app.domains.social.models.subjective_context",
+              "app.domains.social.repository.subjective_context"
+            ],
+            "module": "app.domains.social.service.subjective_context",
+            "path": "backend/app/domains/social/service/subjective_context.py"
+          },
+          {
+            "imports": [
               "app.domains.characters.service.profile",
               "app.domains.social.contracts.actors",
               "app.domains.social.contracts.timeline",
@@ -1562,7 +1589,7 @@
               "app.runtime.routines.joint_references",
               "app.runtime.social.observations",
               "app.runtime.social.sqlalchemy_inbox",
-              "app.runtime.social.subjective_context"
+              "app.runtime.social.subjective_composition"
             ],
             "module": "app.runtime.routine_posts.sqlalchemy_runtime",
             "path": "backend/app/runtime/routine_posts/sqlalchemy_runtime.py"
@@ -1747,9 +1774,9 @@
               "app.domains.social.models.feed",
               "app.domains.social.models.posts",
               "app.domains.social.models.subjective_context",
+              "app.domains.social.service.subjective_context",
               "app.domains.world_characters.models",
-              "app.domains.worlds.models",
-              "app.runtime.social.subjective_context"
+              "app.domains.worlds.models"
             ],
             "module": "app.runtime.social.sqlalchemy_today_activity",
             "path": "backend/app/runtime/social/sqlalchemy_today_activity.py"
@@ -1771,17 +1798,25 @@
           },
           {
             "imports": [
-              "app.core.ids",
-              "app.domains.relationships.models.social",
-              "app.domains.routines.models.resident",
               "app.domains.social.contracts.subjective_context",
-              "app.domains.social.models.posts",
+              "app.domains.social.contracts.subjective_persistence",
               "app.domains.social.models.subjective_context",
+              "app.domains.social.service.subjective_context",
+              "app.runtime.social.subjective_references"
+            ],
+            "module": "app.runtime.social.subjective_composition",
+            "path": "backend/app/runtime/social/subjective_composition.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.models.social",
+              "app.domains.social.contracts.source_writes",
+              "app.domains.social.contracts.subjective_persistence",
               "app.domains.world_characters.models",
               "app.domains.worlds.models"
             ],
-            "module": "app.runtime.social.subjective_context",
-            "path": "backend/app/runtime/social/subjective_context.py"
+            "module": "app.runtime.social.subjective_references",
+            "path": "backend/app/runtime/social/subjective_references.py"
           },
           {
             "imports": [

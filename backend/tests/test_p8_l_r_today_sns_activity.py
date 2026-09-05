@@ -35,10 +35,8 @@ from app.runtime.social.sqlalchemy_today_activity import (
     SqlAlchemyTodaySocialActivityReader,
     TodaySocialActivityReadError,
 )
-from app.runtime.social.subjective_context import (
-    SubjectiveContextPersistenceError,
-    record_declared_subjective_context,
-)
+from app.domains.social.exceptions import SubjectiveContextPersistenceError
+from app.runtime.social.subjective_composition import record_declared_subjective_context
 from app.runtime.chat.today_sns_activity import SqlAlchemyTodaySnsSnapshotValidator
 from app.domains.chat.ports.today_sns_activity import TodaySnsSnapshotChangedError
 

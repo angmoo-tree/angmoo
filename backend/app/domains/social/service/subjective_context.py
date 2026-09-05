@@ -1,38 +1,27 @@
-"""Runtime persistence adapter for declared SNS action subjective context."""
+"""Only a validated declaration attached to a successful canonical action is stored."""
 
 from __future__ import annotations
-
 from datetime import UTC, datetime
 from hashlib import sha256
 import json
-
-from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
-
-from app.domains.relationships.models.social import (
-    SocialEvent,
-    SocialEventEvidence,
-)
-from app.domains.social.models.subjective_context import (
-    SocialActionSubjectiveContext,
-)
-from app.domains.worlds.models import World
-from app.domains.routines.models.resident import AgentPublicActionExecution
-from app.domains.social.models.posts import Post
-from app.domains.world_characters.models import WorldCharacter
 from app.core.ids import uuid7_string
+from app.domains.social.models.subjective_context import SocialActionSubjectiveContext
 from app.domains.social.contracts.subjective_context import ActionSubjectiveContextV1
-
-
-class SubjectiveContextPersistenceError(ValueError):
-    """Stable fail-closed persistence error."""
+from app.domains.social.contracts.subjective_persistence import (
+    SubjectiveExecution,
+    SubjectiveEvent,
+    SubjectiveReferences,
+)
+from app.domains.social.exceptions import SubjectiveContextPersistenceError
+from app.domains.social.repository import subjective_context as repository
 
 
 def subjective_context_digest(
     *,
-    execution: AgentPublicActionExecution,
-    event: SocialEvent,
+    execution: SubjectiveExecution,
+    event: SubjectiveEvent,
     source_content_digest: str | None,
     context: ActionSubjectiveContextV1,
 ) -> str:
@@ -61,11 +50,12 @@ def subjective_context_digest(
 def record_declared_subjective_context(
     db: Session,
     *,
-    execution: AgentPublicActionExecution,
-    event: SocialEvent,
+    execution: SubjectiveExecution,
+    event: SubjectiveEvent,
     source_post_id: str | None,
     context: ActionSubjectiveContextV1 | None,
     captured_at: datetime,
+    references: SubjectiveReferences,
 ) -> SocialActionSubjectiveContext | None:
     """Attach one validated declaration to one already-successful action.
 
@@ -94,8 +84,8 @@ def record_declared_subjective_context(
         raise SubjectiveContextPersistenceError(
             "subjective_context_execution_event_mismatch"
         )
-    world = db.get(World, event.world_id)
-    actor = db.get(WorldCharacter, event.actor_world_character_id)
+    world = references.get_world(event.world_id)
+    actor = references.get_actor(event.actor_world_character_id)
     if (
         world is None
         or actor is None
@@ -103,15 +93,7 @@ def record_declared_subjective_context(
         or actor.status != "active"
     ):
         raise SubjectiveContextPersistenceError("subjective_context_scope_invalid")
-    evidence = db.scalar(
-        select(SocialEventEvidence)
-        .where(
-            SocialEventEvidence.social_event_id == event.id,
-            SocialEventEvidence.public_action_execution_id == execution.id,
-        )
-        .order_by(SocialEventEvidence.id)
-        .limit(1)
-    )
+    evidence = references.get_evidence(event_id=event.id, execution_id=execution.id)
     if evidence is None:
         raise SubjectiveContextPersistenceError(
             "subjective_context_event_evidence_missing"
@@ -127,7 +109,7 @@ def record_declared_subjective_context(
         )
     canonical_post_id = source_post_id or evidence_post_id
     if canonical_post_id is not None:
-        post = db.get(Post, canonical_post_id)
+        post = repository.get_source_post(db, canonical_post_id)
         if (
             post is None
             or post.world_id != world.id
@@ -144,12 +126,7 @@ def record_declared_subjective_context(
         source_content_digest=evidence.content_sha256,
         context=context,
     )
-    existing = db.scalar(
-        select(SocialActionSubjectiveContext).where(
-            SocialActionSubjectiveContext.public_action_execution_id
-            == execution.id
-        )
-    )
+    existing = repository.find_for_execution(db, execution.id)
     if existing is not None:
         if existing.source_digest != digest:
             raise SubjectiveContextPersistenceError(
@@ -182,10 +159,3 @@ def record_declared_subjective_context(
             "subjective_context_uniqueness_conflict"
         ) from exc
     return row
-
-
-__all__ = [
-    "SubjectiveContextPersistenceError",
-    "record_declared_subjective_context",
-    "subjective_context_digest",
-]

@@ -40,7 +40,7 @@ from app.domains.social.contracts.subjective_context import (
     ActionMotivationKind,
     ActionSubjectiveContextV1,
 )
-from app.runtime.social.subjective_context import record_declared_subjective_context
+from app.runtime.social.subjective_composition import record_declared_subjective_context
 from app.runtime.routine_posts.sqlalchemy_runtime import (
     routine_world_character_for_character,
     run_routine_post_runtime,

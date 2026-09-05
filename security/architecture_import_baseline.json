@@ -1,7 +1,7 @@
 {
-  "edge_count": 2739,
-  "external_import_count": 2376,
-  "module_count": 790,
+  "edge_count": 2750,
+  "external_import_count": 2383,
+  "module_count": 794,
   "modules": [
     {
       "external_imports": [],
@@ -5446,6 +5446,18 @@
     {
       "external_imports": [
         "datetime",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.social.contracts.source_writes"
+      ],
+      "module": "app.domains.social.contracts.subjective_persistence",
+      "path": "backend/app/domains/social/contracts/subjective_persistence.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
         "sqlalchemy.orm",
         "typing"
       ],
@@ -5797,6 +5809,19 @@
       ],
       "module": "app.domains.social.repository.reactions",
       "path": "backend/app/domains/social/repository/reactions.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.social.models.posts",
+        "app.domains.social.models.subjective_context"
+      ],
+      "module": "app.domains.social.repository.subjective_context",
+      "path": "backend/app/domains/social/repository/subjective_context.py",
       "wildcard_imports": []
     },
     {
@@ -6346,6 +6371,27 @@
       ],
       "module": "app.domains.social.service.source_writes",
       "path": "backend/app/domains/social/service/source_writes.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "hashlib",
+        "json",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.ids",
+        "app.domains.social.contracts.subjective_context",
+        "app.domains.social.contracts.subjective_persistence",
+        "app.domains.social.exceptions",
+        "app.domains.social.models.subjective_context",
+        "app.domains.social.repository.subjective_context"
+      ],
+      "module": "app.domains.social.service.subjective_context",
+      "path": "backend/app/domains/social/service/subjective_context.py",
       "wildcard_imports": []
     },
     {
@@ -10276,7 +10322,7 @@
         "app.runtime.routines.joint_references",
         "app.runtime.social.observations",
         "app.runtime.social.sqlalchemy_inbox",
-        "app.runtime.social.subjective_context"
+        "app.runtime.social.subjective_composition"
       ],
       "module": "app.runtime.routine_posts.sqlalchemy_runtime",
       "path": "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
@@ -10734,9 +10780,9 @@
         "app.domains.social.models.feed",
         "app.domains.social.models.posts",
         "app.domains.social.models.subjective_context",
+        "app.domains.social.service.subjective_context",
         "app.domains.world_characters.models",
-        "app.domains.worlds.models",
-        "app.runtime.social.subjective_context"
+        "app.domains.worlds.models"
       ],
       "module": "app.runtime.social.sqlalchemy_today_activity",
       "path": "backend/app/runtime/social/sqlalchemy_today_activity.py",
@@ -10765,26 +10811,34 @@
     },
     {
       "external_imports": [
-        "__future__",
         "datetime",
-        "hashlib",
-        "json",
-        "sqlalchemy",
-        "sqlalchemy.exc",
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.ids",
-        "app.domains.relationships.models.social",
-        "app.domains.routines.models.resident",
         "app.domains.social.contracts.subjective_context",
-        "app.domains.social.models.posts",
+        "app.domains.social.contracts.subjective_persistence",
         "app.domains.social.models.subjective_context",
+        "app.domains.social.service.subjective_context",
+        "app.runtime.social.subjective_references"
+      ],
+      "module": "app.runtime.social.subjective_composition",
+      "path": "backend/app/runtime/social/subjective_composition.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.relationships.models.social",
+        "app.domains.social.contracts.source_writes",
+        "app.domains.social.contracts.subjective_persistence",
         "app.domains.world_characters.models",
         "app.domains.worlds.models"
       ],
-      "module": "app.runtime.social.subjective_context",
-      "path": "backend/app/runtime/social/subjective_context.py",
+      "module": "app.runtime.social.subjective_references",
+      "path": "backend/app/runtime/social/subjective_references.py",
       "wildcard_imports": []
     },
     {
@@ -11516,7 +11570,7 @@
         "app.runtime.routine_posts.sqlalchemy_runtime",
         "app.runtime.social.image_generation",
         "app.runtime.social.observations",
-        "app.runtime.social.subjective_context",
+        "app.runtime.social.subjective_composition",
         "app.schemas",
         "app.services.agent_activity_policy",
         "app.services.character_lore",
@@ -11784,7 +11838,7 @@
         "app.runtime.activity_proposals.composition",
         "app.runtime.resident.context",
         "app.runtime.social.observations",
-        "app.runtime.social.subjective_context",
+        "app.runtime.social.subjective_composition",
         "app.schemas",
         "app.services.community",
         "app.services.direct_llm",

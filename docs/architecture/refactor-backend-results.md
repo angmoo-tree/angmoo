@@ -1206,3 +1206,12 @@ API/schema/ORM·기존 protected assertion·전체 split evidence PASS. 경계 *
 선언한 collaborator 주입만 확장하면 기존6본문/5decorator/request 인자 AST가 동일하며 기존 Social HTTP31과 transaction protocol3은 AST 그대로다. 신규 SQLite2node는 두 앱 factory의 요청 Session 동일성·constructor SQL0·manual route5 순서 및 외부 frontend 요청5의 업무 IO 전 차단을 검증했다. 최초 신규 fixture는 read가 Origin만 검사한다고 잘못 가정하여42PASS/1FAIL이었고, 원래 host 기반 읽기 규칙에 맞춰 Host도 외부 값으로 고정했다(제품 변경 없음). 최종 기존 HTTP/멱등성/provider0/프로필/Chat entry/cursor/history inventory 포함 **43 PASS / 14.49초**, 기존 Starlette 경고1. 전체 B5 및 source capture/Hosted/installer 종료는 후속 단계다.
 
 최종 Worlds 오류 계약을 기존 승인된 `worlds.service`의 같은 클래스 객체로 연결한 뒤 요청/HTTP/공통 오류 **25 PASS / 8.36초**를 확인했다. 구조 경계790 modules/2739 edges/legacy197, API·schema·ORM, 보호된4 test파일 assertion 및 전체 split evidence가 통과했고 L4/ER0 현재 inventory도 갱신했다.
+
+
+## AR-B5-C13 — 성공 행동의 명시적 동기·감정 저장 소유
+
+원래 subjective-context policy2/error1의 실제 소유를 Social service/exception으로 옮겼다. own SQL2는 Social repository, World/WC/Relationship 사실 query3은 runtime의 같은 Session collaborator에 두었다. readonly 계약은 원래 attached row를 그대로 사용하며 생성 IO·추가 commit/flush가 없다. 기존 Run/WorldFeed/RoutinePost 행동 호출과 Today digest 소비자의 비-import 본문은 전부 동일하고 옛 adapter 파일은 제거했다.
+
+확장 policy2/error1 AST, 실제 ownSQL2/foreignSQL3 AST가 모두 동일하다. 신규 SQLite2node는 attached row flush/commit0/caller rollback과 naive UTC normalization, declaration 없음 no-op 및 실패/다른 event 실행의 SQL 이전 거절을 검증한다. 최초 신규 마지막 비교에서 빈 SQLAlchemy IdentitySet을 Python set과 비교해215PASS/1FAIL이었으며 빈 크기0으로 올바르게 확인하도록 고쳤다(제품 변경 없음). 최종 Today·원래 SNS/Chat 근거·LangGraph·World Feed·RoutinePost 포함 **245 PASS / 1 기존 PostgreSQL skip / 23.56초**. 전체 B5 및 source capture/Hosted/installer 종료는 후속 단계다.
+
+API·schema·ORM, 보호된 기존 Today assertion, 전체 split evidence를 통과했다. 구조 경계794 modules/2750 edges/legacy197 및 L4/ER0 현재 inventory PASS. Frozen source/checkpoint/additions/승인 nodes는 변경하지 않았다.
