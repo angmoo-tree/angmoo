@@ -689,3 +689,18 @@ Source `8fa9871f81b8b2b534bdd77baae6243326e0a7c6`에서 실제 ON epoch 동기�
 Source `e9f881ae4fea642c6c7b4a754fcfe71ac2ba3b7c`에서 `deliver_candidates`, `enqueue_scope`, `rebuild_briefs`의 실제 실행 본문은 `service/batch_preparation.py`가 소유한다. 같은 Session의 저장/원본 근거 조회 네 협력을 명시적으로 받아 기존 candidate 검증, thread별 묶음, byte/candidate 예산, queue 등록, hot brief의 현재 근거 검증과 dirty flag/commit 흐름을 유지한다. Worker는 실행·중지와 실제 협력 연결을 맡는다. 테스트의 기존 직접 호출은 test 지원 모듈에서 실제 runtime builder를 partial로 연결하며 원래 assertion은 유지한다.
 
 세 실제 업무 본문은 명시 factory 주입만 역변환하면 원문 AST와 같다. 배치 runtime·안전·API·owner 제어 **41 passed / 2 warnings / 15.19초**, 경계 **654/2142/legacy256**, L4 parity97·ER0 76/87/24/44/7·current batch inventory PASS다. 새 역할 source와 test 지원 파일은 후속 선형 capture 대상으로 남기며 보호 기준을 재생성하지 않는다. 예약/종료 정책·외부 World join, source reconciliation·canonical recall·Daypart Memory의 실제 책임과 마지막 legacy bridge는 다음 범위다.
+
+
+### AR-B7-A8 Memory 예약·종료 trigger 업무
+
+Source `989cccadc2c36597311d6e112809a238304d6536`에서 consent·종료 cutoff 허가·날짜/시간대/예약·queue admission의 실제 흐름은 `service/batch_scheduling.py`가 소유한다. World timezone과 Memory 설정의 join은 같은 Session의 runtime query로 연결했다. 명시적 협력 추출을 다시 펼치면 전체 workflow와 join AST가 원문과 같고, 종료 허가 한 SQL·flush·조회 순서/limit·예외 시 scope 회전·commit과 provider-free 조건을 유지한다.
+
+집중 **41 passed / 2 warnings / 14.51초**, 경계655/2155/legacy256·L4 parity97·ER0·current batch inventory PASS다. 전체 guard는 기존 API/ORM/assertions/node 손실 없이 protected2201/current2206을 확인했고, 새 source15개/node5개가 아직 선형 introduction capture 전인 점을 보고했다. 최초 A8 split 기록의 불완전한 symbol/test 목록 두 오류는 실제 전체 소유 목록·정확 test node로 보완했으며 원래 `check_split_evidence`를 다시 실행하여 **0 errors**다. 검사 구현과 frozen 기준을 이 보완에서 바꾸지 않았다.
+
+### AR-B7-A9 Memory canonical recall 실제 조회·근거 재검증
+
+Source `9133d7a709f473755aeff149281f80c6794ceefc`에서 실제 item/evidence SQL과 canonical 회상/projection record hydration은 `repository/recall.py`·`recall_records.py`가 소유한다. Query 검증·허용 연산 선택·결과 상태는 기존 Memory recall 서비스가 맡고, 저장소는 모든 projection 후보의 최신 scope·enabled·valid-time·digest·visibility·observation·block을 다시 검증한다. 실제 Character/World membership/block join은 `runtime/memory/recall_queries.py`, 같은 Session source reader 연결은 `recall_composition.py`로 명시했다. 옛 runtime SQL 구현 파일은 제거했고 현재 소비자를 실제 factory에 연결했다.
+
+Read method 본문10개와 canonical helper10개, 외부 join·block SQL 본문은 명시된 factory/query 추출만 역변환하면 AST가 같다. 회상·retrieval planner·consolidation·inspector 집중 **44 passed / 1 warning / 19.10초**, 신규 SQLite 회귀2개를 포함한 canonical 묶음 **7 passed / 26.07초**다. 새 회귀는 Character summary의 caller flush가 같은 Session에서 보이고 observer에는 보이지 않는 점, 원본 Chat 내용을 그 Session 안에서 바꾸면 저장 digest와 달라져 문서가 제외되고 Session 종료 후 두 변경 모두 rollback되는 점을 확인한다. 경계659/2170/legacy256·L4 parity97·ER0 및 current/frozen-chained Memory inventory PASS다.
+
+초기 파일 분류에서 ORM 기반 record hydration을 pure policies로 둔 오류는 경계 검사에서 발견하여 실제 저장 snapshot을 다루는 repository에 배치했다. 일반 pure 정책의 framework 금지 규칙과 외부 entry 허용을 완화하지 않았다. 전체 source/node 계보 capture·B4~B6 합류·최종 B7/백엔드 통합은 별도 진행 중이다.
