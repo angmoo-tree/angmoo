@@ -13,7 +13,7 @@ from app.domains.world_packages.contracts.seed import (
     WorldPackageDestinationSeedResult,
     resolve_world_package_import_replay,
 )
-from app.domains.world_packages.infrastructure.sqlalchemy_destination_seed import (
+from app.runtime.world_packages.seed import (
     SqlAlchemyWorldPackageDestinationSeed,
 )
 from app.domains.world_packages.service.registry import (

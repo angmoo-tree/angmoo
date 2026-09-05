@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 LOCAL_SMOKE = REPO_ROOT / ".github" / "workflows" / "local-smoke.yml"
 SECURITY = REPO_ROOT / ".github" / "workflows" / "security.yml"
 WINDOWS_HOST = (
@@ -37,10 +37,10 @@ WORLD_PACKAGE_SUITES = (
     "tests/world_packages/test_v1_contract.py",
     "tests/world_packages/test_export.py",
     "tests/world_packages/test_preview.py",
-    "tests/test_l3_5_world_package_import_commit.py",
-    "tests/test_l3_5_world_package_ui_contract.py",
-    "tests/test_l3_5_world_package_closeout.py",
-    "tests/test_l3_5_world_package_closeout_contract.py",
+    "tests/world_packages/test_import_commit.py",
+    "tests/world_packages/test_ui_contract.py",
+    "tests/world_packages/test_closeout.py",
+    "tests/world_packages/test_closeout_contract.py",
 )
 
 
@@ -52,8 +52,8 @@ def test_required_linux_workflows_pin_the_closeout_suite() -> None:
     for test_file in (
         "tests/world_packages/test_v1_contract.py",
         "tests/world_packages/test_preview.py",
-        "tests/test_l3_5_world_package_closeout.py",
-        "tests/test_l3_5_world_package_closeout_contract.py",
+        "tests/world_packages/test_closeout.py",
+        "tests/world_packages/test_closeout_contract.py",
     ):
         assert test_file in security
 
@@ -61,8 +61,8 @@ def test_required_linux_workflows_pin_the_closeout_suite() -> None:
 def test_windows_product_paths_pin_file_ux_and_closeout_contracts() -> None:
     for workflow_path in (WINDOWS_HOST, WINDOWS_INSTALLER):
         workflow = workflow_path.read_text(encoding="utf-8")
-        assert "tests\\test_l3_5_world_package_ui_contract.py" in workflow
-        assert "tests\\test_l3_5_world_package_closeout_contract.py" in workflow
+        assert "tests\\world_packages\\test_ui_contract.py" in workflow
+        assert "tests\\world_packages\\test_closeout_contract.py" in workflow
 
 
 def test_core_ci_runs_the_real_world_package_proxy_smoke() -> None:

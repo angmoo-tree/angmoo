@@ -20,7 +20,7 @@ from sqlalchemy.pool import StaticPool
 from app import models
 from app.domains.identity.dependencies import get_current_user
 from app.core.db import Base, get_db
-from app.domains.world_packages.api.routes import router
+from app.domains.world_packages.router import router
 from app.domains.world_packages.service.staging import (
     StageWorldPackage,
 )
@@ -64,7 +64,7 @@ from app.domains.world_packages.models import (
     WorldPackageImport,
     WorldPackageSource,
 )
-from app.domains.world_packages.infrastructure.sqlalchemy_preview_probe import (
+from app.runtime.world_packages.preview_probe import (
     SqlAlchemyWorldPackagePreviewProbe,
 )
 from app.domains.world_packages.archive.export import (
@@ -703,6 +703,8 @@ def test_stage_api_is_owner_only_and_changes_no_world_or_import_rows(
         db.commit()
 
     app = FastAPI()
+    from app.runtime.world_packages.composition import configure_world_package_runtime
+    configure_world_package_runtime(app)
     app.include_router(router, prefix="/api/v1")
     media_root = tmp_path / "media"
     media_root.mkdir()

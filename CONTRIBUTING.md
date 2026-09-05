@@ -114,9 +114,9 @@ docker compose -f compose.yml -f compose.dev.yml exec -T backend `
   tests/world_packages/test_v1_contract.py `
   tests/world_packages/test_export.py `
   tests/world_packages/test_preview.py `
-  tests/test_l3_5_world_package_import_commit.py `
-  tests/test_l3_5_world_package_closeout.py `
-  tests/test_l3_5_world_package_closeout_contract.py
+  tests/world_packages/test_import_commit.py `
+  tests/world_packages/test_closeout.py `
+  tests/world_packages/test_closeout_contract.py
 ```
 
 Never upload a real `.angmoo-world` to a public Issue, pull request, Action

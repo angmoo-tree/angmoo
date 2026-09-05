@@ -26,7 +26,7 @@ from app.domains.device_home.repository import (
 )
 from app.domains.runtime.public import SearchIndexHit
 from app.domains.social.public import SocialSearchState
-from app.domains.world_packages.api.routes import router
+from app.domains.world_packages.router import router
 from app.domains.world_packages.schemas.content import (
     AssetIndexDocument,
     CharactersDocument,
@@ -48,13 +48,13 @@ from app.domains.world_packages.contracts.preview import (
     WorldPackageNormalizedAsset,
     WorldPackageNormalizedAssetPayload,
 )
-from app.domains.world_packages.infrastructure.filesystem_import_media import (
+from app.domains.world_packages.storage.import_media import (
     FilesystemWorldPackageImportMedia,
 )
-from app.domains.world_packages.infrastructure.sqlalchemy_import_commit import (
+from app.runtime.world_packages.import_commit import (
     SqlAlchemyWorldPackageImportCommitter,
 )
-from app.domains.world_packages.infrastructure.sqlalchemy_destination_seed import (
+from app.runtime.world_packages.seed import (
     SqlAlchemyWorldPackageDestinationSeed,
 )
 from app.domains.world_packages.archive.export import (
@@ -78,7 +78,7 @@ from app.services.world_feed_runtime import run_world_keyword_feed
 
 
 FIXTURE_ROOT = (
-    Path(__file__).parent / "fixtures" / "world_packages" / "v1" / "valid"
+    Path(__file__).parents[1] / "fixtures" / "world_packages" / "v1" / "valid"
 )
 FRONTEND_HEADERS = {"Origin": "http://127.0.0.1:3000"}
 OWNER_ID = "package-import-owner"
@@ -342,6 +342,8 @@ def import_runtime(tmp_path: Path):
         media=media,
     )
     app = FastAPI()
+    from app.runtime.world_packages.composition import configure_world_package_runtime
+    configure_world_package_runtime(app)
     app.include_router(router, prefix="/api/v1")
     app.state.runtime_settings = SimpleNamespace(
         media_root_path=media_root,

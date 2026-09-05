@@ -2,10 +2,16 @@
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator, Callable, Iterator
-from datetime import datetime, timezone
-from pathlib import Path
-import threading
+from app.domains.world_packages.dependencies import _artifacts, _staging, _exporter, _stager, _delivery_session_factory, _import_committer
+from app.domains.world_packages.service.delivery import (
+    _stream_pending_native_delivery,
+    _stream_and_record_delivery,
+    preview_export,
+    prepare_export,
+    acknowledge_export_delivery,
+)
+
+from collections.abc import AsyncIterator
 from typing import Annotated, Literal
 from urllib.parse import quote
 
@@ -23,7 +29,7 @@ from fastapi import (
 from fastapi.responses import StreamingResponse
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.exc import OperationalError
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session
 
 from app.api.identity_dependencies import get_current_user
 from app.api.identity_dependencies import browser_session
@@ -38,51 +44,14 @@ from app.domains.world_packages.schemas.http import (
     WorldPackagePreparedExportRead,
     WorldPackagePreparedImportPreviewRead,
 )
-from app.domains.world_packages.service.export import (
-    ExportWorldPackage,
-)
-from app.domains.world_packages.service.staging import (
-    StageWorldPackage,
-)
-from app.domains.world_packages.application.commit_world_package import (
+from app.domains.world_packages.service.import_approval import (
     CommitWorldPackageImport,
 )
 from app.domains.world_packages.exceptions import (
     WorldPackageContractError,
     WorldPackageReasonCode,
 )
-from app.domains.world_packages.contracts.export import (
-    WorldPackageExportRegistryRecord,
-)
 from app.domains.world_packages.policies.archive import WorldPackagePolicy
-from app.domains.world_packages.storage.exports import (
-    ExportArtifact,
-    FilesystemWorldPackageExportArtifacts,
-)
-from app.domains.world_packages.storage.staging import (
-    FilesystemWorldPackageStaging,
-)
-from app.domains.world_packages.infrastructure.filesystem_import_media import (
-    FilesystemWorldPackageImportMedia,
-)
-from app.domains.world_packages.storage.export_assets import (
-    ManagedMediaPackageAssets,
-)
-from app.domains.world_packages.service.registry import (
-    SqlAlchemyWorldPackageRegistry,
-)
-from app.domains.world_packages.infrastructure.sqlalchemy_preview_probe import (
-    SqlAlchemyWorldPackagePreviewProbe,
-)
-from app.domains.world_packages.infrastructure.sqlalchemy_source_snapshot import (
-    SqlAlchemyWorldPackageSourceSnapshot,
-)
-from app.domains.world_packages.infrastructure.sqlalchemy_import_commit import (
-    SqlAlchemyWorldPackageImportCommitter,
-)
-from app.domains.world_packages.archive.export import (
-    DeterministicWorldPackageZipArchive,
-)
 from app.domains.world_packages.archive.validation import (
     ZipWorldPackageImportValidator,
 )
@@ -101,112 +70,6 @@ PreviewToken = Annotated[
     str,
     Header(alias="X-World-Package-Preview-Token", min_length=32, max_length=128),
 ]
-_STORE_LOCK = threading.Lock()
-
-
-def _paths(request: Request) -> tuple[Path, Path, str]:
-    runtime_config = getattr(request.app.state, "runtime_config", None)
-    runtime_settings = request.app.state.runtime_settings
-    if runtime_config is not None:
-        return (
-            runtime_config.data_paths.media,
-            runtime_config.data_paths.runtime,
-            runtime_settings.media_url_path,
-        )
-    media_root = runtime_settings.media_root_path
-    return media_root, media_root.parent / "runtime", runtime_settings.media_url_path
-
-
-def _artifacts(request: Request) -> FilesystemWorldPackageExportArtifacts:
-    existing = getattr(
-        request.app.state, "world_package_export_artifacts", None
-    )
-    if existing is not None:
-        return existing
-    with _STORE_LOCK:
-        existing = getattr(
-            request.app.state, "world_package_export_artifacts", None
-        )
-        if existing is None:
-            _media_root, runtime_root, _media_url_path = _paths(request)
-            existing = FilesystemWorldPackageExportArtifacts(runtime_root)
-            request.app.state.world_package_export_artifacts = existing
-    return existing
-
-
-def _staging(request: Request) -> FilesystemWorldPackageStaging:
-    existing = getattr(request.app.state, "world_package_import_staging", None)
-    if existing is not None:
-        return existing
-    with _STORE_LOCK:
-        existing = getattr(
-            request.app.state,
-            "world_package_import_staging",
-            None,
-        )
-        if existing is None:
-            _media_root, runtime_root, _media_url_path = _paths(request)
-            existing = FilesystemWorldPackageStaging(runtime_root)
-            request.app.state.world_package_import_staging = existing
-    return existing
-
-
-def _exporter(request: Request, db: Session) -> ExportWorldPackage:
-    media_root, _runtime_root, media_url_path = _paths(request)
-    return ExportWorldPackage(
-        source=SqlAlchemyWorldPackageSourceSnapshot(db),
-        assets=ManagedMediaPackageAssets(
-            media_root=media_root,
-            media_url_path=media_url_path,
-        ),
-        registry=SqlAlchemyWorldPackageRegistry(db),
-        archive=DeterministicWorldPackageZipArchive(),
-    )
-
-
-def _stager(request: Request, db: Session) -> StageWorldPackage:
-    staging = _staging(request)
-    return StageWorldPackage(
-        staging=staging,
-        validator=ZipWorldPackageImportValidator(staging),
-        preview_probe=SqlAlchemyWorldPackagePreviewProbe(db),
-    )
-
-
-def _delivery_session_factory(
-    request: Request, db: Session
-) -> Callable[[], Session]:
-    composition = getattr(request.app.state, "runtime_composition", None)
-    if composition is not None:
-        return composition.session_factory
-    return sessionmaker(bind=db.get_bind(), expire_on_commit=False)
-
-
-def _import_committer(
-    request: Request, db: Session
-) -> SqlAlchemyWorldPackageImportCommitter:
-    existing = getattr(
-        request.app.state, "world_package_import_committer", None
-    )
-    if existing is not None:
-        return existing
-    with _STORE_LOCK:
-        existing = getattr(
-            request.app.state, "world_package_import_committer", None
-        )
-        if existing is None:
-            media_root, runtime_root, media_url_path = _paths(request)
-            existing = SqlAlchemyWorldPackageImportCommitter(
-                _delivery_session_factory(request, db),
-                media=FilesystemWorldPackageImportMedia(
-                    media_root=media_root,
-                    runtime_root=runtime_root,
-                    media_url_path=media_url_path,
-                ),
-            )
-            existing.recover_media()
-            request.app.state.world_package_import_committer = existing
-    return existing
 
 
 def _raise_contract_error(exc: WorldPackageContractError) -> None:
@@ -378,16 +241,16 @@ def preview_world_package_export(
 ) -> WorldPackageExportPreviewRead:
     browser_session.require_local_frontend_request(request, mutation=True)
     try:
-        preview = _exporter(request, db).preview(
+        preview = preview_export(
+            db=db,
+            exporter=_exporter(request, db),
             source_world_id=world_id,
             local_owner_id=current_user.id,
             license=data.domain_license(),
             license_text=data.license_text,
         )
-        db.commit()
         return WorldPackageExportPreviewRead.from_domain(preview)
     except WorldPackageContractError as exc:
-        db.rollback()
         _raise_contract_error(exc)
         raise AssertionError("unreachable")
 
@@ -415,42 +278,20 @@ def prepare_world_package_export(
     operation_id = uuid7_string()
     artifact_store = _artifacts(request)
     try:
-        preview, archive = _exporter(request, db).build(
+        preview, archive, artifact, token, replayed = prepare_export(
+            db=db,
+            exporter=_exporter(request, db),
+            artifact_store=artifact_store,
+            operation_id=operation_id,
             source_world_id=world_id,
             local_owner_id=current_user.id,
             license=data.domain_license(),
             license_text=data.license_text,
-        )
-        artifact, token, replayed = artifact_store.create(
-            operation_id=operation_id,
-            owner_id=current_user.id,
-            filename=preview.recommended_filename,
-            content=archive.content,
-            package_id=preview.package_id,
-            package_version=preview.package_version,
-            source_world_id=world_id,
-            seed_digest=preview.seed_digest,
-            manifest_digest=archive.manifest_digest,
-            license_expression=preview.license.expression,
-            request_digest=archive.archive_digest,
             idempotency_key=normalized_key,
         )
-        db.commit()
     except WorldPackageContractError as exc:
-        db.rollback()
         _raise_contract_error(exc)
         raise AssertionError("unreachable")
-    except IntegrityError as exc:
-        db.rollback()
-        artifact_store.discard(operation_id)
-        _raise_contract_error(
-            WorldPackageContractError(WorldPackageReasonCode.COMMIT_CONFLICT)
-        )
-        raise AssertionError("unreachable") from exc
-    except BaseException:
-        db.rollback()
-        artifact_store.discard(operation_id)
-        raise
 
     return WorldPackagePreparedExportRead(
         operation_id=artifact.operation_id,
@@ -533,33 +374,16 @@ def acknowledge_world_package_export_delivery(
     browser_session.require_local_frontend_request(request, mutation=True)
     artifact_store = _artifacts(request)
     try:
-        artifact = artifact_store.claim(
+        acknowledge_export_delivery(
+            db=db,
+            artifact_store=artifact_store,
             operation_id=operation_id,
             owner_id=current_user.id,
             token=download_token,
         )
-        SqlAlchemyWorldPackageRegistry(db).record_export_delivery(
-            WorldPackageExportRegistryRecord(
-                export_id=artifact.operation_id,
-                package_id=artifact.package_id,
-                package_version=artifact.package_version,
-                source_world_id=artifact.source_world_id,
-                seed_digest=artifact.seed_digest,
-                manifest_digest=artifact.manifest_digest,
-                license_expression=artifact.license_expression,
-                delivery_mode="tauri_save_as",
-                delivered_at=datetime.now(timezone.utc),
-            )
-        )
-        db.commit()
     except WorldPackageContractError as exc:
-        db.rollback()
         _raise_contract_error(exc)
         raise AssertionError("unreachable")
-    except BaseException:
-        db.rollback()
-        raise
-    artifact_store.discard(operation_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -588,44 +412,6 @@ def discard_world_package_export(
         raise AssertionError("unreachable")
     artifact_store.discard(operation_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-
-def _stream_pending_native_delivery(*, artifact: ExportArtifact) -> Iterator[bytes]:
-    """Stream bytes without consuming the version or removing the artifact."""
-
-    with artifact.path.open("rb") as source:
-        while chunk := source.read(64 * 1024):
-            yield chunk
-
-
-def _stream_and_record_delivery(
-    *,
-    artifact: ExportArtifact,
-    artifact_store: FilesystemWorldPackageExportArtifacts,
-    session_factory: Callable[[], Session],
-) -> Iterator[bytes]:
-    try:
-        with artifact.path.open("rb") as source:
-            while chunk := source.read(64 * 1024):
-                yield chunk
-        with session_factory() as delivery_db:
-            registry = SqlAlchemyWorldPackageRegistry(delivery_db)
-            registry.record_export_delivery(
-                WorldPackageExportRegistryRecord(
-                    export_id=artifact.operation_id,
-                    package_id=artifact.package_id,
-                    package_version=artifact.package_version,
-                    source_world_id=artifact.source_world_id,
-                    seed_digest=artifact.seed_digest,
-                    manifest_digest=artifact.manifest_digest,
-                    license_expression=artifact.license_expression,
-                    delivery_mode="browser_download",
-                    delivered_at=datetime.now(timezone.utc),
-                )
-            )
-            delivery_db.commit()
-    finally:
-        artifact_store.discard(artifact.operation_id)
 
 
 __all__ = ["router"]

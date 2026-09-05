@@ -201,7 +201,24 @@
     "backend/app/domains/world_packages/ports/registry.py": "backend/app/domains/world_packages/contracts/interfaces.py",
     "backend/app/domains/world_packages/ports/source_snapshot.py": "backend/app/domains/world_packages/contracts/interfaces.py",
     "backend/app/domains/world_packages/ports/unit_of_work.py": "backend/app/domains/world_packages/contracts/interfaces.py",
-    "backend/app/domains/world_packages/ports/__init__.py": "backend/app/domains/world_packages/contracts/interfaces.py"
+    "backend/app/domains/world_packages/ports/__init__.py": "backend/app/domains/world_packages/contracts/interfaces.py",
+    "backend/app/domains/world_packages/api/routes.py": "backend/app/domains/world_packages/router.py",
+    "backend/app/domains/world_packages/application/commit_world_package.py": "backend/app/domains/world_packages/service/import_approval.py",
+    "backend/app/domains/world_packages/infrastructure/filesystem_import_media.py": "backend/app/domains/world_packages/storage/import_media.py",
+    "backend/app/domains/world_packages/infrastructure/sqlalchemy_destination_seed.py": "backend/app/runtime/world_packages/seed.py",
+    "backend/app/domains/world_packages/infrastructure/sqlalchemy_import_commit.py": "backend/app/runtime/world_packages/import_commit.py",
+    "backend/app/domains/world_packages/infrastructure/sqlalchemy_unit_of_work.py": "backend/app/runtime/world_packages/seed_uow.py",
+    "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py": "backend/app/runtime/world_packages/export_source.py",
+    "backend/app/domains/world_packages/infrastructure/sqlalchemy_preview_probe.py": "backend/app/runtime/world_packages/preview_probe.py",
+    "backend/app/domains/world_packages/public.py": "backend/app/domains/world_packages/contracts/__init__.py",
+    "backend/app/domains/world_packages/api/__init__.py": "backend/app/domains/world_packages/__init__.py",
+    "backend/app/domains/world_packages/application/__init__.py": "backend/app/domains/world_packages/__init__.py",
+    "backend/app/domains/world_packages/domain/__init__.py": "backend/app/domains/world_packages/__init__.py",
+    "backend/app/domains/world_packages/infrastructure/__init__.py": "backend/app/domains/world_packages/models.py",
+    "backend/tests/test_l3_5_world_package_import_commit.py": "backend/tests/world_packages/test_import_commit.py",
+    "backend/tests/test_l3_5_world_package_closeout.py": "backend/tests/world_packages/test_closeout.py",
+    "backend/tests/test_l3_5_world_package_closeout_contract.py": "backend/tests/world_packages/test_closeout_contract.py",
+    "backend/tests/test_l3_5_world_package_ui_contract.py": "backend/tests/world_packages/test_ui_contract.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -441,7 +458,27 @@
     "tests/test_l3_5_world_package_preview.py::test_unknown_license_contract_and_reader_version_fail_closed[license-value0-world_package_license_missing]": "tests/world_packages/test_preview.py::test_unknown_license_contract_and_reader_version_fail_closed[license-value0-world_package_license_missing]",
     "tests/test_l3_5_world_package_preview.py::test_unknown_license_contract_and_reader_version_fail_closed[reader-99.0.0-1-world_package_app_version_unsupported]": "tests/world_packages/test_preview.py::test_unknown_license_contract_and_reader_version_fail_closed[reader-99.0.0-1-world_package_app_version_unsupported]",
     "tests/test_l3_5_world_package_preview.py::test_valid_package_reaches_preview_ready_without_canonical_writes": "tests/world_packages/test_preview.py::test_valid_package_reaches_preview_ready_without_canonical_writes",
-    "tests/test_l3_5_world_package_preview.py::test_webp_preview_is_decoded_bounded_and_metadata_stripped": "tests/world_packages/test_preview.py::test_webp_preview_is_decoded_bounded_and_metadata_stripped"
+    "tests/test_l3_5_world_package_preview.py::test_webp_preview_is_decoded_bounded_and_metadata_stripped": "tests/world_packages/test_preview.py::test_webp_preview_is_decoded_bounded_and_metadata_stripped",
+    "tests/test_l3_5_world_package_closeout.py::test_exclusion_scanner_rejects_private_value_and_forbidden_field": "tests/world_packages/test_closeout.py::test_exclusion_scanner_rejects_private_value_and_forbidden_field",
+    "tests/test_l3_5_world_package_closeout.py::test_two_data_root_round_trip_excludes_private_runtime_and_evolves_independently": "tests/world_packages/test_closeout.py::test_two_data_root_round_trip_excludes_private_runtime_and_evolves_independently",
+    "tests/test_l3_5_world_package_closeout_contract.py::test_closeout_docs_keep_private_data_and_release_gates_separate": "tests/world_packages/test_closeout_contract.py::test_closeout_docs_keep_private_data_and_release_gates_separate",
+    "tests/test_l3_5_world_package_closeout_contract.py::test_core_ci_runs_the_real_world_package_proxy_smoke": "tests/world_packages/test_closeout_contract.py::test_core_ci_runs_the_real_world_package_proxy_smoke",
+    "tests/test_l3_5_world_package_closeout_contract.py::test_exclusion_scanner_is_allow_listed_and_redacts_private_values": "tests/world_packages/test_closeout_contract.py::test_exclusion_scanner_is_allow_listed_and_redacts_private_values",
+    "tests/test_l3_5_world_package_closeout_contract.py::test_required_linux_workflows_pin_the_closeout_suite": "tests/world_packages/test_closeout_contract.py::test_required_linux_workflows_pin_the_closeout_suite",
+    "tests/test_l3_5_world_package_closeout_contract.py::test_windows_product_paths_pin_file_ux_and_closeout_contracts": "tests/world_packages/test_closeout_contract.py::test_windows_product_paths_pin_file_ux_and_closeout_contracts",
+    "tests/test_l3_5_world_package_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media": "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media",
+    "tests/test_l3_5_world_package_import_commit.py::test_commit_is_atomic_registers_one_home_world_and_replays_without_writes": "tests/world_packages/test_import_commit.py::test_commit_is_atomic_registers_one_home_world_and_replays_without_writes",
+    "tests/test_l3_5_world_package_import_commit.py::test_commit_maps_portable_no_role_to_canonical_reserved_role": "tests/world_packages/test_import_commit.py::test_commit_maps_portable_no_role_to_canonical_reserved_role",
+    "tests/test_l3_5_world_package_import_commit.py::test_commit_revalidates_owner_digest_and_collision_preview": "tests/world_packages/test_import_commit.py::test_commit_revalidates_owner_digest_and_collision_preview",
+    "tests/test_l3_5_world_package_import_commit.py::test_concurrent_idempotency_commits_once": "tests/world_packages/test_import_commit.py::test_concurrent_idempotency_commits_once",
+    "tests/test_l3_5_world_package_import_commit.py::test_duplicate_requires_explicit_independent_copy": "tests/world_packages/test_import_commit.py::test_duplicate_requires_explicit_independent_copy",
+    "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime": "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+    "tests/test_l3_5_world_package_import_commit.py::test_media_journal_recovery_keeps_only_canonical_commits": "tests/world_packages/test_import_commit.py::test_media_journal_recovery_keeps_only_canonical_commits",
+    "tests/test_l3_5_world_package_import_commit.py::test_media_promotion_failure_rolls_back_all_rows_and_is_retryable": "tests/world_packages/test_import_commit.py::test_media_promotion_failure_rolls_back_all_rows_and_is_retryable",
+    "tests/test_l3_5_world_package_import_commit.py::test_seed_failure_after_partial_flush_preserves_existing_data": "tests/world_packages/test_import_commit.py::test_seed_failure_after_partial_flush_preserves_existing_data",
+    "tests/test_l3_5_world_package_ui_contract.py::test_export_ui_has_preview_browser_delivery_and_opaque_native_save_as": "tests/world_packages/test_ui_contract.py::test_export_ui_has_preview_browser_delivery_and_opaque_native_save_as",
+    "tests/test_l3_5_world_package_ui_contract.py::test_import_ui_uses_file_selection_digest_approval_and_atomic_navigation": "tests/world_packages/test_ui_contract.py::test_import_ui_uses_file_selection_digest_approval_and_atomic_navigation",
+    "tests/test_l3_5_world_package_ui_contract.py::test_world_package_import_is_available_from_home_studio_and_static_router": "tests/world_packages/test_ui_contract.py::test_world_package_import_is_available_from_home_studio_and_static_router"
   },
   "details": {
     "AR-B1": {
@@ -3587,7 +3624,7 @@
       }
     },
     "AR-B3-package-foundation": {
-      "status": "SOURCE READY — first slice only; export/staging/import runtime migration continues",
+      "status": "SOURCE IMPLEMENTED — final Package role tree; focused 190 passed, integration/Hosted and introduction metadata pending",
       "owners": {
         "schemas/": "HTTP and portable v1 schemas; schemas/v1 JSON resources unchanged",
         "contracts/": "immutable export/preview/seed request and result records",
@@ -3612,7 +3649,7 @@
           "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_registry.py::SqlAlchemyWorldPackageRegistry",
           "new": "backend/app/domains/world_packages/service/registry.py::SqlAlchemyWorldPackageRegistry",
           "direct_consumers": [
-            "backend/app/domains/world_packages/api/routes.py"
+            "backend/app/domains/world_packages/router.py"
           ],
           "test_nodes": [
             "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
@@ -3645,7 +3682,7 @@
           "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_registry.py::__all__",
           "new": "backend/app/domains/world_packages/service/registry.py::__all__",
           "direct_consumers": [
-            "backend/app/domains/world_packages/api/routes.py"
+            "backend/app/domains/world_packages/router.py"
           ],
           "test_nodes": [
             "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
@@ -3660,14 +3697,14 @@
       }
     },
     "AR-B3-package-processing": {
-      "status": "SOURCE READY — processing slice; router/import composition remains",
+      "status": "SOURCE IMPLEMENTED — final Package role tree; focused 190 passed, integration/Hosted and introduction metadata pending",
       "split_files": {
         "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py": [
-          "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py",
+          "backend/app/runtime/world_packages/export_source.py",
           "backend/app/domains/world_packages/service/export_projection.py"
         ],
         "backend/app/domains/world_packages/infrastructure/sqlalchemy_preview_probe.py": [
-          "backend/app/domains/world_packages/infrastructure/sqlalchemy_preview_probe.py",
+          "backend/app/runtime/world_packages/preview_probe.py",
           "backend/app/domains/world_packages/service/preview.py"
         ]
       },
@@ -3676,7 +3713,7 @@
           "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py::_REF_SEPARATORS",
           "new": "backend/app/domains/world_packages/service/export_projection.py::_REF_SEPARATORS",
           "direct_consumers": [
-            "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py"
+            "backend/app/runtime/world_packages/export_source.py"
           ],
           "test_nodes": [
             "tests/world_packages/test_export.py::test_sqlalchemy_snapshot_filters_owner_controlled_and_runtime_state"
@@ -3686,7 +3723,7 @@
           "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py::_portable_key",
           "new": "backend/app/domains/world_packages/service/export_projection.py::_portable_key",
           "direct_consumers": [
-            "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py"
+            "backend/app/runtime/world_packages/export_source.py"
           ],
           "test_nodes": [
             "tests/world_packages/test_export.py::test_sqlalchemy_snapshot_filters_owner_controlled_and_runtime_state"
@@ -3696,7 +3733,7 @@
           "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py::_portable_map",
           "new": "backend/app/domains/world_packages/service/export_projection.py::_portable_map",
           "direct_consumers": [
-            "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py"
+            "backend/app/runtime/world_packages/export_source.py"
           ],
           "test_nodes": [
             "tests/world_packages/test_export.py::test_sqlalchemy_snapshot_filters_owner_controlled_and_runtime_state"
@@ -3706,7 +3743,7 @@
           "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py::_text_list",
           "new": "backend/app/domains/world_packages/service/export_projection.py::_text_list",
           "direct_consumers": [
-            "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py"
+            "backend/app/runtime/world_packages/export_source.py"
           ],
           "test_nodes": [
             "tests/world_packages/test_export.py::test_sqlalchemy_snapshot_filters_owner_controlled_and_runtime_state"
@@ -3716,7 +3753,7 @@
           "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py::_portable_local_profile",
           "new": "backend/app/domains/world_packages/service/export_projection.py::_portable_local_profile",
           "direct_consumers": [
-            "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py"
+            "backend/app/runtime/world_packages/export_source.py"
           ],
           "test_nodes": [
             "tests/world_packages/test_export.py::test_sqlalchemy_snapshot_filters_owner_controlled_and_runtime_state"
@@ -3724,9 +3761,9 @@
         },
         {
           "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py::SqlAlchemyWorldPackageSourceSnapshot",
-          "new": "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py::SqlAlchemyWorldPackageSourceSnapshot",
+          "new": "backend/app/runtime/world_packages/export_source.py::SqlAlchemyWorldPackageSourceSnapshot",
           "direct_consumers": [
-            "backend/app/domains/world_packages/api/routes.py"
+            "backend/app/domains/world_packages/router.py"
           ],
           "test_nodes": [
             "tests/world_packages/test_export.py::test_sqlalchemy_snapshot_filters_owner_controlled_and_runtime_state"
@@ -3734,9 +3771,9 @@
         },
         {
           "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py::__all__",
-          "new": "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py::__all__",
+          "new": "backend/app/runtime/world_packages/export_source.py::__all__",
           "direct_consumers": [
-            "backend/app/domains/world_packages/api/routes.py"
+            "backend/app/domains/world_packages/router.py"
           ],
           "test_nodes": [
             "tests/world_packages/test_export.py::test_sqlalchemy_snapshot_filters_owner_controlled_and_runtime_state"
@@ -3744,9 +3781,9 @@
         },
         {
           "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_preview_probe.py::SqlAlchemyWorldPackagePreviewProbe",
-          "new": "backend/app/domains/world_packages/infrastructure/sqlalchemy_preview_probe.py::SqlAlchemyWorldPackagePreviewProbe",
+          "new": "backend/app/runtime/world_packages/preview_probe.py::SqlAlchemyWorldPackagePreviewProbe",
           "direct_consumers": [
-            "backend/app/domains/world_packages/api/routes.py"
+            "backend/app/domains/world_packages/router.py"
           ],
           "test_nodes": [
             "tests/world_packages/test_preview.py::test_sql_preview_probe_labels_trust_and_blocks_duplicate_or_tampered_version"
@@ -3754,9 +3791,9 @@
         },
         {
           "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_preview_probe.py::__all__",
-          "new": "backend/app/domains/world_packages/infrastructure/sqlalchemy_preview_probe.py::__all__",
+          "new": "backend/app/runtime/world_packages/preview_probe.py::__all__",
           "direct_consumers": [
-            "backend/app/domains/world_packages/api/routes.py"
+            "backend/app/domains/world_packages/router.py"
           ],
           "test_nodes": [
             "tests/world_packages/test_preview.py::test_sql_preview_probe_labels_trust_and_blocks_duplicate_or_tampered_version"
@@ -3766,7 +3803,7 @@
           "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_preview_probe.py::SqlAlchemyWorldPackagePreviewProbe",
           "new": "backend/app/domains/world_packages/service/preview.py::assess_world_package_preview",
           "direct_consumers": [
-            "backend/app/domains/world_packages/infrastructure/sqlalchemy_preview_probe.py"
+            "backend/app/runtime/world_packages/preview_probe.py"
           ],
           "test_nodes": [
             "tests/world_packages/test_preview.py::test_sql_preview_probe_labels_trust_and_blocks_duplicate_or_tampered_version"
@@ -3774,12 +3811,331 @@
         }
       ],
       "unused_export_seam_removal": "ManagedPackageAssetPort and ManagedMediaPackageAssets formerly declared stage_verified_asset/promote_staged_assets/discard_staged_assets with no consumers and NotImplementedError bodies; real import media remains implemented in filesystem_import_media and migrates next slice.",
-      "scope": "Only exact role modules opt in; no whole-domain completion until remaining router/import dependencies migrate.",
+      "scope": "The first 36-module partial scope is superseded by the final whole-world_packages domain scope. Old same-domain caller bridges are removed; only G5 aggregate registration remains.",
       "validation": {
         "package_suites": "89 passed / 1 warning / 39.41 seconds",
         "boundary": "594 modules / 1850 edges / 288 legacy exact edges PASS; 36 exact Package role modules, remaining 55 bridges",
         "remaining": "Final router/dependencies and import runtime source slice; parent linear introduction capture and CI."
       }
+    },
+    "AR-B3-package-composition": {
+      "status": "SOURCE IMPLEMENTED — final Package role tree; focused 190 passed, integration/Hosted and introduction metadata pending",
+      "split_files": {
+        "backend/app/domains/world_packages/api/routes.py": [
+          "backend/app/domains/world_packages/router.py",
+          "backend/app/domains/world_packages/dependencies.py",
+          "backend/app/domains/world_packages/service/delivery.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::router",
+          "new": "backend/app/domains/world_packages/router.py::router",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::IdempotencyKey",
+          "new": "backend/app/domains/world_packages/router.py::IdempotencyKey",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::DownloadToken",
+          "new": "backend/app/domains/world_packages/router.py::DownloadToken",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::PreviewToken",
+          "new": "backend/app/domains/world_packages/router.py::PreviewToken",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::_STORE_LOCK",
+          "new": "backend/app/domains/world_packages/dependencies.py::_STORE_LOCK",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/dependencies.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::_paths",
+          "new": "backend/app/domains/world_packages/dependencies.py::_paths",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::_artifacts",
+          "new": "backend/app/domains/world_packages/dependencies.py::_artifacts",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::_staging",
+          "new": "backend/app/domains/world_packages/dependencies.py::_staging",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::_exporter",
+          "new": "backend/app/domains/world_packages/dependencies.py::_exporter",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::_stager",
+          "new": "backend/app/domains/world_packages/dependencies.py::_stager",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::_delivery_session_factory",
+          "new": "backend/app/domains/world_packages/dependencies.py::_delivery_session_factory",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::_import_committer",
+          "new": "backend/app/domains/world_packages/dependencies.py::_import_committer",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::_raise_contract_error",
+          "new": "backend/app/domains/world_packages/router.py::_raise_contract_error",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::stage_world_package_import",
+          "new": "backend/app/domains/world_packages/router.py::stage_world_package_import",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::read_world_package_import_preview",
+          "new": "backend/app/domains/world_packages/router.py::read_world_package_import_preview",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::discard_world_package_import_preview",
+          "new": "backend/app/domains/world_packages/router.py::discard_world_package_import_preview",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::commit_world_package_import",
+          "new": "backend/app/domains/world_packages/router.py::commit_world_package_import",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::preview_world_package_export",
+          "new": "backend/app/domains/world_packages/router.py::preview_world_package_export",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::prepare_world_package_export",
+          "new": "backend/app/domains/world_packages/router.py::prepare_world_package_export",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::download_world_package_export",
+          "new": "backend/app/domains/world_packages/router.py::download_world_package_export",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::acknowledge_world_package_export_delivery",
+          "new": "backend/app/domains/world_packages/router.py::acknowledge_world_package_export_delivery",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::discard_world_package_export",
+          "new": "backend/app/domains/world_packages/router.py::discard_world_package_export",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::_stream_pending_native_delivery",
+          "new": "backend/app/domains/world_packages/service/delivery.py::_stream_pending_native_delivery",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::_stream_and_record_delivery",
+          "new": "backend/app/domains/world_packages/service/delivery.py::_stream_and_record_delivery",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::__all__",
+          "new": "backend/app/domains/world_packages/router.py::__all__",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::preview_world_package_export",
+          "new": "backend/app/domains/world_packages/service/delivery.py::preview_export",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_native_save_as_requires_ack_and_cancel_does_not_consume_version"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::prepare_world_package_export",
+          "new": "backend/app/domains/world_packages/service/delivery.py::prepare_export",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_native_save_as_requires_ack_and_cancel_does_not_consume_version"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::acknowledge_world_package_export_delivery",
+          "new": "backend/app/domains/world_packages/service/delivery.py::acknowledge_export_delivery",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_native_save_as_requires_ack_and_cancel_does_not_consume_version"
+          ]
+        }
+      ],
+      "runtime_ownership": "World/Character read projection, destination seed, commit and recovery run under app/runtime/world_packages. App factories inject constructor callbacks into Package dependencies; domain modules never import runtime. Existing Session/sessionmaker and row-lock/commit/rollback/media journal order are preserved.",
+      "remaining_compatibility": "No Package public/api/application/domain/ports/infrastructure implementation or same-domain bridge remains. app.models aggregate registration is the sole Package incoming bridge and retires in AR-G5. Upstream B2 worlds/characters public consumers in runtime migrate when those source branches join."
     }
   }
 }

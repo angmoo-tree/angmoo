@@ -18,7 +18,7 @@ from sqlalchemy.pool import StaticPool
 from app import models
 from app.domains.identity.dependencies import get_current_user
 from app.core.db import Base, get_db
-from app.domains.world_packages.api.routes import (
+from app.domains.world_packages.router import (
     _stream_and_record_delivery,
     router,
 )
@@ -54,7 +54,7 @@ from app.domains.world_packages.models import (
     WorldPackageExport,
     WorldPackageSource,
 )
-from app.domains.world_packages.infrastructure.sqlalchemy_source_snapshot import (
+from app.runtime.world_packages.export_source import (
     SqlAlchemyWorldPackageSourceSnapshot,
 )
 from app.domains.world_packages.archive.export import (
@@ -574,6 +574,8 @@ def test_export_api_records_only_completed_download_and_replays_same_seed(
 ) -> None:
     engine, factory, owner = _database_fixture(tmp_path)
     app = FastAPI()
+    from app.runtime.world_packages.composition import configure_world_package_runtime
+    configure_world_package_runtime(app)
     app.include_router(router, prefix="/api/v1")
     media_root = tmp_path / "media"
     media_root.mkdir()
@@ -742,6 +744,8 @@ def test_native_save_as_requires_ack_and_cancel_does_not_consume_version(
 ) -> None:
     engine, factory, owner = _database_fixture(tmp_path)
     app = FastAPI()
+    from app.runtime.world_packages.composition import configure_world_package_runtime
+    configure_world_package_runtime(app)
     app.include_router(router, prefix="/api/v1")
     media_root = tmp_path / "media"
     media_root.mkdir()

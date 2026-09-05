@@ -420,11 +420,15 @@ Import inventory는 현재 사실을 기록하고 import policy는 허용 경계
 
 World Package v1의 Python 입력·출력은 `world_packages/schemas/{http,content,manifest}.py`에 있다. 배포되는 JSON schema는 기존 `schemas/v1/`에 그대로 두므로 `schemas.py` 파일을 동시에 만들지 않는다. 불변 export·preview·seed 기록은 `contracts/`, 오류는 `exceptions.py`, 상태 enum은 `constants.py`, archive·license·collision 판단은 `policies/`가 소유한다. JSON 정규화와 digest bytes는 `utils/canonical.py`에서 정의한다.
 
-네 개 lineage ORM은 `models.py`에서 기존 단일 Base를 공유한다. `service/registry.py`는 같은 seed의 version 재사용, 실제 전달 기록의 충돌, 다음 version 소비를 판단하며 `repository/registry.py`가 동일 Session으로 SQL과 flush를 수행한다. 이 둘은 commit하지 않는다. HTTP export 준비·전달 및 import의 기존 transaction 소유자가 commit/rollback을 결정한다. 특히 native download만으로 전달을 확정하지 않으며 Tauri의 저장 완료 acknowledgment까지 기다린다.
+네 개 lineage ORM은 `models.py`에서 기존 단일 Base를 공유한다. `service/registry.py`는 같은 seed의 version 재사용, 실제 전달 기록의 충돌, 다음 version 소비를 판단하며 `repository/registry.py`가 동일 Session으로 SQL과 flush를 수행한다. 이 둘은 commit하지 않는다. `service/delivery.py`가 export 준비·전달의 commit/rollback을, `runtime/world_packages`가 여러 업무를 함께 저장하는 import의 commit/rollback을 결정한다. 특히 native download만으로 전달을 확정하지 않으며 Tauri의 저장 완료 acknowledgment까지 기다린다.
 
-이 첫 범위의 이전 뒤에도 export·staging·import 실행 조립은 다음 AR-B3 slice에서 전환한다. 현재 `public.py`와 옛 역할에서 새 계약을 읽는 정확한 호환 edge는 이동표에 기록되어 있고, 새 구현이 옛 역할을 다시 호출하는 것은 허용하지 않는다. 다른 업무와 함께 생성하는 seed/commit은 최종적으로 `runtime/world_packages`에서 같은 Session으로 조립한다. 전체 Package나 shared media 전환 완료를 뜻하지 않는다.
+Package는 `router.py`의 HTTP 처리, `dependencies.py`의 요청별 Session·app state 연결, 서비스·codec·storage로 나뉜다. 이전 `api/application/domain/infrastructure/ports/public.py` 구현은 제거했다. 네 ORM을 읽는 기존 `app.models` aggregate만 G5의 등록 이전까지 정확한 임시 소비자로 남으며 같은 클래스 객체를 사용한다. 이 배치는 shared media 전체나 Hosted CI·설치 검증의 완료를 뜻하지 않는다.
 
 
 Package 처리 구현은 `service/export.py`·`staging.py`, `archive/{export,validation,exclusions}.py`, `storage/{staging,exports,export_assets}.py`에서 찾는다. 파일을 읽고 정제하는 codec과 저장 수명 관리는 업무별 하위 package로 구분하며, ZIP 검사를 HTTP나 공용 utils로 복제하지 않는다. 사용 중인 fake/storage/UoW 계약 10개는 `contracts/interfaces.py`로 합쳤다. export-only asset 인터페이스에 있던 세 미구현 import 메서드는 호출자가 없었으며 제거했고, 실제 import media 구현은 별도 계약을 유지한다.
 
-Portable ref/profile 변환은 `service/export_projection.py`, 로컬 export 근거·중복·변조·충돌 판단은 `service/preview.py`가 소유한다. World slug와 Character handle의 충돌 범위는 설치 전체다. 두 읽기 projection의 물리 runtime 이전은 아직 옛 router와 import committer가 직접 만들고 있으므로 마지막 Package 조립 전환과 묶는다. 이 순서를 통해 도메인이 runtime을 import하는 임시 역방향이나 넓은 경계 예외를 만들지 않는다.
+Portable ref/profile 변환은 `service/export_projection.py`, 로컬 export 근거·중복·변조·충돌 판단은 `service/preview.py`가 소유한다. World slug와 Character handle의 충돌 범위는 설치 전체다. SQL 읽기 projection과 World/Character/참여 관계를 함께 생성하는 작업은 `runtime/world_packages/{export_source,preview_probe,seed,seed_uow,import_commit}.py`에서 같은 Session으로 연결한다. Package service가 다른 도메인의 ORM을 직접 조회하거나 runtime을 import하지 않는다.
+
+앱 생성 시 `runtime/world_packages/composition.py`가 구체 constructor를 `WorldPackageRuntimeFactories`로 연결한다. Package dependencies는 전달받은 요청 Session·session factory를 그대로 제공한다. import committer는 기존 초기 복구, 동시 실행 잠금, commit 결과 불명 시 관찰과 media journal 보상 순서를 유지한다. Browser stream의 정상 소진 뒤 전달을 기록하며 취소 시 artifact를 정리한다. Native download는 artifact를 유지하고 명시적인 저장 완료 acknowledgment가 성공적으로 commit된 뒤 정리한다. HTTP router는 권한·입력·상태 코드·응답을 처리하고 이 업무 결정을 중복 구현하지 않는다.
+
+`contracts/__init__.py`는 v1의 순수 공개 타입을 모으며 `contracts/interfaces.py`는 실제 fake·archive·storage·UoW 교체 지점을 정의한다. 런타임 factory 계약은 `contracts/runtime.py`에 있다. 모든 함수에 별도 포트를 생성하지 않으며 같은 역할의 구현을 public 호환 파일로 복제하지 않는다. 아직 전환되지 않은 Worlds/Characters의 지원 계약을 사용하는 runtime 소비자는 해당 B2 source 합류 시 canonical 경로로 연결한다.

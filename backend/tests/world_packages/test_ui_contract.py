@@ -1,7 +1,7 @@
 from pathlib import Path
 
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 FRONTEND_ROOT = REPO_ROOT / "frontend" / "src"
 DESKTOP_ROOT = REPO_ROOT / "desktop" / "src-tauri"
 

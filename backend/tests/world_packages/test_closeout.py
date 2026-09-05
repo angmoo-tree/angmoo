@@ -18,7 +18,7 @@ from app.core.db import Base, get_db
 from app.domains.device_home.repository import (
     SqlAlchemyWorldSurfaceRepository,
 )
-from app.domains.world_packages.api.routes import router
+from app.domains.world_packages.router import router
 from app.domains.world_packages.archive.exclusions import (
     WorldPackageExclusionError,
     scan_world_package_bytes,
@@ -34,10 +34,10 @@ from app.domains.world_packages.contracts.export import (
     WorldPackageSourceIdentity,
 )
 from app.domains.world_packages.schemas.manifest import WorldPackageLicense
-from app.domains.world_packages.infrastructure.filesystem_import_media import (
+from app.domains.world_packages.storage.import_media import (
     FilesystemWorldPackageImportMedia,
 )
-from app.domains.world_packages.infrastructure.sqlalchemy_import_commit import (
+from app.runtime.world_packages.import_commit import (
     SqlAlchemyWorldPackageImportCommitter,
 )
 from app.domains.world_packages.archive.export import (
@@ -46,7 +46,7 @@ from app.domains.world_packages.archive.export import (
 
 
 FIXTURE_ROOT = (
-    Path(__file__).parent / "fixtures" / "world_packages" / "v1" / "valid"
+    Path(__file__).parents[1] / "fixtures" / "world_packages" / "v1" / "valid"
 )
 FRONTEND_HEADERS = {"Origin": "http://127.0.0.1:3000"}
 TARGET_OWNER_ID = "round-trip-target-owner"
@@ -217,6 +217,8 @@ def _target_runtime(target_root: Path) -> SimpleNamespace:
         media_url_path="/media",
     )
     app = FastAPI()
+    from app.runtime.world_packages.composition import configure_world_package_runtime
+    configure_world_package_runtime(app)
     app.include_router(router, prefix="/api/v1")
     app.state.runtime_settings = SimpleNamespace(
         media_root_path=media_root,

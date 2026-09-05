@@ -12,7 +12,7 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from app.domains.world_packages.public import (
+from app.domains.world_packages.contracts import (
     ArchiveEntryDescriptor,
     AssetIndexDocument,
     CharactersDocument,
@@ -376,7 +376,7 @@ def test_world_package_domain_and_ports_have_no_framework_dependency() -> None:
     violations: dict[str, list[str]] = {}
 
     pure_paths = [
-        root / "public.py",
+        root / "contracts" / "__init__.py",
         *sorted((root / "domain").rglob("*.py")),
         *sorted((root / "ports").rglob("*.py")),
         root / "constants.py",
@@ -404,11 +404,11 @@ def test_world_package_domain_and_ports_have_no_framework_dependency() -> None:
             violations[path.relative_to(APP_ROOT).as_posix()] = forbidden
 
     assert violations == {}
-    assert (root / "api" / "routes.py").exists()
+    assert (root / "router.py").exists()
 
 
 def test_public_boundary_exports_only_world_package_domain_modules() -> None:
-    public = APP_ROOT / "domains" / "world_packages" / "public.py"
+    public = APP_ROOT / "domains" / "world_packages" / "contracts" / "__init__.py"
     tree = ast.parse(public.read_text(encoding="utf-8"), filename=str(public))
     imported = {
         node.module

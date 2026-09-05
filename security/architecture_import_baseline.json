@@ -1,6 +1,6 @@
 {
-  "edge_count": 1850,
-  "external_import_count": 1999,
+  "edge_count": 1861,
+  "external_import_count": 2010,
   "module_count": 594,
   "modules": [
     {
@@ -63,7 +63,7 @@
         "app.domains.device_home.router",
         "app.domains.identity.router.auth",
         "app.domains.world_characters.api.routes",
-        "app.domains.world_packages.api.routes"
+        "app.domains.world_packages.router"
       ],
       "module": "app.api.v1.main",
       "path": "backend/app/api/v1/main.py",
@@ -94,7 +94,7 @@
         "app.domains.identity.router.auth",
         "app.domains.identity.router.local",
         "app.domains.world_characters.api.routes",
-        "app.domains.world_packages.api.routes"
+        "app.domains.world_packages.router"
       ],
       "module": "app.api.v1.public",
       "path": "backend/app/api/v1/public.py",
@@ -4516,76 +4516,6 @@
     {
       "external_imports": [],
       "imports": [],
-      "module": "app.domains.world_packages.api",
-      "path": "backend/app/domains/world_packages/api/__init__.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "collections.abc",
-        "datetime",
-        "fastapi",
-        "fastapi.responses",
-        "pathlib",
-        "sqlalchemy.exc",
-        "sqlalchemy.orm",
-        "threading",
-        "typing",
-        "urllib.parse"
-      ],
-      "imports": [
-        "app.api.identity_dependencies",
-        "app.core.db",
-        "app.core.ids",
-        "app.domains.world_packages.application.commit_world_package",
-        "app.domains.world_packages.archive.export",
-        "app.domains.world_packages.archive.validation",
-        "app.domains.world_packages.contracts.export",
-        "app.domains.world_packages.exceptions",
-        "app.domains.world_packages.infrastructure.filesystem_import_media",
-        "app.domains.world_packages.infrastructure.sqlalchemy_import_commit",
-        "app.domains.world_packages.infrastructure.sqlalchemy_preview_probe",
-        "app.domains.world_packages.infrastructure.sqlalchemy_source_snapshot",
-        "app.domains.world_packages.policies.archive",
-        "app.domains.world_packages.schemas.http",
-        "app.domains.world_packages.service.export",
-        "app.domains.world_packages.service.registry",
-        "app.domains.world_packages.service.staging",
-        "app.domains.world_packages.storage.export_assets",
-        "app.domains.world_packages.storage.exports",
-        "app.domains.world_packages.storage.staging"
-      ],
-      "module": "app.domains.world_packages.api.routes",
-      "path": "backend/app/domains/world_packages/api/routes.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.domains.world_packages.application.commit_world_package"
-      ],
-      "module": "app.domains.world_packages.application",
-      "path": "backend/app/domains/world_packages/application/__init__.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__"
-      ],
-      "imports": [
-        "app.domains.world_packages.contracts.import_commit",
-        "app.domains.world_packages.contracts.interfaces",
-        "app.domains.world_packages.contracts.preview",
-        "app.domains.world_packages.exceptions"
-      ],
-      "module": "app.domains.world_packages.application.commit_world_package",
-      "path": "backend/app/domains/world_packages/application/commit_world_package.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [],
       "module": "app.domains.world_packages.archive",
       "path": "backend/app/domains/world_packages/archive/__init__.py",
       "wildcard_imports": []
@@ -4668,7 +4598,20 @@
     },
     {
       "external_imports": [],
-      "imports": [],
+      "imports": [
+        "app.domains.world_packages.constants",
+        "app.domains.world_packages.contracts.export",
+        "app.domains.world_packages.contracts.import_commit",
+        "app.domains.world_packages.contracts.preview",
+        "app.domains.world_packages.contracts.seed",
+        "app.domains.world_packages.exceptions",
+        "app.domains.world_packages.policies.archive",
+        "app.domains.world_packages.policies.collision",
+        "app.domains.world_packages.policies.license",
+        "app.domains.world_packages.schemas.content",
+        "app.domains.world_packages.schemas.manifest",
+        "app.domains.world_packages.utils.canonical"
+      ],
       "module": "app.domains.world_packages.contracts",
       "path": "backend/app/domains/world_packages/contracts/__init__.py",
       "wildcard_imports": []
@@ -4742,6 +4685,18 @@
     },
     {
       "external_imports": [
+        "dataclasses",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.world_packages.contracts.interfaces"
+      ],
+      "module": "app.domains.world_packages.contracts.runtime",
+      "path": "backend/app/domains/world_packages/contracts/runtime.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "dataclasses",
         "typing"
@@ -4757,10 +4712,28 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [],
-      "imports": [],
-      "module": "app.domains.world_packages.domain",
-      "path": "backend/app/domains/world_packages/domain/__init__.py",
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "fastapi",
+        "pathlib",
+        "sqlalchemy.orm",
+        "threading"
+      ],
+      "imports": [
+        "app.domains.world_packages.archive.export",
+        "app.domains.world_packages.archive.validation",
+        "app.domains.world_packages.contracts.runtime",
+        "app.domains.world_packages.service.export",
+        "app.domains.world_packages.service.registry",
+        "app.domains.world_packages.service.staging",
+        "app.domains.world_packages.storage.export_assets",
+        "app.domains.world_packages.storage.exports",
+        "app.domains.world_packages.storage.import_media",
+        "app.domains.world_packages.storage.staging"
+      ],
+      "module": "app.domains.world_packages.dependencies",
+      "path": "backend/app/domains/world_packages/dependencies.py",
       "wildcard_imports": []
     },
     {
@@ -4771,139 +4744,6 @@
       "imports": [],
       "module": "app.domains.world_packages.exceptions",
       "path": "backend/app/domains/world_packages/exceptions.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.domains.world_packages.models"
-      ],
-      "module": "app.domains.world_packages.infrastructure",
-      "path": "backend/app/domains/world_packages/infrastructure/__init__.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "collections.abc",
-        "hashlib",
-        "json",
-        "pathlib",
-        "shutil",
-        "threading"
-      ],
-      "imports": [
-        "app.domains.world_packages.contracts.preview",
-        "app.domains.world_packages.contracts.seed",
-        "app.domains.world_packages.exceptions",
-        "app.domains.world_packages.utils.canonical"
-      ],
-      "module": "app.domains.world_packages.infrastructure.filesystem_import_media",
-      "path": "backend/app/domains/world_packages/infrastructure/filesystem_import_media.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "sqlalchemy.orm",
-        "types"
-      ],
-      "imports": [
-        "app.core.ids",
-        "app.domains.characters.public",
-        "app.domains.world_characters.public",
-        "app.domains.world_packages.contracts.seed",
-        "app.domains.world_packages.service.registry",
-        "app.domains.worlds.public"
-      ],
-      "module": "app.domains.world_packages.infrastructure.sqlalchemy_destination_seed",
-      "path": "backend/app/domains/world_packages/infrastructure/sqlalchemy_destination_seed.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "collections.abc",
-        "sqlalchemy",
-        "sqlalchemy.exc",
-        "sqlalchemy.orm",
-        "time"
-      ],
-      "imports": [
-        "app.core.ids",
-        "app.domains.characters.public",
-        "app.domains.device_home.service",
-        "app.domains.world_characters.public",
-        "app.domains.world_packages.contracts.import_commit",
-        "app.domains.world_packages.contracts.seed",
-        "app.domains.world_packages.exceptions",
-        "app.domains.world_packages.infrastructure.filesystem_import_media",
-        "app.domains.world_packages.infrastructure.sqlalchemy_destination_seed",
-        "app.domains.world_packages.infrastructure.sqlalchemy_preview_probe",
-        "app.domains.world_packages.service.registry",
-        "app.domains.worlds.public"
-      ],
-      "module": "app.domains.world_packages.infrastructure.sqlalchemy_import_commit",
-      "path": "backend/app/domains/world_packages/infrastructure/sqlalchemy_import_commit.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "sqlalchemy",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.domains.characters.public",
-        "app.domains.world_packages.constants",
-        "app.domains.world_packages.contracts.preview",
-        "app.domains.world_packages.exceptions",
-        "app.domains.world_packages.models",
-        "app.domains.world_packages.policies.collision",
-        "app.domains.world_packages.service.preview",
-        "app.domains.world_packages.utils.canonical",
-        "app.domains.worlds.public"
-      ],
-      "module": "app.domains.world_packages.infrastructure.sqlalchemy_preview_probe",
-      "path": "backend/app/domains/world_packages/infrastructure/sqlalchemy_preview_probe.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "sqlalchemy",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.domains.characters.public",
-        "app.domains.world_characters.public",
-        "app.domains.world_packages.contracts.export",
-        "app.domains.world_packages.contracts.seed",
-        "app.domains.world_packages.exceptions",
-        "app.domains.world_packages.schemas.content",
-        "app.domains.world_packages.service.export_projection",
-        "app.domains.world_packages.utils.canonical",
-        "app.domains.worlds.public"
-      ],
-      "module": "app.domains.world_packages.infrastructure.sqlalchemy_source_snapshot",
-      "path": "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "collections.abc",
-        "sqlalchemy.exc",
-        "sqlalchemy.orm",
-        "time"
-      ],
-      "imports": [
-        "app.domains.world_packages.contracts.seed",
-        "app.domains.world_packages.infrastructure.sqlalchemy_destination_seed",
-        "app.domains.world_packages.service.registry"
-      ],
-      "module": "app.domains.world_packages.infrastructure.sqlalchemy_unit_of_work",
-      "path": "backend/app/domains/world_packages/infrastructure/sqlalchemy_unit_of_work.py",
       "wildcard_imports": []
     },
     {
@@ -4972,26 +4812,6 @@
     },
     {
       "external_imports": [],
-      "imports": [
-        "app.domains.world_packages.constants",
-        "app.domains.world_packages.contracts.export",
-        "app.domains.world_packages.contracts.import_commit",
-        "app.domains.world_packages.contracts.preview",
-        "app.domains.world_packages.contracts.seed",
-        "app.domains.world_packages.exceptions",
-        "app.domains.world_packages.policies.archive",
-        "app.domains.world_packages.policies.collision",
-        "app.domains.world_packages.policies.license",
-        "app.domains.world_packages.schemas.content",
-        "app.domains.world_packages.schemas.manifest",
-        "app.domains.world_packages.utils.canonical"
-      ],
-      "module": "app.domains.world_packages.public",
-      "path": "backend/app/domains/world_packages/public.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
       "imports": [],
       "module": "app.domains.world_packages.repository",
       "path": "backend/app/domains/world_packages/repository/__init__.py",
@@ -5012,6 +4832,33 @@
       ],
       "module": "app.domains.world_packages.repository.registry",
       "path": "backend/app/domains/world_packages/repository/registry.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "fastapi",
+        "fastapi.responses",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm",
+        "typing",
+        "urllib.parse"
+      ],
+      "imports": [
+        "app.api.identity_dependencies",
+        "app.core.db",
+        "app.core.ids",
+        "app.domains.world_packages.archive.validation",
+        "app.domains.world_packages.dependencies",
+        "app.domains.world_packages.exceptions",
+        "app.domains.world_packages.policies.archive",
+        "app.domains.world_packages.schemas.http",
+        "app.domains.world_packages.service.delivery",
+        "app.domains.world_packages.service.import_approval"
+      ],
+      "module": "app.domains.world_packages.router",
+      "path": "backend/app/domains/world_packages/router.py",
       "wildcard_imports": []
     },
     {
@@ -5081,6 +4928,26 @@
     {
       "external_imports": [
         "__future__",
+        "collections.abc",
+        "datetime",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.world_packages.contracts.export",
+        "app.domains.world_packages.exceptions",
+        "app.domains.world_packages.schemas.manifest",
+        "app.domains.world_packages.service.export",
+        "app.domains.world_packages.service.registry",
+        "app.domains.world_packages.storage.exports"
+      ],
+      "module": "app.domains.world_packages.service.delivery",
+      "path": "backend/app/domains/world_packages/service/delivery.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "dataclasses"
       ],
       "imports": [
@@ -5107,6 +4974,20 @@
       ],
       "module": "app.domains.world_packages.service.export_projection",
       "path": "backend/app/domains/world_packages/service/export_projection.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__"
+      ],
+      "imports": [
+        "app.domains.world_packages.contracts.import_commit",
+        "app.domains.world_packages.contracts.interfaces",
+        "app.domains.world_packages.contracts.preview",
+        "app.domains.world_packages.exceptions"
+      ],
+      "module": "app.domains.world_packages.service.import_approval",
+      "path": "backend/app/domains/world_packages/service/import_approval.py",
       "wildcard_imports": []
     },
     {
@@ -5198,6 +5079,26 @@
       ],
       "module": "app.domains.world_packages.storage.exports",
       "path": "backend/app/domains/world_packages/storage/exports.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "hashlib",
+        "json",
+        "pathlib",
+        "shutil",
+        "threading"
+      ],
+      "imports": [
+        "app.domains.world_packages.contracts.preview",
+        "app.domains.world_packages.contracts.seed",
+        "app.domains.world_packages.exceptions",
+        "app.domains.world_packages.utils.canonical"
+      ],
+      "module": "app.domains.world_packages.storage.import_media",
+      "path": "backend/app/domains/world_packages/storage/import_media.py",
       "wildcard_imports": []
     },
     {
@@ -5658,6 +5559,7 @@
         "app.runtime.logging_config",
         "app.runtime.single_backend_components",
         "app.runtime.startup_security",
+        "app.runtime.world_packages.composition",
         "app.services.hosted_configuration"
       ],
       "module": "app.main",
@@ -6053,8 +5955,7 @@
         "app.cruds.community",
         "app.domains.runtime.public",
         "app.domains.world_characters.public",
-        "app.domains.world_packages.infrastructure.filesystem_import_media",
-        "app.domains.world_packages.infrastructure.sqlalchemy_import_commit",
+        "app.domains.world_packages.storage.import_media",
         "app.runtime.account_deletion",
         "app.runtime.component_workers",
         "app.runtime.configuration",
@@ -6064,6 +5965,8 @@
         "app.runtime.memory_selection_provider",
         "app.runtime.single_backend_components",
         "app.runtime.startup_security",
+        "app.runtime.world_packages.composition",
+        "app.runtime.world_packages.import_commit",
         "app.services.hosted_configuration"
       ],
       "module": "app.public_main",
@@ -7580,6 +7483,131 @@
       ],
       "module": "app.runtime.startup_security",
       "path": "backend/app/runtime/startup_security.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.runtime.world_packages",
+      "path": "backend/app/runtime/world_packages/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "typing"
+      ],
+      "imports": [
+        "app.domains.world_packages.contracts.runtime",
+        "app.runtime.world_packages.export_source",
+        "app.runtime.world_packages.import_commit",
+        "app.runtime.world_packages.preview_probe"
+      ],
+      "module": "app.runtime.world_packages.composition",
+      "path": "backend/app/runtime/world_packages/composition.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.characters.public",
+        "app.domains.world_characters.public",
+        "app.domains.world_packages.contracts.export",
+        "app.domains.world_packages.contracts.seed",
+        "app.domains.world_packages.exceptions",
+        "app.domains.world_packages.schemas.content",
+        "app.domains.world_packages.service.export_projection",
+        "app.domains.world_packages.utils.canonical",
+        "app.domains.worlds.public"
+      ],
+      "module": "app.runtime.world_packages.export_source",
+      "path": "backend/app/runtime/world_packages/export_source.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm",
+        "time"
+      ],
+      "imports": [
+        "app.core.ids",
+        "app.domains.characters.public",
+        "app.domains.device_home.service",
+        "app.domains.world_characters.public",
+        "app.domains.world_packages.contracts.import_commit",
+        "app.domains.world_packages.contracts.seed",
+        "app.domains.world_packages.exceptions",
+        "app.domains.world_packages.service.registry",
+        "app.domains.world_packages.storage.import_media",
+        "app.domains.worlds.public",
+        "app.runtime.world_packages.preview_probe",
+        "app.runtime.world_packages.seed"
+      ],
+      "module": "app.runtime.world_packages.import_commit",
+      "path": "backend/app/runtime/world_packages/import_commit.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.characters.public",
+        "app.domains.world_packages.constants",
+        "app.domains.world_packages.contracts.preview",
+        "app.domains.world_packages.exceptions",
+        "app.domains.world_packages.models",
+        "app.domains.world_packages.policies.collision",
+        "app.domains.world_packages.service.preview",
+        "app.domains.world_packages.utils.canonical",
+        "app.domains.worlds.public"
+      ],
+      "module": "app.runtime.world_packages.preview_probe",
+      "path": "backend/app/runtime/world_packages/preview_probe.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy.orm",
+        "types"
+      ],
+      "imports": [
+        "app.core.ids",
+        "app.domains.characters.public",
+        "app.domains.world_characters.public",
+        "app.domains.world_packages.contracts.seed",
+        "app.domains.world_packages.service.registry",
+        "app.domains.worlds.public"
+      ],
+      "module": "app.runtime.world_packages.seed",
+      "path": "backend/app/runtime/world_packages/seed.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm",
+        "time"
+      ],
+      "imports": [
+        "app.domains.world_packages.contracts.seed",
+        "app.domains.world_packages.service.registry",
+        "app.runtime.world_packages.seed"
+      ],
+      "module": "app.runtime.world_packages.seed_uow",
+      "path": "backend/app/runtime/world_packages/seed_uow.py",
       "wildcard_imports": []
     },
     {

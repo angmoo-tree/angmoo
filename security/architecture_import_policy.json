@@ -1255,7 +1255,8 @@
   "schema_version": 1,
   "refactor": {
     "domains": [
-      "device_home"
+      "device_home",
+      "world_packages"
     ],
     "globals": [
       "app.config",
@@ -1282,43 +1283,7 @@
       "app.domains.identity.service.demo_access",
       "app.domains.identity.service.external_verification",
       "app.domains.identity.service.local_owner",
-      "app.domains.identity.service.login_throttle",
-      "app.domains.world_packages.archive",
-      "app.domains.world_packages.archive.exclusions",
-      "app.domains.world_packages.archive.export",
-      "app.domains.world_packages.archive.validation",
-      "app.domains.world_packages.constants",
-      "app.domains.world_packages.contracts",
-      "app.domains.world_packages.contracts.export",
-      "app.domains.world_packages.contracts.import_commit",
-      "app.domains.world_packages.contracts.interfaces",
-      "app.domains.world_packages.contracts.preview",
-      "app.domains.world_packages.contracts.seed",
-      "app.domains.world_packages.exceptions",
-      "app.domains.world_packages.models",
-      "app.domains.world_packages.policies",
-      "app.domains.world_packages.policies.archive",
-      "app.domains.world_packages.policies.collision",
-      "app.domains.world_packages.policies.license",
-      "app.domains.world_packages.repository",
-      "app.domains.world_packages.repository.registry",
-      "app.domains.world_packages.schemas",
-      "app.domains.world_packages.schemas.content",
-      "app.domains.world_packages.schemas.http",
-      "app.domains.world_packages.schemas.manifest",
-      "app.domains.world_packages.schemas.v1",
-      "app.domains.world_packages.service",
-      "app.domains.world_packages.service.export",
-      "app.domains.world_packages.service.export_projection",
-      "app.domains.world_packages.service.preview",
-      "app.domains.world_packages.service.registry",
-      "app.domains.world_packages.service.staging",
-      "app.domains.world_packages.storage",
-      "app.domains.world_packages.storage.export_assets",
-      "app.domains.world_packages.storage.exports",
-      "app.domains.world_packages.storage.staging",
-      "app.domains.world_packages.utils",
-      "app.domains.world_packages.utils.canonical"
+      "app.domains.identity.service.login_throttle"
     ],
     "entries": [
       "app.domains.identity.contracts",
@@ -1336,6 +1301,7 @@
       "app.domains.world_packages.contracts.import_commit",
       "app.domains.world_packages.contracts.interfaces",
       "app.domains.world_packages.contracts.preview",
+      "app.domains.world_packages.contracts.runtime",
       "app.domains.world_packages.contracts.seed",
       "app.domains.world_packages.schemas",
       "app.domains.world_packages.schemas.content",
@@ -1343,8 +1309,10 @@
       "app.domains.world_packages.schemas.manifest",
       "app.domains.world_packages.schemas.v1",
       "app.domains.world_packages.service",
+      "app.domains.world_packages.service.delivery",
       "app.domains.world_packages.service.export",
       "app.domains.world_packages.service.export_projection",
+      "app.domains.world_packages.service.import_approval",
       "app.domains.world_packages.service.preview",
       "app.domains.world_packages.service.registry",
       "app.domains.world_packages.service.staging"
@@ -1399,438 +1367,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.domains.world_packages.api.routes",
-        "target": "app.domains.world_packages.archive.export",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.api.routes",
-        "target": "app.domains.world_packages.archive.validation",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.api.routes",
-        "target": "app.domains.world_packages.contracts.export",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.api.routes",
-        "target": "app.domains.world_packages.exceptions",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.api.routes",
-        "target": "app.domains.world_packages.policies.archive",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.api.routes",
-        "target": "app.domains.world_packages.schemas.http",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.api.routes",
-        "target": "app.domains.world_packages.service.export",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.api.routes",
-        "target": "app.domains.world_packages.service.registry",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.api.routes",
-        "target": "app.domains.world_packages.service.staging",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.api.routes",
-        "target": "app.domains.world_packages.storage.export_assets",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.api.routes",
-        "target": "app.domains.world_packages.storage.exports",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.api.routes",
-        "target": "app.domains.world_packages.storage.staging",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.application.commit_world_package",
-        "target": "app.domains.world_packages.contracts.import_commit",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.application.commit_world_package",
-        "target": "app.domains.world_packages.contracts.interfaces",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.application.commit_world_package",
-        "target": "app.domains.world_packages.contracts.preview",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.application.commit_world_package",
-        "target": "app.domains.world_packages.exceptions",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure",
-        "target": "app.domains.world_packages.models",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure.filesystem_import_media",
-        "target": "app.domains.world_packages.contracts.preview",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure.filesystem_import_media",
-        "target": "app.domains.world_packages.contracts.seed",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure.filesystem_import_media",
-        "target": "app.domains.world_packages.exceptions",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure.filesystem_import_media",
-        "target": "app.domains.world_packages.utils.canonical",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure.sqlalchemy_destination_seed",
-        "target": "app.domains.world_packages.contracts.seed",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure.sqlalchemy_destination_seed",
-        "target": "app.domains.world_packages.service.registry",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure.sqlalchemy_import_commit",
-        "target": "app.domains.world_packages.contracts.import_commit",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure.sqlalchemy_import_commit",
-        "target": "app.domains.world_packages.contracts.seed",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure.sqlalchemy_import_commit",
-        "target": "app.domains.world_packages.exceptions",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure.sqlalchemy_import_commit",
-        "target": "app.domains.world_packages.service.registry",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure.sqlalchemy_preview_probe",
-        "target": "app.domains.world_packages.constants",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure.sqlalchemy_preview_probe",
-        "target": "app.domains.world_packages.contracts.preview",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure.sqlalchemy_preview_probe",
-        "target": "app.domains.world_packages.exceptions",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure.sqlalchemy_preview_probe",
-        "target": "app.domains.world_packages.models",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure.sqlalchemy_preview_probe",
-        "target": "app.domains.world_packages.policies.collision",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure.sqlalchemy_preview_probe",
-        "target": "app.domains.world_packages.service.preview",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure.sqlalchemy_preview_probe",
-        "target": "app.domains.world_packages.utils.canonical",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure.sqlalchemy_source_snapshot",
-        "target": "app.domains.world_packages.contracts.export",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure.sqlalchemy_source_snapshot",
-        "target": "app.domains.world_packages.contracts.seed",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure.sqlalchemy_source_snapshot",
-        "target": "app.domains.world_packages.exceptions",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure.sqlalchemy_source_snapshot",
-        "target": "app.domains.world_packages.schemas.content",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure.sqlalchemy_source_snapshot",
-        "target": "app.domains.world_packages.service.export_projection",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure.sqlalchemy_source_snapshot",
-        "target": "app.domains.world_packages.utils.canonical",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure.sqlalchemy_unit_of_work",
-        "target": "app.domains.world_packages.contracts.seed",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.infrastructure.sqlalchemy_unit_of_work",
-        "target": "app.domains.world_packages.service.registry",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.public",
-        "target": "app.domains.world_packages.constants",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.public",
-        "target": "app.domains.world_packages.contracts.export",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.public",
-        "target": "app.domains.world_packages.contracts.import_commit",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.public",
-        "target": "app.domains.world_packages.contracts.preview",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.public",
-        "target": "app.domains.world_packages.contracts.seed",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.public",
-        "target": "app.domains.world_packages.exceptions",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.public",
-        "target": "app.domains.world_packages.policies.archive",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.public",
-        "target": "app.domains.world_packages.policies.collision",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.public",
-        "target": "app.domains.world_packages.policies.license",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.public",
-        "target": "app.domains.world_packages.schemas.content",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.public",
-        "target": "app.domains.world_packages.schemas.manifest",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.world_packages.public",
-        "target": "app.domains.world_packages.utils.canonical",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.models",
         "target": "app.domains.identity.models",
         "owner_stage": "AR-G5",
@@ -1841,9 +1377,9 @@
       {
         "importer": "app.models",
         "target": "app.domains.world_packages.models",
-        "owner_stage": "AR-B3 / AR-G5",
-        "removal_condition": "Finish the named import/router consumer in the final Package slice; aggregate registration retires during G5.",
-        "reason": "Exact remaining caller only; the new role never imports its old caller.",
+        "owner_stage": "AR-G5",
+        "removal_condition": "Move aggregate model registration to runtime.persistence while installing the single app.models Base in G5.",
+        "reason": "Existing aggregate imports the same four ORM classes; no alternate implementation or reverse edge.",
         "review_date": "2026-09-05"
       },
       {

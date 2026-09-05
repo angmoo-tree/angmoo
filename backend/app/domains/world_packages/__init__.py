@@ -1,4 +1,5 @@
-"""World Package bounded context.
+"""World Package schemas, contracts, policy, processing and HTTP ownership.
 
-Only :mod:`app.domains.world_packages.public` is a supported import boundary.
+Other domains consume explicit schema/service/contract entries; the app boundary
+connects the router and supplies shared-session runtime factories.
 """

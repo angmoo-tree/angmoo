@@ -147,7 +147,8 @@ def test_l3_public_package_anchors_have_no_reverse_dependencies() -> None:
     )
 
     for boundary in (*PUBLIC_BOUNDARIES, *L3_5_PUBLIC_BOUNDARIES):
-        path = APP_ROOT / "domains" / boundary / "public.py"
+        relative = Path("contracts/__init__.py") if boundary == "world_packages" else Path("public.py")
+        path = APP_ROOT / "domains" / boundary / relative
         assert path.is_file(), path
         imports = _imports(path)
         assert not {
@@ -162,6 +163,6 @@ def test_l3_5_world_package_boundary_is_documented_and_pure() -> None:
     contract = REPO_ROOT / "docs" / "architecture" / "l3-5-world-package-v1.md"
     text = contract.read_text(encoding="utf-8")
 
-    assert "app.domains.world_packages.public" in text
+    assert "app.domains.world_packages.contracts" in text
     assert "zero provider calls" in text
     assert "no route, DB table, archive/filesystem adapter" in text

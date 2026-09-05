@@ -14,13 +14,13 @@ from sqlalchemy.orm import Session, sessionmaker
 from app import models
 from app.core.db import Base
 from app.domains.world_packages.exceptions import WorldPackageContractError
-from app.domains.world_packages.infrastructure.sqlalchemy_destination_seed import (
+from app.runtime.world_packages.seed import (
     SqlAlchemyWorldPackageDestinationSeed,
 )
-from app.domains.world_packages.infrastructure.sqlalchemy_unit_of_work import (
+from app.runtime.world_packages.seed_uow import (
     SqlAlchemyWorldPackageSeedUnitOfWork,
 )
-from app.domains.world_packages.public import (
+from app.domains.world_packages.contracts import (
     CharactersDocument,
     PortableWorldDefinition,
     WorldCharactersDocument,
@@ -398,6 +398,6 @@ def test_package_routes_do_not_reenter_the_legacy_api_route_folder() -> None:
     assert not any("world_package" in path.name for path in route_root.glob("*.py"))
     domain_route = (
         Path(__file__).resolve().parents[2]
-        / "app/domains/world_packages/api/routes.py"
+        / "app/domains/world_packages/router.py"
     )
     assert domain_route.is_file()
