@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2156,
-      "internal_edge_count": 2277,
+      "external_import_count": 2169,
+      "internal_edge_count": 2292,
       "legacy_import_exception_count": 0,
-      "module_count": 685,
+      "module_count": 694,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -29,6 +29,11 @@
             ],
             "module": "app.domains.relationships.application.graph_planning",
             "path": "backend/app/domains/relationships/application/graph_planning.py"
+          },
+          {
+            "imports": [],
+            "module": "app.domains.relationships.constants",
+            "path": "backend/app/domains/relationships/constants.py"
           },
           {
             "imports": [
@@ -110,17 +115,33 @@
           },
           {
             "imports": [
-              "app.core.db"
+              "app.domains.relationships.models.points",
+              "app.domains.relationships.models.projection",
+              "app.domains.relationships.models.social"
             ],
-            "module": "app.domains.relationships.infrastructure.sqlalchemy_models",
-            "path": "backend/app/domains/relationships/infrastructure/sqlalchemy_models.py"
+            "module": "app.domains.relationships.models",
+            "path": "backend/app/domains/relationships/models/__init__.py"
           },
           {
             "imports": [
               "app.core.db"
             ],
-            "module": "app.domains.relationships.infrastructure.sqlalchemy_social_models",
-            "path": "backend/app/domains/relationships/infrastructure/sqlalchemy_social_models.py"
+            "module": "app.domains.relationships.models.points",
+            "path": "backend/app/domains/relationships/models/points.py"
+          },
+          {
+            "imports": [
+              "app.core.db"
+            ],
+            "module": "app.domains.relationships.models.projection",
+            "path": "backend/app/domains/relationships/models/projection.py"
+          },
+          {
+            "imports": [
+              "app.core.db"
+            ],
+            "module": "app.domains.relationships.models.social",
+            "path": "backend/app/domains/relationships/models/social.py"
           },
           {
             "imports": [
@@ -201,6 +222,44 @@
             ],
             "module": "app.domains.relationships.public",
             "path": "backend/app/domains/relationships/public.py"
+          },
+          {
+            "imports": [],
+            "module": "app.domains.relationships.repository",
+            "path": "backend/app/domains/relationships/repository/__init__.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.constants",
+              "app.domains.relationships.models"
+            ],
+            "module": "app.domains.relationships.repository.points",
+            "path": "backend/app/domains/relationships/repository/points.py"
+          },
+          {
+            "imports": [],
+            "module": "app.domains.relationships.service",
+            "path": "backend/app/domains/relationships/service/__init__.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.constants",
+              "app.domains.relationships.models",
+              "app.domains.relationships.repository.points",
+              "app.domains.relationships.utils.points"
+            ],
+            "module": "app.domains.relationships.service.points",
+            "path": "backend/app/domains/relationships/service/points.py"
+          },
+          {
+            "imports": [],
+            "module": "app.domains.relationships.utils",
+            "path": "backend/app/domains/relationships/utils/__init__.py"
+          },
+          {
+            "imports": [],
+            "module": "app.domains.relationships.utils.points",
+            "path": "backend/app/domains/relationships/utils/points.py"
           },
           {
             "imports": [],
@@ -996,7 +1055,7 @@
           },
           {
             "imports": [
-              "app.domains.relationships.infrastructure.sqlalchemy_social_models",
+              "app.domains.relationships.models.social",
               "app.domains.social.contracts.subjective_context",
               "app.domains.social.contracts.today_activity",
               "app.domains.social.models.subjective_context",
@@ -1027,7 +1086,7 @@
           {
             "imports": [
               "app.core.ids",
-              "app.domains.relationships.infrastructure.sqlalchemy_social_models",
+              "app.domains.relationships.models.social",
               "app.domains.social.contracts.subjective_context",
               "app.domains.social.models.subjective_context",
               "app.domains.worlds.models",

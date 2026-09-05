@@ -10,7 +10,7 @@ import json
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
-from app.domains.relationships.infrastructure.sqlalchemy_social_models import (
+from app.domains.relationships.models.social import (
     SocialEvent,
     SocialEventEvidence,
 )

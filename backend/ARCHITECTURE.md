@@ -23,6 +23,8 @@ Angmoo 백엔드는 **업무별 도메인 안에 HTTP 처리, 업무 흐름, 데
 
 Social의 SQL은 `repository/posts.py`, `profiles.py`, `inbox.py`, `media.py`에서 읽습니다. 다른 업무 ORM을 사용하는 복합 조회는 아직 남은 runtime 전환 범위입니다. `service/notifications.py`는 수신자 없음·자기 자신 알림 제외와 실제 저장 순서를 함께 소유하고, `utils/text.py`·`cursors.py`는 IO 없는 변환만 담당합니다. 기존 SQL helper가 호출하는 `finish_write`는 caller의 지연 commit 구간에서 flush만 하므로, 새 위치를 이유로 commit을 추가하거나 제거하지 않습니다. Community/World Feed의 HTTP DTO는 `schemas/community.py`·`feed.py`에 있습니다. `cruds/community.py`에는 아직 이전하지 않은 여러 업무 조회와 정확한 같은 함수 export가 남으며 B5/B4/G5에서 각 실제 소비자를 전환합니다.
 
+> **AR-B5-C1 Relationships 기반과 후보 처리:** 관계 event/evidence/state/change/proposal/outbox는 `relationships/models/social.py`, replay는 `models/projection.py`, 관계 응답 후보는 `models/points.py`가 실제 ORM을 소유합니다. 후보 입력 판단·생성·선택/소비/실패는 `service/points.py`, 해당 SQL은 `repository/points.py`, 결정적 식별자는 `utils/points.py`에 있습니다. 후보의 기존 명시적 commit과 중복 충돌 rollback→winner 조회를 유지합니다. 이벤트 생성·graph 읽기/계획·projection runtime의 나머지 업무 분리는 다음 B5 단계입니다.
+
 ## 목차
 
 1. [프로젝트 구조](#1-프로젝트-구조)

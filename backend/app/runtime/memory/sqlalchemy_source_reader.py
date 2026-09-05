@@ -20,7 +20,7 @@ from app.domains.memory.public import (
     MemoryScope,
     MemorySourceTypeV1,
 )
-from app.domains.relationships.infrastructure.sqlalchemy_social_models import (
+from app.domains.relationships.models.social import (
     RelationshipStateChange,
     SocialEvent,
     SocialEventEvidence,

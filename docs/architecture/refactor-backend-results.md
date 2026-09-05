@@ -714,3 +714,14 @@ Feed 목록·following의 실제 함수 4개, Inbox 업무 함수 4개를 Social
 원본 31개 함수 body/decorator AST는 실제 서비스 소유 이름을 정규화했을 때 동일하다. #258/#263 API/schema/ORM 차이 0이며 변경 보호 테스트 1개 파일의 assertion도 같다. 신규 `tests/social/test_http_ownership.py`의 3 nodes는 두 factory의 정확 서비스 연결·route 순서·동일 인증 함수, 미구성 요청의 명시적 실패, PATCH 입력/404/422/동일 Session 전달을 검증한다. 초기 신규 fixture의 중첩 라우터 순회와 POST/PATCH 불일치를 수정한 뒤 집중 **40 passed / 1 existing warning / 7.75s**다. 제품 동작이나 기존 assertion은 바꾸지 않았다.
 
 전체 split evidence PASS, architecture **685 modules / 2,277 edges / 241 exact legacy edges**, L4 **685 modules / parity97**, ER0 **Postgres78 / migration subset87 / Neo4j24 / Next44 / parity7**다. Agent/resident·World Feed·media job 및 Relationships/projection의 실제 전환은 아직 남아 있다. 신규 source/tests 첫 도입 capture와 통합 Actions/PR/merge는 root가 순차 수행한다.
+
+
+## AR-B5-C1 — Relationships 모델·응답 후보의 실제 저장과 상태 변경
+
+8개 ORM class와 13개 candidate 함수·7개 상수의 실제 소유를 Relationships models/service/repository/utils/constants로 이전했다. SocialEvent/Evidence/State/Change/Proposal/Outbox와 replay의 두 원본 모델 파일은 whole-file 이동하며 실제 runtime reader와 등록 소비자를 전환했다. AgentRelationshipPoint는 기존 AgentRun 모델에서 실제 class만 추출하고 동일 객체 alias를 남겼다. B4-C의 AgentRun/로그 등 소유와 구분하며 해당 원문은 수정하지 않았다.
+
+후보 입력 판단·상태 변경은 service, signature/expiry/pending/count SQL은 repository, ID/payload 변환은 utils가 소유한다. 원래 explicit commit/refresh, 충돌 rollback 후 winner 조회, expiry의 전체 활성 후보 범위와 pending recipient/order/limit은 같다. 13개 함수·7개 상수·8개 ORM의 본문 및 추출 query AST를 확인해 차이가 없었다.
+
+신규 `tests/relationships/test_point_write_boundaries.py` **2 nodes**는 잘못된 입력의 SQL0, 기존 duplicate SELECT1/commit0/선택 상태 보존, 첫 조회 뒤 외부 Session이 저장한 경쟁 winner를 실제 UNIQUE 실패→rollback→재조회로 복구하는 흐름을 검증한다. 기존 Resident 전체·SocialEvent·projection commands/replay·삭제와 함께 **230 passed / 13.83s**다. #258/#263 API/schema/ORM 차이0, 보호 구조 테스트1파일의 경로 전환 assertion PASS, 전체 split PASS다. 경계는 **694 modules / 2,292 edges / 241 exact legacy edges**, L4 694/parity97, ER0 Postgres78/migration subset87/Neo4j24/Next44/parity7이다.
+
+B4-C의 실제 residual 소비자 연결과 G5 공통 model 등록에서 정확 legacy alias를 종료한다. Graph service/계약, event/proposal/projection의 나머지 실제 정책과 Social agent/media/World Feed 작업은 이어지는 B5 범위다. 이 source의 capture/통합 Actions/PR/merge는 root가 별도로 진행한다.

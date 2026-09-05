@@ -1152,6 +1152,17 @@
       "app.domains.identity.service.world_character_credentials",
       "app.domains.media.contracts",
       "app.domains.media.schemas",
+      "app.domains.relationships.constants",
+      "app.domains.relationships.models",
+      "app.domains.relationships.models.points",
+      "app.domains.relationships.models.projection",
+      "app.domains.relationships.models.social",
+      "app.domains.relationships.repository",
+      "app.domains.relationships.repository.points",
+      "app.domains.relationships.service",
+      "app.domains.relationships.service.points",
+      "app.domains.relationships.utils",
+      "app.domains.relationships.utils.points",
       "app.domains.runtime.contracts",
       "app.domains.runtime.schemas",
       "app.domains.social.constants",
@@ -1290,6 +1301,7 @@
       "app.domains.identity.service.world_character_credentials",
       "app.domains.media.contracts",
       "app.domains.media.schemas",
+      "app.domains.relationships.service.points",
       "app.domains.runtime.contracts",
       "app.domains.runtime.schemas",
       "app.domains.social.contracts",
@@ -2528,6 +2540,62 @@
         "owner_stage": "AR-B5 / AR-B8-A",
         "reason": "The named old export preserves the original public activity function/class identity after actual Social ownership moves.",
         "removal_condition": "Move remaining aggregate and legacy test consumers and remove this exact old export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.relationships.models.social",
+        "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
+        "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
+        "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.relationships.models.projection",
+        "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
+        "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
+        "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.models.agent_runs",
+        "target": "app.domains.relationships.models.points",
+        "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
+        "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
+        "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agent_runs",
+        "target": "app.domains.relationships.constants",
+        "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
+        "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
+        "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agent_runs",
+        "target": "app.domains.relationships.utils.points",
+        "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
+        "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
+        "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agent_runs",
+        "target": "app.domains.relationships.repository.points",
+        "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
+        "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
+        "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agent_runs",
+        "target": "app.domains.relationships.service.points",
+        "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
+        "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
+        "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
         "review_date": "2026-09-06"
       }
     ]

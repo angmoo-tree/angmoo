@@ -305,7 +305,9 @@
     "backend/tests/test_l3_5_world_package_closeout.py": "backend/tests/world_packages/test_closeout.py",
     "backend/tests/test_l3_5_world_package_closeout_contract.py": "backend/tests/world_packages/test_closeout_contract.py",
     "backend/tests/test_l3_5_world_package_ui_contract.py": "backend/tests/world_packages/test_ui_contract.py",
-    "backend/app/services/llm_context.py": "backend/app/core/context_text.py"
+    "backend/app/services/llm_context.py": "backend/app/core/context_text.py",
+    "backend/app/domains/relationships/infrastructure/sqlalchemy_social_models.py": "backend/app/domains/relationships/models/social.py",
+    "backend/app/domains/relationships/infrastructure/sqlalchemy_models.py": "backend/app/domains/relationships/models/projection.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -18974,6 +18976,810 @@
         "AR-B2-B6 original HTTP full symbol map"
       ],
       "remaining": "Agent/resident, World Feed UoWs/search, media jobs, Relationships/projection and final legacy cleanup."
+    },
+    "AR-B5-C1": {
+      "status": "IMPLEMENTED; focused230 PASS; source introduction and integration pending",
+      "scope": "8 actual ORM classes, candidate admission/lifecycle, exact point SQL and deterministic helpers; original source/event/schema unchanged.",
+      "split_files": {
+        "backend/app/models/agent_runs.py": [
+          "backend/app/models/agent_runs.py",
+          "backend/app/domains/relationships/models/points.py"
+        ],
+        "backend/app/cruds/agent_runs.py": [
+          "backend/app/cruds/agent_runs.py",
+          "backend/app/domains/relationships/constants.py",
+          "backend/app/domains/relationships/repository/points.py",
+          "backend/app/domains/relationships/service/points.py",
+          "backend/app/domains/relationships/utils/points.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/models/agent_runs.py::AgentRun",
+          "new": "backend/app/models/agent_runs.py::AgentRun",
+          "direct_consumers": [
+            "backend/app/models/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/models/agent_runs.py::AgentActivityLog",
+          "new": "backend/app/models/agent_runs.py::AgentActivityLog",
+          "direct_consumers": [
+            "backend/app/models/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/models/agent_runs.py::AgentFeedCue",
+          "new": "backend/app/models/agent_runs.py::AgentFeedCue",
+          "direct_consumers": [
+            "backend/app/models/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/models/agent_runs.py::AgentDaypartMemoryEvent",
+          "new": "backend/app/models/agent_runs.py::AgentDaypartMemoryEvent",
+          "direct_consumers": [
+            "backend/app/models/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/models/agent_runs.py::AgentRelationshipPoint",
+          "new": "backend/app/domains/relationships/models/points.py::AgentRelationshipPoint",
+          "direct_consumers": [
+            "backend/app/models/__init__.py",
+            "backend/app/models/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/models/agent_runs.py::AgentPublicActionExecution",
+          "new": "backend/app/models/agent_runs.py::AgentPublicActionExecution",
+          "direct_consumers": [
+            "backend/app/models/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::ACTIVE_RUN_STATUSES",
+          "new": "backend/app/cruds/agent_runs.py::ACTIVE_RUN_STATUSES",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::LAST_ERROR_MAX_LENGTH",
+          "new": "backend/app/cruds/agent_runs.py::LAST_ERROR_MAX_LENGTH",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_EMPTY",
+          "new": "backend/app/cruds/agent_runs.py::SLOT_STATUS_EMPTY",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_IDLE",
+          "new": "backend/app/cruds/agent_runs.py::SLOT_STATUS_IDLE",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_BUSY",
+          "new": "backend/app/cruds/agent_runs.py::SLOT_STATUS_BUSY",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_ASSIGNED_IDLE",
+          "new": "backend/app/cruds/agent_runs.py::SLOT_STATUS_ASSIGNED_IDLE",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_RUNNING",
+          "new": "backend/app/cruds/agent_runs.py::SLOT_STATUS_RUNNING",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_COOLDOWN",
+          "new": "backend/app/cruds/agent_runs.py::SLOT_STATUS_COOLDOWN",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_UNHEALTHY",
+          "new": "backend/app/cruds/agent_runs.py::SLOT_STATUS_UNHEALTHY",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::FREE_SLOT_STATUSES",
+          "new": "backend/app/cruds/agent_runs.py::FREE_SLOT_STATUSES",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::DUE_SLOT_STATUSES",
+          "new": "backend/app/cruds/agent_runs.py::DUE_SLOT_STATUSES",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::ORPHANED_RESIDENT_RUN_ERROR",
+          "new": "backend/app/cruds/agent_runs.py::ORPHANED_RESIDENT_RUN_ERROR",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::TEMPORARY_MANUAL_SLOT_RELEASED_ERROR",
+          "new": "backend/app/cruds/agent_runs.py::TEMPORARY_MANUAL_SLOT_RELEASED_ERROR",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_KINDS",
+          "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_KINDS",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_PENDING",
+          "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_PENDING",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_SELECTED",
+          "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_SELECTED",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_CONSUMED",
+          "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_CONSUMED",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_EXPIRED",
+          "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_EXPIRED",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_FAILED",
+          "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_FAILED",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_ACTIVE_STATUSES",
+          "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_ACTIVE_STATUSES",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::AgentRunConflictError",
+          "new": "backend/app/cruds/agent_runs.py::AgentRunConflictError",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::get_credential",
+          "new": "backend/app/cruds/agent_runs.py::get_credential",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::get_default_credential",
+          "new": "backend/app/cruds/agent_runs.py::get_default_credential",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::create_agent_run",
+          "new": "backend/app/cruds/agent_runs.py::create_agent_run",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::mark_agent_run_finished",
+          "new": "backend/app/cruds/agent_runs.py::mark_agent_run_finished",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::set_agent_run_post_id",
+          "new": "backend/app/cruds/agent_runs.py::set_agent_run_post_id",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::get_public_action_execution_by_signature",
+          "new": "backend/app/cruds/agent_runs.py::get_public_action_execution_by_signature",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::create_public_action_execution",
+          "new": "backend/app/cruds/agent_runs.py::create_public_action_execution",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::mark_public_action_execution_finished",
+          "new": "backend/app/cruds/agent_runs.py::mark_public_action_execution_finished",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::relationship_point_pair_key",
+          "new": "backend/app/domains/relationships/utils/points.py::relationship_point_pair_key",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::relationship_point_source_signature",
+          "new": "backend/app/domains/relationships/utils/points.py::relationship_point_source_signature",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::relationship_point_chain_id",
+          "new": "backend/app/domains/relationships/utils/points.py::relationship_point_chain_id",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::_relationship_point_payload",
+          "new": "backend/app/domains/relationships/utils/points.py::_relationship_point_payload",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::create_relationship_point",
+          "new": "backend/app/domains/relationships/service/points.py::create_relationship_point",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::count_relationship_points_for_pair_since",
+          "new": "backend/app/domains/relationships/repository/points.py::count_relationship_points_for_pair_since",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::expire_relationship_points",
+          "new": "backend/app/domains/relationships/service/points.py::expire_relationship_points",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::list_pending_relationship_points",
+          "new": "backend/app/domains/relationships/service/points.py::list_pending_relationship_points",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_selected",
+          "new": "backend/app/domains/relationships/service/points.py::mark_relationship_point_selected",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::release_relationship_point_selection",
+          "new": "backend/app/domains/relationships/service/points.py::release_relationship_point_selection",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_consumed",
+          "new": "backend/app/domains/relationships/service/points.py::mark_relationship_point_consumed",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_replied",
+          "new": "backend/app/domains/relationships/service/points.py::mark_relationship_point_replied",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_failed",
+          "new": "backend/app/domains/relationships/service/points.py::mark_relationship_point_failed",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::get_active_run_for_session",
+          "new": "backend/app/cruds/agent_runs.py::get_active_run_for_session",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::get_active_run_for_tool_auth_key",
+          "new": "backend/app/cruds/agent_runs.py::get_active_run_for_tool_auth_key",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::get_latest_run_for_session",
+          "new": "backend/app/cruds/agent_runs.py::get_latest_run_for_session",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::get_latest_run_for_tool_auth_key",
+          "new": "backend/app/cruds/agent_runs.py::get_latest_run_for_tool_auth_key",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::get_latest_manual_run_for_user",
+          "new": "backend/app/cruds/agent_runs.py::get_latest_manual_run_for_user",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::get_latest_first_greeting_run_for_user",
+          "new": "backend/app/cruds/agent_runs.py::get_latest_first_greeting_run_for_user",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::ensure_agent_slots",
+          "new": "backend/app/cruds/agent_runs.py::ensure_agent_slots",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::claim_agent_slot",
+          "new": "backend/app/cruds/agent_runs.py::claim_agent_slot",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::release_agent_slot",
+          "new": "backend/app/cruds/agent_runs.py::release_agent_slot",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::list_agent_slots",
+          "new": "backend/app/cruds/agent_runs.py::list_agent_slots",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::recover_expired_resident_slot_runs",
+          "new": "backend/app/cruds/agent_runs.py::recover_expired_resident_slot_runs",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::_clear_resident_slot",
+          "new": "backend/app/cruds/agent_runs.py::_clear_resident_slot",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::assign_resident_slot",
+          "new": "backend/app/cruds/agent_runs.py::assign_resident_slot",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::claim_temporary_resident_slot_assignment",
+          "new": "backend/app/cruds/agent_runs.py::claim_temporary_resident_slot_assignment",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::release_temporary_resident_slot_assignment",
+          "new": "backend/app/cruds/agent_runs.py::release_temporary_resident_slot_assignment",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::release_resident_slot_assignment",
+          "new": "backend/app/cruds/agent_runs.py::release_resident_slot_assignment",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::claim_resident_slot_assignment",
+          "new": "backend/app/cruds/agent_runs.py::claim_resident_slot_assignment",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::claim_due_resident_slots",
+          "new": "backend/app/cruds/agent_runs.py::claim_due_resident_slots",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::has_active_resident_slot_run",
+          "new": "backend/app/cruds/agent_runs.py::has_active_resident_slot_run",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::set_resident_slot_run_id",
+          "new": "backend/app/cruds/agent_runs.py::set_resident_slot_run_id",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::extend_resident_slot_lease",
+          "new": "backend/app/cruds/agent_runs.py::extend_resident_slot_lease",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::complete_resident_slot_run",
+          "new": "backend/app/cruds/agent_runs.py::complete_resident_slot_run",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_langgraph_resident_engine.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::create_relationship_point",
+          "new": "backend/app/domains/relationships/repository/points.py::find_by_signature",
+          "source_member": "Original source_signature SELECT before creation and after IntegrityError rollback; same Session and same query count/order.",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/points.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::expire_relationship_points",
+          "new": "backend/app/domains/relationships/repository/points.py::list_expired",
+          "source_member": "Original active statuses and expires_at <= now SELECT; same Session and same query count/order.",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/points.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::list_pending_relationship_points",
+          "new": "backend/app/domains/relationships/repository/points.py::list_pending",
+          "source_member": "Original recipient/status/expiry/order/limit SELECT after expiry workflow; same Session and same query count/order.",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/points.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        }
+      ],
+      "new_tests": [
+        "backend/tests/relationships/test_point_write_boundaries.py"
+      ],
+      "test_nodes": [
+        "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+        "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+      ]
     }
   }
 }

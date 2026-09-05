@@ -1,7 +1,7 @@
 {
-  "edge_count": 2277,
-  "external_import_count": 2156,
-  "module_count": 685,
+  "edge_count": 2292,
+  "external_import_count": 2169,
+  "module_count": 694,
   "modules": [
     {
       "external_imports": [],
@@ -777,6 +777,10 @@
       "imports": [
         "app.core.agent_activity_schedule",
         "app.core.unit_of_work",
+        "app.domains.relationships.constants",
+        "app.domains.relationships.repository.points",
+        "app.domains.relationships.service.points",
+        "app.domains.relationships.utils.points",
         "app.models"
       ],
       "module": "app.cruds.agent_runs",
@@ -3186,6 +3190,13 @@
     },
     {
       "external_imports": [],
+      "imports": [],
+      "module": "app.domains.relationships.constants",
+      "path": "backend/app/domains/relationships/constants.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
       "imports": [
         "app.domains.relationships.domain.graph_retrieval_plan",
         "app.domains.relationships.domain.graph_retrieval_planner"
@@ -3324,6 +3335,31 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [],
+      "imports": [
+        "app.domains.relationships.models.points",
+        "app.domains.relationships.models.projection",
+        "app.domains.relationships.models.social"
+      ],
+      "module": "app.domains.relationships.models",
+      "path": "backend/app/domains/relationships/models/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.domains.relationships.models.points",
+      "path": "backend/app/domains/relationships/models/points.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [
         "__future__",
         "datetime",
@@ -3333,8 +3369,8 @@
       "imports": [
         "app.core.db"
       ],
-      "module": "app.domains.relationships.infrastructure.sqlalchemy_models",
-      "path": "backend/app/domains/relationships/infrastructure/sqlalchemy_models.py",
+      "module": "app.domains.relationships.models.projection",
+      "path": "backend/app/domains/relationships/models/projection.py",
       "wildcard_imports": []
     },
     {
@@ -3349,8 +3385,8 @@
       "imports": [
         "app.core.db"
       ],
-      "module": "app.domains.relationships.infrastructure.sqlalchemy_social_models",
-      "path": "backend/app/domains/relationships/infrastructure/sqlalchemy_social_models.py",
+      "module": "app.domains.relationships.models.social",
+      "path": "backend/app/domains/relationships/models/social.py",
       "wildcard_imports": []
     },
     {
@@ -3474,6 +3510,68 @@
       ],
       "module": "app.domains.relationships.public",
       "path": "backend/app/domains/relationships/public.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.relationships.repository",
+      "path": "backend/app/domains/relationships/repository/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.relationships.constants",
+        "app.domains.relationships.models"
+      ],
+      "module": "app.domains.relationships.repository.points",
+      "path": "backend/app/domains/relationships/repository/points.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.relationships.service",
+      "path": "backend/app/domains/relationships/service/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.relationships.constants",
+        "app.domains.relationships.models",
+        "app.domains.relationships.repository.points",
+        "app.domains.relationships.utils.points"
+      ],
+      "module": "app.domains.relationships.service.points",
+      "path": "backend/app/domains/relationships/service/points.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.relationships.utils",
+      "path": "backend/app/domains/relationships/utils/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "hashlib",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.relationships.utils.points",
+      "path": "backend/app/domains/relationships/utils/points.py",
       "wildcard_imports": []
     },
     {
@@ -6905,8 +7003,8 @@
         "app.domains.identity.models",
         "app.domains.memory.infrastructure.batch_models",
         "app.domains.memory.infrastructure.sqlalchemy_models",
-        "app.domains.relationships.infrastructure.sqlalchemy_models",
-        "app.domains.relationships.infrastructure.sqlalchemy_social_models",
+        "app.domains.relationships.models.projection",
+        "app.domains.relationships.models.social",
         "app.domains.runtime.infrastructure",
         "app.domains.social.models.feed",
         "app.domains.social.models.manual_writes",
@@ -6973,7 +7071,8 @@
         "typing"
       ],
       "imports": [
-        "app.core.db"
+        "app.core.db",
+        "app.domains.relationships.models.points"
       ],
       "module": "app.models.agent_runs",
       "path": "backend/app/models/agent_runs.py",
@@ -7580,7 +7679,7 @@
         "app.domains.identity.public",
         "app.domains.memory.infrastructure",
         "app.domains.memory.public",
-        "app.domains.relationships.infrastructure.sqlalchemy_social_models",
+        "app.domains.relationships.models.social",
         "app.domains.relationships.public",
         "app.integrations.llm",
         "app.runtime.chat.memory_producer",
@@ -8030,7 +8129,7 @@
       "imports": [
         "app.domains.chat.infrastructure.sqlalchemy_models",
         "app.domains.memory.public",
-        "app.domains.relationships.infrastructure.sqlalchemy_social_models",
+        "app.domains.relationships.models.social",
         "app.domains.routines.infrastructure.sqlalchemy_models",
         "app.runtime.memory.subjective_source",
         "app.runtime.social.sqlalchemy_read_repository"
@@ -8071,7 +8170,7 @@
         "sqlalchemy"
       ],
       "imports": [
-        "app.domains.relationships.infrastructure.sqlalchemy_social_models",
+        "app.domains.relationships.models.social",
         "app.runtime.social.sqlalchemy_read_repository",
         "app.runtime.social.sqlalchemy_today_activity"
       ],
@@ -8582,7 +8681,7 @@
       ],
       "imports": [
         "app.core.ids",
-        "app.domains.relationships.infrastructure.sqlalchemy_social_models",
+        "app.domains.relationships.models.social",
         "app.models"
       ],
       "module": "app.runtime.relationships.sqlalchemy_social_event",
@@ -8896,7 +8995,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.domains.relationships.infrastructure.sqlalchemy_social_models",
+        "app.domains.relationships.models.social",
         "app.domains.social.contracts.subjective_context",
         "app.domains.social.contracts.today_activity",
         "app.domains.social.models.subjective_context",
@@ -8947,7 +9046,7 @@
       ],
       "imports": [
         "app.core.ids",
-        "app.domains.relationships.infrastructure.sqlalchemy_social_models",
+        "app.domains.relationships.models.social",
         "app.domains.social.contracts.subjective_context",
         "app.domains.social.models.subjective_context",
         "app.domains.worlds.models",

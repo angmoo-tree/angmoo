@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.core.ids import uuid7_string
-from app.domains.relationships.infrastructure.sqlalchemy_social_models import (
+from app.domains.relationships.models.social import (
     SOCIAL_EVENT_TYPES,
 )
 
