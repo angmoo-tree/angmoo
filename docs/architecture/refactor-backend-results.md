@@ -540,3 +540,21 @@ source `d80e2ed`·`3205878` 및 guard `dc3da4b`·`651bded`·`1fb943d`, 조립 `a
 WC current 구조 검사 보완을 합친 고정 source `1f74549`의 **전체 백엔드 2,153 passed / 기존 22 skipped / 27 warnings / 481.15초**가 통과했다. API·OpenAPI·ORM, JSON v1·deterministic ZIP·미디어 staging/복구·caller transaction·기존 기능의 보존 검사를 유지한다. current architecture **631/2028/legacy272**, public196 및 ER0/L4/Memory batch 현재 경로 검사를 앞선 통합에서 확인했다. 추적 archive **19.30MB**, HEAD 전체 **371 commits / 21.69MB** Gitleaks findings0이다. 이 source 이후 final WC 결과 합류는 문서 한 파일뿐이다.
 
 Package의 application/domain/infrastructure/ports/public.py 생산 구현은 실제 역할 파일로 이전했고, 같은 업무의 불필요한 전달 계층은 제거했다. G5의 등록을 위한 원래 aggregate ORM 소비자는 그 종료 조건으로 추적한다. Media provider/Character·World 이미지 업무 전체는 다음 PR 범위다. 선행 #278 다음 순차 PR-head Actions·실제 Installer·merge·post-merge를 확인하며 이 로컬 결과만으로 §8.2 전체 종료를 선언하지 않는다.
+
+### Package 준비 커밋의 DCO 보완과 보존된 원본 계보
+
+PR #279의 DCO job `101316333023`은 원래 Package 준비 커밋 7개에 Signed-off-by가 없어 실패했다. CONTRIBUTING의 모든 human commit 자체 서명 규칙과 `check_dco.py`는 그대로 유지했다. 미병합 commit의 누락 trailer만 같은 author의 서명으로 보충하고, 후속 Git DAG의 parent와 additions 기록의 구조화된 `record.commit` 참조를 새 SHA로 연결했다. 원 author/committer/date, 7개 이외 메시지 byte, parent 순서와 merge topology는 그대로다.
+
+| 원래 source commit | 서명 보완 후 같은 source commit |
+| --- | --- |
+| `1fb943d3cef9bfc2aed59406cfc69b188293aff6` | `0e7481added543ce52710c9c0b9e0e0894541c5e` |
+| `320587830a054a2c0b05a354348ea14669f7dace` | `91ddee0caa053412599ca6503e1840ddbf608d1e` |
+| `651bded4f3bd15d92043c008286e7307769c423f` | `9f7f4338cc128a870844db883fac8c4e710a8299` |
+| `a61a0ae5c8a0d10b0bb5bdaf27e190cea7ffefa3` | `6e52d89644f5faa5e0732af1eb015f1ee5085c18` |
+| `d80e2ed495f1388e58a693837ca5309e84d92c07` | `b07fa003f83002d086775d90fa3abbb8fc5072fb` |
+| `dc3da4beba804b623ce8691ee9e754b16bb0663c` | `beca573986f5e2135f798334e54b5fbe3bc9c7fa` |
+| `f61cc48d36c6c9134940671587306aabf173efbb` | `9779c059a8a8e69344526ba00edafd8d95bf0608` |
+
+50개 old/new DAG commit을 구성한 최종 후보에서 전체 source/test blobs는 동일하다. 유일한 tree 차이는 기존 additions JSON의 commit 참조이며, tracked_files blob·test_nodes·assertion·suppression·기록 순서·원래 snapshot 내용은 보존했다. 원본 refs는 로컬 `refs/archive/ar-dco-20260905/`에 따로 보관했다. main `38229fa`와 #258/#263 및 동결 baseline/migration은 바꾸지 않았다. 이전 절의 source SHA는 서명 보완 전 실제 검증 기록이며 위와 같은 내용으로 이어진다.
+
+기존 DCO checker는 Package 및 Media 후보 각각 PASS다. 별도 detached Media 후보 `252a8f02f1745cb19f2f7f6a94a60ed3f19c7842`의 stock 전체 보존은 **2,201 protected/current nodes / items37 PASS**이며, 실제 Git의 최초 source 도입·blob·assertion·append-only prefix·API·ORM까지 원래 검사로 통과했다. 별도 독립 검토에서도 각 후보의 기록과 parent/메시지/source 불변식을 확인했다. 새 source/test 의미가 없으므로 앞선 기능 회귀 증거를 유지하며 게시한 새 PR head의 DCO·전체 필수 checks·Installer는 다시 확인한다. 검사 예외·allowlist·DCO remediation 허용 규칙을 추가하지 않았다.
