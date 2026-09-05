@@ -1,7 +1,7 @@
 {
-  "edge_count": 2607,
-  "external_import_count": 2309,
-  "module_count": 762,
+  "edge_count": 2620,
+  "external_import_count": 2317,
+  "module_count": 767,
   "modules": [
     {
       "external_imports": [],
@@ -3351,6 +3351,17 @@
     },
     {
       "external_imports": [
+        "typing"
+      ],
+      "imports": [
+        "app.domains.relationships.contracts.events"
+      ],
+      "module": "app.domains.relationships.contracts.source_posts",
+      "path": "backend/app/domains/relationships/contracts/source_posts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "fastapi",
         "sqlalchemy.orm"
       ],
@@ -3941,6 +3952,24 @@
       ],
       "module": "app.domains.relationships.service.replay",
       "path": "backend/app/domains/relationships/service/replay.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "datetime",
+        "hashlib",
+        "json",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.ids",
+        "app.domains.relationships.contracts.source_posts",
+        "app.domains.relationships.models"
+      ],
+      "module": "app.domains.relationships.service.source_posts",
+      "path": "backend/app/domains/relationships/service/source_posts.py",
       "wildcard_imports": []
     },
     {
@@ -5636,6 +5665,18 @@
     },
     {
       "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.social.models.manual_writes"
+      ],
+      "module": "app.domains.social.repository.manual_writes",
+      "path": "backend/app/domains/social/repository/manual_writes.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "datetime",
         "sqlalchemy",
         "sqlalchemy.orm"
@@ -5869,6 +5910,20 @@
     },
     {
       "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.social.contracts.writes",
+        "app.domains.social.models.manual_writes",
+        "app.domains.social.models.posts",
+        "app.domains.social.repository.manual_writes"
+      ],
+      "module": "app.domains.social.service.manual_writes",
+      "path": "backend/app/domains/social/service/manual_writes.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "PIL",
         "io",
         "uuid"
@@ -6046,6 +6101,16 @@
       "imports": [],
       "module": "app.domains.social.utils.limits",
       "path": "backend/app/domains/social/utils/limits.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "hashlib",
+        "json"
+      ],
+      "imports": [],
+      "module": "app.domains.social.utils.source_writes",
+      "path": "backend/app/domains/social/utils/source_writes.py",
       "wildcard_imports": []
     },
     {
@@ -10236,10 +10301,6 @@
       "external_imports": [
         "__future__",
         "collections.abc",
-        "datetime",
-        "hashlib",
-        "json",
-        "sqlalchemy",
         "sqlalchemy.orm"
       ],
       "imports": [
@@ -10247,11 +10308,15 @@
         "app.core.sqlite_concurrency",
         "app.core.unit_of_work",
         "app.domains.relationships.service.observations",
+        "app.domains.relationships.service.source_posts",
         "app.domains.social.contracts.observations",
         "app.domains.social.contracts.writes",
         "app.domains.social.models.manual_writes",
         "app.domains.social.repository.blocks",
+        "app.domains.social.repository.manual_writes",
         "app.domains.social.schemas.community",
+        "app.domains.social.service.manual_writes",
+        "app.domains.social.utils.source_writes",
         "app.domains.world_characters.public",
         "app.exceptions",
         "app.models",

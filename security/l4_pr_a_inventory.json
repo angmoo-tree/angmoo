@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2309,
-      "internal_edge_count": 2607,
+      "external_import_count": 2317,
+      "internal_edge_count": 2620,
       "legacy_import_exception_count": 0,
-      "module_count": 762,
+      "module_count": 767,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -131,6 +131,13 @@
             ],
             "module": "app.domains.relationships.contracts.replay",
             "path": "backend/app/domains/relationships/contracts/replay.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.contracts.events"
+            ],
+            "module": "app.domains.relationships.contracts.source_posts",
+            "path": "backend/app/domains/relationships/contracts/source_posts.py"
           },
           {
             "imports": [
@@ -505,6 +512,15 @@
           },
           {
             "imports": [
+              "app.core.ids",
+              "app.domains.relationships.contracts.source_posts",
+              "app.domains.relationships.models"
+            ],
+            "module": "app.domains.relationships.service.source_posts",
+            "path": "backend/app/domains/relationships/service/source_posts.py"
+          },
+          {
+            "imports": [
               "app.domains.relationships.contracts.outbox",
               "app.domains.relationships.policies.events",
               "app.domains.relationships.repository.sqlite_projection_state"
@@ -827,6 +843,13 @@
           },
           {
             "imports": [
+              "app.domains.social.models.manual_writes"
+            ],
+            "module": "app.domains.social.repository.manual_writes",
+            "path": "backend/app/domains/social/repository/manual_writes.py"
+          },
+          {
+            "imports": [
               "app.domains.social.models.posts"
             ],
             "module": "app.domains.social.repository.media",
@@ -979,6 +1002,16 @@
           },
           {
             "imports": [
+              "app.domains.social.contracts.writes",
+              "app.domains.social.models.manual_writes",
+              "app.domains.social.models.posts",
+              "app.domains.social.repository.manual_writes"
+            ],
+            "module": "app.domains.social.service.manual_writes",
+            "path": "backend/app/domains/social/service/manual_writes.py"
+          },
+          {
+            "imports": [
               "app.config",
               "app.domains.media.contracts",
               "app.integrations.media.images"
@@ -1106,6 +1139,11 @@
             "imports": [],
             "module": "app.domains.social.utils.limits",
             "path": "backend/app/domains/social/utils/limits.py"
+          },
+          {
+            "imports": [],
+            "module": "app.domains.social.utils.source_writes",
+            "path": "backend/app/domains/social/utils/source_writes.py"
           },
           {
             "imports": [],
@@ -1422,11 +1460,15 @@
               "app.core.sqlite_concurrency",
               "app.core.unit_of_work",
               "app.domains.relationships.service.observations",
+              "app.domains.relationships.service.source_posts",
               "app.domains.social.contracts.observations",
               "app.domains.social.contracts.writes",
               "app.domains.social.models.manual_writes",
               "app.domains.social.repository.blocks",
+              "app.domains.social.repository.manual_writes",
               "app.domains.social.schemas.community",
+              "app.domains.social.service.manual_writes",
+              "app.domains.social.utils.source_writes",
               "app.domains.world_characters.public",
               "app.exceptions",
               "app.models",

@@ -1099,3 +1099,10 @@ Relationships가 관찰 원본 적격성·방향·중복 receipt·친숙도 1 �
 기존 관찰·SQL·공유 정책·WC 검증 12개와 남은 source writer 13개 AST 계약이 동일하다. 첫 범위 회귀는 관찰 추출 중 남은 source 작성이 사용하는 UTC import를 제거한 오류로 30 PASS/10 FAIL이었으며 원래 import를 복원했다. 기존 assertion을 바꾸지 않고 최종 **44 passed / 기존 warning 1 / 22.74초**를 확인했다. 추가 네 node는 같은 Session/attached 객체/lock→Post→target→block 순서와 실제 caller rollback, 비활성 observer·membership 및 역방향 block을 관계 저장 전에 차단하는 동작을 검증한다. Source capture/전체 B5/Hosted CI/installer는 후속 통합에서 검증한다.
 
 C7 최종 경계 **762 modules / 2,607 edges / exact legacy 205**, PR258/263 API·응답·ORM 및 전체 split evidence 오류 0을 확인했다. 전체 원문 분할 지도에는 임시 runtime export의 `__all__`도 포함했고 검사 규칙을 완화하지 않았다. L4·ER0 current inventory도 통과했다.
+
+
+## AR-B5-C8-A — 성공 source·evidence와 Social 중복 쓰기 기반
+
+Relationships가 source 성공 기록과 evidence digest/저장 두 flush를 실제로 소유한다. `audit_only`와 stage failure injection 순서를 그대로 유지하며 관찰·관계 delta·projection을 추가하지 않았다. Social의 입력 digest·기존 ledger 검증·공개 root 정책 및 candidate 조회도 실제 역할로 이전했다. 기존 runtime UoW는 원래 함수 객체를 직접 호출하며 다음 단계에서 남은 전체 쓰기 정책을 이전한다. 원문의 실제 source 본문/SQL과 기존 runtime 나머지 정의를 비교하고 기존 동시성·중복·실패 롤백·provider-free 회귀를 검증했다. 새 test node나 보호 assertion 변경은 없다. Source capture/전체 B5/Hosted CI/installer는 후속 통합에서 검증한다.
+
+C8-A 집중 **31 passed / 기존 warning 1 / 16.80초**다. 이전한 다섯 함수 본문(ledger SQL 복원 비교 포함)과 남은 runtime 아홉 정의를 원문과 동일 비교했다. 최종 경계 **767 modules / 2,620 edges / exact legacy 205**, API·응답·ORM·전체 split evidence와 L4·ER0 current inventory도 통과했다.

@@ -7,17 +7,17 @@ domain code never imports this adapter.
 
 from __future__ import annotations
 
-import json
 from collections.abc import Callable
-from datetime import UTC, datetime
-from hashlib import sha256
 
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import models
 from app.core import unit_of_work
 from app.core.ids import uuid7_string
+from app.domains.relationships.service.source_posts import record_source_post_event as _record_source_event
+from app.domains.social.utils.source_writes import _request_hash
+from app.domains.social.repository.manual_writes import _candidate
+from app.domains.social.service.manual_writes import _existing_write, _public_root_post
 from app.domains.social.models.manual_writes import (
     OwnerManualInboxCandidate,
     OwnerManualSocialWrite,
@@ -443,58 +443,6 @@ def _require_membership(
         raise SocialWriteForbiddenError("world_membership_inactive")
 
 
-def _request_hash(*, operation: str, payload: dict[str, object]) -> str:
-    encoded = json.dumps(
-        {"operation": operation, **payload},
-        ensure_ascii=False,
-        sort_keys=True,
-        separators=(",", ":"),
-    ).encode("utf-8")
-    return sha256(encoded).hexdigest()
-
-
-def _existing_write(
-    db: Session,
-    *,
-    world_id: str,
-    principal_user_id: str,
-    idempotency_key: str,
-    request_sha256: str,
-) -> tuple[OwnerManualSocialWrite, models.Post] | None:
-    row = db.scalar(
-        select(OwnerManualSocialWrite).where(
-            OwnerManualSocialWrite.world_id == world_id,
-            OwnerManualSocialWrite.owner_user_id == principal_user_id,
-            OwnerManualSocialWrite.idempotency_key == idempotency_key,
-        )
-    )
-    if row is None:
-        return None
-    if row.request_sha256 != request_sha256:
-        raise SocialWriteConflictError("idempotency_payload_mismatch")
-    post = db.get(models.Post, row.result_post_id)
-    if post is None or post.world_id != world_id:
-        raise SocialWriteConflictError("idempotency_result_missing")
-    return row, post
-
-
-def _public_root_post(
-    db: Session, *, world_id: str, target_post_id: str
-) -> models.Post:
-    post = db.get(models.Post, target_post_id)
-    if (
-        post is None
-        or post.world_id != world_id
-        or post.reply_to_post_id is not None
-        or post.deleted_at is not None
-        or post.report_hidden_at is not None
-        or post.visibility != "public"
-        or post.author_world_character_id is None
-    ):
-        raise SocialWriteNotFoundError("reply_target_unavailable")
-    return post
-
-
 def _owner_reply_target(
     db: Session,
     *,
@@ -552,81 +500,6 @@ def _autonomous_reply_target(
     ):
         raise SocialWriteForbiddenError("autonomous_reply_target_invalid")
     return post, target
-
-
-def _candidate(
-    db: Session, *, reply_id: str, target_id: str
-) -> OwnerManualInboxCandidate | None:
-    return db.scalar(
-        select(OwnerManualInboxCandidate).where(
-            OwnerManualInboxCandidate.source_reply_post_id == reply_id,
-            OwnerManualInboxCandidate.target_world_character_id == target_id,
-        )
-    )
-
-
-def _record_source_event(
-    db: Session,
-    *,
-    world_id: str,
-    actor_world_character_id: str,
-    target_world_character_id: str | None,
-    operation: str,
-    post: models.Post,
-    root_post: models.Post,
-    request_key: str,
-    failure_injector: FailureInjector | None,
-) -> None:
-    occurred_at = datetime.now(UTC)
-    event_id = uuid7_string()
-    event_type = "post_published" if operation == "post" else "reply_created"
-    event_key = sha256(
-        f"social-source-v1|{world_id}|{actor_world_character_id}|{request_key}|{operation}".encode()
-    ).hexdigest()
-    db.add(
-        models.SocialEvent(
-            id=event_id,
-            world_id=world_id,
-            actor_world_character_id=actor_world_character_id,
-            target_world_character_id=target_world_character_id,
-            event_type=event_type,
-            result="succeeded",
-            occurred_at=occurred_at,
-            idempotency_key=event_key,
-            schema_version="social-event-v1",
-            retrieval_status="audit_only",
-        )
-    )
-    db.flush()
-    if failure_injector is not None:
-        failure_injector("after_source_event")
-    content_digest = sha256(
-        json.dumps(
-            {"title": post.title, "body": post.body},
-            ensure_ascii=False,
-            sort_keys=True,
-            separators=(",", ":"),
-        ).encode("utf-8")
-    ).hexdigest()
-    db.add(
-        models.SocialEventEvidence(
-            id=uuid7_string(),
-            social_event_id=event_id,
-            evidence_kind="post" if operation == "post" else "reply_post",
-            source_object_type="post",
-            source_object_id=post.id,
-            root_post_id=root_post.id,
-            source_post_id=post.id,
-            target_post_id=None if operation == "post" else root_post.id,
-            content_sha256=content_digest,
-            source_visibility_at_event=post.visibility,
-            source_author_id_at_event=actor_world_character_id,
-            occurred_at=occurred_at,
-        )
-    )
-    db.flush()
-    if failure_injector is not None:
-        failure_injector("after_source_evidence")
 
 
 def _post_snapshot(db: Session, post: models.Post) -> SocialPostSnapshot:

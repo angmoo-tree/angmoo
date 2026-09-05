@@ -682,3 +682,6 @@ Social-memory 진단의 소유권·현재 근거 상태·응답 구성은 `relat
 
 
 실제 관찰의 원본 적격성·방향별 친숙도·중복 receipt·그래프 outbox는 `relationships/service/observations.py`, 해당 evidence SQL은 `repository/observations.py`가 소유한다. Social의 관찰 입력/결과 계약은 그대로 사용하며 `runtime/relationships/observation_references.py`가 caller의 같은 Session에서 WC active membership과 Social Post/양방향 block 조회를 연결한다. 성공 source 자체를 복제하거나 감정을 추론하지 않으며 기존 flush 위치와 caller rollback/commit 책임을 유지한다. Source 작성 runtime UoW의 나머지 전환은 별도로 이어진다.
+
+
+수동·검증된 자율 작성의 성공 source와 evidence는 `relationships/service/source_posts.py`가 원래 `audit_only` 상태로 저장한다. 실제 관찰에 의한 관계 receipt와는 다른 책임이다. source 작성의 중복 digest·이미 작성한 결과 확인·공개 root 검사와 ledger/candidate 조회는 각각 `social/utils/source_writes.py`, `service/manual_writes.py`, `repository/manual_writes.py`에 있다. fault injection 위치와 두 번의 원래 flush를 보존하고 caller의 원자적 쓰기 경계 안에서 실행한다.
