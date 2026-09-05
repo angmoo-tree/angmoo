@@ -18,9 +18,9 @@ from app.domains.social.models.subjective_context import (
     SocialActionSubjectiveContext,
 )
 from app.domains.worlds.models import World
-from app.runtime.social.sqlalchemy_read_repository import (
-    social_persistence_models as models,
-)
+from app.domains.routines.models.resident import AgentPublicActionExecution
+from app.domains.social.models.posts import Post
+from app.domains.world_characters.models import WorldCharacter
 from app.core.ids import uuid7_string
 from app.domains.social.contracts.subjective_context import ActionSubjectiveContextV1
 
@@ -31,7 +31,7 @@ class SubjectiveContextPersistenceError(ValueError):
 
 def subjective_context_digest(
     *,
-    execution: models.AgentPublicActionExecution,
+    execution: AgentPublicActionExecution,
     event: SocialEvent,
     source_content_digest: str | None,
     context: ActionSubjectiveContextV1,
@@ -61,7 +61,7 @@ def subjective_context_digest(
 def record_declared_subjective_context(
     db: Session,
     *,
-    execution: models.AgentPublicActionExecution,
+    execution: AgentPublicActionExecution,
     event: SocialEvent,
     source_post_id: str | None,
     context: ActionSubjectiveContextV1 | None,
@@ -95,7 +95,7 @@ def record_declared_subjective_context(
             "subjective_context_execution_event_mismatch"
         )
     world = db.get(World, event.world_id)
-    actor = db.get(models.WorldCharacter, event.actor_world_character_id)
+    actor = db.get(WorldCharacter, event.actor_world_character_id)
     if (
         world is None
         or actor is None
@@ -127,7 +127,7 @@ def record_declared_subjective_context(
         )
     canonical_post_id = source_post_id or evidence_post_id
     if canonical_post_id is not None:
-        post = db.get(models.Post, canonical_post_id)
+        post = db.get(Post, canonical_post_id)
         if (
             post is None
             or post.world_id != world.id

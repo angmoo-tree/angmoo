@@ -30,9 +30,10 @@ from app.domains.routines.models import (
     JointActivity,
     JointActivityParticipant,
 )
-from app.runtime.social.sqlalchemy_read_repository import (
-    social_persistence_models,
-)
+from app.domains.social.models.feed import WorldCharacterBlock, WorldCharacterFeedObservation
+from app.domains.social.models.posts import Post, PostLike
+from app.domains.world_characters.models import WorldCharacter
+from app.domains.worlds.models import WorldMembership
 
 
 class _MemorySourceModels:
@@ -46,14 +47,14 @@ class _MemorySourceModels:
     RelationshipStateChange = RelationshipStateChange
     SocialEvent = SocialEvent
     SocialEventEvidence = SocialEventEvidence
-    Post = social_persistence_models.Post
-    PostLike = social_persistence_models.PostLike
-    WorldCharacter = social_persistence_models.WorldCharacter
-    WorldCharacterBlock = social_persistence_models.WorldCharacterBlock
+    Post = Post
+    PostLike = PostLike
+    WorldCharacter = WorldCharacter
+    WorldCharacterBlock = WorldCharacterBlock
     WorldCharacterFeedObservation = (
-        social_persistence_models.WorldCharacterFeedObservation
+        WorldCharacterFeedObservation
     )
-    WorldMembership = social_persistence_models.WorldMembership
+    WorldMembership = WorldMembership
 
 
 models = _MemorySourceModels()

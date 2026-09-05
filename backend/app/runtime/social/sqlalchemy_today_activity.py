@@ -18,9 +18,11 @@ from app.domains.social.models.subjective_context import (
     SocialActionSubjectiveContext,
 )
 from app.domains.worlds.models import World
-from app.runtime.social.sqlalchemy_read_repository import (
-    social_persistence_models as models,
-)
+from app.domains.routines.models.resident import AgentPublicActionExecution
+from app.domains.social.models.feed import WorldCharacterBlock
+from app.domains.social.models.posts import Post
+from app.domains.world_characters.models import WorldCharacter
+from app.domains.worlds.models import WorldMembership
 from app.domains.social.contracts.subjective_context import (
     ActionEmotionLabel, ActionMotivationKind, ActionSubjectiveContextV1,
     SubjectiveContextProvenance,
@@ -73,26 +75,26 @@ class SqlAlchemyTodaySocialActivityReader:
             ).order_by(SocialEvent.occurred_at.desc(), SocialEvent.id)
         )
         own_posts, own_overflow = self._bounded(
-            select(models.Post).where(
-                models.Post.world_id == world_id,
-                models.Post.author_world_character_id == subject_world_character_id,
-                models.Post.created_at >= start,
-                models.Post.created_at <= end,
-            ).order_by(models.Post.created_at.desc(), models.Post.id)
+            select(Post).where(
+                Post.world_id == world_id,
+                Post.author_world_character_id == subject_world_character_id,
+                Post.created_at >= start,
+                Post.created_at <= end,
+            ).order_by(Post.created_at.desc(), Post.id)
         )
         # Direct replies only: root visibility never grants unrelated siblings.
-        subject_post_ids = select(models.Post.id).where(
-            models.Post.world_id == world_id,
-            models.Post.author_world_character_id == subject_world_character_id,
+        subject_post_ids = select(Post.id).where(
+            Post.world_id == world_id,
+            Post.author_world_character_id == subject_world_character_id,
         )
         received, received_overflow = self._bounded(
-            select(models.Post).where(
-                models.Post.world_id == world_id,
-                models.Post.created_at >= start,
-                models.Post.created_at <= end,
-                models.Post.reply_to_post_id.in_(subject_post_ids),
-                models.Post.author_world_character_id != subject_world_character_id,
-            ).order_by(models.Post.created_at.desc(), models.Post.id)
+            select(Post).where(
+                Post.world_id == world_id,
+                Post.created_at >= start,
+                Post.created_at <= end,
+                Post.reply_to_post_id.in_(subject_post_ids),
+                Post.author_world_character_id != subject_world_character_id,
+            ).order_by(Post.created_at.desc(), Post.id)
         )
         evidence_rows = self._by_ids(
             SocialEventEvidence, SocialEventEvidence.social_event_id,
@@ -103,7 +105,7 @@ class SqlAlchemyTodaySocialActivityReader:
             evidence_by_event.setdefault(evidence.social_event_id, evidence)
         executions = {
             row.id: row for row in self._by_ids(
-                models.AgentPublicActionExecution, models.AgentPublicActionExecution.id,
+                AgentPublicActionExecution, AgentPublicActionExecution.id,
                 [row.public_action_execution_id for row in evidence_rows
                  if row.public_action_execution_id is not None],
             )
@@ -116,7 +118,7 @@ class SqlAlchemyTodaySocialActivityReader:
                 ) if value is not None
             )
         posts = {post.id: post for post in own_posts + received}
-        posts.update({row.id: row for row in self._by_ids(models.Post, models.Post.id, post_ids)})
+        posts.update({row.id: row for row in self._by_ids(Post, Post.id, post_ids)})
         frontier = {
             post.reply_to_post_id for post in posts.values()
             if post.reply_to_post_id is not None and post.reply_to_post_id not in posts
@@ -124,7 +126,7 @@ class SqlAlchemyTodaySocialActivityReader:
         for _ in range(MAX_TODAY_BRANCH_DEPTH):
             if not frontier:
                 break
-            ancestors = self._by_ids(models.Post, models.Post.id, frontier)
+            ancestors = self._by_ids(Post, Post.id, frontier)
             posts.update({post.id: post for post in ancestors})
             frontier = {
                 post.reply_to_post_id for post in ancestors
@@ -329,9 +331,9 @@ class SqlAlchemyTodaySocialActivityReader:
 
     def _validate_scope(self, owner_id, world_id, subject_id) -> None:
         world = self._db.get(World, world_id, populate_existing=True)
-        subject = self._db.get(models.WorldCharacter, subject_id, populate_existing=True)
+        subject = self._db.get(WorldCharacter, subject_id, populate_existing=True)
         membership = None if subject is None else self._db.get(
-            models.WorldMembership, subject.membership_id, populate_existing=True
+            WorldMembership, subject.membership_id, populate_existing=True
         )
         if (
             world is None or world.owner_user_id != owner_id
@@ -342,21 +344,21 @@ class SqlAlchemyTodaySocialActivityReader:
 
     def _active_world_character_ids(self, world_id):
         return set(self._db.scalars(
-            select(models.WorldCharacter.id).join(
-                models.WorldMembership, models.WorldMembership.id == models.WorldCharacter.membership_id,
+            select(WorldCharacter.id).join(
+                WorldMembership, WorldMembership.id == WorldCharacter.membership_id,
             ).where(
-                models.WorldCharacter.world_id == world_id,
-                models.WorldCharacter.status == "active",
-                models.WorldMembership.world_id == world_id,
-                models.WorldMembership.status == "active",
+                WorldCharacter.world_id == world_id,
+                WorldCharacter.status == "active",
+                WorldMembership.world_id == world_id,
+                WorldMembership.status == "active",
             )
         ).all())
 
     def _blocked_counterparts(self, world_id, subject_id):
-        rows = self._db.scalars(select(models.WorldCharacterBlock).where(
-            models.WorldCharacterBlock.world_id == world_id,
-            or_(models.WorldCharacterBlock.blocker_world_character_id == subject_id,
-                models.WorldCharacterBlock.blocked_world_character_id == subject_id),
+        rows = self._db.scalars(select(WorldCharacterBlock).where(
+            WorldCharacterBlock.world_id == world_id,
+            or_(WorldCharacterBlock.blocker_world_character_id == subject_id,
+                WorldCharacterBlock.blocked_world_character_id == subject_id),
         )).all()
         return {
             row.blocked_world_character_id if row.blocker_world_character_id == subject_id

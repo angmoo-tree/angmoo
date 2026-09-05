@@ -688,3 +688,6 @@ Social-memory 진단의 소유권·현재 근거 상태·응답 구성은 `relat
 
 
 수동·검증된 자율 작성의 actor/target 허용·중복 결과·게시물·inbox candidate·응답 판단은 `social/service/source_writes.py::SocialSourceWriteService`가 구현한다. 같은 도메인의 Timeline 서비스를 받아 기존 정책을 그대로 사용한다. `runtime/social/sqlalchemy_unit_of_work.py`는 SQLite BEGIN IMMEDIATE·재시도·최종 commit을 소유하고 `source_references.py`에서 Character/Identity/WC/membership 및 성공 사건 쓰기를 같은 Session으로 연결한다. WC nullable actor query는 해당 repository의 실제 조회이며 외부 ORM을 서비스 이름으로 재export하지 않는다. 협력 객체 생성은 조회를 수행하지 않고 actor/target 정책은 원래 잠금 이후 순서로 실행한다.
+
+
+Social 임시 `_SocialPersistenceModels`/`social_persistence_models` export는 종료했다. Runtime의 프로필·Today·자기 설명·Memory 근거 복합 조회는 Social/Character/WC/World/Routines의 실제 ORM 클래스를 import한다. 이 변경은 query 조립을 runtime에서 도메인으로 우회 수출하는 변경이 아니며 원래 SQL과 cursor·bounded batch·검증 순서는 유지한다. 각 남은 실제 Social 조회 정책/SQL의 소유 분리는 다음 단계에서 이어진다.

@@ -2,7 +2,7 @@
   "architecture": {
     "backend": {
       "external_import_count": 2326,
-      "internal_edge_count": 2638,
+      "internal_edge_count": 2651,
       "legacy_import_exception_count": 0,
       "module_count": 771,
       "module_cycles": [],
@@ -1465,10 +1465,14 @@
           {
             "imports": [
               "app.config",
+              "app.domains.characters.models",
+              "app.domains.social.models.feed",
+              "app.domains.social.models.posts",
               "app.domains.social.public",
+              "app.domains.world_characters.models",
               "app.domains.world_characters.public",
+              "app.domains.worlds.models",
               "app.pagination",
-              "app.runtime.social.sqlalchemy_read_repository",
               "app.runtime.world_characters.composition"
             ],
             "module": "app.runtime.social.sqlalchemy_profile_repository",
@@ -1488,11 +1492,14 @@
           {
             "imports": [
               "app.domains.relationships.models.social",
+              "app.domains.routines.models.resident",
               "app.domains.social.contracts.subjective_context",
               "app.domains.social.contracts.today_activity",
+              "app.domains.social.models.feed",
+              "app.domains.social.models.posts",
               "app.domains.social.models.subjective_context",
+              "app.domains.world_characters.models",
               "app.domains.worlds.models",
-              "app.runtime.social.sqlalchemy_read_repository",
               "app.runtime.social.subjective_context"
             ],
             "module": "app.runtime.social.sqlalchemy_today_activity",
@@ -1517,10 +1524,12 @@
             "imports": [
               "app.core.ids",
               "app.domains.relationships.models.social",
+              "app.domains.routines.models.resident",
               "app.domains.social.contracts.subjective_context",
+              "app.domains.social.models.posts",
               "app.domains.social.models.subjective_context",
-              "app.domains.worlds.models",
-              "app.runtime.social.sqlalchemy_read_repository"
+              "app.domains.world_characters.models",
+              "app.domains.worlds.models"
             ],
             "module": "app.runtime.social.subjective_context",
             "path": "backend/app/runtime/social/subjective_context.py"

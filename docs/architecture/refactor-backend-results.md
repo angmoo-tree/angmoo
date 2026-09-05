@@ -1115,3 +1115,12 @@ SocialSourceWriteService가 수동/자율 actor·target 허용, idempotency repl
 실제 정책·helper·executor 15개 AST와 기존 관찰 composition class 본문이 동일하다. 먼저 기존 집중 **34 passed / 17.58초**를 확인했다. 추가 source ownership 회귀는 생성 시 조회 없음, BEGIN 이후 같은 Session/attached row, source evidence의 audit_only·관계/graph 없음, 요청당 최종 commit 1회와 replay 중 source 재생성 없음을 검증한다. 기존 assertion은 유지했다. Source capture/전체 B5/Hosted CI/installer는 후속 통합에서 검증한다.
 
 C8-B 최종 집중 **35 passed / 기존 warning 1 / 19.61초**, 경계 **771 modules / 2,638 edges / exact legacy 203**다. Runtime executor의 전역 ORM/옛 Community 서비스 임시 edge 두 개를 종료했다. PR258/263 API·응답·ORM와 전체 split evidence, L4·ER0 current inventory도 통과했다.
+
+
+## AR-B5-C9-A — 임시 Social ORM aggregate 종료와 실제 소비자 연결
+
+행동이 없는 `_SocialPersistenceModels`와 instance export를 제거하고 실제 다섯 runtime 소비자가 각 소유 도메인의 같은 ORM 클래스를 직접 import하도록 전환했다. 프로필/Today/선언된 자기 설명/Memory 근거의 SQL·암호화 cursor·bounded query·공개 범위 로직은 바꾸지 않았다. 다섯 소비자와 남은 read adapter의 31개 완전한 정의를 import 이름 정규화 후 원문과 동일 비교했다. Memory의 이 branch `sqlalchemy_source_reader.py` import 수정은 root A10/A12 통합 시 실제 `source_queries.py`로 연결하며 Memory 실제 service에는 ORM을 추가하지 않는다.
+
+처음 집중은 **43 PASS/1 FAIL**이었다. 실패는 root가 이미 확인한 기존 Memory fixture의 Post+observation add_all 시 observation INSERT가 먼저 실행된 FK 오류로, 실제 reader 호출 전이었다. 원래 FK/DDL/assertion을 유지하고 fixture만 Post add→flush→observation add 순서로 명시했다. Production은 기존 source 조회 및 begin_nested pre-flush 후 observation을 저장하며 정책을 변경하지 않았다. 신규 node는 없고 전체 B5/source capture/Hosted CI/installer는 후속 통합에서 검증한다.
+
+C9-A 최종 집중 **44 passed / 기존 warning 1 / 9.36초**, 경계 **771 modules / 2,651 edges / exact legacy 203**다. 변경한 기존 fixture의 보호 assertion은 모두 동일했고 PR258/263 API·응답·ORM·전체 split evidence 및 L4·ER0 current inventory가 통과했다.

@@ -9,9 +9,8 @@ from app.domains.relationships.models.social import (
     SocialEvent,
     SocialEventEvidence,
 )
-from app.runtime.social.sqlalchemy_read_repository import (
-    social_persistence_models as models,
-)
+from app.domains.routines.models.resident import AgentPublicActionExecution
+from app.domains.social.models.posts import PostLike
 from app.runtime.social.sqlalchemy_today_activity import (
     SqlAlchemyTodaySocialActivityReader,
 )
@@ -24,7 +23,7 @@ def read_subjective_source(session, scope, *, source_type, source_id):
     elif source_type == "SOCIAL_EVENT":
         predicate = evidence_table.social_event_id == source_id
     elif source_type == "REACTION":
-        reaction = session.get(models.PostLike, int(source_id))
+        reaction = session.get(PostLike, int(source_id))
         if (
             reaction is None
             or reaction.actor_world_character_id != scope.subject_world_character_id
@@ -73,8 +72,8 @@ def read_subjective_source(session, scope, *, source_type, source_id):
     executions = {
         row.id: row
         for row in session.scalars(
-            select(models.AgentPublicActionExecution).where(
-                models.AgentPublicActionExecution.id.in_(execution_ids)
+            select(AgentPublicActionExecution).where(
+                AgentPublicActionExecution.id.in_(execution_ids)
             )
         )
     }

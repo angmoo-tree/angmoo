@@ -916,7 +916,10 @@ def test_sqlalchemy_source_reader_requires_observation_visibility_and_no_block(
         claimed_at=NOW,
         observed_at=NOW,
     )
-    memory_session.add_all([post, observation])
+    # The observation FK requires its source Post before the dependent INSERT.
+    memory_session.add(post)
+    memory_session.flush()
+    memory_session.add(observation)
     memory_session.commit()
     reader = SqlAlchemyMemorySourceEvidenceReader(memory_session)
 

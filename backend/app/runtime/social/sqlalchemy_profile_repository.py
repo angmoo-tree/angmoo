@@ -34,9 +34,11 @@ from app.domains.social.public import (
 from app.domains.world_characters.public import (
     WorldCharacterProfileNotFoundError,
 )
-from app.runtime.social.sqlalchemy_read_repository import (
-    social_persistence_models as models,
-)
+from app.domains.characters.models import Character
+from app.domains.social.models.feed import WorldCharacterBlock
+from app.domains.social.models.posts import Post, PostLike, PostMedia
+from app.domains.world_characters.models import WorldCharacter
+from app.domains.worlds.models import WorldMembership
 
 _CURSOR_VERSION = "world-character-social-profile-cursor-v1"
 _CURSOR_AAD = _CURSOR_VERSION.encode("ascii")
@@ -107,21 +109,21 @@ class SqlAlchemyWorldCharacterSocialProfileReader:
         query: WorldCharacterSocialProfileQuery,
     ) -> tuple[str, ...]:
         rows = self.db.scalars(
-            select(models.WorldCharacter.id)
+            select(WorldCharacter.id)
             .join(
-                models.WorldMembership,
-                (models.WorldMembership.id == models.WorldCharacter.membership_id)
-                & (models.WorldMembership.world_id == models.WorldCharacter.world_id),
+                WorldMembership,
+                (WorldMembership.id == WorldCharacter.membership_id)
+                & (WorldMembership.world_id == WorldCharacter.world_id),
             )
             .where(
-                models.WorldCharacter.world_id == query.world_id,
-                models.WorldCharacter.owner_user_id == query.current_user_id,
-                models.WorldCharacter.control_mode == "owner_controlled",
-                models.WorldCharacter.status == "active",
-                models.WorldMembership.user_id == query.current_user_id,
-                models.WorldMembership.status == "active",
+                WorldCharacter.world_id == query.world_id,
+                WorldCharacter.owner_user_id == query.current_user_id,
+                WorldCharacter.control_mode == "owner_controlled",
+                WorldCharacter.status == "active",
+                WorldMembership.user_id == query.current_user_id,
+                WorldMembership.status == "active",
             )
-            .order_by(models.WorldCharacter.id.asc())
+            .order_by(WorldCharacter.id.asc())
         )
         return tuple(str(value) for value in rows)
 
@@ -134,15 +136,15 @@ class SqlAlchemyWorldCharacterSocialProfileReader:
             return frozenset()
         rows = self.db.execute(
             select(
-                models.WorldCharacterBlock.blocker_world_character_id,
-                models.WorldCharacterBlock.blocked_world_character_id,
+                WorldCharacterBlock.blocker_world_character_id,
+                WorldCharacterBlock.blocked_world_character_id,
             ).where(
-                models.WorldCharacterBlock.world_id == world_id,
+                WorldCharacterBlock.world_id == world_id,
                 or_(
-                    models.WorldCharacterBlock.blocker_world_character_id.in_(
+                    WorldCharacterBlock.blocker_world_character_id.in_(
                         viewer_ids
                     ),
-                    models.WorldCharacterBlock.blocked_world_character_id.in_(
+                    WorldCharacterBlock.blocked_world_character_id.in_(
                         viewer_ids
                     ),
                 ),
@@ -163,27 +165,27 @@ class SqlAlchemyWorldCharacterSocialProfileReader:
         blocked_ids: frozenset[str],
     ) -> WorldCharacterSocialProfileCounts:
         authored = (
-            models.Post.world_id == query.world_id,
-            models.Post.author_world_character_id == query.world_character_id,
-            models.Post.visibility == "public",
-            models.Post.deleted_at.is_(None),
-            models.Post.report_hidden_at.is_(None),
+            Post.world_id == query.world_id,
+            Post.author_world_character_id == query.world_character_id,
+            Post.visibility == "public",
+            Post.deleted_at.is_(None),
+            Post.report_hidden_at.is_(None),
         )
         post_count = self.db.scalar(
-            select(func.count(models.Post.id)).where(
+            select(func.count(Post.id)).where(
                 *authored,
-                models.Post.reply_to_post_id.is_(None),
-                models.Post.repost_of_post_id.is_(None),
+                Post.reply_to_post_id.is_(None),
+                Post.repost_of_post_id.is_(None),
             )
         )
 
-        parent = aliased(models.Post)
+        parent = aliased(Post)
         reply_count_statement = (
-            select(func.count(models.Post.id))
-            .join(parent, parent.id == models.Post.reply_to_post_id)
+            select(func.count(Post.id))
+            .join(parent, parent.id == Post.reply_to_post_id)
             .where(
                 *authored,
-                models.Post.reply_to_post_id.is_not(None),
+                Post.reply_to_post_id.is_not(None),
                 parent.world_id == query.world_id,
                 parent.visibility == "public",
                 parent.deleted_at.is_(None),
@@ -197,18 +199,18 @@ class SqlAlchemyWorldCharacterSocialProfileReader:
         reply_count = self.db.scalar(reply_count_statement)
 
         liked_post_statement = (
-            select(func.count(models.PostLike.id))
-            .join(models.Post, models.Post.id == models.PostLike.post_id)
-            .outerjoin(parent, parent.id == models.Post.reply_to_post_id)
+            select(func.count(PostLike.id))
+            .join(Post, Post.id == PostLike.post_id)
+            .outerjoin(parent, parent.id == Post.reply_to_post_id)
             .where(
-                models.PostLike.world_id == query.world_id,
-                models.PostLike.actor_world_character_id == query.world_character_id,
-                models.Post.world_id == query.world_id,
-                models.Post.visibility == "public",
-                models.Post.deleted_at.is_(None),
-                models.Post.report_hidden_at.is_(None),
+                PostLike.world_id == query.world_id,
+                PostLike.actor_world_character_id == query.world_character_id,
+                Post.world_id == query.world_id,
+                Post.visibility == "public",
+                Post.deleted_at.is_(None),
+                Post.report_hidden_at.is_(None),
                 or_(
-                    models.Post.reply_to_post_id.is_(None),
+                    Post.reply_to_post_id.is_(None),
                     and_(
                         parent.world_id == query.world_id,
                         parent.visibility == "public",
@@ -220,25 +222,25 @@ class SqlAlchemyWorldCharacterSocialProfileReader:
         )
         if blocked_ids:
             liked_post_statement = liked_post_statement.where(
-                models.Post.author_world_character_id.not_in(blocked_ids)
+                Post.author_world_character_id.not_in(blocked_ids)
             )
         liked_post_count = self.db.scalar(liked_post_statement)
 
         received_like_statement = (
-            select(func.count(models.PostLike.id))
-            .join(models.Post, models.Post.id == models.PostLike.post_id)
-            .outerjoin(parent, parent.id == models.Post.reply_to_post_id)
+            select(func.count(PostLike.id))
+            .join(Post, Post.id == PostLike.post_id)
+            .outerjoin(parent, parent.id == Post.reply_to_post_id)
             .where(
-                models.PostLike.world_id == query.world_id,
-                models.PostLike.target_world_character_id == query.world_character_id,
-                models.Post.world_id == query.world_id,
-                models.Post.author_world_character_id == query.world_character_id,
-                models.Post.visibility == "public",
-                models.Post.deleted_at.is_(None),
-                models.Post.report_hidden_at.is_(None),
-                models.Post.repost_of_post_id.is_(None),
+                PostLike.world_id == query.world_id,
+                PostLike.target_world_character_id == query.world_character_id,
+                Post.world_id == query.world_id,
+                Post.author_world_character_id == query.world_character_id,
+                Post.visibility == "public",
+                Post.deleted_at.is_(None),
+                Post.report_hidden_at.is_(None),
+                Post.repost_of_post_id.is_(None),
                 or_(
-                    models.Post.reply_to_post_id.is_(None),
+                    Post.reply_to_post_id.is_(None),
                     and_(
                         parent.world_id == query.world_id,
                         parent.visibility == "public",
@@ -250,9 +252,9 @@ class SqlAlchemyWorldCharacterSocialProfileReader:
         )
         if blocked_ids:
             received_like_statement = received_like_statement.where(
-                models.PostLike.actor_world_character_id.not_in(blocked_ids),
+                PostLike.actor_world_character_id.not_in(blocked_ids),
                 or_(
-                    models.Post.reply_to_post_id.is_(None),
+                    Post.reply_to_post_id.is_(None),
                     parent.author_world_character_id.not_in(blocked_ids),
                 ),
             )
@@ -268,26 +270,26 @@ class SqlAlchemyWorldCharacterSocialProfileReader:
         self,
         query: WorldCharacterSocialProfileQuery,
         blocked_ids: frozenset[str],
-    ) -> tuple[list[models.Post], list[tuple[datetime, str]]]:
-        statement = select(models.Post).where(
-            models.Post.world_id == query.world_id,
-            models.Post.author_world_character_id == query.world_character_id,
-            models.Post.visibility == "public",
-            models.Post.deleted_at.is_(None),
-            models.Post.report_hidden_at.is_(None),
+    ) -> tuple[list[Post], list[tuple[datetime, str]]]:
+        statement = select(Post).where(
+            Post.world_id == query.world_id,
+            Post.author_world_character_id == query.world_character_id,
+            Post.visibility == "public",
+            Post.deleted_at.is_(None),
+            Post.report_hidden_at.is_(None),
         )
         if query.tab == "posts":
             statement = statement.where(
-                models.Post.reply_to_post_id.is_(None),
-                models.Post.repost_of_post_id.is_(None),
+                Post.reply_to_post_id.is_(None),
+                Post.repost_of_post_id.is_(None),
             )
         else:
-            parent = aliased(models.Post)
+            parent = aliased(Post)
             statement = statement.join(
                 parent,
-                parent.id == models.Post.reply_to_post_id,
+                parent.id == Post.reply_to_post_id,
             ).where(
-                models.Post.reply_to_post_id.is_not(None),
+                Post.reply_to_post_id.is_not(None),
                 parent.world_id == query.world_id,
                 parent.visibility == "public",
                 parent.deleted_at.is_(None),
@@ -302,18 +304,18 @@ class SqlAlchemyWorldCharacterSocialProfileReader:
             created_at, post_id = cursor
             statement = statement.where(
                 or_(
-                    models.Post.created_at < created_at,
+                    Post.created_at < created_at,
                     and_(
-                        models.Post.created_at == created_at,
-                        models.Post.id < post_id,
+                        Post.created_at == created_at,
+                        Post.id < post_id,
                     ),
                 )
             )
         posts = list(
             self.db.scalars(
                 statement.order_by(
-                    models.Post.created_at.desc(),
-                    models.Post.id.desc(),
+                    Post.created_at.desc(),
+                    Post.id.desc(),
                 ).limit(query.limit + 1)
             )
         )
@@ -323,21 +325,21 @@ class SqlAlchemyWorldCharacterSocialProfileReader:
         self,
         query: WorldCharacterSocialProfileQuery,
         blocked_ids: frozenset[str],
-    ) -> tuple[list[models.Post], list[tuple[datetime, str]]]:
-        parent = aliased(models.Post)
+    ) -> tuple[list[Post], list[tuple[datetime, str]]]:
+        parent = aliased(Post)
         statement = (
-            select(models.PostLike, models.Post)
-            .join(models.Post, models.Post.id == models.PostLike.post_id)
-            .outerjoin(parent, parent.id == models.Post.reply_to_post_id)
+            select(PostLike, Post)
+            .join(Post, Post.id == PostLike.post_id)
+            .outerjoin(parent, parent.id == Post.reply_to_post_id)
             .where(
-                models.PostLike.world_id == query.world_id,
-                models.PostLike.actor_world_character_id == query.world_character_id,
-                models.Post.world_id == query.world_id,
-                models.Post.visibility == "public",
-                models.Post.deleted_at.is_(None),
-                models.Post.report_hidden_at.is_(None),
+                PostLike.world_id == query.world_id,
+                PostLike.actor_world_character_id == query.world_character_id,
+                Post.world_id == query.world_id,
+                Post.visibility == "public",
+                Post.deleted_at.is_(None),
+                Post.report_hidden_at.is_(None),
                 or_(
-                    models.Post.reply_to_post_id.is_(None),
+                    Post.reply_to_post_id.is_(None),
                     and_(
                         parent.world_id == query.world_id,
                         parent.visibility == "public",
@@ -349,7 +351,7 @@ class SqlAlchemyWorldCharacterSocialProfileReader:
         )
         if blocked_ids:
             statement = statement.where(
-                models.Post.author_world_character_id.not_in(blocked_ids)
+                Post.author_world_character_id.not_in(blocked_ids)
             )
         cursor = _decode_cursor(query)
         if cursor is not None:
@@ -360,17 +362,17 @@ class SqlAlchemyWorldCharacterSocialProfileReader:
                 raise WorldCharacterSocialProfileValidationError() from exc
             statement = statement.where(
                 or_(
-                    models.PostLike.created_at < created_at,
+                    PostLike.created_at < created_at,
                     and_(
-                        models.PostLike.created_at == created_at,
-                        models.PostLike.id < like_id_value,
+                        PostLike.created_at == created_at,
+                        PostLike.id < like_id_value,
                     ),
                 )
             )
         rows = self.db.execute(
             statement.order_by(
-                models.PostLike.created_at.desc(),
-                models.PostLike.id.desc(),
+                PostLike.created_at.desc(),
+                PostLike.id.desc(),
             ).limit(query.limit + 1)
         ).all()
         posts = [row[1] for row in rows]
@@ -381,7 +383,7 @@ class SqlAlchemyWorldCharacterSocialProfileReader:
         self,
         *,
         world_id: str,
-        posts: list[models.Post],
+        posts: list[Post],
         blocked_ids: frozenset[str],
     ) -> tuple[WorldCharacterSocialProfilePost, ...]:
         if not posts:
@@ -395,77 +397,77 @@ class SqlAlchemyWorldCharacterSocialProfileReader:
         authors = {
             str(world_character.id): (world_character, character)
             for world_character, character in self.db.execute(
-                select(models.WorldCharacter, models.Character)
+                select(WorldCharacter, Character)
                 .join(
-                    models.Character,
-                    models.Character.id == models.WorldCharacter.character_id,
+                    Character,
+                    Character.id == WorldCharacter.character_id,
                 )
-                .where(models.WorldCharacter.id.in_(author_ids))
+                .where(WorldCharacter.id.in_(author_ids))
             ).all()
         }
         active_author_ids = {
             str(value)
             for value in self.db.scalars(
-                select(models.WorldCharacter.id)
+                select(WorldCharacter.id)
                 .join(
-                    models.Character,
-                    models.Character.id == models.WorldCharacter.character_id,
+                    Character,
+                    Character.id == WorldCharacter.character_id,
                 )
                 .join(
-                    models.WorldMembership,
-                    (models.WorldMembership.id == models.WorldCharacter.membership_id)
+                    WorldMembership,
+                    (WorldMembership.id == WorldCharacter.membership_id)
                     & (
-                        models.WorldMembership.world_id
-                        == models.WorldCharacter.world_id
+                        WorldMembership.world_id
+                        == WorldCharacter.world_id
                     ),
                 )
                 .where(
-                    models.WorldCharacter.id.in_(author_ids),
-                    models.WorldCharacter.world_id == world_id,
-                    models.WorldCharacter.status == "active",
-                    models.WorldMembership.status == "active",
-                    models.Character.deleted_at.is_(None),
-                    models.Character.moderation_status == "active",
+                    WorldCharacter.id.in_(author_ids),
+                    WorldCharacter.world_id == world_id,
+                    WorldCharacter.status == "active",
+                    WorldMembership.status == "active",
+                    Character.deleted_at.is_(None),
+                    Character.moderation_status == "active",
                 )
             )
         }
 
         reply_counts_statement = select(
-            models.Post.reply_to_post_id, func.count(models.Post.id)
+            Post.reply_to_post_id, func.count(Post.id)
         ).where(
-            models.Post.world_id == world_id,
-            models.Post.reply_to_post_id.in_(post_ids),
-            models.Post.visibility == "public",
-            models.Post.deleted_at.is_(None),
-            models.Post.report_hidden_at.is_(None),
+            Post.world_id == world_id,
+            Post.reply_to_post_id.in_(post_ids),
+            Post.visibility == "public",
+            Post.deleted_at.is_(None),
+            Post.report_hidden_at.is_(None),
         )
         if blocked_ids:
             reply_counts_statement = reply_counts_statement.where(
-                models.Post.author_world_character_id.not_in(blocked_ids)
+                Post.author_world_character_id.not_in(blocked_ids)
             )
         reply_counts = {
             str(post_id): int(count)
             for post_id, count in self.db.execute(
-                reply_counts_statement.group_by(models.Post.reply_to_post_id)
+                reply_counts_statement.group_by(Post.reply_to_post_id)
             ).all()
             if post_id is not None
         }
 
         like_counts_statement = select(
-            models.PostLike.post_id,
-            func.count(models.PostLike.id),
+            PostLike.post_id,
+            func.count(PostLike.id),
         ).where(
-            models.PostLike.world_id == world_id,
-            models.PostLike.post_id.in_(post_ids),
+            PostLike.world_id == world_id,
+            PostLike.post_id.in_(post_ids),
         )
         if blocked_ids:
             like_counts_statement = like_counts_statement.where(
-                models.PostLike.actor_world_character_id.not_in(blocked_ids)
+                PostLike.actor_world_character_id.not_in(blocked_ids)
             )
         like_counts = {
             str(post_id): int(count)
             for post_id, count in self.db.execute(
-                like_counts_statement.group_by(models.PostLike.post_id)
+                like_counts_statement.group_by(PostLike.post_id)
             ).all()
         }
 
@@ -473,9 +475,9 @@ class SqlAlchemyWorldCharacterSocialProfileReader:
             list
         )
         for media in self.db.scalars(
-            select(models.PostMedia)
-            .where(models.PostMedia.post_id.in_(post_ids))
-            .order_by(models.PostMedia.post_id.asc(), models.PostMedia.id.asc())
+            select(PostMedia)
+            .where(PostMedia.post_id.in_(post_ids))
+            .order_by(PostMedia.post_id.asc(), PostMedia.id.asc())
         ):
             url = media.url.strip()
             if not url.startswith("/media/") or url.startswith("//"):
@@ -543,7 +545,7 @@ class SqlAlchemyWorldCharacterSocialProfileReader:
 
     def _mentions_by_post(
         self,
-        posts: list[models.Post],
+        posts: list[Post],
     ) -> dict[str, tuple[WorldCharacterSocialProfileMention, ...]]:
         handles_by_post: dict[str, list[str]] = {}
         all_handles: set[str] = set()
@@ -564,10 +566,10 @@ class SqlAlchemyWorldCharacterSocialProfileReader:
         characters = {
             str(character.handle): character
             for character in self.db.scalars(
-                select(models.Character).where(
-                    models.Character.handle.in_(all_handles),
-                    models.Character.deleted_at.is_(None),
-                    models.Character.moderation_status == "active",
+                select(Character).where(
+                    Character.handle.in_(all_handles),
+                    Character.deleted_at.is_(None),
+                    Character.moderation_status == "active",
                 )
             )
             if character.handle is not None
