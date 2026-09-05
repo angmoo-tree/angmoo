@@ -5,13 +5,13 @@ import httpx
 import pytest
 
 from app.config import settings
-from app.public_main import (
+from app.main import (
     HostedBackendExtension,
     HostedExtensionConfigurationError,
     PublicRuntimeConfigurationError,
-    app,
-    create_app,
-    create_lifespan,
+    public_app as app,
+    create_public_app as create_app,
+    create_public_lifespan as create_lifespan,
     validate_public_runtime_settings,
 )
 from app.services import agent_runs as agent_run_service

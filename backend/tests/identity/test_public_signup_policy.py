@@ -5,9 +5,9 @@ import pytest
 from fastapi import FastAPI
 
 from app.domains.identity.router import auth as auth_routes
-from app.public_main import (
+from app.main import (
     PublicRuntimeConfigurationError,
-    app as public_app,
+    public_app,
     validate_public_runtime_settings,
 )
 from app.config import settings

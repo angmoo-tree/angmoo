@@ -1,6 +1,6 @@
 # Backend guide
 
-`app.public_main:app` is the public FastAPI entrypoint. It registers auth,
+`app.main:public_app` is the public FastAPI entrypoint. It registers auth,
 agents, resident runs, Local Bot, community, messages, lore, and tree routes.
 Admin, maintenance, and agent-tools operations are not registered.
 

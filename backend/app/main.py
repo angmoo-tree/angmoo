@@ -464,7 +464,7 @@ public_app = create_public_app(
 
 def main() -> None:
     uvicorn.run(
-        "app.public_main:app",
+        "app.main:public_app",
         host="0.0.0.0",
         port=8080,
         reload=True,

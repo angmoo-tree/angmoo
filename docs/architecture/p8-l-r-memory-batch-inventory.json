@@ -223,8 +223,8 @@
       "sha256": "3c1f412a8b709da23a305fc8ebad13f3e885000ed90b8e1db583e89be90a1621"
     },
     {
-      "path": "backend/app/public_main.py",
-      "sha256": "d1937ba8f6beba015e6f563725ebf38746bd2c0717f4415c1355b8826be74dab"
+      "path": "backend/app/main.py",
+      "sha256": "516cde0986cd21e094261d0f07470f1166ad023ad05b0872a9717984f87a70f5"
     },
     {
       "path": "backend/app/runtime/account_deletion.py",
@@ -236,7 +236,7 @@
     },
     {
       "path": "backend/app/runtime/desktop_sidecar.py",
-      "sha256": "202d5af6af0a90076c87c9d915ba675a50b7c620beb877fd024ded83f8420a54"
+      "sha256": "bceafa6aded212af6b5481e8f47883027ef3256dc391dab4d1f0cd3735545d1a"
     },
     {
       "path": "backend/app/runtime/memory/__init__.py",
@@ -396,7 +396,7 @@
     },
     {
       "path": "scripts/ci/generate_p8_l_r_memory_batch_inventory.py",
-      "sha256": "3efda78ecc55883f91723673c222d3b251ac5655ed8b0e243ab45d17df2e4a77"
+      "sha256": "d850cd5de5b4924afb7f00d15353fabc7cb20231e44a8d839c3a108a3506c574"
     },
     {
       "path": "scripts/ci/run_windows_installer_supported_upgrade.ps1",

@@ -40,7 +40,7 @@ def build_inventory():
         "backend/app/runtime/migrations/sqlite_versions/v8_to_v9_memory_batch.py",
         "backend/app/runtime/migrations/sqlite_versions/manifests/v9.json",
         "backend/app/runtime/persistence/sqlite_schema.py",
-        "backend/app/public_main.py",
+        "backend/app/main.py",
         "backend/app/runtime/desktop_sidecar.py",
         "backend/app/runtime/single_backend_components.py",
         "backend/app/api/v1/routes/memory.py",

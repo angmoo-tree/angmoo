@@ -36,7 +36,7 @@ def _register_canonical_models() -> None:
     small set of models imported by the runtime module itself.
     """
 
-    importlib.import_module("app.public_main")
+    importlib.import_module("app.main")
 
 
 def _parse_args() -> argparse.Namespace:
@@ -102,7 +102,7 @@ def create_contributor_runtime_app(
     # every canonical SQLAlchemy model is registered in Base.metadata. This is
     # the same fail-closed ordering used by the packaged desktop sidecar.
     _register_canonical_models()
-    from app.public_main import create_app
+    from app.main import create_public_app as create_app
 
     data_root = data_root.resolve()
     upgraded = _prepare_contributor_data_root(data_root)

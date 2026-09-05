@@ -652,3 +652,22 @@ Chat HTTP source `74f6c06f9e5501ab3556fed1f3cbd4d5d5546217`에서 독립 준비�
 고정 전 전체 보존 검사에서 public factory가 partial로 바뀌며 Identity factory 검사의 자동 생성 case ID 두 개가 달라진 것을 확인했다. 원래 두 case의 `create_app0`·`create_app1` ID를 명시해 같은 입력·assertion·수집 node를 보존했다. source/split/assertion/억제 표시/API/ORM 계약에는 오류가 없으며 보호 **2,129 / 현재 2,189**다. 선행 committed source/node의 append-only capture는 아직 root 순차 통합에 남아 있어 명령 전체는 exit 1이다. 현재 경계 **656 modules / 2,158 edges / exact legacy 263 PASS**, L4 parity **97**, ER0 **78/87/24/44/7**, Memory batch current, public **196**을 확인했다. 같은 설정·logging·복구 consumer를 main으로 대응했고 더 이상 존재하지 않는 public_main의 실제 업무 import 예외 두 개를 제거했다. 독립 읽기 리뷰에서도 profile·같은 Session·partial·단방향 export에 추가 차단 문제를 발견하지 못했다.
 
 최종 재검사에서 원래 node ID를 포함한 source/split/assertion/억제 표시/API/ORM/기존 node 오류 **0**, 보호 **2,129 / 현재 2,189**를 확인했다. 미캡처된 선행 source **51개 / nodes 54개**만 전체 명령의 exit 1 원인이며, ID 보정 후 관련 실제 회귀도 **9 passed / 23.25초**다. 이번 첫 도입은 `backend/tests/runtime/test_app_factory_ownership.py` 한 파일·6 nodes이며 source commit에서 원본을 고정한다.
+
+
+## AR-B8-G06-A2 — 실제 실행·ASGI export·검사 참조 전환
+
+첫 factory source `90d7fd7f2332b2b27cf2f1bd92ed0e206427e6f7` 뒤 실제 contributor/sidecar의 모델 등록용 동적 import와 public factory 호출을 `app.main`으로 옮겼다. 두 실행기의 전체 모듈 AST는 정확한 import 및 factory alias만 복원하면 원래와 동일하다. 등록→기존 데이터 upgrade→typed RuntimeConfig→같은 Session app 생성 순서, sidecar ready/fatal·stdout/stderr·silent stream·shutdown과 log 설정을 바꾸지 않았다.
+
+개발 ASGI 경로는 `app.main:public_app`이다. `main.app`은 원래 full `/health` 계약을, `main.public_app`은 원래 public readiness 계약을 유지하며 실제 생성 함수는 하나다. 공개 inventory와 full/public 계약 검사는 두 실제 객체를 구분해서 읽는다. 일반 기존 테스트의 import/fixture도 실제 main factory로 전환했고, Chat의 두 pytest case ID와 Identity factory ID는 기존 값을 유지한다.
+
+보존 검사는 임의 assertion 허용 목록을 추가하지 않는다. 보호된 두 앱 namespace의 원본 Git source/export와 파일 map, 새 export의 실제 단일 FastAPI factory 또는 같은 factory partial/name alias를 확인한 경우에만 정확한 ASGI 문자열 상수의 이동을 인정한다. 새 실제 export의 OpenAPI도 원래 full/public frozen 계약에 직접 비교하므로 같은 factory에서 잘못된 profile을 골라도 실패한다. 다른 문자열·없는 export·다른 factory·중복/cycle·미보호 source·행위 assertion 변경을 거부하는 회귀를 추가했다.
+
+첫 집중 검증은 새 ASGI 검사 14 nodes, 호환 module import를 차단한 fresh contributor/sidecar 데이터 준비 1 node와 기존 G0/로그/ER6/ER7/Chat을 합쳐 **93 passed / 기존 1 warning / 66.27초**다. 기존 G3 CLI assertion의 앱 import 문자열 한 개만 실제 ASGI export 이동과 대응하고, 나머지 host/port/reload/logging·호출 횟수·행위 assertion은 유지했다.
+
+Docker의 실제 contributor entrypoint와 PyInstaller의 실제 sidecar entrypoint는 이미 독립 runtime 파일을 지정하므로 빌드 정의에 직접 public_main 경로가 없었다. 바뀐 static import가 main을 포함하며 logging.ini, onefile/onedir 자원 구성을 그대로 유지한다. current runtime inventory는 main을 가리키고 frozen H predecessor의 과거 경로는 재생성하지 않는다. 실제 새 bundle/installer 검증은 B8-B에 남는다.
+
+제품·일반 검사에서 public_main import는 제거했고 임시 호환 파일과 삭제 전 비교용 factory 검사만 남는다. frozen ASGI 원본 경로·negative fixture·과거 pytest ID·기존 logger 이름·역사 문서는 활성 import와 구분한다. B4/B5/B7의 최종 callback, G5, B8-B 파일 제거·삭제 후 최종 후보 실행과 전체 종료는 아직 미완료다.
+
+최종 확장 회귀는 **351 passed / 기존 1 skipped / 1 warning / 104.72초**다. stock 전체 보존 검사는 source/split/assertion/억제 표시/기존 node·full/public API/ORM 및 실제 새 ASGI export의 frozen public 계약 오류 **0**, 보호 **2,129 / 현재 2,204**다. 첫 G06 source를 포함한 현 작업트리에서 확인되는 미캡처 **52 files / 45 committed nodes**만 명령 전체의 exit 1 원인이다. 독립 검토에서도 차단 문제를 발견하지 못했다. 같은 factory 이름을 따라가는 AST는 구조 근거이며, 실제 새 target의 frozen OpenAPI 비교가 행위 gate라는 구분을 유지한다.
+
+검토 후 실제 Python source path literal map과 ASGI export map을 함께 적용한 경우도 같은 negative node에서 확인했다. 접두 문자열은 기존 파일명 정규화의 `app.main:app`까지만 변환되고 `app.main:public_app`으로 확대되지 않는다. 해당 최종 ASGI 회귀 **14 passed**를 확인했으며, 임의 문자열이나 숫자 행위 assertion을 허용하는 예외는 추가하지 않았다. 신규 첫 도입 파일은 `tests/runtime/test_asgi_preservation.py` 14 nodes와 `tests/runtime/test_canonical_bootstrap.py` 1 node다.

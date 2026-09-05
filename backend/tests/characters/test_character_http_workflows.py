@@ -105,7 +105,7 @@ def test_detail_limit_and_missing_runtime_configuration_are_explicit(monkeypatch
 
 def test_both_application_factories_install_workflows_and_schema_aliases_keep_identity():
     from app.main import create_app as create_hosted_app
-    from app.public_main import create_app as create_public_app
+    from app.main import create_public_app
     from app import schemas as aggregate_schemas
     from app.domains.identity.schemas import CredentialRead
     from app.domains.runtime.schemas import AgentActivityLogRead, AgentSlotRead

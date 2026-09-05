@@ -12,7 +12,7 @@ from fastapi.testclient import TestClient
 
 from app.api.v1.routes import world_activity_runtime
 from app.config import Settings
-from app.public_main import create_app
+from app.main import create_public_app as create_app
 from app.runtime.configuration import (
     RuntimeConfigurationError,
     RuntimeProfile,
@@ -162,7 +162,7 @@ def guarded_import(name, *args, **kwargs):
     return original_import(name, *args, **kwargs)
 
 builtins.__import__ = guarded_import
-import app.public_main  # noqa: F401
+import app.main  # noqa: F401
 from app.core import db
 
 assert db._default_engine is None

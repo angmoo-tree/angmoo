@@ -5,7 +5,7 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 from starlette.requests import Request
 
-from app import main, models, public_main
+from app import main, models
 from app.config import settings
 from app.core.db import Base
 from app.domains.identity import dependencies, schemas
@@ -15,7 +15,7 @@ from app.runtime import account_deletion
 
 # Keep the two original case IDs when the public factory becomes a partial.
 @pytest.mark.parametrize(
-    "factory", [main.create_app, public_main.create_app], ids=["create_app0", "create_app1"]
+    "factory", [main.create_app, main.create_public_app], ids=["create_app0", "create_app1"]
 )
 def test_app_factory_supplies_the_runtime_account_deletion_workflow(factory) -> None:
     application = factory()

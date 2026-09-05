@@ -36,7 +36,7 @@ def test_ini_preserves_uvicorn_defaults_and_root_warning_without_handlers():
 
 def test_repeated_factories_preserve_embedding_handlers_levels_and_caplog(caplog, monkeypatch):
     import app.main as legacy
-    import app.public_main as local
+    import app.main as local
 
     root = logging.getLogger()
     caplog.set_level(logging.INFO)
@@ -45,7 +45,7 @@ def test_repeated_factories_preserve_embedding_handlers_levels_and_caplog(caplog
     formatters = [handler.formatter for handler in handlers]
     for _ in range(3):
         legacy.create_app()
-        local.create_app(prepare_media_directories=False)
+        local.create_public_app(prepare_media_directories=False)
     logging.getLogger("angmoo.logging-test").info("retained diagnostic")
     assert root.handlers == handlers
     assert [handler.level for handler in root.handlers] == levels
@@ -160,7 +160,7 @@ def test_contributor_server_and_reload_child_receive_the_same_logging_configurat
 
 def test_public_and_legacy_cli_keep_their_existing_asgi_target(monkeypatch):
     import app.main as legacy
-    import app.public_main as local
+    import app.main as local
 
     calls = []
     monkeypatch.setattr(legacy.uvicorn, "run", lambda *args, **kwargs: calls.append((args, kwargs)))
@@ -168,7 +168,7 @@ def test_public_and_legacy_cli_keep_their_existing_asgi_target(monkeypatch):
     local.main()
     assert len(calls) == 2
     for args, kwargs in calls:
-        assert args == ("app.public_main:app",)
+        assert args == ("app.main:public_app",)
         assert kwargs == {"host": "0.0.0.0", "port": 8080, "reload": True, "log_config": LOGGING_CONFIG}
 
 
@@ -200,7 +200,7 @@ import json, os, sys, threading, time, urllib.request
 from pathlib import Path
 from types import SimpleNamespace
 from fastapi import FastAPI
-import app.public_main as composition
+import app.main as composition
 from app.runtime import desktop_sidecar, configuration
 root = Path(sys.argv[1])
 token, origin = 'a' * 64, 'http://tauri.localhost'
@@ -211,7 +211,7 @@ app.state.runtime_composition = SimpleNamespace(session_factory=lambda: None)
 @app.get('/health')
 async def health():
     return {'status': 'ok'}
-composition.create_app = lambda **kwargs: app
+composition.create_public_app = lambda **kwargs: app
 configuration.initialize_local_installation_identity = lambda factory: None
 desktop_sidecar._build_embedded_runtime_config = lambda *args, **kwargs: object()
 observed = {}

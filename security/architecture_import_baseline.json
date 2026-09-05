@@ -7442,7 +7442,7 @@
       "imports": [
         "app.core.redaction",
         "app.domains.runtime.public",
-        "app.public_main",
+        "app.main",
         "app.runtime.configuration",
         "app.runtime.logging_config",
         "app.runtime.migrations.embedded_data",
@@ -7471,7 +7471,7 @@
       ],
       "imports": [
         "app.core.desktop_loopback",
-        "app.public_main",
+        "app.main",
         "app.runtime.configuration",
         "app.runtime.installer_update",
         "app.runtime.logging_config",

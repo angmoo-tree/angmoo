@@ -88,7 +88,8 @@ def test_cold_runtime_consumers_share_config_without_a_legacy_module(tmp_path: P
 import importlib.util
 import json
 import sys
-from app import config, main, public_main
+from app import config, main
+from app import main as public_main
 from app.core import db, security
 from app.runtime import configuration
 print(json.dumps({
