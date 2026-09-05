@@ -479,3 +479,17 @@ Setup slice의 최종 현재 API·ORM 및 전체 split evidence 검사도 PASS�
 수정된 병합 후보의 Package·routines·WC mode·L4·ER7 회귀는 **163 passed, 1 skipped, 1 warning / 80.86초**, 경계 **635 modules / 2,024 edges / legacy exact 281 PASS**다. L4 parity 97, ER0 76 PostgreSQL 파일/87 migration/24 Neo4j/44 Next route/7 workload를 확인했다. 최초 병합 보조 정규식의 파일 말미 누락은 실패 검증으로 발견하여 Git 양쪽 원문에서 다시 조립했고, 이 163 결과는 수정 후 처음부터 실행했다. 중단한 guard와 최초 실패 후보는 PASS 증거로 사용하지 않는다.
 
 계약/노드 guard는 API·ORM·기존 assertion 차이가 없었으나 merge commit 전에는 합류 branch의 8개 source ancestry가 아직 HEAD의 조상이 아니므로 그 Git 검증이 남았다. 옛 Package test node를 가리키는 B2 split 메타데이터도 이 연결에서 수정했다. merge 소스를 고정한 뒤 provenance와 기존 introduction 미기록 항목을 별도로 검증한다. 이는 B4 계획/활동 전체 완료나 Hosted·installer·merge Gate의 최종 완료를 의미하지 않는다.
+
+## AR-B4-A2b — 계획 서비스·같은 Session의 업무 조회·HTTP
+
+`f541c32`에 이어 일일 계획 생성/조회와 runtime-mode 변경의 실제 판단·응답·저장을 `domains/routines/service/plans.py`로 옮겼다. 과거 선택 이력 SQL은 `repository/plans.py`, 다른 업무의 기존 Character/WC/World/membership/repertoire/credential 조회는 `runtime/routines/plan_references.py`에 있다. `PlanReferences`는 같은 요청 Session과 attached 객체를 유지하며 새 Session·명시적 flush·commit을 만들지 않는다. 기존 SQLAlchemy query의 autoflush와 WorldCharacter FOR UPDATE 조건은 유지한다. WorldCharacter 모드·version 두 대입은 선행 `0c76205`의 WC 소유 함수가 처리하고 마지막 commit은 계획 서비스에 남는다.
+
+계획 HTTP 3개는 `routines/router.py`로 옮겨 원래 mixed router의 prefix·tags·위치에 연결했다. social-memory와 relationship graph의 2개 HTTP는 기존 업무 전환 범위에 남는다. 두 앱 factory는 `runtime/routines/composition.py`를 통해 생성기를 등록하며 HTTP dependencies가 같은 `get_db` Session을 전달한다. 예전 daily-plan usecase·전달 repository·Protocol과 외부 ORM 집계 5파일을 제거했고 실제 plan 함수는 public의 동일 객체 alias로 연결했다. lifecycle public·legacy 소비자는 다음 B4-A3/B4-C 범위다.
+
+- 최종 계획·공동 활동·게시 실행·HTTP security·Local runtime·현재 inventory 묶음: **96 passed / 1 기존 PostgreSQL skip / 1 기존 deprecation warning / 57.84초**. 새 회귀 2 nodes는 실제 SQLite 파일에서 mode/version 변경과 다른 owner 변경이 한 번의 commit으로 함께 저장되며, commit 실패가 전달되고 caller rollback으로 모두 원상 복구되는 것을 확인한다. 이전 assertion과 test 이름은 유지하고 실제 호출에 동일 Session collaborator만 추가했다.
+- `_plan_read`와 `_selection_history`의 전체 실행 AST 본문은 원문과 같다. prepare/get/update의 add/add_all/flush/commit/rollback 호출 순서도 각각 기존 8/0/1개와 같다. 준비 단계의 DST·후보 선택·joint reservation 실패 보상·date singleton·추가 public action 없음 검증을 그대로 실행했다.
+- 현재 API/OpenAPI/ORM·기존 assertion/suppression·test node 누락 **0**: #258 **1,867**, #263 **1,907**, 보호 계보 **2,129**, 현재 **2,169**. 전체 명령은 선행 B2/B3/B4 source 도입 capture가 아직 합류하지 않아 exit 1이며 전체 PASS로 부르지 않는다. 실제 split symbol·직접 소비자·행위 test 증거는 오류 수정 후 전체 다시 검사해 **PASS**였다.
+- 첫 확대 실행은 선행 WC profile 7개 route inventory가 옛 모듈을 가리킨다는 오류를 잡았다. access·operation·assertion은 그대로 두고 실제 `router.profile`로 갱신했다. root의 선행 수정과 같다. split 대응 검사도 선행 파일 연결 helper가 살아 있는 LocalBot `api/v1/deps.py`까지 이동으로 해석한 것을 잡았으며, `79c33f6`의 원래 부분 split을 복원했다. 새 HTTP consumer 이름 2개 오기도 실제 `api/v1/main.py`·`public.py`로 수정했다. guard나 frozen 기준선은 바꾸지 않았다.
+- 경계 **639 modules / 2,041 internal edges / legacy exact 281 PASS**; routines의 실제 새 **21개 module**만 부분 scope다. Public route **196**, L4 parity **97**, ER0 **76 PostgreSQL 파일 / 87 migration / 24 Neo4j / 44 Next route / 7 workload**, Memory batch 현재 inventory를 확인했다. 살아 있는 이전 source의 정확 bridge와 제거 단계를 policy에 기록한다.
+
+이 source는 일일 계획 전환의 로컬 검증이며 B4 전체·Hosted CI·설치 앱·PR/merge 종료가 아니다. source 도입 기록은 root의 선형 capture로 이어진다. 이후 claim/lifecycle·provider/result·resident 전환에서도 오류/권한/commit 의미가 다른 기존 함수를 이름만 보고 합치지 않는다.

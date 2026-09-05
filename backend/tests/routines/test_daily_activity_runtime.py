@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 from app import models, schemas
+from app.runtime.routines.plan_references import SqlAlchemyPlanReferences
 from app.domains.identity import dependencies as api_deps
 from app.api.v1.routes import world_activity_runtime as runtime_routes
 from app.core.db import Base
@@ -299,6 +300,7 @@ def _prepare(
 ):
     return daily_activity_plans.prepare_activity_plan(
         db,
+        references=SqlAlchemyPlanReferences(db),
         character_id=fixture.character.id,
         world_id=fixture.world_character.world_id,
         user=fixture.user,
@@ -349,6 +351,7 @@ def test_routines_public_uses_frozen_clock_and_writes_no_public_action() -> None
 
         created = routines.prepare_activity_plan(
             db,
+            references=SqlAlchemyPlanReferences(db),
             character_id=fixture.character.id,
             world_id=fixture.world_character.world_id,
             user=fixture.user,
@@ -359,6 +362,7 @@ def test_routines_public_uses_frozen_clock_and_writes_no_public_action() -> None
         )
         replay = routines.get_activity_plan(
             db,
+            references=SqlAlchemyPlanReferences(db),
             character_id=fixture.character.id,
             world_id=fixture.world_character.world_id,
             user=fixture.user,
@@ -390,6 +394,7 @@ def test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan() -> N
         ):
             routines.prepare_activity_plan(
                 db,
+                references=SqlAlchemyPlanReferences(db),
                 character_id=fixture.character.id,
                 world_id=fixture.world_character.world_id,
                 user=fixture.user,
@@ -497,6 +502,8 @@ def test_owner_api_prepares_reads_and_forbids_other_user() -> None:
         principal["user"] = fixture.user
 
     app = FastAPI()
+    from app.runtime.routines.composition import configure_routines_runtime
+    configure_routines_runtime(app)
     app.include_router(runtime_routes.router, prefix="/api/v1")
 
     def get_db():

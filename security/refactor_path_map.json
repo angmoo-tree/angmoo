@@ -286,7 +286,12 @@
     "backend/app/domains/routines/infrastructure/system_clock.py": "backend/app/domains/routines/utils/clock.py",
     "backend/tests/test_daily_activity_runtime.py": "backend/tests/routines/test_daily_activity_runtime.py",
     "backend/app/domains/routines/domain/lifecycle.py": "backend/app/domains/routines/contracts/lifecycle.py",
-    "backend/app/domains/routines/infrastructure/sqlalchemy_joint_reservations.py": "backend/app/domains/routines/service/joint_reservations.py"
+    "backend/app/domains/routines/infrastructure/sqlalchemy_joint_reservations.py": "backend/app/domains/routines/service/joint_reservations.py",
+    "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py": "backend/app/domains/routines/service/plans.py",
+    "backend/app/domains/routines/application/daily_plan.py": "backend/app/domains/routines/service/plans.py",
+    "backend/app/domains/routines/infrastructure/sqlalchemy_daily_plan_repository.py": "backend/app/domains/routines/service/plans.py",
+    "backend/app/domains/routines/ports/daily_plan_repository.py": "backend/app/domains/routines/contracts/plans.py",
+    "backend/app/domains/routines/infrastructure/sqlalchemy_daily_plan_models.py": "backend/app/runtime/routines/plan_references.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -1383,6 +1388,7 @@
           "backend/app/domains/identity/exceptions.py"
         ],
         "backend/app/api/v1/deps.py": [
+          "backend/app/api/v1/deps.py",
           "backend/app/domains/identity/dependencies.py"
         ]
       },
@@ -3717,9 +3723,9 @@
         },
         {
           "old": "backend/app/api/v1/deps.py::get_current_local_bot",
-          "new": "backend/app/domains/identity/dependencies.py::get_current_local_bot",
+          "new": "backend/app/api/v1/deps.py::get_current_local_bot",
           "direct_consumers": [
-            "backend/app/domains/identity/dependencies.py"
+            "backend/app/api/v1/deps.py"
           ],
           "test_nodes": [
             "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
@@ -17433,14 +17439,18 @@
       }
     },
     "AR-B4-A2a-plan-decisions": {
-      "status": "SOURCE IMPLEMENTED — pure plan decisions and own joint materialization; 42 passed / 1 existing PostgreSQL skip; A2b owner references pending",
+      "status": "SOURCE IMPLEMENTED — pure decisions, plan service and same-Session owner references; lifecycle/provider/resident slices remain",
       "split_files": {
         "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py": [
           "backend/app/domains/routines/constants.py",
+          "backend/app/domains/routines/contracts/plans.py",
           "backend/app/domains/routines/exceptions.py",
-          "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py",
           "backend/app/domains/routines/policies/planning.py",
-          "backend/app/domains/routines/service/scheduling.py"
+          "backend/app/domains/routines/repository/plans.py",
+          "backend/app/domains/routines/service/plans.py",
+          "backend/app/domains/routines/service/scheduling.py",
+          "backend/app/domains/world_characters/service/runtime_modes.py",
+          "backend/app/runtime/routines/plan_references.py"
         ]
       },
       "split_symbols": [
@@ -17448,7 +17458,7 @@
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::DAYPARTS",
           "new": "backend/app/domains/routines/constants.py::DAYPARTS",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py"
+            "backend/app/domains/routines/public.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17460,7 +17470,7 @@
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::DAYPART_START_HOURS",
           "new": "backend/app/domains/routines/constants.py::DAYPART_START_HOURS",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py"
+            "backend/app/domains/routines/public.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17472,7 +17482,7 @@
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::SELECTION_CONTRACT_VERSION",
           "new": "backend/app/domains/routines/constants.py::SELECTION_CONTRACT_VERSION",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py"
+            "backend/app/domains/routines/public.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17484,7 +17494,7 @@
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::TIMEZONE_CONTRACT_VERSION",
           "new": "backend/app/domains/routines/constants.py::TIMEZONE_CONTRACT_VERSION",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py"
+            "backend/app/domains/routines/public.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17496,7 +17506,7 @@
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::EVENT_CONSUMPTION_NAMESPACE",
           "new": "backend/app/domains/routines/constants.py::EVENT_CONSUMPTION_NAMESPACE",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py"
+            "backend/app/domains/routines/public.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17508,7 +17518,7 @@
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::RECENT_EXACT_DAYS",
           "new": "backend/app/domains/routines/constants.py::RECENT_EXACT_DAYS",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py"
+            "backend/app/domains/routines/public.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17520,7 +17530,7 @@
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::USAGE_WINDOW_DAYS",
           "new": "backend/app/domains/routines/constants.py::USAGE_WINDOW_DAYS",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py"
+            "backend/app/domains/routines/public.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17532,7 +17542,7 @@
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::INITIAL_STATE",
           "new": "backend/app/domains/routines/constants.py::INITIAL_STATE",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py"
+            "backend/app/domains/routines/public.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17544,7 +17554,7 @@
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::DailyActivityPlanError",
           "new": "backend/app/domains/routines/exceptions.py::DailyActivityPlanError",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py"
+            "backend/app/domains/routines/public.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17556,7 +17566,7 @@
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::DailyActivityPlanNotFoundError",
           "new": "backend/app/domains/routines/exceptions.py::DailyActivityPlanNotFoundError",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py"
+            "backend/app/domains/routines/public.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17568,7 +17578,7 @@
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::DailyActivityPlanForbiddenError",
           "new": "backend/app/domains/routines/exceptions.py::DailyActivityPlanForbiddenError",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py"
+            "backend/app/domains/routines/public.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17580,7 +17590,7 @@
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::DailyActivityPlanConflictError",
           "new": "backend/app/domains/routines/exceptions.py::DailyActivityPlanConflictError",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py"
+            "backend/app/domains/routines/public.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17592,7 +17602,7 @@
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::DailyActivityPlanValidationError",
           "new": "backend/app/domains/routines/exceptions.py::DailyActivityPlanValidationError",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py"
+            "backend/app/domains/routines/public.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17604,7 +17614,7 @@
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::_zone",
           "new": "backend/app/domains/routines/policies/planning.py::_zone",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py"
+            "backend/app/domains/routines/service/plans.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17616,7 +17626,7 @@
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::_resolve_local_boundary",
           "new": "backend/app/domains/routines/policies/planning.py::_resolve_local_boundary",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py"
+            "backend/app/domains/routines/service/plans.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17628,7 +17638,7 @@
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::daypart_windows",
           "new": "backend/app/domains/routines/policies/planning.py::daypart_windows",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py"
+            "backend/app/domains/routines/service/plans.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17640,7 +17650,7 @@
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::local_activity_date",
           "new": "backend/app/domains/routines/policies/planning.py::local_activity_date",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py"
+            "backend/app/domains/routines/service/plans.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17652,7 +17662,7 @@
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::_select_candidate",
           "new": "backend/app/domains/routines/policies/planning.py::_select_candidate",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py"
+            "backend/app/domains/routines/service/plans.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17664,7 +17674,7 @@
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::_snapshot",
           "new": "backend/app/domains/routines/policies/planning.py::_snapshot",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py"
+            "backend/app/domains/routines/service/plans.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17676,7 +17686,7 @@
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::_aware_utc",
           "new": "backend/app/domains/routines/service/scheduling.py::aware_utc",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py"
+            "backend/app/domains/routines/service/plans.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17686,9 +17696,9 @@
         },
         {
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::PlanScope",
-          "new": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::PlanScope",
+          "new": "backend/app/domains/routines/contracts/plans.py::PlanScope",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_plan_repository.py"
+            "backend/app/domains/routines/service/plans.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17698,9 +17708,9 @@
         },
         {
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::_load_scope",
-          "new": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::_load_scope",
+          "new": "backend/app/domains/routines/service/plans.py::_load_scope",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_plan_repository.py"
+            "backend/app/domains/routines/service/plans.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17710,9 +17720,9 @@
         },
         {
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::_ready_repertoire",
-          "new": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::_ready_repertoire",
+          "new": "backend/app/domains/routines/service/plans.py::_ready_repertoire",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_plan_repository.py"
+            "backend/app/domains/routines/service/plans.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17722,9 +17732,9 @@
         },
         {
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::_selection_history",
-          "new": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::_selection_history",
+          "new": "backend/app/domains/routines/repository/plans.py::_selection_history",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_plan_repository.py"
+            "backend/app/domains/routines/service/plans.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17734,9 +17744,9 @@
         },
         {
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::prepare_activity_plan",
-          "new": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::prepare_activity_plan",
+          "new": "backend/app/domains/routines/service/plans.py::prepare_activity_plan",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_plan_repository.py"
+            "backend/app/domains/routines/service/plans.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17746,9 +17756,9 @@
         },
         {
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::get_activity_plan",
-          "new": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::get_activity_plan",
+          "new": "backend/app/domains/routines/service/plans.py::get_activity_plan",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_plan_repository.py"
+            "backend/app/domains/routines/service/plans.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17758,9 +17768,9 @@
         },
         {
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::update_activity_runtime_mode",
-          "new": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::update_activity_runtime_mode",
+          "new": "backend/app/domains/routines/service/plans.py::update_activity_runtime_mode",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_plan_repository.py"
+            "backend/app/domains/routines/service/plans.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
@@ -17770,14 +17780,55 @@
         },
         {
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::_plan_read",
-          "new": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::_plan_read",
+          "new": "backend/app/domains/routines/service/plans.py::_plan_read",
           "direct_consumers": [
-            "backend/app/domains/routines/infrastructure/sqlalchemy_daily_plan_repository.py"
+            "backend/app/domains/routines/service/plans.py"
           ],
           "test_nodes": [
             "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
             "tests/routines/test_daily_activity_runtime.py::test_daypart_windows_are_contiguous_across_dst_and_late_access_skips",
             "tests/routines/test_daily_activity_runtime.py::test_joint_schedule_links_both_participants_and_claim_has_no_consumption"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::_load_scope",
+          "new": "backend/app/runtime/routines/plan_references.py::SqlAlchemyPlanReferences",
+          "direct_consumers": [
+            "backend/app/domains/routines/dependencies.py",
+            "backend/app/domains/routines/service/plans.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::_ready_repertoire",
+          "new": "backend/app/runtime/routines/plan_references.py::SqlAlchemyPlanReferences",
+          "direct_consumers": [
+            "backend/app/domains/routines/dependencies.py",
+            "backend/app/domains/routines/service/plans.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py::update_activity_runtime_mode",
+          "new": "backend/app/domains/world_characters/service/runtime_modes.py::set_activity_runtime_mode",
+          "direct_consumers": [
+            "backend/app/runtime/routines/plan_references.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
           ]
         }
       ],
@@ -17787,11 +17838,296 @@
         "exceptions.py": "same daily plan error objects",
         "service/joint_reservations.py": "routines-owned reservation query and atomic plan/episode materialization"
       },
-      "remaining": "A2b injects the same-Session foreign references and WC-owned mode mutation, then moves actual prepare/get/update and deletes one-method layers. A3 preserves separate active lifecycle caller contracts.",
+      "remaining": "A2b completes actual prepare/get/update; A3/B4-B/C retain distinct lifecycle, provider and resident admission/commit contracts.",
       "validation": {
         "focused": "42 passed, 1 skipped /12.15s; unchanged DST/selection/joint rollback/publish/replay tests",
         "scope": "15 exact routines role modules; old scoped plan and lifecycle carry exact bridges",
         "provenance": "Source first, parent capture after linear merge; no frozen source edits"
+      }
+    },
+    "AR-B4-A2b-plan-service": {
+      "status": "SOURCE IMPLEMENTED — 96 passed / 1 existing PostgreSQL skip; exact partial scope and split evidence passed; root introduction capture pending",
+      "split_files": {
+        "backend/app/domains/routines/public.py": [
+          "backend/app/domains/routines/public.py",
+          "backend/app/domains/routines/service/plans.py",
+          "backend/app/domains/routines/utils/clock.py"
+        ],
+        "backend/app/api/v1/routes/world_activity_runtime.py": [
+          "backend/app/api/v1/routes/world_activity_runtime.py",
+          "backend/app/domains/routines/router.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/domains/routines/public.py::_clock",
+          "new": "backend/app/domains/routines/utils/clock.py::resolve_clock",
+          "direct_consumers": [
+            "backend/app/domains/routines/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/public.py::prepare_activity_plan",
+          "new": "backend/app/domains/routines/service/plans.py::prepare_activity_plan",
+          "direct_consumers": [
+            "backend/app/domains/routines/router.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/public.py::get_activity_plan",
+          "new": "backend/app/domains/routines/service/plans.py::get_activity_plan",
+          "direct_consumers": [
+            "backend/app/domains/routines/router.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/public.py::update_activity_runtime_mode",
+          "new": "backend/app/domains/routines/service/plans.py::update_activity_runtime_mode",
+          "direct_consumers": [
+            "backend/app/domains/routines/router.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/public.py::reconcile_all_elapsed_routines",
+          "new": "backend/app/domains/routines/public.py::reconcile_all_elapsed_routines",
+          "direct_consumers": [
+            "backend/app/domains/routines/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/public.py::recover_expired_claims",
+          "new": "backend/app/domains/routines/public.py::recover_expired_claims",
+          "direct_consumers": [
+            "backend/app/domains/routines/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/public.py::close_elapsed_dayparts",
+          "new": "backend/app/domains/routines/public.py::close_elapsed_dayparts",
+          "direct_consumers": [
+            "backend/app/domains/routines/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/public.py::interrupt_inactive_world_character",
+          "new": "backend/app/domains/routines/public.py::interrupt_inactive_world_character",
+          "direct_consumers": [
+            "backend/app/domains/routines/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/public.py::__all__",
+          "new": "backend/app/domains/routines/public.py::__all__",
+          "direct_consumers": [
+            "backend/app/domains/routines/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_activity_runtime.py::router",
+          "new": "backend/app/api/v1/routes/world_activity_runtime.py::router",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_activity_runtime.py",
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_activity_runtime.py::_raise_plan_error",
+          "new": "backend/app/domains/routines/router.py::_raise_plan_error",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_activity_runtime.py",
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_activity_runtime.py::_raise_social_memory_error",
+          "new": "backend/app/api/v1/routes/world_activity_runtime.py::_raise_social_memory_error",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_activity_runtime.py",
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_activity_runtime.py::_raise_relationship_graph_error",
+          "new": "backend/app/api/v1/routes/world_activity_runtime.py::_raise_relationship_graph_error",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_activity_runtime.py",
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_activity_runtime.py::get_daily_activity_plan",
+          "new": "backend/app/domains/routines/router.py::get_daily_activity_plan",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_activity_runtime.py",
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_activity_runtime.py::prepare_daily_activity_plan",
+          "new": "backend/app/domains/routines/router.py::prepare_daily_activity_plan",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_activity_runtime.py",
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_activity_runtime.py::update_world_character_activity_runtime_mode",
+          "new": "backend/app/domains/routines/router.py::update_world_character_activity_runtime_mode",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_activity_runtime.py",
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_activity_runtime.py::get_world_character_social_memory",
+          "new": "backend/app/api/v1/routes/world_activity_runtime.py::get_world_character_social_memory",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_activity_runtime.py",
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_activity_runtime.py::get_world_character_relationship_graph",
+          "new": "backend/app/api/v1/routes/world_activity_runtime.py::get_world_character_relationship_graph",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_activity_runtime.py",
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ]
+        }
+      ],
+      "removed_forwarders": {
+        "backend/app/domains/routines/application/daily_plan.py": "backend/app/domains/routines/service/plans.py",
+        "backend/app/domains/routines/infrastructure/sqlalchemy_daily_plan_repository.py": "backend/app/domains/routines/service/plans.py",
+        "backend/app/domains/routines/ports/daily_plan_repository.py": "backend/app/domains/routines/contracts/plans.py",
+        "backend/app/domains/routines/infrastructure/sqlalchemy_daily_plan_models.py": "backend/app/runtime/routines/plan_references.py"
+      },
+      "same_session": "HTTP dependencies share the original get_db dependency. Runtime PlanReferences uses that Session, original SELECT/FOR UPDATE predicates and ordering; no new Session or commit. WC owns the two mode/version assignments. Plan service retains all original flush/commit/rollback/IntegrityError replay timing.",
+      "clock": "Former public Clock/FrozenClock support remains in utils.clock.resolve_clock; supplying both now and clock still raises before scope queries.",
+      "compatibility": "The public plan names are same-object service aliases. public lifecycle and the existing services.daily_activity_plans alias remain exact B4-A3/B4-C consumers; no new domain-to-runtime import.",
+      "remaining": "Routines scope is partial. Active lifecycle/claims, joint activity admission, provider post execution and resident/lease orchestration are the subsequent B4 slices.",
+      "validation": {
+        "focused": "96 passed / 1 skipped / 1 warning /57.84s; same-Session commit and rollback included",
+        "contracts": "No API/OpenAPI/ORM/assertion/suppression/test-node loss; protected2129/current2169; full command awaits prior source introduction metadata",
+        "split": "All current split symbol/consumer/test evidence PASS after exact live-path correction",
+        "architecture": "639 modules /2041 edges /legacy exact281;21 routines partial roles",
+        "inventories": "Public196;L4 parity97;ER0 76/87/24/44/7;Memory batch current"
       }
     }
   }

@@ -1,53 +1,45 @@
+"""Daily plan policy, own persistence, and the original transaction boundary."""
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import UTC, date, datetime, time, timedelta
+from datetime import datetime
 from hashlib import sha256
+from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.ids import uuid7_string
-from app.domains.routines import schemas
-from app.domains.routines.infrastructure import sqlalchemy_daily_plan_models as models
+from app.domains.routines import models, schemas
+from app.domains.routines.contracts.clock import Clock
+from app.domains.routines.contracts.plans import PlanOwner, PlanReferences, PlanScope
+from app.domains.routines.constants import DAYPARTS, SELECTION_CONTRACT_VERSION, TIMEZONE_CONTRACT_VERSION, INITIAL_STATE
+from app.domains.routines.exceptions import DailyActivityPlanNotFoundError, DailyActivityPlanForbiddenError, DailyActivityPlanConflictError, DailyActivityPlanValidationError
+from app.domains.routines.policies.planning import daypart_windows, local_activity_date, _select_candidate, _snapshot
+from app.domains.routines.repository.plans import _selection_history
 from app.domains.routines.service import joint_reservations as sqlalchemy_joint_reservations
-from app.domains.world_characters.public import character_contract_hash
-from app.domains.routines.constants import DAYPARTS, DAYPART_START_HOURS, SELECTION_CONTRACT_VERSION, TIMEZONE_CONTRACT_VERSION, EVENT_CONSUMPTION_NAMESPACE, RECENT_EXACT_DAYS, USAGE_WINDOW_DAYS, INITIAL_STATE
-from app.domains.routines.exceptions import DailyActivityPlanError, DailyActivityPlanNotFoundError, DailyActivityPlanForbiddenError, DailyActivityPlanConflictError, DailyActivityPlanValidationError
-from app.domains.routines.policies.planning import _zone, _resolve_local_boundary, daypart_windows, local_activity_date, _select_candidate, _snapshot
 from app.domains.routines.service.scheduling import aware_utc as _aware_utc
-
-
-@dataclass(frozen=True)
-class PlanScope:
-    world: models.World
-    membership: models.WorldMembership
-    world_character: models.WorldCharacter
-    character: models.Character
+from app.domains.routines.utils.clock import resolve_clock
+from app.domains.world_characters.service.setup_validation import character_contract_hash
 
 
 def _load_scope(
-    db: Session,
+    references: PlanReferences,
     *,
     character_id: str,
     world_id: str,
-    user: models.User,
+    user: PlanOwner,
     lock_for_update: bool = False,
 ) -> PlanScope:
-    character = db.get(models.Character, character_id)
+    character = references.get_character(character_id)
     if character is None or character.deleted_at is not None:
         raise DailyActivityPlanNotFoundError(character_id)
     if character.owner_id != user.id:
         raise DailyActivityPlanForbiddenError(character_id)
 
-    statement = select(models.WorldCharacter).where(
-        models.WorldCharacter.world_id == world_id,
-        models.WorldCharacter.character_id == character_id,
+    world_character = references.find_world_character(
+        character_id=character_id, world_id=world_id, lock_for_update=lock_for_update
     )
-    if lock_for_update:
-        statement = statement.with_for_update()
-    world_character = db.scalar(statement)
     if world_character is None:
         raise DailyActivityPlanNotFoundError(character_id)
     if world_character.control_mode != "autonomous":
@@ -55,7 +47,7 @@ def _load_scope(
             "owner_controlled_automation_disabled"
         )
 
-    membership = db.get(models.WorldMembership, world_character.membership_id)
+    membership = references.get_membership(world_character.membership_id)
     if (
         membership is None
         or membership.world_id != world_id
@@ -63,17 +55,17 @@ def _load_scope(
         or membership.status != "active"
     ):
         raise DailyActivityPlanValidationError("world_membership_inactive")
-    world = db.get(models.World, world_id)
+    world = references.get_world(world_id)
     if world is None:
         raise DailyActivityPlanNotFoundError(world_id)
     return PlanScope(world, membership, world_character, character)
 
 
 def _ready_repertoire(
-    db: Session,
+    references: PlanReferences,
     *,
     scope: PlanScope,
-) -> tuple[models.WorldActivityRepertoire, list[models.WorldActivityCandidate]]:
+) -> tuple[Any, list[Any]]:
     if scope.world.status != "published" or scope.world.readiness_status != "publish_ready":
         raise DailyActivityPlanValidationError("world_not_ready")
     if scope.world_character.status not in {"pending", "inactive", "active"}:
@@ -81,16 +73,10 @@ def _ready_repertoire(
 
     character_hash = character_contract_hash(scope.character)
     world_hash = scope.world.contract_hash
-    repertoire = db.scalar(
-        select(models.WorldActivityRepertoire).where(
-            models.WorldActivityRepertoire.world_character_id
-            == scope.world_character.id,
-            models.WorldActivityRepertoire.status == "ready",
-        )
-    )
+    repertoire = references.get_ready_repertoire(scope.world_character.id)
     if repertoire is None:
         raise DailyActivityPlanValidationError("repertoire_not_ready")
-    profile = db.get(models.WorldCommunityProfile, repertoire.community_profile_id)
+    profile = references.get_profile(repertoire.community_profile_id)
     if profile is None or profile.status != "ready":
         raise DailyActivityPlanValidationError("profile_not_ready")
     if (
@@ -101,14 +87,7 @@ def _ready_repertoire(
     ):
         raise DailyActivityPlanValidationError("repertoire_stale")
 
-    candidates = list(
-        db.scalars(
-            select(models.WorldActivityCandidate).where(
-                models.WorldActivityCandidate.repertoire_id == repertoire.id,
-                models.WorldActivityCandidate.enabled.is_(True),
-            )
-        )
-    )
+    candidates = references.list_enabled_candidates(repertoire.id)
     if len(candidates) != 40:
         raise DailyActivityPlanValidationError("repertoire_candidate_count_invalid")
     signatures = {candidate.canonical_signature for candidate in candidates}
@@ -120,41 +99,21 @@ def _ready_repertoire(
     return repertoire, candidates
 
 
-def _selection_history(
-    db: Session,
-    *,
-    world_character_id: str,
-    local_date: date,
-) -> list[tuple[models.DailyActivityPlanItem, date]]:
-    earliest = local_date - timedelta(days=USAGE_WINDOW_DAYS)
-    rows = db.execute(
-        select(models.DailyActivityPlanItem, models.DailyActivityPlan.local_date)
-        .join(
-            models.DailyActivityPlan,
-            models.DailyActivityPlan.id == models.DailyActivityPlanItem.plan_id,
-        )
-        .where(
-            models.DailyActivityPlan.world_character_id == world_character_id,
-            models.DailyActivityPlan.local_date >= earliest,
-            models.DailyActivityPlan.local_date < local_date,
-        )
-    )
-    return [(item, history_date) for item, history_date in rows]
-
-
 def prepare_activity_plan(
     db: Session,
     *,
     character_id: str,
     world_id: str,
-    user: models.User,
+    user: PlanOwner,
+    references: PlanReferences,
     data: schemas.DailyActivityPlanPrepareCreate,
     now: datetime | None = None,
+    clock: Clock | None = None,
 ) -> schemas.DailyActivityPlanRead:
     del data  # the date-scoped unique resource is the durable idempotency boundary
-    current = _aware_utc(now or datetime.now(UTC))
+    current = _aware_utc(resolve_clock(now=now, clock=clock).now_utc())
     scope = _load_scope(
-        db,
+        references,
         character_id=character_id,
         world_id=world_id,
         user=user,
@@ -176,7 +135,7 @@ def prepare_activity_plan(
             reused=True,
         )
 
-    repertoire, candidates = _ready_repertoire(db, scope=scope)
+    repertoire, candidates = _ready_repertoire(references, scope=scope)
     windows = daypart_windows(target_date, scope.world.timezone)
     history = _selection_history(
         db,
@@ -331,12 +290,14 @@ def get_activity_plan(
     *,
     character_id: str,
     world_id: str,
-    user: models.User,
+    user: PlanOwner,
+    references: PlanReferences,
     now: datetime | None = None,
+    clock: Clock | None = None,
 ) -> schemas.DailyActivityPlanRead:
-    current = _aware_utc(now or datetime.now(UTC))
+    current = _aware_utc(resolve_clock(now=now, clock=clock).now_utc())
     scope = _load_scope(
-        db,
+        references,
         character_id=character_id,
         world_id=world_id,
         user=user,
@@ -364,21 +325,23 @@ def update_activity_runtime_mode(
     *,
     character_id: str,
     world_id: str,
-    user: models.User,
+    user: PlanOwner,
+    references: PlanReferences,
     data: schemas.WorldCharacterRuntimeModeUpdate,
     now: datetime | None = None,
+    clock: Clock | None = None,
 ) -> schemas.WorldCharacterRuntimeModeRead:
-    current = _aware_utc(now or datetime.now(UTC))
+    current = _aware_utc(resolve_clock(now=now, clock=clock).now_utc())
     scope = _load_scope(
-        db,
+        references,
         character_id=character_id,
         world_id=world_id,
         user=user,
         lock_for_update=True,
     )
     if data.activity_runtime_mode == "routine_resident_v1":
-        repertoire, _candidates = _ready_repertoire(db, scope=scope)
-        credential = db.get(models.LlmCredential, repertoire.credential_id)
+        repertoire, _candidates = _ready_repertoire(references, scope=scope)
+        credential = references.get_credential(repertoire.credential_id)
         if (
             credential is None
             or not credential.enabled
@@ -412,8 +375,9 @@ def update_activity_runtime_mode(
         if current_item is None or current_item.episode is None:
             raise DailyActivityPlanValidationError("activity_plan_not_ready")
 
-    scope.world_character.activity_runtime_mode = data.activity_runtime_mode
-    scope.world_character.version += 1
+    references.set_activity_runtime_mode(
+        scope.world_character, activity_runtime_mode=data.activity_runtime_mode
+    )
     db.commit()
     return schemas.WorldCharacterRuntimeModeRead(
         world_character_id=scope.world_character.id,
@@ -428,7 +392,7 @@ def _plan_read(
     db: Session,
     *,
     plan: models.DailyActivityPlan,
-    world_character: models.WorldCharacter,
+    world_character: Any,
     now: datetime,
     reused: bool,
 ) -> schemas.DailyActivityPlanRead:

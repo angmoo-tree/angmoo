@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 from app import models, schemas
+from app.runtime.routines.plan_references import SqlAlchemyPlanReferences
 from app.core.db import Base
 from app.cruds import agents as agent_crud
 from app.runtime.social.sqlalchemy_unit_of_work import (
@@ -1245,6 +1246,7 @@ def test_runtime_mode_readiness_does_not_enable_autonomy() -> None:
 
         updated = daily_activity_plans.update_activity_runtime_mode(
             db,
+            references=SqlAlchemyPlanReferences(db),
             character_id=fixture.character.id,
             world_id=fixture.world.id,
             user=fixture.user,

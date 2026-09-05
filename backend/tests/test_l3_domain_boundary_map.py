@@ -69,8 +69,8 @@ def test_l3_current_entrypoints_track_completed_and_pending_migrations() -> None
         APP_ROOT
         / "domains"
         / "routines"
-        / "infrastructure"
-        / "sqlalchemy_daily_activity_plans.py": {
+        / "service"
+        / "plans.py": {
             "prepare_activity_plan",
             "get_activity_plan",
             "update_activity_runtime_mode",

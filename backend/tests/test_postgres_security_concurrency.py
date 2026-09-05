@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import NullPool
 
 from app import models, schemas
+from app.runtime.routines.plan_references import SqlAlchemyPlanReferences
 from app.domains.chat.api import schemas as chat_schemas
 from app.config import settings
 from app.cruds import agent_runs as agent_run_crud
@@ -387,6 +388,7 @@ def test_daily_activity_plan_is_singleton_across_twenty_postgres_sessions() -> N
             barrier.wait()
             result = daily_activity_plans.prepare_activity_plan(
                 db,
+                references=SqlAlchemyPlanReferences(db),
                 character_id=character_id,
                 world_id=world_id,
                 user=user,
