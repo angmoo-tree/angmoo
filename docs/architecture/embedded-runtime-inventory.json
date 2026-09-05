@@ -123,7 +123,7 @@
         "tests": [
           "backend/tests/worlds/test_creator_routes.py",
           "backend/tests/worlds/test_definition_contract.py",
-          "backend/tests/test_world_foundation.py"
+          "backend/tests/worlds/test_foundation.py"
         ]
       },
       {

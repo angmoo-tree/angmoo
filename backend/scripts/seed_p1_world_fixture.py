@@ -11,7 +11,7 @@ if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
 from app.core.db import SessionLocal
-from app.services import world_foundation
+from app.runtime.worlds import foundation as world_foundation
 
 
 def seed() -> str:

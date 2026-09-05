@@ -1,7 +1,7 @@
 {
-  "edge_count": 3325,
-  "external_import_count": 2684,
-  "module_count": 945,
+  "edge_count": 3330,
+  "external_import_count": 2691,
+  "module_count": 948,
   "modules": [
     {
       "external_imports": [],
@@ -8970,6 +8970,19 @@
     {
       "external_imports": [
         "__future__",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.world_characters.models"
+      ],
+      "module": "app.domains.world_characters.service.foundation",
+      "path": "backend/app/domains/world_characters/service/foundation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "datetime",
         "sqlalchemy",
         "sqlalchemy.orm"
@@ -10011,6 +10024,24 @@
       ],
       "module": "app.domains.worlds.service.definition",
       "path": "backend/app/domains/worlds/service/definition.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "uuid"
+      ],
+      "imports": [
+        "app.domains.worlds.models",
+        "app.domains.worlds.service.definition"
+      ],
+      "module": "app.domains.worlds.service.foundation",
+      "path": "backend/app/domains/worlds/service/foundation.py",
       "wildcard_imports": []
     },
     {
@@ -13555,6 +13586,30 @@
     },
     {
       "external_imports": [],
+      "imports": [],
+      "module": "app.runtime.worlds",
+      "path": "backend/app/runtime/worlds/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.characters.models",
+        "app.domains.identity.models",
+        "app.domains.world_characters.service.foundation",
+        "app.domains.worlds.service.foundation"
+      ],
+      "module": "app.runtime.worlds.foundation",
+      "path": "backend/app/runtime/worlds/foundation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
       "imports": [
         "app.domains.character_lore.schemas",
         "app.domains.chat.schemas",
@@ -14067,24 +14122,6 @@
       ],
       "module": "app.services.world_character_provider",
       "path": "backend/app/services/world_character_provider.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "dataclasses",
-        "datetime",
-        "hashlib",
-        "sqlalchemy",
-        "sqlalchemy.orm",
-        "uuid"
-      ],
-      "imports": [
-        "app.domains.worlds.service.definition",
-        "app.models"
-      ],
-      "module": "app.services.world_foundation",
-      "path": "backend/app/services/world_foundation.py",
       "wildcard_imports": []
     }
   ],

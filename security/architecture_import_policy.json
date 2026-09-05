@@ -395,10 +395,6 @@
         {
           "importer": "app.services.langgraph_resident",
           "imported": "app.services.prompt_safety"
-        },
-        {
-          "importer": "app.services.world_foundation",
-          "imported": "app.models"
         }
       ],
       "id": "pre-t2-5-horizontal-layer-imports",
@@ -1132,7 +1128,9 @@
       "app.domains.social.service.feed_reaction_validation",
       "app.domains.social.service.keyword_feed",
       "app.domains.social.service.resident_affordances",
-      "app.domains.social.service.world_feed"
+      "app.domains.social.service.world_feed",
+      "app.domains.world_characters.service.foundation",
+      "app.domains.worlds.service.foundation"
     ],
     "entries": [
       "app.domains.character_lore.contracts",
@@ -1502,7 +1500,9 @@
       "app.domains.social.service.feed_reaction_validation",
       "app.domains.social.service.keyword_feed",
       "app.domains.social.service.resident_affordances",
-      "app.domains.social.service.world_feed"
+      "app.domains.social.service.world_feed",
+      "app.domains.world_characters.service.foundation",
+      "app.domains.worlds.service.foundation"
     ],
     "bridges": [
       {
@@ -2071,14 +2071,6 @@
         "owner_stage": "AR-B2",
         "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
         "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.world_foundation",
-        "target": "app.domains.worlds.service.definition",
-        "owner_stage": "AR-B8-A",
-        "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
-        "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
         "review_date": "2026-09-05"
       },
       {

@@ -1887,3 +1887,13 @@ C19 최종 직접/검색/Package/보안 검증은 **37 PASS / 35.38초 / 기존 
 Local Bot 통합 `de9a4bd67a7ff0540d0fd84a6b15ebca155cfa46`에 Search `49c0f1f`, C16~C19의 `62227bd`까지를 합류했다. Runtime Search 계약과 process binding은 각각 실제 `runtime.contracts.search`와 `runtime/search/binding.py`를 사용한다. feed cycle/provider는 실제 `integrations.direct_llm`을 사용하며 같은 Memory daypart 구현과 Social affordance 연결을 유지했다. 옛 `services/world_feed_search.py`, `world_feed_runtime.py`, `feed_reaction_planner.py`는 제거됐다.
 
 검색·cycle 원자 저장·provider 계약·성공 action·Package import·Today SNS 결합 검사 **46 PASS / 1 warning / 27.14초**다. 원래 보존 진단은 보호2,201/current2,379 nodes, source/split/assertion/suppression/ASGI/APIORM/node 모두0이다. 경계 **945 modules / 3,325 edges / legacy115**, L4 **945/99**, ER0 **87/87/24/44/7**을 통과했다. 아직 준비 source이며 B4 후속·Community 실제 업무 종료 및 원본 introduction 원장·stock/PR/merge/installer와 AR-G5/AR-B8-B 전체 종료는 별도다.
+
+### AR-B8 World foundation source preparation — 2026-09-06 08:37 KST
+
+The former `app.services.world_foundation` implementation now belongs to Worlds (default World and membership creation), World Characters (resident lookup/add/count), and `app.runtime.worlds.foundation` (cross-domain owner selection and ordered transaction composition). `backend/scripts/seed_p1_world_fixture.py` calls the actual runtime composition. The original five definitions and nine constants match after expanding six concrete owner functions, including the original query/flush order, UUID values, default inactive residents, and absence of a commit.
+
+The original seven tests moved whole to `tests/worlds/test_foundation.py`; a new rollback test verifies that initialization cannot commit the caller's transaction. Focused validation: **8 passed**. Boundary validation: **931 modules / 3232 edges / 128 exact legacy edges**. Read-only original preservation diagnostics report **0 source, split, assertion, suppression, ASGI, API/ORM or node errors** (protected 2201 / current 2375). L4 inventory 931/97 and ER0 86/87/24/44/7 pass. These are source preparation results; immutable introduction metadata, full stock gate, hosted CI, installer and merge remain pending integration.
+
+### G5 integration of World foundation — 2026-09-06 08:45 KST
+
+Merged preparation source `447e3c1` into the current Social/Search/Chat/Memory/Runtime integration. Actual World foundation tests: **8 passed**. Original read-only preservation diagnostics remain **0 errors** across sources, split ownership, assertions, suppressions, ASGI exports, API/ORM and test nodes (**2201 protected / 2380 current**). Architecture boundaries pass at **948 modules / 3330 edges / 114 exact legacy edges**; L4 948/99 and ER0 87/87/24/44/7 pass. Full stock source introduction metadata and hosted/installer gates remain pending.
