@@ -5,8 +5,10 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import models, schemas
-from app.api.v1.deps import get_current_user, get_db, get_optional_current_user
-from app.core import browser_session
+from app.domains.identity.dependencies import get_current_user
+from app.core.db import get_db
+from app.domains.identity.dependencies import get_optional_current_user
+from app.domains.identity import browser_session
 from app.domains.world_characters import public as world_character_setup
 from app.domains.worlds import public as world_service
 

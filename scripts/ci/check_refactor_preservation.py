@@ -204,6 +204,17 @@ def normalized_assertion(fragment: str, literals: list[tuple[str, str]]) -> str:
                     # import statement used by source-contract tests. No numeric
                     # expectations, predicates, or other text is exempted.
                     original = re.sub(r"(?<![\w./])" + re.escape(old) + r"(?![\w])", lambda _: new, original)
+                    if old.startswith("app.") and old.endswith(".__init__"):
+                        # A mapped package initializer also has this exact import
+                        # spelling. Do not extend the map to sibling modules or
+                        # arbitrary directory-prefix descendants.
+                        package = old.removesuffix(".__init__")
+                        target = new.removesuffix(".__init__")
+                        original = re.sub(
+                            r"(?<![\w./])" + re.escape(package) + r"(?![\w./])",
+                            lambda _: target,
+                            original,
+                        )
                 node.value = original
             return node
 

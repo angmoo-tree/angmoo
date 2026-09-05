@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 
-from app.api.v1.deps import get_current_user
+from app.domains.identity.dependencies import get_current_user
 from app.api.v1.routes import runtime_status as runtime_routes
 from app.core.db import get_db
 from app.domains.runtime import public as runtime

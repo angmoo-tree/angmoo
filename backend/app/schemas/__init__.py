@@ -47,19 +47,17 @@ from app.schemas.agents import (
     CredentialRead,
     CredentialUpsert,
 )
-from app.domains.identity.api import (
-    AccountDeletionCreate,
-    AuthRead,
-    GoogleLoginRead,
-    GoogleLoginCreate,
-    GoogleLinkCreate,
-    GoogleSignupCompleteCreate,
-    LoginCreate,
-    SignupCreate,
-    UserDisplayNameUpdate,
-    UserPreferencesUpdate,
-    UserRead,
-)
+from app.domains.identity.schemas import AccountDeletionCreate
+from app.domains.identity.schemas import AuthRead
+from app.domains.identity.schemas import GoogleLoginRead
+from app.domains.identity.schemas import GoogleLoginCreate
+from app.domains.identity.schemas import GoogleLinkCreate
+from app.domains.identity.schemas import GoogleSignupCompleteCreate
+from app.domains.identity.schemas import LoginCreate
+from app.domains.identity.schemas import SignupCreate
+from app.domains.identity.schemas import UserDisplayNameUpdate
+from app.domains.identity.schemas import UserPreferencesUpdate
+from app.domains.identity.schemas import UserRead
 from app.schemas.characters import (
     AgentCharacterStateWrite,
     CharacterActivityRead,

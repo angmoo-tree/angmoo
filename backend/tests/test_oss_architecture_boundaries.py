@@ -13,7 +13,8 @@ PUBLIC_RUNTIME_FILES = (
     APP_ROOT / "services" / "agent_runs.py",
     APP_ROOT / "services" / "agent_writing.py",
     APP_ROOT / "services" / "agents.py",
-    APP_ROOT / "services" / "auth.py",
+    APP_ROOT / "domains" / "identity" / "service" / "auth.py",
+    APP_ROOT / "runtime" / "account_deletion.py",
     APP_ROOT / "services" / "langgraph_resident.py",
     APP_ROOT / "services" / "resident_contracts.py",
 )
@@ -80,7 +81,7 @@ def test_crud_modules_do_not_import_services():
 def test_provider_sdk_imports_are_confined_to_provider_adapters_and_oauth():
     allowed = {
         "providers/gemini.py",
-        "services/auth.py",
+        "integrations/google_identity.py",
     }
     violations: dict[str, list[str]] = {}
     for path in sorted(APP_ROOT.rglob("*.py")):
@@ -99,8 +100,8 @@ def test_provider_sdk_imports_are_confined_to_provider_adapters_and_oauth():
 def test_secret_decryption_is_confined_to_credential_resolver():
     allowed = {
         "core/security.py",
-        "core/startup_security.py",
-        "domains/identity/application/resolve_credential.py",
+        "runtime/startup_security.py",
+        "domains/identity/service/credential_resolution.py",
     }
     violations: list[str] = []
     for path in sorted(APP_ROOT.rglob("*.py")):

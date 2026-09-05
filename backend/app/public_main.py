@@ -15,7 +15,7 @@ from app.core.config import Settings, settings
 from app.core.db import SessionLocal, get_db
 from app.core.request_limits import RequestBodyLimitMiddleware
 from app.core.public_media import mount_public_media
-from app.core.startup_security import validate_startup_security
+from app.runtime.startup_security import validate_startup_security
 from app.cruds.community import seed_demo_data
 from app.domains.world_characters.public import (
     reconcile_local_autonomous_runtime_modes,
@@ -302,6 +302,9 @@ def create_app(
         redoc_url="/redoc" if runtime_settings.api_docs_enabled else None,
         openapi_url=("/openapi.json" if runtime_settings.api_docs_enabled else None),
     )
+    from app.runtime.account_deletion import delete_current_user_account
+
+    runtime_app.state.account_deletion_workflow = delete_current_user_account
     runtime_app.add_middleware(RequestBodyLimitMiddleware)
     runtime_app.include_router(
         create_public_api_router(extension.routers if extension else ()),

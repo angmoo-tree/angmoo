@@ -371,6 +371,52 @@
         "tests/test_refactor_backend_partial_scopes.py": {},
         "tests/test_refactor_public_node_moves.py": {}
       }
+    },
+    {
+      "commit": "5f7a184ecce29a06b5ef91b9521e9ec1945395a7",
+      "feature_id": "AR-G0",
+      "reason": "Protect exact synthetic checkpoint fixture exception and negative scanner regressions",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_t2_secret_allowlist.py::test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence[checkpoint_git_blob-0000000000000000000000000000000000000000]",
+        "tests/test_t2_secret_allowlist.py::test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence[evidence_commit-0000000000000000000000000000000000000000]",
+        "tests/test_t2_secret_allowlist.py::test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence[path-security/*]",
+        "tests/test_t2_secret_allowlist.py::test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence[rule-openai-api-key]",
+        "tests/test_t2_secret_allowlist.py::test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence[value-different-fixture-value]",
+        "tests/test_t2_secret_allowlist.py::test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence[value_sha256-0000000000000000000000000000000000000000000000000000000000000000]",
+        "tests/test_t2_secret_allowlist.py::test_checkpoint_exception_does_not_suppress_another_value_path_or_rule",
+        "tests/test_t2_secret_allowlist.py::test_checkpoint_exception_matches_only_the_existing_frozen_synthetic_fixture"
+      ],
+      "test_assertions": {
+        "tests/test_t2_secret_allowlist.py": {
+          "test_current_exact_allowlist_metadata_passes": [
+            "assert checker.validate() == []"
+          ],
+          "test_broad_scope_and_missing_review_metadata_are_rejected": [
+            "assert any(('scope must stay exact' in error for error in errors))",
+            "assert any(('missing metadata fields' in error for error in errors))"
+          ],
+          "test_checkpoint_exception_matches_only_the_existing_frozen_synthetic_fixture": [
+            "assert entry['value'] == original['value']",
+            "assert hashlib.sha256(entry['value'].encode()).hexdigest() == checker.CHECKPOINT_FIXTURE_SHA256",
+            "assert any((entry['value'] in assertion for assertion in assertions))",
+            "assert checkpoint['commit'] == entry['evidence_commit']",
+            "assert hashlib.sha1(f'blob {len(checkpoint_bytes)}\\x00'.encode() + checkpoint_bytes).hexdigest() == entry['checkpoint_git_blob']"
+          ],
+          "test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence": [
+            "assert checker.validate(fixture)"
+          ],
+          "test_checkpoint_exception_does_not_suppress_another_value_path_or_rule": [
+            "assert list(scanner.scan_text(entry.path, entry.value, allowlist=allowlist)) == []",
+            "assert {finding.rule for finding in scanner.scan_text('security/another-checkpoint.json', entry.value, allowlist=allowlist)} == {'google-api-key'}",
+            "assert {finding.rule for finding in scanner.scan_text(entry.path, entry.value + '1', allowlist=allowlist)} == {'google-api-key'}",
+            "assert {finding.rule for finding in scanner.scan_text(entry.path, another_rule.value, allowlist=allowlist)} == {'openai-api-key'}"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_t2_secret_allowlist.py": {}
+      }
     }
   ]
 }

@@ -79,7 +79,7 @@ def _bootstrap_local_session(
 
     from app import models
     from app.core import security
-    from app.domains.identity.domain.local_owner import LOCAL_INSTALLATION_KEY
+    from app.domains.identity.constants import LOCAL_INSTALLATION_KEY
     from app.runtime.contributor_backend import CONTRIBUTOR_GENERATION
     from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
     from app.runtime.persistence.sqlite_database import (

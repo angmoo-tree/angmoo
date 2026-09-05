@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app import models, schemas
-from app.api.v1.deps import get_current_user, get_db
+from app.domains.identity.dependencies import get_current_user
+from app.core.db import get_db
 from app.services import tree as tree_service
 
 

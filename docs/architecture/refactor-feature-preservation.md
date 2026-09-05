@@ -113,3 +113,5 @@ AR-B1은 PR #260에서 legacy alias 없이 병합됐다. AR-F1은 PR #261에서 
 Character·CharacterState는 `app.domains.characters.models`, seed 요청은 `contracts`, flush-only seed는 `service.seed`, 기존 생성·프로필·핸들 처리는 `service.profile`, 상태 저장은 `service.state`가 실제 구현을 소유한다. 기존 집계 경로는 동일 객체의 한 방향 호환 export이며 종료 담당과 제거 조건은 `architecture_import_policy.json`의 exact bridge에 있다. 부분 추출한 수평 파일의 남은 함수도 `refactor_path_map.json`의 symbol 대응표에 그대로 남는다고 기록했다.
 
 이 단계는 seed와 일반 생성의 서로 다른 transaction 정책을 보존한다. WorldCharacter와 Social activity projection, credential·Creator·활동 실행·다업무 삭제는 담당 전환이 완료될 때까지 기존 책임을 유지한다. media 참조 검증만 Character schema에 필요한 AR-B3 선행 의존성으로 `app.domains.media.schemas`로 옮겼다. 전체 Characters 전환과 source 도입 증거 캡처·통합 검증은 진행 중이다.
+
+AR-B2의 identity 구현은 15개 소유 테스트 파일·기존 133 nodes와 함께 역할 파일로 이전했다. Auth의 계정 삭제 부분은 runtime의 같은 session/UoW workflow로 분리했고 실패 시 DB rollback·비공개 media 복구, 성공 후 purge 순서를 유지한다. Local owner의 실패한 claim 시도 횟수 commit과 session 발급 제한도 보존한다. 두 factory의 callback 연결, HTTP dependency의 같은 객체 identity, 기존 model/schema aggregate 호환은 G06·G05 후속 단계에서 이어받을 계약이다. 현재 적용·검증·PR·병합 결과는 [백엔드 전환 결과](refactor-backend-results.md)에 별도로 기록한다.

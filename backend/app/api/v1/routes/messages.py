@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
-from app.api.v1.deps import get_current_user, get_db
+from app.domains.identity.dependencies import get_current_user
+from app.core.db import get_db
 from app.domains.chat import public as chat
 from app.domains.identity.public import User
 from app.runtime.chat.composition import chat_service

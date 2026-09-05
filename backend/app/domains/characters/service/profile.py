@@ -9,7 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from app.domains.characters import models, schemas
 from app.domains.characters.exceptions import CharacterHandleConflictError, InvalidCharacterHandleError
-from app.domains.identity.public import User
+from app.domains.characters.contracts import CharacterOwner
 
 HANDLE_RE = re.compile(r"^[a-z0-9_]{2,40}$")
 
@@ -85,7 +85,7 @@ def list_characters_for_user(db: Session, user_id: str) -> list[models.Character
 
 
 def create_character(
-    db: Session, *, user: User, character_id: str, data: schemas.AgentCreate
+    db: Session, *, user: CharacterOwner, character_id: str, data: schemas.AgentCreate
 ) -> models.Character:
     requested_handle = (
         normalize_character_handle(data.handle) if data.handle else None

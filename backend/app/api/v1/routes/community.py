@@ -5,7 +5,9 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app import schemas
-from app.api.v1.deps import get_current_user, get_db, get_optional_current_user
+from app.domains.identity.dependencies import get_current_user
+from app.core.db import get_db
+from app.domains.identity.dependencies import get_optional_current_user
 from app.services import community as community_service
 
 router = APIRouter(tags=["community"])

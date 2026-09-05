@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 from app import models, schemas
-from app.api.v1 import deps as api_deps
+from app.domains.identity import dependencies as api_deps
 from app.api.v1.routes import worlds as world_routes
 from app.api.v1.routes import world_character_setup as setup_routes
 from app.core import security
