@@ -1106,3 +1106,12 @@ C7 최종 경계 **762 modules / 2,607 edges / exact legacy 205**, PR258/263 API
 Relationships가 source 성공 기록과 evidence digest/저장 두 flush를 실제로 소유한다. `audit_only`와 stage failure injection 순서를 그대로 유지하며 관찰·관계 delta·projection을 추가하지 않았다. Social의 입력 digest·기존 ledger 검증·공개 root 정책 및 candidate 조회도 실제 역할로 이전했다. 기존 runtime UoW는 원래 함수 객체를 직접 호출하며 다음 단계에서 남은 전체 쓰기 정책을 이전한다. 원문의 실제 source 본문/SQL과 기존 runtime 나머지 정의를 비교하고 기존 동시성·중복·실패 롤백·provider-free 회귀를 검증했다. 새 test node나 보호 assertion 변경은 없다. Source capture/전체 B5/Hosted CI/installer는 후속 통합에서 검증한다.
 
 C8-A 집중 **31 passed / 기존 warning 1 / 16.80초**다. 이전한 다섯 함수 본문(ledger SQL 복원 비교 포함)과 남은 runtime 아홉 정의를 원문과 동일 비교했다. 최종 경계 **767 modules / 2,620 edges / exact legacy 205**, API·응답·ORM·전체 split evidence와 L4·ER0 current inventory도 통과했다.
+
+
+## AR-B5-C8-B — Social 실제 source 작성 정책과 runtime 트랜잭션 분리
+
+SocialSourceWriteService가 수동/자율 actor·target 허용, idempotency replay, 실제 Timeline 호출, source/evidence·inbox 후보 순서, 최종 응답을 소유한다. Runtime은 기존 BEGIN IMMEDIATE/timeout 복원/재시도·최종 commit을 그대로 유지한다. WC nullable query와 Character/Identity/membership 및 Relationships source 쓰기는 같은 caller Session의 typed references에서 연결한다. 각 조회의 원래 시점과 nullable 결과, 객체 identity를 유지하며 불필요한 조회/사전검증/commit을 추가하지 않았다.
+
+실제 정책·helper·executor 15개 AST와 기존 관찰 composition class 본문이 동일하다. 먼저 기존 집중 **34 passed / 17.58초**를 확인했다. 추가 source ownership 회귀는 생성 시 조회 없음, BEGIN 이후 같은 Session/attached row, source evidence의 audit_only·관계/graph 없음, 요청당 최종 commit 1회와 replay 중 source 재생성 없음을 검증한다. 기존 assertion은 유지했다. Source capture/전체 B5/Hosted CI/installer는 후속 통합에서 검증한다.
+
+C8-B 최종 집중 **35 passed / 기존 warning 1 / 19.61초**, 경계 **771 modules / 2,638 edges / exact legacy 203**다. Runtime executor의 전역 ORM/옛 Community 서비스 임시 edge 두 개를 종료했다. PR258/263 API·응답·ORM와 전체 split evidence, L4·ER0 current inventory도 통과했다.

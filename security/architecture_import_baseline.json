@@ -1,7 +1,7 @@
 {
-  "edge_count": 2620,
-  "external_import_count": 2317,
-  "module_count": 767,
+  "edge_count": 2638,
+  "external_import_count": 2326,
+  "module_count": 771,
   "modules": [
     {
       "external_imports": [],
@@ -5390,6 +5390,21 @@
     {
       "external_imports": [
         "__future__",
+        "collections.abc",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.social.contracts.actors",
+        "app.domains.social.models.posts",
+        "app.domains.world_characters.contracts.owner_identity"
+      ],
+      "module": "app.domains.social.contracts.source_writes",
+      "path": "backend/app/domains/social/contracts/source_writes.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "dataclasses",
         "enum"
       ],
@@ -6045,6 +6060,31 @@
     },
     {
       "external_imports": [
+        "__future__",
+        "collections.abc",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.ids",
+        "app.core.unit_of_work",
+        "app.domains.social.contracts.actors",
+        "app.domains.social.contracts.source_writes",
+        "app.domains.social.contracts.writes",
+        "app.domains.social.models.manual_writes",
+        "app.domains.social.models.posts",
+        "app.domains.social.repository.blocks",
+        "app.domains.social.repository.manual_writes",
+        "app.domains.social.schemas.community",
+        "app.domains.social.service.manual_writes",
+        "app.domains.social.service.timeline",
+        "app.domains.social.utils.source_writes"
+      ],
+      "module": "app.domains.social.service.source_writes",
+      "path": "backend/app/domains/social/service/source_writes.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "datetime",
         "sqlalchemy.orm",
         "uuid"
@@ -6365,6 +6405,17 @@
       ],
       "module": "app.domains.world_characters.public",
       "path": "backend/app/domains/world_characters/public.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.world_characters.models"
+      ],
+      "module": "app.domains.world_characters.repository.source_writes",
+      "path": "backend/app/domains/world_characters/repository/source_writes.py",
       "wildcard_imports": []
     },
     {
@@ -10215,6 +10266,27 @@
     },
     {
       "external_imports": [
+        "collections.abc",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.characters.service.profile",
+        "app.domains.identity.service.profile",
+        "app.domains.relationships.service.source_posts",
+        "app.domains.social.contracts.actors",
+        "app.domains.social.contracts.source_writes",
+        "app.domains.social.models.posts",
+        "app.domains.world_characters.contracts.owner_identity",
+        "app.domains.world_characters.repository.source_writes",
+        "app.domains.world_characters.service.owner_identity",
+        "app.domains.worlds.service.character_entry"
+      ],
+      "module": "app.runtime.social.source_references",
+      "path": "backend/app/runtime/social/source_references.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "datetime",
         "sqlalchemy",
@@ -10304,24 +10376,15 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.ids",
         "app.core.sqlite_concurrency",
-        "app.core.unit_of_work",
         "app.domains.relationships.service.observations",
-        "app.domains.relationships.service.source_posts",
         "app.domains.social.contracts.observations",
         "app.domains.social.contracts.writes",
-        "app.domains.social.models.manual_writes",
-        "app.domains.social.repository.blocks",
-        "app.domains.social.repository.manual_writes",
-        "app.domains.social.schemas.community",
-        "app.domains.social.service.manual_writes",
-        "app.domains.social.utils.source_writes",
-        "app.domains.world_characters.public",
+        "app.domains.social.service.source_writes",
         "app.exceptions",
-        "app.models",
         "app.runtime.relationships.observation_references",
-        "app.services.community"
+        "app.runtime.social.source_references",
+        "app.runtime.social.timeline"
       ],
       "module": "app.runtime.social.sqlalchemy_unit_of_work",
       "path": "backend/app/runtime/social/sqlalchemy_unit_of_work.py",

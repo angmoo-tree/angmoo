@@ -805,14 +805,6 @@
         {
           "importer": "app.runtime.social.sqlalchemy_read_repository",
           "imported": "app.models"
-        },
-        {
-          "importer": "app.runtime.social.sqlalchemy_unit_of_work",
-          "imported": "app.models"
-        },
-        {
-          "importer": "app.runtime.social.sqlalchemy_unit_of_work",
-          "imported": "app.services.community"
         }
       ],
       "id": "l4-social-persistence-model-bridge",
@@ -1126,6 +1118,7 @@
       "app.domains.social.contracts.observations",
       "app.domains.social.contracts.profile_activity",
       "app.domains.social.contracts.search_state",
+      "app.domains.social.contracts.source_writes",
       "app.domains.social.contracts.subjective_context",
       "app.domains.social.contracts.timeline",
       "app.domains.social.contracts.today_activity",
@@ -1167,6 +1160,7 @@
       "app.domains.social.service.profile_activity",
       "app.domains.social.service.profiles",
       "app.domains.social.service.source_posts",
+      "app.domains.social.service.source_writes",
       "app.domains.social.service.timeline",
       "app.domains.social.service.visibility",
       "app.domains.social.utils",
@@ -1189,6 +1183,7 @@
       "app.domains.world_characters.contracts.studio_surface",
       "app.domains.world_characters.exceptions",
       "app.domains.world_characters.models",
+      "app.domains.world_characters.repository.source_writes",
       "app.domains.world_characters.router",
       "app.domains.world_characters.router.entry",
       "app.domains.world_characters.router.profile",
@@ -1343,6 +1338,7 @@
       "app.domains.social.contracts.observations",
       "app.domains.social.contracts.profile_activity",
       "app.domains.social.contracts.search_state",
+      "app.domains.social.contracts.source_writes",
       "app.domains.social.contracts.subjective_context",
       "app.domains.social.contracts.timeline",
       "app.domains.social.contracts.today_activity",
@@ -1365,6 +1361,7 @@
       "app.domains.social.service.profile_activity",
       "app.domains.social.service.profiles",
       "app.domains.social.service.source_posts",
+      "app.domains.social.service.source_writes",
       "app.domains.social.service.timeline",
       "app.domains.social.service.visibility",
       "app.domains.world_characters.contracts",
