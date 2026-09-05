@@ -1,7 +1,7 @@
 {
-  "edge_count": 2028,
-  "external_import_count": 2062,
-  "module_count": 631,
+  "edge_count": 2087,
+  "external_import_count": 2079,
+  "module_count": 640,
   "modules": [
     {
       "external_imports": [],
@@ -145,7 +145,6 @@
         "app.services.community",
         "app.services.direct_llm",
         "app.services.maintenance",
-        "app.services.profile_media",
         "app.services.runtime_boundary"
       ],
       "module": "app.api.v1.routes.agents",
@@ -921,6 +920,7 @@
     {
       "external_imports": [
         "fastapi",
+        "fastapi.responses",
         "sqlalchemy.orm"
       ],
       "imports": [
@@ -930,7 +930,9 @@
         "app.domains.characters.schemas",
         "app.domains.characters.service.creator",
         "app.domains.characters.service.drafts",
+        "app.domains.characters.service.image_generation",
         "app.domains.characters.service.management",
+        "app.domains.characters.service.media",
         "app.domains.characters.service.state",
         "app.domains.identity.service.demo_access",
         "app.domains.media.contracts",
@@ -1022,6 +1024,34 @@
     {
       "external_imports": [
         "datetime",
+        "logging",
+        "sqlalchemy.orm",
+        "uuid"
+      ],
+      "imports": [
+        "app.config",
+        "app.core.security",
+        "app.domains.characters.contracts",
+        "app.domains.characters.exceptions",
+        "app.domains.characters.models",
+        "app.domains.characters.schemas",
+        "app.domains.characters.service.creator",
+        "app.domains.characters.service.drafts",
+        "app.domains.characters.service.image_quota",
+        "app.domains.characters.service.media",
+        "app.domains.characters.service.media_storage",
+        "app.domains.characters.service.profile",
+        "app.integrations.image_provider",
+        "app.integrations.pollinations_image",
+        "app.integrations.replicate_image"
+      ],
+      "module": "app.domains.characters.service.image_generation",
+      "path": "backend/app/domains/characters/service/image_generation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
         "sqlalchemy",
         "sqlalchemy.orm"
       ],
@@ -1049,6 +1079,47 @@
       ],
       "module": "app.domains.characters.service.management",
       "path": "backend/app/domains/characters/service/management.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.characters.contracts",
+        "app.domains.characters.exceptions",
+        "app.domains.characters.models",
+        "app.domains.characters.schemas",
+        "app.domains.characters.service.access",
+        "app.domains.characters.service.creator",
+        "app.domains.characters.service.drafts",
+        "app.domains.characters.service.image_quota",
+        "app.domains.characters.service.media_storage",
+        "app.domains.characters.service.profile",
+        "app.domains.identity.service.demo_access",
+        "app.integrations.media.files"
+      ],
+      "module": "app.domains.characters.service.media",
+      "path": "backend/app/domains/characters/service/media.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "PIL",
+        "io",
+        "shutil",
+        "uuid"
+      ],
+      "imports": [
+        "app.config",
+        "app.domains.media.contracts",
+        "app.integrations.media.files",
+        "app.integrations.media.images"
+      ],
+      "module": "app.domains.characters.service.media_storage",
+      "path": "backend/app/domains/characters/service/media_storage.py",
       "wildcard_imports": []
     },
     {
@@ -4339,6 +4410,28 @@
     {
       "external_imports": [],
       "imports": [],
+      "module": "app.domains.social.service",
+      "path": "backend/app/domains/social/service/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "PIL",
+        "io",
+        "uuid"
+      ],
+      "imports": [
+        "app.config",
+        "app.domains.media.contracts",
+        "app.integrations.media.images"
+      ],
+      "module": "app.domains.social.service.media_storage",
+      "path": "backend/app/domains/social/service/media_storage.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
       "module": "app.domains.world_characters",
       "path": "backend/app/domains/world_characters/__init__.py",
       "wildcard_imports": []
@@ -5794,16 +5887,15 @@
     },
     {
       "external_imports": [
-        "PIL",
         "__future__",
-        "base64",
-        "io",
         "pathlib",
-        "uuid",
-        "warnings"
+        "uuid"
       ],
       "imports": [
-        "app.config"
+        "app.config",
+        "app.domains.media.contracts",
+        "app.integrations.media.files",
+        "app.integrations.media.images"
       ],
       "module": "app.domains.worlds.storage",
       "path": "backend/app/domains/worlds/storage.py",
@@ -5821,6 +5913,25 @@
       "imports": [],
       "module": "app.integrations",
       "path": "backend/app/integrations/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "json",
+        "threading",
+        "typing",
+        "urllib.error",
+        "urllib.parse",
+        "urllib.request"
+      ],
+      "imports": [
+        "app.config",
+        "app.integrations.bounded_http",
+        "app.integrations.provider_http"
+      ],
+      "module": "app.integrations.azure_translation",
+      "path": "backend/app/integrations/azure_translation.py",
       "wildcard_imports": []
     },
     {
@@ -5867,6 +5978,20 @@
       "imports": [],
       "module": "app.integrations.google_identity",
       "path": "backend/app/integrations/google_identity.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [
+        "app.core.image_generation",
+        "app.integrations.pollinations_image",
+        "app.integrations.replicate_image"
+      ],
+      "module": "app.integrations.image_provider",
+      "path": "backend/app/integrations/image_provider.py",
       "wildcard_imports": []
     },
     {
@@ -6010,6 +6135,86 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.integrations.media",
+      "path": "backend/app/integrations/media/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "dataclasses",
+        "pathlib",
+        "shutil",
+        "typing",
+        "uuid"
+      ],
+      "imports": [
+        "app.config",
+        "app.domains.media.contracts",
+        "app.integrations.media.images"
+      ],
+      "module": "app.integrations.media.files",
+      "path": "backend/app/integrations/media/files.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "PIL",
+        "base64",
+        "io",
+        "warnings"
+      ],
+      "imports": [
+        "app.config",
+        "app.domains.media.contracts"
+      ],
+      "module": "app.integrations.media.images",
+      "path": "backend/app/integrations/media/images.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "asyncio",
+        "base64",
+        "dataclasses",
+        "hashlib",
+        "json",
+        "logging",
+        "re",
+        "typing",
+        "urllib.error",
+        "urllib.parse",
+        "urllib.request"
+      ],
+      "imports": [
+        "app.config",
+        "app.integrations.bounded_http",
+        "app.integrations.provider_http"
+      ],
+      "module": "app.integrations.pollinations_image",
+      "path": "backend/app/integrations/pollinations_image.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "dataclasses",
+        "ipaddress",
+        "re",
+        "socket",
+        "urllib.error",
+        "urllib.parse",
+        "urllib.request"
+      ],
+      "imports": [],
+      "module": "app.integrations.provider_http",
+      "path": "backend/app/integrations/provider_http.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [
         "__future__",
         "datetime",
@@ -6020,6 +6225,29 @@
       ],
       "module": "app.integrations.relationship_graph_read",
       "path": "backend/app/integrations/relationship_graph_read.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "asyncio",
+        "dataclasses",
+        "ipaddress",
+        "json",
+        "re",
+        "socket",
+        "time",
+        "urllib.error",
+        "urllib.parse",
+        "urllib.request"
+      ],
+      "imports": [
+        "app.config",
+        "app.integrations.bounded_http",
+        "app.integrations.provider_http"
+      ],
+      "module": "app.integrations.replicate_image",
+      "path": "backend/app/integrations/replicate_image.py",
       "wildcard_imports": []
     },
     {
@@ -6477,10 +6705,10 @@
         "app.domains.identity.constants",
         "app.domains.identity.exceptions",
         "app.domains.identity.service.auth",
+        "app.integrations.media.files",
         "app.models",
         "app.runtime.memory_privacy",
         "app.runtime.world_characters.cleanup",
-        "app.services.profile_media",
         "app.services.runtime_boundary"
       ],
       "module": "app.runtime.account_deletion",
@@ -6504,7 +6732,6 @@
         "re",
         "sqlalchemy",
         "sqlalchemy.orm",
-        "threading",
         "typing",
         "urllib.error",
         "urllib.parse",
@@ -6524,10 +6751,20 @@
         "app.domains.characters.models",
         "app.domains.characters.service.creator",
         "app.domains.characters.service.drafts",
+        "app.domains.characters.service.image_generation",
         "app.domains.characters.service.image_quota",
+        "app.domains.characters.service.media",
+        "app.domains.characters.service.media_storage",
         "app.domains.characters.service.profile",
         "app.domains.identity.service.demo_access",
+        "app.integrations.azure_translation",
         "app.integrations.bounded_http",
+        "app.integrations.image_provider",
+        "app.integrations.media.files",
+        "app.integrations.media.images",
+        "app.integrations.pollinations_image",
+        "app.integrations.provider_http",
+        "app.integrations.replicate_image",
         "app.models",
         "app.policies.name_policy",
         "app.runtime.characters.management",
@@ -6535,12 +6772,7 @@
         "app.services.agent_activity_policy",
         "app.services.agent_runs",
         "app.services.direct_llm",
-        "app.services.image_provider",
         "app.services.operation_settings",
-        "app.services.pollinations_image",
-        "app.services.profile_media",
-        "app.services.provider_http",
-        "app.services.replicate_image",
         "app.services.runtime_boundary",
         "app.services.service_image_key"
       ],
@@ -6580,6 +6812,8 @@
         "app.domains.characters.service.access",
         "app.domains.characters.service.creator",
         "app.domains.characters.service.management",
+        "app.domains.characters.service.media",
+        "app.domains.characters.service.media_storage",
         "app.domains.characters.service.mutations",
         "app.domains.characters.service.persona",
         "app.domains.characters.service.profile",
@@ -6588,6 +6822,8 @@
         "app.domains.world_characters.public",
         "app.domains.world_characters.service.readiness",
         "app.exceptions",
+        "app.integrations.media.files",
+        "app.integrations.media.images",
         "app.models",
         "app.policies.name_policy",
         "app.runtime.memory_privacy",
@@ -6602,7 +6838,6 @@
         "app.services.maintenance",
         "app.services.operation_settings",
         "app.services.post_image_generation",
-        "app.services.profile_media",
         "app.services.runtime_boundary",
         "app.services.service_image_key"
       ],
@@ -8823,20 +9058,6 @@
     {
       "external_imports": [
         "__future__",
-        "typing"
-      ],
-      "imports": [
-        "app.core.image_generation",
-        "app.services.pollinations_image",
-        "app.services.replicate_image"
-      ],
-      "module": "app.services.image_provider",
-      "path": "backend/app/services/image_provider.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
         "dataclasses",
         "datetime",
         "hashlib",
@@ -9055,30 +9276,6 @@
     {
       "external_imports": [
         "__future__",
-        "asyncio",
-        "base64",
-        "dataclasses",
-        "hashlib",
-        "json",
-        "logging",
-        "re",
-        "typing",
-        "urllib.error",
-        "urllib.parse",
-        "urllib.request"
-      ],
-      "imports": [
-        "app.config",
-        "app.integrations.bounded_http",
-        "app.services.provider_http"
-      ],
-      "module": "app.services.pollinations_image",
-      "path": "backend/app/services/pollinations_image.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
         "collections.abc",
         "dataclasses",
         "datetime",
@@ -9096,16 +9293,17 @@
         "app.credentials",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.social.service.media_storage",
+        "app.integrations.image_provider",
+        "app.integrations.media.files",
+        "app.integrations.pollinations_image",
+        "app.integrations.replicate_image",
         "app.models",
         "app.schemas",
         "app.services.agent_activity_policy",
         "app.services.direct_llm",
         "app.services.image_prompt_safety",
-        "app.services.image_provider",
         "app.services.operation_settings",
-        "app.services.pollinations_image",
-        "app.services.profile_media",
-        "app.services.replicate_image",
         "app.services.service_image_key"
       ],
       "module": "app.services.post_image_generation",
@@ -9131,20 +9329,14 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "PIL",
-        "base64",
-        "dataclasses",
-        "io",
-        "pathlib",
-        "shutil",
-        "typing",
-        "uuid",
-        "warnings"
-      ],
+      "external_imports": [],
       "imports": [
-        "app.config",
-        "app.domains.media.contracts"
+        "app.domains.characters.service.media_storage",
+        "app.domains.media.contracts",
+        "app.domains.social.service.media_storage",
+        "app.domains.worlds.storage",
+        "app.integrations.media.files",
+        "app.integrations.media.images"
       ],
       "module": "app.services.profile_media",
       "path": "backend/app/services/profile_media.py",
@@ -9159,46 +9351,6 @@
       ],
       "module": "app.services.prompt_safety",
       "path": "backend/app/services/prompt_safety.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "collections.abc",
-        "dataclasses",
-        "ipaddress",
-        "re",
-        "socket",
-        "urllib.error",
-        "urllib.parse",
-        "urllib.request"
-      ],
-      "imports": [],
-      "module": "app.services.provider_http",
-      "path": "backend/app/services/provider_http.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "asyncio",
-        "dataclasses",
-        "ipaddress",
-        "json",
-        "re",
-        "socket",
-        "time",
-        "urllib.error",
-        "urllib.parse",
-        "urllib.request"
-      ],
-      "imports": [
-        "app.config",
-        "app.integrations.bounded_http",
-        "app.services.provider_http"
-      ],
-      "module": "app.services.replicate_image",
-      "path": "backend/app/services/replicate_image.py",
       "wildcard_imports": []
     },
     {

@@ -1,28 +1,20 @@
-"""Filesystem storage adapter for World Creator banner images."""
+"""World banner placement and World-specific errors over shared media IO.
 
+The legacy upload entry preserves the former profile_media exception contract;
+its compatibility export has no production consumer and is retired with B8.
+"""
 from __future__ import annotations
 
-import base64
-from io import BytesIO
 from pathlib import Path
 from uuid import uuid4
-import warnings
-
-from PIL import Image, ImageOps, UnidentifiedImageError
 
 from app.config import settings
-
-
-CONTENT_TYPES = {
-    "image/jpeg": ("jpg", b"\xff\xd8\xff"),
-    "image/png": ("png", b"\x89PNG\r\n\x1a\n"),
-    "image/webp": ("webp", b"RIFF"),
-}
-BANNER_TARGET_SIZE = (1024, 384)
-WEBP_QUALITY = 80
-MAX_IMAGE_DIMENSION = 4096
-MAX_IMAGE_PIXELS = 16_777_216
-MAX_IMAGE_FRAMES = 1
+from app.domains.media.contracts import InvalidProfileMediaError
+from app.integrations.media import files, images
+from app.integrations.media.images import (
+    CONTENT_TYPES, decode_profile_media, encode_profile_media_webp,
+    validate_profile_media_content,
+)
 
 
 class InvalidWorldBannerMediaError(Exception):
@@ -64,112 +56,47 @@ def delete_media_url(media_url: str | None) -> None:
 
 
 def _decode_banner_media(*, content_type: str, data_base64: str) -> bytes:
-    if content_type not in CONTENT_TYPES:
-        raise InvalidWorldBannerMediaError(
-            "Only jpg, png, and webp images are allowed"
-        )
     try:
-        content = base64.b64decode(data_base64, validate=True)
-    except ValueError as exc:
-        raise InvalidWorldBannerMediaError("Invalid image payload") from exc
-    if not content:
-        raise InvalidWorldBannerMediaError("Image payload is empty")
-    if len(content) > settings.media_upload_max_bytes:
-        raise InvalidWorldBannerMediaError("Image file is too large")
-    _assert_image_signature(content_type, content)
-    _assert_decodable_image(content)
-    return content
+        return images.decode_profile_media(
+            content_type=content_type, data_base64=data_base64,
+        )
+    except InvalidProfileMediaError as exc:
+        raise InvalidWorldBannerMediaError(str(exc)) from exc
 
 
 def _encode_banner_webp(content: bytes) -> bytes:
     try:
-        with Image.open(BytesIO(content)) as image:
-            _assert_safe_image_geometry(image)
-            image = ImageOps.exif_transpose(image)
-            image.load()
-            image = _flatten_for_webp(image)
-            image.thumbnail(BANNER_TARGET_SIZE, Image.Resampling.LANCZOS)
-            output = BytesIO()
-            image.save(output, format="WEBP", quality=WEBP_QUALITY, method=6)
-            encoded = output.getvalue()
-    except (
-        Image.DecompressionBombError,
-        Image.DecompressionBombWarning,
-        OSError,
-        UnidentifiedImageError,
-        ValueError,
-    ) as exc:
-        raise InvalidWorldBannerMediaError("Invalid image payload") from exc
-    if not encoded:
-        raise InvalidWorldBannerMediaError("Image payload is empty")
-    return encoded
+        return images.encode_profile_media_webp(media_type="banner", content=content)
+    except InvalidProfileMediaError as exc:
+        raise InvalidWorldBannerMediaError(str(exc)) from exc
 
 
 def _media_url_to_path(media_url: str) -> Path:
-    url_prefix = f"{settings.media_url_path}/"
-    if not media_url.startswith(url_prefix):
-        raise InvalidWorldBannerMediaError("Invalid media URL")
-    relative = media_url[len(url_prefix) :]
-    path = (settings.media_root_path / relative).resolve()
-    root = settings.media_root_path.resolve()
     try:
-        path.relative_to(root)
-    except ValueError as exc:
-        raise InvalidWorldBannerMediaError("Invalid media path") from exc
-    return path
+        return files.media_url_to_path(media_url)
+    except InvalidProfileMediaError as exc:
+        raise InvalidWorldBannerMediaError(str(exc)) from exc
 
 
-def _assert_image_signature(content_type: str, content: bytes) -> None:
-    if content_type == "image/webp":
-        if not (content.startswith(b"RIFF") and content[8:12] == b"WEBP"):
-            raise InvalidWorldBannerMediaError("Invalid webp image")
-        return
-    signature = CONTENT_TYPES[content_type][1]
-    if not content.startswith(signature):
-        raise InvalidWorldBannerMediaError(
-            "Image content does not match its type"
-        )
+def save_legacy_world_banner(
+    *,
+    world_id: str,
+    content_type: str,
+    data_base64: str,
+) -> str:
+    content = decode_profile_media(content_type=content_type, data_base64=data_base64)
+    normalized_content_type = content_type.strip().lower()
+    if normalized_content_type not in CONTENT_TYPES:
+        raise InvalidProfileMediaError("Only jpg, png, and webp images are allowed")
+    validate_profile_media_content(normalized_content_type, content)
+    encoded = encode_profile_media_webp(
+        media_type="banner",
+        content=content,
+    )
 
-
-def _assert_decodable_image(content: bytes) -> None:
-    try:
-        with warnings.catch_warnings():
-            warnings.simplefilter("error", Image.DecompressionBombWarning)
-            with Image.open(BytesIO(content)) as image:
-                _assert_safe_image_geometry(image)
-                image.verify()
-    except (
-        Image.DecompressionBombError,
-        Image.DecompressionBombWarning,
-        OSError,
-        UnidentifiedImageError,
-        ValueError,
-    ) as exc:
-        raise InvalidWorldBannerMediaError("Invalid image payload") from exc
-
-
-def _assert_safe_image_geometry(image: Image.Image) -> None:
-    width, height = image.size
-    if (
-        width <= 0
-        or height <= 0
-        or width > MAX_IMAGE_DIMENSION
-        or height > MAX_IMAGE_DIMENSION
-        or width * height > MAX_IMAGE_PIXELS
-    ):
-        raise InvalidWorldBannerMediaError("Image dimensions are too large")
-    if int(getattr(image, "n_frames", 1)) > MAX_IMAGE_FRAMES:
-        raise InvalidWorldBannerMediaError("Animated images are not supported")
-
-
-def _flatten_for_webp(image: Image.Image) -> Image.Image:
-    if image.mode in {"RGBA", "LA"} or (
-        image.mode == "P" and "transparency" in image.info
-    ):
-        rgba = image.convert("RGBA")
-        background = Image.new("RGB", rgba.size, (255, 255, 255))
-        background.paste(rgba, mask=rgba.getchannel("A"))
-        return background
-    if image.mode != "RGB":
-        return image.convert("RGB")
-    return image
+    world_dir = settings.media_root_path / "worlds" / world_id
+    world_dir.mkdir(parents=True, exist_ok=True)
+    filename = f"banner-{uuid4().hex}.webp"
+    path = world_dir / filename
+    path.write_bytes(encoded)
+    return f"{settings.media_url_path}/worlds/{world_id}/{filename}"

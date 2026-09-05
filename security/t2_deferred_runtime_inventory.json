@@ -2,6 +2,15 @@
   "entries": [
     {
       "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "backend/app/integrations/pollinations_image.py"
+    },
+    {
+      "markers": [
         "hosted-extension-type"
       ],
       "owner_phases": [
@@ -17,15 +26,6 @@
         "L0-L4 hosted extension compatibility audit"
       ],
       "path": "backend/app/public_main.py"
-    },
-    {
-      "markers": [
-        "product-host"
-      ],
-      "owner_phases": [
-        "L0-L4 product URL, privacy UX, provider referer"
-      ],
-      "path": "backend/app/services/pollinations_image.py"
     },
     {
       "markers": [
@@ -67,6 +67,15 @@
     },
     {
       "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "backend/tests/media/test_replicate_image.py"
+    },
+    {
+      "markers": [
         "privacy-contact",
         "product-host"
       ],
@@ -93,15 +102,6 @@
         "L0-L4 product URL, privacy UX, provider referer"
       ],
       "path": "backend/tests/test_post_image_generation.py"
-    },
-    {
-      "markers": [
-        "product-host"
-      ],
-      "owner_phases": [
-        "L0-L4 product URL, privacy UX, provider referer"
-      ],
-      "path": "backend/tests/test_replicate_image.py"
     },
     {
       "markers": [

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from app.runtime.world_characters.queries import count_enabled_autonomous_world_characters
+from app.domains.characters.service import media as media_service
 
 from app.domains.characters.service.creator import (
     llm_credential_error_message,
@@ -93,7 +94,9 @@ from app.services import image_prompt_safety
 from app.services import maintenance as maintenance_service
 from app.services import post_image_generation
 from app.core import prompt_safety
-from app.services import profile_media
+from app.domains.characters.service import media_storage as profile_media
+from app.integrations.media import files as media_files
+from app.integrations.media import images as media_images
 from app.services import service_image_key
 from app.services import operation_settings
 from app.services.direct_llm import (
@@ -997,35 +1000,7 @@ def upload_profile_media(
     character_id: str,
     data: schemas.AgentProfileMediaUpload,
 ) -> schemas.AgentDetailRead:
-    character = _get_owned_character(db, user, character_id)
-    demo_lock.ensure_demo_user_mutable(user)
-    try:
-        url = profile_media.save_profile_media(
-            character_id=character.id,
-            media_type=data.media_type,
-            content_type=data.content_type,
-            data_base64=data.data_base64,
-        )
-    except profile_media.InvalidProfileMediaError as exc:
-        raise InvalidProfileMediaError(str(exc)) from exc
-
-    if data.media_type == "avatar":
-        character.avatar_url = url
-    else:
-        character.banner_url = url
-    _invalidate_image_visual_identity_if_present(db, character.id)
-    db.commit()
-    agent_crud.log_activity(
-        db,
-        user_id=user.id,
-        character_id=character.id,
-        action_type="profile_updated",
-        target_post_id=None,
-        reason=f"user_uploaded_{data.media_type}",
-        result=f"Agent {data.media_type} image was uploaded.",
-    )
-    db.refresh(character)
-    return _build_agent_detail(db, character)
+    return media_service.upload_profile_media(db, user, character_id, data, workflows=build_character_media_workflows())
 
 
 def get_image_settings(
@@ -1110,7 +1085,7 @@ def upload_image_seed(
         )
     except profile_media.InvalidProfileMediaError as exc:
         raise InvalidProfileMediaError(str(exc)) from exc
-    profile_media.delete_media_url(setting.seed_image_url)
+    media_files.delete_media_url(setting.seed_image_url)
     setting.seed_image_url = seed_image_url
     if setting.visual_identity_source_hash is not None:
         setting.visual_identity_prompt = None
@@ -1128,7 +1103,7 @@ def delete_image_seed(
     character = _get_owned_character(db, user, character_id)
     demo_lock.ensure_demo_user_mutable(user)
     setting = agent_crud.ensure_image_generation_setting(db, character.id)
-    profile_media.delete_media_url(setting.seed_image_url)
+    media_files.delete_media_url(setting.seed_image_url)
     setting.seed_image_url = None
     if setting.visual_identity_source_hash is not None:
         setting.visual_identity_prompt = None
@@ -1882,20 +1857,20 @@ def delete_agent(
         db.rollback()
         try:
             media_quarantine.restore()
-        except profile_media.PrivateMediaCleanupError as restore_exc:
+        except media_files.PrivateMediaCleanupError as restore_exc:
             raise AgentDeletionMediaCleanupError(
                 "private_media_restore_failed"
             ) from restore_exc
         raise
     try:
         media_quarantine.purge()
-    except profile_media.PrivateMediaCleanupError as exc:
+    except media_files.PrivateMediaCleanupError as exc:
         raise AgentDeletionMediaCleanupError("private_media_purge_failed") from exc
 
 
 def _quarantine_agent_private_media(
     db: Session, user_id: str, character_id: str
-) -> profile_media.PrivateMediaQuarantine:
+) -> media_files.PrivateMediaQuarantine:
     candidate_ids = list(
         db.scalars(
             select(character_models.ProfileImageCandidate.id).where(
@@ -1909,7 +1884,7 @@ def _quarantine_agent_private_media(
         media_root / "profile-candidates" / user_id / candidate_id
         for candidate_id in candidate_ids
     )
-    return profile_media.quarantine_private_media(paths)
+    return media_files.quarantine_private_media(paths)
 
 
 def _build_tendency_analysis_prompt(*, character: character_models.Character) -> str:
@@ -3233,3 +3208,13 @@ def build_character_management_workflows() -> CharacterManagementWorkflows:
 
 def _build_full_character_detail(db: Session, character: character_models.Character) -> schemas.AgentDetailRead:
     return _build_agent_detail(db, character, recent_activity_limit=AGENT_DETAIL_ACTIVITY_LIMIT)
+
+
+def build_character_media_workflows():
+    from app.domains.characters.contracts import CharacterMediaWorkflows
+
+    return CharacterMediaWorkflows(
+        invalidate_visual_identity=_invalidate_image_visual_identity_if_present,
+        log_activity=agent_crud.log_activity,
+        build_detail=_build_agent_detail,
+    )

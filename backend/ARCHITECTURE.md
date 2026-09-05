@@ -491,3 +491,43 @@ Portable ref/profile 변환은 `service/export_projection.py`, 로컬 export 근
 앱 생성 시 `runtime/world_packages/composition.py`가 구체 constructor를 `WorldPackageRuntimeFactories`로 연결한다. Package dependencies는 전달받은 요청 Session·session factory를 그대로 제공한다. import committer는 기존 초기 복구, 동시 실행 잠금, commit 결과 불명 시 관찰과 media journal 보상 순서를 유지한다. Browser stream의 정상 소진 뒤 전달을 기록하며 취소 시 artifact를 정리한다. Native download는 artifact를 유지하고 명시적인 저장 완료 acknowledgment가 성공적으로 commit된 뒤 정리한다. HTTP router는 권한·입력·상태 코드·응답을 처리하고 이 업무 결정을 중복 구현하지 않는다.
 
 `contracts/__init__.py`는 v1의 순수 공개 타입을 모으며 `contracts/interfaces.py`는 실제 fake·archive·storage·UoW 교체 지점을 정의한다. 런타임 factory 계약은 `contracts/runtime.py`에 있다. 모든 함수에 별도 포트를 생성하지 않으며 같은 역할의 구현을 public 호환 파일로 복제하지 않는다. 아직 전환되지 않은 Worlds/Characters의 지원 계약을 사용하는 runtime 소비자는 해당 B2 source 합류 시 canonical 경로로 연결한다.
+
+### Media의 공유 처리와 업무 소유
+
+`integrations/media/images.py`는 제한된 이미지 해석과 WebP 변환, `files.py`는 관리 경로와 삭제 복구용 quarantine을 담당합니다. 소유자 승인이나 공개 여부, 후보 만료와 quota는 결정하지 않습니다. Character의 profile/draft/candidate/seed 저장은 `characters/service/media_storage.py`, 생성된 Post 파일 저장은 `social/service/media_storage.py`에서 찾습니다. 두 서비스는 해당 업무가 전달한 ID·용도에 맞는 파일을 만들며 기존 호출자가 인증과 DB transaction을 계속 소유합니다.
+
+Character 업로드의 원본 크기 한도와 Post의 인코딩 결과 크기 한도는 서로 다른 기존 계약입니다. 공통 decoder를 쓴다는 이유로 이 정책을 하나로 합치지 않습니다. World Package의 lossless 재인코딩·digest/journal도 별도 계약입니다. `core/public_media.py`의 공개 mount 목록에 draft나 candidate 디렉터리를 추가하지 않습니다.
+
+이 설명의 현재 적용 범위는 AR-B3-M1입니다. `services/profile_media.py`는 같은 객체의 임시 export와 역사 World helper만 남기며, 미전환 Character HTTP/candidate 업무와 Social job은 각 B3/B5 단계에서 소비자를 옮깁니다. quota·job·publication을 포괄하는 전역 media service는 만들지 않습니다.
+
+
+### 이미지 provider 통신
+
+`integrations/image_provider.py`가 모델별 실제 클라이언트를 선택하고, `pollinations_image.py`와 `replicate_image.py`는 provider 요청·응답·대기·실패 변환을 처리합니다. `integrations/provider_http.py`는 공개 HTTPS URL·리다이렉트·민감 헤더 제거와 제한된 오류 진단을 공유합니다. 외부 호출 횟수나 후보 quota를 결정하는 업무는 이 통신 모듈로 옮기지 않습니다.
+
+AR-B3-M2에서 이 네 파일의 실제 구현과 모든 Python 소비자를 이전하고 옛 `services` 파일은 제거했습니다. 기존 운영 필터와 연결되는 Pollinations logger 이름은 유지합니다. Replicate 전용 검증은 `tests/media`에 있고, Post quota와 provider 실패가 연결되는 혼합 검증은 기존 Social 검증 위치에 남습니다.
+
+
+### Character media 후보와 비공개 조회
+
+`characters/service/media.py`는 소유자/후보 scope·만료·업로드·적용·폐기·비공개 파일 조회를 소유합니다. Draft 조회는 기존 Creator lifecycle의 정리 규칙을 사용하며 같은 `CreatorWorkflows`를 전달합니다. Profile 적용과 upload는 `CharacterMediaWorkflows`로 이미지 설정 무효화·활동 기록·상세 응답 조립을 같은 Session에서 실행합니다.
+
+두 동작의 원래 저장 순서는 다릅니다. Upload는 Character 변경을 먼저 commit한 뒤 활동을 기록합니다. 후보 적용은 quota 확정과 후보 DB 삭제·활동 기록을 함께 commit한 뒤 후보 파일을 삭제합니다. 구조를 단순하게 보이게 만들기 위해 이 transaction 차이를 없애지 않습니다. 두 앱 factory는 callback factory를 `app.state`에 등록하고 HTTP dependency가 이를 제공합니다.
+
+현재 11개 미디어 조회/업로드/적용/삭제 HTTP는 Character router에서 실제 구현하며 기존 혼합 router의 원래 위치에 같은 route 객체로 연결됩니다. 비공개 응답은 `private, no-store`와 `nosniff`를 유지합니다. 이미지 생성 두 endpoint와 provider·settings 조립은 뒤이은 media source 범위이고, 남은 runtime forwarding의 실제 소비자는 보존 지도와 tests에서 추적하여 후속 종료 단계에서 제거합니다.
+
+
+### Character 이미지 생성
+
+`characters/service/image_generation.py`는 생성 허용 판단, 일별 quota 예약, prompt/seed/size 정책, 후보 기록과 실패 예약의 상태 전이를 담당합니다. 실제 이미지 요청은 `integrations/image_provider.py`를 사용합니다. `CharacterImageGenerationWorkflows`는 여러 업무가 함께 소유하는 설정 조회·서비스 키 해석·번역 기능만 연결하며 기존 호출 시점에 같은 Session을 전달합니다.
+
+서비스 키를 사용할 수 없으면 quota 예약 전에 종료합니다. 일별 quota가 소진되면 번역과 이미지 provider를 부르지 않습니다. Provider 오류 또는 파일 정제 실패는 기존 오류 분류를 사용해 예약을 failed로 확정하고 commit합니다. Draft의 생성 cooldown/초기 commit·마지막 commit과 Profile 생성의 응답 순서는 서로 다른 기존 흐름을 유지합니다.
+
+이 적용으로 미디어 생성 두 HTTP도 Character router를 사용합니다. 기존 runtime에는 LLM credential/외부 번역·이전 URL-helper와 실제 잔여 호출자가 있는 forwarding이 남으며, 무기한 도메인 비즈니스 구현으로 취급하지 않습니다. 후속 shared transport/World 정리와 B4/B8의 설정·삭제 소유권 종료는 결과 문서에 별도로 기록합니다.
+
+
+### Media 소유권
+
+프로필/Draft 후보의 권한·quota·apply/discard는 Character `service/media.py`, `service/image_generation.py`, `service/image_quota.py`가 담당한다. 파일 배치는 Character·World·Social 각 소유 코드가 수행하고, 공통 이미지 정제·경로 검증·quarantine은 `integrations/media`를 사용한다. 공통 처리에서 공개 여부나 다른 업무의 quota를 결정하지 않는다. World 배너 오류와 commit 실패 보상은 World에 남는다. Post job/게시 부착과 World Package lossless codec은 각각 자신의 업무 계약을 유지한다.
+
+실제 이미지 provider/검증된 HTTP/Azure 번역은 `integrations`에 있다. Runtime은 설정/credential·Character 후처리 callback을 제공하며 provider 호출 횟수와 기존 transaction 순서를 유지한다. 과거 media export와 생산에서 호출하지 않는 URL helper는 이전 테스트의 한시적 호환 경로로 결과 문서에 소유·종료 단계를 기록하고 새 기능의 시작점으로 사용하지 않는다.

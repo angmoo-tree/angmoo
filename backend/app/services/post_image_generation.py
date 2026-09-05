@@ -34,14 +34,13 @@ from app.credentials import (
 )
 from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
+from app.integrations import image_provider, pollinations_image, replicate_image
+from app.domains.social.service import media_storage as profile_media
+from app.integrations.media import files as media_files
 from app.services import (
     agent_activity_policy,
     image_prompt_safety,
-    image_provider,
     operation_settings,
-    pollinations_image,
-    profile_media,
-    replicate_image,
     service_image_key,
 )
 from app.services.direct_llm import (
@@ -1208,7 +1207,7 @@ def _select_reference_image(
 def _build_reference_image(*, source: str, url: str) -> _ReferenceImage | None:
     if url.startswith("/media/"):
         try:
-            path = profile_media.media_url_to_path(url)
+            path = media_files.media_url_to_path(url)
             content = path.read_bytes()
         except (OSError, profile_media.InvalidProfileMediaError):
             return None

@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2062,
-      "internal_edge_count": 2028,
+      "external_import_count": 2079,
+      "internal_edge_count": 2087,
       "legacy_import_exception_count": 0,
-      "module_count": 631,
+      "module_count": 640,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -379,6 +379,20 @@
             ],
             "module": "app.domains.social.public",
             "path": "backend/app/domains/social/public.py"
+          },
+          {
+            "imports": [],
+            "module": "app.domains.social.service",
+            "path": "backend/app/domains/social/service/__init__.py"
+          },
+          {
+            "imports": [
+              "app.config",
+              "app.domains.media.contracts",
+              "app.integrations.media.images"
+            ],
+            "module": "app.domains.social.service.media_storage",
+            "path": "backend/app/domains/social/service/media_storage.py"
           },
           {
             "imports": [

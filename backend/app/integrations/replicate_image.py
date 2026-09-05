@@ -13,7 +13,7 @@ from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 from app.config import settings
 from app.integrations import bounded_http
-from app.services import provider_http
+from app.integrations import provider_http
 
 
 REPLICATE_PREDICTIONS_URL = "https://api.replicate.com/v1/predictions"

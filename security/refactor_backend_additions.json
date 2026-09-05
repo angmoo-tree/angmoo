@@ -2150,6 +2150,260 @@
       "test_suppressions": {
         "tests/world_packages/test_composition_delivery.py": {}
       }
+    },
+    {
+      "commit": "660651dd1a9f6b03be094cbf0de77c272b7feed3",
+      "feature_id": "K11",
+      "reason": "AR-B3 Media actual codec storage provider and image workflow ownership; original source and regression introduction",
+      "tracked_files": {
+        "backend/app/domains/characters/service/media_storage.py": "476e544c6c4baa6fd8f9cee5d5da873e0ddd6c9f",
+        "backend/app/domains/social/service/__init__.py": "2c8c27fe0210a79d34aa27e9563c402336af6a2e",
+        "backend/app/domains/social/service/media_storage.py": "b9f4e5a9654f457a42811af113fcfdeeb753eaca",
+        "backend/app/integrations/media/__init__.py": "0cd7603bb8264966b01447e0b634dc22ef96af5d",
+        "backend/app/integrations/media/files.py": "b0ec00cb0d6f796c288bdaf9a6613d915ee6473f",
+        "backend/app/integrations/media/images.py": "d784ac211de2838369b9d8109df3f2aa85da5914",
+        "backend/tests/media/test_media_storage_boundaries.py": "4123e248638547ce834af2518d40fca039dcf17e"
+      },
+      "test_nodes": [
+        "tests/media/test_media_storage_boundaries.py::test_character_upload_limit_does_not_replace_post_encoded_size_contract",
+        "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes",
+        "tests/media/test_media_storage_boundaries.py::test_quarantine_partial_move_failure_restores_preceding_file"
+      ],
+      "test_assertions": {
+        "tests/media/test_media_storage_boundaries.py": {
+          "_png_bytes": [],
+          "test_character_upload_limit_does_not_replace_post_encoded_size_contract": [
+            "pytest.raises(InvalidProfileMediaError, match='Image file is too large')",
+            "assert path.is_file()",
+            "assert result['byte_size'] == path.stat().st_size",
+            "assert result['byte_size'] <= 2048",
+            "assert (result['width'], result['height']) == (8, 5)"
+          ],
+          "test_quarantine_partial_move_failure_restores_preceding_file": [
+            "pytest.raises(files.PrivateMediaCleanupError, match='private_media_quarantine_failed')",
+            "assert first.read_bytes() == b'first'",
+            "assert second.read_bytes() == b'second'",
+            "assert not any((tmp_path / '.media-deletion-quarantine').rglob('*.webp'))"
+          ],
+          "test_compatibility_exports_use_owner_implementations_and_same_error_classes": [
+            "assert profile_media.save_profile_media is character_media.save_profile_media",
+            "assert profile_media.save_generated_post_image_bytes is post_media.save_generated_post_image_bytes",
+            "assert profile_media.encode_profile_media_webp is images.encode_profile_media_webp",
+            "assert profile_media.quarantine_private_media is files.quarantine_private_media",
+            "assert profile_media.PrivateMediaCleanupError is files.PrivateMediaCleanupError",
+            "assert profile_media.InvalidProfileMediaError is InvalidProfileMediaError"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/media/test_media_storage_boundaries.py": {}
+      }
+    },
+    {
+      "commit": "baeaefb8199ce54d29fa85919d167a01efc5a9ad",
+      "feature_id": "K11",
+      "reason": "AR-B3 Media actual provider and image workflow ownership; original committed source and regression introduction",
+      "tracked_files": {
+        "backend/app/domains/characters/service/media.py": "2b17fa2ae5d91283d1437a9c1959f35970a35428",
+        "backend/tests/characters/test_character_media_workflows.py": "b249999758c552c2bb2146a706d6b1cccc0525a3"
+      },
+      "test_nodes": [
+        "tests/characters/test_character_media_workflows.py::test_apply_candidate_keeps_quota_and_log_in_commit_before_file_cleanup",
+        "tests/characters/test_character_media_workflows.py::test_both_factories_supply_same_media_runtime_callbacks",
+        "tests/characters/test_character_media_workflows.py::test_private_http_keeps_owner_dependency_file_headers_and_route_identity[draft]",
+        "tests/characters/test_character_media_workflows.py::test_private_http_keeps_owner_dependency_file_headers_and_route_identity[profile]",
+        "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log"
+      ],
+      "test_assertions": {
+        "tests/characters/test_character_media_workflows.py": {
+          "_database": [],
+          "_character": [],
+          "test_upload_callbacks_keep_session_and_commit_before_activity_log": [
+            "assert result is character",
+            "assert events == ['save', 'invalidate', 'commit', 'log', 'detail']",
+            "assert character.avatar_url == '/media/characters/bird/new.webp'",
+            "assert kwargs['character_id'] == character.id",
+            "assert session is db and character_id == character.id",
+            "assert session is db",
+            "assert kwargs['reason'] == 'user_uploaded_avatar'",
+            "assert session is db and actual is character"
+          ],
+          "test_apply_candidate_keeps_quota_and_log_in_commit_before_file_cleanup": [
+            "assert result is character",
+            "assert events == ['invalidate', 'log', 'commit', 'cleanup', 'detail']",
+            "assert db.get(models.ProfileImageCandidate, 'candidate') is None",
+            "assert reservation.status == 'applied'",
+            "assert not (tmp_path / 'profile-candidates' / owner.id / 'candidate').exists()",
+            "assert media.media_files.media_url_to_path(character.avatar_url).is_file()",
+            "assert events == ['invalidate', 'log', 'commit']",
+            "assert session is db and character_id == character.id",
+            "assert session is db and reservation.status == 'applied'",
+            "assert kwargs['reason'] == 'user_applied_generated_avatar'",
+            "assert session is db and actual is character"
+          ],
+          "test_private_http_keeps_owner_dependency_file_headers_and_route_identity": [
+            "assert next((r for r in mixed.router.routes if r.name == name)) is next((r for r in router.router.routes if r.name == name))",
+            "assert response.status_code == 200",
+            "assert response.content == b'private-preview'",
+            "assert response.headers['cache-control'] == 'private, no-store'",
+            "assert response.headers['x-content-type-options'] == 'nosniff'",
+            "assert calls[0][0] is db and calls[0][1] is owner",
+            "assert calls[0][3] == ({'workflows': workflow} if kind == 'draft' else {})"
+          ],
+          "test_both_factories_supply_same_media_runtime_callbacks": [
+            "assert callbacks.invalidate_visual_identity is management._invalidate_image_visual_identity_if_present",
+            "assert callbacks.log_activity is management.agent_crud.log_activity",
+            "assert callbacks.build_detail is management._build_agent_detail"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/characters/test_character_media_workflows.py": {}
+      }
+    },
+    {
+      "commit": "9a66655e7bd4c1575f5edddda20a2e51bd9513d8",
+      "feature_id": "K11",
+      "reason": "AR-B3 Media actual provider and image workflow ownership; original committed source and regression introduction",
+      "tracked_files": {
+        "backend/app/domains/characters/service/image_generation.py": "172773ede810378e9229bcfc30a64923f883f9fa",
+        "backend/tests/characters/test_character_image_generation_workflows.py": "11bd980e6e48e344deac9180cb771b46a2fe7f2f"
+      },
+      "test_nodes": [
+        "tests/characters/test_character_image_generation_workflows.py::test_both_factories_bind_original_settings_key_and_translation_callbacks",
+        "tests/characters/test_character_image_generation_workflows.py::test_failed_generation_commits_failed_quota_once_without_candidate[pollinations]",
+        "tests/characters/test_character_image_generation_workflows.py::test_failed_generation_commits_failed_quota_once_without_candidate[replicate]",
+        "tests/characters/test_character_image_generation_workflows.py::test_failed_generation_commits_failed_quota_once_without_candidate[storage]",
+        "tests/characters/test_character_image_generation_workflows.py::test_missing_service_key_does_not_reserve_quota_or_call_provider"
+      ],
+      "test_assertions": {
+        "tests/characters/test_character_image_generation_workflows.py": {
+          "_engine": [],
+          "_workflows": [],
+          "test_failed_generation_commits_failed_quota_once_without_candidate": [
+            "pytest.raises(exceptions.AgentCreationDraftMediaError)",
+            "assert str(error.value) == ('candidate_storage_failed' if failure == 'storage' else 'provider_unavailable')",
+            "assert len(calls) == 1",
+            "assert calls[0]['log_context']['scope'] == 'create'",
+            "assert list(db.scalars(select(models.ProfileImageCandidate))) == []",
+            "assert len(reservations) == 1",
+            "assert reservations[0].status == 'failed'",
+            "assert reservations[0].candidate_id is None"
+          ],
+          "test_missing_service_key_does_not_reserve_quota_or_call_provider": [
+            "pytest.raises(exceptions.AgentCreationDraftMediaError, match='profile_image_key_unavailable')",
+            "assert list(db.scalars(select(models.ProfileImageQuotaReservation))) == []"
+          ],
+          "test_both_factories_bind_original_settings_key_and_translation_callbacks": [
+            "assert workflows.get_model is creator.operation_settings.get_pollinations_profile_image_model",
+            "assert workflows.get_route_mode is creator.operation_settings.get_pollinations_profile_image_route_mode",
+            "assert workflows.translate_prompt is creator._translate_image_prompt_to_english",
+            "assert workflows.resolve_api_key is creator._resolve_profile_image_api_key"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/characters/test_character_image_generation_workflows.py": {}
+      }
+    },
+    {
+      "commit": "99fb396ba43dc3e480be214ba0ba3658a3cf65ed",
+      "feature_id": "K11",
+      "reason": "AR-B3 Media actual provider and image workflow ownership; original committed source and regression introduction",
+      "tracked_files": {
+        "backend/tests/media/test_world_banner_codec.py": "da44ac5355b56a23a84d55990ca2988ace5961c1"
+      },
+      "test_nodes": [
+        "tests/media/test_world_banner_codec.py::test_world_banner_uses_shared_sanitized_bytes_and_legacy_exception_contract",
+        "tests/media/test_world_banner_codec.py::test_world_delete_ignores_paths_outside_the_configured_media_root",
+        "tests/media/test_world_banner_codec.py::test_world_upload_keeps_world_error_and_writes_no_file[image/gif--Only jpg, png, and webp images are allowed]",
+        "tests/media/test_world_banner_codec.py::test_world_upload_keeps_world_error_and_writes_no_file[image/png-!-Invalid image payload]",
+        "tests/media/test_world_banner_codec.py::test_world_upload_keeps_world_error_and_writes_no_file[image/png--Image payload is empty]",
+        "tests/media/test_world_banner_codec.py::test_world_upload_keeps_world_error_and_writes_no_file[image/png-YWJj-Image content does not match its type]",
+        "tests/media/test_world_banner_codec.py::test_world_upload_keeps_world_error_and_writes_no_file[image/png-iVBORw0KGgo=-Invalid image payload]",
+        "tests/media/test_world_banner_codec.py::test_world_upload_keeps_world_error_and_writes_no_file[image/webp-YWJj-Invalid webp image]"
+      ],
+      "test_assertions": {
+        "tests/media/test_world_banner_codec.py": {
+          "test_world_upload_keeps_world_error_and_writes_no_file": [
+            "pytest.raises(storage.InvalidWorldBannerMediaError)",
+            "assert str(result.value) == message",
+            "assert not isinstance(result.value, InvalidProfileMediaError)",
+            "assert list(tmp_path.iterdir()) == []"
+          ],
+          "test_world_banner_uses_shared_sanitized_bytes_and_legacy_exception_contract": [
+            "assert path.parent == tmp_path / 'worlds' / 'world'",
+            "assert path.read_bytes() == images.encode_profile_media_webp(media_type='banner', content=content)",
+            "assert profile_media.save_world_banner is storage.save_legacy_world_banner",
+            "pytest.raises(InvalidProfileMediaError, match='Invalid image payload')",
+            "assert image.size == (768, 384)",
+            "assert image.mode == 'RGB'",
+            "assert image.getpixel((0, 0)) == (255, 255, 255)"
+          ],
+          "test_world_delete_ignores_paths_outside_the_configured_media_root": [
+            "assert outside.read_bytes() == b'outside'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/media/test_world_banner_codec.py": {}
+      }
+    },
+    {
+      "commit": "dd78da66d2423b50373c7297319714c611938846",
+      "feature_id": "K11",
+      "reason": "AR-B3 Media actual provider and image workflow ownership; original committed source and regression introduction",
+      "tracked_files": {
+        "backend/app/integrations/azure_translation.py": "bc0fddc952ef126bcb9c067fd7c2e9027ecfa760",
+        "backend/tests/media/test_azure_translation.py": "75634ea2b63c5ac106400d19381025c317175f5b"
+      },
+      "test_nodes": [
+        "tests/media/test_azure_translation.py::test_disabled_translation_has_no_file_or_provider_side_effect",
+        "tests/media/test_azure_translation.py::test_failed_translation_releases_reserved_characters[payload]",
+        "tests/media/test_azure_translation.py::test_failed_translation_releases_reserved_characters[transport]",
+        "tests/media/test_azure_translation.py::test_month_rollover_and_exact_limit_preserve_usage_file_semantics",
+        "tests/media/test_azure_translation.py::test_success_cache_and_monthly_limit_keep_provider_call_count"
+      ],
+      "test_assertions": {
+        "tests/media/test_azure_translation.py": {
+          "translation_settings": [],
+          "Response::__init__": [],
+          "Response::__enter__": [],
+          "Response::__exit__": [],
+          "Response::read": [],
+          "test_success_cache_and_monthly_limit_keep_provider_call_count": [
+            "assert creator._translate_image_prompt_to_english('하늘') == 'blue sky'",
+            "assert creator._translate_image_prompt_to_english(' 하늘 ') == 'blue sky'",
+            "assert creator._translate_image_prompt_to_english(' plain English ') == 'plain English'",
+            "assert creator._translate_image_prompt_to_english('초과문자') == '초과문자'",
+            "assert len(requests) == 1",
+            "assert request.get_header('Ocp-apim-subscription-key') == 'translation-test-fixture'",
+            "assert 'translation-test-fixture' not in request.full_url",
+            "assert json.loads(request.data) == [{'Text': '하늘'}]",
+            "assert timeout == settings.translation_timeout_seconds",
+            "assert json.loads(translation_settings.read_text())['chars'] == 2"
+          ],
+          "test_failed_translation_releases_reserved_characters": [
+            "assert creator._translate_image_prompt_to_english('하늘') == '하늘'",
+            "assert len(calls) == 1",
+            "assert json.loads(translation_settings.read_text())['chars'] == 0",
+            "assert '하늘' not in creator._TRANSLATION_CACHE"
+          ],
+          "test_disabled_translation_has_no_file_or_provider_side_effect": [
+            "assert creator._translate_image_prompt_to_english('하늘') == '하늘'",
+            "assert not translation_settings.exists()"
+          ],
+          "test_month_rollover_and_exact_limit_preserve_usage_file_semantics": [
+            "assert client._reserve_translation_chars(4)",
+            "assert not client._reserve_translation_chars(1)",
+            "assert json.loads(translation_settings.read_text()) == {'month': datetime.now(UTC).strftime('%Y-%m'), 'chars': 4}",
+            "assert json.loads(translation_settings.read_text())['chars'] == 0"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/media/test_azure_translation.py": {}
+      }
     }
   ]
 }
