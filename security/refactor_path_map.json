@@ -7244,12 +7244,15 @@
           "backend/app/domains/characters/service/promotion.py",
           "backend/app/domains/routines/constants.py",
           "backend/app/domains/routines/exceptions.py",
+          "backend/app/domains/routines/repository/autonomy.py",
           "backend/app/domains/routines/schemas/tendency.py",
           "backend/app/domains/routines/service/activity_management.py",
+          "backend/app/domains/routines/service/autonomy_management.py",
           "backend/app/domains/routines/service/tendency.py",
           "backend/app/domains/routines/service/tendency_settings.py",
           "backend/app/exceptions.py",
-          "backend/app/runtime/characters/management.py"
+          "backend/app/runtime/characters/management.py",
+          "backend/app/runtime/resident/autonomy_reads.py"
         ],
         "backend/app/services/agent_creation_drafts.py": [
           "backend/app/domains/characters/exceptions.py",
@@ -7361,33 +7364,39 @@
         },
         {
           "old": "backend/app/services/agents.py::SERVER_LLM_AUTONOMY_CAPACITY_ERROR_MESSAGE",
-          "new": "backend/app/runtime/characters/management.py::SERVER_LLM_AUTONOMY_CAPACITY_ERROR_MESSAGE",
+          "new": "backend/app/domains/routines/constants.py::SERVER_LLM_AUTONOMY_CAPACITY_ERROR_MESSAGE",
           "direct_consumers": [
+            "backend/app/domains/routines/service/autonomy_management.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "source_member": "Original full workflow/query/constant after exact owner/callback/type binding restoration. Global-before-World lock order, assignment/World/Character writes, original commit/flush/rejection rollback and same attached values remain unchanged."
         },
         {
           "old": "backend/app/services/agents.py::WORLD_AUTONOMY_CAPACITY_ERROR_MESSAGE",
-          "new": "backend/app/runtime/characters/management.py::WORLD_AUTONOMY_CAPACITY_ERROR_MESSAGE",
+          "new": "backend/app/domains/routines/constants.py::WORLD_AUTONOMY_CAPACITY_ERROR_MESSAGE",
           "direct_consumers": [
+            "backend/app/domains/routines/service/autonomy_management.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "source_member": "Original full workflow/query/constant after exact owner/callback/type binding restoration. Global-before-World lock order, assignment/World/Character writes, original commit/flush/rejection rollback and same attached values remain unchanged."
         },
         {
           "old": "backend/app/services/agents.py::SERVER_LLM_AUTONOMY_CAPACITY_LOCK_KEY",
-          "new": "backend/app/runtime/characters/management.py::SERVER_LLM_AUTONOMY_CAPACITY_LOCK_KEY",
+          "new": "backend/app/domains/routines/constants.py::SERVER_LLM_AUTONOMY_CAPACITY_LOCK_KEY",
           "direct_consumers": [
+            "backend/app/domains/routines/service/autonomy_management.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "source_member": "Original full workflow/query/constant after exact owner/callback/type binding restoration. Global-before-World lock order, assignment/World/Character writes, original commit/flush/rejection rollback and same attached values remain unchanged."
         },
         {
           "old": "backend/app/services/agents.py::AGENT_DETAIL_ACTIVITY_LIMIT",
@@ -8248,55 +8257,65 @@
         },
         {
           "old": "backend/app/services/agents.py::_lock_server_llm_autonomy_capacity",
-          "new": "backend/app/runtime/characters/management.py::_lock_server_llm_autonomy_capacity",
+          "new": "backend/app/domains/routines/repository/autonomy.py::_lock_server_llm_autonomy_capacity",
           "direct_consumers": [
+            "backend/app/domains/routines/service/autonomy_management.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_tendency.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
-          ]
+          ],
+          "source_member": "Original full workflow/query/constant after exact owner/callback/type binding restoration. Global-before-World lock order, assignment/World/Character writes, original commit/flush/rejection rollback and same attached values remain unchanged."
         },
         {
           "old": "backend/app/services/agents.py::_effective_server_llm_autonomy_count",
-          "new": "backend/app/runtime/characters/management.py::_effective_server_llm_autonomy_count",
+          "new": "backend/app/runtime/resident/autonomy_reads.py::count_effective_active_server_llm_autonomy_agents",
           "direct_consumers": [
+            "backend/app/domains/routines/service/autonomy_management.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_tendency.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
-          ]
+          ],
+          "source_member": "Remove only the original one-call forwarding function; the same original aggregate implementation receives the identical Session and optional exclusion set through the runtime collaborator. No query or policy is duplicated."
         },
         {
           "old": "backend/app/services/agents.py::_reject_server_llm_autonomy_capacity",
-          "new": "backend/app/runtime/characters/management.py::_reject_server_llm_autonomy_capacity",
+          "new": "backend/app/domains/routines/service/autonomy_management.py::_reject_server_llm_autonomy_capacity",
           "direct_consumers": [
+            "backend/app/domains/routines/service/autonomy_management.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_tendency.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
-          ]
+          ],
+          "source_member": "Original full workflow/query/constant after exact owner/callback/type binding restoration. Global-before-World lock order, assignment/World/Character writes, original commit/flush/rejection rollback and same attached values remain unchanged."
         },
         {
           "old": "backend/app/services/agents.py::_reject_world_autonomy_capacity",
-          "new": "backend/app/runtime/characters/management.py::_reject_world_autonomy_capacity",
+          "new": "backend/app/domains/routines/service/autonomy_management.py::_reject_world_autonomy_capacity",
           "direct_consumers": [
+            "backend/app/domains/routines/service/autonomy_management.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_tendency.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
-          ]
+          ],
+          "source_member": "Original full workflow/query/constant after exact owner/callback/type binding restoration. Global-before-World lock order, assignment/World/Character writes, original commit/flush/rejection rollback and same attached values remain unchanged."
         },
         {
           "old": "backend/app/services/agents.py::_log_autonomy_activation_rejection",
-          "new": "backend/app/runtime/characters/management.py::_log_autonomy_activation_rejection",
+          "new": "backend/app/domains/routines/service/autonomy_management.py::_log_autonomy_activation_rejection",
           "direct_consumers": [
+            "backend/app/domains/routines/service/autonomy_management.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activate_agent_rejects_when_server_llm_autonomy_capacity_is_full",
             "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
             "tests/routines/test_activity_limits.py::test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomically"
-          ]
+          ],
+          "source_member": "Original full workflow/query/constant after exact owner/callback/type binding restoration. Global-before-World lock order, assignment/World/Character writes, original commit/flush/rejection rollback and same attached values remain unchanged."
         },
         {
           "old": "backend/app/services/agents.py::get_agent",
@@ -8576,38 +8595,44 @@
         },
         {
           "old": "backend/app/services/agents.py::activate_agent",
-          "new": "backend/app/runtime/characters/management.py::activate_agent",
+          "new": "backend/app/domains/routines/service/autonomy_management.py::activate_agent",
           "direct_consumers": [
+            "backend/app/domains/routines/service/autonomy_management.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activate_agent_rejects_when_server_llm_autonomy_capacity_is_full",
             "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
             "tests/routines/test_activity_limits.py::test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomically"
-          ]
+          ],
+          "source_member": "Original full workflow/query/constant after exact owner/callback/type binding restoration. Global-before-World lock order, assignment/World/Character writes, original commit/flush/rejection rollback and same attached values remain unchanged."
         },
         {
           "old": "backend/app/services/agents.py::_activate_agent_uow",
-          "new": "backend/app/runtime/characters/management.py::_activate_agent_uow",
+          "new": "backend/app/domains/routines/service/autonomy_management.py::_activate_agent_uow",
           "direct_consumers": [
+            "backend/app/domains/routines/service/autonomy_management.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activate_agent_rejects_when_server_llm_autonomy_capacity_is_full",
             "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
             "tests/routines/test_activity_limits.py::test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomically"
-          ]
+          ],
+          "source_member": "Original full workflow/query/constant after exact owner/callback/type binding restoration. Global-before-World lock order, assignment/World/Character writes, original commit/flush/rejection rollback and same attached values remain unchanged."
         },
         {
           "old": "backend/app/services/agents.py::deactivate_agent",
-          "new": "backend/app/runtime/characters/management.py::deactivate_agent",
+          "new": "backend/app/domains/routines/service/autonomy_management.py::deactivate_agent",
           "direct_consumers": [
+            "backend/app/domains/routines/service/autonomy_management.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
             "tests/routines/test_activity_limits.py::test_activate_and_deactivate_sync_selected_routine_world_character"
-          ]
+          ],
+          "source_member": "Original full workflow/query/constant after exact owner/callback/type binding restoration. Global-before-World lock order, assignment/World/Character writes, original commit/flush/rejection rollback and same attached values remain unchanged."
         },
         {
           "old": "backend/app/services/agents.py::delete_agent",
@@ -8803,15 +8828,17 @@
         },
         {
           "old": "backend/app/services/agents.py::_ensure_activity_profile_ready",
-          "new": "backend/app/runtime/characters/management.py::_ensure_activity_profile_ready",
+          "new": "backend/app/domains/routines/service/autonomy_management.py::_ensure_activity_profile_ready",
           "direct_consumers": [
+            "backend/app/domains/routines/service/autonomy_management.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
             "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
             "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
-          ]
+          ],
+          "source_member": "Original full workflow/query/constant after exact owner/callback/type binding restoration. Global-before-World lock order, assignment/World/Character writes, original commit/flush/rejection rollback and same attached values remain unchanged."
         },
         {
           "old": "backend/app/services/agents.py::_clear_tendency_analysis",
@@ -10367,6 +10394,32 @@
           ],
           "test_nodes": [
             "tests/characters/test_character_http_workflows.py::test_character_writes_reach_runtime_in_same_session_after_original_commits"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_activate_agent_uow",
+          "new": "backend/app/domains/characters/service/mutations.py::set_activity_status",
+          "source_member": "Original Character.status assignment only: inactive in failed activation, active in successful activation, inactive in deactivation. No query/flush/commit/validation added; caller retains exact branch and transaction position.",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py",
+            "backend/app/domains/routines/service/autonomy_management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_sqlite_concurrent_world_activation_serializes_capacity_at_one",
+            "tests/routines/test_activity_limits.py::test_effective_server_llm_autonomy_count_includes_auto_or_slot_unique"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::deactivate_agent",
+          "new": "backend/app/domains/characters/service/mutations.py::set_activity_status",
+          "source_member": "Original Character.status assignment only: inactive in failed activation, active in successful activation, inactive in deactivation. No query/flush/commit/validation added; caller retains exact branch and transaction position.",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py",
+            "backend/app/domains/routines/service/autonomy_management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_sqlite_concurrent_world_activation_serializes_capacity_at_one",
+            "tests/routines/test_activity_limits.py::test_effective_server_llm_autonomy_count_includes_auto_or_slot_unique"
           ]
         }
       ],
@@ -25135,7 +25188,8 @@
           "backend/app/domains/routines/repository/slots.py",
           "backend/app/domains/routines/service/activity_logs.py",
           "backend/app/domains/routines/service/activity_settings.py",
-          "backend/app/domains/routines/service/feed_cues.py"
+          "backend/app/domains/routines/service/feed_cues.py",
+          "backend/app/runtime/resident/autonomy_reads.py"
         ],
         "backend/app/schemas/agents.py": [
           "backend/app/domains/characters/schemas.py",
@@ -25756,8 +25810,9 @@
         },
         {
           "old": "backend/app/cruds/agents.py::count_effective_active_server_llm_autonomy_agents",
-          "new": "backend/app/cruds/agents.py::count_effective_active_server_llm_autonomy_agents",
+          "new": "backend/app/runtime/resident/autonomy_reads.py::count_effective_active_server_llm_autonomy_agents",
           "direct_consumers": [
+            "backend/app/domains/routines/service/autonomy_management.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
@@ -25768,7 +25823,8 @@
             "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner.",
+          "source_member": "Original full workflow/query/constant after exact owner/callback/type binding restoration. Global-before-World lock order, assignment/World/Character writes, original commit/flush/rejection rollback and same attached values remain unchanged."
         },
         {
           "old": "backend/app/schemas/agents.py::AgentGoogleModel",
@@ -28093,7 +28149,8 @@
           "backend/app/domains/routines/repository/slots.py",
           "backend/app/domains/routines/service/activity_logs.py",
           "backend/app/domains/routines/service/activity_settings.py",
-          "backend/app/domains/routines/service/feed_cues.py"
+          "backend/app/domains/routines/service/feed_cues.py",
+          "backend/app/runtime/resident/autonomy_reads.py"
         ]
       },
       "split_symbols": [
@@ -28587,8 +28644,9 @@
         },
         {
           "old": "backend/app/cruds/agents.py::count_effective_active_server_llm_autonomy_agents",
-          "new": "backend/app/cruds/agents.py::count_effective_active_server_llm_autonomy_agents",
+          "new": "backend/app/runtime/resident/autonomy_reads.py::count_effective_active_server_llm_autonomy_agents",
           "direct_consumers": [
+            "backend/app/domains/routines/service/autonomy_management.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
@@ -28599,7 +28657,8 @@
             "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner.",
+          "source_member": "Original full workflow/query/constant after exact owner/callback/type binding restoration. Global-before-World lock order, assignment/World/Character writes, original commit/flush/rejection rollback and same attached values remain unchanged."
         },
         {
           "old": "backend/app/cruds/agent_runs.py::ACTIVE_RUN_STATUSES",
@@ -29598,7 +29657,8 @@
           "backend/app/domains/routines/repository/slots.py",
           "backend/app/domains/routines/service/activity_logs.py",
           "backend/app/domains/routines/service/activity_settings.py",
-          "backend/app/domains/routines/service/feed_cues.py"
+          "backend/app/domains/routines/service/feed_cues.py",
+          "backend/app/runtime/resident/autonomy_reads.py"
         ]
       },
       "split_symbols": [
@@ -30092,8 +30152,9 @@
         },
         {
           "old": "backend/app/cruds/agents.py::count_effective_active_server_llm_autonomy_agents",
-          "new": "backend/app/cruds/agents.py::count_effective_active_server_llm_autonomy_agents",
+          "new": "backend/app/runtime/resident/autonomy_reads.py::count_effective_active_server_llm_autonomy_agents",
           "direct_consumers": [
+            "backend/app/domains/routines/service/autonomy_management.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
@@ -30104,7 +30165,8 @@
             "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner.",
+          "source_member": "Original full workflow/query/constant after exact owner/callback/type binding restoration. Global-before-World lock order, assignment/World/Character writes, original commit/flush/rejection rollback and same attached values remain unchanged."
         },
         {
           "old": "backend/app/cruds/agent_runs.py::ACTIVE_RUN_STATUSES",
@@ -31105,7 +31167,8 @@
           "backend/app/domains/routines/repository/slots.py",
           "backend/app/domains/routines/service/activity_logs.py",
           "backend/app/domains/routines/service/activity_settings.py",
-          "backend/app/domains/routines/service/feed_cues.py"
+          "backend/app/domains/routines/service/feed_cues.py",
+          "backend/app/runtime/resident/autonomy_reads.py"
         ]
       },
       "split_symbols": [
@@ -31599,8 +31662,9 @@
         },
         {
           "old": "backend/app/cruds/agents.py::count_effective_active_server_llm_autonomy_agents",
-          "new": "backend/app/cruds/agents.py::count_effective_active_server_llm_autonomy_agents",
+          "new": "backend/app/runtime/resident/autonomy_reads.py::count_effective_active_server_llm_autonomy_agents",
           "direct_consumers": [
+            "backend/app/domains/routines/service/autonomy_management.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
@@ -31611,7 +31675,8 @@
             "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner.",
+          "source_member": "Original full workflow/query/constant after exact owner/callback/type binding restoration. Global-before-World lock order, assignment/World/Character writes, original commit/flush/rejection rollback and same attached values remain unchanged."
         },
         {
           "old": "backend/app/cruds/agent_runs.py::ACTIVE_RUN_STATUSES",
@@ -33308,6 +33373,20 @@
         "inventories": "L4 771/14/97; ER0 85/87/24/44/7; Memorybatch current",
         "preservation": "read-only source/split/assertion/suppression/APIORM/nodes all zero errors; protected2139/current2287. Exact signed foundation2path supplement only; root linear stock introduction pending."
       }
+    },
+    "AR-B4-C7-B-autonomy-management": {
+      "status": "IMPLEMENTED — 176 PASS / one existing PostgreSQL skip; exact namespace-only follow-up4PASS; original-six read-only diagnostics zero errors (stock introductions pending root)",
+      "actual_paths": [
+        "backend/app/domains/characters/service/mutations.py",
+        "backend/app/domains/routines/contracts/autonomy_management.py",
+        "backend/app/domains/routines/repository/autonomy.py",
+        "backend/app/domains/routines/service/autonomy_management.py",
+        "backend/app/runtime/resident/autonomy_reads.py"
+      ],
+      "ownership": "Routines owns actual activation/deactivation/preparation7 workflows, lock1 and original capacity constants. Runtime owns the original cross-owner two-set aggregate1 and lazy IO/foreign-owner bindings. Character owns the exact attached status3 assignments.",
+      "preservation": "Original workflow7/lock1/query1 AST exactly match after narrow collaborator/type/status binding restoration. SQLite immediate/deferred commits, fixed global then World lock, partial credentialsync compensation, idempotent enabled shortcut, original commit/flush, rejection rollback/log and nullable owner lookups remain.",
+      "remaining": "Management entry functions only bind actual workflows until C7 HTTP/composition closes. Original profile bind/release/reload and first-greeting/run-now/tendency provider workflows follow C7. All four old aggregate test consumers use its actual runtime owner and the old cruds aggregate alias is removed.",
+      "test_binding": "Four original assertions retain their original namespace spelling through explicit test-local bindings to the real aggregate/settings/slots and actual owner source functions. No fake result, production alias, assertion rewrite or checker change."
     }
   },
   "test_symbols": {

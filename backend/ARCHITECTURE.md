@@ -726,3 +726,10 @@ Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 S
 `routines/service/activity_management.py`는 활동 시간 입력과 활동 설정 저장, 슬롯의 다음 실행 시각 변경을 담당합니다. Character 소유권과 Identity의 demo 변경 제한은 같은 Session에서 기존 소유 기능을 호출합니다. 최초 설정의 commit 시점과 설정 변경 후 slot 갱신 순서를 유지하며, 외부 값을 미리 읽지 않습니다.
 
 성향 분석의 provider 출력 형식은 `schemas/tendency.py`, 프롬프트·문자열 정제·범위와 주제 검증은 `service/tendency.py`, 저장된 성향의 준비 상태와 변경은 `service/tendency_settings.py`에 있습니다. provider 통신과 슬롯 해제는 runtime이 조립합니다. Character와 Routines에서 기존에 함께 사용하던 `AgentServiceError` 기반은 `app/exceptions.py`의 하나의 클래스이며, 기존 Character 이름도 같은 객체를 가리킵니다.
+
+
+### 자율활동 활성화와 비활성화
+
+`routines/service/autonomy_management.py`는 활성화·비활성화의 권한, 준비 상태, 정원, 슬롯 배정과 보상 순서를 소유합니다. 전역 잠금을 먼저 얻고 해당 World 잠금을 얻는 순서를 유지합니다. SQLite에서는 기존 immediate transaction과 지연 commit 구간을 사용하며, 정원 실패는 원래 rollback 뒤 거절 기록을 저장합니다.
+
+다른 도메인의 User·Character·credential·WorldCharacter는 같은 Session으로 연결합니다. 상태를 바꿀 때는 Character의 실제 대입 함수를 사용하고, provider profile의 bind/release/reload는 런타임 협력으로 실행합니다. `runtime/resident/autonomy_reads.py`는 기존 Character/활동 설정/배정 슬롯의 두 집합 SQL을 그대로 소유하며, 도메인 간 join을 개별 조회로 쪼개지 않습니다.

@@ -1134,3 +1134,10 @@ B7 Memory 7개 실제 정의와 원래 미호출/검사용 5개 정의는 아직
 최종 집중 검증은 **155 passed / 기존 경고 6개 / 12.96초**이다. 신규 실제 SQLite 검사는 같은 Session의 pending Character/Setting/Slot을 유지하며, schedule callback 시점의 다른 Session에는 이전 값이 보이고 최종 commit 뒤 새 값이 보이는 것을 확인한다. 공통 기반으로 이동한 오류는 기존 Character catch에서 같은 동작과 오류 필드를 유지한다.
 
 최종 소스 경계는 771 modules / 2636 edges / exact legacy 202 / cycle 0이다. L4 771/14/97, ER0 85/87/24/44/7과 Memory batch가 현재 코드와 일치한다. 최초 진단에서 남은 generic parametrized 테스트 경로 9개를 실제 이전 경로로 고쳤고, 최종 원래 6개 읽기 전용 검사는 모두 오류 0(보호 2139개 / 현재 2287개)이다. assertion, suppression, API/ORM 및 원래 노드는 모두 보존했다. 선행 최초 도입 원장이 합류하기 전의 진단이며 stock gate·Hosted CI와 구분한다.
+
+
+## AR-B4-C7-B — 자율활동 활성화·비활성화
+
+실제 활성화·비활성화·준비 정책 7개를 Routines 서비스로, 전역 transaction lock 1개를 Routines repository로, 원래 두 집합을 합산하는 cross-owner query 1개를 runtime aggregate로 옮겼다. Character.status의 원래 대입 3개는 Character mutations의 동일 객체 대입으로 연결했다. 전역→World 잠금, 이미 활성화된 경우의 반환, credential sync 실패 보상, commit/flush와 rollback 후 거절 로그의 원래 순서는 그대로이다. 원래 9개 본문은 정확한 collaborator/type/status 복원 뒤 AST가 동일하다. 초기 95개 통과 후 SQLite 재시도 mock을 실제 service 위치로 바꿨고 해당 1개와 tendency48 검사는 모두 통과했다. 관리 HTTP와 나머지 provider 실행 조립은 후속 C7 범위이다.
+
+최종 C7-B 관련 176개 통과, 기존 PostgreSQL 환경 1개 skip, 기존 경고 5개를 확인했다. 네 테스트의 원래 namespace를 실제 소유 함수에 명시 바인딩한 뒤 해당 4개도 재통과했다. 원래 assertion AST는 그대로이고 제품 alias나 검사기 예외는 추가하지 않았다. 현재 경계는 775 modules / 2662 edges / exact legacy 202 / cycle 0이다. 기존 여섯 보존 검사의 읽기 전용 진단은 모두 오류 0, 보호 노드 2139 / 현재 2287이다. 선행 도입 원장 연결과 원래 stock gate는 root의 순차 통합에서 처리한다.
