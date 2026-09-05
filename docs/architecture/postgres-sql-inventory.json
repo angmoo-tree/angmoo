@@ -1107,6 +1107,18 @@
     },
     {
       "markers": {
+        "pgvector": [
+          30
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/pyproject.toml",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "795125bab3be5f77aa35ae43d262beac0d7ee5af8fd482b110d98ee94c811a76",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
         "advisory_lock": [
           19,
           35,
@@ -1185,12 +1197,12 @@
       "transition_pr": "P8-L-G memory write/lifecycle"
     }
   ],
-  "entry_count": 75,
+  "entry_count": 76,
   "marker_counts": {
     "advisory_lock": 9,
     "driver_or_url": 48,
     "jsonb": 9,
-    "pgvector": 4,
+    "pgvector": 5,
     "row_lock": 30,
     "skip_locked": 7
   },
