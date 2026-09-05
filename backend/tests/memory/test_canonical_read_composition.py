@@ -3,7 +3,8 @@ from app.domains.characters.models import Character
 from app.domains.memory.contracts.recall import CanonicalRecallOperation, CanonicalRecallQuery
 from app.domains.memory.repository.recall import SqlAlchemyCanonicalRecallRepository, SqlAlchemyMemoryRecallDocumentSource
 from app.runtime.memory.recall_queries import read_character_summary_rows
-from app.runtime.memory.sqlalchemy_source_reader import SqlAlchemyMemorySourceEvidenceReader, models as source_models
+from app.runtime.memory.source_composition import source_evidence_reader as SqlAlchemyMemorySourceEvidenceReader
+from app.runtime.memory.source_queries import models as source_models
 from test_p8_l_h_canonical_recall import NOW, _accept_chat_memory, runtime_factory
 
 

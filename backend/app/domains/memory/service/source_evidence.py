@@ -1,76 +1,27 @@
-"""Runtime SQLAlchemy composition for eligible canonical Memory evidence."""
+"""Interpret canonical source rows under Memory success/scope/observation rules."""
 
 from __future__ import annotations
-
 from datetime import datetime
 from dataclasses import replace
 import hashlib
 import json
 from typing import Any
-
-from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
-
-from app.domains.chat.infrastructure.sqlalchemy_models import (
-    MessageMessage,
-    MessageThread,
-)
-from app.domains.memory.public import (
-    CanonicalMemoryEvidence,
-    MemoryScope,
-    MemorySourceTypeV1,
-)
-from app.domains.relationships.infrastructure.sqlalchemy_social_models import (
-    RelationshipStateChange,
-    SocialEvent,
-    SocialEventEvidence,
-)
-from app.domains.routines.infrastructure.sqlalchemy_models import (
-    ActivityBeat,
-    JointActivity,
-    JointActivityParticipant,
-)
-from app.runtime.social.sqlalchemy_read_repository import (
-    social_persistence_models,
-)
-
-
-class _MemorySourceModels:
-    """Concrete runtime bindings kept above the Memory domain boundary."""
-
-    ActivityBeat = ActivityBeat
-    JointActivity = JointActivity
-    JointActivityParticipant = JointActivityParticipant
-    MessageMessage = MessageMessage
-    MessageThread = MessageThread
-    RelationshipStateChange = RelationshipStateChange
-    SocialEvent = SocialEvent
-    SocialEventEvidence = SocialEventEvidence
-    Post = social_persistence_models.Post
-    PostLike = social_persistence_models.PostLike
-    WorldCharacter = social_persistence_models.WorldCharacter
-    WorldCharacterBlock = social_persistence_models.WorldCharacterBlock
-    WorldCharacterFeedObservation = (
-        social_persistence_models.WorldCharacterFeedObservation
-    )
-    WorldMembership = social_persistence_models.WorldMembership
-
-
-models = _MemorySourceModels()
+from app.domains.memory.contracts.source_evidence import CanonicalMemoryEvidence
+from app.domains.memory.contracts.scope import MemoryScope
+from app.domains.memory.contracts.provenance import MemorySourceTypeV1
+from app.domains.memory.contracts.source_queries import MemorySourceQueries, SourcePost
 
 
 class SqlAlchemyMemorySourceEvidenceReader:
     """Translate canonical rows into a bounded eligibility snapshot."""
 
-    def __init__(self, session: Session) -> None:
+    def __init__(self, session: Session, *, queries: MemorySourceQueries) -> None:
         self._session = session
+        self._queries = queries
 
     def read_evidence(
-        self,
-        *,
-        scope: MemoryScope,
-        source_type: MemorySourceTypeV1,
-        source_id: str,
+        self, *, scope: MemoryScope, source_type: MemorySourceTypeV1, source_id: str
     ) -> CanonicalMemoryEvidence | None:
         readers = {
             MemorySourceTypeV1.CHAT_MESSAGE: self._read_chat_message,
@@ -87,11 +38,10 @@ class SqlAlchemyMemorySourceEvidenceReader:
         if (
             evidence is None
             or evidence.actor_world_character_id != scope.subject_world_character_id
-            or not evidence.successful
+            or (not evidence.successful)
         ):
             return evidence
-        from app.runtime.memory.subjective_source import read_subjective_source
-
+        read_subjective_source = self._queries.read_subjective_source
         subjective = read_subjective_source(
             self._session, scope, source_type=source_type.value, source_id=source_id
         )
@@ -107,23 +57,13 @@ class SqlAlchemyMemorySourceEvidenceReader:
         )
 
     def _read_chat_message(
-        self,
-        scope: MemoryScope,
-        source_type: MemorySourceTypeV1,
-        source_id: str,
+        self, scope: MemoryScope, source_type: MemorySourceTypeV1, source_id: str
     ) -> CanonicalMemoryEvidence | None:
         try:
             message_id = int(source_id)
         except ValueError:
             return None
-        pair = self._session.execute(
-            select(models.MessageMessage, models.MessageThread)
-            .join(
-                models.MessageThread,
-                models.MessageThread.id == models.MessageMessage.thread_id,
-            )
-            .where(models.MessageMessage.id == message_id)
-        ).one_or_none()
+        pair = self._queries.chat_message_pair(self._session, message_id).one_or_none()
         if pair is None:
             return None
         message, thread = pair
@@ -174,12 +114,9 @@ class SqlAlchemyMemorySourceEvidenceReader:
         )
 
     def _read_post(
-        self,
-        scope: MemoryScope,
-        source_type: MemorySourceTypeV1,
-        source_id: str,
+        self, scope: MemoryScope, source_type: MemorySourceTypeV1, source_id: str
     ) -> CanonicalMemoryEvidence | None:
-        post = self._session.get(models.Post, source_id)
+        post = self._queries.post_row(self._session, source_id)
         if post is None:
             return None
         is_reply = post.reply_to_post_id is not None
@@ -190,7 +127,7 @@ class SqlAlchemyMemorySourceEvidenceReader:
         )
         target = None
         if post.reply_to_post_id:
-            parent = self._session.get(models.Post, post.reply_to_post_id)
+            parent = self._queries.reply_parent(self._session, post)
             if parent is not None:
                 target = parent.author_world_character_id
         actor = post.author_world_character_id
@@ -198,12 +135,10 @@ class SqlAlchemyMemorySourceEvidenceReader:
         if counterpart is None and actor != scope.subject_world_character_id:
             counterpart = actor
         observation_id, observed = self._post_observation(
-            scope=scope,
-            post=post,
-            actor=actor,
+            scope=scope, post=post, actor=actor
         )
         visible = post.deleted_at is None and post.report_hidden_at is None
-        summary = " ".join(part for part in (post.title, post.body) if part)
+        summary = " ".join((part for part in (post.title, post.body) if part))
         return self._build(
             scope=scope,
             source_type=source_type,
@@ -233,28 +168,23 @@ class SqlAlchemyMemorySourceEvidenceReader:
         )
 
     def _read_reaction(
-        self,
-        scope: MemoryScope,
-        source_type: MemorySourceTypeV1,
-        source_id: str,
+        self, scope: MemoryScope, source_type: MemorySourceTypeV1, source_id: str
     ) -> CanonicalMemoryEvidence | None:
         try:
             reaction_id = int(source_id)
         except ValueError:
             return None
-        reaction = self._session.get(models.PostLike, reaction_id)
+        reaction = self._queries.reaction_row(self._session, reaction_id)
         if reaction is None:
             return None
-        post = self._session.get(models.Post, reaction.post_id)
+        post = self._queries.reaction_post(self._session, reaction)
         if post is None:
             return None
         actor = reaction.actor_world_character_id
         target = reaction.target_world_character_id
         counterpart = _counterpart(scope.subject_world_character_id, actor, target)
         observation_id, post_observed = self._post_observation(
-            scope=scope,
-            post=post,
-            actor=actor,
+            scope=scope, post=post, actor=actor
         )
         observed = scope.subject_world_character_id == actor or post_observed
         visible = post.deleted_at is None and post.report_hidden_at is None
@@ -284,12 +214,9 @@ class SqlAlchemyMemorySourceEvidenceReader:
         )
 
     def _read_social_event(
-        self,
-        scope: MemoryScope,
-        source_type: MemorySourceTypeV1,
-        source_id: str,
+        self, scope: MemoryScope, source_type: MemorySourceTypeV1, source_id: str
     ) -> CanonicalMemoryEvidence | None:
-        event = self._session.get(models.SocialEvent, source_id)
+        event = self._queries.social_event_row(self._session, source_id)
         if event is None:
             return None
         actor = event.actor_world_character_id
@@ -316,9 +243,8 @@ class SqlAlchemyMemorySourceEvidenceReader:
                 "invalidation_reason": event.invalidation_reason,
             },
             successful=event.result == "succeeded",
-            visible=(
-                event.retrieval_status == "eligible" and event.invalidated_at is None
-            ),
+            visible=event.retrieval_status == "eligible"
+            and event.invalidated_at is None,
             observed=observed,
             actor=actor,
             target=target,
@@ -328,12 +254,9 @@ class SqlAlchemyMemorySourceEvidenceReader:
         )
 
     def _read_activity_event(
-        self,
-        scope: MemoryScope,
-        source_type: MemorySourceTypeV1,
-        source_id: str,
+        self, scope: MemoryScope, source_type: MemorySourceTypeV1, source_id: str
     ) -> CanonicalMemoryEvidence | None:
-        beat = self._session.get(models.ActivityBeat, source_id)
+        beat = self._queries.activity_beat_row(self._session, source_id)
         if beat is None:
             return None
         summary = _structured_text(beat.result_snapshot or beat.state_after_snapshot)
@@ -364,15 +287,12 @@ class SqlAlchemyMemorySourceEvidenceReader:
         )
 
     def _read_relationship_event(
-        self,
-        scope: MemoryScope,
-        source_type: MemorySourceTypeV1,
-        source_id: str,
+        self, scope: MemoryScope, source_type: MemorySourceTypeV1, source_id: str
     ) -> CanonicalMemoryEvidence | None:
-        change = self._session.get(models.RelationshipStateChange, source_id)
+        change = self._queries.relationship_change_row(self._session, source_id)
         if change is None:
             return None
-        event = self._session.get(models.SocialEvent, change.social_event_id)
+        event = self._queries.relationship_social_event(self._session, change)
         if event is None:
             return None
         observation_id = self._social_event_observation(scope, event.id)
@@ -384,9 +304,7 @@ class SqlAlchemyMemorySourceEvidenceReader:
             source_id=source_id,
             source_world_id=change.world_id,
             created_at=change.created_at,
-            summary=(
-                f"relationship {change.valence}/{change.intensity}: {actor} -> {target}"
-            ),
+            summary=f"relationship {change.valence}/{change.intensity}: {actor} -> {target}",
             digest_payload={
                 "id": change.id,
                 "social_event_id": change.social_event_id,
@@ -399,15 +317,12 @@ class SqlAlchemyMemorySourceEvidenceReader:
                 "event_retrieval_status": event.retrieval_status,
                 "event_invalidated_at": event.invalidated_at,
             },
-            successful=(
-                change.applied
-                and event.result == "succeeded"
-                and event.retrieval_status == "eligible"
-            ),
+            successful=change.applied
+            and event.result == "succeeded"
+            and (event.retrieval_status == "eligible"),
             visible=event.invalidated_at is None,
-            observed=(
-                scope.subject_world_character_id == actor and observation_id is not None
-            ),
+            observed=scope.subject_world_character_id == actor
+            and observation_id is not None,
             actor=actor,
             target=target,
             observation_id=observation_id,
@@ -416,22 +331,12 @@ class SqlAlchemyMemorySourceEvidenceReader:
         )
 
     def _read_joint_commitment(
-        self,
-        scope: MemoryScope,
-        source_type: MemorySourceTypeV1,
-        source_id: str,
+        self, scope: MemoryScope, source_type: MemorySourceTypeV1, source_id: str
     ) -> CanonicalMemoryEvidence | None:
-        joint = self._session.get(models.JointActivity, source_id)
+        joint = self._queries.joint_activity_row(self._session, source_id)
         if joint is None:
             return None
-        participants = list(
-            self._session.scalars(
-                select(models.JointActivityParticipant).where(
-                    models.JointActivityParticipant.joint_activity_id == joint.id,
-                    models.JointActivityParticipant.world_id == joint.world_id,
-                )
-            )
-        )
+        participants = list(self._queries.joint_participants(self._session, joint))
         participant_ids = [row.world_character_id for row in participants]
         counterpart = next(
             (
@@ -442,27 +347,30 @@ class SqlAlchemyMemorySourceEvidenceReader:
             None,
         )
         accepted = all(
-            row.participation_status
-            in {"accepted", "scheduled", "active", "consumed", "completed"}
-            for row in participants
+            (
+                row.participation_status
+                in {"accepted", "scheduled", "active", "consumed", "completed"}
+                for row in participants
+            )
         )
         scheduled = (
             joint.scheduled_start_at is not None
             and joint.scheduled_end_at is not None
-            and joint.status
-            in {"scheduled", "ready", "active", "represented", "completed"}
+            and (
+                joint.status
+                in {"scheduled", "ready", "active", "represented", "completed"}
+            )
         )
         successful = (
             len(participants) >= 2
             and scope.subject_world_character_id in participant_ids
             and accepted
             and scheduled
-            and joint.source_proposal_event_id is not None
-            and joint.source_acceptance_event_id is not None
+            and (joint.source_proposal_event_id is not None)
+            and (joint.source_acceptance_event_id is not None)
         )
         summary = (
-            f"{joint.activity_seed} ({joint.scheduled_start_at.isoformat()} - "
-            f"{joint.scheduled_end_at.isoformat()})"
+            f"{joint.activity_seed} ({joint.scheduled_start_at.isoformat()} - {joint.scheduled_end_at.isoformat()})"
             if scheduled
             else joint.activity_seed
         )
@@ -484,8 +392,10 @@ class SqlAlchemyMemorySourceEvidenceReader:
                 "source_acceptance_event_id": joint.source_acceptance_event_id,
                 "participants": sorted(participant_ids),
                 "participant_statuses": sorted(
-                    (row.world_character_id, row.participation_status)
-                    for row in participants
+                    (
+                        (row.world_character_id, row.participation_status)
+                        for row in participants
+                    )
                 ),
             },
             successful=successful,
@@ -547,109 +457,35 @@ class SqlAlchemyMemorySourceEvidenceReader:
         )
 
     def _post_observation(
-        self,
-        *,
-        scope: MemoryScope,
-        post: models.Post,
-        actor: str | None,
+        self, *, scope: MemoryScope, post: SourcePost, actor: str | None
     ) -> tuple[str | None, bool]:
         if actor == scope.subject_world_character_id:
-            return None, True
-        row = self._session.scalar(
-            select(models.WorldCharacterFeedObservation).where(
-                models.WorldCharacterFeedObservation.world_id == scope.world_id,
-                models.WorldCharacterFeedObservation.observer_world_character_id
-                == scope.subject_world_character_id,
-                models.WorldCharacterFeedObservation.post_id == post.id,
-                models.WorldCharacterFeedObservation.status == "observed",
-                models.WorldCharacterFeedObservation.observed_at.is_not(None),
-            )
-        )
+            return (None, True)
+        row = self._queries.post_observation(self._session, scope, post)
         return (None, False) if row is None else (row.id, True)
 
     def _social_event_observation(
         self, scope: MemoryScope, event_id: str
     ) -> str | None:
-        source_post_ids = list(
-            self._session.scalars(
-                select(models.SocialEventEvidence.source_post_id).where(
-                    models.SocialEventEvidence.social_event_id == event_id,
-                    models.SocialEventEvidence.source_post_id.is_not(None),
-                )
-            )
-        )
+        source_post_ids = list(self._queries.event_post_ids(self._session, event_id))
         if not source_post_ids:
             return None
-        return self._session.scalar(
-            select(models.WorldCharacterFeedObservation.id).where(
-                models.WorldCharacterFeedObservation.world_id == scope.world_id,
-                models.WorldCharacterFeedObservation.observer_world_character_id
-                == scope.subject_world_character_id,
-                models.WorldCharacterFeedObservation.post_id.in_(source_post_ids),
-                models.WorldCharacterFeedObservation.status == "observed",
-                models.WorldCharacterFeedObservation.observed_at.is_not(None),
-            )
-        )
+        return self._queries.event_observation(self._session, source_post_ids, scope)
 
     def _participants_active(
-        self,
-        *,
-        world_id: str,
-        values: tuple[str | None, ...],
+        self, *, world_id: str, values: tuple[str | None, ...]
     ) -> bool:
         ids = {value for value in values if value is not None}
         if not ids or not world_id:
             return False
-        active = set(
-            self._session.scalars(
-                select(models.WorldCharacter.id)
-                .join(
-                    models.WorldMembership,
-                    models.WorldMembership.id == models.WorldCharacter.membership_id,
-                )
-                .where(
-                    models.WorldCharacter.id.in_(ids),
-                    models.WorldCharacter.world_id == world_id,
-                    models.WorldCharacter.status == "active",
-                    models.WorldMembership.status == "active",
-                )
-            )
-        )
+        active = set(self._queries.active_participant_ids(self._session, ids, world_id))
         return active == ids
 
-    def _blocked(
-        self,
-        *,
-        world_id: str,
-        subject: str,
-        counterpart: str | None,
-    ) -> bool:
+    def _blocked(self, *, world_id: str, subject: str, counterpart: str | None) -> bool:
         if counterpart is None or not world_id:
             return False
         return (
-            self._session.scalar(
-                select(models.WorldCharacterBlock.id).where(
-                    models.WorldCharacterBlock.world_id == world_id,
-                    or_(
-                        (
-                            models.WorldCharacterBlock.blocker_world_character_id
-                            == subject
-                        )
-                        & (
-                            models.WorldCharacterBlock.blocked_world_character_id
-                            == counterpart
-                        ),
-                        (
-                            models.WorldCharacterBlock.blocker_world_character_id
-                            == counterpart
-                        )
-                        & (
-                            models.WorldCharacterBlock.blocked_world_character_id
-                            == subject
-                        ),
-                    ),
-                )
-            )
+            self._queries.block_id(self._session, world_id, subject, counterpart)
             is not None
         )
 

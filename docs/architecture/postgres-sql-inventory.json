@@ -802,14 +802,14 @@
     {
       "markers": {
         "driver_or_url": [
-          332,
-          562
+          330,
+          560
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/chat/world_generation.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "04c66da65abab9b70676be2b52c24da83ae88096acb358dda1918c88ec11cf3f",
+      "source_sha256": "5423a28017e4beb9437044920a2bbff099b5f4d6bb12da532e58cda064de65e2",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1193,7 +1193,7 @@
       "owner": "P8-L-G",
       "path": "scripts/ci/generate_p8_l_g_memory_write_inventory.py",
       "removal_condition": "retain only while cross-provider same-scope serialization or its negative inventory guard is required",
-      "source_sha256": "c194c8fc21d96da989a6d50c2bfb699706f4cf7a6ec636e4a1a59b500f8804ed",
+      "source_sha256": "0d0cf9f38444c9ffef60fe528ab5c23169d782e4f5cd88217e93103d68d7a5f0",
       "transition_pr": "P8-L-G memory write/lifecycle"
     }
   ],

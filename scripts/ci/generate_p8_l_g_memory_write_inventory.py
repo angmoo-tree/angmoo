@@ -45,7 +45,7 @@ REQUIRED_FILES = (
     "backend/app/domains/memory/contracts/source_evidence.py",
     "backend/app/domains/memory/contracts/maintenance_queue.py",
     "backend/app/domains/memory/repository/items.py",
-    "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+    "backend/app/domains/memory/service/source_evidence.py",
     "backend/app/domains/memory/repository/queue.py",
     "backend/app/domains/memory/public.py",
     "backend/tests/test_p8_l_g_memory_write_lifecycle.py",
@@ -117,7 +117,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+        "backend/app/domains/memory/service/source_evidence.py",
         (
             "MemorySourceTypeV1.CHAT_MESSAGE",
             "MemorySourceTypeV1.POST",

@@ -81,9 +81,7 @@ from app.runtime.chat import model_bindings as models
 from app.runtime.chat.memory_producer import SqlAlchemySuccessfulChatMemoryProducer
 from app.runtime.chat import sqlalchemy_service
 from app.runtime.chat.retrieval_policy import SqlAlchemyRetrievalPolicyResolver
-from app.runtime.memory.sqlalchemy_source_reader import (
-    SqlAlchemyMemorySourceEvidenceReader,
-)
+from app.runtime.memory.source_composition import source_evidence_reader as SqlAlchemyMemorySourceEvidenceReader
 from app.runtime.graph_projection.relationship_graph_read import (
     SqlAlchemyRelationshipGraphReadGateway,
 )

@@ -2,7 +2,7 @@
 from app.runtime.memory.scope_queries import read_due_batch_configs
 from app.domains.memory.contracts.batch_preparation import MemoryPreparationDependencies
 from app.runtime.memory.composition import memory_repository, memory_batch_repository, memory_consolidation_repository
-from app.runtime.memory.sqlalchemy_source_reader import SqlAlchemyMemorySourceEvidenceReader
+from app.runtime.memory.source_composition import source_evidence_reader as SqlAlchemyMemorySourceEvidenceReader
 
 
 def build_preparation_dependencies() -> MemoryPreparationDependencies:

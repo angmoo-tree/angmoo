@@ -13,7 +13,7 @@ from app.domains.memory.contracts.scope import MemoryScope
 from app.domains.memory.service.inspector import MemoryReadService
 from app.domains.memory.service.scope import MemoryScopeService
 from app.domains.memory.service.items import MemoryWriteLifecycleService
-from app.runtime.memory.sqlalchemy_source_reader import SqlAlchemyMemorySourceEvidenceReader
+from app.runtime.memory.source_composition import source_evidence_reader as SqlAlchemyMemorySourceEvidenceReader
 from app.runtime.world_characters.composition import public_profile_service
 from app.runtime.memory_selection_provider import memory_provider
 

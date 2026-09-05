@@ -115,6 +115,10 @@
       "sha256": "60a63a5f5c5dc9963df5538a17f1356fca93f467dae7c3ca0ba57d9bf4bd7acc"
     },
     {
+      "path": "backend/app/domains/memory/contracts/source_queries.py",
+      "sha256": "b80a08a1b515cb3dd87ac92a27407464a744f01539e34f084b88d0bc2b243f7b"
+    },
+    {
       "path": "backend/app/domains/memory/dependencies.py",
       "sha256": "2fba4905e9ee3ef6b69cc951f3066c345a2556ad1cf27194f592d69243084e5e"
     },
@@ -275,6 +279,10 @@
       "sha256": "db3d21e640445796e37bd14c3f93d8897bb43f41b8e88fb90ffd713b0db8ac36"
     },
     {
+      "path": "backend/app/domains/memory/service/source_evidence.py",
+      "sha256": "5e61e2df4e5d4bf3f1b6b284f72b299c36ee2fea6df51a6e2470b72a4b316974"
+    },
+    {
       "path": "backend/app/integrations/llm/memory_selection.py",
       "sha256": "1de42b7c01d84860bbe19ca8676ba5113cf0a308ddea1c8d3a9f080d01b1c8eb"
     },
@@ -296,15 +304,15 @@
     },
     {
       "path": "backend/app/runtime/memory/__init__.py",
-      "sha256": "df05782cc7de3c5a411c980adde971025c1ad99309bfb9705f4564d802cfc2b2"
+      "sha256": "6dfcdc0546580f82d6351c3bb440c51a8e5b1bad2adbd13dc0be8e9c28564c3d"
     },
     {
       "path": "backend/app/runtime/memory/batch_preparation.py",
-      "sha256": "16a5d12f60c1e883ad106e437fd2822d25a8971a52b94fb53ce0a64b595cbed7"
+      "sha256": "62277d8879f95ae506b07804bbc05c94880938f69bc74e6d20ca6993b479908d"
     },
     {
       "path": "backend/app/runtime/memory/batch_runtime.py",
-      "sha256": "0e56d130f4b606bf3e0678b6d97d0e3e4436c0d5a088298bf7073395c36d89d4"
+      "sha256": "f6421cfc9a31f9e76b451045c4a9023f788ba1263ab4d509215c4791a7f22e21"
     },
     {
       "path": "backend/app/runtime/memory/composition.py",
@@ -312,7 +320,7 @@
     },
     {
       "path": "backend/app/runtime/memory/recall_composition.py",
-      "sha256": "5c33c1f9a928cf7a3e59122ce91320816bcbee7c4ffb19130afbfc53b4d19300"
+      "sha256": "3d1c555c365a92f070e3890c1914b90e6ad6198258e1cc0a1f741930e54af221"
     },
     {
       "path": "backend/app/runtime/memory/recall_projection.py",
@@ -320,7 +328,7 @@
     },
     {
       "path": "backend/app/runtime/memory/recall_queries.py",
-      "sha256": "01d0126ea85b72602538cc81ef7291f67d461eb90514d924081871a71018c66a"
+      "sha256": "7719b80c722102fc868fca0ea0c20015d45fe00432b0a8822acd627190498c4a"
     },
     {
       "path": "backend/app/runtime/memory/scope_queries.py",
@@ -331,12 +339,16 @@
       "sha256": "bb5f1984e41c0c79df264f4ae2a9ade1bacb4d1147aa482115541f9ce0c27efb"
     },
     {
+      "path": "backend/app/runtime/memory/source_composition.py",
+      "sha256": "ff04e32ccc45fd925c60d58d40966cd55d7838e4f8c683b7b864b5fe34a38c0d"
+    },
+    {
       "path": "backend/app/runtime/memory/source_delivery.py",
       "sha256": "9fc76566b940903d71f4b2fc07940369075023bba09a4b89975ba4ac0a01fc5e"
     },
     {
-      "path": "backend/app/runtime/memory/sqlalchemy_source_reader.py",
-      "sha256": "69083ca0669961c72cedad111dcfc61e5da3694377e80284dc956da587984e05"
+      "path": "backend/app/runtime/memory/source_queries.py",
+      "sha256": "2e448c0b7a9b6c2b44159180dcc5c0105939f9194a4bfd9fcbb438b7d7a607a0"
     },
     {
       "path": "backend/app/runtime/memory/sqlite_fts5_recall.py",

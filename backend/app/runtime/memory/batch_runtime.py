@@ -54,9 +54,7 @@ from app.runtime.memory.source_delivery import (
     install_memory_delivery,
     uninstall_memory_delivery,
 )
-from app.runtime.memory.sqlalchemy_source_reader import (
-    SqlAlchemyMemorySourceEvidenceReader,
-)
+from app.runtime.memory.source_composition import source_evidence_reader as SqlAlchemyMemorySourceEvidenceReader
 
 
 logger = logging.getLogger(__name__)

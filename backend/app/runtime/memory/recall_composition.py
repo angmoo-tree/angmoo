@@ -2,7 +2,7 @@
 from datetime import UTC, datetime
 from app.domains.memory.repository.recall import SqlAlchemyCanonicalRecallRepository, SqlAlchemyMemoryRecallDocumentSource
 from app.runtime.memory.recall_queries import read_character_summary_rows
-from app.runtime.memory.sqlalchemy_source_reader import SqlAlchemyMemorySourceEvidenceReader
+from app.runtime.memory.source_composition import source_evidence_reader as SqlAlchemyMemorySourceEvidenceReader
 
 
 def canonical_recall_repository(session_factory):

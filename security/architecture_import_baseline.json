@@ -1,7 +1,7 @@
 {
-  "edge_count": 2170,
-  "external_import_count": 2119,
-  "module_count": 659,
+  "edge_count": 2177,
+  "external_import_count": 2129,
+  "module_count": 662,
   "modules": [
     {
       "external_imports": [],
@@ -2686,6 +2686,19 @@
     },
     {
       "external_imports": [
+        "__future__",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.memory.contracts.scope"
+      ],
+      "module": "app.domains.memory.contracts.source_queries",
+      "path": "backend/app/domains/memory/contracts/source_queries.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "fastapi"
       ],
       "imports": [
@@ -3327,6 +3340,26 @@
       ],
       "module": "app.domains.memory.service.scope",
       "path": "backend/app/domains/memory/service/scope.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "json",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.memory.contracts.provenance",
+        "app.domains.memory.contracts.scope",
+        "app.domains.memory.contracts.source_evidence",
+        "app.domains.memory.contracts.source_queries"
+      ],
+      "module": "app.domains.memory.service.source_evidence",
+      "path": "backend/app/domains/memory/service/source_evidence.py",
       "wildcard_imports": []
     },
     {
@@ -7223,7 +7256,7 @@
         "app.runtime.chat.today_sns_activity",
         "app.runtime.graph_projection.relationship_graph_read",
         "app.runtime.memory.composition",
-        "app.runtime.memory.sqlalchemy_source_reader",
+        "app.runtime.memory.source_composition",
         "app.runtime.social.sqlalchemy_today_activity"
       ],
       "module": "app.runtime.chat.world_generation",
@@ -7544,7 +7577,7 @@
       "imports": [
         "app.runtime.memory.recall_composition",
         "app.runtime.memory.recall_projection",
-        "app.runtime.memory.sqlalchemy_source_reader",
+        "app.runtime.memory.source_composition",
         "app.runtime.memory.sqlite_fts5_recall"
       ],
       "module": "app.runtime.memory",
@@ -7557,7 +7590,7 @@
         "app.domains.memory.contracts.batch_preparation",
         "app.runtime.memory.composition",
         "app.runtime.memory.scope_queries",
-        "app.runtime.memory.sqlalchemy_source_reader"
+        "app.runtime.memory.source_composition"
       ],
       "module": "app.runtime.memory.batch_preparation",
       "path": "backend/app/runtime/memory/batch_preparation.py",
@@ -7589,8 +7622,8 @@
         "app.domains.memory.service.items",
         "app.runtime.memory.batch_preparation",
         "app.runtime.memory.composition",
-        "app.runtime.memory.source_delivery",
-        "app.runtime.memory.sqlalchemy_source_reader"
+        "app.runtime.memory.source_composition",
+        "app.runtime.memory.source_delivery"
       ],
       "module": "app.runtime.memory.batch_runtime",
       "path": "backend/app/runtime/memory/batch_runtime.py",
@@ -7619,7 +7652,7 @@
       "imports": [
         "app.domains.memory.repository.recall",
         "app.runtime.memory.recall_queries",
-        "app.runtime.memory.sqlalchemy_source_reader"
+        "app.runtime.memory.source_composition"
       ],
       "module": "app.runtime.memory.recall_composition",
       "path": "backend/app/runtime/memory/recall_composition.py",
@@ -7648,7 +7681,7 @@
       ],
       "imports": [
         "app.domains.characters.models",
-        "app.runtime.memory.sqlalchemy_source_reader"
+        "app.runtime.memory.source_queries"
       ],
       "module": "app.runtime.memory.recall_queries",
       "path": "backend/app/runtime/memory/recall_queries.py",
@@ -7686,6 +7719,16 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [],
+      "imports": [
+        "app.domains.memory.service.source_evidence",
+        "app.runtime.memory.source_queries"
+      ],
+      "module": "app.runtime.memory.source_composition",
+      "path": "backend/app/runtime/memory/source_composition.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [
         "datetime",
         "logging",
@@ -7718,8 +7761,8 @@
         "app.runtime.memory.subjective_source",
         "app.runtime.social.sqlalchemy_read_repository"
       ],
-      "module": "app.runtime.memory.sqlalchemy_source_reader",
-      "path": "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+      "module": "app.runtime.memory.source_queries",
+      "path": "backend/app/runtime/memory/source_queries.py",
       "wildcard_imports": []
     },
     {
@@ -7774,7 +7817,7 @@
         "app.domains.memory.service.items",
         "app.domains.memory.service.scope",
         "app.runtime.memory.composition",
-        "app.runtime.memory.sqlalchemy_source_reader",
+        "app.runtime.memory.source_composition",
         "app.runtime.memory_selection_provider",
         "app.runtime.world_characters.composition"
       ],

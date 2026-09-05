@@ -5,9 +5,7 @@ from app.runtime.memory.recall_projection import (
     MemoryRecallProjectionState,
 )
 from app.runtime.memory.recall_composition import canonical_recall_repository as SqlAlchemyCanonicalRecallRepository, recall_document_source as SqlAlchemyMemoryRecallDocumentSource
-from app.runtime.memory.sqlalchemy_source_reader import (
-    SqlAlchemyMemorySourceEvidenceReader,
-)
+from app.runtime.memory.source_composition import source_evidence_reader as SqlAlchemyMemorySourceEvidenceReader
 from app.runtime.memory.sqlite_fts5_recall import (
     MemoryRecallIndexError,
     MemoryRecallIndexSchemaError,

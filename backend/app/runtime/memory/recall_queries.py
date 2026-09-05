@@ -1,7 +1,7 @@
 """Original Character/World membership/block joins in the Memory read Session."""
 from sqlalchemy import select
 from app.domains.characters.models import Character
-from app.runtime.memory.sqlalchemy_source_reader import models as source_models
+from app.runtime.memory.source_queries import models as source_models
 
 
 def read_character_summary_rows(session, query, requested):
