@@ -13,9 +13,9 @@ Angmoo 백엔드는 **업무별 도메인 안에 HTTP 처리, 업무 흐름, 데
 > **AR-B2 WorldCharacter 기반 적용 범위:** 6개 ORM은 `world_characters/models.py`, 입출력은 `schemas/identity.py`·`schemas/setup.py`, 순수 업무 계약은 `contracts/`, 오류는 `exceptions.py`가 소유합니다. 생성기 통신은 `client.py`, 응답 검증은 `service/setup_validation.py`, Package용 seed는 `service/seed.py`에 있습니다. 소유자·입장·승인·Studio·퇴장·runtime mode·readiness의 실제 업무 흐름은 `service/`, HTTP는 `router/profile.py`·`entry.py`·`setup.py`가 소유합니다. 여러 업무 join과 삭제·runtime busy 검사 및 시작 조립은 `runtime/world_characters/`에 있습니다. 미전환 외부 소비자는 정확한 bridge만 허용합니다. immutable SQLite migration이 사용하는 옛 ORM 경로 두 개는 같은 class 객체의 alias로 유지합니다.
 
 
-> **AR-B5-A Social 기반 적용 범위:** 게시물·반응·미디어 작업은 `social/models/posts.py`, Feed cursor·관찰·block은 `models/feed.py`, owner 수동 작성·inbox 후보는 `models/manual_writes.py`, 성공 행동의 당시 자기 설명은 `models/subjective_context.py`가 실제 ORM을 소유합니다. 수동 쓰기·관찰·프로필·Today·subjective context의 값과 오류는 `contracts/`, 수동 HTTP 요청·응답은 `schemas/manual.py`에 있습니다. 일반 게시물/agent tool 서비스와 Relationship/projection 전환은 뒤이은 B5 범위입니다. immutable SQLite v7→v8와 Alembic 0088의 subjective-context import는 같은 클래스와 schema helper의 호환만 남습니다. 기존 공통 model export도 같은 클래스를 사용하고 G5에서 최종 조립 위치를 정리합니다.
+> **AR-B5-A Social 기반 적용 범위:** 게시물·반응·미디어 작업은 `social/models/posts.py`, Feed cursor·관찰·block은 `models/feed.py`, owner 수동 작성·inbox 후보는 `models/manual_writes.py`, 성공 행동의 당시 자기 설명은 `models/subjective_context.py`가 실제 ORM을 소유합니다. 수동 쓰기·관찰·프로필·Today·subjective context의 값과 오류는 `contracts/`, 수동 HTTP 요청·응답은 `schemas/manual.py`에 있습니다. 원본 글·반응·프로필 업무 흐름은 아래 B5-B2~B6 적용 범위로 이어지며 agent 도구와 Relationship/projection 전환은 아직 남아 있습니다. immutable SQLite v7→v8와 Alembic 0088의 subjective-context import는 같은 클래스와 schema helper의 호환만 남습니다. 기존 공통 model export도 같은 클래스를 사용하고 G5에서 최종 조립 위치를 정리합니다.
 
-> **AR-B5-B1/B2 Social 읽기 적용 범위:** `repository/{posts,profiles,media,inbox}.py`는 Social 테이블의 실제 SQL을 소유하고, `service/notifications.py`는 수신자·자기 알림 판단을 수행합니다. `service/posts.py`는 게시물·스레드 읽기, `service/visibility.py`는 삭제·신고·인용·조상 게시물 공개 판단, `service/presentation.py`는 응답 조립을 담당합니다. User와 Character 조회는 각 소유 도메인의 service를 같은 Session으로 호출합니다. 멘션 조회의 한 번의 SQL, 입력 순서·삭제/정지 필터와 nullable 조회를 유지하며, 조회 협력은 flush/commit을 추가하지 않습니다. 기존 `services/community.py`의 쓰기·프로필·Inbox·agent 동작은 아직 실제 남은 구현이며 이어지는 B5에서 이전합니다.
+> **AR-B5-B1/B2 Social 읽기 적용 범위:** `repository/{posts,profiles,media,inbox}.py`는 Social 테이블의 실제 SQL을 소유하고, `service/notifications.py`는 수신자·자기 알림 판단을 수행합니다. `service/posts.py`는 게시물·스레드 읽기, `service/visibility.py`는 삭제·신고·인용·조상 게시물 공개 판단, `service/presentation.py`는 응답 조립을 담당합니다. User와 Character 조회는 각 소유 도메인의 service를 같은 Session으로 호출합니다. 멘션 조회의 한 번의 SQL, 입력 순서·삭제/정지 필터와 nullable 조회를 유지하며, 조회 협력은 flush/commit을 추가하지 않습니다. 원본 글·반응은 `service/timeline.py`, 프로필·팔로우는 `service/profiles.py`가 현재 실제 업무 구현을 소유합니다. 기존 `services/community.py`의 feed·Inbox·agent 도구와 HTTP 연결은 이어지는 B5에서 이전합니다.
 
 > **Social 저장과 협력:** `service/source_posts.py`는 원본 글·타임라인 글 생성, `repository/reactions.py`는 반응·신고 저장, `repository/profiles.py`는 팔로우 저장을 소유합니다. 이미 검증된 actor의 id/name/display_name을 읽는 협력은 외부 ORM 조회를 대신하는 우회 저장소가 아닙니다. `service/joint_posts.py`의 각 필드 대입과 `notifications.ensure_joint_started_notification`의 query/add는 기존 공동 활동 caller의 Session과 저장 순서를 유지합니다.
 
@@ -541,3 +541,12 @@ AR-B3-M2에서 이 네 파일의 실제 구현과 모든 Python 소비자를 이
 프로필/Draft 후보의 권한·quota·apply/discard는 Character `service/media.py`, `service/image_generation.py`, `service/image_quota.py`가 담당한다. 파일 배치는 Character·World·Social 각 소유 코드가 수행하고, 공통 이미지 정제·경로 검증·quarantine은 `integrations/media`를 사용한다. 공통 처리에서 공개 여부나 다른 업무의 quota를 결정하지 않는다. World 배너 오류와 commit 실패 보상은 World에 남는다. Post job/게시 부착과 World Package lossless codec은 각각 자신의 업무 계약을 유지한다.
 
 실제 이미지 provider/검증된 HTTP/Azure 번역은 `integrations`에 있다. Runtime은 설정/credential·Character 후처리 callback을 제공하며 provider 호출 횟수와 기존 transaction 순서를 유지한다. 과거 media export와 생산에서 호출하지 않는 URL helper는 이전 테스트의 한시적 호환 경로로 결과 문서에 소유·종료 단계를 기록하고 새 기능의 시작점으로 사용하지 않는다.
+
+
+### Social 프로필과 팔로우
+
+프로필의 팔로우 권한·중복 알림·팔로우 해제, 글/답글/좋아요 수와 목록, 팔로워 응답 구성은 `social/service/profiles.py`에서 찾는다. SQL은 Social의 `repository/profiles.py`가 담당하고 User·Character의 nullable 조회는 각 소유 서비스에 같은 Session을 전달한다. 다른 도메인의 ORM을 가져와 조회를 복제하지 않는다.
+
+프로필 표시와 팔로우 가능 여부는 서로 다른 기존 판단이다. 삭제된 Character의 기존 프로필은 이름과 미디어를 가린 응답을 유지하지만 해당 Character를 새로운 팔로우 대상으로 선택하는 것은 거절한다. 각 서비스의 flush·commit 규칙을 그대로 사용하므로 호출자의 deferred transaction에 참여하며 프로필 구성 과정에서 새로운 commit을 만들지 않는다. `utils/limits.py`는 기존 페이지 크기 제한 계산만 공유한다.
+
+현재 AR-B5-B6에서 이 실제 구현을 이전했다. 남은 HTTP·agent 호출자의 옛 Community import는 정확한 임시 소비자로 추적하며 전체 Social·Relationships 전환 완료로 취급하지 않는다.

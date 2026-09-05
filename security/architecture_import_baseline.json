@@ -1,7 +1,7 @@
 {
-  "edge_count": 2175,
-  "external_import_count": 2125,
-  "module_count": 667,
+  "edge_count": 2189,
+  "external_import_count": 2126,
+  "module_count": 669,
   "modules": [
     {
       "external_imports": [],
@@ -4737,6 +4737,28 @@
     },
     {
       "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.characters.service.profile",
+        "app.domains.identity.service.profile",
+        "app.domains.social.constants",
+        "app.domains.social.contracts.actors",
+        "app.domains.social.exceptions",
+        "app.domains.social.repository.profiles",
+        "app.domains.social.schemas.community",
+        "app.domains.social.service.notifications",
+        "app.domains.social.service.presentation",
+        "app.domains.social.service.timeline",
+        "app.domains.social.service.visibility",
+        "app.domains.social.utils.limits"
+      ],
+      "module": "app.domains.social.service.profiles",
+      "path": "backend/app/domains/social/service/profiles.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "sqlalchemy",
         "sqlalchemy.orm"
       ],
@@ -4803,6 +4825,13 @@
       "imports": [],
       "module": "app.domains.social.utils.cursors",
       "path": "backend/app/domains/social/utils/cursors.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.social.utils.limits",
+      "path": "backend/app/domains/social/utils/limits.py",
       "wildcard_imports": []
     },
     {
@@ -9328,8 +9357,10 @@
         "app.domains.social.service.notifications",
         "app.domains.social.service.posts",
         "app.domains.social.service.presentation",
+        "app.domains.social.service.profiles",
         "app.domains.social.service.timeline",
         "app.domains.social.service.visibility",
+        "app.domains.social.utils.limits",
         "app.models",
         "app.runtime.social.timeline",
         "app.schemas",

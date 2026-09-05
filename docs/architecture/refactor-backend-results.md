@@ -667,3 +667,12 @@ WorldCharacter는 `service/social_scope.py`에서 기존 WC 작성 범위와 cur
 Root와 합의한 잔여가 있다. `CommunityMutationQuotaBucket` 실제 정의와 Identity public/legacy auth/common model의 기존 동일 객체 assertion은 유지한다. 해당 모델과 공개 별칭의 최종 소유는 G5/B8에서 검토한다. 이 때문에 기존 quota 호출과 B4-C의 기존 AgentActivityLog 호출 2개만 정확 runtime 경로로 옮겼으며 원래 다른 도메인의 ORM을 서비스에 재수출하지 않았다. 기존 legacy 검사 형식의 owner_stage L6 아래 removal_condition에 정확 AR-B4-C/G5/B8 소유를 기록했다.
 
 B5-B5 최종 보존 검사: #258/#263 API/schema/ORM 차이 0, 변경 기존 테스트 3개 파일 assertion/raises/warns PASS, 전체 split evidence PASS. 기존 검사 형식의 top-level class 매핑에 각 destination_member를 함께 기록했고 실제 nested method 12개가 존재하는지 별도 AST 확인했다. L4 667 modules/parity97, ER0 Postgres78/migration subset87/Neo4j24/Next44/parity7도 통과했다.
+
+
+## AR-B5-B6 — 프로필·팔로우 업무 흐름
+
+기존 Community의 실제 프로필 함수 17개와 페이지 크기 helper 1개를 `social/service/profiles.py`·`utils/limits.py`로 이전했다. 소유 Character 조회와 User 조회는 기존 nullable 결과를 반환하는 각 소유 서비스로 연결하고, Post·follow SQL은 이미 이전한 Social repository를 사용한다. 원래 함수 18개의 AST 본문은 import 대상과 읽기 계약의 타입 표기만 정규화했을 때 모두 같았다. 분기·조회·권한 확인·알림 생성·응답 순서는 변경하지 않았다.
+
+새 `tests/social/test_profile_workflows.py`의 **2 nodes**는 실제 SQLite에서 팔로우 중복 요청의 동일 결과/알림 1개, 해제 상태와 caller rollback, 소유하지 않은 follower와 self-follow의 쓰기 전 거절, 없는 User 오류, 삭제된 Character의 기존 표시 가림과 신규 팔로우 거절을 검증한다. 기존 관련 회귀와 함께 **44 passed / 1 existing warning / 7.55s**다. 같은 Session과 deferred commit 동작을 유지하며 추가 provider 요청은 없다.
+
+#258/#263 API·schema·ORM 차이 0, 기존 보호 테스트 변경 0, 전체 split evidence PASS다. 원래 AR-B2-B6의 전체 Community symbol 지도를 유지하면서 정확히 18개의 목적지를 갱신했다. 경계 검사는 **669 modules / 2,189 edges / 241 exact legacy edges**로 통과했다. 신규 source 도입 capture와 통합 Actions/PR/merge는 root의 후속 검증이며 전체 B5 완료를 의미하지 않는다.

@@ -13519,8 +13519,10 @@
           "backend/app/domains/social/service/notifications.py",
           "backend/app/domains/social/service/posts.py",
           "backend/app/domains/social/service/presentation.py",
+          "backend/app/domains/social/service/profiles.py",
           "backend/app/domains/social/service/timeline.py",
           "backend/app/domains/social/service/visibility.py",
+          "backend/app/domains/social/utils/limits.py",
           "backend/app/domains/world_characters/service/social_scope.py",
           "backend/app/runtime/social/timeline.py",
           "backend/app/services/community.py"
@@ -14746,92 +14748,101 @@
         },
         {
           "old": "backend/app/services/community.py::follow_profile",
-          "new": "backend/app/services/community.py::follow_profile",
+          "new": "backend/app/domains/social/service/profiles.py::follow_profile",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_profile_workflows.py::test_follow_workflow_deduplicates_notification_and_retains_caller_transaction",
+            "tests/social/test_profile_workflows.py::test_profile_workflow_preserves_fail_closed_order_and_deleted_display"
           ]
         },
         {
           "old": "backend/app/services/community.py::get_follow_status",
-          "new": "backend/app/services/community.py::get_follow_status",
+          "new": "backend/app/domains/social/service/profiles.py::get_follow_status",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_profile_workflows.py::test_follow_workflow_deduplicates_notification_and_retains_caller_transaction",
+            "tests/social/test_profile_workflows.py::test_profile_workflow_preserves_fail_closed_order_and_deleted_display"
           ]
         },
         {
           "old": "backend/app/services/community.py::unfollow_profile",
-          "new": "backend/app/services/community.py::unfollow_profile",
+          "new": "backend/app/domains/social/service/profiles.py::unfollow_profile",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_profile_workflows.py::test_follow_workflow_deduplicates_notification_and_retains_caller_transaction",
+            "tests/social/test_profile_workflows.py::test_profile_workflow_preserves_fail_closed_order_and_deleted_display"
           ]
         },
         {
           "old": "backend/app/services/community.py::get_user_profile",
-          "new": "backend/app/services/community.py::get_user_profile",
+          "new": "backend/app/domains/social/service/profiles.py::get_user_profile",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_profile_workflows.py::test_follow_workflow_deduplicates_notification_and_retains_caller_transaction",
+            "tests/social/test_profile_workflows.py::test_profile_workflow_preserves_fail_closed_order_and_deleted_display"
           ]
         },
         {
           "old": "backend/app/services/community.py::get_character_profile",
-          "new": "backend/app/services/community.py::get_character_profile",
+          "new": "backend/app/domains/social/service/profiles.py::get_character_profile",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_profile_workflows.py::test_follow_workflow_deduplicates_notification_and_retains_caller_transaction",
+            "tests/social/test_profile_workflows.py::test_profile_workflow_preserves_fail_closed_order_and_deleted_display"
           ]
         },
         {
           "old": "backend/app/services/community.py::get_user_profile_feed",
-          "new": "backend/app/services/community.py::get_user_profile_feed",
+          "new": "backend/app/domains/social/service/profiles.py::get_user_profile_feed",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_profile_workflows.py::test_follow_workflow_deduplicates_notification_and_retains_caller_transaction",
+            "tests/social/test_profile_workflows.py::test_profile_workflow_preserves_fail_closed_order_and_deleted_display"
           ]
         },
         {
           "old": "backend/app/services/community.py::get_character_profile_feed",
-          "new": "backend/app/services/community.py::get_character_profile_feed",
+          "new": "backend/app/domains/social/service/profiles.py::get_character_profile_feed",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_profile_workflows.py::test_follow_workflow_deduplicates_notification_and_retains_caller_transaction",
+            "tests/social/test_profile_workflows.py::test_profile_workflow_preserves_fail_closed_order_and_deleted_display"
           ]
         },
         {
           "old": "backend/app/services/community.py::get_user_profile_connections",
-          "new": "backend/app/services/community.py::get_user_profile_connections",
+          "new": "backend/app/domains/social/service/profiles.py::get_user_profile_connections",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_profile_workflows.py::test_follow_workflow_deduplicates_notification_and_retains_caller_transaction",
+            "tests/social/test_profile_workflows.py::test_profile_workflow_preserves_fail_closed_order_and_deleted_display"
           ]
         },
         {
           "old": "backend/app/services/community.py::get_character_profile_connections",
-          "new": "backend/app/services/community.py::get_character_profile_connections",
+          "new": "backend/app/domains/social/service/profiles.py::get_character_profile_connections",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_profile_workflows.py::test_follow_workflow_deduplicates_notification_and_retains_caller_transaction",
+            "tests/social/test_profile_workflows.py::test_profile_workflow_preserves_fail_closed_order_and_deleted_display"
           ]
         },
         {
@@ -15576,12 +15587,14 @@
         },
         {
           "old": "backend/app/services/community.py::_safe_limit",
-          "new": "backend/app/services/community.py::_safe_limit",
+          "new": "backend/app/domains/social/utils/limits.py::_safe_limit",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/services/community.py",
+            "backend/app/domains/social/service/profiles.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_profile_workflows.py::test_follow_workflow_deduplicates_notification_and_retains_caller_transaction",
+            "tests/social/test_profile_workflows.py::test_profile_workflow_preserves_fail_closed_order_and_deleted_display"
           ]
         },
         {
@@ -15619,52 +15632,57 @@
         },
         {
           "old": "backend/app/services/community.py::_profile_ref",
-          "new": "backend/app/services/community.py::_profile_ref",
+          "new": "backend/app/domains/social/service/profiles.py::_profile_ref",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_profile_workflows.py::test_follow_workflow_deduplicates_notification_and_retains_caller_transaction",
+            "tests/social/test_profile_workflows.py::test_profile_workflow_preserves_fail_closed_order_and_deleted_display"
           ]
         },
         {
           "old": "backend/app/services/community.py::_profile_connections_page",
-          "new": "backend/app/services/community.py::_profile_connections_page",
+          "new": "backend/app/domains/social/service/profiles.py::_profile_connections_page",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_profile_workflows.py::test_follow_workflow_deduplicates_notification_and_retains_caller_transaction",
+            "tests/social/test_profile_workflows.py::test_profile_workflow_preserves_fail_closed_order_and_deleted_display"
           ]
         },
         {
           "old": "backend/app/services/community.py::_profile_list_item",
-          "new": "backend/app/services/community.py::_profile_list_item",
+          "new": "backend/app/domains/social/service/profiles.py::_profile_list_item",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_profile_workflows.py::test_follow_workflow_deduplicates_notification_and_retains_caller_transaction",
+            "tests/social/test_profile_workflows.py::test_profile_workflow_preserves_fail_closed_order_and_deleted_display"
           ]
         },
         {
           "old": "backend/app/services/community.py::_viewer_follows_character",
-          "new": "backend/app/services/community.py::_viewer_follows_character",
+          "new": "backend/app/domains/social/service/profiles.py::_viewer_follows_character",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_profile_workflows.py::test_follow_workflow_deduplicates_notification_and_retains_caller_transaction",
+            "tests/social/test_profile_workflows.py::test_profile_workflow_preserves_fail_closed_order_and_deleted_display"
           ]
         },
         {
           "old": "backend/app/services/community.py::_character_search_result",
-          "new": "backend/app/services/community.py::_character_search_result",
+          "new": "backend/app/domains/social/service/profiles.py::_character_search_result",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_profile_workflows.py::test_follow_workflow_deduplicates_notification_and_retains_caller_transaction",
+            "tests/social/test_profile_workflows.py::test_profile_workflow_preserves_fail_closed_order_and_deleted_display"
           ]
         },
         {
@@ -15723,32 +15741,35 @@
         },
         {
           "old": "backend/app/services/community.py::_resolve_follower",
-          "new": "backend/app/services/community.py::_resolve_follower",
+          "new": "backend/app/domains/social/service/profiles.py::_resolve_follower",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_profile_workflows.py::test_follow_workflow_deduplicates_notification_and_retains_caller_transaction",
+            "tests/social/test_profile_workflows.py::test_profile_workflow_preserves_fail_closed_order_and_deleted_display"
           ]
         },
         {
           "old": "backend/app/services/community.py::_resolve_target_profile",
-          "new": "backend/app/services/community.py::_resolve_target_profile",
+          "new": "backend/app/domains/social/service/profiles.py::_resolve_target_profile",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_profile_workflows.py::test_follow_workflow_deduplicates_notification_and_retains_caller_transaction",
+            "tests/social/test_profile_workflows.py::test_profile_workflow_preserves_fail_closed_order_and_deleted_display"
           ]
         },
         {
           "old": "backend/app/services/community.py::_ensure_not_self_follow",
-          "new": "backend/app/services/community.py::_ensure_not_self_follow",
+          "new": "backend/app/domains/social/service/profiles.py::_ensure_not_self_follow",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_profile_workflows.py::test_follow_workflow_deduplicates_notification_and_retains_caller_transaction",
+            "tests/social/test_profile_workflows.py::test_profile_workflow_preserves_fail_closed_order_and_deleted_display"
           ]
         },
         {
@@ -18644,6 +18665,21 @@
       ],
       "deferred_quota_owner": "Root explicitly retains Identity CommunityMutationQuotaBucket and historical 3-way class identity assertions until G5/B8; no foreign ORM bridge or fake service ORM export. Existing quota remains a typed runtime collaboration.",
       "remaining": "Profile/inbox/agent workflows, media jobs, Relationships/projection and HTTP ownership transition."
+    },
+    "AR-B5-B6": {
+      "status": "IMPLEMENTED; focused44 PASS; original18 function bodies/order preserved; API/ORM/assertions/full split PASS; source introduction and integration pending",
+      "scope": "Actual profile/follow authorization, read pages, counts, connection presentation and bounded limit helper. Identity/Character lookups use the owning service with unchanged nullable and attached-object behavior.",
+      "source_split_owners": [
+        "AR-B2-B6 retains all original Community definitions; 18 destinations now point to actual Social profile/helper implementations."
+      ],
+      "new_tests": [
+        "backend/tests/social/test_profile_workflows.py"
+      ],
+      "test_nodes": [
+        "tests/social/test_profile_workflows.py::test_follow_workflow_deduplicates_notification_and_retains_caller_transaction",
+        "tests/social/test_profile_workflows.py::test_profile_workflow_preserves_fail_closed_order_and_deleted_display"
+      ],
+      "remaining": "Feed/inbox/agent workflows, media jobs, Relationships/projection and HTTP ownership transition."
     }
   }
 }

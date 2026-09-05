@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2125,
-      "internal_edge_count": 2175,
+      "external_import_count": 2126,
+      "internal_edge_count": 2189,
       "legacy_import_exception_count": 0,
-      "module_count": 667,
+      "module_count": 669,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -562,6 +562,24 @@
           },
           {
             "imports": [
+              "app.domains.characters.service.profile",
+              "app.domains.identity.service.profile",
+              "app.domains.social.constants",
+              "app.domains.social.contracts.actors",
+              "app.domains.social.exceptions",
+              "app.domains.social.repository.profiles",
+              "app.domains.social.schemas.community",
+              "app.domains.social.service.notifications",
+              "app.domains.social.service.presentation",
+              "app.domains.social.service.timeline",
+              "app.domains.social.service.visibility",
+              "app.domains.social.utils.limits"
+            ],
+            "module": "app.domains.social.service.profiles",
+            "path": "backend/app/domains/social/service/profiles.py"
+          },
+          {
+            "imports": [
               "app.core.search_text",
               "app.core.unit_of_work",
               "app.domains.social.contracts.actors",
@@ -610,6 +628,11 @@
             "imports": [],
             "module": "app.domains.social.utils.cursors",
             "path": "backend/app/domains/social/utils/cursors.py"
+          },
+          {
+            "imports": [],
+            "module": "app.domains.social.utils.limits",
+            "path": "backend/app/domains/social/utils/limits.py"
           },
           {
             "imports": [],

@@ -1169,11 +1169,13 @@
       "app.domains.social.service.notifications",
       "app.domains.social.service.posts",
       "app.domains.social.service.presentation",
+      "app.domains.social.service.profiles",
       "app.domains.social.service.source_posts",
       "app.domains.social.service.timeline",
       "app.domains.social.service.visibility",
       "app.domains.social.utils",
       "app.domains.social.utils.cursors",
+      "app.domains.social.utils.limits",
       "app.domains.social.utils.text",
       "app.domains.world_characters.client",
       "app.domains.world_characters.contracts",
@@ -1279,6 +1281,7 @@
       "app.domains.social.service.notifications",
       "app.domains.social.service.posts",
       "app.domains.social.service.presentation",
+      "app.domains.social.service.profiles",
       "app.domains.social.service.source_posts",
       "app.domains.social.service.timeline",
       "app.domains.social.service.visibility",
@@ -2422,6 +2425,22 @@
         "owner_stage": "AR-B5 / AR-B8-A",
         "reason": "The named old caller imports actual Social workflow/helper objects or the identical original quota exception.",
         "removal_condition": "Move remaining HTTP/agent callers to the canonical service and retire the exact legacy alias. Historical quota model/public identity is a root-approved G5/B8 review item.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.social.service.profiles",
+        "owner_stage": "AR-B5 / AR-B8-A",
+        "reason": "The remaining named Community callers use the identical profile workflow and bounded limit helper after actual implementation moves to Social ownership.",
+        "removal_condition": "Move remaining HTTP and agent callers to canonical services and remove this exact legacy import.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.social.utils.limits",
+        "owner_stage": "AR-B5 / AR-B8-A",
+        "reason": "The remaining named Community callers use the identical profile workflow and bounded limit helper after actual implementation moves to Social ownership.",
+        "removal_condition": "Move remaining HTTP and agent callers to canonical services and remove this exact legacy import.",
         "review_date": "2026-09-05"
       }
     ]
