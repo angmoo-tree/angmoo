@@ -431,3 +431,9 @@ Import inventory는 현재 사실을 기록하고 import policy는 허용 경계
 Character 입력과 상태·Creator 모델은 `characters/models.py`, `schemas.py`, `contracts.py`에서 찾는다. 생성·표시 프로필·페르소나·동의의 실제 변경은 `service/mutations.py`가 담당하고, `access.py`·`persona.py`·`promotion.py`가 해당 판단을 공유한다. Caller-owned World seed는 `service/seed.py`의 flush-only 계약을 따르며 일반 생성의 기존 commit을 합치지 않는다.
 
 Creator 이미지 한도는 `service/image_quota.py`, draft 응답·파싱·쿨다운은 `service/creator.py`가 소유한다. 파일과 provider의 외부 작업, 여러 업무의 활동·credential·상세 응답 연결은 현재 `runtime/characters`에서 이어간다. 해당 runtime에는 후속 B2/B3/B4/B8 이전 대상이 남아 있어 전체 전환 완료로 보지 않는다. 새로운 Character 업무 판단을 이 혼합 runtime에 계속 추가하는 구조가 아니다. 기존 혼합 `/agents` router의 업무별 분리 역시 남아 있다.
+
+#### Character 관리 HTTP와 런타임 연결
+
+기본 Character 관리 6개 API는 `domains/characters/router.py` → `service/management.py` → profile/persona mutation으로 연결된다. HTTP dependency는 앱 생성 시 등록한 `CharacterManagementWorkflows`를 가져온다. 이 callback에는 활동 설정·credential·기록·상세 응답 조립이 들어가며 동일 DB Session을 받는다. Character의 소유권과 프로필 변경은 service가 판단하고, HTTP 계층에는 오류의 응답 코드 변환만 둔다.
+
+기존 `/agents` 집계 파일은 아직 활동·LocalBot·이미지 API를 포함하므로 canonical Character APIRoute를 원래 위치에 조립한다. 일반 상세 조립의 최근 활동 20개와 단일 조회 200개 한도, drafts 우선 경로 매칭은 유지한다. `AgentDetailRead`는 Character schemas이며 credential/활동/slot의 읽기 계약은 각각 Identity/Runtime schemas에서 가져온다. 이 DTO 선행 추출이 다른 업무 실행 로직의 이전 완료를 뜻하지 않는다.

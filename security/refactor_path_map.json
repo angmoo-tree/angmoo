@@ -434,6 +434,8 @@
         ],
         "backend/app/schemas/agents.py": [
           "backend/app/domains/characters/schemas.py",
+          "backend/app/domains/identity/schemas.py",
+          "backend/app/domains/runtime/schemas.py",
           "backend/app/schemas/agents.py"
         ]
       },
@@ -1883,7 +1885,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::CredentialRead",
-          "new": "backend/app/schemas/agents.py::CredentialRead",
+          "new": "backend/app/domains/identity/schemas.py::CredentialRead",
           "direct_consumers": [
             "backend/app/schemas/__init__.py"
           ],
@@ -1933,7 +1935,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentActionRangeRead",
-          "new": "backend/app/schemas/agents.py::AgentActionRangeRead",
+          "new": "backend/app/domains/runtime/schemas.py::AgentActionRangeRead",
           "direct_consumers": [
             "backend/app/schemas/__init__.py"
           ],
@@ -1943,7 +1945,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentActivitySettingRead",
-          "new": "backend/app/schemas/agents.py::AgentActivitySettingRead",
+          "new": "backend/app/domains/runtime/schemas.py::AgentActivitySettingRead",
           "direct_consumers": [
             "backend/app/schemas/__init__.py"
           ],
@@ -2050,7 +2052,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentImageGenerationSettingRead",
-          "new": "backend/app/schemas/agents.py::AgentImageGenerationSettingRead",
+          "new": "backend/app/domains/characters/schemas.py::AgentImageGenerationSettingRead",
           "direct_consumers": [
             "backend/app/schemas/__init__.py"
           ],
@@ -2072,7 +2074,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentActivitySummaryRead",
-          "new": "backend/app/schemas/agents.py::AgentActivitySummaryRead",
+          "new": "backend/app/domains/runtime/schemas.py::AgentActivitySummaryRead",
           "direct_consumers": [
             "backend/app/schemas/__init__.py"
           ],
@@ -2082,7 +2084,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentActivityProfileReadinessRead",
-          "new": "backend/app/schemas/agents.py::AgentActivityProfileReadinessRead",
+          "new": "backend/app/domains/runtime/schemas.py::AgentActivityProfileReadinessRead",
           "direct_consumers": [
             "backend/app/schemas/__init__.py"
           ],
@@ -2106,7 +2108,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentDetailRead",
-          "new": "backend/app/schemas/agents.py::AgentDetailRead",
+          "new": "backend/app/domains/characters/schemas.py::AgentDetailRead",
           "direct_consumers": [
             "backend/app/schemas/__init__.py"
           ],
@@ -4591,11 +4593,13 @@
       "split_files": {
         "backend/app/schemas/agent_runs.py": [
           "backend/app/core/response_schemas.py",
+          "backend/app/domains/runtime/schemas.py",
           "backend/app/schemas/agent_runs.py"
         ],
         "backend/app/services/agents.py": [
           "backend/app/domains/characters/exceptions.py",
           "backend/app/domains/characters/service/access.py",
+          "backend/app/domains/characters/service/management.py",
           "backend/app/domains/characters/service/mutations.py",
           "backend/app/domains/characters/service/persona.py",
           "backend/app/domains/characters/service/promotion.py",
@@ -4632,7 +4636,7 @@
         },
         {
           "old": "backend/app/schemas/agent_runs.py::AgentActivityLogRead",
-          "new": "backend/app/schemas/agent_runs.py::AgentActivityLogRead",
+          "new": "backend/app/domains/runtime/schemas.py::AgentActivityLogRead",
           "direct_consumers": [
             "backend/app/schemas/agent_runs.py"
           ],
@@ -4664,7 +4668,7 @@
         },
         {
           "old": "backend/app/schemas/agent_runs.py::AgentSlotRead",
-          "new": "backend/app/schemas/agent_runs.py::AgentSlotRead",
+          "new": "backend/app/domains/runtime/schemas.py::AgentSlotRead",
           "direct_consumers": [
             "backend/app/schemas/agent_runs.py"
           ],
@@ -5311,7 +5315,7 @@
         },
         {
           "old": "backend/app/services/agents.py::AgentActiveHoursInvalidError",
-          "new": "backend/app/runtime/characters/management.py::AgentActiveHoursInvalidError",
+          "new": "backend/app/domains/characters/exceptions.py::AgentActiveHoursInvalidError",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
@@ -5444,13 +5448,14 @@
         },
         {
           "old": "backend/app/services/agents.py::list_agents",
-          "new": "backend/app/runtime/characters/management.py::list_agents",
+          "new": "backend/app/domains/characters/service/management.py::list_agents",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "part": "Character selection/mutation and callback ordering"
         },
         {
           "old": "backend/app/services/agents.py::llm_credential_error_message",
@@ -5511,7 +5516,7 @@
         },
         {
           "old": "backend/app/services/agents.py::create_agent",
-          "new": "backend/app/runtime/characters/management.py::create_agent",
+          "new": "backend/app/domains/characters/service/management.py::create_agent",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
@@ -5519,7 +5524,8 @@
             "tests/test_agent_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
             "tests/test_agent_activity_limits.py::test_create_agent_applies_initial_activity_settings",
             "tests/test_agent_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
-          ]
+          ],
+          "part": "Character selection/mutation and callback ordering"
         },
         {
           "old": "backend/app/services/agents.py::_validate_initial_activity_settings",
@@ -5611,13 +5617,14 @@
         },
         {
           "old": "backend/app/services/agents.py::get_agent",
-          "new": "backend/app/runtime/characters/management.py::get_agent",
+          "new": "backend/app/domains/characters/service/management.py::get_agent",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/test_m3_authorization_deletion.py::test_two_user_object_authorization_matrix_denies_cross_owner_access"
-          ]
+          ],
+          "part": "Character selection/mutation and callback ordering"
         },
         {
           "old": "backend/app/services/agents.py::get_local_connection",
@@ -5719,35 +5726,38 @@
         },
         {
           "old": "backend/app/services/agents.py::update_profile",
-          "new": "backend/app/runtime/characters/management.py::update_profile",
+          "new": "backend/app/domains/characters/service/management.py::update_profile",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/identity/test_demo_account_lock.py::test_agent_route_returns_403_for_locked_demo_error",
             "tests/identity/test_demo_account_lock.py::test_agent_service_blocks_profile_update_after_ownership_check"
-          ]
+          ],
+          "part": "Character selection/mutation and callback ordering"
         },
         {
           "old": "backend/app/services/agents.py::update_promotion_usage",
-          "new": "backend/app/runtime/characters/management.py::update_promotion_usage",
+          "new": "backend/app/domains/characters/service/management.py::update_promotion_usage",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/test_agent_promotion_usage.py::test_update_promotion_usage_tracks_revocation_and_regrant",
             "tests/test_agent_promotion_usage.py::test_update_promotion_usage_requires_owner"
-          ]
+          ],
+          "part": "Character selection/mutation and callback ordering"
         },
         {
           "old": "backend/app/services/agents.py::update_persona",
-          "new": "backend/app/runtime/characters/management.py::update_persona",
+          "new": "backend/app/domains/characters/service/management.py::update_persona",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving"
-          ]
+          ],
+          "part": "Character selection/mutation and callback ordering"
         },
         {
           "old": "backend/app/services/agents.py::upload_profile_media",
@@ -6532,7 +6542,7 @@
         },
         {
           "old": "backend/app/services/agents.py::_agent_list_sort_key",
-          "new": "backend/app/runtime/characters/management.py::_agent_list_sort_key",
+          "new": "backend/app/domains/characters/service/management.py::_agent_list_sort_key",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
@@ -7575,6 +7585,50 @@
             "tests/characters/test_creator_policies.py::test_owned_profile_mutations_preserve_commits_without_activity_or_credential_tables",
             "tests/identity/test_demo_account_lock.py::test_agent_service_blocks_profile_update_after_ownership_check"
           ]
+        },
+        {
+          "old": "backend/app/services/agents.py::get_agent",
+          "new": "backend/app/runtime/characters/management.py::_build_full_character_detail",
+          "part": "Original runtime tail and transaction/response behavior",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_character_writes_reach_runtime_in_same_session_after_original_commits"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::create_agent",
+          "new": "backend/app/runtime/characters/management.py::_after_character_created",
+          "part": "Original runtime tail and transaction/response behavior",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_character_writes_reach_runtime_in_same_session_after_original_commits"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::update_profile",
+          "new": "backend/app/runtime/characters/management.py::_after_character_profile_updated",
+          "part": "Original runtime tail and transaction/response behavior",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_character_writes_reach_runtime_in_same_session_after_original_commits"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::update_persona",
+          "new": "backend/app/runtime/characters/management.py::_after_character_persona_updated",
+          "part": "Original runtime tail and transaction/response behavior",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_character_writes_reach_runtime_in_same_session_after_original_commits"
+          ]
         }
       ],
       "full_file_moves": {
@@ -8209,6 +8263,497 @@
         "tests/logging/test_runtime_logging.py::test_container_and_both_pyinstaller_layouts_include_logging_resource"
       ],
       "remaining": "Full packaged product/installer and required CI after sequential integration; final G12 closeout in B8-B."
+    },
+    "AR-B2-B3": {
+      "status": "PARTIAL IMPLEMENTATION; Character HTTP/management complete for six operations; Creator media/activity/delete composition remains explicitly separate",
+      "split_files": {
+        "backend/app/api/v1/routes/agents.py": [
+          "backend/app/api/v1/routes/agents.py",
+          "backend/app/domains/characters/router.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/api/v1/routes/agents.py::router",
+          "new": "backend/app/api/v1/routes/agents.py::router",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::TENDENCY_ANALYSIS_RETRY_DETAIL",
+          "new": "backend/app/api/v1/routes/agents.py::TENDENCY_ANALYSIS_RETRY_DETAIL",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::_raise_demo_account_locked",
+          "new": "backend/app/api/v1/routes/agents.py::_raise_demo_account_locked",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::list_agents",
+          "new": "backend/app/domains/characters/router.py::list_agents",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::create_agent",
+          "new": "backend/app/domains/characters/router.py::create_agent",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::create_agent_draft",
+          "new": "backend/app/api/v1/routes/agents.py::create_agent_draft",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::get_agent_draft",
+          "new": "backend/app/api/v1/routes/agents.py::get_agent_draft",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::get_agent_draft_media",
+          "new": "backend/app/api/v1/routes/agents.py::get_agent_draft_media",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::update_agent_draft",
+          "new": "backend/app/api/v1/routes/agents.py::update_agent_draft",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::enhance_agent_draft_persona",
+          "new": "backend/app/api/v1/routes/agents.py::enhance_agent_draft_persona",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::upload_agent_draft_media",
+          "new": "backend/app/api/v1/routes/agents.py::upload_agent_draft_media",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::generate_agent_draft_media",
+          "new": "backend/app/api/v1/routes/agents.py::generate_agent_draft_media",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::get_agent_draft_media_usage",
+          "new": "backend/app/api/v1/routes/agents.py::get_agent_draft_media_usage",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::get_agent_draft_media_candidate_content",
+          "new": "backend/app/api/v1/routes/agents.py::get_agent_draft_media_candidate_content",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::apply_agent_draft_media_candidate",
+          "new": "backend/app/api/v1/routes/agents.py::apply_agent_draft_media_candidate",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::discard_agent_draft_media_candidate",
+          "new": "backend/app/api/v1/routes/agents.py::discard_agent_draft_media_candidate",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::complete_agent_draft",
+          "new": "backend/app/api/v1/routes/agents.py::complete_agent_draft",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::get_agent",
+          "new": "backend/app/domains/characters/router.py::get_agent",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::delete_agent",
+          "new": "backend/app/api/v1/routes/agents.py::delete_agent",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::get_local_connection",
+          "new": "backend/app/api/v1/routes/agents.py::get_local_connection",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::issue_local_key",
+          "new": "backend/app/api/v1/routes/agents.py::issue_local_key",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::revoke_local_key",
+          "new": "backend/app/api/v1/routes/agents.py::revoke_local_key",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::get_feed_cue",
+          "new": "backend/app/api/v1/routes/agents.py::get_feed_cue",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::give_feed_cue",
+          "new": "backend/app/api/v1/routes/agents.py::give_feed_cue",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::update_profile",
+          "new": "backend/app/domains/characters/router.py::update_profile",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::update_persona",
+          "new": "backend/app/domains/characters/router.py::update_persona",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::update_promotion_usage",
+          "new": "backend/app/domains/characters/router.py::update_promotion_usage",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::upload_profile_media",
+          "new": "backend/app/api/v1/routes/agents.py::upload_profile_media",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::get_image_settings",
+          "new": "backend/app/api/v1/routes/agents.py::get_image_settings",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::update_image_settings",
+          "new": "backend/app/api/v1/routes/agents.py::update_image_settings",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::delete_image_settings_key",
+          "new": "backend/app/api/v1/routes/agents.py::delete_image_settings_key",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::upload_image_seed",
+          "new": "backend/app/api/v1/routes/agents.py::upload_image_seed",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::delete_image_seed",
+          "new": "backend/app/api/v1/routes/agents.py::delete_image_seed",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::generate_profile_media",
+          "new": "backend/app/api/v1/routes/agents.py::generate_profile_media",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::get_profile_media_usage",
+          "new": "backend/app/api/v1/routes/agents.py::get_profile_media_usage",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::get_agent_profile_media_candidate_content",
+          "new": "backend/app/api/v1/routes/agents.py::get_agent_profile_media_candidate_content",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::apply_profile_media_candidate",
+          "new": "backend/app/api/v1/routes/agents.py::apply_profile_media_candidate",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::discard_profile_media_candidate",
+          "new": "backend/app/api/v1/routes/agents.py::discard_profile_media_candidate",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::update_credential",
+          "new": "backend/app/api/v1/routes/agents.py::update_credential",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::get_credential_metadata",
+          "new": "backend/app/api/v1/routes/agents.py::get_credential_metadata",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::delete_credential",
+          "new": "backend/app/api/v1/routes/agents.py::delete_credential",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::get_settings",
+          "new": "backend/app/api/v1/routes/agents.py::get_settings",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::update_settings",
+          "new": "backend/app/api/v1/routes/agents.py::update_settings",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::analyze_tendency",
+          "new": "backend/app/api/v1/routes/agents.py::analyze_tendency",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::activate_agent",
+          "new": "backend/app/api/v1/routes/agents.py::activate_agent",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::deactivate_agent",
+          "new": "backend/app/api/v1/routes/agents.py::deactivate_agent",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::run_now",
+          "new": "backend/app/api/v1/routes/agents.py::run_now",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::first_greeting",
+          "new": "backend/app/api/v1/routes/agents.py::first_greeting",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        }
+      ]
     }
   }
 }

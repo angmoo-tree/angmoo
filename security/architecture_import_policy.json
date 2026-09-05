@@ -1240,13 +1240,16 @@
     ],
     "modules": [
       "app.domains.characters.contracts",
+      "app.domains.characters.dependencies",
       "app.domains.characters.exceptions",
       "app.domains.characters.models",
+      "app.domains.characters.router",
       "app.domains.characters.schemas",
       "app.domains.characters.service",
       "app.domains.characters.service.access",
       "app.domains.characters.service.creator",
       "app.domains.characters.service.image_quota",
+      "app.domains.characters.service.management",
       "app.domains.characters.service.mutations",
       "app.domains.characters.service.persona",
       "app.domains.characters.service.profile",
@@ -1273,7 +1276,8 @@
       "app.domains.identity.service.external_verification",
       "app.domains.identity.service.local_owner",
       "app.domains.identity.service.login_throttle",
-      "app.domains.media.schemas"
+      "app.domains.media.schemas",
+      "app.domains.runtime.schemas"
     ],
     "entries": [
       "app.domains.characters.contracts",
@@ -1281,6 +1285,7 @@
       "app.domains.characters.service.access",
       "app.domains.characters.service.creator",
       "app.domains.characters.service.image_quota",
+      "app.domains.characters.service.management",
       "app.domains.characters.service.mutations",
       "app.domains.characters.service.persona",
       "app.domains.characters.service.profile",
@@ -1297,7 +1302,8 @@
       "app.domains.identity.service.external_verification",
       "app.domains.identity.service.local_owner",
       "app.domains.identity.service.login_throttle",
-      "app.domains.media.schemas"
+      "app.domains.media.schemas",
+      "app.domains.runtime.schemas"
     ],
     "bridges": [
       {
@@ -1610,6 +1616,54 @@
         "owner_stage": "AR-B2-B / AR-B4 / AR-G5",
         "removal_condition": "Retain legitimate runtime composition while transitioning remaining activity owners and completing aggregate ORM removal.",
         "reason": "Character ORM and owned profile query use their canonical implementation instead of old aggregate exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.api.v1.routes.agents",
+        "target": "app.domains.characters.router",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
+        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
+        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.management",
+        "target": "app.domains.characters.contracts",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
+        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
+        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.management",
+        "target": "app.domains.characters.service.management",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
+        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
+        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.agent_runs",
+        "target": "app.domains.runtime.schemas",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
+        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
+        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.agents",
+        "target": "app.domains.identity.schemas",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
+        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
+        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.agents",
+        "target": "app.domains.runtime.schemas",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
+        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
+        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
         "review_date": "2026-09-05"
       }
     ]

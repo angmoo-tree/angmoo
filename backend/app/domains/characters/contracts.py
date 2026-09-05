@@ -1,9 +1,13 @@
-"""Caller-owned Character seed contracts."""
+"""Character seed inputs and caller-composed management workflows."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Callable, Protocol, TYPE_CHECKING
+from sqlalchemy.orm import Session
+
+if TYPE_CHECKING:
+    from app.domains.characters import models, schemas
 
 
 class CharacterOwner(Protocol):
@@ -29,4 +33,27 @@ class AutonomousCharacterSeedData:
     banner_url: str | None = None
 
 
-__all__ = ["AutonomousCharacterSeedData"]
+__all__ = ["AutonomousCharacterSeedData", "CharacterOwner", "CharacterManagementWorkflows"]
+
+
+@dataclass(frozen=True)
+class CharacterManagementWorkflows:
+    """Runtime work composed after/before Character writes in the caller Session.
+
+    Callbacks preserve the existing activity/credential commits. They must not
+    create a replacement Session or detach the supplied Character/owner.
+    """
+
+    validate_initial_activity: Callable[[schemas.AgentCreate], None]
+    after_create: Callable[
+        [Session, CharacterOwner, models.Character, schemas.AgentCreate],
+        schemas.AgentDetailRead,
+    ]
+    build_detail: Callable[[Session, models.Character], schemas.AgentDetailRead]
+    build_full_detail: Callable[[Session, models.Character], schemas.AgentDetailRead]
+    after_profile: Callable[
+        [Session, CharacterOwner, models.Character, bool], schemas.AgentDetailRead
+    ]
+    after_persona: Callable[
+        [Session, CharacterOwner, models.Character], schemas.AgentDetailRead
+    ]
