@@ -1180,3 +1180,12 @@ Identity repository/credentials.py는 원래 nullable id 조회, 소유자/활�
 공통 이미지 키의 실제7함수·캐시2개는 `credentials/service_images.py`로 이동했고 원래 services/service_image_key.py를 제거했다. 모든 현재 제품/테스트 소비자가 한 모듈을 공유하여 캐시나 비밀 해석을 복제하지 않는다. 기존 OSS secret-reveal 허용 목록의 파일 경로만 실제 소유자로 전환했다.
 
 원래244개 함수·값 전체 AST를 비교했고 owner save 호출을 원문으로 펼친 동작이 같다. 처음 Lore import를 module docstring/future import보다 앞에 넣어 collection SyntaxError가 발생한 것은 import 순서를 수정했다. 최종 Identity/이미지/credential privacy/OSS 검사는217 PASS/16기존 warnings/29.80초다. 새 test node는 없으며 원래6보존진단0오류(protected2201/current2258), boundary761/2525/legacy177 및 L4/ER0 PASS다. 실제 owner HTTP 및 runtime slot·World 협력, LocalBot, G5/G06/B8 최종종료는 계속 진행 중이다.
+
+
+### AR-B8 LocalBot key 실제 소유·HTTP
+
+실제 key 조회3개는 LocalBot repository/keys.py, 발급·폐기·last_used_at 갱신 정책3개는 service/key_records.py로 이동했다. service/key_management.py는 소유자/실행모드·token prefix·활성 또는 최신 key 표시·발급/폐기 후 활동기록의 원래5흐름을 소유한다. HTTP3개는 router/keys.py, runtime/local_bot/keys.py는 같은 Session의 실제 Routines activity logger만 연결한다. 원래 CRUD와 Character management의 남은 호출은 같은 객체/짧은 runtime 연결로 추적하며 후속 Bot auth/actions 합류에서 정리한다.
+
+182개 전체 원본 함수·값을 비교했고 정확한 query/owner save/typed workflow만 펼치면 AST가 동일하다. 최초 새 API fixture의 실행모드 server_llm은 실제 DB의 llm/local CHECK에서 거부되었으며, DB규칙을 바꾸지 않고 fixture를 llm과 실제 foreign owner로 수정했다. 최종35 PASS/기존warning1/14.22초다. 새2node는 실제 HTTP+SQLite에서 key 발급→해시조회→인증/사용시각→교체→폐기 및 활동로그를 확인하며 raw token은 연결 읽기에 나오지 않는다. 다른 소유자404와 LLM모드409에서 key/log0도 확인했다.
+
+경계771/2555/legacy177, L4/ER0 PASS, 원래6보존진단0오류(protected2201/current2260)다. Character 접근 서비스의 실제 예외 계약을 그대로 사용하여 새로운 예외계층/규칙을 추가하지 않았다. 원래 Bot 본문과19개 HTTP의 실제 역할 이전, G5/G06/B8 통합은 미완료다.

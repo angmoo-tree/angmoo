@@ -1,4 +1,7 @@
 from __future__ import annotations
+from app.domains.local_bot.constants import LOCAL_KEY_PREFIX
+from app.domains.local_bot.service import key_management as local_key_management
+from app.runtime.local_bot.keys import build_local_key_workflows
 from app.domains.identity.repository import credentials as credential_repository
 from app.domains.identity.service import character_credentials as character_credential_service
 from app.domains.characters.service import image_settings_owner
@@ -201,7 +204,6 @@ TENDENCY_ACTION_DEFAULTS = {
 }
 # OpenClaw validates the global tool allowlist before honoring tool_choice="none".
 TENDENCY_LLM_TOOLS_ALLOW = ["angmoo_list_feed"]
-LOCAL_KEY_PREFIX = "angmoo_local_"
 
 
 class _TendencyRangePayload(BaseModel):
@@ -570,56 +572,16 @@ def get_agent(db: Session, user: models.User, character_id: str) -> schemas.Agen
 
 
 
-def get_local_connection(
-    db: Session, user: models.User, character_id: str
-) -> schemas.AgentLocalConnectionRead:
-    character = _get_owned_character(db, user, character_id)
-    _ensure_local_mode(character)
-    return _local_connection_read(db, character)
+def get_local_connection(db: Session, user: models.User, character_id: str) -> schemas.AgentLocalConnectionRead:
+    return local_key_management.get_local_connection(db, user, character_id)
 
 
-def issue_local_key(
-    db: Session, user: models.User, character_id: str
-) -> schemas.AgentLocalKeyCreateRead:
-    character = _get_owned_character(db, user, character_id)
-    _ensure_local_mode(character)
-    token = f"{LOCAL_KEY_PREFIX}{security.create_token()}"
-    key = agent_crud.create_local_key(
-        db,
-        user=user,
-        character=character,
-        token=token,
-        token_prefix=_local_key_token_prefix(token),
-    )
-    agent_crud.log_activity(
-        db,
-        user_id=user.id,
-        character_id=character.id,
-        action_type="local_key_issued",
-        target_post_id=None,
-        reason="local_key_management",
-        result=f"Issued local key prefix {key.token_prefix}.",
-    )
-    return schemas.AgentLocalKeyCreateRead(
-        connection=_local_connection_read(db, character),
-        token=token,
-    )
+def issue_local_key(db: Session, user: models.User, character_id: str) -> schemas.AgentLocalKeyCreateRead:
+    return local_key_management.issue_local_key(db, user, character_id, workflows=build_local_key_workflows())
 
 
 def revoke_local_key(db: Session, user: models.User, character_id: str) -> None:
-    character = _get_owned_character(db, user, character_id)
-    _ensure_local_mode(character)
-    key = agent_crud.revoke_active_local_key(db, character.id)
-    if key is not None:
-        agent_crud.log_activity(
-            db,
-            user_id=user.id,
-            character_id=character.id,
-            action_type="local_key_revoked",
-            target_post_id=None,
-            reason="local_key_management",
-            result=f"Revoked local key prefix {key.token_prefix}.",
-        )
+    return local_key_management.revoke_local_key(db, user, character_id, workflows=build_local_key_workflows())
 
 
 def get_feed_cue(
@@ -2483,24 +2445,12 @@ async def run_agent_now(
             raise cleanup_error
 
 
-def _local_connection_read(
-    db: Session, character: character_models.Character
-) -> schemas.AgentLocalConnectionRead:
-    active_key = agent_crud.get_active_local_key(db, character.id)
-    key = active_key or agent_crud.get_latest_local_key(db, character.id)
-    return schemas.AgentLocalConnectionRead(
-        character_id=character.id,
-        execution_mode=character.execution_mode,  # type: ignore[arg-type]
-        has_active_key=active_key is not None,
-        token_prefix=key.token_prefix if key else None,
-        last_used_at=key.last_used_at if key else None,
-        created_at=key.created_at if key else None,
-        revoked_at=key.revoked_at if key else None,
-    )
+def _local_connection_read(db: Session, character: character_models.Character) -> schemas.AgentLocalConnectionRead:
+    return local_key_management._local_connection_read(db, character)
 
 
 def _local_key_token_prefix(token: str) -> str:
-    return f"{token[:24]}..."
+    return local_key_management._local_key_token_prefix(token)
 
 
 def _agent_deletion_slot_condition(db: Session, *, user_id: str, character_id: str):

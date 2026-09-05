@@ -1,3 +1,5 @@
+from app.domains.local_bot.repository.keys import get_active_local_key, get_active_local_key_by_hash, get_latest_local_key
+from app.domains.local_bot.service.key_records import create_local_key, mark_local_key_used, revoke_active_local_key
 from app.domains.identity.repository.credentials import get_character_credential
 from app.domains.identity.service.character_credentials import default_auth_profile_id, default_credential_model, upsert_credential
 from datetime import UTC, datetime, timedelta
@@ -40,94 +42,16 @@ from app.core import unit_of_work
 
 
 
-def get_active_local_key(
-    db: Session, character_id: str
-) -> models.AgentLocalKey | None:
-    return db.scalar(
-        select(models.AgentLocalKey)
-        .where(models.AgentLocalKey.character_id == character_id)
-        .where(models.AgentLocalKey.enabled.is_(True))
-        .where(models.AgentLocalKey.revoked_at.is_(None))
-        .order_by(
-            models.AgentLocalKey.created_at.desc(),
-            models.AgentLocalKey.id.desc(),
-        )
-        .limit(1)
-    )
 
 
-def get_active_local_key_by_hash(
-    db: Session, token_hash: str
-) -> models.AgentLocalKey | None:
-    return db.scalar(
-        select(models.AgentLocalKey)
-        .where(models.AgentLocalKey.token_hash == token_hash)
-        .where(models.AgentLocalKey.enabled.is_(True))
-        .where(models.AgentLocalKey.revoked_at.is_(None))
-        .limit(1)
-    )
 
 
-def get_latest_local_key(
-    db: Session, character_id: str
-) -> models.AgentLocalKey | None:
-    return db.scalar(
-        select(models.AgentLocalKey)
-        .where(models.AgentLocalKey.character_id == character_id)
-        .order_by(
-            models.AgentLocalKey.created_at.desc(),
-            models.AgentLocalKey.id.desc(),
-        )
-        .limit(1)
-    )
 
 
-def create_local_key(
-    db: Session,
-    *,
-    user: models.User,
-    character: models.Character,
-    token: str,
-    token_prefix: str,
-) -> models.AgentLocalKey:
-    revoke_active_local_key(db, character.id, commit=False)
-    key = models.AgentLocalKey(
-        id=f"local-key-{uuid4().hex[:12]}",
-        owner_id=user.id,
-        character_id=character.id,
-        token_hash=security.hash_token(token),
-        token_prefix=token_prefix,
-        enabled=True,
-    )
-    db.add(key)
-    db.commit()
-    db.refresh(key)
-    return key
 
 
-def revoke_active_local_key(
-    db: Session, character_id: str, *, commit: bool = True
-) -> models.AgentLocalKey | None:
-    key = get_active_local_key(db, character_id)
-    if key is None:
-        return None
-    key.enabled = False
-    key.revoked_at = datetime.now(UTC)
-    if commit:
-        db.commit()
-        db.refresh(key)
-    else:
-        db.flush()
-    return key
 
 
-def mark_local_key_used(
-    db: Session, key: models.AgentLocalKey, *, used_at: datetime | None = None
-) -> models.AgentLocalKey:
-    key.last_used_at = used_at or datetime.now(UTC)
-    db.commit()
-    db.refresh(key)
-    return key
 
 
 

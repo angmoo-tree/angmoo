@@ -41,3 +41,6 @@ LOCAL_BOT_ACTION_LABELS = (
     "state",
     "unfollow",
 )
+
+
+LOCAL_KEY_PREFIX = 'angmoo_local_'

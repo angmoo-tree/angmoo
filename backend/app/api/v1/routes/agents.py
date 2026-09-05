@@ -1,3 +1,5 @@
+from app.domains.local_bot.router.keys import get_local_connection, issue_local_key, revoke_local_key
+from app.domains.local_bot.router.keys import router as local_key_router
 from app.domains.characters.router import delete_image_seed, delete_image_settings_key, get_image_settings, update_image_settings, upload_image_seed
 from app.domains.characters.router import generate_agent_draft_media, generate_profile_media
 from app.domains.characters.router import (
@@ -46,6 +48,7 @@ from app.services.runtime_boundary import OpenClawGatewayAuthError, OpenClawGate
 
 router = APIRouter(prefix="/agents", tags=["agents"])
 _character_routes = {route.name: route for route in character_router.routes}
+_local_key_routes = {route.name: route for route in local_key_router.routes}
 TENDENCY_ANALYSIS_RETRY_DETAIL = (
     "성향 분석 결과를 정리하지 못했습니다. 잠시 후 다시 시도해주세요."
 )
@@ -136,54 +139,13 @@ def delete_agent(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.get(
-    "/{character_id}/local-connection",
-    response_model=schemas.AgentLocalConnectionRead,
-)
-def get_local_connection(
-    character_id: str,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentLocalConnectionRead:
-    try:
-        return agent_service.get_local_connection(db, user, character_id)
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.AgentExecutionModeError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+router.routes.append(_local_key_routes["get_local_connection"])
 
 
-@router.post(
-    "/{character_id}/local-key",
-    response_model=schemas.AgentLocalKeyCreateRead,
-    status_code=status.HTTP_201_CREATED,
-)
-def issue_local_key(
-    character_id: str,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentLocalKeyCreateRead:
-    try:
-        return agent_service.issue_local_key(db, user, character_id)
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.AgentExecutionModeError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+router.routes.append(_local_key_routes["issue_local_key"])
 
 
-@router.delete("/{character_id}/local-key", status_code=status.HTTP_204_NO_CONTENT)
-def revoke_local_key(
-    character_id: str,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> Response:
-    try:
-        agent_service.revoke_local_key(db, user, character_id)
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.AgentExecutionModeError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+router.routes.append(_local_key_routes["revoke_local_key"])
 
 
 @router.get("/{character_id}/feed-cue", response_model=schemas.AgentFeedCueRead | None)

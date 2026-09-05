@@ -1,7 +1,7 @@
 {
-  "edge_count": 2525,
-  "external_import_count": 2291,
-  "module_count": 761,
+  "edge_count": 2555,
+  "external_import_count": 2303,
+  "module_count": 771,
   "modules": [
     {
       "external_imports": [],
@@ -137,6 +137,7 @@
         "app.core.db",
         "app.domains.characters.router",
         "app.domains.identity.dependencies",
+        "app.domains.local_bot.router.keys",
         "app.domains.operations.service.maintenance",
         "app.models",
         "app.runtime.characters.creator",
@@ -748,6 +749,8 @@
         "app.core.unit_of_work",
         "app.domains.identity.repository.credentials",
         "app.domains.identity.service.character_credentials",
+        "app.domains.local_bot.repository.keys",
+        "app.domains.local_bot.service.key_records",
         "app.domains.routines.constants",
         "app.domains.routines.service.activity_logs",
         "app.domains.routines.service.activity_settings",
@@ -2732,6 +2735,37 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.local_bot.contracts",
+      "path": "backend/app/domains/local_bot/contracts/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "dataclasses",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.local_bot.contracts.key_management",
+      "path": "backend/app/domains/local_bot/contracts/key_management.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "fastapi"
+      ],
+      "imports": [
+        "app.api.identity_dependencies",
+        "app.core.db",
+        "app.domains.local_bot.contracts.key_management"
+      ],
+      "module": "app.domains.local_bot.dependencies",
+      "path": "backend/app/domains/local_bot/dependencies.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [
         "dataclasses"
       ],
@@ -2762,6 +2796,18 @@
     },
     {
       "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.local_bot.models"
+      ],
+      "module": "app.domains.local_bot.repository.keys",
+      "path": "backend/app/domains/local_bot/repository/keys.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "datetime",
         "sqlalchemy",
         "sqlalchemy.exc",
@@ -2772,6 +2818,29 @@
       ],
       "module": "app.domains.local_bot.repository.quota",
       "path": "backend/app/domains/local_bot/repository/quota.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.local_bot.router",
+      "path": "backend/app/domains/local_bot/router/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "fastapi",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.characters.service.access",
+        "app.domains.local_bot.contracts.key_management",
+        "app.domains.local_bot.dependencies",
+        "app.domains.local_bot.schemas",
+        "app.domains.local_bot.service.key_management"
+      ],
+      "module": "app.domains.local_bot.router.keys",
+      "path": "backend/app/domains/local_bot/router/keys.py",
       "wildcard_imports": []
     },
     {
@@ -2792,6 +2861,39 @@
       "imports": [],
       "module": "app.domains.local_bot.service",
       "path": "backend/app/domains/local_bot/service/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.security",
+        "app.domains.characters.service.access",
+        "app.domains.local_bot.constants",
+        "app.domains.local_bot.contracts.key_management",
+        "app.domains.local_bot.repository.keys",
+        "app.domains.local_bot.schemas",
+        "app.domains.local_bot.service.key_records"
+      ],
+      "module": "app.domains.local_bot.service.key_management",
+      "path": "backend/app/domains/local_bot/service/key_management.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy.orm",
+        "uuid"
+      ],
+      "imports": [
+        "app.core.security",
+        "app.domains.local_bot.contracts.key_management",
+        "app.domains.local_bot.models",
+        "app.domains.local_bot.repository.keys"
+      ],
+      "module": "app.domains.local_bot.service.key_records",
+      "path": "backend/app/domains/local_bot/service/key_records.py",
       "wildcard_imports": []
     },
     {
@@ -8066,6 +8168,7 @@
         "app.runtime.character_lore",
         "app.runtime.characters.creator",
         "app.runtime.characters.management",
+        "app.runtime.local_bot.keys",
         "app.runtime.logging_config",
         "app.runtime.memory_http",
         "app.runtime.routines.composition",
@@ -8332,6 +8435,7 @@
         "app.runtime.characters.management",
         "app.runtime.component_workers",
         "app.runtime.configuration",
+        "app.runtime.local_bot.keys",
         "app.runtime.logging_config",
         "app.runtime.memory.batch_runtime",
         "app.runtime.memory.shutdown",
@@ -8526,6 +8630,8 @@
         "app.domains.identity.repository.credentials",
         "app.domains.identity.service.character_credentials",
         "app.domains.identity.service.demo_access",
+        "app.domains.local_bot.constants",
+        "app.domains.local_bot.service.key_management",
         "app.domains.operations.service.maintenance",
         "app.domains.operations.service.settings",
         "app.domains.routines.service.tick_schedule",
@@ -8537,6 +8643,7 @@
         "app.integrations.media.images",
         "app.models",
         "app.policies.name_policy",
+        "app.runtime.local_bot.keys",
         "app.runtime.memory_privacy",
         "app.runtime.world_characters.cleanup",
         "app.runtime.world_characters.queries",
@@ -9018,6 +9125,23 @@
       ],
       "module": "app.runtime.installer_update",
       "path": "backend/app/runtime/installer_update.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.runtime.local_bot",
+      "path": "backend/app/runtime/local_bot/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.local_bot.contracts.key_management",
+        "app.domains.routines.service.activity_logs"
+      ],
+      "module": "app.runtime.local_bot.keys",
+      "path": "backend/app/runtime/local_bot/keys.py",
       "wildcard_imports": []
     },
     {

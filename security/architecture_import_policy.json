@@ -896,10 +896,16 @@
       "app.domains.identity.service.profile",
       "app.domains.identity.service.world_character_credentials",
       "app.domains.local_bot.constants",
+      "app.domains.local_bot.contracts.key_management",
+      "app.domains.local_bot.dependencies",
       "app.domains.local_bot.exceptions",
       "app.domains.local_bot.models",
+      "app.domains.local_bot.repository.keys",
       "app.domains.local_bot.repository.quota",
+      "app.domains.local_bot.router.keys",
       "app.domains.local_bot.schemas",
+      "app.domains.local_bot.service.key_management",
+      "app.domains.local_bot.service.key_records",
       "app.domains.local_bot.service.quota",
       "app.domains.media.contracts",
       "app.domains.media.schemas",
@@ -1172,7 +1178,10 @@
       "app.domains.identity.service.owner_context",
       "app.domains.identity.service.profile",
       "app.domains.identity.service.world_character_credentials",
+      "app.domains.local_bot.contracts.key_management",
       "app.domains.local_bot.schemas",
+      "app.domains.local_bot.service.key_management",
+      "app.domains.local_bot.service.key_records",
       "app.domains.local_bot.service.quota",
       "app.domains.media.contracts",
       "app.domains.media.schemas",
@@ -2946,6 +2955,22 @@
         "owner_stage": "AR-B4/AR-B8-A",
         "removal_condition": "Remove same-object CRUD exports when all original callers use actual Identity roles; none remain at AR-B8-B.",
         "reason": "Existing unconverted caller keeps the same actual query or scoped credential workflow and caller Session.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agents",
+        "target": "app.domains.local_bot.repository.keys",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove original same-object CRUD key aliases after LocalBot authentication/actions and remaining callers move; none remain at AR-B8-B.",
+        "reason": "Existing caller uses the same key query/write function during actual LocalBot role migration.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agents",
+        "target": "app.domains.local_bot.service.key_records",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove original same-object CRUD key aliases after LocalBot authentication/actions and remaining callers move; none remain at AR-B8-B.",
+        "reason": "Existing caller uses the same key query/write function during actual LocalBot role migration.",
         "review_date": "2026-09-06"
       }
     ]
