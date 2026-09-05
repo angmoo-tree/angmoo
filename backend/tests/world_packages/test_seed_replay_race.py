@@ -42,7 +42,7 @@ def test_completed_import_after_slug_selection_is_resolved_once(
     def find_import(registry, **scope):
         record = original_find(registry, **scope)
         if get_ident() == main_thread:
-            observed.append((registry._db, scope, record))
+            observed.append((registry._repository._db, scope, record))
             order.append("replay" if record is not None else "miss")
         return record
 
