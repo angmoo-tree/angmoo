@@ -3,7 +3,7 @@
 from sqlalchemy.orm import Session
 
 from app.domains.chat.application.today_sns_activity import TodaySnsActivityAssembler
-from app.domains.chat.domain.today_sns_activity import TodaySnsActivitySnapshot
+from app.domains.chat.contracts.today_sns_activity import TodaySnsActivitySnapshot
 from app.domains.chat.ports.today_sns_activity import TodaySnsSnapshotChangedError
 from app.runtime.social.sqlalchemy_today_activity import SqlAlchemyTodaySocialActivityReader
 

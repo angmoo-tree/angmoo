@@ -53,7 +53,7 @@ from app.domains.chat.application import (
     RetrievalRoutingService,
     WorkflowCoordinatorMetrics,
 )
-from app.domains.chat.domain import (
+from app.domains.chat.contracts import (
     CHAT_GENERATION_STREAM_VERSION,
     RESOLVED_RETRIEVAL_VERSION,
     RETRIEVAL_INTENT_VERSION,

@@ -27,7 +27,7 @@ from app.runtime.migrations.generation import EmbeddedGenerationController
 from app.domains.chat.infrastructure.world_scope_migration import (
     rebuild_message_threads_v3,
 )
-from app.domains.chat.infrastructure.sqlalchemy_models import (
+from app.domains.chat.models import (
     drop_response_request_schema,
 )
 from app.domains.memory.infrastructure.sqlalchemy_models import (

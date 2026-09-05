@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from app import models
 from app.core.db import Base
 from app.domains.chat.application import BoundedFakeAnswerRequestExecutor
-from app.domains.chat.domain import (
+from app.domains.chat.contracts import (
     CreateResponseRequest,
     GenerationContractError,
     GenerationEvent,

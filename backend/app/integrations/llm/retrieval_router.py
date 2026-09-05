@@ -8,7 +8,7 @@ from app.domains.chat.policies import (
     WORLD_CHAT_FOREGROUND_MAX_OUTPUT_TOKENS,
     resolve_world_chat_model_execution_policy,
 )
-from app.domains.chat.domain.retrieval_router import (
+from app.domains.chat.contracts.retrieval_router import (
     parse_retrieval_intent_payload,
     retrieval_router_response_schema,
     router_validation_code_from_exception,

@@ -6,11 +6,11 @@ from dataclasses import dataclass
 import json
 from typing import Protocol
 
-from app.domains.chat.domain.retrieval_intent import (
+from app.domains.chat.contracts.retrieval_intent import (
     RetrievalContractError,
     RetrievalIntentEnvelope,
 )
-from app.domains.chat.domain.retrieval_router import normalize_router_validation_code
+from app.domains.chat.contracts.retrieval_router import normalize_router_validation_code
 
 
 MAX_ROUTER_CONTEXT_MESSAGES = 20

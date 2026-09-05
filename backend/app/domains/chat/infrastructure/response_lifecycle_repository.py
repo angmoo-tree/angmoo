@@ -9,7 +9,7 @@ from sqlalchemy import or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.domains.chat.domain.generation_lifecycle import (
+from app.domains.chat.contracts.generation_lifecycle import (
     GenerationContractError,
     GenerationEvent,
     GenerationFence,
@@ -20,15 +20,15 @@ from app.domains.chat.domain.generation_lifecycle import (
     validate_event_sequence,
     validate_transition,
 )
-from app.domains.chat.domain.response_request import (
+from app.domains.chat.contracts.response_request import (
     CreateResponseRequest,
     ResponseCommitPayload,
     ResponseRequestRecord,
 )
-from app.domains.chat.domain.retrieval_intent import RetrievalRoute
-from app.domains.chat.domain.retrieval_router import RouterFailureDiagnostic
-from app.domains.chat.domain.workflow_recipe import WorkflowRecipe
-from app.domains.chat.infrastructure.sqlalchemy_models import (
+from app.domains.chat.contracts.retrieval_intent import RetrievalRoute
+from app.domains.chat.contracts.retrieval_router import RouterFailureDiagnostic
+from app.domains.chat.contracts.workflow_recipe import WorkflowRecipe
+from app.domains.chat.models import (
     ChatResponseRequest,
     MessageMessage,
     MessageThread,

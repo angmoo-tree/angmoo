@@ -8,7 +8,7 @@ from enum import StrEnum
 from collections.abc import Mapping
 from typing import Any
 
-from app.domains.chat.domain.retrieval_intent import RetrievalContractError, RetrievalRoute
+from app.domains.chat.contracts.retrieval_intent import RetrievalContractError, RetrievalRoute
 
 
 class LlmNode(StrEnum):

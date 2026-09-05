@@ -42,44 +42,44 @@ from app.domains.chat.application.retrieval_routing import (
     RetrievalRoutingMetrics,
     RetrievalRoutingResult,
 )
-from app.domains.chat.domain.call_tracker import (
+from app.domains.chat.contracts.call_tracker import (
     LlmNode,
     RouteAwareCallTracker,
     restore_call_tracker_snapshot,
 )
-from app.domains.chat.domain.evidence_bundle import (
+from app.domains.chat.contracts.evidence_bundle import (
     EVIDENCE_BUNDLE_VERSION,
     EvidenceItem,
     EvidenceKind,
     opaque_evidence_reference,
 )
-from app.domains.chat.domain.generation_lifecycle import (
+from app.domains.chat.contracts.generation_lifecycle import (
     GenerationEventType,
     GenerationFence,
     ResponseRequestState,
     ResponseTerminalReason,
 )
-from app.domains.chat.domain.resolved_envelope import (
+from app.domains.chat.contracts.resolved_envelope import (
     ResolvedRetrievalEnvelope,
     RetrievalHardCaps,
 )
-from app.domains.chat.domain.response_request import (
+from app.domains.chat.contracts.response_request import (
     CreateResponseRequest,
     EvidenceCapability,
     RetrievalAxis,
     RetrievalOutcome,
     build_request_scope_hash,
 )
-from app.domains.chat.domain.retrieval_intent import (
+from app.domains.chat.contracts.retrieval_intent import (
     RetrievalDecision,
     RetrievalIntentEnvelope,
     RetrievalRoute,
 )
-from app.domains.chat.domain.retrieval_router import (
+from app.domains.chat.contracts.retrieval_router import (
     RetrievalRouterRepairExhaustedError,
     RouterFailureDiagnostic,
 )
-from app.domains.chat.domain.workflow_recipe import (
+from app.domains.chat.contracts.workflow_recipe import (
     WorkflowAxis,
     WorkflowRecipe,
     select_workflow_recipe,
@@ -720,7 +720,7 @@ def test_today_snapshot_reaches_both_providers_without_extra_calls(
     response_session, route, expected_calls,
 ):
     from app.domains.chat.application.today_sns_activity import TodaySnsActivityAssembler
-    from app.domains.chat.domain.retrieval_intent import RetrievalContractError
+    from app.domains.chat.contracts.retrieval_intent import RetrievalContractError
     from app.runtime.social.sqlalchemy_today_activity import SqlAlchemyTodaySocialActivityReader
     from app.runtime.chat.today_sns_activity import SqlAlchemyTodaySnsSnapshotValidator
 

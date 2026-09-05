@@ -521,3 +521,18 @@ Setup slice의 최종 현재 API·ORM 및 전체 split evidence 검사도 PASS�
 - 정확한 기반 module 5개·entry 3개와 임시 소비 연결 8개만 scope에 반영했다. Thread repository/service, generation lifecycle 및 HTTP endpoint 구현은 아직 이전하지 않았다.
 
 이는 AR-B5 후 순차 통합할 독립 준비 source다. 전체 보존 계보 capture·통합 회귀·PR·merge·post-merge 및 AR-B6 완료로 표시하지 않는다.
+
+
+## AR-B6-A1 — Chat 계약·모델과 실제 thread SQL 기반
+
+Media `dd78da66`에서 새 Chat 작업트리를 만들고 계약 준비 `4def2b5`를 합친 merge `8e6be936dce66626119a43d4fe0a55632dd91c9d`를 먼저 고정했다. B5 이후 순차 병합할 준비 구현이며 Chat 전체 완료가 아니다.
+
+남은 순수 값/검증 계약 9개 파일과 package export를 `contracts/`로, Chat ORM 5개와 DDL helper를 `models.py`로 옮겼다. 함수/class **85개 AST 본문은 동일**하고 모든 class는 같은 Base/metadata를 사용한다. immutable v5→v6와 Alembic 본문은 수정하지 않았으며 이전 models module만 같은 객체 alias로 유지한다. 실제 소비자와 살아 있는 검사기의 물리 경로를 새 역할로 연결했고 frozen 역사 inventory·source/checkpoint·승인 node를 다시 만들지 않았다.
+
+`repository/threads.py`에는 실제 SQL query 9개와 원래 advisory lock/tuple lookup 함수 4개를 옮겼다. requester/deleted/ambiguous scope·정렬·limit 2·joinedload·같은 Session은 유지하고 repository에서 commit/rollback하지 않는다. World/legacy count는 동일 requester/deleted 조건의 하나의 query를 사용한다. thread admission·mutation/commit·오류 판단은 아직 원래 실행 service에 있으며 A2에서 교차 owner/credential 협력과 함께 이전한다.
+
+새 회귀 1개는 실제 SQLite에서 owner/삭제 필터·정렬·중복 후보 최대 2개·동일 attached 객체·caller rollback을 검증한다. 첫 집중 134개 실행은 generated inventory 명령 후반과 겹쳤으므로 고정tree 통과 증거로 사용하지 않고, 모든 명령 종료 뒤 동일 범위를 다시 실행한다.
+
+고정 tree 재실행은 **134 passed / 기존 4 warnings / 22.26초**였다. 모델/계약 85개와 원문에서 온 lock/lookup 함수 4개의 AST가 같고 현재 API·ORM 계약은 원래 baseline와 후속 checkpoint 모두 차이가 없었다. Live architecture는 **638 modules / 2,064 edges / exact legacy 265 PASS**, ER0 **77/87/24/44/7 PASS**, L4 parity **97**, Memory batch 및 World Chat identity inventory current다.
+
+전체 assertion 보존 검사는 많은 이동 경로의 정규식 재컴파일 병목으로 종료 전에 중단했으므로 PASS로 표시하지 않는다. 별도 검증된 검사기 성능 수정의 적용 뒤 source·assertion·node 통합 검사를 다시 실행한다. 신규 source/test introduction capture와 PR·merge·설치 Gate는 root의 선형 통합에서 진행한다.

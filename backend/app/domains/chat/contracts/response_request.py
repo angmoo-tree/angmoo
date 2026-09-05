@@ -9,13 +9,13 @@ import hashlib
 import json
 from typing import Any
 
-from app.domains.chat.domain.generation_lifecycle import (
+from app.domains.chat.contracts.generation_lifecycle import (
     CHAT_GENERATION_STREAM_VERSION,
     ResponseRequestState,
     ResponseTerminalReason,
 )
-from app.domains.chat.domain.retrieval_intent import RetrievalRoute
-from app.domains.chat.domain.workflow_recipe import WorkflowRecipe
+from app.domains.chat.contracts.retrieval_intent import RetrievalRoute
+from app.domains.chat.contracts.workflow_recipe import WorkflowRecipe
 
 
 def build_request_scope_hash(

@@ -5,21 +5,21 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Protocol
 
-from app.domains.chat.domain.generation_lifecycle import (
+from app.domains.chat.contracts.generation_lifecycle import (
     GenerationEvent,
     GenerationFence,
     ResponseRequestState,
     ResponseTerminalReason,
     SequenceOutcome,
 )
-from app.domains.chat.domain.response_request import (
+from app.domains.chat.contracts.response_request import (
     CreateResponseRequest,
     ResponseCommitPayload,
     ResponseRequestRecord,
 )
-from app.domains.chat.domain.retrieval_intent import RetrievalRoute
-from app.domains.chat.domain.retrieval_router import RouterFailureDiagnostic
-from app.domains.chat.domain.workflow_recipe import WorkflowRecipe
+from app.domains.chat.contracts.retrieval_intent import RetrievalRoute
+from app.domains.chat.contracts.retrieval_router import RouterFailureDiagnostic
+from app.domains.chat.contracts.workflow_recipe import WorkflowRecipe
 
 
 class ResponseLifecycleRepositoryPort(Protocol):

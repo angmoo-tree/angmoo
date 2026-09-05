@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from app.domains.chat.domain.evidence_bundle import (
+from app.domains.chat.contracts.evidence_bundle import (
     EvidenceBundle,
     compute_evidence_hash,
 )
@@ -14,8 +14,8 @@ from app.domains.chat.policies import (
     WORLD_CHAT_FOREGROUND_MAX_OUTPUT_TOKENS,
     resolve_world_chat_model_execution_policy,
 )
-from app.domains.chat.domain.response_request import RetrievalOutcome
-from app.domains.chat.domain.retrieval_intent import RetrievalRoute
+from app.domains.chat.contracts.response_request import RetrievalOutcome
+from app.domains.chat.contracts.retrieval_intent import RetrievalRoute
 from app.domains.chat.ports.character_response_generator import (
     CharacterResponseGeneratorRequest,
     CharacterResponseProfile,

@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Protocol
 
 from app.domains.social.public import TodaySocialActivityRead
-from app.domains.chat.domain.today_sns_activity import TodaySnsActivitySnapshot
+from app.domains.chat.contracts.today_sns_activity import TodaySnsActivitySnapshot
 
 
 class TodaySnsSnapshotChangedError(ValueError):

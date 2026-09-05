@@ -6,7 +6,7 @@ from datetime import UTC, datetime, time
 from hashlib import sha256
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from app.domains.chat.domain.today_sns_activity import (
+from app.domains.chat.contracts.today_sns_activity import (
     MAX_TODAY_ENTRY_TEXT_CHARS,
     TodaySnsActivityEntry,
     TodaySnsActivitySnapshot,

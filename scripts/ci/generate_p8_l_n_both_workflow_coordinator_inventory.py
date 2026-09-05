@@ -22,7 +22,7 @@ M_INVENTORY_SHA256 = (
     "2ed92b329b7c63365911e79aa3b431c5ca1e1d77bcef3a3736da9a3d81e0e3bd"
 )
 
-from app.domains.chat.domain import (  # noqa: E402
+from app.domains.chat.contracts import (  # noqa: E402
     RETRIEVAL_WORKFLOW_VERSION,
     WORKFLOW_RECIPE_REGISTRY,
     WorkflowAxis,
@@ -42,9 +42,9 @@ REQUIRED_FILES = (
     "backend/app/domains/chat/application/both_retrieval.py",
     "backend/app/domains/chat/application/canonical_retrieval.py",
     "backend/app/domains/chat/application/graph_retrieval.py",
-    "backend/app/domains/chat/domain/__init__.py",
-    "backend/app/domains/chat/domain/call_tracker.py",
-    "backend/app/domains/chat/domain/workflow_recipe.py",
+    "backend/app/domains/chat/contracts/__init__.py",
+    "backend/app/domains/chat/contracts/call_tracker.py",
+    "backend/app/domains/chat/contracts/workflow_recipe.py",
     "backend/app/domains/chat/public.py",
     "backend/tests/test_p8_l_n_both_workflow_coordinator.py",
     "backend/tests/test_p8_l_n_both_workflow_coordinator_inventory.py",
@@ -151,7 +151,7 @@ def _recipe_contract() -> dict[str, Any]:
 
 def _boundary_contract() -> dict[str, Any]:
     _require_text(
-        "backend/app/domains/chat/domain/workflow_recipe.py",
+        "backend/app/domains/chat/contracts/workflow_recipe.py",
         (
             "WORKFLOW_RECIPE_REGISTRY",
             "select_workflow_recipe",

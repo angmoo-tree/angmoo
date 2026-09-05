@@ -19,18 +19,18 @@ from app.domains.chat.application.graph_retrieval import (
     GraphRetrievalCommand,
     GraphRetrievalPlanningService,
 )
-from app.domains.chat.domain.call_tracker import (
+from app.domains.chat.contracts.call_tracker import (
     LlmNode,
     RouteAwareCallTracker,
     restore_call_tracker_snapshot,
 )
-from app.domains.chat.domain.resolved_envelope import ResolvedRetrievalEnvelope
-from app.domains.chat.domain.retrieval_intent import (
+from app.domains.chat.contracts.resolved_envelope import ResolvedRetrievalEnvelope
+from app.domains.chat.contracts.retrieval_intent import (
     RetrievalContractError,
     RetrievalIntentEnvelope,
     RetrievalRoute,
 )
-from app.domains.chat.domain.workflow_recipe import (
+from app.domains.chat.contracts.workflow_recipe import (
     RetrievalWorkflow,
     WorkflowAxis,
     WorkflowDependencyBinding,

@@ -8,7 +8,7 @@ from datetime import UTC, datetime
 from app.domains.chat.application.both_retrieval import BothRetrievalResult
 from app.domains.chat.application.canonical_retrieval import CanonicalPlanningResult
 from app.domains.chat.application.graph_retrieval import GraphPlanningResult
-from app.domains.chat.domain.evidence_bundle import (
+from app.domains.chat.contracts.evidence_bundle import (
     MAX_EVIDENCE_BUNDLE_CHARS,
     MAX_EVIDENCE_ITEM_CHARS,
     MAX_EVIDENCE_ITEMS,
@@ -20,13 +20,13 @@ from app.domains.chat.domain.evidence_bundle import (
     compute_evidence_hash,
     opaque_evidence_reference,
 )
-from app.domains.chat.domain.response_request import (
+from app.domains.chat.contracts.response_request import (
     DegradedReason,
     RetrievalAxis,
     RetrievalOutcome,
 )
-from app.domains.chat.domain.retrieval_intent import RetrievalRoute
-from app.domains.chat.domain.today_sns_activity import (
+from app.domains.chat.contracts.retrieval_intent import RetrievalRoute
+from app.domains.chat.contracts.today_sns_activity import (
     TodaySnsActivityEntry,
     TodaySnsActivitySnapshot,
 )

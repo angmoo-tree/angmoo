@@ -264,7 +264,7 @@
     },
     {
       "path": "backend/app/runtime/memory/sqlalchemy_source_reader.py",
-      "sha256": "69083ca0669961c72cedad111dcfc61e5da3694377e80284dc956da587984e05"
+      "sha256": "749808e3d737bbf6c3f1a1ac6461a5a9778b884b11789a209e626cd3527151f7"
     },
     {
       "path": "backend/app/runtime/memory/sqlite_fts5_recall.py",
@@ -388,7 +388,7 @@
     },
     {
       "path": "scripts/ci/build_windows_installer_supported_upgrade_fixture.py",
-      "sha256": "9b949db3b400a9e7f87473aa2fe28d1c631ac0efc68f974cd2a231791ea98a61"
+      "sha256": "9b028dba3f3b30d6aa391fc08ae45ca1ff3881a524ed3d98489117be25504644"
     },
     {
       "path": "scripts/ci/check_windows_installer_supported_upgrade_matrix.py",

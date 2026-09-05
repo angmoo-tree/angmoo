@@ -8,13 +8,13 @@ from enum import StrEnum
 import hashlib
 import json
 
-from app.domains.chat.domain.response_request import (
+from app.domains.chat.contracts.response_request import (
     DegradedReason,
     EvidenceCapability,
     RetrievalAxis,
     RetrievalOutcome,
 )
-from app.domains.chat.domain.retrieval_intent import RetrievalRoute
+from app.domains.chat.contracts.retrieval_intent import RetrievalRoute
 
 
 EVIDENCE_BUNDLE_VERSION = "evidence-bundle.v1"

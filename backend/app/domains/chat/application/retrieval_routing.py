@@ -9,20 +9,20 @@ import re
 from time import monotonic
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from app.domains.chat.domain.call_tracker import LlmNode, RouteAwareCallTracker
-from app.domains.chat.domain.resolved_envelope import (
+from app.domains.chat.contracts.call_tracker import LlmNode, RouteAwareCallTracker
+from app.domains.chat.contracts.resolved_envelope import (
     ResolvedEntityBinding,
     ResolvedRetrievalEnvelope,
     RetrievalHardCaps,
 )
-from app.domains.chat.domain.retrieval_intent import (
+from app.domains.chat.contracts.retrieval_intent import (
     RetrievalContractError,
     RetrievalDecision,
     RetrievalIntentEnvelope,
     RetrievalRoute,
     RetrievalTimeKind,
 )
-from app.domains.chat.domain.retrieval_router import (
+from app.domains.chat.contracts.retrieval_router import (
     RetrievalRouterRepairExhaustedError,
     RouterFailureDiagnostic,
     router_validation_is_retryable,

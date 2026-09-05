@@ -7,11 +7,11 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
-from app.domains.chat.domain.call_tracker import (
+from app.domains.chat.contracts.call_tracker import (
     LlmNode,
     restore_call_tracker_snapshot,
 )
-from app.domains.chat.domain.retrieval_intent import RetrievalContractError
+from app.domains.chat.contracts.retrieval_intent import RetrievalContractError
 from app.domains.chat.ports.character_response_generator import (
     CharacterResponseGeneratorError,
     CharacterResponseGeneratorPort,

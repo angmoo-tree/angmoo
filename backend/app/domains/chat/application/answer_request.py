@@ -5,13 +5,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 
-from app.domains.chat.domain.call_tracker import LlmNode, RouteAwareCallTracker
-from app.domains.chat.domain.resolved_envelope import ResolvedRetrievalEnvelope
-from app.domains.chat.domain.retrieval_intent import (
+from app.domains.chat.contracts.call_tracker import LlmNode, RouteAwareCallTracker
+from app.domains.chat.contracts.resolved_envelope import ResolvedRetrievalEnvelope
+from app.domains.chat.contracts.retrieval_intent import (
     RetrievalContractError,
     RetrievalIntentEnvelope,
 )
-from app.domains.chat.domain.workflow_recipe import RetrievalWorkflow
+from app.domains.chat.contracts.workflow_recipe import RetrievalWorkflow
 from app.domains.memory.public import CANONICAL_PRIMITIVE_REGISTRY
 from app.domains.relationships.public import GRAPH_RECALL_PRIMITIVE_REGISTRY
 

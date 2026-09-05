@@ -7,7 +7,7 @@ import hashlib
 import json
 from typing import Any
 
-from app.domains.chat.domain.retrieval_intent import (
+from app.domains.chat.contracts.retrieval_intent import (
     RETRIEVAL_INTENT_VERSION,
     RetrievalContractError,
     RetrievalIntentEnvelope,

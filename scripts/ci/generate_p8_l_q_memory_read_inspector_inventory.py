@@ -22,7 +22,7 @@ FROZEN_OUTPUT_SHA256 = "543f8f2457abbc03f50b7e0cace5fa8edffe680c74df53379fa21da5
 P_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-p-evidence-response-streaming-inventory.json"
 P_INVENTORY_SHA256 = "c802ddb544291cb29b113cb3ab3aad80fdda67fdc96d621eadb820bf3abb8cca"
 
-from app.domains.chat.domain.evidence_bundle import MAX_EVIDENCE_ITEMS  # noqa: E402
+from app.domains.chat.contracts.evidence_bundle import MAX_EVIDENCE_ITEMS  # noqa: E402
 from app.domains.memory.domain.read_surface import (  # noqa: E402
     MAX_MEMORY_READ_EVIDENCE_ITEMS,
     MAX_MEMORY_READ_PAGE_SIZE,
@@ -45,8 +45,8 @@ REQUIRED_FILES = (
     "backend/app/domains/chat/application/evidence_assembly.py",
     "backend/app/domains/chat/application/messages.py",
     "backend/app/domains/chat/application/response_workflow.py",
-    "backend/app/domains/chat/domain/evidence_bundle.py",
-    "backend/app/domains/chat/domain/response_request.py",
+    "backend/app/domains/chat/contracts/evidence_bundle.py",
+    "backend/app/domains/chat/contracts/response_request.py",
     "backend/app/domains/chat/infrastructure/response_lifecycle_repository.py",
     "backend/app/domains/chat/ports/runtime.py",
     "backend/app/domains/chat/public.py",

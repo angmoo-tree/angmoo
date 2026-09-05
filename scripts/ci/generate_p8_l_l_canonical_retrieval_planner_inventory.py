@@ -26,7 +26,7 @@ CORPUS_PATH = (
     ROOT / "backend/tests/fixtures/p8_l/canonical_planner_v1/held_out_ko.jsonl"
 )
 
-from app.domains.chat.domain import RetrievalRoute  # noqa: E402
+from app.domains.chat.contracts import RetrievalRoute  # noqa: E402
 from app.domains.memory.public import (  # noqa: E402
     CANONICAL_PLAN_VERSION,
     CANONICAL_PRIMITIVE_REGISTRY,
@@ -49,7 +49,7 @@ REQUIRED_FILES = (
     "backend/app/domains/memory/ports/canonical_planner_provider.py",
     "backend/app/domains/memory/application/canonical_planning.py",
     "backend/app/domains/chat/application/canonical_retrieval.py",
-    "backend/app/domains/chat/domain/call_tracker.py",
+    "backend/app/domains/chat/contracts/call_tracker.py",
     "backend/app/integrations/llm/canonical_retrieval_planner.py",
     "backend/tests/fixtures/p8_l/canonical_planner_v1/held_out_ko.jsonl",
     "backend/tests/test_p8_l_l_canonical_retrieval_planner.py",

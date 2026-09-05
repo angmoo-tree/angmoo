@@ -514,3 +514,8 @@ WorldCharacter의 생성·재시도·승인·거절·입장 정책은 `service/a
 채팅의 HTTP 입출력은 `domains/chat/schemas.py`, 공통 업무 오류는 `exceptions.py`, 모델 선택·reasoning·토큰 및 generation lease 규칙은 `policies.py`에 있습니다. `contracts/model_binding.py`는 thread 모델 연결 방식과 값의 계약을 소유합니다. 소비자는 이 실제 파일을 import하며 옛 `api/schemas.py`와 `domain/` 계약 파일의 재수출 경로는 두지 않습니다.
 
 이 기반 이전은 Chat 실행 서비스 전체의 이전 완료와 구분합니다. Thread SQL, generation 시작·재연결·취소·최종 저장, SSE와 provider 실행은 후속 Chat 단계에서 같은 정책과 트랜잭션 경계를 유지하며 이전합니다. API·generation·runtime의 남은 연결은 부분 scope의 정확한 임시 소비자로 기록합니다.
+
+
+#### Chat 데이터와 thread 조회
+
+Chat의 ORM은 `chat/models.py`, 요청·응답/값·generation fence·retrieval plan·evidence 규칙은 `schemas.py`와 `contracts/`에 있다. `repository/threads.py`는 실제 Chat table 조회와 transaction-scoped advisory lock을 소유하며 commit/rollback을 수행하지 않는다. owner/scope 확인과 상태/오류·commit 순서는 서비스가 유지한다. 다른 업무 ORM을 repository에 가져와 Chat 소유처럼 확장하지 않는다. AR-B6-A1 현재 thread 실행 service와 교차 업무 조립의 이전은 진행 중이며 옛 runtime 경로와 API 전체가 이미 종료된 것으로 해석하지 않는다.

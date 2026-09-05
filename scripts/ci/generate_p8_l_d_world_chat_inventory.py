@@ -204,7 +204,7 @@ def _migration_contract() -> dict[str, Any]:
 
 
 def _thread_contract() -> dict[str, Any]:
-    relative = "backend/app/domains/chat/infrastructure/sqlalchemy_models.py"
+    relative = "backend/app/domains/chat/models.py"
     _require_text(
         relative,
         (*REQUIRED_THREAD_COLUMNS, *REQUIRED_THREAD_CONSTRAINTS, *REQUIRED_THREAD_INDEXES),

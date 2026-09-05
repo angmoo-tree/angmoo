@@ -20,14 +20,14 @@ OUTPUT_PATH = ROOT / "docs/architecture/p8-l-p-evidence-response-streaming-inven
 O_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-o-memory-consolidation-inventory.json"
 O_INVENTORY_SHA256 = "ff10df3e8a6c9e222c7a88c206d9dbbdefc7ba49c753a875bcdb721d02d3c055"
 
-from app.domains.chat.domain import CHAT_GENERATION_STREAM_VERSION  # noqa: E402
-from app.domains.chat.domain.evidence_bundle import (  # noqa: E402
+from app.domains.chat.contracts import CHAT_GENERATION_STREAM_VERSION  # noqa: E402
+from app.domains.chat.contracts.evidence_bundle import (  # noqa: E402
     EVIDENCE_BUNDLE_VERSION,
     MAX_EVIDENCE_BUNDLE_CHARS,
     MAX_EVIDENCE_ITEM_CHARS,
     MAX_EVIDENCE_ITEMS,
 )
-from app.domains.chat.domain.retrieval_router import (  # noqa: E402
+from app.domains.chat.contracts.retrieval_router import (  # noqa: E402
     ROUTER_DIAGNOSTIC_VERSION,
     ROUTER_SECURITY_VALIDATION_CODES,
     ROUTER_VALIDATION_CODES,
@@ -55,12 +55,12 @@ REQUIRED_FILES = (
     "backend/app/domains/chat/application/generation_lifecycle.py",
     "backend/app/domains/chat/application/retrieval_routing.py",
     "backend/app/domains/chat/application/response_workflow.py",
-    "backend/app/domains/chat/domain/evidence_bundle.py",
+    "backend/app/domains/chat/contracts/evidence_bundle.py",
     "backend/app/domains/chat/domain/model_binding.py",
-    "backend/app/domains/chat/domain/retrieval_router.py",
+    "backend/app/domains/chat/contracts/retrieval_router.py",
     "backend/app/domains/chat/infrastructure/model_binding_migration.py",
     "backend/app/domains/chat/infrastructure/response_lifecycle_repository.py",
-    "backend/app/domains/chat/infrastructure/sqlalchemy_models.py",
+    "backend/app/domains/chat/models.py",
     "backend/app/domains/chat/ports/character_response_generator.py",
     "backend/app/domains/chat/ports/response_lifecycle.py",
     "backend/app/domains/chat/ports/retrieval_router_provider.py",
@@ -151,7 +151,7 @@ def _forbid_imports(relative: str, prefixes: tuple[str, ...]) -> None:
 
 def _boundary_contract() -> dict[str, Any]:
     for relative in (
-        "backend/app/domains/chat/domain/evidence_bundle.py",
+        "backend/app/domains/chat/contracts/evidence_bundle.py",
         "backend/app/domains/chat/application/character_response.py",
         "backend/app/domains/chat/application/evidence_assembly.py",
         "backend/app/domains/chat/application/response_workflow.py",
@@ -217,7 +217,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/domains/chat/domain/retrieval_router.py",
+        "backend/app/domains/chat/contracts/retrieval_router.py",
         (
             "RouterFailureDiagnostic",
             "ROUTER_VALIDATION_CODES",

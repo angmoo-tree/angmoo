@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
-from app.domains.chat.domain.retrieval_intent import RetrievalContractError
+from app.domains.chat.contracts.retrieval_intent import RetrievalContractError
 
 
 @dataclass(frozen=True, slots=True)

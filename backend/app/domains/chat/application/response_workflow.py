@@ -29,7 +29,7 @@ from app.domains.chat.application.graph_retrieval import (
     GraphRetrievalPlanningService,
 )
 from app.domains.chat.application.retrieval_routing import RetrievalRoutingService
-from app.domains.chat.domain.generation_lifecycle import (
+from app.domains.chat.contracts.generation_lifecycle import (
     GenerationContractError,
     GenerationEvent,
     GenerationEventType,
@@ -38,18 +38,18 @@ from app.domains.chat.domain.generation_lifecycle import (
     ResponseTerminalReason,
     TERMINAL_STATES,
 )
-from app.domains.chat.domain.evidence_bundle import EvidenceKind
-from app.domains.chat.domain.response_request import (
+from app.domains.chat.contracts.evidence_bundle import EvidenceKind
+from app.domains.chat.contracts.response_request import (
     ResponseCommitPayload,
     ResponseMetadata,
     ResponseRequestRecord,
 )
-from app.domains.chat.domain.retrieval_intent import (
+from app.domains.chat.contracts.retrieval_intent import (
     RetrievalContractError,
     RetrievalRoute,
 )
-from app.domains.chat.domain.retrieval_router import RouterFailureDiagnostic
-from app.domains.chat.domain.today_sns_activity import TodaySnsActivitySnapshot
+from app.domains.chat.contracts.retrieval_router import RouterFailureDiagnostic
+from app.domains.chat.contracts.today_sns_activity import TodaySnsActivitySnapshot
 from app.domains.chat.ports.today_sns_activity import (
     TodaySnsSnapshotChangedError, TodaySnsSnapshotValidatorPort,
 )

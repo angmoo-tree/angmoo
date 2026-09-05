@@ -1,7 +1,7 @@
 """Canonical ORM bindings used by the unchanged Chat v1 SQLAlchemy workflow."""
 
 from app.domains.characters.models import Character
-from app.domains.chat.infrastructure.sqlalchemy_models import (
+from app.domains.chat.models import (
     CharacterMessageSetting,
     ChatResponseRequest,
     MessageMessage,

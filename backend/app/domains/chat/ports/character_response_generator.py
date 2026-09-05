@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from collections.abc import Mapping
 from typing import Any, Protocol
 
-from app.domains.chat.domain.evidence_bundle import EvidenceBundle
+from app.domains.chat.contracts.evidence_bundle import EvidenceBundle
 
 
 class CharacterResponseGeneratorError(RuntimeError):

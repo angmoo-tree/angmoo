@@ -7,7 +7,7 @@ from enum import StrEnum
 from types import MappingProxyType
 from typing import Protocol
 
-from app.domains.chat.domain.retrieval_intent import (
+from app.domains.chat.contracts.retrieval_intent import (
     RetrievalContractError,
     RetrievalIntentEnvelope,
     RetrievalRoute,
