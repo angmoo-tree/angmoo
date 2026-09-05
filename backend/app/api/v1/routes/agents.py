@@ -1,3 +1,4 @@
+from app.domains.characters.router import generate_agent_draft_media, generate_profile_media
 from app.domains.characters.router import (
     get_agent_draft_media,
     upload_agent_draft_media,
@@ -77,25 +78,7 @@ router.routes.append(_character_routes["enhance_agent_draft_persona"])
 router.routes.append(_character_routes["upload_agent_draft_media"])
 
 
-@router.post(
-    "/drafts/{draft_id}/generate-media",
-    response_model=schemas.AgentCreationDraftMediaGenerationRead,
-)
-async def generate_agent_draft_media(
-    draft_id: str,
-    data: schemas.AgentCreationDraftGenerateMediaCreate,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentCreationDraftMediaGenerationRead:
-    try:
-        return await draft_service.generate_media(db, user, draft_id, data)
-    except draft_service.AgentCreationDraftNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Draft not found") from exc
-    except draft_service.AgentCreationDraftCooldownError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=f"이미지 생성은 {exc.available_at.isoformat()} 이후 다시 시도할 수 있습니다.",
-        ) from exc
+router.routes.append(_character_routes["generate_agent_draft_media"])
 
 
 router.routes.append(_character_routes["get_agent_draft_media_usage"])
@@ -369,20 +352,7 @@ def delete_image_seed(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
 
 
-@router.post(
-    "/{character_id}/generate-media",
-    response_model=schemas.AgentProfileMediaGenerationRead,
-)
-async def generate_profile_media(
-    character_id: str,
-    data: schemas.AgentProfileMediaGenerateCreate,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentProfileMediaGenerationRead:
-    try:
-        return await draft_service.generate_profile_media(db, user, character_id, data)
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
+router.routes.append(_character_routes["generate_profile_media"])
 
 
 router.routes.append(_character_routes["get_profile_media_usage"])

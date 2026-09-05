@@ -619,7 +619,7 @@
     },
     "POST /api/v1/agents/drafts/{draft_id}/generate-media": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "generate_agent_draft_media"
     },
     "POST /api/v1/agents/drafts/{draft_id}/media": {
@@ -654,7 +654,7 @@
     },
     "POST /api/v1/agents/{character_id}/generate-media": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "generate_profile_media"
     },
     "POST /api/v1/agents/{character_id}/image-settings/seed": {

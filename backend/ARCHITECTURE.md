@@ -474,3 +474,12 @@ AR-B3-M2에서 이 네 파일의 실제 구현과 모든 Python 소비자를 이
 두 동작의 원래 저장 순서는 다릅니다. Upload는 Character 변경을 먼저 commit한 뒤 활동을 기록합니다. 후보 적용은 quota 확정과 후보 DB 삭제·활동 기록을 함께 commit한 뒤 후보 파일을 삭제합니다. 구조를 단순하게 보이게 만들기 위해 이 transaction 차이를 없애지 않습니다. 두 앱 factory는 callback factory를 `app.state`에 등록하고 HTTP dependency가 이를 제공합니다.
 
 현재 11개 미디어 조회/업로드/적용/삭제 HTTP는 Character router에서 실제 구현하며 기존 혼합 router의 원래 위치에 같은 route 객체로 연결됩니다. 비공개 응답은 `private, no-store`와 `nosniff`를 유지합니다. 이미지 생성 두 endpoint와 provider·settings 조립은 뒤이은 media source 범위이고, 남은 runtime forwarding의 실제 소비자는 보존 지도와 tests에서 추적하여 후속 종료 단계에서 제거합니다.
+
+
+### Character 이미지 생성
+
+`characters/service/image_generation.py`는 생성 허용 판단, 일별 quota 예약, prompt/seed/size 정책, 후보 기록과 실패 예약의 상태 전이를 담당합니다. 실제 이미지 요청은 `integrations/image_provider.py`를 사용합니다. `CharacterImageGenerationWorkflows`는 여러 업무가 함께 소유하는 설정 조회·서비스 키 해석·번역 기능만 연결하며 기존 호출 시점에 같은 Session을 전달합니다.
+
+서비스 키를 사용할 수 없으면 quota 예약 전에 종료합니다. 일별 quota가 소진되면 번역과 이미지 provider를 부르지 않습니다. Provider 오류 또는 파일 정제 실패는 기존 오류 분류를 사용해 예약을 failed로 확정하고 commit합니다. Draft의 생성 cooldown/초기 commit·마지막 commit과 Profile 생성의 응답 순서는 서로 다른 기존 흐름을 유지합니다.
+
+이 적용으로 미디어 생성 두 HTTP도 Character router를 사용합니다. 기존 runtime에는 LLM credential/외부 번역·이전 URL-helper와 실제 잔여 호출자가 있는 forwarding이 남으며, 무기한 도메인 비즈니스 구현으로 취급하지 않습니다. 후속 shared transport/World 정리와 B4/B8의 설정·삭제 소유권 종료는 결과 문서에 별도로 기록합니다.

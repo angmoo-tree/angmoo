@@ -4636,6 +4636,7 @@
           "backend/app/domains/characters/exceptions.py",
           "backend/app/domains/characters/service/creator.py",
           "backend/app/domains/characters/service/drafts.py",
+          "backend/app/domains/characters/service/image_generation.py",
           "backend/app/domains/characters/service/image_quota.py",
           "backend/app/domains/characters/service/media.py",
           "backend/app/runtime/characters/creator.py"
@@ -6668,12 +6669,14 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::POLLINATIONS_MAX_SEED",
-          "new": "backend/app/runtime/characters/creator.py::POLLINATIONS_MAX_SEED",
+          "new": "backend/app/domains/characters/service/image_generation.py::POLLINATIONS_MAX_SEED",
           "direct_consumers": [
+            "backend/app/domains/characters/router.py",
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_creation_drafts.py::test_draft_media_seed_stays_within_pollinations_limit"
+            "tests/characters/test_character_image_generation_workflows.py::test_missing_service_key_does_not_reserve_quota_or_call_provider",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
           ]
         },
         {
@@ -6742,13 +6745,14 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::STYLE_PROMPTS",
-          "new": "backend/app/runtime/characters/creator.py::STYLE_PROMPTS",
+          "new": "backend/app/domains/characters/service/image_generation.py::STYLE_PROMPTS",
           "direct_consumers": [
+            "backend/app/domains/characters/router.py",
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_creation_drafts.py::test_avatar_pollinations_prompt_enforces_front_facing_composition",
-            "tests/test_agent_creation_drafts.py::test_banner_pollinations_prompt_does_not_use_avatar_composition"
+            "tests/characters/test_character_image_generation_workflows.py::test_missing_service_key_does_not_reserve_quota_or_call_provider",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
           ]
         },
         {
@@ -7030,23 +7034,25 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::generate_media",
-          "new": "backend/app/runtime/characters/creator.py::generate_media",
+          "new": "backend/app/domains/characters/service/image_generation.py::generate_media",
           "direct_consumers": [
+            "backend/app/domains/characters/router.py",
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_creation_drafts.py::test_generate_media_creates_server_candidate_and_consumes_daily_quota",
-            "tests/test_agent_creation_drafts.py::test_profile_image_quota_exceeded_skips_translation_and_pollinations",
-            "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate"
+            "tests/characters/test_character_image_generation_workflows.py::test_missing_service_key_does_not_reserve_quota_or_call_provider",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::generate_profile_media",
-          "new": "backend/app/runtime/characters/creator.py::generate_profile_media",
+          "new": "backend/app/domains/characters/service/image_generation.py::generate_profile_media",
           "direct_consumers": [
+            "backend/app/domains/characters/router.py",
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
+            "tests/characters/test_character_image_generation_workflows.py::test_missing_service_key_does_not_reserve_quota_or_call_provider",
             "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
           ]
         },
@@ -7300,14 +7306,14 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_generate_profile_image_candidate",
-          "new": "backend/app/runtime/characters/creator.py::_generate_profile_image_candidate",
+          "new": "backend/app/domains/characters/service/image_generation.py::_generate_profile_image_candidate",
           "direct_consumers": [
+            "backend/app/domains/characters/router.py",
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_creation_drafts.py::test_generate_media_creates_server_candidate_and_consumes_daily_quota",
-            "tests/test_agent_creation_drafts.py::test_profile_image_quota_exceeded_skips_translation_and_pollinations",
-            "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate"
+            "tests/characters/test_character_image_generation_workflows.py::test_missing_service_key_does_not_reserve_quota_or_call_provider",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
           ]
         },
         {
@@ -7455,14 +7461,14 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_build_pollinations_prompt",
-          "new": "backend/app/runtime/characters/creator.py::_build_pollinations_prompt",
+          "new": "backend/app/domains/characters/service/image_generation.py::_build_pollinations_prompt",
           "direct_consumers": [
+            "backend/app/domains/characters/router.py",
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_creation_drafts.py::test_avatar_pollinations_prompt_enforces_front_facing_composition",
-            "tests/test_agent_creation_drafts.py::test_banner_pollinations_prompt_does_not_use_avatar_composition",
-            "tests/test_agent_creation_drafts.py::test_generate_media_creates_server_candidate_and_consumes_daily_quota"
+            "tests/characters/test_character_image_generation_workflows.py::test_missing_service_key_does_not_reserve_quota_or_call_provider",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
           ]
         },
         {
@@ -7529,14 +7535,14 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_pollinations_image_size",
-          "new": "backend/app/runtime/characters/creator.py::_pollinations_image_size",
+          "new": "backend/app/domains/characters/service/image_generation.py::_pollinations_image_size",
           "direct_consumers": [
+            "backend/app/domains/characters/router.py",
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_creation_drafts.py::test_generate_media_creates_server_candidate_and_consumes_daily_quota",
-            "tests/test_agent_creation_drafts.py::test_profile_image_quota_exceeded_skips_translation_and_pollinations",
-            "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate"
+            "tests/characters/test_character_image_generation_workflows.py::test_missing_service_key_does_not_reserve_quota_or_call_provider",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
           ]
         },
         {
@@ -7592,14 +7598,14 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_draft_media_seed",
-          "new": "backend/app/runtime/characters/creator.py::_draft_media_seed",
+          "new": "backend/app/domains/characters/service/image_generation.py::_draft_media_seed",
           "direct_consumers": [
+            "backend/app/domains/characters/router.py",
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_creation_drafts.py::test_draft_media_seed_stays_within_pollinations_limit",
-            "tests/test_agent_creation_drafts.py::test_generate_media_creates_server_candidate_and_consumes_daily_quota",
-            "tests/test_agent_creation_drafts.py::test_profile_image_quota_exceeded_skips_translation_and_pollinations"
+            "tests/characters/test_character_image_generation_workflows.py::test_missing_service_key_does_not_reserve_quota_or_call_provider",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
           ]
         },
         {
@@ -8453,12 +8459,14 @@
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::generate_agent_draft_media",
-          "new": "backend/app/api/v1/routes/agents.py::generate_agent_draft_media",
+          "new": "backend/app/domains/characters/router.py::generate_agent_draft_media",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_image_generation_workflows.py::test_missing_service_key_does_not_reserve_quota_or_call_provider",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
           ]
         },
         {
@@ -8683,12 +8691,14 @@
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::generate_profile_media",
-          "new": "backend/app/api/v1/routes/agents.py::generate_profile_media",
+          "new": "backend/app/domains/characters/router.py::generate_profile_media",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_image_generation_workflows.py::test_missing_service_key_does_not_reserve_quota_or_call_provider",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
           ]
         },
         {
@@ -14357,6 +14367,29 @@
         "backend/app/api/v1/routes/agents.py::discard_profile_media_candidate": "backend/app/domains/characters/router.py::discard_profile_media_candidate"
       },
       "remaining": "Generation/quota reservation/provider work continues in the next media slice. Two generate HTTP routes still use the old runtime composition; B4/B8 retain only their documented activity/settings/deletion ownership."
+    },
+    "AR-B3-M4": {
+      "status": "Character draft/profile generation and candidate quota/persistence are actual service/image_generation functions. Five policy symbols and two original HTTP endpoints moved; settings, service-key and translation callbacks remain runtime collaborators at their existing call points.",
+      "actual_moved_symbols": {
+        "backend/app/runtime/characters/creator.py::POLLINATIONS_MAX_SEED": "backend/app/domains/characters/service/image_generation.py::POLLINATIONS_MAX_SEED",
+        "backend/app/runtime/characters/creator.py::STYLE_PROMPTS": "backend/app/domains/characters/service/image_generation.py::STYLE_PROMPTS",
+        "backend/app/runtime/characters/creator.py::generate_media": "backend/app/domains/characters/service/image_generation.py::generate_media",
+        "backend/app/runtime/characters/creator.py::generate_profile_media": "backend/app/domains/characters/service/image_generation.py::generate_profile_media",
+        "backend/app/runtime/characters/creator.py::_generate_profile_image_candidate": "backend/app/domains/characters/service/image_generation.py::_generate_profile_image_candidate",
+        "backend/app/runtime/characters/creator.py::_build_pollinations_prompt": "backend/app/domains/characters/service/image_generation.py::_build_pollinations_prompt",
+        "backend/app/runtime/characters/creator.py::_pollinations_image_size": "backend/app/domains/characters/service/image_generation.py::_pollinations_image_size",
+        "backend/app/runtime/characters/creator.py::_draft_media_seed": "backend/app/domains/characters/service/image_generation.py::_draft_media_seed",
+        "backend/app/api/v1/routes/agents.py::generate_agent_draft_media": "backend/app/domains/characters/router.py::generate_agent_draft_media",
+        "backend/app/api/v1/routes/agents.py::generate_profile_media": "backend/app/domains/characters/router.py::generate_profile_media"
+      },
+      "preserved": [
+        "key unavailable before quota reservation",
+        "quota exhaustion skips translation and provider",
+        "reserve commit/lock/count semantics remain in Character image_quota",
+        "one generation result persists candidate then commits; exact provider/storage failure finalizes failed quota and commits",
+        "same model/route selection timing, prompt/seed and ordering; no new public media mount"
+      ],
+      "remaining": "Legacy URL/translation helper transport cleanup and World banner integration are separate media follow-up. Social quota/job remains AR-B5; image settings and multi-domain deletion remain AR-B8-A."
     }
   }
 }

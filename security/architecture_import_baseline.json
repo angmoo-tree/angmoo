@@ -1,7 +1,7 @@
 {
-  "edge_count": 2005,
-  "external_import_count": 2057,
-  "module_count": 620,
+  "edge_count": 2022,
+  "external_import_count": 2061,
+  "module_count": 621,
   "modules": [
     {
       "external_imports": [],
@@ -927,6 +927,7 @@
         "app.domains.characters.schemas",
         "app.domains.characters.service.creator",
         "app.domains.characters.service.drafts",
+        "app.domains.characters.service.image_generation",
         "app.domains.characters.service.management",
         "app.domains.characters.service.media",
         "app.domains.characters.service.state",
@@ -1015,6 +1016,34 @@
       ],
       "module": "app.domains.characters.service.drafts",
       "path": "backend/app/domains/characters/service/drafts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "logging",
+        "sqlalchemy.orm",
+        "uuid"
+      ],
+      "imports": [
+        "app.config",
+        "app.core.security",
+        "app.domains.characters.contracts",
+        "app.domains.characters.exceptions",
+        "app.domains.characters.models",
+        "app.domains.characters.schemas",
+        "app.domains.characters.service.creator",
+        "app.domains.characters.service.drafts",
+        "app.domains.characters.service.image_quota",
+        "app.domains.characters.service.media",
+        "app.domains.characters.service.media_storage",
+        "app.domains.characters.service.profile",
+        "app.integrations.image_provider",
+        "app.integrations.pollinations_image",
+        "app.integrations.replicate_image"
+      ],
+      "module": "app.domains.characters.service.image_generation",
+      "path": "backend/app/domains/characters/service/image_generation.py",
       "wildcard_imports": []
     },
     {
@@ -6634,6 +6663,7 @@
         "app.domains.characters.models",
         "app.domains.characters.service.creator",
         "app.domains.characters.service.drafts",
+        "app.domains.characters.service.image_generation",
         "app.domains.characters.service.image_quota",
         "app.domains.characters.service.media",
         "app.domains.characters.service.media_storage",

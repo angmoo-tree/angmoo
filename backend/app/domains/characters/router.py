@@ -5,6 +5,9 @@ from sqlalchemy.orm import Session
 from app.domains.characters import schemas, exceptions as errors
 from app.domains.characters.contracts import CharacterOwner, CharacterManagementWorkflows, CreatorWorkflows, CharacterMediaWorkflows
 from app.domains.characters.dependencies import get_current_user, get_db, get_character_management_workflows, get_creator_workflows
+from app.domains.characters.service import image_generation as image_generation_service
+from app.domains.characters.contracts import CharacterImageGenerationWorkflows
+from app.domains.characters.dependencies import get_image_generation_workflows
 from app.domains.characters.service import media as media_service
 from app.domains.characters.dependencies import get_character_media_workflows
 from app.domains.characters.service import management as character_service
@@ -477,3 +480,34 @@ def discard_profile_media_candidate(
     except errors.AgentProfileImageCandidateNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Candidate not found") from exc
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post('/drafts/{draft_id}/generate-media', response_model=schemas.AgentCreationDraftMediaGenerationRead)
+async def generate_agent_draft_media(
+    draft_id: str,
+    data: schemas.AgentCreationDraftGenerateMediaCreate,
+    db: Session = Depends(get_db),
+    user: CharacterOwner = Depends(get_current_user),
+    workflows: CharacterImageGenerationWorkflows = Depends(get_image_generation_workflows),
+    creator_workflows: CreatorWorkflows = Depends(get_creator_workflows),
+) -> schemas.AgentCreationDraftMediaGenerationRead:
+    try:
+        return await image_generation_service.generate_media(db, user, draft_id, data, workflows=workflows, creator_workflows=creator_workflows)
+    except errors.AgentCreationDraftNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Draft not found') from exc
+    except errors.AgentCreationDraftCooldownError as exc:
+        raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=f'이미지 생성은 {exc.available_at.isoformat()} 이후 다시 시도할 수 있습니다.') from exc
+
+
+@router.post('/{character_id}/generate-media', response_model=schemas.AgentProfileMediaGenerationRead)
+async def generate_profile_media(
+    character_id: str,
+    data: schemas.AgentProfileMediaGenerateCreate,
+    db: Session = Depends(get_db),
+    user: CharacterOwner = Depends(get_current_user),
+    workflows: CharacterImageGenerationWorkflows = Depends(get_image_generation_workflows),
+) -> schemas.AgentProfileMediaGenerationRead:
+    try:
+        return await image_generation_service.generate_profile_media(db, user, character_id, data, workflows=workflows)
+    except errors.AgentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Agent not found') from exc

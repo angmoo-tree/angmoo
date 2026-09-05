@@ -39,6 +39,7 @@ __all__ = [
     "CharacterManagementWorkflows",
     "CreatorWorkflows",
     "CharacterMediaWorkflows",
+    "CharacterImageGenerationWorkflows",
 ]
 
 
@@ -107,3 +108,14 @@ class CharacterMediaWorkflows:
     invalidate_visual_identity: Callable[[Session, str], None]
     log_activity: MediaActivityLog
     build_detail: Callable[[Session, models.Character], schemas.AgentDetailRead]
+
+
+@dataclass(frozen=True)
+class CharacterImageGenerationWorkflows:
+    """External settings/key/translation used at the original admission points."""
+
+    get_model: Callable[[Session], str]
+    get_route_mode: Callable[[Session], str]
+    image_key_available: Callable[[str], bool]
+    resolve_api_key: Callable[[str], str | None]
+    translate_prompt: Callable[[str], str]

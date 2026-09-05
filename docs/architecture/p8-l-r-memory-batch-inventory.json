@@ -224,7 +224,7 @@
     },
     {
       "path": "backend/app/public_main.py",
-      "sha256": "52066ed50930dad2a563119423bd13835dcdcc0f92d6011b694a704dc5fb6e32"
+      "sha256": "cafb2d4e84d5a0d632e98cd9da5ffcee7a085ebd60051ed45c29555525ac3094"
     },
     {
       "path": "backend/app/runtime/account_deletion.py",

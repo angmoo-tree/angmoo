@@ -333,3 +333,14 @@ M2 집중 검증은 **135 passed / 2 warnings / 12.49s**이며 전체 **2121 tes
 새 회귀 **5 nodes**는 `tests/characters/test_character_media_workflows.py`에 있으며 실제 SQLite transaction과 callback Session, commit 후 파일 정리, private HTTP 헤더와 두 factory 연결을 검증한다. 최초 fixture의 필수 persona_summary/filename 누락을 보완한 최종 혼합 matrix는 **165 passed / 2 warnings / 15.76s**다. 원본 #258·#263 대비 API/ORM contract 차이 0, complete split evidence 오류 0이다. Architecture는 620 modules / 2005 edges / 267 exact legacy edges, public route inventory는 기존 196 operations로 통과했다. 원래 split 목적지 24개(13 service + 11 HTTP)를 갱신했고 frozen 증거는 수정하지 않았다.
 
 이 source는 generate_media/generate_profile_media와 quota 예약/provider 수행을 완료했다고 표시하지 않는다. 두 generation endpoint와 해당 Character 업무는 다음 B3 source에서 이동한다. 활동/settings/multi-domain deletion은 이전에 명시한 B4/B8-A 소유 범위를 유지한다. source introduction capture·통합 CI·PR/merge는 root가 순차 기록한다.
+
+
+## AR-B3-M4 — Character 이미지 생성·quota·실패 상태
+
+`generate_media`, `generate_profile_media`, `_generate_profile_image_candidate`의 실제 업무와 prompt/seed/size 관련 5개 원래 symbol을 `characters/service/image_generation.py`로 옮겼다. 두 생성 HTTP 함수도 Character router에 놓고 기존 API 조립 위치에 같은 route 객체를 연결했다. Runtime은 기존 model/route 설정, 서비스 key availability/해석과 translation을 `CharacterImageGenerationWorkflows`로 제공한다.
+
+Key 없는 경우 reserve 이전 종료, quota 소진 시 번역/provider 0, 기존 lock/count/reserve commit, 성공 candidate 기록/commit, Pollinations/Replicate/정제 실패별 failed 예약 finalize/commit을 보존한다. Draft 사전 cooldown/설정 저장과 마지막 commit, Profile 생성의 별도 순서를 하나로 합치지 않았다. M2의 실제 provider 객체를 그대로 사용하며 새로운 provider 요청을 추가하지 않았다.
+
+신규 **5 nodes**는 `tests/characters/test_character_image_generation_workflows.py`에 있다. 세 실패 종류의 실제 SQLite failed reservation 저장과 후보 없음, key 없는 경우 quota/provider 0, 두 factory의 원래 callback 동일성을 확인한다. 최종 집중 검증은 **145 passed / 2 warnings / 12.18s**, #258/#263 대비 API/ORM 차이 0이다. Architecture는 621 modules / 2022 edges / 267 exact legacy edges, public route inventory는 196 operations로 통과했다. 기존 complete split의 목적지 10개를 갱신했으며 신규 기준선을 재생성하지 않았다.
+
+Media 후속 정리는 World banner의 공유 codec 연결, 실제 남은 외부 번역·legacy URL-helper, mixed profile_media 호환 소비자 종료다. Social quota/job/publication은 B5, image settings와 multi-domain 삭제는 B8-A의 기존 소유 계획을 유지한다. Source introduction capture·통합 Actions·PR/merge는 root가 순차 수행한다.

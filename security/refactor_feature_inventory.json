@@ -2773,6 +2773,7 @@
         "backend/app/credentials/__init__.py",
         "backend/app/credentials/contracts.py",
         "backend/app/credentials/resolver.py",
+        "backend/app/domains/characters/service/image_generation.py",
         "backend/app/domains/characters/service/media.py",
         "backend/app/domains/characters/service/media_storage.py",
         "backend/app/domains/social/service/media_storage.py",
@@ -2886,6 +2887,7 @@
         "backend/app/services/world_feed_runtime.py"
       ],
       "test_paths": [
+        "backend/tests/characters/test_character_image_generation_workflows.py",
         "backend/tests/characters/test_character_media_workflows.py",
         "backend/tests/identity/test_credential_resolver.py",
         "backend/tests/identity/test_l1_local_v2_credentials.py",
