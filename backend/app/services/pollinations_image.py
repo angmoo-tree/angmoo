@@ -13,7 +13,8 @@ from urllib.parse import quote, urlencode
 from urllib.request import Request
 
 from app.config import settings
-from app.services import bounded_http, provider_http
+from app.integrations import bounded_http
+from app.services import provider_http
 
 
 logger = logging.getLogger(__name__)

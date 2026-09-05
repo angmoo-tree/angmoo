@@ -5,8 +5,8 @@ from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 
-from app.api.v1.deps import get_current_user
-from app.core import browser_session
+from app.api.identity_dependencies import get_current_user
+from app.api.identity_dependencies import browser_session
 from app.core.db import get_db
 from app.domains.world_characters.api.schemas import (
     OwnerControlledIdentityRead,

@@ -2,7 +2,7 @@ from io import BytesIO
 
 import pytest
 
-from app.services import bounded_http
+from app.integrations import bounded_http
 
 
 class _Response:

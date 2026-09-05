@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2019,
-      "internal_edge_count": 1838,
+      "external_import_count": 2011,
+      "internal_edge_count": 1861,
       "legacy_import_exception_count": 0,
-      "module_count": 594,
+      "module_count": 593,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -1091,7 +1091,7 @@
       },
       {
         "path": "backend/tests/test_l3_5_world_package_import_commit.py",
-        "sha256": "99bafd329ba55a81568519a9f45d75ceab9b2978d94e602340c183e4bc035900"
+        "sha256": "b987f460427bc960b4f4addf27a2f81ad6f4c8b20bbbed09a093f8c12bebd91b"
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",
@@ -1099,7 +1099,7 @@
       },
       {
         "path": "backend/tests/test_l3_owner_manual_social_inbox.py",
-        "sha256": "acf01fb266bbc9d2a42a80659ed619c3df43133ae7ad78a73ad5a10852a6f659"
+        "sha256": "1443f5ce298f85a71cae49627294eeeed640c2c1b4b3ebd8d4f472cf4f11f1d1"
       },
       {
         "path": "backend/tests/test_l4_social_search_projection.py",

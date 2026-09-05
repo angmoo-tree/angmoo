@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 from app import models
-from app.api.v1.deps import get_current_user
+from app.domains.identity.dependencies import get_current_user
 from app.api.v1.routes.memory import router as memory_router
 from app.api.v1.routes.world_chat_response import router as response_router
 from app.core.db import Base, get_db

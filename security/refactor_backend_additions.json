@@ -839,6 +839,140 @@
       "test_suppressions": {
         "tests/migrations/test_alembic_layout.py": {}
       }
+    },
+    {
+      "commit": "9841bdff3c226a1bc9a07a0246b31dda8e8be87b",
+      "feature_id": "AR-B2",
+      "reason": "Preserve identity role implementation, same-session deletion regressions and exact package spelling guards after linear G0-G4 evidence.",
+      "tracked_files": {
+        "backend/app/api/identity_dependencies.py": "f5e1a72444545f8c3ea6cf46ec7f85ef95877771",
+        "backend/app/domains/identity/constants.py": "5edde8b5bff0cf0196e9827bab93a4be2e57e9f7",
+        "backend/app/domains/identity/exceptions.py": "d1436c6daab27ac404453107f9fb0e6d0afc4d5f",
+        "backend/app/domains/identity/policies.py": "69b813c6c957fbbef8925132a962b3c8ceaaa07e",
+        "backend/app/domains/identity/router/__init__.py": "7dd3259e1f22472cf8d1f50545bcd725e48d1eb9",
+        "backend/app/domains/identity/service/__init__.py": "b7ad566ad1a8c32a37b3a1c25f809b6351e26549",
+        "backend/app/integrations/google_identity.py": "80da86ff457b775cae4bf2a9165b79fb028b64c8",
+        "backend/app/runtime/account_deletion.py": "dc75269ac511a2bf6c0be7b6daf14227973db8ab",
+        "backend/tests/identity/test_account_deletion_composition.py": "503d68c6471073ed6bfaa0b1b974d66121c333ba"
+      },
+      "test_nodes": [
+        "tests/identity/test_account_deletion_composition.py::test_app_factory_supplies_the_runtime_account_deletion_workflow[create_app0]",
+        "tests/identity/test_account_deletion_composition.py::test_app_factory_supplies_the_runtime_account_deletion_workflow[create_app1]",
+        "tests/identity/test_account_deletion_composition.py::test_identity_admission_and_real_deletion_share_the_session_and_one_commit",
+        "tests/test_refactor_backend_checkpoint.py::test_package_initializer_move_does_not_normalize_unmapped_descendants",
+        "tests/test_refactor_backend_checkpoint.py::test_package_initializer_move_normalizes_its_exact_import_spelling"
+      ],
+      "test_assertions": {
+        "tests/identity/test_account_deletion_composition.py": {
+          "test_app_factory_supplies_the_runtime_account_deletion_workflow": [
+            "assert dependencies.get_account_deletion_workflow(request) is account_deletion.delete_current_user_account"
+          ],
+          "test_identity_admission_and_real_deletion_share_the_session_and_one_commit": [
+            "assert committed == [db]",
+            "assert db.get(models.User, user.id).deleted_at is not None",
+            "assert db.get(models.Character, character.id).deleted_at is not None",
+            "assert session is db",
+            "assert principal is user"
+          ]
+        },
+        "tests/test_refactor_backend_checkpoint.py": {
+          "test_pr263_checkpoint_preserves_hotfix_regressions_beyond_pr258": [
+            "assert p.checkpoint_errors(checkpoint, p.BASELINE.read_bytes()) == []",
+            "assert hotfix",
+            "assert p.missing_nodes(approved, remaining, moves, node_snapshots=[baseline['test_nodes'], checkpoint['test_nodes']]) == [deleted]"
+          ],
+          "test_checkpoint_cannot_be_recaptured_to_hide_a_regression": [
+            "assert any(('checkpoint mutated' in error for error in p.checkpoint_errors(checkpoint, p.BASELINE.read_bytes())))"
+          ],
+          "test_original_baseline_and_wrong_checkpoint_commit_are_rejected": [
+            "assert any(('exact PR263 commit' in error for error in errors))",
+            "assert any(('PR258 source baseline mutated' in error for error in errors))"
+          ],
+          "test_nodes_follow_second_move_and_count_checkpoint_lineage_once": [
+            "assert p.missing_nodes(['old::test', 'pilot::test', 'hotfix::test'], ['final::test', 'hotfix::test', 'new::test'], {'old::test': 'pilot::test', 'pilot::test': 'final::test'}, node_snapshots=[['old::test'], ['pilot::test', 'hotfix::test']]) == []"
+          ],
+          "test_move_cannot_swallow_an_independent_existing_destination": [
+            "pytest.raises(ValueError, match='independent cases cannot collapse')"
+          ],
+          "test_unexplained_missing_renamed_or_merged_test_nodes_are_rejected": [
+            "pytest.raises(ValueError, match=match)"
+          ],
+          "write": [],
+          "snapshot": [],
+          "test_moved_test_cannot_keep_its_name_and_delete_assertion_or_raises": [
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([expected], {node: target}, {}, tmp_path)))"
+          ],
+          "test_assertions_inside_local_test_helpers_cannot_disappear": [
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([expected], {node: node}, {}, tmp_path)))"
+          ],
+          "test_new_skip_or_xfail_cannot_hide_a_collected_regression": [
+            "assert any(('skip/xfail suppression changed' in error for error in p.check_suppressions([expected], {}, tmp_path)))"
+          ],
+          "test_existing_skips_are_preserved_and_collection_hook_suppression_is_guarded": [
+            "assert p.check_suppressions([expected], {}, tmp_path) == []",
+            "assert p.check_suppressions([expected], {}, tmp_path)"
+          ],
+          "test_assertions_accept_explicit_path_move_and_additional_checks": [
+            "assert p.check_assertions([expected], {node: target}, {'backend/app/core/config.py': 'backend/app/config.py'}, tmp_path) == []",
+            "assert p.check_assertions([expected], {node: target}, {}, tmp_path)"
+          ],
+          "test_unchanged_synthetic_legacy_path_fixture_survives_real_move_without_weakening_expectations": [
+            "assert p.check_assertions([expected], {node: node}, files, tmp_path) == []",
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([expected], {node: node}, files, tmp_path)))"
+          ],
+          "test_parameterized_nodes_preserve_the_underlying_class_assertions": [
+            "assert p.check_assertions([expected], {node: target}, {}, tmp_path) == []",
+            "assert p.missing_nodes([node], [target.replace('[v8]', '[v9]')], {node: target}) == [target]"
+          ],
+          "test_missing_or_empty_marker_cannot_preserve_a_source_implementation": [
+            "assert any(('empty package marker' in error for error in p.check_sources([old], {old: target}, tmp_path)))",
+            "assert any(('source missing' in error for error in p.check_sources([old], {old: 'backend/app/missing.py'}, tmp_path)))",
+            "pytest.raises(ValueError, match='absent from frozen')"
+          ],
+          "test_source_moves_follow_multiple_steps_and_reject_unsafe_destination": [
+            "assert p.check_sources(['backend/app/old.py'], {'backend/app/old.py': 'backend/app/intermediate.py', 'backend/app/intermediate.py': 'backend/app/current.py'}, tmp_path) == []",
+            "assert p.check_sources(['backend/app/old.py'], {'backend/app/old.py': '../outside.py'}, tmp_path)"
+          ],
+          "test_addition_records_require_commit_feature_and_reason": [
+            "assert any(('exact introduction commit' in error for error in p.addition_errors(additions, checkpoint, tmp_path)))"
+          ],
+          "test_addition_history_cannot_be_removed_or_rewritten": [
+            "assert any(('history was changed or removed' in error for error in p.addition_errors(additions, checkpoint, tmp_path)))"
+          ],
+          "test_addition_commit_source_and_assertion_provenance_are_checked": [
+            "assert p.addition_errors(additions, checkpoint, tmp_path) == []",
+            "assert any(('source provenance changed' in error for error in errors))",
+            "assert any(('assertion provenance changed' in error for error in errors))"
+          ],
+          "test_later_commit_cannot_claim_it_introduced_an_older_unrecorded_source": [
+            "assert any(('first introduction commit' in error for error in p.addition_errors(additions, checkpoint, tmp_path)))"
+          ],
+          "test_new_committed_source_requires_record_and_mapped_destinations_are_not_new_work": [
+            "assert p.unrecorded_committed_sources(checkpoint, [], targets, tmp_path) == ['committed source lacks append-only introduction evidence: backend/app/new.py']",
+            "assert p.unrecorded_committed_sources(checkpoint, [{'tracked_files': {'backend/app/new.py': 'blob'}}], targets, tmp_path) == []"
+          ],
+          "test_capture_does_not_call_surviving_frozen_bridge_a_new_source": [
+            "assert capture.unprotected_files(tracked, [old], {old: new}) == {added: 'new-test-blob'}"
+          ],
+          "test_new_split_requires_real_symbols_consumers_and_behavior_test_evidence": [
+            "assert p.check_split_evidence({'details': {'AR-B2': detail}}, snapshots, tmp_path) == []",
+            "assert any(('split omits' in error for error in p.check_split_evidence({'details': {'AR-B2': broken}}, snapshots, tmp_path)))",
+            "assert any(('does not define' in error for error in p.check_split_evidence({'details': {'AR-B2': broken}}, snapshots, tmp_path)))"
+          ],
+          "test_package_initializer_move_normalizes_its_exact_import_spelling": [
+            "assert p.normalized_assertion(\"assert 'app.domains.identity.infrastructure' in imports\", literals) == p.normalized_assertion(\"assert 'app.domains.identity.models' in imports\", literals)",
+            "assert p.normalized_assertion(\"assert 'from app.domains.identity.infrastructure import User' in source\", literals) == p.normalized_assertion(\"assert 'from app.domains.identity.models import User' in source\", literals)"
+          ],
+          "test_package_initializer_move_does_not_normalize_unmapped_descendants": [
+            "assert p.normalized_assertion(fragment, literals) == p.normalized_assertion(fragment, [])",
+            "assert p.normalized_assertion(fragment, literals) == p.normalized_assertion(fragment, [])"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/identity/test_account_deletion_composition.py": {},
+        "tests/test_refactor_backend_checkpoint.py": {}
+      }
     }
   ]
 }

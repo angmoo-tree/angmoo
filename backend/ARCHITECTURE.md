@@ -4,7 +4,7 @@ Angmoo 백엔드는 **업무별 도메인 안에 HTTP 처리, 업무 흐름, 데
 
 이 문서는 기능을 추가하거나 버그를 수정하는 기여자가 코드의 위치와 연결 방식을 이해하기 위한 설명서입니다. [FastAPI Best Practices](https://github.com/zhanymkanov/fastapi-best-practices#project-structure)의 도메인별 구성을 바탕으로, Angmoo의 로컬 실행·AI 호출·기억·World 경계를 설명합니다.
 
-> **적용 상태 — 2026-09-05:** AR-0 기준선과 AR-1 검사 지원은 PR #259에서 병합됐습니다. `device_home` 첫 backend 파일럿은 PR #260, merge commit `a55c521b9adad624ae1342b2a7b270abc2237f79`로 병합됐고 역할별 파일과 새 경계 검사를 사용합니다. §8.2는 #263 기준의 AR-G0 후속 보존·부분 전환 검사 지원을 바탕으로 진행 중입니다. AR-G1에서 공통 설정 구현과 실제 소비자를 `app/config.py`로 옮겼습니다. 다른 도메인과 전역 기반은 아직 기존 경로와 규칙을 사용합니다. 실제 범위와 검증·PR·병합 상태는 [보존 지도](../docs/architecture/refactor-feature-preservation.md)와 [백엔드 전환 결과](../docs/architecture/refactor-backend-results.md)에 기록합니다.
+> **적용 상태 — 2026-09-05:** AR-0 기준선과 AR-1 검사 지원은 PR #259에서 병합됐습니다. `device_home` 첫 backend 파일럿은 PR #260, merge commit `a55c521b9adad624ae1342b2a7b270abc2237f79`로 병합됐고 역할별 파일과 새 경계 검사를 사용합니다. §8.2의 AR-G0 후속 보존·부분 전환 검사를 바탕으로 공통 설정을 `app/config.py`로, identity 실제 구현을 역할 파일로 옮겼습니다. identity의 옛 `public.py`는 미전환 소비자의 동일 객체 호환만 남아 부분 scope로 관리합니다. 다른 업무와 공통 기반의 상태, 검증·PR·병합 결과는 [보존 지도](../docs/architecture/refactor-feature-preservation.md)와 [백엔드 전환 결과](../docs/architecture/refactor-backend-results.md)에 기록합니다.
 
 > **AR-G2 적용 범위:** 공통 오류 4개는 `app/exceptions.py`, Device Home·Social profile이 함께 사용하는 cursor bytes 변환은 `app/pagination.py`가 소유합니다. 기존 core 모듈은 동시성·middleware 구현과 동일 오류 객체의 export를 유지합니다. 다른 업무 오류·cursor payload·query·실행 계약은 기존 소유 모듈에서 계속 관리합니다. 병합 및 통합 검증 상태는 위 실행 결과 문서에서 구분합니다.
 
@@ -187,6 +187,16 @@ from app.domains.worlds import schemas as worlds_schemas
 - 테스트에서 교체해야 하는 provider·clock·저장 경계는 작은 Protocol이나 주입 가능한 객체로 남길 수 있습니다. 모든 서비스에 추상 인터페이스가 필요한 것은 아닙니다.
 
 ## 5. 공통 모델과 데이터베이스
+
+### Identity 구현에서 경계를 찾는 예
+
+로그인·세션·프로필 변경은 [identity/service/auth.py](app/domains/identity/service/auth.py), Local owner bootstrap은 [service/local_owner.py](app/domains/identity/service/local_owner.py), 자격 해석·변환은 `service/credential_resolution.py`와 `service/credential_migration.py`에 있습니다. HTTP 입력과 cookie 처리는 `router/`, `dependencies.py`, `browser_session.py`가 소유하고, ORM은 `models.py`, 요청·응답은 `schemas.py`, 비밀을 숨기는 credential과 Local snapshot 타입은 `contracts.py`에서 찾습니다.
+
+Local owner 서비스는 기존 `SqlAlchemyIdentityRepository`에 있던 업무 판단·commit/rollback을 소유합니다. 별도의 전달 전용 use case를 거치지 않고 직접 메서드를 호출하며 테스트는 `clock` 또는 기존 `now`를 주입할 수 있습니다. 잘못된 owner claim의 시도 횟수를 commit하는 동작도 그대로입니다. `_owner_candidates`는 동일 session으로 본인 캐릭터 수·활성 World membership 수·credential 수만 읽는 bootstrap projection이며, 다른 업무의 테이블을 쓰는 일반 repository가 아닙니다.
+
+계정 삭제는 여러 업무와 비공개 미디어를 함께 다루므로 [runtime/account_deletion.py](app/runtime/account_deletion.py)가 실행 순서·동일 session·단일 commit/rollback·미디어 quarantine의 복구와 purge를 소유합니다. Identity 서비스는 확인 문구·이미 삭제된 사용자·demo 계정 허용 여부를 확인하고 주입된 workflow에 같은 `Session`과 사용자 객체를 전달합니다. 두 앱 factory가 workflow를 연결하고 HTTP dependency가 이를 가져옵니다. Identity가 runtime을 import하거나 자기 DB session을 새로 만들지 않습니다.
+
+다른 업무의 router는 공통 HTTP 연결인 [app/api/identity_dependencies.py](app/api/identity_dependencies.py)에서 인증 dependency와 cookie transport의 같은 객체를 사용합니다. 업무 서비스에서 이 HTTP 연결을 사용하지 않습니다. 기존 다른 도메인의 `identity.public` ORM/type 소비자는 후속 전환 때 service/schema/contract로 옮기며 정확한 목록과 종료 단계는 [이동표](../security/refactor_path_map.json)의 `AR-B2-identity`에 있습니다. 이 호환 때문에 전체 identity scope 완료는 AR-B8-A에서 확인합니다.
 
 `models.py`는 위치에 따라 책임이 다릅니다.
 

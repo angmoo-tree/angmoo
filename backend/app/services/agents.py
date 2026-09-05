@@ -29,7 +29,7 @@ from app.services import agent_activity_policy
 from app.services import activity_profile_readiness
 from app.services import community as community_service
 from app.services import agent_runs as agent_run_service
-from app.services import demo_lock
+from app.domains.identity.service import demo_access as demo_lock
 from app.services import image_prompt_safety
 from app.services import maintenance as maintenance_service
 from app.services import post_image_generation

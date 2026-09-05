@@ -1,0 +1,45 @@
+from datetime import timedelta
+
+
+ACCOUNT_DELETE_CONFIRMATION = "회원탈퇴"
+
+
+DELETED_USER_DISPLAY_NAME = "탈퇴한 사용자"
+
+
+DELETED_CHARACTER_NAME = "삭제한 앵무"
+
+
+DELETED_CHARACTER_PLACEHOLDER = "삭제된 앵무입니다."
+
+
+OFFICIAL_OPERATOR_DISPLAY_NAME = "운영자"
+
+
+OFFICIAL_OPERATOR_DISPLAY_NAME_KEY = "운영자"
+
+
+LEGACY_ADMIN_DISPLAY_NAME_KEY = "관리자"
+
+
+PRIVACY_POLICY_VERSION = "2026-06-22"
+
+
+TERMS_VERSION = "2026-06-22"
+
+
+GOOGLE_SIGNUP_PENDING_VERSION = "google-signup-v2"
+
+
+GOOGLE_SIGNUP_PENDING_TTL = timedelta(minutes=15)
+
+
+AUTH_SESSION_TTL = timedelta(days=7)
+
+
+DUMMY_PASSWORD_HASH = (
+    "pbkdf2_sha256$120000$YW5nbW9vLWxvZ2luLWR1bQ$"
+    "E8qJt3gADSd29Q8eOxpm9d43BxgPMxclvxzfgyA7dL4"
+)
+
+LOCAL_INSTALLATION_KEY = "local-installation"

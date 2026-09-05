@@ -13,7 +13,7 @@
 | AR-G2 | LOCAL VERIFIED · PR/MERGE PENDING | 공통 오류 4개·cursor bytes helper 2개·소비자/테스트 이전 |
 | AR-G3 | IMPLEMENTED · LOCAL VERIFICATION · PR/CI PENDING | logging.ini·초기화·배포 자원 연결 |
 | AR-G4 | LOCAL VERIFIED · PR PENDING | Alembic 물리 경로·역사 본문 보존; G5 최종 모델 등록 연결 대기 |
-| AR-B2 | NOT STARTED | identity→characters→worlds→world_characters |
+| AR-B2 | IDENTITY IMPLEMENTED · FULL BACKEND PASS · PR PREPARATION | identity 역할 이전; characters→worlds→world_characters 후속 |
 | AR-B3 | NOT STARTED | World Package→media |
 | AR-B4 | NOT STARTED | routines→routine_posts→활동 조립 |
 | AR-B5 | NOT STARTED | social→relationships→projection |
@@ -188,3 +188,53 @@ G0~G3를 합친 고정 merge commit `381ef66`에서 migration layout·logging·�
 ### G4의 잠금 파일 기반 migration 검증 환경
 
 PR #270의 clean CI에서 역사 revision `20260604_0037`이 import하는 `pgvector.sqlalchemy.Vector`가 없어 실제 Alembic 그래프 검사 두 개가 실패했다. 로컬 공용 venv에는 해당 패키지가 이미 있어 선행 집중 검증만으로 누락을 발견하지 못했다. 기존 revision 본문·그래프·검사는 그대로 두고, 역사 migration 도구와 검증에 필요한 `pgvector==0.5.0`을 개발 의존성 및 lock에 명시했다. 새 G4 전용 venv에서 `uv sync --locked --group dev` 후 migration 회귀 **8 passed, 29.73초**였다. 기존 runtime dependencies의 버전과 Local SQLite migration 경로는 변하지 않는다. 이후 PR의 전체 CI는 동일 lock으로 검증한다.
+
+## AR-B2 첫 PR: Identity 역할 이전
+
+Identity 소유 코드를 `router/`, `schemas.py`, `models.py`, `dependencies.py`, `contracts.py`, `exceptions.py`, `policies.py`, `service/`로 옮겼다. 기존 인증·프로필·JWT/session, Local owner bootstrap/claim, BYOK credential 해석·이전, Google 검증 예약, 로그인 실패 제한, Turnstile와 demo 잠금을 유지한다. 도메인 소유 테스트 15개 파일의 기존 133 nodes도 `tests/identity/`로 옮겼으며 기존 assertion·parameter·fixture를 유지했다.
+
+`services/auth.py`의 다른 업무 삭제 코드는 `runtime/account_deletion.py`로 분리했다. Identity service가 계정 삭제 요청을 승인하고, 두 앱 factory가 주입한 runtime workflow에 같은 Session과 User 객체를 전달한다. Runtime은 삭제 실행 순서, 한 번의 commit, 실패 rollback·비공개 media 복구, 성공 후 purge를 소유한다. 실제 SQLite·User·Character를 쓰는 통합 테스트가 같은 Session과 단일 commit을 검증하고, 두 factory의 callback 연결도 각각 검증한다. 이후 G06 앱 생성 통합은 이 연결을 보존한다.
+
+기존 `SqlAlchemyIdentityRepository`에는 실제 업무 규칙과 commit이 함께 있었다. 이를 `LocalIdentityService`로 옮기고 다섯 개의 단순 forwarding wrapper 및 소비자가 없던 repository Protocol을 제거했다. `clock`과 명시적인 `now`는 계속 주입할 수 있다. 잘못된 claim 시도 횟수 저장, race 처리, session 발급 제한의 실패 commit·rollback은 유지했다. Bootstrap 후보 표시는 같은 Session으로 소유자별 Character·World membership·credential 수를 읽는 한정된 조회를 유지하며 다른 도메인의 테이블을 수정하지 않는다.
+
+Browser cookie·CSRF·Origin과 proxy source 해석은 identity의 HTTP 지원 코드에 모았다. 다른 router의 HTTP dependency 연결은 `app.api.identity_dependencies`가 같은 callable 객체를 제공한다. Local Bot dependency는 기존 `api/v1/deps.py`에 남겼다. Google SDK 호출과 bounded HTTP 응답 읽기는 `integrations/`에 있으며, startup 보안 검증 조립은 `runtime/startup_security.py`로 옮겼다.
+
+### 경계와 후속 제거
+
+Identity의 실제 역할 20개 module에 부분 scope를 적용했다. `identity.public`은 아직 다른 업무의 정확한 ORM/type 소비자 22곳이 사용하는 같은 객체의 호환 export여서 전체 도메인 완료로 선언하지 않는다. 새 identity 코드는 이 public이나 이전 services를 가져오지 않는다. 남은 소비자와 제거 단계는 경로 지도에 기록했고, 업무별 후속 PR 및 AR-B8-A에서 닫는다. 기존 model/schema aggregate의 같은 객체 호환은 AR-G5에서 정리한다.
+
+경계 정책은 필요한 14개 정확 bridge를 기록한다. Account deletion이 이전 auth에서 사용하던 다섯 legacy edge는 실행 조립 소유자에게 그대로 이전했으며 넓은 예외를 추가하지 않았다. 기존 legacy exact edge는 312개에서 289개가 됐다. 현재 inventory는 backend **679 modules / 1,860 internal edges**다. 이동 지도에는 파일 이전 42개, test node 이전 133개, 분리 원본 10개와 정의 symbol 198개의 실제 목적지·소비자·검증 경로가 있다.
+
+### 로컬 검증과 남은 Gate
+
+- Identity 및 계정 삭제·Memory batch·World Creator 경로: **171 passed / 15 warnings / 23.55초**. 앞선 혼합 범위 실행은 Identity·privacy 삭제·SQLite·runtime·API·Device Home을 포함해 **210 passed / 16 warnings / 60.45초**였다.
+- 보존 검사·Identity architecture·login throttle·OSS 경계 회귀: **55 passed / 15.60초**. 이동한 `__init__.py`의 정확 package import 문자열만 정규화했고, 미매핑 하위 모듈·경로·유사 이름을 허용하지 않는 검사 두 개를 추가했다.
+- Public node 기준: **approved 604 / current 2,037 / new 1,463 PASS**. 승인 node 목록은 바꾸지 않았다.
+- 기능 보존 검사: **#258 1,867 / #263 1,907 / 보존 계보 2,030 / 현재 2,037 nodes**. 기존 assertion·분리 symbol·API/OpenAPI·ORM 계약의 누락은 없다. 독립 준비 branch의 출발점에 포함된 G0 Gitleaks 회귀 두 개만 introduction metadata가 없다는 오류를 남겼다. 최신 G0 metadata를 합류한 뒤 같은 검사를 통과해야 하며 이 결과를 전체 PASS로 기록하지 않는다.
+- Live inventory·부분 scope·L0 계약 검사는 **78 passed / 1 failed / 8.93초**였다. 실패한 `test_l4_pr_a_architecture_and_parity_oracles_are_exact`는 live 결과의 module/edge/import 수를 이전 680/1,837/2,288과 비교한다. 현재 679/1,860/2,281의 실제 결과와 frozen 기준을 구분하는 후속 검토가 필요하며, 기존 숫자 assertion은 바꾸지 않았다.
+- 변경·신규 파일 120개에 대해 기존 exact allowlist를 적용한 secret scanner는 **findings 0**이었다. 실제 credential 값이나 새 예외는 추가하지 않았다.
+
+Architecture/L4/ER0/Memory batch의 live inventory를 현재 코드로 갱신했다. 고정 #258 baseline·#263 checkpoint·승인 test node·frozen migration과 선행 Today SNS inventory는 수정하지 않았다. Source commit 후 새 파일·신규 5개 test node의 도입 증거를 별도 capture하며 Git 추적 파일을 사용하는 inventory도 다시 갱신한다. 최신 G0와 G1~G4 통합, 최종 backend 검증, PR-head Actions, merge와 post-merge는 후속 결과를 확인할 때 기록한다. 이 Identity 검증은 전체 AR-B2 또는 설치 앱·실제 AI 검증 완료를 뜻하지 않는다.
+
+
+### Identity와 선행 공통 기반의 통합 검증
+
+G0~G4를 합친 후보에서 보존 검사 **#258 1,867 / #263 1,907 / protected/current 2,085 nodes, items37 PASS**를 확인했다. source `9841bdff3c226a1bc9a07a0246b31dda8e8be87b`의 실제 신규 파일9개·회귀5개는 별도 append-only 증거로 기록했다. 부분 경계는 **593 modules / 1,861 internal edges / 288 exact legacy edges PASS**였다.
+
+새 Identity router를 사용하는 API operation 13개의 보안 inventory module 위치를 실제 경로로 옮겼다. URL·method·endpoint 이름·access 분류·검증은 그대로이며 public 목록은 같은 196 operations다. 선행 L4의 현재/역사 topology 구분을 포함해 Identity·config·logging·migration·보안·P8 inventory 집중 검사는 **233 passed / 기존 1 skipped, 62.09초**였다.
+
+고정 commit `0d97e38dab51624b80d2e7a994f25c480bae9c26`에서 전체 backend suite는 **2,063 passed / 기존 22 skipped / 26 warnings, 495.44초**로 통과했다. 실행 중 source·test·metadata를 수정하지 않았다. 이후 합류한 선행 변경은 G2의 browser fixture 동기화와 그 현재 source fingerprint이며 backend 소스는 같다. 공통 CI/OSS/metadata/container/launcher/installer/Host Tauri 계약 7개, 실제 Gitleaks 8.30.1 추적 archive·328 commits history 검사도 PASS/findings0이었다. PR-head·실제 설치·merge·post-merge는 별도 Gate로 남긴다.
+
+### Identity PR의 현재 소스 inventory 보완
+
+PR #270의 OSS 검사는 deferred runtime inventory에 동일한 4개 경로가 각각 세 번 들어간 불일치를 거부했다. 병합 충돌의 Git index 세 stage가 남은 시점에 생성한 것이 원인이며, 해결·stage된 현재 추적 파일로 다시 수집했다. 30개 행은 서로 다른 실제 경로 22개가 되고 marker·owner·경로 내용은 그대로다. Git index가 해결된 뒤 생성하고 `--check`하는 순서를 후속 통합에도 적용한다. 같은 PR의 전체 backend 실패 2개는 G4 Alembic 그래프가 과거 pgvector import를 실제로 읽으면서 드러난 개발 의존성 누락이며 G4 소유 수정으로 통합한다.
+
+### Identity PR의 토큰 HMAC 경고와 호환 검증
+
+G4 선행 main merge `d01787b`까지 병합 후 전체 post-merge가 통과했다. Installer `33967365530`의 build·clean·지원 버전 직접 업데이트·실패 복구·aggregate가 모두 SUCCESS이며 22:22:02 KST 종료했다. Identity PR #270의 G4 계보 후보 `86d372e`는 일반 회귀를 통과했지만 CodeQL check `101310868679`가 가입 토큰의 HMAC을 비밀번호용 SHA256 해시로 표시했다. 원래 #263 `app/services/auth.py`와 이동 후보의 key 생성·서명·검증·JTI digest 함수 네 개 AST는 동일하다.
+
+실제 데이터는 서버 app_secret에서 context를 분리한 MAC key와 Google sub/email/만료/random JTI이며 사용자 비밀번호 저장은 `core/security.py`의 PBKDF2를 유지한다. 경고를 무시하거나 검사 설정을 줄이지 않았다. 네 one-shot HMAC을 Python 공식 동등 API인 `hmac.digest(key, message, "sha256")`와 필요 시 `.hex()`로 명시하여 목적을 분명히 했다. [Python HMAC 문서](https://docs.python.org/3/library/hmac.html#hmac.digest). 기존 토큰 일회성 소비 테스트에는 이전 HMAC 생성 API로 독립 계산한 key·서명·JTI digest 바이트의 일치도 추가했다. 기존 assertion을 제거하지 않았다.
+
+고정 source `bac98ec321e854c866fa842522b82bbbbb346346`에서 정책/Google 가입·browser cookie 보안 **19 passed / 5.23초**, 전체 보존 **2,085 protected/current nodes / items37 PASS**다. 서명 형식·compare_digest·만료·일회성 grant·DB/KDF 계약은 유지하며 새 CodeQL 및 전체 PR-head CI 결과는 별도로 확인한다. 문법 변경이 검사 통과를 보장한다고 미리 판정하지 않는다.
+
+후속 CodeQL의 상세 alert #14는 verified Google ID-token의 `sub`/`email` 추출과 `google_identity.verify_id_token` 반환을 password source로 분류했다. 실제 sink는 해당 공개 식별 정보를 포함하는 토큰의 keyed MAC이며 사용자 비밀번호 저장이 아니다. byte 호환·비밀번호 PBKDF2 유지·원래 #263 AST 근거를 첨부하여 **이 alert 한 건만 false positive로 review/dismiss**했다. query·workflow·심각도·scanner 제외 규칙은 바꾸지 않았다. 이 기록은 검사 자체를 끈 PASS가 아니며 후속 동일 후보의 검사를 다시 확인한다. HMAC import 제거와 줄 변경으로 생긴 current import/SQL inventory drift도 생성기로 맞췄다. Frozen 계약은 유지한다.

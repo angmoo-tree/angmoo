@@ -3,7 +3,7 @@
 Legacy modules re-export these objects while callers migrate incrementally.
 """
 
-from app.domains.identity.api.schemas import (
+from app.domains.identity.schemas import (
     AccountDeletionCreate,
     AuthRead,
     FeedContentFilter,
@@ -17,13 +17,14 @@ from app.domains.identity.api.schemas import (
     UserPreferencesUpdate,
     UserRead,
 )
-from app.domains.identity.application.resolve_credential import (
-    CredentialResolutionError,
-    CredentialResolver,
+from app.domains.identity.exceptions import CredentialResolutionError
+from app.domains.identity.service.credential_resolution import CredentialResolver
+from app.domains.identity.contracts import (
+    CredentialMaterial,
+    CredentialPurpose,
 )
-from app.domains.identity.domain.credential import CredentialMaterial, CredentialPurpose
-from app.domains.identity.domain.local_owner import LOCAL_INSTALLATION_KEY
-from app.domains.identity.infrastructure.sqlalchemy_auth_models import (
+from app.domains.identity.constants import LOCAL_INSTALLATION_KEY
+from app.domains.identity.models import (
     AuthExternalVerificationReservation,
     AuthGoogleSignupGrant,
     AuthLoginThrottleBucket,
@@ -32,8 +33,6 @@ from app.domains.identity.infrastructure.sqlalchemy_auth_models import (
     DISPLAY_NAME_CHANGE_COOLDOWN,
     InstallationIdentity,
     User,
-)
-from app.domains.identity.infrastructure.sqlalchemy_credential_models import (
     LlmCredential,
 )
 

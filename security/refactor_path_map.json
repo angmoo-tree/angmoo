@@ -122,7 +122,49 @@
     "backend/app/alembic/versions/20260831_0086_chat_response_request_lifecycle.py": "backend/alembic/versions/20260831_0086_chat_response_request_lifecycle.py",
     "backend/app/alembic/versions/20260903_0087_world_chat_model_binding.py": "backend/alembic/versions/20260903_0087_world_chat_model_binding.py",
     "backend/app/alembic/versions/20260904_0088_social_action_subjective_context.py": "backend/alembic/versions/20260904_0088_social_action_subjective_context.py",
-    "backend/app/alembic/versions/20260904_0089_memory_batch.py": "backend/alembic/versions/20260904_0089_memory_batch.py"
+    "backend/app/alembic/versions/20260904_0089_memory_batch.py": "backend/alembic/versions/20260904_0089_memory_batch.py",
+    "backend/app/domains/identity/domain/local_owner.py": "backend/app/domains/identity/contracts.py",
+    "backend/app/domains/identity/domain/credential.py": "backend/app/domains/identity/contracts.py",
+    "backend/app/domains/identity/api/schemas.py": "backend/app/domains/identity/schemas.py",
+    "backend/app/domains/identity/api/local_schemas.py": "backend/app/domains/identity/schemas.py",
+    "backend/app/domains/identity/infrastructure/sqlalchemy_auth_models.py": "backend/app/domains/identity/models.py",
+    "backend/app/domains/identity/infrastructure/sqlalchemy_credential_models.py": "backend/app/domains/identity/models.py",
+    "backend/app/domains/identity/application/resolve_credential.py": "backend/app/domains/identity/service/credential_resolution.py",
+    "backend/app/domains/identity/application/migrate_local_credentials.py": "backend/app/domains/identity/service/credential_migration.py",
+    "backend/app/services/demo_lock.py": "backend/app/domains/identity/service/demo_access.py",
+    "backend/app/services/external_auth_verification.py": "backend/app/domains/identity/service/external_verification.py",
+    "backend/app/services/turnstile.py": "backend/app/domains/identity/client.py",
+    "backend/app/services/login_throttle.py": "backend/app/domains/identity/service/login_throttle.py",
+    "backend/app/core/browser_session.py": "backend/app/domains/identity/browser_session.py",
+    "backend/app/services/bounded_http.py": "backend/app/integrations/bounded_http.py",
+    "backend/app/api/v1/routes/auth.py": "backend/app/domains/identity/router/auth.py",
+    "backend/app/domains/identity/api/local_routes.py": "backend/app/domains/identity/router/local.py",
+    "backend/app/domains/identity/infrastructure/sqlalchemy_identity_repository.py": "backend/app/domains/identity/service/local_owner.py",
+    "backend/app/domains/identity/application/local_owner.py": "backend/app/domains/identity/service/local_owner.py",
+    "backend/app/services/auth.py": "backend/app/domains/identity/service/auth.py",
+    "backend/app/api/v1/deps.py": "backend/app/domains/identity/dependencies.py",
+    "backend/app/domains/identity/api/__init__.py": "backend/app/domains/identity/schemas.py",
+    "backend/app/domains/identity/application/__init__.py": "backend/app/domains/identity/service/credential_resolution.py",
+    "backend/app/domains/identity/domain/__init__.py": "backend/app/domains/identity/contracts.py",
+    "backend/app/domains/identity/infrastructure/__init__.py": "backend/app/domains/identity/models.py",
+    "backend/app/domains/identity/ports/__init__.py": "backend/app/domains/identity/service/local_owner.py",
+    "backend/app/domains/identity/ports/identity_repository.py": "backend/app/domains/identity/service/local_owner.py",
+    "backend/app/core/startup_security.py": "backend/app/runtime/startup_security.py",
+    "backend/tests/test_auth_policy_versions.py": "backend/tests/identity/test_auth_policy_versions.py",
+    "backend/tests/test_auth_session_contract.py": "backend/tests/identity/test_auth_session_contract.py",
+    "backend/tests/test_browser_session_security.py": "backend/tests/identity/test_browser_session_security.py",
+    "backend/tests/test_credential_resolver.py": "backend/tests/identity/test_credential_resolver.py",
+    "backend/tests/test_demo_account_lock.py": "backend/tests/identity/test_demo_account_lock.py",
+    "backend/tests/test_google_verification_throttle.py": "backend/tests/identity/test_google_verification_throttle.py",
+    "backend/tests/test_l1_byok_ownership_privacy.py": "backend/tests/identity/test_l1_byok_ownership_privacy.py",
+    "backend/tests/test_l1_identity_architecture.py": "backend/tests/identity/test_l1_identity_architecture.py",
+    "backend/tests/test_l1_identity_domain_foundation.py": "backend/tests/identity/test_l1_identity_domain_foundation.py",
+    "backend/tests/test_l1_local_owner_session.py": "backend/tests/identity/test_l1_local_owner_session.py",
+    "backend/tests/test_l1_local_v2_credentials.py": "backend/tests/identity/test_l1_local_v2_credentials.py",
+    "backend/tests/test_login_throttle_security.py": "backend/tests/identity/test_login_throttle_security.py",
+    "backend/tests/test_public_signup_policy.py": "backend/tests/identity/test_public_signup_policy.py",
+    "backend/tests/test_session_logout_security.py": "backend/tests/identity/test_session_logout_security.py",
+    "backend/tests/test_turnstile.py": "backend/tests/identity/test_turnstile.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -160,7 +202,140 @@
     "tests/test_startup_security.py::test_production_startup_rejects_unsafe_security_configuration[overrides9-invalid_oci_auth_mode]": "tests/config/test_startup_security.py::test_production_startup_rejects_unsafe_security_configuration[overrides9-invalid_oci_auth_mode]",
     "tests/test_request_body_limits.py::test_request_body_limit_classifies_large_upload_routes": "tests/common/test_request_body_limits.py::test_request_body_limit_classifies_large_upload_routes",
     "tests/test_request_body_limits.py::test_default_body_limit_rejects_content_length_before_route": "tests/common/test_request_body_limits.py::test_default_body_limit_rejects_content_length_before_route",
-    "tests/test_request_body_limits.py::test_default_body_limit_accepts_exact_boundary": "tests/common/test_request_body_limits.py::test_default_body_limit_accepts_exact_boundary"
+    "tests/test_request_body_limits.py::test_default_body_limit_accepts_exact_boundary": "tests/common/test_request_body_limits.py::test_default_body_limit_accepts_exact_boundary",
+    "tests/test_demo_account_lock.py::test_demo_principal_blocks_unsafe_http_methods[POST]": "tests/identity/test_demo_account_lock.py::test_demo_principal_blocks_unsafe_http_methods[POST]",
+    "tests/test_demo_account_lock.py::test_normal_principal_remains_mutable": "tests/identity/test_demo_account_lock.py::test_normal_principal_remains_mutable",
+    "tests/test_demo_account_lock.py::test_account_delete_route_returns_403_for_locked_demo_user": "tests/identity/test_demo_account_lock.py::test_account_delete_route_returns_403_for_locked_demo_user",
+    "tests/test_auth_session_contract.py::test_legacy_null_expiry_keeps_seven_day_contract": "tests/identity/test_auth_session_contract.py::test_legacy_null_expiry_keeps_seven_day_contract",
+    "tests/test_google_verification_throttle.py::test_google_verifier_is_not_called_after_source_limit": "tests/identity/test_google_verification_throttle.py::test_google_verifier_is_not_called_after_source_limit",
+    "tests/test_session_logout_security.py::test_expired_session_cannot_be_used_for_logout": "tests/identity/test_session_logout_security.py::test_expired_session_cannot_be_used_for_logout",
+    "tests/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call": "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call",
+    "tests/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token": "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+    "tests/test_l1_local_v2_credentials.py::test_local_v2_rejects_tampering_and_wrong_scope": "tests/identity/test_l1_local_v2_credentials.py::test_local_v2_rejects_tampering_and_wrong_scope",
+    "tests/test_auth_session_contract.py::test_session_issuer_rejects_already_expired_session": "tests/identity/test_auth_session_contract.py::test_session_issuer_rejects_already_expired_session",
+    "tests/test_l1_local_owner_session.py::test_local_mutations_reject_invalid_origin_host_and_cross_site[headers2]": "tests/identity/test_l1_local_owner_session.py::test_local_mutations_reject_invalid_origin_host_and_cross_site[headers2]",
+    "tests/test_session_logout_security.py::test_logout_revokes_only_current_session[password]": "tests/identity/test_session_logout_security.py::test_logout_revokes_only_current_session[password]",
+    "tests/test_demo_account_lock.py::test_demo_session_dependency_blocks_mutation[PUT]": "tests/identity/test_demo_account_lock.py::test_demo_session_dependency_blocks_mutation[PUT]",
+    "tests/test_session_logout_security.py::test_revoked_and_invalid_logout_tokens_share_the_same_401_contract": "tests/identity/test_session_logout_security.py::test_revoked_and_invalid_logout_tokens_share_the_same_401_contract",
+    "tests/test_auth_session_contract.py::test_authenticated_session_context_rejects_cookie_origin_and_token_ambiguity": "tests/identity/test_auth_session_contract.py::test_authenticated_session_context_rejects_cookie_origin_and_token_ambiguity",
+    "tests/test_l1_identity_domain_foundation.py::test_identity_model_table_contracts_are_unchanged": "tests/identity/test_l1_identity_domain_foundation.py::test_identity_model_table_contracts_are_unchanged",
+    "tests/test_credential_resolver.py::test_resolver_rejects_invalid_agent_credential[overrides1]": "tests/identity/test_credential_resolver.py::test_resolver_rejects_invalid_agent_credential[overrides1]",
+    "tests/test_browser_session_security.py::test_google_signup_pending_token_is_cookie_only": "tests/identity/test_browser_session_security.py::test_google_signup_pending_token_is_cookie_only",
+    "tests/test_demo_account_lock.py::test_demo_principal_blocks_unsafe_http_methods[PATCH]": "tests/identity/test_demo_account_lock.py::test_demo_principal_blocks_unsafe_http_methods[PATCH]",
+    "tests/test_l1_local_owner_session.py::test_expired_local_session_cannot_authenticate": "tests/identity/test_l1_local_owner_session.py::test_expired_local_session_cannot_authenticate",
+    "tests/test_auth_policy_versions.py::test_google_signup_route_checks_turnstile_before_user_creation": "tests/identity/test_auth_policy_versions.py::test_google_signup_route_checks_turnstile_before_user_creation",
+    "tests/test_l1_local_v2_credentials.py::test_local_v2_round_trip_is_randomized_and_scoped": "tests/identity/test_l1_local_v2_credentials.py::test_local_v2_round_trip_is_randomized_and_scoped",
+    "tests/test_google_verification_throttle.py::test_google_route_returns_generic_429_with_retry_after": "tests/identity/test_google_verification_throttle.py::test_google_route_returns_generic_429_with_retry_after",
+    "tests/test_demo_account_lock.py::test_demo_principal_allows_safe_http_methods[OPTIONS]": "tests/identity/test_demo_account_lock.py::test_demo_principal_allows_safe_http_methods[OPTIONS]",
+    "tests/test_public_signup_policy.py::test_public_environment_disables_hosted_signup": "tests/identity/test_public_signup_policy.py::test_public_environment_disables_hosted_signup",
+    "tests/test_turnstile.py::test_siteverify_oversized_content_length_fails_closed": "tests/identity/test_turnstile.py::test_siteverify_oversized_content_length_fails_closed",
+    "tests/test_login_throttle_security.py::test_throttle_backoff_matches_approved_thresholds": "tests/identity/test_login_throttle_security.py::test_throttle_backoff_matches_approved_thresholds",
+    "tests/test_credential_resolver.py::test_message_resolver_accepts_agent_or_message_source[agent]": "tests/identity/test_credential_resolver.py::test_message_resolver_accepts_agent_or_message_source[agent]",
+    "tests/test_login_throttle_security.py::test_stale_bucket_cleanup_failure_does_not_escape": "tests/identity/test_login_throttle_security.py::test_stale_bucket_cleanup_failure_does_not_escape",
+    "tests/test_turnstile.py::test_enabled_rejects_missing_secret": "tests/identity/test_turnstile.py::test_enabled_rejects_missing_secret",
+    "tests/test_demo_account_lock.py::test_demo_lock_normalizes_configured_email": "tests/identity/test_demo_account_lock.py::test_demo_lock_normalizes_configured_email",
+    "tests/test_l1_local_v2_credentials.py::test_migration_rolls_back_all_rows_when_one_envelope_is_invalid": "tests/identity/test_l1_local_v2_credentials.py::test_migration_rolls_back_all_rows_when_one_envelope_is_invalid",
+    "tests/test_l1_byok_ownership_privacy.py::test_byok_register_metadata_replace_and_idempotent_delete_are_owner_scoped": "tests/identity/test_l1_byok_ownership_privacy.py::test_byok_register_metadata_replace_and_idempotent_delete_are_owner_scoped",
+    "tests/test_l1_identity_domain_foundation.py::test_legacy_schema_imports_share_canonical_identity_objects": "tests/identity/test_l1_identity_domain_foundation.py::test_legacy_schema_imports_share_canonical_identity_objects",
+    "tests/test_turnstile.py::test_siteverify_success_allows": "tests/identity/test_turnstile.py::test_siteverify_success_allows",
+    "tests/test_l1_local_owner_session.py::test_runtime_prepare_creates_only_an_unclaimed_installation_identity": "tests/identity/test_l1_local_owner_session.py::test_runtime_prepare_creates_only_an_unclaimed_installation_identity",
+    "tests/test_auth_policy_versions.py::test_google_signup_completion_records_current_privacy_and_terms_versions": "tests/identity/test_auth_policy_versions.py::test_google_signup_completion_records_current_privacy_and_terms_versions",
+    "tests/test_public_signup_policy.py::test_public_quickstart_sends_exact_frontend_session_boundary": "tests/identity/test_public_signup_policy.py::test_public_quickstart_sends_exact_frontend_session_boundary",
+    "tests/test_l1_identity_domain_foundation.py::test_legacy_model_imports_share_canonical_identity_objects": "tests/identity/test_l1_identity_domain_foundation.py::test_legacy_model_imports_share_canonical_identity_objects",
+    "tests/test_l1_local_owner_session.py::test_logout_revokes_local_session_and_expires_cookie": "tests/identity/test_l1_local_owner_session.py::test_logout_revokes_local_session_and_expires_cookie",
+    "tests/test_turnstile.py::test_enabled_rejects_missing_token": "tests/identity/test_turnstile.py::test_enabled_rejects_missing_token",
+    "tests/test_login_throttle_security.py::test_login_route_returns_generic_429_with_retry_after": "tests/identity/test_login_throttle_security.py::test_login_route_returns_generic_429_with_retry_after",
+    "tests/test_turnstile.py::test_siteverify_network_error_is_unavailable": "tests/identity/test_turnstile.py::test_siteverify_network_error_is_unavailable",
+    "tests/test_auth_session_contract.py::test_expiring_session_sets_matching_browser_cookie_max_age": "tests/identity/test_auth_session_contract.py::test_expiring_session_sets_matching_browser_cookie_max_age",
+    "tests/test_public_signup_policy.py::test_public_runtime_rejects_enabled_password_signup": "tests/identity/test_public_signup_policy.py::test_public_runtime_rejects_enabled_password_signup",
+    "tests/test_l1_local_owner_session.py::test_local_session_reentry_issues_opaque_cookie_for_claimed_owner": "tests/identity/test_l1_local_owner_session.py::test_local_session_reentry_issues_opaque_cookie_for_claimed_owner",
+    "tests/test_l1_local_v2_credentials.py::test_dev_v1_is_readable_but_cannot_be_selected_for_new_writes": "tests/identity/test_l1_local_v2_credentials.py::test_dev_v1_is_readable_but_cannot_be_selected_for_new_writes",
+    "tests/test_demo_account_lock.py::test_locked_demo_local_bot_is_blocked_before_last_used_update": "tests/identity/test_demo_account_lock.py::test_locked_demo_local_bot_is_blocked_before_last_used_update",
+    "tests/test_l1_byok_ownership_privacy.py::test_support_metadata_excludes_secrets_and_private_payloads": "tests/identity/test_l1_byok_ownership_privacy.py::test_support_metadata_excludes_secrets_and_private_payloads",
+    "tests/test_public_signup_policy.py::test_public_quickstart_uses_explicit_loopback_session_bootstrap": "tests/identity/test_public_signup_policy.py::test_public_quickstart_uses_explicit_loopback_session_bootstrap",
+    "tests/test_demo_account_lock.py::test_normal_local_bot_authentication_still_updates_last_used": "tests/identity/test_demo_account_lock.py::test_normal_local_bot_authentication_still_updates_last_used",
+    "tests/test_turnstile.py::test_siteverify_chunked_oversized_body_fails_closed_without_unbounded_read": "tests/identity/test_turnstile.py::test_siteverify_chunked_oversized_body_fails_closed_without_unbounded_read",
+    "tests/test_auth_policy_versions.py::test_google_signup_pending_token_is_consumed_once": "tests/identity/test_auth_policy_versions.py::test_google_signup_pending_token_is_consumed_once",
+    "tests/test_l1_local_owner_session.py::test_valid_challenge_has_bounded_invalid_claim_attempts": "tests/identity/test_l1_local_owner_session.py::test_valid_challenge_has_bounded_invalid_claim_attempts",
+    "tests/test_l1_identity_domain_foundation.py::test_credential_imports_share_canonical_identity_objects": "tests/identity/test_l1_identity_domain_foundation.py::test_credential_imports_share_canonical_identity_objects",
+    "tests/test_l1_local_v2_credentials.py::test_settings_reads_app_secret_from_file_without_environment_value": "tests/identity/test_l1_local_v2_credentials.py::test_settings_reads_app_secret_from_file_without_environment_value",
+    "tests/test_demo_account_lock.py::test_demo_principal_blocks_unsafe_http_methods[PUT]": "tests/identity/test_demo_account_lock.py::test_demo_principal_blocks_unsafe_http_methods[PUT]",
+    "tests/test_l1_local_owner_session.py::test_local_mutations_reject_invalid_origin_host_and_cross_site[headers1]": "tests/identity/test_l1_local_owner_session.py::test_local_mutations_reject_invalid_origin_host_and_cross_site[headers1]",
+    "tests/test_browser_session_security.py::test_cookie_and_user_bearer_are_rejected_as_ambiguous": "tests/identity/test_browser_session_security.py::test_cookie_and_user_bearer_are_rejected_as_ambiguous",
+    "tests/test_demo_account_lock.py::test_demo_principal_blocks_unsafe_http_methods[DELETE]": "tests/identity/test_demo_account_lock.py::test_demo_principal_blocks_unsafe_http_methods[DELETE]",
+    "tests/test_l1_local_owner_session.py::test_clean_bootstrap_claims_one_owner_and_stores_only_session_hash": "tests/identity/test_l1_local_owner_session.py::test_clean_bootstrap_claims_one_owner_and_stores_only_session_hash",
+    "tests/test_turnstile.py::test_siteverify_invalid_json_is_unavailable": "tests/identity/test_turnstile.py::test_siteverify_invalid_json_is_unavailable",
+    "tests/test_l1_byok_ownership_privacy.py::test_failed_replace_preserves_old_local_v2_material": "tests/identity/test_l1_byok_ownership_privacy.py::test_failed_replace_preserves_old_local_v2_material",
+    "tests/test_l1_local_owner_session.py::test_local_mutations_reject_invalid_origin_host_and_cross_site[headers3]": "tests/identity/test_l1_local_owner_session.py::test_local_mutations_reject_invalid_origin_host_and_cross_site[headers3]",
+    "tests/test_browser_session_security.py::test_production_browser_origin_configuration_fails_closed": "tests/identity/test_browser_session_security.py::test_production_browser_origin_configuration_fails_closed",
+    "tests/test_login_throttle_security.py::test_successful_login_resets_only_account_source_bucket": "tests/identity/test_login_throttle_security.py::test_successful_login_resets_only_account_source_bucket",
+    "tests/test_google_verification_throttle.py::test_google_verification_reservation_stores_only_hashed_source": "tests/identity/test_google_verification_throttle.py::test_google_verification_reservation_stores_only_hashed_source",
+    "tests/test_auth_policy_versions.py::test_google_account_can_signup_again_after_deleted_user_scrubbed": "tests/identity/test_auth_policy_versions.py::test_google_account_can_signup_again_after_deleted_user_scrubbed",
+    "tests/test_credential_resolver.py::test_resolver_rejects_invalid_agent_credential[overrides2]": "tests/identity/test_credential_resolver.py::test_resolver_rejects_invalid_agent_credential[overrides2]",
+    "tests/test_demo_account_lock.py::test_demo_session_dependency_blocks_mutation[DELETE]": "tests/identity/test_demo_account_lock.py::test_demo_session_dependency_blocks_mutation[DELETE]",
+    "tests/test_browser_session_security.py::test_invalid_cookie_logout_is_idempotent_and_deletes_cookie": "tests/identity/test_browser_session_security.py::test_invalid_cookie_logout_is_idempotent_and_deletes_cookie",
+    "tests/test_google_verification_throttle.py::test_google_link_reserves_verification_for_user_and_trusted_source": "tests/identity/test_google_verification_throttle.py::test_google_link_reserves_verification_for_user_and_trusted_source",
+    "tests/test_session_logout_security.py::test_logout_revokes_only_current_session[demo]": "tests/identity/test_session_logout_security.py::test_logout_revokes_only_current_session[demo]",
+    "tests/test_auth_session_contract.py::test_authenticated_session_context_resolves_bearer_without_exposing_token": "tests/identity/test_auth_session_contract.py::test_authenticated_session_context_resolves_bearer_without_exposing_token",
+    "tests/test_credential_resolver.py::test_resolver_returns_redacted_material_for_owned_character": "tests/identity/test_credential_resolver.py::test_resolver_returns_redacted_material_for_owned_character",
+    "tests/test_demo_account_lock.py::test_demo_principal_allows_safe_http_methods[GET]": "tests/identity/test_demo_account_lock.py::test_demo_principal_allows_safe_http_methods[GET]",
+    "tests/test_demo_account_lock.py::test_demo_principal_accepts_session_method_or_locked_email": "tests/identity/test_demo_account_lock.py::test_demo_principal_accepts_session_method_or_locked_email",
+    "tests/test_demo_account_lock.py::test_demo_session_dependency_blocks_mutation[POST]": "tests/identity/test_demo_account_lock.py::test_demo_session_dependency_blocks_mutation[POST]",
+    "tests/test_login_throttle_security.py::test_missing_and_google_only_users_run_one_password_verification": "tests/identity/test_login_throttle_security.py::test_missing_and_google_only_users_run_one_password_verification",
+    "tests/test_turnstile.py::test_disabled_allows_missing_token": "tests/identity/test_turnstile.py::test_disabled_allows_missing_token",
+    "tests/test_l1_local_v2_credentials.py::test_settings_rejects_a_missing_app_secret_file": "tests/identity/test_l1_local_v2_credentials.py::test_settings_rejects_a_missing_app_secret_file",
+    "tests/test_l1_identity_architecture.py::test_removed_identity_legacy_edges_are_not_allowlisted": "tests/identity/test_l1_identity_architecture.py::test_removed_identity_legacy_edges_are_not_allowlisted",
+    "tests/test_credential_resolver.py::test_message_resolver_accepts_agent_or_message_source[message]": "tests/identity/test_credential_resolver.py::test_message_resolver_accepts_agent_or_message_source[message]",
+    "tests/test_l1_identity_architecture.py::test_identity_domain_is_the_canonical_aggregate_source": "tests/identity/test_l1_identity_architecture.py::test_identity_domain_is_the_canonical_aggregate_source",
+    "tests/test_demo_account_lock.py::test_incomplete_demo_profile_is_blocked_before_profile_gate": "tests/identity/test_demo_account_lock.py::test_incomplete_demo_profile_is_blocked_before_profile_gate",
+    "tests/test_demo_account_lock.py::test_demo_session_dependency_allows_get": "tests/identity/test_demo_account_lock.py::test_demo_session_dependency_allows_get",
+    "tests/test_demo_account_lock.py::test_locked_email_dependency_blocks_google_session_mutation": "tests/identity/test_demo_account_lock.py::test_locked_email_dependency_blocks_google_session_mutation",
+    "tests/test_login_throttle_security.py::test_missing_and_existing_account_login_timings_have_similar_medians": "tests/identity/test_login_throttle_security.py::test_missing_and_existing_account_login_timings_have_similar_medians",
+    "tests/test_demo_account_lock.py::test_agent_route_returns_403_for_locked_demo_error": "tests/identity/test_demo_account_lock.py::test_agent_route_returns_403_for_locked_demo_error",
+    "tests/test_session_logout_security.py::test_logout_revokes_only_current_session[google]": "tests/identity/test_session_logout_security.py::test_logout_revokes_only_current_session[google]",
+    "tests/test_demo_account_lock.py::test_demo_session_dependency_blocks_mutation[PATCH]": "tests/identity/test_demo_account_lock.py::test_demo_session_dependency_blocks_mutation[PATCH]",
+    "tests/test_l1_local_owner_session.py::test_local_mutations_reject_invalid_origin_host_and_cross_site[headers0]": "tests/identity/test_l1_local_owner_session.py::test_local_mutations_reject_invalid_origin_host_and_cross_site[headers0]",
+    "tests/test_l1_identity_architecture.py::test_identity_compatibility_facades_only_point_inward": "tests/identity/test_l1_identity_architecture.py::test_identity_compatibility_facades_only_point_inward",
+    "tests/test_demo_account_lock.py::test_demo_mutation_is_blocked_before_route_handler": "tests/identity/test_demo_account_lock.py::test_demo_mutation_is_blocked_before_route_handler",
+    "tests/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl": "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+    "tests/test_login_throttle_security.py::test_login_source_uses_forwarded_chain_only_for_trusted_peer": "tests/identity/test_login_throttle_security.py::test_login_source_uses_forwarded_chain_only_for_trusted_peer",
+    "tests/test_credential_resolver.py::test_resolver_rejects_invalid_agent_credential[overrides0]": "tests/identity/test_credential_resolver.py::test_resolver_rejects_invalid_agent_credential[overrides0]",
+    "tests/test_public_signup_policy.py::test_public_runtime_exposes_local_owner_bootstrap_not_hosted_login": "tests/identity/test_public_signup_policy.py::test_public_runtime_exposes_local_owner_bootstrap_not_hosted_login",
+    "tests/test_auth_session_contract.py::test_explicit_session_expiry_overrides_legacy_ttl": "tests/identity/test_auth_session_contract.py::test_explicit_session_expiry_overrides_legacy_ttl",
+    "tests/test_l1_local_v2_credentials.py::test_migration_atomically_converts_every_local_credential_type": "tests/identity/test_l1_local_v2_credentials.py::test_migration_atomically_converts_every_local_credential_type",
+    "tests/test_demo_account_lock.py::test_optional_demo_dependency_blocks_mutation_when_token_is_present": "tests/identity/test_demo_account_lock.py::test_optional_demo_dependency_blocks_mutation_when_token_is_present",
+    "tests/test_l1_local_owner_session.py::test_expired_challenge_is_rejected_without_creating_owner": "tests/identity/test_l1_local_owner_session.py::test_expired_challenge_is_rejected_without_creating_owner",
+    "tests/test_demo_account_lock.py::test_public_demo_login_route_is_absent": "tests/identity/test_demo_account_lock.py::test_public_demo_login_route_is_absent",
+    "tests/test_credential_resolver.py::test_resolver_rejects_invalid_agent_credential[overrides4]": "tests/identity/test_credential_resolver.py::test_resolver_rejects_invalid_agent_credential[overrides4]",
+    "tests/test_l1_local_v2_credentials.py::test_legacy_field_migrates_to_valid_local_v2": "tests/identity/test_l1_local_v2_credentials.py::test_legacy_field_migrates_to_valid_local_v2",
+    "tests/test_l1_local_owner_session.py::test_existing_data_candidate_is_adopted_without_rewriting_foreign_keys": "tests/identity/test_l1_local_owner_session.py::test_existing_data_candidate_is_adopted_without_rewriting_foreign_keys",
+    "tests/test_turnstile.py::test_enabled_rejects_oversized_token": "tests/identity/test_turnstile.py::test_enabled_rejects_oversized_token",
+    "tests/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions": "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions",
+    "tests/test_public_signup_policy.py::test_hosted_production_rejects_password_signup_even_if_flag_is_enabled": "tests/identity/test_public_signup_policy.py::test_hosted_production_rejects_password_signup_even_if_flag_is_enabled",
+    "tests/test_browser_session_security.py::test_cookie_auth_requires_origin_for_mutation_and_allows_exact_origin": "tests/identity/test_browser_session_security.py::test_cookie_auth_requires_origin_for_mutation_and_allows_exact_origin",
+    "tests/test_l1_local_owner_session.py::test_multiple_existing_users_are_never_preselected": "tests/identity/test_l1_local_owner_session.py::test_multiple_existing_users_are_never_preselected",
+    "tests/test_login_throttle_security.py::test_login_throttle_persists_hashed_subjects_and_returns_retry_after": "tests/identity/test_login_throttle_security.py::test_login_throttle_persists_hashed_subjects_and_returns_retry_after",
+    "tests/test_public_signup_policy.py::test_hosted_auth_facade_keeps_legacy_routes_outside_local_default": "tests/identity/test_public_signup_policy.py::test_hosted_auth_facade_keeps_legacy_routes_outside_local_default",
+    "tests/test_auth_policy_versions.py::test_legacy_profile_setup_records_current_privacy_and_terms_versions": "tests/identity/test_auth_policy_versions.py::test_legacy_profile_setup_records_current_privacy_and_terms_versions",
+    "tests/test_login_throttle_security.py::test_login_source_ignores_forwarded_header_from_untrusted_peer": "tests/identity/test_login_throttle_security.py::test_login_source_ignores_forwarded_header_from_untrusted_peer",
+    "tests/test_l1_local_v2_credentials.py::test_invalid_legacy_field_requests_recovery_without_plaintext": "tests/identity/test_l1_local_v2_credentials.py::test_invalid_legacy_field_requests_recovery_without_plaintext",
+    "tests/test_browser_session_security.py::test_production_cookie_is_secure": "tests/identity/test_browser_session_security.py::test_production_cookie_is_secure",
+    "tests/test_demo_account_lock.py::test_agent_service_blocks_profile_update_after_ownership_check": "tests/identity/test_demo_account_lock.py::test_agent_service_blocks_profile_update_after_ownership_check",
+    "tests/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens": "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+    "tests/test_auth_policy_versions.py::test_email_signup_route_checks_turnstile_before_user_creation": "tests/identity/test_auth_policy_versions.py::test_email_signup_route_checks_turnstile_before_user_creation",
+    "tests/test_auth_session_contract.py::test_authenticated_desktop_webview_resolves_claimed_installation_owner": "tests/identity/test_auth_session_contract.py::test_authenticated_desktop_webview_resolves_claimed_installation_owner",
+    "tests/test_credential_resolver.py::test_resolver_rejects_invalid_agent_credential[overrides3]": "tests/identity/test_credential_resolver.py::test_resolver_rejects_invalid_agent_credential[overrides3]",
+    "tests/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json": "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+    "tests/test_l1_identity_domain_foundation.py::test_credential_material_repr_does_not_expose_secret": "tests/identity/test_l1_identity_domain_foundation.py::test_credential_material_repr_does_not_expose_secret",
+    "tests/test_turnstile.py::test_siteverify_failure_rejects_without_logging_secrets": "tests/identity/test_turnstile.py::test_siteverify_failure_rejects_without_logging_secrets",
+    "tests/test_auth_session_contract.py::test_auth_session_expiry_migration_is_nullable_and_reversible": "tests/identity/test_auth_session_contract.py::test_auth_session_expiry_migration_is_nullable_and_reversible",
+    "tests/test_google_verification_throttle.py::test_google_verification_active_lease_limit_and_stale_lease": "tests/identity/test_google_verification_throttle.py::test_google_verification_active_lease_limit_and_stale_lease",
+    "tests/test_google_verification_throttle.py::test_google_link_route_returns_generic_429_with_retry_after": "tests/identity/test_google_verification_throttle.py::test_google_link_route_returns_generic_429_with_retry_after",
+    "tests/test_browser_session_security.py::test_invalid_google_signup_pending_cookie_is_deleted": "tests/identity/test_browser_session_security.py::test_invalid_google_signup_pending_cookie_is_deleted",
+    "tests/test_google_verification_throttle.py::test_google_link_rate_limit_prevents_credential_verification": "tests/identity/test_google_verification_throttle.py::test_google_link_rate_limit_prevents_credential_verification",
+    "tests/test_l1_local_owner_session.py::test_bootstrap_closes_after_claim_and_replayed_challenge_loses_race": "tests/identity/test_l1_local_owner_session.py::test_bootstrap_closes_after_claim_and_replayed_challenge_loses_race",
+    "tests/test_demo_account_lock.py::test_demo_principal_allows_safe_http_methods[HEAD]": "tests/identity/test_demo_account_lock.py::test_demo_principal_allows_safe_http_methods[HEAD]",
+    "tests/test_turnstile.py::test_siteverify_timeout_is_unavailable": "tests/identity/test_turnstile.py::test_siteverify_timeout_is_unavailable"
   },
   "details": {
     "AR-B1": {
@@ -858,6 +1033,2452 @@
       "verification": "tests/migrations/test_alembic_layout.py checks PR263 revision Git blobs, actual Alembic graph, external-cwd CLI, and metadata registration on a real in-memory SQLite connection without executing historical upgrades.",
       "remaining": "AR-G5 must reconnect and revalidate the final app.models Base and model registration. G13 final completion and PR/merge/Actions are not claimed by this physical move.",
       "security": "Add only the exact new 0072 revision path to the existing fixed-marker Gitleaks allowance; retain the old path for history scans. No secret-value or rule widening."
+    },
+    "AR-B2-identity": {
+      "status": "IMPLEMENTED; focused behavior/guard/public node checks PASS; source capture, integrated validation, PR and merge pending",
+      "scope": "PARTIAL: all new identity role modules are active, while exact identity.public ORM/type compatibility consumers remain until their own stages and AR-B8-A. No migrated identity code imports public or legacy services.",
+      "account_deletion": "Identity service admits the request; main and public_main install the same runtime callable, dependencies resolve it, and service passes the caller Session/user unchanged. Runtime owns one commit/rollback and media restore/purge. Both factory bindings are G06 preservation contracts.",
+      "local_owner": "SqlAlchemyIdentityRepository was the policy/transaction implementation. It becomes LocalIdentityService with optional clock/explicit now; five forwarding wrappers and the unused repository Protocol retire without altering failed-attempt commit behavior.",
+      "shared_dependencies": "app.api.identity_dependencies re-exports the identical HTTP dependency callables/browser module for other routers. SDK I/O lives in integrations/google_identity and integrations/bounded_http; startup security composition lives in runtime/startup_security.",
+      "bootstrap_projection": "LocalIdentityService._owner_candidates reads only owner-scoped counts from characters, active world_memberships and llm_credentials in the same Session. It does not write foreign tables; this bounded bootstrap projection is preserved explicitly.",
+      "public_bridge_consumers": [
+        "backend/app/api/v1/routes/memory.py",
+        "backend/app/api/v1/routes/messages.py",
+        "backend/app/api/v1/routes/runtime_status.py",
+        "backend/app/api/v1/routes/world_chat.py",
+        "backend/app/api/v1/routes/world_chat_response.py",
+        "backend/app/domains/routines/infrastructure/sqlalchemy_daily_plan_models.py",
+        "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py",
+        "backend/app/domains/world_characters/infrastructure/autonomous_setup_models.py",
+        "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py",
+        "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py",
+        "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py",
+        "backend/app/integrations/llm/canonical_retrieval_planner.py",
+        "backend/app/integrations/llm/character_response_generator.py",
+        "backend/app/integrations/llm/graph_retrieval_planner.py",
+        "backend/app/integrations/llm/memory_consolidation.py",
+        "backend/app/integrations/llm/memory_selection.py",
+        "backend/app/integrations/llm/retrieval_router.py",
+        "backend/app/runtime/chat/model_bindings.py",
+        "backend/app/runtime/chat/retrieval_policy.py",
+        "backend/app/runtime/chat/world_generation.py",
+        "backend/app/runtime/memory_selection_provider.py",
+        "backend/app/runtime/persistence/sqlite_scheduler_lease.py"
+      ],
+      "public_bridge_retirement": "AR-B2 character/world/model consumers, AR-B3 package consumers, AR-B4 routine consumers and AR-B6 chat consumers move to supported service/schema/contract; final closure and complete identity domain scope at AR-B8-A. Aggregate model aliases retire with AR-G5.",
+      "split_files": {
+        "backend/app/services/auth.py": [
+          "backend/app/domains/identity/constants.py",
+          "backend/app/domains/identity/exceptions.py",
+          "backend/app/domains/identity/service/auth.py",
+          "backend/app/runtime/account_deletion.py"
+        ],
+        "backend/app/domains/identity/domain/local_owner.py": [
+          "backend/app/domains/identity/constants.py",
+          "backend/app/domains/identity/contracts.py",
+          "backend/app/domains/identity/exceptions.py",
+          "backend/app/domains/identity/policies.py"
+        ],
+        "backend/app/domains/identity/application/resolve_credential.py": [
+          "backend/app/domains/identity/exceptions.py",
+          "backend/app/domains/identity/service/credential_resolution.py"
+        ],
+        "backend/app/domains/identity/application/migrate_local_credentials.py": [
+          "backend/app/domains/identity/exceptions.py",
+          "backend/app/domains/identity/service/credential_migration.py"
+        ],
+        "backend/app/services/demo_lock.py": [
+          "backend/app/domains/identity/exceptions.py",
+          "backend/app/domains/identity/service/demo_access.py"
+        ],
+        "backend/app/services/external_auth_verification.py": [
+          "backend/app/domains/identity/exceptions.py",
+          "backend/app/domains/identity/service/external_verification.py"
+        ],
+        "backend/app/services/turnstile.py": [
+          "backend/app/domains/identity/client.py",
+          "backend/app/domains/identity/exceptions.py"
+        ],
+        "backend/app/services/login_throttle.py": [
+          "backend/app/domains/identity/browser_session.py",
+          "backend/app/domains/identity/service/login_throttle.py"
+        ],
+        "backend/app/core/browser_session.py": [
+          "backend/app/domains/identity/browser_session.py",
+          "backend/app/domains/identity/exceptions.py"
+        ],
+        "backend/app/api/v1/deps.py": [
+          "backend/app/api/v1/deps.py",
+          "backend/app/domains/identity/dependencies.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/services/auth.py::AuthError",
+          "new": "backend/app/domains/identity/exceptions.py::AuthError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::EmailAlreadyExistsError",
+          "new": "backend/app/domains/identity/exceptions.py::EmailAlreadyExistsError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::InvalidCredentialsError",
+          "new": "backend/app/domains/identity/exceptions.py::InvalidCredentialsError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::LoginRateLimitedError",
+          "new": "backend/app/domains/identity/exceptions.py::LoginRateLimitedError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::GoogleLoginRateLimitedError",
+          "new": "backend/app/domains/identity/exceptions.py::GoogleLoginRateLimitedError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::GoogleAuthConfigError",
+          "new": "backend/app/domains/identity/exceptions.py::GoogleAuthConfigError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::InvalidGoogleCredentialError",
+          "new": "backend/app/domains/identity/exceptions.py::InvalidGoogleCredentialError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::GoogleEmailAlreadyExistsError",
+          "new": "backend/app/domains/identity/exceptions.py::GoogleEmailAlreadyExistsError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::GoogleLinkEmailMismatchError",
+          "new": "backend/app/domains/identity/exceptions.py::GoogleLinkEmailMismatchError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::GoogleSubAlreadyLinkedError",
+          "new": "backend/app/domains/identity/exceptions.py::GoogleSubAlreadyLinkedError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::InvalidGoogleSignupTokenError",
+          "new": "backend/app/domains/identity/exceptions.py::InvalidGoogleSignupTokenError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::PolicyAgreementRequiredError",
+          "new": "backend/app/domains/identity/exceptions.py::PolicyAgreementRequiredError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::DisplayNameAlreadyExistsError",
+          "new": "backend/app/domains/identity/exceptions.py::DisplayNameAlreadyExistsError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::DisplayNameInvalidError",
+          "new": "backend/app/domains/identity/exceptions.py::DisplayNameInvalidError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::ReservedDisplayNameError",
+          "new": "backend/app/domains/identity/exceptions.py::ReservedDisplayNameError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::DisplayNameBlockedError",
+          "new": "backend/app/domains/identity/exceptions.py::DisplayNameBlockedError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::DisplayNameCooldownError",
+          "new": "backend/app/domains/identity/exceptions.py::DisplayNameCooldownError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::AccountDeletionConfirmationError",
+          "new": "backend/app/domains/identity/exceptions.py::AccountDeletionConfirmationError",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_removes_private_graph_and_keeps_public_content",
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_restores_private_media_when_database_commit_fails"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::AccountDeletionBusyError",
+          "new": "backend/app/domains/identity/exceptions.py::AccountDeletionBusyError",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_removes_private_graph_and_keeps_public_content",
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_restores_private_media_when_database_commit_fails"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::AccountDeletionCredentialSyncError",
+          "new": "backend/app/domains/identity/exceptions.py::AccountDeletionCredentialSyncError",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_removes_private_graph_and_keeps_public_content",
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_restores_private_media_when_database_commit_fails"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::AccountDeletionMediaCleanupError",
+          "new": "backend/app/domains/identity/exceptions.py::AccountDeletionMediaCleanupError",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_removes_private_graph_and_keeps_public_content",
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_restores_private_media_when_database_commit_fails"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::ACCOUNT_DELETE_CONFIRMATION",
+          "new": "backend/app/domains/identity/constants.py::ACCOUNT_DELETE_CONFIRMATION",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::DELETED_USER_DISPLAY_NAME",
+          "new": "backend/app/domains/identity/constants.py::DELETED_USER_DISPLAY_NAME",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_removes_private_graph_and_keeps_public_content",
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_restores_private_media_when_database_commit_fails"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::DELETED_CHARACTER_NAME",
+          "new": "backend/app/domains/identity/constants.py::DELETED_CHARACTER_NAME",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_removes_private_graph_and_keeps_public_content",
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_restores_private_media_when_database_commit_fails"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::DELETED_CHARACTER_PLACEHOLDER",
+          "new": "backend/app/domains/identity/constants.py::DELETED_CHARACTER_PLACEHOLDER",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_removes_private_graph_and_keeps_public_content",
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_restores_private_media_when_database_commit_fails"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::OFFICIAL_OPERATOR_DISPLAY_NAME",
+          "new": "backend/app/domains/identity/constants.py::OFFICIAL_OPERATOR_DISPLAY_NAME",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::OFFICIAL_OPERATOR_DISPLAY_NAME_KEY",
+          "new": "backend/app/domains/identity/constants.py::OFFICIAL_OPERATOR_DISPLAY_NAME_KEY",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::LEGACY_ADMIN_DISPLAY_NAME_KEY",
+          "new": "backend/app/domains/identity/constants.py::LEGACY_ADMIN_DISPLAY_NAME_KEY",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::PRIVACY_POLICY_VERSION",
+          "new": "backend/app/domains/identity/constants.py::PRIVACY_POLICY_VERSION",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::TERMS_VERSION",
+          "new": "backend/app/domains/identity/constants.py::TERMS_VERSION",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::GOOGLE_SIGNUP_PENDING_VERSION",
+          "new": "backend/app/domains/identity/constants.py::GOOGLE_SIGNUP_PENDING_VERSION",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::GOOGLE_SIGNUP_PENDING_TTL",
+          "new": "backend/app/domains/identity/constants.py::GOOGLE_SIGNUP_PENDING_TTL",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::AUTH_SESSION_TTL",
+          "new": "backend/app/domains/identity/constants.py::AUTH_SESSION_TTL",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::DUMMY_PASSWORD_HASH",
+          "new": "backend/app/domains/identity/constants.py::DUMMY_PASSWORD_HASH",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::IssuedAuthSession",
+          "new": "backend/app/domains/identity/service/auth.py::IssuedAuthSession",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::GoogleLoginResult",
+          "new": "backend/app/domains/identity/service/auth.py::GoogleLoginResult",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::normalize_email",
+          "new": "backend/app/domains/identity/service/auth.py::normalize_email",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::normalize_display_name",
+          "new": "backend/app/domains/identity/service/auth.py::normalize_display_name",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::normalize_display_name_key",
+          "new": "backend/app/domains/identity/service/auth.py::normalize_display_name_key",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::create_user",
+          "new": "backend/app/domains/identity/service/auth.py::create_user",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::login",
+          "new": "backend/app/domains/identity/service/auth.py::login",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::login_with_google",
+          "new": "backend/app/domains/identity/service/auth.py::login_with_google",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::complete_google_signup",
+          "new": "backend/app/domains/identity/service/auth.py::complete_google_signup",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::link_google_account",
+          "new": "backend/app/domains/identity/service/auth.py::link_google_account",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::update_user_display_name",
+          "new": "backend/app/domains/identity/service/auth.py::update_user_display_name",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::update_user_preferences",
+          "new": "backend/app/domains/identity/service/auth.py::update_user_preferences",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::get_user_for_token",
+          "new": "backend/app/domains/identity/service/auth.py::get_user_for_token",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::get_session_for_token",
+          "new": "backend/app/domains/identity/service/auth.py::get_session_for_token",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::get_user_session_for_token",
+          "new": "backend/app/domains/identity/service/auth.py::get_user_session_for_token",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::revoke_current_session",
+          "new": "backend/app/domains/identity/service/auth.py::revoke_current_session",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_google_login_from_auth",
+          "new": "backend/app/domains/identity/service/auth.py::_google_login_from_auth",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_ensure_policy_agreements",
+          "new": "backend/app/domains/identity/service/auth.py::_ensure_policy_agreements",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_has_policy_agreements",
+          "new": "backend/app/domains/identity/service/auth.py::_has_policy_agreements",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_set_policy_agreements",
+          "new": "backend/app/domains/identity/service/auth.py::_set_policy_agreements",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_pending_signup_key",
+          "new": "backend/app/domains/identity/service/auth.py::_pending_signup_key",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_b64url_encode",
+          "new": "backend/app/domains/identity/service/auth.py::_b64url_encode",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_b64url_decode",
+          "new": "backend/app/domains/identity/service/auth.py::_b64url_decode",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_create_pending_google_signup_token",
+          "new": "backend/app/domains/identity/service/auth.py::_create_pending_google_signup_token",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_read_pending_google_signup_token",
+          "new": "backend/app/domains/identity/service/auth.py::_read_pending_google_signup_token",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_pending_signup_jti_hash",
+          "new": "backend/app/domains/identity/service/auth.py::_pending_signup_jti_hash",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_lock_pending_google_signup_grant",
+          "new": "backend/app/domains/identity/service/auth.py::_lock_pending_google_signup_grant",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::issue_auth_session",
+          "new": "backend/app/domains/identity/service/auth.py::issue_auth_session",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::auth_session_cookie_max_age",
+          "new": "backend/app/domains/identity/service/auth.py::auth_session_cookie_max_age",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_create_auth_response",
+          "new": "backend/app/domains/identity/service/auth.py::_create_auth_response",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_password_hash_for_verification",
+          "new": "backend/app/domains/identity/service/auth.py::_password_hash_for_verification",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_is_current_password_hash",
+          "new": "backend/app/domains/identity/service/auth.py::_is_current_password_hash",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_verify_google_credential",
+          "new": "backend/app/domains/identity/service/auth.py::_verify_google_credential",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_required_payload_string",
+          "new": "backend/app/domains/identity/service/auth.py::_required_payload_string",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_ensure_display_name_available",
+          "new": "backend/app/domains/identity/service/auth.py::_ensure_display_name_available",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_ensure_display_name_allowed",
+          "new": "backend/app/domains/identity/service/auth.py::_ensure_display_name_allowed",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_is_official_operator_user",
+          "new": "backend/app/domains/identity/service/auth.py::_is_official_operator_user",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_ensure_display_name_not_blocked",
+          "new": "backend/app/domains/identity/service/auth.py::_ensure_display_name_not_blocked",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_ensure_display_name_change_allowed",
+          "new": "backend/app/domains/identity/service/auth.py::_ensure_display_name_change_allowed",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_is_same_display_name",
+          "new": "backend/app/domains/identity/service/auth.py::_is_same_display_name",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_utcnow",
+          "new": "backend/app/domains/identity/service/auth.py::_utcnow",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_as_utc",
+          "new": "backend/app/domains/identity/service/auth.py::_as_utc",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_raise_user_integrity_error",
+          "new": "backend/app/domains/identity/service/auth.py::_raise_user_integrity_error",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::delete_current_user_account",
+          "new": "backend/app/domains/identity/service/auth.py::delete_current_user_account",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/auth.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_auth_policy_versions.py::test_auth_session_is_valid_before_absolute_ttl",
+            "tests/identity/test_auth_policy_versions.py::test_expired_auth_session_is_rejected_like_invalid_token",
+            "tests/identity/test_auth_policy_versions.py::test_email_signup_records_current_privacy_and_terms_versions"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_quarantine_account_private_media",
+          "new": "backend/app/runtime/account_deletion.py::_quarantine_account_private_media",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_removes_private_graph_and_keeps_public_content",
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_restores_private_media_when_database_commit_fails"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_ensure_account_deletion_not_busy",
+          "new": "backend/app/runtime/account_deletion.py::_ensure_account_deletion_not_busy",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_removes_private_graph_and_keeps_public_content",
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_restores_private_media_when_database_commit_fails"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_release_openclaw_profiles_for_account",
+          "new": "backend/app/runtime/account_deletion.py::_release_openclaw_profiles_for_account",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_removes_private_graph_and_keeps_public_content",
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_restores_private_media_when_database_commit_fails"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_reload_openclaw_secrets_sync",
+          "new": "backend/app/runtime/account_deletion.py::_reload_openclaw_secrets_sync",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_removes_private_graph_and_keeps_public_content",
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_restores_private_media_when_database_commit_fails"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_clear_resident_slots_for_account",
+          "new": "backend/app/runtime/account_deletion.py::_clear_resident_slots_for_account",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_removes_private_graph_and_keeps_public_content",
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_restores_private_media_when_database_commit_fails"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_scrub_account_data",
+          "new": "backend/app/runtime/account_deletion.py::_scrub_account_data",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_removes_private_graph_and_keeps_public_content",
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_restores_private_media_when_database_commit_fails"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_owned_agent_run_condition",
+          "new": "backend/app/runtime/account_deletion.py::_owned_agent_run_condition",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_removes_private_graph_and_keeps_public_content",
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_restores_private_media_when_database_commit_fails"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_owned_agent_slot_condition",
+          "new": "backend/app/runtime/account_deletion.py::_owned_agent_slot_condition",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_removes_private_graph_and_keeps_public_content",
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_restores_private_media_when_database_commit_fails"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_character_id_condition",
+          "new": "backend/app/runtime/account_deletion.py::_character_id_condition",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_removes_private_graph_and_keeps_public_content",
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_restores_private_media_when_database_commit_fails"
+          ]
+        },
+        {
+          "old": "backend/app/services/auth.py::_deleted_character_handle",
+          "new": "backend/app/runtime/account_deletion.py::_deleted_character_handle",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_removes_private_graph_and_keeps_public_content",
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_restores_private_media_when_database_commit_fails"
+          ]
+        },
+        {
+          "old": "backend/app/domains/identity/domain/local_owner.py::LocalIdentityError",
+          "new": "backend/app/domains/identity/exceptions.py::LocalIdentityError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/local_owner.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_l1_local_owner_session.py::test_clean_bootstrap_claims_one_owner_and_stores_only_session_hash",
+            "tests/identity/test_l1_local_owner_session.py::test_valid_challenge_has_bounded_invalid_claim_attempts"
+          ]
+        },
+        {
+          "old": "backend/app/domains/identity/domain/local_owner.py::LocalOwnerUnclaimedError",
+          "new": "backend/app/domains/identity/exceptions.py::LocalOwnerUnclaimedError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/local_owner.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_l1_local_owner_session.py::test_clean_bootstrap_claims_one_owner_and_stores_only_session_hash",
+            "tests/identity/test_l1_local_owner_session.py::test_valid_challenge_has_bounded_invalid_claim_attempts"
+          ]
+        },
+        {
+          "old": "backend/app/domains/identity/domain/local_owner.py::BootstrapClosedError",
+          "new": "backend/app/domains/identity/exceptions.py::BootstrapClosedError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/local_owner.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_l1_local_owner_session.py::test_clean_bootstrap_claims_one_owner_and_stores_only_session_hash",
+            "tests/identity/test_l1_local_owner_session.py::test_valid_challenge_has_bounded_invalid_claim_attempts"
+          ]
+        },
+        {
+          "old": "backend/app/domains/identity/domain/local_owner.py::BootstrapChallengeInvalidError",
+          "new": "backend/app/domains/identity/exceptions.py::BootstrapChallengeInvalidError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/local_owner.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_l1_local_owner_session.py::test_clean_bootstrap_claims_one_owner_and_stores_only_session_hash",
+            "tests/identity/test_l1_local_owner_session.py::test_valid_challenge_has_bounded_invalid_claim_attempts"
+          ]
+        },
+        {
+          "old": "backend/app/domains/identity/domain/local_owner.py::BootstrapRaceLostError",
+          "new": "backend/app/domains/identity/exceptions.py::BootstrapRaceLostError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/local_owner.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_l1_local_owner_session.py::test_clean_bootstrap_claims_one_owner_and_stores_only_session_hash",
+            "tests/identity/test_l1_local_owner_session.py::test_valid_challenge_has_bounded_invalid_claim_attempts"
+          ]
+        },
+        {
+          "old": "backend/app/domains/identity/domain/local_owner.py::LocalOwnerCandidateInvalidError",
+          "new": "backend/app/domains/identity/exceptions.py::LocalOwnerCandidateInvalidError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/local_owner.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_l1_local_owner_session.py::test_clean_bootstrap_claims_one_owner_and_stores_only_session_hash",
+            "tests/identity/test_l1_local_owner_session.py::test_valid_challenge_has_bounded_invalid_claim_attempts"
+          ]
+        },
+        {
+          "old": "backend/app/domains/identity/domain/local_owner.py::LocalOwnerProfileInvalidError",
+          "new": "backend/app/domains/identity/exceptions.py::LocalOwnerProfileInvalidError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/local_owner.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_l1_local_owner_session.py::test_clean_bootstrap_claims_one_owner_and_stores_only_session_hash",
+            "tests/identity/test_l1_local_owner_session.py::test_valid_challenge_has_bounded_invalid_claim_attempts"
+          ]
+        },
+        {
+          "old": "backend/app/domains/identity/domain/local_owner.py::LocalOwnerPrivacyAcknowledgementRequiredError",
+          "new": "backend/app/domains/identity/exceptions.py::LocalOwnerPrivacyAcknowledgementRequiredError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/local_owner.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_l1_local_owner_session.py::test_clean_bootstrap_claims_one_owner_and_stores_only_session_hash",
+            "tests/identity/test_l1_local_owner_session.py::test_valid_challenge_has_bounded_invalid_claim_attempts"
+          ]
+        },
+        {
+          "old": "backend/app/domains/identity/domain/local_owner.py::LocalSessionRateLimitedError",
+          "new": "backend/app/domains/identity/exceptions.py::LocalSessionRateLimitedError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/local_owner.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_l1_local_owner_session.py::test_clean_bootstrap_claims_one_owner_and_stores_only_session_hash",
+            "tests/identity/test_l1_local_owner_session.py::test_valid_challenge_has_bounded_invalid_claim_attempts"
+          ]
+        },
+        {
+          "old": "backend/app/domains/identity/domain/local_owner.py::LocalSessionUnavailableError",
+          "new": "backend/app/domains/identity/exceptions.py::LocalSessionUnavailableError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/local_owner.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_l1_local_owner_session.py::test_clean_bootstrap_claims_one_owner_and_stores_only_session_hash",
+            "tests/identity/test_l1_local_owner_session.py::test_valid_challenge_has_bounded_invalid_claim_attempts"
+          ]
+        },
+        {
+          "old": "backend/app/domains/identity/domain/local_owner.py::LOCAL_INSTALLATION_KEY",
+          "new": "backend/app/domains/identity/constants.py::LOCAL_INSTALLATION_KEY",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/local_owner.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_l1_local_owner_session.py::test_clean_bootstrap_claims_one_owner_and_stores_only_session_hash",
+            "tests/identity/test_l1_local_owner_session.py::test_valid_challenge_has_bounded_invalid_claim_attempts"
+          ]
+        },
+        {
+          "old": "backend/app/domains/identity/domain/local_owner.py::normalize_local_display_name",
+          "new": "backend/app/domains/identity/policies.py::normalize_local_display_name",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/local_owner.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_l1_local_owner_session.py::test_clean_bootstrap_claims_one_owner_and_stores_only_session_hash",
+            "tests/identity/test_l1_local_owner_session.py::test_valid_challenge_has_bounded_invalid_claim_attempts"
+          ]
+        },
+        {
+          "old": "backend/app/domains/identity/domain/local_owner.py::normalize_local_label",
+          "new": "backend/app/domains/identity/policies.py::normalize_local_label",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/local_owner.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_l1_local_owner_session.py::test_clean_bootstrap_claims_one_owner_and_stores_only_session_hash",
+            "tests/identity/test_l1_local_owner_session.py::test_valid_challenge_has_bounded_invalid_claim_attempts"
+          ]
+        },
+        {
+          "old": "backend/app/domains/identity/domain/local_owner.py::BootstrapState",
+          "new": "backend/app/domains/identity/contracts.py::BootstrapState",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/local_owner.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_l1_local_owner_session.py::test_clean_bootstrap_claims_one_owner_and_stores_only_session_hash",
+            "tests/identity/test_l1_local_owner_session.py::test_valid_challenge_has_bounded_invalid_claim_attempts"
+          ]
+        },
+        {
+          "old": "backend/app/domains/identity/domain/local_owner.py::LocalOwnerCandidate",
+          "new": "backend/app/domains/identity/contracts.py::LocalOwnerCandidate",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/local_owner.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_l1_local_owner_session.py::test_clean_bootstrap_claims_one_owner_and_stores_only_session_hash",
+            "tests/identity/test_l1_local_owner_session.py::test_valid_challenge_has_bounded_invalid_claim_attempts"
+          ]
+        },
+        {
+          "old": "backend/app/domains/identity/domain/local_owner.py::LocalUserSnapshot",
+          "new": "backend/app/domains/identity/contracts.py::LocalUserSnapshot",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/local_owner.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_l1_local_owner_session.py::test_clean_bootstrap_claims_one_owner_and_stores_only_session_hash",
+            "tests/identity/test_l1_local_owner_session.py::test_valid_challenge_has_bounded_invalid_claim_attempts"
+          ]
+        },
+        {
+          "old": "backend/app/domains/identity/domain/local_owner.py::LocalBootstrapStatus",
+          "new": "backend/app/domains/identity/contracts.py::LocalBootstrapStatus",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/local_owner.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_l1_local_owner_session.py::test_clean_bootstrap_claims_one_owner_and_stores_only_session_hash",
+            "tests/identity/test_l1_local_owner_session.py::test_valid_challenge_has_bounded_invalid_claim_attempts"
+          ]
+        },
+        {
+          "old": "backend/app/domains/identity/domain/local_owner.py::IssuedBootstrapChallenge",
+          "new": "backend/app/domains/identity/contracts.py::IssuedBootstrapChallenge",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/local_owner.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_l1_local_owner_session.py::test_clean_bootstrap_claims_one_owner_and_stores_only_session_hash",
+            "tests/identity/test_l1_local_owner_session.py::test_valid_challenge_has_bounded_invalid_claim_attempts"
+          ]
+        },
+        {
+          "old": "backend/app/domains/identity/domain/local_owner.py::IssuedLocalSession",
+          "new": "backend/app/domains/identity/contracts.py::IssuedLocalSession",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/local_owner.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_l1_local_owner_session.py::test_clean_bootstrap_claims_one_owner_and_stores_only_session_hash",
+            "tests/identity/test_l1_local_owner_session.py::test_valid_challenge_has_bounded_invalid_claim_attempts"
+          ]
+        },
+        {
+          "old": "backend/app/domains/identity/application/resolve_credential.py::CredentialResolutionError",
+          "new": "backend/app/domains/identity/exceptions.py::CredentialResolutionError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/credential_resolution.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_credential_resolver.py::test_resolver_returns_redacted_material_for_owned_character",
+            "tests/identity/test_credential_resolver.py::test_resolver_rejects_invalid_agent_credential",
+            "tests/identity/test_credential_resolver.py::test_message_resolver_accepts_agent_or_message_source"
+          ]
+        },
+        {
+          "old": "backend/app/domains/identity/application/resolve_credential.py::_DEFAULT_STORED_PURPOSES",
+          "new": "backend/app/domains/identity/service/credential_resolution.py::_DEFAULT_STORED_PURPOSES",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/credential_resolution.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_credential_resolver.py::test_resolver_returns_redacted_material_for_owned_character",
+            "tests/identity/test_credential_resolver.py::test_resolver_rejects_invalid_agent_credential",
+            "tests/identity/test_credential_resolver.py::test_message_resolver_accepts_agent_or_message_source"
+          ]
+        },
+        {
+          "old": "backend/app/domains/identity/application/resolve_credential.py::CredentialResolver",
+          "new": "backend/app/domains/identity/service/credential_resolution.py::CredentialResolver",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/credential_resolution.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_credential_resolver.py::test_resolver_returns_redacted_material_for_owned_character",
+            "tests/identity/test_credential_resolver.py::test_resolver_rejects_invalid_agent_credential",
+            "tests/identity/test_credential_resolver.py::test_message_resolver_accepts_agent_or_message_source"
+          ]
+        },
+        {
+          "old": "backend/app/domains/identity/application/migrate_local_credentials.py::CredentialMigrationError",
+          "new": "backend/app/domains/identity/exceptions.py::CredentialMigrationError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/credential_migration.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_credential_resolver.py::test_resolver_returns_redacted_material_for_owned_character",
+            "tests/identity/test_credential_resolver.py::test_resolver_rejects_invalid_agent_credential",
+            "tests/identity/test_credential_resolver.py::test_message_resolver_accepts_agent_or_message_source"
+          ]
+        },
+        {
+          "old": "backend/app/domains/identity/application/migrate_local_credentials.py::CredentialEnvelopeMigration",
+          "new": "backend/app/domains/identity/service/credential_migration.py::CredentialEnvelopeMigration",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/credential_migration.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_credential_resolver.py::test_resolver_returns_redacted_material_for_owned_character",
+            "tests/identity/test_credential_resolver.py::test_resolver_rejects_invalid_agent_credential",
+            "tests/identity/test_credential_resolver.py::test_message_resolver_accepts_agent_or_message_source"
+          ]
+        },
+        {
+          "old": "backend/app/domains/identity/application/migrate_local_credentials.py::migrate_local_credential_envelope",
+          "new": "backend/app/domains/identity/service/credential_migration.py::migrate_local_credential_envelope",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/credential_migration.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_credential_resolver.py::test_resolver_returns_redacted_material_for_owned_character",
+            "tests/identity/test_credential_resolver.py::test_resolver_rejects_invalid_agent_credential",
+            "tests/identity/test_credential_resolver.py::test_message_resolver_accepts_agent_or_message_source"
+          ]
+        },
+        {
+          "old": "backend/app/services/demo_lock.py::DemoAccountLockedError",
+          "new": "backend/app/domains/identity/exceptions.py::DemoAccountLockedError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/demo_access.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_demo_account_lock.py::test_demo_lock_normalizes_configured_email",
+            "tests/identity/test_demo_account_lock.py::test_demo_principal_accepts_session_method_or_locked_email",
+            "tests/identity/test_demo_account_lock.py::test_demo_principal_allows_safe_http_methods"
+          ]
+        },
+        {
+          "old": "backend/app/services/demo_lock.py::DEMO_ACCOUNT_LOCKED_MESSAGE",
+          "new": "backend/app/domains/identity/service/demo_access.py::DEMO_ACCOUNT_LOCKED_MESSAGE",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/demo_access.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_demo_account_lock.py::test_demo_lock_normalizes_configured_email",
+            "tests/identity/test_demo_account_lock.py::test_demo_principal_accepts_session_method_or_locked_email",
+            "tests/identity/test_demo_account_lock.py::test_demo_principal_allows_safe_http_methods"
+          ]
+        },
+        {
+          "old": "backend/app/services/demo_lock.py::SAFE_DEMO_HTTP_METHODS",
+          "new": "backend/app/domains/identity/service/demo_access.py::SAFE_DEMO_HTTP_METHODS",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/demo_access.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_demo_account_lock.py::test_demo_lock_normalizes_configured_email",
+            "tests/identity/test_demo_account_lock.py::test_demo_principal_accepts_session_method_or_locked_email",
+            "tests/identity/test_demo_account_lock.py::test_demo_principal_allows_safe_http_methods"
+          ]
+        },
+        {
+          "old": "backend/app/services/demo_lock.py::is_locked_demo_user",
+          "new": "backend/app/domains/identity/service/demo_access.py::is_locked_demo_user",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/demo_access.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_demo_account_lock.py::test_demo_lock_normalizes_configured_email",
+            "tests/identity/test_demo_account_lock.py::test_demo_principal_accepts_session_method_or_locked_email",
+            "tests/identity/test_demo_account_lock.py::test_demo_principal_allows_safe_http_methods"
+          ]
+        },
+        {
+          "old": "backend/app/services/demo_lock.py::is_read_only_demo_principal",
+          "new": "backend/app/domains/identity/service/demo_access.py::is_read_only_demo_principal",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/demo_access.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_demo_account_lock.py::test_demo_lock_normalizes_configured_email",
+            "tests/identity/test_demo_account_lock.py::test_demo_principal_accepts_session_method_or_locked_email",
+            "tests/identity/test_demo_account_lock.py::test_demo_principal_allows_safe_http_methods"
+          ]
+        },
+        {
+          "old": "backend/app/services/demo_lock.py::ensure_demo_request_allowed",
+          "new": "backend/app/domains/identity/service/demo_access.py::ensure_demo_request_allowed",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/demo_access.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_demo_account_lock.py::test_demo_lock_normalizes_configured_email",
+            "tests/identity/test_demo_account_lock.py::test_demo_principal_accepts_session_method_or_locked_email",
+            "tests/identity/test_demo_account_lock.py::test_demo_principal_allows_safe_http_methods"
+          ]
+        },
+        {
+          "old": "backend/app/services/demo_lock.py::ensure_demo_admin_access_allowed",
+          "new": "backend/app/domains/identity/service/demo_access.py::ensure_demo_admin_access_allowed",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/demo_access.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_demo_account_lock.py::test_demo_lock_normalizes_configured_email",
+            "tests/identity/test_demo_account_lock.py::test_demo_principal_accepts_session_method_or_locked_email",
+            "tests/identity/test_demo_account_lock.py::test_demo_principal_allows_safe_http_methods"
+          ]
+        },
+        {
+          "old": "backend/app/services/demo_lock.py::ensure_demo_user_mutable",
+          "new": "backend/app/domains/identity/service/demo_access.py::ensure_demo_user_mutable",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/demo_access.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_demo_account_lock.py::test_demo_lock_normalizes_configured_email",
+            "tests/identity/test_demo_account_lock.py::test_demo_principal_accepts_session_method_or_locked_email",
+            "tests/identity/test_demo_account_lock.py::test_demo_principal_allows_safe_http_methods"
+          ]
+        },
+        {
+          "old": "backend/app/services/external_auth_verification.py::ExternalVerificationRateLimitedError",
+          "new": "backend/app/domains/identity/exceptions.py::ExternalVerificationRateLimitedError",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/external_verification.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_google_verification_throttle.py::test_google_verifier_is_not_called_after_source_limit",
+            "tests/identity/test_google_verification_throttle.py::test_google_verification_active_lease_limit_and_stale_lease",
+            "tests/identity/test_google_verification_throttle.py::test_google_verification_reservation_stores_only_hashed_source"
+          ]
+        },
+        {
+          "old": "backend/app/services/external_auth_verification.py::PROVIDER_GOOGLE",
+          "new": "backend/app/domains/identity/service/external_verification.py::PROVIDER_GOOGLE",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/external_verification.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_google_verification_throttle.py::test_google_verifier_is_not_called_after_source_limit",
+            "tests/identity/test_google_verification_throttle.py::test_google_verification_active_lease_limit_and_stale_lease",
+            "tests/identity/test_google_verification_throttle.py::test_google_verification_reservation_stores_only_hashed_source"
+          ]
+        },
+        {
+          "old": "backend/app/services/external_auth_verification.py::_GLOBAL_LOCK_KEY",
+          "new": "backend/app/domains/identity/service/external_verification.py::_GLOBAL_LOCK_KEY",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/external_verification.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_google_verification_throttle.py::test_google_verifier_is_not_called_after_source_limit",
+            "tests/identity/test_google_verification_throttle.py::test_google_verification_active_lease_limit_and_stale_lease",
+            "tests/identity/test_google_verification_throttle.py::test_google_verification_reservation_stores_only_hashed_source"
+          ]
+        },
+        {
+          "old": "backend/app/services/external_auth_verification.py::_NON_POSTGRES_LOCK",
+          "new": "backend/app/domains/identity/service/external_verification.py::_NON_POSTGRES_LOCK",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/external_verification.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_google_verification_throttle.py::test_google_verifier_is_not_called_after_source_limit",
+            "tests/identity/test_google_verification_throttle.py::test_google_verification_active_lease_limit_and_stale_lease",
+            "tests/identity/test_google_verification_throttle.py::test_google_verification_reservation_stores_only_hashed_source"
+          ]
+        },
+        {
+          "old": "backend/app/services/external_auth_verification.py::logger",
+          "new": "backend/app/domains/identity/service/external_verification.py::logger",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/external_verification.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_google_verification_throttle.py::test_google_verifier_is_not_called_after_source_limit",
+            "tests/identity/test_google_verification_throttle.py::test_google_verification_active_lease_limit_and_stale_lease",
+            "tests/identity/test_google_verification_throttle.py::test_google_verification_reservation_stores_only_hashed_source"
+          ]
+        },
+        {
+          "old": "backend/app/services/external_auth_verification.py::reserve_google_verification",
+          "new": "backend/app/domains/identity/service/external_verification.py::reserve_google_verification",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/external_verification.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_google_verification_throttle.py::test_google_verifier_is_not_called_after_source_limit",
+            "tests/identity/test_google_verification_throttle.py::test_google_verification_active_lease_limit_and_stale_lease",
+            "tests/identity/test_google_verification_throttle.py::test_google_verification_reservation_stores_only_hashed_source"
+          ]
+        },
+        {
+          "old": "backend/app/services/external_auth_verification.py::complete_google_verification",
+          "new": "backend/app/domains/identity/service/external_verification.py::complete_google_verification",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/external_verification.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_google_verification_throttle.py::test_google_verifier_is_not_called_after_source_limit",
+            "tests/identity/test_google_verification_throttle.py::test_google_verification_active_lease_limit_and_stale_lease",
+            "tests/identity/test_google_verification_throttle.py::test_google_verification_reservation_stores_only_hashed_source"
+          ]
+        },
+        {
+          "old": "backend/app/services/external_auth_verification.py::_retry_after_seconds",
+          "new": "backend/app/domains/identity/service/external_verification.py::_retry_after_seconds",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/external_verification.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_google_verification_throttle.py::test_google_verifier_is_not_called_after_source_limit",
+            "tests/identity/test_google_verification_throttle.py::test_google_verification_active_lease_limit_and_stale_lease",
+            "tests/identity/test_google_verification_throttle.py::test_google_verification_reservation_stores_only_hashed_source"
+          ]
+        },
+        {
+          "old": "backend/app/services/external_auth_verification.py::_reservation_lock",
+          "new": "backend/app/domains/identity/service/external_verification.py::_reservation_lock",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/external_verification.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_google_verification_throttle.py::test_google_verifier_is_not_called_after_source_limit",
+            "tests/identity/test_google_verification_throttle.py::test_google_verification_active_lease_limit_and_stale_lease",
+            "tests/identity/test_google_verification_throttle.py::test_google_verification_reservation_stores_only_hashed_source"
+          ]
+        },
+        {
+          "old": "backend/app/services/external_auth_verification.py::_subject_hash",
+          "new": "backend/app/domains/identity/service/external_verification.py::_subject_hash",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/external_verification.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_google_verification_throttle.py::test_google_verifier_is_not_called_after_source_limit",
+            "tests/identity/test_google_verification_throttle.py::test_google_verification_active_lease_limit_and_stale_lease",
+            "tests/identity/test_google_verification_throttle.py::test_google_verification_reservation_stores_only_hashed_source"
+          ]
+        },
+        {
+          "old": "backend/app/services/external_auth_verification.py::_aware_utc",
+          "new": "backend/app/domains/identity/service/external_verification.py::_aware_utc",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/external_verification.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_google_verification_throttle.py::test_google_verifier_is_not_called_after_source_limit",
+            "tests/identity/test_google_verification_throttle.py::test_google_verification_active_lease_limit_and_stale_lease",
+            "tests/identity/test_google_verification_throttle.py::test_google_verification_reservation_stores_only_hashed_source"
+          ]
+        },
+        {
+          "old": "backend/app/services/turnstile.py::TurnstileError",
+          "new": "backend/app/domains/identity/exceptions.py::TurnstileError",
+          "direct_consumers": [
+            "backend/app/domains/identity/client.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_turnstile.py::test_disabled_allows_missing_token",
+            "tests/identity/test_turnstile.py::test_enabled_rejects_missing_token",
+            "tests/identity/test_turnstile.py::test_enabled_rejects_oversized_token"
+          ]
+        },
+        {
+          "old": "backend/app/services/turnstile.py::TurnstileVerificationError",
+          "new": "backend/app/domains/identity/exceptions.py::TurnstileVerificationError",
+          "direct_consumers": [
+            "backend/app/domains/identity/client.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_turnstile.py::test_disabled_allows_missing_token",
+            "tests/identity/test_turnstile.py::test_enabled_rejects_missing_token",
+            "tests/identity/test_turnstile.py::test_enabled_rejects_oversized_token"
+          ]
+        },
+        {
+          "old": "backend/app/services/turnstile.py::TurnstileConfigError",
+          "new": "backend/app/domains/identity/exceptions.py::TurnstileConfigError",
+          "direct_consumers": [
+            "backend/app/domains/identity/client.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_turnstile.py::test_disabled_allows_missing_token",
+            "tests/identity/test_turnstile.py::test_enabled_rejects_missing_token",
+            "tests/identity/test_turnstile.py::test_enabled_rejects_oversized_token"
+          ]
+        },
+        {
+          "old": "backend/app/services/turnstile.py::TurnstileUnavailableError",
+          "new": "backend/app/domains/identity/exceptions.py::TurnstileUnavailableError",
+          "direct_consumers": [
+            "backend/app/domains/identity/client.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_turnstile.py::test_disabled_allows_missing_token",
+            "tests/identity/test_turnstile.py::test_enabled_rejects_missing_token",
+            "tests/identity/test_turnstile.py::test_enabled_rejects_oversized_token"
+          ]
+        },
+        {
+          "old": "backend/app/services/turnstile.py::TURNSTILE_SITEVERIFY_URL",
+          "new": "backend/app/domains/identity/client.py::TURNSTILE_SITEVERIFY_URL",
+          "direct_consumers": [
+            "backend/app/domains/identity/client.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_turnstile.py::test_disabled_allows_missing_token",
+            "tests/identity/test_turnstile.py::test_enabled_rejects_missing_token",
+            "tests/identity/test_turnstile.py::test_enabled_rejects_oversized_token"
+          ]
+        },
+        {
+          "old": "backend/app/services/turnstile.py::TURNSTILE_MAX_TOKEN_LENGTH",
+          "new": "backend/app/domains/identity/client.py::TURNSTILE_MAX_TOKEN_LENGTH",
+          "direct_consumers": [
+            "backend/app/domains/identity/client.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_turnstile.py::test_disabled_allows_missing_token",
+            "tests/identity/test_turnstile.py::test_enabled_rejects_missing_token",
+            "tests/identity/test_turnstile.py::test_enabled_rejects_oversized_token"
+          ]
+        },
+        {
+          "old": "backend/app/services/turnstile.py::TURNSTILE_MAX_RESPONSE_BYTES",
+          "new": "backend/app/domains/identity/client.py::TURNSTILE_MAX_RESPONSE_BYTES",
+          "direct_consumers": [
+            "backend/app/domains/identity/client.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_turnstile.py::test_disabled_allows_missing_token",
+            "tests/identity/test_turnstile.py::test_enabled_rejects_missing_token",
+            "tests/identity/test_turnstile.py::test_enabled_rejects_oversized_token"
+          ]
+        },
+        {
+          "old": "backend/app/services/turnstile.py::logger",
+          "new": "backend/app/domains/identity/client.py::logger",
+          "direct_consumers": [
+            "backend/app/domains/identity/client.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_turnstile.py::test_disabled_allows_missing_token",
+            "tests/identity/test_turnstile.py::test_enabled_rejects_missing_token",
+            "tests/identity/test_turnstile.py::test_enabled_rejects_oversized_token"
+          ]
+        },
+        {
+          "old": "backend/app/services/turnstile.py::verify_turnstile_or_raise",
+          "new": "backend/app/domains/identity/client.py::verify_turnstile_or_raise",
+          "direct_consumers": [
+            "backend/app/domains/identity/client.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_turnstile.py::test_disabled_allows_missing_token",
+            "tests/identity/test_turnstile.py::test_enabled_rejects_missing_token",
+            "tests/identity/test_turnstile.py::test_enabled_rejects_oversized_token"
+          ]
+        },
+        {
+          "old": "backend/app/services/login_throttle.py::FAILURE_WINDOW",
+          "new": "backend/app/domains/identity/service/login_throttle.py::FAILURE_WINDOW",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/login_throttle.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_login_throttle_security.py::test_missing_and_google_only_users_run_one_password_verification",
+            "tests/identity/test_login_throttle_security.py::test_login_throttle_persists_hashed_subjects_and_returns_retry_after",
+            "tests/identity/test_login_throttle_security.py::test_successful_login_resets_only_account_source_bucket"
+          ]
+        },
+        {
+          "old": "backend/app/services/login_throttle.py::STALE_BUCKET_AGE",
+          "new": "backend/app/domains/identity/service/login_throttle.py::STALE_BUCKET_AGE",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/login_throttle.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_login_throttle_security.py::test_missing_and_google_only_users_run_one_password_verification",
+            "tests/identity/test_login_throttle_security.py::test_login_throttle_persists_hashed_subjects_and_returns_retry_after",
+            "tests/identity/test_login_throttle_security.py::test_successful_login_resets_only_account_source_bucket"
+          ]
+        },
+        {
+          "old": "backend/app/services/login_throttle.py::logger",
+          "new": "backend/app/domains/identity/service/login_throttle.py::logger",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/login_throttle.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_login_throttle_security.py::test_missing_and_google_only_users_run_one_password_verification",
+            "tests/identity/test_login_throttle_security.py::test_login_throttle_persists_hashed_subjects_and_returns_retry_after",
+            "tests/identity/test_login_throttle_security.py::test_successful_login_resets_only_account_source_bucket"
+          ]
+        },
+        {
+          "old": "backend/app/services/login_throttle.py::LoginThrottle",
+          "new": "backend/app/domains/identity/service/login_throttle.py::LoginThrottle",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/login_throttle.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_login_throttle_security.py::test_missing_and_google_only_users_run_one_password_verification",
+            "tests/identity/test_login_throttle_security.py::test_login_throttle_persists_hashed_subjects_and_returns_retry_after",
+            "tests/identity/test_login_throttle_security.py::test_successful_login_resets_only_account_source_bucket"
+          ]
+        },
+        {
+          "old": "backend/app/services/login_throttle.py::lock_login_throttle",
+          "new": "backend/app/domains/identity/service/login_throttle.py::lock_login_throttle",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/login_throttle.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_login_throttle_security.py::test_missing_and_google_only_users_run_one_password_verification",
+            "tests/identity/test_login_throttle_security.py::test_login_throttle_persists_hashed_subjects_and_returns_retry_after",
+            "tests/identity/test_login_throttle_security.py::test_successful_login_resets_only_account_source_bucket"
+          ]
+        },
+        {
+          "old": "backend/app/services/login_throttle.py::cleanup_stale_buckets",
+          "new": "backend/app/domains/identity/service/login_throttle.py::cleanup_stale_buckets",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/login_throttle.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_login_throttle_security.py::test_missing_and_google_only_users_run_one_password_verification",
+            "tests/identity/test_login_throttle_security.py::test_login_throttle_persists_hashed_subjects_and_returns_retry_after",
+            "tests/identity/test_login_throttle_security.py::test_successful_login_resets_only_account_source_bucket"
+          ]
+        },
+        {
+          "old": "backend/app/services/login_throttle.py::blocked_until_for_failure_count",
+          "new": "backend/app/domains/identity/service/login_throttle.py::blocked_until_for_failure_count",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/login_throttle.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_login_throttle_security.py::test_missing_and_google_only_users_run_one_password_verification",
+            "tests/identity/test_login_throttle_security.py::test_login_throttle_persists_hashed_subjects_and_returns_retry_after",
+            "tests/identity/test_login_throttle_security.py::test_successful_login_resets_only_account_source_bucket"
+          ]
+        },
+        {
+          "old": "backend/app/services/login_throttle.py::request_source",
+          "new": "backend/app/domains/identity/browser_session.py::request_source",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_login_throttle_security.py::test_missing_and_google_only_users_run_one_password_verification",
+            "tests/identity/test_login_throttle_security.py::test_login_throttle_persists_hashed_subjects_and_returns_retry_after",
+            "tests/identity/test_login_throttle_security.py::test_successful_login_resets_only_account_source_bucket"
+          ]
+        },
+        {
+          "old": "backend/app/services/login_throttle.py::_ensure_bucket",
+          "new": "backend/app/domains/identity/service/login_throttle.py::_ensure_bucket",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/login_throttle.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_login_throttle_security.py::test_missing_and_google_only_users_run_one_password_verification",
+            "tests/identity/test_login_throttle_security.py::test_login_throttle_persists_hashed_subjects_and_returns_retry_after",
+            "tests/identity/test_login_throttle_security.py::test_successful_login_resets_only_account_source_bucket"
+          ]
+        },
+        {
+          "old": "backend/app/services/login_throttle.py::_subject_hash",
+          "new": "backend/app/domains/identity/service/login_throttle.py::_subject_hash",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/login_throttle.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_login_throttle_security.py::test_missing_and_google_only_users_run_one_password_verification",
+            "tests/identity/test_login_throttle_security.py::test_login_throttle_persists_hashed_subjects_and_returns_retry_after",
+            "tests/identity/test_login_throttle_security.py::test_successful_login_resets_only_account_source_bucket"
+          ]
+        },
+        {
+          "old": "backend/app/services/login_throttle.py::_canonical_address",
+          "new": "backend/app/domains/identity/browser_session.py::_canonical_address",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_login_throttle_security.py::test_missing_and_google_only_users_run_one_password_verification",
+            "tests/identity/test_login_throttle_security.py::test_login_throttle_persists_hashed_subjects_and_returns_retry_after",
+            "tests/identity/test_login_throttle_security.py::test_successful_login_resets_only_account_source_bucket"
+          ]
+        },
+        {
+          "old": "backend/app/services/login_throttle.py::_trusted_proxy_networks",
+          "new": "backend/app/domains/identity/browser_session.py::_trusted_proxy_networks",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_login_throttle_security.py::test_missing_and_google_only_users_run_one_password_verification",
+            "tests/identity/test_login_throttle_security.py::test_login_throttle_persists_hashed_subjects_and_returns_retry_after",
+            "tests/identity/test_login_throttle_security.py::test_successful_login_resets_only_account_source_bucket"
+          ]
+        },
+        {
+          "old": "backend/app/services/login_throttle.py::_is_trusted_proxy",
+          "new": "backend/app/domains/identity/browser_session.py::_is_trusted_proxy",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_login_throttle_security.py::test_missing_and_google_only_users_run_one_password_verification",
+            "tests/identity/test_login_throttle_security.py::test_login_throttle_persists_hashed_subjects_and_returns_retry_after",
+            "tests/identity/test_login_throttle_security.py::test_successful_login_resets_only_account_source_bucket"
+          ]
+        },
+        {
+          "old": "backend/app/services/login_throttle.py::_aware_utc",
+          "new": "backend/app/domains/identity/service/login_throttle.py::_aware_utc",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/login_throttle.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_login_throttle_security.py::test_missing_and_google_only_users_run_one_password_verification",
+            "tests/identity/test_login_throttle_security.py::test_login_throttle_persists_hashed_subjects_and_returns_retry_after",
+            "tests/identity/test_login_throttle_security.py::test_successful_login_resets_only_account_source_bucket"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::SESSION_COOKIE_NAME",
+          "new": "backend/app/domains/identity/browser_session.py::SESSION_COOKIE_NAME",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::GOOGLE_PENDING_COOKIE_NAME",
+          "new": "backend/app/domains/identity/browser_session.py::GOOGLE_PENDING_COOKIE_NAME",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::BOOTSTRAP_CHALLENGE_COOKIE_NAME",
+          "new": "backend/app/domains/identity/browser_session.py::BOOTSTRAP_CHALLENGE_COOKIE_NAME",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::LOCAL_FRONTEND_ORIGIN_HEADER",
+          "new": "backend/app/domains/identity/browser_session.py::LOCAL_FRONTEND_ORIGIN_HEADER",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::COOKIE_PATH",
+          "new": "backend/app/domains/identity/browser_session.py::COOKIE_PATH",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::SESSION_MAX_AGE_SECONDS",
+          "new": "backend/app/domains/identity/browser_session.py::SESSION_MAX_AGE_SECONDS",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::GOOGLE_PENDING_MAX_AGE_SECONDS",
+          "new": "backend/app/domains/identity/browser_session.py::GOOGLE_PENDING_MAX_AGE_SECONDS",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::BOOTSTRAP_CHALLENGE_MAX_AGE_SECONDS",
+          "new": "backend/app/domains/identity/browser_session.py::BOOTSTRAP_CHALLENGE_MAX_AGE_SECONDS",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::UNSAFE_METHODS",
+          "new": "backend/app/domains/identity/browser_session.py::UNSAFE_METHODS",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::BrowserSessionConfigurationError",
+          "new": "backend/app/domains/identity/exceptions.py::BrowserSessionConfigurationError",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::canonical_origin",
+          "new": "backend/app/domains/identity/browser_session.py::canonical_origin",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::allowed_origins",
+          "new": "backend/app/domains/identity/browser_session.py::allowed_origins",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::validate_browser_session_settings",
+          "new": "backend/app/domains/identity/browser_session.py::validate_browser_session_settings",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::_is_authenticated_desktop_request",
+          "new": "backend/app/domains/identity/browser_session.py::_is_authenticated_desktop_request",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::require_browser_origin",
+          "new": "backend/app/domains/identity/browser_session.py::require_browser_origin",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::require_local_frontend_request",
+          "new": "backend/app/domains/identity/browser_session.py::require_local_frontend_request",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::require_cookie_mutation_origin",
+          "new": "backend/app/domains/identity/browser_session.py::require_cookie_mutation_origin",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::session_cookie_token",
+          "new": "backend/app/domains/identity/browser_session.py::session_cookie_token",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::bootstrap_challenge_cookie_token",
+          "new": "backend/app/domains/identity/browser_session.py::bootstrap_challenge_cookie_token",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::google_pending_cookie_token",
+          "new": "backend/app/domains/identity/browser_session.py::google_pending_cookie_token",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::set_session_cookie",
+          "new": "backend/app/domains/identity/browser_session.py::set_session_cookie",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::delete_session_cookie",
+          "new": "backend/app/domains/identity/browser_session.py::delete_session_cookie",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::set_bootstrap_challenge_cookie",
+          "new": "backend/app/domains/identity/browser_session.py::set_bootstrap_challenge_cookie",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::delete_bootstrap_challenge_cookie",
+          "new": "backend/app/domains/identity/browser_session.py::delete_bootstrap_challenge_cookie",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::seconds_until",
+          "new": "backend/app/domains/identity/browser_session.py::seconds_until",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::set_google_pending_cookie",
+          "new": "backend/app/domains/identity/browser_session.py::set_google_pending_cookie",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::delete_google_pending_cookie",
+          "new": "backend/app/domains/identity/browser_session.py::delete_google_pending_cookie",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::_cookie_security",
+          "new": "backend/app/domains/identity/browser_session.py::_cookie_security",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/core/browser_session.py::_csrf_error",
+          "new": "backend/app/domains/identity/browser_session.py::_csrf_error",
+          "direct_consumers": [
+            "backend/app/domains/identity/browser_session.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/deps.py::AuthorizationHeader",
+          "new": "backend/app/domains/identity/dependencies.py::AuthorizationHeader",
+          "direct_consumers": [
+            "backend/app/domains/identity/dependencies.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/deps.py::AuthenticatedSessionContext",
+          "new": "backend/app/domains/identity/dependencies.py::AuthenticatedSessionContext",
+          "direct_consumers": [
+            "backend/app/domains/identity/dependencies.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/deps.py::_bearer_token",
+          "new": "backend/app/domains/identity/dependencies.py::_bearer_token",
+          "direct_consumers": [
+            "backend/app/domains/identity/dependencies.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/deps.py::get_current_user",
+          "new": "backend/app/domains/identity/dependencies.py::get_current_user",
+          "direct_consumers": [
+            "backend/app/domains/identity/dependencies.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/deps.py::get_current_user_allow_incomplete",
+          "new": "backend/app/domains/identity/dependencies.py::get_current_user_allow_incomplete",
+          "direct_consumers": [
+            "backend/app/domains/identity/dependencies.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/deps.py::resolve_authenticated_session_context",
+          "new": "backend/app/domains/identity/dependencies.py::resolve_authenticated_session_context",
+          "direct_consumers": [
+            "backend/app/domains/identity/dependencies.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/deps.py::get_current_session_for_logout",
+          "new": "backend/app/domains/identity/dependencies.py::get_current_session_for_logout",
+          "direct_consumers": [
+            "backend/app/domains/identity/dependencies.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/deps.py::get_optional_current_user",
+          "new": "backend/app/domains/identity/dependencies.py::get_optional_current_user",
+          "direct_consumers": [
+            "backend/app/domains/identity/dependencies.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/deps.py::_user_token_from_request",
+          "new": "backend/app/domains/identity/dependencies.py::_user_token_from_request",
+          "direct_consumers": [
+            "backend/app/domains/identity/dependencies.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/deps.py::_resolve_session_context",
+          "new": "backend/app/domains/identity/dependencies.py::_resolve_session_context",
+          "direct_consumers": [
+            "backend/app/domains/identity/dependencies.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/deps.py::_resolve_desktop_owner_context",
+          "new": "backend/app/domains/identity/dependencies.py::_resolve_desktop_owner_context",
+          "direct_consumers": [
+            "backend/app/domains/identity/dependencies.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/deps.py::_ensure_demo_request_allowed",
+          "new": "backend/app/domains/identity/dependencies.py::_ensure_demo_request_allowed",
+          "direct_consumers": [
+            "backend/app/domains/identity/dependencies.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/deps.py::__all__",
+          "new": "backend/app/domains/identity/dependencies.py::__all__",
+          "direct_consumers": [
+            "backend/app/domains/identity/dependencies.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/deps.py::get_current_local_bot",
+          "new": "backend/app/api/v1/deps.py::get_current_local_bot",
+          "direct_consumers": [
+            "backend/app/api/v1/deps.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
+            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
+            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+          ]
+        }
+      ],
+      "forwarding_removals": {
+        "backend/app/domains/identity/application/local_owner.py": [
+          "GetLocalBootstrapStatus -> LocalIdentityService.get_bootstrap_status",
+          "EnsureLocalInstallationIdentity -> LocalIdentityService.ensure_local_installation_identity",
+          "CreateLocalBootstrapChallenge -> LocalIdentityService.create_bootstrap_challenge",
+          "ClaimLocalOwner -> LocalIdentityService.claim_local_owner",
+          "IssueLocalSession -> LocalIdentityService.issue_local_session"
+        ],
+        "backend/app/domains/identity/ports/identity_repository.py": [
+          "IdentityRepository: no separate repository consumer/fake implementation; explicit now and clock remain injectable on the service"
+        ]
+      },
+      "test_ownership": {
+        "moved_files": 15,
+        "moved_nodes": 133,
+        "mixed_tests_remain": "M3 privacy/account deletion, SQLite/runtime, Memory batch and Device Home keep their mixed owner paths and receive actual import/workflow changes only."
+      },
+      "validation": {
+        "identity_mixed_behavior": "171 passed / 15 warnings / 23.55 seconds; identity plus account-deletion, Memory batch and World Creator routes",
+        "guard_and_boundary_regressions": "55 passed / 15.60 seconds; exact package initializer normalization does not permit unmapped descendants",
+        "prior_mixed_integration": "210 passed / 16 warnings / 60.45 seconds; identity, deletion/privacy, SQLite, runtime composition, Memory batch, API and Device Home",
+        "public_node_baseline": "approved=604 current=2037 new=1463 PASS; no approved list edits",
+        "preservation": "PR258=1867 PR263=1907 protected_lineages=2030 current=2037; assertions/splits/API/ORM preserved; only two inherited G0 introduction metadata errors pending merge of latest G0 evidence",
+        "remaining": "Root integrates G1-G4 and latest G0, commits source, appends introduction metadata, refreshes git-tracked inventory and runs integrated/CI checks. No checkpoint is regenerated."
+      }
     }
   }
 }

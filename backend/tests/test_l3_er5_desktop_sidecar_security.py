@@ -7,12 +7,10 @@ import pytest
 from fastapi import FastAPI, Request, Response
 from fastapi.testclient import TestClient
 
-from app.core.browser_session import (
-    allowed_origins,
-    require_local_frontend_request,
-    set_bootstrap_challenge_cookie,
-    set_session_cookie,
-)
+from app.domains.identity.browser_session import allowed_origins
+from app.domains.identity.browser_session import require_local_frontend_request
+from app.domains.identity.browser_session import set_bootstrap_challenge_cookie
+from app.domains.identity.browser_session import set_session_cookie
 from app.config import Settings
 from app.core.desktop_loopback import (
     DesktopLoopbackPolicy,

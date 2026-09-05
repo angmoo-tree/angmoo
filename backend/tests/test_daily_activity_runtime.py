@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 from app import models, schemas
-from app.api.v1 import deps as api_deps
+from app.domains.identity import dependencies as api_deps
 from app.api.v1.routes import world_activity_runtime as runtime_routes
 from app.core.db import Base
 from app.domains.routines import public as routines

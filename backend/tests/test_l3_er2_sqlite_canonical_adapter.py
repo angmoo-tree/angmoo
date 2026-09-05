@@ -13,9 +13,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app import models
-from app.domains.identity.infrastructure.sqlalchemy_identity_repository import (
-    SqlAlchemyIdentityRepository,
-)
+from app.domains.identity.service.local_owner import LocalIdentityService as SqlAlchemyIdentityRepository
 from app.domains.runtime.ports.unit_of_work import UnitOfWorkPort
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
 from app.runtime.persistence.sqlite_codecs import (
