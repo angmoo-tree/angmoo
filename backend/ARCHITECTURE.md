@@ -447,6 +447,46 @@ Import inventory는 현재 사실을 기록하고 import policy는 허용 경계
 안정적인 소유권·호출 방향·공통 파일 책임이 바뀌면 이 문서를 갱신합니다. 개별 모델 옵션·모든 파일 목록·PR 진행률은 상세 계약과 실제 코드에서 관리합니다. 기능 하나의 동작 변경 때문에 전체 아키텍처 설명을 매번 다시 작성할 필요는 없습니다.
 
 
+### World Package의 계약과 lineage 저장
+
+World Package v1의 Python 입력·출력은 `world_packages/schemas/{http,content,manifest}.py`에 있다. 배포되는 JSON schema는 기존 `schemas/v1/`에 그대로 두므로 `schemas.py` 파일을 동시에 만들지 않는다. 불변 export·preview·seed 기록은 `contracts/`, 오류는 `exceptions.py`, 상태 enum은 `constants.py`, archive·license·collision 판단은 `policies/`가 소유한다. JSON 정규화와 digest bytes는 `utils/canonical.py`에서 정의한다.
+
+네 개 lineage ORM은 `models.py`에서 기존 단일 Base를 공유한다. `service/registry.py`는 같은 seed의 version 재사용, 실제 전달 기록의 충돌, 다음 version 소비를 판단하며 `repository/registry.py`가 동일 Session으로 SQL과 flush를 수행한다. 이 둘은 commit하지 않는다. `service/delivery.py`가 export 준비·전달의 commit/rollback을, `runtime/world_packages`가 여러 업무를 함께 저장하는 import의 commit/rollback을 결정한다. 특히 native download만으로 전달을 확정하지 않으며 Tauri의 저장 완료 acknowledgment까지 기다린다.
+
+Package는 `router.py`의 HTTP 처리, `dependencies.py`의 요청별 Session·app state 연결, 서비스·codec·storage로 나뉜다. 이전 `api/application/domain/infrastructure/ports/public.py` 구현은 제거했다. 네 ORM을 읽는 기존 `app.models` aggregate만 G5의 등록 이전까지 정확한 임시 소비자로 남으며 같은 클래스 객체를 사용한다. 이 배치는 shared media 전체나 Hosted CI·설치 검증의 완료를 뜻하지 않는다.
+
+
+Package 처리 구현은 `service/export.py`·`staging.py`, `archive/{export,validation,exclusions}.py`, `storage/{staging,exports,export_assets}.py`에서 찾는다. 파일을 읽고 정제하는 codec과 저장 수명 관리는 업무별 하위 package로 구분하며, ZIP 검사를 HTTP나 공용 utils로 복제하지 않는다. 사용 중인 fake/storage/UoW 계약 10개는 `contracts/interfaces.py`로 합쳤다. export-only asset 인터페이스에 있던 세 미구현 import 메서드는 호출자가 없었으며 제거했고, 실제 import media 구현은 별도 계약을 유지한다.
+
+Portable ref/profile 변환은 `service/export_projection.py`, 로컬 export 근거·중복·변조·충돌 판단은 `service/preview.py`가 소유한다. World slug와 Character handle의 충돌 범위는 설치 전체다. SQL 읽기 projection과 World/Character/참여 관계를 함께 생성하는 작업은 `runtime/world_packages/{export_source,preview_probe,seed,seed_uow,import_commit}.py`에서 같은 Session으로 연결한다. Package service가 다른 도메인의 ORM을 직접 조회하거나 runtime을 import하지 않는다.
+
+앱 생성 시 `runtime/world_packages/composition.py`가 구체 constructor를 `WorldPackageRuntimeFactories`로 연결한다. Package dependencies는 전달받은 요청 Session·session factory를 그대로 제공한다. import committer는 기존 초기 복구, 동시 실행 잠금, commit 결과 불명 시 관찰과 media journal 보상 순서를 유지한다. Browser stream의 정상 소진 뒤 전달을 기록하며 취소 시 artifact를 정리한다. Native download는 artifact를 유지하고 명시적인 저장 완료 acknowledgment가 성공적으로 commit된 뒤 정리한다. HTTP router는 권한·입력·상태 코드·응답을 처리하고 이 업무 결정을 중복 구현하지 않는다.
+
+`contracts/__init__.py`는 v1의 순수 공개 타입을 모으며 `contracts/interfaces.py`는 실제 fake·archive·storage·UoW 교체 지점을 정의한다. 런타임 factory 계약은 `contracts/runtime.py`에 있다. 모든 함수에 별도 포트를 생성하지 않으며 같은 역할의 구현을 public 호환 파일로 복제하지 않는다. 아직 전환되지 않은 Worlds/Characters의 지원 계약을 사용하는 runtime 소비자는 해당 B2 source 합류 시 canonical 경로로 연결한다.
+
+### Routines foundation의 현재 역할
+
+AR-B4-A1에서 일일 활동의 입출력은 `domains/routines/schemas.py`, 아홉 ORM은 `models.py`가 소유합니다. 모델은 기존과 같은 Base·table·column·index·FK를 사용합니다. `policies/activity_state.py`는 mood/energy 등의 상태 범위와 delta를 검증하고, `service/scheduling.py`는 이미 지난 tick을 무더기로 재실행하지 않고 가장 최근 due tick과 건너뛴 횟수를 계산합니다. 안정적인 오류는 `exceptions.py`, immutable 결과와 clock 계약은 `contracts/`, 실제 SystemClock/FrozenClock은 `utils/clock.py`에 있습니다.
+
+계획 생성·권한 scope·공동 예약의 실제 서비스는 아래 A2 역할을 사용합니다. A3a의 `service/lifecycle.py`는 autonomous 소유권을 검사하는 claim 회복·기간 종료·비활성 World 중단을 소유합니다. 전역 activity runtime의 같은 이름 함수는 manual 제외·선택적 now·오류/commit 의미가 달라 단순 별칭으로 통합하지 않습니다. 그 claim 실행은 A3 후속, provider/result 실행은 AR-B4-B, resident·lease·worker는 AR-B4-C에서 이어갑니다. 이 부분 전환의 정확한 기존 소비자와 제거 시점은 경계 검사 policy와 보존 지도에 기록합니다.
+
+AR-B4-A2에서는 version/daypart/history 상수를 `constants.py`, 실제 DST boundary·후보 선택·snapshot 규칙을 `policies/planning.py`에 두고, routines ORM만 다루는 공동 예약 query와 materialization을 `service/joint_reservations.py`로 옮겼습니다. `service/plans.py`는 소유권·scope·40개 repertoire 후보·readiness·계획 생성/조회·모드 변경과 commit/rollback을 소유합니다. 과거 선택 이력 조회는 `repository/plans.py`, 응답은 `schemas.py`, HTTP 상태 변환은 `router.py`에 있습니다.
+
+계획 요청에서 다른 업무를 읽는 SQL은 `runtime/routines/plan_references.py`가 기존 Session으로 수행합니다. 앱 생성 시 `runtime/routines/composition.py`가 factory를 등록하고 `dependencies.py`가 요청의 `get_db`와 같은 Session을 전달합니다. `contracts/plans.py`의 `PlanReferences`는 그 실제 협력 경계이며 서비스마다 반복해서 추가하는 계층이 아닙니다. WorldCharacter 모드·version 변경은 WC 소유 함수에 요청하고, 최종 commit은 기존 계획 서비스가 수행합니다. 이 조립에는 새 Session·worker 실행·별도 commit이 없습니다.
+
+기존 `public.py`의 계획·guarded lifecycle 함수는 실제 서비스와 같은 객체를 제공하는 임시 별칭입니다. 단순 전달만 하던 daily-plan/lifecycle usecase·repository 클래스와 외부 ORM 집계 파일은 제거했습니다. Clock/FrozenClock 지원과 `now`·`clock` 동시 입력 거부는 `utils/clock.py`에 유지합니다. 옛 `services/daily_activity_plans.py`와 public 소비자는 A3 후속/B4-C에서 차례대로 정리합니다. 전체 routines 전환 완료를 뜻하지 않습니다.
+
+공동 활동의 실제 참가자·차단·장소·시간대·역할 검증은 `service/joint_activity/eligibility.py`, 두 참여자의 예약과 계획 연결·revision은 `planning.py`, 시작 claim과 게시·종료 상태 전이는 `execution.py`가 소유합니다. `service/joint_activity/__init__.py`는 같은 구현 객체만 모읍니다. 별도 `service/joint_scheduling.py`의 accepted-unscheduled 계약은 참가 허용 상태와 오류가 다르므로 이 활성 참가자 전용 흐름에 합치지 않습니다.
+
+공동 활동 서비스는 `contracts/joint_activity.py`의 `JointReferences`로 관련 업무를 읽고 변경을 요청합니다. `runtime/routines/joint_references.py`는 같은 Session의 차단·장소·게시 수·근거 SQL과 기존 SocialEvent 조립을 연결합니다. Post의 두 ID 대입과 add-only 알림은 Social 소유 함수를 사용합니다. Joint 자체와 참가자·계획·episode 변경은 Routines에 남습니다. 시작 게시의 마지막 flush와 호출자 commit/rollback, claim의 사전 commit, 종료 scan의 기존 commit 조건을 바꾸지 않습니다.
+
+`runtime/routines/lifecycle_references.py`는 같은 Session에서 WorldCharacter·membership을 읽고, 만료 계획과 autonomous WorldCharacter를 연결하던 기존 join을 수행합니다. Lifecycle 서비스가 현재 업무의 상태 전이와 commit을 담당하고, scheduler가 이 조회 협력 객체를 전달합니다. 모든 캐릭터의 기간 종료를 한 번에 원자 처리하도록 변경하지 않습니다. 기존처럼 한 캐릭터의 종료 commit 후 다음 캐릭터를 처리하며, 뒤의 scope가 실패해도 앞서 완료한 commit은 유지됩니다. 조회 협력 객체는 별도 Session이나 commit을 만들지 않습니다.
+
+실행기가 기존 admission을 확인한 뒤 사용하는 beat/소비 기록 처리는 `service/execution/claims.py`가 소유합니다. claim·재시도·실패·성공 저장의 실제 SQL과 규칙이 이곳에 있으며, `execution/lifecycle.py`는 그 실행 경로의 기존 회복·종료·중단 계약을 유지합니다. 위의 guarded lifecycle과 검사 조건이 다르므로 호출 경로에 맞는 함수를 사용합니다. `execution/__init__.py`는 같은 함수 객체를 공개하는 package 입구이며 별도 유스케이스나 실행 전달 계층이 아닙니다.
+
+게시 결과를 확인할 때의 Post·WorldCharacter와 중단 시 membership 조회는 `runtime/routines/activity_references.py`가 같은 Session으로 수행합니다. `contracts/activity.py`는 그 실제 조회 계약입니다. 먼저 episode, 다음 beat를 잠그던 순서와 claim commit은 유지하며, 성공 처리의 `commit=False`는 flush만 수행합니다. 호출자가 게시물과 beat/episode의 성공 상태를 함께 commit하거나 rollback합니다. 소비 namespace는 `contracts/lifecycle.py`의 공통 계약을 사용합니다. 의미가 같음을 확인한 UTC/due 계산과 open-claim 종료 helper만 공유하고, 서로 다른 admission 규칙을 삭제하지 않습니다.
+
+승인된 공동 활동의 기존 exact/window 예약과 대표 게시 claim은 `service/joint_scheduling.py`에 있습니다. stable scheduling 오류는 `exceptions.py`, 고유한 허용 daypart와 예약 불가 상태 값은 `constants.py`에 있습니다. 이 계약은 active membership 안의 pending/inactive/active 캐릭터를 허용하며, 이미 active인 계획 항목에는 새 예약을 넣지 않습니다. 기존 proposal opening 실행기는 active 캐릭터만 허용하는 별도 계약이므로 이름이 비슷하다는 이유로 이 서비스와 합치지 않습니다. 참여자 조회도 `ActivityReferences`를 통해 caller Session을 공유하고, 양쪽 계획·revision·대표 claim의 commit/rollback은 이 서비스가 그대로 소유합니다.
 ### Character/Creator 전환의 현재 위치
 
 Character 입력과 상태·Creator 모델은 `characters/models.py`, `schemas.py`, `contracts.py`에서 찾는다. 생성·표시 프로필·페르소나·동의의 실제 변경은 `service/mutations.py`가 담당하고, `access.py`·`persona.py`·`promotion.py`가 해당 판단을 공유한다. Caller-owned World seed는 `service/seed.py`의 flush-only 계약을 따르며 일반 생성의 기존 commit을 합치지 않는다.
@@ -579,3 +619,36 @@ Today 인기 root Post의 SQL은 Social repository에 있고 공개 응답·반�
 댓글 조회는 Social repository, 활동 로그 조회/기존 visible filter는 `runtime/social/profile_activity.py`의 같은 Session 협력이다. 원래 댓글 20개 조회 → 공개 Character/state 구성 → 활동 로그 80개 조회와 visible/dedupe 20개 적용 순서를 유지한다. 이미 로드한 state의 ORM identity-map 사용이나 필요한 lazy read도 보존한다.
 
 기존 schema aggregate는 같은 class를 내보내는 임시 호환 경로이며 구현이 중복되지 않는다. ActivityLog와 visible filter의 실제 owner 이동은 AR-B4-C가 이 정확한 runtime 소비자까지 연결한다.
+
+
+### RoutinePost의 입력 형식과 이벤트 문맥
+
+`routine_posts/schemas.py`는 장면 계획·게시 초안·상태 효과의 Pydantic 형식을 소유합니다. `contracts/interaction.py`는 서버가 관찰한 성공 사건 후보의 값입니다. World·consumer·시간 범위와 기존 소비 여부를 확인하고, 관련도 순서와 글자 수·JSON byte 한도를 적용하는 실제 정책은 `service/event_context.py`에 있습니다. 제한 값은 `constants.py`, 문맥 사용 불가 오류는 `exceptions.py`, 텍스트 표현은 `utils/text.py`에서 찾습니다. 공통 텍스트 정제의 실제 구현은 `core/context_text.py`를 사용합니다.
+
+이벤트를 프롬프트에 넣었다는 사실이 성공적인 행동이나 소비 완료를 뜻하지 않습니다. 이 정책은 후보를 제한하며 실제 게시·source 소비·beat 상태의 저장은 기존 RoutinePost transaction이 담당합니다. AR-B4-B1에서 기존 입력과 정책을 먼저 이전했고, 관련 테스트는 `tests/routine_posts/test_runtime.py`로 모았습니다. 문맥의 immutable 값은 `contracts/context.py`, scope·readiness·이전 성공·claim 만료·재시도와 source 소비 판단은 `service/context.py`가 소유합니다. `runtime/routine_posts/context_references.py`는 호출자의 같은 Session으로 기존 nullable 조회와 SQL을 수행하며 새 Session·commit·명시적 flush를 만들지 않습니다. 문맥에 든 World·참여·계획·episode는 기존 attached 객체의 읽기 값이고 다른 도메인 ORM을 문맥 계약에서 import하거나 복제하지 않습니다. 옛 context 구현과 `services/routine_post_context.py` alias는 제거했습니다. 생성 결과와 provider 교체 계약은 `contracts/generation.py`, 서버 근거·응답 schema·상태 검증과 제한된 공개 문맥은 `service/evidence.py`에 있습니다. `service/generation.py`는 계획 생성→검증→게시문 생성의 실제 두 호출 순서를, `client.py`는 목적별 credential 해석과 외부 호출 식별자 변환을 소유합니다. 공유 통신은 `integrations/direct_llm.py`를 사용하며 새로운 forwarding 계층을 만들지 않습니다. 옛 provider/public/서비스 alias는 제거했습니다. 활동 설정·성공 댓글 관찰·실제 게시 transaction과 resident 조립은 B4-C에서 이어집니다.
+
+
+### 활동 실행 기록과 설정
+
+`routines/models/plans.py`는 일일 계획·episode/beat·공동 활동을, `models/resident.py`는 활동 설정·AgentRun·Slot·공개 행동 실행·FeedCue·활동 로그를 소유합니다. 두 파일은 기존 단일 Base를 사용하고 `models/__init__.py`에서 같은 클래스 객체를 제공합니다. HTTP의 일일 계획 형식은 `schemas/plans.py`, 활동 설정/로그/슬롯과 feed-cue 형식은 `schemas/resident.py`에서 찾습니다. Character 상세 화면은 이 실제 응답 형식을 그대로 사용합니다.
+
+설정의 get/ensure/update는 `service/activity_settings.py`, 활동 로그의 숨김·90초 상태 저장 중복 제거·최신순 조회·저장은 `service/activity_logs.py`가 담당합니다. Settings의 명시적 commit/flush 선택과 log의 `unit_of_work.finish_write`를 유지하므로, 기존 caller가 여러 업무를 한 트랜잭션으로 저장할 때 새 commit을 넣지 않습니다. Social timeline도 같은 Session으로 이 로그 소유 함수를 호출합니다.
+
+AR-B4-C1의 적용은 이 실제 모델/입력/저장 범위입니다. AgentRelationshipPoint는 Relationships, AgentDaypartMemoryEvent는 Memory의 후속 실제 소유로 분리하며 이미지 설정과 섞지 않습니다. Scheduler/lease·실행 그래프·LLM 정책·활동 HTTP와 남은 혼합 CRUD의 순차 이전은 후속 C2+ 작업입니다. 아직 남은 전역 CRUD에는 동일 함수 export를 추적된 임시 소비자로 두며, 새 Routines 서비스는 그 경로를 import하지 않습니다.
+
+
+일일 계획이 필요로 하는 Character contract hash는 이미 존재하는 `PlanReferences`가 WC 소유 함수를 연결합니다. World/WC 준비 확인 뒤, repertoire 조회 직전의 원래 위치에서 같은 attached Character를 전달합니다. Character 상세 응답이 Routines의 실제 DTO를 사용해도 Routines 업무 코드가 WC 구현을 직접 역참조하지 않아 패키지 순환이 생기지 않습니다.
+
+
+### 활동 시각과 resident 실행 수명
+
+Routines의 `service/tick_schedule.py`는 active hours·다음 실행·재시도·재개 시각과 deterministic jitter를 계산합니다. World timezone과 Character image quota도 이 같은 시간 값을 사용합니다. `runtime/resident/scheduler.py`는 파일 잠금·DB lease·fencing epoch·heartbeat·취소와 종료 대기를 담당하고 앱의 기존 component worker가 한 번 연결합니다. 별도 scheduler 실행 프로세스를 만들지 않습니다.
+
+그래프 단계가 전달하는 순수 값은 `routines/contracts/resident.py::ResidentGraphState`, 실행 중 같은 Session과 attached 객체를 묶는 context는 `runtime/resident/context.py::LangGraphResidentContext`입니다. Context는 저장소·트랜잭션을 새로 열지 않으며 원래 생성자가 전달한 객체와 callback을 유지합니다. C2는 이 역할만 이전했으며 실제 agent-run 흐름·활동 정책·provider/graph·활동 HTTP와 남은 호환은 후속 C 단계입니다.
+
+
+### 실행 응답과 활동 허용 값
+
+`routines/schemas/runs.py`는 기존 Run/Slot/Tick 입출력 다섯 형식을 소유합니다. `contracts/activity_policy.py`의 ActivityPolicy는 한 tick에서 허용/차단한 행동과 다음 시각을 담고 기존 prompt 표현을 제공합니다. `service/activity_sessions.py`는 예약 실행과 소유자 수동 실행의 기존 세션 표시를 구별합니다. 실제 허용 판단/횟수 조회/World 활성화 검증은 다음 C3b에서 각각 업무와 runtime 협력으로 이전합니다.
+
+Resident Context는 Character/CharacterState, LlmCredential, AgentFeedCue와 ActivityPolicy의 실제 소유 타입을 그대로 참조합니다. Scheduler도 같은 Routines Tick 응답을 사용하며 별도 DTO나 ORM class를 만들지 않습니다. 이전의 공통 모델/스키마 및 legacy 정책 값 import 세 개는 제거했습니다.

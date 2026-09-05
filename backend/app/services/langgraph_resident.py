@@ -60,10 +60,8 @@ from app.services.direct_llm import (
     generate_json,
 )
 from app.core.context_text import neutralize_context_text
-from app.services.resident_contracts import (
-    LangGraphResidentContext,
-    ResidentGraphState as _ResidentGraphState,
-)
+from app.runtime.resident.context import LangGraphResidentContext
+from app.domains.routines.contracts.resident import ResidentGraphState as _ResidentGraphState
 from app.services.world_feed_runtime import run_world_keyword_feed
 
 

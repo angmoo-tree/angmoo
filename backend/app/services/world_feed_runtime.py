@@ -35,7 +35,7 @@ from app.services.feed_reaction_planner import (
     FeedReactionValidationError,
     validate_reaction_decision,
 )
-from app.services.resident_contracts import LangGraphResidentContext
+from app.runtime.resident.context import LangGraphResidentContext
 from app.services.world_feed_search import (
     KeywordClaim,
     ReadySearchProfile,

@@ -1,8 +1,8 @@
 """Bind the existing activity-log query/filter to the public profile projection."""
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from app.models.agent_runs import AgentActivityLog
-from app.cruds import agents as agent_crud
+from app.domains.routines.models import AgentActivityLog
+from app.domains.routines.service import activity_logs as agent_crud
 from app.domains.social.constants import HIDDEN_AGENT_ACTIVITY_ACTION_TYPES
 from app.domains.social.contracts.activity import PublicActivityLog
 from app.domains.social.service.profile_activity import ProfileActivityService

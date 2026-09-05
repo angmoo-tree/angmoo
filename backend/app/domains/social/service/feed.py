@@ -1,6 +1,6 @@
 """Feed selection, owner authorization and public response composition."""
 from datetime import UTC, datetime, time
-from app.core import agent_activity_schedule as agent_activity_policy
+from app.domains.routines.service import tick_schedule as agent_activity_policy
 from sqlalchemy.orm import Session
 from app.domains.social.contracts.actors import SocialUser
 from app.domains.social.schemas import community as schemas

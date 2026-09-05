@@ -161,10 +161,6 @@
           "importer": "app.models"
         },
         {
-          "imported": "app.models.agent_slots",
-          "importer": "app.models"
-        },
-        {
           "imported": "app.models.character_lore",
           "importer": "app.models"
         },
@@ -309,10 +305,6 @@
           "importer": "app.runtime.world_characters.lifecycle"
         },
         {
-          "imported": "app.schemas.agent_runs",
-          "importer": "app.schemas"
-        },
-        {
           "imported": "app.schemas.agents",
           "importer": "app.schemas"
         },
@@ -326,10 +318,6 @@
         },
         {
           "imported": "app.schemas.maintenance",
-          "importer": "app.schemas"
-        },
-        {
-          "imported": "app.schemas.routine_post",
           "importer": "app.schemas"
         },
         {
@@ -353,10 +341,6 @@
           "importer": "app.schemas"
         },
         {
-          "imported": "app.schemas.agent_runs",
-          "importer": "app.schemas.agents"
-        },
-        {
           "imported": "app.schemas.characters",
           "importer": "app.schemas.agents"
         },
@@ -375,14 +359,6 @@
         {
           "imported": "app.services.daily_activity_plans",
           "importer": "app.services.activity_proposal_runtime"
-        },
-        {
-          "imported": "app.services.joint_activity_runtime",
-          "importer": "app.services.activity_proposal_runtime"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.activity_runtime"
         },
         {
           "imported": "app.cruds.agents",
@@ -549,20 +525,8 @@
           "importer": "app.services.feed_reaction_planner"
         },
         {
-          "imported": "app.services.resident_contracts",
-          "importer": "app.services.feed_reaction_planner"
-        },
-        {
           "imported": "app.services.world_feed_search",
           "importer": "app.services.feed_reaction_planner"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.joint_activity_runtime"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.joint_activity_scheduling"
         },
         {
           "imported": "app.cruds.agent_runs",
@@ -610,10 +574,6 @@
         },
         {
           "imported": "app.services.prompt_safety",
-          "importer": "app.services.langgraph_resident"
-        },
-        {
-          "imported": "app.services.resident_contracts",
           "importer": "app.services.langgraph_resident"
         },
         {
@@ -733,22 +693,6 @@
           "importer": "app.services.post_image_job_worker"
         },
         {
-          "imported": "app.models",
-          "importer": "app.services.resident_contracts"
-        },
-        {
-          "imported": "app.services.agent_activity_policy",
-          "importer": "app.services.resident_contracts"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.services.resident_tick_scheduler"
-        },
-        {
-          "imported": "app.services.agent_runs",
-          "importer": "app.services.resident_tick_scheduler"
-        },
-        {
           "imported": "app.cruds.community",
           "importer": "app.services.tree"
         },
@@ -790,10 +734,6 @@
         },
         {
           "imported": "app.services.feed_reaction_planner",
-          "importer": "app.services.world_feed_runtime"
-        },
-        {
-          "imported": "app.services.resident_contracts",
           "importer": "app.services.world_feed_runtime"
         },
         {
@@ -858,10 +798,6 @@
           "importer": "app.compatibility.routine_posts.legacy"
         },
         {
-          "imported": "app.services.activity_runtime",
-          "importer": "app.compatibility.routine_posts.legacy"
-        },
-        {
           "imported": "app.services.activity_state_contracts",
           "importer": "app.compatibility.routine_posts.legacy"
         },
@@ -871,14 +807,6 @@
         },
         {
           "imported": "app.services.community",
-          "importer": "app.compatibility.routine_posts.legacy"
-        },
-        {
-          "imported": "app.services.joint_activity_runtime",
-          "importer": "app.compatibility.routine_posts.legacy"
-        },
-        {
-          "imported": "app.services.resident_contracts",
           "importer": "app.compatibility.routine_posts.legacy"
         }
       ],
@@ -925,19 +853,6 @@
       "reason": "L4 keeps one runtime-owned FTS5 projection adapter over the frozen pre-domain Post ORM while the social domain owns the search port and query contract.",
       "removal_condition": "Remove this exact edge when L6 moves canonical Post persistence behind a repository port shared by social writes and search projection.",
       "review_date": "2026-11-27"
-    },
-    {
-      "edges": [
-        {
-          "imported": "app.services.resident_tick_scheduler",
-          "importer": "app.runtime.component_workers"
-        }
-      ],
-      "id": "er4-single-backend-existing-worker-bridge",
-      "owner_stage": "L6",
-      "reason": "The canonical in-process component manager owns the reviewed scheduler and projector behavior through one runtime bridge while their internal services remain pre-L6 modules.",
-      "removal_condition": "Move the scheduler tick runner and graph projector implementation behind L6 canonical runtime ports, then remove all three exact edges.",
-      "review_date": "2026-11-20"
     },
     {
       "edges": [
@@ -1014,45 +929,20 @@
       "edges": [
         {
           "importer": "app.runtime.social.timeline",
-          "imported": "app.cruds.agents"
-        },
-        {
-          "importer": "app.runtime.social.timeline",
           "imported": "app.services.community_abuse_quota"
         }
       ]
     },
     {
-      "id": "ar-b5-discovery-existing-activity-read",
+      "id": "ar-b4-c2-existing-resident-caller-moves",
       "owner_stage": "L6",
-      "reason": "The original Today aggregate joins Character with the still-unmigrated AgentActivityLog and hidden-action set. Only the exact same read dependencies move into runtime composition; no new domain code consumes legacy implementations.",
-      "removal_condition": "AR-B4-C moves AgentActivityLog and its hidden-action constants and updates this exact Social discovery consumer, retaining query shape and Session.",
+      "reason": "Four existing implementation edges move with their actual Session-rich Context and process scheduler; imported targets and original behavior are unchanged. AR-B4-C3+ owns removal, not new functionality.",
+      "removal_condition": "AR-B4-C3+ replaces ActivityPolicy, AgentRun and schema aggregate with actual canonical owners; G5 finishes registration. Remove each exact edge as that owner migrates, before B8-A closeout.",
       "review_date": "2026-09-06",
       "edges": [
         {
-          "importer": "app.runtime.social.discovery",
-          "imported": "app.cruds.agents"
-        },
-        {
-          "importer": "app.runtime.social.discovery",
-          "imported": "app.models.agent_runs"
-        }
-      ]
-    },
-    {
-      "id": "ar-b5-profile-existing-activity-read",
-      "owner_stage": "L6",
-      "reason": "The original public activity query and visible-log filter now execute in named runtime composition using the same Session, SQL limit/order and dedupe behavior.",
-      "removal_condition": "AR-B4-C replaces AgentActivityLog and filter_visible_activity_logs with actual canonical activity ownership and updates this exact consumer.",
-      "review_date": "2026-09-06",
-      "edges": [
-        {
-          "importer": "app.runtime.social.profile_activity",
-          "imported": "app.cruds.agents"
-        },
-        {
-          "importer": "app.runtime.social.profile_activity",
-          "imported": "app.models.agent_runs"
+          "importer": "app.runtime.resident.scheduler",
+          "imported": "app.services.agent_runs"
         }
       ]
     }
@@ -1123,7 +1013,6 @@
       "app.domains.characters.service.persona",
       "app.domains.characters.service.profile",
       "app.domains.characters.service.promotion",
-      "app.domains.characters.service.search",
       "app.domains.characters.service.seed",
       "app.domains.characters.service.state",
       "app.domains.characters.service.world_lifecycle",
@@ -1152,55 +1041,69 @@
       "app.domains.identity.service.world_character_credentials",
       "app.domains.media.contracts",
       "app.domains.media.schemas",
-      "app.domains.relationships.constants",
-      "app.domains.relationships.contracts",
-      "app.domains.relationships.contracts.events",
-      "app.domains.relationships.contracts.graph_execution",
-      "app.domains.relationships.contracts.graph_plan",
-      "app.domains.relationships.contracts.graph_planner",
-      "app.domains.relationships.contracts.graph_query",
-      "app.domains.relationships.contracts.graph_read",
-      "app.domains.relationships.contracts.graph_recall",
-      "app.domains.relationships.contracts.graph_recall_gateway",
-      "app.domains.relationships.contracts.outbox",
-      "app.domains.relationships.contracts.projection",
-      "app.domains.relationships.contracts.projection_commands",
-      "app.domains.relationships.contracts.query",
-      "app.domains.relationships.contracts.replay",
-      "app.domains.relationships.exceptions",
-      "app.domains.relationships.models",
-      "app.domains.relationships.models.points",
-      "app.domains.relationships.models.projection",
-      "app.domains.relationships.models.social",
-      "app.domains.relationships.policies",
-      "app.domains.relationships.policies.events",
-      "app.domains.relationships.policies.graph_plan_schema",
-      "app.domains.relationships.policies.graph_recall",
-      "app.domains.relationships.repository",
-      "app.domains.relationships.repository.events",
-      "app.domains.relationships.repository.points",
-      "app.domains.relationships.repository.state",
-      "app.domains.relationships.schemas",
-      "app.domains.relationships.service",
-      "app.domains.relationships.service.events",
-      "app.domains.relationships.service.graph_planning",
-      "app.domains.relationships.service.graph_read",
-      "app.domains.relationships.service.graph_recall",
-      "app.domains.relationships.service.points",
-      "app.domains.relationships.service.projection_events",
-      "app.domains.relationships.service.state",
-      "app.domains.relationships.utils",
-      "app.domains.relationships.utils.points",
-      "app.domains.relationships.utils.projection_digest",
+      "app.domains.routine_posts.client",
+      "app.domains.routine_posts.constants",
+      "app.domains.routine_posts.contracts",
+      "app.domains.routine_posts.contracts.context",
+      "app.domains.routine_posts.contracts.generation",
+      "app.domains.routine_posts.contracts.interaction",
+      "app.domains.routine_posts.exceptions",
+      "app.domains.routine_posts.schemas",
+      "app.domains.routine_posts.service",
+      "app.domains.routine_posts.service.context",
+      "app.domains.routine_posts.service.event_context",
+      "app.domains.routine_posts.service.evidence",
+      "app.domains.routine_posts.service.generation",
+      "app.domains.routine_posts.utils",
+      "app.domains.routine_posts.utils.text",
+      "app.domains.routines.constants",
+      "app.domains.routines.contracts",
+      "app.domains.routines.contracts.activity",
+      "app.domains.routines.contracts.activity_policy",
+      "app.domains.routines.contracts.clock",
+      "app.domains.routines.contracts.joint_activity",
+      "app.domains.routines.contracts.lifecycle",
+      "app.domains.routines.contracts.plans",
+      "app.domains.routines.contracts.resident",
+      "app.domains.routines.dependencies",
+      "app.domains.routines.exceptions",
+      "app.domains.routines.models",
+      "app.domains.routines.models.plans",
+      "app.domains.routines.models.resident",
+      "app.domains.routines.policies",
+      "app.domains.routines.policies.activity_state",
+      "app.domains.routines.policies.planning",
+      "app.domains.routines.repository",
+      "app.domains.routines.repository.plans",
+      "app.domains.routines.router",
+      "app.domains.routines.schemas",
+      "app.domains.routines.schemas.plans",
+      "app.domains.routines.schemas.resident",
+      "app.domains.routines.schemas.runs",
+      "app.domains.routines.service",
+      "app.domains.routines.service.activity_logs",
+      "app.domains.routines.service.activity_sessions",
+      "app.domains.routines.service.activity_settings",
+      "app.domains.routines.service.execution",
+      "app.domains.routines.service.execution.claims",
+      "app.domains.routines.service.execution.lifecycle",
+      "app.domains.routines.service.joint_activity",
+      "app.domains.routines.service.joint_activity.eligibility",
+      "app.domains.routines.service.joint_activity.execution",
+      "app.domains.routines.service.joint_activity.planning",
+      "app.domains.routines.service.joint_reservations",
+      "app.domains.routines.service.joint_scheduling",
+      "app.domains.routines.service.lifecycle",
+      "app.domains.routines.service.plans",
+      "app.domains.routines.service.scheduling",
+      "app.domains.routines.service.tick_schedule",
+      "app.domains.routines.utils",
+      "app.domains.routines.utils.clock",
       "app.domains.runtime.contracts",
-      "app.domains.runtime.schemas",
       "app.domains.social.constants",
       "app.domains.social.contracts",
-      "app.domains.social.contracts.activity",
       "app.domains.social.contracts.actors",
-      "app.domains.social.contracts.discovery",
       "app.domains.social.contracts.inbox",
-      "app.domains.social.contracts.inbox_reads",
       "app.domains.social.contracts.observations",
       "app.domains.social.contracts.profile_activity",
       "app.domains.social.contracts.search_state",
@@ -1208,7 +1111,6 @@
       "app.domains.social.contracts.timeline",
       "app.domains.social.contracts.today_activity",
       "app.domains.social.contracts.writes",
-      "app.domains.social.dependencies",
       "app.domains.social.exceptions",
       "app.domains.social.models",
       "app.domains.social.models.feed",
@@ -1216,36 +1118,27 @@
       "app.domains.social.models.posts",
       "app.domains.social.models.subjective_context",
       "app.domains.social.repository",
-      "app.domains.social.repository.activity",
       "app.domains.social.repository.inbox",
       "app.domains.social.repository.media",
       "app.domains.social.repository.posts",
       "app.domains.social.repository.profiles",
       "app.domains.social.repository.reactions",
-      "app.domains.social.router",
       "app.domains.social.schemas",
-      "app.domains.social.schemas.activity",
       "app.domains.social.schemas.community",
       "app.domains.social.schemas.feed",
       "app.domains.social.schemas.manual",
       "app.domains.social.service",
       "app.domains.social.service.activity_results",
-      "app.domains.social.service.discovery",
-      "app.domains.social.service.feed",
-      "app.domains.social.service.inbox",
       "app.domains.social.service.joint_posts",
       "app.domains.social.service.media_storage",
       "app.domains.social.service.notifications",
       "app.domains.social.service.posts",
       "app.domains.social.service.presentation",
-      "app.domains.social.service.profile_activity",
-      "app.domains.social.service.profiles",
       "app.domains.social.service.source_posts",
       "app.domains.social.service.timeline",
       "app.domains.social.service.visibility",
       "app.domains.social.utils",
       "app.domains.social.utils.cursors",
-      "app.domains.social.utils.limits",
       "app.domains.social.utils.text",
       "app.domains.world_characters.client",
       "app.domains.world_characters.contracts",
@@ -1293,7 +1186,61 @@
       "app.domains.worlds.service.generation_context",
       "app.domains.worlds.service.reserved_roles",
       "app.domains.worlds.service.scheduling",
-      "app.domains.worlds.storage"
+      "app.domains.worlds.storage",
+      "app.domains.characters.service.search",
+      "app.domains.relationships.constants",
+      "app.domains.relationships.contracts",
+      "app.domains.relationships.contracts.events",
+      "app.domains.relationships.contracts.graph_execution",
+      "app.domains.relationships.contracts.graph_plan",
+      "app.domains.relationships.contracts.graph_planner",
+      "app.domains.relationships.contracts.graph_query",
+      "app.domains.relationships.contracts.graph_read",
+      "app.domains.relationships.contracts.graph_recall",
+      "app.domains.relationships.contracts.graph_recall_gateway",
+      "app.domains.relationships.contracts.outbox",
+      "app.domains.relationships.contracts.projection",
+      "app.domains.relationships.contracts.projection_commands",
+      "app.domains.relationships.contracts.query",
+      "app.domains.relationships.contracts.replay",
+      "app.domains.relationships.exceptions",
+      "app.domains.relationships.models",
+      "app.domains.relationships.models.points",
+      "app.domains.relationships.models.projection",
+      "app.domains.relationships.models.social",
+      "app.domains.relationships.policies",
+      "app.domains.relationships.policies.events",
+      "app.domains.relationships.policies.graph_plan_schema",
+      "app.domains.relationships.policies.graph_recall",
+      "app.domains.relationships.repository",
+      "app.domains.relationships.repository.events",
+      "app.domains.relationships.repository.points",
+      "app.domains.relationships.repository.state",
+      "app.domains.relationships.schemas",
+      "app.domains.relationships.service",
+      "app.domains.relationships.service.events",
+      "app.domains.relationships.service.graph_planning",
+      "app.domains.relationships.service.graph_read",
+      "app.domains.relationships.service.graph_recall",
+      "app.domains.relationships.service.points",
+      "app.domains.relationships.service.projection_events",
+      "app.domains.relationships.service.state",
+      "app.domains.relationships.utils",
+      "app.domains.relationships.utils.points",
+      "app.domains.relationships.utils.projection_digest",
+      "app.domains.social.contracts.activity",
+      "app.domains.social.contracts.discovery",
+      "app.domains.social.contracts.inbox_reads",
+      "app.domains.social.dependencies",
+      "app.domains.social.repository.activity",
+      "app.domains.social.router",
+      "app.domains.social.schemas.activity",
+      "app.domains.social.service.discovery",
+      "app.domains.social.service.feed",
+      "app.domains.social.service.inbox",
+      "app.domains.social.service.profile_activity",
+      "app.domains.social.service.profiles",
+      "app.domains.social.utils.limits"
     ],
     "entries": [
       "app.domains.characters.contracts",
@@ -1311,7 +1258,6 @@
       "app.domains.characters.service.persona",
       "app.domains.characters.service.profile",
       "app.domains.characters.service.promotion",
-      "app.domains.characters.service.search",
       "app.domains.characters.service.seed",
       "app.domains.characters.service.state",
       "app.domains.characters.service.world_lifecycle",
@@ -1330,35 +1276,49 @@
       "app.domains.identity.service.world_character_credentials",
       "app.domains.media.contracts",
       "app.domains.media.schemas",
-      "app.domains.relationships.contracts.events",
-      "app.domains.relationships.contracts.graph_execution",
-      "app.domains.relationships.contracts.graph_plan",
-      "app.domains.relationships.contracts.graph_planner",
-      "app.domains.relationships.contracts.graph_query",
-      "app.domains.relationships.contracts.graph_read",
-      "app.domains.relationships.contracts.graph_recall",
-      "app.domains.relationships.contracts.graph_recall_gateway",
-      "app.domains.relationships.contracts.outbox",
-      "app.domains.relationships.contracts.projection",
-      "app.domains.relationships.contracts.projection_commands",
-      "app.domains.relationships.contracts.query",
-      "app.domains.relationships.contracts.replay",
-      "app.domains.relationships.schemas",
-      "app.domains.relationships.service.events",
-      "app.domains.relationships.service.graph_planning",
-      "app.domains.relationships.service.graph_read",
-      "app.domains.relationships.service.graph_recall",
-      "app.domains.relationships.service.points",
-      "app.domains.relationships.service.projection_events",
-      "app.domains.relationships.service.state",
+      "app.domains.routine_posts.contracts",
+      "app.domains.routine_posts.contracts.context",
+      "app.domains.routine_posts.contracts.generation",
+      "app.domains.routine_posts.contracts.interaction",
+      "app.domains.routine_posts.schemas",
+      "app.domains.routine_posts.service",
+      "app.domains.routine_posts.service.context",
+      "app.domains.routine_posts.service.event_context",
+      "app.domains.routine_posts.service.evidence",
+      "app.domains.routine_posts.service.generation",
+      "app.domains.routines.contracts",
+      "app.domains.routines.contracts.activity",
+      "app.domains.routines.contracts.activity_policy",
+      "app.domains.routines.contracts.clock",
+      "app.domains.routines.contracts.joint_activity",
+      "app.domains.routines.contracts.lifecycle",
+      "app.domains.routines.contracts.plans",
+      "app.domains.routines.contracts.resident",
+      "app.domains.routines.schemas",
+      "app.domains.routines.schemas.plans",
+      "app.domains.routines.schemas.resident",
+      "app.domains.routines.schemas.runs",
+      "app.domains.routines.service",
+      "app.domains.routines.service.activity_logs",
+      "app.domains.routines.service.activity_sessions",
+      "app.domains.routines.service.activity_settings",
+      "app.domains.routines.service.execution",
+      "app.domains.routines.service.execution.claims",
+      "app.domains.routines.service.execution.lifecycle",
+      "app.domains.routines.service.joint_activity",
+      "app.domains.routines.service.joint_activity.eligibility",
+      "app.domains.routines.service.joint_activity.execution",
+      "app.domains.routines.service.joint_activity.planning",
+      "app.domains.routines.service.joint_reservations",
+      "app.domains.routines.service.joint_scheduling",
+      "app.domains.routines.service.lifecycle",
+      "app.domains.routines.service.plans",
+      "app.domains.routines.service.scheduling",
+      "app.domains.routines.service.tick_schedule",
       "app.domains.runtime.contracts",
-      "app.domains.runtime.schemas",
       "app.domains.social.contracts",
-      "app.domains.social.contracts.activity",
       "app.domains.social.contracts.actors",
-      "app.domains.social.contracts.discovery",
       "app.domains.social.contracts.inbox",
-      "app.domains.social.contracts.inbox_reads",
       "app.domains.social.contracts.observations",
       "app.domains.social.contracts.profile_activity",
       "app.domains.social.contracts.search_state",
@@ -1367,21 +1327,15 @@
       "app.domains.social.contracts.today_activity",
       "app.domains.social.contracts.writes",
       "app.domains.social.schemas",
-      "app.domains.social.schemas.activity",
       "app.domains.social.schemas.community",
       "app.domains.social.schemas.feed",
       "app.domains.social.schemas.manual",
       "app.domains.social.service.activity_results",
-      "app.domains.social.service.discovery",
-      "app.domains.social.service.feed",
-      "app.domains.social.service.inbox",
       "app.domains.social.service.joint_posts",
       "app.domains.social.service.media_storage",
       "app.domains.social.service.notifications",
       "app.domains.social.service.posts",
       "app.domains.social.service.presentation",
-      "app.domains.social.service.profile_activity",
-      "app.domains.social.service.profiles",
       "app.domains.social.service.source_posts",
       "app.domains.social.service.timeline",
       "app.domains.social.service.visibility",
@@ -1436,7 +1390,38 @@
       "app.domains.worlds.schemas",
       "app.domains.worlds.service",
       "app.domains.worlds.service.character_entry",
-      "app.domains.worlds.service.definition"
+      "app.domains.worlds.service.definition",
+      "app.domains.characters.service.search",
+      "app.domains.relationships.contracts.events",
+      "app.domains.relationships.contracts.graph_execution",
+      "app.domains.relationships.contracts.graph_plan",
+      "app.domains.relationships.contracts.graph_planner",
+      "app.domains.relationships.contracts.graph_query",
+      "app.domains.relationships.contracts.graph_read",
+      "app.domains.relationships.contracts.graph_recall",
+      "app.domains.relationships.contracts.graph_recall_gateway",
+      "app.domains.relationships.contracts.outbox",
+      "app.domains.relationships.contracts.projection",
+      "app.domains.relationships.contracts.projection_commands",
+      "app.domains.relationships.contracts.query",
+      "app.domains.relationships.contracts.replay",
+      "app.domains.relationships.schemas",
+      "app.domains.relationships.service.events",
+      "app.domains.relationships.service.graph_planning",
+      "app.domains.relationships.service.graph_read",
+      "app.domains.relationships.service.graph_recall",
+      "app.domains.relationships.service.points",
+      "app.domains.relationships.service.projection_events",
+      "app.domains.relationships.service.state",
+      "app.domains.social.contracts.activity",
+      "app.domains.social.contracts.discovery",
+      "app.domains.social.contracts.inbox_reads",
+      "app.domains.social.schemas.activity",
+      "app.domains.social.service.discovery",
+      "app.domains.social.service.feed",
+      "app.domains.social.service.inbox",
+      "app.domains.social.service.profile_activity",
+      "app.domains.social.service.profiles"
     ],
     "bridges": [
       {
@@ -2056,24 +2041,8 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.schemas.agent_runs",
-        "target": "app.domains.runtime.schemas",
-        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
-        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
-        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.schemas.agents",
         "target": "app.domains.identity.schemas",
-        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
-        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
-        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.schemas.agents",
-        "target": "app.domains.runtime.schemas",
         "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
         "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
         "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
@@ -2464,22 +2433,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.services.joint_activity_runtime",
-        "target": "app.domains.social.service.joint_posts",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Existing joint transaction delegates each original Post link assignment to its Social owner.",
-        "removal_condition": "AR-B4 replaces the legacy joint runtime consumer with typed same-Session collaboration.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.joint_activity_runtime",
-        "target": "app.domains.social.service.notifications",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Joint transaction invokes Social-owned exact notification lookup/add, retaining its own final flush.",
-        "removal_condition": "AR-B4 replaces the legacy joint runtime consumer with typed same-Session collaboration.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.cruds.community",
         "target": "app.domains.social.repository.reactions",
         "owner_stage": "AR-B5 / AR-B8-A",
@@ -2526,6 +2479,270 @@
         "reason": "The named old caller imports actual Social workflow/helper objects or the identical original quota exception.",
         "removal_condition": "Move remaining HTTP/agent callers to the canonical service and retire the exact legacy alias. Historical quota model/public identity is a root-approved G5/B8 review item.",
         "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.constants",
+        "owner_stage": "AR-B4-A3 / AR-B4-C / AR-G5",
+        "removal_condition": "Retire this exact legacy lifecycle or aggregate consumer after its actual owner service and caller move; retain same-object plan aliases only until remaining B4 consumers use canonical roles.",
+        "reason": "Actual plan service owns all decisions and commits. This existing lifecycle/public or horizontal consumer imports the same object while its own remaining workflow is still tracked separately.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.contracts.clock",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.contracts.lifecycle",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.contracts.plans",
+        "owner_stage": "AR-B4-A3 / AR-B4-C / AR-G5",
+        "removal_condition": "Retire this exact legacy lifecycle or aggregate consumer after its actual owner service and caller move; retain same-object plan aliases only until remaining B4 consumers use canonical roles.",
+        "reason": "Actual plan service owns all decisions and commits. This existing lifecycle/public or horizontal consumer imports the same object while its own remaining workflow is still tracked separately.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.exceptions",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.policies.planning",
+        "owner_stage": "AR-B4-A3 / AR-B4-C / AR-G5",
+        "removal_condition": "Retire this exact legacy lifecycle or aggregate consumer after its actual owner service and caller move; retain same-object plan aliases only until remaining B4 consumers use canonical roles.",
+        "reason": "Actual plan service owns all decisions and commits. This existing lifecycle/public or horizontal consumer imports the same object while its own remaining workflow is still tracked separately.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.service.lifecycle",
+        "owner_stage": "AR-B4-A3b / AR-B4-B / AR-B4-C / AR-G5",
+        "removal_condition": "Move this exact legacy claim, joint, provider, scheduler or aggregate consumer to its actual owner; remove the same-object alias after the last tracked caller moves.",
+        "reason": "Actual guarded lifecycle is now service-owned; these existing callers or public aliases preserve the original invocation and no-catch-up/per-character commit contracts while their remaining roles transition.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.service.plans",
+        "owner_stage": "AR-B4-A3 / AR-B4-C / AR-G5",
+        "removal_condition": "Retire this exact legacy lifecycle or aggregate consumer after its actual owner service and caller move; retain same-object plan aliases only until remaining B4 consumers use canonical roles.",
+        "reason": "Actual plan service owns all decisions and commits. This existing lifecycle/public or horizontal consumer imports the same object while its own remaining workflow is still tracked separately.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.service.scheduling",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.utils.clock",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models.world_activity_runtime",
+        "target": "app.domains.routines.models",
+        "owner_stage": "AR-G5",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.world_activity_runtime",
+        "target": "app.domains.routines.schemas",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.activity_state_contracts",
+        "target": "app.domains.routines.policies.activity_state",
+        "owner_stage": "AR-B4-B / AR-B4-C",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.lifecycle",
+        "owner_stage": "AR-B4-A3b / AR-B4-B / AR-B4-C / AR-G5",
+        "removal_condition": "Move this exact legacy claim, joint, provider, scheduler or aggregate consumer to its actual owner; remove the same-object alias after the last tracked caller moves.",
+        "reason": "Actual guarded lifecycle is now service-owned; these existing callers or public aliases preserve the original invocation and no-catch-up/per-character commit contracts while their remaining roles transition.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.activity_proposal_runtime",
+        "target": "app.domains.routines.service.joint_activity",
+        "owner_stage": "AR-B5",
+        "reason": "Existing Proposal orchestration now calls the actual joint service; no new policy remains in a compatibility copy. B5 owns the Proposal role transition.",
+        "removal_condition": "Move actual Proposal policy into Relationships and its same-Session joint collaboration into runtime during AR-B5, then remove this exact legacy consumer edge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.routine_posts.schemas",
+        "owner_stage": "AR-G5",
+        "reason": "Exact remaining consumer keeps the identical RoutinePost type/function while context and provider roles transition. Converted role modules do not import legacy code.",
+        "removal_condition": "Move actual context/provider implementation in AR-B4-B2/B3 and remove the exact legacy consumer; global schema collection retires at G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.api.v1.routes.world_activity_runtime",
+        "target": "app.domains.routines.router",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
+        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agents",
+        "target": "app.domains.routines.constants",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
+        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agents",
+        "target": "app.domains.routines.service.activity_logs",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
+        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agents",
+        "target": "app.domains.routines.service.activity_settings",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
+        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.routines.constants",
+        "owner_stage": "AR-B5",
+        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
+        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.routines.models",
+        "owner_stage": "AR-G5",
+        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
+        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas.agents",
+        "target": "app.domains.routines.schemas",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
+        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agent_runs",
+        "target": "app.domains.routines.service.tick_schedule",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing not-yet-migrated activity runtime/CRUD uses the identical owner clock or pure graph-state contract. All policy is in the canonical module; no new legacy body is introduced.",
+        "removal_condition": "Switch remaining agent-run/LLM graph/activity CRUD roles in later B4-C slices and remove this exact legacy consumer edge.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_activity_policy",
+        "target": "app.domains.routines.service.tick_schedule",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing not-yet-migrated activity runtime/CRUD uses the identical owner clock or pure graph-state contract. All policy is in the canonical module; no new legacy body is introduced.",
+        "removal_condition": "Switch remaining agent-run/LLM graph/activity CRUD roles in later B4-C slices and remove this exact legacy consumer edge.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.tick_schedule",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing not-yet-migrated activity runtime/CRUD uses the identical owner clock or pure graph-state contract. All policy is in the canonical module; no new legacy body is introduced.",
+        "removal_condition": "Switch remaining agent-run/LLM graph/activity CRUD roles in later B4-C slices and remove this exact legacy consumer edge.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.contracts.resident",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing not-yet-migrated activity runtime/CRUD uses the identical owner clock or pure graph-state contract. All policy is in the canonical module; no new legacy body is introduced.",
+        "removal_condition": "Switch remaining agent-run/LLM graph/activity CRUD roles in later B4-C slices and remove this exact legacy consumer edge.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.routines.schemas.runs",
+        "owner_stage": "AR-G5",
+        "reason": "Exact existing mixed consumer now imports the same actual Run/policy value and session rule owner, with no new legacy implementation.",
+        "removal_condition": "Move remaining activity policy/runtime in C3b+ and global schema aggregate in G5; remove this exact edge when its source owner transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas.agents",
+        "target": "app.domains.routines.schemas.runs",
+        "owner_stage": "AR-G5",
+        "reason": "Exact existing mixed consumer now imports the same actual Run/policy value and session rule owner, with no new legacy implementation.",
+        "removal_condition": "Move remaining activity policy/runtime in C3b+ and global schema aggregate in G5; remove this exact edge when its source owner transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_activity_policy",
+        "target": "app.domains.routines.constants",
+        "owner_stage": "AR-B4-C",
+        "reason": "Exact existing mixed consumer now imports the same actual Run/policy value and session rule owner, with no new legacy implementation.",
+        "removal_condition": "Move remaining activity policy/runtime in C3b+ and global schema aggregate in G5; remove this exact edge when its source owner transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_activity_policy",
+        "target": "app.domains.routines.contracts.activity_policy",
+        "owner_stage": "AR-B4-C",
+        "reason": "Exact existing mixed consumer now imports the same actual Run/policy value and session rule owner, with no new legacy implementation.",
+        "removal_condition": "Move remaining activity policy/runtime in C3b+ and global schema aggregate in G5; remove this exact edge when its source owner transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_activity_policy",
+        "target": "app.domains.routines.exceptions",
+        "owner_stage": "AR-B4-C",
+        "reason": "Exact existing mixed consumer now imports the same actual Run/policy value and session rule owner, with no new legacy implementation.",
+        "removal_condition": "Move remaining activity policy/runtime in C3b+ and global schema aggregate in G5; remove this exact edge when its source owner transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_activity_policy",
+        "target": "app.domains.routines.service.activity_sessions",
+        "owner_stage": "AR-B4-C",
+        "reason": "Exact existing mixed consumer now imports the same actual Run/policy value and session rule owner, with no new legacy implementation.",
+        "removal_condition": "Move remaining activity policy/runtime in C3b+ and global schema aggregate in G5; remove this exact edge when its source owner transitions.",
+        "review_date": "2026-09-06"
       },
       {
         "importer": "app.services.community",

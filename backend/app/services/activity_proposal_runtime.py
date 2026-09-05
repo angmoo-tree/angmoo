@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from app.runtime.routines.joint_references import SqlAlchemyJointReferences
+
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from hashlib import sha256
@@ -9,7 +11,8 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.core.ids import uuid7_string
-from app.services import daily_activity_plans, joint_activity_runtime
+from app.services import daily_activity_plans
+from app.domains.routines.service import joint_activity as joint_activity_runtime
 
 
 OPEN_PROPOSAL_LIMIT_PER_PAIR = 1
@@ -129,7 +132,7 @@ def proposal_eligibility(
     target_id = post.author_world_character_id
     try:
         joint_activity_runtime.validate_pair(
-            db,
+            db, references=SqlAlchemyJointReferences(db),
             world_id=post.world_id,
             first_world_character_id=actor_world_character_id,
             second_world_character_id=target_id,
@@ -209,13 +212,13 @@ def validate_preview(
             eligibility.reason_code or "proposal_ineligible"
         )
     proposer, target = joint_activity_runtime.validate_pair(
-        db,
+        db, references=SqlAlchemyJointReferences(db),
         world_id=world_id,
         first_world_character_id=proposer_world_character_id,
         second_world_character_id=preview.target_world_character_id,
     )
     joint_activity_runtime.validate_place(
-        db,
+        db, references=SqlAlchemyJointReferences(db),
         world_id=world_id,
         place_key=preview.place_key,
         target_daypart=preview.target_daypart,
@@ -354,7 +357,7 @@ def resolve_acceptance_schedule(
     if world is None:
         raise ActivityProposalRuntimeError("world_not_found")
     joint_activity_runtime.validate_pair(
-        db,
+        db, references=SqlAlchemyJointReferences(db),
         world_id=proposal.world_id,
         first_world_character_id=proposal.proposer_world_character_id,
         second_world_character_id=proposal.target_world_character_id,
@@ -376,7 +379,7 @@ def resolve_acceptance_schedule(
             continue
         if all(
             joint_activity_runtime.slot_available(
-                db,
+                db, references=SqlAlchemyJointReferences(db),
                 world_id=proposal.world_id,
                 world_character_id=world_character_id,
                 local_date=candidate_date,
@@ -450,7 +453,7 @@ def apply_response(
         proposal.status = "accepted"
         proposal.accepted_at = current
         scheduled = joint_activity_runtime.create_scheduled_joint(
-            db,
+            db, references=SqlAlchemyJointReferences(db),
             proposal=proposal,
             acceptance_event_id=response_event.id,
             scheduled_local_date=schedule.local_date,
@@ -481,13 +484,13 @@ def apply_response(
     if counter_date_policy == "exact" and counter_target_date is None:
         raise ActivityProposalRuntimeError("proposal_exact_date_required")
     proposer, target = joint_activity_runtime.validate_pair(
-        db,
+        db, references=SqlAlchemyJointReferences(db),
         world_id=proposal.world_id,
         first_world_character_id=proposal.target_world_character_id,
         second_world_character_id=proposal.proposer_world_character_id,
     )
     joint_activity_runtime.validate_place(
-        db,
+        db, references=SqlAlchemyJointReferences(db),
         world_id=proposal.world_id,
         place_key=counter_place_key,
         target_daypart=str(counter_target_daypart),

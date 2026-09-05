@@ -19,7 +19,7 @@ from app.services.direct_llm import (
     generate_json,
 )
 from app.core.context_text import neutralize_context_text
-from app.services.resident_contracts import LangGraphResidentContext
+from app.runtime.resident.context import LangGraphResidentContext
 from app.services.world_feed_search import ReadySearchProfile
 
 

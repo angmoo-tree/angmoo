@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2200,
-      "internal_edge_count": 2329,
+      "external_import_count": 2250,
+      "internal_edge_count": 2472,
       "legacy_import_exception_count": 0,
-      "module_count": 700,
+      "module_count": 727,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -716,8 +716,8 @@
           },
           {
             "imports": [
-              "app.core.agent_activity_schedule",
               "app.domains.characters.service.profile",
+              "app.domains.routines.service.tick_schedule",
               "app.domains.social.contracts.actors",
               "app.domains.social.exceptions",
               "app.domains.social.repository.posts",
@@ -1013,14 +1013,39 @@
           },
           {
             "imports": [
+              "app.compatibility.routine_posts.canonical_interactions",
+              "app.domains.routine_posts.contracts.context",
+              "app.domains.routines.contracts.lifecycle",
+              "app.domains.routines.models",
+              "app.domains.world_characters.models",
+              "app.domains.worlds.models",
+              "app.runtime.routines.activity_references"
+            ],
+            "module": "app.runtime.routine_posts.context_references",
+            "path": "backend/app/runtime/routine_posts/context_references.py"
+          },
+          {
+            "imports": [
               "app.compatibility.routine_posts.legacy",
               "app.core.unit_of_work",
-              "app.domains.routine_posts.infrastructure.direct_llm_provider",
-              "app.domains.routine_posts.infrastructure.sqlalchemy_context",
-              "app.domains.routines.public",
+              "app.domains.routine_posts.constants",
+              "app.domains.routine_posts.contracts.context",
+              "app.domains.routine_posts.contracts.generation",
+              "app.domains.routine_posts.exceptions",
+              "app.domains.routine_posts.service.context",
+              "app.domains.routine_posts.service.evidence",
+              "app.domains.routine_posts.service.generation",
+              "app.domains.routines.exceptions",
+              "app.domains.routines.service.execution.claims",
+              "app.domains.routines.service.execution.lifecycle",
+              "app.domains.routines.service.joint_activity",
+              "app.domains.routines.service.lifecycle",
               "app.domains.social.contracts.subjective_context",
               "app.domains.social.public",
               "app.integrations.direct_llm",
+              "app.runtime.routine_posts.context_references",
+              "app.runtime.routines.activity_references",
+              "app.runtime.routines.joint_references",
               "app.runtime.social.observations",
               "app.runtime.social.sqlalchemy_inbox",
               "app.runtime.social.subjective_context"
@@ -1046,13 +1071,13 @@
           {
             "imports": [
               "app.core.search_text",
-              "app.cruds.agents",
               "app.domains.characters.models",
+              "app.domains.routines.constants",
+              "app.domains.routines.models",
               "app.domains.social.contracts.discovery",
               "app.domains.social.models.posts",
               "app.domains.social.repository.posts",
-              "app.domains.social.service.discovery",
-              "app.models.agent_runs"
+              "app.domains.social.service.discovery"
             ],
             "module": "app.runtime.social.discovery",
             "path": "backend/app/runtime/social/discovery.py"
@@ -1078,11 +1103,11 @@
           },
           {
             "imports": [
-              "app.cruds.agents",
+              "app.domains.routines.models",
+              "app.domains.routines.service.activity_logs",
               "app.domains.social.constants",
               "app.domains.social.contracts.activity",
-              "app.domains.social.service.profile_activity",
-              "app.models.agent_runs"
+              "app.domains.social.service.profile_activity"
             ],
             "module": "app.runtime.social.profile_activity",
             "path": "backend/app/runtime/social/profile_activity.py"
@@ -1163,7 +1188,7 @@
           },
           {
             "imports": [
-              "app.cruds.agents",
+              "app.domains.routines.service.activity_logs",
               "app.domains.social.service.timeline",
               "app.runtime.relationships.sqlalchemy_social_event",
               "app.services.community_abuse_quota"
@@ -1177,7 +1202,6 @@
             "imports": [
               "app.config",
               "app.core.active_hours",
-              "app.core.agent_activity_limits",
               "app.core.search_text",
               "app.core.security",
               "app.core.unit_of_work",
@@ -1186,6 +1210,7 @@
               "app.domains.characters.service.search",
               "app.domains.characters.service.state",
               "app.domains.identity.service.profile",
+              "app.domains.routines.constants",
               "app.domains.social.constants",
               "app.domains.social.repository.inbox",
               "app.domains.social.repository.media",
@@ -1216,9 +1241,9 @@
               "app.core.context_text",
               "app.credentials",
               "app.providers.gemini",
+              "app.runtime.resident.context",
               "app.schemas",
               "app.services.direct_llm",
-              "app.services.resident_contracts",
               "app.services.world_feed_search"
             ],
             "module": "app.services.feed_reaction_planner",
@@ -1626,7 +1651,7 @@
       },
       {
         "path": "backend/tests/test_feed_reaction_intent.py",
-        "sha256": "d9d11f1bf12c949289619c447a3d207bc000f38c207dca3643c824bc22ffdccf"
+        "sha256": "bd1e83111413a0e8d66ac185b326bf70e8fb19e90632950cfcdf8d00149207f3"
       },
       {
         "path": "backend/tests/test_graph_projection_replay.py",
@@ -1642,7 +1667,7 @@
       },
       {
         "path": "backend/tests/world_packages/test_import_commit.py",
-        "sha256": "1970d16c21f7b753473ab55f1a12d4f1c95b1557734c43994d390baf7ec8f145"
+        "sha256": "119af4aafa8ba1388a9868641cfb47f9542efb334acafc232b4ffe34bed32ce1"
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",
@@ -1878,7 +1903,7 @@
         },
         {
           "path": "backend/app/runtime/migrations/sqlite_versions/v2_to_v3_no_specific_role.py",
-          "sha256": "7f4a3ef9f3860718f60a2bad3095393e493eb90ae627be9195929d0a2cc1b3a4"
+          "sha256": "26889dca6777ed4658a7cecfc153e546e6ad25adb07485a5a1b5414ba4fc262c"
         }
       ]
     }

@@ -25,7 +25,7 @@ from app.domains.relationships.models.social import (
     SocialEvent,
     SocialEventEvidence,
 )
-from app.domains.routines.infrastructure.sqlalchemy_models import (
+from app.domains.routines.models import (
     ActivityBeat,
     JointActivity,
     JointActivityParticipant,

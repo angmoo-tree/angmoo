@@ -16,7 +16,8 @@ PUBLIC_RUNTIME_FILES = (
     APP_ROOT / "domains" / "identity" / "service" / "auth.py",
     APP_ROOT / "runtime" / "account_deletion.py",
     APP_ROOT / "services" / "langgraph_resident.py",
-    APP_ROOT / "services" / "resident_contracts.py",
+    APP_ROOT / "runtime" / "resident" / "context.py",
+    APP_ROOT / "domains" / "routines" / "contracts" / "resident.py",
 )
 
 
@@ -135,13 +136,13 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
             "_refine_image_prompt",
             "_image_key_for_source",
         },
-        "domains/routine_posts/infrastructure/direct_llm_provider.py": {"_api_key"},
+        "domains/routine_posts/client.py": {"_api_key"},
         "services/service_image_key.py": {
             "get_service_image_api_key",
             "get_replicate_image_api_key",
             "get_profile_image_api_key",
         },
-        "domains/world_characters/infrastructure/direct_llm_setup_provider.py": {
+        "domains/world_characters/client.py": {
             "generate_community_profile",
             "generate_repertoire",
         },

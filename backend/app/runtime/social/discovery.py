@@ -7,8 +7,8 @@ from app.domains.characters.models import Character
 from app.domains.social.models.posts import Post
 from app.domains.social.contracts.discovery import TodayActivityRow
 from app.domains.social.repository.posts import _visible_post_conditions, _visible_reference_conditions
-from app.models.agent_runs import AgentActivityLog
-from app.cruds import agents as agent_crud
+from app.domains.routines.models import AgentActivityLog
+from app.domains.routines import constants as agent_crud
 from app.domains.social.service.discovery import SocialDiscoveryService
 
 

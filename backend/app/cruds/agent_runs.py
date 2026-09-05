@@ -7,7 +7,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app import models
-from app.core import agent_activity_schedule, unit_of_work
+from app.domains.routines.service import tick_schedule as agent_activity_schedule
+from app.core import unit_of_work
 from app.domains.relationships.constants import (RELATIONSHIP_POINT_KINDS, RELATIONSHIP_POINT_PENDING, RELATIONSHIP_POINT_SELECTED, RELATIONSHIP_POINT_CONSUMED, RELATIONSHIP_POINT_EXPIRED, RELATIONSHIP_POINT_FAILED, RELATIONSHIP_POINT_ACTIVE_STATUSES)
 from app.domains.relationships.utils.points import (relationship_point_pair_key, relationship_point_source_signature, relationship_point_chain_id, _relationship_point_payload)
 from app.domains.relationships.repository.points import count_relationship_points_for_pair_since

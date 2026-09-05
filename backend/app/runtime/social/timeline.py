@@ -2,7 +2,7 @@
 from datetime import datetime
 from typing import Literal
 from sqlalchemy.orm import Session
-from app.cruds import agents as agent_crud
+from app.domains.routines.service import activity_logs as agent_crud
 from app.services import community_abuse_quota
 from app.runtime.relationships import sqlalchemy_social_event
 from app.domains.social.service.timeline import SocialTimelineService
