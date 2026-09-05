@@ -1134,6 +1134,69 @@
       "test_suppressions": {
         "tests/characters/test_creator_policies.py": {}
       }
+    },
+    {
+      "commit": "e57ca7fa5c6940b9268d8a6a8df2d36685890087",
+      "feature_id": "AR-B2",
+      "reason": "Character HTTP and same-session management workflow introduction after foundation evidence",
+      "tracked_files": {
+        "backend/app/domains/characters/dependencies.py": "9ed9ee23aef16d9338f5ce3ee64193d78b20958d",
+        "backend/app/domains/characters/router.py": "40afff996eb36e57b0fb8ed50f7509221009428f",
+        "backend/app/domains/characters/service/management.py": "c69155548840d4f73cb38af3bc612fdef76a6837",
+        "backend/app/domains/runtime/schemas.py": "76643db67e3b0a4f588f0a512ebe464f26a3b4a2",
+        "backend/tests/characters/test_character_http_workflows.py": "1b96ab905ba7339328dcc99a69b08693c697be87"
+      },
+      "test_nodes": [
+        "tests/characters/test_character_http_workflows.py::test_both_application_factories_install_workflows_and_schema_aliases_keep_identity",
+        "tests/characters/test_character_http_workflows.py::test_character_writes_reach_runtime_in_same_session_after_original_commits",
+        "tests/characters/test_character_http_workflows.py::test_detail_limit_and_missing_runtime_configuration_are_explicit",
+        "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+      ],
+      "test_assertions": {
+        "tests/characters/test_character_http_workflows.py": {
+          "_unreachable": [],
+          "_workflows": [],
+          "test_character_writes_reach_runtime_in_same_session_after_original_commits": [
+            "assert management.update_profile(db, owner, character.id, schemas.AgentProfileUpdate(one_liner='changed'), workflows=replace(callbacks, after_profile=profile_changed)) is character",
+            "pytest.raises(exceptions.AgentNotFoundError)",
+            "assert calls == []",
+            "assert current is db and actual_owner is owner",
+            "assert object_session(character) is db",
+            "assert [kind for kind, _ in calls] == ['validate', 'commit', 'commit']",
+            "assert character.promotion_usage_allowed is True",
+            "assert current is db and actual_owner is owner and (actual_character is character)",
+            "assert calls == [('commit', db)]",
+            "assert actual_character.one_liner == 'changed'",
+            "assert media_changed is False"
+          ],
+          "test_shared_auth_override_and_original_route_order_work_for_character_http": [
+            "assert dependencies.get_current_user is get_current_user",
+            "assert dependencies.get_db is get_db",
+            "assert original is canonical",
+            "assert paths.index('/agents/drafts/{draft_id}') < paths.index('/agents/{character_id}')",
+            "assert canonical.unique_id == 'list_agents_agents_get'",
+            "assert response.status_code == 200",
+            "assert response.json() == []"
+          ],
+          "test_detail_limit_and_missing_runtime_configuration_are_explicit": [
+            "assert callbacks.build_detail(db, character) is marker",
+            "assert callbacks.build_full_detail(db, character) is marker",
+            "assert seen == [(db, character, {}), (db, character, {'recent_activity_limit': runtime.AGENT_DETAIL_ACTIVITY_LIMIT})]",
+            "pytest.raises(RuntimeError, match='character management workflows are not configured')"
+          ],
+          "test_both_application_factories_install_workflows_and_schema_aliases_keep_identity": [
+            "assert aggregate_schemas.AgentDetailRead is schemas.AgentDetailRead",
+            "assert aggregate_schemas.CredentialRead is CredentialRead",
+            "assert aggregate_schemas.AgentActivityLogRead is AgentActivityLogRead",
+            "assert aggregate_schemas.AgentSlotRead is AgentSlotRead",
+            "assert workflows.build_detail is runtime._build_agent_detail",
+            "assert workflows.after_create is runtime._after_character_created"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/characters/test_character_http_workflows.py": {}
+      }
     }
   ]
 }
