@@ -366,3 +366,11 @@ API/OpenAPI/ORM, 기존 assertion·suppression, 분할 source와 테스트 계�
 승인 public node 검사는 **604 유지 / current 2,092 PASS**였다. `--contracts --nodes`는 **#258 1,867 / #263 1,907 / 보호 계보 2,080 / current 2,092**를 수집했고 기존 API·OpenAPI·ORM·assertion·split 검사에서 변경/누락을 보고하지 않았다. 단, 선행 Identity `abbd08c`의 신규 source 9개와 node 5개가 아직 append-only introduction metadata에 없어서 전체 명령은 exit 1이었다. 이 검사 전체를 PASS로 기록하지 않으며, Identity와 Worlds source를 순서대로 capture한 뒤 통합 후보에서 다시 판정한다. Worlds source의 도입 증거도 부모 작업에서 해당 실제 commit을 기준으로 추가한다.
 
 Live architecture는 **598 modules / 1,878 internal edges / 2,021 external imports / exact legacy 287 PASS**다. ER0는 **76 PostgreSQL source / 기존 역사 migration 부분집합 87 / Neo4j query 24 / Next route 44 / parity workload 7**로 통과했다. PostgreSQL source 하나의 증가는 원래 timezone query를 별도 service 파일에 배치한 결과다. L4의 parity 97 nodes, Memory batch live inventory, local-smoke의 이동한 두 테스트 경로도 연결했다. frozen source baseline·checkpoint·승인 node·SQLite/Alembic 본문과 역사 inventory는 재작성하지 않았다. PR-head CI와 최종 G5·G06·백엔드 통합 검증은 별도 절차로 남는다.
+
+### Worlds 선형 통합 검증
+
+Character 완료 source와 모든 선행 introduction 증거 뒤에 Worlds source `38c26102a7d1f576d4eb9686f4cb9fb3585f75f2`의 신규 파일 5개·회귀 7개를 캡처했다. 현재 보안 route inventory는 실제 World router의 module 필드 10개를 반영하며 URL·method·access·endpoint 계약은 그대로다.
+
+Worlds·권한·Package import·WorldCharacter lifecycle/setup·활동 소비자 집중 검사는 **129 passed / 6 warnings, 33.27초**였다. 이 집중 실행 시작과 Git metadata commit 완료가 잠시 겹쳤으므로 해당 실행을 고정 HEAD 전체 증거로 쓰지 않는다. 고정 후보 `6b9e77d`에서 권한/삭제 회귀 **8 passed, 6.19초**, public **196 operations**, 전체 보존 **2,125 protected/current nodes / items 37 PASS**를 다시 확인했다. 후자의 실행 중 source·test·metadata는 수정하지 않았다.
+
+같은 후보에서 공통 CI 계약 7개, architecture **618 modules / 1,988 edges / exact legacy 281**, deferred **22 files**, L4 **97 parity nodes**, ER0 **77/87/24/44/7**, P8-R inventory가 모두 통과했다. 실제 Gitleaks는 추적 archive **18.97MB**와 후보의 전체 **338 ancestor commits / 20.96MB**에서 findings 0이었다. 이후 선행 Creator 결과를 합친 변경은 문서 한 파일뿐이다. PR-head의 전체 backend·실제 Installer와 순차 merge/post-merge 결과는 별도로 확인한다.
