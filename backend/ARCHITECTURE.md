@@ -647,3 +647,8 @@ Character row lock과 owner-controlled WorldCharacter 제외를 사용하는 배
 `runtime/resident/read_only_lanes.py`는 읽기 전용 provider 호출의 한정된 재시도와 대기, 오류 분류·진단 payload를 수행합니다. 실제 공개 행동을 실행하거나 재실행하는 역할은 맡지 않습니다. 취소와 재시도 대상이 아닌 오류는 원래 객체로 전파하고, 진단 정보의 합성 순서와 비밀 가림을 유지합니다. Run/slot/retry의 오류 클래스는 `routines/exceptions.py`가 실제로 소유합니다. 현재 runtime contract의 두 Run 오류 export는 기존 Character 오류 동일성 테스트가 소비하는 같은 객체이며, 복제 클래스가 아닙니다. 이 정확한 임시 계약의 종료는 B8 전환에 포함됩니다.
 
 교차 도메인의 HTTP 오류 처리는 `routines/contracts/execution_errors.py`의 명시적 두 오류 계약을 사용한다. 실제 정의는 `routines/exceptions.py`의 한 객체이며, Character router와 현재 runtime 계약만 이 지원 표면을 통해 사용한다. 기존 service/schema/contract 경계 검사에 예외를 추가하지 않는다.
+
+
+### 실행 결과의 저장과 진단
+
+`routines/service/run_results.py`는 Run 결과에 남길 필드, 비밀 가림, 단계별 오류와 사용량 집계, snapshot 저장을 소유합니다. 원래의 redaction 뒤 허용 필드 선택과 오류 길이 제한을 유지하며 원본 요청 payload를 변경하지 않습니다. 자기 Run은 `repository/runs.py::get_run`으로 caller Session에서 읽습니다. Snapshot 갱신은 원래의 commit을 수행하고, 쓰기 단계 조회나 없는 Run을 처리할 때 별도 commit을 추가하지 않습니다. Provider 호출이나 Daypart 기억 저장은 이 서비스의 책임이 아닙니다.

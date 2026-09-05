@@ -1,7 +1,7 @@
 {
-  "edge_count": 2418,
-  "external_import_count": 2270,
-  "module_count": 722,
+  "edge_count": 2421,
+  "external_import_count": 2273,
+  "module_count": 723,
   "modules": [
     {
       "external_imports": [],
@@ -4430,6 +4430,20 @@
       ],
       "module": "app.domains.routines.service.run_backoff",
       "path": "backend/app/domains/routines/service/run_backoff.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.core.redaction",
+        "app.domains.routines.repository.runs"
+      ],
+      "module": "app.domains.routines.service.run_results",
+      "path": "backend/app/domains/routines/service/run_results.py",
       "wildcard_imports": []
     },
     {
@@ -10165,6 +10179,7 @@
         "app.domains.routines.repository.slots",
         "app.domains.routines.service.lifecycle",
         "app.domains.routines.service.run_backoff",
+        "app.domains.routines.service.run_results",
         "app.domains.routines.service.runs",
         "app.domains.routines.service.slot_assignments",
         "app.domains.routines.service.slot_leases",

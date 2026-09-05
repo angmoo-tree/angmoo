@@ -995,3 +995,14 @@ C5a 기존 영향 범위와 신규 회귀는 **293 passed / 기존 PG 1 skip / �
 교차 도메인의 HTTP 오류 처리는 `routines/contracts/execution_errors.py`의 명시적 두 오류 계약을 사용한다. 실제 정의는 `routines/exceptions.py`의 한 객체이며, Character router와 현재 runtime 계약만 이 지원 표면을 통해 사용한다. 기존 service/schema/contract 경계 검사에 예외를 추가하지 않는다.
 
 C5b 최종 현재 후보는 **406 passed / 기존 PostgreSQL 1 skip / 기존 warnings 6 / 61.65초**다. 경계 **722 modules / 2,418 edges / exact legacy 209 / cycle 0**, L4 parity97·ER0 85/87/24/44/7·Memory batch 현재 inventory도 통과했다. 읽기 전용 원래 보존 진단은 **source/split/assertion/suppression/API·ORM/node 각각 오류 0**, 보호 **2,139 / 현재 2,248 nodes**다. Signed 최초 도입 두 경로만 메모리에 보충했으며 tracked source additions·checkpoint·frozen 자료와 검사 구현은 변경하지 않았다. 부모 선형 도입 append 후 stock 전체·통합 CI·installer는 별도 완료 조건이다.
+
+
+## AR-B4-C5c — Run 결과 정제·사용량·snapshot 실제 소유
+
+결과 정제·사용량 집계·저장 실제 11함수는 Routines service/run_results.py, 반복 nullable Run 조회는 자기 repository/runs.py로 이전했다. 한정된 두 query 호출을 복원하면 원문 11함수 AST가 같고, 기존 결과 테스트 7개 본문 AST도 동일하다. 허용 필드, error1500 제한, perCall/scope/token 집계, writing lanes, redaction→merge 저장 순서와 원래 commit을 유지한다.
+
+새 SQLite 3 nodes는 caller의 대기 중 결과를 포함한 snapshot commit·입력 불변, 없는 Run에서 다른 대기 변경을 commit하지 않는 조건·rollback, attached writing lanes 조회의 no-commit·rollback을 검증한다. 기존 영향 묶음과 **256 passed / 기존 warnings2 / 26.63초**를 확인했다. Memory/B5 branch ancestry는 병합하지 않고 기존 Daypart 책임은 B7 소유 후속으로 유지했다. 현재 목록·원래 보존 검사와 부모 선형 도입 append 이후 stock 전체 검증은 다음 조건이다.
+
+C5c 미커밋 소비자 검토에서 자동 추출의 import 삽입 기준 누락으로 다섯 전역 이름이 연결되지 않은 것을 발견했다. 격리 서비스 검증만으로 실행 본문의 미호출 경로까지 보장할 수 없음을 확인하고 정확 import를 연결했다. Community·individual flow·resident slot 세 실제 실행 함수 및 중첩 code의 LOAD_GLOBAL 의존이 실제 모듈/builtins에 모두 존재하는 영구 회귀 3 nodes를 추가했다. 이 구조 회귀는 실제 provider 성공 경로의 대체 증거가 아니며 기존 실행·기능 검사를 계속 유지한다. 최종 검증은 이 보완 뒤 고정된 후보를 사용한다.
+
+C5c 보완 후 최종 현재 후보는 **422 passed / 기존 PostgreSQL 1 skip / 기존 warnings5 / 81.27초**다. 실제 세 실행 함수의 copied namespace에서 누락 import 다섯 개를 제거한 읽기 전용 음성 대조는 다섯 의존을 모두 검출했다. 경계 **723 modules / 2,421 edges / exact legacy209 / cycle0**, L4 parity97·ER0 85/87/24/44/7·Memory batch 현재 inventory를 유지한다. 원래 보존 함수의 읽기 전용 진단은 **source/split/assertion/suppression/API·ORM/node 각각 오류0**, 보호 **2,139 / 현재2,254 nodes**다. 선행 signed 두 경로의 메모리 보충만 사용했으며 tracked frozen/checkpoint/additions·검사 구현은 변경하지 않았다. ER0의 역사적 `<82` 개수 assertion은 현재 파일 분할 수와의 구분을 부모가 별도 검토 중이며 stock 전체·CI·installer를 통과했다고 표시하지 않는다.

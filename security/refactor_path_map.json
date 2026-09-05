@@ -817,7 +817,14 @@
     "tests/test_tendency_note_action_selection.py::test_read_only_lane_deferred_retry_at_uses_30_minutes": "tests/routines/test_read_only_lanes.py::test_read_only_lane_deferred_retry_at_uses_30_minutes",
     "tests/test_tendency_note_action_selection.py::test_read_only_lane_error_classifier_distinguishes_timeout_sources": "tests/routines/test_read_only_lanes.py::test_read_only_lane_error_classifier_distinguishes_timeout_sources",
     "tests/test_tendency_note_action_selection.py::test_read_only_lane_retry_records_gateway_timing_diagnostics": "tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_records_gateway_timing_diagnostics",
-    "tests/test_tendency_note_action_selection.py::test_read_only_lane_retry_success_after_timeout": "tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_success_after_timeout"
+    "tests/test_tendency_note_action_selection.py::test_read_only_lane_retry_success_after_timeout": "tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_success_after_timeout",
+    "tests/test_langgraph_resident_engine.py::test_stored_gateway_result_preserves_llm_failure_metadata": "tests/routines/test_run_results.py::test_stored_gateway_result_preserves_llm_failure_metadata",
+    "tests/test_langgraph_resident_engine.py::test_stored_gateway_result_preserves_provider_error_details": "tests/routines/test_run_results.py::test_stored_gateway_result_preserves_provider_error_details",
+    "tests/test_langgraph_resident_engine.py::test_stored_gateway_result_preserves_relationship_review": "tests/routines/test_run_results.py::test_stored_gateway_result_preserves_relationship_review",
+    "tests/test_tendency_note_action_selection.py::test_compact_stored_lane_result_keeps_inbox_decision_evidence": "tests/routines/test_run_results.py::test_compact_stored_lane_result_keeps_inbox_decision_evidence",
+    "tests/test_tendency_note_action_selection.py::test_compact_stored_lane_result_keeps_read_only_attempt_diagnostics": "tests/routines/test_run_results.py::test_compact_stored_lane_result_keeps_read_only_attempt_diagnostics",
+    "tests/test_tendency_note_action_selection.py::test_stored_gateway_result_keeps_langgraph_v2_observability": "tests/routines/test_run_results.py::test_stored_gateway_result_keeps_langgraph_v2_observability",
+    "tests/test_tendency_note_action_selection.py::test_stored_gateway_result_keeps_sanitize_fallback_reason": "tests/routines/test_run_results.py::test_stored_gateway_result_keeps_sanitize_fallback_reason"
   },
   "details": {
     "AR-B1": {
@@ -10878,7 +10885,9 @@
           "backend/app/domains/routines/contracts/backoff.py",
           "backend/app/domains/routines/exceptions.py",
           "backend/app/domains/routines/repository/run_backoff.py",
+          "backend/app/domains/routines/repository/runs.py",
           "backend/app/domains/routines/service/run_backoff.py",
+          "backend/app/domains/routines/service/run_results.py",
           "backend/app/domains/runtime/contracts.py",
           "backend/app/runtime/resident/read_only_lanes.py",
           "backend/app/services/agent_runs.py"
@@ -12933,62 +12942,83 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_safe_gateway_result",
-          "new": "backend/app/services/agent_runs.py::_safe_gateway_result",
+          "new": "backend/app/domains/routines/service/run_results.py::_safe_gateway_result",
           "direct_consumers": [
+            "backend/app/domains/routines/service/run_results.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_run_results.py::test_snapshot_commits_same_session_pending_result_and_preserves_input",
+            "tests/routines/test_run_results.py::test_missing_snapshot_does_not_commit_other_pending_session_writes",
+            "tests/routines/test_run_results.py::test_pending_writing_results_read_attached_values_without_committing",
+            "tests/routines/test_run_results.py::test_stored_gateway_result_preserves_relationship_review"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_compact_stored_llm_usage",
-          "new": "backend/app/services/agent_runs.py::_compact_stored_llm_usage",
+          "new": "backend/app/domains/routines/service/run_results.py::_compact_stored_llm_usage",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/run_results.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_run_results.py::test_snapshot_commits_same_session_pending_result_and_preserves_input",
+            "tests/routines/test_run_results.py::test_missing_snapshot_does_not_commit_other_pending_session_writes",
+            "tests/routines/test_run_results.py::test_pending_writing_results_read_attached_values_without_committing",
+            "tests/routines/test_run_results.py::test_stored_gateway_result_preserves_relationship_review"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_compact_stored_lane_result",
-          "new": "backend/app/services/agent_runs.py::_compact_stored_lane_result",
+          "new": "backend/app/domains/routines/service/run_results.py::_compact_stored_lane_result",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/run_results.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_run_results.py::test_snapshot_commits_same_session_pending_result_and_preserves_input",
+            "tests/routines/test_run_results.py::test_missing_snapshot_does_not_commit_other_pending_session_writes",
+            "tests/routines/test_run_results.py::test_pending_writing_results_read_attached_values_without_committing",
+            "tests/routines/test_run_results.py::test_stored_gateway_result_preserves_relationship_review"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_compact_writing_composition_lane",
-          "new": "backend/app/services/agent_runs.py::_compact_writing_composition_lane",
+          "new": "backend/app/domains/routines/service/run_results.py::_compact_writing_composition_lane",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/run_results.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_run_results.py::test_snapshot_commits_same_session_pending_result_and_preserves_input",
+            "tests/routines/test_run_results.py::test_missing_snapshot_does_not_commit_other_pending_session_writes",
+            "tests/routines/test_run_results.py::test_pending_writing_results_read_attached_values_without_committing",
+            "tests/routines/test_run_results.py::test_stored_gateway_result_preserves_relationship_review"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_stored_gateway_result",
-          "new": "backend/app/services/agent_runs.py::_stored_gateway_result",
+          "new": "backend/app/domains/routines/service/run_results.py::_stored_gateway_result",
           "direct_consumers": [
+            "backend/app/domains/routines/service/run_results.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_run_results.py::test_snapshot_commits_same_session_pending_result_and_preserves_input",
+            "tests/routines/test_run_results.py::test_missing_snapshot_does_not_commit_other_pending_session_writes",
+            "tests/routines/test_run_results.py::test_pending_writing_results_read_attached_values_without_committing",
+            "tests/routines/test_run_results.py::test_stored_gateway_result_preserves_relationship_review"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_persist_agent_run_gateway_snapshot",
-          "new": "backend/app/services/agent_runs.py::_persist_agent_run_gateway_snapshot",
+          "new": "backend/app/domains/routines/service/run_results.py::_persist_agent_run_gateway_snapshot",
           "direct_consumers": [
+            "backend/app/domains/routines/service/run_results.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_run_results.py::test_snapshot_commits_same_session_pending_result_and_preserves_input",
+            "tests/routines/test_run_results.py::test_missing_snapshot_does_not_commit_other_pending_session_writes",
+            "tests/routines/test_run_results.py::test_pending_writing_results_read_attached_values_without_committing",
+            "tests/routines/test_run_results.py::test_stored_gateway_result_preserves_relationship_review"
           ]
         },
         {
@@ -13003,52 +13033,69 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_positive_int",
-          "new": "backend/app/services/agent_runs.py::_positive_int",
+          "new": "backend/app/domains/routines/service/run_results.py::_positive_int",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/run_results.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_run_results.py::test_snapshot_commits_same_session_pending_result_and_preserves_input",
+            "tests/routines/test_run_results.py::test_missing_snapshot_does_not_commit_other_pending_session_writes",
+            "tests/routines/test_run_results.py::test_pending_writing_results_read_attached_values_without_committing",
+            "tests/routines/test_run_results.py::test_stored_gateway_result_preserves_relationship_review"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_extract_gateway_llm_usage",
-          "new": "backend/app/services/agent_runs.py::_extract_gateway_llm_usage",
+          "new": "backend/app/domains/routines/service/run_results.py::_extract_gateway_llm_usage",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/run_results.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_run_results.py::test_snapshot_commits_same_session_pending_result_and_preserves_input",
+            "tests/routines/test_run_results.py::test_missing_snapshot_does_not_commit_other_pending_session_writes",
+            "tests/routines/test_run_results.py::test_pending_writing_results_read_attached_values_without_committing",
+            "tests/routines/test_run_results.py::test_stored_gateway_result_preserves_relationship_review"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_compact_llm_usage",
-          "new": "backend/app/services/agent_runs.py::_compact_llm_usage",
+          "new": "backend/app/domains/routines/service/run_results.py::_compact_llm_usage",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/run_results.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_run_results.py::test_snapshot_commits_same_session_pending_result_and_preserves_input",
+            "tests/routines/test_run_results.py::test_missing_snapshot_does_not_commit_other_pending_session_writes",
+            "tests/routines/test_run_results.py::test_pending_writing_results_read_attached_values_without_committing",
+            "tests/routines/test_run_results.py::test_stored_gateway_result_preserves_relationship_review"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_llm_usage_summary",
-          "new": "backend/app/services/agent_runs.py::_build_llm_usage_summary",
+          "new": "backend/app/domains/routines/service/run_results.py::_build_llm_usage_summary",
           "direct_consumers": [
+            "backend/app/domains/routines/service/run_results.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_run_results.py::test_snapshot_commits_same_session_pending_result_and_preserves_input",
+            "tests/routines/test_run_results.py::test_missing_snapshot_does_not_commit_other_pending_session_writes",
+            "tests/routines/test_run_results.py::test_pending_writing_results_read_attached_values_without_committing",
+            "tests/routines/test_run_results.py::test_stored_gateway_result_preserves_relationship_review"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_pending_writing_composition_lanes",
-          "new": "backend/app/services/agent_runs.py::_pending_writing_composition_lanes",
+          "new": "backend/app/domains/routines/service/run_results.py::_pending_writing_composition_lanes",
           "direct_consumers": [
+            "backend/app/domains/routines/service/run_results.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_run_results.py::test_snapshot_commits_same_session_pending_result_and_preserves_input",
+            "tests/routines/test_run_results.py::test_missing_snapshot_does_not_commit_other_pending_session_writes",
+            "tests/routines/test_run_results.py::test_pending_writing_results_read_attached_values_without_committing",
+            "tests/routines/test_run_results.py::test_stored_gateway_result_preserves_relationship_review"
           ]
         },
         {
@@ -13777,6 +13824,34 @@
             "tests/routines/test_run_backoff.py::test_runtime_backoff_keeps_rate_limit_and_timeout_separate",
             "tests/routines/test_run_backoff.py::test_recent_model_overload_detects_same_character_or_credential",
             "tests/routines/test_run_backoff.py::test_overload_query_reads_pending_caller_result_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_persist_agent_run_gateway_snapshot",
+          "new": "backend/app/domains/routines/repository/runs.py::get_run",
+          "source_member": "Exact original nullable db.get(AgentRun, run_id) read only, with the caller Session and original autoflush. Persistence keeps merge/redaction/commit; pending lanes keep type guards and no-write behavior.",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/run_results.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_run_results.py::test_snapshot_commits_same_session_pending_result_and_preserves_input",
+            "tests/routines/test_run_results.py::test_missing_snapshot_does_not_commit_other_pending_session_writes",
+            "tests/routines/test_run_results.py::test_pending_writing_results_read_attached_values_without_committing",
+            "tests/routines/test_run_results.py::test_stored_gateway_result_preserves_relationship_review"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_pending_writing_composition_lanes",
+          "new": "backend/app/domains/routines/repository/runs.py::get_run",
+          "source_member": "Exact original nullable db.get(AgentRun, run_id) read only, with the caller Session and original autoflush. Persistence keeps merge/redaction/commit; pending lanes keep type guards and no-write behavior.",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/run_results.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_run_results.py::test_snapshot_commits_same_session_pending_result_and_preserves_input",
+            "tests/routines/test_run_results.py::test_missing_snapshot_does_not_commit_other_pending_session_writes",
+            "tests/routines/test_run_results.py::test_pending_writing_results_read_attached_values_without_committing",
+            "tests/routines/test_run_results.py::test_stored_gateway_result_preserves_relationship_review"
           ]
         }
       ]
@@ -31342,8 +31417,8 @@
       "checked_execution_source_map": "AR-B2-B5 retains the complete original AgentRun source map, now pointing exact9 helpers/6constants/2retry classes to actual owners.",
       "split_files": {
         "backend/app/domains/runtime/contracts.py": [
-          "backend/app/domains/runtime/contracts.py",
-          "backend/app/domains/routines/exceptions.py"
+          "backend/app/domains/routines/exceptions.py",
+          "backend/app/domains/runtime/contracts.py"
         ]
       },
       "split_symbols": [
@@ -31463,6 +31538,34 @@
       "preservation": "19 original definitions and8 existing test bodies/raises/monkeypatches have identical AST. Retry bounds/random delay/sleep, metadata override order, first_error/attempt_errors, diagnostic redaction and established logger category are unchanged. Cancellation/permanent failure propagate the original object without sleep or retry.",
       "remaining": "Runtime contract keeps exact same-class exports solely for current Character parameterization/class identity test; root B8 error-contract transition must preserve those original assertions. Original real execution imports canonical functions/classes, no duplicate retry wrapper. Remaining provider result/context/prompt/AgentRun/graph roles remain later B4-C.",
       "supported_error_contract": "routines/contracts/execution_errors.py exports the same two actual classes for Character HTTP/runtime compatibility consumers, following the existing allowed service/schema/contract boundary. Actual definitions remain routines.exceptions; no class copies or boundary exceptions."
+    },
+    "AR-B4-C5c-run-results": {
+      "status": "IMPLEMENTED — final current422 passed / existingPG1skip; read-only original preservation checks0; parent source introduction and stock integration pending",
+      "checked_source_map": "Existing complete AR-B2-B5 source map retargets eleven actual definitions and adds two exact query members; no duplicate full-map copy.",
+      "actual_paths": [
+        "backend/app/domains/routines/service/run_results.py",
+        "backend/app/domains/routines/repository/runs.py"
+      ],
+      "test_nodes": [
+        "tests/routines/test_run_results.py::test_snapshot_commits_same_session_pending_result_and_preserves_input",
+        "tests/routines/test_run_results.py::test_missing_snapshot_does_not_commit_other_pending_session_writes",
+        "tests/routines/test_run_results.py::test_pending_writing_results_read_attached_values_without_committing",
+        "tests/routines/test_run_results.py::test_stored_gateway_result_preserves_relationship_review",
+        "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+      ],
+      "test_moves": {
+        "backend/tests/test_tendency_note_action_selection.py::test_compact_stored_lane_result_keeps_read_only_attempt_diagnostics": "backend/tests/routines/test_run_results.py::test_compact_stored_lane_result_keeps_read_only_attempt_diagnostics",
+        "backend/tests/test_tendency_note_action_selection.py::test_compact_stored_lane_result_keeps_inbox_decision_evidence": "backend/tests/routines/test_run_results.py::test_compact_stored_lane_result_keeps_inbox_decision_evidence",
+        "backend/tests/test_tendency_note_action_selection.py::test_stored_gateway_result_keeps_sanitize_fallback_reason": "backend/tests/routines/test_run_results.py::test_stored_gateway_result_keeps_sanitize_fallback_reason",
+        "backend/tests/test_tendency_note_action_selection.py::test_stored_gateway_result_keeps_langgraph_v2_observability": "backend/tests/routines/test_run_results.py::test_stored_gateway_result_keeps_langgraph_v2_observability",
+        "backend/tests/test_langgraph_resident_engine.py::test_stored_gateway_result_preserves_llm_failure_metadata": "backend/tests/routines/test_run_results.py::test_stored_gateway_result_preserves_llm_failure_metadata",
+        "backend/tests/test_langgraph_resident_engine.py::test_stored_gateway_result_preserves_provider_error_details": "backend/tests/routines/test_run_results.py::test_stored_gateway_result_preserves_provider_error_details",
+        "backend/tests/test_langgraph_resident_engine.py::test_stored_gateway_result_preserves_relationship_review": "backend/tests/routines/test_run_results.py::test_stored_gateway_result_preserves_relationship_review"
+      },
+      "ownership": "Routines owns stored Run outcome redaction, bounded lane diagnostics, token counters and JSON snapshot persistence. Own nullable query is repository; sameSession commit stays in actual service.",
+      "preservation": "11 original function ASTs match after exact nullable query restoration; 7 moved test bodies are identical. Retained keys, error1500 limit, usage counts/perCall/scope, writing lanes, redaction-before-retention, merge order, missingRun early return and unconditional original commit are preserved.",
+      "remaining": "Actual context/prompt/execution composition and exact bridges remain B4-C/B8-A. Memory Daypart remains existing original owner pending B7 integration; no Memory/B5 ancestry or duplicate Daypart implementation is introduced.",
+      "execution_binding_regression": "Source review caught five missing actual consumer imports despite isolated service tests passing. They are connected, and three real execution code objects plus nested code now check all LOAD_GLOBAL dependencies against actual module/builtins; an external missing-five negative probe demonstrates the defect is detected. No behavioral assertion or suppression is removed."
     }
   },
   "test_symbols": {

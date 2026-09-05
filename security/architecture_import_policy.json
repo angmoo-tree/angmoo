@@ -1075,6 +1075,7 @@
       "app.domains.routines.service.plans",
       "app.domains.routines.service.public_action_executions",
       "app.domains.routines.service.run_backoff",
+      "app.domains.routines.service.run_results",
       "app.domains.routines.service.runs",
       "app.domains.routines.service.scheduling",
       "app.domains.routines.service.slot_assignments",
@@ -1253,6 +1254,7 @@
       "app.domains.routines.service.plans",
       "app.domains.routines.service.public_action_executions",
       "app.domains.routines.service.run_backoff",
+      "app.domains.routines.service.run_results",
       "app.domains.routines.service.runs",
       "app.domains.routines.service.scheduling",
       "app.domains.routines.service.slot_assignments",
@@ -2769,6 +2771,14 @@
         "owner_stage": "AR-B4-C",
         "reason": "Remaining real AgentRun execution consumes the same backoff decision after its actual policy/query move; no duplicate classifier or forwarding function.",
         "removal_condition": "Move remaining actual execution orchestration to runtime/owner services in B4-C and remove this exact legacy consumer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.run_results",
+        "owner_stage": "AR-B4-C",
+        "reason": "Remaining actual AgentRun orchestration consumes canonical result retention and snapshot persistence; no duplicate policy or forwarding function.",
+        "removal_condition": "Move actual execution composition to runtime in B4-C and remove this exact legacy consumer before B8-A.",
         "review_date": "2026-09-06"
       }
     ]

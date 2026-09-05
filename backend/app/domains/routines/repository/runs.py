@@ -77,3 +77,7 @@ def get_latest_first_greeting_run_for_user(
         )
         .order_by(models.AgentRun.created_at.desc(), models.AgentRun.id.desc())
     )
+
+
+def get_run(db: Session, run_id: str) -> models.AgentRun | None:
+    return db.get(models.AgentRun, run_id)
