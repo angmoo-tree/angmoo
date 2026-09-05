@@ -5,7 +5,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy.orm import Session
 
 from app import models
-from app.runtime.graph_projection import sqlalchemy_state as graph_projection_crud
+from app.domains.relationships.repository import projection_state as graph_projection_crud
 from app.runtime.relationships import (
     sqlalchemy_social_event as social_event_runtime,
 )

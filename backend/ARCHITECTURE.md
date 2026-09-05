@@ -661,3 +661,6 @@ Resident Context는 Character/CharacterState, LlmCredential, AgentFeedCue와 Act
 
 
 활동 제안의 한도·발행·수락·거절·역제안은 Relationships `service/proposals.py`를 수정한다. 공동 활동 슬롯과 두 참가자의 예약/계획 변경은 Routines 소유이며 `runtime/activity_proposals`가 같은 Session의 두 서비스를 조립한다. 이 상위 조립은 각 도메인과 기존 event/joint runtime을 단방향으로 참조하며 제안 상태 판단을 복제하지 않는다. 예약 도중 실패해도 caller가 근거 event와 모든 상태를 함께 rollback할 수 있도록 제안 서비스는 자체 commit을 하지 않는다.
+
+
+Projection outbox의 업무 상태 전이와 재시도 기준은 Relationships가 소유한다. Session 기반 경로의 `service/projection_state.py`는 원래 claim/finalize 순서를 수행하고 commit은 실행 경로가 맡는다. 후보 선택·World별 readiness 집계는 같은 도메인의 repository가 소유하며, 이 조회 결과를 그래프의 권한 판단을 대신하는 근거로 사용하지 않는다.

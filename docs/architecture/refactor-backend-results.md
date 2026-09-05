@@ -1036,3 +1036,12 @@ Relationships `service/proposals.py`가 제안 한도·cooldown·preview·발행
 기존 업무 흐름 **6개와 SQL 5개 AST**는 정확한 소유 함수 호출만 원문으로 확장하면 동일하다. 최초 새 transaction test는 datetime fixture의 인자 타입 오류 2개를 수정했고 제품 코드나 기존 assertion은 바꾸지 않았다. 수정 후 신규 정상/예약 직후 실패 주입 2개를 포함한 집중 **21 passed / 21.13초**, 수동 요청·삭제·projection까지 **47 passed / 기존 warning 1 / 31.39초**를 확인했다. 실제 2개 Session에서 같은 attached Proposal을 예약에 전달하고, 예약을 만든 직후 실패해도 caller rollback으로 제안·Joint·참가자·근거를 함께 되돌린다.
 
 구조 검사가 `runtime.relationships`와 `runtime.routines`의 역방향 조립 의존을 발견했다. 제안+예약 상위 조립을 독립 `runtime/activity_proposals`로 분리하여 각 runtime에 대한 의존을 단방향으로 만들었다. 검사 예외를 추가하지 않았으며 최종 **740 modules / 2,517 edges / exact legacy 214 / cycle 0**으로 통과했다. 경로 정정 뒤 같은 집중 **21 passed / 24.32초**, 변경된 Proposal split 2개도 통과했다. API·응답 스키마·ORM는 PR258/263과 동일하고, 이동한 보호 test assertion과 full split 역시 정정 전 검증에서 오류 0이었다. 최종 source 도입/전체보존/Hosted CI/installer는 부모 선형 통합에서 별도로 검증한다.
+
+
+## AR-B5-C5-A — Outbox 상태 전이와 World readiness 조회
+
+기존 SQLAlchemy outbox의 claim/finalize 실제 업무는 Relationships `service/projection_state.py`, claim 후보/World 집계/nullable row 조회는 repository, GraphOutboxCounts는 contracts가 소유한다. 원래 runtime/sqlalchemy_state.py는 제거하고 실제 consumer 5개를 역할별 구현에 연결했다. 같은 Session·claim flush·finalize의 caller commit·rebuild 제외·정렬·batch bound·skip_locked·owner 검사·retry/dead 전이 순서를 유지한다. canonical SQLite CAS 구현은 이 source에서 바꾸지 않고 다음 책임 전환 대상으로 둔다.
+
+원문 **6개 실제 body/query 계약 AST 동일**, 집중 **37 passed / 기존 PostgreSQL 연결 gate 1 skip / 21.94초**. 새 transaction node는 SQLite에서 이 Session 기반 구현의 claim/재시도 rollback과 stale owner 차단을 검사한다. 이 테스트를 PostgreSQL skip_locked 동시성 검증으로 표시하지 않는다. canonical SQLite의 기존 10-worker claim/reclaim 회귀도 함께 통과했다. 기존 테스트 assertion은 바꾸지 않았고 source capture/Hosted PostgreSQL gate/전체 B5 종료는 부모 통합에서 수행한다.
+
+C5-A 최종 경계는 **741 modules / 2,520 edges / exact legacy 213**으로 통과했고 API·응답 스키마·ORM는 PR258/263과 동일하다. 변경된 보호 테스트 2개 파일의 assertion과 전체 기존 split evidence도 오류 0이며 L4·ER0 current inventory를 갱신했다.

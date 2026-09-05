@@ -8,7 +8,7 @@ from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app import models, schemas
-from app.runtime.graph_projection import sqlalchemy_state as graph_projection_crud
+from app.domains.relationships.repository import projection_state as graph_projection_crud
 from app.runtime.graph_projection.relationship_graph_read import (
     SqlAlchemyRelationshipGraphReadGateway,
 )

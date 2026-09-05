@@ -79,3 +79,6 @@ SEARCH_DAYS = 7
 
 
 PROPOSAL_TTL = timedelta(days=7)
+
+
+LEASE_TTL_SECONDS = 60

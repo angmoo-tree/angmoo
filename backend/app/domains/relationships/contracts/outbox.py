@@ -57,3 +57,14 @@ class OutboxPort(Protocol):
 
 
 __all__ = ["OutboxFinalizeStatus", "OutboxPort", "ProjectionWorkItem"]
+
+
+@dataclass(frozen=True)
+class GraphOutboxCounts:
+    pending: int
+    processing: int
+    dead: int
+    oldest_pending_at: datetime | None
+    last_succeeded_at: datetime | None
+    active_replay: bool
+    failed_rebuild: bool

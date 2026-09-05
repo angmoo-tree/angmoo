@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.config import Settings, settings
-from app.runtime.graph_projection import sqlalchemy_state as graph_projection_crud
+from app.domains.relationships.repository import projection_state as graph_projection_crud
 from app.domains.relationships import public as relationships
 from app.domains.relationships import (schemas)
 from app.domains.relationships.exceptions import (GraphReadBackendError)

@@ -380,7 +380,8 @@
     "backend/app/domains/relationships/application/graph_planning.py": "backend/app/domains/relationships/service/graph_planning.py",
     "backend/app/domains/relationships/graph_recall/service.py": "backend/app/domains/relationships/service/graph_recall.py",
     "backend/app/services/activity_proposal_runtime.py": "backend/app/runtime/activity_proposals/composition.py",
-    "backend/tests/test_activity_proposal_runtime.py": "backend/tests/relationships/test_activity_proposals.py"
+    "backend/tests/test_activity_proposal_runtime.py": "backend/tests/relationships/test_activity_proposals.py",
+    "backend/app/runtime/graph_projection/sqlalchemy_state.py": "backend/app/domains/relationships/service/projection_state.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -29255,6 +29256,103 @@
       ],
       "new_files": [
         "backend/app/runtime/activity_proposals/__init__.py"
+      ]
+    },
+    "AR-B5-C5-A": {
+      "status": "IMPLEMENTED; focused37 PASS/1 existing PG skip; 6 AST body/query contracts PASS; source introduction pending",
+      "scope": "Original SQLAlchemy outbox claim/finalize rules and readiness queries belong to Relationships; canonical SQLite CAS path remains unchanged for next slice.",
+      "split_files": {
+        "backend/app/runtime/graph_projection/sqlalchemy_state.py": [
+          "backend/app/domains/relationships/constants.py",
+          "backend/app/domains/relationships/contracts/outbox.py",
+          "backend/app/domains/relationships/repository/projection_state.py",
+          "backend/app/domains/relationships/service/projection_state.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_state.py::LEASE_TTL_SECONDS",
+          "new": "backend/app/domains/relationships/constants.py::LEASE_TTL_SECONDS",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/projection_state.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_state_transaction.py::test_sqlalchemy_lease_and_retry_remain_in_the_caller_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_state.py::GraphOutboxCounts",
+          "new": "backend/app/domains/relationships/contracts/outbox.py::GraphOutboxCounts",
+          "direct_consumers": [
+            "backend/app/domains/relationships/repository/projection_state.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_state_transaction.py::test_sqlalchemy_lease_and_retry_remain_in_the_caller_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_state.py::claim_batch",
+          "new": "backend/app/domains/relationships/service/projection_state.py::claim_batch",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/sqlalchemy_outbox.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_state_transaction.py::test_sqlalchemy_lease_and_retry_remain_in_the_caller_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_state.py::finalize_success",
+          "new": "backend/app/domains/relationships/service/projection_state.py::finalize_success",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/sqlalchemy_outbox.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_state_transaction.py::test_sqlalchemy_lease_and_retry_remain_in_the_caller_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_state.py::finalize_failure",
+          "new": "backend/app/domains/relationships/service/projection_state.py::finalize_failure",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/sqlalchemy_outbox.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_state_transaction.py::test_sqlalchemy_lease_and_retry_remain_in_the_caller_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_state.py::world_counts",
+          "new": "backend/app/domains/relationships/repository/projection_state.py::world_counts",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/social_memory_read.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_state_transaction.py::test_sqlalchemy_lease_and_retry_remain_in_the_caller_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_state.py::claim_batch",
+          "new": "backend/app/domains/relationships/repository/projection_state.py::claimable_rows",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/projection_state.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_state_transaction.py::test_sqlalchemy_lease_and_retry_remain_in_the_caller_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_state.py::finalize_failure",
+          "new": "backend/app/domains/relationships/repository/projection_state.py::get_outbox",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/projection_state.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_state_transaction.py::test_sqlalchemy_lease_and_retry_remain_in_the_caller_transaction"
+          ]
+        }
+      ],
+      "new_tests": [
+        "tests/relationships/test_projection_state_transaction.py::test_sqlalchemy_lease_and_retry_remain_in_the_caller_transaction"
       ]
     }
   }

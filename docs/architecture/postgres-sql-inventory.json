@@ -498,6 +498,21 @@
     {
       "markers": {
         "row_lock": [
+          43
+        ],
+        "skip_locked": [
+          43
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/relationships/repository/projection_state.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "a071a077783a8c3f7ee309dec8d270529ab2271f7576e24c4283372312f16143",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "row_lock": [
           108
         ]
       },
@@ -998,21 +1013,6 @@
       "path": "backend/app/runtime/graph_projection/replay.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "4f73837f854a9ba7e81dce07f77410968b8ef167e84952f0bdac84e6e7227f35",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
-    },
-    {
-      "markers": {
-        "row_lock": [
-          65
-        ],
-        "skip_locked": [
-          65
-        ]
-      },
-      "owner": "ER2-ER7 legacy evidence",
-      "path": "backend/app/runtime/graph_projection/sqlalchemy_state.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "1a2ca72c76048c25158646eb36667782d716602fc40ce5805376e0f7fa358ff7",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

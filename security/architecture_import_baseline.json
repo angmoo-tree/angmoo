@@ -1,7 +1,7 @@
 {
-  "edge_count": 2517,
-  "external_import_count": 2271,
-  "module_count": 740,
+  "edge_count": 2520,
+  "external_import_count": 2273,
+  "module_count": 741,
   "modules": [
     {
       "external_imports": [],
@@ -3515,6 +3515,21 @@
     },
     {
       "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.relationships.contracts.outbox",
+        "app.domains.relationships.models"
+      ],
+      "module": "app.domains.relationships.repository.projection_state",
+      "path": "backend/app/domains/relationships/repository/projection_state.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "datetime",
         "sqlalchemy",
         "sqlalchemy.orm"
@@ -3678,6 +3693,20 @@
       ],
       "module": "app.domains.relationships.service.projection_events",
       "path": "backend/app/domains/relationships/service/projection_events.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.relationships.constants",
+        "app.domains.relationships.repository.projection_state"
+      ],
+      "module": "app.domains.relationships.service.projection_state",
+      "path": "backend/app/domains/relationships/service/projection_state.py",
       "wildcard_imports": []
     },
     {
@@ -8543,13 +8572,13 @@
         "app.domains.relationships.contracts.projection",
         "app.domains.relationships.exceptions",
         "app.domains.relationships.public",
+        "app.domains.relationships.repository.projection_state",
         "app.domains.relationships.schemas",
         "app.integrations.ladybug_projection",
         "app.integrations.relationship_graph_read",
         "app.models",
         "app.runtime.graph_projection.metrics",
-        "app.runtime.graph_projection.process_client",
-        "app.runtime.graph_projection.sqlalchemy_state"
+        "app.runtime.graph_projection.process_client"
       ],
       "module": "app.runtime.graph_projection.relationship_graph_read",
       "path": "backend/app/runtime/graph_projection/relationship_graph_read.py",
@@ -8586,9 +8615,9 @@
       "imports": [
         "app.config",
         "app.domains.relationships.public",
+        "app.domains.relationships.repository.projection_state",
         "app.models",
         "app.runtime.graph_projection.relationship_graph_read",
-        "app.runtime.graph_projection.sqlalchemy_state",
         "app.runtime.relationships.sqlalchemy_social_read_repository",
         "app.schemas"
       ],
@@ -8627,27 +8656,12 @@
         "app.core.sqlite_concurrency",
         "app.domains.relationships.contracts.outbox",
         "app.domains.relationships.contracts.projection_commands",
+        "app.domains.relationships.service.projection_state",
         "app.models",
-        "app.runtime.graph_projection.sqlalchemy_commands",
-        "app.runtime.graph_projection.sqlalchemy_state"
+        "app.runtime.graph_projection.sqlalchemy_commands"
       ],
       "module": "app.runtime.graph_projection.sqlalchemy_outbox",
       "path": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "dataclasses",
-        "datetime",
-        "sqlalchemy",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.models"
-      ],
-      "module": "app.runtime.graph_projection.sqlalchemy_state",
-      "path": "backend/app/runtime/graph_projection/sqlalchemy_state.py",
       "wildcard_imports": []
     },
     {

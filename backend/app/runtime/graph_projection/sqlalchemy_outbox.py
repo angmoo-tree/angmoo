@@ -10,7 +10,7 @@ from sqlalchemy import Engine, exists, or_, select, update
 from sqlalchemy.orm import Session
 
 from app import models
-from app.runtime.graph_projection import sqlalchemy_state as graph_projection_crud
+from app.domains.relationships.service import projection_state as graph_projection_crud
 from app.domains.relationships.contracts.outbox import (OutboxFinalizeStatus, ProjectionWorkItem)
 from app.domains.relationships.contracts.projection_commands import (ProjectionCommand)
 from app.core.sqlite_concurrency import (
