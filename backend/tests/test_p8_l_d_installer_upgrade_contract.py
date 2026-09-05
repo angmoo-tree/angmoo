@@ -135,6 +135,11 @@ def test_supported_installer_builder_freezes_every_readable_predecessor(
         source.close()
     assert fixture["target_data_version"] == 9
     assert fixture["target_table_count"] == 102
+    if source_version == 8:
+        assert fixture["generation"] == (
+            "er6-preview-v2-schema-v3-schema-v4-schema-v6-schema-v7-schema-v8"
+        )
+        assert len(fixture["generation"]) == 64
 
 
 def test_v3_installer_fixture_is_legacy_shaped_and_proves_v4_chat_backfill(

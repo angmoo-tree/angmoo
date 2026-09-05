@@ -41,6 +41,9 @@ from app.runtime.persistence.sqlite_schema import (
 )
 
 
+MAX_GENERATION_NAME_LENGTH = 64
+
+
 class SqliteCanonicalUpgradeError(RuntimeError):
     """Privacy-safe canonical upgrade failure."""
 
@@ -128,8 +131,10 @@ class SqliteCanonicalUpgradeCoordinator:
         final_relative = f"generations/{final_generation}"
         final_root = self._paths.canonical / final_relative
         if final_root.exists():
-            final_generation = (
-                f"{final_generation}-{uuid4().hex[:8]}"[:64]
+            final_generation = _target_generation_name(
+                source_root.name,
+                latest.schema_version,
+                disambiguator=uuid4().hex[:8],
             )
             final_relative = f"generations/{final_generation}"
         staging = (
@@ -427,17 +432,32 @@ def _require_staging_capacity(source: Path, root: Path) -> None:
         raise SqliteCanonicalUpgradeError("sqlite_migration_disk_space_low")
 
 
-def _target_generation_name(source: str, version: int) -> str:
-    suffix = f"-v{version}"
+def _target_generation_name(
+    source: str,
+    version: int,
+    *,
+    disambiguator: str | None = None,
+) -> str:
+    version_suffix = f"-v{version}"
     if source.endswith("-v1"):
-        value = source[:-3] + suffix
+        prefix = source[:-3]
     else:
-        value = source + f"-schema-v{version}"
+        prefix = source
+        version_suffix = f"-schema-v{version}"
+    suffix = version_suffix
+    if disambiguator is not None:
+        suffix += f"-{disambiguator}"
     allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-"
-    value = "".join(
-        character if character in allowed else "-" for character in value
+    prefix = "".join(
+        character if character in allowed else "-" for character in prefix
     )
-    return value[:64]
+    suffix = "".join(
+        character if character in allowed else "-" for character in suffix
+    )
+    prefix_limit = MAX_GENERATION_NAME_LENGTH - len(suffix)
+    if prefix_limit <= 0:
+        raise SqliteCanonicalUpgradeError("sqlite_generation_name_invalid")
+    return f"{prefix[:prefix_limit]}{suffix}"
 
 
 __all__ = [
