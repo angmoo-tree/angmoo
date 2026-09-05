@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from datetime import datetime
 
-from app.domains.memory.application.recall import (
+from app.domains.memory.service.recall import (
     CANONICAL_PRIMITIVE_REGISTRY,
     CanonicalRecallService,
 )

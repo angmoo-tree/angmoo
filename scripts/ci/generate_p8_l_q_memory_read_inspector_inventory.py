@@ -51,10 +51,10 @@ REQUIRED_FILES = (
     "backend/app/domains/chat/ports/runtime.py",
     "backend/app/domains/chat/public.py",
     "backend/app/domains/memory/api/schemas.py",
-    "backend/app/domains/memory/application/read_surface.py",
+    "backend/app/domains/memory/service/inspector.py",
     "backend/app/domains/memory/contracts/inspector.py",
     "backend/app/domains/memory/infrastructure/repository.py",
-    "backend/app/domains/memory/ports/repository.py",
+    "backend/app/domains/memory/contracts/item_store.py",
     "backend/app/domains/memory/public.py",
     "backend/app/runtime/chat/sqlalchemy_adapter.py",
     "backend/app/runtime/chat/sqlalchemy_service.py",
@@ -164,14 +164,14 @@ def _forbid_imports(relative: str, prefixes: tuple[str, ...]) -> None:
 def _boundary_contract() -> dict[str, Any]:
     for relative in (
         "backend/app/domains/memory/contracts/inspector.py",
-        "backend/app/domains/memory/application/read_surface.py",
+        "backend/app/domains/memory/service/inspector.py",
     ):
         _forbid_imports(
             relative,
             ("app.integrations", "app.runtime", "sqlalchemy", "fastapi"),
         )
     _require_text(
-        "backend/app/domains/memory/application/read_surface.py",
+        "backend/app/domains/memory/service/inspector.py",
         (
             "get_scope_setting(scope)",
             "fresh.source_digest == row.source_digest",

@@ -15,7 +15,7 @@ from app.domains.memory.contracts.recall import (
     MemoryRecallSearchQuery,
     RecallDocumentKind,
 )
-from app.domains.memory.ports.recall import (
+from app.domains.memory.contracts.recall_store import (
     CanonicalRecallRepositoryPort,
     MemoryRecallIndexPort,
 )

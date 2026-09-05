@@ -41,15 +41,15 @@ class InventoryError(RuntimeError):
 
 
 REQUIRED_FILES = (
-    "backend/app/domains/memory/application/consolidation.py",
+    "backend/app/domains/memory/service/consolidation.py",
     "backend/app/domains/memory/policies/consolidation.py",
     "backend/app/domains/memory/policies/consolidation_output.py",
     "backend/app/domains/memory/infrastructure/consolidation_repository.py",
     "backend/app/domains/memory/infrastructure/maintenance_queue.py",
     "backend/app/domains/memory/infrastructure/maintenance_unit_of_work.py",
-    "backend/app/domains/memory/ports/consolidation_provider.py",
-    "backend/app/domains/memory/ports/consolidation_repository.py",
-    "backend/app/domains/memory/ports/maintenance_unit_of_work.py",
+    "backend/app/domains/memory/contracts/consolidation_provider.py",
+    "backend/app/domains/memory/contracts/consolidation_store.py",
+    "backend/app/domains/memory/contracts/maintenance_transaction.py",
     "backend/app/domains/memory/public.py",
     "backend/app/integrations/llm/memory_consolidation.py",
     "backend/tests/test_p8_l_o_memory_consolidation.py",
@@ -110,11 +110,11 @@ def _boundary_contract() -> dict[str, Any]:
         ("app.integrations", "app.runtime", "sqlalchemy", "fastapi"),
     )
     _forbid_imports(
-        "backend/app/domains/memory/application/consolidation.py",
+        "backend/app/domains/memory/service/consolidation.py",
         ("app.integrations", "app.runtime", "sqlalchemy", "fastapi"),
     )
     _require_text(
-        "backend/app/domains/memory/application/consolidation.py",
+        "backend/app/domains/memory/service/consolidation.py",
         (
             "memory_evidence_blocked_code",
             "enqueue_maintenance=False",

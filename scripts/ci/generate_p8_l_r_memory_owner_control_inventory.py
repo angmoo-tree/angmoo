@@ -40,11 +40,11 @@ class InventoryError(RuntimeError):
 REQUIRED_FILES = (
     "backend/app/api/v1/routes/memory.py",
     "backend/app/domains/memory/api/schemas.py",
-    "backend/app/domains/memory/application/scope_control.py",
-    "backend/app/domains/memory/application/write_lifecycle.py",
+    "backend/app/domains/memory/service/scope.py",
+    "backend/app/domains/memory/service/items.py",
     "backend/app/domains/memory/contracts/items.py",
     "backend/app/domains/memory/infrastructure/repository.py",
-    "backend/app/domains/memory/ports/repository.py",
+    "backend/app/domains/memory/contracts/item_store.py",
     "backend/app/domains/memory/public.py",
     "backend/app/runtime/memory/recall_projection.py",
     "backend/app/runtime/persistence/sqlite_schema.py",
@@ -128,8 +128,8 @@ def _forbid_imports(relative: str, prefixes: tuple[str, ...]) -> None:
 def _boundary_contract() -> dict[str, Any]:
     for relative in (
         "backend/app/domains/memory/contracts/items.py",
-        "backend/app/domains/memory/application/scope_control.py",
-        "backend/app/domains/memory/application/write_lifecycle.py",
+        "backend/app/domains/memory/service/scope.py",
+        "backend/app/domains/memory/service/items.py",
     ):
         _forbid_imports(
             relative,
@@ -151,7 +151,7 @@ def _boundary_contract() -> dict[str, Any]:
         ("SELECT ", "INSERT ", "UPDATE ", "DELETE FROM ", "MATCH ", "session.execute("),
     )
     _require_text(
-        "backend/app/domains/memory/application/write_lifecycle.py",
+        "backend/app/domains/memory/service/items.py",
         (
             "def correct_summary(",
             "memory_correction_item_id(",

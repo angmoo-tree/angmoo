@@ -1183,12 +1183,22 @@
       "app.domains.identity.service.world_character_credentials",
       "app.domains.media.contracts",
       "app.domains.media.schemas",
+      "app.domains.memory.contracts",
+      "app.domains.memory.contracts.batch",
+      "app.domains.memory.contracts.consolidation_provider",
+      "app.domains.memory.contracts.consolidation_store",
       "app.domains.memory.contracts.inspector",
+      "app.domains.memory.contracts.item_store",
       "app.domains.memory.contracts.items",
+      "app.domains.memory.contracts.maintenance_queue",
+      "app.domains.memory.contracts.maintenance_transaction",
+      "app.domains.memory.contracts.planner_provider",
       "app.domains.memory.contracts.provenance",
       "app.domains.memory.contracts.recall",
+      "app.domains.memory.contracts.recall_store",
       "app.domains.memory.contracts.retrieval_plan",
       "app.domains.memory.contracts.scope",
+      "app.domains.memory.contracts.source_evidence",
       "app.domains.memory.exceptions",
       "app.domains.memory.policies.batch",
       "app.domains.memory.policies.consolidation",
@@ -1199,6 +1209,14 @@
       "app.domains.memory.policies.validation",
       "app.domains.memory.schemas",
       "app.domains.memory.schemas.batch",
+      "app.domains.memory.service",
+      "app.domains.memory.service.batch_selection",
+      "app.domains.memory.service.consolidation",
+      "app.domains.memory.service.inspector",
+      "app.domains.memory.service.items",
+      "app.domains.memory.service.recall",
+      "app.domains.memory.service.retrieval_plan",
+      "app.domains.memory.service.scope",
       "app.domains.runtime.contracts",
       "app.domains.runtime.schemas",
       "app.domains.social.service",
@@ -1283,14 +1301,32 @@
       "app.domains.identity.service.world_character_credentials",
       "app.domains.media.contracts",
       "app.domains.media.schemas",
+      "app.domains.memory.contracts",
+      "app.domains.memory.contracts.batch",
+      "app.domains.memory.contracts.consolidation_provider",
+      "app.domains.memory.contracts.consolidation_store",
       "app.domains.memory.contracts.inspector",
+      "app.domains.memory.contracts.item_store",
       "app.domains.memory.contracts.items",
+      "app.domains.memory.contracts.maintenance_queue",
+      "app.domains.memory.contracts.maintenance_transaction",
+      "app.domains.memory.contracts.planner_provider",
       "app.domains.memory.contracts.provenance",
       "app.domains.memory.contracts.recall",
+      "app.domains.memory.contracts.recall_store",
       "app.domains.memory.contracts.retrieval_plan",
       "app.domains.memory.contracts.scope",
+      "app.domains.memory.contracts.source_evidence",
       "app.domains.memory.schemas",
       "app.domains.memory.schemas.batch",
+      "app.domains.memory.service",
+      "app.domains.memory.service.batch_selection",
+      "app.domains.memory.service.consolidation",
+      "app.domains.memory.service.inspector",
+      "app.domains.memory.service.items",
+      "app.domains.memory.service.recall",
+      "app.domains.memory.service.retrieval_plan",
+      "app.domains.memory.service.scope",
       "app.domains.runtime.contracts",
       "app.domains.runtime.schemas",
       "app.domains.social.service.media_storage",
@@ -2100,46 +2136,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.domains.memory.application.batch_selection",
-        "target": "app.domains.memory.exceptions",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move the recorded actual Memory service, policy, repository or HTTP consumer to its supported role and remove the obsolete export. No new legacy consumers.",
-        "reason": "Existing Memory consumer uses the exact same schema/error object from its canonical owner; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.consolidation",
-        "target": "app.domains.memory.exceptions",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move the recorded actual Memory service, policy, repository or HTTP consumer to its supported role and remove the obsolete export. No new legacy consumers.",
-        "reason": "Existing Memory consumer uses the exact same schema/error object from its canonical owner; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.recall",
-        "target": "app.domains.memory.exceptions",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move the recorded actual Memory service, policy, repository or HTTP consumer to its supported role and remove the obsolete export. No new legacy consumers.",
-        "reason": "Existing Memory consumer uses the exact same schema/error object from its canonical owner; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.scope_control",
-        "target": "app.domains.memory.exceptions",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move the recorded actual Memory service, policy, repository or HTTP consumer to its supported role and remove the obsolete export. No new legacy consumers.",
-        "reason": "Existing Memory consumer uses the exact same schema/error object from its canonical owner; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.write_lifecycle",
-        "target": "app.domains.memory.exceptions",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move the recorded actual Memory service, policy, repository or HTTP consumer to its supported role and remove the obsolete export. No new legacy consumers.",
-        "reason": "Existing Memory consumer uses the exact same schema/error object from its canonical owner; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.domains.memory.domain",
         "target": "app.domains.memory.exceptions",
         "owner_stage": "AR-B7 / AR-B8-A",
@@ -2177,198 +2173,6 @@
         "owner_stage": "AR-B7 / AR-B8-A",
         "removal_condition": "Move the recorded actual Memory service, policy, repository or HTTP consumer to its supported role and remove the obsolete export. No new legacy consumers.",
         "reason": "Existing Memory consumer uses the exact same schema/error object from its canonical owner; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.batch_selection",
-        "target": "app.domains.memory.policies.batch",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.batch_selection",
-        "target": "app.domains.memory.policies.selection_output",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.canonical_planning",
-        "target": "app.domains.memory.contracts.recall",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.canonical_planning",
-        "target": "app.domains.memory.contracts.retrieval_plan",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.canonical_planning",
-        "target": "app.domains.memory.contracts.scope",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.canonical_planning",
-        "target": "app.domains.memory.policies.retrieval_planner",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.consolidation",
-        "target": "app.domains.memory.contracts.items",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.consolidation",
-        "target": "app.domains.memory.contracts.provenance",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.consolidation",
-        "target": "app.domains.memory.policies.consolidation",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.consolidation",
-        "target": "app.domains.memory.policies.validation",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.read_surface",
-        "target": "app.domains.memory.contracts.inspector",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.read_surface",
-        "target": "app.domains.memory.contracts.items",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.read_surface",
-        "target": "app.domains.memory.contracts.provenance",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.read_surface",
-        "target": "app.domains.memory.contracts.scope",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.read_surface",
-        "target": "app.domains.memory.policies.retention",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.recall",
-        "target": "app.domains.memory.contracts.recall",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.scope_control",
-        "target": "app.domains.memory.contracts.items",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.scope_control",
-        "target": "app.domains.memory.contracts.provenance",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.scope_control",
-        "target": "app.domains.memory.contracts.scope",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.scope_control",
-        "target": "app.domains.memory.policies.retention",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.write_lifecycle",
-        "target": "app.domains.memory.contracts.items",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.write_lifecycle",
-        "target": "app.domains.memory.contracts.provenance",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.write_lifecycle",
-        "target": "app.domains.memory.contracts.scope",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.application.write_lifecycle",
-        "target": "app.domains.memory.policies.validation",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
         "review_date": "2026-09-05"
       },
       {
@@ -2596,139 +2400,43 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.domains.memory.ports.batch",
-        "target": "app.domains.memory.contracts.items",
+        "importer": "app.domains.memory.infrastructure.batch_repository",
+        "target": "app.domains.memory.contracts.batch",
         "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
+        "removal_condition": "Transition the recorded actual repository, HTTP or aggregate consumer and retire its old source; no new legacy caller.",
+        "reason": "Existing Memory consumer now reaches the original real workflow or exercised typed collaborator from its role owner, without a new forwarding layer.",
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.domains.memory.ports.batch",
-        "target": "app.domains.memory.contracts.scope",
+        "importer": "app.domains.memory.infrastructure.maintenance_queue",
+        "target": "app.domains.memory.contracts.maintenance_queue",
         "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
+        "removal_condition": "Transition the recorded actual repository, HTTP or aggregate consumer and retire its old source; no new legacy caller.",
+        "reason": "Existing Memory consumer now reaches the original real workflow or exercised typed collaborator from its role owner, without a new forwarding layer.",
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.domains.memory.ports.batch",
-        "target": "app.domains.memory.policies.selection_output",
+        "importer": "app.domains.memory.infrastructure.repository",
+        "target": "app.domains.memory.contracts.source_evidence",
         "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
+        "removal_condition": "Transition the recorded actual repository, HTTP or aggregate consumer and retire its old source; no new legacy caller.",
+        "reason": "Existing Memory consumer now reaches the original real workflow or exercised typed collaborator from its role owner, without a new forwarding layer.",
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.domains.memory.ports.canonical_planner_provider",
-        "target": "app.domains.memory.contracts.retrieval_plan",
+        "importer": "app.domains.memory.public",
+        "target": "app.domains.memory.contracts",
         "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
+        "removal_condition": "Transition the recorded actual repository, HTTP or aggregate consumer and retire its old source; no new legacy caller.",
+        "reason": "Existing Memory consumer now reaches the original real workflow or exercised typed collaborator from its role owner, without a new forwarding layer.",
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.domains.memory.ports.consolidation_provider",
-        "target": "app.domains.memory.policies.consolidation",
+        "importer": "app.domains.memory.public",
+        "target": "app.domains.memory.service",
         "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.ports.consolidation_provider",
-        "target": "app.domains.memory.policies.consolidation_output",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.ports.consolidation_repository",
-        "target": "app.domains.memory.contracts.items",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.ports.consolidation_repository",
-        "target": "app.domains.memory.contracts.scope",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.ports.consolidation_repository",
-        "target": "app.domains.memory.policies.consolidation",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.ports.recall",
-        "target": "app.domains.memory.contracts.recall",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.ports.recall",
-        "target": "app.domains.memory.contracts.scope",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.ports.repository",
-        "target": "app.domains.memory.contracts.inspector",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.ports.repository",
-        "target": "app.domains.memory.contracts.items",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.ports.repository",
-        "target": "app.domains.memory.contracts.provenance",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.ports.repository",
-        "target": "app.domains.memory.contracts.scope",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.ports.source_reader",
-        "target": "app.domains.memory.contracts.provenance",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.ports.source_reader",
-        "target": "app.domains.memory.contracts.scope",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
+        "removal_condition": "Transition the recorded actual repository, HTTP or aggregate consumer and retire its old source; no new legacy caller.",
+        "reason": "Existing Memory consumer now reaches the original real workflow or exercised typed collaborator from its role owner, without a new forwarding layer.",
         "review_date": "2026-09-05"
       }
     ]

@@ -12,7 +12,7 @@ from app.domains.memory.policies.consolidation_output import (
     parse_memory_consolidation_payload,
 )
 from app.domains.memory.exceptions import MemoryDomainError
-from app.domains.memory.ports.consolidation_provider import (
+from app.domains.memory.contracts.consolidation_provider import (
     MemoryConsolidationProviderError,
     MemoryConsolidationProviderRequest,
     MemoryConsolidationProviderResult,

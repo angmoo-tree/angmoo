@@ -1,14 +1,14 @@
 """Memory application services."""
 
-from app.domains.memory.application.scope_control import MemoryScopeService
-from app.domains.memory.application.write_lifecycle import MemoryWriteLifecycleService
-from app.domains.memory.application.recall import (
+from app.domains.memory.service.scope import MemoryScopeService
+from app.domains.memory.service.items import MemoryWriteLifecycleService
+from app.domains.memory.service.recall import (
     CANONICAL_PRIMITIVE_REGISTRY,
     CanonicalPrimitiveSpec,
     CanonicalRecallService,
     CanonicalRecallValidator,
 )
-from app.domains.memory.application.canonical_planning import (
+from app.domains.memory.service.retrieval_plan import (
     CanonicalPlanExecutionContext,
     CanonicalPlanExecutionResult,
     CanonicalPlanStepExecution,
@@ -16,8 +16,8 @@ from app.domains.memory.application.canonical_planning import (
     CanonicalRetrievalPlanExecutor,
     CanonicalRetrievalPlanValidator,
 )
-from app.domains.memory.application.consolidation import MemoryConsolidationService
-from app.domains.memory.application.read_surface import (
+from app.domains.memory.service.consolidation import MemoryConsolidationService
+from app.domains.memory.service.inspector import (
     MemoryReadService,
     memory_lifecycle,
 )

@@ -19,7 +19,7 @@ from app.domains.memory.contracts.inspector import (
     MemoryItemEvidenceRecord,
     MemoryItemPage,
 )
-from app.domains.memory.ports.source_reader import CanonicalMemoryEvidence
+from app.domains.memory.contracts.source_evidence import CanonicalMemoryEvidence
 
 
 class MemoryRepositoryPort(Protocol):

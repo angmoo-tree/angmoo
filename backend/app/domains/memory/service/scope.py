@@ -5,7 +5,7 @@ from app.domains.memory.contracts.items import normalize_memory_idempotency_key
 from app.domains.memory.contracts.provenance import MemoryProviderMode
 from app.domains.memory.policies.retention import validate_retention_days
 from app.domains.memory.contracts.scope import MemoryScope, MemoryScopeSetting
-from app.domains.memory.ports.repository import MemoryRepositoryPort
+from app.domains.memory.contracts.item_store import MemoryRepositoryPort
 
 
 class MemoryScopeService:

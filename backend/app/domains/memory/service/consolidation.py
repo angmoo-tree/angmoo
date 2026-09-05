@@ -6,7 +6,7 @@ from collections.abc import Callable
 from datetime import UTC, datetime
 import hashlib
 
-from app.domains.memory.application.write_lifecycle import (
+from app.domains.memory.service.items import (
     MemoryWriteLifecycleService,
     memory_evidence_blocked_code,
 )
@@ -38,20 +38,20 @@ from app.domains.memory.contracts.items import (
 )
 from app.domains.memory.policies.validation import validate_memory_item_shape
 from app.domains.memory.contracts.provenance import MemoryProviderMode
-from app.domains.memory.ports.consolidation_provider import (
+from app.domains.memory.contracts.consolidation_provider import (
     MemoryConsolidationProviderError,
     MemoryConsolidationProviderPort,
     MemoryConsolidationProviderRequest,
     MemoryConsolidationSource,
 )
-from app.domains.memory.ports.consolidation_repository import (
+from app.domains.memory.contracts.consolidation_store import (
     MemoryConsolidationRepositoryPort,
 )
-from app.domains.memory.ports.maintenance_queue import MemoryMaintenanceQueuePort
-from app.domains.memory.ports.maintenance_unit_of_work import (
+from app.domains.memory.contracts.maintenance_queue import MemoryMaintenanceQueuePort
+from app.domains.memory.contracts.maintenance_transaction import (
     MemoryMaintenanceUnitOfWorkPort,
 )
-from app.domains.memory.ports.source_reader import MemorySourceEvidenceReaderPort
+from app.domains.memory.contracts.source_evidence import MemorySourceEvidenceReaderPort
 
 
 class MemoryConsolidationService:

@@ -7,8 +7,8 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import sessionmaker
 
 from app import models
-from app.domains.memory.application.batch_selection import MemoryBatchSelectionService
-from app.domains.memory.application.scope_control import MemoryScopeService
+from app.domains.memory.service.batch_selection import MemoryBatchSelectionService
+from app.domains.memory.service.scope import MemoryScopeService
 from app.domains.memory.policies.batch import MEMORY_CONSENT_VERSION
 from app.domains.memory.exceptions import MemoryConflictError
 from app.domains.memory.infrastructure.batch_models import (

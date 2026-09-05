@@ -16,8 +16,8 @@ from app.domains.memory.contracts.inspector import (
 )
 from app.domains.memory.policies.retention import is_memory_expired
 from app.domains.memory.contracts.scope import MemoryScope, MemoryScopeSetting
-from app.domains.memory.ports.repository import MemoryRepositoryPort
-from app.domains.memory.ports.source_reader import MemorySourceEvidenceReaderPort
+from app.domains.memory.contracts.item_store import MemoryRepositoryPort
+from app.domains.memory.contracts.source_evidence import MemorySourceEvidenceReaderPort
 
 
 class MemoryReadService:

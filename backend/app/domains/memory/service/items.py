@@ -21,8 +21,8 @@ from app.domains.memory.contracts.items import (
 from app.domains.memory.policies.validation import validate_memory_item_shape
 from app.domains.memory.contracts.provenance import MemoryKindV1, MemorySourceTypeV1
 from app.domains.memory.contracts.scope import MemoryScope, MemoryScopeSetting
-from app.domains.memory.ports.repository import MemoryRepositoryPort
-from app.domains.memory.ports.source_reader import (
+from app.domains.memory.contracts.item_store import MemoryRepositoryPort
+from app.domains.memory.contracts.source_evidence import (
     CanonicalMemoryEvidence,
     MemorySourceEvidenceReaderPort,
 )

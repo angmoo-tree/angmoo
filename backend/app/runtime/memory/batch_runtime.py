@@ -23,8 +23,8 @@ from app.domains.memory.contracts.items import as_utc
 from app.domains.memory.contracts.provenance import MemoryKindV1, MemorySourceTypeV1
 from app.domains.memory.contracts.scope import MemoryScope
 from app.domains.memory.exceptions import MemoryDomainError
-from app.domains.memory.application.batch_selection import MemoryBatchSelectionService
-from app.domains.memory.application.write_lifecycle import (
+from app.domains.memory.service.batch_selection import MemoryBatchSelectionService
+from app.domains.memory.service.items import (
     MemoryWriteLifecycleService,
     memory_evidence_blocked_code,
 )

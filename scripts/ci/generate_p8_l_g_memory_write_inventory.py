@@ -40,10 +40,10 @@ class InventoryError(RuntimeError):
 
 REQUIRED_FILES = (
     "backend/app/domains/memory/contracts/items.py",
-    "backend/app/domains/memory/application/write_lifecycle.py",
-    "backend/app/domains/memory/ports/repository.py",
-    "backend/app/domains/memory/ports/source_reader.py",
-    "backend/app/domains/memory/ports/maintenance_queue.py",
+    "backend/app/domains/memory/service/items.py",
+    "backend/app/domains/memory/contracts/item_store.py",
+    "backend/app/domains/memory/contracts/source_evidence.py",
+    "backend/app/domains/memory/contracts/maintenance_queue.py",
     "backend/app/domains/memory/infrastructure/repository.py",
     "backend/app/runtime/memory/sqlalchemy_source_reader.py",
     "backend/app/domains/memory/infrastructure/maintenance_queue.py",
@@ -94,7 +94,7 @@ def _fixture_contract(name: str) -> dict[str, Any]:
 
 def _boundary_contract() -> dict[str, Any]:
     _require_text(
-        "backend/app/domains/memory/application/write_lifecycle.py",
+        "backend/app/domains/memory/service/items.py",
         (
             "class MemoryWriteLifecycleService",
             'return self._blocked("memory_opt_out")',

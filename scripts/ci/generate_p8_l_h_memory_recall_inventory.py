@@ -42,8 +42,8 @@ class InventoryError(RuntimeError):
 
 REQUIRED_FILES = (
     "backend/app/domains/memory/contracts/recall.py",
-    "backend/app/domains/memory/application/recall.py",
-    "backend/app/domains/memory/ports/recall.py",
+    "backend/app/domains/memory/service/recall.py",
+    "backend/app/domains/memory/contracts/recall_store.py",
     "backend/app/domains/memory/public.py",
     "backend/app/runtime/memory/sqlite_fts5_recall.py",
     "backend/app/runtime/memory/sqlalchemy_recall.py",
@@ -84,7 +84,7 @@ def _require_text(relative: str, values: tuple[str, ...]) -> None:
 
 def _boundary_contract() -> dict[str, Any]:
     _require_text(
-        "backend/app/domains/memory/application/recall.py",
+        "backend/app/domains/memory/service/recall.py",
         (
             "CANONICAL_PRIMITIVE_REGISTRY",
             "class CanonicalRecallValidator",

@@ -46,7 +46,7 @@ from app.domains.memory.infrastructure.sqlalchemy_models import (
     MemoryMaintenanceJob,
     MemoryScopeSettingModel,
 )
-from app.domains.memory.ports.source_reader import CanonicalMemoryEvidence
+from app.domains.memory.contracts.source_evidence import CanonicalMemoryEvidence
 
 
 class SqlAlchemyMemoryRepository:

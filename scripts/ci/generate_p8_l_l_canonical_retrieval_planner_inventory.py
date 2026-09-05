@@ -46,8 +46,8 @@ class InventoryError(RuntimeError):
 REQUIRED_FILES = (
     "backend/app/domains/memory/contracts/retrieval_plan.py",
     "backend/app/domains/memory/policies/retrieval_planner.py",
-    "backend/app/domains/memory/ports/canonical_planner_provider.py",
-    "backend/app/domains/memory/application/canonical_planning.py",
+    "backend/app/domains/memory/contracts/planner_provider.py",
+    "backend/app/domains/memory/service/retrieval_plan.py",
     "backend/app/domains/chat/application/canonical_retrieval.py",
     "backend/app/domains/chat/domain/call_tracker.py",
     "backend/app/integrations/llm/canonical_retrieval_planner.py",
@@ -126,7 +126,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/domains/memory/application/canonical_planning.py",
+        "backend/app/domains/memory/service/retrieval_plan.py",
         (
             "CanonicalRetrievalPlanValidator",
             "CanonicalRetrievalPlanExecutor",

@@ -460,7 +460,7 @@
       "owner": "P8-L-G",
       "path": "backend/app/domains/memory/infrastructure/maintenance_queue.py",
       "removal_condition": "retain only while cross-provider same-scope serialization or its negative inventory guard is required",
-      "source_sha256": "03cce9ab3d7a62055e0b93ef0e2220321e59250da89b638b6070916351204445",
+      "source_sha256": "0e8c0969cbfe6a8be0d43ecc6c0dd174d698ce91c1efa2ba2c94b0485b9ea43f",
       "transition_pr": "P8-L-G memory write/lifecycle"
     },
     {
@@ -475,7 +475,7 @@
       "owner": "P8-L-G",
       "path": "backend/app/domains/memory/infrastructure/repository.py",
       "removal_condition": "retain only while cross-provider same-scope serialization or its negative inventory guard is required",
-      "source_sha256": "72a3741804ea0e969b56216a06442d5d3844e4ef6241aa47cb5fecacce5a808a",
+      "source_sha256": "d7878d02cfeba3a2b7ed36b07bf3a93cf012a3c68c47b719f6059bebcd607597",
       "transition_pr": "P8-L-G memory write/lifecycle"
     },
     {
@@ -1193,7 +1193,7 @@
       "owner": "P8-L-G",
       "path": "scripts/ci/generate_p8_l_g_memory_write_inventory.py",
       "removal_condition": "retain only while cross-provider same-scope serialization or its negative inventory guard is required",
-      "source_sha256": "6d4d37ce7b47924a6fcb050bd72467711a4fa89f0eb579225d6637f9e0a19f69",
+      "source_sha256": "cdd5f505cabfe6fe7343d5f456054c06b3a57525ca3b1a6c00ab186a91a165c8",
       "transition_pr": "P8-L-G memory write/lifecycle"
     }
   ],

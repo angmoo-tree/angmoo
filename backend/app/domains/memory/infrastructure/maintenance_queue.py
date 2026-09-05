@@ -16,7 +16,7 @@ from app.domains.memory.infrastructure.sqlalchemy_models import (
     MemoryMaintenanceJob,
     MemoryScopeSettingModel,
 )
-from app.domains.memory.ports.maintenance_queue import MemoryMaintenanceWorkItem
+from app.domains.memory.contracts.maintenance_queue import MemoryMaintenanceWorkItem
 
 
 class SqlAlchemyMemoryMaintenanceQueue:

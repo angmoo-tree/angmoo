@@ -41,7 +41,7 @@ from app.domains.memory.infrastructure.sqlalchemy_models import (
     MemoryMaintenanceJob,
     MemoryScopeSettingModel,
 )
-from app.domains.memory.ports.batch import MemoryBatchSettings, MemorySelectionBatch
+from app.domains.memory.contracts.batch import MemoryBatchSettings, MemorySelectionBatch
 
 
 class SqlAlchemyMemoryBatchRepository:

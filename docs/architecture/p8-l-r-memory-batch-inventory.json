@@ -28,7 +28,7 @@
     },
     {
       "path": "backend/app/api/v1/routes/memory.py",
-      "sha256": "09556269c50a52196d2877499f8431b39a2bc12644a99e04758397e0a2cef1c9"
+      "sha256": "2609e6d9ae7b7b731a06d2c725036f1d7a97a72d9a1f9718d03da0d5826b9d3d"
     },
     {
       "path": "backend/app/domains/memory/__init__.py",
@@ -39,44 +39,44 @@
       "sha256": "a1f2561bd3ffdd36b8942f7f7e441601a1dda05e6dee8ecd4a6655c72dc72f9c"
     },
     {
-      "path": "backend/app/domains/memory/application/__init__.py",
-      "sha256": "1c2b95a836faa62a33baaa8557579024dd38bf01458ca430f28414c6e1babe8c"
+      "path": "backend/app/domains/memory/contracts/__init__.py",
+      "sha256": "e4789e83fead334becc9d539df1362d314ac6cf253eaa5a247764bf715281159"
     },
     {
-      "path": "backend/app/domains/memory/application/batch_selection.py",
-      "sha256": "76c876299d8527c0ef9e334fdd7732613eed4c425b35e9cadc108933ea16d56e"
+      "path": "backend/app/domains/memory/contracts/batch.py",
+      "sha256": "75f47624c29a3c1fbaba95e546f38c6c1c9858c4556f9398388b5c0c87fff539"
     },
     {
-      "path": "backend/app/domains/memory/application/canonical_planning.py",
-      "sha256": "548612818ed2e9b495dc7e2743221bceb9e32a6ea4c9532dc645d0bf9507b913"
+      "path": "backend/app/domains/memory/contracts/consolidation_provider.py",
+      "sha256": "3a11d8b8aea839d52442003bc15b1d81dcc8d11d2f5343aea7ef24b89aeed196"
     },
     {
-      "path": "backend/app/domains/memory/application/consolidation.py",
-      "sha256": "5b8b3b8db8ecb4dbcd0df87bbc806b2fd2b3f076b5fa06ddbd82a9e760a15dcf"
-    },
-    {
-      "path": "backend/app/domains/memory/application/read_surface.py",
-      "sha256": "68a4985ecb3fbd72220f97961ea005a8d3bc69052921efcbd597ec91dad72a82"
-    },
-    {
-      "path": "backend/app/domains/memory/application/recall.py",
-      "sha256": "2be5ab67d3fb636e8972dd4b3d2f0b5527d32fdd3a6b5f6f41287e8b23cdd414"
-    },
-    {
-      "path": "backend/app/domains/memory/application/scope_control.py",
-      "sha256": "cbd6d753b394c998d7cba2153cb20e39c8b0064da97323655d8738950d64f65a"
-    },
-    {
-      "path": "backend/app/domains/memory/application/write_lifecycle.py",
-      "sha256": "b5bfa925184987ad3c953dca244e75fb1210b17365b4dcedf7d39ebbf6a49013"
+      "path": "backend/app/domains/memory/contracts/consolidation_store.py",
+      "sha256": "f03289f6c0ab0bb0e69e81852f9591c78693a38a99cc3a025144fe88da52ae04"
     },
     {
       "path": "backend/app/domains/memory/contracts/inspector.py",
       "sha256": "7377f4c3e050136856edef675924ddf73b9ff63bb4e5e0953a5390fbc9beebdb"
     },
     {
+      "path": "backend/app/domains/memory/contracts/item_store.py",
+      "sha256": "2a019cbf2da845a3fe5a24a08594fb204d669cae141344a79b258fd7ed211e6f"
+    },
+    {
       "path": "backend/app/domains/memory/contracts/items.py",
       "sha256": "3788289bed3efa247b3a7cae0e27632c09890918cf6d232914b584384abbd8d1"
+    },
+    {
+      "path": "backend/app/domains/memory/contracts/maintenance_queue.py",
+      "sha256": "b1ff50c1adaa5529ad628e41abdd11e77bebf5f5d50f0836dce1809f6a3f5e70"
+    },
+    {
+      "path": "backend/app/domains/memory/contracts/maintenance_transaction.py",
+      "sha256": "7a42fe51740c183f58d589c25d5126d5607d5e2637f017a31638e10e0df00a5d"
+    },
+    {
+      "path": "backend/app/domains/memory/contracts/planner_provider.py",
+      "sha256": "6dc5984738ca3af3fbd94688113a24be6c2c5ea3e90e6c2380983a9b174d5ffe"
     },
     {
       "path": "backend/app/domains/memory/contracts/provenance.py",
@@ -87,12 +87,20 @@
       "sha256": "e9d8f4aa53919c901f0fe74cc8f893d14b5b1b537a4382f1bc006b6b30385f20"
     },
     {
+      "path": "backend/app/domains/memory/contracts/recall_store.py",
+      "sha256": "23a1e45fc306a31ad862eb46bd7097b625b5a68cc28ee04ea71bb87454c22c41"
+    },
+    {
       "path": "backend/app/domains/memory/contracts/retrieval_plan.py",
       "sha256": "a92ac065ebe3757f5f373a901fdd6d997c475b1070d4c105ae25f315aa185f99"
     },
     {
       "path": "backend/app/domains/memory/contracts/scope.py",
       "sha256": "ef78f4dec7871f0066faa77eb823666016cc0a4a2e6e5af3ba96b4b424557a24"
+    },
+    {
+      "path": "backend/app/domains/memory/contracts/source_evidence.py",
+      "sha256": "60a63a5f5c5dc9963df5538a17f1356fca93f467dae7c3ca0ba57d9bf4bd7acc"
     },
     {
       "path": "backend/app/domains/memory/domain/__init__.py",
@@ -116,7 +124,7 @@
     },
     {
       "path": "backend/app/domains/memory/infrastructure/batch_repository.py",
-      "sha256": "ee5da696c90ca55501d5908cd3019f0523707f68ab51a46124488d862386331f"
+      "sha256": "b651506bcca409a91e71b50fff8e8938ac67a518c8ef48b956941209def8e4c2"
     },
     {
       "path": "backend/app/domains/memory/infrastructure/consolidation_repository.py",
@@ -124,7 +132,7 @@
     },
     {
       "path": "backend/app/domains/memory/infrastructure/maintenance_queue.py",
-      "sha256": "03cce9ab3d7a62055e0b93ef0e2220321e59250da89b638b6070916351204445"
+      "sha256": "0e8c0969cbfe6a8be0d43ecc6c0dd174d698ce91c1efa2ba2c94b0485b9ea43f"
     },
     {
       "path": "backend/app/domains/memory/infrastructure/maintenance_unit_of_work.py",
@@ -132,7 +140,7 @@
     },
     {
       "path": "backend/app/domains/memory/infrastructure/repository.py",
-      "sha256": "72a3741804ea0e969b56216a06442d5d3844e4ef6241aa47cb5fecacce5a808a"
+      "sha256": "d7878d02cfeba3a2b7ed36b07bf3a93cf012a3c68c47b719f6059bebcd607597"
     },
     {
       "path": "backend/app/domains/memory/infrastructure/sqlalchemy_models.py",
@@ -167,48 +175,8 @@
       "sha256": "4c5ffbfa335b77473549c1b07685bc368acc3e7e2c3e47182bd8cc55a1688d21"
     },
     {
-      "path": "backend/app/domains/memory/ports/__init__.py",
-      "sha256": "688a51e603c19374fe94eb1e404967ba44c524d97ea168225ac123dddbe482cc"
-    },
-    {
-      "path": "backend/app/domains/memory/ports/batch.py",
-      "sha256": "75f47624c29a3c1fbaba95e546f38c6c1c9858c4556f9398388b5c0c87fff539"
-    },
-    {
-      "path": "backend/app/domains/memory/ports/canonical_planner_provider.py",
-      "sha256": "6dc5984738ca3af3fbd94688113a24be6c2c5ea3e90e6c2380983a9b174d5ffe"
-    },
-    {
-      "path": "backend/app/domains/memory/ports/consolidation_provider.py",
-      "sha256": "3a11d8b8aea839d52442003bc15b1d81dcc8d11d2f5343aea7ef24b89aeed196"
-    },
-    {
-      "path": "backend/app/domains/memory/ports/consolidation_repository.py",
-      "sha256": "f03289f6c0ab0bb0e69e81852f9591c78693a38a99cc3a025144fe88da52ae04"
-    },
-    {
-      "path": "backend/app/domains/memory/ports/maintenance_queue.py",
-      "sha256": "b1ff50c1adaa5529ad628e41abdd11e77bebf5f5d50f0836dce1809f6a3f5e70"
-    },
-    {
-      "path": "backend/app/domains/memory/ports/maintenance_unit_of_work.py",
-      "sha256": "7a42fe51740c183f58d589c25d5126d5607d5e2637f017a31638e10e0df00a5d"
-    },
-    {
-      "path": "backend/app/domains/memory/ports/recall.py",
-      "sha256": "23a1e45fc306a31ad862eb46bd7097b625b5a68cc28ee04ea71bb87454c22c41"
-    },
-    {
-      "path": "backend/app/domains/memory/ports/repository.py",
-      "sha256": "6fa86d2473be28439237d4b3159e13cf9104180644b86ba65c3e9d6ab74a0585"
-    },
-    {
-      "path": "backend/app/domains/memory/ports/source_reader.py",
-      "sha256": "60a63a5f5c5dc9963df5538a17f1356fca93f467dae7c3ca0ba57d9bf4bd7acc"
-    },
-    {
       "path": "backend/app/domains/memory/public.py",
-      "sha256": "f0cf1cffc0e86ba8aa5c6e138722fdad615e987d1250c4ae80ab14b0772c31c8"
+      "sha256": "fe9e037f97ce191d1cdfd7342875400c917616115e1d99acf9bd317472b68211"
     },
     {
       "path": "backend/app/domains/memory/schemas/__init__.py",
@@ -217,6 +185,38 @@
     {
       "path": "backend/app/domains/memory/schemas/batch.py",
       "sha256": "243712b1b1e0195ccf1266050acec23737fc53b51c7d425e8b8f8fda880fa80f"
+    },
+    {
+      "path": "backend/app/domains/memory/service/__init__.py",
+      "sha256": "b83e36670f6d0a95c792a8b67329b2633ae63da145ca995ac96d3ba07e9592a0"
+    },
+    {
+      "path": "backend/app/domains/memory/service/batch_selection.py",
+      "sha256": "431673a2c3044afd42e8e4cf021231111faf82c48bc92ec4be4b2e39481f4ecd"
+    },
+    {
+      "path": "backend/app/domains/memory/service/consolidation.py",
+      "sha256": "8cc18d9a5ad2f24f75ccebf4db7682e9a57458fa5eae9fae5219cfe0dbb9847d"
+    },
+    {
+      "path": "backend/app/domains/memory/service/inspector.py",
+      "sha256": "e705b69add0e2043a53a4dc69588b4302b053818962df667f9a60d6b9807bcde"
+    },
+    {
+      "path": "backend/app/domains/memory/service/items.py",
+      "sha256": "e0c782686c8b42e89a2161fc3385f758fbc351e525b86ac611e6ef390e786c51"
+    },
+    {
+      "path": "backend/app/domains/memory/service/recall.py",
+      "sha256": "5d0a16f36bc160d301f08359c5b3df198e1087eb2b147af8eda06b3b17321cb5"
+    },
+    {
+      "path": "backend/app/domains/memory/service/retrieval_plan.py",
+      "sha256": "7864c2e2d2843d12b0d4138c8bcf2b3b5eb74330f1cee39c7fe02e32d8852764"
+    },
+    {
+      "path": "backend/app/domains/memory/service/scope.py",
+      "sha256": "db3d21e640445796e37bd14c3f93d8897bb43f41b8e88fb90ffd713b0db8ac36"
     },
     {
       "path": "backend/app/integrations/llm/memory_selection.py",
@@ -244,7 +244,7 @@
     },
     {
       "path": "backend/app/runtime/memory/batch_runtime.py",
-      "sha256": "4cb6db1f575ef7498c7131767e664a71f801b685890fa1e7fa94ec91d249efa9"
+      "sha256": "cc85f9c2f80f36390e52aa77e0ba5e6ab6bb9acaf5870b8f5db93471f57bfcd1"
     },
     {
       "path": "backend/app/runtime/memory/recall_projection.py",
@@ -312,11 +312,11 @@
     },
     {
       "path": "backend/tests/test_p8_l_r_memory_batch_runtime.py",
-      "sha256": "01e797734e6d9541451d6896f733e283d2fe14cf1e26db352ddf74997f674d4e"
+      "sha256": "54e7522bf6278c0a3e5433aa4c5500384128b84dd26761f88b1021f04fa79e2f"
     },
     {
       "path": "backend/tests/test_p8_l_r_memory_batch_safety.py",
-      "sha256": "9256946a7277e571954ea462dc132bd8cb99d648d2a6951ad2053f26f8fe4326"
+      "sha256": "7b39c316b645b838433f67dd241d9519456aa51ac5c07b8b3bf980f2abffd6b6"
     },
     {
       "path": "browser-tests/memory-batch-fixture.ts",

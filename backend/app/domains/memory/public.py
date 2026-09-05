@@ -1,6 +1,6 @@
 """Supported backend boundary for canonical Memory consumers."""
 
-from app.domains.memory.application import (
+from app.domains.memory.service import (
     CANONICAL_PRIMITIVE_REGISTRY,
     CanonicalPrimitiveSpec,
     CanonicalPlanExecutionContext,
@@ -109,7 +109,7 @@ from app.domains.memory.domain import (
     parse_memory_consolidation_payload,
     validate_consolidation_summary,
 )
-from app.domains.memory.ports import (
+from app.domains.memory.contracts import (
     MAX_CANONICAL_PLANNER_MESSAGE_CHARACTERS,
     CanonicalRecallRepositoryPort,
     CanonicalMemoryEvidence,

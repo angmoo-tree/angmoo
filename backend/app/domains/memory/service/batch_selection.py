@@ -5,7 +5,7 @@ import time
 from collections.abc import Callable
 from datetime import UTC, datetime
 
-from app.domains.memory.application.write_lifecycle import (
+from app.domains.memory.service.items import (
     MemoryWriteLifecycleService,
     memory_evidence_blocked_code,
 )
@@ -16,11 +16,11 @@ from app.domains.memory.policies.batch import (
 )
 from app.domains.memory.exceptions import MemoryDomainError, MemoryValidationError
 from app.domains.memory.policies.selection_output import MemorySelectionSource
-from app.domains.memory.ports.batch import (
+from app.domains.memory.contracts.batch import (
     MemoryBatchRepositoryPort,
     MemorySelectionProviderPort,
 )
-from app.domains.memory.ports.source_reader import MemorySourceEvidenceReaderPort
+from app.domains.memory.contracts.source_evidence import MemorySourceEvidenceReaderPort
 
 
 class MemoryBatchSelectionService:
