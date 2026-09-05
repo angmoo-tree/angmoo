@@ -4,7 +4,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.domains.world_characters import models
-from app.domains.world_characters.schemas import readiness as schemas
+from app.domains.characters import schemas
 from app.domains.world_characters.contracts.readiness import ReadinessCharacter, ReadinessSetting
 from app.domains.worlds.service import character_entry as world_entry
 from app.domains.world_characters.service import setup_validation as world_character_contracts

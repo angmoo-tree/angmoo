@@ -1259,7 +1259,6 @@
       "app.domains.world_characters.router.setup",
       "app.domains.world_characters.schemas",
       "app.domains.world_characters.schemas.identity",
-      "app.domains.world_characters.schemas.readiness",
       "app.domains.world_characters.schemas.setup",
       "app.domains.world_characters.service",
       "app.domains.world_characters.service.autonomous_setup",
@@ -1334,7 +1333,6 @@
       "app.domains.world_characters.contracts.studio_surface",
       "app.domains.world_characters.schemas",
       "app.domains.world_characters.schemas.identity",
-      "app.domains.world_characters.schemas.readiness",
       "app.domains.world_characters.schemas.setup",
       "app.domains.world_characters.service",
       "app.domains.world_characters.service.autonomous_setup",
@@ -1853,14 +1851,6 @@
         "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
         "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
         "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.schemas.agents",
-        "target": "app.domains.world_characters.schemas.readiness",
-        "owner_stage": "AR-B2",
-        "removal_condition": "Switch the exact shared schema aggregate in G5 or AgentRun readiness consumer in B4/B8-A; preserve the same DTO object and readiness policy.",
-        "reason": "Existing remaining schema/agent consumer now uses the canonical WC readiness implementation. No canonical module depends on this legacy consumer.",
         "review_date": "2026-09-05"
       },
       {
