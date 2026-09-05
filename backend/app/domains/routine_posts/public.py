@@ -7,14 +7,11 @@ from app.domains.routine_posts.infrastructure.direct_llm_provider import (
     RoutinePostProvider,
     validate_routine_generation,
 )
-from app.domains.routine_posts.infrastructure.sqlalchemy_context import (
-    EmptyRoutineInteractionSource,
-    RoutineContextUnavailable,
-    RoutineInteractionInput,
-    RoutineInteractionSource,
-    RoutinePostContext,
-    assemble_routine_post_context,
-)
+from app.domains.routine_posts.contracts.context import RoutineInteractionSource, RoutinePostContext
+from app.domains.routine_posts.contracts.interaction import RoutineInteractionInput
+from app.domains.routine_posts.exceptions import RoutineContextUnavailable
+from app.domains.routine_posts.service.event_context import EmptyRoutineInteractionSource
+from app.domains.routine_posts.service.context import assemble_routine_post_context
 
 
 __all__ = [

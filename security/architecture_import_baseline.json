@@ -1,7 +1,7 @@
 {
-  "edge_count": 2274,
-  "external_import_count": 2161,
-  "module_count": 686,
+  "edge_count": 2289,
+  "external_import_count": 2165,
+  "module_count": 687,
   "modules": [
     {
       "external_imports": [],
@@ -3487,6 +3487,21 @@
       "external_imports": [
         "__future__",
         "dataclasses",
+        "datetime",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routine_posts.contracts.interaction",
+        "app.domains.routines.contracts.lifecycle"
+      ],
+      "module": "app.domains.routine_posts.contracts.context",
+      "path": "backend/app/domains/routine_posts/contracts/context.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
         "datetime"
       ],
       "imports": [],
@@ -3520,7 +3535,7 @@
       "imports": [
         "app.compatibility.routine_posts.legacy",
         "app.credentials",
-        "app.domains.routine_posts.infrastructure.sqlalchemy_context",
+        "app.domains.routine_posts.contracts.context",
         "app.domains.routine_posts.schemas",
         "app.domains.routine_posts.utils.text",
         "app.integrations.direct_llm",
@@ -3531,33 +3546,14 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "__future__",
-        "dataclasses",
-        "datetime",
-        "sqlalchemy",
-        "sqlalchemy.orm",
-        "typing"
-      ],
-      "imports": [
-        "app.compatibility.routine_posts.legacy",
-        "app.domains.routine_posts.constants",
-        "app.domains.routine_posts.contracts.interaction",
-        "app.domains.routine_posts.exceptions",
-        "app.domains.routine_posts.service.event_context",
-        "app.domains.routine_posts.utils.text",
-        "app.domains.routines.contracts.lifecycle",
-        "app.domains.routines.service.scheduling"
-      ],
-      "module": "app.domains.routine_posts.infrastructure.sqlalchemy_context",
-      "path": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
-      "wildcard_imports": []
-    },
-    {
       "external_imports": [],
       "imports": [
+        "app.domains.routine_posts.contracts.context",
+        "app.domains.routine_posts.contracts.interaction",
+        "app.domains.routine_posts.exceptions",
         "app.domains.routine_posts.infrastructure.direct_llm_provider",
-        "app.domains.routine_posts.infrastructure.sqlalchemy_context"
+        "app.domains.routine_posts.service.context",
+        "app.domains.routine_posts.service.event_context"
       ],
       "module": "app.domains.routine_posts.public",
       "path": "backend/app/domains/routine_posts/public.py",
@@ -3587,7 +3583,26 @@
       "external_imports": [
         "__future__",
         "datetime",
-        "json"
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routine_posts.contracts.context",
+        "app.domains.routine_posts.exceptions",
+        "app.domains.routine_posts.service.event_context",
+        "app.domains.routines.contracts.lifecycle",
+        "app.domains.routines.service",
+        "app.domains.routines.service.scheduling"
+      ],
+      "module": "app.domains.routine_posts.service.context",
+      "path": "backend/app/domains/routine_posts/service/context.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "json",
+        "typing"
       ],
       "imports": [
         "app.domains.routine_posts.constants",
@@ -3845,7 +3860,9 @@
     },
     {
       "external_imports": [],
-      "imports": [],
+      "imports": [
+        "app.domains.routines.policies.activity_state"
+      ],
       "module": "app.domains.routines.service",
       "path": "backend/app/domains/routines/service/__init__.py",
       "wildcard_imports": []
@@ -8667,6 +8684,27 @@
       "external_imports": [
         "__future__",
         "datetime",
+        "sqlalchemy",
+        "typing"
+      ],
+      "imports": [
+        "app.compatibility.routine_posts.canonical_interactions",
+        "app.domains.routine_posts.contracts.context",
+        "app.domains.routines.contracts.lifecycle",
+        "app.domains.routines.models",
+        "app.domains.world_characters.models",
+        "app.domains.worlds.models",
+        "app.models.agent_settings",
+        "app.runtime.routines.activity_references"
+      ],
+      "module": "app.runtime.routine_posts.context_references",
+      "path": "backend/app/runtime/routine_posts/context_references.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
         "hashlib",
         "json",
         "logging",
@@ -8677,8 +8715,10 @@
       "imports": [
         "app.compatibility.routine_posts.legacy",
         "app.core.unit_of_work",
+        "app.domains.routine_posts.contracts.context",
+        "app.domains.routine_posts.exceptions",
         "app.domains.routine_posts.infrastructure.direct_llm_provider",
-        "app.domains.routine_posts.infrastructure.sqlalchemy_context",
+        "app.domains.routine_posts.service.context",
         "app.domains.routines.exceptions",
         "app.domains.routines.service.execution.claims",
         "app.domains.routines.service.execution.lifecycle",
@@ -8687,6 +8727,7 @@
         "app.domains.social.contracts.subjective_context",
         "app.domains.social.public",
         "app.integrations.direct_llm",
+        "app.runtime.routine_posts.context_references",
         "app.runtime.routines.activity_references",
         "app.runtime.routines.joint_references",
         "app.runtime.social.observations",
@@ -10049,18 +10090,6 @@
       ],
       "module": "app.services.resident_tick_scheduler",
       "path": "backend/app/services/resident_tick_scheduler.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "sys"
-      ],
-      "imports": [
-        "app.domains.routine_posts.infrastructure.sqlalchemy_context"
-      ],
-      "module": "app.services.routine_post_context",
-      "path": "backend/app/services/routine_post_context.py",
       "wildcard_imports": []
     },
     {

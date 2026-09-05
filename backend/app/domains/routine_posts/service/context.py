@@ -1,98 +1,28 @@
+"""Routine scope, retry continuity and bounded source-event context policy."""
 from __future__ import annotations
-
-from dataclasses import dataclass
 from datetime import datetime
-from typing import Protocol
-
-from sqlalchemy import select
-from sqlalchemy.orm import Session
-
-from app.compatibility.routine_posts import legacy
-from app.domains.routines.contracts.lifecycle import DueTick, EVENT_CONSUMPTION_NAMESPACE
-from app.domains.routines.service.scheduling import latest_due_tick
-from app.domains.routine_posts.contracts.interaction import RoutineInteractionInput
-from app.domains.routine_posts.constants import MAX_SOURCE_EVENTS, MAX_EVENT_EXCERPT_CHARS, MAX_TOTAL_EVENT_EXCERPT_CHARS, MAX_EVENT_CONTEXT_JSON_BYTES
+from typing import Any
+from app.domains.routine_posts.contracts.context import RoutineContextReferences, RoutineInteractionSource, RoutinePostContext
 from app.domains.routine_posts.exceptions import RoutineContextUnavailable
-from app.domains.routine_posts.service.event_context import _bounded_events, _relationship_rank
-from app.domains.routine_posts.utils.text import _clip
-from app.domains.routines.service.scheduling import aware_utc as _aware_utc
-
-
-models = legacy.models
-activity_state_contracts = legacy.activity_state_contracts
-neutralize_context_text = legacy.neutralize_context_text
-
-
-
-
-class RoutineInteractionSource(Protocol):
-    def candidates(
-        self,
-        db: Session,
-        *,
-        world_id: str,
-        consumer_world_character_id: str,
-        episode_id: str,
-        after: datetime,
-        before: datetime,
-    ) -> list[RoutineInteractionInput]: ...
-
-
-class EmptyRoutineInteractionSource:
-    def candidates(
-        self,
-        db: Session,
-        *,
-        world_id: str,
-        consumer_world_character_id: str,
-        episode_id: str,
-        after: datetime,
-        before: datetime,
-    ) -> list[RoutineInteractionInput]:
-        del db, world_id, consumer_world_character_id, episode_id, after, before
-        return []
-
-
-@dataclass(frozen=True)
-class RoutinePostContext:
-    world: models.World
-    membership: models.WorldMembership
-    world_character: models.WorldCharacter
-    character: models.Character
-    profile: models.WorldCommunityProfile
-    plan: models.DailyActivityPlan
-    item: models.DailyActivityPlanItem
-    episode: models.ActivityEpisode
-    due_tick: DueTick
-    previous_beat: models.ActivityBeat | None
-    previous_post: models.Post | None
-    state_before: dict[str, object]
-    source_events: tuple[RoutineInteractionInput, ...]
-    eligible_event_count: int
-    overflow_reason_counts: dict[str, int]
-    prompt_comment_chars: int
-
-    @property
-    def considered_source_event_ids(self) -> list[str]:
-        return [event.source_event_id for event in self.source_events]
-
-
-
-
+from app.domains.routine_posts.service.event_context import _bounded_events
+from app.domains.routines.contracts.lifecycle import DueTick
+from app.domains.routines.service.scheduling import aware_utc as _aware_utc, latest_due_tick
+from app.domains.routines import service as activity_state_contracts
 
 
 def assemble_routine_post_context(
-    db: Session,
+    db: Any,
     *,
-    world_character: models.WorldCharacter,
-    character: models.Character,
+    references: RoutineContextReferences,
+    world_character: Any,
+    character: Any,
     now: datetime,
     interaction_source: RoutineInteractionSource | None = None,
 ) -> RoutinePostContext:
     current = _aware_utc(now)
     if world_character.status != "active":
         raise RoutineContextUnavailable("WORLD_SCOPE_INVALID")
-    membership = db.get(models.WorldMembership, world_character.membership_id)
+    membership = references.get_membership(world_character.membership_id)
     if (
         membership is None
         or membership.world_id != world_character.world_id
@@ -100,26 +30,15 @@ def assemble_routine_post_context(
         or membership.status != "active"
     ):
         raise RoutineContextUnavailable("MEMBERSHIP_INACTIVE")
-    world = db.get(models.World, world_character.world_id)
+    world = references.get_world(world_character.world_id)
     if world is None or world.status != "published" or world.readiness_status != "publish_ready":
         raise RoutineContextUnavailable("WORLD_SCOPE_INVALID")
 
-    item = db.scalar(
-        select(models.DailyActivityPlanItem).where(
-            models.DailyActivityPlanItem.world_character_id == world_character.id,
-            models.DailyActivityPlanItem.scheduled_start_at <= current,
-            models.DailyActivityPlanItem.scheduled_end_at > current,
-            models.DailyActivityPlanItem.status.in_({"planned", "active"}),
-        )
-    )
+    item = references.current_item(world_character_id=world_character.id, current=current)
     if item is None:
         raise RoutineContextUnavailable("NO_ROUTINE_CONTEXT")
-    plan = db.get(models.DailyActivityPlan, item.plan_id)
-    episode = db.scalar(
-        select(models.ActivityEpisode).where(
-            models.ActivityEpisode.plan_item_id == item.id
-        )
-    )
+    plan = references.get_plan(item.plan_id)
+    episode = references.episode_for_item(item.id)
     if (
         plan is None
         or episode is None
@@ -130,9 +49,9 @@ def assemble_routine_post_context(
     ):
         raise RoutineContextUnavailable("NO_ROUTINE_CONTEXT")
 
-    repertoire = db.get(models.WorldActivityRepertoire, plan.repertoire_id)
+    repertoire = references.get_repertoire(plan.repertoire_id)
     profile = (
-        db.get(models.WorldCommunityProfile, repertoire.community_profile_id)
+        references.get_profile(repertoire.community_profile_id)
         if repertoire is not None
         else None
     )
@@ -140,12 +59,12 @@ def assemble_routine_post_context(
         raise RoutineContextUnavailable("NO_ROUTINE_CONTEXT")
 
     previous_beat = (
-        db.get(models.ActivityBeat, episode.last_successful_beat_id)
+        references.get_beat(episode.last_successful_beat_id)
         if episode.last_successful_beat_id is not None
         else None
     )
     previous_post = (
-        db.get(models.Post, previous_beat.source_post_id)
+        references.get_post(previous_beat.source_post_id)
         if previous_beat is not None and previous_beat.source_post_id is not None
         else None
     )
@@ -159,15 +78,10 @@ def assemble_routine_post_context(
     ):
         raise RoutineContextUnavailable("WORLD_SCOPE_INVALID")
 
-    latest_beat = db.scalar(
-        select(models.ActivityBeat)
-        .where(models.ActivityBeat.episode_id == episode.id)
-        .order_by(models.ActivityBeat.scheduled_for.desc(), models.ActivityBeat.id.desc())
-        .limit(1)
-    )
-    setting = db.get(models.AgentActivitySetting, character.id)
+    latest_beat = references.latest_beat(episode.id)
+    setting = references.get_activity_setting(character.id)
     interval_minutes = setting.activity_interval_minutes if setting is not None else 60
-    retry_beat: models.ActivityBeat | None = None
+    retry_beat: Any | None = None
     if latest_beat is not None and latest_beat.status == "claimed":
         claim_expiry = (
             _aware_utc(latest_beat.claim_expires_at)
@@ -205,7 +119,7 @@ def assemble_routine_post_context(
         else _aware_utc(item.scheduled_start_at)
     )
     if interaction_source is None:
-        source = legacy.canonical_interaction_source()
+        source = references.default_interaction_source()
     else:
         source = interaction_source
     raw_events = source.candidates(
@@ -219,14 +133,8 @@ def assemble_routine_post_context(
     event_ids = list(dict.fromkeys(event.source_event_id for event in raw_events))
     blocked_event_ids: set[str] = set()
     if event_ids:
-        for consumption in db.scalars(
-            select(models.ActivityEventConsumption).where(
-                models.ActivityEventConsumption.consumer_world_character_id
-                == world_character.id,
-                models.ActivityEventConsumption.source_social_event_id.in_(event_ids),
-                models.ActivityEventConsumption.namespace
-                == EVENT_CONSUMPTION_NAMESPACE,
-            )
+        for consumption in references.event_consumptions(
+            world_character_id=world_character.id, event_ids=event_ids,
         ):
             active_claim = (
                 consumption.status == "claimed"

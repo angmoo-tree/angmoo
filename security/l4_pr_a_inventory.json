@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2161,
-      "internal_edge_count": 2274,
+      "external_import_count": 2165,
+      "internal_edge_count": 2289,
       "legacy_import_exception_count": 0,
-      "module_count": 686,
+      "module_count": 687,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -744,10 +744,26 @@
           },
           {
             "imports": [
+              "app.compatibility.routine_posts.canonical_interactions",
+              "app.domains.routine_posts.contracts.context",
+              "app.domains.routines.contracts.lifecycle",
+              "app.domains.routines.models",
+              "app.domains.world_characters.models",
+              "app.domains.worlds.models",
+              "app.models.agent_settings",
+              "app.runtime.routines.activity_references"
+            ],
+            "module": "app.runtime.routine_posts.context_references",
+            "path": "backend/app/runtime/routine_posts/context_references.py"
+          },
+          {
+            "imports": [
               "app.compatibility.routine_posts.legacy",
               "app.core.unit_of_work",
+              "app.domains.routine_posts.contracts.context",
+              "app.domains.routine_posts.exceptions",
               "app.domains.routine_posts.infrastructure.direct_llm_provider",
-              "app.domains.routine_posts.infrastructure.sqlalchemy_context",
+              "app.domains.routine_posts.service.context",
               "app.domains.routines.exceptions",
               "app.domains.routines.service.execution.claims",
               "app.domains.routines.service.execution.lifecycle",
@@ -756,6 +772,7 @@
               "app.domains.social.contracts.subjective_context",
               "app.domains.social.public",
               "app.integrations.direct_llm",
+              "app.runtime.routine_posts.context_references",
               "app.runtime.routines.activity_references",
               "app.runtime.routines.joint_references",
               "app.runtime.social.observations",

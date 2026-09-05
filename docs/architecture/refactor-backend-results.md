@@ -846,3 +846,16 @@ API 하위의 실제 Pydantic 형식은 `routine_posts/schemas.py`, `RoutineInte
 현재 경계는 **686 modules / 2,274 edges / legacy exact 234 PASS**, ER0 **81/87/24/44/7**, L4 parity **97**이다. RoutinePost는 B1의 정확한 9개 역할 모듈만 PARTIAL 전환 대상으로 관리한다. 실제 foreign query·재시도 context 조립과 provider 검증/prompt/통신, 그 직접 public/서비스 별칭 소비자는 AR-B4-B2/B3에서 종료한다. 전체 B4와 실제 설치/재시작·Hosted CI·merge 완료를 주장하지 않는다.
 
 B1의 마지막 수정은 CI가 요구하는 기존 WC suite 경로 문자열 하나였다. 수정 후 RoutinePost·Proposal·closeout·Today inventory 검증은 **29 passed / 1 기존 PostgreSQL skip / 10.62초**로 통과했다. 앞선 광역 실행의 제품 검증 76개와 이 마지막 영향 범위 결과를 구분해 기록하며, 광역 78개 전체가 마지막 tree에서 다시 통과했다고 표기하지 않는다. source 고정 시 제품 코드와 기존 assertion/조건은 그대로이며 frozen baseline/checkpoint/additions와 Today predecessor JSON 변경은 0이다.
+
+
+## AR-B4-B2 — RoutinePost 문맥·재시도와 같은 Session 조회
+
+`RoutinePostContext`·source 계약은 `contracts/context.py`, 실제 scope/readiness/이전 성공/claim 만료/재시도/source 순서와 소비 차단 정책은 `service/context.py`로 이전했다. `runtime/routine_posts/context_references.py`는 원래 nullable get·SQL 12개를 호출자의 같은 Session에서 연결하며 consumption 결과를 즉시 list로 바꾸지 않고 기존 iterator로 반환한다. membership/Post의 동일 조회는 이미 존재하는 ActivityReferences 구현을 사용한다. 다른 업무의 attached 객체는 복제하지 않으며 새 Session·commit·명시적인 flush를 만들지 않는다.
+
+업무 함수의 collaborator 호출을 원문 표현으로 복원해 body/order AST 차이 0, runtime으로 추출한 실제 nullable get/SQL 12개도 차이 0을 확인했다. 원래 interaction source factory와 동일 클래스가 같은 위치에서 만들어지고, provider 주입/fake와 원래 db callback을 유지한다. `services/routine_post_context.py`와 옛 `infrastructure/sqlalchemy_context.py`는 실제 소비자를 전환한 뒤 제거했다. Routines 상태 검증·적용은 기존 실제 함수를 service의 같은 객체 export로 제공한다.
+
+새 **2 nodes**는 독립 연결의 SQLite에서 applied/active-claimed 소비 기록과 episode 상태의 미커밋 변경을 caller context가 보고, observer에게는 보이지 않으며 rollback으로 원복되는지 검증한다. 초기 fixture가 자기 자신을 대상으로 한 SocialEvent를 만들어 기존 DB 제약에 걸렸으므로 실제 다른 참여자를 생성하고 FK 검증을 켰다. 기존 제품 정책·assertion·parameter ID·PostgreSQL skip은 바꾸지 않았다. 수정 후 집중 검증은 **26 passed / 1 기존 PostgreSQL skip / 10.81초**다.
+
+Direct LLM 응답 검증·prompt/transport와 그 public/서비스 별칭은 B3, AgentActivitySetting과 canonical interaction adapter는 B4-C의 실제 남은 소유 전환 범위다. 현재 RoutinePost scope에는 실제 전환한 contract/service만 추가하고 bridge는 정확한 남은 consumer/종료 단계로 기록한다. frozen source/checkpoint/approved nodes/Today predecessor JSON은 변경하지 않는다. 최종 보존 검사와 source introduction·통합 Actions·merge는 이어지는 별도 증거로 기록한다.
+
+B2 최종 고정 후보의 집중 묶음은 **67 passed / 1 기존 PostgreSQL skip / 46.67초**다. 보존 검사는 frozen **1,867/1,907**, 보호 계보 **2,139**, 현재 **2,226 nodes**를 확인했고 API/schema/ORM·기존 assertion/raises/warns/suppression·누락 node·모든 split 증거 오류는 0이다. 종료 코드 1의 항목은 선행 source/test의 부모 append-only introduction 기록 대기뿐이다. 현재 구조 경계 **687 modules / 2,289 edges / legacy exact 235 PASS**, L4 parity **97**, ER0 **81/87/24/44/7** 및 MemoryBatch inventory 검증도 통과했다. 원래 활동 설정 조회의 위치가 context에서 runtime으로 바뀐 한 개 edge만 AR-B4-C 종료 조건으로 추적하며 광역 legacy prefix는 허용하지 않았다.

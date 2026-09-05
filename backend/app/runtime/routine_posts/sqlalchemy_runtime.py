@@ -20,11 +20,10 @@ from app.domains.routine_posts.infrastructure.direct_llm_provider import (
     RoutinePostProvider,
     validate_routine_generation,
 )
-from app.domains.routine_posts.infrastructure.sqlalchemy_context import (
-    RoutineContextUnavailable,
-    RoutineInteractionSource,
-    assemble_routine_post_context,
-)
+from app.domains.routine_posts.exceptions import RoutineContextUnavailable
+from app.domains.routine_posts.contracts.context import RoutineInteractionSource
+from app.domains.routine_posts.service.context import assemble_routine_post_context
+from app.runtime.routine_posts.context_references import SqlAlchemyRoutineContextReferences
 from app.domains.routines.service.lifecycle import reconcile_all_elapsed_routines
 from app.domains.routines.service.execution import claims as activity_claims
 from app.domains.routines.service.execution import lifecycle as activity_lifecycle
@@ -266,7 +265,7 @@ async def run_routine_post_runtime(
 
     try:
         context = assemble_routine_post_context(
-            db,
+            db, references=SqlAlchemyRoutineContextReferences(db),
             world_character=world_character,
             character=resident_context.character,
             now=resident_context.run_started_at,

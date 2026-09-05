@@ -1,6 +1,7 @@
 """Filter, rank and bound source events before they enter a routine prompt."""
 from __future__ import annotations
 from datetime import datetime
+from typing import Any
 import json
 from app.domains.routine_posts.constants import MAX_SOURCE_EVENTS, MAX_EVENT_EXCERPT_CHARS, MAX_TOTAL_EVENT_EXCERPT_CHARS, MAX_EVENT_CONTEXT_JSON_BYTES
 from app.domains.routine_posts.contracts.interaction import RoutineInteractionInput
@@ -106,3 +107,18 @@ def _bounded_events(
         selected.append(item)
         total_chars += len(item.excerpt)
     return tuple(selected), reasons, total_chars, len(normalized)
+
+
+class EmptyRoutineInteractionSource:
+    def candidates(
+        self,
+        db: Any,
+        *,
+        world_id: str,
+        consumer_world_character_id: str,
+        episode_id: str,
+        after: datetime,
+        before: datetime,
+    ) -> list[RoutineInteractionInput]:
+        del db, world_id, consumer_world_character_id, episode_id, after, before
+        return []

@@ -15,7 +15,7 @@ from app.credentials import (
 )
 from app.domains.routine_posts import schemas
 from app.domains.routine_posts.utils.text import _clip
-from app.domains.routine_posts.infrastructure.sqlalchemy_context import (
+from app.domains.routine_posts.contracts.context import (
     RoutinePostContext,
 )
 from app.integrations.direct_llm import (

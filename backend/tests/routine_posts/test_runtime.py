@@ -36,10 +36,9 @@ from app.services import community as community_service
 from app.services.agent_activity_policy import ActivityPolicy
 from app.services.direct_llm import DirectLlmCallContext, DirectLlmError
 from app.services.resident_contracts import LangGraphResidentContext
-from app.services.routine_post_context import (
-    RoutineInteractionInput,
-    assemble_routine_post_context,
-)
+from app.domains.routine_posts.contracts.interaction import RoutineInteractionInput
+from app.domains.routine_posts.service.context import assemble_routine_post_context
+from app.runtime.routine_posts.context_references import SqlAlchemyRoutineContextReferences
 from app.services.routine_post_planner import (
     GEMINI_ROUTINE_BEAT_PLAN_RESPONSE_SCHEMA,
     GEMINI_ROUTINE_POST_DRAFT_RESPONSE_SCHEMA,
@@ -702,7 +701,7 @@ def test_context_bounds_events_and_excludes_cross_world_input() -> None:
             )
         )
         context = assemble_routine_post_context(
-            db,
+            db, references=SqlAlchemyRoutineContextReferences(db),
             world_character=fixture.world_character,
             character=fixture.character,
             now=now,
@@ -719,6 +718,88 @@ def test_context_bounds_events_and_excludes_cross_world_input() -> None:
             "prompt_item_limit": 4,
         }
         assert "cross-world" not in context.considered_source_event_ids
+
+
+@pytest.mark.parametrize("blocked_status", ("applied", "claimed"))
+def test_context_reads_caller_pending_state_and_consumption_without_committing(
+    tmp_path, blocked_status: str,
+) -> None:
+    engine = create_engine(f"sqlite:///{tmp_path / 'context.sqlite3'}")
+    @event.listens_for(engine, "connect")
+    def _foreign_keys(dbapi_connection, _connection_record):
+        dbapi_connection.execute("PRAGMA foreign_keys=ON")
+    Base.metadata.create_all(engine)
+    now = _utc(datetime(2026, 8, 10, 10, 5))
+    with Session(engine, expire_on_commit=False) as db:
+        fixture = _seed(db)
+        episode_id = fixture.morning_episode.id
+        original_state = dict(fixture.morning_episode.current_state_snapshot)
+        event_id = "context-source-event"
+        actor = models.Character(
+            id="context-actor", owner_id=fixture.user.id, name="Context friend",
+            handle="context-friend", one_liner="A classmate", personality="Kind",
+            speech_style="Calm", worldview="Learning", topic_preferences="Alchemy",
+            safety_rules="Be careful", persona_summary="A classmate", moderation_status="active",
+        )
+        db.add(actor)
+        db.flush()
+        actor_wc = models.WorldCharacter(
+            id="context-actor-wc", world_id=fixture.world.id, character_id=actor.id,
+            membership_id=fixture.world_character.membership_id, status="active",
+            character_contract_hash=world_character_contracts.character_contract_hash(actor),
+            world_contract_hash=fixture.world.contract_hash,
+        )
+        db.add(actor_wc)
+        db.flush()
+        db.add(models.SocialEvent(
+            id=event_id, world_id=fixture.world.id,
+            actor_world_character_id=actor_wc.id,
+            target_world_character_id=fixture.world_character.id,
+            event_type="comment_created", result="succeeded",
+            occurred_at=now - timedelta(minutes=1),
+            idempotency_key="context-source-event", schema_version="social-event-v1",
+        ))
+        db.commit()
+        fixture.morning_episode.current_state_snapshot = {
+            **original_state, "action_note": "caller pending context",
+        }
+        db.add(models.ActivityEventConsumption(
+            id="context-consumption", world_id=fixture.world.id,
+            consumer_world_character_id=fixture.world_character.id,
+            source_social_event_id=event_id, namespace="next_activity_beat",
+            status=blocked_status, idempotency_key="context-consumption",
+            claim_expires_at=now + timedelta(minutes=5),
+        ))
+        seen_sessions = []
+
+        class Source:
+            def candidates(self, session, **_kwargs):
+                seen_sessions.append(session)
+                return [RoutineInteractionInput(
+                    source_event_id=event_id, world_id=fixture.world.id,
+                    consumer_world_character_id=fixture.world_character.id,
+                    actor_world_character_id=actor_wc.id,
+                    excerpt="A response in the current activity.",
+                    occurred_at=now - timedelta(minutes=1),
+                )]
+
+        context = assemble_routine_post_context(
+            db, references=SqlAlchemyRoutineContextReferences(db),
+            world_character=fixture.world_character, character=fixture.character,
+            now=now, interaction_source=Source(),
+        )
+        assert seen_sessions == [db]
+        assert context.episode is fixture.morning_episode
+        assert context.state_before["action_note"] == "caller pending context"
+        assert context.considered_source_event_ids == []
+        assert context.overflow_reason_counts == {"already_consumed": 1}
+        with Session(engine) as observer:
+            assert observer.get(models.ActivityEpisode, episode_id).current_state_snapshot == original_state
+            assert observer.get(models.ActivityEventConsumption, "context-consumption") is None
+        db.rollback()
+        assert fixture.morning_episode.current_state_snapshot == original_state
+        assert db.get(models.ActivityEventConsumption, "context-consumption") is None
+    engine.dispose()
 
 
 def test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once() -> (
