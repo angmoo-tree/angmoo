@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2067,
-      "internal_edge_count": 2022,
+      "external_import_count": 2065,
+      "internal_edge_count": 2031,
       "legacy_import_exception_count": 0,
-      "module_count": 631,
+      "module_count": 632,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -1055,7 +1055,7 @@
       {
         "counter": "concurrent_world_package_commits",
         "expected": 1,
-        "test": "backend/tests/test_l3_5_world_package_import_commit.py::test_concurrent_idempotency_commits_once"
+        "test": "backend/tests/world_packages/test_import_commit.py::test_concurrent_idempotency_commits_once"
       }
     ],
     "oracle_artifacts": [
@@ -1094,8 +1094,8 @@
         "sha256": "3ed2b66bd3cdfd8d6de9f5fb204cf1a294de125dff0b555f1286de22c36d332c"
       },
       {
-        "path": "backend/tests/test_l3_5_world_package_import_commit.py",
-        "sha256": "ba20e3dd1873fe036f55e665dd0de403556af9dde32f23465852a78bb925bd91"
+        "path": "backend/tests/world_packages/test_import_commit.py",
+        "sha256": "1970d16c21f7b753473ab55f1a12d4f1c95b1557734c43994d390baf7ec8f145"
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",
@@ -1175,16 +1175,6 @@
       "backend/tests/test_l2_5_frontend_architecture_boundaries.py::test_repository_frontend_boundaries_pass",
       "backend/tests/test_l2_5_frontend_architecture_boundaries.py::test_route_must_import_feature_public_entry",
       "backend/tests/test_l2_5_frontend_architecture_boundaries.py::test_shared_primitive_cannot_import_product_feature",
-      "backend/tests/test_l3_5_world_package_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media",
-      "backend/tests/test_l3_5_world_package_import_commit.py::test_commit_is_atomic_registers_one_home_world_and_replays_without_writes",
-      "backend/tests/test_l3_5_world_package_import_commit.py::test_commit_maps_portable_no_role_to_canonical_reserved_role",
-      "backend/tests/test_l3_5_world_package_import_commit.py::test_commit_revalidates_owner_digest_and_collision_preview",
-      "backend/tests/test_l3_5_world_package_import_commit.py::test_concurrent_idempotency_commits_once",
-      "backend/tests/test_l3_5_world_package_import_commit.py::test_duplicate_requires_explicit_independent_copy",
-      "backend/tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
-      "backend/tests/test_l3_5_world_package_import_commit.py::test_media_journal_recovery_keeps_only_canonical_commits",
-      "backend/tests/test_l3_5_world_package_import_commit.py::test_media_promotion_failure_rolls_back_all_rows_and_is_retryable",
-      "backend/tests/test_l3_5_world_package_import_commit.py::test_seed_failure_after_partial_flush_preserves_existing_data",
       "backend/tests/test_l3_er3_graph_query_parity.py::test_ladybug_outage_backlog_recovers_to_zero_lag",
       "backend/tests/test_l3_er3_graph_query_parity.py::test_ladybug_typed_query_workload_and_world_isolation",
       "backend/tests/test_l3_er3_graph_query_parity.py::test_ladybug_world_replay_restores_digest_and_sqlite_source",
@@ -1227,6 +1217,16 @@
       "backend/tests/test_world_feed_search.py::test_profile_requires_eight_searchable_keywords",
       "backend/tests/test_world_feed_search.py::test_search_text_normalization_is_deterministic",
       "backend/tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+      "backend/tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media",
+      "backend/tests/world_packages/test_import_commit.py::test_commit_is_atomic_registers_one_home_world_and_replays_without_writes",
+      "backend/tests/world_packages/test_import_commit.py::test_commit_maps_portable_no_role_to_canonical_reserved_role",
+      "backend/tests/world_packages/test_import_commit.py::test_commit_revalidates_owner_digest_and_collision_preview",
+      "backend/tests/world_packages/test_import_commit.py::test_concurrent_idempotency_commits_once",
+      "backend/tests/world_packages/test_import_commit.py::test_duplicate_requires_explicit_independent_copy",
+      "backend/tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+      "backend/tests/world_packages/test_import_commit.py::test_media_journal_recovery_keeps_only_canonical_commits",
+      "backend/tests/world_packages/test_import_commit.py::test_media_promotion_failure_rolls_back_all_rows_and_is_retryable",
+      "backend/tests/world_packages/test_import_commit.py::test_seed_failure_after_partial_flush_preserves_existing_data",
       "backend/tests/worlds/test_definition_contract.py::test_canonical_definition_treats_prompt_like_text_as_data",
       "backend/tests/worlds/test_definition_contract.py::test_complete_world_is_canonical_and_provider_free",
       "backend/tests/worlds/test_definition_contract.py::test_generation_context_excludes_owner_media_and_workflow_fields",
@@ -1252,7 +1252,7 @@
       "windows-installer"
     ],
     "workflow": ".github/workflows/windows-installer.yml",
-    "workflow_sha256": "627fe62581f442507ce4099335c3974921bc012c1a15019fc6c58e69d065c389"
+    "workflow_sha256": "aea09610bcd72c5c59ee6a9af99c88287d0ef1176a20b9198c520780d2e6a8e4"
   },
   "policy_id": "angmoo-l4-pr-a-p5-p7-inventory-v1",
   "runtime": {

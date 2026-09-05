@@ -10,7 +10,7 @@ import sys
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "backend"))
 
-from app.domains.world_packages.application.exclusion_scan import (
+from app.domains.world_packages.archive.exclusions import (
     WorldPackageExclusionError,
     scan_world_package_bytes,
 )

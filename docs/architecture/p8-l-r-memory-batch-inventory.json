@@ -24,7 +24,7 @@
   "files": [
     {
       "path": ".github/workflows/windows-installer.yml",
-      "sha256": "627fe62581f442507ce4099335c3974921bc012c1a15019fc6c58e69d065c389"
+      "sha256": "aea09610bcd72c5c59ee6a9af99c88287d0ef1176a20b9198c520780d2e6a8e4"
     },
     {
       "path": "backend/app/api/v1/routes/memory.py",
@@ -224,7 +224,7 @@
     },
     {
       "path": "backend/app/public_main.py",
-      "sha256": "fc391d871e05d553882d822f661e084b5bbf08be0c0df355ebe43ccbbd066624"
+      "sha256": "af6698f06de9867e9388b23ded6a04fc58098c4dfe805e21f6fca02ac851c143"
     },
     {
       "path": "backend/app/runtime/account_deletion.py",

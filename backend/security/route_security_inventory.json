@@ -84,12 +84,12 @@
     },
     "DELETE /api/v1/world-package-exports/{operation_id}": {
       "access": "owner-only",
-      "module": "app.domains.world_packages.api.routes",
+      "module": "app.domains.world_packages.router",
       "endpoint": "discard_world_package_export"
     },
     "DELETE /api/v1/world-package-imports/{operation_id}": {
       "access": "owner-only",
-      "module": "app.domains.world_packages.api.routes",
+      "module": "app.domains.world_packages.router",
       "endpoint": "discard_world_package_import_preview"
     },
     "DELETE /api/v1/worlds/{world_id}/banner": {
@@ -254,12 +254,12 @@
     },
     "GET /api/v1/world-package-exports/{operation_id}/download": {
       "access": "owner-only",
-      "module": "app.domains.world_packages.api.routes",
+      "module": "app.domains.world_packages.router",
       "endpoint": "download_world_package_export"
     },
     "GET /api/v1/world-package-imports/{operation_id}/preview": {
       "access": "owner-only",
-      "module": "app.domains.world_packages.api.routes",
+      "module": "app.domains.world_packages.router",
       "endpoint": "read_world_package_import_preview"
     },
     "GET /api/v1/feed": {
@@ -869,27 +869,27 @@
     },
     "POST /api/v1/world-package-imports/stage": {
       "access": "owner-only",
-      "module": "app.domains.world_packages.api.routes",
+      "module": "app.domains.world_packages.router",
       "endpoint": "stage_world_package_import"
     },
     "POST /api/v1/world-package-imports/{operation_id}/commit": {
       "access": "owner-only",
-      "module": "app.domains.world_packages.api.routes",
+      "module": "app.domains.world_packages.router",
       "endpoint": "commit_world_package_import"
     },
     "POST /api/v1/world-package-exports/{operation_id}/delivery-ack": {
       "access": "owner-only",
-      "module": "app.domains.world_packages.api.routes",
+      "module": "app.domains.world_packages.router",
       "endpoint": "acknowledge_world_package_export_delivery"
     },
     "POST /api/v1/worlds/{world_id}/package-exports": {
       "access": "owner-only",
-      "module": "app.domains.world_packages.api.routes",
+      "module": "app.domains.world_packages.router",
       "endpoint": "prepare_world_package_export"
     },
     "POST /api/v1/worlds/{world_id}/package-exports/preview": {
       "access": "owner-only",
-      "module": "app.domains.world_packages.api.routes",
+      "module": "app.domains.world_packages.router",
       "endpoint": "preview_world_package_export"
     },
     "POST /api/v1/worlds/{world_id}/archive": {

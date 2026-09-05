@@ -23,7 +23,7 @@ from app.api.v1.routes import world_chat_response
 from app.domains.device_home.router import router as device_home_router
 from app.domains.identity.router.local import router as local_identity_router
 from app.domains.world_characters.router.profile import router as world_character_router
-from app.domains.world_packages.api.routes import router as world_package_router
+from app.domains.world_packages.router import router as world_package_router
 
 
 class HostedRouterConfigurationError(RuntimeError):

@@ -23,7 +23,7 @@ on:
       - "backend/app/domains/social/**"
       - "backend/app/runtime/social/**"
       - "backend/app/runtime/routine_posts/**"
-      - "backend/tests/test_l3_5_world_package_import_commit.py"
+      - "backend/tests/world_packages/test_import_commit.py"
       - "backend/tests/test_l4_pr_f_closeout_contract.py"
       - ".github/CODEOWNERS"
       - ".github/workflows/windows-host-tauri-dev.yml"
@@ -53,7 +53,7 @@ on:
       - "backend/app/domains/social/**"
       - "backend/app/runtime/social/**"
       - "backend/app/runtime/routine_posts/**"
-      - "backend/tests/test_l3_5_world_package_import_commit.py"
+      - "backend/tests/world_packages/test_import_commit.py"
       - "backend/tests/test_l4_pr_f_closeout_contract.py"
       - ".github/CODEOWNERS"
       - ".github/workflows/windows-host-tauri-dev.yml"
@@ -119,9 +119,9 @@ jobs:
           .\.venv\Scripts\python.exe -m pytest -q `
             tests\test_embedded_data_migration_contract.py `
             tests\test_embedded_data_migration.py `
-            tests\test_l3_5_world_package_import_commit.py `
-            tests\test_l3_5_world_package_ui_contract.py `
-            tests\test_l3_5_world_package_closeout_contract.py `
+            tests\world_packages\test_import_commit.py `
+            tests\world_packages\test_ui_contract.py `
+            tests\world_packages\test_closeout_contract.py `
             tests\test_l4_pr_f_closeout_contract.py
           Pop-Location
       - name: Verify installed and Docker-bridge Rust modes
