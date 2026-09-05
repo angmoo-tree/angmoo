@@ -288,3 +288,63 @@ def test_package_initializer_move_does_not_normalize_unmapped_descendants() -> N
         assert p.normalized_assertion(fragment, literals) == p.normalized_assertion(fragment, [])
     fragment = "assert 'vendor.app.domains.identity.infrastructure' in imports"
     assert p.normalized_assertion(fragment, literals) == p.normalized_assertion(fragment, [])
+
+
+def test_chained_literal_path_move_preserves_exact_root_and_predicate(monkeypatch, tmp_path):
+    source = ("from pathlib import Path\n"
+              "APP_ROOT = Path(__file__).resolve().parents[1] / 'app'\n"
+              "def test_contract():\n"
+              "    root = APP_ROOT / 'domains' / 'world_packages'\n"
+              "    assert (root / 'api' / 'routes.py').exists()\n")
+    old = "tests/test_old.py::test_contract"
+    new = "tests/world_packages/test_new.py::test_contract"
+    expected = snapshot(source, old)
+    expected["tracked_files"] = {"backend/tests/test_old.py": "source-blob"}
+    monkeypatch.setattr(p, "git_bytes", lambda *args, **kwargs: source.encode())
+    changed = source.replace("parents[1]", "parents[2]").replace("'api' / 'routes.py'", "'router.py'")
+    write(tmp_path, "backend/tests/world_packages/test_new.py", changed)
+    files = {"backend/app/domains/world_packages/api/routes.py": "backend/app/domains/world_packages/router.py"}
+    assert p.check_assertions([expected], {old: new}, files, tmp_path) == []
+    assert p.check_assertions([expected], {old: new}, {}, tmp_path)
+    for altered in (
+        changed.replace(".exists()", ".is_file()"),
+        changed.replace("'world_packages'", "'different_world_packages'"),
+        changed.replace("    root = APP_ROOT / 'domains' / 'world_packages'", "    root = make_root()"),
+        changed.replace("    root =", "    other_root =").replace("(root /", "(other_root /"),
+        changed.replace("'router.py'", "'router.py.backup'"),
+        changed.replace("    assert", "    root = make_root()\n    assert"),
+        changed.replace("    root = APP_ROOT", "    Path = make_path()\n    root = APP_ROOT"),
+    ):
+        write(tmp_path, "backend/tests/world_packages/test_new.py", altered)
+        assert any("expectation missing or changed" in error for error in p.check_assertions([expected], {old: new}, files, tmp_path))
+
+
+@pytest.mark.parametrize("fragment", [
+    "assert (other / 'api' / 'routes.py').exists()",
+    "assert (root() / 'api' / 'routes.py').exists()",
+    "assert (root / variable / 'routes.py').exists()",
+    "assert (root / 'api' / 'routes.py.backup').exists()",
+    "assert (root / 'api' / 'routes.py' / 'extra').exists()",
+    "assert (root / 'api_extra' / 'routes.py').exists()",
+    "assert (root / 'api/routes.py').exists()",
+    "assert (root / '..' / 'api' / 'routes.py').exists()",
+])
+def test_chained_path_normalization_rejects_unmapped_roots_calls_and_prefixes(fragment):
+    literals = p.path_literals({"backend/app/domains/world_packages/api/routes.py": "backend/app/domains/world_packages/router.py"})
+    roots = {"root": "backend/app/domains/world_packages"}
+    assert p.normalized_assertion(fragment, literals, roots=roots) == p.normalized_assertion(fragment, [])
+
+
+def test_literal_roots_require_a_tracked_path_constructor_and_unique_binding():
+    source = ("from pathlib import Path\n"
+              "BASE = Path(__file__).resolve().parents[1] / 'app'\n"
+              "def test_contract():\n"
+              "    root = BASE / 'domains' / 'world_packages'\n")
+    assert p.literal_path_roots(source, "backend/tests/test_old.py")["test_contract"]["root"] == "backend/app/domains/world_packages"
+    for altered in (
+        source.replace("from pathlib import Path", "from custom import Path"),
+        source.replace("Path(__file__)", "factory(__file__)"),
+        source.replace("def test_contract():", "def test_contract(BASE):"),
+        source + "    root = get_root()\n",
+    ):
+        assert "root" not in p.literal_path_roots(altered, "backend/tests/test_old.py").get("test_contract", {})
