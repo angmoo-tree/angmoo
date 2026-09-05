@@ -7248,8 +7248,11 @@
           "backend/app/domains/routines/schemas/tendency.py",
           "backend/app/domains/routines/service/activity_management.py",
           "backend/app/domains/routines/service/autonomy_management.py",
+          "backend/app/domains/routines/service/feed_cues.py",
+          "backend/app/domains/routines/service/manual_activity.py",
           "backend/app/domains/routines/service/tendency.py",
           "backend/app/domains/routines/service/tendency_settings.py",
+          "backend/app/domains/routines/service/tick_schedule.py",
           "backend/app/exceptions.py",
           "backend/app/runtime/characters/management.py",
           "backend/app/runtime/resident/autonomy_reads.py"
@@ -7420,13 +7423,16 @@
         },
         {
           "old": "backend/app/services/agents.py::RUN_NOW_COOLDOWN",
-          "new": "backend/app/runtime/characters/management.py::RUN_NOW_COOLDOWN",
+          "new": "backend/app/domains/routines/constants.py::RUN_NOW_COOLDOWN",
           "direct_consumers": [
+            "backend/app/domains/routines/service/feed_cues.py",
+            "backend/app/domains/routines/service/manual_activity.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "source_member": "Original full body/constant with only exact same-Session callback and canonical type/owner name restoration. Conditional order, latest run cooldown, assigned-vs-temporary claim, primary-error-before-cleanup-error and explicit provider profile cleanup are unchanged."
         },
         {
           "old": "backend/app/services/agents.py::FIRST_GREETING_COOLDOWN",
@@ -7462,23 +7468,29 @@
         },
         {
           "old": "backend/app/services/agents.py::RUN_NOW_SCHEDULER_GUARD_WINDOW",
-          "new": "backend/app/runtime/characters/management.py::RUN_NOW_SCHEDULER_GUARD_WINDOW",
+          "new": "backend/app/domains/routines/constants.py::RUN_NOW_SCHEDULER_GUARD_WINDOW",
           "direct_consumers": [
+            "backend/app/domains/routines/service/feed_cues.py",
+            "backend/app/domains/routines/service/manual_activity.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "source_member": "Original full body/constant with only exact same-Session callback and canonical type/owner name restoration. Conditional order, latest run cooldown, assigned-vs-temporary claim, primary-error-before-cleanup-error and explicit provider profile cleanup are unchanged."
         },
         {
           "old": "backend/app/services/agents.py::RUN_NOW_SCHEDULER_HEADROOM",
-          "new": "backend/app/runtime/characters/management.py::RUN_NOW_SCHEDULER_HEADROOM",
+          "new": "backend/app/domains/routines/constants.py::RUN_NOW_SCHEDULER_HEADROOM",
           "direct_consumers": [
+            "backend/app/domains/routines/service/feed_cues.py",
+            "backend/app/domains/routines/service/manual_activity.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "source_member": "Original full body/constant with only exact same-Session callback and canonical type/owner name restoration. Conditional order, latest run cooldown, assigned-vs-temporary claim, primary-error-before-cleanup-error and explicit provider profile cleanup are unchanged."
         },
         {
           "old": "backend/app/services/agents.py::DELETED_CHARACTER_NAME",
@@ -8171,15 +8183,18 @@
         },
         {
           "old": "backend/app/services/agents.py::_ensure_feed_cue_prompt_safety",
-          "new": "backend/app/runtime/characters/management.py::_ensure_feed_cue_prompt_safety",
+          "new": "backend/app/domains/routines/service/feed_cues.py::_ensure_feed_cue_prompt_safety",
           "direct_consumers": [
+            "backend/app/domains/routines/service/feed_cues.py",
+            "backend/app/domains/routines/service/manual_activity.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/routines/test_tendency.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
-          ]
+          ],
+          "source_member": "Original full body/constant with only exact same-Session callback and canonical type/owner name restoration. Conditional order, latest run cooldown, assigned-vs-temporary claim, primary-error-before-cleanup-error and explicit provider profile cleanup are unchanged."
         },
         {
           "old": "backend/app/services/agents.py::_ensure_tendency_prompt_safety",
@@ -8360,25 +8375,31 @@
         },
         {
           "old": "backend/app/services/agents.py::get_feed_cue",
-          "new": "backend/app/runtime/characters/management.py::get_feed_cue",
+          "new": "backend/app/domains/routines/service/feed_cues.py::get_feed_cue",
           "direct_consumers": [
+            "backend/app/domains/routines/service/feed_cues.py",
+            "backend/app/domains/routines/service/manual_activity.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "source_member": "Original full body/constant with only exact same-Session callback and canonical type/owner name restoration. Conditional order, latest run cooldown, assigned-vs-temporary claim, primary-error-before-cleanup-error and explicit provider profile cleanup are unchanged."
         },
         {
           "old": "backend/app/services/agents.py::give_feed_cue",
-          "new": "backend/app/runtime/characters/management.py::give_feed_cue",
+          "new": "backend/app/domains/routines/service/feed_cues.py::give_feed_cue",
           "direct_consumers": [
+            "backend/app/domains/routines/service/feed_cues.py",
+            "backend/app/domains/routines/service/manual_activity.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/routines/test_tendency.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
-          ]
+          ],
+          "source_member": "Original full body/constant with only exact same-Session callback and canonical type/owner name restoration. Conditional order, latest run cooldown, assigned-vs-temporary claim, primary-error-before-cleanup-error and explicit provider profile cleanup are unchanged."
         },
         {
           "old": "backend/app/services/agents.py::run_first_greeting",
@@ -8901,99 +8922,126 @@
         },
         {
           "old": "backend/app/services/agents.py::_aware_utc",
-          "new": "backend/app/runtime/characters/management.py::_aware_utc",
+          "new": "backend/app/domains/routines/service/tick_schedule.py::aware_utc",
           "direct_consumers": [
+            "backend/app/domains/routines/service/feed_cues.py",
+            "backend/app/domains/routines/service/manual_activity.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "source_member": "Original three-statement UTC normalization body is exactly identical to existing tick_schedule.aware_utc. Reuse that actual implementation; no new normalization behavior or wrapper."
         },
         {
           "old": "backend/app/services/agents.py::_slot_has_live_lease",
-          "new": "backend/app/runtime/characters/management.py::_slot_has_live_lease",
+          "new": "backend/app/domains/routines/service/manual_activity.py::_slot_has_live_lease",
           "direct_consumers": [
+            "backend/app/domains/routines/service/feed_cues.py",
+            "backend/app/domains/routines/service/manual_activity.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "source_member": "Original full body/constant with only exact same-Session callback and canonical type/owner name restoration. Conditional order, latest run cooldown, assigned-vs-temporary claim, primary-error-before-cleanup-error and explicit provider profile cleanup are unchanged."
         },
         {
           "old": "backend/app/services/agents.py::_slot_is_live_running",
-          "new": "backend/app/runtime/characters/management.py::_slot_is_live_running",
+          "new": "backend/app/domains/routines/service/manual_activity.py::_slot_is_live_running",
           "direct_consumers": [
+            "backend/app/domains/routines/service/feed_cues.py",
+            "backend/app/domains/routines/service/manual_activity.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
             "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
             "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
-          ]
+          ],
+          "source_member": "Original full body/constant with only exact same-Session callback and canonical type/owner name restoration. Conditional order, latest run cooldown, assigned-vs-temporary claim, primary-error-before-cleanup-error and explicit provider profile cleanup are unchanged."
         },
         {
           "old": "backend/app/services/agents.py::_slot_is_assigned_resident",
-          "new": "backend/app/runtime/characters/management.py::_slot_is_assigned_resident",
+          "new": "backend/app/domains/routines/service/manual_activity.py::_slot_is_assigned_resident",
           "direct_consumers": [
+            "backend/app/domains/routines/service/feed_cues.py",
+            "backend/app/domains/routines/service/manual_activity.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "source_member": "Original full body/constant with only exact same-Session callback and canonical type/owner name restoration. Conditional order, latest run cooldown, assigned-vs-temporary claim, primary-error-before-cleanup-error and explicit provider profile cleanup are unchanged."
         },
         {
           "old": "backend/app/services/agents.py::_allowed_existing_running_resident_slots",
-          "new": "backend/app/runtime/characters/management.py::_allowed_existing_running_resident_slots",
+          "new": "backend/app/domains/routines/service/manual_activity.py::_allowed_existing_running_resident_slots",
           "direct_consumers": [
+            "backend/app/domains/routines/service/feed_cues.py",
+            "backend/app/domains/routines/service/manual_activity.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "source_member": "Original full body/constant with only exact same-Session callback and canonical type/owner name restoration. Conditional order, latest run cooldown, assigned-vs-temporary claim, primary-error-before-cleanup-error and explicit provider profile cleanup are unchanged."
         },
         {
           "old": "backend/app/services/agents.py::_slot_is_due",
-          "new": "backend/app/runtime/characters/management.py::_slot_is_due",
+          "new": "backend/app/domains/routines/service/manual_activity.py::_slot_is_due",
           "direct_consumers": [
+            "backend/app/domains/routines/service/feed_cues.py",
+            "backend/app/domains/routines/service/manual_activity.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "source_member": "Original full body/constant with only exact same-Session callback and canonical type/owner name restoration. Conditional order, latest run cooldown, assigned-vs-temporary claim, primary-error-before-cleanup-error and explicit provider profile cleanup are unchanged."
         },
         {
           "old": "backend/app/services/agents.py::_slot_is_imminent",
-          "new": "backend/app/runtime/characters/management.py::_slot_is_imminent",
+          "new": "backend/app/domains/routines/service/manual_activity.py::_slot_is_imminent",
           "direct_consumers": [
+            "backend/app/domains/routines/service/feed_cues.py",
+            "backend/app/domains/routines/service/manual_activity.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "source_member": "Original full body/constant with only exact same-Session callback and canonical type/owner name restoration. Conditional order, latest run cooldown, assigned-vs-temporary claim, primary-error-before-cleanup-error and explicit provider profile cleanup are unchanged."
         },
         {
           "old": "backend/app/services/agents.py::_ensure_run_now_scheduler_safe",
-          "new": "backend/app/runtime/characters/management.py::_ensure_run_now_scheduler_safe",
+          "new": "backend/app/domains/routines/service/manual_activity.py::_ensure_run_now_scheduler_safe",
           "direct_consumers": [
+            "backend/app/domains/routines/service/feed_cues.py",
+            "backend/app/domains/routines/service/manual_activity.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
             "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
             "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
-          ]
+          ],
+          "source_member": "Original full body/constant with only exact same-Session callback and canonical type/owner name restoration. Conditional order, latest run cooldown, assigned-vs-temporary claim, primary-error-before-cleanup-error and explicit provider profile cleanup are unchanged."
         },
         {
           "old": "backend/app/services/agents.py::_ensure_claimed_temporary_run_now_scheduler_safe",
-          "new": "backend/app/runtime/characters/management.py::_ensure_claimed_temporary_run_now_scheduler_safe",
+          "new": "backend/app/domains/routines/service/manual_activity.py::_ensure_claimed_temporary_run_now_scheduler_safe",
           "direct_consumers": [
+            "backend/app/domains/routines/service/feed_cues.py",
+            "backend/app/domains/routines/service/manual_activity.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
             "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
             "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
-          ]
+          ],
+          "source_member": "Original full body/constant with only exact same-Session callback and canonical type/owner name restoration. Conditional order, latest run cooldown, assigned-vs-temporary claim, primary-error-before-cleanup-error and explicit provider profile cleanup are unchanged."
         },
         {
           "old": "backend/app/services/agents.py::_ensure_imported_world_runtime_enabled",
@@ -9009,15 +9057,18 @@
         },
         {
           "old": "backend/app/services/agents.py::run_agent_now",
-          "new": "backend/app/runtime/characters/management.py::run_agent_now",
+          "new": "backend/app/domains/routines/service/manual_activity.py::run_agent_now",
           "direct_consumers": [
+            "backend/app/domains/routines/service/feed_cues.py",
+            "backend/app/domains/routines/service/manual_activity.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
             "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
             "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
-          ]
+          ],
+          "source_member": "Original full body/constant with only exact same-Session callback and canonical type/owner name restoration. Conditional order, latest run cooldown, assigned-vs-temporary claim, primary-error-before-cleanup-error and explicit provider profile cleanup are unchanged."
         },
         {
           "old": "backend/app/services/agents.py::_get_owned_character",
@@ -9160,15 +9211,18 @@
         },
         {
           "old": "backend/app/services/agents.py::_manual_run_available_at",
-          "new": "backend/app/runtime/characters/management.py::_manual_run_available_at",
+          "new": "backend/app/domains/routines/service/manual_activity.py::_manual_run_available_at",
           "direct_consumers": [
+            "backend/app/domains/routines/service/feed_cues.py",
+            "backend/app/domains/routines/service/manual_activity.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
             "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
             "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
-          ]
+          ],
+          "source_member": "Original full body/constant with only exact same-Session callback and canonical type/owner name restoration. Conditional order, latest run cooldown, assigned-vs-temporary claim, primary-error-before-cleanup-error and explicit provider profile cleanup are unchanged."
         },
         {
           "old": "backend/app/services/agents.py::_first_greeting_available_at",
@@ -33387,6 +33441,19 @@
       "preservation": "Original workflow7/lock1/query1 AST exactly match after narrow collaborator/type/status binding restoration. SQLite immediate/deferred commits, fixed global then World lock, partial credentialsync compensation, idempotent enabled shortcut, original commit/flush, rejection rollback/log and nullable owner lookups remain.",
       "remaining": "Management entry functions only bind actual workflows until C7 HTTP/composition closes. Original profile bind/release/reload and first-greeting/run-now/tendency provider workflows follow C7. All four old aggregate test consumers use its actual runtime owner and the old cruds aggregate alias is removed.",
       "test_binding": "Four original assertions retain their original namespace spelling through explicit test-local bindings to the real aggregate/settings/slots and actual owner source functions. No fake result, production alias, assertion rewrite or checker change."
+    },
+    "AR-B4-C7-C-manual-and-feed-cues": {
+      "status": "IMPLEMENTED — 154 related tests PASS, AST17 exact; boundary777/2691/legacy202/cycle0. Original-six read-only diagnostics zero after restoring untouched AR-B1/AR-F1 historical split metadata; stock introductions pending root.",
+      "actual_paths": [
+        "backend/app/domains/routines/service/manual_activity.py",
+        "backend/app/domains/routines/contracts/manual_activity.py",
+        "backend/app/domains/routines/service/feed_cues.py",
+        "backend/app/domains/routines/contracts/feed_cues.py"
+      ],
+      "ownership": "Routines owns actual manual-run request flow and scheduler/cooldown rules10, feed-cue query/admission/prompt policies3 and constants3. The existing identical UTC helper is reused. Runtime factories only bind same-Session owners and original provider/lease IO.",
+      "preservation": "Original fixed-error order, owner-controlled/imported-World restrictions, tendency-before-auto-enabled feed check, time/slot lookup order, returned run, temporary claim race and BaseException cleanup precedence preserved. No new commits/flushes, no provider fallback, no production aggregate alias.",
+      "test_bindings": "Two source inspection tests explicitly bind the original namespace to the actual defining manual/feed/autonomy functions; all original assertions and collected nodes remain.",
+      "remaining": "Existing mixed management entry wrappers bind these exact actual functions only until C7 HTTP/composition source. First greeting, tendency provider/state and credential owner4/HTTP remain next C7; B5/B7/Runtime/Operations canonical sources connect during root sequential integration."
     }
   },
   "test_symbols": {

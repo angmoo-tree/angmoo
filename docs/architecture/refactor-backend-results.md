@@ -1141,3 +1141,10 @@ B7 Memory 7개 실제 정의와 원래 미호출/검사용 5개 정의는 아직
 실제 활성화·비활성화·준비 정책 7개를 Routines 서비스로, 전역 transaction lock 1개를 Routines repository로, 원래 두 집합을 합산하는 cross-owner query 1개를 runtime aggregate로 옮겼다. Character.status의 원래 대입 3개는 Character mutations의 동일 객체 대입으로 연결했다. 전역→World 잠금, 이미 활성화된 경우의 반환, credential sync 실패 보상, commit/flush와 rollback 후 거절 로그의 원래 순서는 그대로이다. 원래 9개 본문은 정확한 collaborator/type/status 복원 뒤 AST가 동일하다. 초기 95개 통과 후 SQLite 재시도 mock을 실제 service 위치로 바꿨고 해당 1개와 tendency48 검사는 모두 통과했다. 관리 HTTP와 나머지 provider 실행 조립은 후속 C7 범위이다.
 
 최종 C7-B 관련 176개 통과, 기존 PostgreSQL 환경 1개 skip, 기존 경고 5개를 확인했다. 네 테스트의 원래 namespace를 실제 소유 함수에 명시 바인딩한 뒤 해당 4개도 재통과했다. 원래 assertion AST는 그대로이고 제품 alias나 검사기 예외는 추가하지 않았다. 현재 경계는 775 modules / 2662 edges / exact legacy 202 / cycle 0이다. 기존 여섯 보존 검사의 읽기 전용 진단은 모두 오류 0, 보호 노드 2139 / 현재 2287이다. 선행 도입 원장 연결과 원래 stock gate는 root의 순차 통합에서 처리한다.
+
+
+## AR-B4-C7-C — 수동 실행과 모이 요청
+
+실제 수동 실행·슬롯 안전·쿨다운 10개, 모이 조회·입력·프롬프트 정책 3개, 수동 실행 상수 3개를 Routines로 이전했다. UTC 변환은 기존 동일한 3문장 함수 하나를 재사용했다. 정확한 callback·타입 연결을 원래 이름으로 복원하면 17개 본문/상수가 동일하다. 기존 배정 슬롯/임시 슬롯의 서로 다른 실행, claim 경쟁, provider profile의 cleanup, BaseException 원래 오류 우선순위를 보존했다. 관련 기존 회귀 154개가 통과했고, source inspection 2개도 원래 assertion을 실제 정의 함수로 연결했다. HTTP와 혼합 entry는 후속 C7에서 실제 조립 위치로 연결한다.
+
+C7-C 현재 경계는 777 modules / 2691 edges / exact legacy 202 / cycle0이다. L4는 777/14/97, ER0은 86/87/24/44/7, Memory inventory는 current이다. 원래 보존 진단은 source/assertion/suppression/API·ORM/node 오류0이다. 지도 갱신 때 불필요하게 재계산된 기존 AR-B1/AR-F1의 legacy split metadata 7개를 원래 HEAD 값으로 복구했고, 동일 원래 split 검사도 오류0으로 확인했다. 보호2139/현재2287이며 동결/검사기/additions 변경은 없다. stock 통과는 root의 순차 도입 연결 후 확인한다.
