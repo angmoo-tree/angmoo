@@ -652,3 +652,8 @@ Character row lock과 owner-controlled WorldCharacter 제외를 사용하는 배
 ### 실행 결과의 저장과 진단
 
 `routines/service/run_results.py`는 Run 결과에 남길 필드, 비밀 가림, 단계별 오류와 사용량 집계, snapshot 저장을 소유합니다. 원래의 redaction 뒤 허용 필드 선택과 오류 길이 제한을 유지하며 원본 요청 payload를 변경하지 않습니다. 자기 Run은 `repository/runs.py::get_run`으로 caller Session에서 읽습니다. Snapshot 갱신은 원래의 commit을 수행하고, 쓰기 단계 조회나 없는 Run을 처리할 때 별도 commit을 추가하지 않습니다. Provider 호출이나 Daypart 기억 저장은 이 서비스의 책임이 아닙니다.
+
+
+### 활동 로그를 통한 실행 근거 확인
+
+`routines/service/activity_evidence.py`는 실제 ActivityLog에서 상태 저장·tick 완료·스레드 조회를 확인하고, 관찰 결과와 공개 행동 근거를 표현합니다. 원래 JSON의 실패 기본값과 조회 전 expire_all 호출을 보존합니다. `repository/activity_evidence.py`는 이벤트 종류·시각 범위·정렬·제한이 다른 아홉 조회를 각각 소유하며 같은 Session을 사용합니다. 관찰 문장에서 공개 행동을 했다고 잘못 주장하면 그 문장을 근거로 사용하지 않습니다. `utils/context_text.py`는 원래의 공백 압축만 담당하며, 의미가 다른 Memory 문맥의 정제 함수를 대신하지 않습니다.

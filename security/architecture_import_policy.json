@@ -1044,6 +1044,7 @@
       "app.domains.routines.policies.planning",
       "app.domains.routines.repository",
       "app.domains.routines.repository.activity_counts",
+      "app.domains.routines.repository.activity_evidence",
       "app.domains.routines.repository.feed_cues",
       "app.domains.routines.repository.plans",
       "app.domains.routines.repository.public_action_executions",
@@ -1056,6 +1057,7 @@
       "app.domains.routines.schemas.resident",
       "app.domains.routines.schemas.runs",
       "app.domains.routines.service",
+      "app.domains.routines.service.activity_evidence",
       "app.domains.routines.service.activity_logs",
       "app.domains.routines.service.activity_policy",
       "app.domains.routines.service.activity_scope",
@@ -1088,6 +1090,7 @@
       "app.domains.routines.utils",
       "app.domains.routines.utils.activity_actions",
       "app.domains.routines.utils.clock",
+      "app.domains.routines.utils.context_text",
       "app.domains.runtime.contracts",
       "app.domains.social.constants",
       "app.domains.social.contracts",
@@ -1235,6 +1238,7 @@
       "app.domains.routines.schemas.resident",
       "app.domains.routines.schemas.runs",
       "app.domains.routines.service",
+      "app.domains.routines.service.activity_evidence",
       "app.domains.routines.service.activity_logs",
       "app.domains.routines.service.activity_policy",
       "app.domains.routines.service.activity_scope",
@@ -2779,6 +2783,22 @@
         "owner_stage": "AR-B4-C",
         "reason": "Remaining actual AgentRun orchestration consumes canonical result retention and snapshot persistence; no duplicate policy or forwarding function.",
         "removal_condition": "Move actual execution composition to runtime in B4-C and remove this exact legacy consumer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.activity_evidence",
+        "owner_stage": "AR-B4-C",
+        "reason": "Remaining actual execution/prompt composition consumes the same actual Routines evidence/text function after responsibility extraction.",
+        "removal_condition": "Move remaining actual execution/prompt composition in B4-C; retire exact legacy consumer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.utils.context_text",
+        "owner_stage": "AR-B4-C",
+        "reason": "Remaining actual execution/prompt composition consumes the same actual Routines evidence/text function after responsibility extraction.",
+        "removal_condition": "Move remaining actual execution/prompt composition in B4-C; retire exact legacy consumer before B8-A.",
         "review_date": "2026-09-06"
       }
     ]

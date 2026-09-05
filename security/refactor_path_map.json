@@ -10884,10 +10884,13 @@
           "backend/app/domains/routines/constants.py",
           "backend/app/domains/routines/contracts/backoff.py",
           "backend/app/domains/routines/exceptions.py",
+          "backend/app/domains/routines/repository/activity_evidence.py",
           "backend/app/domains/routines/repository/run_backoff.py",
           "backend/app/domains/routines/repository/runs.py",
+          "backend/app/domains/routines/service/activity_evidence.py",
           "backend/app/domains/routines/service/run_backoff.py",
           "backend/app/domains/routines/service/run_results.py",
+          "backend/app/domains/routines/utils/context_text.py",
           "backend/app/domains/runtime/contracts.py",
           "backend/app/runtime/resident/read_only_lanes.py",
           "backend/app/services/agent_runs.py"
@@ -11084,22 +11087,29 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::GENERIC_OBSERVATION_RESULT",
-          "new": "backend/app/services/agent_runs.py::GENERIC_OBSERVATION_RESULT",
+          "new": "backend/app/domains/routines/constants.py::GENERIC_OBSERVATION_RESULT",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/services/agent_runs.py",
+            "backend/app/domains/routines/service/activity_evidence.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::OBSERVATION_NOTE_ACTION_TYPE",
-          "new": "backend/app/services/agent_runs.py::OBSERVATION_NOTE_ACTION_TYPE",
+          "new": "backend/app/domains/routines/constants.py::OBSERVATION_NOTE_ACTION_TYPE",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/repository/activity_evidence.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -11665,12 +11675,16 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_clip_text",
-          "new": "backend/app/services/agent_runs.py::_clip_text",
+          "new": "backend/app/domains/routines/utils/context_text.py::_clip_text",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/services/agent_runs.py",
+            "backend/app/domains/routines/service/activity_evidence.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -11885,32 +11899,41 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_latest_v6_feed_interest_payload",
-          "new": "backend/app/services/agent_runs.py::_latest_v6_feed_interest_payload",
+          "new": "backend/app/domains/routines/service/activity_evidence.py::_latest_v6_feed_interest_payload",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_latest_v6_feed_history_sanitize_payload",
-          "new": "backend/app/services/agent_runs.py::_latest_v6_feed_history_sanitize_payload",
+          "new": "backend/app/domains/routines/service/activity_evidence.py::_latest_v6_feed_history_sanitize_payload",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_latest_v6_inbox_review_payload",
-          "new": "backend/app/services/agent_runs.py::_latest_v6_inbox_review_payload",
+          "new": "backend/app/domains/routines/service/activity_evidence.py::_latest_v6_inbox_review_payload",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -12445,32 +12468,41 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_observation_result",
-          "new": "backend/app/services/agent_runs.py::_format_observation_result",
+          "new": "backend/app/domains/routines/service/activity_evidence.py::_format_observation_result",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::PUBLIC_ACTION_CLAIM_PATTERNS",
-          "new": "backend/app/services/agent_runs.py::PUBLIC_ACTION_CLAIM_PATTERNS",
+          "new": "backend/app/domains/routines/constants.py::PUBLIC_ACTION_CLAIM_PATTERNS",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/activity_evidence.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_has_public_action_claim",
-          "new": "backend/app/services/agent_runs.py::_has_public_action_claim",
+          "new": "backend/app/domains/routines/service/activity_evidence.py::_has_public_action_claim",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/activity_evidence.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -12495,92 +12527,121 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_has_state_saved_since",
-          "new": "backend/app/services/agent_runs.py::_has_state_saved_since",
+          "new": "backend/app/domains/routines/service/activity_evidence.py::_has_state_saved_since",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_has_activity_since",
-          "new": "backend/app/services/agent_runs.py::_has_activity_since",
+          "new": "backend/app/domains/routines/service/activity_evidence.py::_has_activity_since",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/services/agent_runs.py",
+            "backend/app/domains/routines/service/activity_evidence.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_has_tick_completed_since",
-          "new": "backend/app/services/agent_runs.py::_has_tick_completed_since",
+          "new": "backend/app/domains/routines/service/activity_evidence.py::_has_tick_completed_since",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_has_thread_viewed_since",
-          "new": "backend/app/services/agent_runs.py::_has_thread_viewed_since",
+          "new": "backend/app/domains/routines/service/activity_evidence.py::_has_thread_viewed_since",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::V6_STATE_PUBLIC_ACTION_LEDGER_TYPES",
-          "new": "backend/app/services/agent_runs.py::V6_STATE_PUBLIC_ACTION_LEDGER_TYPES",
+          "new": "backend/app/domains/routines/constants.py::V6_STATE_PUBLIC_ACTION_LEDGER_TYPES",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/activity_evidence.py",
+            "backend/app/domains/routines/repository/activity_evidence.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_tick_public_action_ledger_since",
-          "new": "backend/app/services/agent_runs.py::_format_tick_public_action_ledger_since",
+          "new": "backend/app/domains/routines/service/activity_evidence.py::_format_tick_public_action_ledger_since",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_tick_activity_since",
-          "new": "backend/app/services/agent_runs.py::_format_tick_activity_since",
+          "new": "backend/app/domains/routines/service/activity_evidence.py::_format_tick_activity_since",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::V6_OBSERVATION_CONTEXT_TYPES",
-          "new": "backend/app/services/agent_runs.py::V6_OBSERVATION_CONTEXT_TYPES",
+          "new": "backend/app/domains/routines/constants.py::V6_OBSERVATION_CONTEXT_TYPES",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/repository/activity_evidence.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_tick_observation_context_since",
-          "new": "backend/app/services/agent_runs.py::_format_tick_observation_context_since",
+          "new": "backend/app/domains/routines/service/activity_evidence.py::_format_tick_observation_context_since",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -13852,6 +13913,132 @@
             "tests/routines/test_run_results.py::test_missing_snapshot_does_not_commit_other_pending_session_writes",
             "tests/routines/test_run_results.py::test_pending_writing_results_read_attached_values_without_committing",
             "tests/routines/test_run_results.py::test_stored_gateway_result_preserves_relationship_review"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_latest_v6_feed_interest_payload",
+          "new": "backend/app/domains/routines/repository/activity_evidence.py::latest_feed_interest",
+          "source_member": "Exact original nullable scalar/list SQL expression only. Original Character filter, since>=, event predicate, order and independent limit remain. Service retains expire_all before query where originally present. Sanitize event name is supplied by original caller at the same evaluation point instead of importing Social legacy implementation.",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/activity_evidence.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_latest_v6_feed_history_sanitize_payload",
+          "new": "backend/app/domains/routines/repository/activity_evidence.py::latest_feed_history_sanitize",
+          "source_member": "Exact original nullable scalar/list SQL expression only. Original Character filter, since>=, event predicate, order and independent limit remain. Service retains expire_all before query where originally present. Sanitize event name is supplied by original caller at the same evaluation point instead of importing Social legacy implementation.",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/activity_evidence.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_latest_v6_inbox_review_payload",
+          "new": "backend/app/domains/routines/repository/activity_evidence.py::latest_inbox_review",
+          "source_member": "Exact original nullable scalar/list SQL expression only. Original Character filter, since>=, event predicate, order and independent limit remain. Service retains expire_all before query where originally present. Sanitize event name is supplied by original caller at the same evaluation point instead of importing Social legacy implementation.",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/activity_evidence.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_format_observation_result",
+          "new": "backend/app/domains/routines/repository/activity_evidence.py::recent_observation_notes",
+          "source_member": "Exact original nullable scalar/list SQL expression only. Original Character filter, since>=, event predicate, order and independent limit remain. Service retains expire_all before query where originally present. Sanitize event name is supplied by original caller at the same evaluation point instead of importing Social legacy implementation.",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/activity_evidence.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_has_state_saved_since",
+          "new": "backend/app/domains/routines/repository/activity_evidence.py::state_activity_id_since",
+          "source_member": "Exact original nullable scalar/list SQL expression only. Original Character filter, since>=, event predicate, order and independent limit remain. Service retains expire_all before query where originally present. Sanitize event name is supplied by original caller at the same evaluation point instead of importing Social legacy implementation.",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/activity_evidence.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_has_activity_since",
+          "new": "backend/app/domains/routines/repository/activity_evidence.py::activity_id_since",
+          "source_member": "Exact original nullable scalar/list SQL expression only. Original Character filter, since>=, event predicate, order and independent limit remain. Service retains expire_all before query where originally present. Sanitize event name is supplied by original caller at the same evaluation point instead of importing Social legacy implementation.",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/activity_evidence.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_format_tick_public_action_ledger_since",
+          "new": "backend/app/domains/routines/repository/activity_evidence.py::tick_public_action_logs",
+          "source_member": "Exact original nullable scalar/list SQL expression only. Original Character filter, since>=, event predicate, order and independent limit remain. Service retains expire_all before query where originally present. Sanitize event name is supplied by original caller at the same evaluation point instead of importing Social legacy implementation.",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/activity_evidence.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_format_tick_activity_since",
+          "new": "backend/app/domains/routines/repository/activity_evidence.py::visible_tick_activity_logs",
+          "source_member": "Exact original nullable scalar/list SQL expression only. Original Character filter, since>=, event predicate, order and independent limit remain. Service retains expire_all before query where originally present. Sanitize event name is supplied by original caller at the same evaluation point instead of importing Social legacy implementation.",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/activity_evidence.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_format_tick_observation_context_since",
+          "new": "backend/app/domains/routines/repository/activity_evidence.py::tick_observation_logs",
+          "source_member": "Exact original nullable scalar/list SQL expression only. Original Character filter, since>=, event predicate, order and independent limit remain. Service retains expire_all before query where originally present. Sanitize event name is supplied by original caller at the same evaluation point instead of importing Social legacy implementation.",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/activity_evidence.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+            "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+            "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         }
       ]
@@ -31566,6 +31753,25 @@
       "preservation": "11 original function ASTs match after exact nullable query restoration; 7 moved test bodies are identical. Retained keys, error1500 limit, usage counts/perCall/scope, writing lanes, redaction-before-retention, merge order, missingRun early return and unconditional original commit are preserved.",
       "remaining": "Actual context/prompt/execution composition and exact bridges remain B4-C/B8-A. Memory Daypart remains existing original owner pending B7 integration; no Memory/B5 ancestry or duplicate Daypart implementation is introduced.",
       "execution_binding_regression": "Source review caught five missing actual consumer imports despite isolated service tests passing. They are connected, and three real execution code objects plus nested code now check all LOAD_GLOBAL dependencies against actual module/builtins; an external missing-five negative probe demonstrates the defect is detected. No behavioral assertion or suppression is removed."
+    },
+    "AR-B4-C5d-activity-evidence": {
+      "status": "IMPLEMENTED — final current429 passed / existingPG1skip; read-only original preservation checks0; parent source introduction and stock integration pending",
+      "checked_source_map": "Existing complete AR-B2-B5 map retargets thirteen definitions and five constants plus nine exact SQL source members. Original assertions and source checkpoint unchanged.",
+      "actual_paths": [
+        "backend/app/domains/routines/service/activity_evidence.py",
+        "backend/app/domains/routines/repository/activity_evidence.py",
+        "backend/app/domains/routines/utils/context_text.py",
+        "backend/app/domains/routines/constants.py"
+      ],
+      "test_nodes": [
+        "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+        "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
+        "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+        "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+      ],
+      "ownership": "Routines owns its ActivityLog evidence selection, JSON fallback, actual state/tick/thread completion and truthful observation/public-action ledger. Repository owns independent original nine queries; whitespace-only clipping is pure Routines utility and intentionally differs from Memory neutralizing clip.",
+      "preservation": "13 original functions plus5 constants are AST-identical after exact query restoration and one explicit original sanitize event parameter. Nine query expressions retain sameSession/autoflush, expire_all where originally present, nullable handling, integer PK ordering, limits5/10/20 and hidden9 event set. Provider calls and Daypart Memory unchanged.",
+      "remaining": "Real provider/graph/context/prompt execution orchestration and exact legacy bridges remain B4-C/B8-A. No B5/B7 ancestry or duplicate owner implementation introduced."
     }
   },
   "test_symbols": {

@@ -1,7 +1,7 @@
 {
-  "edge_count": 2421,
-  "external_import_count": 2273,
-  "module_count": 723,
+  "edge_count": 2429,
+  "external_import_count": 2283,
+  "module_count": 726,
   "modules": [
     {
       "external_imports": [],
@@ -3640,7 +3640,8 @@
     },
     {
       "external_imports": [
-        "datetime"
+        "datetime",
+        "re"
       ],
       "imports": [
         "app.domains.routines.contracts.lifecycle"
@@ -3937,6 +3938,21 @@
     {
       "external_imports": [
         "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.models"
+      ],
+      "module": "app.domains.routines.repository.activity_evidence",
+      "path": "backend/app/domains/routines/repository/activity_evidence.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "sqlalchemy",
         "sqlalchemy.orm"
       ],
@@ -4094,6 +4110,24 @@
       ],
       "module": "app.domains.routines.service",
       "path": "backend/app/domains/routines/service/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "json",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.core.context_text",
+        "app.domains.routines.constants",
+        "app.domains.routines.repository.activity_evidence",
+        "app.domains.routines.utils.context_text"
+      ],
+      "module": "app.domains.routines.service.activity_evidence",
+      "path": "backend/app/domains/routines/service/activity_evidence.py",
       "wildcard_imports": []
     },
     {
@@ -4616,6 +4650,13 @@
       ],
       "module": "app.domains.routines.utils.clock",
       "path": "backend/app/domains/routines/utils/clock.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.routines.utils.context_text",
+      "path": "backend/app/domains/routines/utils/context_text.py",
       "wildcard_imports": []
     },
     {
@@ -10177,6 +10218,7 @@
         "app.domains.routines.exceptions",
         "app.domains.routines.repository.feed_cues",
         "app.domains.routines.repository.slots",
+        "app.domains.routines.service.activity_evidence",
         "app.domains.routines.service.lifecycle",
         "app.domains.routines.service.run_backoff",
         "app.domains.routines.service.run_results",
@@ -10186,6 +10228,7 @@
         "app.domains.routines.service.slot_pool",
         "app.domains.routines.service.slot_recovery",
         "app.domains.routines.service.tick_schedule",
+        "app.domains.routines.utils.context_text",
         "app.domains.social.public",
         "app.domains.world_characters.public",
         "app.domains.world_characters.service.readiness",

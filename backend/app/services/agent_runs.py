@@ -1,3 +1,18 @@
+from app.domains.routines.service.activity_evidence import (
+    _format_observation_result,
+    _format_tick_activity_since,
+    _format_tick_observation_context_since,
+    _format_tick_public_action_ledger_since,
+    _has_activity_since,
+    _has_state_saved_since,
+    _has_thread_viewed_since,
+    _has_tick_completed_since,
+    _latest_v6_feed_history_sanitize_payload,
+    _latest_v6_feed_interest_payload,
+    _latest_v6_inbox_review_payload,
+)
+from app.domains.routines.utils.context_text import _clip_text
+from app.domains.routines.constants import GENERIC_OBSERVATION_RESULT
 from app.domains.routines.service.run_results import (
     _build_llm_usage_summary,
     _pending_writing_composition_lanes,
@@ -98,8 +113,6 @@ KOREAN_WEEKDAYS = (
     "토요일",
     "일요일",
 )
-GENERIC_OBSERVATION_RESULT = "커뮤니티 흐름을 둘러봤어요."
-OBSERVATION_NOTE_ACTION_TYPE = "observation_note_saved"
 RUNTIME_LAST_ERROR_PREFIX = "angmoo_runtime:"
 FEED_PERCEPTION_DEBUG_ACTION_TYPE = "feed_perception_debug"
 TOOL_CHOICE_COMPLETE_TICK = {
@@ -266,13 +279,6 @@ def _format_feed_cue(cue: models.AgentFeedCue | None) -> str:
 - Use this user-provided "모이" once. If creating a post is allowed in this tick, strongly prefer writing exactly one new post based on this topic.
 - Do not copy the topic mechanically. Digest it through the character persona, speech style, and safety rules. If this is not a first greeting cue, also consider the current community mood.
 - If post creation is blocked by backend policy, do not force another public action just to consume this cue.{first_greeting_rule}"""
-
-
-def _clip_text(value: str | None, limit: int) -> str:
-    text = " ".join((value or "").split())
-    if len(text) <= limit:
-        return text
-    return f"{text[: max(0, limit - 3)]}..."
 
 
 def _format_profile_ref(
@@ -636,73 +642,6 @@ def _profile_display_name_for_action_menu(
             return user.display_name
         return f"user:{user_id}"
     return "unknown"
-
-
-def _latest_v6_feed_interest_payload(
-    db: Session, *, character_id: str, since: datetime
-) -> dict[str, Any]:
-    log = db.scalar(
-        select(models.AgentActivityLog)
-        .where(
-            models.AgentActivityLog.character_id == character_id,
-            models.AgentActivityLog.action_type == "feed_interests_noted",
-            models.AgentActivityLog.created_at >= since,
-        )
-        .order_by(models.AgentActivityLog.created_at.desc(), models.AgentActivityLog.id.desc())
-        .limit(1)
-    )
-    if log is None:
-        return {"interests": [], "post_seed": "", "no_relevant_signal": True}
-    try:
-        payload = json.loads(log.result)
-    except json.JSONDecodeError:
-        return {"interests": [], "post_seed": "", "no_relevant_signal": True}
-    return payload if isinstance(payload, dict) else {"interests": []}
-
-
-def _latest_v6_feed_history_sanitize_payload(
-    db: Session, *, character_id: str, since: datetime
-) -> dict[str, Any] | None:
-    log = db.scalar(
-        select(models.AgentActivityLog)
-        .where(
-            models.AgentActivityLog.character_id == character_id,
-            models.AgentActivityLog.action_type
-            == community_service.FEED_HISTORY_SANITIZED_ACTION_TYPE,
-            models.AgentActivityLog.created_at >= since,
-        )
-        .order_by(models.AgentActivityLog.created_at.desc(), models.AgentActivityLog.id.desc())
-        .limit(1)
-    )
-    if log is None:
-        return None
-    try:
-        payload = json.loads(log.result)
-    except json.JSONDecodeError:
-        return None
-    return payload if isinstance(payload, dict) else None
-
-
-def _latest_v6_inbox_review_payload(
-    db: Session, *, character_id: str, since: datetime
-) -> dict[str, Any]:
-    log = db.scalar(
-        select(models.AgentActivityLog)
-        .where(
-            models.AgentActivityLog.character_id == character_id,
-            models.AgentActivityLog.action_type == "inbox_reviewed",
-            models.AgentActivityLog.created_at >= since,
-        )
-        .order_by(models.AgentActivityLog.created_at.desc(), models.AgentActivityLog.id.desc())
-        .limit(1)
-    )
-    if log is None:
-        return {"candidate_notification_id": None}
-    try:
-        payload = json.loads(log.result)
-    except json.JSONDecodeError:
-        return {"candidate_notification_id": None}
-    return payload if isinstance(payload, dict) else {"candidate_notification_id": None}
 
 
 def _v6_inbox_candidates_from_review(
@@ -3492,46 +3431,6 @@ def _format_relationship_review_candidate(
     return "- none"
 
 
-def _format_observation_result(
-    db: Session, *, character_id: str, since: datetime
-) -> str:
-    db.expire_all()
-    logs = list(
-        db.scalars(
-            select(models.AgentActivityLog)
-            .where(
-                models.AgentActivityLog.character_id == character_id,
-                models.AgentActivityLog.created_at >= since,
-                models.AgentActivityLog.action_type == OBSERVATION_NOTE_ACTION_TYPE,
-            )
-            .order_by(
-                models.AgentActivityLog.created_at.desc(),
-                models.AgentActivityLog.id.desc(),
-            )
-            .limit(5)
-        )
-    )
-    for log in logs:
-        note = neutralize_context_text(log.result or "").strip()
-        if note and not _has_public_action_claim(note):
-            return note[:1000]
-    return GENERIC_OBSERVATION_RESULT
-
-
-PUBLIC_ACTION_CLAIM_PATTERNS = (
-    re.compile(r"좋아요[^\n.!?。]*?(눌|누르|남겼|했|했다|표시)", re.IGNORECASE),
-    re.compile(r"(댓글|답글|대댓글)[^\n.!?。]*?(달|남겼|작성|썼|했|했다)", re.IGNORECASE),
-    re.compile(r"(글|게시물|포스트)[^\n.!?。]*?(작성|올렸|남겼|썼|발행|게시)", re.IGNORECASE),
-    re.compile(r"(팔로우|리포스트|공유)[^\n.!?。]*?(했|했다|눌|남겼)", re.IGNORECASE),
-    re.compile(r"(메시지|응원)[^\n.!?。]*?(남겼|전했|달았|보냈)", re.IGNORECASE),
-    re.compile(r"\b(liked|replied|commented|posted|followed|reposted)\b", re.IGNORECASE),
-)
-
-
-def _has_public_action_claim(text: str) -> bool:
-    return any(pattern.search(text) for pattern in PUBLIC_ACTION_CLAIM_PATTERNS)
-
-
 def _format_state_for_llm_context(state: models.CharacterState | None) -> str:
     if state is None:
         return "no saved state"
@@ -3547,173 +3446,6 @@ def _policy_allows_observe(
     activity_policy: agent_activity_policy.ActivityPolicy | None,
 ) -> bool:
     return activity_policy is not None and "observe" in activity_policy.allowed_actions
-
-
-def _has_state_saved_since(
-    db: Session, *, character_id: str, since: datetime
-) -> bool:
-    db.expire_all()
-    return (
-        db.scalar(
-            select(models.AgentActivityLog.id)
-            .where(
-                models.AgentActivityLog.character_id == character_id,
-                models.AgentActivityLog.action_type.in_(
-                    ("state_saved", "state_save_suppressed")
-                ),
-                models.AgentActivityLog.created_at >= since,
-            )
-            .limit(1)
-        )
-        is not None
-    )
-
-
-def _has_activity_since(
-    db: Session, *, character_id: str, since: datetime, action_types: tuple[str, ...]
-) -> bool:
-    db.expire_all()
-    return (
-        db.scalar(
-            select(models.AgentActivityLog.id)
-            .where(
-                models.AgentActivityLog.character_id == character_id,
-                models.AgentActivityLog.action_type.in_(action_types),
-                models.AgentActivityLog.created_at >= since,
-            )
-            .limit(1)
-        )
-        is not None
-    )
-
-
-def _has_tick_completed_since(
-    db: Session, *, character_id: str, since: datetime
-) -> bool:
-    return _has_activity_since(
-        db, character_id=character_id, since=since, action_types=("tick_completed",)
-    )
-
-
-def _has_thread_viewed_since(
-    db: Session, *, character_id: str, since: datetime
-) -> bool:
-    return _has_activity_since(
-        db, character_id=character_id, since=since, action_types=("thread_viewed",)
-    )
-
-
-V6_STATE_PUBLIC_ACTION_LEDGER_TYPES = (
-    "post_created",
-    "replied",
-    "liked",
-    "reposted",
-    "followed",
-    "unfollowed",
-)
-
-
-def _format_tick_public_action_ledger_since(
-    db: Session, *, character_id: str, since: datetime
-) -> str:
-    db.expire_all()
-    logs = list(
-        db.scalars(
-            select(models.AgentActivityLog)
-            .where(
-                models.AgentActivityLog.character_id == character_id,
-                models.AgentActivityLog.created_at >= since,
-                models.AgentActivityLog.action_type.in_(
-                    V6_STATE_PUBLIC_ACTION_LEDGER_TYPES
-                ),
-            )
-            .order_by(
-                models.AgentActivityLog.created_at.asc(),
-                models.AgentActivityLog.id.asc(),
-            )
-            .limit(20)
-        )
-    )
-    grouped: dict[str, list[str]] = {
-        action_type: [] for action_type in V6_STATE_PUBLIC_ACTION_LEDGER_TYPES
-    }
-    for log in logs:
-        detail = log.target_post_id or _clip_text(
-            neutralize_context_text(log.result or log.reason), 120
-        )
-        grouped[log.action_type].append(detail or "recorded")
-
-    return "\n".join(
-        f"- {action_type}: {', '.join(grouped[action_type]) if grouped[action_type] else 'none'}"
-        for action_type in V6_STATE_PUBLIC_ACTION_LEDGER_TYPES
-    )
-
-
-def _format_tick_activity_since(
-    db: Session, *, character_id: str, since: datetime
-) -> str:
-    db.expire_all()
-    logs = list(
-        db.scalars(
-            select(models.AgentActivityLog)
-            .where(
-                models.AgentActivityLog.character_id == character_id,
-                models.AgentActivityLog.created_at >= since,
-                models.AgentActivityLog.action_type.not_in(
-                    agent_crud.HIDDEN_ACTIVITY_ACTION_TYPES
-                ),
-            )
-            .order_by(models.AgentActivityLog.created_at.asc(), models.AgentActivityLog.id.asc())
-            .limit(20)
-        )
-    )
-    if not logs:
-        return "- none"
-    return "\n".join(
-        (
-            f"- {log.created_at.isoformat()} {log.action_type}; "
-            f"target_post_id={log.target_post_id or '-'}; "
-            f"{_clip_text(neutralize_context_text(log.result or log.reason), 500)}"
-        )
-        for log in logs
-    )
-
-
-V6_OBSERVATION_CONTEXT_TYPES = (
-    "inbox_reviewed",
-    "feed_viewed",
-    "feed_interests_noted",
-)
-
-
-def _format_tick_observation_context_since(
-    db: Session, *, character_id: str, since: datetime
-) -> str:
-    db.expire_all()
-    logs = list(
-        db.scalars(
-            select(models.AgentActivityLog)
-            .where(
-                models.AgentActivityLog.character_id == character_id,
-                models.AgentActivityLog.created_at >= since,
-                models.AgentActivityLog.action_type.in_(V6_OBSERVATION_CONTEXT_TYPES),
-            )
-            .order_by(
-                models.AgentActivityLog.created_at.asc(),
-                models.AgentActivityLog.id.asc(),
-            )
-            .limit(10)
-        )
-    )
-    if not logs:
-        return "- none"
-    return "\n".join(
-        (
-            f"- {log.action_type}; target_post_id={log.target_post_id or '-'}; "
-            f"{_clip_text(neutralize_context_text(log.result or log.reason), 900)}"
-        )
-        for log in logs
-    )
 
 
 def _is_success_status(status: str) -> bool:
@@ -5582,7 +5314,8 @@ async def _run_resident_individual_tool_flow(
         sanitize_retry_exhausted = True
         result["feed_history_sanitize_lane"] = exc.lane_result
     feed_history_sanitize_payload = _latest_v6_feed_history_sanitize_payload(
-        db, character_id=character.id, since=run_started_at
+        db, character_id=character.id, since=run_started_at,
+        action_type=community_service.FEED_HISTORY_SANITIZED_ACTION_TYPE,
     )
     if feed_history_sanitize_payload is None:
         result["feed_history_sanitize_fallback"] = "metadata_only"

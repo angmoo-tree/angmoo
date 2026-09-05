@@ -1006,3 +1006,12 @@ C5b 최종 현재 후보는 **406 passed / 기존 PostgreSQL 1 skip / 기존 war
 C5c 미커밋 소비자 검토에서 자동 추출의 import 삽입 기준 누락으로 다섯 전역 이름이 연결되지 않은 것을 발견했다. 격리 서비스 검증만으로 실행 본문의 미호출 경로까지 보장할 수 없음을 확인하고 정확 import를 연결했다. Community·individual flow·resident slot 세 실제 실행 함수 및 중첩 code의 LOAD_GLOBAL 의존이 실제 모듈/builtins에 모두 존재하는 영구 회귀 3 nodes를 추가했다. 이 구조 회귀는 실제 provider 성공 경로의 대체 증거가 아니며 기존 실행·기능 검사를 계속 유지한다. 최종 검증은 이 보완 뒤 고정된 후보를 사용한다.
 
 C5c 보완 후 최종 현재 후보는 **422 passed / 기존 PostgreSQL 1 skip / 기존 warnings5 / 81.27초**다. 실제 세 실행 함수의 copied namespace에서 누락 import 다섯 개를 제거한 읽기 전용 음성 대조는 다섯 의존을 모두 검출했다. 경계 **723 modules / 2,421 edges / exact legacy209 / cycle0**, L4 parity97·ER0 85/87/24/44/7·Memory batch 현재 inventory를 유지한다. 원래 보존 함수의 읽기 전용 진단은 **source/split/assertion/suppression/API·ORM/node 각각 오류0**, 보호 **2,139 / 현재2,254 nodes**다. 선행 signed 두 경로의 메모리 보충만 사용했으며 tracked frozen/checkpoint/additions·검사 구현은 변경하지 않았다. ER0의 역사적 `<82` 개수 assertion은 현재 파일 분할 수와의 구분을 부모가 별도 검토 중이며 stock 전체·CI·installer를 통과했다고 표시하지 않는다.
+
+
+## AR-B4-C5d — ActivityLog 실행 근거·관찰·결과 표현
+
+실행 근거 12함수와 공백 압축 1함수·상수5개를 실제 Routines 역할로 이전했다. Repository는 원래 SQL 아홉 개를 독립 소유하고 service는 원래 expire_all 시점·nullable/JSON fallback·상태 판정·표현을 유지한다. Exact query를 복원하면 실제 함수13개·상수5개 AST가 같으며, sanitize 이벤트 값만 기존 caller가 같은 시점에 명시 전달한다. 외부 ORM이나 Daypart 기억 책임은 옮기지 않았다.
+
+새 SQLite 회귀는 동일 세션의 미커밋 로그·정수 PK 최신 순서·JSON 기본값·rollback, expire_all이 미저장 변경을 폐기한 뒤 조회하는 원래 의미, 공개 행동20개 제한·숨김9유형·사실에 맞는 관찰 문장 선택을 검증한다. 초기 데이터 fixture의 로그 ID를 실제 정수 PK에 맞춰 수정했으며 제품 모델·기존 assertion은 변경하지 않았다. 최종 현재 검증과 부모 선형 통합은 별도로 기록한다.
+
+C5d 최종 현재 후보는 **429 passed / 기존 PostgreSQL 1 skip / 기존 warnings5 / 103.90초**다. 경계 **726 modules / 2,429 edges / exact legacy209 / cycle0**, L4 parity97·ER0 85/87/24/44/7·Memory batch 현재 inventory가 통과했다. 읽기 전용 원래 보존 진단은 **source/split/assertion/suppression/API·ORM/node 각각 오류0**, 보호 **2,139 / 현재2,257 nodes**다. 선행 signed 두 경로의 메모리 보충만 사용했고 tracked frozen/checkpoint/additions·검사 구현은 변경하지 않았다. 부모 source 도입 append 및 ER0 역사·현재 수치 구분 보완 후 stock 전체·CI·installer는 별도 조건이다.
