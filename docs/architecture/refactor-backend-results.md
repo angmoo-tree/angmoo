@@ -1148,3 +1148,12 @@ Source `940ef7896fb414d18b703d20d118dbea918ed2df`는 마지막 Character image O
 최초 집중검사는64 PASS/15 FAIL이었다. 실패15개는14개 기존 monkeypatch가 삭제된 `post_image_generation.agent_crud.get_image_generation_setting`을 가리킨 결과였고 실제 `image_setting_repository`로 fixture target만 전환했다. 원래 assertions/예외검사를 보존하고 최종79 PASS/9.79초다. 최초 파일명 오기로 선택한 미존재 test 경로는 수집0개로 종료했으며 실제 `identity/test_l1_local_v2_credentials.py`를 확인하여 검증했다.
 
 경계751/2489/187legacy, L4/ER0 PASS, 원래 source/split/assertions/suppression/APIORM/node6진단0(protected2201/current2255)이다. 기존 split 증거에 이미 옮겨진 Routines·Character 정의도 모두 유지하고 실제 최종 model 경로를 반영했다. 새 node는 없다. 상위 owner HTTP/media workflow와 Social visual-identity write 연결 및 G5 aliases는 후속 작업이다. 전체 B8/설치/merge 종료를 뜻하지 않는다.
+
+
+### AR-B8 LocalBot A1 실제 모델·입력·사용량 책임
+
+Source `e703fbc41963a1504a2b9cade64023a307dee4bb`는 LocalBot actual3ORM·입력4개·기존 quota 및 Bot 오류/상수를 실제 도메인으로 옮겼다. `service/quota.py`는 일자 재설정/cooldown/limit·consume 정책, `repository/quota.py`는 원래2개 row-lock 조회와2개 nested-insert/IntegrityError 처리를 소유한다. 읽기 사용량의 명시 commit과 행동 사용량의 호출자 완료/rollback 책임을 합치지 않았다. 기존3개 model/quota 파일을 제거했고 아직 main Bot workflow/HTTP는 후속이다.
+
+실제 SQL에 원래 인수를 펼친 AST로97개 전체 정의·상수가 동일하며 기존 관련50 PASS/20.07초다. 새 node는 없다. 현재 경계757/2495/182legacy와 L4/ER0 PASS, 원래 source/assertion/suppression/APIORM/node 진단0이다. 최초 split 진단은 삭제된 quota 경로를 가리키던 옛 Lore 소비자2개가 실패했다. 같은 이름의 다른 `_aware_utc`/APP_TIMEZONE을 실제 Lore 소비자로 기재한 목록을 실제 `character_lore/service/parser_quota.py` 내부 호출 및 `service/documents.py` import로 좁혔고 원래 split 검사를 다시 실행해0오류를 확인했다. 제품 코드·테스트 기대값을 변경하지 않았다.
+
+protected2201/current2255이며 선행 sourceintro 통합/전체 stock gate는 대기다. LocalBot 인증/owner key/행동서비스/HTTP, G5 모델등록 및 B8 최종 검증은 남아 있다.
