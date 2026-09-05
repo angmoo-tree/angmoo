@@ -663,3 +663,6 @@ Routines의 `service/tick_schedule.py`는 active hours·다음 실행·재시도
 `routines/schemas/runs.py`는 기존 Run/Slot/Tick 입출력 다섯 형식을 소유합니다. `contracts/activity_policy.py`의 ActivityPolicy는 한 tick에서 허용/차단한 행동과 다음 시각을 담고 기존 prompt 표현을 제공합니다. `service/activity_sessions.py`는 예약 실행과 소유자 수동 실행의 기존 세션 표시를 구별합니다. 실제 허용 판단/횟수 조회/World 활성화 검증은 다음 C3b에서 각각 업무와 runtime 협력으로 이전합니다.
 
 Resident Context는 Character/CharacterState, LlmCredential, AgentFeedCue와 ActivityPolicy의 실제 소유 타입을 그대로 참조합니다. Scheduler도 같은 Routines Tick 응답을 사용하며 별도 DTO나 ORM class를 만들지 않습니다. 이전의 공통 모델/스키마 및 legacy 정책 값 import 세 개는 제거했습니다.
+
+
+Operations는 `domains/operations/models.py`의 설정·공지·감사 모델, `service/settings.py`의 DB/환경/기본값 선택, `service/maintenance.py`의 실행 허용·공지 우선순위, `repository.py`의 실제 조회·개인정보 정리를 소유한다. 계정 삭제 조립은 호출자의 같은 Session으로 감사 정보 정리를 요청하고 기존 외부 트랜잭션이 완료를 결정한다. 설정 읽기나 repository가 임의로 commit하지 않는다.

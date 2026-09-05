@@ -153,7 +153,7 @@ from app.domains.tree.schemas import (
     TreePostSummary,
     TreeRelatedCharacterRead,
 )
-from app.schemas.maintenance import AgentActivityMaintenanceRead
+from app.domains.operations.schemas import AgentActivityMaintenanceRead
 from app.domains.chat.api.schemas import (
     CharacterMessageSettingRead,
     CharacterMessageSettingUpdate,

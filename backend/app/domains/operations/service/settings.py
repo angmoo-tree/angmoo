@@ -1,69 +1,9 @@
 from __future__ import annotations
-
-from dataclasses import dataclass
-from datetime import datetime
-from typing import Literal
-
 from sqlalchemy.orm import Session
-
-from app import models
 from app.config import settings
-
-
-PollinationsFreeImageModel = Literal["flux", "zimage", "sana", "replicate-zimage-turbo-lora"]
-PollinationsImageRouteMode = Literal["direct", "lambda"]
-SettingSource = Literal["db", "env", "default"]
-
-POLLINATIONS_FREE_IMAGE_MODEL_KEY = "pollinations_free_image_model"
-DEFAULT_POLLINATIONS_FREE_IMAGE_MODEL: PollinationsFreeImageModel = "flux"
-POLLINATIONS_FREE_IMAGE_MODEL_LABELS: dict[PollinationsFreeImageModel, str] = {
-    "flux": "Pollinations · Flux Schnell",
-    "zimage": "Pollinations · Z-Image Turbo",
-    "sana": "Pollinations · Sana Sprint 1.6B",
-    "replicate-zimage-turbo-lora": "Replicate · Z-Image Turbo LoRA",
-}
-POLLINATIONS_IMAGE_ROUTE_MODE_KEY = "pollinations_image_route_mode"
-DEFAULT_POLLINATIONS_IMAGE_ROUTE_MODE: PollinationsImageRouteMode = "direct"
-POLLINATIONS_IMAGE_ROUTE_MODE_LABELS: dict[PollinationsImageRouteMode, str] = {
-    "lambda": "Lambda relay",
-    "direct": "Direct",
-}
-POLLINATIONS_PROFILE_IMAGE_MODEL_KEY = "pollinations_profile_image_model"
-DEFAULT_POLLINATIONS_PROFILE_IMAGE_MODEL: PollinationsFreeImageModel = "zimage"
-POLLINATIONS_PROFILE_IMAGE_ROUTE_MODE_KEY = "pollinations_profile_image_route_mode"
-DEFAULT_POLLINATIONS_PROFILE_IMAGE_ROUTE_MODE: PollinationsImageRouteMode = "lambda"
-
-
-@dataclass(frozen=True)
-class PollinationsFreeImageModelSetting:
-    model: PollinationsFreeImageModel
-    updated_by_user_id: str | None
-    updated_at: datetime | None
-
-
-@dataclass(frozen=True)
-class PollinationsImageRouteModeSetting:
-    mode: PollinationsImageRouteMode
-    source: SettingSource
-    updated_by_user_id: str | None
-    updated_at: datetime | None
-
-
-@dataclass(frozen=True)
-class PollinationsProfileImageModelSetting:
-    model: PollinationsFreeImageModel
-    source: SettingSource
-    updated_by_user_id: str | None
-    updated_at: datetime | None
-
-
-@dataclass(frozen=True)
-class PollinationsProfileImageRouteModeSetting:
-    mode: PollinationsImageRouteMode
-    source: SettingSource
-    updated_by_user_id: str | None
-    updated_at: datetime | None
-
+from app.domains.operations import repository as operation_repository
+from app.domains.operations.contracts import PollinationsFreeImageModel, PollinationsFreeImageModelSetting, PollinationsImageRouteMode, PollinationsImageRouteModeSetting, PollinationsProfileImageModelSetting, PollinationsProfileImageRouteModeSetting, SettingSource
+from app.domains.operations.constants import DEFAULT_POLLINATIONS_FREE_IMAGE_MODEL, DEFAULT_POLLINATIONS_IMAGE_ROUTE_MODE, DEFAULT_POLLINATIONS_PROFILE_IMAGE_MODEL, DEFAULT_POLLINATIONS_PROFILE_IMAGE_ROUTE_MODE, POLLINATIONS_FREE_IMAGE_MODEL_KEY, POLLINATIONS_FREE_IMAGE_MODEL_LABELS, POLLINATIONS_IMAGE_ROUTE_MODE_KEY, POLLINATIONS_IMAGE_ROUTE_MODE_LABELS, POLLINATIONS_PROFILE_IMAGE_MODEL_KEY, POLLINATIONS_PROFILE_IMAGE_ROUTE_MODE_KEY
 
 def normalize_pollinations_free_image_model(
     value: str | None,
@@ -91,7 +31,7 @@ def get_pollinations_free_image_model_setting(
     db: Session | None = None,
 ) -> PollinationsFreeImageModelSetting:
     if db is not None and hasattr(db, "get"):
-        row = db.get(models.SiteOperationSetting, POLLINATIONS_FREE_IMAGE_MODEL_KEY)
+        row = operation_repository.read_setting(db, POLLINATIONS_FREE_IMAGE_MODEL_KEY)
         model = normalize_pollinations_free_image_model(row.value if row is not None else None)
         if model is not None:
             return PollinationsFreeImageModelSetting(
@@ -120,7 +60,7 @@ def get_pollinations_image_route_mode_setting(
     db: Session | None = None,
 ) -> PollinationsImageRouteModeSetting:
     if db is not None and hasattr(db, "get"):
-        row = db.get(models.SiteOperationSetting, POLLINATIONS_IMAGE_ROUTE_MODE_KEY)
+        row = operation_repository.read_setting(db, POLLINATIONS_IMAGE_ROUTE_MODE_KEY)
         mode = normalize_pollinations_image_route_mode(row.value if row is not None else None)
         if mode is not None:
             return PollinationsImageRouteModeSetting(
@@ -156,7 +96,7 @@ def get_pollinations_profile_image_model_setting(
     db: Session | None = None,
 ) -> PollinationsProfileImageModelSetting:
     if db is not None and hasattr(db, "get"):
-        row = db.get(models.SiteOperationSetting, POLLINATIONS_PROFILE_IMAGE_MODEL_KEY)
+        row = operation_repository.read_setting(db, POLLINATIONS_PROFILE_IMAGE_MODEL_KEY)
         model = normalize_pollinations_free_image_model(row.value if row is not None else None)
         if model is not None:
             return PollinationsProfileImageModelSetting(
@@ -194,7 +134,7 @@ def get_pollinations_profile_image_route_mode_setting(
     db: Session | None = None,
 ) -> PollinationsProfileImageRouteModeSetting:
     if db is not None and hasattr(db, "get"):
-        row = db.get(models.SiteOperationSetting, POLLINATIONS_PROFILE_IMAGE_ROUTE_MODE_KEY)
+        row = operation_repository.read_setting(db, POLLINATIONS_PROFILE_IMAGE_ROUTE_MODE_KEY)
         mode = normalize_pollinations_image_route_mode(row.value if row is not None else None)
         if mode is not None:
             return PollinationsProfileImageRouteModeSetting(

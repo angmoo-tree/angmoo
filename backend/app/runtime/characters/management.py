@@ -91,14 +91,14 @@ from app.services import community as community_service
 from app.services import agent_runs as agent_run_service
 from app.domains.identity.service import demo_access as demo_lock
 from app.services import image_prompt_safety
-from app.services import maintenance as maintenance_service
+from app.domains.operations.service import maintenance as maintenance_service
 from app.services import post_image_generation
 from app.core import prompt_safety
 from app.domains.characters.service import media_storage as profile_media
 from app.integrations.media import files as media_files
 from app.integrations.media import images as media_images
 from app.services import service_image_key
-from app.services import operation_settings
+from app.domains.operations.service import settings as operation_settings
 from app.services.direct_llm import (
     DirectLlmCallContext,
     DirectLlmDeferred,

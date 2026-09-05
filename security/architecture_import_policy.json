@@ -49,10 +49,6 @@
           "importer": "app.api.v1.routes.agents"
         },
         {
-          "imported": "app.services.maintenance",
-          "importer": "app.api.v1.routes.agents"
-        },
-        {
           "imported": "app.services.runtime_boundary",
           "importer": "app.api.v1.routes.agents"
         },
@@ -133,10 +129,6 @@
           "importer": "app.main"
         },
         {
-          "imported": "app.models.admin_ops",
-          "importer": "app.models"
-        },
-        {
           "imported": "app.models.agent_local_keys",
           "importer": "app.models"
         },
@@ -213,10 +205,6 @@
           "importer": "app.runtime.characters.creator"
         },
         {
-          "imported": "app.services.operation_settings",
-          "importer": "app.runtime.characters.creator"
-        },
-        {
           "imported": "app.services.runtime_boundary",
           "importer": "app.runtime.characters.creator"
         },
@@ -265,14 +253,6 @@
           "importer": "app.runtime.characters.management"
         },
         {
-          "imported": "app.services.maintenance",
-          "importer": "app.runtime.characters.management"
-        },
-        {
-          "imported": "app.services.operation_settings",
-          "importer": "app.runtime.characters.management"
-        },
-        {
           "imported": "app.services.post_image_generation",
           "importer": "app.runtime.characters.management"
         },
@@ -298,10 +278,6 @@
         },
         {
           "imported": "app.schemas.characters",
-          "importer": "app.schemas"
-        },
-        {
-          "imported": "app.schemas.maintenance",
           "importer": "app.schemas"
         },
         {
@@ -386,10 +362,6 @@
         },
         {
           "imported": "app.services.langgraph_resident",
-          "importer": "app.services.agent_runs"
-        },
-        {
-          "imported": "app.services.maintenance",
           "importer": "app.services.agent_runs"
         },
         {
@@ -573,18 +545,6 @@
           "importer": "app.services.local_bot_quota"
         },
         {
-          "imported": "app.models",
-          "importer": "app.services.maintenance"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.services.maintenance"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.operation_settings"
-        },
-        {
           "imported": "app.cruds.agents",
           "importer": "app.services.post_image_generation"
         },
@@ -610,10 +570,6 @@
         },
         {
           "imported": "app.services.image_prompt_safety",
-          "importer": "app.services.post_image_generation"
-        },
-        {
-          "imported": "app.services.operation_settings",
           "importer": "app.services.post_image_generation"
         },
         {
@@ -1045,6 +1001,14 @@
       "app.domains.memory.service.retrieval_plan",
       "app.domains.memory.service.scope",
       "app.domains.memory.service.source_evidence",
+      "app.domains.operations.constants",
+      "app.domains.operations.contracts",
+      "app.domains.operations.exceptions",
+      "app.domains.operations.models",
+      "app.domains.operations.repository",
+      "app.domains.operations.schemas",
+      "app.domains.operations.service.maintenance",
+      "app.domains.operations.service.settings",
       "app.domains.routine_posts.client",
       "app.domains.routine_posts.constants",
       "app.domains.routine_posts.contracts",
@@ -1280,6 +1244,10 @@
       "app.domains.memory.service.retrieval_plan",
       "app.domains.memory.service.scope",
       "app.domains.memory.service.source_evidence",
+      "app.domains.operations.contracts",
+      "app.domains.operations.schemas",
+      "app.domains.operations.service.maintenance",
+      "app.domains.operations.service.settings",
       "app.domains.routine_posts.contracts",
       "app.domains.routine_posts.contracts.context",
       "app.domains.routine_posts.contracts.generation",
@@ -2902,6 +2870,38 @@
         "owner_stage": "AR-B4 / AR-B8-A",
         "removal_condition": "Move the existing resident execution caller in B4; Lore already has actual service and typed runtime composition.",
         "reason": "Existing resident work calls exact Lore service/text/value roles at the original execution position.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.operations.models",
+        "owner_stage": "AR-B8-A/G5",
+        "removal_condition": "Remove global model/schema aggregates after all actual domain owners and registration callers are migrated.",
+        "reason": "Existing global import preserves the same moved operation ORM/schema object during the final source transition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.operations.schemas",
+        "owner_stage": "AR-B8-A/G5",
+        "removal_condition": "Remove global model/schema aggregates after all actual domain owners and registration callers are migrated.",
+        "reason": "Existing global import preserves the same moved operation ORM/schema object during the final source transition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.operations.service.maintenance",
+        "owner_stage": "AR-B4",
+        "removal_condition": "Remove this existing exact consumer edge when its actual Routines or Social implementation moves; no remaining bridge after AR-B8-B.",
+        "reason": "Unmigrated original workflow calls the same moved operation policy; no new implementation uses a legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.post_image_generation",
+        "target": "app.domains.operations.service.settings",
+        "owner_stage": "AR-B5",
+        "removal_condition": "Remove this existing exact consumer edge when its actual Routines or Social implementation moves; no remaining bridge after AR-B8-B.",
+        "reason": "Unmigrated original workflow calls the same moved operation policy; no new implementation uses a legacy owner.",
         "review_date": "2026-09-06"
       }
     ]

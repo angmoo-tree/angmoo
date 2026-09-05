@@ -1,0 +1,2 @@
+class AgentActivityMaintenanceError(Exception):
+    pass

@@ -415,7 +415,11 @@
     "backend/tests/test_lore_parser_quota.py": "backend/tests/character_lore/test_parser_quota.py",
     "backend/tests/test_lore_upload_security.py": "backend/tests/character_lore/test_upload_security.py",
     "backend/app/services/character_lore.py": "backend/app/runtime/character_lore.py",
-    "backend/app/api/v1/routes/character_lore.py": "backend/app/domains/character_lore/router.py"
+    "backend/app/api/v1/routes/character_lore.py": "backend/app/domains/character_lore/router.py",
+    "backend/app/models/admin_ops.py": "backend/app/domains/operations/models.py",
+    "backend/app/services/operation_settings.py": "backend/app/domains/operations/service/settings.py",
+    "backend/app/services/maintenance.py": "backend/app/domains/operations/service/maintenance.py",
+    "backend/app/schemas/maintenance.py": "backend/app/domains/operations/schemas.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -35477,6 +35481,701 @@
         "B8 identity credential query actual owner and B5 recent-topic helper canonical path are runtime composition consumers only; no domain imports legacy services",
         "linear source capture/CI/G06 final merge remain root-owned"
       ]
+    },
+    "AR-B8-OPERATIONS-A1": {
+      "status": "SOURCE PREPARATION; 62 complete original definitions/values/account functions AST identical after actual query and account-write expansion; focused150 PASS/2warnings/13.11s; boundary749/2482/legacy188; original6diagnostics0/protected2201/current2255; sequential source introduction pending",
+      "split_files": {
+        "backend/app/services/operation_settings.py": [
+          "backend/app/domains/operations/service/settings.py",
+          "backend/app/domains/operations/contracts.py",
+          "backend/app/domains/operations/constants.py",
+          "backend/app/domains/operations/repository.py"
+        ],
+        "backend/app/services/maintenance.py": [
+          "backend/app/domains/operations/service/maintenance.py",
+          "backend/app/domains/operations/constants.py",
+          "backend/app/domains/operations/exceptions.py",
+          "backend/app/domains/operations/repository.py"
+        ],
+        "backend/app/runtime/account_deletion.py": [
+          "backend/app/runtime/account_deletion.py",
+          "backend/app/domains/operations/repository.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/services/operation_settings.py::PollinationsFreeImageModel",
+          "new": "backend/app/domains/operations/contracts.py::PollinationsFreeImageModel",
+          "direct_consumers": [
+            "backend/app/domains/operations/constants.py",
+            "backend/app/domains/operations/contracts.py",
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::PollinationsImageRouteMode",
+          "new": "backend/app/domains/operations/contracts.py::PollinationsImageRouteMode",
+          "direct_consumers": [
+            "backend/app/domains/operations/constants.py",
+            "backend/app/domains/operations/contracts.py",
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::SettingSource",
+          "new": "backend/app/domains/operations/contracts.py::SettingSource",
+          "direct_consumers": [
+            "backend/app/domains/operations/contracts.py",
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::POLLINATIONS_FREE_IMAGE_MODEL_KEY",
+          "new": "backend/app/domains/operations/constants.py::POLLINATIONS_FREE_IMAGE_MODEL_KEY",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::DEFAULT_POLLINATIONS_FREE_IMAGE_MODEL",
+          "new": "backend/app/domains/operations/constants.py::DEFAULT_POLLINATIONS_FREE_IMAGE_MODEL",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::POLLINATIONS_FREE_IMAGE_MODEL_LABELS",
+          "new": "backend/app/domains/operations/constants.py::POLLINATIONS_FREE_IMAGE_MODEL_LABELS",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::POLLINATIONS_IMAGE_ROUTE_MODE_KEY",
+          "new": "backend/app/domains/operations/constants.py::POLLINATIONS_IMAGE_ROUTE_MODE_KEY",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::DEFAULT_POLLINATIONS_IMAGE_ROUTE_MODE",
+          "new": "backend/app/domains/operations/constants.py::DEFAULT_POLLINATIONS_IMAGE_ROUTE_MODE",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::POLLINATIONS_IMAGE_ROUTE_MODE_LABELS",
+          "new": "backend/app/domains/operations/constants.py::POLLINATIONS_IMAGE_ROUTE_MODE_LABELS",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::POLLINATIONS_PROFILE_IMAGE_MODEL_KEY",
+          "new": "backend/app/domains/operations/constants.py::POLLINATIONS_PROFILE_IMAGE_MODEL_KEY",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::DEFAULT_POLLINATIONS_PROFILE_IMAGE_MODEL",
+          "new": "backend/app/domains/operations/constants.py::DEFAULT_POLLINATIONS_PROFILE_IMAGE_MODEL",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::POLLINATIONS_PROFILE_IMAGE_ROUTE_MODE_KEY",
+          "new": "backend/app/domains/operations/constants.py::POLLINATIONS_PROFILE_IMAGE_ROUTE_MODE_KEY",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::DEFAULT_POLLINATIONS_PROFILE_IMAGE_ROUTE_MODE",
+          "new": "backend/app/domains/operations/constants.py::DEFAULT_POLLINATIONS_PROFILE_IMAGE_ROUTE_MODE",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::PollinationsFreeImageModelSetting",
+          "new": "backend/app/domains/operations/contracts.py::PollinationsFreeImageModelSetting",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::PollinationsImageRouteModeSetting",
+          "new": "backend/app/domains/operations/contracts.py::PollinationsImageRouteModeSetting",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::PollinationsProfileImageModelSetting",
+          "new": "backend/app/domains/operations/contracts.py::PollinationsProfileImageModelSetting",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::PollinationsProfileImageRouteModeSetting",
+          "new": "backend/app/domains/operations/contracts.py::PollinationsProfileImageRouteModeSetting",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::normalize_pollinations_free_image_model",
+          "new": "backend/app/domains/operations/service/settings.py::normalize_pollinations_free_image_model",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::normalize_pollinations_image_route_mode",
+          "new": "backend/app/domains/operations/service/settings.py::normalize_pollinations_image_route_mode",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::get_pollinations_free_image_model",
+          "new": "backend/app/domains/operations/service/settings.py::get_pollinations_free_image_model",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::get_pollinations_free_image_model_setting",
+          "new": "backend/app/domains/operations/service/settings.py::get_pollinations_free_image_model_setting",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/settings.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::get_pollinations_image_route_mode",
+          "new": "backend/app/domains/operations/service/settings.py::get_pollinations_image_route_mode",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::get_pollinations_image_route_mode_setting",
+          "new": "backend/app/domains/operations/service/settings.py::get_pollinations_image_route_mode_setting",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::get_pollinations_profile_image_model",
+          "new": "backend/app/domains/operations/service/settings.py::get_pollinations_profile_image_model",
+          "direct_consumers": [
+            "backend/app/runtime/characters/creator.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::get_pollinations_profile_image_model_setting",
+          "new": "backend/app/domains/operations/service/settings.py::get_pollinations_profile_image_model_setting",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::get_pollinations_profile_image_route_mode",
+          "new": "backend/app/domains/operations/service/settings.py::get_pollinations_profile_image_route_mode",
+          "direct_consumers": [
+            "backend/app/runtime/characters/creator.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::get_pollinations_profile_image_route_mode_setting",
+          "new": "backend/app/domains/operations/service/settings.py::get_pollinations_profile_image_route_mode_setting",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::pollinations_free_image_model_options",
+          "new": "backend/app/domains/operations/service/settings.py::pollinations_free_image_model_options",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::pollinations_free_image_model_label",
+          "new": "backend/app/domains/operations/service/settings.py::pollinations_free_image_model_label",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::pollinations_image_route_mode_options",
+          "new": "backend/app/domains/operations/service/settings.py::pollinations_image_route_mode_options",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::pollinations_image_route_mode_label",
+          "new": "backend/app/domains/operations/service/settings.py::pollinations_image_route_mode_label",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::INFO_BANNER_KEY",
+          "new": "backend/app/domains/operations/constants.py::INFO_BANNER_KEY",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::MAINTENANCE_BANNER_KEY",
+          "new": "backend/app/domains/operations/constants.py::MAINTENANCE_BANNER_KEY",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::AgentActivityMaintenanceError",
+          "new": "backend/app/domains/operations/exceptions.py::AgentActivityMaintenanceError",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/maintenance.py",
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::get_agent_activity_maintenance",
+          "new": "backend/app/domains/operations/service/maintenance.py::get_agent_activity_maintenance",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::agent_activity_maintenance_enabled",
+          "new": "backend/app/domains/operations/service/maintenance.py::agent_activity_maintenance_enabled",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::agent_activity_blocks_auto_ticks",
+          "new": "backend/app/domains/operations/service/maintenance.py::agent_activity_blocks_auto_ticks",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/maintenance.py",
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::agent_activity_blocks_run_now",
+          "new": "backend/app/domains/operations/service/maintenance.py::agent_activity_blocks_run_now",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::agent_activity_blocks_feed_cues",
+          "new": "backend/app/domains/operations/service/maintenance.py::agent_activity_blocks_feed_cues",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::agent_activity_auto_tick_allowed_character_ids",
+          "new": "backend/app/domains/operations/service/maintenance.py::agent_activity_auto_tick_allowed_character_ids",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/maintenance.py",
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::ensure_auto_ticks_available",
+          "new": "backend/app/domains/operations/service/maintenance.py::ensure_auto_ticks_available",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::ensure_run_now_available",
+          "new": "backend/app/domains/operations/service/maintenance.py::ensure_run_now_available",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/maintenance.py",
+            "backend/app/services/agent_runs.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::ensure_feed_cues_available",
+          "new": "backend/app/domains/operations/service/maintenance.py::ensure_feed_cues_available",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::ensure_agent_activity_available",
+          "new": "backend/app/domains/operations/service/maintenance.py::ensure_agent_activity_available",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::_banner_row",
+          "new": "backend/app/domains/operations/repository.py::read_banner",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::_info_banner",
+          "new": "backend/app/domains/operations/service/maintenance.py::_info_banner",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::_maintenance_banner",
+          "new": "backend/app/domains/operations/service/maintenance.py::_maintenance_banner",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/operation_settings.py::get_pollinations_free_image_model_setting",
+          "new": "backend/app/domains/operations/repository.py::read_setting",
+          "direct_consumers": [
+            "backend/app/domains/operations/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_service_image_model_uses_operation_setting_and_user_model_stays_per_agent",
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/account_deletion.py::_scrub_account_data",
+          "new": "backend/app/domains/operations/repository.py::scrub_user_attribution",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_account_deletion_composition.py::test_identity_admission_and_real_deletion_share_the_session_and_one_commit"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/account_deletion.py::delete_current_user_account",
+          "new": "backend/app/runtime/account_deletion.py::delete_current_user_account",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_account_deletion_composition.py::test_identity_admission_and_real_deletion_share_the_session_and_one_commit"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/account_deletion.py::_quarantine_account_private_media",
+          "new": "backend/app/runtime/account_deletion.py::_quarantine_account_private_media",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_account_deletion_composition.py::test_identity_admission_and_real_deletion_share_the_session_and_one_commit"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/account_deletion.py::_ensure_account_deletion_not_busy",
+          "new": "backend/app/runtime/account_deletion.py::_ensure_account_deletion_not_busy",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_account_deletion_composition.py::test_identity_admission_and_real_deletion_share_the_session_and_one_commit"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/account_deletion.py::_release_openclaw_profiles_for_account",
+          "new": "backend/app/runtime/account_deletion.py::_release_openclaw_profiles_for_account",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_account_deletion_composition.py::test_identity_admission_and_real_deletion_share_the_session_and_one_commit"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/account_deletion.py::_reload_openclaw_secrets_sync",
+          "new": "backend/app/runtime/account_deletion.py::_reload_openclaw_secrets_sync",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_account_deletion_composition.py::test_identity_admission_and_real_deletion_share_the_session_and_one_commit"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/account_deletion.py::_clear_resident_slots_for_account",
+          "new": "backend/app/runtime/account_deletion.py::_clear_resident_slots_for_account",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_account_deletion_composition.py::test_identity_admission_and_real_deletion_share_the_session_and_one_commit"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/account_deletion.py::_scrub_account_data",
+          "new": "backend/app/runtime/account_deletion.py::_scrub_account_data",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_account_deletion_composition.py::test_identity_admission_and_real_deletion_share_the_session_and_one_commit"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/account_deletion.py::_owned_agent_run_condition",
+          "new": "backend/app/runtime/account_deletion.py::_owned_agent_run_condition",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_account_deletion_composition.py::test_identity_admission_and_real_deletion_share_the_session_and_one_commit"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/account_deletion.py::_owned_agent_slot_condition",
+          "new": "backend/app/runtime/account_deletion.py::_owned_agent_slot_condition",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_account_deletion_composition.py::test_identity_admission_and_real_deletion_share_the_session_and_one_commit"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/account_deletion.py::_character_id_condition",
+          "new": "backend/app/runtime/account_deletion.py::_character_id_condition",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_account_deletion_composition.py::test_identity_admission_and_real_deletion_share_the_session_and_one_commit"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/account_deletion.py::_deleted_character_handle",
+          "new": "backend/app/runtime/account_deletion.py::_deleted_character_handle",
+          "direct_consumers": [
+            "backend/app/runtime/account_deletion.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_account_deletion_composition.py::test_identity_admission_and_real_deletion_share_the_session_and_one_commit"
+          ]
+        }
+      ],
+      "direct_consumers": [
+        "backend/app/models/__init__.py",
+        "backend/app/schemas/__init__.py",
+        "backend/app/services/agent_runs.py",
+        "backend/app/services/post_image_generation.py",
+        "backend/app/runtime/characters/creator.py",
+        "backend/app/runtime/characters/management.py",
+        "backend/app/api/v1/routes/agents.py"
+      ],
+      "preserved": "Same database/env/default precedence, case normalization, optionalSession no-read branch, notice/maintenance precedence, auto/run/feed blocks and allowlist, same-Session three account scrub updates without commit.",
+      "remaining": "Global models/schema aliases G5; LocalBot/Characterimage roles; future Routines/Social source consumers merged sequentially."
     }
   }
 }

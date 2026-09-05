@@ -86,7 +86,7 @@ from app.services import agent_activity_policy
 from app.services import agent_runs as agent_run_service
 from app.domains.identity.service import demo_access as demo_lock
 from app.services.direct_llm import DirectLlmCallContext, RunLlmTracker, generate_text
-from app.services import operation_settings
+from app.domains.operations.service import settings as operation_settings
 from app.integrations import image_provider
 from app.integrations import pollinations_image
 from app.core import prompt_safety

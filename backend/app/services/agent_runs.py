@@ -59,7 +59,7 @@ from app.services.agent_briefs import (
 )
 from app.services import community as community_service
 from app.core.context_text import neutralize_context_text
-from app.services import maintenance as maintenance_service
+from app.domains.operations.service import maintenance as maintenance_service
 from app.services.direct_llm import DirectLlmDeferred
 from app.services.langgraph_resident import (
     LangGraphResidentContext,

@@ -38,7 +38,7 @@ from app.runtime.characters import creator as draft_service
 from app.runtime.characters import management as agent_service
 from app.services import agent_runs as agent_run_service
 from app.services import community as community_service
-from app.services import maintenance as maintenance_service
+from app.domains.operations.service import maintenance as maintenance_service
 from app.services.direct_llm import DirectLlmDeferred, DirectLlmError, DirectLlmJsonError
 from app.services.runtime_boundary import OpenClawGatewayAuthError, OpenClawGatewayError
 

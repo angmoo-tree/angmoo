@@ -1,16 +1,8 @@
 from sqlalchemy.orm import Session
-
-from app import models, schemas
 from app.config import settings
-
-
-INFO_BANNER_KEY = "agent_activity_info"
-MAINTENANCE_BANNER_KEY = "agent_activity_maintenance"
-
-
-class AgentActivityMaintenanceError(Exception):
-    pass
-
+from app.domains.operations import schemas, repository as operation_repository
+from app.domains.operations.constants import INFO_BANNER_KEY, MAINTENANCE_BANNER_KEY
+from app.domains.operations.exceptions import AgentActivityMaintenanceError
 
 def get_agent_activity_maintenance(
     db: Session | None = None,
@@ -84,14 +76,8 @@ def ensure_agent_activity_available(db: Session | None = None) -> None:
     ensure_run_now_available(db)
 
 
-def _banner_row(db: Session | None, key: str) -> models.SiteOperationBanner | None:
-    if db is None:
-        return None
-    return db.get(models.SiteOperationBanner, key)
-
-
 def _info_banner(db: Session | None) -> dict[str, object]:
-    row = _banner_row(db, INFO_BANNER_KEY)
+    row = operation_repository.read_banner(db, INFO_BANNER_KEY)
     if row is not None:
         return {
             "enabled": row.enabled,
@@ -112,7 +98,7 @@ def _info_banner(db: Session | None) -> dict[str, object]:
 
 
 def _maintenance_banner(db: Session | None) -> dict[str, object]:
-    row = _banner_row(db, MAINTENANCE_BANNER_KEY)
+    row = operation_repository.read_banner(db, MAINTENANCE_BANNER_KEY)
     if row is not None:
         return {
             "enabled": row.enabled,
