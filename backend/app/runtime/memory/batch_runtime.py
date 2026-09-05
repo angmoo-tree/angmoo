@@ -9,6 +9,7 @@ from uuid import uuid4
 from sqlalchemy import exists, func, insert, or_, select, update
 
 from app.core.db import Base
+from app.domains.memory.repository.delivery import sync_epoch
 from app.domains.memory.policies.batch import (
     MAX_SELECTION_CANDIDATES,
     MAX_SELECTION_INPUT_UTF8_BYTES,
@@ -48,7 +49,6 @@ from app.domains.memory.models.items import (
 )
 from app.runtime.memory.source_delivery import (
     install_memory_delivery,
-    sync_epoch,
     uninstall_memory_delivery,
 )
 from app.runtime.memory.sqlalchemy_source_reader import (

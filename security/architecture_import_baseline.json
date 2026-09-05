@@ -1,7 +1,7 @@
 {
-  "edge_count": 2122,
-  "external_import_count": 2097,
-  "module_count": 650,
+  "edge_count": 2124,
+  "external_import_count": 2099,
+  "module_count": 651,
   "modules": [
     {
       "external_imports": [],
@@ -2929,6 +2929,20 @@
       ],
       "module": "app.domains.memory.repository.consolidation",
       "path": "backend/app/domains/memory/repository/consolidation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "uuid"
+      ],
+      "imports": [
+        "app.domains.memory.models.batch",
+        "app.domains.memory.models.items"
+      ],
+      "module": "app.domains.memory.repository.delivery",
+      "path": "backend/app/domains/memory/repository/delivery.py",
       "wildcard_imports": []
     },
     {
@@ -7442,6 +7456,7 @@
         "app.domains.memory.models.items",
         "app.domains.memory.policies.batch",
         "app.domains.memory.policies.consolidation",
+        "app.domains.memory.repository.delivery",
         "app.domains.memory.service.batch_selection",
         "app.domains.memory.service.items",
         "app.runtime.memory.composition",
@@ -7518,13 +7533,11 @@
       "external_imports": [
         "datetime",
         "logging",
-        "sqlalchemy",
-        "uuid"
+        "sqlalchemy"
       ],
       "imports": [
         "app.core.db",
-        "app.domains.memory.models.batch",
-        "app.domains.memory.models.items"
+        "app.domains.memory.repository.delivery"
       ],
       "module": "app.runtime.memory.source_delivery",
       "path": "backend/app/runtime/memory/source_delivery.py",

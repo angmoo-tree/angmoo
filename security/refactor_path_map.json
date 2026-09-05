@@ -18348,6 +18348,121 @@
       "scope": "HTTP and stable error translation in router; actual scope/consent/pin/correction/delete transaction flow in service.management; inspector response values in service.presentation; lazy concrete factory/profile/credential collaboration in runtime.memory_http.",
       "preserved": "Request owner and CSRF guards, lazy construction, provider readiness without generation, scope and version checks, existing query order, summary before commit, rollback on every mutation failure, error status and schema operation contracts. Both app factories and standalone fixture use the same workflow builder.",
       "remaining": "Worker and source/projection ownership, daypart memory and final old public/aggregate consumer cleanup."
+    },
+    "AR-B7-A6": {
+      "status": "SOURCE PREPARATION; two real persistence functions retain exact full AST; validation pending",
+      "split_files": {
+        "backend/app/runtime/memory/source_delivery.py": [
+          "backend/app/runtime/memory/source_delivery.py",
+          "backend/app/domains/memory/repository/delivery.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/runtime/memory/source_delivery.py::_PENDING",
+          "new": "backend/app/runtime/memory/source_delivery.py::_PENDING",
+          "direct_consumers": [
+            "backend/app/runtime/memory/batch_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/source_delivery.py::_after_flush",
+          "new": "backend/app/runtime/memory/source_delivery.py::_after_flush",
+          "direct_consumers": [
+            "backend/app/runtime/memory/batch_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/source_delivery.py::_before_flush",
+          "new": "backend/app/runtime/memory/source_delivery.py::_before_flush",
+          "direct_consumers": [
+            "backend/app/runtime/memory/batch_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/source_delivery.py::_capture_object",
+          "new": "backend/app/runtime/memory/source_delivery.py::_capture_object",
+          "direct_consumers": [
+            "backend/app/runtime/memory/batch_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/source_delivery.py::_rollback",
+          "new": "backend/app/runtime/memory/source_delivery.py::_rollback",
+          "direct_consumers": [
+            "backend/app/runtime/memory/batch_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/source_delivery.py::capture_delivery",
+          "new": "backend/app/domains/memory/repository/delivery.py::capture_delivery",
+          "direct_consumers": [
+            "backend/app/runtime/memory/source_delivery.py",
+            "backend/app/runtime/memory/batch_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/source_delivery.py::install_memory_delivery",
+          "new": "backend/app/runtime/memory/source_delivery.py::install_memory_delivery",
+          "direct_consumers": [
+            "backend/app/runtime/memory/batch_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/source_delivery.py::logger",
+          "new": "backend/app/runtime/memory/source_delivery.py::logger",
+          "direct_consumers": [
+            "backend/app/runtime/memory/batch_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/source_delivery.py::sync_epoch",
+          "new": "backend/app/domains/memory/repository/delivery.py::sync_epoch",
+          "direct_consumers": [
+            "backend/app/runtime/memory/source_delivery.py",
+            "backend/app/runtime/memory/batch_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/source_delivery.py::uninstall_memory_delivery",
+          "new": "backend/app/runtime/memory/source_delivery.py::uninstall_memory_delivery",
+          "direct_consumers": [
+            "backend/app/runtime/memory/batch_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai"
+          ]
+        }
+      ],
+      "scope": "Memory owns the real connection-level ON epoch and deduplicated source admission writes. Runtime retains multi-domain successful-source dispatch and SQLAlchemy event hooks.",
+      "preserved": "Exact connection SQL, timestamp and version predicates, no independent Session, no commit/rollback or model call introduced; after-commit and rollback hook behavior unchanged."
     }
   }
 }

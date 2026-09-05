@@ -1215,6 +1215,7 @@
       "app.domains.memory.repository.activation",
       "app.domains.memory.repository.batch",
       "app.domains.memory.repository.consolidation",
+      "app.domains.memory.repository.delivery",
       "app.domains.memory.repository.items",
       "app.domains.memory.repository.queue",
       "app.domains.memory.router",
