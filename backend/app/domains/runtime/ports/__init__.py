@@ -1,22 +1,14 @@
 """Framework-neutral ports implemented by local-runtime adapters."""
 
-from app.domains.runtime.ports.application_runtime_probe import (
-    ApplicationRuntimeProbe,
-)
-from app.domains.runtime.ports.runtime_data_path import (
-    RuntimeDataPathPort,
-    RuntimeDataPaths,
-)
-from app.domains.runtime.ports.scheduler_lease_repository import (
-    ClaimLeasePort,
-    SchedulerLeaseRepository,
-)
-from app.domains.runtime.ports.search_index import (
-    SearchIndexDocument,
-    SearchIndexHit,
-    SearchIndexPort,
-)
-from app.domains.runtime.ports.unit_of_work import UnitOfWorkPort
+from app.domains.runtime.contracts.status_reader import ApplicationRuntimeProbe
+from app.domains.runtime.contracts.data_paths import RuntimeDataPathPort
+from app.domains.runtime.contracts.data_paths import RuntimeDataPaths
+from app.domains.runtime.contracts.lease_store import ClaimLeasePort
+from app.domains.runtime.contracts.lease_store import SchedulerLeaseRepository
+from app.domains.runtime.contracts.search import SearchIndexDocument
+from app.domains.runtime.contracts.search import SearchIndexHit
+from app.domains.runtime.contracts.search import SearchIndexPort
+from app.domains.runtime.contracts.transaction import UnitOfWorkPort
 
 __all__ = [
     "ApplicationRuntimeProbe",

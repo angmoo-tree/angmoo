@@ -18,12 +18,10 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 from uuid import uuid4
 
-from app.domains.runtime.ports.release_candidate import (
-    ReleaseCandidateBackupFile,
-    ReleaseCandidateBackupManifest,
-    ReleaseCandidateBackupReport,
-)
-from app.domains.runtime.ports.runtime_data_path import RuntimeDataPathPort
+from app.domains.runtime.contracts.release import ReleaseCandidateBackupFile
+from app.domains.runtime.contracts.release import ReleaseCandidateBackupManifest
+from app.domains.runtime.contracts.release import ReleaseCandidateBackupReport
+from app.domains.runtime.contracts.data_paths import RuntimeDataPathPort
 
 BACKUP_MANIFEST_NAME = "release-candidate-backup.json"
 SYNTHETIC_FIXTURE_MARKER = "synthetic-fixture.json"

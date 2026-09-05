@@ -10,10 +10,8 @@ from app.domains.memory.service.daypart_observations import (
 from app.domains.memory.service import daypart_observations
 from app.domains.memory.contracts.daypart import DaypartObservationReferences
 
-from app.domains.runtime.contracts import (
-    AgentRunServiceError,
-    AgentSlotUnavailableError,
-)
+from app.domains.runtime.exceptions import AgentRunServiceError
+from app.domains.runtime.exceptions import AgentSlotUnavailableError
 import asyncio
 import hashlib
 import json

@@ -24,3 +24,6 @@ class RuntimeDiagnosticCode(StrEnum):
     PROJECTOR_STALLED = "projector_stalled"
     GRAPH_DEGRADED = "graph_degraded"
     DIAGNOSTIC_REDACTION_FAILED = "diagnostic_redaction_failed"
+
+SCHEDULER_SINGLETON_KEY = "resident-tick-scheduler"
+

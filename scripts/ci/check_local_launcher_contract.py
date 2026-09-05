@@ -59,7 +59,7 @@ FORBIDDEN_LAUNCHER_SNIPPETS = (
 
 
 def _runtime_diagnostic_values(root: Path) -> set[str]:
-    path = root / "backend/app/domains/runtime/domain/diagnostic_codes.py"
+    path = root / "backend/app/domains/runtime/constants.py"
     tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     values: set[str] = set()
     for node in tree.body:

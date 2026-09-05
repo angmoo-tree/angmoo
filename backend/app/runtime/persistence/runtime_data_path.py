@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from app.domains.runtime.ports.runtime_data_path import RuntimeDataPaths
+from app.domains.runtime.contracts.data_paths import RuntimeDataPaths
 
 
 class StaticRuntimeDataPath:

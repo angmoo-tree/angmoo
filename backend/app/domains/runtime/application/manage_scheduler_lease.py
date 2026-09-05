@@ -1,13 +1,9 @@
 from __future__ import annotations
 
-from app.domains.runtime.domain.scheduler_lease import (
-    SchedulerLeaseSnapshot,
-    SchedulerTickPermit,
-    SchedulerTickResult,
-)
-from app.domains.runtime.ports.scheduler_lease_repository import (
-    SchedulerLeaseRepository,
-)
+from app.domains.runtime.contracts.lease import SchedulerLeaseSnapshot
+from app.domains.runtime.contracts.lease import SchedulerTickPermit
+from app.domains.runtime.contracts.lease import SchedulerTickResult
+from app.domains.runtime.contracts.lease_store import SchedulerLeaseRepository
 
 
 class SchedulerLeaseCoordinator:

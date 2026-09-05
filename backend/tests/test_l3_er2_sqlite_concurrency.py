@@ -15,11 +15,9 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.domains.identity.public import LOCAL_INSTALLATION_KEY
-from app.domains.runtime.domain.scheduler_lease import (
-    SchedulerLeaseHeldError,
-    SchedulerLeaseLostError,
-    SchedulerTickResult,
-)
+from app.domains.runtime.exceptions import SchedulerLeaseHeldError
+from app.domains.runtime.exceptions import SchedulerLeaseLostError
+from app.domains.runtime.contracts.lease import SchedulerTickResult
 from app.runtime.graph_projection import SqliteProjectionOutbox
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
 from app.core.sqlite_concurrency import (

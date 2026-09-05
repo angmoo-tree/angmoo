@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from app.domains.runtime.domain.installation_state import ApplicationRuntimeStatus
-from app.domains.runtime.ports.application_runtime_probe import ApplicationRuntimeProbe
+from app.domains.runtime.contracts.status import ApplicationRuntimeStatus
+from app.domains.runtime.contracts.status_reader import ApplicationRuntimeProbe
 
 
 class ReadApplicationRuntimeStatus:

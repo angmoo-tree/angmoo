@@ -10,22 +10,20 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.config import Settings, settings
-from app.domains.runtime.domain.diagnostic_codes import RuntimeDiagnosticCode
-from app.domains.runtime.domain.installation_state import (
-    ActivityRuntimeStatus,
-    ApplicationRuntimeStatus,
-    InstallationState,
-    MigrationRuntimeStatus,
-    OwnerRuntimeStatus,
-    ProjectorRuntimeStatus,
-    ProviderFailureClass,
-    ProviderUsageRuntimeStatus,
-    RuntimeCapabilityStatus,
-    RuntimeComponentState,
-    RuntimeComponentStatus,
-    RuntimeDependencyStatus,
-    SchedulerRuntimeStatus,
-)
+from app.domains.runtime.constants import RuntimeDiagnosticCode
+from app.domains.runtime.contracts.status import ActivityRuntimeStatus
+from app.domains.runtime.contracts.status import ApplicationRuntimeStatus
+from app.domains.runtime.contracts.status import InstallationState
+from app.domains.runtime.contracts.status import MigrationRuntimeStatus
+from app.domains.runtime.contracts.status import OwnerRuntimeStatus
+from app.domains.runtime.contracts.status import ProjectorRuntimeStatus
+from app.domains.runtime.contracts.status import ProviderFailureClass
+from app.domains.runtime.contracts.status import ProviderUsageRuntimeStatus
+from app.domains.runtime.contracts.status import RuntimeCapabilityStatus
+from app.domains.runtime.contracts.status import RuntimeComponentState
+from app.domains.runtime.contracts.status import RuntimeComponentStatus
+from app.domains.runtime.contracts.status import RuntimeDependencyStatus
+from app.domains.runtime.contracts.status import SchedulerRuntimeStatus
 
 
 RUNTIME_MIGRATION_HEAD = "20260825_0083"

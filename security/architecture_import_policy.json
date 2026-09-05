@@ -1180,7 +1180,23 @@
       "app.domains.routines.service.tick_schedule",
       "app.domains.routines.utils",
       "app.domains.routines.utils.clock",
+      "app.domains.runtime.constants",
       "app.domains.runtime.contracts",
+      "app.domains.runtime.contracts.components",
+      "app.domains.runtime.contracts.data_paths",
+      "app.domains.runtime.contracts.execution_errors",
+      "app.domains.runtime.contracts.lease",
+      "app.domains.runtime.contracts.lease_store",
+      "app.domains.runtime.contracts.release",
+      "app.domains.runtime.contracts.search",
+      "app.domains.runtime.contracts.status",
+      "app.domains.runtime.contracts.status_reader",
+      "app.domains.runtime.contracts.transaction",
+      "app.domains.runtime.contracts.vector_recall",
+      "app.domains.runtime.exceptions",
+      "app.domains.runtime.policies.lease",
+      "app.domains.runtime.schemas",
+      "app.domains.runtime.service.components",
       "app.domains.social.constants",
       "app.domains.social.contracts",
       "app.domains.social.contracts.actors",
@@ -1383,6 +1399,19 @@
       "app.domains.routines.service.scheduling",
       "app.domains.routines.service.tick_schedule",
       "app.domains.runtime.contracts",
+      "app.domains.runtime.contracts.components",
+      "app.domains.runtime.contracts.data_paths",
+      "app.domains.runtime.contracts.execution_errors",
+      "app.domains.runtime.contracts.lease",
+      "app.domains.runtime.contracts.lease_store",
+      "app.domains.runtime.contracts.release",
+      "app.domains.runtime.contracts.search",
+      "app.domains.runtime.contracts.status",
+      "app.domains.runtime.contracts.status_reader",
+      "app.domains.runtime.contracts.transaction",
+      "app.domains.runtime.contracts.vector_recall",
+      "app.domains.runtime.schemas",
+      "app.domains.runtime.service.components",
       "app.domains.social.contracts",
       "app.domains.social.contracts.actors",
       "app.domains.social.contracts.inbox",
@@ -2110,7 +2139,7 @@
       },
       {
         "importer": "app.services.runtime_boundary",
-        "target": "app.domains.runtime.contracts",
+        "target": "app.domains.runtime.exceptions",
         "owner_stage": "AR-B2-B / AR-B3 / AR-B4 / AR-B8-A",
         "reason": "Same runtime-neutral/validation error object or exact credential message policy is now shared with canonical Creator HTTP.",
         "removal_condition": "Remove old aggregate error imports when runtime/media consumers migrate; no duplicate exception definitions.",
@@ -2118,7 +2147,7 @@
       },
       {
         "importer": "app.services.agent_runs",
-        "target": "app.domains.runtime.contracts",
+        "target": "app.domains.runtime.exceptions",
         "owner_stage": "AR-B2-B / AR-B3 / AR-B4 / AR-B8-A",
         "reason": "Same runtime-neutral/validation error object or exact credential message policy is now shared with canonical Creator HTTP.",
         "removal_condition": "Remove old aggregate error imports when runtime/media consumers migrate; no duplicate exception definitions.",
@@ -2882,6 +2911,198 @@
         "owner_stage": "AR-B4 / AR-B7 / AR-B8-A",
         "removal_condition": "Move the existing resident executor/aggregate consumer to its actual role; keep only immutable migrations and exact registration/cleanup contracts where required.",
         "reason": "Original resident caller consumes actual Memory implementation or the same registered ORM object; no new forwarding implementation or product dependency.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.public",
+        "target": "app.domains.runtime.schemas",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
+        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.public",
+        "target": "app.domains.runtime.contracts.components",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
+        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.public",
+        "target": "app.domains.runtime.service.components",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
+        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.public",
+        "target": "app.domains.runtime.constants",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
+        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.public",
+        "target": "app.domains.runtime.contracts.status",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
+        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.public",
+        "target": "app.domains.runtime.exceptions",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
+        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.public",
+        "target": "app.domains.runtime.contracts.lease",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
+        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.public",
+        "target": "app.domains.runtime.policies.lease",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
+        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.public",
+        "target": "app.domains.runtime.contracts.status_reader",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
+        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.application.manage_scheduler_lease",
+        "target": "app.domains.runtime.contracts.lease",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
+        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.application.manage_scheduler_lease",
+        "target": "app.domains.runtime.contracts.lease_store",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
+        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.application.read_runtime_status",
+        "target": "app.domains.runtime.contracts.status",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
+        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.application.read_runtime_status",
+        "target": "app.domains.runtime.contracts.status_reader",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
+        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.infrastructure.sqlalchemy_application_runtime_probe",
+        "target": "app.domains.runtime.constants",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
+        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.infrastructure.sqlalchemy_application_runtime_probe",
+        "target": "app.domains.runtime.contracts.status",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
+        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.infrastructure.sqlalchemy_scheduler_lease",
+        "target": "app.domains.runtime.constants",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
+        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.infrastructure.sqlalchemy_scheduler_lease",
+        "target": "app.domains.runtime.exceptions",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
+        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.infrastructure.sqlalchemy_scheduler_lease",
+        "target": "app.domains.runtime.contracts.lease",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
+        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.infrastructure.sqlalchemy_scheduler_lease",
+        "target": "app.domains.runtime.policies.lease",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
+        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.ports",
+        "target": "app.domains.runtime.contracts.status_reader",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
+        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.ports",
+        "target": "app.domains.runtime.contracts.data_paths",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
+        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.ports",
+        "target": "app.domains.runtime.contracts.lease_store",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
+        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.ports",
+        "target": "app.domains.runtime.contracts.search",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
+        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.ports",
+        "target": "app.domains.runtime.contracts.transaction",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
+        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
         "review_date": "2026-09-06"
       }
     ]

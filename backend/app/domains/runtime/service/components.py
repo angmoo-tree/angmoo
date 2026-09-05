@@ -5,27 +5,15 @@ from datetime import UTC, datetime
 import threading
 from typing import Protocol
 
-from app.domains.runtime.domain.diagnostic_codes import RuntimeDiagnosticCode
-from app.domains.runtime.domain.installation_state import (
-    ApplicationRuntimeStatus,
-    InstallationState,
-    RuntimeComponentState,
-    RuntimeComponentStatus,
-    RuntimeDependencyStatus,
-)
+from app.domains.runtime.constants import RuntimeDiagnosticCode
+from app.domains.runtime.contracts.status import ApplicationRuntimeStatus
+from app.domains.runtime.contracts.status import InstallationState
+from app.domains.runtime.contracts.status import RuntimeComponentState
+from app.domains.runtime.contracts.status import RuntimeComponentStatus
+from app.domains.runtime.contracts.status import RuntimeDependencyStatus
 
 
-class ComponentMode(Protocol):
-    LOCAL_RUNTIME_COMPONENT_MODE: str
-
-
-@dataclass(frozen=True)
-class ComponentObservation:
-    name: str
-    state: RuntimeComponentState
-    started_at: datetime | None = None
-    last_heartbeat_at: datetime | None = None
-    reason_code: RuntimeDiagnosticCode | None = None
+from app.domains.runtime.contracts.components import ComponentMode, ComponentObservation
 
 
 class ComponentObservationRegistry:
