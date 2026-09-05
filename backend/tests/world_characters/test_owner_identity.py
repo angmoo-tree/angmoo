@@ -1,4 +1,5 @@
 from __future__ import annotations
+from app.runtime.resident import slots as resident_slots
 
 import asyncio
 from datetime import UTC, datetime, timedelta
@@ -16,7 +17,7 @@ from sqlalchemy.pool import StaticPool
 from app import models
 from app.domains.identity.dependencies import get_current_user
 from app.core.db import Base, get_db
-from app.cruds import agent_runs as agent_run_crud
+from app.domains.routines import constants as agent_run_crud
 from app.domains.world_characters.router.profile import router
 from app.services import agent_runs as agent_run_service
 from app.runtime.characters import management as agent_service
@@ -456,7 +457,7 @@ def test_scheduler_claim_excludes_owner_controlled_but_keeps_autonomous() -> Non
         )
         db.commit()
 
-        claimed = agent_run_crud.claim_due_resident_slots(
+        claimed = resident_slots.claim_due_resident_slots(
             db,
             now=now,
             max_count=5,

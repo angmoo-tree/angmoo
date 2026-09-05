@@ -1,4 +1,12 @@
 from __future__ import annotations
+from app.domains.routines import constants as routine_constants
+from app.domains.routines.repository import slots as slot_queries
+from app.domains.routines.service import slot_assignments as slot_assignments
+from app.domains.routines.service import slot_pool as slot_pool
+from app.domains.routines.repository import feed_cues as feed_cue_queries
+from app.domains.routines.repository import runs as routine_run_queries
+from app.domains.routines.service import feed_cues as feed_cues
+from app.domains.routines.service import runs as routine_runs
 
 from app.runtime.world_characters.queries import count_enabled_autonomous_world_characters
 from app.domains.characters.service import media as media_service
@@ -81,11 +89,10 @@ from app.credentials import (
     CredentialResolutionError,
     CredentialResolver,
 )
-from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
 from app.policies import name_policy
-from app.services import agent_activity_policy
+from app.runtime.resident import activity_policy as agent_activity_policy
 from app.domains.world_characters.service import readiness as activity_profile_readiness
 from app.services import community as community_service
 from app.services import agent_runs as agent_run_service
@@ -631,7 +638,7 @@ def get_feed_cue(
 ) -> schemas.AgentFeedCueRead | None:
     character = _get_owned_character(db, user, character_id)
     _ensure_llm_mode(character)
-    cue = agent_crud.get_pending_feed_cue(db, character.id)
+    cue = feed_cue_queries.get_pending_feed_cue(db, character.id)
     return schemas.AgentFeedCueRead.model_validate(cue) if cue else None
 
 
@@ -659,10 +666,10 @@ def give_feed_cue(
         raise AgentFeedCueUnavailableError(
             f"지금은 글쓰기 제한 때문에 모이를 받을 수 없습니다: {reason}"
         )
-    if agent_crud.get_pending_feed_cue(db, character.id) is not None:
+    if feed_cue_queries.get_pending_feed_cue(db, character.id) is not None:
         raise AgentFeedCueConflictError("이미 다음 활동을 기다리는 모이가 있습니다.")
     _ensure_feed_cue_prompt_safety(data.topic)
-    cue = agent_crud.create_feed_cue(
+    cue = feed_cues.create_feed_cue(
         db, user=user, character=character, topic=data.topic
     )
     return schemas.AgentFeedCueRead.model_validate(cue)
@@ -745,7 +752,7 @@ async def run_first_greeting(
             ),
             log_manual_activity=False,
         )
-        agent_run_crud.set_agent_run_post_id(db, run_id, post.id)
+        routine_runs.set_agent_run_post_id(db, run_id, post.id)
         agent_crud.log_activity(
             db,
             user_id=user.id,
@@ -783,7 +790,7 @@ async def run_first_greeting(
             "llm_usage_summary": tracker.summary(),
             "image_attempt": image_attempt,
         }
-        agent_run_crud.mark_agent_run_finished(
+        routine_runs.mark_agent_run_finished(
             db, run_id, "completed", gateway_result=gateway_result
         )
         return schemas.AgentFirstGreetingRead(
@@ -806,7 +813,7 @@ async def run_first_greeting(
             "wait_seconds": round(exc.wait_seconds, 3),
             "llm_usage_summary": tracker.summary(),
         }
-        agent_run_crud.mark_agent_run_finished(
+        routine_runs.mark_agent_run_finished(
             db, run_id, "deferred", gateway_result=gateway_result
         )
         raise
@@ -819,7 +826,7 @@ async def run_first_greeting(
             "error": redact_secret_text(str(exc))[:1000],
             "llm_usage_summary": tracker.summary(),
         }
-        agent_run_crud.mark_agent_run_finished(
+        routine_runs.mark_agent_run_finished(
             db, run_id, "failed", gateway_result=gateway_result
         )
         raise
@@ -1128,10 +1135,10 @@ def update_credential(
         character=character,
         world_id=data.world_id,
     )
-    current_assigned_slot = agent_crud.get_assigned_slot(db, character.id)
+    current_assigned_slot = slot_queries.get_assigned_slot(db, character.id)
     if (
         current_assigned_slot is not None
-        and current_assigned_slot.status == agent_run_crud.SLOT_STATUS_RUNNING
+        and current_assigned_slot.status == routine_constants.SLOT_STATUS_RUNNING
     ):
         raise ActiveSlotBusyError(
             "앵무가 지금 활동 중이라 API key 또는 모델을 바꿀 수 없습니다. 활동이 끝난 뒤 다시 시도해주세요."
@@ -1238,10 +1245,10 @@ def delete_credential(
     ):
         return
 
-    assigned_slot = agent_crud.get_assigned_slot(db, character.id)
+    assigned_slot = slot_queries.get_assigned_slot(db, character.id)
     if (
         assigned_slot is not None
-        and assigned_slot.status == agent_run_crud.SLOT_STATUS_RUNNING
+        and assigned_slot.status == routine_constants.SLOT_STATUS_RUNNING
     ):
         raise ActiveSlotBusyError(
             "앵무가 지금 활동 중이라 API key를 삭제할 수 없습니다. 활동이 끝난 뒤 다시 시도해주세요."
@@ -1256,7 +1263,7 @@ def delete_credential(
                 credential=credential,
             )
             _reload_openclaw_secrets_sync()
-        agent_run_crud.release_resident_slot_assignment(
+        slot_assignments.release_resident_slot_assignment(
             db,
             user_id=user.id,
             character_id=character.id,
@@ -1358,7 +1365,7 @@ def update_settings(
     }
     schedule_changed = bool(data.model_fields_set & schedule_fields)
     setting = agent_crud.update_setting(db, setting, data, commit=False)
-    slot = agent_crud.get_assigned_slot(db, character.id)
+    slot = slot_queries.get_assigned_slot(db, character.id)
     if slot is not None:
         slot.heartbeat_interval_seconds = agent_activity_policy.tick_interval_seconds(
             setting
@@ -1366,7 +1373,7 @@ def update_settings(
         if (
             setting.auto_enabled
             and schedule_changed
-            and slot.status == agent_run_crud.SLOT_STATUS_ASSIGNED_IDLE
+            and slot.status == routine_constants.SLOT_STATUS_ASSIGNED_IDLE
         ):
             policy = agent_activity_policy.build_activity_policy(
                 db,
@@ -1474,7 +1481,7 @@ async def analyze_tendency(
 
     run_id = str(uuid4())
     timeout_seconds = settings.openclaw_timeout_seconds
-    slot = agent_run_crud.claim_agent_slot(
+    slot = slot_pool.claim_agent_slot(
         db,
         run_id=run_id,
         agent_ids=settings.openclaw_agent_ids,
@@ -1571,7 +1578,7 @@ async def analyze_tendency(
                 if last_error is None:
                     last_error = release_error
                     _mark_tendency_error(db, setting, release_error)
-        agent_run_crud.release_agent_slot(
+        slot_pool.release_agent_slot(
             db, agent_id=slot.agent_id, run_id=run_id, last_error=last_error
         )
         if release_error is not None and last_error == release_error:
@@ -1645,7 +1652,7 @@ def _activate_agent_uow(
     if credential is None or not credential.enabled:
         raise CredentialRequiredError("Agent credential is required before activation")
 
-    current_assigned_slot = agent_crud.get_assigned_slot(db, character.id)
+    current_assigned_slot = slot_queries.get_assigned_slot(db, character.id)
     selected_world_character = selected_autonomous_world_character(
         db, character_id=character.id
     )
@@ -1717,7 +1724,7 @@ def _activate_agent_uow(
                 _reload_openclaw_secrets_sync()
             except CredentialSyncError:
                 pass
-            agent_run_crud.release_resident_slot_assignment(
+            slot_assignments.release_resident_slot_assignment(
                 db,
                 user_id=user.id,
                 character_id=character.id,
@@ -1778,7 +1785,7 @@ def deactivate_agent(
 ) -> schemas.AgentDetailRead:
     character = _get_owned_character(db, user, character_id)
     current_setting = agent_crud.ensure_setting(db, character.id)
-    assigned_slot = agent_crud.get_assigned_slot(db, character.id)
+    assigned_slot = slot_queries.get_assigned_slot(db, character.id)
     if assigned_slot is None and not current_setting.auto_enabled:
         changed = set_active_world_character_autonomy(
             db,
@@ -1790,7 +1797,7 @@ def deactivate_agent(
         return _build_agent_detail(db, character)
     if (
         assigned_slot is not None
-        and assigned_slot.status == agent_run_crud.SLOT_STATUS_RUNNING
+        and assigned_slot.status == routine_constants.SLOT_STATUS_RUNNING
     ):
         raise ActiveSlotBusyError(
             f"agent {character.id}가 지금 실행 중이라 끌 수 없습니다. 잠시 뒤 다시 시도해주세요."
@@ -1808,7 +1815,7 @@ def deactivate_agent(
             credential=credential,
         )
         _reload_openclaw_secrets_sync()
-    agent_run_crud.release_resident_slot_assignment(
+    slot_assignments.release_resident_slot_assignment(
         db,
         user_id=user.id,
         character_id=character.id,
@@ -2362,7 +2369,7 @@ def _slot_has_live_lease(slot: models.AgentSlot, now: datetime) -> bool:
 
 def _slot_is_live_running(slot: models.AgentSlot, now: datetime) -> bool:
     return (
-        slot.status == agent_run_crud.SLOT_STATUS_RUNNING
+        slot.status == routine_constants.SLOT_STATUS_RUNNING
         and _slot_has_live_lease(slot, now)
     )
 
@@ -2409,7 +2416,7 @@ def _ensure_run_now_scheduler_safe(
 
     live_running_count = sum(
         1
-        for slot in agent_run_crud.list_agent_slots(db)
+        for slot in slot_queries.list_agent_slots(db)
         if _slot_is_assigned_resident(slot) and _slot_is_live_running(slot, now)
     )
     if live_running_count > _allowed_existing_running_resident_slots():
@@ -2424,7 +2431,7 @@ def _ensure_claimed_temporary_run_now_scheduler_safe(
 ) -> None:
     live_other_running_count = sum(
         1
-        for slot in agent_run_crud.list_agent_slots(db)
+        for slot in slot_queries.list_agent_slots(db)
         if slot.agent_id != target_slot.agent_id
         and _slot_is_assigned_resident(slot)
         and _slot_is_live_running(slot, now)
@@ -2486,7 +2493,7 @@ async def run_agent_now(
         "Do not only save mood/state. Save character state after the public action, "
         "then summarize what you did and why in Korean."
     )
-    assigned_slot = agent_crud.get_assigned_slot(db, character.id)
+    assigned_slot = slot_queries.get_assigned_slot(db, character.id)
     if assigned_slot is not None:
         _ensure_run_now_scheduler_safe(
             db,
@@ -2515,7 +2522,7 @@ async def run_agent_now(
             timeout_seconds=timeout_seconds,
         )
     except agent_run_service.AgentSlotUnavailableError as exc:
-        raced_slot = agent_crud.get_assigned_slot(db, character.id)
+        raced_slot = slot_queries.get_assigned_slot(db, character.id)
         if raced_slot is not None and _slot_is_live_running(
             raced_slot, datetime.now(UTC)
         ):
@@ -2624,7 +2631,7 @@ def _ensure_agent_deletion_not_busy(
         .where(
             models.AgentRun.user_id == user_id,
             models.AgentRun.character_id == character_id,
-            models.AgentRun.status.in_(agent_run_crud.ACTIVE_RUN_STATUSES),
+            models.AgentRun.status.in_(routine_constants.ACTIVE_RUN_STATUSES),
         )
         .limit(1)
     )
@@ -2639,7 +2646,7 @@ def _ensure_agent_deletion_not_busy(
             _agent_deletion_slot_condition(
                 db, user_id=user_id, character_id=character_id
             ),
-            models.AgentSlot.status == agent_run_crud.SLOT_STATUS_RUNNING,
+            models.AgentSlot.status == routine_constants.SLOT_STATUS_RUNNING,
         )
         .limit(1)
     )
@@ -2665,7 +2672,7 @@ def _release_openclaw_profile_for_agent(
     )
     released = False
     for slot in slots:
-        if slot.status == agent_run_crud.SLOT_STATUS_RUNNING:
+        if slot.status == routine_constants.SLOT_STATUS_RUNNING:
             raise ActiveSlotBusyError(
                 "앵무가 지금 활동 중이라 삭제할 수 없습니다. 잠시 뒤 다시 시도해주세요."
             )
@@ -2706,11 +2713,11 @@ def _clear_resident_slots_for_agent(
         )
     )
     for slot in slots:
-        if slot.status == agent_run_crud.SLOT_STATUS_RUNNING:
+        if slot.status == routine_constants.SLOT_STATUS_RUNNING:
             raise ActiveSlotBusyError(
                 "앵무가 지금 활동 중이라 삭제할 수 없습니다. 잠시 뒤 다시 시도해주세요."
             )
-        slot.status = agent_run_crud.SLOT_STATUS_EMPTY
+        slot.status = routine_constants.SLOT_STATUS_EMPTY
         slot.assigned_user_id = None
         slot.assigned_character_id = None
         slot.assigned_credential_id = None
@@ -2928,7 +2935,7 @@ def _deleted_character_handle(db: Session, character_id: str) -> str:
 
 
 def _manual_run_available_at(db: Session, user_id: str) -> datetime | None:
-    latest_manual_run = agent_run_crud.get_latest_manual_run_for_user(db, user_id)
+    latest_manual_run = routine_run_queries.get_latest_manual_run_for_user(db, user_id)
     if latest_manual_run is None:
         return None
     created_at = latest_manual_run.created_at
@@ -2938,7 +2945,7 @@ def _manual_run_available_at(db: Session, user_id: str) -> datetime | None:
 
 
 def _first_greeting_available_at(db: Session, user_id: str) -> datetime | None:
-    latest_run = agent_run_crud.get_latest_first_greeting_run_for_user(db, user_id)
+    latest_run = routine_run_queries.get_latest_first_greeting_run_for_user(db, user_id)
     if latest_run is None:
         return None
     created_at = latest_run.created_at
@@ -2977,7 +2984,7 @@ def _claim_first_greeting_run(
     available_at = _first_greeting_available_at(db, user.id)
     if available_at is not None and available_at > current:
         raise FirstGreetingCooldownError(available_at)
-    return agent_run_crud.create_agent_run(
+    return routine_runs.create_agent_run(
         db,
         run_id=run_id,
         user_id=user.id,
@@ -2999,7 +3006,7 @@ def _build_agent_detail(
 ) -> schemas.AgentDetailRead:
     setting = agent_crud.ensure_setting(db, character.id)
     credential = agent_crud.get_character_credential(db, character.id)
-    slot = agent_crud.get_assigned_slot(db, character.id)
+    slot = slot_queries.get_assigned_slot(db, character.id)
     recent_activity = agent_crud.list_recent_activity(
         db, character.id, limit=recent_activity_limit
     )

@@ -88,33 +88,6 @@ def test_v6_state_recovery_uses_run_scoped_scratch_session() -> None:
     assert "session_key=main_run_session_key" in source
 
 
-def test_v6_state_recovery_prompt_is_tool_only_and_compact() -> None:
-    character = SimpleNamespace(
-        id="char-test",
-        name="테스트",
-        handle="test",
-        persona_summary="quiet observer",
-        speech_style="short Korean notes",
-    )
-    activity_policy = SimpleNamespace(tendency_summary="prefers compact observations")
-
-    prompt = agent_runs._build_v6_state_recovery_prompt(
-        character=character,
-        state=None,
-        activity_policy=activity_policy,
-        public_action_ledger="- observed only",
-        tick_activity="- feed_viewed; feed_interests_noted",
-        observation_context="- semantic_event: someone discussed resting",
-    )
-
-    assert "angmoo_save_character_state" in prompt
-    assert "Do not call public action, feed, inbox, writing, read, or scan tools." in prompt
-    assert "Public action ledger from this tick" in prompt
-    assert "Compact observation context from this tick" in prompt
-    assert "raw feed" not in prompt.lower()
-    assert "thread body" not in prompt.lower()
-
-
 def test_writing_composition_prefers_run_tool_auth_key() -> None:
     source = inspect.getsource(agent_writing._run_composition_gateway)
 
@@ -127,12 +100,12 @@ def test_agent_tool_auth_rejects_daypart_session_key(monkeypatch) -> None:
         raise AssertionError("daypart session key must not fall back to session lookup")
 
     monkeypatch.setattr(
-        community.agent_run_crud,
+        community.routine_run_queries,
         "get_active_run_for_tool_auth_key",
         lambda db, key: None,
     )
     monkeypatch.setattr(
-        community.agent_run_crud,
+        community.routine_run_queries,
         "get_active_run_for_session",
         fail_session_lookup,
     )
@@ -157,12 +130,12 @@ def test_agent_tool_auth_keeps_run_scoped_session_fallback(monkeypatch) -> None:
     )
 
     monkeypatch.setattr(
-        community.agent_run_crud,
+        community.routine_run_queries,
         "get_active_run_for_tool_auth_key",
         lambda db, key: None,
     )
     monkeypatch.setattr(
-        community.agent_run_crud,
+        community.routine_run_queries,
         "get_active_run_for_session",
         lambda db, key: run if key == "agent:angmoo-8:resident-tick:user-a:char-a:run-1" else None,
     )

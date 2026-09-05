@@ -21,8 +21,8 @@ def test_l3_representative_suites_are_required_by_local_smoke() -> None:
     workflow = WORKFLOW.read_text(encoding="utf-8")
     for test_file in (
         "tests/world_characters/test_setup_service.py",
-        "tests/test_daily_activity_runtime.py",
-        "tests/test_routine_post_runtime.py",
+        "tests/routines/test_daily_activity_runtime.py",
+        "tests/routine_posts/test_runtime.py",
         "tests/world_characters/test_owner_identity.py",
         "tests/test_l3_owner_manual_social_inbox.py",
         "tests/test_l3_domain_boundary_map.py",

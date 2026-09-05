@@ -11,7 +11,7 @@ from app import schemas
 from app.core import security
 from app.core import unit_of_work
 from app.cruds import agents as agent_crud
-from app.services import agent_activity_policy
+from app.domains.routines.service import tick_schedule as agent_activity_policy
 from app.runtime.characters import management as agent_service
 from app.services import community as community_service
 from app.domains.identity.service import demo_access as demo_lock

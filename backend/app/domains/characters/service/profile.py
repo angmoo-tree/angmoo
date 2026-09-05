@@ -199,3 +199,16 @@ def _raise_handle_conflict_from_integrity(exc: IntegrityError, handle: str) -> N
     message = str(exc.orig)
     if "uq_characters_handle" in message or "characters_handle_key" in message:
         raise CharacterHandleConflictError(f"@{handle} 핸들은 이미 사용 중입니다.") from exc
+
+
+def list_mentionable_characters(db: Session, handles: list[str]) -> list[models.Character]:
+    """Read active mention candidates in the caller Session without writes."""
+    return list(
+        db.scalars(
+            select(models.Character).where(
+                models.Character.handle.in_(handles),
+                models.Character.deleted_at.is_(None),
+                models.Character.moderation_status == "active",
+            )
+        )
+    )

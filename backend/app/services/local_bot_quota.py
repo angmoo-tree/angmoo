@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app import models
-from app.services import agent_activity_policy
+from app.domains.routines.service import tick_schedule as agent_activity_policy
 
 
 @dataclass(frozen=True)

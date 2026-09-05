@@ -15,10 +15,10 @@ from app.config import settings
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
-from app.services.agent_briefs import PREPARED_CREATE_POST_BRIEF_SENTINEL
+from app.domains.routines.service.action_briefs import PREPARED_CREATE_POST_BRIEF_SENTINEL
 from app.services import character_lore as character_lore_service
 from app.services import community as community_service
-from app.services.llm_context import neutralize_context_text
+from app.core.context_text import neutralize_context_text
 from app.services.runtime_boundary import OpenClawGatewayClient, OpenClawGatewayError
 
 

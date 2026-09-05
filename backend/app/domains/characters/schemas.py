@@ -1,6 +1,6 @@
 """Character identity/state and owner-facing profile/creation inputs."""
 from app.domains.identity.schemas import CredentialRead
-from app.domains.runtime.schemas import (
+from app.domains.routines.schemas import (
     AgentActivitySettingRead,
     AgentActivitySummaryRead,
     AgentActivityLogRead,

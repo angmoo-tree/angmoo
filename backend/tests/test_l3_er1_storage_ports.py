@@ -10,8 +10,8 @@ from app.domains.relationships.graph_read.repository import (
 from app.domains.relationships.ports.outbox import OutboxPort, ProjectionWorkItem
 from app.domains.relationships.ports.projection import RelationshipProjectionPort
 from app.domains.relationships.projection.commands import NoGraphMutationCommand
-from app.domains.routines.infrastructure.system_clock import SystemClock
-from app.domains.routines.ports.clock import ClockPort
+from app.domains.routines.utils.clock import SystemClock
+from app.domains.routines.contracts.clock import ClockPort
 from app.domains.runtime.infrastructure.sqlalchemy_scheduler_lease import (
     SqlAlchemySchedulerLeaseRepository,
 )

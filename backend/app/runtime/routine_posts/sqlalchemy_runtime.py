@@ -1,4 +1,8 @@
 from __future__ import annotations
+from app.domains.routines.repository import public_action_executions as public_action_queries
+from app.domains.routines.service import public_action_executions as public_action_executions
+
+from app.runtime.routines.joint_references import SqlAlchemyJointReferences
 
 from datetime import UTC, datetime, timedelta
 from hashlib import sha256
@@ -11,19 +15,19 @@ from sqlalchemy.orm import Session
 
 from app.compatibility.routine_posts import legacy
 from app.core import unit_of_work
-from app.domains.routine_posts.infrastructure.direct_llm_provider import (
-    ROUTINE_CONTRACT_VERSION,
-    DirectRoutinePostProvider,
-    RoutineGeneration,
-    RoutinePostProvider,
-    validate_routine_generation,
-)
-from app.domains.routine_posts.infrastructure.sqlalchemy_context import (
-    RoutineContextUnavailable,
-    RoutineInteractionSource,
-    assemble_routine_post_context,
-)
-from app.domains.routines.public import reconcile_all_elapsed_routines
+from app.domains.routine_posts.constants import ROUTINE_CONTRACT_VERSION
+from app.domains.routine_posts.contracts.generation import RoutineGeneration, RoutinePostProvider
+from app.domains.routine_posts.service.evidence import validate_routine_generation
+from app.domains.routine_posts.service.generation import DirectRoutinePostProvider
+from app.domains.routine_posts.exceptions import RoutineContextUnavailable
+from app.domains.routine_posts.contracts.context import RoutineInteractionSource
+from app.domains.routine_posts.service.context import assemble_routine_post_context
+from app.runtime.routine_posts.context_references import SqlAlchemyRoutineContextReferences
+from app.domains.routines.service.lifecycle import reconcile_all_elapsed_routines
+from app.domains.routines.service.execution import claims as activity_claims
+from app.domains.routines.service.execution import lifecycle as activity_lifecycle
+from app.domains.routines import exceptions as activity_errors
+from app.runtime.routines.activity_references import SqlAlchemyActivityReferences
 from app.runtime.social.sqlalchemy_inbox import (
     ManualInboxRuntimeError,
     claimed_observation_post_id,
@@ -38,7 +42,7 @@ from app.runtime.social.sqlalchemy_inbox import (
 )
 from app.runtime.social.observations import observe_source
 from app.domains.social.public import SocialObservationError
-from app.domains.social.domain.subjective_context import ActionSubjectiveContextV1
+from app.domains.social.contracts.subjective_context import ActionSubjectiveContextV1
 from app.runtime.social.subjective_context import record_declared_subjective_context
 from app.integrations.direct_llm import (
     DirectLlmDeferred,
@@ -50,9 +54,8 @@ from app.integrations.direct_llm import (
 
 models = legacy.models
 agent_run_crud = legacy.agent_run_crud
-activity_runtime = legacy.activity_runtime
 agent_activity_policy = legacy.agent_activity_policy
-joint_activity_runtime = legacy.joint_activity_runtime
+from app.domains.routines.service import joint_activity as joint_activity_runtime
 social_event_runtime = legacy.social_event_runtime
 community_service = legacy.community_service
 LangGraphResidentContext = legacy.LangGraphResidentContext
@@ -152,7 +155,7 @@ def _failure_code(exc: BaseException) -> str:
     return "routine_generation_failed"
 
 
-def _runtime_error_code(exc: activity_runtime.ActivityRuntimeError) -> str:
+def _runtime_error_code(exc: activity_errors.ActivityRuntimeError) -> str:
     value = str(exc).strip()
     return value.upper() if value else "ROUTINE_RUNTIME_CONFLICT"
 
@@ -173,20 +176,20 @@ def _finish_failed_beat(
     )
     try:
         if retryable and beat.attempt_count < 2:
-            activity_runtime.release_activity_beat_for_retry(
+            activity_claims.release_activity_beat_for_retry(
                 db,
                 beat_id=beat.id,
                 claim_run_id=claim_run_id,
                 reason_code=reason_code,
             )
         else:
-            activity_runtime.fail_activity_beat(
+            activity_claims.fail_activity_beat(
                 db,
                 beat_id=beat.id,
                 claim_run_id=claim_run_id,
                 reason_code=reason_code,
             )
-    except activity_runtime.ActivityRuntimeError:
+    except activity_errors.ActivityRuntimeError:
         db.rollback()
         logger.exception(
             "routine_beat_failure_finalize_failed beat_id=%s run_id=%s",
@@ -220,7 +223,7 @@ async def run_routine_post_runtime(
         return _safe_result(outcome="POST_NOT_ALLOWED", tracker=tracker)
     try:
         joint_activity_runtime.complete_due_joint_activities(
-            db,
+            db, references=SqlAlchemyJointReferences(db),
             world_id=world_character.world_id,
             now=resident_context.run_started_at,
         )
@@ -239,12 +242,12 @@ async def run_routine_post_runtime(
         )
 
     try:
-        activity_runtime.close_elapsed_dayparts(
+        activity_lifecycle.close_elapsed_dayparts(
             db,
             world_character_id=world_character.id,
             now=resident_context.run_started_at,
         )
-    except activity_runtime.ActivityRuntimeError as exc:
+    except activity_errors.ActivityRuntimeError as exc:
         db.rollback()
         logger.exception(
             'routine_elapsed_daypart_transition_failed run_id=%s '
@@ -261,7 +264,7 @@ async def run_routine_post_runtime(
 
     try:
         context = assemble_routine_post_context(
-            db,
+            db, references=SqlAlchemyRoutineContextReferences(db),
             world_character=world_character,
             character=resident_context.character,
             now=resident_context.run_started_at,
@@ -291,7 +294,7 @@ async def run_routine_post_runtime(
         scheduled_for=context.due_tick.scheduled_for,
     )
     try:
-        claim = activity_runtime.claim_activity_beat(
+        claim = activity_claims.claim_activity_beat(
             db,
             episode_id=context.episode.id,
             scheduled_for=context.due_tick.scheduled_for,
@@ -305,7 +308,7 @@ async def run_routine_post_runtime(
             skipped_tick_count=context.due_tick.skipped_tick_count,
             now=resident_context.run_started_at,
         )
-    except activity_runtime.ActivityRuntimeError as exc:
+    except activity_errors.ActivityRuntimeError as exc:
         return _safe_result(outcome=_runtime_error_code(exc), tracker=tracker)
     beat = claim.row
     if not isinstance(beat, models.ActivityBeat):
@@ -326,8 +329,9 @@ async def run_routine_post_runtime(
                 )
                 claimed_manual_source_ids.append(event.source_event_id)
             else:
-                activity_runtime.claim_event_consumption(
+                activity_claims.claim_event_consumption(
                     db,
+                    references=SqlAlchemyActivityReferences(db),
                     world_id=context.world.id,
                     consumer_world_character_id=world_character.id,
                     source_social_event_id=event.source_event_id,
@@ -337,7 +341,7 @@ async def run_routine_post_runtime(
                     claim_expires_at=resident_context.run_started_at + CLAIM_LEASE,
                     now=resident_context.run_started_at,
                 )
-    except (activity_runtime.ActivityRuntimeError, ManualInboxRuntimeError) as exc:
+    except (activity_errors.ActivityRuntimeError, ManualInboxRuntimeError) as exc:
         _finish_failed_beat(
             db,
             beat=beat,
@@ -349,7 +353,7 @@ async def run_routine_post_runtime(
         return _safe_result(
             outcome=(
                 _runtime_error_code(exc)
-                if isinstance(exc, activity_runtime.ActivityRuntimeError)
+                if isinstance(exc, activity_errors.ActivityRuntimeError)
                 else "MANUAL_INBOX_CLAIM_CONFLICT"
             ),
             tracker=tracker,
@@ -415,7 +419,7 @@ async def run_routine_post_runtime(
     execution_signature = _execution_signature(
         world_character_id=world_character.id, beat_id=beat.id
     )
-    existing_execution = agent_run_crud.get_public_action_execution_by_signature(
+    existing_execution = public_action_queries.get_public_action_execution_by_signature(
         db, execution_signature
     )
     if existing_execution is not None and existing_execution.status == "succeeded":
@@ -438,7 +442,7 @@ async def run_routine_post_runtime(
     if joint_activity is not None and joint_activity.opening_post_id is None:
         try:
             opening_claim = joint_activity_runtime.claim_opening(
-                db,
+                db, references=SqlAlchemyJointReferences(db),
                 joint_activity_id=joint_activity.id,
                 claimant_world_character_id=world_character.id,
                 now=resident_context.run_started_at,
@@ -533,7 +537,7 @@ async def run_routine_post_runtime(
 
     try:
         with unit_of_work.deferred_commits():
-            execution = agent_run_crud.create_public_action_execution(
+            execution = public_action_executions.create_public_action_execution(
                 db,
                 run_id=resident_context.run_id,
                 character_id=resident_context.character.id,
@@ -559,7 +563,7 @@ async def run_routine_post_runtime(
             )
             post = db.get(models.Post, post_read.id)
             if post is None:
-                raise activity_runtime.ActivityRuntimeValidationError(
+                raise activity_errors.ActivityRuntimeValidationError(
                     "publish_evidence_missing"
                 )
             result_snapshot["post_evidence"] = {
@@ -596,7 +600,7 @@ async def run_routine_post_runtime(
             result_snapshot["social_event_id"] = event_result.event.id
             if joint_activity is not None:
                 started_event = joint_activity_runtime.apply_joint_post(
-                    db,
+                    db, references=SqlAlchemyJointReferences(db),
                     joint_activity_id=joint_activity.id,
                     author_world_character_id=world_character.id,
                     post=post,
@@ -618,8 +622,9 @@ async def run_routine_post_runtime(
                 claim_run_id=resident_context.run_id,
                 now=resident_context.run_started_at,
             )
-            activity_runtime.complete_activity_beat(
+            activity_claims.complete_activity_beat(
                 db,
+                references=SqlAlchemyActivityReferences(db),
                 beat_id=beat.id,
                 claim_run_id=resident_context.run_id,
                 source_post_id=post.id,
@@ -630,7 +635,7 @@ async def run_routine_post_runtime(
                 commit=False,
             )
             execution.target_post_id = post.id
-            agent_run_crud.mark_public_action_execution_finished(
+            public_action_executions.mark_public_action_execution_finished(
                 db,
                 execution,
                 status="succeeded",

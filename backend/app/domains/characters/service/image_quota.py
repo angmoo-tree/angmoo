@@ -2,7 +2,7 @@
 from datetime import UTC, date, datetime, timedelta
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
-from app.core import agent_activity_schedule as agent_activity_policy
+from app.domains.routines.service import tick_schedule as agent_activity_policy
 from app.domains.characters import models, schemas
 from app.domains.characters.contracts import CharacterOwner
 from app.domains.characters.exceptions import AgentProfileImageQuotaExceededError, AgentCreationDraftMediaError

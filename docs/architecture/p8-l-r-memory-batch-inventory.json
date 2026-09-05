@@ -224,15 +224,15 @@
     },
     {
       "path": "backend/app/public_main.py",
-      "sha256": "c05e16bc0ae22651861ef978b43660005ab7a54e738c28d7f5941b9ca60cba41"
+      "sha256": "b0fad77a6ab33ce92a52bdc24b302a8d63a27bd0fa9d9556f8ac26c5b5e82206"
     },
     {
       "path": "backend/app/runtime/account_deletion.py",
-      "sha256": "32f4fc68f52d9e3bdc830abfa785b8c6b442d82d7a3935c7cce86e191927cebe"
+      "sha256": "a602ccc22ba27b855254de9b9bf5a1487ed7abd4f9a29021f89caa7ab95342c3"
     },
     {
       "path": "backend/app/runtime/characters/management.py",
-      "sha256": "84dcef338e766d88b0351df51ae5f7147b5bd3fd133fb3ec1632402a73a1cf28"
+      "sha256": "6dc38dd892daea055bc8f921d830d43baead90d8fbccc38e6a1d60cb4a064240"
     },
     {
       "path": "backend/app/runtime/desktop_sidecar.py",
@@ -264,7 +264,7 @@
     },
     {
       "path": "backend/app/runtime/memory/sqlalchemy_source_reader.py",
-      "sha256": "69083ca0669961c72cedad111dcfc61e5da3694377e80284dc956da587984e05"
+      "sha256": "4a2d1952f6d1d6803132494fcc21aad73b2789ec176faf1a1ea872d043c5217c"
     },
     {
       "path": "backend/app/runtime/memory/sqlite_fts5_recall.py",
