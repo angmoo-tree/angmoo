@@ -150,7 +150,7 @@
         "missing_tests": [],
         "phase": "P4",
         "tests": [
-          "backend/tests/test_routine_post_runtime.py",
+          "backend/tests/routine_posts/test_runtime.py",
           "backend/tests/test_l3_owner_manual_social_inbox.py"
         ]
       },

@@ -1,0 +1,6 @@
+"""Limits for the public routine source-event context."""
+
+MAX_SOURCE_EVENTS = 8
+MAX_EVENT_EXCERPT_CHARS = 400
+MAX_TOTAL_EVENT_EXCERPT_CHARS = 2_400
+MAX_EVENT_CONTEXT_JSON_BYTES = 6_000

@@ -581,3 +581,10 @@ AR-B3-M2에서 이 네 파일의 실제 구현과 모든 Python 소비자를 이
 프로필/Draft 후보의 권한·quota·apply/discard는 Character `service/media.py`, `service/image_generation.py`, `service/image_quota.py`가 담당한다. 파일 배치는 Character·World·Social 각 소유 코드가 수행하고, 공통 이미지 정제·경로 검증·quarantine은 `integrations/media`를 사용한다. 공통 처리에서 공개 여부나 다른 업무의 quota를 결정하지 않는다. World 배너 오류와 commit 실패 보상은 World에 남는다. Post job/게시 부착과 World Package lossless codec은 각각 자신의 업무 계약을 유지한다.
 
 실제 이미지 provider/검증된 HTTP/Azure 번역은 `integrations`에 있다. Runtime은 설정/credential·Character 후처리 callback을 제공하며 provider 호출 횟수와 기존 transaction 순서를 유지한다. 과거 media export와 생산에서 호출하지 않는 URL helper는 이전 테스트의 한시적 호환 경로로 결과 문서에 소유·종료 단계를 기록하고 새 기능의 시작점으로 사용하지 않는다.
+
+
+### RoutinePost의 입력 형식과 이벤트 문맥
+
+`routine_posts/schemas.py`는 장면 계획·게시 초안·상태 효과의 Pydantic 형식을 소유합니다. `contracts/interaction.py`는 서버가 관찰한 성공 사건 후보의 값입니다. World·consumer·시간 범위와 기존 소비 여부를 확인하고, 관련도 순서와 글자 수·JSON byte 한도를 적용하는 실제 정책은 `service/event_context.py`에 있습니다. 제한 값은 `constants.py`, 문맥 사용 불가 오류는 `exceptions.py`, 텍스트 표현은 `utils/text.py`에서 찾습니다. 공통 텍스트 정제의 실제 구현은 `core/context_text.py`를 사용합니다.
+
+이벤트를 프롬프트에 넣었다는 사실이 성공적인 행동이나 소비 완료를 뜻하지 않습니다. 이 정책은 후보를 제한하며 실제 게시·source 소비·beat 상태의 저장은 기존 RoutinePost transaction이 담당합니다. AR-B4-B1에서 기존 입력과 정책을 먼저 이전했고, 관련 테스트는 `tests/routine_posts/test_runtime.py`로 모았습니다. 아직 남은 `infrastructure/sqlalchemy_context.py`의 다중 업무 조회·재시도 조립과 `direct_llm_provider.py`의 생성 검증·prompt·통신은 다음 B2/B3의 실제 책임 이전 범위입니다. 이 두 파일이나 public 별칭을 완료된 구조로 취급하지 않습니다.

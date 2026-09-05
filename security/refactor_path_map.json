@@ -330,7 +330,13 @@
     "backend/app/domains/routines/ports/__init__.py": "backend/app/domains/routines/__init__.py",
     "backend/app/services/activity_runtime.py": "backend/app/domains/routines/service/execution/__init__.py",
     "backend/app/services/joint_activity_scheduling.py": "backend/app/domains/routines/service/joint_scheduling.py",
-    "backend/app/services/joint_activity_runtime.py": "backend/app/domains/routines/service/joint_activity/__init__.py"
+    "backend/app/services/joint_activity_runtime.py": "backend/app/domains/routines/service/joint_activity/__init__.py",
+    "backend/app/domains/routine_posts/api/schemas.py": "backend/app/domains/routine_posts/schemas.py",
+    "backend/app/domains/routine_posts/api/__init__.py": "backend/app/domains/routine_posts/schemas.py",
+    "backend/app/domains/routine_posts/domain/interaction.py": "backend/app/domains/routine_posts/contracts/interaction.py",
+    "backend/app/domains/routine_posts/domain/__init__.py": "backend/app/domains/routine_posts/contracts/__init__.py",
+    "backend/app/schemas/routine_post.py": "backend/app/domains/routine_posts/schemas.py",
+    "backend/tests/test_routine_post_runtime.py": "backend/tests/routine_posts/test_runtime.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -673,7 +679,27 @@
     "tests/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action": "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
     "tests/test_daily_activity_runtime.py::test_scheduler_reconciles_all_elapsed_routines_without_catch_up_work": "tests/routines/test_daily_activity_runtime.py::test_scheduler_reconciles_all_elapsed_routines_without_catch_up_work",
     "tests/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates": "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
-    "tests/test_daily_activity_runtime.py::test_state_contract_bounds_decay_and_rejects_excess_delta": "tests/routines/test_daily_activity_runtime.py::test_state_contract_bounds_decay_and_rejects_excess_delta"
+    "tests/test_daily_activity_runtime.py::test_state_contract_bounds_decay_and_rejects_excess_delta": "tests/routines/test_daily_activity_runtime.py::test_state_contract_bounds_decay_and_rejects_excess_delta",
+    "tests/test_routine_post_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run": "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+    "tests/test_routine_post_runtime.py::test_context_bounds_events_and_excludes_cross_world_input": "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+    "tests/test_routine_post_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode": "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+    "tests/test_routine_post_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph": "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+    "tests/test_routine_post_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis": "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+    "tests/test_routine_post_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat": "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+    "tests/test_routine_post_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation": "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+    "tests/test_routine_post_runtime.py::test_publish_fault_rolls_back_post_state_and_execution": "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+    "tests/test_routine_post_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras[response_schema0]": "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras[response_schema0]",
+    "tests/test_routine_post_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras[response_schema1]": "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras[response_schema1]",
+    "tests/test_routine_post_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence": "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+    "tests/test_routine_post_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success": "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+    "tests/test_routine_post_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once": "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+    "tests/test_routine_post_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart": "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+    "tests/test_routine_post_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy": "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+    "tests/test_routine_post_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions": "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions",
+    "tests/test_routine_post_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service": "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+    "tests/test_routine_post_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post": "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+    "tests/test_routine_post_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire": "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+    "tests/test_routine_post_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate": "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate"
   },
   "details": {
     "AR-B1": {
@@ -7688,9 +7714,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_routine_post_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
-            "tests/test_routine_post_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
-            "tests/test_routine_post_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis"
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis"
           ]
         },
         {
@@ -7700,9 +7726,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_routine_post_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
-            "tests/test_routine_post_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
-            "tests/test_routine_post_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis"
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis"
           ]
         },
         {
@@ -8526,9 +8552,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_routine_post_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
-            "tests/test_routine_post_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
-            "tests/test_routine_post_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis"
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis"
           ]
         },
         {
@@ -18623,8 +18649,8 @@
       "scope": "Actual timeline mutation/report/deletion workflow, Social notification admission, bounded post-result text; WC owns actual author/active-world/member validation, runtime only binds pre-existing same-Session collaborators.",
       "split_files": {
         "backend/app/services/community_abuse_quota.py": [
-          "backend/app/services/community_abuse_quota.py",
-          "backend/app/domains/social/exceptions.py"
+          "backend/app/domains/social/exceptions.py",
+          "backend/app/services/community_abuse_quota.py"
         ]
       },
       "split_symbols": [
@@ -20939,6 +20965,1232 @@
       "transaction": "SqlAlchemyJointReferences extends the same-Session ActivityReferences reads. Foreign block/place/post-count/evidence queries retain exact SQL and order. Post field writes and add-only notifications call Social owner functions. Successful event composition uses the existing same-Session event runtime. No callback creates a Session or changes commit/flush ownership.",
       "publication_order": "Joint Post ID assignment still precedes later validation; opening ID then participant/item/episode state, started event/evidence, nullable other then actor WC reads, exact Notification helper, final caller flush. Opening claim commits before provider execution; complete-due retains skip_locked and per-scan commit only when rows exist.",
       "remaining": "routines scope stays PARTIAL. B5 owns ActivityProposal policy; its exact legacy consumer uses canonical joint service plus the runtime collaborator until B5 migrates. B4-B/C still owns routine-post provider/context and resident/lease/activity log closure; no full-domain claim."
+    },
+    "AR-B4-B1-routine-post-foundation": {
+      "status": "SOURCE IMPLEMENTED — final affected suites29 passed/1 PGskip; prior broad76 product/integration passes; API/ORM/assertion/node loss0; split0; parent capture pending",
+      "split_files": {
+        "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py": [
+          "backend/app/domains/routine_posts/constants.py",
+          "backend/app/domains/routine_posts/exceptions.py",
+          "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+          "backend/app/domains/routine_posts/service/event_context.py",
+          "backend/app/domains/routine_posts/utils/text.py",
+          "backend/app/domains/routines/contracts/lifecycle.py",
+          "backend/app/domains/routines/service/scheduling.py"
+        ],
+        "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py": [
+          "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+          "backend/app/domains/routine_posts/utils/text.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::models",
+          "new": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::models",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::activity_state_contracts",
+          "new": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::activity_state_contracts",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::neutralize_context_text",
+          "new": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::neutralize_context_text",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::MAX_SOURCE_EVENTS",
+          "new": "backend/app/domains/routine_posts/constants.py::MAX_SOURCE_EVENTS",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::MAX_EVENT_EXCERPT_CHARS",
+          "new": "backend/app/domains/routine_posts/constants.py::MAX_EVENT_EXCERPT_CHARS",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::MAX_TOTAL_EVENT_EXCERPT_CHARS",
+          "new": "backend/app/domains/routine_posts/constants.py::MAX_TOTAL_EVENT_EXCERPT_CHARS",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::MAX_EVENT_CONTEXT_JSON_BYTES",
+          "new": "backend/app/domains/routine_posts/constants.py::MAX_EVENT_CONTEXT_JSON_BYTES",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::RoutineContextUnavailable",
+          "new": "backend/app/domains/routine_posts/exceptions.py::RoutineContextUnavailable",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::RoutineInteractionSource",
+          "new": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::RoutineInteractionSource",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::EmptyRoutineInteractionSource",
+          "new": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::EmptyRoutineInteractionSource",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::RoutinePostContext",
+          "new": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::RoutinePostContext",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::_aware_utc",
+          "new": "backend/app/domains/routines/service/scheduling.py::aware_utc",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::_clip",
+          "new": "backend/app/domains/routine_posts/utils/text.py::_clip",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::_relationship_rank",
+          "new": "backend/app/domains/routine_posts/service/event_context.py::_relationship_rank",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::_bounded_events",
+          "new": "backend/app/domains/routine_posts/service/event_context.py::_bounded_events",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::assemble_routine_post_context",
+          "new": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::assemble_routine_post_context",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::models",
+          "new": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::models",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::activity_state_contracts",
+          "new": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::activity_state_contracts",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::neutralize_context_text",
+          "new": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::neutralize_context_text",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::LangGraphResidentContext",
+          "new": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::LangGraphResidentContext",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::ROUTINE_CONTRACT_VERSION",
+          "new": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::ROUTINE_CONTRACT_VERSION",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::GEMINI_ROUTINE_BEAT_PLAN_RESPONSE_SCHEMA",
+          "new": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::GEMINI_ROUTINE_BEAT_PLAN_RESPONSE_SCHEMA",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::GEMINI_ROUTINE_POST_DRAFT_RESPONSE_SCHEMA",
+          "new": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::GEMINI_ROUTINE_POST_DRAFT_RESPONSE_SCHEMA",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::RoutineGeneration",
+          "new": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::RoutineGeneration",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::RoutinePostProvider",
+          "new": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::RoutinePostProvider",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::_api_key",
+          "new": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::_api_key",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::_llm_context",
+          "new": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::_llm_context",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::_clip",
+          "new": "backend/app/domains/routine_posts/utils/text.py::_clip",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::_common_context",
+          "new": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::_common_context",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::allowed_continuity_facts",
+          "new": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::allowed_continuity_facts",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::allowed_detail_keys",
+          "new": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::allowed_detail_keys",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::build_routine_beat_plan_response_schema",
+          "new": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::build_routine_beat_plan_response_schema",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::_validate_plan",
+          "new": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::_validate_plan",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::_state_after",
+          "new": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::_state_after",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::validate_routine_generation",
+          "new": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::validate_routine_generation",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::DirectRoutinePostProvider",
+          "new": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py::DirectRoutinePostProvider",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
+            "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/tests/routine_posts/test_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::activity_runtime",
+          "new": "backend/app/domains/routines/contracts/lifecycle.py::DueTick",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ],
+          "source_role": "The frozen activity_runtime module alias supplied these three values. AR-B4-A3b already connected their actual canonical owners; this B1 split retains that delivery evidence."
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::activity_runtime",
+          "new": "backend/app/domains/routines/contracts/lifecycle.py::EVENT_CONSUMPTION_NAMESPACE",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ],
+          "source_role": "The frozen activity_runtime module alias supplied these three values. AR-B4-A3b already connected their actual canonical owners; this B1 split retains that delivery evidence."
+        },
+        {
+          "old": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py::activity_runtime",
+          "new": "backend/app/domains/routines/service/scheduling.py::latest_due_tick",
+          "direct_consumers": [
+            "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_gemini_transport_uses_json_schema_without_openapi_extras",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_binds_continuation_to_server_evidence",
+            "tests/routine_posts/test_runtime.py::test_routine_planner_schema_disallows_evidence_without_prior_success",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis",
+            "tests/routine_posts/test_runtime.py::test_context_bounds_events_and_excludes_cross_world_input",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/routine_posts/test_runtime.py::test_runtime_closes_elapsed_episode_before_activating_current_daypart",
+            "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
+            "tests/routine_posts/test_runtime.py::test_provider_adapter_cannot_bypass_server_evidence_validation",
+            "tests/routine_posts/test_runtime.py::test_publish_fault_rolls_back_post_state_and_execution",
+            "tests/routine_posts/test_runtime.py::test_runtime_mode_readiness_does_not_enable_autonomy",
+            "tests/routine_posts/test_runtime.py::test_langgraph_routes_routine_mode_without_building_legacy_graph",
+            "tests/routine_posts/test_runtime.py::test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode",
+            "tests/routine_posts/test_runtime.py::test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run",
+            "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
+            "tests/routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions"
+          ],
+          "source_role": "The frozen activity_runtime module alias supplied these three values. AR-B4-A3b already connected their actual canonical owners; this B1 split retains that delivery evidence."
+        }
+      ],
+      "ownership": "Canonical Pydantic schemas and InteractionInput own the unchanged generated-output and source-event value contracts. constants/exceptions/utils/text own original values/errors/normalization; service/event_context owns real scope/time/replay filtering, ordering, normalization and item/character/JSON byte budgets.",
+      "remaining": "RoutinePostContext and its multi-domain SQL/read/retry assembly remain in the original infrastructure file until B2. Provider schema binding/validation/prompt orchestration and transport remain B3. These precise old modules are not marked converted; partial imports expire as each real owner moves. Public/sys.modules aliases retire with their named remaining callers.",
+      "test_move": "tests/test_routine_post_runtime.py -> tests/routine_posts/test_runtime.py; same assertions, helper bodies, parametrization and Postgres skip condition; local-smoke, ER0 and closeout references use the exact new path."
     }
   }
 }

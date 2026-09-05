@@ -831,3 +831,18 @@ B5-B5 최종 보존 검사: #258/#263 API/schema/ORM 차이 0, 변경 기존 테
 ### AR-B4-B 준비 — 공통 context text와 Social timeline 선행 연결
 
 A3d `7ca4e38` 뒤 B5 `c0f3be2` 전체 계보를 합쳤다. `services/llm_context.py`의 동일 함수가 `core/context_text.py`로 이전한 경로를 유지하고, Social timeline의 활동 기록은 현재 AgentActivityLog 구현을 같은 Session callback으로 연결한다. Joint UoW·기존 Proposal·RoutinePost·Social 소유 회귀는 **39 passed / 1 기존 PostgreSQL skip / 16.44초**다. 경계 **682 modules / 2,265 edges / legacy exact 235 PASS**, ER0 **81/87/24/44/7**, L4 parity **97**을 확인했다. `test_timeline_writes.py`라는 존재하지 않는 파일명으로 첫 테스트 수집이 거부되어 실제 `tests/social`의 소유 검증을 포함해 다시 실행했으며 제품 코드는 그 사이 수정하지 않았다. B4-B의 schema·이벤트 제한·context·provider 역할 이전은 이 통합 뒤에 진행한다.
+
+
+## AR-B4-B1 — RoutinePost schema·상호작용 계약·이벤트 문맥 정책
+
+API 하위의 실제 Pydantic 형식은 `routine_posts/schemas.py`, `RoutineInteractionInput`은 `contracts/interaction.py`로 옮겼다. Social 감정/동기 enum은 같은 canonical contracts 값을 참조한다. `_bounded_events`의 World/consumer/time/replay 필터, source 중복·정렬·범위 정규화·개수/문자/JSON byte 제한은 `service/event_context.py`가 실제 소유하고, 상수·오류·공통 text 표현을 각 역할로 나눴다. 생성기와 context 양쪽의 동일 `_clip`은 실제 구현 한 개로 모았다.
+
+옛 API/domain initializer와 global routine schema alias를 제거하고 schema 등록은 실제 새 클래스를 import한다. 기존 20개 실행 node와 helper/parametrize/skip 조건을 바꾸지 않고 `tests/routine_posts/test_runtime.py`로 이전했다. local-smoke·ER0·closeout과 source/node/split 지도는 현재 경로를 사용한다. 복사한 전체 테스트 AST는 동일하고, 이전한 값·함수/클래스 본문 36개도 차이가 없다. 새 기능이나 추가 회귀 node를 만들지 않았다.
+
+첫 집중 검증은 **75 passed / 1 기존 PostgreSQL skip / 2 failed**였다. 실패는 옛 WC setup/owner-identity suite 경로와 Today inventory generator의 삭제된 Social import였다. WC의 두 문자열을 이미 승인된 정확 경로로 연결하고 원래 inclusion assert를 유지했다. Today JSON은 MemoryBatch의 동결된 predecessor이므로 historical REQUIRED_FILES·JSON·SHA를 재생성하지 않고, 실행에 필요한 동일 Social contract import만 바꿨다. `--check`의 기존 frozen SHA 검사는 통과한다. 두 번째 광역 실행은 **76 passed / 1 기존 skip / 1 경로 실패**였으며 마지막 owner-identity 문자열 보완 후 영향 범위를 다시 검증한다.
+
+전체 보존 검사는 frozen **1,867/1,907**, 보호 계보 **2,139**, 현재 **2,224 nodes**를 확인했고 API/ORM·기존 assertion/exception/suppression·누락 node의 오류는 0이다. split 검사에서 frozen context의 옛 `activity_runtime` alias 한 개의 전달 증거가 빠져 있어 A3b가 이미 연결한 DueTick·namespace·latest_due_tick의 실제 소유 대상으로 추가했다. B1 split 전용 재검증은 **오류 0**이며 검사 규칙은 바꾸지 않았다. 새/선행 소스 등록은 부모의 선형 capture가 남는다.
+
+현재 경계는 **686 modules / 2,274 edges / legacy exact 234 PASS**, ER0 **81/87/24/44/7**, L4 parity **97**이다. RoutinePost는 B1의 정확한 9개 역할 모듈만 PARTIAL 전환 대상으로 관리한다. 실제 foreign query·재시도 context 조립과 provider 검증/prompt/통신, 그 직접 public/서비스 별칭 소비자는 AR-B4-B2/B3에서 종료한다. 전체 B4와 실제 설치/재시작·Hosted CI·merge 완료를 주장하지 않는다.
+
+B1의 마지막 수정은 CI가 요구하는 기존 WC suite 경로 문자열 하나였다. 수정 후 RoutinePost·Proposal·closeout·Today inventory 검증은 **29 passed / 1 기존 PostgreSQL skip / 10.62초**로 통과했다. 앞선 광역 실행의 제품 검증 76개와 이 마지막 영향 범위 결과를 구분해 기록하며, 광역 78개 전체가 마지막 tree에서 다시 통과했다고 표기하지 않는다. source 고정 시 제품 코드와 기존 assertion/조건은 그대로이며 frozen baseline/checkpoint/additions와 Today predecessor JSON 변경은 0이다.

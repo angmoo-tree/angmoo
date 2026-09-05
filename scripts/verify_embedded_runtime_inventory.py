@@ -71,7 +71,7 @@ PARITY_WORKLOADS = (
         "phase": "P4",
         "contract": "Routine continuation publishes atomically with normal two-call and repair-bounded three-call behavior",
         "tests": [
-            "backend/tests/test_routine_post_runtime.py",
+            "backend/tests/routine_posts/test_runtime.py",
             "backend/tests/test_l3_owner_manual_social_inbox.py",
         ],
     },

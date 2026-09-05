@@ -261,7 +261,7 @@ from app.domains.social.schemas.feed import (
     WorldFeedCycleStatusRead,
     WorldFeedObservationRead,
 )
-from app.schemas.routine_post import (
+from app.domains.routine_posts.schemas import (
     RoutineBeatPlan,
     RoutinePostDraft,
     RoutineSourceEventEffect,

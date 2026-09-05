@@ -13,7 +13,8 @@ from app.credentials import (
     CredentialResolutionError,
     CredentialResolver,
 )
-from app.domains.routine_posts.api import schemas
+from app.domains.routine_posts import schemas
+from app.domains.routine_posts.utils.text import _clip
 from app.domains.routine_posts.infrastructure.sqlalchemy_context import (
     RoutinePostContext,
 )
@@ -84,8 +85,6 @@ def _llm_context(
     )
 
 
-def _clip(value: object, limit: int) -> str:
-    return neutralize_context_text(str(value or "")).strip()[:limit]
 
 
 def _common_context(context: RoutinePostContext) -> dict[str, object]:

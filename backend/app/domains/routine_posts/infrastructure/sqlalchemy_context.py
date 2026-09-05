@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime
-import json
+from datetime import datetime
 from typing import Protocol
 
 from sqlalchemy import select
@@ -11,7 +10,12 @@ from sqlalchemy.orm import Session
 from app.compatibility.routine_posts import legacy
 from app.domains.routines.contracts.lifecycle import DueTick, EVENT_CONSUMPTION_NAMESPACE
 from app.domains.routines.service.scheduling import latest_due_tick
-from app.domains.routine_posts.domain.interaction import RoutineInteractionInput
+from app.domains.routine_posts.contracts.interaction import RoutineInteractionInput
+from app.domains.routine_posts.constants import MAX_SOURCE_EVENTS, MAX_EVENT_EXCERPT_CHARS, MAX_TOTAL_EVENT_EXCERPT_CHARS, MAX_EVENT_CONTEXT_JSON_BYTES
+from app.domains.routine_posts.exceptions import RoutineContextUnavailable
+from app.domains.routine_posts.service.event_context import _bounded_events, _relationship_rank
+from app.domains.routine_posts.utils.text import _clip
+from app.domains.routines.service.scheduling import aware_utc as _aware_utc
 
 
 models = legacy.models
@@ -19,16 +23,6 @@ activity_state_contracts = legacy.activity_state_contracts
 neutralize_context_text = legacy.neutralize_context_text
 
 
-MAX_SOURCE_EVENTS = 8
-MAX_EVENT_EXCERPT_CHARS = 400
-MAX_TOTAL_EVENT_EXCERPT_CHARS = 2_400
-MAX_EVENT_CONTEXT_JSON_BYTES = 6_000
-
-
-class RoutineContextUnavailable(Exception):
-    def __init__(self, reason_code: str) -> None:
-        self.reason_code = reason_code
-        super().__init__(reason_code)
 
 
 class RoutineInteractionSource(Protocol):
@@ -83,113 +77,8 @@ class RoutinePostContext:
         return [event.source_event_id for event in self.source_events]
 
 
-def _aware_utc(value: datetime) -> datetime:
-    if value.tzinfo is None:
-        return value.replace(tzinfo=UTC)
-    return value.astimezone(UTC)
 
 
-def _clip(value: object, limit: int) -> str:
-    return neutralize_context_text(str(value or "")).strip()[:limit]
-
-
-def _relationship_rank(value: str) -> int:
-    return {
-        "trusted": 4,
-        "close": 3,
-        "familiar": 2,
-        "new": 1,
-        "unknown": 0,
-    }.get(value, 0)
-
-
-def _bounded_events(
-    raw_events: list[RoutineInteractionInput],
-    *,
-    world_id: str,
-    consumer_world_character_id: str,
-    after: datetime,
-    before: datetime,
-    blocked_event_ids: set[str] | None = None,
-) -> tuple[tuple[RoutineInteractionInput, ...], dict[str, int], int, int]:
-    reasons: dict[str, int] = {}
-
-    def reject(reason: str) -> None:
-        reasons[reason] = reasons.get(reason, 0) + 1
-
-    normalized: list[RoutineInteractionInput] = []
-    seen: set[str] = set()
-    for item in raw_events:
-        occurred_at = _aware_utc(item.occurred_at)
-        if item.source_event_id in (blocked_event_ids or set()):
-            reject("already_consumed")
-            continue
-        if item.source_event_id in seen:
-            reject("already_consumed")
-            continue
-        if (
-            item.world_id != world_id
-            or item.consumer_world_character_id != consumer_world_character_id
-        ):
-            reject("world_scope_filtered")
-            continue
-        if occurred_at <= after or occurred_at > before:
-            reject("policy_filtered")
-            continue
-        excerpt = _clip(item.excerpt, MAX_EVENT_EXCERPT_CHARS)
-        if not excerpt:
-            reject("policy_filtered")
-            continue
-        seen.add(item.source_event_id)
-        normalized.append(
-            RoutineInteractionInput(
-                source_event_id=item.source_event_id,
-                world_id=item.world_id,
-                consumer_world_character_id=item.consumer_world_character_id,
-                actor_world_character_id=item.actor_world_character_id,
-                excerpt=excerpt,
-                occurred_at=occurred_at,
-                directness=max(0, min(int(item.directness), 100)),
-                episode_relevance=max(0, min(int(item.episode_relevance), 100)),
-                relationship_band=item.relationship_band,
-            )
-        )
-    normalized.sort(
-        key=lambda item: (
-            -item.directness,
-            -item.episode_relevance,
-            -_relationship_rank(item.relationship_band),
-            -item.occurred_at.timestamp(),
-            item.source_event_id,
-        )
-    )
-
-    selected: list[RoutineInteractionInput] = []
-    total_chars = 0
-    for item in normalized:
-        if len(selected) >= MAX_SOURCE_EVENTS:
-            reject("prompt_item_limit")
-            continue
-        if total_chars + len(item.excerpt) > MAX_TOTAL_EVENT_EXCERPT_CHARS:
-            reject("excerpt_char_limit")
-            continue
-        candidate = [*selected, item]
-        payload = [
-            {
-                "source_event_id": event.source_event_id,
-                "actor_world_character_id": event.actor_world_character_id,
-                "excerpt": event.excerpt,
-                "occurred_at": event.occurred_at.isoformat(),
-                "relationship_band": event.relationship_band,
-            }
-            for event in candidate
-        ]
-        if len(json.dumps(payload, ensure_ascii=False).encode("utf-8")) > MAX_EVENT_CONTEXT_JSON_BYTES:
-            reject("context_char_limit")
-            continue
-        selected.append(item)
-        total_chars += len(item.excerpt)
-    return tuple(selected), reasons, total_chars, len(normalized)
 
 
 def assemble_routine_post_context(

@@ -1,7 +1,7 @@
 {
-  "edge_count": 2265,
+  "edge_count": 2274,
   "external_import_count": 2161,
-  "module_count": 682,
+  "module_count": 686,
   "modules": [
     {
       "external_imports": [],
@@ -426,7 +426,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.domains.routine_posts.domain.interaction",
+        "app.domains.routine_posts.contracts.interaction",
         "app.models",
         "app.runtime.social.sqlalchemy_inbox"
       ],
@@ -3472,28 +3472,15 @@
     {
       "external_imports": [],
       "imports": [],
-      "module": "app.domains.routine_posts.api",
-      "path": "backend/app/domains/routine_posts/api/__init__.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "pydantic",
-        "typing"
-      ],
-      "imports": [
-        "app.domains.social.public"
-      ],
-      "module": "app.domains.routine_posts.api.schemas",
-      "path": "backend/app/domains/routine_posts/api/schemas.py",
+      "module": "app.domains.routine_posts.constants",
+      "path": "backend/app/domains/routine_posts/constants.py",
       "wildcard_imports": []
     },
     {
       "external_imports": [],
       "imports": [],
-      "module": "app.domains.routine_posts.domain",
-      "path": "backend/app/domains/routine_posts/domain/__init__.py",
+      "module": "app.domains.routine_posts.contracts",
+      "path": "backend/app/domains/routine_posts/contracts/__init__.py",
       "wildcard_imports": []
     },
     {
@@ -3503,8 +3490,15 @@
         "datetime"
       ],
       "imports": [],
-      "module": "app.domains.routine_posts.domain.interaction",
-      "path": "backend/app/domains/routine_posts/domain/interaction.py",
+      "module": "app.domains.routine_posts.contracts.interaction",
+      "path": "backend/app/domains/routine_posts/contracts/interaction.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.routine_posts.exceptions",
+      "path": "backend/app/domains/routine_posts/exceptions.py",
       "wildcard_imports": []
     },
     {
@@ -3526,8 +3520,9 @@
       "imports": [
         "app.compatibility.routine_posts.legacy",
         "app.credentials",
-        "app.domains.routine_posts.api.schemas",
         "app.domains.routine_posts.infrastructure.sqlalchemy_context",
+        "app.domains.routine_posts.schemas",
+        "app.domains.routine_posts.utils.text",
         "app.integrations.direct_llm",
         "app.providers.gemini"
       ],
@@ -3540,14 +3535,17 @@
         "__future__",
         "dataclasses",
         "datetime",
-        "json",
         "sqlalchemy",
         "sqlalchemy.orm",
         "typing"
       ],
       "imports": [
         "app.compatibility.routine_posts.legacy",
-        "app.domains.routine_posts.domain.interaction",
+        "app.domains.routine_posts.constants",
+        "app.domains.routine_posts.contracts.interaction",
+        "app.domains.routine_posts.exceptions",
+        "app.domains.routine_posts.service.event_context",
+        "app.domains.routine_posts.utils.text",
         "app.domains.routines.contracts.lifecycle",
         "app.domains.routines.service.scheduling"
       ],
@@ -3563,6 +3561,58 @@
       ],
       "module": "app.domains.routine_posts.public",
       "path": "backend/app/domains/routine_posts/public.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.social.contracts.subjective_context"
+      ],
+      "module": "app.domains.routine_posts.schemas",
+      "path": "backend/app/domains/routine_posts/schemas.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.routine_posts.service",
+      "path": "backend/app/domains/routine_posts/service/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "json"
+      ],
+      "imports": [
+        "app.domains.routine_posts.constants",
+        "app.domains.routine_posts.contracts.interaction",
+        "app.domains.routine_posts.utils.text",
+        "app.domains.routines.service.scheduling"
+      ],
+      "module": "app.domains.routine_posts.service.event_context",
+      "path": "backend/app/domains/routine_posts/service/event_context.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.routine_posts.utils",
+      "path": "backend/app/domains/routine_posts/utils/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.core.context_text"
+      ],
+      "module": "app.domains.routine_posts.utils.text",
+      "path": "backend/app/domains/routine_posts/utils/text.py",
       "wildcard_imports": []
     },
     {
@@ -9232,6 +9282,7 @@
         "app.domains.chat.api.schemas",
         "app.domains.identity.schemas",
         "app.domains.relationships.graph_read.schemas",
+        "app.domains.routine_posts.schemas",
         "app.domains.social.schemas.community",
         "app.domains.social.schemas.feed",
         "app.schemas.agent_runs",
@@ -9239,7 +9290,6 @@
         "app.schemas.character_lore",
         "app.schemas.characters",
         "app.schemas.maintenance",
-        "app.schemas.routine_post",
         "app.schemas.social_memory",
         "app.schemas.tree",
         "app.schemas.world_activity_runtime",
@@ -9344,18 +9394,6 @@
       ],
       "module": "app.schemas.messages",
       "path": "backend/app/schemas/messages.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "sys"
-      ],
-      "imports": [
-        "app.domains.routine_posts.api.schemas"
-      ],
-      "module": "app.schemas.routine_post",
-      "path": "backend/app/schemas/routine_post.py",
       "wildcard_imports": []
     },
     {

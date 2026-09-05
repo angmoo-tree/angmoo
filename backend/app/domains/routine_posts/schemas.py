@@ -4,7 +4,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from app.domains.social.public import (
+from app.domains.social.contracts.subjective_context import (
     ActionEmotionLabel,
     ActionMotivationKind,
 )
