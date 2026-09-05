@@ -1498,6 +1498,85 @@
       "test_suppressions": {
         "tests/world_characters/test_owner_character_uow.py": {}
       }
+    },
+    {
+      "commit": "82a7b3e61f894fe2dcacf0011bbb47dcc6e9faf8",
+      "feature_id": "AR-B2",
+      "reason": "WorldCharacter profile Studio lifecycle and same-Session runtime read composition",
+      "tracked_files": {
+        "backend/app/api/world_character_dependencies.py": "2547363dc8a71757a2c4fdc53d662d118be6d353",
+        "backend/app/domains/characters/service/world_lifecycle.py": "753813f16c22e4238e632d14de62d2ca8748593c",
+        "backend/app/domains/world_characters/contracts/lifecycle.py": "5102ced95ff4857451634ceef206185357f7350b",
+        "backend/app/domains/world_characters/contracts/queries.py": "57fa049d85a9250c27c30eb014685bc914a013b6",
+        "backend/app/runtime/world_characters/__init__.py": "4a207ed0ca6874c571e17bfbc75a75238eefb15e",
+        "backend/app/runtime/world_characters/composition.py": "debdac3f13e1fc501552aad66d9aff30d6e783b6",
+        "backend/app/runtime/world_characters/queries.py": "bcf8b79e59a54346326425bc04d742eda7593262",
+        "backend/tests/world_characters/test_joined_reads.py": "68468f0a4fc4e1be84b93a99f5d4fab32b020fc7"
+      },
+      "test_nodes": [
+        "tests/world_characters/test_joined_reads.py::test_joined_read_adapter_retains_filters_order_null_rows_and_one_query_each"
+      ],
+      "test_assertions": {
+        "tests/world_characters/test_joined_reads.py": {
+          "test_joined_read_adapter_retains_filters_order_null_rows_and_one_query_each": [
+            "assert len(calls) == 1",
+            "assert [wc.id for wc, _character_row in public] == ['wc-a', 'wc-b']",
+            "assert all((inspect(row).session is db for pair in public for row in pair))",
+            "assert len(calls) == 2",
+            "assert [wc.id for wc, _character_row in studio] == ['wc-s', 'wc-p', 'wc-a', 'wc-b']",
+            "assert len(calls) == 3",
+            "assert [character.id for character, _wc in candidates] == ['suspended', 'pending', 'unlinked', 'tie-first', 'tie-second']",
+            "assert next((wc for character, wc in candidates if character.id == 'unlinked')) is None",
+            "assert queries.public_profile_row(db, 'world-a', 'wc-a')[1] is public[0][1]",
+            "assert len(calls) == 4",
+            "assert queries.public_profile_rows(db, 'world-a') == []",
+            "assert len(calls) == 1"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/world_characters/test_joined_reads.py": {}
+      }
+    },
+    {
+      "commit": "19530cb436a8d969dc685c255e59ab2f146dea85",
+      "feature_id": "AR-B2",
+      "reason": "WorldCharacter autonomous setup admission provider stage retry approval rejection and runtime repair",
+      "tracked_files": {
+        "backend/app/domains/identity/service/world_character_credentials.py": "1aa9b871872d5ba41a78e675e87dd0d5855577e0",
+        "backend/app/domains/worlds/service/character_entry.py": "e2870ce54d4475ecbd1308b2a982d2380c5e88bc",
+        "backend/app/runtime/world_characters/recovery.py": "bed7932050e6fed08f08828c6275f955cd04818b"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "0c7620531e09899465c0a8a09aef80f116d17fc9",
+      "feature_id": "AR-B2",
+      "reason": "Same-Session caller-validated WorldCharacter mode write with rollback preservation",
+      "tracked_files": {
+        "backend/tests/world_characters/test_runtime_mode_write.py": "3f1c4344b161880621b86f1922e173f0092a9c3a"
+      },
+      "test_nodes": [
+        "tests/world_characters/test_runtime_mode_write.py::test_mode_write_defers_flush_and_commit_and_rolls_back_with_caller"
+      ],
+      "test_assertions": {
+        "tests/world_characters/test_runtime_mode_write.py": {
+          "test_mode_write_defers_flush_and_commit_and_rolls_back_with_caller": [
+            "assert inspect(target).session is db",
+            "assert target.activity_runtime_mode == 'legacy_agent_v1'",
+            "assert target.version == original_version + 1",
+            "assert target.feed_runtime_mode == 'legacy_latest_v1'",
+            "assert calls == []",
+            "assert target.activity_runtime_mode == original_mode",
+            "assert target.version == original_version"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/world_characters/test_runtime_mode_write.py": {}
+      }
     }
   ]
 }
