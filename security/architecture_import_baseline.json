@@ -1,7 +1,7 @@
 {
-  "edge_count": 2810,
-  "external_import_count": 2406,
-  "module_count": 807,
+  "edge_count": 2828,
+  "external_import_count": 2410,
+  "module_count": 810,
   "modules": [
     {
       "external_imports": [],
@@ -5872,6 +5872,18 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.domains.social.models.posts"
+      ],
+      "module": "app.domains.social.repository.resident_affordances",
+      "path": "backend/app/domains/social/repository/resident_affordances.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
         "app.domains.social.models.posts",
         "app.domains.social.models.subjective_context"
       ],
@@ -6079,6 +6091,16 @@
       ],
       "module": "app.domains.social.service.activity_results",
       "path": "backend/app/domains/social/service/activity_results.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.core.context_text",
+        "app.domains.social.schemas.community"
+      ],
+      "module": "app.domains.social.service.agent_presentation",
+      "path": "backend/app/domains/social/service/agent_presentation.py",
       "wildcard_imports": []
     },
     {
@@ -6444,6 +6466,26 @@
       ],
       "module": "app.domains.social.service.profiles",
       "path": "backend/app/domains/social/service/profiles.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.characters.service.profile",
+        "app.domains.social.exceptions",
+        "app.domains.social.models.posts",
+        "app.domains.social.repository.inbox",
+        "app.domains.social.repository.posts",
+        "app.domains.social.repository.profiles",
+        "app.domains.social.repository.resident_affordances",
+        "app.domains.social.service.profiles",
+        "app.domains.social.service.visibility"
+      ],
+      "module": "app.domains.social.service.resident_affordances",
+      "path": "backend/app/domains/social/service/resident_affordances.py",
       "wildcard_imports": []
     },
     {
@@ -11550,6 +11592,7 @@
         "app.domains.routines.service.tick_schedule",
         "app.domains.runtime.contracts",
         "app.domains.social.public",
+        "app.domains.social.service.resident_affordances",
         "app.domains.world_characters.public",
         "app.domains.world_characters.service.readiness",
         "app.models",
@@ -11586,6 +11629,7 @@
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.social.service.resident_affordances",
         "app.models",
         "app.schemas",
         "app.services.agent_briefs",
@@ -11665,13 +11709,16 @@
         "app.domains.characters.service.state",
         "app.domains.social.constants",
         "app.domains.social.exceptions",
+        "app.domains.social.repository.resident_affordances",
         "app.domains.social.service.activity_results",
+        "app.domains.social.service.agent_presentation",
         "app.domains.social.service.feed",
         "app.domains.social.service.inbox",
         "app.domains.social.service.notifications",
         "app.domains.social.service.posts",
         "app.domains.social.service.presentation",
         "app.domains.social.service.profiles",
+        "app.domains.social.service.resident_affordances",
         "app.domains.social.service.timeline",
         "app.domains.social.service.visibility",
         "app.domains.social.utils.limits",
@@ -11801,6 +11848,7 @@
         "app.domains.routines.contracts.resident",
         "app.domains.social.contracts.subjective_context",
         "app.domains.social.service.image_attachment",
+        "app.domains.social.service.resident_affordances",
         "app.domains.world_characters.contracts.runtime_modes",
         "app.models",
         "app.runtime.resident.context",

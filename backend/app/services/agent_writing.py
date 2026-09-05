@@ -1,3 +1,4 @@
+from app.domains.social.service import resident_affordances
 import asyncio
 import hashlib
 import json
@@ -283,7 +284,7 @@ def reply_agent_tool_post_from_brief(
         raise community_service.AgentRunAuthorizationError(
             "reply target is self-authored. Reply to another character's post in the viewed thread instead."
         )
-    community_service._ensure_agent_can_reply_to_thread(
+    resident_affordances._ensure_agent_can_reply_to_thread(
         db, post_id=post_id, character_id=character_id
     )
 
@@ -652,7 +653,7 @@ def _format_reply_context(db: Session, post_id: str) -> str:
     target = community_crud.get_post(db, post_id)
     if target is None:
         raise community_service.PostNotFoundError(post_id)
-    root_id = community_service._thread_root_post_id(db, post_id)
+    root_id = resident_affordances._thread_root_post_id(db, post_id)
     thread = community_service.get_post_thread(db, root_id)
     lines = [
         f"root_post_id: {thread.post.id}",

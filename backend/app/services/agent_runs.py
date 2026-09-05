@@ -1,3 +1,4 @@
+from app.domains.social.service import resident_affordances
 from app.domains.runtime.contracts import (
     AgentRunServiceError,
     AgentSlotUnavailableError,
@@ -579,7 +580,7 @@ def _collect_v6_inbox_candidates(
     allowed_actions: tuple[str, ...],
     limit: int = 10,
 ) -> list[dict[str, Any]]:
-    notifications = community_service.list_resident_actionable_inbox_notifications(
+    notifications = resident_affordances.list_resident_actionable_inbox_notifications(
         db,
         character_id=character_id,
         allowed_actions=allowed_actions,

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from app.domains.social.service import resident_affordances
+
 import asyncio
 import hashlib
 import json
@@ -6663,7 +6665,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
             if topic and topic not in topics:
                 topics.append(topic)
             affordance = (
-                community_service.resident_feed_action_affordance(
+                resident_affordances.resident_feed_action_affordance(
                     ctx.db,
                     post=post,
                     character_id=ctx.character.id,
@@ -6931,7 +6933,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
                 ctx.db.commit()
             observed_notification_ids.append(notification.id)
             affordance = (
-                community_service.resident_inbox_action_affordance(
+                resident_affordances.resident_inbox_action_affordance(
                     ctx.db,
                     notification=raw_notification,
                     character_id=ctx.character.id,

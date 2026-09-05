@@ -1240,3 +1240,12 @@ Social의 source/notification 정책과 자기 ORM query/mutation, WC의 활성/
 원문 정책·조회·오류·전체 트랜잭션 **19개 AST 확장 비교가 동일**하다. 기존 event/WorldFeed/LangGraph/RoutinePost와 새 SQLite2 회귀가 **239 PASS / 기존 PostgreSQL 전용 1 SKIP / 27.85초**다. 신규 검증은 잘못된 NO_ACTION 입력의 SQL0·sameSession·관계/event0·rollback 및 attached 반응의 caller flush/rollback을 확인한다. 최초 실행의 새 reaction fixture가 필수 user_id를 빠뜨려 **238 PASS / 신규 fixture 1 FAIL / 1 SKIP**였고, fixture에 원래 owner_id만 채운 뒤 위 결과를 얻었다. 제품 DDL·nullable·기존 assertion을 바꾸지 않았다. 전체 B5·G07·원본 도입 capture·Hosted/installer 종료는 후속 범위다.
 
 최종 C15 소유 계약과 canonical ORM import 기준 확대 검증은 **255 PASS / 기존 PostgreSQL 전용 1 SKIP / 26.74초**다. PR #258/#263 API·schema·ORM 계약 동일, 변경된 보호 테스트 1개 파일 assertion과 전체 split evidence 검사가 통과했다. 경계 검사는 **807 module / 2810 edge / legacy exact edge 189**로 통과했고 L4/ER0 현재 inventory도 통과했다. Event 이름 판단은 읽기 전용 응답 값 계약을 소비하여 Social↔Relationships package cycle을 만들지 않는다. 검색 profile 역시 실제 attached 객체의 읽는 속성만 계약으로 표현하므로 옛 Search module 예외를 추가하지 않았다.
+
+
+## AR-B5-C16 — Resident Feed·Inbox 가능 행동과 응답 정제 소유
+
+Community 원래 함수 23개를 Social repository/service로 이전했다. 반응 존재·visible reply BFS, self-author·target·대꾸 중복 및 actionable Inbox 정렬/상한, 원본을 바꾸지 않는 agent 응답 복사와 정제가 실제 소유 대상이다. 동일 Character profile 조회와 Social nullable/visible SQL을 직접 연결하며, 활동 정책 자체는 이미 Routines가 결정한 allowed_actions를 그대로 받는다. 외부 LangGraph/AgentRun/writing 소비자도 실제 Social service로 연결했다.
+
+직접 관련 기존 회귀와 새 SQLite 1개는 **228 PASS / 12.27초**다. 신규 검증은 allowed_actions 비활성 SQL0, 같은 Session의 pending like가 원래 autoflush를 거쳐 already_liked에 반영됨, 새 commit 없음, rollback 후 원래 행동 가능 상태 회복을 확인한다. Community 나머지 102개 actual 함수와 G07·full B5·capture/Hosted 통합은 후속 범위로 남는다.
+
+C16 확대 Social·Relationships·LangGraph·WorldFeed·follow/public activity 검증은 **298 PASS / 67.60초 / 기존 Starlette warning 1개**다. 원래 23개 body와 남은 102개 정의의 AST는 동일하고 PR #258/#263 API/schema/ORM 및 전체 split evidence도 통과했다. 최초 split 검사에서는 기존 Community의 retained/이전 소유 정의 행이 빠져 1개 metadata 오류가 발생했고, 원래 AR-B2-B6의 236개 추적 행을 동일하게 승계해 전체 원본을 포함했다. 구조/검사/보호 assertion을 완화하지 않았고 최종 경계는 **810 module / 2828 edge / legacy189**, L4/ER0도 통과했다.

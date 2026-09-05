@@ -733,3 +733,6 @@ Today SNS의 범위·권한·차단·조상 게시물·성공 근거·명시적 
 
 
 성공한 자율 행동을 기록할 때 `social/service/action_sources.py`가 원본 글·반응 확인과 World 연결을, `action_notifications.py`가 생성/입력 알림 연결과 명시적 NO_ACTION 처리 판단을 소유한다. `world_characters/service/action_scope.py`는 원래 활성 WorldCharacter 조회·확인, `relationships/service/action_response.py`는 제안 응답의 허용 판단을 수행한다. 실행 레코드 필드는 `routines/service/public_action_executions.py`가 실제 대입하며 flush/commit을 추가하지 않는다. `runtime/social/{langgraph_actions,world_feed_actions}.py`는 같은 Session에서 소유 서비스를 호출하고 성공 event/evidence·proposal 저장을 원래 순서로 연결한다. 오류 생성자는 이 협력에서 원래 오류 클래스를 전달하여 scope 오류의 class와 reason을 유지하고, 이를 위해 다른 업무를 역참조하지 않는다. 옛 services의 두 social_apply 파일은 제거했다.
+
+
+Resident가 Feed·Inbox에서 시도할 수 있는 Social 행동과 차단 이유는 `social/service/resident_affordances.py`에서 판단한다. 원래 좋아요·리포스트 존재와 visible reply 탐색 SQL은 `repository/resident_affordances.py`, agent 문맥용 응답 복사·텍스트 정제는 `service/agent_presentation.py`가 소유한다. 다른 캐릭터 조회는 기존 Character profile service의 같은 nullable 조회를 사용한다. 활성 정책이 이미 정한 allowed_actions를 받아 Social의 self/기존 반응/target/visibility 규칙만 적용하며 Routines의 정책을 중복 구현하지 않는다. Community의 다른 기능은 전환 중이고, 이 23개 함수에 대해서만 동일 함수 import로 협력한다.

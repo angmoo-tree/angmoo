@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2406,
-      "internal_edge_count": 2810,
+      "external_import_count": 2410,
+      "internal_edge_count": 2828,
       "legacy_import_exception_count": 0,
-      "module_count": 807,
+      "module_count": 810,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -975,6 +975,13 @@
           },
           {
             "imports": [
+              "app.domains.social.models.posts"
+            ],
+            "module": "app.domains.social.repository.resident_affordances",
+            "path": "backend/app/domains/social/repository/resident_affordances.py"
+          },
+          {
+            "imports": [
               "app.domains.social.models.posts",
               "app.domains.social.models.subjective_context"
             ],
@@ -1109,6 +1116,14 @@
             ],
             "module": "app.domains.social.service.activity_results",
             "path": "backend/app/domains/social/service/activity_results.py"
+          },
+          {
+            "imports": [
+              "app.core.context_text",
+              "app.domains.social.schemas.community"
+            ],
+            "module": "app.domains.social.service.agent_presentation",
+            "path": "backend/app/domains/social/service/agent_presentation.py"
           },
           {
             "imports": [
@@ -1358,6 +1373,21 @@
             ],
             "module": "app.domains.social.service.profiles",
             "path": "backend/app/domains/social/service/profiles.py"
+          },
+          {
+            "imports": [
+              "app.domains.characters.service.profile",
+              "app.domains.social.exceptions",
+              "app.domains.social.models.posts",
+              "app.domains.social.repository.inbox",
+              "app.domains.social.repository.posts",
+              "app.domains.social.repository.profiles",
+              "app.domains.social.repository.resident_affordances",
+              "app.domains.social.service.profiles",
+              "app.domains.social.service.visibility"
+            ],
+            "module": "app.domains.social.service.resident_affordances",
+            "path": "backend/app/domains/social/service/resident_affordances.py"
           },
           {
             "imports": [

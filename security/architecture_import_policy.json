@@ -1097,6 +1097,7 @@
       "app.domains.social.repository.posts",
       "app.domains.social.repository.profiles",
       "app.domains.social.repository.reactions",
+      "app.domains.social.repository.resident_affordances",
       "app.domains.social.repository.subjective_context",
       "app.domains.social.repository.today_activity",
       "app.domains.social.repository.world_profile",
@@ -1112,6 +1113,7 @@
       "app.domains.social.service.action_notifications",
       "app.domains.social.service.action_sources",
       "app.domains.social.service.activity_results",
+      "app.domains.social.service.agent_presentation",
       "app.domains.social.service.discovery",
       "app.domains.social.service.feed",
       "app.domains.social.service.image_attachment",
@@ -1133,6 +1135,7 @@
       "app.domains.social.service.profile_activity",
       "app.domains.social.service.profile_cursor",
       "app.domains.social.service.profiles",
+      "app.domains.social.service.resident_affordances",
       "app.domains.social.service.source_posts",
       "app.domains.social.service.source_writes",
       "app.domains.social.service.subjective_context",
@@ -1343,6 +1346,7 @@
       "app.domains.social.service.action_notifications",
       "app.domains.social.service.action_sources",
       "app.domains.social.service.activity_results",
+      "app.domains.social.service.agent_presentation",
       "app.domains.social.service.discovery",
       "app.domains.social.service.feed",
       "app.domains.social.service.image_attachment",
@@ -1364,6 +1368,7 @@
       "app.domains.social.service.profile_activity",
       "app.domains.social.service.profile_cursor",
       "app.domains.social.service.profiles",
+      "app.domains.social.service.resident_affordances",
       "app.domains.social.service.source_posts",
       "app.domains.social.service.source_writes",
       "app.domains.social.service.subjective_context",
@@ -3028,6 +3033,54 @@
         "owner_stage": "AR-B5",
         "reason": "The exact still-supported source-write consumer uses the single transaction execution contract while callers move to the owning service/runtime executor.",
         "removal_condition": "Remove this exact application/ports consumer after its remaining calls and type exports use the canonical contract; no new implementation belongs in this compatibility path.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.social.repository.resident_affordances",
+        "owner_stage": "AR-B5 / AR-B4",
+        "reason": "Exact pre-existing resident/agent tool functions now resolve to their actual Social owner; no new business policy is added to the old consumer.",
+        "removal_condition": "Move the remaining Community/AgentRun/LangGraph/writing orchestration to actual owner/runtime modules and remove these exact same-function consumer imports.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.social.service.resident_affordances",
+        "owner_stage": "AR-B5 / AR-B4",
+        "reason": "Exact pre-existing resident/agent tool functions now resolve to their actual Social owner; no new business policy is added to the old consumer.",
+        "removal_condition": "Move the remaining Community/AgentRun/LangGraph/writing orchestration to actual owner/runtime modules and remove these exact same-function consumer imports.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.social.service.resident_affordances",
+        "owner_stage": "AR-B5 / AR-B4",
+        "reason": "Exact pre-existing resident/agent tool functions now resolve to their actual Social owner; no new business policy is added to the old consumer.",
+        "removal_condition": "Move the remaining Community/AgentRun/LangGraph/writing orchestration to actual owner/runtime modules and remove these exact same-function consumer imports.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_writing",
+        "target": "app.domains.social.service.resident_affordances",
+        "owner_stage": "AR-B5 / AR-B4",
+        "reason": "Exact pre-existing resident/agent tool functions now resolve to their actual Social owner; no new business policy is added to the old consumer.",
+        "removal_condition": "Move the remaining Community/AgentRun/LangGraph/writing orchestration to actual owner/runtime modules and remove these exact same-function consumer imports.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.social.service.resident_affordances",
+        "owner_stage": "AR-B5 / AR-B4",
+        "reason": "Exact pre-existing resident/agent tool functions now resolve to their actual Social owner; no new business policy is added to the old consumer.",
+        "removal_condition": "Move the remaining Community/AgentRun/LangGraph/writing orchestration to actual owner/runtime modules and remove these exact same-function consumer imports.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.social.service.agent_presentation",
+        "owner_stage": "AR-B5 / AR-B4",
+        "reason": "Exact pre-existing resident/agent tool functions now resolve to their actual Social owner; no new business policy is added to the old consumer.",
+        "removal_condition": "Move the remaining Community/AgentRun/LangGraph/writing orchestration to actual owner/runtime modules and remove these exact same-function consumer imports.",
         "review_date": "2026-09-06"
       }
     ]
