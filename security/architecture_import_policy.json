@@ -1248,6 +1248,7 @@
       "app.domains.characters.service",
       "app.domains.characters.service.access",
       "app.domains.characters.service.creator",
+      "app.domains.characters.service.drafts",
       "app.domains.characters.service.image_quota",
       "app.domains.characters.service.management",
       "app.domains.characters.service.mutations",
@@ -1284,6 +1285,7 @@
       "app.domains.characters.schemas",
       "app.domains.characters.service.access",
       "app.domains.characters.service.creator",
+      "app.domains.characters.service.drafts",
       "app.domains.characters.service.image_quota",
       "app.domains.characters.service.management",
       "app.domains.characters.service.mutations",
@@ -1664,6 +1666,22 @@
         "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
         "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
         "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.creator",
+        "target": "app.domains.characters.service.drafts",
+        "owner_stage": "AR-B2-B / AR-B3 / AR-B8-A",
+        "reason": "Actual Creator ORM lifecycle moved; runtime binds provider/file/Character callbacks and its remaining media operations use the canonical owned-draft gate.",
+        "removal_condition": "Retire temporary lifecycle wrappers when mixed HTTP/media consumers move; retain only external and multi-domain work.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.creator",
+        "target": "app.domains.characters.contracts",
+        "owner_stage": "AR-B2-B / AR-B3 / AR-B8-A",
+        "reason": "Actual Creator ORM lifecycle moved; runtime binds provider/file/Character callbacks and its remaining media operations use the canonical owned-draft gate.",
+        "removal_condition": "Retire temporary lifecycle wrappers when mixed HTTP/media consumers move; retain only external and multi-domain work.",
         "review_date": "2026-09-05"
       }
     ]

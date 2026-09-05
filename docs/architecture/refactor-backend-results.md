@@ -257,3 +257,14 @@ Character 목록·생성·단건 조회·프로필·페르소나·홍보 동의 
 - 경계 검사: **610 modules / 1943 edges / legacy exact 282**. 공개 route inventory **196 operations**. 원래 6개 entry의 module 필드만 변경했고 public generator를 갱신했다.
 - 남은 B2 책임: Creator draft CRUD/검증/완료와 파일·provider callback 분리. 프로필 이미지 저장·후처리 B3, 활동/성향/자율실행 B4, LocalBot와 복합 삭제 조립 B8을 이 Character HTTP slice의 완료로 간주하지 않는다.
 - 통합 보존 검사에서 #258 1,867 / #263 1,907 노드, 현재 2,103 노드가 수집됐고 API/OpenAPI/ORM·assertion·suppression 차이는 없었다. 이후 분할 지도의 원래 source 기준 symbol/consumer를 보정해 split evidence 단독 검사 PASS를 확인했다. 아직 병합하지 않은 Identity/Character source 도입 증거에 대한 append-only 오류는 root의 선형 capture 대상이며, 이 상태를 전체 보존 검사 PASS로 기록하지 않는다.
+
+### AR-B2-B4 — Creator 초안 수명주기와 외부 작업 연결
+
+`service/drafts.py`가 초안 create/get/update/enhance/complete, owned lookup, 만료 초안 정리, 초안 candidate DB 정리 8개 실제 함수의 구현을 소유한다. `CreatorWorkflows`의 LLM 호출·credential 해석·파일 삭제/승격·Character 실행 후처리는 runtime에서 연결한다. 초안별 commit/rollback, media-before-DB 삭제 순서, key 검증 후 초안 저장, 소유권 확인 후 provider 호출, 완료 중 기존 여러 commit을 보존한다.
+
+Creator 조회/수정 2개 endpoint가 canonical router에 추가되었다. 기존 생성·보강·완료 HTTP의 gateway/활동 오류 변환과 이미지 관련 API는 mixed API 조립에 남아 runtime의 얇은 compatibility entry를 통해 canonical lifecycle을 호출한다. 실제 초안 업무 구현이 runtime에 중복되지 않는다. 남은 adapter/provider 오류 정리와 프로필 이미지 작업은 B3/B4/B8의 소유권에 따라 종료하며, 이 단계에서 broad 전체 domain 완료를 선언하지 않는다.
+
+- 신규 `tests/characters/test_creator_workflows.py` **4개 node**: key 확인 전 insert 없음·암호화 scope 동일, foreign owner 은닉, 개별 만료 cleanup rollback·media-first·미만료 유지, persona 보강의 owner/provider/commit 순서, 두 factory와 원래 route 객체/순서.
+- Characters/Creator/promotion/private preview/prompt/demo lock 집중 검사 **94 passed, 1 warning (12.98s)**. 기존 테스트의 assertion은 수정하지 않았다.
+- 이전 runtime 실제 8개 함수의 본문 AST를 callback 이름·model alias·명시적 workflow 인자만 역정규화해 비교한 결과 **차이 0**. 실제 분기·field·오류·commit/flush 순서가 보존됨을 별도로 확인했다.
+- 경계 **611 modules / 1957 edges / legacy exact 282**, 공개 route inventory **196 operations**. 이번 변경은 기존 추가 2개 route의 module 필드만 바꾸고 public generator를 실행했다.

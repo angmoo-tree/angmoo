@@ -711,6 +711,7 @@
         "backend/app/domains/characters/service/__init__.py",
         "backend/app/domains/characters/service/access.py",
         "backend/app/domains/characters/service/creator.py",
+        "backend/app/domains/characters/service/drafts.py",
         "backend/app/domains/characters/service/image_quota.py",
         "backend/app/domains/characters/service/management.py",
         "backend/app/domains/characters/service/persona.py",
@@ -945,7 +946,7 @@
         "character_foundation": "Local focused tests: 32 passed, 1 existing warning. New roles plus existing create/consent/Package/WorldCharacter suites; CI/merge and remaining B2-B pending."
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet. AR-B2-B1 Character foundation moved: same ORM/schema identity, separate profile commit vs seed flush-only, caller-owned state write. Creator/readiness/World/runtime portions remain pending; no whole-domain completion claim. Creator ORM/schema, owner admission/prompt/promotion and image quota policy now live in Character role files. Mixed multi-domain workflows moved to runtime.characters without blanket domain completion. Six Character HTTP operations now use canonical management service and same-session runtime callbacks. Credential and runtime summary DTOs are exact partial prerequisities; activity execution ownership is unchanged.",
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet. AR-B2-B1 Character foundation moved: same ORM/schema identity, separate profile commit vs seed flush-only, caller-owned state write. Creator/readiness/World/runtime portions remain pending; no whole-domain completion claim. Creator ORM/schema, owner admission/prompt/promotion and image quota policy now live in Character role files. Mixed multi-domain workflows moved to runtime.characters without blanket domain completion. Six Character HTTP operations now use canonical management service and same-session runtime callbacks. Credential and runtime summary DTOs are exact partial prerequisities; activity execution ownership is unchanged. Creator lifecycle owns draft DB writes/expiry/owner admission while external callbacks preserve media/LLM order in the same Session.",
       "backend_status": "MAPPED",
       "frontend_status": "MAPPED"
     },

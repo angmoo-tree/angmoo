@@ -1,4 +1,6 @@
 from app.domains.characters.router import (
+    get_agent_draft,
+    update_agent_draft,
     list_agents,
     create_agent,
     get_agent,
@@ -69,16 +71,7 @@ async def create_agent_draft(
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
 
 
-@router.get("/drafts/{draft_id}", response_model=schemas.AgentCreationDraftRead)
-def get_agent_draft(
-    draft_id: str,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentCreationDraftRead:
-    try:
-        return draft_service.get_draft(db, user, draft_id)
-    except draft_service.AgentCreationDraftNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Draft not found") from exc
+router.routes.append(_character_routes["get_agent_draft"])
 
 
 @router.get("/drafts/{draft_id}/media/{media_type}", response_class=FileResponse)
@@ -113,21 +106,7 @@ def get_agent_draft_media(
     )
 
 
-@router.patch("/drafts/{draft_id}", response_model=schemas.AgentCreationDraftRead)
-def update_agent_draft(
-    draft_id: str,
-    data: schemas.AgentCreationDraftUpdate,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentCreationDraftRead:
-    try:
-        return draft_service.update_draft(db, user, draft_id, data)
-    except draft_service.AgentCreationDraftNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Draft not found") from exc
-    except draft_service.AgentCreationDraftHandleConflictError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except draft_service.AgentCreationDraftValidationError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+router.routes.append(_character_routes["update_agent_draft"])
 
 
 @router.post(

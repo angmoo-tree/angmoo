@@ -1,7 +1,7 @@
 {
-  "edge_count": 1943,
-  "external_import_count": 2039,
-  "module_count": 610,
+  "edge_count": 1957,
+  "external_import_count": 2044,
+  "module_count": 611,
   "modules": [
     {
       "external_imports": [],
@@ -924,6 +924,7 @@
         "app.domains.characters.dependencies",
         "app.domains.characters.exceptions",
         "app.domains.characters.schemas",
+        "app.domains.characters.service.drafts",
         "app.domains.characters.service.management",
         "app.domains.identity.service.demo_access"
       ],
@@ -985,6 +986,29 @@
       ],
       "module": "app.domains.characters.service.creator",
       "path": "backend/app/domains/characters/service/creator.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "logging",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "uuid"
+      ],
+      "imports": [
+        "app.core.security",
+        "app.domains.characters.contracts",
+        "app.domains.characters.exceptions",
+        "app.domains.characters.models",
+        "app.domains.characters.schemas",
+        "app.domains.characters.service.creator",
+        "app.domains.characters.service.persona",
+        "app.domains.characters.service.profile",
+        "app.policies.name_policy"
+      ],
+      "module": "app.domains.characters.service.drafts",
+      "path": "backend/app/domains/characters/service/drafts.py",
       "wildcard_imports": []
     },
     {
@@ -5923,6 +5947,7 @@
         "app.core.request_limits",
         "app.cruds.community",
         "app.runtime.account_deletion",
+        "app.runtime.characters.creator",
         "app.runtime.characters.management",
         "app.runtime.logging_config",
         "app.runtime.single_backend_components",
@@ -6313,6 +6338,7 @@
         "app.domains.world_packages.infrastructure.filesystem_import_media",
         "app.domains.world_packages.infrastructure.sqlalchemy_import_commit",
         "app.runtime.account_deletion",
+        "app.runtime.characters.creator",
         "app.runtime.characters.management",
         "app.runtime.component_workers",
         "app.runtime.configuration",
@@ -6398,9 +6424,11 @@
         "app.credentials",
         "app.cruds.agent_runs",
         "app.cruds.agents",
+        "app.domains.characters.contracts",
         "app.domains.characters.exceptions",
         "app.domains.characters.models",
         "app.domains.characters.service.creator",
+        "app.domains.characters.service.drafts",
         "app.domains.characters.service.image_quota",
         "app.domains.characters.service.profile",
         "app.domains.identity.service.demo_access",

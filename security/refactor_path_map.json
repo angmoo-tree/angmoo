@@ -4608,6 +4608,7 @@
         "backend/app/services/agent_creation_drafts.py": [
           "backend/app/domains/characters/exceptions.py",
           "backend/app/domains/characters/service/creator.py",
+          "backend/app/domains/characters/service/drafts.py",
           "backend/app/domains/characters/service/image_quota.py",
           "backend/app/runtime/characters/creator.py"
         ]
@@ -6904,7 +6905,7 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::create_draft",
-          "new": "backend/app/runtime/characters/creator.py::create_draft",
+          "new": "backend/app/domains/characters/service/drafts.py::create_draft",
           "direct_consumers": [
             "backend/app/runtime/characters/creator.py"
           ],
@@ -6914,7 +6915,7 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::get_draft",
-          "new": "backend/app/runtime/characters/creator.py::get_draft",
+          "new": "backend/app/domains/characters/service/drafts.py::get_draft",
           "direct_consumers": [
             "backend/app/runtime/characters/creator.py"
           ],
@@ -6954,7 +6955,7 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::update_draft",
-          "new": "backend/app/runtime/characters/creator.py::update_draft",
+          "new": "backend/app/domains/characters/service/drafts.py::update_draft",
           "direct_consumers": [
             "backend/app/runtime/characters/creator.py"
           ],
@@ -6966,7 +6967,7 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::enhance_persona",
-          "new": "backend/app/runtime/characters/creator.py::enhance_persona",
+          "new": "backend/app/domains/characters/service/drafts.py::enhance_persona",
           "direct_consumers": [
             "backend/app/runtime/characters/creator.py"
           ],
@@ -7068,7 +7069,7 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::complete_draft",
-          "new": "backend/app/runtime/characters/creator.py::complete_draft",
+          "new": "backend/app/domains/characters/service/drafts.py::complete_draft",
           "direct_consumers": [
             "backend/app/runtime/characters/creator.py"
           ],
@@ -7104,7 +7105,7 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_get_owned_draft",
-          "new": "backend/app/runtime/characters/creator.py::_get_owned_draft",
+          "new": "backend/app/domains/characters/service/drafts.py::_get_owned_draft",
           "direct_consumers": [
             "backend/app/runtime/characters/creator.py"
           ],
@@ -7128,7 +7129,7 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_cleanup_expired_drafts",
-          "new": "backend/app/runtime/characters/creator.py::_cleanup_expired_drafts",
+          "new": "backend/app/domains/characters/service/drafts.py::_cleanup_expired_drafts",
           "direct_consumers": [
             "backend/app/runtime/characters/creator.py"
           ],
@@ -7139,7 +7140,7 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_delete_profile_image_candidates_for_draft",
-          "new": "backend/app/runtime/characters/creator.py::_delete_profile_image_candidates_for_draft",
+          "new": "backend/app/domains/characters/service/drafts.py::_delete_profile_image_candidates_for_draft",
           "direct_consumers": [
             "backend/app/runtime/characters/creator.py"
           ],
@@ -8335,7 +8336,7 @@
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::get_agent_draft",
-          "new": "backend/app/api/v1/routes/agents.py::get_agent_draft",
+          "new": "backend/app/domains/characters/router.py::get_agent_draft",
           "direct_consumers": [
             "backend/app/api/v1/routes/agents.py"
           ],
@@ -8355,7 +8356,7 @@
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::update_agent_draft",
-          "new": "backend/app/api/v1/routes/agents.py::update_agent_draft",
+          "new": "backend/app/domains/characters/router.py::update_agent_draft",
           "direct_consumers": [
             "backend/app/api/v1/routes/agents.py"
           ],
@@ -8754,6 +8755,10 @@
           ]
         }
       ]
+    },
+    "AR-B2-B4": {
+      "status": "Creator draft lifecycle actual implementation moved; media/provider adapters and cross-domain HTTP error mapping remain explicitly composed",
+      "reason": "Original eight draft functions now own DB decisions in service.drafts. Existing original-source split maps point to these exact bodies, keeping earlier policy/helper moves. Two additional draft HTTP endpoints keep the same registered route positions."
     }
   }
 }

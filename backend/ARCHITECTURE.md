@@ -437,3 +437,9 @@ Creator 이미지 한도는 `service/image_quota.py`, draft 응답·파싱·쿨�
 기본 Character 관리 6개 API는 `domains/characters/router.py` → `service/management.py` → profile/persona mutation으로 연결된다. HTTP dependency는 앱 생성 시 등록한 `CharacterManagementWorkflows`를 가져온다. 이 callback에는 활동 설정·credential·기록·상세 응답 조립이 들어가며 동일 DB Session을 받는다. Character의 소유권과 프로필 변경은 service가 판단하고, HTTP 계층에는 오류의 응답 코드 변환만 둔다.
 
 기존 `/agents` 집계 파일은 아직 활동·LocalBot·이미지 API를 포함하므로 canonical Character APIRoute를 원래 위치에 조립한다. 일반 상세 조립의 최근 활동 20개와 단일 조회 200개 한도, drafts 우선 경로 매칭은 유지한다. `AgentDetailRead`는 Character schemas이며 credential/활동/slot의 읽기 계약은 각각 Identity/Runtime schemas에서 가져온다. 이 DTO 선행 추출이 다른 업무 실행 로직의 이전 완료를 뜻하지 않는다.
+
+#### Creator 초안의 수명주기
+
+초안 생성·조회·수정·페르소나 보강·완료와 만료 정리는 `domains/characters/service/drafts.py`가 담당한다. ORM 변경과 소유권·검증은 그곳에서 읽을 수 있고, 파일이나 LLM 작업은 `CreatorWorkflows`를 통해 runtime이 연결한다. callback은 기존 요청의 Session을 그대로 사용하며 초안 정리의 per-draft commit/rollback 정책을 바꾸지 않는다. get/update draft HTTP도 Character router가 담당한다.
+
+파일 전송·이미지 candidate 생성/승격과 provider-specific 오류 변환은 아직 runtime/API 조립의 실제 책임이다. 기존 생성·보강·완료 HTTP에서 이어지는 임시 runtime entry는 canonical lifecycle을 호출할 뿐 업무 구현을 중복하지 않는다. 이를 특정 파일 이름만으로 다른 도메인에 통째로 옮기지 않으며 B3 media와 B4 activity 전환에서 남은 소비 경계를 정리한다.
