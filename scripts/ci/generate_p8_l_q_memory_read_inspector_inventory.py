@@ -53,7 +53,7 @@ REQUIRED_FILES = (
     "backend/app/domains/memory/api/schemas.py",
     "backend/app/domains/memory/service/inspector.py",
     "backend/app/domains/memory/contracts/inspector.py",
-    "backend/app/domains/memory/infrastructure/repository.py",
+    "backend/app/domains/memory/repository/items.py",
     "backend/app/domains/memory/contracts/item_store.py",
     "backend/app/domains/memory/public.py",
     "backend/app/runtime/chat/sqlalchemy_adapter.py",

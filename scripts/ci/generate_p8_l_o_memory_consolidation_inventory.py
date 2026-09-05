@@ -44,8 +44,8 @@ REQUIRED_FILES = (
     "backend/app/domains/memory/service/consolidation.py",
     "backend/app/domains/memory/policies/consolidation.py",
     "backend/app/domains/memory/policies/consolidation_output.py",
-    "backend/app/domains/memory/infrastructure/consolidation_repository.py",
-    "backend/app/domains/memory/infrastructure/maintenance_queue.py",
+    "backend/app/domains/memory/repository/consolidation.py",
+    "backend/app/domains/memory/repository/queue.py",
     "backend/app/domains/memory/infrastructure/maintenance_unit_of_work.py",
     "backend/app/domains/memory/contracts/consolidation_provider.py",
     "backend/app/domains/memory/contracts/consolidation_store.py",
@@ -142,7 +142,7 @@ def _boundary_contract() -> dict[str, Any]:
         ("app.integrations.direct_llm",),
     )
     _require_text(
-        "backend/app/domains/memory/infrastructure/consolidation_repository.py",
+        "backend/app/domains/memory/repository/consolidation.py",
         (
             "memory_item_set_digest",
             "memory_item_high_watermark",

@@ -43,7 +43,7 @@ REQUIRED_FILES = (
     "backend/app/domains/memory/service/scope.py",
     "backend/app/domains/memory/service/items.py",
     "backend/app/domains/memory/contracts/items.py",
-    "backend/app/domains/memory/infrastructure/repository.py",
+    "backend/app/domains/memory/repository/items.py",
     "backend/app/domains/memory/contracts/item_store.py",
     "backend/app/domains/memory/public.py",
     "backend/app/runtime/memory/recall_projection.py",
@@ -161,7 +161,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/domains/memory/infrastructure/repository.py",
+        "backend/app/domains/memory/repository/items.py",
         (
             "def correct_item_summary(",
             "old.status = MemoryItemStatus.SUPERSEDED.value",

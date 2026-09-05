@@ -9,7 +9,9 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.core.db import Base
-from app.domains.memory.infrastructure import SqlAlchemyMemoryRepository
+from app.runtime.memory.composition import (
+    memory_repository as SqlAlchemyMemoryRepository,
+)
 from app.domains.memory.public import (
     DEFAULT_MEMORY_RETENTION_DAYS,
     MemoryConflictError,

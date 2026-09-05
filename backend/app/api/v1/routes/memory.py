@@ -50,7 +50,9 @@ from app.domains.memory.exceptions import (
 from app.domains.memory.contracts.provenance import MemoryProviderMode, MemorySourceTypeV1
 from app.domains.memory.policies.retention import DEFAULT_MEMORY_RETENTION_DAYS
 from app.domains.memory.contracts.scope import MemoryScope
-from app.domains.memory.infrastructure.repository import SqlAlchemyMemoryRepository
+from app.runtime.memory.composition import (
+    memory_repository as SqlAlchemyMemoryRepository,
+)
 from app.runtime.memory.sqlalchemy_source_reader import (
     SqlAlchemyMemorySourceEvidenceReader,
 )
@@ -59,8 +61,8 @@ from app.domains.memory.schemas.batch import (
     MemoryBatchSettingRead,
     MemoryBatchSettingUpdate,
 )
-from app.domains.memory.infrastructure.batch_repository import (
-    SqlAlchemyMemoryBatchRepository,
+from app.runtime.memory.composition import (
+    memory_batch_repository as SqlAlchemyMemoryBatchRepository,
 )
 from app.providers.registry import MESSAGE_GOOGLE_MODELS
 from app.runtime.memory_selection_provider import memory_provider

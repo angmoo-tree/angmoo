@@ -152,7 +152,7 @@ def _line_numbers(text: str, pattern: re.Pattern[str]) -> list[int]:
 
 def _postgres_owner(path: str) -> tuple[str, str, str]:
     if path == (
-        "backend/app/domains/memory/infrastructure/consolidation_repository.py"
+        "backend/app/domains/memory/repository/consolidation.py"
     ):
         return (
             "P8-L-O",

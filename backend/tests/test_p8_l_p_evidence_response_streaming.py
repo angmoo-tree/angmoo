@@ -94,7 +94,9 @@ from app.domains.chat.ports.character_response_generator import (
 )
 from app.domains.chat.ports.successful_chat_memory import SuccessfulChatMemorySource
 from app.domains.chat.ports.retrieval_policy import RetrievalPreflightCommand
-from app.domains.memory.infrastructure import SqlAlchemyMemoryRepository
+from app.runtime.memory.composition import (
+    memory_repository as SqlAlchemyMemoryRepository,
+)
 from app.domains.memory.public import (
     CANONICAL_PRIMITIVE_REGISTRY,
     MemoryScope,

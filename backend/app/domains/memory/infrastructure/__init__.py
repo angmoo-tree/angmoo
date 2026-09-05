@@ -1,10 +1,10 @@
 """Infrastructure adapters owned by the memory domain."""
 
-from app.domains.memory.infrastructure.maintenance_queue import (
+from app.domains.memory.repository.queue import (
     SqlAlchemyMemoryMaintenanceQueue,
 )
-from app.domains.memory.infrastructure.repository import SqlAlchemyMemoryRepository
-from app.domains.memory.infrastructure.consolidation_repository import (
+from app.domains.memory.repository.items import SqlAlchemyMemoryRepository
+from app.domains.memory.repository.consolidation import (
     SqlAlchemyMemoryConsolidationRepository,
 )
 from app.domains.memory.infrastructure.maintenance_unit_of_work import (

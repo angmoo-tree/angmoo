@@ -9,7 +9,7 @@ from sqlalchemy import and_, or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.core.db import Base
+from app.domains.memory.contracts.scope_references import MemoryScopeReferences
 from app.domains.memory.exceptions import (
     MemoryConflictError,
     MemoryNotFoundError,
@@ -50,8 +50,9 @@ from app.domains.memory.contracts.source_evidence import CanonicalMemoryEvidence
 
 
 class SqlAlchemyMemoryRepository:
-    def __init__(self, session: Session) -> None:
+    def __init__(self, session: Session, *, references: MemoryScopeReferences) -> None:
         self._session = session
+        self._references = references
 
     def validate_scope(self, scope: MemoryScope) -> None:
         self._validate_scope(scope)
@@ -125,7 +126,7 @@ class SqlAlchemyMemoryRepository:
         updated = self._find_scope(scope, populate_existing=True)
         if updated is None:
             raise MemoryConflictError("memory_scope_update_missing")
-        from app.domains.memory.infrastructure.activation import record_activation
+        from app.domains.memory.repository.activation import record_activation
 
         record_activation(self._session, updated)
         if not enabled:
@@ -959,29 +960,7 @@ class SqlAlchemyMemoryRepository:
         return True
 
     def _validate_scope(self, scope: MemoryScope) -> None:
-        users = Base.metadata.tables["users"]
-        worlds = Base.metadata.tables["worlds"]
-        world_characters = Base.metadata.tables["world_characters"]
-        owner_exists = self._session.scalar(
-            select(users.c.id).where(
-                users.c.id == scope.owner_id,
-                users.c.deleted_at.is_(None),
-            )
-        )
-        world_exists = self._session.scalar(
-            select(worlds.c.id).where(
-                worlds.c.id == scope.world_id,
-                worlds.c.owner_user_id == scope.owner_id,
-                worlds.c.archived_at.is_(None),
-            )
-        )
-        subject_exists = self._session.scalar(
-            select(world_characters.c.id).where(
-                world_characters.c.id == scope.subject_world_character_id,
-                world_characters.c.world_id == scope.world_id,
-                world_characters.c.status == "active",
-            )
-        )
+        owner_exists, world_exists, subject_exists = self._references.read_presence(scope)
         if owner_exists is None or world_exists is None or subject_exists is None:
             raise MemoryScopeError("memory_scope_invalid")
 

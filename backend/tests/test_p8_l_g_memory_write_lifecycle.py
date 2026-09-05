@@ -12,9 +12,9 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.core.db import Base
-from app.domains.memory.infrastructure import (
-    SqlAlchemyMemoryMaintenanceQueue,
-    SqlAlchemyMemoryRepository,
+from app.domains.memory.infrastructure import SqlAlchemyMemoryMaintenanceQueue
+from app.runtime.memory.composition import (
+    memory_repository as SqlAlchemyMemoryRepository,
 )
 from app.runtime.memory import SqlAlchemyMemorySourceEvidenceReader
 from app.domains.memory.public import (

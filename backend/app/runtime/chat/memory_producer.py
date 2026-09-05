@@ -5,7 +5,9 @@ from __future__ import annotations
 from sqlalchemy.orm import Session
 
 from app.domains.chat.ports import SuccessfulChatMemorySource
-from app.domains.memory.infrastructure import SqlAlchemyMemoryRepository
+from app.runtime.memory.composition import (
+    memory_repository as SqlAlchemyMemoryRepository,
+)
 from app.domains.memory.public import (
     MemoryKindV1,
     MemoryScope,

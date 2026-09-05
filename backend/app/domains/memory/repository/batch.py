@@ -8,7 +8,7 @@ from uuid import uuid4
 from sqlalchemy import case, exists, func, or_, select, update
 from sqlalchemy.orm import Session
 
-from app.core.db import Base
+from app.domains.memory.contracts.scope_references import MemoryScopeReferences
 from app.domains.memory.policies.batch import (
     MEMORY_CONSENT_VERSION,
     MAX_BATCH_ATTEMPTS,
@@ -32,10 +32,10 @@ from app.domains.memory.models.batch import (
     MemorySelectionDecisionModel,
     MemorySourceDelivery,
 )
-from app.domains.memory.infrastructure.maintenance_queue import (
+from app.domains.memory.repository.queue import (
     SqlAlchemyMemoryMaintenanceQueue,
 )
-from app.domains.memory.infrastructure.repository import SqlAlchemyMemoryRepository
+from app.domains.memory.repository.items import SqlAlchemyMemoryRepository
 from app.domains.memory.models.items import (
     MemoryCandidate,
     MemoryMaintenanceJob,
@@ -45,17 +45,15 @@ from app.domains.memory.contracts.batch import MemoryBatchSettings, MemorySelect
 
 
 class SqlAlchemyMemoryBatchRepository:
-    def __init__(self, session: Session) -> None:
+    def __init__(self, session: Session, *, references: MemoryScopeReferences) -> None:
         self.session = session
-        self.memory = SqlAlchemyMemoryRepository(session)
+        self._references = references
+        self.memory = SqlAlchemyMemoryRepository(session, references=references)
         self.queue = SqlAlchemyMemoryMaintenanceQueue(session)
 
     def timezone(self, scope: MemoryScope) -> str:
         self.memory.validate_scope(scope)
-        worlds = Base.metadata.tables["worlds"]
-        zone = self.session.scalar(
-            select(worlds.c.timezone).where(worlds.c.id == scope.world_id)
-        )
+        zone = self._references.read_timezone(scope)
         schedule_timezone(zone)
         return zone
 

@@ -60,7 +60,7 @@ REQUIRED_FILES = (
     "backend/app/domains/memory/contracts/source_evidence.py",
     "backend/app/domains/memory/contracts/maintenance_queue.py",
     "backend/app/domains/memory/models/items.py",
-    "backend/app/domains/memory/infrastructure/repository.py",
+    "backend/app/domains/memory/repository/items.py",
     "backend/app/alembic/versions/20260831_0085_canonical_memory_schema.py",
     "backend/app/runtime/migrations/sqlite_versions/v4_to_v5_canonical_memory.py",
     "backend/app/runtime/migrations/sqlite_versions/manifests/v5.json",
@@ -305,7 +305,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/domains/memory/infrastructure/repository.py",
+        "backend/app/domains/memory/repository/items.py",
         (
             "enabled=False",
             "worlds.c.owner_user_id == scope.owner_id",

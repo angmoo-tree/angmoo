@@ -11,10 +11,9 @@ from sqlalchemy.orm import Session
 from app import models
 from app.core.db import Base
 from app.domains.identity.public import CredentialMaterial, CredentialPurpose
-from app.domains.memory.infrastructure import (
-    SqlAlchemyMemoryConsolidationRepository,
-    SqlAlchemyMemoryMaintenanceQueue,
-    SqlAlchemyMemoryMaintenanceUnitOfWork,
+from app.domains.memory.infrastructure import SqlAlchemyMemoryMaintenanceQueue, SqlAlchemyMemoryMaintenanceUnitOfWork
+from app.runtime.memory.composition import (
+    memory_consolidation_repository as SqlAlchemyMemoryConsolidationRepository,
 )
 from app.domains.memory.public import (
     CanonicalMemoryEvidence,

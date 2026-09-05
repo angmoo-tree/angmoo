@@ -8,6 +8,8 @@ from uuid import uuid4
 from sqlalchemy import func, or_, select, update
 from sqlalchemy.orm import Session
 
+from app.domains.memory.contracts.scope_references import MemoryScopeReferences
+
 from app.domains.memory.policies.consolidation import (
     MAX_HOT_BRIEF_SOURCE_ITEMS,
     MAX_HOT_BRIEF_SUMMARY_LENGTH,
@@ -28,7 +30,7 @@ from app.domains.memory.contracts.provenance import (
     MemoryItemStatus,
 )
 from app.domains.memory.contracts.scope import MemoryScopeSetting
-from app.domains.memory.infrastructure.repository import SqlAlchemyMemoryRepository
+from app.domains.memory.repository.items import SqlAlchemyMemoryRepository
 from app.domains.memory.models.items import (
     MemoryCandidate,
     MemoryHotBrief,
@@ -41,8 +43,8 @@ from app.domains.memory.models.items import (
 class SqlAlchemyMemoryConsolidationRepository(SqlAlchemyMemoryRepository):
     """One canonical adapter that also satisfies the existing write port."""
 
-    def __init__(self, session: Session) -> None:
-        super().__init__(session)
+    def __init__(self, session: Session, *, references: MemoryScopeReferences) -> None:
+        super().__init__(session, references=references)
         self._session = session
 
     def get_scope_setting_by_id(

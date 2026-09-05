@@ -52,7 +52,9 @@ from app.domains.chat.ports import (
     RetrievalRouterContextMessage,
 )
 from app.domains.identity.public import CredentialMaterial
-from app.domains.memory.infrastructure import SqlAlchemyMemoryRepository
+from app.runtime.memory.composition import (
+    memory_repository as SqlAlchemyMemoryRepository,
+)
 from app.domains.memory.public import (
     CanonicalRetrievalPlanExecutor,
     MemoryEvidenceAvailability,

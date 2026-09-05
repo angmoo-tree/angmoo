@@ -28,7 +28,7 @@
     },
     {
       "path": "backend/app/api/v1/routes/memory.py",
-      "sha256": "2609e6d9ae7b7b731a06d2c725036f1d7a97a72d9a1f9718d03da0d5826b9d3d"
+      "sha256": "cd443ea4fbc36380fc2f3770efb5c6222bfe4147b1a524831edb867ba550f60e"
     },
     {
       "path": "backend/app/domains/memory/__init__.py",
@@ -99,6 +99,10 @@
       "sha256": "ef78f4dec7871f0066faa77eb823666016cc0a4a2e6e5af3ba96b4b424557a24"
     },
     {
+      "path": "backend/app/domains/memory/contracts/scope_references.py",
+      "sha256": "bec9e259535ccab0201af71b4f805798d6cbd7cc40668221ab2fb674ae53f43d"
+    },
+    {
       "path": "backend/app/domains/memory/contracts/source_evidence.py",
       "sha256": "60a63a5f5c5dc9963df5538a17f1356fca93f467dae7c3ca0ba57d9bf4bd7acc"
     },
@@ -112,35 +116,15 @@
     },
     {
       "path": "backend/app/domains/memory/infrastructure/__init__.py",
-      "sha256": "001a6f9fac809429e430a5344ff01c8b79e2424d3f277c960aedaee7d3c65c9b"
-    },
-    {
-      "path": "backend/app/domains/memory/infrastructure/activation.py",
-      "sha256": "0d37dcd1fce33b6cef311bdb95cc32cf603311a0e1f1d1aa599e1604689d9d28"
+      "sha256": "c99814137c0977ec0cb5b80fa8a0a1c36d90ea3b527b24b1a7c8513c2b039b62"
     },
     {
       "path": "backend/app/domains/memory/infrastructure/batch_models.py",
       "sha256": "95da12f313ce60f110ccf26c4619dbd4721d70c3f0800c1bc2db4b0f57a4e8e3"
     },
     {
-      "path": "backend/app/domains/memory/infrastructure/batch_repository.py",
-      "sha256": "3aefd250d24035c9e8a139c5ef3ed7b80460f1717d110f3c553866cbfa5e0f49"
-    },
-    {
-      "path": "backend/app/domains/memory/infrastructure/consolidation_repository.py",
-      "sha256": "f35526239f551a6b63f74837565fae0a88dcd2acd3fda9f3557a1d2e3d037a07"
-    },
-    {
-      "path": "backend/app/domains/memory/infrastructure/maintenance_queue.py",
-      "sha256": "823a7fbfb1cb1f5670089455e3eab74814c7856623f8efdc9c674259c82f3a47"
-    },
-    {
       "path": "backend/app/domains/memory/infrastructure/maintenance_unit_of_work.py",
       "sha256": "d3509fa4d74bcb28568041615c274137c1119c76eeb92163d8ef8770a1219f5f"
-    },
-    {
-      "path": "backend/app/domains/memory/infrastructure/repository.py",
-      "sha256": "34201bff0bc4ac66d7dbe1c6640c22bc91c902fc415587af7c588a4ec157e5ba"
     },
     {
       "path": "backend/app/domains/memory/infrastructure/sqlalchemy_models.py",
@@ -185,6 +169,26 @@
     {
       "path": "backend/app/domains/memory/public.py",
       "sha256": "fe9e037f97ce191d1cdfd7342875400c917616115e1d99acf9bd317472b68211"
+    },
+    {
+      "path": "backend/app/domains/memory/repository/activation.py",
+      "sha256": "0d37dcd1fce33b6cef311bdb95cc32cf603311a0e1f1d1aa599e1604689d9d28"
+    },
+    {
+      "path": "backend/app/domains/memory/repository/batch.py",
+      "sha256": "9f9d5943c759a592411906e1a88eb4e5f84d7c08ed2c52cea8810990c949a1af"
+    },
+    {
+      "path": "backend/app/domains/memory/repository/consolidation.py",
+      "sha256": "fd0a31e5e6aeadf5b1480c34351e0ec2fb4464df968a28c355547c34ef2737a3"
+    },
+    {
+      "path": "backend/app/domains/memory/repository/items.py",
+      "sha256": "9fc62ea20410321d6ba2ac1d6dc436b7043c8d5e807a5d4dbcc3e0d4ad985a82"
+    },
+    {
+      "path": "backend/app/domains/memory/repository/queue.py",
+      "sha256": "823a7fbfb1cb1f5670089455e3eab74814c7856623f8efdc9c674259c82f3a47"
     },
     {
       "path": "backend/app/domains/memory/schemas/__init__.py",
@@ -252,11 +256,19 @@
     },
     {
       "path": "backend/app/runtime/memory/batch_runtime.py",
-      "sha256": "3cb955e2e50e20a0e974f33c8f99ffbe3f5263669ea850076bf944ecaf580293"
+      "sha256": "1f9c10d7e9ee36f493ca7703817a1ce6a9ffacbfaceebb62b303f0f3612939d0"
+    },
+    {
+      "path": "backend/app/runtime/memory/composition.py",
+      "sha256": "ffc8b259e43241295d4e2c73d9968d72f7569eab89047de75d8f2f69aaaab57b"
     },
     {
       "path": "backend/app/runtime/memory/recall_projection.py",
       "sha256": "1b0ed5540914a060467e7f935d84680180c0033d2095c8270be39038d659a6ac"
+    },
+    {
+      "path": "backend/app/runtime/memory/scope_queries.py",
+      "sha256": "c4628f92b57034bb15f19bb9298646b4fd60ba2828867a3dd5d7e2aaa8c15157"
     },
     {
       "path": "backend/app/runtime/memory/shutdown.py",
@@ -320,11 +332,11 @@
     },
     {
       "path": "backend/tests/test_p8_l_r_memory_batch_runtime.py",
-      "sha256": "5e6f3cbeaf1efb1a063ff472d036e55de3d7b573b3b91d36fc4b79074dfc357b"
+      "sha256": "4cf1e5ade7c349b398bb04da6e8a497bdb5b9782774e63c0213da7208499cabe"
     },
     {
       "path": "backend/tests/test_p8_l_r_memory_batch_safety.py",
-      "sha256": "9436cb249cf1594f225c826b880a1bf1ae799c544d64d648afd252fe86c3a615"
+      "sha256": "4b66aaa77ea1db5830aa98b6e520f34fc98ca93b4f454b1e61b8bf9d214d32c4"
     },
     {
       "path": "browser-tests/memory-batch-fixture.ts",

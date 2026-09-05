@@ -33,13 +33,15 @@ from app.domains.memory.models.batch import (
     MemoryBatchSetting,
     MemorySourceDelivery,
 )
-from app.domains.memory.infrastructure.batch_repository import (
-    SqlAlchemyMemoryBatchRepository,
+from app.runtime.memory.composition import (
+    memory_batch_repository as SqlAlchemyMemoryBatchRepository,
 )
-from app.domains.memory.infrastructure.consolidation_repository import (
-    SqlAlchemyMemoryConsolidationRepository,
+from app.runtime.memory.composition import (
+    memory_consolidation_repository as SqlAlchemyMemoryConsolidationRepository,
 )
-from app.domains.memory.infrastructure.repository import SqlAlchemyMemoryRepository
+from app.runtime.memory.composition import (
+    memory_repository as SqlAlchemyMemoryRepository,
+)
 from app.domains.memory.models.items import (
     MemoryCandidate,
     MemoryScopeSettingModel,

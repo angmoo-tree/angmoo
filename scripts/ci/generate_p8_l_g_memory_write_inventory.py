@@ -44,9 +44,9 @@ REQUIRED_FILES = (
     "backend/app/domains/memory/contracts/item_store.py",
     "backend/app/domains/memory/contracts/source_evidence.py",
     "backend/app/domains/memory/contracts/maintenance_queue.py",
-    "backend/app/domains/memory/infrastructure/repository.py",
+    "backend/app/domains/memory/repository/items.py",
     "backend/app/runtime/memory/sqlalchemy_source_reader.py",
-    "backend/app/domains/memory/infrastructure/maintenance_queue.py",
+    "backend/app/domains/memory/repository/queue.py",
     "backend/app/domains/memory/public.py",
     "backend/tests/test_p8_l_g_memory_write_lifecycle.py",
     "docs/architecture/p8-l-g-memory-write-lifecycle.md",
@@ -105,7 +105,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/domains/memory/infrastructure/repository.py",
+        "backend/app/domains/memory/repository/items.py",
         (
             "with self._session.begin_nested():",
             "self._session.add(self._new_evidence(item.id, evidence))",
@@ -144,7 +144,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/domains/memory/infrastructure/maintenance_queue.py",
+        "backend/app/domains/memory/repository/queue.py",
         (
             ".with_for_update()",
             ".execution_options(populate_existing=True)",

@@ -14,7 +14,9 @@ from app.domains.identity.dependencies import get_current_user
 from app.api.v1.routes.memory import router as memory_router
 from app.api.v1.routes.world_chat_response import router as response_router
 from app.core.db import Base, get_db
-from app.domains.memory.infrastructure import SqlAlchemyMemoryRepository
+from app.runtime.memory.composition import (
+    memory_repository as SqlAlchemyMemoryRepository,
+)
 from app.domains.memory.public import (
     MemoryEvidenceAvailability,
     MemoryKindV1,

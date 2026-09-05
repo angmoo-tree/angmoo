@@ -325,7 +325,12 @@
     "backend/app/domains/memory/ports/maintenance_unit_of_work.py": "backend/app/domains/memory/contracts/maintenance_transaction.py",
     "backend/app/domains/memory/ports/batch.py": "backend/app/domains/memory/contracts/batch.py",
     "backend/app/domains/memory/infrastructure/sqlalchemy_models.py": "backend/app/domains/memory/models/items.py",
-    "backend/app/domains/memory/infrastructure/batch_models.py": "backend/app/domains/memory/models/batch.py"
+    "backend/app/domains/memory/infrastructure/batch_models.py": "backend/app/domains/memory/models/batch.py",
+    "backend/app/domains/memory/infrastructure/repository.py": "backend/app/domains/memory/repository/items.py",
+    "backend/app/domains/memory/infrastructure/batch_repository.py": "backend/app/domains/memory/repository/batch.py",
+    "backend/app/domains/memory/infrastructure/consolidation_repository.py": "backend/app/domains/memory/repository/consolidation.py",
+    "backend/app/domains/memory/infrastructure/maintenance_queue.py": "backend/app/domains/memory/repository/queue.py",
+    "backend/app/domains/memory/infrastructure/activation.py": "backend/app/domains/memory/repository/activation.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -17855,6 +17860,81 @@
       },
       "preserved": "Frozen Alembic 0085/0089 and embedded v4->v5/v8->v9 bodies remain unchanged. Only their five imported constants/builders are explicitly re-exported at historical paths; no ORM class or builder implementation is duplicated. One existing Base and metadata remain under G5 registration ownership.",
       "remaining": "Owned SQL repositories/queue, same-Session scope queries, HTTP/runtime composition and G5 registry; retain the two exact aliases while immutable historical revisions require them."
+    },
+    "AR-B7-A4": {
+      "status": "SOURCE PREPARATION; original SQL and unchanged repository methods verified by AST; runtime regressions pending",
+      "moved_files": {
+        "backend/app/domains/memory/infrastructure/repository.py": "backend/app/domains/memory/repository/items.py",
+        "backend/app/domains/memory/infrastructure/batch_repository.py": "backend/app/domains/memory/repository/batch.py",
+        "backend/app/domains/memory/infrastructure/consolidation_repository.py": "backend/app/domains/memory/repository/consolidation.py",
+        "backend/app/domains/memory/infrastructure/maintenance_queue.py": "backend/app/domains/memory/repository/queue.py",
+        "backend/app/domains/memory/infrastructure/activation.py": "backend/app/domains/memory/repository/activation.py"
+      },
+      "scope": "Actual Memory item, batch, consolidation, leased queue and activation persistence. Three existing foreign-scope reads and one timezone read are composed in runtime with the identical caller Session; invalid-scope and timezone decisions remain in Memory.",
+      "preserved": "No separate transaction, no early return, no implicit commit/rollback, no new domain-to-runtime dependency. Every original unchanged repository method and foreign SQL statement is AST-compared; constructors require real read collaborators.",
+      "split_files": {
+        "backend/app/domains/memory/infrastructure/repository.py": [
+          "backend/app/domains/memory/repository/items.py",
+          "backend/app/runtime/memory/scope_queries.py"
+        ],
+        "backend/app/domains/memory/infrastructure/batch_repository.py": [
+          "backend/app/domains/memory/repository/batch.py",
+          "backend/app/runtime/memory/scope_queries.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/domains/memory/infrastructure/repository.py::SqlAlchemyMemoryRepository",
+          "new": "backend/app/domains/memory/repository/items.py::SqlAlchemyMemoryRepository",
+          "direct_consumers": [
+            "backend/app/runtime/memory/composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_f_memory_domain.py::test_scope_control_rejects_cross_owner_or_inactive_subject"
+          ]
+        },
+        {
+          "old": "backend/app/domains/memory/infrastructure/repository.py::SqlAlchemyMemoryRepository",
+          "new": "backend/app/runtime/memory/scope_queries.py::read_scope_presence",
+          "direct_consumers": [
+            "backend/app/runtime/memory/composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_f_memory_domain.py::test_scope_control_rejects_cross_owner_or_inactive_subject"
+          ]
+        },
+        {
+          "old": "backend/app/domains/memory/infrastructure/repository.py::__all__",
+          "new": "backend/app/domains/memory/repository/items.py::__all__",
+          "direct_consumers": [
+            "backend/app/runtime/memory/composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_f_memory_domain.py::test_scope_control_rejects_cross_owner_or_inactive_subject"
+          ]
+        },
+        {
+          "old": "backend/app/domains/memory/infrastructure/batch_repository.py::SqlAlchemyMemoryBatchRepository",
+          "new": "backend/app/domains/memory/repository/batch.py::SqlAlchemyMemoryBatchRepository",
+          "direct_consumers": [
+            "backend/app/runtime/memory/composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_f_memory_domain.py::test_scope_control_rejects_cross_owner_or_inactive_subject"
+          ]
+        },
+        {
+          "old": "backend/app/domains/memory/infrastructure/batch_repository.py::SqlAlchemyMemoryBatchRepository",
+          "new": "backend/app/runtime/memory/scope_queries.py::read_scope_timezone",
+          "direct_consumers": [
+            "backend/app/runtime/memory/composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_f_memory_domain.py::test_scope_control_rejects_cross_owner_or_inactive_subject"
+          ]
+        }
+      ],
+      "remaining": "Memory HTTP workflow and dependency composition; runtime lifecycle ownership and final aggregate cleanup. Existing schema migration aliases remain exact."
     }
   }
 }

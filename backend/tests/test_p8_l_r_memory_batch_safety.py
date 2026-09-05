@@ -18,8 +18,8 @@ from app.domains.memory.models.batch import (
     MemorySourceDelivery,
     MemorySelectionDecisionModel,
 )
-from app.domains.memory.infrastructure.batch_repository import (
-    SqlAlchemyMemoryBatchRepository,
+from app.runtime.memory.composition import (
+    memory_batch_repository as SqlAlchemyMemoryBatchRepository,
 )
 from app.domains.memory.models.items import (
     MemoryCandidate,
