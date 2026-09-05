@@ -709,3 +709,6 @@ Social 임시 `_SocialPersistenceModels`/`social_persistence_models` export는 �
 
 
 시각 정체성의 수동 값·이미지 hash 캐시, 생성 응답 검증, fallback과 seed→avatar→banner 참조 선택은 `social/service/image_identity.py`가 담당한다. `ImageGenerationWorkflows`는 원시 LLM 응답과 파일 참조 로딩 및 Character의 실제 저장 협력을 제공한다. 정상 검증을 통과한 값만 같은 attached 설정 객체에 저장하며, 캐시 적중·잘못된 응답에 저장을 추가하지 않는다. HTTP DTO와 LLM 출력 schema의 기존 검증 규칙도 유지한다.
+
+
+이미지 작업의 실제 실행 조립은 `runtime/social/image_generation.py`, 워커의 Session·시각·반복·취소·로그는 `runtime/social/image_job_worker.py`에 있다. 앞의 파일은 Social 서비스에 Character 설정·비밀 해석·LLM·파일 로딩 협력을 연결한다. 프롬프트/참조 정책이나 quota/첨부를 찾아볼 때는 해당 `social/service/image_*.py`를 사용한다. 옛 이미지 services 두 파일 및 사용하지 않는 private wrapper4·단순 정책 재수출을 제거하고 caller와 테스트를 실제 소유 모듈에 연결했다.

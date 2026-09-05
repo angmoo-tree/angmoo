@@ -1,4 +1,6 @@
-from app.domains.social.service import image_identity
+from app.domains.social.service import image_identity, image_prompts, image_reference_policy
+from app.domains.social import constants as image_constants
+from app.core import security
 import asyncio
 import base64
 from datetime import UTC, datetime
@@ -25,7 +27,8 @@ from app.core.image_generation import (
 )
 from app.config import settings
 from app.cruds import agents as agent_crud
-from app.services import image_prompt_safety, post_image_generation, profile_media, service_image_key
+from app.services import image_prompt_safety, profile_media, service_image_key
+from app.runtime.social import image_generation as post_image_generation
 from app.domains.social.service import image_generation as image_policy
 from app.integrations import pollinations_image
 from app.runtime.characters import management as agent_service
@@ -92,6 +95,7 @@ def test_service_image_model_uses_operation_setting_and_user_model_stays_per_age
 
 
 def test_first_greeting_image_mode_uses_first_greeting_identity_model() -> None:
+    from app.domains.social.service import image_prompts as post_image_generation
     assert (
         post_image_generation._image_llm_model_for_writing_mode("first_greeting")
         == "gemini-3.1-flash-lite"
@@ -335,7 +339,7 @@ def test_image_generation_setting_manual_visual_identity_uses_null_hash() -> Non
 
 
 def test_visual_identity_prompt_requires_shared_style_contract() -> None:
-    prompt = post_image_generation._visual_identity_system_prompt(
+    prompt = image_prompts._visual_identity_system_prompt(
         character=_character_stub()
     ).lower()
 
@@ -817,7 +821,7 @@ def test_pollinations_image_reference_fallback_remains_for_klein(monkeypatch) ->
 def test_klein_prompt_refiner_includes_body_structure_guidance() -> None:
     character = _character_stub()
 
-    prompt = post_image_generation._image_prompt_system_prompt(
+    prompt = image_prompts._image_prompt_system_prompt(
         character=character,
         image_model=POLLINATIONS_IMAGE_MODEL_FLUX_KLEIN,
     )
@@ -853,7 +857,7 @@ def test_klein_prompt_refiner_includes_body_structure_guidance() -> None:
 
 
 def test_zimage_prompt_refiner_includes_prompt_enhancer_guidance() -> None:
-    prompt = post_image_generation._image_prompt_system_prompt(
+    prompt = image_prompts._image_prompt_system_prompt(
         character=_character_stub(),
         image_model=POLLINATIONS_IMAGE_MODEL_ZIMAGE,
     ).lower()
@@ -880,7 +884,7 @@ def test_zimage_prompt_refiner_includes_prompt_enhancer_guidance() -> None:
 
 
 def test_flux_schnell_prompt_refiner_includes_concrete_text_to_image_guidance() -> None:
-    prompt = post_image_generation._image_prompt_system_prompt(
+    prompt = image_prompts._image_prompt_system_prompt(
         character=_character_stub(),
         image_model=POLLINATIONS_IMAGE_MODEL_FLUX_SCHNELL,
     ).lower()
@@ -920,7 +924,7 @@ def test_flux_schnell_prompt_refiner_includes_concrete_text_to_image_guidance() 
 
 
 def test_pruna_edit_prompt_refiner_includes_editing_guidance() -> None:
-    prompt = post_image_generation._image_prompt_system_prompt(
+    prompt = image_prompts._image_prompt_system_prompt(
         character=_character_stub(),
         image_model=POLLINATIONS_IMAGE_MODEL_PRUNA_EDIT,
     ).lower()
@@ -946,6 +950,7 @@ def test_pruna_edit_prompt_refiner_includes_editing_guidance() -> None:
 
 
 def test_replicate_models_reuse_existing_prompt_refiners() -> None:
+    from app.domains.social.service import image_prompts as post_image_generation
     character = _character_stub()
 
     assert post_image_generation._image_prompt_system_prompt(
@@ -965,7 +970,8 @@ def test_replicate_models_reuse_existing_prompt_refiners() -> None:
 
 
 def test_klein_compose_prompt_appends_body_structure_suffix() -> None:
-    prompt = post_image_generation._compose_pollinations_prompt(
+    from app.domains.social import constants as post_image_generation
+    prompt = image_prompts._compose_pollinations_prompt(
         {"prompt": "soft morning scene"},
         model=POLLINATIONS_IMAGE_MODEL_FLUX_KLEIN,
     )
@@ -975,7 +981,7 @@ def test_klein_compose_prompt_appends_body_structure_suffix() -> None:
 
 
 def test_zimage_compose_prompt_does_not_append_klein_suffix() -> None:
-    prompt = post_image_generation._compose_pollinations_prompt(
+    prompt = image_prompts._compose_pollinations_prompt(
         {"prompt": "soft morning scene"},
         model=POLLINATIONS_IMAGE_MODEL_ZIMAGE,
     )
@@ -984,7 +990,7 @@ def test_zimage_compose_prompt_does_not_append_klein_suffix() -> None:
 
 
 def test_flux_schnell_compose_prompt_does_not_append_klein_suffix() -> None:
-    prompt = post_image_generation._compose_pollinations_prompt(
+    prompt = image_prompts._compose_pollinations_prompt(
         {"prompt": "soft morning scene"},
         model=POLLINATIONS_IMAGE_MODEL_FLUX_SCHNELL,
     )
@@ -993,7 +999,7 @@ def test_flux_schnell_compose_prompt_does_not_append_klein_suffix() -> None:
 
 
 def test_pruna_edit_compose_prompt_does_not_append_klein_suffix() -> None:
-    prompt = post_image_generation._compose_pollinations_prompt(
+    prompt = image_prompts._compose_pollinations_prompt(
         {"prompt": "Modify the reference image."},
         model=POLLINATIONS_IMAGE_MODEL_PRUNA_EDIT,
     )
@@ -1101,14 +1107,14 @@ def test_prepare_post_image_does_not_skip_new_root_post_modes(
         lambda _db, _character_id: setting,
     )
     monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
-    monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
+    monkeypatch.setattr(security, "decrypt_secret", lambda value, **_kwargs: value)
     monkeypatch.setattr(
         image_identity,
         "_refine_image_prompt",
         fake_refine_image_prompt,
     )
     monkeypatch.setattr(
-        post_image_generation.pollinations_image,
+        pollinations_image,
         "generate_image",
         fake_generate_image,
     )
@@ -1179,9 +1185,9 @@ def test_prepare_post_image_flux_uses_visual_identity_without_reference(monkeypa
         lambda _db, _character_id: setting,
     )
     monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
-    monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
+    monkeypatch.setattr(security, "decrypt_secret", lambda value, **_kwargs: value)
     monkeypatch.setattr(image_identity, "_refine_image_prompt", fake_refine_image_prompt)
-    monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
+    monkeypatch.setattr(pollinations_image, "generate_image", fake_generate_image)
 
     result = asyncio.run(
         post_image_generation.prepare_post_image(
@@ -1259,9 +1265,9 @@ def test_prepare_post_image_reads_route_mode_at_processing_time(monkeypatch) -> 
         lambda _db, _character_id: setting,
     )
     monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
-    monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
+    monkeypatch.setattr(security, "decrypt_secret", lambda value, **_kwargs: value)
     monkeypatch.setattr(image_identity, "_refine_image_prompt", fake_refine_image_prompt)
-    monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
+    monkeypatch.setattr(pollinations_image, "generate_image", fake_generate_image)
 
     result = asyncio.run(
         post_image_generation.prepare_post_image(
@@ -1333,9 +1339,9 @@ def test_prepare_post_image_flux_failure_keeps_pollinations_diagnostics(
         lambda _db, _character_id: setting,
     )
     monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
-    monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
+    monkeypatch.setattr(security, "decrypt_secret", lambda value, **_kwargs: value)
     monkeypatch.setattr(image_identity, "_refine_image_prompt", fake_refine_image_prompt)
-    monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
+    monkeypatch.setattr(pollinations_image, "generate_image", fake_generate_image)
 
     result = asyncio.run(
         post_image_generation.prepare_post_image(
@@ -1408,8 +1414,8 @@ def test_local_api_prepare_uses_deterministic_prompt_without_llm(monkeypatch) ->
         lambda _db, _character_id: setting,
     )
     monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
-    monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
-    monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
+    monkeypatch.setattr(security, "decrypt_secret", lambda value, **_kwargs: value)
+    monkeypatch.setattr(pollinations_image, "generate_image", fake_generate_image)
     monkeypatch.setattr(image_identity, "_refine_image_prompt", fail_refiner)
     monkeypatch.setattr(image_identity, "_ensure_visual_identity", fail_identity)
 
@@ -1473,8 +1479,8 @@ def test_local_api_prepare_reads_route_mode_at_worker_processing_time(monkeypatc
         lambda _db, _character_id: setting,
     )
     monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
-    monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
-    monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
+    monkeypatch.setattr(security, "decrypt_secret", lambda value, **_kwargs: value)
+    monkeypatch.setattr(pollinations_image, "generate_image", fake_generate_image)
 
     result = asyncio.run(
         post_image_generation.prepare_local_api_post_image(
@@ -1525,8 +1531,8 @@ def test_local_api_prepare_flux_uses_visual_identity_without_reference(monkeypat
         lambda _db, _character_id: setting,
     )
     monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
-    monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
-    monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
+    monkeypatch.setattr(security, "decrypt_secret", lambda value, **_kwargs: value)
+    monkeypatch.setattr(pollinations_image, "generate_image", fake_generate_image)
 
     result = asyncio.run(
         post_image_generation.prepare_local_api_post_image(
@@ -1584,8 +1590,8 @@ def test_local_api_prepare_failure_propagates_attempt_metadata(monkeypatch) -> N
         lambda _db, _character_id: setting,
     )
     monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
-    monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
-    monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
+    monkeypatch.setattr(security, "decrypt_secret", lambda value, **_kwargs: value)
+    monkeypatch.setattr(pollinations_image, "generate_image", fake_generate_image)
 
     result = asyncio.run(
         post_image_generation.prepare_local_api_post_image(
@@ -1681,7 +1687,7 @@ def test_prepare_post_image_service_mode_uses_service_key_and_reservation(
         fake_refine_image_prompt,
     )
     monkeypatch.setattr(
-        post_image_generation.pollinations_image,
+        pollinations_image,
         "generate_image",
         fake_generate_image,
     )
@@ -1783,7 +1789,7 @@ def test_prepare_post_image_service_failure_keeps_service_mapping_and_diagnostic
         lambda *_args, **_kwargs: None,
     )
     monkeypatch.setattr(image_identity, "_refine_image_prompt", fake_refine_image_prompt)
-    monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
+    monkeypatch.setattr(pollinations_image, "generate_image", fake_generate_image)
 
     result = asyncio.run(
         post_image_generation.prepare_post_image(
@@ -1975,7 +1981,10 @@ def test_pruna_edit_prepare_skips_unusable_reference(monkeypatch) -> None:
 
 
 def test_pollinations_reference_policy_by_model() -> None:
-    reference = post_image_generation._ReferenceImage(
+    from app.domains.social.service import image_reference_policy as post_image_generation
+    from app.runtime.social.image_generation import _ReferenceImage
+
+    reference = _ReferenceImage(
         source="seed",
         url="https://angmoo.com/media/seed.webp",
         source_hash="hash",
@@ -2028,7 +2037,8 @@ def test_pollinations_reference_policy_by_model() -> None:
 
 
 def test_klein_compose_prompt_preserves_suffix_under_length_limit() -> None:
-    prompt = post_image_generation._compose_pollinations_prompt(
+    from app.domains.social import constants as post_image_generation
+    prompt = image_prompts._compose_pollinations_prompt(
         {"prompt": "a" * 2200},
         model=POLLINATIONS_IMAGE_MODEL_FLUX_KLEIN,
     )

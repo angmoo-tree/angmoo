@@ -92,7 +92,8 @@ from app.services import agent_runs as agent_run_service
 from app.domains.identity.service import demo_access as demo_lock
 from app.services import image_prompt_safety
 from app.services import maintenance as maintenance_service
-from app.services import post_image_generation
+from app.runtime.social import image_generation as post_image_generation
+from app.domains.social.service import image_attachment
 from app.core import prompt_safety
 from app.domains.characters.service import media_storage as profile_media
 from app.integrations.media import files as media_files
@@ -919,7 +920,7 @@ async def _attach_first_greeting_image(
             current_time_text=run_started_at.isoformat(),
             run_started_at=run_started_at,
         )
-        return post_image_generation.attach_prepared_post_image(
+        return image_attachment.attach_prepared_post_image(
             db=db,
             post_id=post.id,
             prepared=prepared,

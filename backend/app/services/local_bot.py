@@ -16,7 +16,7 @@ from app.runtime.characters import management as agent_service
 from app.services import community as community_service
 from app.domains.identity.service import demo_access as demo_lock
 from app.services import local_bot_quota
-from app.services import post_image_generation
+from app.runtime.social import image_generation as post_image_generation
 
 
 POST_COOLDOWN = timedelta(minutes=30)

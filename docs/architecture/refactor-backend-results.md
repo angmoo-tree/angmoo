@@ -1172,3 +1172,12 @@ C10-D 최종 집중 **80 PASS / 28.12초**. 원래7 실제 정책 확장 및 남
 원래4 정책을 협력 호출로 확장한 AST, raw LLM2 본문, owner write5문장, 남은 정의 본문 동일 PASS. 새 SQLite3node는 정상 저장/observer 가시성·cache provider0·unusable/empty/invalid 응답의 저장0/추가 commit0을 검증한다. 기존 image 및 OSS 경계 집중 **68 PASS / 33.75초**. 기존 테스트의 monkeypatch 실제 대상 및 plaintext reveal의 정확 client 함수명만 바꿨으며 assertion과 strict allowlist 비교는 보존했다. 전체 B5/source capture/Hosted/installer 완료를 뜻하지 않는다.
 
 API/schema/ORM·기존 protected test2 assertion·전체 split evidence PASS. 경계 **788 modules / 2733 edges / legacy 200**, L4/ER0 PASS. 별도 Character owner source `734492bf6551fdb5dea24d2b9140e4ac2d97ef18`의 `repository/image_settings.store_image_visual_identity`에 같은 callback을 연결하는 선형 통합이 남아 있다.
+
+
+## AR-B5-C10-F — 이미지 실행 조립·워커의 실제 runtime 소유
+
+업무 판단을 앞선 C10-A~E에서 분리한 뒤 남은 concrete runtime15 정의와 worker2 정의를 `runtime/social`로 옮겼다. 각 본문 AST는 원문과 동일하다. 사용하지 않는 private wrapper4와 정책/상수/모델을 모아 재수출하던 import를 제거했다. LocalBot/Character/LangGraph는 동일 이미지 workflow를, 첨부·quota 종료는 실제 Social image_attachment를 호출한다. 기존 테스트 역시 실제 prompt/reference/constants/credential/provider 소유자를 사용하고 plaintext reveal의 정확 파일 경로를 전환했다.
+
+기존 image/LocalBot/provider 보안/OSS 및 실제 SQLite 회귀 **91 PASS / 26.26초**. 새 테스트 노드는 없으며 기존 assertion을 유지한다. Character 설정·visual write, Operations, DirectLlm 및 공통 이미지 문구 정책의 독립 선행 source는 최종 선형 통합에서 canonical import로 연결한다. 현재 혼합 image 테스트는 Character 설정/외부 provider/공통 키/Social 사례가 섞여 있어 전체를 Social로 잘못 분류하지 않고 G07 실제 소유별 분리 대상으로 기록했다. 전체 B5/source capture/Hosted/installer 종료는 아니다.
+
+보존 검사는 기존 assertion의 receiver 이름도 보호하므로 5개 기존 테스트에서 그 이름을 현재의 실제 정책/상수 모듈에 대한 local import alias로 유지했다. 제품 재수출을 되살리지 않았고 assertion을 삭제·완화하지 않았다. 이동 지도 갱신 중 무관한 역사 split 설명을 재계산한 변경은 검사에서 발견해 원본으로 복구했다. 최종 집중 **91 PASS / 31.19초**, API/schema/ORM·protected test3 assertion·전체 split evidence PASS. 경계 **788 modules / 2726 edges / legacy 197**, L4/ER0 PASS.

@@ -49,7 +49,8 @@ from app.services import agent_activity_policy
 from app.services import character_lore as character_lore_service
 from app.services import community as community_service
 from app.services import langgraph_social_apply
-from app.services import post_image_generation
+from app.runtime.social import image_generation as post_image_generation
+from app.domains.social.service import image_attachment
 from app.services import prompt_safety
 from app.services.direct_llm import (
     DirectLlmCallContext,
@@ -8629,7 +8630,7 @@ def _execute_writing_plan(
     if blocked is not None:
         blocked_field, blocked_result = blocked
         if prepared_image is not None:
-            post_image_generation.release_prepared_post_image_quota(
+            image_attachment.release_prepared_post_image_quota(
                 db=ctx.db,
                 prepared=prepared_image,
                 status="failed",
@@ -8697,7 +8698,7 @@ def _execute_writing_plan(
                 author_world_character_id=actor.id,
             )
             image_attempt = (
-                post_image_generation.attach_prepared_post_image(
+                image_attachment.attach_prepared_post_image(
                     db=ctx.db,
                     post_id=result.id,
                     prepared=prepared_image,

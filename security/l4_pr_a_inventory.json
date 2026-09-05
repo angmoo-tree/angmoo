@@ -1,8 +1,8 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2371,
-      "internal_edge_count": 2733,
+      "external_import_count": 2370,
+      "internal_edge_count": 2726,
       "legacy_import_exception_count": 0,
       "module_count": 788,
       "module_cycles": [],
@@ -1561,6 +1561,43 @@
             ],
             "module": "app.runtime.social.discovery",
             "path": "backend/app/runtime/social/discovery.py"
+          },
+          {
+            "imports": [
+              "app.config",
+              "app.credentials",
+              "app.cruds.agents",
+              "app.domains.characters.models",
+              "app.domains.identity.models",
+              "app.domains.social.contracts.image_generation",
+              "app.domains.social.schemas.community",
+              "app.domains.social.schemas.image_generation",
+              "app.domains.social.service.image_generation",
+              "app.domains.social.service.image_identity",
+              "app.domains.social.service.image_prompts",
+              "app.domains.social.service.media_storage",
+              "app.integrations.image_provider",
+              "app.integrations.media.files",
+              "app.models.agent_settings",
+              "app.services.direct_llm",
+              "app.services.image_prompt_safety",
+              "app.services.operation_settings",
+              "app.services.service_image_key"
+            ],
+            "module": "app.runtime.social.image_generation",
+            "path": "backend/app/runtime/social/image_generation.py"
+          },
+          {
+            "imports": [
+              "app.config",
+              "app.core.db",
+              "app.domains.characters.service.profile",
+              "app.domains.social.service.image_attachment",
+              "app.domains.social.service.image_jobs",
+              "app.runtime.social.image_generation"
+            ],
+            "module": "app.runtime.social.image_job_worker",
+            "path": "backend/app/runtime/social/image_job_worker.py"
           },
           {
             "imports": [

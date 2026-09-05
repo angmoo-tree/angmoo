@@ -10,7 +10,7 @@ from app.domains.social.contracts.image_generation import PreparedPostImage
 from app.domains.social.models.posts import Post, PostImageGenerationJob
 from app.domains.social.repository.media import create_post_image_generation_job
 from app.domains.social.service.image_jobs import mark_stale_post_image_generation_jobs_failed
-from app.services import post_image_job_worker as worker
+from app.runtime.social import image_job_worker as worker
 from test_l4_social_write_uow import _session_factory
 
 
@@ -57,7 +57,7 @@ def test_image_worker_claims_then_validates_in_same_session(monkeypatch, tmp_pat
     monkeypatch.setattr(worker, "SessionLocal", lambda: db)
     monkeypatch.setattr(worker, "get_character", character)
     monkeypatch.setattr(worker.post_image_generation, "prepare_local_api_post_image", prepare)
-    monkeypatch.setattr(worker.post_image_generation, "attach_prepared_post_image", attach)
+    monkeypatch.setattr(worker.image_attachment, "attach_prepared_post_image", attach)
     assert asyncio.run(worker.process_one_post_image_job()) is True
     assert commits == ["commit", "commit"]
     assert calls == (["character", "prepare", "attach"] if removed is None else ["character"])

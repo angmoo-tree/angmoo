@@ -1,24 +1,8 @@
+"""Concrete image workflow: same-Session owners, credential/LLM clients and reference files."""
 from __future__ import annotations
 
 from app.domains.social.service import image_generation as image_policy, image_identity
-from app.domains.social.service.image_generation import _image_key_source, _has_user_image_key
 
-from app.domains.social.service.image_attachment import (
-    attach_prepared_post_image,
-    release_prepared_post_image_quota,
-)
-from app.domains.social.service.image_reference_policy import (
-    _pollinations_reference_url,
-    _reference_image_url,
-    _accepts_pollinations_reference,
-    _requires_pollinations_reference,
-    _requires_reference,
-    _allows_reference_fallback,
-)
-from app.domains.social.service.image_attempts import (
-    _pollinations_failed,
-    _replicate_failed,
-)
 
 from app.domains.social.contracts.image_generation import (
     PreparedPostImage,
@@ -27,90 +11,32 @@ from app.domains.social.schemas.image_generation import (
     _VisualIdentityPayload,
     _ImagePromptPayload,
 )
-from app.domains.social.service.image_prompts import (
-    _visual_identity_system_prompt,
-    _image_prompt_system_prompt,
-    _default_image_prompt_system_prompt,
-    _klein_image_prompt_system_prompt,
-    _flux_schnell_image_prompt_system_prompt,
-    _zimage_image_prompt_system_prompt,
-    _sana_image_prompt_system_prompt,
-    _pruna_edit_image_prompt_system_prompt,
-    _compose_pollinations_prompt,
-    _append_prompt_suffix,
-    _compose_local_api_pollinations_prompt,
-    _fallback_visual_identity,
-    _image_llm_model_for_writing_mode,
-    json_safe_prompt,
-    json_dumps,
-)
-from app.domains.social.exceptions import ServiceImageQuotaError
-from app.domains.social.service.image_quota import (
-    _daily_image_count,
-    _daily_image_usage,
-    _daily_image_window_count,
-    _daily_image_window,
-    _service_quota_date,
-    _reserve_service_image_quota,
-    _finalize_service_image_quota,
-)
-from app.domains.social.service.image_attempts import (
-    _service_failure_class,
-    _skipped,
-    _failed,
-)
-from app.domains.social.constants import (
-    POLLINATIONS_IMAGE_TIMEOUT_SECONDS,
-    IMAGE_PROMPT_MAX_LENGTH,
-    LOCAL_API_PROMPT_SAFETY_SUFFIX,
-    KLEIN_BODY_STRUCTURE_PROMPT_SUFFIX,
-    SERVICE_IMAGE_ACTIVE_RESERVATION_STATUSES,
-    IMAGE_VISUAL_IDENTITY_FIRST_GREETING_MODEL,
-)
+from app.domains.social.service.image_prompts import _visual_identity_system_prompt, _image_prompt_system_prompt, json_safe_prompt
 
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from datetime import UTC, date, datetime, time, timedelta
+from datetime import datetime
 import hashlib
 from typing import Any
 from urllib.parse import urlparse
 
-from pydantic import BaseModel, Field, ValidationError
 from sqlalchemy.orm import Session
 
-from app import models, schemas
+from app.domains.characters.models import Character
+from app.domains.identity.models import LlmCredential
+from app.models.agent_settings import AgentImageGenerationSetting
+from app.domains.social.schemas import community as schemas
 from app.config import settings
-from app.core import security  # compatibility hook for existing image tests
-from app.core.image_generation import (
-    POLLINATIONS_IMAGE_MODEL_FLUX_KLEIN,
-    POLLINATIONS_IMAGE_MODEL_FLUX_SCHNELL,
-    POLLINATIONS_IMAGE_MODEL_PRUNA_EDIT,
-    POLLINATIONS_IMAGE_MODEL_SANA,
-    POLLINATIONS_IMAGE_MODEL_ZIMAGE,
-    REPLICATE_IMAGE_MODEL_ZIMAGE_TURBO_LORA,
-    REPLICATE_IMAGE_MODEL_PRUNA_EDIT,
-    DEFAULT_POLLINATIONS_IMAGE_MODEL,
-    IMAGE_MODEL_OPTIONS,
-    POST_IMAGE_TARGET_MAX_BYTES,
-    POST_IMAGE_TARGET_SIZE,
-    POST_IMAGE_WEBP_QUALITY_STEPS,
-)
 from app.credentials import (
     CredentialPurpose,
     CredentialResolutionError,
     CredentialResolver,
 )
 from app.cruds import agents as agent_crud
-from app.cruds import community as community_crud
-from app.integrations import image_provider, pollinations_image, replicate_image
+from app.integrations import image_provider
 from app.domains.social.service import media_storage as profile_media
 from app.integrations.media import files as media_files
-from app.services import (
-    agent_activity_policy,
-    image_prompt_safety,
-    operation_settings,
-    service_image_key,
-)
+from app.services import image_prompt_safety, operation_settings, service_image_key
 from app.services.direct_llm import (
     DirectLlmCallContext,
     DirectLlmError,
@@ -132,8 +58,8 @@ class _ReferenceImage:
 async def prepare_post_image(
     *,
     db: Session,
-    character: models.Character,
-    credential: models.LlmCredential,
+    character: Character,
+    credential: LlmCredential,
     run_id: str,
     tracker: RunLlmTracker,
     writing_mode: str,
@@ -166,7 +92,7 @@ def create_local_api_post_image_request(
     db: Session,
     user_id: str,
     local_key_prefix: str,
-    character: models.Character,
+    character: Character,
     post_id: str,
     image_prompt: str,
     requested_at: datetime,
@@ -186,7 +112,7 @@ def create_local_api_post_image_request(
 async def prepare_local_api_post_image(
     *,
     db: Session,
-    character: models.Character,
+    character: Character,
     image_prompt: str,
     run_started_at: datetime,
     key_source: str = "user",
@@ -210,9 +136,9 @@ async def prepare_local_api_post_image(
 async def _ensure_visual_identity(
     *,
     db: Session,
-    setting: models.AgentImageGenerationSetting,
-    character: models.Character,
-    credential: models.LlmCredential,
+    setting: AgentImageGenerationSetting,
+    character: Character,
+    credential: LlmCredential,
     reference: _ReferenceImage,
     tracker: RunLlmTracker,
     run_id: str,
@@ -220,46 +146,6 @@ async def _ensure_visual_identity(
     model_override: str | None = None,
 ) -> str | None:
     return await image_identity._ensure_visual_identity(workflows=RuntimeImageGenerationWorkflows(), db=db, setting=setting, character=character, credential=credential, reference=reference, tracker=tracker, run_id=run_id, on_rate_limit_wait=on_rate_limit_wait, model_override=model_override)
-
-
-async def _resolve_visual_identity(
-    *,
-    db: Session,
-    setting: models.AgentImageGenerationSetting,
-    character: models.Character,
-    credential: models.LlmCredential,
-    reference: _ReferenceImage | None,
-    tracker: RunLlmTracker,
-    run_id: str,
-    on_rate_limit_wait: Callable[[float], Awaitable[None]] | None,
-    model_override: str | None = None,
-) -> str:
-    return await image_identity._resolve_visual_identity(workflows=RuntimeImageGenerationWorkflows(), db=db, setting=setting, character=character, credential=credential, reference=reference, tracker=tracker, run_id=run_id, on_rate_limit_wait=on_rate_limit_wait, model_override=model_override)
-
-
-async def _refine_image_prompt(
-    *,
-    character: models.Character,
-    credential: models.LlmCredential,
-    tracker: RunLlmTracker,
-    run_id: str,
-    image_model: str,
-    current_time_text: str,
-    post_title: str,
-    post_body: str,
-    writing_plan: dict[str, Any],
-    visual_identity: str,
-    on_rate_limit_wait: Callable[[float], Awaitable[None]] | None,
-    model_override: str | None = None,
-) -> dict[str, str]:
-    return await image_identity._refine_image_prompt(workflows=RuntimeImageGenerationWorkflows(), character=character, credential=credential, tracker=tracker, run_id=run_id, image_model=image_model, current_time_text=current_time_text, post_title=post_title, post_body=post_body, writing_plan=writing_plan, visual_identity=visual_identity, on_rate_limit_wait=on_rate_limit_wait, model_override=model_override)
-
-
-def _select_reference_image(
-    character: models.Character,
-    setting: models.AgentImageGenerationSetting,
-) -> _ReferenceImage | None:
-    return image_identity._select_reference_image(workflows=RuntimeImageGenerationWorkflows(), character=character, setting=setting)
 
 
 def _build_reference_image(*, source: str, url: str) -> _ReferenceImage | None:
@@ -311,7 +197,7 @@ def _mime_type_from_url(url: str) -> str:
 
 
 def _image_model_for_key_source(
-    setting: models.AgentImageGenerationSetting | None,
+    setting: AgentImageGenerationSetting | None,
     key_source: str,
     *,
     db: Session | None = None,
@@ -320,11 +206,11 @@ def _image_model_for_key_source(
 
 
 def _image_key_for_source(
-    setting: models.AgentImageGenerationSetting,
+    setting: AgentImageGenerationSetting,
     key_source: str,
     model: str,
     *,
-    character: models.Character,
+    character: Character,
 ) -> str | None:
     if key_source == "service":
         if image_provider.is_replicate_model(model):
@@ -353,26 +239,6 @@ def _image_key_for_source(
         ).reveal()
     except CredentialResolutionError:
         return None
-
-
-def _local_api_image_skip_reason(
-    *,
-    db: Session,
-    setting: models.AgentImageGenerationSetting | None,
-    character: models.Character,
-    image_prompt: str,
-    requested_at: datetime,
-    key_source: str,
-) -> str | None:
-    return image_policy._local_api_image_skip_reason(
-        workflows=RuntimeImageGenerationWorkflows(),
-        db=db,
-        setting=setting,
-        character=character,
-        image_prompt=image_prompt,
-        requested_at=requested_at,
-        key_source=key_source,
-    )
 
 
 def _unsafe_image_text_reason(text: str | None) -> str | None:
@@ -417,11 +283,11 @@ class RuntimeImageGenerationWorkflows:
 
 
     def image_key_for_source(self,
-        setting: models.AgentImageGenerationSetting,
+        setting: AgentImageGenerationSetting,
         key_source: str,
         model: str,
         *,
-        character: models.Character,
+        character: Character,
     ) -> str | None:
         return _image_key_for_source(setting, key_source, model, character=character)
 
@@ -441,7 +307,7 @@ class RuntimeImageGenerationWorkflows:
     def build_reference_image(self, *, source: str, url: str) -> _ReferenceImage | None:
         return _build_reference_image(source=source, url=url)
 
-    def store_image_visual_identity(self, db: Session, setting: models.AgentImageGenerationSetting, *, identity_prompt: str, source_hash: str) -> str:
+    def store_image_visual_identity(self, db: Session, setting: AgentImageGenerationSetting, *, identity_prompt: str, source_hash: str) -> str:
         # Preserve the attached setting and the caller's explicit commit/refresh.
         setting.visual_identity_prompt = identity_prompt.strip()
         setting.visual_identity_source_hash = source_hash
@@ -451,8 +317,8 @@ class RuntimeImageGenerationWorkflows:
 
     async def generate_visual_identity_payload(self,
         *,
-        character: models.Character,
-        credential: models.LlmCredential,
+        character: Character,
+        credential: LlmCredential,
         reference: _ReferenceImage,
         tracker: RunLlmTracker,
         run_id: str,
@@ -463,8 +329,8 @@ class RuntimeImageGenerationWorkflows:
 
     async def generate_image_prompt_payload(self,
         *,
-        character: models.Character,
-        credential: models.LlmCredential,
+        character: Character,
+        credential: LlmCredential,
         tracker: RunLlmTracker,
         run_id: str,
         image_model: str,
@@ -481,8 +347,8 @@ class RuntimeImageGenerationWorkflows:
 
 async def _generate_visual_identity_payload(
     *,
-    character: models.Character,
-    credential: models.LlmCredential,
+    character: Character,
+    credential: LlmCredential,
     reference: _ReferenceImage,
     tracker: RunLlmTracker,
     run_id: str,
@@ -530,8 +396,8 @@ async def _generate_visual_identity_payload(
 
 async def _generate_image_prompt_payload(
     *,
-    character: models.Character,
-    credential: models.LlmCredential,
+    character: Character,
+    credential: LlmCredential,
     tracker: RunLlmTracker,
     run_id: str,
     image_model: str,

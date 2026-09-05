@@ -246,6 +246,10 @@
         },
         {
           "importer": "app.runtime.characters.management",
+          "imported": "app.runtime.social.image_generation"
+        },
+        {
+          "importer": "app.runtime.characters.management",
           "imported": "app.schemas"
         },
         {
@@ -278,15 +282,39 @@
         },
         {
           "importer": "app.runtime.characters.management",
-          "imported": "app.services.post_image_generation"
-        },
-        {
-          "importer": "app.runtime.characters.management",
           "imported": "app.services.runtime_boundary"
         },
         {
           "importer": "app.runtime.characters.management",
           "imported": "app.services.service_image_key"
+        },
+        {
+          "importer": "app.runtime.social.image_generation",
+          "imported": "app.cruds.agents"
+        },
+        {
+          "importer": "app.runtime.social.image_generation",
+          "imported": "app.models.agent_settings"
+        },
+        {
+          "importer": "app.runtime.social.image_generation",
+          "imported": "app.services.direct_llm"
+        },
+        {
+          "importer": "app.runtime.social.image_generation",
+          "imported": "app.services.image_prompt_safety"
+        },
+        {
+          "importer": "app.runtime.social.image_generation",
+          "imported": "app.services.operation_settings"
+        },
+        {
+          "importer": "app.runtime.social.image_generation",
+          "imported": "app.services.service_image_key"
+        },
+        {
+          "importer": "app.runtime.social.image_job_worker",
+          "imported": "app.runtime.social.image_generation"
         },
         {
           "importer": "app.runtime.world_characters.cleanup",
@@ -526,6 +554,10 @@
         },
         {
           "importer": "app.services.langgraph_resident",
+          "imported": "app.runtime.social.image_generation"
+        },
+        {
+          "importer": "app.services.langgraph_resident",
           "imported": "app.schemas"
         },
         {
@@ -547,10 +579,6 @@
         {
           "importer": "app.services.langgraph_resident",
           "imported": "app.services.langgraph_social_apply"
-        },
-        {
-          "importer": "app.services.langgraph_resident",
-          "imported": "app.services.post_image_generation"
         },
         {
           "importer": "app.services.langgraph_resident",
@@ -582,6 +610,10 @@
         },
         {
           "importer": "app.services.local_bot",
+          "imported": "app.runtime.social.image_generation"
+        },
+        {
+          "importer": "app.services.local_bot",
           "imported": "app.schemas"
         },
         {
@@ -595,10 +627,6 @@
         {
           "importer": "app.services.local_bot",
           "imported": "app.services.local_bot_quota"
-        },
-        {
-          "importer": "app.services.local_bot",
-          "imported": "app.services.post_image_generation"
         },
         {
           "importer": "app.services.local_bot_quota",
@@ -623,46 +651,6 @@
         {
           "importer": "app.services.operation_settings",
           "imported": "app.models"
-        },
-        {
-          "importer": "app.services.post_image_generation",
-          "imported": "app.cruds.agents"
-        },
-        {
-          "importer": "app.services.post_image_generation",
-          "imported": "app.cruds.community"
-        },
-        {
-          "importer": "app.services.post_image_generation",
-          "imported": "app.models"
-        },
-        {
-          "importer": "app.services.post_image_generation",
-          "imported": "app.schemas"
-        },
-        {
-          "importer": "app.services.post_image_generation",
-          "imported": "app.services.agent_activity_policy"
-        },
-        {
-          "importer": "app.services.post_image_generation",
-          "imported": "app.services.direct_llm"
-        },
-        {
-          "importer": "app.services.post_image_generation",
-          "imported": "app.services.image_prompt_safety"
-        },
-        {
-          "importer": "app.services.post_image_generation",
-          "imported": "app.services.operation_settings"
-        },
-        {
-          "importer": "app.services.post_image_generation",
-          "imported": "app.services.service_image_key"
-        },
-        {
-          "importer": "app.services.post_image_job_worker",
-          "imported": "app.services.post_image_generation"
         },
         {
           "importer": "app.services.tree",
@@ -2384,14 +2372,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.services.post_image_generation",
-        "target": "app.domains.social.service.media_storage",
-        "owner_stage": "AR-B5",
-        "removal_condition": "Retire the recorded legacy consumer when its remaining tests/job responsibilities move to the canonical owner.",
-        "reason": "Social quota/job attachment calls its actual Social file-placement function; shared paths use integrations.media.files.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.models",
         "target": "app.domains.world_packages.models",
         "owner_stage": "AR-G5",
@@ -3040,62 +3020,6 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.services.post_image_generation",
-        "target": "app.domains.social.service.image_attempts",
-        "owner_stage": "AR-B5",
-        "reason": "The remaining legacy image orchestration uses the same actual Social prompt/quota/result/validation definition during its bounded transition.",
-        "removal_condition": "Move the remaining provider/Character bindings and image request/attachment workflow to their actual owners, then retire this exact legacy consumer.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.post_image_generation",
-        "target": "app.domains.social.service.image_quota",
-        "owner_stage": "AR-B5",
-        "reason": "The remaining legacy image orchestration uses the same actual Social prompt/quota/result/validation definition during its bounded transition.",
-        "removal_condition": "Move the remaining provider/Character bindings and image request/attachment workflow to their actual owners, then retire this exact legacy consumer.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.post_image_generation",
-        "target": "app.domains.social.exceptions",
-        "owner_stage": "AR-B5",
-        "reason": "The remaining legacy image orchestration uses the same actual Social prompt/quota/result/validation definition during its bounded transition.",
-        "removal_condition": "Move the remaining provider/Character bindings and image request/attachment workflow to their actual owners, then retire this exact legacy consumer.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.post_image_generation",
-        "target": "app.domains.social.constants",
-        "owner_stage": "AR-B5",
-        "reason": "The remaining legacy image orchestration uses the same actual Social prompt/quota/result/validation definition during its bounded transition.",
-        "removal_condition": "Move the remaining provider/Character bindings and image request/attachment workflow to their actual owners, then retire this exact legacy consumer.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.post_image_generation",
-        "target": "app.domains.social.contracts.image_generation",
-        "owner_stage": "AR-B5",
-        "reason": "The remaining legacy image orchestration uses the same actual Social prompt/quota/result/validation definition during its bounded transition.",
-        "removal_condition": "Move the remaining provider/Character bindings and image request/attachment workflow to their actual owners, then retire this exact legacy consumer.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.post_image_generation",
-        "target": "app.domains.social.schemas.image_generation",
-        "owner_stage": "AR-B5",
-        "reason": "The remaining legacy image orchestration uses the same actual Social prompt/quota/result/validation definition during its bounded transition.",
-        "removal_condition": "Move the remaining provider/Character bindings and image request/attachment workflow to their actual owners, then retire this exact legacy consumer.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.post_image_generation",
-        "target": "app.domains.social.service.image_prompts",
-        "owner_stage": "AR-B5",
-        "reason": "The remaining legacy image orchestration uses the same actual Social prompt/quota/result/validation definition during its bounded transition.",
-        "removal_condition": "Move the remaining provider/Character bindings and image request/attachment workflow to their actual owners, then retire this exact legacy consumer.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.cruds.community",
         "target": "app.domains.social.service.image_jobs",
         "owner_stage": "AR-B5",
@@ -3104,51 +3028,11 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.services.post_image_job_worker",
-        "target": "app.domains.social.service.image_jobs",
-        "owner_stage": "AR-B5",
-        "reason": "The old worker/CRUD surface binds the actual Social job policy and nullable Character lookup during the bounded image workflow transition.",
-        "removal_condition": "Retire the exact old worker/CRUD consumer after provider/Character bindings and image source workflow use canonical runtime composition.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.post_image_job_worker",
-        "target": "app.domains.characters.service.profile",
-        "owner_stage": "AR-B5",
-        "reason": "The old worker/CRUD surface binds the actual Social job policy and nullable Character lookup during the bounded image workflow transition.",
-        "removal_condition": "Retire the exact old worker/CRUD consumer after provider/Character bindings and image source workflow use canonical runtime composition.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.post_image_generation",
-        "target": "app.domains.social.service.image_reference_policy",
-        "owner_stage": "AR-B5",
-        "reason": "Legacy generation orchestration imports the identical actual Social attachment/reference decision function during migration.",
-        "removal_condition": "Remove the old image generation consumer after its remaining provider and Character callback wiring moves to canonical runtime.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.post_image_generation",
+        "importer": "app.services.langgraph_resident",
         "target": "app.domains.social.service.image_attachment",
         "owner_stage": "AR-B5",
-        "reason": "Legacy generation orchestration imports the identical actual Social attachment/reference decision function during migration.",
-        "removal_condition": "Remove the old image generation consumer after its remaining provider and Character callback wiring moves to canonical runtime.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.post_image_generation",
-        "target": "app.domains.social.service.image_generation",
-        "owner_stage": "AR-B5",
-        "reason": "Remaining original Character/LLM/secret/settings binding constructs the real Social generation service calls while its last client responsibilities move.",
-        "removal_condition": "Move the concrete binding to runtime/social and remove the old image generation module after all exact consumers/monkeypatch targets are canonical.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.post_image_generation",
-        "target": "app.domains.social.service.image_identity",
-        "owner_stage": "AR-B5",
-        "reason": "Concrete image runtime binds owner persistence and raw LLM/file clients to actual Social identity policies.",
-        "removal_condition": "Move actual concrete binding to runtime/social and switch all callers/monkeypatches before removing the old image module.",
+        "reason": "Existing resident caller now invokes actual Social attachment and quota completion instead of an old image runtime export.",
+        "removal_condition": "Move the remaining actual resident orchestration into runtime/resident in AR-B4 and retain its same-Session Social service call.",
         "review_date": "2026-09-06"
       }
     ]

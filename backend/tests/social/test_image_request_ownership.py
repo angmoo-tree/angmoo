@@ -8,7 +8,7 @@ from app.domains.characters.models import Character
 from app.domains.social.models.posts import Post, PostImageGenerationJob
 from app.domains.social.schemas.community import BotImageRequestRead
 from app.models.agent_settings import AgentImageGenerationSetting
-from app.services import post_image_generation
+from app.runtime.social import image_generation as post_image_generation
 from test_l4_social_write_uow import _session_factory
 
 
