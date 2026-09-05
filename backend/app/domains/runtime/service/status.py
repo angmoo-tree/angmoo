@@ -1,4 +1,5 @@
 from __future__ import annotations
+from app.domains.runtime.contracts.status_reader import ApplicationRuntimeProbe
 
 from app.domains.runtime.contracts.status_queries import RuntimeStatusQueries
 
@@ -482,3 +483,11 @@ def _aware_utc(value: datetime) -> datetime:
     if value.tzinfo is None:
         return value.replace(tzinfo=UTC)
     return value.astimezone(UTC)
+
+
+class ReadApplicationRuntimeStatus:
+    def __init__(self, probe: ApplicationRuntimeProbe) -> None:
+        self._probe = probe
+
+    def execute(self) -> ApplicationRuntimeStatus:
+        return self._probe.read_status()

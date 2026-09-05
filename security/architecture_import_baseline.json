@@ -1,7 +1,7 @@
 {
-  "edge_count": 2458,
-  "external_import_count": 2297,
-  "module_count": 737,
+  "edge_count": 2469,
+  "external_import_count": 2303,
+  "module_count": 741,
   "modules": [
     {
       "external_imports": [],
@@ -84,7 +84,6 @@
         "app.api.v1.routes.community",
         "app.api.v1.routes.manual_social",
         "app.api.v1.routes.messages",
-        "app.api.v1.routes.runtime_status",
         "app.api.v1.routes.tree",
         "app.api.v1.routes.world_activity_runtime",
         "app.api.v1.routes.world_character_setup",
@@ -94,6 +93,7 @@
         "app.domains.identity.router.auth",
         "app.domains.identity.router.local",
         "app.domains.memory.router",
+        "app.domains.runtime.router",
         "app.domains.world_characters.router.entry",
         "app.domains.world_characters.router.profile",
         "app.domains.world_characters.router.setup",
@@ -237,25 +237,6 @@
       ],
       "module": "app.api.v1.routes.messages",
       "path": "backend/app/api/v1/routes/messages.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "fastapi",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.config",
-        "app.core.db",
-        "app.domains.identity.browser_session",
-        "app.domains.identity.dependencies",
-        "app.domains.identity.public",
-        "app.domains.runtime.public",
-        "app.runtime.diagnostics.status_composition"
-      ],
-      "module": "app.api.v1.routes.runtime_status",
-      "path": "backend/app/api/v1/routes/runtime_status.py",
       "wildcard_imports": []
     },
     {
@@ -2135,6 +2116,18 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.identity.constants",
+        "app.domains.identity.models"
+      ],
+      "module": "app.domains.identity.repository.runtime_access",
+      "path": "backend/app/domains/identity/repository/runtime_access.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.domains.identity.router",
@@ -2364,6 +2357,17 @@
       ],
       "module": "app.domains.identity.service.profile",
       "path": "backend/app/domains/identity/service/profile.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.identity.repository.runtime_access"
+      ],
+      "module": "app.domains.identity.service.runtime_access",
+      "path": "backend/app/domains/identity/service/runtime_access.py",
       "wildcard_imports": []
     },
     {
@@ -4607,30 +4611,6 @@
     },
     {
       "external_imports": [
-        "__future__"
-      ],
-      "imports": [
-        "app.domains.runtime.contracts.lease",
-        "app.domains.runtime.contracts.lease_store"
-      ],
-      "module": "app.domains.runtime.application.manage_scheduler_lease",
-      "path": "backend/app/domains/runtime/application/manage_scheduler_lease.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__"
-      ],
-      "imports": [
-        "app.domains.runtime.contracts.status",
-        "app.domains.runtime.contracts.status_reader"
-      ],
-      "module": "app.domains.runtime.application.read_runtime_status",
-      "path": "backend/app/domains/runtime/application/read_runtime_status.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
         "__future__",
         "datetime",
         "enum"
@@ -4681,6 +4661,20 @@
       ],
       "module": "app.domains.runtime.contracts.execution_errors",
       "path": "backend/app/domains/runtime/contracts/execution_errors.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.config",
+        "app.domains.runtime.contracts.status_reader"
+      ],
+      "module": "app.domains.runtime.contracts.http",
+      "path": "backend/app/domains/runtime/contracts/http.py",
       "wildcard_imports": []
     },
     {
@@ -4790,6 +4784,19 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "fastapi"
+      ],
+      "imports": [
+        "app.api.identity_dependencies",
+        "app.core.db",
+        "app.domains.runtime.contracts.http"
+      ],
+      "module": "app.domains.runtime.dependencies",
+      "path": "backend/app/domains/runtime/dependencies.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.domains.runtime.domain",
@@ -4856,8 +4863,6 @@
     {
       "external_imports": [],
       "imports": [
-        "app.domains.runtime.application.manage_scheduler_lease",
-        "app.domains.runtime.application.read_runtime_status",
         "app.domains.runtime.constants",
         "app.domains.runtime.contracts.components",
         "app.domains.runtime.contracts.lease",
@@ -4868,7 +4873,9 @@
         "app.domains.runtime.policies.lease",
         "app.domains.runtime.ports",
         "app.domains.runtime.schemas",
-        "app.domains.runtime.service.components"
+        "app.domains.runtime.service.components",
+        "app.domains.runtime.service.lease_coordinator",
+        "app.domains.runtime.service.status"
       ],
       "module": "app.domains.runtime.public",
       "path": "backend/app/domains/runtime/public.py",
@@ -4926,6 +4933,26 @@
     {
       "external_imports": [
         "__future__",
+        "fastapi",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.api.identity_dependencies",
+        "app.config",
+        "app.domains.identity.service.runtime_access",
+        "app.domains.runtime.contracts.http",
+        "app.domains.runtime.dependencies",
+        "app.domains.runtime.schemas",
+        "app.domains.runtime.service.components",
+        "app.domains.runtime.service.status"
+      ],
+      "module": "app.domains.runtime.router",
+      "path": "backend/app/domains/runtime/router.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "datetime",
         "pydantic",
         "typing"
@@ -4953,6 +4980,18 @@
       ],
       "module": "app.domains.runtime.service.components",
       "path": "backend/app/domains/runtime/service/components.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__"
+      ],
+      "imports": [
+        "app.domains.runtime.contracts.lease",
+        "app.domains.runtime.contracts.lease_store"
+      ],
+      "module": "app.domains.runtime.service.lease_coordinator",
+      "path": "backend/app/domains/runtime/service/lease_coordinator.py",
       "wildcard_imports": []
     },
     {
@@ -5005,7 +5044,8 @@
         "app.config",
         "app.domains.runtime.constants",
         "app.domains.runtime.contracts.status",
-        "app.domains.runtime.contracts.status_queries"
+        "app.domains.runtime.contracts.status_queries",
+        "app.domains.runtime.contracts.status_reader"
       ],
       "module": "app.domains.runtime.service.status",
       "path": "backend/app/domains/runtime/service/status.py",
@@ -7544,6 +7584,7 @@
         "app.runtime.account_deletion",
         "app.runtime.characters.creator",
         "app.runtime.characters.management",
+        "app.runtime.diagnostics.http",
         "app.runtime.logging_config",
         "app.runtime.memory_http",
         "app.runtime.routines.composition",
@@ -7895,6 +7936,7 @@
         "app.runtime.characters.management",
         "app.runtime.component_workers",
         "app.runtime.configuration",
+        "app.runtime.diagnostics.http",
         "app.runtime.logging_config",
         "app.runtime.memory.batch_runtime",
         "app.runtime.memory.shutdown",
@@ -8350,6 +8392,17 @@
       ],
       "module": "app.runtime.desktop_sidecar",
       "path": "backend/app/runtime/desktop_sidecar.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "fastapi"
+      ],
+      "imports": [
+        "app.runtime.diagnostics.status_composition"
+      ],
+      "module": "app.runtime.diagnostics.http",
+      "path": "backend/app/runtime/diagnostics/http.py",
       "wildcard_imports": []
     },
     {

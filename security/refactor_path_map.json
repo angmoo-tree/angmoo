@@ -416,7 +416,10 @@
     "backend/app/domains/runtime/domain/scheduler_lease.py": "backend/app/domains/runtime/contracts/lease.py",
     "backend/app/domains/runtime/application/single_backend_components.py": "backend/app/domains/runtime/service/components.py",
     "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py": "backend/app/domains/runtime/service/status.py",
-    "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py": "backend/app/domains/runtime/service/scheduler_lease.py"
+    "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py": "backend/app/domains/runtime/service/scheduler_lease.py",
+    "backend/app/api/v1/routes/runtime_status.py": "backend/app/domains/runtime/router.py",
+    "backend/app/domains/runtime/application/read_runtime_status.py": "backend/app/domains/runtime/service/status.py",
+    "backend/app/domains/runtime/application/manage_scheduler_lease.py": "backend/app/domains/runtime/service/lease_coordinator.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -33557,7 +33560,7 @@
           "old": "backend/app/domains/runtime/domain/scheduler_lease.py::SchedulerTickResult",
           "new": "backend/app/domains/runtime/contracts/lease.py::SchedulerTickResult",
           "direct_consumers": [
-            "backend/app/domains/runtime/application/manage_scheduler_lease.py",
+            "backend/app/domains/runtime/service/lease_coordinator.py",
             "backend/app/domains/runtime/contracts/lease_store.py",
             "backend/app/domains/runtime/public.py",
             "backend/tests/test_l3_er2_sqlite_concurrency.py",
@@ -33625,7 +33628,7 @@
           "old": "backend/app/domains/runtime/domain/scheduler_lease.py::SchedulerLeaseSnapshot",
           "new": "backend/app/domains/runtime/contracts/lease.py::SchedulerLeaseSnapshot",
           "direct_consumers": [
-            "backend/app/domains/runtime/application/manage_scheduler_lease.py",
+            "backend/app/domains/runtime/service/lease_coordinator.py",
             "backend/app/domains/runtime/contracts/lease_store.py",
             "backend/app/domains/runtime/public.py",
             "backend/app/domains/runtime/service/scheduler_lease.py",
@@ -33640,7 +33643,7 @@
           "old": "backend/app/domains/runtime/domain/scheduler_lease.py::SchedulerTickPermit",
           "new": "backend/app/domains/runtime/contracts/lease.py::SchedulerTickPermit",
           "direct_consumers": [
-            "backend/app/domains/runtime/application/manage_scheduler_lease.py",
+            "backend/app/domains/runtime/service/lease_coordinator.py",
             "backend/app/domains/runtime/contracts/lease_store.py",
             "backend/app/domains/runtime/policies/lease.py",
             "backend/app/domains/runtime/public.py",
@@ -34495,6 +34498,69 @@
       ],
       "preserved": "Original owner/TTL validation, BEGIN IMMEDIATE retry executor, same connection Identity lookup, CAS predicates/rowcount errors, clock sample order, callbacks and read snapshot.",
       "remaining": "Runtime HTTP and old aggregate removal; G5 single Base/DB/registry; G06 final compatibility removal."
+    },
+    "AR-B8-RUNTIME-A5": {
+      "status": "SOURCE PREPARATION; actual HTTP/owner query+predicate and2classes AST preserved; both factory calls verified; focused35 PASS/25.91s; original full diagnostics pending",
+      "split_files": {
+        "backend/app/api/v1/routes/runtime_status.py": [
+          "backend/app/domains/runtime/router.py",
+          "backend/app/domains/identity/service/runtime_access.py",
+          "backend/app/domains/identity/repository/runtime_access.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/api/v1/routes/runtime_status.py::router",
+          "new": "backend/app/domains/runtime/router.py::router",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_owner_runtime_status_endpoint_is_versioned_and_content_free",
+            "tests/test_l2_runtime_diagnostics.py::test_runtime_status_endpoint_rejects_non_owner"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/runtime_status.py::get_runtime_status",
+          "new": "backend/app/domains/runtime/router.py::get_runtime_status",
+          "direct_consumers": [
+            "backend/app/domains/runtime/router.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_owner_runtime_status_endpoint_is_versioned_and_content_free",
+            "tests/test_l2_runtime_diagnostics.py::test_runtime_status_endpoint_rejects_non_owner"
+          ],
+          "consumer_note": "The unchanged router.get decorator registers the endpoint."
+        },
+        {
+          "old": "backend/app/api/v1/routes/runtime_status.py::get_runtime_status",
+          "new": "backend/app/domains/identity/service/runtime_access.py::is_runtime_owner",
+          "direct_consumers": [
+            "backend/app/domains/runtime/router.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_owner_runtime_status_endpoint_is_versioned_and_content_free",
+            "tests/test_l2_runtime_diagnostics.py::test_runtime_status_endpoint_rejects_non_owner"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/runtime_status.py::get_runtime_status",
+          "new": "backend/app/domains/identity/repository/runtime_access.py::read_installation",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/runtime_access.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_owner_runtime_status_endpoint_is_versioned_and_content_free",
+            "tests/test_l2_runtime_diagnostics.py::test_runtime_status_endpoint_rejects_non_owner"
+          ]
+        }
+      ],
+      "direct_consumers": [
+        "backend/app/domains/runtime/public.py",
+        "backend/app/api/v1/public.py",
+        "backend/tests/test_l2_runtime_diagnostics.py"
+      ],
+      "preserved": "Same browser origin check and auth dependency, same Session Identity get and claimed-owner predicate, exact403 detail, runtime_config branch and factory defaults, schema/privacy/component overlay."
     }
   }
 }

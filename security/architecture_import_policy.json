@@ -1040,6 +1040,7 @@
       "app.domains.identity.exceptions",
       "app.domains.identity.models",
       "app.domains.identity.policies",
+      "app.domains.identity.repository.runtime_access",
       "app.domains.identity.router",
       "app.domains.identity.router.auth",
       "app.domains.identity.router.local",
@@ -1054,6 +1055,7 @@
       "app.domains.identity.service.login_throttle",
       "app.domains.identity.service.owner_context",
       "app.domains.identity.service.profile",
+      "app.domains.identity.service.runtime_access",
       "app.domains.identity.service.world_character_credentials",
       "app.domains.media.contracts",
       "app.domains.media.schemas",
@@ -1185,6 +1187,7 @@
       "app.domains.runtime.contracts.components",
       "app.domains.runtime.contracts.data_paths",
       "app.domains.runtime.contracts.execution_errors",
+      "app.domains.runtime.contracts.http",
       "app.domains.runtime.contracts.lease",
       "app.domains.runtime.contracts.lease_store",
       "app.domains.runtime.contracts.release",
@@ -1194,14 +1197,17 @@
       "app.domains.runtime.contracts.status_reader",
       "app.domains.runtime.contracts.transaction",
       "app.domains.runtime.contracts.vector_recall",
+      "app.domains.runtime.dependencies",
       "app.domains.runtime.exceptions",
       "app.domains.runtime.models",
       "app.domains.runtime.policies.lease",
       "app.domains.runtime.repository.scheduler_lease",
       "app.domains.runtime.repository.sqlite_lease",
       "app.domains.runtime.repository.status",
+      "app.domains.runtime.router",
       "app.domains.runtime.schemas",
       "app.domains.runtime.service.components",
+      "app.domains.runtime.service.lease_coordinator",
       "app.domains.runtime.service.scheduler_lease",
       "app.domains.runtime.service.sqlite_lease",
       "app.domains.runtime.service.status",
@@ -1324,6 +1330,7 @@
       "app.domains.identity.service.login_throttle",
       "app.domains.identity.service.owner_context",
       "app.domains.identity.service.profile",
+      "app.domains.identity.service.runtime_access",
       "app.domains.identity.service.world_character_credentials",
       "app.domains.media.contracts",
       "app.domains.media.schemas",
@@ -1410,6 +1417,7 @@
       "app.domains.runtime.contracts.components",
       "app.domains.runtime.contracts.data_paths",
       "app.domains.runtime.contracts.execution_errors",
+      "app.domains.runtime.contracts.http",
       "app.domains.runtime.contracts.lease",
       "app.domains.runtime.contracts.lease_store",
       "app.domains.runtime.contracts.release",
@@ -1421,6 +1429,7 @@
       "app.domains.runtime.contracts.vector_recall",
       "app.domains.runtime.schemas",
       "app.domains.runtime.service.components",
+      "app.domains.runtime.service.lease_coordinator",
       "app.domains.runtime.service.scheduler_lease",
       "app.domains.runtime.service.sqlite_lease",
       "app.domains.runtime.service.status",
@@ -2998,38 +3007,6 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.domains.runtime.application.manage_scheduler_lease",
-        "target": "app.domains.runtime.contracts.lease",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
-        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.runtime.application.manage_scheduler_lease",
-        "target": "app.domains.runtime.contracts.lease_store",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
-        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.runtime.application.read_runtime_status",
-        "target": "app.domains.runtime.contracts.status",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
-        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.runtime.application.read_runtime_status",
-        "target": "app.domains.runtime.contracts.status_reader",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
-        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.domains.runtime.ports",
         "target": "app.domains.runtime.contracts.status_reader",
         "owner_stage": "AR-B8-A",
@@ -3091,6 +3068,22 @@
         "owner_stage": "AR-B8-A",
         "removal_condition": "Remove the Runtime model aggregate exports when their actual callers and G5 model registration consume the defining role before AR-B8-B.",
         "reason": "Existing Runtime aggregate exposes the same moved scheduler ORM class during the bounded source transition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.public",
+        "target": "app.domains.runtime.service.status",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove old Runtime aggregate exports and reconnect actual consumers before AR-B8-B.",
+        "reason": "Existing one-way Runtime aggregate retains the same moved reader/coordinator until the next source slice.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.public",
+        "target": "app.domains.runtime.service.lease_coordinator",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove old Runtime aggregate exports and reconnect actual consumers before AR-B8-B.",
+        "reason": "Existing one-way Runtime aggregate retains the same moved reader/coordinator until the next source slice.",
         "review_date": "2026-09-06"
       }
     ]

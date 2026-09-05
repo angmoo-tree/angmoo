@@ -1,25 +1,15 @@
+"""Owner-only Runtime status HTTP endpoint and stable response metadata."""
 from __future__ import annotations
-
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
-
-from app.domains.identity.dependencies import get_current_user
-from app.domains.identity import browser_session
+from app.api.identity_dependencies import browser_session
 from app.config import settings
-from app.core.db import get_db
-from app.domains.identity.public import (
-    InstallationIdentity,
-    LOCAL_INSTALLATION_KEY,
-    User,
-)
-from app.domains.runtime.public import (
-    LocalRuntimeStatusRead,
-    ReadApplicationRuntimeStatus,
-    overlay_in_process_component_status,
-    runtime_status_read,
-)
-from app.runtime.diagnostics.status_composition import create_runtime_status_reader as SqlAlchemyApplicationRuntimeProbe
-
+from app.domains.identity.service.runtime_access import is_runtime_owner
+from app.domains.runtime.contracts.http import RuntimeOwner as User
+from app.domains.runtime.dependencies import get_current_user, get_db, get_runtime_status_reader_factory
+from app.domains.runtime.schemas import LocalRuntimeStatusRead, runtime_status_read
+from app.domains.runtime.service.status import ReadApplicationRuntimeStatus
+from app.domains.runtime.service.components import overlay_in_process_component_status
 
 router = APIRouter(prefix="/runtime", tags=["runtime"])
 
@@ -31,18 +21,14 @@ def get_runtime_status(
     current_user: User = Depends(get_current_user),
 ) -> LocalRuntimeStatusRead:
     browser_session.require_local_frontend_request(request, mutation=False)
-    installation = db.get(InstallationIdentity, LOCAL_INSTALLATION_KEY)
-    if (
-        installation is None
-        or installation.bootstrap_state != "claimed"
-        or installation.owner_user_id != current_user.id
-    ):
+    if not is_runtime_owner(db, current_user.id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="local_owner_required",
         )
     runtime_settings = getattr(request.app.state, "runtime_settings", settings)
     runtime_config = getattr(request.app.state, "runtime_config", None)
+    SqlAlchemyApplicationRuntimeProbe = get_runtime_status_reader_factory(request)
     probe = (
         SqlAlchemyApplicationRuntimeProbe(db, config=runtime_settings)
         if runtime_config is not None

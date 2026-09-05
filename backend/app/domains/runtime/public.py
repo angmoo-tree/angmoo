@@ -2,10 +2,10 @@
 
 from app.domains.runtime.schemas import LocalRuntimeStatusRead
 from app.domains.runtime.schemas import runtime_status_read
-from app.domains.runtime.application.read_runtime_status import (
+from app.domains.runtime.service.status import (
     ReadApplicationRuntimeStatus,
 )
-from app.domains.runtime.application.manage_scheduler_lease import (
+from app.domains.runtime.service.lease_coordinator import (
     SchedulerLeaseCoordinator,
 )
 from app.domains.runtime.contracts.components import ComponentObservation

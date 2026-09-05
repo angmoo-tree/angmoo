@@ -9,7 +9,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 
 from app.domains.identity.dependencies import get_current_user
-from app.api.v1.routes import runtime_status as runtime_routes
+from app.domains.runtime import router as runtime_routes
 from app.core.db import get_db
 from app.domains.runtime import public as runtime
 from app.domains.runtime.service.status import RUNTIME_MIGRATION_HEAD
@@ -92,7 +92,7 @@ def _client(monkeypatch, *, authenticated_user_id: str, owner_user_id: str) -> T
     app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(
         id=authenticated_user_id
     )
-    monkeypatch.setattr(runtime_routes, "SqlAlchemyApplicationRuntimeProbe", _FakeProbe)
+    app.state.runtime_status_reader_factory = _FakeProbe
     return TestClient(app, base_url="http://127.0.0.1:3000")
 
 
