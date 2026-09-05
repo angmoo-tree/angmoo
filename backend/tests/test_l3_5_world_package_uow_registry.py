@@ -300,7 +300,7 @@ def test_registry_schema_freezes_fk_check_unique_and_guarded_downgrade() -> None
 
     migration = (
         Path(__file__).resolve().parents[1]
-        / "app/alembic/versions/20260825_0083_world_package_registry.py"
+        / "alembic/versions/20260825_0083_world_package_registry.py"
     ).read_text(encoding="utf-8")
     assert 'down_revision: str | None = "20260819_0082"' in migration
     assert "cannot downgrade 0083 while" in migration
@@ -331,7 +331,7 @@ def test_alembic_0082_upgrade_downgrade_upgrade_on_sqlite(
 
     migration_path = (
         Path(__file__).resolve().parents[1]
-        / "app/alembic/versions/20260825_0083_world_package_registry.py"
+        / "alembic/versions/20260825_0083_world_package_registry.py"
     )
     spec = importlib.util.spec_from_file_location(
         "world_package_registry_migration_0083",

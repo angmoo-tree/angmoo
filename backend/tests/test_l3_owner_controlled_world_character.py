@@ -25,7 +25,7 @@ from app.services import agents as agent_service
 FRONTEND_HEADERS = {"Origin": "http://127.0.0.1:3000"}
 MIGRATION_PATH = (
     Path(__file__).resolve().parents[1]
-    / "app/alembic/versions/20260818_0081_owner_controlled_world_character.py"
+    / "alembic/versions/20260818_0081_owner_controlled_world_character.py"
 )
 
 

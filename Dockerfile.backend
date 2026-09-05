@@ -54,6 +54,7 @@ RUN uv sync --frozen --no-dev --no-install-project --no-cache
 
 FROM base AS source
 COPY --chown=angmoo:angmoo backend/app ./app
+COPY --chown=angmoo:angmoo backend/alembic ./alembic
 COPY --chown=angmoo:angmoo backend/scripts ./scripts
 COPY --chown=angmoo:angmoo backend/alembic.ini ./
 COPY --chown=angmoo:angmoo scripts/docker/backend-entrypoint.sh /usr/local/bin/angmoo-backend-entrypoint

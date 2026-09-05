@@ -4,7 +4,7 @@
 
 ## 기준과 적용 상태
 
-2026-09-05 AR-0의 기준은 PR #258 merge `6e56f0837cc11ff42ccbb520050bbd32c5e9bc14`, tree `99f679acb9aab1e3b28628d0aee6d71ae0364d74`다. 준비·검사 지원 PR #259, backend Device Home PR #260, frontend Device Home PR #261이 차례대로 병합되어 §8.1 준비와 두 파일럿이 완료됐다. 기준선 JSON은 현재 경로로 재생성하지 않으며, 단계별 결과는 [파일럿 결과](refactor-pilot-results.md)에 누적한다. §8.2는 #263 merge `d7037625a19071eb279ad2ea35c3ace6fe5b5289`를 추가 체크포인트로 삼아 AR-G0 검사 지원부터 진행한다. AR-G1 이후 제품 이전·AR-F2 이후·AR-X는 아직 미착수이며, 새 실행 증거는 [백엔드 전환 결과](refactor-backend-results.md)에 누적한다.
+2026-09-05 AR-0의 기준은 PR #258 merge `6e56f0837cc11ff42ccbb520050bbd32c5e9bc14`, tree `99f679acb9aab1e3b28628d0aee6d71ae0364d74`다. 준비·검사 지원 PR #259, backend Device Home PR #260, frontend Device Home PR #261이 차례대로 병합되어 §8.1 준비와 두 파일럿이 완료됐다. 기준선 JSON은 현재 경로로 재생성하지 않으며, 단계별 결과는 [파일럿 결과](refactor-pilot-results.md)에 누적한다. §8.2는 #263 merge `d7037625a19071eb279ad2ea35c3ace6fe5b5289`를 추가 체크포인트로 삼아 AR-G0 검사 지원부터 진행한다. §8.2 공통 기반 전환은 단계별로 진행하며, AR-G4의 Alembic 물리 경로는 로컬 검증 후 PR 대기 상태다. AR-F2 이후·AR-X는 아직 미착수이며, 새 실행 증거는 [백엔드 전환 결과](refactor-backend-results.md)에 누적한다.
 
 | 자료 | 소유하는 정보 |
 | --- | --- |
@@ -78,7 +78,7 @@
 | G10 | .env.example/개발 .env | 비밀 제외, 설치 앱의 개발 .env 독립성 |
 | G11 | root .gitignore | Git 제외와 Docker/installer 배포 제외는 별도. source/lock/migration 추적 유지 |
 | G12 | 목표 logging.ini | 명시적 초기화·redaction·stdout/stderr/handshake·중복 handler 방지 |
-| G13 | backend/alembic 목표 | 역사적 revision과 embedded SQLite frozen migration 보존·등록/CI/패키징 연결 |
+| G13 | backend/alembic 물리 경로 적용·G5 최종 연결 대기 | 전체 88개 역사 revision 본문·그래프와 embedded SQLite frozen migration 보존. G4는 경로/CLI/등록 검증, G5는 최종 Base·등록 경로 재검증 |
 
 공통 기반의 최종 이전은 AR-G다. AR-B1은 기존 Base/DB를 사용하며 G02/G05 완료를 주장하지 않는다. `runtime`, `integrations`, `providers`, `credentials`도 역할과 소비자가 있으므로 유지한다.
 

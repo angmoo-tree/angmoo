@@ -104,8 +104,14 @@ REQUIRED_FILES = (
 )
 
 
+# Preserve historical record paths while resolving the unchanged revision after AR-G4.
+ALEMBIC_REVISION_RECORD = "backend/app/alembic/versions/20260904_0088_social_action_subjective_context.py"
+ALEMBIC_REVISION_SOURCE = "backend/alembic/versions/20260904_0088_social_action_subjective_context.py"
+
+
 def _record(relative):
-    data = (ROOT / relative).read_bytes().replace(b"\r\n", b"\n")
+    path = ROOT / (ALEMBIC_REVISION_SOURCE if relative == ALEMBIC_REVISION_RECORD else relative)
+    data = path.read_bytes().replace(b"\r\n", b"\n")
     return {"path": relative, "size": len(data), "sha256": hashlib.sha256(data).hexdigest()}
 
 

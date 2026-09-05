@@ -25,7 +25,7 @@ from app.services import world_character_contracts
 FRONTEND_HEADERS = {"Origin": "http://127.0.0.1:3000"}
 MIGRATION_PATH = (
     Path(__file__).resolve().parents[1]
-    / "app/alembic/versions/20260819_0082_owner_manual_social_inbox.py"
+    / "alembic/versions/20260819_0082_owner_manual_social_inbox.py"
 )
 
 

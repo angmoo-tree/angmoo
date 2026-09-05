@@ -183,7 +183,7 @@ def _assignment(module: ast.Module, name: str) -> Any:
 def _alembic_inventory() -> dict[str, Any]:
     revisions: dict[str, dict[str, Any]] = {}
     referenced: set[str] = set()
-    for path in sorted((ROOT / "backend/app/alembic/versions").glob("*.py")):
+    for path in sorted((ROOT / "backend/alembic/versions").glob("*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         revision = _assignment(tree, "revision")
         down_revision = _assignment(tree, "down_revision")
