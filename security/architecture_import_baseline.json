@@ -1,7 +1,7 @@
 {
-  "edge_count": 2482,
-  "external_import_count": 2281,
-  "module_count": 749,
+  "edge_count": 2489,
+  "external_import_count": 2280,
+  "module_count": 751,
   "modules": [
     {
       "external_imports": [],
@@ -1084,7 +1084,8 @@
         "typing"
       ],
       "imports": [
-        "app.core.db"
+        "app.core.db",
+        "app.core.image_generation"
       ],
       "module": "app.domains.characters.models",
       "path": "backend/app/domains/characters/models.py",
@@ -1099,6 +1100,25 @@
       ],
       "module": "app.domains.characters.public",
       "path": "backend/app/domains/characters/public.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.characters.repository",
+      "path": "backend/app/domains/characters/repository/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.image_generation",
+        "app.domains.characters.models"
+      ],
+      "module": "app.domains.characters.repository.image_settings",
+      "path": "backend/app/domains/characters/repository/image_settings.py",
       "wildcard_imports": []
     },
     {
@@ -1133,6 +1153,7 @@
         "typing"
       ],
       "imports": [
+        "app.core.image_generation",
         "app.core.response_schemas",
         "app.domains.identity.schemas",
         "app.domains.media.schemas",
@@ -1248,6 +1269,20 @@
       ],
       "module": "app.domains.characters.service.image_quota",
       "path": "backend/app/domains/characters/service/image_quota.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.security",
+        "app.domains.characters.models",
+        "app.domains.characters.repository.image_settings",
+        "app.domains.characters.schemas"
+      ],
+      "module": "app.domains.characters.service.image_settings",
+      "path": "backend/app/domains/characters/service/image_settings.py",
       "wildcard_imports": []
     },
     {
@@ -7880,7 +7915,6 @@
         "app.domains.world_packages.models",
         "app.models.agent_local_keys",
         "app.models.agent_runs",
-        "app.models.agent_settings",
         "app.models.local_bot_quotas",
         "app.models.world_activity_runtime",
         "app.models.world_character_setup",
@@ -7925,21 +7959,6 @@
       ],
       "module": "app.models.agent_runs",
       "path": "backend/app/models/agent_runs.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "datetime",
-        "sqlalchemy",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.core.active_hours",
-        "app.core.db",
-        "app.core.image_generation"
-      ],
-      "module": "app.models.agent_settings",
-      "path": "backend/app/models/agent_settings.py",
       "wildcard_imports": []
     },
     {
@@ -8329,8 +8348,10 @@
         "app.domains.characters.contracts",
         "app.domains.characters.exceptions",
         "app.domains.characters.models",
+        "app.domains.characters.repository.image_settings",
         "app.domains.characters.service.access",
         "app.domains.characters.service.creator",
+        "app.domains.characters.service.image_settings",
         "app.domains.characters.service.management",
         "app.domains.characters.service.media",
         "app.domains.characters.service.media_storage",
@@ -10897,6 +10918,7 @@
         "app.credentials",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.characters.repository.image_settings",
         "app.domains.operations.service.settings",
         "app.domains.social.service.media_storage",
         "app.integrations.image_provider",

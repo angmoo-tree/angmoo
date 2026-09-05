@@ -1,4 +1,5 @@
 from __future__ import annotations
+from app.domains.characters.repository import image_settings as image_setting_repository
 
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
@@ -133,7 +134,7 @@ async def prepare_post_image(
     run_started_at: datetime,
     on_rate_limit_wait: Callable[[float], Awaitable[None]] | None = None,
 ) -> PreparedPostImage:
-    setting = agent_crud.get_image_generation_setting(db, character.id)
+    setting = image_setting_repository.get_image_generation_setting(db, character.id)
     if setting is None:
         return _skipped("no_image_key")
     key_source = _image_key_source(setting)
@@ -362,7 +363,7 @@ def create_local_api_post_image_request(
     image_prompt: str,
     requested_at: datetime,
 ) -> schemas.BotImageRequestRead:
-    setting = agent_crud.get_image_generation_setting(db, character.id)
+    setting = image_setting_repository.get_image_generation_setting(db, character.id)
     key_source = _image_key_source(setting)
     model = _image_model_for_key_source(setting, key_source, db=db)
     skip_reason = _local_api_image_skip_reason(
@@ -478,7 +479,7 @@ async def prepare_local_api_post_image(
     post_id: str | None = None,
     job_id: int | None = None,
 ) -> PreparedPostImage:
-    setting = agent_crud.get_image_generation_setting(db, character.id)
+    setting = image_setting_repository.get_image_generation_setting(db, character.id)
     if setting is None:
         return _skipped("no_image_key")
     key_source = key_source if key_source in {"service", "user"} else _image_key_source(setting)

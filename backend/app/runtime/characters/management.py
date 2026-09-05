@@ -1,4 +1,6 @@
 from __future__ import annotations
+from app.domains.characters.repository import image_settings as image_setting_repository
+from app.domains.characters.service import image_settings as image_setting_service
 
 from app.runtime.world_characters.queries import count_enabled_autonomous_world_characters
 from app.domains.characters.service import media as media_service
@@ -496,7 +498,7 @@ def _apply_initial_activity_settings(
 
 
 def _ensure_initial_image_settings(db: Session, character_id: str) -> None:
-    setting = agent_crud.ensure_image_generation_setting(db, character_id)
+    setting = image_setting_repository.ensure_image_generation_setting(db, character_id)
     setting.image_key_mode = (
         "service" if service_image_key.is_service_image_available() else "disabled"
     )
@@ -1010,7 +1012,7 @@ def get_image_settings(
 ) -> schemas.AgentImageGenerationSettingRead:
     character = _get_owned_character(db, user, character_id)
     return _image_generation_setting_read(
-        db, agent_crud.ensure_image_generation_setting(db, character.id)
+        db, image_setting_repository.ensure_image_generation_setting(db, character.id)
     )
 
 
@@ -1027,7 +1029,7 @@ def update_image_settings(
             image_prompt_safety.ensure_safe_image_text(data.visual_identity_prompt)
         except image_prompt_safety.UnsafeImagePromptError as exc:
             raise UnsafeImagePromptError(str(exc)) from exc
-    setting = agent_crud.ensure_image_generation_setting(db, character.id)
+    setting = image_setting_repository.ensure_image_generation_setting(db, character.id)
     requested_mode = data.image_key_mode
     effective_model = data.pollinations_image_model or setting.pollinations_image_model
     if (
@@ -1060,7 +1062,7 @@ def update_image_settings(
         if not has_new_key and (not has_saved_key or clearing_key):
             provider_label = "Replicate API token" if is_replicate else "Pollinations API key"
             raise ImageSettingsInvalidError(f"내 key를 사용하려면 {provider_label}이 필요합니다.")
-    setting = agent_crud.update_image_generation_setting(
+    setting = image_setting_service.update_image_generation_setting(
         db,
         setting,
         data,
@@ -1076,7 +1078,7 @@ def upload_image_seed(
 ) -> schemas.AgentImageGenerationSettingRead:
     character = _get_owned_character(db, user, character_id)
     demo_lock.ensure_demo_user_mutable(user)
-    setting = agent_crud.ensure_image_generation_setting(db, character.id)
+    setting = image_setting_repository.ensure_image_generation_setting(db, character.id)
     try:
         seed_image_url = profile_media.save_seed_image(
             character_id=character.id,
@@ -1102,7 +1104,7 @@ def delete_image_seed(
 ) -> schemas.AgentImageGenerationSettingRead:
     character = _get_owned_character(db, user, character_id)
     demo_lock.ensure_demo_user_mutable(user)
-    setting = agent_crud.ensure_image_generation_setting(db, character.id)
+    setting = image_setting_repository.ensure_image_generation_setting(db, character.id)
     media_files.delete_media_url(setting.seed_image_url)
     setting.seed_image_url = None
     if setting.visual_identity_source_hash is not None:
@@ -3026,7 +3028,7 @@ def _build_agent_detail(
         settings=schemas.AgentActivitySettingRead.model_validate(setting),
         image_settings=_image_generation_setting_read(
             db,
-            agent_crud.ensure_image_generation_setting(db, character.id)
+            image_setting_repository.ensure_image_generation_setting(db, character.id)
         ),
         promotion_usage=_promotion_usage_read(character),
         assigned_slot=schemas.AgentSlotRead.model_validate(slot) if slot else None,
@@ -3141,7 +3143,7 @@ def _service_image_quota_read(db: Session, character_id: str) -> dict[str, int |
 
 
 def _invalidate_image_visual_identity_if_present(db: Session, character_id: str) -> None:
-    setting = agent_crud.get_image_generation_setting(db, character_id)
+    setting = image_setting_repository.get_image_generation_setting(db, character_id)
     if setting is None:
         return
     if setting.visual_identity_source_hash is None:

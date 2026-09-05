@@ -137,10 +137,6 @@
           "importer": "app.models"
         },
         {
-          "imported": "app.models.agent_settings",
-          "importer": "app.models"
-        },
-        {
           "imported": "app.models.local_bot_quotas",
           "importer": "app.models"
         },
@@ -892,6 +888,7 @@
       "app.domains.characters.dependencies",
       "app.domains.characters.exceptions",
       "app.domains.characters.models",
+      "app.domains.characters.repository.image_settings",
       "app.domains.characters.router",
       "app.domains.characters.schemas",
       "app.domains.characters.service",
@@ -900,6 +897,7 @@
       "app.domains.characters.service.drafts",
       "app.domains.characters.service.image_generation",
       "app.domains.characters.service.image_quota",
+      "app.domains.characters.service.image_settings",
       "app.domains.characters.service.management",
       "app.domains.characters.service.media",
       "app.domains.characters.service.media_storage",
@@ -1178,6 +1176,7 @@
       "app.domains.characters.service.drafts",
       "app.domains.characters.service.image_generation",
       "app.domains.characters.service.image_quota",
+      "app.domains.characters.service.image_settings",
       "app.domains.characters.service.management",
       "app.domains.characters.service.media",
       "app.domains.characters.service.media_storage",
@@ -2902,6 +2901,14 @@
         "owner_stage": "AR-B5",
         "removal_condition": "Remove this existing exact consumer edge when its actual Routines or Social implementation moves; no remaining bridge after AR-B8-B.",
         "reason": "Unmigrated original workflow calls the same moved operation policy; no new implementation uses a legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.post_image_generation",
+        "target": "app.domains.characters.repository.image_settings",
+        "owner_stage": "AR-B5",
+        "removal_condition": "Remove exact existing legacy consumer after its actual owner transition; all temporary consumers retire before AR-B8-B.",
+        "reason": "Original same-object model/input or same-Session image setting access during source transition.",
         "review_date": "2026-09-06"
       }
     ]

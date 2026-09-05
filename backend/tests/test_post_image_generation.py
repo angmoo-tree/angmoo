@@ -1,3 +1,5 @@
+from app.domains.characters.repository import image_settings as image_setting_repository
+from app.domains.characters.service import image_settings as image_setting_service
 import asyncio
 import base64
 from datetime import UTC, datetime
@@ -119,8 +121,8 @@ def test_image_generation_setting_encrypts_key() -> None:
 
     with Session(engine) as db:
         _add_image_setting_owner(db)
-        setting = agent_crud.ensure_image_generation_setting(db, "char-1")
-        updated = agent_crud.update_image_generation_setting(
+        setting = image_setting_repository.ensure_image_generation_setting(db, "char-1")
+        updated = image_setting_service.update_image_generation_setting(
             db,
             setting,
             schemas.AgentImageGenerationSettingUpdate(pollinations_api_key="test-key"),
@@ -130,7 +132,7 @@ def test_image_generation_setting_encrypts_key() -> None:
         assert updated.encrypted_pollinations_api_key
         assert "test-key" not in updated.encrypted_pollinations_api_key
 
-        cleared = agent_crud.update_image_generation_setting(
+        cleared = image_setting_service.update_image_generation_setting(
             db,
             updated,
             schemas.AgentImageGenerationSettingUpdate(clear_pollinations_api_key=True),
@@ -147,11 +149,11 @@ def test_image_generation_setting_mode_sync_and_preserve_key() -> None:
 
     with Session(engine) as db:
         _add_image_setting_owner(db)
-        setting = agent_crud.ensure_image_generation_setting(db, "char-1")
+        setting = image_setting_repository.ensure_image_generation_setting(db, "char-1")
         assert setting.image_key_mode == "disabled"
         assert setting.image_generation_enabled is False
 
-        user_mode = agent_crud.update_image_generation_setting(
+        user_mode = image_setting_service.update_image_generation_setting(
             db,
             setting,
             schemas.AgentImageGenerationSettingUpdate(
@@ -163,7 +165,7 @@ def test_image_generation_setting_mode_sync_and_preserve_key() -> None:
         assert user_mode.image_generation_enabled is True
         assert user_mode.encrypted_pollinations_api_key
 
-        disabled = agent_crud.update_image_generation_setting(
+        disabled = image_setting_service.update_image_generation_setting(
             db,
             user_mode,
             schemas.AgentImageGenerationSettingUpdate(image_key_mode="disabled"),
@@ -172,7 +174,7 @@ def test_image_generation_setting_mode_sync_and_preserve_key() -> None:
         assert disabled.image_generation_enabled is False
         assert disabled.encrypted_pollinations_api_key
 
-        cleared = agent_crud.update_image_generation_setting(
+        cleared = image_setting_service.update_image_generation_setting(
             db,
             disabled,
             schemas.AgentImageGenerationSettingUpdate(
@@ -246,7 +248,7 @@ def test_initial_image_setting_uses_service_key_availability(monkeypatch) -> Non
             lambda: True,
         )
         agent_service._ensure_initial_image_settings(db, "char-service")
-        service_setting = agent_crud.get_image_generation_setting(db, "char-service")
+        service_setting = image_setting_repository.get_image_generation_setting(db, "char-service")
         assert service_setting is not None
         assert service_setting.image_key_mode == "service"
         assert service_setting.image_generation_enabled is True
@@ -257,7 +259,7 @@ def test_initial_image_setting_uses_service_key_availability(monkeypatch) -> Non
             lambda: False,
         )
         agent_service._ensure_initial_image_settings(db, "char-disabled")
-        disabled_setting = agent_crud.get_image_generation_setting(db, "char-disabled")
+        disabled_setting = image_setting_repository.get_image_generation_setting(db, "char-disabled")
         assert disabled_setting is not None
         assert disabled_setting.image_key_mode == "disabled"
         assert disabled_setting.image_generation_enabled is False
@@ -317,10 +319,10 @@ def test_image_generation_setting_manual_visual_identity_uses_null_hash() -> Non
     models.AgentImageGenerationSetting.__table__.create(engine)
 
     with Session(engine) as db:
-        setting = agent_crud.ensure_image_generation_setting(db, "char-1")
+        setting = image_setting_repository.ensure_image_generation_setting(db, "char-1")
         setting.visual_identity_prompt = "auto identity"
         setting.visual_identity_source_hash = "hash"
-        updated = agent_crud.update_image_generation_setting(
+        updated = image_setting_service.update_image_generation_setting(
             db,
             setting,
             schemas.AgentImageGenerationSettingUpdate(
@@ -1016,7 +1018,7 @@ def test_pruna_edit_prepare_skips_without_reference(monkeypatch) -> None:
     )
 
     monkeypatch.setattr(
-        post_image_generation.agent_crud,
+        post_image_generation.image_setting_repository,
         "get_image_generation_setting",
         lambda _db, _character_id: setting,
     )
@@ -1094,7 +1096,7 @@ def test_prepare_post_image_does_not_skip_new_root_post_modes(
         )
 
     monkeypatch.setattr(
-        post_image_generation.agent_crud,
+        post_image_generation.image_setting_repository,
         "get_image_generation_setting",
         lambda _db, _character_id: setting,
     )
@@ -1172,7 +1174,7 @@ def test_prepare_post_image_flux_uses_visual_identity_without_reference(monkeypa
         )
 
     monkeypatch.setattr(
-        post_image_generation.agent_crud,
+        post_image_generation.image_setting_repository,
         "get_image_generation_setting",
         lambda _db, _character_id: setting,
     )
@@ -1252,7 +1254,7 @@ def test_prepare_post_image_reads_route_mode_at_processing_time(monkeypatch) -> 
         )
 
     monkeypatch.setattr(
-        post_image_generation.agent_crud,
+        post_image_generation.image_setting_repository,
         "get_image_generation_setting",
         lambda _db, _character_id: setting,
     )
@@ -1326,7 +1328,7 @@ def test_prepare_post_image_flux_failure_keeps_pollinations_diagnostics(
         )
 
     monkeypatch.setattr(
-        post_image_generation.agent_crud,
+        post_image_generation.image_setting_repository,
         "get_image_generation_setting",
         lambda _db, _character_id: setting,
     )
@@ -1401,7 +1403,7 @@ def test_local_api_prepare_uses_deterministic_prompt_without_llm(monkeypatch) ->
         raise AssertionError("local API image path must not call ImageVisualIdentity")
 
     monkeypatch.setattr(
-        post_image_generation.agent_crud,
+        post_image_generation.image_setting_repository,
         "get_image_generation_setting",
         lambda _db, _character_id: setting,
     )
@@ -1466,7 +1468,7 @@ def test_local_api_prepare_reads_route_mode_at_worker_processing_time(monkeypatc
         )
 
     monkeypatch.setattr(
-        post_image_generation.agent_crud,
+        post_image_generation.image_setting_repository,
         "get_image_generation_setting",
         lambda _db, _character_id: setting,
     )
@@ -1518,7 +1520,7 @@ def test_local_api_prepare_flux_uses_visual_identity_without_reference(monkeypat
         )
 
     monkeypatch.setattr(
-        post_image_generation.agent_crud,
+        post_image_generation.image_setting_repository,
         "get_image_generation_setting",
         lambda _db, _character_id: setting,
     )
@@ -1577,7 +1579,7 @@ def test_local_api_prepare_failure_propagates_attempt_metadata(monkeypatch) -> N
         )
 
     monkeypatch.setattr(
-        post_image_generation.agent_crud,
+        post_image_generation.image_setting_repository,
         "get_image_generation_setting",
         lambda _db, _character_id: setting,
     )
@@ -1653,7 +1655,7 @@ def test_prepare_post_image_service_mode_uses_service_key_and_reservation(
         return SimpleNamespace(id=123)
 
     monkeypatch.setattr(
-        post_image_generation.agent_crud,
+        post_image_generation.image_setting_repository,
         "get_image_generation_setting",
         lambda _db, _character_id: setting,
     )
@@ -1755,7 +1757,7 @@ def test_prepare_post_image_service_failure_keeps_service_mapping_and_diagnostic
         )
 
     monkeypatch.setattr(
-        post_image_generation.agent_crud,
+        post_image_generation.image_setting_repository,
         "get_image_generation_setting",
         lambda _db, _character_id: setting,
     )
@@ -1825,7 +1827,7 @@ def test_local_api_prepare_requires_manual_visual_identity(monkeypatch) -> None:
     )
     character = SimpleNamespace(id="char-1", name="Local Bird", avatar_url=None, banner_url=None)
     monkeypatch.setattr(
-        post_image_generation.agent_crud,
+        post_image_generation.image_setting_repository,
         "get_image_generation_setting",
         lambda _db, _character_id: setting,
     )
@@ -1878,7 +1880,7 @@ def test_pruna_edit_prepare_skips_without_public_reference_url(monkeypatch) -> N
     )
 
     monkeypatch.setattr(
-        post_image_generation.agent_crud,
+        post_image_generation.image_setting_repository,
         "get_image_generation_setting",
         lambda _db, _character_id: setting,
     )
@@ -1937,7 +1939,7 @@ def test_pruna_edit_prepare_skips_unusable_reference(monkeypatch) -> None:
         raise AssertionError("refiner should not run for unusable edit reference")
 
     monkeypatch.setattr(
-        post_image_generation.agent_crud,
+        post_image_generation.image_setting_repository,
         "get_image_generation_setting",
         lambda _db, _character_id: setting,
     )
