@@ -656,3 +656,9 @@ source `67f5178c3ce5d2dcde41700f4ddd251c01300721`에서 owner/World/subject 범�
 고정 source `a131115`에서 실제 scope CAS/replay·item lifecycle·근거 검증·canonical recall·retrieval plan·consolidation·batch selection의 실행 본문을 `service/`에 배치했다. repository/source/provider/queue/transaction의 기존 typed 협력 계약은 `contracts/`에 두며 실제 repository·provider·worker·회귀 fake가 사용하는 계약만 승계한다. 18개 role 파일의 클래스·함수·메서드 **145개 AST가 import 연결만 정규화하면 원문과 동일**하다. 새 전달 service를 추가하거나 provider/DB 호출·commit·rollback 순서를 변경하지 않았다.
 
 동일 source의 Memory·retrieval planner·Today SNS 회귀는 **190 passed / 2,011 deselected / 2 warnings / 54.73초**, 경계 **640/2087/legacy256**, L4 parity97·Memory batch·ER0 **76/87/24/44/7** PASS다. 이 단계에서 application/ports의 원래 파일을 실제 역할로 옮겼으며 공통 SQL 등록과 원래 source snapshot은 보존했다. `Port`가 붙은 기존 구조적 type 이름은 소비자/fake 호환을 위해 유지한다. SQL/FTS/queue 구현과 같은 Session의 외부 업무 조회, HTTP·runtime 조립 및 public/domain aggregate 제거는 다음 단계다.
+
+### AR-B7-A3 Memory ORM 소유와 역사적 migration 연결
+
+Source `7fcecd27fc155242819c3172357da1f8429f3dbf`에서 Memory ORM 13개와 기존 schema 생성 함수의 원문 AST를 유지하면서 `models/items.py`와 `models/batch.py`로 이전했다. 현재 소비자 22개를 연결했고, 고정 Alembic 0085/0089와 SQLite v4→v5/v8→v9의 본문은 변경하지 않았다. 역사적 두 import 경로는 필요한 상수·schema 함수 5개의 같은 객체만 export하며 ORM 구현을 중복하지 않는다.
+
+동일 source의 Memory·retrieval planner·Today SNS·embedded data migration 회귀는 **213 passed / 1,988 deselected / 2 warnings / 102.96초**다. 현재 경계 **642/2089/legacy256**, L4 parity97, ER0 **76/87/24/44/7**과 현재 Memory batch inventory가 통과했다. 원본 API/ORM·기존 assertion·suppression·후속 source/node 계보 보존은 **protected/current 2,201 nodes / 37 items PASS**다. SQL 저장·동일 Session의 타 업무 조회·HTTP/runtime 연결은 다음 전환 대상이며 B7 전체 완료로 표시하지 않는다.
