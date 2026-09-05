@@ -282,3 +282,9 @@ Character 소유 `AgentCreationDraft`, `ProfileImageCandidate`, `ProfileImageQuo
 ### Characters 선행 기반 통합 전체 검증
 
 고정 후보 `6f18f63`에서 전체 backend suite는 **2,077 passed / 기존 22 skipped / 26 warnings, 492.55초**였다. 실행 중 source·test·metadata는 수정하지 않았다. 별도 보존 검사는 G2의 SQLite 공통 오류 소비자 하나가 삭제된 `services/agents.py`를 가리킨다고 거부했다. 동일 오류를 실제로 import·catch하는 `runtime/characters/management.py`로 그 소비자 기록만 전환하고 재검증한다. 선행 Identity CI에서 발견된 deferred inventory 중복과 G4의 역사 migration 개발 의존성은 해당 소유 PR에서 수정한 뒤 통합한다. 전체 테스트 통과를 PR·설치·머지 완료로 표시하지 않는다.
+
+### Character introduction 증거의 Git fingerprint 검사
+
+PR #271 Gitleaks가 source addition의 `characters/service/access.py` Git blob fingerprint 한 줄을 generic API key로 탐지했다. 실제 source commit `d8780945`의 Git object와 정확히 일치함을 확인하고, 해당 evidence 파일·key·40자리 hash·rule의 조합만 허용한다. 원본/추가 보존 자료는 변경하지 않는다. 다른 경로·key·hash는 계속 탐지하는 대조와 현재 추적 source·commit history를 확인한다.
+
+실제 Gitleaks 8.30.1에서 추적 source 18.54MB와 현재 후보의 329 ancestor commits는 findings0이었다. 정확한 조합은 허용하고 다른 파일·key·hash 세 경우는 각각 탐지됐다.
