@@ -17,7 +17,7 @@ SPEC.loader.exec_module(b)
 
 SERVICE = "app.domains.memory.service.recall"
 SCHEMA = "app.domains.memory.schemas.recall"
-OLD = "app.domains.memory.service.recall"
+OLD = "app.domains.memory.application.recall"
 
 
 def policy(*, modules=(SERVICE,), entries=(SERVICE,), bridges=()):
@@ -48,7 +48,7 @@ def test_partial_service_and_schema_entries_work_without_completing_the_domain()
         b._module(SERVICE, imports=(SCHEMA, "app.domains.identity.public")),
         b._module(SCHEMA, external=("pydantic",)),
         b._module("app.domains.identity.public"),
-        b._module("app.domains.memory.service.batch"),
+        b._module("app.domains.memory.application.batch"),
         scope=policy(modules=(SERVICE, SCHEMA), entries=(SERVICE, SCHEMA)),
     )
     assert result == []
@@ -123,7 +123,7 @@ def test_nonexistent_migrated_entry_is_not_an_import_allowlist():
 def test_unconverted_sibling_keeps_legacy_pure_layer_protection():
     result = errors(
         b._module(SERVICE),
-        b._module("app.domains.memory.service.batch", external=("sqlalchemy",)),
+        b._module("app.domains.memory.application.batch", external=("sqlalchemy",)),
     )
     assert any("domain_pure_layer_imports_framework" in error for error in result)
 
@@ -216,7 +216,7 @@ def test_unused_compatibility_bridge_fails_instead_of_becoming_a_future_exceptio
 
 
 @pytest.mark.parametrize("change", [
-    {"importer": "app.domains.memory.service.*"},
+    {"importer": "app.domains.memory.application.*"},
     {"target": "app.domains.memory.service.*"},
     {"owner_stage": ""}, {"removal_condition": ""}, {"reason": ""},
     {"review_date": "next week"}, {"extra": "blanket permission"},
