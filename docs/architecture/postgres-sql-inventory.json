@@ -498,6 +498,18 @@
     {
       "markers": {
         "row_lock": [
+          108
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/relationships/repository/proposals.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "dbbf91df82a6c57208214562acb856df9809283f3c7b09df58ab0bab90744b2d",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "row_lock": [
           18
         ]
       },
@@ -1105,18 +1117,6 @@
       "path": "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "448fd8d1d59f471298a7e42644c59a3cc7b3f293ff48bc687a4d2052899c765c",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
-    },
-    {
-      "markers": {
-        "row_lock": [
-          323
-        ]
-      },
-      "owner": "ER2-ER7 legacy evidence",
-      "path": "backend/app/services/activity_proposal_runtime.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "68e86ae8ed58b27ff2b1605ca7924b0a60b763d136c72bb0840af822990a1be8",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

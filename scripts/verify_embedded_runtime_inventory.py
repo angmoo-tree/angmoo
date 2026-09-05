@@ -88,7 +88,7 @@ PARITY_WORKLOADS = (
         "contract": "Successful social events create directional relationship state and evidence once; failed writes create none",
         "tests": [
             "backend/tests/test_social_event_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py",
+            "backend/tests/relationships/test_activity_proposals.py",
         ],
     },
     {

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from app.runtime.activity_proposals import composition as activity_proposal_runtime
+
 from app.runtime.routines.joint_references import SqlAlchemyJointReferences
 
 from datetime import date, datetime, timedelta
@@ -15,9 +17,7 @@ from app.runtime.relationships import (
     sqlalchemy_social_event as social_event_runtime,
 )
 from app.domains.routines.service import joint_activity as joint_activity_runtime
-from app.services import (
-    activity_proposal_runtime,
-)
+
 from routines.test_daily_activity_runtime import _engine, _prepare, _seed, _utc
 
 

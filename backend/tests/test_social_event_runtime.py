@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from app.runtime.activity_proposals import composition as activity_proposal_runtime
+
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 
@@ -15,11 +17,7 @@ from app.runtime.relationships import (
     sqlalchemy_social_event as social_event_runtime,
 )
 from app.domains.social.public import SocialObservationError
-from app.services import (
-    activity_proposal_runtime,
-    langgraph_social_apply,
-    world_character_contracts,
-)
+from app.services import langgraph_social_apply, world_character_contracts
 from app.runtime.graph_projection.sqlalchemy_commands import (
     RelationshipStateProjectionCommand,
     build_projection_command,

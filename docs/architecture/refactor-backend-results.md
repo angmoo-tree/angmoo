@@ -1027,3 +1027,12 @@ C3-B 최종 구조 검사는 **734 modules / 2,500 edges / exact legacy 217**, �
 원래 activity_proposal_runtime의 상수 7개·오류·결과 dataclass 3개·자체 조회 3개·daypart marker/문구 판단과 기존 동일 UTC 함수를 실제 Relationships 역할 경로로 연결했다. **17개 정의 AST 동일**이며 외부 Joint ORM 반환 타입만 attached 값의 read-only 구조 계약으로 표현한다(객체를 변환하거나 복사하지 않는다). 나머지 제안 생성·응답·일정 workflow는 C4B에서 소유 이전하며, 원래 서비스의 6개 정확한 임시 import만 다음 단계 제거 조건과 함께 기록했다.
 
 집중 검증 **19 passed / 14.61초**. 기존 Proposal·SocialEvent·공동 실행의 assertion은 변경하지 않았고 신규 node는 없다. Source capture/Hosted CI와 전체 B5 종료는 후속 단계다.
+
+
+## AR-B5-C4-B — 제안 생성·응답·예약의 실제 업무 소유
+
+Relationships `service/proposals.py`가 제안 한도·cooldown·preview·발행·일정 탐색·수락·거절·역제안의 원래 흐름과 상태 변경을 소유한다. 자체 Proposal/evidence 조회는 repository로 분리하고, Joint 조회는 Routines repository에 두었다. World/Social/Routines의 실제 함수는 `runtime/activity_proposals`가 같은 Session으로 연결하며, 각 Routines 호출의 기존 JointReferences 생성 시점도 유지한다. 기존 `services/activity_proposal_runtime.py`는 제거했고 caller 5개를 실제 runtime 구성에 연결했다. C4-A의 정확한 임시 bridge 6개도 모두 종료했다. 기존 Proposal 테스트 5개는 `tests/relationships/test_activity_proposals.py`로 옮겨 실제 소유와 일치시켰다.
+
+기존 업무 흐름 **6개와 SQL 5개 AST**는 정확한 소유 함수 호출만 원문으로 확장하면 동일하다. 최초 새 transaction test는 datetime fixture의 인자 타입 오류 2개를 수정했고 제품 코드나 기존 assertion은 바꾸지 않았다. 수정 후 신규 정상/예약 직후 실패 주입 2개를 포함한 집중 **21 passed / 21.13초**, 수동 요청·삭제·projection까지 **47 passed / 기존 warning 1 / 31.39초**를 확인했다. 실제 2개 Session에서 같은 attached Proposal을 예약에 전달하고, 예약을 만든 직후 실패해도 caller rollback으로 제안·Joint·참가자·근거를 함께 되돌린다.
+
+구조 검사가 `runtime.relationships`와 `runtime.routines`의 역방향 조립 의존을 발견했다. 제안+예약 상위 조립을 독립 `runtime/activity_proposals`로 분리하여 각 runtime에 대한 의존을 단방향으로 만들었다. 검사 예외를 추가하지 않았으며 최종 **740 modules / 2,517 edges / exact legacy 214 / cycle 0**으로 통과했다. 경로 정정 뒤 같은 집중 **21 passed / 24.32초**, 변경된 Proposal split 2개도 통과했다. API·응답 스키마·ORM는 PR258/263과 동일하고, 이동한 보호 test assertion과 full split 역시 정정 전 검증에서 오류 0이었다. 최종 source 도입/전체보존/Hosted CI/installer는 부모 선형 통합에서 별도로 검증한다.

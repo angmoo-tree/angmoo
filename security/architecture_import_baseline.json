@@ -1,7 +1,7 @@
 {
-  "edge_count": 2508,
-  "external_import_count": 2266,
-  "module_count": 737,
+  "edge_count": 2517,
+  "external_import_count": 2271,
+  "module_count": 740,
   "modules": [
     {
       "external_imports": [],
@@ -3515,6 +3515,7 @@
     },
     {
       "external_imports": [
+        "datetime",
         "sqlalchemy",
         "sqlalchemy.orm"
       ],
@@ -3677,6 +3678,28 @@
       ],
       "module": "app.domains.relationships.service.projection_events",
       "path": "backend/app/domains/relationships/service/projection_events.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "hashlib",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.ids",
+        "app.domains.relationships.constants",
+        "app.domains.relationships.contracts.proposals",
+        "app.domains.relationships.exceptions",
+        "app.domains.relationships.models",
+        "app.domains.relationships.policies.events",
+        "app.domains.relationships.policies.proposals",
+        "app.domains.relationships.repository.proposals",
+        "app.domains.routines.service.joint_activity"
+      ],
+      "module": "app.domains.relationships.service.proposals",
+      "path": "backend/app/domains/relationships/service/proposals.py",
       "wildcard_imports": []
     },
     {
@@ -4148,6 +4171,7 @@
     },
     {
       "external_imports": [
+        "sqlalchemy",
         "sqlalchemy.orm"
       ],
       "imports": [
@@ -8039,6 +8063,48 @@
     {
       "external_imports": [],
       "imports": [],
+      "module": "app.runtime.activity_proposals",
+      "path": "backend/app/runtime/activity_proposals/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.relationships.contracts.proposals",
+        "app.domains.relationships.exceptions",
+        "app.domains.relationships.models",
+        "app.domains.relationships.repository.proposals",
+        "app.domains.relationships.service.proposals",
+        "app.runtime.activity_proposals.references"
+      ],
+      "module": "app.runtime.activity_proposals.composition",
+      "path": "backend/app/runtime/activity_proposals/composition.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.policies.planning",
+        "app.domains.routines.repository.event_evidence",
+        "app.domains.routines.service.joint_activity",
+        "app.domains.social.repository.event_evidence",
+        "app.domains.worlds.service.character_entry",
+        "app.runtime.routines.joint_references"
+      ],
+      "module": "app.runtime.activity_proposals.references",
+      "path": "backend/app/runtime/activity_proposals/references.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
       "module": "app.runtime.characters",
       "path": "backend/app/runtime/characters/__init__.py",
       "wildcard_imports": []
@@ -10296,33 +10362,6 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "__future__",
-        "dataclasses",
-        "datetime",
-        "hashlib",
-        "sqlalchemy",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.core.ids",
-        "app.domains.relationships.constants",
-        "app.domains.relationships.contracts.proposals",
-        "app.domains.relationships.exceptions",
-        "app.domains.relationships.policies.events",
-        "app.domains.relationships.policies.proposals",
-        "app.domains.relationships.repository.proposals",
-        "app.domains.routines.service.joint_activity",
-        "app.models",
-        "app.runtime.routines.joint_references",
-        "app.schemas",
-        "app.services.daily_activity_plans"
-      ],
-      "module": "app.services.activity_proposal_runtime",
-      "path": "backend/app/services/activity_proposal_runtime.py",
-      "wildcard_imports": []
-    },
-    {
       "external_imports": [],
       "imports": [
         "app.domains.routines.policies.activity_state"
@@ -10672,8 +10711,8 @@
       ],
       "imports": [
         "app.models",
-        "app.runtime.relationships.sqlalchemy_social_event",
-        "app.services.activity_proposal_runtime"
+        "app.runtime.activity_proposals.composition",
+        "app.runtime.relationships.sqlalchemy_social_event"
       ],
       "module": "app.services.langgraph_social_apply",
       "path": "backend/app/services/langgraph_social_apply.py",
@@ -10967,11 +11006,11 @@
         "app.domains.social.contracts.subjective_context",
         "app.domains.social.public",
         "app.models",
+        "app.runtime.activity_proposals.composition",
         "app.runtime.resident.context",
         "app.runtime.social.observations",
         "app.runtime.social.subjective_context",
         "app.schemas",
-        "app.services.activity_proposal_runtime",
         "app.services.community",
         "app.services.direct_llm",
         "app.services.feed_reaction_planner",
@@ -11019,9 +11058,9 @@
       ],
       "imports": [
         "app.models",
+        "app.runtime.activity_proposals.composition",
         "app.runtime.relationships.sqlalchemy_social_event",
         "app.schemas",
-        "app.services.activity_proposal_runtime",
         "app.services.world_feed_search"
       ],
       "module": "app.services.world_feed_social_apply",

@@ -658,3 +658,6 @@ Resident Context는 Character/CharacterState, LlmCredential, AgentFeedCue와 Act
 
 
 성공한 Social source가 관계 이벤트를 만들 때 `relationships/service/events.py`가 재실행 확인·근거 적격성·변화량·상태·outbox의 순서를 소유한다. 근거 조회는 각 실제 소유자의 조회 함수에 요청하고 runtime의 `event_references.py`가 원래 Session을 연결한다. Actor의 잠금과 WorldCharacter/member 상태 판단은 WorldCharacter 서비스에 남고, evidence의 공개 여부 판단은 Relationships가 원래 시점에 수행한다. 이 흐름은 commit하지 않으므로 게시/실행/event/evidence/outbox는 caller의 하나의 transaction으로 함께 저장하거나 되돌린다.
+
+
+활동 제안의 한도·발행·수락·거절·역제안은 Relationships `service/proposals.py`를 수정한다. 공동 활동 슬롯과 두 참가자의 예약/계획 변경은 Routines 소유이며 `runtime/activity_proposals`가 같은 Session의 두 서비스를 조립한다. 이 상위 조립은 각 도메인과 기존 event/joint runtime을 단방향으로 참조하며 제안 상태 판단을 복제하지 않는다. 예약 도중 실패해도 caller가 근거 event와 모든 상태를 함께 rollback할 수 있도록 제안 서비스는 자체 commit을 하지 않는다.

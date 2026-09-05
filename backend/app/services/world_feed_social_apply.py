@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from app.runtime.activity_proposals import composition as activity_proposal_runtime
+
 from dataclasses import dataclass
 from datetime import datetime
 from hashlib import sha256
@@ -11,7 +13,7 @@ from app import models, schemas
 from app.runtime.relationships import (
     sqlalchemy_social_event as social_event_runtime,
 )
-from app.services import activity_proposal_runtime
+
 from app.services.world_feed_search import ReadySearchProfile
 
 

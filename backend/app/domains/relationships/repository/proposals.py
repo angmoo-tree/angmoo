@@ -1,4 +1,5 @@
 """Proposal counts and successful published-evidence lookup in the caller Session."""
+from datetime import datetime
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 from app.domains.relationships import models
@@ -67,3 +68,46 @@ def find_open_proposal_for_source_post(
         .order_by(models.ActivityProposal.created_at.desc())
         .limit(1)
     )
+
+
+def recent_failed_pair(db: Session, *, actor_id: str, target_id: str, cutoff: datetime) -> str | None:
+    return db.scalar(
+            select(models.ActivityProposal.id)
+            .where(
+                models.ActivityProposal.proposer_world_character_id == actor_id,
+                models.ActivityProposal.target_world_character_id == target_id,
+                models.ActivityProposal.status.in_(
+                    {"rejected", "cancelled", "expired"}
+                ),
+                models.ActivityProposal.updated_at >= cutoff,
+            )
+            .limit(1)
+        )
+
+
+def find_by_source_event(db: Session, *, proposal_event: models.SocialEvent) -> models.ActivityProposal | None:
+    return db.scalar(
+        select(models.ActivityProposal).where(
+            models.ActivityProposal.source_proposal_event_id == proposal_event.id
+        )
+    )
+
+
+def source_post_for_event(db: Session, *, proposal_event: models.SocialEvent) -> str | None:
+    return db.scalar(
+            select(models.SocialEventEvidence.source_post_id).where(
+                models.SocialEventEvidence.social_event_id == proposal_event.id
+            )
+        )
+
+
+def find_for_update(db: Session, *, proposal_id: str) -> models.ActivityProposal | None:
+    return db.scalar(
+        select(models.ActivityProposal)
+        .where(models.ActivityProposal.id == proposal_id)
+        .with_for_update()
+    )
+
+
+def get_proposal(db: Session, proposal_id: str) -> models.ActivityProposal | None:
+    return db.get(models.ActivityProposal, proposal_id)

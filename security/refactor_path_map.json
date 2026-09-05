@@ -378,7 +378,9 @@
     "backend/app/domains/relationships/infrastructure/__init__.py": "backend/app/domains/relationships/__init__.py",
     "backend/app/domains/relationships/graph_read/use_case.py": "backend/app/domains/relationships/service/graph_read.py",
     "backend/app/domains/relationships/application/graph_planning.py": "backend/app/domains/relationships/service/graph_planning.py",
-    "backend/app/domains/relationships/graph_recall/service.py": "backend/app/domains/relationships/service/graph_recall.py"
+    "backend/app/domains/relationships/graph_recall/service.py": "backend/app/domains/relationships/service/graph_recall.py",
+    "backend/app/services/activity_proposal_runtime.py": "backend/app/runtime/activity_proposals/composition.py",
+    "backend/tests/test_activity_proposal_runtime.py": "backend/tests/relationships/test_activity_proposals.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -826,7 +828,12 @@
     "tests/test_l2_scheduler_singleton.py::test_shutdown_during_tick_drains_then_releases_without_second_tick": "tests/routines/test_scheduler_singleton.py::test_shutdown_during_tick_drains_then_releases_without_second_tick",
     "tests/test_l2_scheduler_singleton.py::test_sleep_wake_gap_does_not_replay_missed_intervals": "tests/routines/test_scheduler_singleton.py::test_sleep_wake_gap_does_not_replay_missed_intervals",
     "tests/test_l2_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates": "tests/routines/test_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates",
-    "tests/test_l2_scheduler_singleton.py::test_wait_between_ticks_keeps_lease_alive": "tests/routines/test_scheduler_singleton.py::test_wait_between_ticks_keeps_lease_alive"
+    "tests/test_l2_scheduler_singleton.py::test_wait_between_ticks_keeps_lease_alive": "tests/routines/test_scheduler_singleton.py::test_wait_between_ticks_keeps_lease_alive",
+    "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode": "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+    "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship": "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+    "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision": "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+    "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta": "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+    "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans": "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
   },
   "details": {
     "AR-B1": {
@@ -18594,98 +18601,98 @@
           "old": "backend/app/services/joint_activity_runtime.py::JointActivityRuntimeError",
           "new": "backend/app/domains/routines/exceptions.py::JointActivityRuntimeError",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::OpeningClaim",
           "new": "backend/app/domains/routines/contracts/joint_activity.py::OpeningClaim",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::ScheduledJoint",
           "new": "backend/app/domains/routines/service/joint_activity/planning.py::ScheduledJoint",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::_aware_utc",
           "new": "backend/app/domains/routines/service/scheduling.py::aware_utc",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::_participant_rows",
           "new": "backend/app/domains/routines/service/joint_activity/planning.py::_participant_rows",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::_eligible_world_character",
           "new": "backend/app/domains/routines/service/joint_activity/eligibility.py::_eligible_world_character",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::_mutually_blocked",
           "new": "backend/app/runtime/routines/joint_references.py::SqlAlchemyJointReferences",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ],
           "destination_members": [
             "mutually_blocked"
@@ -18695,266 +18702,266 @@
           "old": "backend/app/services/joint_activity_runtime.py::validate_pair",
           "new": "backend/app/domains/routines/service/joint_activity/eligibility.py::validate_pair",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::validate_place",
           "new": "backend/app/domains/routines/service/joint_activity/eligibility.py::validate_place",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::active_commitment_count",
           "new": "backend/app/domains/routines/service/joint_activity/planning.py::active_commitment_count",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::reservation_for",
           "new": "backend/app/domains/routines/service/joint_activity/planning.py::reservation_for",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::slot_available",
           "new": "backend/app/domains/routines/service/joint_activity/planning.py::slot_available",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::_item_snapshot",
           "new": "backend/app/domains/routines/service/joint_activity/planning.py::_item_snapshot",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::_joint_snapshot",
           "new": "backend/app/domains/routines/service/joint_activity/planning.py::_joint_snapshot",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::_materialize_existing_plan",
           "new": "backend/app/domains/routines/service/joint_activity/planning.py::_materialize_existing_plan",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::create_scheduled_joint",
           "new": "backend/app/domains/routines/service/joint_activity/planning.py::create_scheduled_joint",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::materialize_reservation_for_new_plan",
           "new": "backend/app/domains/routines/service/joint_activity/planning.py::materialize_reservation_for_new_plan",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::claim_opening",
           "new": "backend/app/domains/routines/service/joint_activity/execution.py::claim_opening",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::release_opening",
           "new": "backend/app/domains/routines/service/joint_activity/execution.py::release_opening",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::apply_joint_post",
           "new": "backend/app/domains/routines/service/joint_activity/execution.py::apply_joint_post",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::complete_due_joint_activities",
           "new": "backend/app/domains/routines/service/joint_activity/execution.py::complete_due_joint_activities",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::DAYPARTS",
           "new": "backend/app/domains/routines/constants.py::DAYPARTS",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::OPENING_LEASE",
           "new": "backend/app/domains/routines/constants.py::OPENING_LEASE",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::MAX_PARTICIPANT_OPENING_ATTEMPTS",
           "new": "backend/app/domains/routines/constants.py::MAX_PARTICIPANT_OPENING_ATTEMPTS",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::MAX_JOINT_OPENING_ATTEMPTS",
           "new": "backend/app/domains/routines/constants.py::MAX_JOINT_OPENING_ATTEMPTS",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::ACTIVE_JOINT_STATUSES",
           "new": "backend/app/domains/routines/constants.py::ACTIVE_JOINT_STATUSES",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -18966,11 +18973,11 @@
           ],
           "test_nodes": [
             "tests/social/test_joint_post_links.py::test_joint_links_keep_assignment_stages_and_caller_rollback",
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -18982,11 +18989,11 @@
           ],
           "test_nodes": [
             "tests/social/test_joint_post_links.py::test_joint_links_keep_assignment_stages_and_caller_rollback",
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -18998,11 +19005,11 @@
           ],
           "test_nodes": [
             "tests/social/test_joint_notifications.py::test_joint_notification_keeps_exact_dedupe_payload_and_caller_write_boundary",
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         }
       ]
@@ -20746,15 +20753,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -20766,15 +20773,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -20786,15 +20793,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -20806,15 +20813,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -20826,15 +20833,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -20846,15 +20853,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -20866,15 +20873,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -20886,15 +20893,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -20906,15 +20913,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -20926,15 +20933,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -20946,15 +20953,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -20966,15 +20973,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ],
           "destination_members": [
             "mutually_blocked"
@@ -20989,15 +20996,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -21009,15 +21016,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -21029,15 +21036,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -21049,15 +21056,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -21069,15 +21076,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -21089,15 +21096,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -21109,15 +21116,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -21129,15 +21136,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -21149,15 +21156,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -21169,15 +21176,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -21189,15 +21196,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -21209,15 +21216,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -21229,15 +21236,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -21249,15 +21256,15 @@
             "backend/app/domains/routines/service/joint_activity/execution.py",
             "backend/app/domains/routines/service/joint_activity/planning.py",
             "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py"
+            "backend/app/runtime/activity_proposals/references.py",
+            "backend/tests/relationships/test_activity_proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ]
         },
         {
@@ -21269,11 +21276,11 @@
             "backend/app/runtime/routines/joint_references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans",
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta"
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans",
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta"
           ],
           "destination_members": [
             "get_membership",
@@ -21289,11 +21296,11 @@
             "backend/app/runtime/routines/joint_references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
           ],
           "destination_members": [
             "get_enabled_place"
@@ -21308,11 +21315,11 @@
             "backend/app/runtime/routines/joint_references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans",
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta"
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans",
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta"
           ],
           "destination_members": [
             "ensure_started_notification",
@@ -21330,11 +21337,11 @@
             "backend/app/runtime/routines/joint_references.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
-            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans",
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta"
+            "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans",
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta"
           ],
           "destination_members": [
             "record_completed_event",
@@ -28612,7 +28619,8 @@
           "backend/app/domains/relationships/policies/events.py",
           "backend/app/domains/relationships/policies/proposals.py",
           "backend/app/domains/relationships/repository/proposals.py",
-          "backend/app/services/activity_proposal_runtime.py"
+          "backend/app/domains/relationships/service/proposals.py",
+          "backend/app/runtime/activity_proposals/composition.py"
         ]
       },
       "split_symbols": [
@@ -28620,263 +28628,634 @@
           "old": "backend/app/services/activity_proposal_runtime.py::OPEN_PROPOSAL_LIMIT_PER_PAIR",
           "new": "backend/app/domains/relationships/constants.py::OPEN_PROPOSAL_LIMIT_PER_PAIR",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/domains/relationships/service/proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
           ]
         },
         {
           "old": "backend/app/services/activity_proposal_runtime.py::OPEN_PROPOSAL_LIMIT_PER_CHARACTER",
           "new": "backend/app/domains/relationships/constants.py::OPEN_PROPOSAL_LIMIT_PER_CHARACTER",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/domains/relationships/service/proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
           ]
         },
         {
           "old": "backend/app/services/activity_proposal_runtime.py::ACTIVE_COMMITMENT_LIMIT",
           "new": "backend/app/domains/relationships/constants.py::ACTIVE_COMMITMENT_LIMIT",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/domains/relationships/service/proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
           ]
         },
         {
           "old": "backend/app/services/activity_proposal_runtime.py::COUNTER_LIMIT",
           "new": "backend/app/domains/relationships/constants.py::COUNTER_LIMIT",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/domains/relationships/service/proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
           ]
         },
         {
           "old": "backend/app/services/activity_proposal_runtime.py::PAIR_COOLDOWN",
           "new": "backend/app/domains/relationships/constants.py::PAIR_COOLDOWN",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/domains/relationships/service/proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
           ]
         },
         {
           "old": "backend/app/services/activity_proposal_runtime.py::SEARCH_DAYS",
           "new": "backend/app/domains/relationships/constants.py::SEARCH_DAYS",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/domains/relationships/service/proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
           ]
         },
         {
           "old": "backend/app/services/activity_proposal_runtime.py::PROPOSAL_TTL",
           "new": "backend/app/domains/relationships/constants.py::PROPOSAL_TTL",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/domains/relationships/service/proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
           ]
         },
         {
           "old": "backend/app/services/activity_proposal_runtime.py::ActivityProposalRuntimeError",
           "new": "backend/app/domains/relationships/exceptions.py::ActivityProposalRuntimeError",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/domains/relationships/service/proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
           ]
         },
         {
           "old": "backend/app/services/activity_proposal_runtime.py::ProposalEligibility",
           "new": "backend/app/domains/relationships/contracts/proposals.py::ProposalEligibility",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/domains/relationships/service/proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
           ]
         },
         {
           "old": "backend/app/services/activity_proposal_runtime.py::ResolvedSchedule",
           "new": "backend/app/domains/relationships/contracts/proposals.py::ResolvedSchedule",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/domains/relationships/service/proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
           ]
         },
         {
           "old": "backend/app/services/activity_proposal_runtime.py::ProposalResponseResult",
           "new": "backend/app/domains/relationships/contracts/proposals.py::ProposalResponseResult",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/domains/relationships/service/proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
           ]
         },
         {
           "old": "backend/app/services/activity_proposal_runtime.py::_aware_utc",
           "new": "backend/app/domains/relationships/policies/events.py::_aware_utc",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/domains/relationships/service/proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
           ]
         },
         {
           "old": "backend/app/services/activity_proposal_runtime.py::_open_pair_count",
           "new": "backend/app/domains/relationships/repository/proposals.py::_open_pair_count",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/domains/relationships/service/proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
           ]
         },
         {
           "old": "backend/app/services/activity_proposal_runtime.py::_open_character_count",
           "new": "backend/app/domains/relationships/repository/proposals.py::_open_character_count",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/domains/relationships/service/proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
           ]
         },
         {
           "old": "backend/app/services/activity_proposal_runtime.py::_cooldown_active",
-          "new": "backend/app/services/activity_proposal_runtime.py::_cooldown_active",
+          "new": "backend/app/domains/relationships/service/proposals.py::_cooldown_active",
           "direct_consumers": [
-            "backend/app/services/world_feed_social_apply.py",
-            "backend/app/services/langgraph_social_apply.py"
+            "backend/app/runtime/activity_proposals/composition.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
           ]
         },
         {
           "old": "backend/app/services/activity_proposal_runtime.py::proposal_eligibility",
-          "new": "backend/app/services/activity_proposal_runtime.py::proposal_eligibility",
+          "new": "backend/app/domains/relationships/service/proposals.py::proposal_eligibility",
           "direct_consumers": [
-            "backend/app/services/world_feed_social_apply.py",
-            "backend/app/services/langgraph_social_apply.py"
+            "backend/app/runtime/activity_proposals/composition.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
           ]
         },
         {
           "old": "backend/app/services/activity_proposal_runtime.py::_DAYPART_MARKERS",
           "new": "backend/app/domains/relationships/policies/proposals.py::_DAYPART_MARKERS",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/domains/relationships/service/proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
           ]
         },
         {
           "old": "backend/app/services/activity_proposal_runtime.py::_text_daypart_consistent",
           "new": "backend/app/domains/relationships/policies/proposals.py::_text_daypart_consistent",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/domains/relationships/service/proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
           ]
         },
         {
           "old": "backend/app/services/activity_proposal_runtime.py::validate_preview",
-          "new": "backend/app/services/activity_proposal_runtime.py::validate_preview",
+          "new": "backend/app/domains/relationships/service/proposals.py::validate_preview",
           "direct_consumers": [
-            "backend/app/services/world_feed_social_apply.py",
-            "backend/app/services/langgraph_social_apply.py"
+            "backend/app/runtime/activity_proposals/composition.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
           ]
         },
         {
           "old": "backend/app/services/activity_proposal_runtime.py::create_published_proposal",
-          "new": "backend/app/services/activity_proposal_runtime.py::create_published_proposal",
+          "new": "backend/app/domains/relationships/service/proposals.py::create_published_proposal",
           "direct_consumers": [
-            "backend/app/services/world_feed_social_apply.py",
-            "backend/app/services/langgraph_social_apply.py"
+            "backend/app/runtime/activity_proposals/composition.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
           ]
         },
         {
           "old": "backend/app/services/activity_proposal_runtime.py::find_open_proposal_for_source_post",
           "new": "backend/app/domains/relationships/repository/proposals.py::find_open_proposal_for_source_post",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py"
+            "backend/app/domains/relationships/service/proposals.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
           ]
         },
         {
           "old": "backend/app/services/activity_proposal_runtime.py::resolve_acceptance_schedule",
-          "new": "backend/app/services/activity_proposal_runtime.py::resolve_acceptance_schedule",
+          "new": "backend/app/domains/relationships/service/proposals.py::resolve_acceptance_schedule",
           "direct_consumers": [
-            "backend/app/services/world_feed_social_apply.py",
-            "backend/app/services/langgraph_social_apply.py"
+            "backend/app/runtime/activity_proposals/composition.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
           ]
         },
         {
           "old": "backend/app/services/activity_proposal_runtime.py::apply_response",
-          "new": "backend/app/services/activity_proposal_runtime.py::apply_response",
+          "new": "backend/app/domains/relationships/service/proposals.py::apply_response",
           "direct_consumers": [
-            "backend/app/services/world_feed_social_apply.py",
-            "backend/app/services/langgraph_social_apply.py"
+            "backend/app/runtime/activity_proposals/composition.py"
           ],
           "test_nodes": [
-            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
-            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::proposal_eligibility",
+          "new": "backend/app/runtime/activity_proposals/composition.py::proposal_eligibility",
+          "direct_consumers": [
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode"
           ]
         }
       ],
       "new_tests": []
+    },
+    "AR-B5-C4-B": {
+      "status": "IMPLEMENTED; focused21 PASS; 6 workflow and 5 SQL AST preserved; source introduction pending",
+      "scope": "Proposal admission/publish/accept/reject/counter workflows own real rules and mutations; runtime binds Routines reservations and World/Social reads to the caller Session.",
+      "split_files": {
+        "backend/app/services/activity_proposal_runtime.py": [
+          "backend/app/domains/relationships/constants.py",
+          "backend/app/domains/relationships/contracts/proposals.py",
+          "backend/app/domains/relationships/exceptions.py",
+          "backend/app/domains/relationships/policies/events.py",
+          "backend/app/domains/relationships/policies/proposals.py",
+          "backend/app/domains/relationships/repository/proposals.py",
+          "backend/app/domains/relationships/service/proposals.py",
+          "backend/app/domains/routines/repository/event_evidence.py",
+          "backend/app/runtime/activity_proposals/references.py",
+          "backend/app/runtime/activity_proposals/composition.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::OPEN_PROPOSAL_LIMIT_PER_PAIR",
+          "new": "backend/app/domains/relationships/constants.py::OPEN_PROPOSAL_LIMIT_PER_PAIR",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/proposals.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::OPEN_PROPOSAL_LIMIT_PER_CHARACTER",
+          "new": "backend/app/domains/relationships/constants.py::OPEN_PROPOSAL_LIMIT_PER_CHARACTER",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/proposals.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::ACTIVE_COMMITMENT_LIMIT",
+          "new": "backend/app/domains/relationships/constants.py::ACTIVE_COMMITMENT_LIMIT",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/proposals.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::COUNTER_LIMIT",
+          "new": "backend/app/domains/relationships/constants.py::COUNTER_LIMIT",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/proposals.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::PAIR_COOLDOWN",
+          "new": "backend/app/domains/relationships/constants.py::PAIR_COOLDOWN",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/proposals.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::SEARCH_DAYS",
+          "new": "backend/app/domains/relationships/constants.py::SEARCH_DAYS",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/proposals.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::PROPOSAL_TTL",
+          "new": "backend/app/domains/relationships/constants.py::PROPOSAL_TTL",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/proposals.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::ActivityProposalRuntimeError",
+          "new": "backend/app/domains/relationships/exceptions.py::ActivityProposalRuntimeError",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/proposals.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::ProposalEligibility",
+          "new": "backend/app/domains/relationships/contracts/proposals.py::ProposalEligibility",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/proposals.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::ResolvedSchedule",
+          "new": "backend/app/domains/relationships/contracts/proposals.py::ResolvedSchedule",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/proposals.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::ProposalResponseResult",
+          "new": "backend/app/domains/relationships/contracts/proposals.py::ProposalResponseResult",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/proposals.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::_aware_utc",
+          "new": "backend/app/domains/relationships/policies/events.py::_aware_utc",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/proposals.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::_open_pair_count",
+          "new": "backend/app/domains/relationships/repository/proposals.py::_open_pair_count",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/proposals.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::_open_character_count",
+          "new": "backend/app/domains/relationships/repository/proposals.py::_open_character_count",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/proposals.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::_cooldown_active",
+          "new": "backend/app/domains/relationships/service/proposals.py::_cooldown_active",
+          "direct_consumers": [
+            "backend/app/runtime/activity_proposals/composition.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::proposal_eligibility",
+          "new": "backend/app/domains/relationships/service/proposals.py::proposal_eligibility",
+          "direct_consumers": [
+            "backend/app/runtime/activity_proposals/composition.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::_DAYPART_MARKERS",
+          "new": "backend/app/domains/relationships/policies/proposals.py::_DAYPART_MARKERS",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/proposals.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::_text_daypart_consistent",
+          "new": "backend/app/domains/relationships/policies/proposals.py::_text_daypart_consistent",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/proposals.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::validate_preview",
+          "new": "backend/app/domains/relationships/service/proposals.py::validate_preview",
+          "direct_consumers": [
+            "backend/app/runtime/activity_proposals/composition.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::create_published_proposal",
+          "new": "backend/app/domains/relationships/service/proposals.py::create_published_proposal",
+          "direct_consumers": [
+            "backend/app/runtime/activity_proposals/composition.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::find_open_proposal_for_source_post",
+          "new": "backend/app/domains/relationships/repository/proposals.py::find_open_proposal_for_source_post",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/proposals.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::resolve_acceptance_schedule",
+          "new": "backend/app/domains/relationships/service/proposals.py::resolve_acceptance_schedule",
+          "direct_consumers": [
+            "backend/app/runtime/activity_proposals/composition.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::apply_response",
+          "new": "backend/app/domains/relationships/service/proposals.py::apply_response",
+          "direct_consumers": [
+            "backend/app/runtime/activity_proposals/composition.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::proposal_eligibility",
+          "new": "backend/app/runtime/activity_proposals/composition.py::proposal_eligibility",
+          "direct_consumers": [
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_activity_proposals.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::proposal_eligibility",
+          "new": "backend/app/runtime/activity_proposals/references.py::SqlAlchemyProposalReferences",
+          "direct_consumers": [
+            "backend/app/runtime/activity_proposals/composition.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_proposal_transaction.py::test_acceptance_reservation_uses_same_session_and_caller_rollback[False]",
+            "tests/relationships/test_proposal_transaction.py::test_acceptance_reservation_uses_same_session_and_caller_rollback[True]"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::apply_response",
+          "new": "backend/app/domains/routines/repository/event_evidence.py::find_joint_for_proposal",
+          "direct_consumers": [
+            "backend/app/runtime/activity_proposals/references.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_proposal_transaction.py::test_acceptance_reservation_uses_same_session_and_caller_rollback[False]",
+            "tests/relationships/test_proposal_transaction.py::test_acceptance_reservation_uses_same_session_and_caller_rollback[True]"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::_cooldown_active",
+          "new": "backend/app/domains/relationships/repository/proposals.py::recent_failed_pair",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/proposals.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_proposal_transaction.py::test_acceptance_reservation_uses_same_session_and_caller_rollback[False]",
+            "tests/relationships/test_proposal_transaction.py::test_acceptance_reservation_uses_same_session_and_caller_rollback[True]"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::create_published_proposal",
+          "new": "backend/app/domains/relationships/repository/proposals.py::find_by_source_event",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/proposals.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_proposal_transaction.py::test_acceptance_reservation_uses_same_session_and_caller_rollback[False]",
+            "tests/relationships/test_proposal_transaction.py::test_acceptance_reservation_uses_same_session_and_caller_rollback[True]"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::create_published_proposal",
+          "new": "backend/app/domains/relationships/repository/proposals.py::source_post_for_event",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/proposals.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_proposal_transaction.py::test_acceptance_reservation_uses_same_session_and_caller_rollback[False]",
+            "tests/relationships/test_proposal_transaction.py::test_acceptance_reservation_uses_same_session_and_caller_rollback[True]"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::apply_response",
+          "new": "backend/app/domains/relationships/repository/proposals.py::find_for_update",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/proposals.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_proposal_transaction.py::test_acceptance_reservation_uses_same_session_and_caller_rollback[False]",
+            "tests/relationships/test_proposal_transaction.py::test_acceptance_reservation_uses_same_session_and_caller_rollback[True]"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::resolve_acceptance_schedule",
+          "new": "backend/app/domains/relationships/repository/proposals.py::get_proposal",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/proposals.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_proposal_transaction.py::test_acceptance_reservation_uses_same_session_and_caller_rollback[False]",
+            "tests/relationships/test_proposal_transaction.py::test_acceptance_reservation_uses_same_session_and_caller_rollback[True]"
+          ]
+        }
+      ],
+      "new_tests": [
+        "tests/relationships/test_proposal_transaction.py::test_acceptance_reservation_uses_same_session_and_caller_rollback[False]",
+        "tests/relationships/test_proposal_transaction.py::test_acceptance_reservation_uses_same_session_and_caller_rollback[True]"
+      ],
+      "new_files": [
+        "backend/app/runtime/activity_proposals/__init__.py"
+      ]
     }
   }
 }

@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2266,
-      "internal_edge_count": 2508,
+      "external_import_count": 2271,
+      "internal_edge_count": 2517,
       "legacy_import_exception_count": 0,
-      "module_count": 737,
+      "module_count": 740,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -333,6 +333,21 @@
             ],
             "module": "app.domains.relationships.service.projection_events",
             "path": "backend/app/domains/relationships/service/projection_events.py"
+          },
+          {
+            "imports": [
+              "app.core.ids",
+              "app.domains.relationships.constants",
+              "app.domains.relationships.contracts.proposals",
+              "app.domains.relationships.exceptions",
+              "app.domains.relationships.models",
+              "app.domains.relationships.policies.events",
+              "app.domains.relationships.policies.proposals",
+              "app.domains.relationships.repository.proposals",
+              "app.domains.routines.service.joint_activity"
+            ],
+            "module": "app.domains.relationships.service.proposals",
+            "path": "backend/app/domains/relationships/service/proposals.py"
           },
           {
             "imports": [
@@ -1740,7 +1755,7 @@
       },
       {
         "path": "backend/tests/test_social_event_runtime.py",
-        "sha256": "79bfdf8120ec42b76caaa367146a8603ffa5a37853f4a6a8c2c940c8aeb9a00f"
+        "sha256": "2c28c1bbadafcf759687a94a15064e16c11a9dd37899d99eba6bde6ca25029e0"
       },
       {
         "path": "backend/tests/test_t2_architecture_inventory.py",
