@@ -1339,3 +1339,5 @@ C7-C 현재 경계는 777 modules / 2691 edges / exact legacy 202 / cycle0이다
 `cf142ac` 전체 backend 실행은 **2269 passed / 22 skipped / 27 warnings / 2 failed / 685.81초**였다. 두 실패는 실제 실행 기능이 아니라 이동된 소스에 대한 검사 연결이었다. L3 경계 검사는 삭제한 `services/langgraph_resident.py` 대신 실제 `runtime/resident/langgraph.py`를 읽는다. 저장 개수 제한 부재 검사는 management의 실제 분리 소유인 `routines/service/autonomy_management.py`도 명시 source group으로 읽어 원래 검사 범위를 유지한다. 실제 파일 내용만 읽으며 원래 금지 문자열·capacity 설정 단언은 모두 그대로다. 수정 후 두 검사 파일은 **11 passed / 7.06초**다.
 
 첫 stock 전체 검사는 보호/current **2293/2293**으로 source/split/단언/suppression/API·ORM/node 손실이 없었으나, G07.test_paths의 옛 tendency 파일 참조 한 건으로 실패했다. 이 한 항목을 이미 검증된 file/node map의 `tests/routines/test_tendency.py`로 연결했다. 원본 node 목록·frozen/checkpoint·원장 내용은 바꾸지 않았다. stock 재검사와 최종 C7/작성 경로 합류 뒤 전체 backend 재실행은 별도 게이트로 남긴다.
+
+`70b238c` 고정 tree에서 stock `--contracts --nodes` 재검사는 **PASS(37items / protected2293 / current2293)**다. 실패 원인인 실제 경로만 보완했으며 원래 단언과 86개 append-only 기록은 그대로다. 최종 C7/작성 책임 합류와 이후 전체 backend·Hosted CI는 계속 진행 상태다.
