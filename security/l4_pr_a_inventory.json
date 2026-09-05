@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2292,
-      "internal_edge_count": 1848,
+      "external_import_count": 2019,
+      "internal_edge_count": 1838,
       "legacy_import_exception_count": 0,
-      "module_count": 683,
+      "module_count": 594,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -1099,7 +1099,7 @@
       },
       {
         "path": "backend/tests/test_l3_owner_manual_social_inbox.py",
-        "sha256": "c67a8abc619157156d3f7480a734e3c2c7a0ed459be0bb5ff65d2cb78e9a417f"
+        "sha256": "acf01fb266bbc9d2a42a80659ed619c3df43133ae7ad78a73ad5a10852a6f659"
       },
       {
         "path": "backend/tests/test_l4_social_search_projection.py",

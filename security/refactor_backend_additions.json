@@ -793,6 +793,52 @@
       "test_suppressions": {
         "tests/logging/test_runtime_logging.py": {}
       }
+    },
+    {
+      "commit": "960fd4685179c2c48958f18eaa5a9a93d855064c",
+      "feature_id": "AR-G4",
+      "reason": "Preserve root Alembic layout, immutable revision graph, metadata registration and historical inventory regression coverage.",
+      "tracked_files": {
+        "backend/tests/migrations/test_alembic_layout.py": "d12408fda65d9f37342f40eeaa452d3430655044"
+      },
+      "test_nodes": [
+        "tests/migrations/test_alembic_layout.py::test_alembic_env_registers_canonical_metadata_on_real_memory_connection",
+        "tests/migrations/test_alembic_layout.py::test_alembic_heads_from_outside_backend",
+        "tests/migrations/test_alembic_layout.py::test_historical_inventory_record_keeps_old_path_and_digest[d_world_chat-20260831_0084_world_scoped_chat_identity.py]",
+        "tests/migrations/test_alembic_layout.py::test_historical_inventory_record_keeps_old_path_and_digest[f_memory-20260831_0085_canonical_memory_schema.py]",
+        "tests/migrations/test_alembic_layout.py::test_historical_inventory_record_keeps_old_path_and_digest[j_response_generation-20260831_0086_chat_response_request_lifecycle.py]",
+        "tests/migrations/test_alembic_layout.py::test_historical_inventory_record_keeps_old_path_and_digest[p_evidence_response_streaming-20260903_0087_world_chat_model_binding.py]",
+        "tests/migrations/test_alembic_layout.py::test_historical_inventory_record_keeps_old_path_and_digest[r_today_sns_activity-20260904_0088_social_action_subjective_context.py]",
+        "tests/migrations/test_alembic_layout.py::test_historical_revision_blobs_and_graph_remain_unchanged"
+      ],
+      "test_assertions": {
+        "tests/migrations/test_alembic_layout.py": {
+          "test_historical_revision_blobs_and_graph_remain_unchanged": [
+            "assert len(historical) == 88",
+            "assert actual_graph == expected_graph",
+            "assert len(actual_graph) == 88",
+            "assert script.get_heads() == ['20260904_0089']",
+            "assert not list((BACKEND / 'app/alembic').rglob('*.py'))",
+            "assert actual_blob == expected_blob, old_path"
+          ],
+          "test_alembic_heads_from_outside_backend": [
+            "assert result.returncode == 0, result.stdout + result.stderr",
+            "assert result.stdout.strip() == '20260904_0089 (head)'"
+          ],
+          "test_alembic_env_registers_canonical_metadata_on_real_memory_connection": [
+            "assert result.returncode == 0, result.stdout + result.stderr",
+            "assert result_data == {'registered_tables': expected_count, 'revision_bodies_run': 0}",
+            "assert not list(tmp_path.rglob('*.sqlite3'))"
+          ],
+          "test_historical_inventory_record_keeps_old_path_and_digest": [
+            "assert spec is not None and spec.loader is not None",
+            "assert record == {'path': old_path, 'size': len(data), 'sha256': hashlib.sha256(data).hexdigest()}"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/migrations/test_alembic_layout.py": {}
+      }
     }
   ]
 }

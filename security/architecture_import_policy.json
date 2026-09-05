@@ -6,10 +6,6 @@
       "edges": [
         {
           "imported": "app.models",
-          "importer": "app.alembic.env"
-        },
-        {
-          "imported": "app.models",
           "importer": "app.api.v1.deps"
         },
         {

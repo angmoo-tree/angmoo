@@ -22,7 +22,7 @@ from app.services import auth as auth_service
 ALLOWED_ORIGIN = "http://127.0.0.1:3000"
 MIGRATION_PATH = (
     Path(__file__).resolve().parents[1]
-    / "app/alembic/versions/20260804_0069_auth_session_expiry.py"
+    / "alembic/versions/20260804_0069_auth_session_expiry.py"
 )
 
 

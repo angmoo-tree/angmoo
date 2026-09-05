@@ -29,7 +29,7 @@ Python 패키지 이름은 `app`이고, 업무 패키지는 `app/domains`에 모
 
 ```text
 backend/
-├── alembic/                         # 목표: 기존 migration 이력의 루트 배치
+├── alembic/                         # 역사 migration 이력의 루트 배치
 │   ├── env.py
 │   └── versions/
 ├── app/
@@ -81,7 +81,7 @@ backend/
 ├── .env.example                    # 비밀 없는 개발 설정 예시
 ├── .env                            # 선택적 개발 설정·Git/제품 배포 제외
 ├── logging.ini                     # 앱 기본 level·Uvicorn console 설정
-└── alembic.ini                     # 목표: backend/alembic 연결
+└── alembic.ini                     # backend/alembic 연결
 
 저장소 root/
 └── .gitignore                      # 저장소 전체의 제외 규칙
@@ -316,7 +316,9 @@ Sidecar는 `log_config=None`·`access_log=False`를 유지합니다. 설치 작�
 
 ORM의 Python 위치가 바뀌어도 table·column·constraint·index·ID·시간·source provenance는 같아야 합니다. 구조 이동만을 이유로 DB migration을 추가하지 않습니다.
 
-기존 Alembic은 현재 `app/alembic`에 있고, 목표는 `backend/alembic`입니다. 목표 `alembic.ini`는 `script_location = %(here)s/alembic`을 사용하며, `env.py`의 metadata 등록·검사·CI·패키징 참조를 함께 연결합니다. 역사적 revision의 본문·ID·연결 그래프와 frozen predecessor 자료는 보존합니다. 필요한 과거 import는 호환 경로를 해결한 뒤 전환합니다.
+Alembic은 `backend/alembic`에 둡니다. `alembic.ini`의 `script_location = %(here)s/alembic`과 `prepend_sys_path = %(here)s`는 명령을 실행하는 작업 디렉터리와 관계없이 이 경로와 backend 패키지를 찾게 합니다. `env.py`는 앱 모델을 등록한 단일 metadata를 사용하고, Docker도 `alembic/`과 `alembic.ini`를 함께 포함합니다. 역사적 revision의 본문·ID·연결 그래프와 frozen predecessor 자료는 보존합니다. 필요한 과거 import는 호환 경로를 해결한 뒤 전환합니다.
+
+AR-G4에서 88개 revision과 `env.py`·`script.py.mako`의 물리 경로를 옮겼습니다. 전체 revision의 #263 Git blob·연결 그래프·단일 head와 실제 SQLite 메모리 연결의 metadata 등록은 [Alembic 회귀 테스트](tests/migrations/test_alembic_layout.py)로 확인합니다. 이 검증은 PostgreSQL 역사 migration 전체를 SQLite에 실행하지 않습니다. ER0의 87개 역사 목록은 `20260825_0083`을 제외하는 기존 부분집합으로, 전체 revision 수와 다릅니다. AR-G5에서 최종 `app/models.py`·Base 등록 경로를 연결한 뒤 이 검증을 다시 통과해야 G13을 완료할 수 있습니다.
 
 별도로 `app/runtime/migrations`의 embedded SQLite upgrade가 설치 사용자 데이터를 갱신합니다. Alembic 위치 변경이나 ORM 등록만으로 설치 DB 업그레이드가 완성되지 않습니다. PostgreSQL·Neo4j 역사 자료를 현재 runtime의 새 서버 의존성으로 바꾸지 않습니다. 신규 설치·지원 이전 버전 upgrade·재실행·실패 복구를 격리된 synthetic DB에서 확인합니다. [Embedded runtime 계약](../docs/architecture/embedded-runtime-adr.md), [마이그레이션 회귀](tests/test_embedded_data_migration.py)
 

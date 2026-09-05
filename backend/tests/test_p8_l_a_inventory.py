@@ -713,7 +713,7 @@ def test_p8_l_a_reserves_append_only_migrations_without_changing_schema() -> Non
 def test_p8_l_a_inventory_rejects_duplicate_alembic_revision_ids(
     tmp_path: Path,
 ) -> None:
-    versions = tmp_path / "backend/app/alembic/versions"
+    versions = tmp_path / "backend/alembic/versions"
     versions.mkdir(parents=True)
     source = 'revision: str = "duplicate"\ndown_revision: str | None = None\n'
     (versions / "a.py").write_text(source, encoding="utf-8")
