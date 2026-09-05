@@ -2,8 +2,6 @@
 
 import sys
 
-from app.domains.world_characters.infrastructure import (
-    autonomous_setup_contracts as _implementation,
-)
+from app.domains.world_characters.service import setup_validation as _implementation
 
 sys.modules[__name__] = _implementation

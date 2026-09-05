@@ -10,9 +10,9 @@ from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import Session
 
 from app.core.ids import uuid7_string
-from app.domains.characters.public import Character
+from app.domains.characters.models import Character
 from app.domains.device_home.service import get_device_home_world
-from app.domains.world_characters.public import WorldCharacter
+from app.domains.world_characters.models import WorldCharacter
 from app.domains.world_packages.exceptions import (
     WorldPackageContractError,
     WorldPackageReasonCode,
@@ -36,11 +36,8 @@ from app.runtime.world_packages.preview_probe import (
 from app.domains.world_packages.service.registry import (
     SqlAlchemyWorldPackageRegistry,
 )
-from app.domains.worlds.public import (
-    WORLD_CONTRACT_VERSION,
-    World,
-    WorldMembership,
-)
+from app.domains.worlds.service.definition import WORLD_CONTRACT_VERSION
+from app.domains.worlds.models import World, WorldMembership
 
 
 class SqlAlchemyWorldPackageImportCommitter:

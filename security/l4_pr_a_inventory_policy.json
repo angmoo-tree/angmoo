@@ -157,7 +157,7 @@
     "backend/tests/test_relationship_graph_repository.py",
     "backend/tests/test_social_event_runtime.py",
     "backend/tests/test_t2_architecture_inventory.py",
-    "backend/tests/test_world_definition_contract.py",
+    "backend/tests/worlds/test_definition_contract.py",
     "backend/tests/test_world_feed_search.py"
   ],
   "policy_id": "angmoo-l4-pr-a-p5-p7-inventory-v1",

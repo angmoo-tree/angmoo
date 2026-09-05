@@ -1,11 +1,11 @@
-"""Single supported entrypoint for World Creator use cases.
+"""Temporary compatibility exports for unmigrated World consumers.
 
-API routes and other domains import this module instead of reaching into the
-SQLAlchemy adapter. Compatibility modules may re-export these names while the
-remaining L3 boundaries migrate in later pull requests.
+New calls use worlds.service, worlds.schemas and worlds.contracts. ORM exports
+remain here only for the individually tracked WC/Package/Routines consumers;
+canonical World implementations never import this module.
 """
 
-from app.domains.worlds.infrastructure.sqlalchemy_world_creator import (
+from app.domains.worlds.service.creator import (
     WorldArchivedError,
     WorldBannerValidationError,
     WorldCreatorRoleRequiredError,
@@ -36,26 +36,26 @@ from app.domains.worlds.infrastructure.sqlalchemy_world_creator import (
     upload_world_banner,
     validate_world_definition,
 )
-from app.domains.worlds.infrastructure.generation_context import (
+from app.domains.worlds.service.generation_context import (
     build_world_generation_context,
 )
-from app.domains.worlds.infrastructure.definition_repository import (
+from app.domains.worlds.service.definition import (
     WORLD_CONTRACT_VERSION,
     refresh_world_contract,
     world_contract_hash,
 )
-from app.domains.worlds.domain.reserved_roles import (
+from app.domains.worlds.contracts import (
     NO_SPECIFIC_ROLE_DESCRIPTION,
     NO_SPECIFIC_ROLE_KEY,
     NO_SPECIFIC_ROLE_NAME,
     NO_SPECIFIC_ROLE_PORTABLE_REF,
     is_canonical_no_specific_role,
 )
-from app.domains.worlds.infrastructure.sqlalchemy_reserved_roles import (
+from app.domains.worlds.service.reserved_roles import (
     ReservedWorldRoleConflictError,
     ensure_no_specific_role,
 )
-from app.domains.worlds.api.schemas import (
+from app.domains.worlds.schemas import (
     WorldDaypartProfileInput,
     WorldDraftCreate,
     WorldGenerationContextRead,
@@ -64,7 +64,7 @@ from app.domains.worlds.api.schemas import (
     WorldRoleInput,
     WorldRuleInput,
 )
-from app.domains.worlds.infrastructure.sqlalchemy_models import (
+from app.domains.worlds.models import (
     JSON_DOCUMENT,
     World,
     WorldMembership,

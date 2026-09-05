@@ -1,3 +1,6 @@
+from app.domains.media.contracts import (
+    InvalidProfileMediaError,
+)
 import base64
 from dataclasses import dataclass, field
 from io import BytesIO
@@ -28,8 +31,6 @@ MAX_IMAGE_PIXELS = 16_777_216
 MAX_IMAGE_FRAMES = 1
 
 
-class InvalidProfileMediaError(Exception):
-    pass
 
 
 class PrivateMediaCleanupError(Exception):

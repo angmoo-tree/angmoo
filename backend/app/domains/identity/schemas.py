@@ -1,3 +1,4 @@
+from app.core.response_schemas import UtcInstantResponseModel
 from datetime import datetime
 from typing import Literal
 
@@ -161,3 +162,20 @@ def _user_read(user: LocalUserSnapshot) -> UserRead:
         feed_content_filter=user.feed_content_filter,
         is_admin=user.is_admin,
     )
+
+
+class CredentialRead(UtcInstantResponseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    owner_id: str
+    character_id: str | None = None
+    provider: str
+    purpose: str
+    model: str
+    label: str
+    key_fingerprint: str | None = None
+    enabled: bool
+    created_at: datetime
+    updated_at: datetime
+    cooldown_until: datetime | None = None

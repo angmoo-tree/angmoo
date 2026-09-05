@@ -25,19 +25,19 @@
           "importer": "app.api.v1.routes.agents"
         },
         {
+          "imported": "app.runtime.characters.creator",
+          "importer": "app.api.v1.routes.agents"
+        },
+        {
+          "imported": "app.runtime.characters.management",
+          "importer": "app.api.v1.routes.agents"
+        },
+        {
           "imported": "app.schemas",
           "importer": "app.api.v1.routes.agents"
         },
         {
-          "imported": "app.services.agent_creation_drafts",
-          "importer": "app.api.v1.routes.agents"
-        },
-        {
           "imported": "app.services.agent_runs",
-          "importer": "app.api.v1.routes.agents"
-        },
-        {
-          "imported": "app.services.agents",
           "importer": "app.api.v1.routes.agents"
         },
         {
@@ -177,10 +177,6 @@
           "importer": "app.models"
         },
         {
-          "imported": "app.models.agent_creation_drafts",
-          "importer": "app.models"
-        },
-        {
           "imported": "app.models.agent_local_keys",
           "importer": "app.models"
         },
@@ -201,19 +197,11 @@
           "importer": "app.models"
         },
         {
-          "imported": "app.models.characters",
-          "importer": "app.models"
-        },
-        {
           "imported": "app.models.community",
           "importer": "app.models"
         },
         {
           "imported": "app.models.local_bot_quotas",
-          "importer": "app.models"
-        },
-        {
-          "imported": "app.models.profile_images",
           "importer": "app.models"
         },
         {
@@ -247,6 +235,142 @@
         {
           "imported": "app.services.hosted_configuration",
           "importer": "app.public_main"
+        },
+        {
+          "imported": "app.cruds.agent_runs",
+          "importer": "app.runtime.characters.creator"
+        },
+        {
+          "imported": "app.cruds.agents",
+          "importer": "app.runtime.characters.creator"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.runtime.characters.creator"
+        },
+        {
+          "imported": "app.runtime.characters.management",
+          "importer": "app.runtime.characters.creator"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.runtime.characters.creator"
+        },
+        {
+          "imported": "app.services.agent_activity_policy",
+          "importer": "app.runtime.characters.creator"
+        },
+        {
+          "imported": "app.services.agent_runs",
+          "importer": "app.runtime.characters.creator"
+        },
+        {
+          "imported": "app.services.direct_llm",
+          "importer": "app.runtime.characters.creator"
+        },
+        {
+          "imported": "app.services.image_provider",
+          "importer": "app.runtime.characters.creator"
+        },
+        {
+          "imported": "app.services.operation_settings",
+          "importer": "app.runtime.characters.creator"
+        },
+        {
+          "imported": "app.services.pollinations_image",
+          "importer": "app.runtime.characters.creator"
+        },
+        {
+          "imported": "app.services.profile_media",
+          "importer": "app.runtime.characters.creator"
+        },
+        {
+          "imported": "app.services.provider_http",
+          "importer": "app.runtime.characters.creator"
+        },
+        {
+          "imported": "app.services.replicate_image",
+          "importer": "app.runtime.characters.creator"
+        },
+        {
+          "imported": "app.services.runtime_boundary",
+          "importer": "app.runtime.characters.creator"
+        },
+        {
+          "imported": "app.services.service_image_key",
+          "importer": "app.runtime.characters.creator"
+        },
+        {
+          "imported": "app.cruds.agent_runs",
+          "importer": "app.runtime.characters.management"
+        },
+        {
+          "imported": "app.cruds.agents",
+          "importer": "app.runtime.characters.management"
+        },
+        {
+          "imported": "app.cruds.community",
+          "importer": "app.runtime.characters.management"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.runtime.characters.management"
+        },
+        {
+          "imported": "app.schemas",
+          "importer": "app.runtime.characters.management"
+        },
+        {
+          "imported": "app.services.activity_profile_readiness",
+          "importer": "app.runtime.characters.management"
+        },
+        {
+          "imported": "app.services.agent_activity_policy",
+          "importer": "app.runtime.characters.management"
+        },
+        {
+          "imported": "app.services.agent_runs",
+          "importer": "app.runtime.characters.management"
+        },
+        {
+          "imported": "app.services.community",
+          "importer": "app.runtime.characters.management"
+        },
+        {
+          "imported": "app.services.direct_llm",
+          "importer": "app.runtime.characters.management"
+        },
+        {
+          "imported": "app.services.image_prompt_safety",
+          "importer": "app.runtime.characters.management"
+        },
+        {
+          "imported": "app.services.maintenance",
+          "importer": "app.runtime.characters.management"
+        },
+        {
+          "imported": "app.services.operation_settings",
+          "importer": "app.runtime.characters.management"
+        },
+        {
+          "imported": "app.services.post_image_generation",
+          "importer": "app.runtime.characters.management"
+        },
+        {
+          "imported": "app.services.profile_media",
+          "importer": "app.runtime.characters.management"
+        },
+        {
+          "imported": "app.services.runtime_boundary",
+          "importer": "app.runtime.characters.management"
+        },
+        {
+          "imported": "app.services.service_image_key",
+          "importer": "app.runtime.characters.management"
+        },
+        {
+          "imported": "app.services.world_character_setup",
+          "importer": "app.runtime.characters.management"
         },
         {
           "imported": "app.schemas.agent_runs",
@@ -366,78 +490,6 @@
         },
         {
           "imported": "app.cruds.agent_runs",
-          "importer": "app.services.agent_creation_drafts"
-        },
-        {
-          "imported": "app.cruds.agents",
-          "importer": "app.services.agent_creation_drafts"
-        },
-        {
-          "imported": "app.cruds.community",
-          "importer": "app.services.agent_creation_drafts"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.agent_creation_drafts"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.services.agent_creation_drafts"
-        },
-        {
-          "imported": "app.services.agent_activity_policy",
-          "importer": "app.services.agent_creation_drafts"
-        },
-        {
-          "imported": "app.services.agent_runs",
-          "importer": "app.services.agent_creation_drafts"
-        },
-        {
-          "imported": "app.services.agents",
-          "importer": "app.services.agent_creation_drafts"
-        },
-        {
-          "imported": "app.services.direct_llm",
-          "importer": "app.services.agent_creation_drafts"
-        },
-        {
-          "imported": "app.services.image_provider",
-          "importer": "app.services.agent_creation_drafts"
-        },
-        {
-          "imported": "app.services.operation_settings",
-          "importer": "app.services.agent_creation_drafts"
-        },
-        {
-          "imported": "app.services.pollinations_image",
-          "importer": "app.services.agent_creation_drafts"
-        },
-        {
-          "imported": "app.services.profile_media",
-          "importer": "app.services.agent_creation_drafts"
-        },
-        {
-          "imported": "app.services.prompt_safety",
-          "importer": "app.services.agent_creation_drafts"
-        },
-        {
-          "imported": "app.services.provider_http",
-          "importer": "app.services.agent_creation_drafts"
-        },
-        {
-          "imported": "app.services.replicate_image",
-          "importer": "app.services.agent_creation_drafts"
-        },
-        {
-          "imported": "app.services.runtime_boundary",
-          "importer": "app.services.agent_creation_drafts"
-        },
-        {
-          "imported": "app.services.service_image_key",
-          "importer": "app.services.agent_creation_drafts"
-        },
-        {
-          "imported": "app.cruds.agent_runs",
           "importer": "app.services.agent_runs"
         },
         {
@@ -531,82 +583,6 @@
         {
           "imported": "app.services.runtime_boundary",
           "importer": "app.services.agent_writing"
-        },
-        {
-          "imported": "app.cruds.agent_runs",
-          "importer": "app.services.agents"
-        },
-        {
-          "imported": "app.cruds.agents",
-          "importer": "app.services.agents"
-        },
-        {
-          "imported": "app.cruds.community",
-          "importer": "app.services.agents"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.agents"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.services.agents"
-        },
-        {
-          "imported": "app.services.activity_profile_readiness",
-          "importer": "app.services.agents"
-        },
-        {
-          "imported": "app.services.agent_activity_policy",
-          "importer": "app.services.agents"
-        },
-        {
-          "imported": "app.services.agent_runs",
-          "importer": "app.services.agents"
-        },
-        {
-          "imported": "app.services.community",
-          "importer": "app.services.agents"
-        },
-        {
-          "imported": "app.services.direct_llm",
-          "importer": "app.services.agents"
-        },
-        {
-          "imported": "app.services.image_prompt_safety",
-          "importer": "app.services.agents"
-        },
-        {
-          "imported": "app.services.maintenance",
-          "importer": "app.services.agents"
-        },
-        {
-          "imported": "app.services.operation_settings",
-          "importer": "app.services.agents"
-        },
-        {
-          "imported": "app.services.post_image_generation",
-          "importer": "app.services.agents"
-        },
-        {
-          "imported": "app.services.profile_media",
-          "importer": "app.services.agents"
-        },
-        {
-          "imported": "app.services.prompt_safety",
-          "importer": "app.services.agents"
-        },
-        {
-          "imported": "app.services.runtime_boundary",
-          "importer": "app.services.agents"
-        },
-        {
-          "imported": "app.services.service_image_key",
-          "importer": "app.services.agents"
-        },
-        {
-          "imported": "app.services.world_character_setup",
-          "importer": "app.services.agents"
         },
         {
           "imported": "app.cruds.agents",
@@ -793,15 +769,15 @@
           "importer": "app.services.local_bot"
         },
         {
+          "imported": "app.runtime.characters.management",
+          "importer": "app.services.local_bot"
+        },
+        {
           "imported": "app.schemas",
           "importer": "app.services.local_bot"
         },
         {
           "imported": "app.services.agent_activity_policy",
-          "importer": "app.services.local_bot"
-        },
-        {
-          "imported": "app.services.agents",
           "importer": "app.services.local_bot"
         },
         {
@@ -1018,10 +994,6 @@
         },
         {
           "imported": "app.models",
-          "importer": "app.services.world_foundation"
-        },
-        {
-          "imported": "app.services.world_definitions",
           "importer": "app.services.world_foundation"
         },
         {
@@ -1264,6 +1236,21 @@
       "app.pagination"
     ],
     "modules": [
+      "app.domains.characters.contracts",
+      "app.domains.characters.exceptions",
+      "app.domains.characters.models",
+      "app.domains.characters.schemas",
+      "app.domains.characters.service",
+      "app.domains.characters.service.access",
+      "app.domains.characters.service.creator",
+      "app.domains.characters.service.image_quota",
+      "app.domains.characters.service.mutations",
+      "app.domains.characters.service.owner_controlled",
+      "app.domains.characters.service.persona",
+      "app.domains.characters.service.profile",
+      "app.domains.characters.service.promotion",
+      "app.domains.characters.service.seed",
+      "app.domains.characters.service.state",
       "app.domains.identity.browser_session",
       "app.domains.identity.client",
       "app.domains.identity.constants",
@@ -1284,6 +1271,58 @@
       "app.domains.identity.service.external_verification",
       "app.domains.identity.service.local_owner",
       "app.domains.identity.service.login_throttle",
+      "app.domains.identity.service.owner_context",
+      "app.domains.media.schemas",
+      "app.domains.world_characters.client",
+      "app.domains.world_characters.contracts",
+      "app.domains.world_characters.contracts.owner_identity",
+      "app.domains.world_characters.contracts.provider",
+      "app.domains.world_characters.contracts.public_profile",
+      "app.domains.world_characters.contracts.runtime_modes",
+      "app.domains.world_characters.contracts.seed",
+      "app.domains.world_characters.contracts.setup",
+      "app.domains.world_characters.contracts.studio_lifecycle",
+      "app.domains.world_characters.contracts.studio_surface",
+      "app.domains.world_characters.exceptions",
+      "app.domains.world_characters.models",
+      "app.domains.world_characters.schemas",
+      "app.domains.world_characters.schemas.identity",
+      "app.domains.world_characters.schemas.setup",
+      "app.domains.world_characters.service",
+      "app.domains.world_characters.service.owner_identity",
+      "app.domains.world_characters.service.seed",
+      "app.domains.world_characters.service.setup_validation",
+      "app.domains.worlds.contracts",
+      "app.domains.worlds.exceptions",
+      "app.domains.worlds.models",
+      "app.domains.worlds.router",
+      "app.domains.worlds.schemas",
+      "app.domains.worlds.service",
+      "app.domains.worlds.service.creator",
+      "app.domains.worlds.service.definition",
+      "app.domains.worlds.service.generation_context",
+      "app.domains.worlds.service.reserved_roles",
+      "app.domains.worlds.service.scheduling",
+      "app.domains.worlds.storage",
+      "app.domains.characters.dependencies",
+      "app.domains.characters.router",
+      "app.domains.characters.service.drafts",
+      "app.domains.characters.service.management",
+      "app.domains.media.contracts",
+      "app.domains.runtime.contracts",
+      "app.domains.runtime.schemas",
+      "app.domains.characters.service.world_lifecycle",
+      "app.domains.identity.service.world_character_credentials",
+      "app.domains.world_characters.contracts.lifecycle",
+      "app.domains.world_characters.contracts.queries",
+      "app.domains.world_characters.router",
+      "app.domains.world_characters.router.profile",
+      "app.domains.world_characters.service.autonomous_setup",
+      "app.domains.world_characters.service.lifecycle",
+      "app.domains.world_characters.service.public_profile",
+      "app.domains.world_characters.service.runtime_modes",
+      "app.domains.world_characters.service.studio",
+      "app.domains.worlds.service.character_entry",
       "app.domains.routines.constants",
       "app.domains.routines.contracts",
       "app.domains.routines.contracts.clock",
@@ -1301,6 +1340,18 @@
       "app.domains.routines.utils.clock"
     ],
     "entries": [
+      "app.domains.characters.contracts",
+      "app.domains.characters.schemas",
+      "app.domains.characters.service.access",
+      "app.domains.characters.service.creator",
+      "app.domains.characters.service.image_quota",
+      "app.domains.characters.service.mutations",
+      "app.domains.characters.service.owner_controlled",
+      "app.domains.characters.service.persona",
+      "app.domains.characters.service.profile",
+      "app.domains.characters.service.promotion",
+      "app.domains.characters.service.seed",
+      "app.domains.characters.service.state",
       "app.domains.identity.contracts",
       "app.domains.identity.schemas",
       "app.domains.identity.service",
@@ -1311,6 +1362,43 @@
       "app.domains.identity.service.external_verification",
       "app.domains.identity.service.local_owner",
       "app.domains.identity.service.login_throttle",
+      "app.domains.identity.service.owner_context",
+      "app.domains.media.schemas",
+      "app.domains.world_characters.contracts",
+      "app.domains.world_characters.contracts.owner_identity",
+      "app.domains.world_characters.contracts.provider",
+      "app.domains.world_characters.contracts.public_profile",
+      "app.domains.world_characters.contracts.runtime_modes",
+      "app.domains.world_characters.contracts.seed",
+      "app.domains.world_characters.contracts.setup",
+      "app.domains.world_characters.contracts.studio_lifecycle",
+      "app.domains.world_characters.contracts.studio_surface",
+      "app.domains.world_characters.schemas",
+      "app.domains.world_characters.schemas.identity",
+      "app.domains.world_characters.schemas.setup",
+      "app.domains.world_characters.service.owner_identity",
+      "app.domains.world_characters.service.seed",
+      "app.domains.world_characters.service.setup_validation",
+      "app.domains.worlds.contracts",
+      "app.domains.worlds.schemas",
+      "app.domains.worlds.service",
+      "app.domains.worlds.service.definition",
+      "app.domains.characters.service.drafts",
+      "app.domains.characters.service.management",
+      "app.domains.media.contracts",
+      "app.domains.runtime.contracts",
+      "app.domains.runtime.schemas",
+      "app.domains.characters.service.world_lifecycle",
+      "app.domains.identity.service.world_character_credentials",
+      "app.domains.world_characters.contracts.lifecycle",
+      "app.domains.world_characters.contracts.queries",
+      "app.domains.world_characters.service",
+      "app.domains.world_characters.service.autonomous_setup",
+      "app.domains.world_characters.service.lifecycle",
+      "app.domains.world_characters.service.public_profile",
+      "app.domains.world_characters.service.runtime_modes",
+      "app.domains.world_characters.service.studio",
+      "app.domains.worlds.service.character_entry",
       "app.domains.routines.contracts",
       "app.domains.routines.contracts.clock",
       "app.domains.routines.contracts.lifecycle",
@@ -1340,6 +1428,54 @@
       "app.domains.world_packages.service.staging"
     ],
     "bridges": [
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.characters.exceptions",
+        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
+        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
+        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.characters.service.profile",
+        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
+        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
+        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.characters.service.state",
+        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
+        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
+        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.characters.public",
+        "target": "app.domains.characters.contracts",
+        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
+        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
+        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.characters.public",
+        "target": "app.domains.characters.models",
+        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
+        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
+        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.characters.public",
+        "target": "app.domains.characters.service.seed",
+        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
+        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
+        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
+        "review_date": "2026-09-05"
+      },
       {
         "importer": "app.domains.identity.public",
         "target": "app.domains.identity.constants",
@@ -1386,6 +1522,614 @@
         "owner_stage": "AR-B8-A",
         "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
         "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.world_characters.infrastructure",
+        "target": "app.domains.world_characters.models",
+        "owner_stage": "AR-B2",
+        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
+        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.world_characters.infrastructure.sqlalchemy_models",
+        "target": "app.domains.world_characters.models",
+        "owner_stage": "AR-B8-A",
+        "reason": "Immutable v2->v3 import retains the identical model object.",
+        "removal_condition": "Preserve supported frozen migration loading until a verified compatibility resolver replaces this path.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.world_characters.infrastructure.sqlalchemy_setup_models",
+        "target": "app.domains.world_characters.models",
+        "owner_stage": "AR-B8-A",
+        "reason": "Immutable v2->v3 import retains the identical model object.",
+        "removal_condition": "Preserve supported frozen migration loading until a verified compatibility resolver replaces this path.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.world_characters.public",
+        "target": "app.domains.world_characters.contracts.owner_identity",
+        "owner_stage": "AR-B2",
+        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
+        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.world_characters.public",
+        "target": "app.domains.world_characters.contracts.public_profile",
+        "owner_stage": "AR-B2",
+        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
+        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.world_characters.public",
+        "target": "app.domains.world_characters.contracts.runtime_modes",
+        "owner_stage": "AR-B2",
+        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
+        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.world_characters.public",
+        "target": "app.domains.world_characters.contracts.seed",
+        "owner_stage": "AR-B2",
+        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
+        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.world_characters.public",
+        "target": "app.domains.world_characters.contracts.studio_lifecycle",
+        "owner_stage": "AR-B2",
+        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
+        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.world_characters.public",
+        "target": "app.domains.world_characters.models",
+        "owner_stage": "AR-B2",
+        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
+        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.world_characters.public",
+        "target": "app.domains.world_characters.service.owner_identity",
+        "owner_stage": "AR-B2",
+        "removal_condition": "Move this exact remaining WC HTTP/public consumer in its workflow slice; scheduler legacy bridge closes in AR-B4.",
+        "reason": "Existing owner identity collaboration now calls the actual canonical service with the same Session.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.world_characters.public",
+        "target": "app.domains.world_characters.service.seed",
+        "owner_stage": "AR-B2",
+        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
+        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.world_characters.public",
+        "target": "app.domains.world_characters.service.setup_validation",
+        "owner_stage": "AR-B2",
+        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
+        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.worlds.domain.reserved_roles",
+        "target": "app.domains.worlds.contracts",
+        "owner_stage": "AR-B8-A",
+        "reason": "The immutable SQLite v2->v3 migration imports this exact path; only identical object exports remain.",
+        "removal_condition": "Keep until supported historical migration import loading has a verified compatibility resolver; no duplicate implementation or model registration is permitted.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.worlds.infrastructure.definition_repository",
+        "target": "app.domains.worlds.service.definition",
+        "owner_stage": "AR-B8-A",
+        "reason": "The immutable SQLite v2->v3 migration imports this exact path; only identical object exports remain.",
+        "removal_condition": "Keep until supported historical migration import loading has a verified compatibility resolver; no duplicate implementation or model registration is permitted.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.worlds.infrastructure.sqlalchemy_models",
+        "target": "app.domains.worlds.models",
+        "owner_stage": "AR-B8-A",
+        "reason": "The immutable SQLite v2->v3 migration imports this exact path; only identical object exports remain.",
+        "removal_condition": "Keep until supported historical migration import loading has a verified compatibility resolver; no duplicate implementation or model registration is permitted.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.worlds.infrastructure.sqlalchemy_reserved_roles",
+        "target": "app.domains.worlds.service.reserved_roles",
+        "owner_stage": "AR-B8-A",
+        "reason": "The immutable SQLite v2->v3 migration imports this exact path; only identical object exports remain.",
+        "removal_condition": "Keep until supported historical migration import loading has a verified compatibility resolver; no duplicate implementation or model registration is permitted.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.worlds.public",
+        "target": "app.domains.worlds.contracts",
+        "owner_stage": "AR-B8-A",
+        "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
+        "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.worlds.public",
+        "target": "app.domains.worlds.models",
+        "owner_stage": "AR-B8-A",
+        "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
+        "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.worlds.public",
+        "target": "app.domains.worlds.schemas",
+        "owner_stage": "AR-B8-A",
+        "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
+        "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.worlds.public",
+        "target": "app.domains.worlds.service.creator",
+        "owner_stage": "AR-B8-A",
+        "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
+        "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.worlds.public",
+        "target": "app.domains.worlds.service.definition",
+        "owner_stage": "AR-B8-A",
+        "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
+        "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.worlds.public",
+        "target": "app.domains.worlds.service.generation_context",
+        "owner_stage": "AR-B8-A",
+        "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
+        "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.worlds.public",
+        "target": "app.domains.worlds.service.reserved_roles",
+        "owner_stage": "AR-B8-A",
+        "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
+        "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.characters.models",
+        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
+        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
+        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.identity.models",
+        "owner_stage": "AR-G5",
+        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
+        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models.agent_creation_drafts",
+        "target": "app.domains.characters.models",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
+        "removal_condition": "Finish the recorded Creator/profile and activity consumers, retaining only actual multi-domain runtime composition; retire aggregate exports during G5.",
+        "reason": "The former mixed implementation now calls the exact canonical Character class or service. This bridge does not permit new legacy edges.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models.auth",
+        "target": "app.domains.identity.models",
+        "owner_stage": "AR-G5",
+        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
+        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models.characters",
+        "target": "app.domains.characters.models",
+        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
+        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
+        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models.credentials",
+        "target": "app.domains.identity.models",
+        "owner_stage": "AR-G5",
+        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
+        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models.profile_images",
+        "target": "app.domains.characters.models",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
+        "removal_condition": "Finish the recorded Creator/profile and activity consumers, retaining only actual multi-domain runtime composition; retire aggregate exports during G5.",
+        "reason": "The former mixed implementation now calls the exact canonical Character class or service. This bridge does not permit new legacy edges.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models.worlds",
+        "target": "app.domains.world_characters.models",
+        "owner_stage": "AR-B2",
+        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
+        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models.worlds",
+        "target": "app.domains.worlds.models",
+        "owner_stage": "AR-G5",
+        "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
+        "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.creator",
+        "target": "app.domains.characters.exceptions",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
+        "removal_condition": "Finish the recorded Creator/profile and activity consumers, retaining only actual multi-domain runtime composition; retire aggregate exports during G5.",
+        "reason": "The former mixed implementation now calls the exact canonical Character class or service. This bridge does not permit new legacy edges.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.creator",
+        "target": "app.domains.characters.models",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-G5",
+        "removal_condition": "Retain legitimate runtime composition while transitioning remaining activity owners and completing aggregate ORM removal.",
+        "reason": "Character ORM and owned profile query use their canonical implementation instead of old aggregate exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.creator",
+        "target": "app.domains.characters.service.creator",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
+        "removal_condition": "Finish the recorded Creator/profile and activity consumers, retaining only actual multi-domain runtime composition; retire aggregate exports during G5.",
+        "reason": "The former mixed implementation now calls the exact canonical Character class or service. This bridge does not permit new legacy edges.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.creator",
+        "target": "app.domains.characters.service.image_quota",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
+        "removal_condition": "Finish the recorded Creator/profile and activity consumers, retaining only actual multi-domain runtime composition; retire aggregate exports during G5.",
+        "reason": "The former mixed implementation now calls the exact canonical Character class or service. This bridge does not permit new legacy edges.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.creator",
+        "target": "app.domains.characters.service.profile",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-G5",
+        "removal_condition": "Retain legitimate runtime composition while transitioning remaining activity owners and completing aggregate ORM removal.",
+        "reason": "Character ORM and owned profile query use their canonical implementation instead of old aggregate exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.creator",
+        "target": "app.domains.identity.service.demo_access",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
+        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.management",
+        "target": "app.domains.characters.exceptions",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
+        "removal_condition": "Finish the recorded Creator/profile and activity consumers, retaining only actual multi-domain runtime composition; retire aggregate exports during G5.",
+        "reason": "The former mixed implementation now calls the exact canonical Character class or service. This bridge does not permit new legacy edges.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.management",
+        "target": "app.domains.characters.models",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-G5",
+        "removal_condition": "Retain legitimate runtime composition while transitioning remaining activity owners and completing aggregate ORM removal.",
+        "reason": "Character ORM and owned profile query use their canonical implementation instead of old aggregate exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.management",
+        "target": "app.domains.characters.service.access",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
+        "removal_condition": "Finish the recorded Creator/profile and activity consumers, retaining only actual multi-domain runtime composition; retire aggregate exports during G5.",
+        "reason": "The former mixed implementation now calls the exact canonical Character class or service. This bridge does not permit new legacy edges.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.management",
+        "target": "app.domains.characters.service.mutations",
+        "owner_stage": "AR-B2-B / AR-G5",
+        "removal_condition": "Preserve multi-domain composition but remove aggregate role bridges after their consumers migrate.",
+        "reason": "Canonical Character role implementation owns this mutation/model.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.management",
+        "target": "app.domains.characters.service.persona",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
+        "removal_condition": "Finish the recorded Creator/profile and activity consumers, retaining only actual multi-domain runtime composition; retire aggregate exports during G5.",
+        "reason": "The former mixed implementation now calls the exact canonical Character class or service. This bridge does not permit new legacy edges.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.management",
+        "target": "app.domains.characters.service.profile",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-G5",
+        "removal_condition": "Retain legitimate runtime composition while transitioning remaining activity owners and completing aggregate ORM removal.",
+        "reason": "Character ORM and owned profile query use their canonical implementation instead of old aggregate exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.management",
+        "target": "app.domains.characters.service.promotion",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
+        "removal_condition": "Finish the recorded Creator/profile and activity consumers, retaining only actual multi-domain runtime composition; retire aggregate exports during G5.",
+        "reason": "The former mixed implementation now calls the exact canonical Character class or service. This bridge does not permit new legacy edges.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.management",
+        "target": "app.domains.identity.service.demo_access",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
+        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.identity.schemas",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
+        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.agents",
+        "target": "app.domains.characters.schemas",
+        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
+        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
+        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.auth",
+        "target": "app.domains.identity.schemas",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
+        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.characters",
+        "target": "app.domains.characters.schemas",
+        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
+        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
+        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.media_security",
+        "target": "app.domains.media.schemas",
+        "owner_stage": "AR-B3",
+        "removal_condition": "Move existing managed-media schema consumers to media.schemas and remove the old schema helper path after B3 contract tests.",
+        "reason": "The exact original pure validator is needed by the Character input schema before the remaining B3 media transition. No file storage, quota or image-job ownership moves here.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.world_character_setup",
+        "target": "app.domains.world_characters.schemas.setup",
+        "owner_stage": "AR-B2",
+        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
+        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.worlds",
+        "target": "app.domains.worlds.schemas",
+        "owner_stage": "AR-B8-A",
+        "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
+        "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.world_characters.contracts.runtime_modes",
+        "owner_stage": "AR-B2",
+        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
+        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.local_bot",
+        "target": "app.domains.identity.service.demo_access",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
+        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.world_character_contracts",
+        "target": "app.domains.world_characters.service.setup_validation",
+        "owner_stage": "AR-B2",
+        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
+        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.world_character_provider",
+        "target": "app.domains.world_characters.client",
+        "owner_stage": "AR-B2",
+        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
+        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.world_feed_search",
+        "target": "app.domains.world_characters.contracts.runtime_modes",
+        "owner_stage": "AR-B2",
+        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
+        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.world_foundation",
+        "target": "app.domains.worlds.service.definition",
+        "owner_stage": "AR-B8-A",
+        "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
+        "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.api.v1.routes.agents",
+        "target": "app.domains.characters.router",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
+        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
+        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.management",
+        "target": "app.domains.characters.contracts",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
+        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
+        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.management",
+        "target": "app.domains.characters.service.management",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
+        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
+        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.agent_runs",
+        "target": "app.domains.runtime.schemas",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
+        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
+        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.agents",
+        "target": "app.domains.identity.schemas",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
+        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
+        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.agents",
+        "target": "app.domains.runtime.schemas",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
+        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
+        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.creator",
+        "target": "app.domains.characters.service.drafts",
+        "owner_stage": "AR-B2-B / AR-B3 / AR-B8-A",
+        "reason": "Actual Creator ORM lifecycle moved; runtime binds provider/file/Character callbacks and its remaining media operations use the canonical owned-draft gate.",
+        "removal_condition": "Retire temporary lifecycle wrappers when mixed HTTP/media consumers move; retain only external and multi-domain work.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.creator",
+        "target": "app.domains.characters.contracts",
+        "owner_stage": "AR-B2-B / AR-B3 / AR-B8-A",
+        "reason": "Actual Creator ORM lifecycle moved; runtime binds provider/file/Character callbacks and its remaining media operations use the canonical owned-draft gate.",
+        "removal_condition": "Retire temporary lifecycle wrappers when mixed HTTP/media consumers move; retain only external and multi-domain work.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.management",
+        "target": "app.domains.characters.service.creator",
+        "owner_stage": "AR-B2-B / AR-B3 / AR-B4 / AR-B8-A",
+        "reason": "Same runtime-neutral/validation error object or exact credential message policy is now shared with canonical Creator HTTP.",
+        "removal_condition": "Remove old aggregate error imports when runtime/media consumers migrate; no duplicate exception definitions.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.runtime_boundary",
+        "target": "app.domains.runtime.contracts",
+        "owner_stage": "AR-B2-B / AR-B3 / AR-B4 / AR-B8-A",
+        "reason": "Same runtime-neutral/validation error object or exact credential message policy is now shared with canonical Creator HTTP.",
+        "removal_condition": "Remove old aggregate error imports when runtime/media consumers migrate; no duplicate exception definitions.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.runtime.contracts",
+        "owner_stage": "AR-B2-B / AR-B3 / AR-B4 / AR-B8-A",
+        "reason": "Same runtime-neutral/validation error object or exact credential message policy is now shared with canonical Creator HTTP.",
+        "removal_condition": "Remove old aggregate error imports when runtime/media consumers migrate; no duplicate exception definitions.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.profile_media",
+        "target": "app.domains.media.contracts",
+        "owner_stage": "AR-B2-B / AR-B3 / AR-B4 / AR-B8-A",
+        "reason": "Same runtime-neutral/validation error object or exact credential message policy is now shared with canonical Creator HTTP.",
+        "removal_condition": "Remove old aggregate error imports when runtime/media consumers migrate; no duplicate exception definitions.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.characters.service.state",
+        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A",
+        "reason": "State admission/writes are canonical Character work; old Community consumers retain their same error type and HTTP assembly keeps the same APIRoute.",
+        "removal_condition": "Retire Community state wrappers after Social/tool consumers call Character service directly; keep HTTP assembly only while mixed routes migrate.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.characters.exceptions",
+        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A",
+        "reason": "State admission/writes are canonical Character work; old Community consumers retain their same error type and HTTP assembly keeps the same APIRoute.",
+        "removal_condition": "Retire Community state wrappers after Social/tool consumers call Character service directly; keep HTTP assembly only while mixed routes migrate.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.api.v1.routes.community",
+        "target": "app.domains.characters.router",
+        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A",
+        "reason": "State admission/writes are canonical Character work; old Community consumers retain their same error type and HTTP assembly keeps the same APIRoute.",
+        "removal_condition": "Retire Community state wrappers after Social/tool consumers call Character service directly; keep HTTP assembly only while mixed routes migrate.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.world_characters.public",
+        "target": "app.domains.world_characters.service.autonomous_setup",
+        "owner_stage": "AR-B2",
+        "removal_condition": "Switch the remaining exact mixed setup API/cleanup facade to its final owner in the next WC slice.",
+        "reason": "Existing consumers now reach canonical setup/repair implementation; no new canonical module calls this compatibility surface.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.world_characters.public",
+        "target": "app.domains.world_characters.service.runtime_modes",
+        "owner_stage": "AR-B2",
+        "removal_condition": "Switch the remaining exact mixed setup API/cleanup facade to its final owner in the next WC slice.",
+        "reason": "Existing consumers now reach canonical setup/repair implementation; no new canonical module calls this compatibility surface.",
         "review_date": "2026-09-05"
       },
       {
@@ -1558,34 +2302,10 @@
       },
       {
         "importer": "app.models",
-        "target": "app.domains.identity.models",
-        "owner_stage": "AR-G5",
-        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
-        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.models",
         "target": "app.domains.world_packages.models",
         "owner_stage": "AR-G5",
         "removal_condition": "Move aggregate model registration to runtime.persistence while installing the single app.models Base in G5.",
         "reason": "Existing aggregate imports the same four ORM classes; no alternate implementation or reverse edge.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.models.auth",
-        "target": "app.domains.identity.models",
-        "owner_stage": "AR-G5",
-        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
-        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.models.credentials",
-        "target": "app.domains.identity.models",
-        "owner_stage": "AR-G5",
-        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
-        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
         "review_date": "2026-09-05"
       },
       {
@@ -1594,22 +2314,6 @@
         "owner_stage": "AR-G5",
         "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
         "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.schemas",
-        "target": "app.domains.identity.schemas",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
-        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.schemas.auth",
-        "target": "app.domains.identity.schemas",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
-        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
         "review_date": "2026-09-05"
       },
       {
@@ -1650,30 +2354,6 @@
         "owner_stage": "AR-B4-B / AR-B4-C",
         "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
         "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.agent_creation_drafts",
-        "target": "app.domains.identity.service.demo_access",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
-        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.agents",
-        "target": "app.domains.identity.service.demo_access",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
-        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.local_bot",
-        "target": "app.domains.identity.service.demo_access",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
-        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
         "review_date": "2026-09-05"
       }
     ]

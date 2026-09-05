@@ -18,8 +18,8 @@ from app.credentials import (
     CredentialResolutionError,
     CredentialResolver,
 )
-from app.services import agent_creation_drafts as draft_service
-from app.services import agents as agent_service
+from app.runtime.characters import creator as draft_service
+from app.runtime.characters import management as agent_service
 from app.domains.identity.service import auth as auth_service
 from app.services import character_lore as lore_service
 from app.services import community as community_service

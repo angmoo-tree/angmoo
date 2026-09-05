@@ -49,7 +49,7 @@ def test_l3_execution_map_records_exact_baseline_and_status() -> None:
 
 def test_l3_current_entrypoints_track_completed_and_pending_migrations() -> None:
     expected = {
-        APP_ROOT / "domains" / "worlds" / "infrastructure" / "sqlalchemy_world_creator.py": {
+        APP_ROOT / "domains" / "worlds" / "service" / "creator.py": {
             "create_world",
             "update_world",
             "validate_world_definition",
@@ -58,8 +58,8 @@ def test_l3_current_entrypoints_track_completed_and_pending_migrations() -> None
         APP_ROOT
         / "domains"
         / "world_characters"
-        / "infrastructure"
-        / "sqlalchemy_autonomous_setup.py": {
+        / "service"
+        / "autonomous_setup.py": {
             "enter_world",
             "preflight_setup",
             "generate_setup",
@@ -96,7 +96,7 @@ def test_l3_current_entrypoints_track_completed_and_pending_migrations() -> None
 
 
 def test_world_creator_route_uses_worlds_public_boundary() -> None:
-    route = APP_ROOT / "api" / "v1" / "routes" / "worlds.py"
+    route = APP_ROOT / "domains" / "worlds" / "router.py"
     imports = _imports(route)
 
     assert "app.domains.worlds" in imports

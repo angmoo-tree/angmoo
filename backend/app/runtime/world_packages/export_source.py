@@ -7,11 +7,9 @@ from app.domains.world_packages.service.export_projection import _portable_key, 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.domains.characters.public import Character
-from app.domains.world_characters.public import (
-    WorldCharacter,
-    character_contract_hash,
-)
+from app.domains.characters.models import Character
+from app.domains.world_characters.models import WorldCharacter
+from app.domains.world_characters.service.setup_validation import character_contract_hash
 from app.domains.world_packages.utils.canonical import canonical_sha256
 from app.domains.world_packages.schemas.content import (
     AutonomousCharacterTemplate,
@@ -29,16 +27,9 @@ from app.domains.world_packages.exceptions import (
 )
 from app.domains.world_packages.contracts.export import WorldPackageMediaCandidate
 from app.domains.world_packages.contracts.seed import WorldPackageSourceSnapshot
-from app.domains.worlds.public import (
-    NO_SPECIFIC_ROLE_KEY,
-    WorldMembershipRequiredError,
-    WorldNotFoundError,
-    WorldOwnerRoleRequiredError,
-    get_generation_context,
-    is_canonical_no_specific_role,
-    require_owner_access,
-    world_contract_hash,
-)
+from app.domains.worlds.contracts import NO_SPECIFIC_ROLE_KEY, is_canonical_no_specific_role
+from app.domains.worlds.service.creator import WorldMembershipRequiredError, WorldNotFoundError, WorldOwnerRoleRequiredError, get_generation_context, require_owner_access
+from app.domains.worlds.service.definition import world_contract_hash
 
 
 

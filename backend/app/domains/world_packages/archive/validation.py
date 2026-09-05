@@ -26,11 +26,7 @@ from app.domains.world_packages.schemas.content import (
     PortableWorldDefinition,
     WorldCharactersDocument,
 )
-from app.domains.worlds.public import (
-    NO_SPECIFIC_ROLE_DESCRIPTION,
-    NO_SPECIFIC_ROLE_NAME,
-    NO_SPECIFIC_ROLE_PORTABLE_REF,
-)
+from app.domains.worlds.contracts import NO_SPECIFIC_ROLE_DESCRIPTION, NO_SPECIFIC_ROLE_NAME, NO_SPECIFIC_ROLE_PORTABLE_REF
 from app.domains.world_packages.exceptions import (
     WorldPackageContractError,
     WorldPackageReasonCode,
@@ -54,9 +50,7 @@ from app.domains.world_packages.contracts.preview import (
 from app.domains.world_packages.storage.staging import (
     FilesystemWorldPackageStaging,
 )
-from app.domains.worlds.public import (
-    WORLD_CONTRACT_VERSION,
-)
+from app.domains.worlds.service.definition import WORLD_CONTRACT_VERSION
 
 
 _EOCD_SIGNATURE = b"PK\x05\x06"

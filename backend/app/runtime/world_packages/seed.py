@@ -7,14 +7,10 @@ from types import SimpleNamespace
 from sqlalchemy.orm import Session
 
 from app.core.ids import uuid7_string
-from app.domains.characters.public import (
-    AutonomousCharacterSeedData,
-    seed_autonomous_character,
-)
-from app.domains.world_characters.public import (
-    AutonomousWorldCharacterSeedData,
-    seed_autonomous_world_character,
-)
+from app.domains.characters.contracts import AutonomousCharacterSeedData
+from app.domains.characters.service.seed import seed_autonomous_character
+from app.domains.world_characters.contracts.seed import AutonomousWorldCharacterSeedData
+from app.domains.world_characters.service.seed import seed_autonomous_world_character
 from app.domains.world_packages.contracts.seed import (
     WorldPackageDestinationSeedRequest,
     WorldPackageDestinationSeedResult,
@@ -25,17 +21,9 @@ from app.domains.world_packages.contracts.seed import (
 from app.domains.world_packages.service.registry import (
     SqlAlchemyWorldPackageRegistry,
 )
-from app.domains.worlds.public import (
-    NO_SPECIFIC_ROLE_KEY,
-    NO_SPECIFIC_ROLE_PORTABLE_REF,
-    WorldDaypartProfileInput,
-    WorldDraftCreate,
-    WorldGlossaryTermInput,
-    WorldPlaceInput,
-    WorldRoleInput,
-    WorldRuleInput,
-    seed_world,
-)
+from app.domains.worlds.contracts import NO_SPECIFIC_ROLE_KEY, NO_SPECIFIC_ROLE_PORTABLE_REF
+from app.domains.worlds.schemas import WorldDaypartProfileInput, WorldDraftCreate, WorldGlossaryTermInput, WorldPlaceInput, WorldRoleInput, WorldRuleInput
+from app.domains.worlds.service.creator import seed_world
 
 
 def _local_ref(value: str) -> str:

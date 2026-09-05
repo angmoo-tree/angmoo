@@ -19,9 +19,7 @@ from app.core.request_limits import RequestBodyLimitMiddleware
 from app.core.public_media import mount_public_media
 from app.runtime.startup_security import validate_startup_security
 from app.cruds.community import seed_demo_data
-from app.domains.world_characters.public import (
-    reconcile_local_autonomous_runtime_modes,
-)
+from app.runtime.world_characters.recovery import reconcile_local_autonomous_runtime_modes
 from app.services.hosted_configuration import (
     HostedConfigurationRegistrationError,
     HostedPromptProvider,
@@ -310,6 +308,10 @@ def create_app(
     runtime_app.state.account_deletion_workflow = delete_current_user_account
     from app.runtime.world_packages.composition import configure_world_package_runtime
     configure_world_package_runtime(runtime_app)
+    from app.runtime.characters.management import build_character_management_workflows
+    runtime_app.state.character_management_workflows = build_character_management_workflows
+    from app.runtime.characters.creator import build_creator_workflows
+    runtime_app.state.creator_workflows = build_creator_workflows
     runtime_app.add_middleware(RequestBodyLimitMiddleware)
     runtime_app.include_router(
         create_public_api_router(extension.routers if extension else ()),

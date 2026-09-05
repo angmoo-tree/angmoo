@@ -8,6 +8,11 @@ Angmoo 백엔드는 **업무별 도메인 안에 HTTP 처리, 업무 흐름, 데
 
 > **AR-G2 적용 범위:** 공통 오류 4개는 `app/exceptions.py`, Device Home·Social profile이 함께 사용하는 cursor bytes 변환은 `app/pagination.py`가 소유합니다. 기존 core 모듈은 동시성·middleware 구현과 동일 오류 객체의 export를 유지합니다. 다른 업무 오류·cursor payload·query·실행 계약은 기존 소유 모듈에서 계속 관리합니다. 병합 및 통합 검증 상태는 위 실행 결과 문서에서 구분합니다.
 
+> **AR-B2 Worlds 적용 범위:** World 정의·readiness·생성·배너와 10개 HTTP 경로는 `worlds/models.py`, `schemas.py`, `contracts.py`, `exceptions.py`, `storage.py`, `service/`, `router.py`가 소유합니다. WorldCharacter의 4개 기존 HTTP 경로와 setup/lifecycle은 다음 B2 PR 범위입니다. Worlds 전체를 완료 scope로 올리지 않고 실제 새 역할 12개 module만 검사합니다. `worlds.public` 및 frozen SQLite v2→v3가 사용하는 옛 경로 4개는 같은 객체를 제공하는 추적된 호환 경로입니다.
+
+> **AR-B2 WorldCharacter 기반 적용 범위:** 6개 ORM은 `world_characters/models.py`, 입출력은 `schemas/identity.py`·`schemas/setup.py`, 순수 업무 계약은 `contracts/`, 오류는 `exceptions.py`가 소유합니다. 생성기 통신은 `client.py`, 응답 검증은 `service/setup_validation.py`, Package용 seed는 `service/seed.py`에 있습니다. 소유자·입장·승인·Studio 실행 흐름의 실제 이전은 다음 slice이며, 현재 기존 workflow가 새 기반을 소비하는 정확한 bridge만 허용합니다. immutable SQLite migration이 사용하는 옛 ORM 경로 두 개는 같은 class 객체의 alias로 유지합니다.
+
+
 ## 목차
 
 1. [프로젝트 구조](#1-프로젝트-구조)
@@ -95,6 +100,16 @@ backend/
 
 ## 2. 도메인 안에서 코드 찾기
 
+### Character 정체성 기반의 현재 위치
+
+AR-B2-B의 첫 전환 범위는 캐릭터 자체의 ORM·입력 schema·handle/프로필 저장·상태 저장·Package seed입니다. `characters/models.py`, `schemas.py`, `exceptions.py`, `contracts.py`, `service/profile.py`, `service/state.py`, `service/seed.py`가 실제 구현을 소유합니다. 관리 화면 전체, Creator workflow, 자율활동과 Local Bot은 아직 뒤이은 전환 범위입니다.
+
+`profile.create_character`의 기존 commit/refresh와 `seed.seed_autonomous_character`의 caller-owned flush-only 저장은 별도 계약입니다. 전자는 일반 저장 캐릭터를 inactive 상태로 만들고, 후자는 World Package 등의 transaction에 참여합니다. `state.upsert_character_state`는 기존 `unit_of_work.finish_write`를 사용하므로 지연 commit 구간에서는 flush만 합니다. 이 차이를 일반적인 repository 규칙 하나로 바꾸지 않습니다.
+
+현재 `app.cruds.community`와 `app.schemas` 등의 옛 소비자 경로는 필요한 같은 함수·class 객체를 단방향으로 재노출합니다. 새 Character 구현은 그 호환 경로를 다시 import하지 않습니다. `characters/public.py`도 WorldCharacter·Package·runtime 소비자 전환 동안 동일 모델/seed 객체를 제공하는 임시 표면이며, 전체 도메인 전환 완료를 뜻하지 않습니다.
+
+### 역할별로 문제 찾기
+
 먼저 **어느 업무의 동작인가**를 찾고, 다음으로 **어떤 역할이 달라지는가**를 찾습니다. 예를 들어 게시물 목록에 권한 없는 World의 글이 섞이면 `social`의 조회·권한 경로를 확인합니다. JSON 필드 이름만 잘못됐다면 같은 도메인의 응답 schema와 router 변환이 출발점입니다.
 
 | 파일 | 담당하는 내용 | 판단 예시 |
@@ -109,6 +124,10 @@ backend/
 | `utils.py` | 업무 판단 없는 작은 보조 함수 | 정해진 형식의 문자열을 변환함 |
 
 DB 조회가 복잡하거나 여러 서비스에서 함께 쓰이면 **`repository.py`**에 모읍니다. 순수한 업무 판단을 따로 테스트하고 싶다면 **`policies.py`**, 실제 교체 가능한 외부 경계의 타입이 필요하면 **`contracts.py`**를 사용할 수 있습니다. 이 세 파일은 Angmoo에서 추가한 선택지이며, 모든 서비스가 반드시 통과하는 계층이 아닙니다.
+
+Worlds의 `service/creator.py`는 권한·row version·상태 전이·commit을, `service/definition.py`는 canonical hash와 readiness·정의 조회를, `service/generation_context.py`는 생성에 제공할 World 정보를 소유합니다. 배너 파일 검증·변환·저장은 `storage.py`에 있고, DB commit 실패 시 새 파일을 정리하고 성공 후 이전 파일을 지우는 순서는 creator service에 있습니다. `seed_world`와 system role의 `ensure_no_specific_role`은 전달받은 Session에서 flush만 수행하므로 Package의 원자 import가 commit/rollback을 소유합니다.
+
+World timezone 변경과 자율활동 슬롯 재예약은 기존과 같이 한 트랜잭션입니다. `service/scheduling.py`는 이 변경에 참여하는 한정된 기존 협력 query이며 worker를 시작하거나 commit하지 않습니다. active autonomous resident·enabled activity·idle slot 필터와 UTC/World timezone 의미를 유지합니다. 활동·scheduler 소유권의 AR-B4 전환은 이 함수의 같은 Session 계약을 이어받으며, creator service에서 runtime을 역으로 import하지 않습니다.
 
 외부 서비스 통신을 한 도메인만 소유한다면 그 안의 `client.py`가 가능하고, 여러 업무가 사용하는 AI·이미지·graph 통신은 기존 `integrations`·`providers`에 둡니다. URL 호출·SDK 응답 변환과 업무 권한 판단은 구분합니다.
 
@@ -440,3 +459,36 @@ AR-B4-A1에서 일일 활동의 입출력은 `domains/routines/schemas.py`, 아�
 계획 생성·권한 scope·공동 예약·claim 회복의 실제 service/repository 전환은 뒤의 AR-B4-A2/A3 범위입니다. 현재 domain lifecycle과 전역 activity runtime의 같은 이름 함수는 manual 제외·선택적 now·오류/commit 의미가 달라 단순 별칭으로 통합하지 않습니다. provider/result 실행은 AR-B4-B, resident·lease·worker는 AR-B4-C에서 이어갑니다. 이 부분 전환의 정확한 기존 소비자와 제거 시점은 경계 검사 policy와 보존 지도에 기록합니다.
 
 AR-B4-A2a에서는 version/daypart/history 상수를 `constants.py`, 실제 DST boundary·후보 선택·snapshot 규칙을 `policies/planning.py`에 두고, routines ORM만 다루는 공동 예약 query와 materialization을 `service/joint_reservations.py`로 옮겼습니다. 현재 기존 계획 파일에 남은 scope·다른 도메인 read·prepare/get/update transaction은 다음 A2b의 책임입니다. WorldCharacter mode 변경은 WC 소유 mutation을 같은 Session에서 호출하도록 연결하며, runtime 조립에 새로운 외부 ORM 수정 구현을 만들지 않습니다.
+### Character/Creator 전환의 현재 위치
+
+Character 입력과 상태·Creator 모델은 `characters/models.py`, `schemas.py`, `contracts.py`에서 찾는다. 생성·표시 프로필·페르소나·동의의 실제 변경은 `service/mutations.py`가 담당하고, `access.py`·`persona.py`·`promotion.py`가 해당 판단을 공유한다. Caller-owned World seed는 `service/seed.py`의 flush-only 계약을 따르며 일반 생성의 기존 commit을 합치지 않는다.
+
+Creator 이미지 한도는 `service/image_quota.py`, draft 응답·파싱·쿨다운은 `service/creator.py`가 소유한다. 파일과 provider의 외부 작업, 여러 업무의 활동·credential·상세 응답 연결은 현재 `runtime/characters`에서 이어간다. 해당 runtime에는 후속 B2/B3/B4/B8 이전 대상이 남아 있어 전체 전환 완료로 보지 않는다. 새로운 Character 업무 판단을 이 혼합 runtime에 계속 추가하는 구조가 아니다. 기존 혼합 `/agents` router의 업무별 분리 역시 남아 있다.
+
+#### Character 관리 HTTP와 런타임 연결
+
+기본 Character 관리 6개 API는 `domains/characters/router.py` → `service/management.py` → profile/persona mutation으로 연결된다. HTTP dependency는 앱 생성 시 등록한 `CharacterManagementWorkflows`를 가져온다. 이 callback에는 활동 설정·credential·기록·상세 응답 조립이 들어가며 동일 DB Session을 받는다. Character의 소유권과 프로필 변경은 service가 판단하고, HTTP 계층에는 오류의 응답 코드 변환만 둔다.
+
+기존 `/agents` 집계 파일은 아직 활동·LocalBot·이미지 API를 포함하므로 canonical Character APIRoute를 원래 위치에 조립한다. 일반 상세 조립의 최근 활동 20개와 단일 조회 200개 한도, drafts 우선 경로 매칭은 유지한다. `AgentDetailRead`는 Character schemas이며 credential/활동/slot의 읽기 계약은 각각 Identity/Runtime schemas에서 가져온다. 이 DTO 선행 추출이 다른 업무 실행 로직의 이전 완료를 뜻하지 않는다.
+
+#### Creator 초안의 수명주기
+
+초안 생성·조회·수정·페르소나 보강·완료와 만료 정리는 `domains/characters/service/drafts.py`가 담당한다. ORM 변경과 소유권·검증은 그곳에서 읽을 수 있고, 파일이나 LLM 작업은 `CreatorWorkflows`를 통해 runtime이 연결한다. callback은 기존 요청의 Session을 그대로 사용하며 초안 정리의 per-draft commit/rollback 정책을 바꾸지 않는다. get/update draft HTTP도 Character router가 담당한다.
+
+파일 전송·이미지 candidate 생성/승격과 provider-specific 오류 변환은 아직 runtime/API 조립의 실제 책임이다. 기존 생성·보강·완료 HTTP에서 이어지는 임시 runtime entry는 canonical lifecycle을 호출할 뿐 업무 구현을 중복하지 않는다. 이를 특정 파일 이름만으로 다른 도메인에 통째로 옮기지 않으며 B3 media와 B4 activity 전환에서 남은 소비 경계를 정리한다.
+
+#### 현재 Character 기본 구현의 완료 범위
+
+Character/Creator 기본 HTTP 11개와 owner state API 1개가 Character router와 서비스에 연결된다. state URL은 역사적으로 community namespace이므로 같은 파일의 `state_router`를 사용하며, API assembly가 원래 자리에 연결한다. Creator provider 실패는 runtime-neutral 계약과 media validation 계약을 받아 기존 HTTP 상태로 변환한다. 이전 런타임/service 오류 export는 같은 클래스다.
+
+순수 state admission/쓰기/응답은 Character 서비스가 소유한다. 기존 Social tool 소비자에게는 Community 오류 타입을 유지하는 호환 wrapper만 남는다. 활동/World readiness/미디어/Local Bot/복합 삭제와 공개 Social profile/search는 각각 해당 실제 업무의 후속 단계에 속하며, 기본 Character 완료를 이유로 섞어 옮기지 않는다. 자세한 종료 경계와 bridge 소비자는 `docs/architecture/refactor-backend-results.md`의 B2 Character 감사표를 따른다.
+
+WorldCharacter의 소유자 identity는 `service/owner_identity.py`의 실제 조회·생성·수정 서비스가 담당합니다. 설치 소유자 확인은 Identity의 `service/owner_context.py`, 특수 Character seed·프로필 쓰기는 Character의 `service/owner_controlled.py`에 요청합니다. 일반 create/update의 commit/rollback/refresh는 WC 서비스가 유지하고 Package seed는 같은 Session에서 flush만 합니다. 이전 application forwarding 함수와 repository Protocol은 실제 호출 전환 후 제거했습니다.
+
+
+WorldCharacter의 공개 프로필·Studio·후보 조회와 퇴장 정책은 `service/public_profile.py`, `service/studio.py`, `service/lifecycle.py`에 있습니다. World 권한 확인·프로필 표현·퇴장 버전 및 상태 판단은 이 서비스가 소유합니다. Character/WorldMembership을 함께 읽는 기존 SQL은 `runtime/world_characters/queries.py`가 같은 Session에서 실행하며 `contracts/queries.py` 계약으로 주입됩니다. API와 다른 runtime 소비자는 `runtime/world_characters/composition.py` 또는 공통 HTTP 연결 `app/api/world_character_dependencies.py`에서 조립합니다. 서비스가 runtime을 역으로 import하지 않으며 row 개수·DB 정렬·조회 횟수를 바꾸지 않습니다.
+
+기존 프로필·Studio·소유자 HTTP 7개 경로는 `router/profile.py`에 있습니다. 단순 application forwarding 함수와 repository Protocol은 실제 호출을 옮긴 뒤 제거했으며, 퇴장 runtime guard는 `contracts/lifecycle.py`에 실제 협력 계약으로 남습니다. 선택된 World에서 퇴장할 때 Character의 비활성화도 Character 서비스의 같은 attached 객체 쓰기로 연결하고 commit/rollback은 원래 WC 트랜잭션이 수행합니다.
+
+
+WorldCharacter의 생성·재시도·승인·거절·입장 정책은 `service/autonomous_setup.py`에 있습니다. Character 조회, nullable World/membership 조회·입장 membership seed·World contract version 쓰기, agent-purpose credential 조회는 각 소유 서비스와 같은 Session으로 협력합니다. `infrastructure/autonomous_setup_models.py`의 외부 ORM 집합은 제거했습니다. Provider budget·쿼터·실패 상태 기록과 commit 경계는 WC 서비스에 유지합니다. Runtime mode의 실제 repair 정책은 `service/runtime_modes.py`, 시작 시 Session factory·SQLite immediate 실행은 `runtime/world_characters/recovery.py`가 소유합니다. Runtime의 capacity query는 원래 WC/Character join을 그대로 유지합니다.

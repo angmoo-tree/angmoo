@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2018,
-      "internal_edge_count": 1874,
+      "external_import_count": 2065,
+      "internal_edge_count": 2024,
       "legacy_import_exception_count": 0,
-      "module_count": 602,
+      "module_count": 635,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -551,7 +551,8 @@
               "app.domains.social.public",
               "app.domains.world_characters.public",
               "app.pagination",
-              "app.runtime.social.sqlalchemy_read_repository"
+              "app.runtime.social.sqlalchemy_read_repository",
+              "app.runtime.world_characters.composition"
             ],
             "module": "app.runtime.social.sqlalchemy_profile_repository",
             "path": "backend/app/runtime/social/sqlalchemy_profile_repository.py"
@@ -573,7 +574,7 @@
               "app.domains.social.domain.subjective_context",
               "app.domains.social.domain.today_activity",
               "app.domains.social.infrastructure.sqlalchemy_subjective_context_models",
-              "app.domains.worlds.infrastructure.sqlalchemy_models",
+              "app.domains.worlds.models",
               "app.runtime.social.sqlalchemy_read_repository",
               "app.runtime.social.subjective_context"
             ],
@@ -603,7 +604,7 @@
               "app.domains.relationships.infrastructure.sqlalchemy_social_models",
               "app.domains.social.domain.subjective_context",
               "app.domains.social.infrastructure.sqlalchemy_subjective_context_models",
-              "app.domains.worlds.infrastructure.sqlalchemy_models",
+              "app.domains.worlds.models",
               "app.runtime.social.sqlalchemy_read_repository"
             ],
             "module": "app.runtime.social.subjective_context",
@@ -620,6 +621,9 @@
               "app.core.security",
               "app.core.unit_of_work",
               "app.cruds.agents",
+              "app.domains.characters.exceptions",
+              "app.domains.characters.service.profile",
+              "app.domains.characters.service.state",
               "app.models",
               "app.schemas"
             ],
@@ -1071,7 +1075,7 @@
     "parity_test_files": [
       {
         "path": "backend/tests/test_embedded_data_migration.py",
-        "sha256": "5690b09ce0911347c466a9685e59879412aeeef1d36064f55f0f20d0a5adaff3"
+        "sha256": "79eed21ca8ff7dc0f0a128b94b37a3513f2bd10f948d354ebd491211c8576ac9"
       },
       {
         "path": "backend/tests/test_feed_reaction_intent.py",
@@ -1091,7 +1095,7 @@
       },
       {
         "path": "backend/tests/world_packages/test_import_commit.py",
-        "sha256": "6a87c35e6373b46dd01a63b096e78d5ba8987ad245db765552fc4dbda4870de2"
+        "sha256": "96d7f32cd2aa68093423cbb61195a3e65fc65478794afe3a5a7d68758a383dd4"
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",
@@ -1099,7 +1103,7 @@
       },
       {
         "path": "backend/tests/test_l3_owner_manual_social_inbox.py",
-        "sha256": "1443f5ce298f85a71cae49627294eeeed640c2c1b4b3ebd8d4f472cf4f11f1d1"
+        "sha256": "d6c5fe8ccdb8174ce57a513d039616aa83d2d4c75161d50362b102bd3117b236"
       },
       {
         "path": "backend/tests/test_l4_social_search_projection.py",
@@ -1122,8 +1126,8 @@
         "sha256": "e3d3903d08fab8797a8566dc4122a983121e5b73a2b8d9165d0c08a9b5b32cf4"
       },
       {
-        "path": "backend/tests/test_world_definition_contract.py",
-        "sha256": "913f028b71935a33a83a041598ae91f767140781a985509ea8fd93597f55890b"
+        "path": "backend/tests/worlds/test_definition_contract.py",
+        "sha256": "659ba64ba063fb5ef8dfba5a03c950f8f870964dd8aa5a78a52083682b9957b2"
       },
       {
         "path": "backend/tests/test_world_feed_search.py",
@@ -1206,12 +1210,6 @@
       "backend/tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
       "backend/tests/test_t2_architecture_inventory.py::test_architecture_inventory_is_deterministic_and_current",
       "backend/tests/test_t2_architecture_inventory.py::test_architecture_inventory_resolves_imported_modules_and_relative_imports",
-      "backend/tests/test_world_definition_contract.py::test_canonical_definition_treats_prompt_like_text_as_data",
-      "backend/tests/test_world_definition_contract.py::test_complete_world_is_canonical_and_provider_free",
-      "backend/tests/test_world_definition_contract.py::test_generation_context_excludes_owner_media_and_workflow_fields",
-      "backend/tests/test_world_definition_contract.py::test_name_only_draft_is_saved_but_not_publish_ready",
-      "backend/tests/test_world_definition_contract.py::test_optional_catalog_is_versioned_archived_and_hash_stable_by_order",
-      "backend/tests/test_world_definition_contract.py::test_semantic_change_updates_hash_but_banner_and_visibility_do_not",
       "backend/tests/test_world_feed_search.py::test_blocked_author_is_not_a_candidate",
       "backend/tests/test_world_feed_search.py::test_character_privacy_cleanup_removes_p5_runtime_state",
       "backend/tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
@@ -1228,7 +1226,13 @@
       "backend/tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
       "backend/tests/world_packages/test_import_commit.py::test_media_journal_recovery_keeps_only_canonical_commits",
       "backend/tests/world_packages/test_import_commit.py::test_media_promotion_failure_rolls_back_all_rows_and_is_retryable",
-      "backend/tests/world_packages/test_import_commit.py::test_seed_failure_after_partial_flush_preserves_existing_data"
+      "backend/tests/world_packages/test_import_commit.py::test_seed_failure_after_partial_flush_preserves_existing_data",
+      "backend/tests/worlds/test_definition_contract.py::test_canonical_definition_treats_prompt_like_text_as_data",
+      "backend/tests/worlds/test_definition_contract.py::test_complete_world_is_canonical_and_provider_free",
+      "backend/tests/worlds/test_definition_contract.py::test_generation_context_excludes_owner_media_and_workflow_fields",
+      "backend/tests/worlds/test_definition_contract.py::test_name_only_draft_is_saved_but_not_publish_ready",
+      "backend/tests/worlds/test_definition_contract.py::test_optional_catalog_is_versioned_archived_and_hash_stable_by_order",
+      "backend/tests/worlds/test_definition_contract.py::test_semantic_change_updates_hash_but_banner_and_visibility_do_not"
     ]
   },
   "documentation": "docs/architecture/l4-p5-p7-parity-baseline.md",

@@ -5,7 +5,7 @@ from __future__ import annotations
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
-from app.domains.characters.infrastructure.sqlalchemy_models import Character
+from app.domains.characters.models import Character
 from app.domains.chat.domain.retrieval_intent import RetrievalContractError
 from app.domains.chat.infrastructure.sqlalchemy_models import MessageThread
 from app.domains.chat.ports.retrieval_policy import (
@@ -21,10 +21,10 @@ from app.domains.identity.public import (
 from app.domains.memory.infrastructure.sqlalchemy_models import (
     MemoryScopeSettingModel,
 )
-from app.domains.world_characters.infrastructure.sqlalchemy_models import (
+from app.domains.world_characters.models import (
     WorldCharacter,
 )
-from app.domains.worlds.infrastructure.sqlalchemy_models import World, WorldMembership
+from app.domains.worlds.models import World, WorldMembership
 from app.runtime.relationships.sqlalchemy_social_event import (
     world_character_pair_is_blocked,
 )

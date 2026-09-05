@@ -36,7 +36,7 @@
 
 | ID | 기능 | 보존의 핵심 |
 | --- | --- | --- |
-| K01 | identity 역할 파일·공통 HTTP 연결·runtime 계정 삭제로 이전 | session/CSRF·credential 접근·계정 삭제·비밀 노출 경계. 기존 public 소비자는 정확한 부분 scope로 보호 |
+| K01 | owner·인증·BYOK·프로필 | session/CSRF·credential 접근·계정 삭제·비밀 노출 경계 |
 | K02 | Device Home·Phone·World 목록 | owner 범위·launchability와 runtime 상태 구분·빈 상태·재시도·탐색 |
 | K03 | Character·World Creator·Studio | 생성/편집·readiness·membership·definition hash |
 | K04 | WorldCharacter 구성 | 수동/자율 구분·4시간대×10 routine 후보·승인·재시작 |
@@ -109,6 +109,20 @@ AR-1은 새 규칙 지원과 허용/거부 fixture를 먼저 제공한다. 실�
 
 AR-B1은 PR #260에서 legacy alias 없이 병합됐다. AR-F1은 PR #261에서 Home의 화면·공용 코드를 옮겼고 네 feature facade 소비자, 공용 TypeScript bridge 7개, semantic CSS 직접 소비자 7개를 제거 단계와 함께 기록했다. AR-0/1과 두 파일럿의 완료는 전체 리팩터링 완료가 아니다. AR-G·AR-B2 이후·AR-F2 이후·AR-X가 남으며, P8-L-S 실제 AI 품질·인과·사용자 closeout도 별도로 남는다.
 
+
+### AR-B2-B1 Character 기반의 현재 연결
+
+Character·CharacterState는 `app.domains.characters.models`, seed 요청은 `contracts`, flush-only seed는 `service.seed`, 기존 생성·프로필·핸들 처리는 `service.profile`, 상태 저장은 `service.state`가 실제 구현을 소유한다. 기존 집계 경로는 동일 객체의 한 방향 호환 export이며 종료 담당과 제거 조건은 `architecture_import_policy.json`의 exact bridge에 있다. 부분 추출한 수평 파일의 남은 함수도 `refactor_path_map.json`의 symbol 대응표에 그대로 남는다고 기록했다.
+
+이 단계는 seed와 일반 생성의 서로 다른 transaction 정책을 보존한다. WorldCharacter와 Social activity projection, credential·Creator·활동 실행·다업무 삭제는 담당 전환이 완료될 때까지 기존 책임을 유지한다. media 참조 검증만 Character schema에 필요한 AR-B3 선행 의존성으로 `app.domains.media.schemas`로 옮겼다. 전체 Characters 전환과 source 도입 증거 캡처·통합 검증은 진행 중이다.
+
 AR-G1은 공통 설정을 `app/config.py`로 옮기면서 기존 startup-security 25 nodes를 `tests/config/test_startup_security.py`에 그대로 연결한다. 다른 업무·runtime 테스트는 소유 위치를 유지하고 설정 import만 전환한다. 새 설정 경로·cold import 회귀 2개는 별도 도입 증거에 기록한다. 고정 기준선·과거 secret-scan allowlist·검사 fixture의 옛 경로는 역사 또는 검사 입력이며 실행 호환 파일이 아니다. G01 코드 이전은 AR-G 전체나 설치 앱 최종 검증 완료를 뜻하지 않는다.
 
 AR-B2의 identity 구현은 15개 소유 테스트 파일·기존 133 nodes와 함께 역할 파일로 이전했다. Auth의 계정 삭제 부분은 runtime의 같은 session/UoW workflow로 분리했고 실패 시 DB rollback·비공개 media 복구, 성공 후 purge 순서를 유지한다. Local owner의 실패한 claim 시도 횟수 commit과 session 발급 제한도 보존한다. 두 factory의 callback 연결, HTTP dependency의 같은 객체 identity, 기존 model/schema aggregate 호환은 G06·G05 후속 단계에서 이어받을 계약이다. 현재 적용·검증·PR·병합 결과는 [백엔드 전환 결과](refactor-backend-results.md)에 별도로 기록한다.
+
+AR-B2 Worlds는 정의·생성·readiness·배너를 12개 실제 역할 module로 이전한다. 기존 Creator 테스트 2파일·11 nodes는 `tests/worlds/`로 옮기며 local-smoke·ER0·L4의 실제 실행 경로도 연결한다. Mixed Worlds router의 14개 endpoint 중 World 10개는 새 router로, WorldCharacter 4개와 leave runtime guard는 기존 경로에 남긴다. 두 앱의 router 순서와 WC에서 전달된 World 오류의 HTTP 변환도 보존한다.
+
+Worlds 부분 전환은 K03 전체 또는 WC·Package·활동·frontend 완료가 아니다. Package seed의 flush-only, 기존 World mutation의 commit, 이전 배너 정리, timezone 재예약의 같은 Session을 유지한다. `worlds.public`의 미전환 ORM 소비자와 immutable v2→v3 import 호환 4개는 정확한 bridge·후속 종료 조건으로 관리한다. 새 서비스에서 ORM 클래스를 export해 다른 업무의 저장 접근을 위장하지 않는다. 원본 3파일을 분리한 63개 symbol에는 실제 목적지·소비자·검증 node가 있으며, frozen migration과 기준선 본문은 바꾸지 않는다.
+
+
+AR-B2 WorldCharacter 기반 slice는 6개 ORM과 두 schema 묶음, 입력 계약·오류, 생성기 client, 응답 검증 및 flush-only seed를 새 역할 경로로 옮긴다. 기존 setup contract 테스트는 `tests/world_characters/test_setup_contracts.py`로 이동하며 test node·symbol map이 원본 assertion을 계속 보호한다. provider monkeypatch 호환은 같은 module 객체로 유지하고, frozen v2→v3의 옛 ORM import 두 개도 새 class와 동일한 객체다. 원본 5파일의 66개 symbol 분리를 기록했으며 setup·entry·owner·Studio workflow는 아직 후속 slice다.

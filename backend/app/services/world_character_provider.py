@@ -2,8 +2,6 @@
 
 import sys
 
-from app.domains.world_characters.infrastructure import (
-    direct_llm_setup_provider as _implementation,
-)
+from app.domains.world_characters import client as _implementation
 
 sys.modules[__name__] = _implementation

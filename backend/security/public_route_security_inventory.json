@@ -94,7 +94,7 @@
     },
     "DELETE /api/v1/worlds/{world_id}/banner": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.worlds",
+      "module": "app.domains.worlds.router",
       "endpoint": "remove_world_banner"
     },
     "DELETE /api/v1/worlds/{world_id}/world-characters/{subject_id}/memories/{memory_id}": {
@@ -109,12 +109,12 @@
     },
     "GET /api/v1/agents": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "list_agents"
     },
     "GET /api/v1/agents/drafts/{draft_id}": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "get_agent_draft"
     },
     "GET /api/v1/agents/drafts/{draft_id}/media-candidates/{candidate_id}/content": {
@@ -134,7 +134,7 @@
     },
     "GET /api/v1/agents/{character_id}": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "get_agent"
     },
     "GET /api/v1/agents/{character_id}/credential": {
@@ -404,7 +404,7 @@
     },
     "GET /api/v1/worlds/{world_id}": {
       "access": "public",
-      "module": "app.api.v1.routes.worlds",
+      "module": "app.domains.worlds.router",
       "endpoint": "get_world"
     },
     "GET /api/v1/worlds/{world_id}/character-candidates": {
@@ -454,12 +454,12 @@
     },
     "GET /api/v1/worlds/{world_id}/creator-context": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.worlds",
+      "module": "app.domains.worlds.router",
       "endpoint": "get_world_creator_context"
     },
     "GET /api/v1/worlds/{world_id}/generation-context": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.worlds",
+      "module": "app.domains.worlds.router",
       "endpoint": "get_world_generation_context"
     },
     "GET /api/v1/worlds/{world_id}/manual-social/feed": {
@@ -524,7 +524,7 @@
     },
     "PATCH /api/v1/agents/drafts/{draft_id}": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "update_agent_draft"
     },
     "PATCH /api/v1/auth/me": {
@@ -574,7 +574,7 @@
     },
     "PATCH /api/v1/worlds/{world_id}": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.worlds",
+      "module": "app.domains.worlds.router",
       "endpoint": "update_world"
     },
     "PATCH /api/v1/worlds/{world_id}/characters/{character_id}/role": {
@@ -594,22 +594,22 @@
     },
     "POST /api/v1/agents": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "create_agent"
     },
     "POST /api/v1/agents/drafts": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "create_agent_draft"
     },
     "POST /api/v1/agents/drafts/{draft_id}/complete": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "complete_agent_draft"
     },
     "POST /api/v1/agents/drafts/{draft_id}/enhance-persona": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "enhance_agent_draft_persona"
     },
     "POST /api/v1/agents/drafts/{draft_id}/generate-media": {
@@ -739,7 +739,7 @@
     },
     "POST /api/v1/characters/{character_id}/state": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.characters.router",
       "endpoint": "save_character_state"
     },
     "POST /api/v1/characters/{character_id}/worlds/{world_id}/activity-plan/prepare": {
@@ -854,17 +854,17 @@
     },
     "POST /api/v1/worlds": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.worlds",
+      "module": "app.domains.worlds.router",
       "endpoint": "create_world"
     },
     "POST /api/v1/worlds/{world_id}/archive": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.worlds",
+      "module": "app.domains.worlds.router",
       "endpoint": "archive_world"
     },
     "POST /api/v1/worlds/{world_id}/banner": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.worlds",
+      "module": "app.domains.worlds.router",
       "endpoint": "upload_world_banner"
     },
     "POST /api/v1/worlds/{world_id}/characters": {
@@ -919,12 +919,12 @@
     },
     "POST /api/v1/worlds/{world_id}/publish": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.worlds",
+      "module": "app.domains.worlds.router",
       "endpoint": "publish_world"
     },
     "POST /api/v1/worlds/{world_id}/validate": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.worlds",
+      "module": "app.domains.worlds.router",
       "endpoint": "validate_world_definition"
     },
     "POST /api/v1/worlds/{world_id}/world-characters/{subject_id}/memories/{memory_id}/corrections": {
@@ -949,17 +949,17 @@
     },
     "PUT /api/v1/agents/{character_id}/persona": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "update_persona"
     },
     "PUT /api/v1/agents/{character_id}/profile": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "update_profile"
     },
     "PUT /api/v1/agents/{character_id}/promotion-usage": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "update_promotion_usage"
     },
     "PUT /api/v1/agents/{character_id}/settings": {

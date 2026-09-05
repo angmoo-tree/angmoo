@@ -8,7 +8,7 @@ from app.domains.identity.models import LocalOwnerBootstrapChallenge
 from app.domains.identity.models import User
 from app.domains.identity.models import LlmCredential
 from app.domains.runtime.infrastructure import RuntimeSchedulerLease
-from app.models.characters import Character, CharacterState
+from app.domains.characters.models import Character, CharacterState
 from app.models.character_lore import CharacterLoreChunk, CharacterLoreSource, LoreParserLease
 from app.models.agent_settings import AgentActivitySetting, AgentImageGenerationSetting
 from app.models.agent_local_keys import AgentLocalKey
@@ -53,7 +53,7 @@ from app.domains.memory.infrastructure.sqlalchemy_models import (
     MemoryMaintenanceJob,
     MemoryScopeSettingModel,
 )
-from app.models.profile_images import ProfileImageCandidate, ProfileImageQuotaReservation
+from app.domains.characters.models import ProfileImageCandidate, ProfileImageQuotaReservation
 from app.models.agent_runs import (
     AgentActivityLog,
     AgentDaypartMemoryEvent,
@@ -62,7 +62,7 @@ from app.models.agent_runs import (
     AgentRelationshipPoint,
     AgentRun,
 )
-from app.models.agent_creation_drafts import AgentCreationDraft
+from app.domains.characters.models import AgentCreationDraft
 from app.models.admin_ops import AdminAuditLog, SiteOperationBanner, SiteOperationSetting
 from app.models.tree import TreeComment, TreePost
 from app.models.worlds import (

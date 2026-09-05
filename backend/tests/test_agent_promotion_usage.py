@@ -5,8 +5,8 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
 from app import models, schemas
-from app.services import agent_creation_drafts as draft_service
-from app.services import agents as agent_service
+from app.runtime.characters import creator as draft_service
+from app.runtime.characters import management as agent_service
 
 
 def _create_tables(engine) -> None:

@@ -27,7 +27,7 @@
     },
     {
       "path": "backend/app/main.py",
-      "sha256": "39b2432376d845000c17526a2286585c022fbff8c966d33da6fdb77f5846ceb3"
+      "sha256": "06cff31c5b7511acbb84948bd7a4128a5a06285d204523cf8d3f388129fe562c"
     },
     {
       "path": "backend/app/services/resident_tick_scheduler.py",
@@ -121,8 +121,8 @@
         "missing_tests": [],
         "phase": "P1",
         "tests": [
-          "backend/tests/test_world_creator_routes.py",
-          "backend/tests/test_world_definition_contract.py",
+          "backend/tests/worlds/test_creator_routes.py",
+          "backend/tests/worlds/test_definition_contract.py",
           "backend/tests/test_world_foundation.py"
         ]
       },
@@ -131,9 +131,9 @@
         "missing_tests": [],
         "phase": "P2",
         "tests": [
-          "backend/tests/test_world_character_contracts.py",
-          "backend/tests/test_world_character_setup_service.py",
-          "backend/tests/test_l3_owner_controlled_world_character.py"
+          "backend/tests/world_characters/test_setup_contracts.py",
+          "backend/tests/world_characters/test_setup_service.py",
+          "backend/tests/world_characters/test_owner_identity.py"
         ]
       },
       {
@@ -287,7 +287,7 @@
       "owner": "ER4",
       "path": "backend/app/public_main.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "46e416e727f89e66dc99c963571eb008395eb5d000396954aa85e09e59e77c46",
+      "source_sha256": "f2a574056241875f9192fdf95cff64114a84c1774f4b97bce13d8675d7cfbd28",
       "transition_pr": "ER4 PR J"
     },
     {

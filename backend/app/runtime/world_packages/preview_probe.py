@@ -5,7 +5,7 @@ from __future__ import annotations
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.domains.characters.public import Character
+from app.domains.characters.models import Character
 from app.domains.world_packages.utils.canonical import canonical_sha256
 from app.domains.world_packages.service.preview import assess_world_package_preview
 from app.domains.world_packages.policies.collision import (
@@ -25,7 +25,7 @@ from app.domains.world_packages.models import (
     WorldPackageExport,
     WorldPackageImport,
 )
-from app.domains.worlds.public import World
+from app.domains.worlds.models import World
 
 
 class SqlAlchemyWorldPackagePreviewProbe:
