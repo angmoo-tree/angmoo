@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2341,
-      "internal_edge_count": 2690,
+      "external_import_count": 2352,
+      "internal_edge_count": 2699,
       "legacy_import_exception_count": 0,
-      "module_count": 780,
+      "module_count": 783,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -661,6 +661,13 @@
             "path": "backend/app/domains/social/contracts/image_generation.py"
           },
           {
+            "imports": [
+              "app.domains.social.contracts.image_generation"
+            ],
+            "module": "app.domains.social.contracts.image_jobs",
+            "path": "backend/app/domains/social/contracts/image_jobs.py"
+          },
+          {
             "imports": [],
             "module": "app.domains.social.contracts.inbox",
             "path": "backend/app/domains/social/contracts/inbox.py"
@@ -860,6 +867,13 @@
           },
           {
             "imports": [
+              "app.domains.social.models.posts"
+            ],
+            "module": "app.domains.social.repository.image_jobs",
+            "path": "backend/app/domains/social/repository/image_jobs.py"
+          },
+          {
+            "imports": [
               "app.domains.social.models.posts",
               "app.domains.social.utils.cursors"
             ],
@@ -1023,6 +1037,18 @@
             ],
             "module": "app.domains.social.service.image_attempts",
             "path": "backend/app/domains/social/service/image_attempts.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.contracts.image_generation",
+              "app.domains.social.contracts.image_jobs",
+              "app.domains.social.models.posts",
+              "app.domains.social.repository.event_evidence",
+              "app.domains.social.repository.image_jobs",
+              "app.domains.social.repository.media"
+            ],
+            "module": "app.domains.social.service.image_jobs",
+            "path": "backend/app/domains/social/service/image_jobs.py"
           },
           {
             "imports": [
@@ -1650,6 +1676,7 @@
               "app.domains.social.repository.posts",
               "app.domains.social.repository.profiles",
               "app.domains.social.repository.reactions",
+              "app.domains.social.service.image_jobs",
               "app.domains.social.service.notifications",
               "app.domains.social.service.profile_activity",
               "app.domains.social.service.source_posts",

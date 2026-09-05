@@ -1141,5 +1141,3 @@ def _replicate_failed(
         quota_reservation_id=quota_reservation_id,
         **extra,
     )
-
-

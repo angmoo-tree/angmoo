@@ -1140,3 +1140,10 @@ SQL·협력 호출을 원문으로 확장한 **6개 정책 AST 동일**. 기존 
 기존 이미지/provider/Local Bot 집중 **72 PASS/5.67초**. 신규 실제 SQLite quota 회귀는 KST 자정·naive UTC 입력·한도 초과 시 추가 commit 없음·release 후 미사용·attached는 사용량 유지와 기존 commit 횟수를 검증한다. 최종 **73 PASS/6.06초**, 기존 assertion 수정 없음. 전체 B5/source capture/Hosted CI/installer는 후속 통합에서 검증한다.
 
 C10-A 최종 확인: 원래 57개 모든 함수/class 본문 동일, API/schema/ORM·기존 assertion·전체 split evidence PASS. 경계 780 modules / 2690 edges / legacy 202, L4/ER0 PASS.
+
+
+## AR-B5-C10-B — 이미지 queue 상태·처리 정책과 워커 연결
+
+claim/stale/완료 3개 원래 상태 정책을 Social service로 이동하고 기존 PostgreSQL skip_locked·정렬·limit 및 stale cutoff query는 repository로 나누었다. 워커의 실제 Character/Post 검사→prepare→attach→finish 정책도 같은 service에 두며 원래 Session 생성/시각 계산/취소/실패 로그/대기 loop는 worker에 유지한다. Character는 같은 Session의 nullable 실제 소유 조회를 callback으로 연결하며 Social은 외부 ORM에 의존하지 않는다.
+
+원래 query를 확장한 상태3·처리1 AST 동일. 신규4 node는 실제 worker를 통해 claim commit 이후 attached Character/Session/처리 시각, 제거된 Character/Post에서 provider0, 최종 commit·실패, stale cutoff의 strict < 및 조건부 commit을 검증한다. 기존 이미지/quota/provider/Local Bot 포함 **77 PASS/9.23초**. 기존 assertion 변경 없음. 전체 B5/source capture/Hosted CI/installer는 후속 통합에서 검증한다.

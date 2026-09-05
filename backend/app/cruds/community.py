@@ -1,3 +1,8 @@
+from app.domains.social.service.image_jobs import (
+    claim_next_post_image_generation_job,
+    mark_stale_post_image_generation_jobs_failed,
+    finish_post_image_generation_job,
+)
 from app.domains.social.constants import HIDDEN_AGENT_ACTIVITY_ACTION_TYPES, PUBLIC_ACTIVITY_ACTION_ALIASES, PUBLIC_ACTIVITY_ACTION_TYPES, PUBLIC_ACTIVITY_SUMMARIES
 from app.domains.social.service.profile_activity import _public_activity_event
 from app.runtime.social.profile_activity import profile_activity_service
@@ -38,7 +43,6 @@ from app.domains.social.repository.inbox import (
     list_unread_reply_notifications_for_character,
 )
 from app.domains.social.repository.media import (
-    claim_next_post_image_generation_job,
     count_active_post_image_jobs_for_character_between,
     count_post_media_for_character_between,
     count_service_image_global_used,
@@ -46,11 +50,9 @@ from app.domains.social.repository.media import (
     create_post_image_generation_job,
     create_post_image_quota_reservation,
     create_post_media,
-    finish_post_image_generation_job,
     get_post_image_quota_reservation,
     list_post_media,
     lock_service_image_quota,
-    mark_stale_post_image_generation_jobs_failed,
     update_post_image_quota_reservation,
 )
 from app.domains.social.repository.posts import (

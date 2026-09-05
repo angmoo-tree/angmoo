@@ -697,3 +697,6 @@ Social 임시 `_SocialPersistenceModels`/`social_persistence_models` export는 �
 
 
 게시물 이미지의 시각 정체성·scene 프롬프트 규칙은 `social/service/image_prompts.py`, 구조화 출력 검증은 `social/schemas/image_generation.py`, prepared 결과는 `social/contracts/image_generation.py`에 있다. Character 사실은 readonly `ImageCharacter`로 사용한다. 날짜별 사용량·무료 quota 예약/종료 정책은 `social/service/image_quota.py`가 실제 Social media repository를 호출하며 기존 lock→사용량→예약→commit/refresh 순서와 KST 날짜 계산을 유지한다. 오류는 Social exceptions, 실패/건너뜀 결과 작성은 image_attempts가 소유한다.
+
+
+이미지 작업의 queued→processing claim, stale 실패, 완료·quota 종료 및 Character/Post 존재 확인 순서는 `social/service/image_jobs.py`가 소유한다. `social/repository/image_jobs.py`는 기존 대기 작업 선택과 stale 목록 query만 수행한다. 워커는 Session·설정 시각·루프와 구체 callback을 연결한다. Claim commit/refresh가 완료된 후 같은 Session에서 Character를 조회하고, 삭제된 Character나 Post이면 provider를 호출하지 않고 기존 실패를 저장한다. Provider·attachment는 명시적인 typed callback이며 service가 실행 runtime을 import하지 않는다.

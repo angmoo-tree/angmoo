@@ -777,24 +777,35 @@
     },
     {
       "markers": {
+        "driver_or_url": [
+          9
+        ],
+        "row_lock": [
+          10
+        ],
+        "skip_locked": [
+          10
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/social/repository/image_jobs.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "56955aeb4a6b9ddd4e3a0aeac5b46de17fdbd6f09095fdc84ef243566cdc8ca0",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
         "advisory_lock": [
           93
         ],
         "driver_or_url": [
-          90,
-          203
-        ],
-        "row_lock": [
-          204
-        ],
-        "skip_locked": [
-          204
+          90
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/social/repository/media.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "18221945e8faad2208e7358d4d90444f3486bd923d6d079d9387c58d33b583ba",
+      "source_sha256": "4f2278a0226d9a54752cee6faea6e50bd7a5e641b5c255702b7e718e8521dc38",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1272,10 +1283,10 @@
       "transition_pr": "P8-L-G memory write/lifecycle"
     }
   ],
-  "entry_count": 82,
+  "entry_count": 83,
   "marker_counts": {
     "advisory_lock": 10,
-    "driver_or_url": 49,
+    "driver_or_url": 50,
     "jsonb": 11,
     "pgvector": 5,
     "row_lock": 35,

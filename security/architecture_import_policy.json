@@ -662,14 +662,6 @@
         },
         {
           "importer": "app.services.post_image_job_worker",
-          "imported": "app.cruds.community"
-        },
-        {
-          "importer": "app.services.post_image_job_worker",
-          "imported": "app.models"
-        },
-        {
-          "importer": "app.services.post_image_job_worker",
           "imported": "app.services.post_image_generation"
         },
         {
@@ -1110,6 +1102,7 @@
       "app.domains.social.contracts.actors",
       "app.domains.social.contracts.discovery",
       "app.domains.social.contracts.image_generation",
+      "app.domains.social.contracts.image_jobs",
       "app.domains.social.contracts.inbox",
       "app.domains.social.contracts.inbox_reads",
       "app.domains.social.contracts.manual_feed",
@@ -1132,6 +1125,7 @@
       "app.domains.social.repository.activity",
       "app.domains.social.repository.blocks",
       "app.domains.social.repository.event_evidence",
+      "app.domains.social.repository.image_jobs",
       "app.domains.social.repository.inbox",
       "app.domains.social.repository.manual_feed",
       "app.domains.social.repository.manual_writes",
@@ -1151,6 +1145,7 @@
       "app.domains.social.service.discovery",
       "app.domains.social.service.feed",
       "app.domains.social.service.image_attempts",
+      "app.domains.social.service.image_jobs",
       "app.domains.social.service.image_prompts",
       "app.domains.social.service.image_quota",
       "app.domains.social.service.inbox",
@@ -1338,6 +1333,7 @@
       "app.domains.social.contracts.actors",
       "app.domains.social.contracts.discovery",
       "app.domains.social.contracts.image_generation",
+      "app.domains.social.contracts.image_jobs",
       "app.domains.social.contracts.inbox",
       "app.domains.social.contracts.inbox_reads",
       "app.domains.social.contracts.manual_feed",
@@ -1359,6 +1355,7 @@
       "app.domains.social.service.discovery",
       "app.domains.social.service.feed",
       "app.domains.social.service.image_attempts",
+      "app.domains.social.service.image_jobs",
       "app.domains.social.service.image_prompts",
       "app.domains.social.service.image_quota",
       "app.domains.social.service.inbox",
@@ -3086,6 +3083,30 @@
         "owner_stage": "AR-B5",
         "reason": "The remaining legacy image orchestration uses the same actual Social prompt/quota/result/validation definition during its bounded transition.",
         "removal_condition": "Move the remaining provider/Character bindings and image request/attachment workflow to their actual owners, then retire this exact legacy consumer.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.social.service.image_jobs",
+        "owner_stage": "AR-B5",
+        "reason": "The old worker/CRUD surface binds the actual Social job policy and nullable Character lookup during the bounded image workflow transition.",
+        "removal_condition": "Retire the exact old worker/CRUD consumer after provider/Character bindings and image source workflow use canonical runtime composition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.post_image_job_worker",
+        "target": "app.domains.social.service.image_jobs",
+        "owner_stage": "AR-B5",
+        "reason": "The old worker/CRUD surface binds the actual Social job policy and nullable Character lookup during the bounded image workflow transition.",
+        "removal_condition": "Retire the exact old worker/CRUD consumer after provider/Character bindings and image source workflow use canonical runtime composition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.post_image_job_worker",
+        "target": "app.domains.characters.service.profile",
+        "owner_stage": "AR-B5",
+        "reason": "The old worker/CRUD surface binds the actual Social job policy and nullable Character lookup during the bounded image workflow transition.",
+        "removal_condition": "Retire the exact old worker/CRUD consumer after provider/Character bindings and image source workflow use canonical runtime composition.",
         "review_date": "2026-09-06"
       }
     ]
