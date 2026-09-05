@@ -1107,3 +1107,12 @@ ER0 generator의 실제 scheduler coupling 참조를 service로 바꿔 생성/�
 위 ER0 실패는 과거 물리 파일 수 조건을 고정 checkpoint `d7037625a19071eb279ad2ea35c3ace6fe5b5289`의 원본 Git inventory에 적용하여 보존하고, 현재 inventory는 별도 실제 전체 source scan과 entries/entry_count/각 marker·줄·hash·owner·조건이 모두 일치하도록 검증해 해결했다. 현재 entry_count82를 축소하거나 제외하지 않는다. 고정 API/ORM/실행 계약은 바꾸지 않았다.
 
 새4개 negative nodes는 실제 임시 source와 대조하여 잘못된 count, 누락한 entry, 조작 hash, 나중에 추가된 marker source를 모두 거부한다. 원래 ER7 driver 의존성·poisoned environment·실행 검사와 함께 **20 PASS/1 warning/28.68초**다. 원래 source/split/assertion/억제/APIORM/node 보존 진단도0오류(protected2201/current2252)다. 과거 threshold를 현재 검증으로 오인하지 않도록 test helper·주석에 구분을 명시했다. 전체 stock source/node 원장은 선행 단계 순차 합류가 여전히 필요하다.
+
+
+### AR-B8 Runtime A4 SQLite lease 실제 정책·SQL 분리
+
+Source `763375b69e10810743dc9bbad1f76d5d3bf340d6`는 SQLite acquire/heartbeat/begin/finish/release/current 판정과 snapshot을 `service/sqlite_lease.py`, 원래5개 read/write/CAS SQL을 `repository/sqlite_lease.py`로 분리했다. `runtime/persistence/sqlite_scheduler_lease.py`는 기존 engine·clock·bounded BEGIN IMMEDIATE executor·읽기 connection과 같은 connection의 Identity 조회를 연결한다. 원래 constructor 입력/검증과 `_write`/`_now` 본문을 보존했다. Callback은 실제 트랜잭션 안의 원래 시점에 실행된다.
+
+새 SQL에 실제 호출 인수를 대입하고 동일 ORM Table 상수 참조를 펼쳐 **16개 workflow/helper/executor 전체 AST**가 원본과 동일함을 확인했다. 생성 후 실제4개 callback, 읽기 with-context/행 조회/None 처리도 원래 구현과 대조했다. 10개 동시 claim·만료 재획득·오래된 epoch 거부·heartbeat/실패 유지·tick·BEGIN IMMEDIATE/복구·single-backend·ER7 회귀는 **42 PASS/1 warning/37.13초**다. 새 node는 없다.
+
+현재 경계737/2458/legacy222·L4 parity97·ER0 전체82/87/24/44/7 PASS, 원래 source/split/assertion/억제/APIORM/node 읽기 진단0(protected2201/current2252)이다. 앞선 지도 소비자9개를 실제 새 값 참조로 연결했다. Runtime HTTP/집합 export 제거, G5 등록, G06 파일 제거 및 선행 source/node 원장 합류/최종 통합은 남아 있다.
