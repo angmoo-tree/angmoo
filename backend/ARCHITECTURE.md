@@ -13,6 +13,8 @@ Angmoo 백엔드는 **업무별 도메인 안에 HTTP 처리, 업무 흐름, 데
 > **AR-B2 WorldCharacter 기반 적용 범위:** 6개 ORM은 `world_characters/models.py`, 입출력은 `schemas/identity.py`·`schemas/setup.py`, 순수 업무 계약은 `contracts/`, 오류는 `exceptions.py`가 소유합니다. 생성기 통신은 `client.py`, 응답 검증은 `service/setup_validation.py`, Package용 seed는 `service/seed.py`에 있습니다. 소유자·입장·승인·Studio·퇴장·runtime mode·readiness의 실제 업무 흐름은 `service/`, HTTP는 `router/profile.py`·`entry.py`·`setup.py`가 소유합니다. 여러 업무 join과 삭제·runtime busy 검사 및 시작 조립은 `runtime/world_characters/`에 있습니다. 미전환 외부 소비자는 정확한 bridge만 허용합니다. immutable SQLite migration이 사용하는 옛 ORM 경로 두 개는 같은 class 객체의 alias로 유지합니다.
 
 
+> **AR-B5-A Social 기반 적용 범위:** 게시물·반응·미디어 작업은 `social/models/posts.py`, Feed cursor·관찰·block은 `models/feed.py`, owner 수동 작성·inbox 후보는 `models/manual_writes.py`, 성공 행동의 당시 자기 설명은 `models/subjective_context.py`가 실제 ORM을 소유합니다. 수동 쓰기·관찰·프로필·Today·subjective context의 값과 오류는 `contracts/`, 수동 HTTP 요청·응답은 `schemas/manual.py`에 있습니다. 일반 게시물/agent tool 서비스와 Relationship/projection 전환은 뒤이은 B5 범위입니다. immutable SQLite v7→v8와 Alembic 0088의 subjective-context import는 같은 클래스와 schema helper의 호환만 남습니다. 기존 공통 model export도 같은 클래스를 사용하고 G5에서 최종 조립 위치를 정리합니다.
+
 ## 목차
 
 1. [프로젝트 구조](#1-프로젝트-구조)

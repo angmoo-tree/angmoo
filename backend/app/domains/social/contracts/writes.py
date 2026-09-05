@@ -1,7 +1,7 @@
 """Canonical social source-write contracts.
 
-These values are storage-neutral.  The SQLite adapter owns persistence and the
-application layer owns when the caller-provided unit of work is committed.
+These values are storage-neutral.  The Social write service owns validation and persistence within the
+caller-provided SQLite unit of work.
 """
 
 from __future__ import annotations

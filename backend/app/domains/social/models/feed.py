@@ -18,7 +18,11 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
-from app.models.worlds import JSON_DOCUMENT
+from sqlalchemy import JSON
+from sqlalchemy.dialects.postgresql import JSONB
+
+
+JSON_DOCUMENT = JSON().with_variant(JSONB(), "postgresql")
 
 
 class WorldCharacterFeedCursor(Base):

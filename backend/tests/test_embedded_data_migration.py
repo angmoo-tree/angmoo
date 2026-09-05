@@ -33,7 +33,7 @@ from app.domains.chat.infrastructure.sqlalchemy_models import (
 from app.domains.memory.infrastructure.sqlalchemy_models import (
     drop_memory_schema_v1,
 )
-from app.domains.social.infrastructure.sqlalchemy_subjective_context_models import (
+from app.domains.social.models.subjective_context import (
     drop_subjective_context_schema,
 )
 from app.runtime.migrations.ladybug_versions import registry as graph_registry

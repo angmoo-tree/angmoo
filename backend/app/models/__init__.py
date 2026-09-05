@@ -17,7 +17,7 @@ from app.models.local_bot_quotas import (
     LocalBotReadQuotaBucket,
 )
 from app.models.agent_slots import AgentSlot
-from app.models.community import (
+from app.domains.social.models.posts import (
     Comment,
     Notification,
     Post,
@@ -93,7 +93,7 @@ from app.models.world_activity_runtime import (
     JointActivityParticipant,
     JointActivityRepresentationClaim,
 )
-from app.models.world_feed import (
+from app.domains.social.models.feed import (
     WorldCharacterBlock,
     WorldCharacterFeedCursor,
     WorldCharacterFeedObservation,
@@ -109,11 +109,11 @@ from app.domains.relationships.infrastructure.sqlalchemy_social_models import (
     SocialEvent,
     SocialEventEvidence,
 )
-from app.domains.social.infrastructure.sqlalchemy_models import (
+from app.domains.social.models.manual_writes import (
     OwnerManualInboxCandidate,
     OwnerManualSocialWrite,
 )
-from app.domains.social.infrastructure.sqlalchemy_subjective_context_models import (
+from app.domains.social.models.subjective_context import (
     SocialActionSubjectiveContext,
 )
 from app.domains.world_packages.infrastructure.sqlalchemy_models import (

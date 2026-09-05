@@ -228,7 +228,20 @@
     "backend/app/api/v1/routes/worlds.py": "backend/app/domains/world_characters/router/entry.py",
     "backend/app/services/world_character_setup.py": "backend/app/runtime/world_characters/cleanup.py",
     "backend/app/services/worlds.py": "backend/app/domains/world_characters/service/membership.py",
-    "backend/app/services/activity_profile_readiness.py": "backend/app/domains/world_characters/service/readiness.py"
+    "backend/app/services/activity_profile_readiness.py": "backend/app/domains/world_characters/service/readiness.py",
+    "backend/app/models/community.py": "backend/app/domains/social/models/posts.py",
+    "backend/app/models/world_feed.py": "backend/app/domains/social/models/feed.py",
+    "backend/app/domains/social/infrastructure/sqlalchemy_models.py": "backend/app/domains/social/models/manual_writes.py",
+    "backend/app/domains/social/infrastructure/sqlalchemy_subjective_context_models.py": "backend/app/domains/social/models/subjective_context.py",
+    "backend/app/domains/social/domain/inbox.py": "backend/app/domains/social/contracts/inbox.py",
+    "backend/app/domains/social/domain/observations.py": "backend/app/domains/social/contracts/observations.py",
+    "backend/app/domains/social/domain/profile_activity.py": "backend/app/domains/social/contracts/profile_activity.py",
+    "backend/app/domains/social/domain/search_state.py": "backend/app/domains/social/contracts/search_state.py",
+    "backend/app/domains/social/domain/subjective_context.py": "backend/app/domains/social/contracts/subjective_context.py",
+    "backend/app/domains/social/domain/today_activity.py": "backend/app/domains/social/contracts/today_activity.py",
+    "backend/app/domains/social/domain/writes.py": "backend/app/domains/social/contracts/writes.py",
+    "backend/app/domains/social/domain/__init__.py": "backend/app/domains/social/contracts/__init__.py",
+    "backend/app/domains/social/api/schemas.py": "backend/app/domains/social/schemas/manual.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -16737,6 +16750,121 @@
       "existing_splits_updated": [
         "AR-B2-worlds: all original 14 routes plus guard/error mapping now point at actual current owners",
         "AR-B2-B1: all Character/shared response symbols retained; readiness DTO has its actual WC schema owner"
+      ]
+    },
+    "AR-B5-A": {
+      "status": "IMPLEMENTED; focused35 PASS; original69 ASTs/API-schema-ORM/changed6files assertions/split evidence PASS. Existing e6 WC package cycle is being fixed by root; Social partial-scope checks have no violations. No source capture yet.",
+      "scope": "16 Social ORM classes, seven value-contract modules and manual/profile HTTP schemas. Single metadata/class identity; no business flow/query/transaction changes.",
+      "owned_symbols": {
+        "backend/app/models/community.py": [
+          "Post",
+          "PostMedia",
+          "PostImageGenerationJob",
+          "PostImageQuotaReservation",
+          "PostLike",
+          "PostRepost",
+          "PostReport",
+          "Comment",
+          "ProfileFollow",
+          "Notification"
+        ],
+        "backend/app/models/world_feed.py": [
+          "WorldCharacterFeedCursor",
+          "WorldCharacterFeedObservation",
+          "WorldCharacterBlock"
+        ],
+        "backend/app/domains/social/infrastructure/sqlalchemy_models.py": [
+          "OwnerManualSocialWrite",
+          "OwnerManualInboxCandidate"
+        ],
+        "backend/app/domains/social/infrastructure/sqlalchemy_subjective_context_models.py": [
+          "_sql_values",
+          "SocialActionSubjectiveContext",
+          "create_subjective_context_schema",
+          "drop_subjective_context_schema"
+        ],
+        "backend/app/domains/social/domain/inbox.py": [
+          "ManualInboxInteractionCandidate"
+        ],
+        "backend/app/domains/social/domain/observations.py": [
+          "SocialObservationError",
+          "SocialObservationCommand",
+          "SocialObservationResult"
+        ],
+        "backend/app/domains/social/domain/profile_activity.py": [
+          "WorldCharacterSocialProfileError",
+          "WorldCharacterSocialProfileNotFoundError",
+          "WorldCharacterSocialProfileForbiddenError",
+          "WorldCharacterSocialProfileValidationError",
+          "WorldCharacterSocialProfileQuery",
+          "WorldCharacterSocialProfileCounts",
+          "WorldCharacterSocialProfileMention",
+          "WorldCharacterSocialProfileMedia",
+          "WorldCharacterSocialProfilePost",
+          "WorldCharacterSocialProfilePage"
+        ],
+        "backend/app/domains/social/domain/search_state.py": [
+          "SocialSearchState",
+          "SocialSearchUnavailable"
+        ],
+        "backend/app/domains/social/domain/subjective_context.py": [
+          "ActionMotivationKind",
+          "ActionEmotionLabel",
+          "SubjectiveContextProvenance",
+          "SubjectiveContextContractError",
+          "ActionSubjectiveContextV1"
+        ],
+        "backend/app/domains/social/domain/today_activity.py": [
+          "TodaySocialActivityKind",
+          "TodaySocialCoverageStatus",
+          "TodaySocialSubjectiveRecord",
+          "TodaySocialActivityRecord",
+          "TodaySocialActivityRead"
+        ],
+        "backend/app/domains/social/domain/writes.py": [
+          "SocialWriteError",
+          "SocialWriteNotFoundError",
+          "SocialWriteForbiddenError",
+          "SocialWriteConflictError",
+          "SocialWriteRetryableError",
+          "OwnerPostCommand",
+          "OwnerReplyCommand",
+          "ValidatedAutonomousWriteCommand",
+          "SocialPostSnapshot",
+          "SocialWriteDelivery",
+          "SocialWriteResult"
+        ],
+        "backend/app/domains/social/domain/__init__.py": [],
+        "backend/app/domains/social/api/schemas.py": [
+          "_clean",
+          "OwnerManualPostWrite",
+          "OwnerManualReplyWrite",
+          "ManualSocialWritePostRead",
+          "ManualSocialPostRead",
+          "ManualSocialDeliveryRead",
+          "ManualSocialWriteRead",
+          "ManualSocialFeedRead",
+          "WorldCharacterSocialProfileCountsRead",
+          "WorldCharacterSocialProfileMentionRead",
+          "WorldCharacterSocialProfileMediaRead",
+          "WorldCharacterSocialProfilePostRead",
+          "WorldCharacterSocialProfileRead"
+        ]
+      },
+      "same_object_compatibility": [
+        "backend/app/domains/social/infrastructure/sqlalchemy_subjective_context_models.py"
+      ],
+      "removed_model_aliases": [
+        "backend/app/models/community.py",
+        "backend/app/models/world_feed.py",
+        "backend/app/domains/social/infrastructure/sqlalchemy_models.py"
+      ],
+      "tests": [
+        "tests/social/test_foundation_contracts.py",
+        "tests/test_l4_social_write_uow.py",
+        "tests/test_l3_owner_manual_social_inbox.py",
+        "tests/test_p8_l_r_today_sns_activity.py",
+        "tests/test_p8_l_r_today_sns_activity_migration.py"
       ]
     }
   }

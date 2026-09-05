@@ -1,14 +1,14 @@
-from app.domains.social.domain.observations import (
+from app.domains.social.contracts.observations import (
     ObservationLane,
     SocialObservationCommand,
     SocialObservationError,
     SocialObservationResult,
 )
-from app.domains.social.domain.search_state import (
+from app.domains.social.contracts.search_state import (
     SocialSearchState,
     SocialSearchUnavailable,
 )
-from app.domains.social.domain.writes import (
+from app.domains.social.contracts.writes import (
     OwnerPostCommand,
     OwnerReplyCommand,
     SocialPostSnapshot,
@@ -21,7 +21,7 @@ from app.domains.social.domain.writes import (
     SocialWriteRetryableError,
     ValidatedAutonomousWriteCommand,
 )
-from app.domains.social.domain.profile_activity import (
+from app.domains.social.contracts.profile_activity import (
     WorldCharacterSocialProfileCounts,
     WorldCharacterSocialProfileError,
     WorldCharacterSocialProfileForbiddenError,
@@ -34,7 +34,7 @@ from app.domains.social.domain.profile_activity import (
     WorldCharacterSocialProfileTab,
     WorldCharacterSocialProfileValidationError,
 )
-from app.domains.social.domain.subjective_context import (
+from app.domains.social.contracts.subjective_context import (
     ACTION_SUBJECTIVE_CONTEXT_VERSION,
     ActionEmotionLabel,
     ActionMotivationKind,
@@ -42,7 +42,7 @@ from app.domains.social.domain.subjective_context import (
     SubjectiveContextContractError,
     SubjectiveContextProvenance,
 )
-from app.domains.social.domain.today_activity import (
+from app.domains.social.contracts.today_activity import (
     TodaySocialActivityKind,
     TodaySocialActivityRead,
     TodaySocialActivityRecord,

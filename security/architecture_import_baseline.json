@@ -1,7 +1,7 @@
 {
   "edge_count": 2022,
-  "external_import_count": 2067,
-  "module_count": 631,
+  "external_import_count": 2068,
+  "module_count": 634,
   "modules": [
     {
       "external_imports": [],
@@ -212,8 +212,8 @@
         "app.core.db",
         "app.domains.identity.browser_session",
         "app.domains.identity.dependencies",
-        "app.domains.social.api.schemas",
         "app.domains.social.public",
+        "app.domains.social.schemas.manual",
         "app.domains.world_characters.public",
         "app.domains.worlds.public",
         "app.runtime.social.sqlalchemy_profile_repository",
@@ -4052,20 +4052,6 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "__future__",
-        "datetime",
-        "pydantic",
-        "typing"
-      ],
-      "imports": [
-        "app.domains.social.domain.profile_activity"
-      ],
-      "module": "app.domains.social.api.schemas",
-      "path": "backend/app/domains/social/api/schemas.py",
-      "wildcard_imports": []
-    },
-    {
       "external_imports": [],
       "imports": [
         "app.domains.social.application.keyword_feed",
@@ -4084,7 +4070,7 @@
         "dataclasses"
       ],
       "imports": [
-        "app.domains.social.domain",
+        "app.domains.social.contracts",
         "app.domains.social.ports"
       ],
       "module": "app.domains.social.application.keyword_feed",
@@ -4096,7 +4082,7 @@
         "__future__"
       ],
       "imports": [
-        "app.domains.social.domain.observations",
+        "app.domains.social.contracts.observations",
         "app.domains.social.ports.observation_unit_of_work"
       ],
       "module": "app.domains.social.application.observations",
@@ -4108,7 +4094,7 @@
         "__future__"
       ],
       "imports": [
-        "app.domains.social.domain.profile_activity",
+        "app.domains.social.contracts.profile_activity",
         "app.domains.social.ports.profile_activity"
       ],
       "module": "app.domains.social.application.profile_activity",
@@ -4122,7 +4108,7 @@
         "threading"
       ],
       "imports": [
-        "app.domains.social.domain",
+        "app.domains.social.contracts",
         "app.domains.social.ports"
       ],
       "module": "app.domains.social.application.search_runtime",
@@ -4134,7 +4120,7 @@
         "__future__"
       ],
       "imports": [
-        "app.domains.social.domain.writes",
+        "app.domains.social.contracts.writes",
         "app.domains.social.ports.write_unit_of_work"
       ],
       "module": "app.domains.social.application.writes",
@@ -4144,15 +4130,15 @@
     {
       "external_imports": [],
       "imports": [
-        "app.domains.social.domain.observations",
-        "app.domains.social.domain.profile_activity",
-        "app.domains.social.domain.search_state",
-        "app.domains.social.domain.subjective_context",
-        "app.domains.social.domain.today_activity",
-        "app.domains.social.domain.writes"
+        "app.domains.social.contracts.observations",
+        "app.domains.social.contracts.profile_activity",
+        "app.domains.social.contracts.search_state",
+        "app.domains.social.contracts.subjective_context",
+        "app.domains.social.contracts.today_activity",
+        "app.domains.social.contracts.writes"
       ],
-      "module": "app.domains.social.domain",
-      "path": "backend/app/domains/social/domain/__init__.py",
+      "module": "app.domains.social.contracts",
+      "path": "backend/app/domains/social/contracts/__init__.py",
       "wildcard_imports": []
     },
     {
@@ -4162,8 +4148,8 @@
         "datetime"
       ],
       "imports": [],
-      "module": "app.domains.social.domain.inbox",
-      "path": "backend/app/domains/social/domain/inbox.py",
+      "module": "app.domains.social.contracts.inbox",
+      "path": "backend/app/domains/social/contracts/inbox.py",
       "wildcard_imports": []
     },
     {
@@ -4174,8 +4160,8 @@
         "typing"
       ],
       "imports": [],
-      "module": "app.domains.social.domain.observations",
-      "path": "backend/app/domains/social/domain/observations.py",
+      "module": "app.domains.social.contracts.observations",
+      "path": "backend/app/domains/social/contracts/observations.py",
       "wildcard_imports": []
     },
     {
@@ -4186,8 +4172,8 @@
         "typing"
       ],
       "imports": [],
-      "module": "app.domains.social.domain.profile_activity",
-      "path": "backend/app/domains/social/domain/profile_activity.py",
+      "module": "app.domains.social.contracts.profile_activity",
+      "path": "backend/app/domains/social/contracts/profile_activity.py",
       "wildcard_imports": []
     },
     {
@@ -4196,8 +4182,8 @@
         "enum"
       ],
       "imports": [],
-      "module": "app.domains.social.domain.search_state",
-      "path": "backend/app/domains/social/domain/search_state.py",
+      "module": "app.domains.social.contracts.search_state",
+      "path": "backend/app/domains/social/contracts/search_state.py",
       "wildcard_imports": []
     },
     {
@@ -4207,8 +4193,8 @@
         "enum"
       ],
       "imports": [],
-      "module": "app.domains.social.domain.subjective_context",
-      "path": "backend/app/domains/social/domain/subjective_context.py",
+      "module": "app.domains.social.contracts.subjective_context",
+      "path": "backend/app/domains/social/contracts/subjective_context.py",
       "wildcard_imports": []
     },
     {
@@ -4219,8 +4205,8 @@
         "enum"
       ],
       "imports": [],
-      "module": "app.domains.social.domain.today_activity",
-      "path": "backend/app/domains/social/domain/today_activity.py",
+      "module": "app.domains.social.contracts.today_activity",
+      "path": "backend/app/domains/social/contracts/today_activity.py",
       "wildcard_imports": []
     },
     {
@@ -4231,8 +4217,40 @@
         "typing"
       ],
       "imports": [],
-      "module": "app.domains.social.domain.writes",
-      "path": "backend/app/domains/social/domain/writes.py",
+      "module": "app.domains.social.contracts.writes",
+      "path": "backend/app/domains/social/contracts/writes.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.social.models.subjective_context"
+      ],
+      "module": "app.domains.social.infrastructure.sqlalchemy_subjective_context_models",
+      "path": "backend/app/domains/social/infrastructure/sqlalchemy_subjective_context_models.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.social.models",
+      "path": "backend/app/domains/social/models/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.dialects.postgresql",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.domains.social.models.feed",
+      "path": "backend/app/domains/social/models/feed.py",
       "wildcard_imports": []
     },
     {
@@ -4245,8 +4263,22 @@
       "imports": [
         "app.core.db"
       ],
-      "module": "app.domains.social.infrastructure.sqlalchemy_models",
-      "path": "backend/app/domains/social/infrastructure/sqlalchemy_models.py",
+      "module": "app.domains.social.models.manual_writes",
+      "path": "backend/app/domains/social/models/manual_writes.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.domains.social.models.posts",
+      "path": "backend/app/domains/social/models/posts.py",
       "wildcard_imports": []
     },
     {
@@ -4259,10 +4291,10 @@
       ],
       "imports": [
         "app.core.db",
-        "app.domains.social.domain.subjective_context"
+        "app.domains.social.contracts.subjective_context"
       ],
-      "module": "app.domains.social.infrastructure.sqlalchemy_subjective_context_models",
-      "path": "backend/app/domains/social/infrastructure/sqlalchemy_subjective_context_models.py",
+      "module": "app.domains.social.models.subjective_context",
+      "path": "backend/app/domains/social/models/subjective_context.py",
       "wildcard_imports": []
     },
     {
@@ -4283,7 +4315,7 @@
         "typing"
       ],
       "imports": [
-        "app.domains.social.domain.observations"
+        "app.domains.social.contracts.observations"
       ],
       "module": "app.domains.social.ports.observation_unit_of_work",
       "path": "backend/app/domains/social/ports/observation_unit_of_work.py",
@@ -4295,7 +4327,7 @@
         "typing"
       ],
       "imports": [
-        "app.domains.social.domain.profile_activity"
+        "app.domains.social.contracts.profile_activity"
       ],
       "module": "app.domains.social.ports.profile_activity",
       "path": "backend/app/domains/social/ports/profile_activity.py",
@@ -4319,7 +4351,7 @@
         "typing"
       ],
       "imports": [
-        "app.domains.social.domain.writes"
+        "app.domains.social.contracts.writes"
       ],
       "module": "app.domains.social.ports.write_unit_of_work",
       "path": "backend/app/domains/social/ports/write_unit_of_work.py",
@@ -4331,12 +4363,33 @@
       ],
       "imports": [
         "app.domains.social.application",
-        "app.domains.social.domain",
-        "app.domains.social.domain.inbox",
+        "app.domains.social.contracts",
+        "app.domains.social.contracts.inbox",
         "app.domains.social.ports"
       ],
       "module": "app.domains.social.public",
       "path": "backend/app/domains/social/public.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.social.schemas",
+      "path": "backend/app/domains/social/schemas/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.social.contracts.profile_activity"
+      ],
+      "module": "app.domains.social.schemas.manual",
+      "path": "backend/app/domains/social/schemas/manual.py",
       "wildcard_imports": []
     },
     {
@@ -6203,8 +6256,10 @@
         "app.domains.relationships.infrastructure.sqlalchemy_models",
         "app.domains.relationships.infrastructure.sqlalchemy_social_models",
         "app.domains.runtime.infrastructure",
-        "app.domains.social.infrastructure.sqlalchemy_models",
-        "app.domains.social.infrastructure.sqlalchemy_subjective_context_models",
+        "app.domains.social.models.feed",
+        "app.domains.social.models.manual_writes",
+        "app.domains.social.models.posts",
+        "app.domains.social.models.subjective_context",
         "app.domains.world_packages.infrastructure.sqlalchemy_models",
         "app.models.admin_ops",
         "app.models.agent_local_keys",
@@ -6212,12 +6267,10 @@
         "app.models.agent_settings",
         "app.models.agent_slots",
         "app.models.character_lore",
-        "app.models.community",
         "app.models.local_bot_quotas",
         "app.models.tree",
         "app.models.world_activity_runtime",
         "app.models.world_character_setup",
-        "app.models.world_feed",
         "app.models.worlds"
       ],
       "module": "app.models",
@@ -6339,20 +6392,6 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "datetime",
-        "sqlalchemy",
-        "sqlalchemy.orm",
-        "typing"
-      ],
-      "imports": [
-        "app.core.db"
-      ],
-      "module": "app.models.community",
-      "path": "backend/app/models/community.py",
-      "wildcard_imports": []
-    },
-    {
       "external_imports": [],
       "imports": [
         "app.domains.identity.models"
@@ -6424,22 +6463,6 @@
       ],
       "module": "app.models.world_character_setup",
       "path": "backend/app/models/world_character_setup.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "datetime",
-        "sqlalchemy",
-        "sqlalchemy.orm",
-        "typing"
-      ],
-      "imports": [
-        "app.core.db",
-        "app.models.worlds"
-      ],
-      "module": "app.models.world_feed",
-      "path": "backend/app/models/world_feed.py",
       "wildcard_imports": []
     },
     {
@@ -7944,7 +7967,7 @@
         "app.domains.routine_posts.infrastructure.direct_llm_provider",
         "app.domains.routine_posts.infrastructure.sqlalchemy_context",
         "app.domains.routines.public",
-        "app.domains.social.domain.subjective_context",
+        "app.domains.social.contracts.subjective_context",
         "app.domains.social.public",
         "app.integrations.direct_llm",
         "app.runtime.social.observations",
@@ -8082,8 +8105,8 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.domains.social.domain.inbox",
-        "app.domains.social.infrastructure.sqlalchemy_models",
+        "app.domains.social.contracts.inbox",
+        "app.domains.social.models.manual_writes",
         "app.models"
       ],
       "module": "app.runtime.social.sqlalchemy_inbox",
@@ -8125,8 +8148,8 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.domains.social.api.schemas",
-        "app.domains.social.domain",
+        "app.domains.social.contracts",
+        "app.domains.social.schemas.manual",
         "app.domains.world_characters.public",
         "app.models",
         "app.runtime.relationships.sqlalchemy_social_event"
@@ -8147,9 +8170,9 @@
       ],
       "imports": [
         "app.domains.relationships.infrastructure.sqlalchemy_social_models",
-        "app.domains.social.domain.subjective_context",
-        "app.domains.social.domain.today_activity",
-        "app.domains.social.infrastructure.sqlalchemy_subjective_context_models",
+        "app.domains.social.contracts.subjective_context",
+        "app.domains.social.contracts.today_activity",
+        "app.domains.social.models.subjective_context",
         "app.domains.worlds.models",
         "app.runtime.social.sqlalchemy_read_repository",
         "app.runtime.social.subjective_context"
@@ -8172,9 +8195,9 @@
         "app.core.ids",
         "app.core.sqlite_concurrency",
         "app.core.unit_of_work",
-        "app.domains.social.domain.observations",
-        "app.domains.social.domain.writes",
-        "app.domains.social.infrastructure.sqlalchemy_models",
+        "app.domains.social.contracts.observations",
+        "app.domains.social.contracts.writes",
+        "app.domains.social.models.manual_writes",
         "app.domains.world_characters.public",
         "app.exceptions",
         "app.models",
@@ -8198,8 +8221,8 @@
       "imports": [
         "app.core.ids",
         "app.domains.relationships.infrastructure.sqlalchemy_social_models",
-        "app.domains.social.domain.subjective_context",
-        "app.domains.social.infrastructure.sqlalchemy_subjective_context_models",
+        "app.domains.social.contracts.subjective_context",
+        "app.domains.social.models.subjective_context",
         "app.domains.worlds.models",
         "app.runtime.social.sqlalchemy_read_repository"
       ],
@@ -8495,7 +8518,7 @@
         "typing"
       ],
       "imports": [
-        "app.domains.social.domain.subjective_context"
+        "app.domains.social.contracts.subjective_context"
       ],
       "module": "app.schemas.world_feed",
       "path": "backend/app/schemas/world_feed.py",
@@ -8904,7 +8927,7 @@
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
-        "app.domains.social.domain.subjective_context",
+        "app.domains.social.contracts.subjective_context",
         "app.domains.world_characters.contracts.runtime_modes",
         "app.models",
         "app.runtime.routine_posts.sqlalchemy_runtime",
@@ -9374,7 +9397,7 @@
       "imports": [
         "app.core.unit_of_work",
         "app.cruds.agent_runs",
-        "app.domains.social.domain.subjective_context",
+        "app.domains.social.contracts.subjective_context",
         "app.domains.social.public",
         "app.models",
         "app.runtime.social.observations",

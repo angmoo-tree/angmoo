@@ -189,10 +189,6 @@
           "importer": "app.models"
         },
         {
-          "imported": "app.models.community",
-          "importer": "app.models"
-        },
-        {
           "imported": "app.models.local_bot_quotas",
           "importer": "app.models"
         },
@@ -209,16 +205,8 @@
           "importer": "app.models"
         },
         {
-          "imported": "app.models.world_feed",
-          "importer": "app.models"
-        },
-        {
           "imported": "app.models.worlds",
           "importer": "app.models"
-        },
-        {
-          "imported": "app.models.worlds",
-          "importer": "app.models.world_feed"
         },
         {
           "imported": "app.cruds.community",
@@ -1200,13 +1188,17 @@
     ],
     "modules": [
       "app.domains.characters.contracts",
+      "app.domains.characters.dependencies",
       "app.domains.characters.exceptions",
       "app.domains.characters.models",
+      "app.domains.characters.router",
       "app.domains.characters.schemas",
       "app.domains.characters.service",
       "app.domains.characters.service.access",
       "app.domains.characters.service.creator",
+      "app.domains.characters.service.drafts",
       "app.domains.characters.service.image_quota",
+      "app.domains.characters.service.management",
       "app.domains.characters.service.mutations",
       "app.domains.characters.service.owner_controlled",
       "app.domains.characters.service.persona",
@@ -1237,7 +1229,25 @@
       "app.domains.identity.service.login_throttle",
       "app.domains.identity.service.owner_context",
       "app.domains.identity.service.world_character_credentials",
+      "app.domains.media.contracts",
       "app.domains.media.schemas",
+      "app.domains.runtime.contracts",
+      "app.domains.runtime.schemas",
+      "app.domains.social.contracts",
+      "app.domains.social.contracts.inbox",
+      "app.domains.social.contracts.observations",
+      "app.domains.social.contracts.profile_activity",
+      "app.domains.social.contracts.search_state",
+      "app.domains.social.contracts.subjective_context",
+      "app.domains.social.contracts.today_activity",
+      "app.domains.social.contracts.writes",
+      "app.domains.social.models",
+      "app.domains.social.models.feed",
+      "app.domains.social.models.manual_writes",
+      "app.domains.social.models.posts",
+      "app.domains.social.models.subjective_context",
+      "app.domains.social.schemas",
+      "app.domains.social.schemas.manual",
       "app.domains.world_characters.client",
       "app.domains.world_characters.contracts",
       "app.domains.world_characters.contracts.lifecycle",
@@ -1284,21 +1294,16 @@
       "app.domains.worlds.service.generation_context",
       "app.domains.worlds.service.reserved_roles",
       "app.domains.worlds.service.scheduling",
-      "app.domains.worlds.storage",
-      "app.domains.characters.dependencies",
-      "app.domains.characters.router",
-      "app.domains.characters.service.drafts",
-      "app.domains.characters.service.management",
-      "app.domains.media.contracts",
-      "app.domains.runtime.contracts",
-      "app.domains.runtime.schemas"
+      "app.domains.worlds.storage"
     ],
     "entries": [
       "app.domains.characters.contracts",
       "app.domains.characters.schemas",
       "app.domains.characters.service.access",
       "app.domains.characters.service.creator",
+      "app.domains.characters.service.drafts",
       "app.domains.characters.service.image_quota",
+      "app.domains.characters.service.management",
       "app.domains.characters.service.mutations",
       "app.domains.characters.service.owner_controlled",
       "app.domains.characters.service.persona",
@@ -1319,7 +1324,20 @@
       "app.domains.identity.service.login_throttle",
       "app.domains.identity.service.owner_context",
       "app.domains.identity.service.world_character_credentials",
+      "app.domains.media.contracts",
       "app.domains.media.schemas",
+      "app.domains.runtime.contracts",
+      "app.domains.runtime.schemas",
+      "app.domains.social.contracts",
+      "app.domains.social.contracts.inbox",
+      "app.domains.social.contracts.observations",
+      "app.domains.social.contracts.profile_activity",
+      "app.domains.social.contracts.search_state",
+      "app.domains.social.contracts.subjective_context",
+      "app.domains.social.contracts.today_activity",
+      "app.domains.social.contracts.writes",
+      "app.domains.social.schemas",
+      "app.domains.social.schemas.manual",
       "app.domains.world_characters.contracts",
       "app.domains.world_characters.contracts.lifecycle",
       "app.domains.world_characters.contracts.owner_identity",
@@ -1351,12 +1369,7 @@
       "app.domains.worlds.schemas",
       "app.domains.worlds.service",
       "app.domains.worlds.service.character_entry",
-      "app.domains.worlds.service.definition",
-      "app.domains.characters.service.drafts",
-      "app.domains.characters.service.management",
-      "app.domains.media.contracts",
-      "app.domains.runtime.contracts",
-      "app.domains.runtime.schemas"
+      "app.domains.worlds.service.definition"
     ],
     "bridges": [
       {
@@ -2077,6 +2090,150 @@
         "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A",
         "reason": "State admission/writes are canonical Character work; old Community consumers retain their same error type and HTTP assembly keeps the same APIRoute.",
         "removal_condition": "Retire Community state wrappers after Social/tool consumers call Character service directly; keep HTTP assembly only while mixed routes migrate.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.social.application.keyword_feed",
+        "target": "app.domains.social.contracts",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
+        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.social.application.observations",
+        "target": "app.domains.social.contracts.observations",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
+        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.social.application.profile_activity",
+        "target": "app.domains.social.contracts.profile_activity",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
+        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.social.application.search_runtime",
+        "target": "app.domains.social.contracts",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
+        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.social.application.writes",
+        "target": "app.domains.social.contracts.writes",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
+        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.social.infrastructure.sqlalchemy_subjective_context_models",
+        "target": "app.domains.social.models.subjective_context",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
+        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.social.ports.observation_unit_of_work",
+        "target": "app.domains.social.contracts.observations",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
+        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.social.ports.profile_activity",
+        "target": "app.domains.social.contracts.profile_activity",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
+        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.social.ports.write_unit_of_work",
+        "target": "app.domains.social.contracts.writes",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
+        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.social.public",
+        "target": "app.domains.social.contracts",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
+        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.social.public",
+        "target": "app.domains.social.contracts.inbox",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
+        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.social.models.feed",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
+        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.social.models.manual_writes",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
+        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.social.models.posts",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
+        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.social.models.subjective_context",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
+        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.world_feed",
+        "target": "app.domains.social.contracts.subjective_context",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
+        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.social.contracts.subjective_context",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
+        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.world_feed_runtime",
+        "target": "app.domains.social.contracts.subjective_context",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
+        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
         "review_date": "2026-09-05"
       }
     ]

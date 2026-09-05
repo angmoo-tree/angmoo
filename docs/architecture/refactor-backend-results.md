@@ -464,3 +464,14 @@ Character·Account 삭제가 함께 사용하는 여러 업무 SQL은 `runtime/w
 - 최종 현재 architecture **624 modules / 1,963 internal edges / exact legacy 272 PASS**. ER0 **75/87/24/44/7**, L4 parity **97**, Memory batch current를 유지한다. Frozen migration/승인 baseline/checkpoint는 변경하지 않았다.
 
 장시간 전체 보존 명령은 위 수집 오류를 발견한 상태에서 중단하고, 수정 후 전체 수집·계약/split·변경 assertion 검사를 개별 완료했다. 모든 선행 source의 introduction capture, 전체 assertion/node 계보 검사와 PR/merge/설치 검증은 root의 순차 통합 단계에서 이어진다. 이 소스의 집중 검증을 전체 AR-B2 또는 §8.2 완료로 확대하지 않는다.
+
+
+## AR-B5-A Social 모델·계약 기반
+
+- 기준 `e6cfca2e724d6c7f928cc169117d836df3698354`; 실제 소유 원본 13개를 `social/models/`, `contracts/`, `schemas/manual.py`로 이전했습니다. Social ORM 16개, 클래스·함수 69개 전체 AST는 원본과 같습니다. `feed.py`의 JSON/JSONB type는 World ORM의 import 대신 동일 dialect 구성을 로컬 정의하며 table/type 계약은 동일합니다.
+- `models/community.py`, `models/world_feed.py`, `social/infrastructure/sqlalchemy_models.py`는 실제 Python 소비자가 canonical 모델로 바뀐 뒤 제거했습니다. frozen SQLite v7→v8/Alembic 0088이 사용하는 subjective-context 경로만 동일 객체 alias로 유지했습니다. revision 본문과 DB schema는 수정하지 않았습니다.
+- 수동 owner 요청의 즉시 AI 0회, inbox pending 후보, replay·observation, World별 Today 증거·검증된 자기 설명, 기존 마이그레이션과 registry class identity 회귀: **35 passed, 1 기존 warning / 23.77s**.
+- API·schema·ORM fingerprint는 PR #258과 #263 기준 모두 동일합니다. 변경된 기존 테스트 6개 파일의 assertion/raises/warns와 기존 split evidence는 보존됐습니다. 최초 자체 검사 wrapper에서 전체 test_nodes를 남긴 채 일부 assertion만 필터하여 허위 missing evidence가 출력되어, test_nodes와 assertion을 함께 필터한 검사로 다시 확인했습니다. 제품·보존 검사 코드는 변경하지 않았습니다.
+- L4 live inventory `backend_modules=634 / parity_nodes=97`, ER0 `postgres_files=77 / migrations=87 / neo4j_queries=24 / next_routes=44` 생성이 통과했습니다. architecture partial Social scope 위반은 없지만 e6 기준의 Character–Runtime–WorldCharacter package cycle이 남아 root WC 통합에서 수정 중입니다. 이 source에서 예외를 추가하지 않았습니다.
+- 신규 테스트: `tests/social/test_foundation_contracts.py::test_all_social_models_share_registered_metadata_and_original_tables`, `::test_frozen_subjective_migration_and_public_values_keep_single_definitions`. 기존 테스트 노드를 삭제·완화하지 않았습니다.
+- **B5 전체 완료가 아닙니다.** 실제 Social 서비스/SQL/HTTP, Relationship의 원자 갱신, projection/outbox 및 Today 소비 경로 전환은 다음 source 단위에서 계속합니다. source introduction capture·전체 CI·병합은 root 선형 통합에서 진행합니다.

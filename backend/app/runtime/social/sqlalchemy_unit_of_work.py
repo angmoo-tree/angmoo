@@ -18,16 +18,16 @@ from sqlalchemy.orm import Session
 from app import models
 from app.core import unit_of_work
 from app.core.ids import uuid7_string
-from app.domains.social.infrastructure.sqlalchemy_models import (
+from app.domains.social.models.manual_writes import (
     OwnerManualInboxCandidate,
     OwnerManualSocialWrite,
 )
-from app.domains.social.domain.observations import (
+from app.domains.social.contracts.observations import (
     SocialObservationCommand,
     SocialObservationError,
     SocialObservationResult,
 )
-from app.domains.social.domain.writes import (
+from app.domains.social.contracts.writes import (
     OwnerPostCommand,
     OwnerReplyCommand,
     SocialPostSnapshot,

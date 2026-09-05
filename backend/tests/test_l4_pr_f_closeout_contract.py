@@ -12,8 +12,8 @@ APP_ROOT = REPO_ROOT / "backend" / "app"
 def test_l4_social_runtime_has_one_concrete_owner_and_no_temporary_facades() -> None:
     required = (
         APP_ROOT / "domains" / "social" / "public.py",
-        APP_ROOT / "domains" / "social" / "domain" / "inbox.py",
-        APP_ROOT / "domains" / "social" / "infrastructure" / "sqlalchemy_models.py",
+        APP_ROOT / "domains" / "social" / "contracts" / "inbox.py",
+        APP_ROOT / "domains" / "social" / "models" / "manual_writes.py",
         APP_ROOT / "runtime" / "social" / "sqlalchemy_unit_of_work.py",
         APP_ROOT / "runtime" / "social" / "sqlalchemy_inbox.py",
         APP_ROOT / "runtime" / "social" / "sqlalchemy_read_repository.py",

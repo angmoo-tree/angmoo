@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from app.domains.social.domain.writes import (
+from app.domains.social.contracts.writes import (
     OwnerPostCommand,
     OwnerReplyCommand,
     SocialWriteResult,
