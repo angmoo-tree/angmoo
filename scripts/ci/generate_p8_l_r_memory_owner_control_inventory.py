@@ -38,7 +38,7 @@ class InventoryError(RuntimeError):
 
 
 REQUIRED_FILES = (
-    "backend/app/api/v1/routes/memory.py",
+    "backend/app/domains/memory/router.py",
     "backend/app/domains/memory/api/schemas.py",
     "backend/app/domains/memory/service/scope.py",
     "backend/app/domains/memory/service/items.py",
@@ -136,7 +136,7 @@ def _boundary_contract() -> dict[str, Any]:
             ("app.integrations", "app.runtime", "sqlalchemy", "fastapi"),
         )
     _require_text(
-        "backend/app/api/v1/routes/memory.py",
+        "backend/app/domains/memory/router.py",
         (
             '@router.put("/memory/settings"',
             '@router.put("/memories/{memory_id}/pin"',
@@ -147,7 +147,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _forbid_text(
-        "backend/app/api/v1/routes/memory.py",
+        "backend/app/domains/memory/router.py",
         ("SELECT ", "INSERT ", "UPDATE ", "DELETE FROM ", "MATCH ", "session.execute("),
     )
     _require_text(

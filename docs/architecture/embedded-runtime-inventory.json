@@ -27,7 +27,7 @@
     },
     {
       "path": "backend/app/main.py",
-      "sha256": "847c8243529d2fc4f755bd82ddb4b2c5e3dd7020887f8f8721331e8629caeea5"
+      "sha256": "a12a393fbe77798458cf695f3ac9c30699e97e5de34599ad7c11f91d12d852ed"
     },
     {
       "path": "backend/app/services/resident_tick_scheduler.py",
@@ -287,7 +287,7 @@
       "owner": "ER4",
       "path": "backend/app/public_main.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "c05e16bc0ae22651861ef978b43660005ab7a54e738c28d7f5941b9ca60cba41",
+      "source_sha256": "c845745f39a8df8d7dde00d06b47b9854fc64ebd8d1a2a83286e4f719817b8ff",
       "transition_pr": "ER4 PR J"
     },
     {

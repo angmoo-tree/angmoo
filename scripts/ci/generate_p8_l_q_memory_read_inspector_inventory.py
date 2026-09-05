@@ -39,7 +39,7 @@ class InventoryError(RuntimeError):
 REQUIRED_FILES = (
     "backend/app/api/v1/main.py",
     "backend/app/api/v1/public.py",
-    "backend/app/api/v1/routes/memory.py",
+    "backend/app/domains/memory/router.py",
     "backend/app/api/v1/routes/world_chat_response.py",
     "backend/app/domains/chat/api/schemas.py",
     "backend/app/domains/chat/application/evidence_assembly.py",
@@ -183,7 +183,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/api/v1/routes/memory.py",
+        "backend/app/domains/memory/router.py",
         (
             '@router.get("/memory/settings"',
             '@router.get("/memories"',
@@ -192,7 +192,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _forbid_text(
-        "backend/app/api/v1/routes/memory.py",
+        "backend/app/domains/memory/router.py",
         ("@router.post", "@router.patch", "@router.put", "@router.delete"),
     )
     _require_text(

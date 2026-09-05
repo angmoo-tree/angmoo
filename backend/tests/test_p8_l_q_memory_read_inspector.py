@@ -11,7 +11,7 @@ from sqlalchemy.pool import StaticPool
 
 from app import models
 from app.domains.identity.dependencies import get_current_user
-from app.api.v1.routes.memory import router as memory_router
+from app.domains.memory.router import router as memory_router
 from app.api.v1.routes.world_chat_response import router as response_router
 from app.core.db import Base, get_db
 from app.runtime.memory.composition import (
@@ -100,6 +100,8 @@ def _fixture() -> tuple[TestClient, object, dict[str, models.User | None]]:
     Base.metadata.create_all(engine)
     principal: dict[str, models.User | None] = {"user": None}
     app = FastAPI()
+    from app.runtime.memory_http import build_memory_workflows
+    app.state.memory_workflows = build_memory_workflows
     app.include_router(memory_router, prefix="/api/v1")
     app.include_router(response_router, prefix="/api/v1")
 

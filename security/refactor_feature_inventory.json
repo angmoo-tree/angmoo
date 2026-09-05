@@ -3986,7 +3986,7 @@
       "stage": "AR-B7 / AR-F3",
       "status": "MAPPED",
       "current_paths": [
-        "backend/app/api/v1/routes/memory.py",
+        "backend/app/domains/memory/router.py",
         "backend/app/domains/memory/__init__.py",
         "backend/app/domains/memory/api/__init__.py",
         "backend/app/domains/memory/schemas/batch.py",
@@ -4901,7 +4901,7 @@
       "stage": "AR-B7 / AR-F3",
       "status": "MAPPED",
       "current_paths": [
-        "backend/app/api/v1/routes/memory.py",
+        "backend/app/domains/memory/router.py",
         "backend/app/domains/memory/__init__.py",
         "backend/app/domains/memory/api/__init__.py",
         "backend/app/domains/memory/schemas/batch.py",

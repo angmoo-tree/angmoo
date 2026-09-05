@@ -330,7 +330,8 @@
     "backend/app/domains/memory/infrastructure/batch_repository.py": "backend/app/domains/memory/repository/batch.py",
     "backend/app/domains/memory/infrastructure/consolidation_repository.py": "backend/app/domains/memory/repository/consolidation.py",
     "backend/app/domains/memory/infrastructure/maintenance_queue.py": "backend/app/domains/memory/repository/queue.py",
-    "backend/app/domains/memory/infrastructure/activation.py": "backend/app/domains/memory/repository/activation.py"
+    "backend/app/domains/memory/infrastructure/activation.py": "backend/app/domains/memory/repository/activation.py",
+    "backend/app/api/v1/routes/memory.py": "backend/app/domains/memory/router.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -17935,6 +17936,418 @@
         }
       ],
       "remaining": "Memory HTTP workflow and dependency composition; runtime lifecycle ownership and final aggregate cleanup. Existing schema migration aliases remain exact."
+    },
+    "AR-B7-A5": {
+      "status": "SOURCE PREPARATION; existing HTTP operations and real owner workflow bodies separated; validation pending",
+      "split_files": {
+        "backend/app/api/v1/routes/memory.py": [
+          "backend/app/domains/memory/router.py",
+          "backend/app/domains/memory/service/management.py",
+          "backend/app/domains/memory/service/presentation.py",
+          "backend/app/runtime/memory_http.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/api/v1/routes/memory.py::_service",
+          "new": "backend/app/runtime/memory_http.py::_service",
+          "direct_consumers": [
+            "backend/app/domains/memory/service/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::read_memory_batch_setting",
+          "new": "backend/app/domains/memory/router.py::read_memory_batch_setting",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::read_memory_batch_setting",
+          "new": "backend/app/domains/memory/service/management.py::read_memory_batch_setting",
+          "direct_consumers": [
+            "backend/app/runtime/memory_http.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::update_memory_batch_setting",
+          "new": "backend/app/domains/memory/router.py::update_memory_batch_setting",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::update_memory_batch_setting",
+          "new": "backend/app/domains/memory/service/management.py::update_memory_batch_setting",
+          "direct_consumers": [
+            "backend/app/runtime/memory_http.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::_scope_service",
+          "new": "backend/app/runtime/memory_http.py::_scope_service",
+          "direct_consumers": [
+            "backend/app/domains/memory/service/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::retry_memory_batch",
+          "new": "backend/app/domains/memory/router.py::retry_memory_batch",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::retry_memory_batch",
+          "new": "backend/app/domains/memory/service/management.py::retry_memory_batch",
+          "direct_consumers": [
+            "backend/app/runtime/memory_http.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::_write_service",
+          "new": "backend/app/runtime/memory_http.py::_write_service",
+          "direct_consumers": [
+            "backend/app/domains/memory/service/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::_scope",
+          "new": "backend/app/domains/memory/router.py::_scope",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::_raise_memory_read_error",
+          "new": "backend/app/domains/memory/router.py::_raise_memory_read_error",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::_raise_memory_mutation_error",
+          "new": "backend/app/domains/memory/router.py::_raise_memory_mutation_error",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::read_memory_setting",
+          "new": "backend/app/domains/memory/router.py::read_memory_setting",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::read_memory_setting",
+          "new": "backend/app/domains/memory/service/management.py::read_memory_setting",
+          "direct_consumers": [
+            "backend/app/runtime/memory_http.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::update_memory_setting",
+          "new": "backend/app/domains/memory/router.py::update_memory_setting",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::update_memory_setting",
+          "new": "backend/app/domains/memory/service/management.py::update_memory_setting",
+          "direct_consumers": [
+            "backend/app/runtime/memory_http.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::list_memory_items",
+          "new": "backend/app/domains/memory/router.py::list_memory_items",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::list_memory_items",
+          "new": "backend/app/domains/memory/service/management.py::list_memory_items",
+          "direct_consumers": [
+            "backend/app/runtime/memory_http.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::read_memory_item",
+          "new": "backend/app/domains/memory/router.py::read_memory_item",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::read_memory_item",
+          "new": "backend/app/domains/memory/service/management.py::read_memory_item",
+          "direct_consumers": [
+            "backend/app/runtime/memory_http.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::update_memory_pin",
+          "new": "backend/app/domains/memory/router.py::update_memory_pin",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::update_memory_pin",
+          "new": "backend/app/domains/memory/service/management.py::update_memory_pin",
+          "direct_consumers": [
+            "backend/app/runtime/memory_http.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::correct_memory_item",
+          "new": "backend/app/domains/memory/router.py::correct_memory_item",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::correct_memory_item",
+          "new": "backend/app/domains/memory/service/management.py::correct_memory_item",
+          "direct_consumers": [
+            "backend/app/runtime/memory_http.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::delete_memory_item",
+          "new": "backend/app/domains/memory/router.py::delete_memory_item",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::delete_memory_item",
+          "new": "backend/app/domains/memory/service/management.py::delete_memory_item",
+          "direct_consumers": [
+            "backend/app/runtime/memory_http.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::_scope_read",
+          "new": "backend/app/domains/memory/service/presentation.py::_scope_read",
+          "direct_consumers": [
+            "backend/app/domains/memory/service/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::_setting_read",
+          "new": "backend/app/domains/memory/service/presentation.py::_setting_read",
+          "direct_consumers": [
+            "backend/app/domains/memory/service/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::_item_summary",
+          "new": "backend/app/domains/memory/service/presentation.py::_item_summary",
+          "direct_consumers": [
+            "backend/app/domains/memory/service/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::_evidence_read",
+          "new": "backend/app/domains/memory/service/presentation.py::_evidence_read",
+          "direct_consumers": [
+            "backend/app/domains/memory/service/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::_related_character",
+          "new": "backend/app/domains/memory/service/presentation.py::_related_character",
+          "direct_consumers": [
+            "backend/app/domains/memory/service/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::_character_names",
+          "new": "backend/app/runtime/memory_http.py::_character_names",
+          "direct_consumers": [
+            "backend/app/domains/memory/service/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::_canonical_href",
+          "new": "backend/app/domains/memory/service/presentation.py::_canonical_href",
+          "direct_consumers": [
+            "backend/app/domains/memory/service/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::_source_label",
+          "new": "backend/app/domains/memory/service/presentation.py::_source_label",
+          "direct_consumers": [
+            "backend/app/domains/memory/service/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::router",
+          "new": "backend/app/domains/memory/router.py::router",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/memory.py::__all__",
+          "new": "backend/app/domains/memory/router.py::__all__",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_owner_control.py::test_owner_setting_is_saved_scope_exact_csrf_safe_and_replayable",
+            "tests/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version"
+          ]
+        }
+      ],
+      "scope": "HTTP and stable error translation in router; actual scope/consent/pin/correction/delete transaction flow in service.management; inspector response values in service.presentation; lazy concrete factory/profile/credential collaboration in runtime.memory_http.",
+      "preserved": "Request owner and CSRF guards, lazy construction, provider readiness without generation, scope and version checks, existing query order, summary before commit, rollback on every mutation failure, error status and schema operation contracts. Both app factories and standalone fixture use the same workflow builder.",
+      "remaining": "Worker and source/projection ownership, daypart memory and final old public/aggregate consumer cleanup."
     }
   }
 }

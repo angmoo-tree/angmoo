@@ -43,7 +43,7 @@ def build_inventory():
         "backend/app/public_main.py",
         "backend/app/runtime/desktop_sidecar.py",
         "backend/app/runtime/single_backend_components.py",
-        "backend/app/api/v1/routes/memory.py",
+        "backend/app/domains/memory/router.py",
         "backend/app/runtime/account_deletion.py",
         "backend/app/runtime/characters/management.py",
         "backend/tests/test_p8_l_r_memory_batch*.py",
