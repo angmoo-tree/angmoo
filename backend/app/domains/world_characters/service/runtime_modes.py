@@ -193,3 +193,15 @@ __all__ = [
     "repair_local_autonomous_runtime_mode",
     "repair_affected_local_autonomous_runtime_modes",
 ]
+
+
+def set_activity_runtime_mode(
+    world_character: models.WorldCharacter, *, activity_runtime_mode: str,
+) -> None:
+    """Apply the caller-validated mode/version write in the caller transaction.
+
+    The activity-plan command owns its existing authorization/readiness checks
+    and commit. This collaboration neither flushes nor adds another validation.
+    """
+    world_character.activity_runtime_mode = activity_runtime_mode
+    world_character.version += 1
