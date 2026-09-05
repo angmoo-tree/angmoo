@@ -76,15 +76,15 @@ from app.services import agent_runs as agent_run_service
 from app.domains.identity.service import demo_access as demo_lock
 from app.services.direct_llm import DirectLlmCallContext, RunLlmTracker, generate_text
 from app.services import operation_settings
-from app.services import image_provider
-from app.services import pollinations_image
+from app.integrations import image_provider
+from app.integrations import pollinations_image
 from app.core import prompt_safety
 from app.domains.characters.service import media_storage as profile_media
 from app.integrations.media import files as media_files
 from app.integrations.media import images as media_images
 from app.integrations import bounded_http
-from app.services import provider_http
-from app.services import replicate_image
+from app.integrations import provider_http
+from app.integrations import replicate_image
 from app.services import service_image_key
 from app.services.runtime_boundary import (
     OpenClawGatewayClient,

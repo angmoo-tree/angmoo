@@ -312,3 +312,13 @@ Frozen 원본과 checkpoint는 수정하지 않았다. 원본 profile_media 전�
 M1 집중 검증은 **136 passed / 3 warnings / 14.01s**다. 새 회귀 3개는 Character 원본 upload 한도와 Post encoded 크기 계약의 구별, quarantine 두 번째 파일 이동 실패 시 첫 파일 복원, 기존 export의 동일 함수·오류 객체를 검증한다. 추출한 36개 원본 symbol의 AST 본문 비교 차이는 0개다. Architecture는 619 modules / 1991 edges / 279 exact legacy edges로 통과했다.
 
 `check_refactor_preservation.py --contracts --nodes`는 원본 #258 1867 / #263 1907 / protected lineages 2080 / current 2121을 수집했다. API/ORM·assertion·suppression·node 누락·split 오류는 없고 선행 source 74건의 append-only introduction 기록만 root 선형 통합 대기다. 따라서 전체 CLI 성공이나 신규 source capture 완료로 표시하지 않는다. 이 source의 신규 node 3개는 `tests/media/test_media_storage_boundaries.py`에 있다.
+
+
+## AR-B3-M2 — 이미지 provider 실제 전송 소유
+
+`services/{image_provider,pollinations_image,replicate_image,provider_http}.py`의 실제 구현을 같은 이름의 `integrations` 파일로 옮겼다. 모든 Python 제품·테스트 import를 전환했으며 옛 파일/새 호환 facade는 남기지 않았다. 모델별 dispatch, required-reference preflight, 안전 필터/relay/fallback, public HTTPS/DNS/redirect/민감 헤더, 응답 byte bound, 오류 redaction, polling/timeout과 요청 횟수는 원래 구현이다. Pollinations logger는 기존 `app.services.pollinations_image` category를 명시적으로 유지한다.
+
+두 Replicate 전용 suite는 `tests/media`로 이동했고 기존 node 이름·assertion을 유지했다. 혼합 Post/provider security suite는 소유 범위를 바꾸지 않았다. 원본 file/node map과 K11/current deferred path를 갱신했으며, 없어져야 할 옛 provider legacy edge 11개를 제거했다. Social quota/job, 서비스 이미지 key 소유, Character 후보 업무는 각각 기존 명시 단계에서 이어진다.
+
+
+M2 집중 검증은 **135 passed / 2 warnings / 12.49s**이며 전체 **2121 tests collected / 6.43s**, protected mapped node loss 0이다. 네 transport 파일의 기존 함수/class 45개 AST 본문 차이는 0개다. Architecture는 619 modules / 1991 edges / 268 exact legacy edges로 통과했다. 신규 test node는 없으며 기존 Replicate 두 suite의 one-to-one node map을 유지했다. source/메타데이터 도입 capture와 전체 API/ORM 재검증은 root의 선형 통합에서 이어진다.

@@ -3,7 +3,7 @@ from urllib.request import Request
 
 import pytest
 
-from app.services import replicate_image
+from app.integrations import replicate_image
 
 
 def _public_dns(_host, _port, **_kwargs):

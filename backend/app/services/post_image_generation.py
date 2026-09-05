@@ -34,14 +34,12 @@ from app.credentials import (
 )
 from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
+from app.integrations import image_provider, pollinations_image, replicate_image
 from app.services import (
     agent_activity_policy,
     image_prompt_safety,
-    image_provider,
     operation_settings,
-    pollinations_image,
     profile_media,
-    replicate_image,
     service_image_key,
 )
 from app.services.direct_llm import (

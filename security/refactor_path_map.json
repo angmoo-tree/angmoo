@@ -174,7 +174,13 @@
     "backend/app/models/profile_images.py": "backend/app/domains/characters/models.py",
     "backend/app/core/config.py": "backend/app/config.py",
     "backend/tests/test_startup_security.py": "backend/tests/config/test_startup_security.py",
-    "backend/tests/test_request_body_limits.py": "backend/tests/common/test_request_body_limits.py"
+    "backend/tests/test_request_body_limits.py": "backend/tests/common/test_request_body_limits.py",
+    "backend/app/services/replicate_image.py": "backend/app/integrations/replicate_image.py",
+    "backend/app/services/image_provider.py": "backend/app/integrations/image_provider.py",
+    "backend/app/services/provider_http.py": "backend/app/integrations/provider_http.py",
+    "backend/app/services/pollinations_image.py": "backend/app/integrations/pollinations_image.py",
+    "backend/tests/test_replicate_image.py": "backend/tests/media/test_replicate_image.py",
+    "backend/tests/test_replicate_url_security.py": "backend/tests/media/test_replicate_url_security.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -345,7 +351,26 @@
     "tests/test_google_verification_throttle.py::test_google_link_rate_limit_prevents_credential_verification": "tests/identity/test_google_verification_throttle.py::test_google_link_rate_limit_prevents_credential_verification",
     "tests/test_l1_local_owner_session.py::test_bootstrap_closes_after_claim_and_replayed_challenge_loses_race": "tests/identity/test_l1_local_owner_session.py::test_bootstrap_closes_after_claim_and_replayed_challenge_loses_race",
     "tests/test_demo_account_lock.py::test_demo_principal_allows_safe_http_methods[HEAD]": "tests/identity/test_demo_account_lock.py::test_demo_principal_allows_safe_http_methods[HEAD]",
-    "tests/test_turnstile.py::test_siteverify_timeout_is_unavailable": "tests/identity/test_turnstile.py::test_siteverify_timeout_is_unavailable"
+    "tests/test_turnstile.py::test_siteverify_timeout_is_unavailable": "tests/identity/test_turnstile.py::test_siteverify_timeout_is_unavailable",
+    "tests/test_replicate_image.py::test_p_image_edit_posts_reference_payload_and_downloads_output": "tests/media/test_replicate_image.py::test_p_image_edit_posts_reference_payload_and_downloads_output",
+    "tests/test_replicate_image.py::test_p_image_edit_requires_reference_in_provider": "tests/media/test_replicate_image.py::test_p_image_edit_requires_reference_in_provider",
+    "tests/test_replicate_url_security.py::test_output_download_never_adds_the_provider_bearer": "tests/media/test_replicate_url_security.py::test_output_download_never_adds_the_provider_bearer",
+    "tests/test_replicate_url_security.py::test_redirect_handler_revalidates_the_destination": "tests/media/test_replicate_url_security.py::test_redirect_handler_revalidates_the_destination",
+    "tests/test_replicate_url_security.py::test_replicate_api_url_allowlist_accepts_only_documented_paths[https://api.replicate.com/v1/models/prunaai/p-image-edit/predictions]": "tests/media/test_replicate_url_security.py::test_replicate_api_url_allowlist_accepts_only_documented_paths[https://api.replicate.com/v1/models/prunaai/p-image-edit/predictions]",
+    "tests/test_replicate_url_security.py::test_replicate_api_url_allowlist_accepts_only_documented_paths[https://api.replicate.com/v1/predictions/prediction_123]": "tests/media/test_replicate_url_security.py::test_replicate_api_url_allowlist_accepts_only_documented_paths[https://api.replicate.com/v1/predictions/prediction_123]",
+    "tests/test_replicate_url_security.py::test_replicate_api_url_allowlist_accepts_only_documented_paths[https://api.replicate.com/v1/predictions]": "tests/media/test_replicate_url_security.py::test_replicate_api_url_allowlist_accepts_only_documented_paths[https://api.replicate.com/v1/predictions]",
+    "tests/test_replicate_url_security.py::test_replicate_api_url_allowlist_rejects_untrusted_destinations[http://api.replicate.com/v1/predictions/prediction_123]": "tests/media/test_replicate_url_security.py::test_replicate_api_url_allowlist_rejects_untrusted_destinations[http://api.replicate.com/v1/predictions/prediction_123]",
+    "tests/test_replicate_url_security.py::test_replicate_api_url_allowlist_rejects_untrusted_destinations[https://api.replicate.com.evil.example/v1/predictions/prediction_123]": "tests/media/test_replicate_url_security.py::test_replicate_api_url_allowlist_rejects_untrusted_destinations[https://api.replicate.com.evil.example/v1/predictions/prediction_123]",
+    "tests/test_replicate_url_security.py::test_replicate_api_url_allowlist_rejects_untrusted_destinations[https://api.replicate.com/v1/models/other/predictions]": "tests/media/test_replicate_url_security.py::test_replicate_api_url_allowlist_rejects_untrusted_destinations[https://api.replicate.com/v1/models/other/predictions]",
+    "tests/test_replicate_url_security.py::test_replicate_api_url_allowlist_rejects_untrusted_destinations[https://api.replicate.com:444/v1/predictions/prediction_123]": "tests/media/test_replicate_url_security.py::test_replicate_api_url_allowlist_rejects_untrusted_destinations[https://api.replicate.com:444/v1/predictions/prediction_123]",
+    "tests/test_replicate_url_security.py::test_replicate_api_url_allowlist_rejects_untrusted_destinations[https://attacker.example/v1/predictions/prediction_123]": "tests/media/test_replicate_url_security.py::test_replicate_api_url_allowlist_rejects_untrusted_destinations[https://attacker.example/v1/predictions/prediction_123]",
+    "tests/test_replicate_url_security.py::test_replicate_api_url_allowlist_rejects_untrusted_destinations[https://user@api.replicate.com/v1/predictions/prediction_123]": "tests/media/test_replicate_url_security.py::test_replicate_api_url_allowlist_rejects_untrusted_destinations[https://user@api.replicate.com/v1/predictions/prediction_123]",
+    "tests/test_replicate_url_security.py::test_replicate_output_url_accepts_only_delivery_hosts[https://pbxt.replicate.delivery/output.png]": "tests/media/test_replicate_url_security.py::test_replicate_output_url_accepts_only_delivery_hosts[https://pbxt.replicate.delivery/output.png]",
+    "tests/test_replicate_url_security.py::test_replicate_output_url_accepts_only_delivery_hosts[https://replicate.delivery/output.png]": "tests/media/test_replicate_url_security.py::test_replicate_output_url_accepts_only_delivery_hosts[https://replicate.delivery/output.png]",
+    "tests/test_replicate_url_security.py::test_replicate_output_url_rejects_lookalike_and_internal_hosts[https://127.0.0.1/output.png]": "tests/media/test_replicate_url_security.py::test_replicate_output_url_rejects_lookalike_and_internal_hosts[https://127.0.0.1/output.png]",
+    "tests/test_replicate_url_security.py::test_replicate_output_url_rejects_lookalike_and_internal_hosts[https://evil.example/output.png]": "tests/media/test_replicate_url_security.py::test_replicate_output_url_rejects_lookalike_and_internal_hosts[https://evil.example/output.png]",
+    "tests/test_replicate_url_security.py::test_replicate_output_url_rejects_lookalike_and_internal_hosts[https://replicate.delivery.evil.example/output.png]": "tests/media/test_replicate_url_security.py::test_replicate_output_url_rejects_lookalike_and_internal_hosts[https://replicate.delivery.evil.example/output.png]",
+    "tests/test_replicate_url_security.py::test_replicate_url_rejects_private_dns_results": "tests/media/test_replicate_url_security.py::test_replicate_url_rejects_private_dns_results"
   },
   "details": {
     "AR-B1": {
@@ -14224,6 +14249,25 @@
         "backend/app/runtime/characters/creator.py": "AR-B3 Character media admission/candidates/private preview and provider composition.",
         "backend/app/runtime/characters/management.py": "AR-B3 upload flow; activity/settings and multi-domain deletion remain their documented AR-B4/AR-B8-A scopes."
       }
+    },
+    "AR-B3-M2": {
+      "status": "Shared provider HTTP, Pollinations, Replicate and image-provider dispatch are actual integrations. Every repository Python caller uses the new module; old service files are removed.",
+      "file_moves": {
+        "backend/app/services/replicate_image.py": "backend/app/integrations/replicate_image.py",
+        "backend/app/services/image_provider.py": "backend/app/integrations/image_provider.py",
+        "backend/app/services/provider_http.py": "backend/app/integrations/provider_http.py",
+        "backend/app/services/pollinations_image.py": "backend/app/integrations/pollinations_image.py",
+        "backend/tests/test_replicate_image.py": "backend/tests/media/test_replicate_image.py",
+        "backend/tests/test_replicate_url_security.py": "backend/tests/media/test_replicate_url_security.py"
+      },
+      "preserved": [
+        "same timeouts, response byte bounds and redirect validation",
+        "same Pollinations safety/relay/fallback/request count",
+        "same Replicate reference preflight, poll/retry/cancellation behavior",
+        "unchanged logger category app.services.pollinations_image",
+        "no credential reveal or Social quota/job-policy movement"
+      ],
+      "test_move": "The two provider-specific Replicate suites move to tests/media without changing their test names or assertions. Mixed Social/provider security tests retain their current owner paths."
     }
   }
 }

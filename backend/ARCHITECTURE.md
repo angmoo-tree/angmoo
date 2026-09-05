@@ -458,3 +458,10 @@ Character/Creator 기본 HTTP 11개와 owner state API 1개가 Character router�
 Character 업로드의 원본 크기 한도와 Post의 인코딩 결과 크기 한도는 서로 다른 기존 계약입니다. 공통 decoder를 쓴다는 이유로 이 정책을 하나로 합치지 않습니다. World Package의 lossless 재인코딩·digest/journal도 별도 계약입니다. `core/public_media.py`의 공개 mount 목록에 draft나 candidate 디렉터리를 추가하지 않습니다.
 
 이 설명의 현재 적용 범위는 AR-B3-M1입니다. `services/profile_media.py`는 같은 객체의 임시 export와 역사 World helper만 남기며, 미전환 Character HTTP/candidate 업무와 Social job은 각 B3/B5 단계에서 소비자를 옮깁니다. quota·job·publication을 포괄하는 전역 media service는 만들지 않습니다.
+
+
+### 이미지 provider 통신
+
+`integrations/image_provider.py`가 모델별 실제 클라이언트를 선택하고, `pollinations_image.py`와 `replicate_image.py`는 provider 요청·응답·대기·실패 변환을 처리합니다. `integrations/provider_http.py`는 공개 HTTPS URL·리다이렉트·민감 헤더 제거와 제한된 오류 진단을 공유합니다. 외부 호출 횟수나 후보 quota를 결정하는 업무는 이 통신 모듈로 옮기지 않습니다.
+
+AR-B3-M2에서 이 네 파일의 실제 구현과 모든 Python 소비자를 이전하고 옛 `services` 파일은 제거했습니다. 기존 운영 필터와 연결되는 Pollinations logger 이름은 유지합니다. Replicate 전용 검증은 `tests/media`에 있고, Post quota와 provider 실패가 연결되는 혼합 검증은 기존 Social 검증 위치에 남습니다.

@@ -9,7 +9,8 @@ from urllib.request import Request
 import pytest
 
 from app import schemas
-from app.services import (pollinations_image, post_image_generation, provider_http, replicate_image)
+from app.services import post_image_generation
+from app.integrations import pollinations_image, provider_http, replicate_image
 from app.runtime.characters import creator as agent_creation_drafts
 
 

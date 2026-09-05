@@ -25,7 +25,7 @@
       "owner_phases": [
         "L0-L4 product URL, privacy UX, provider referer"
       ],
-      "path": "backend/app/services/pollinations_image.py"
+      "path": "backend/app/integrations/pollinations_image.py"
     },
     {
       "markers": [
@@ -34,7 +34,7 @@
       "owner_phases": [
         "L0-L4 product URL, privacy UX, provider referer"
       ],
-      "path": "backend/app/services/pollinations_image.py"
+      "path": "backend/app/integrations/pollinations_image.py"
     },
     {
       "markers": [
@@ -43,7 +43,7 @@
       "owner_phases": [
         "L0-L4 product URL, privacy UX, provider referer"
       ],
-      "path": "backend/app/services/pollinations_image.py"
+      "path": "backend/app/integrations/pollinations_image.py"
     },
     {
       "markers": [
@@ -155,7 +155,7 @@
       "owner_phases": [
         "L0-L4 product URL, privacy UX, provider referer"
       ],
-      "path": "backend/tests/test_replicate_image.py"
+      "path": "backend/tests/media/test_replicate_image.py"
     },
     {
       "markers": [

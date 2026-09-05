@@ -5842,6 +5842,20 @@
     {
       "external_imports": [
         "__future__",
+        "typing"
+      ],
+      "imports": [
+        "app.core.image_generation",
+        "app.integrations.pollinations_image",
+        "app.integrations.replicate_image"
+      ],
+      "module": "app.integrations.image_provider",
+      "path": "backend/app/integrations/image_provider.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "collections",
         "ctypes",
         "dataclasses",
@@ -6021,6 +6035,47 @@
     {
       "external_imports": [
         "__future__",
+        "asyncio",
+        "base64",
+        "dataclasses",
+        "hashlib",
+        "json",
+        "logging",
+        "re",
+        "typing",
+        "urllib.error",
+        "urllib.parse",
+        "urllib.request"
+      ],
+      "imports": [
+        "app.config",
+        "app.integrations.bounded_http",
+        "app.integrations.provider_http"
+      ],
+      "module": "app.integrations.pollinations_image",
+      "path": "backend/app/integrations/pollinations_image.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "dataclasses",
+        "ipaddress",
+        "re",
+        "socket",
+        "urllib.error",
+        "urllib.parse",
+        "urllib.request"
+      ],
+      "imports": [],
+      "module": "app.integrations.provider_http",
+      "path": "backend/app/integrations/provider_http.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "datetime",
         "typing"
       ],
@@ -6029,6 +6084,29 @@
       ],
       "module": "app.integrations.relationship_graph_read",
       "path": "backend/app/integrations/relationship_graph_read.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "asyncio",
+        "dataclasses",
+        "ipaddress",
+        "json",
+        "re",
+        "socket",
+        "time",
+        "urllib.error",
+        "urllib.parse",
+        "urllib.request"
+      ],
+      "imports": [
+        "app.config",
+        "app.integrations.bounded_http",
+        "app.integrations.provider_http"
+      ],
+      "module": "app.integrations.replicate_image",
+      "path": "backend/app/integrations/replicate_image.py",
       "wildcard_imports": []
     },
     {
@@ -6536,8 +6614,12 @@
         "app.domains.characters.service.profile",
         "app.domains.identity.service.demo_access",
         "app.integrations.bounded_http",
+        "app.integrations.image_provider",
         "app.integrations.media.files",
         "app.integrations.media.images",
+        "app.integrations.pollinations_image",
+        "app.integrations.provider_http",
+        "app.integrations.replicate_image",
         "app.models",
         "app.policies.name_policy",
         "app.runtime.characters.management",
@@ -6545,11 +6627,7 @@
         "app.services.agent_activity_policy",
         "app.services.agent_runs",
         "app.services.direct_llm",
-        "app.services.image_provider",
         "app.services.operation_settings",
-        "app.services.pollinations_image",
-        "app.services.provider_http",
-        "app.services.replicate_image",
         "app.services.runtime_boundary",
         "app.services.service_image_key"
       ],
@@ -8639,20 +8717,6 @@
     {
       "external_imports": [
         "__future__",
-        "typing"
-      ],
-      "imports": [
-        "app.core.image_generation",
-        "app.services.pollinations_image",
-        "app.services.replicate_image"
-      ],
-      "module": "app.services.image_provider",
-      "path": "backend/app/services/image_provider.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
         "dataclasses",
         "datetime",
         "hashlib",
@@ -8871,30 +8935,6 @@
     {
       "external_imports": [
         "__future__",
-        "asyncio",
-        "base64",
-        "dataclasses",
-        "hashlib",
-        "json",
-        "logging",
-        "re",
-        "typing",
-        "urllib.error",
-        "urllib.parse",
-        "urllib.request"
-      ],
-      "imports": [
-        "app.config",
-        "app.integrations.bounded_http",
-        "app.services.provider_http"
-      ],
-      "module": "app.services.pollinations_image",
-      "path": "backend/app/services/pollinations_image.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
         "collections.abc",
         "dataclasses",
         "datetime",
@@ -8912,16 +8952,16 @@
         "app.credentials",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.integrations.image_provider",
+        "app.integrations.pollinations_image",
+        "app.integrations.replicate_image",
         "app.models",
         "app.schemas",
         "app.services.agent_activity_policy",
         "app.services.direct_llm",
         "app.services.image_prompt_safety",
-        "app.services.image_provider",
         "app.services.operation_settings",
-        "app.services.pollinations_image",
         "app.services.profile_media",
-        "app.services.replicate_image",
         "app.services.service_image_key"
       ],
       "module": "app.services.post_image_generation",
@@ -8971,46 +9011,6 @@
       ],
       "module": "app.services.prompt_safety",
       "path": "backend/app/services/prompt_safety.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "collections.abc",
-        "dataclasses",
-        "ipaddress",
-        "re",
-        "socket",
-        "urllib.error",
-        "urllib.parse",
-        "urllib.request"
-      ],
-      "imports": [],
-      "module": "app.services.provider_http",
-      "path": "backend/app/services/provider_http.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "asyncio",
-        "dataclasses",
-        "ipaddress",
-        "json",
-        "re",
-        "socket",
-        "time",
-        "urllib.error",
-        "urllib.parse",
-        "urllib.request"
-      ],
-      "imports": [
-        "app.config",
-        "app.integrations.bounded_http",
-        "app.services.provider_http"
-      ],
-      "module": "app.services.replicate_image",
-      "path": "backend/app/services/replicate_image.py",
       "wildcard_imports": []
     },
     {

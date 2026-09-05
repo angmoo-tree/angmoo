@@ -269,23 +269,7 @@
           "importer": "app.runtime.characters.creator"
         },
         {
-          "imported": "app.services.image_provider",
-          "importer": "app.runtime.characters.creator"
-        },
-        {
           "imported": "app.services.operation_settings",
-          "importer": "app.runtime.characters.creator"
-        },
-        {
-          "imported": "app.services.pollinations_image",
-          "importer": "app.runtime.characters.creator"
-        },
-        {
-          "imported": "app.services.provider_http",
-          "importer": "app.runtime.characters.creator"
-        },
-        {
-          "imported": "app.services.replicate_image",
           "importer": "app.runtime.characters.creator"
         },
         {
@@ -669,14 +653,6 @@
           "importer": "app.services.feed_reaction_planner"
         },
         {
-          "imported": "app.services.pollinations_image",
-          "importer": "app.services.image_provider"
-        },
-        {
-          "imported": "app.services.replicate_image",
-          "importer": "app.services.image_provider"
-        },
-        {
           "imported": "app.models",
           "importer": "app.services.joint_activity_runtime"
         },
@@ -809,10 +785,6 @@
           "importer": "app.services.operation_settings"
         },
         {
-          "imported": "app.services.provider_http",
-          "importer": "app.services.pollinations_image"
-        },
-        {
           "imported": "app.cruds.agents",
           "importer": "app.services.post_image_generation"
         },
@@ -841,23 +813,11 @@
           "importer": "app.services.post_image_generation"
         },
         {
-          "imported": "app.services.image_provider",
-          "importer": "app.services.post_image_generation"
-        },
-        {
           "imported": "app.services.operation_settings",
           "importer": "app.services.post_image_generation"
         },
         {
-          "imported": "app.services.pollinations_image",
-          "importer": "app.services.post_image_generation"
-        },
-        {
           "imported": "app.services.profile_media",
-          "importer": "app.services.post_image_generation"
-        },
-        {
-          "imported": "app.services.replicate_image",
           "importer": "app.services.post_image_generation"
         },
         {
@@ -875,10 +835,6 @@
         {
           "imported": "app.services.post_image_generation",
           "importer": "app.services.post_image_job_worker"
-        },
-        {
-          "imported": "app.services.provider_http",
-          "importer": "app.services.replicate_image"
         },
         {
           "imported": "app.models",

@@ -1,4 +1,4 @@
-from app.services import replicate_image
+from app.integrations import replicate_image
 
 
 def test_p_image_edit_posts_reference_payload_and_downloads_output(monkeypatch) -> None:
@@ -57,7 +57,7 @@ def test_p_image_edit_requires_reference_in_provider(monkeypatch) -> None:
     import asyncio
 
     from app.core.image_generation import REPLICATE_IMAGE_MODEL_PRUNA_EDIT
-    from app.services import image_provider
+    from app.integrations import image_provider
 
     called = False
 
