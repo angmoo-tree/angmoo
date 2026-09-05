@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from app.domains.social.domain import SocialSearchState, SocialSearchUnavailable
+from app.domains.social.contracts import SocialSearchState, SocialSearchUnavailable
 from app.domains.social.ports import SocialSearchIndexPort
 
 

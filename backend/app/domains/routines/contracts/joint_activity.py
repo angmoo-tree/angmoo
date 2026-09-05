@@ -1,0 +1,26 @@
+"""Related reads and owner writes participating in one joint-activity transaction."""
+from __future__ import annotations
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any, Protocol
+from app.domains.routines.contracts.activity import ActivityReferences
+
+@dataclass(frozen=True)
+class OpeningClaim:
+    joint_activity_id: str
+    claimant_world_character_id: str
+    claim_version: int
+    expires_at: datetime
+    reused: bool
+
+
+
+class JointReferences(ActivityReferences, Protocol):
+    def mutually_blocked(self, *, world_id: str, first_id: str, second_id: str) -> bool: ...
+    def get_enabled_place(self, *, world_id: str, place_key: str) -> Any: ...
+    def visible_joint_post_count(self, *, joint_activity_id: str) -> int: ...
+    def set_joint_activity_id(self, post: Any, *, joint_activity_id: str) -> None: ...
+    def set_opening_post_id(self, post: Any, *, opening_post_id: str) -> None: ...
+    def record_started_event(self, *, joint: Any, author_world_character_id: str, post: Any, post_event: Any, current: datetime) -> Any: ...
+    def ensure_started_notification(self, *, joint_activity_id: str, world_id: str, recipient_world_character_id: str, actor_world_character_id: str, recipient_character_id: str, actor_character_id: str, source_social_event_id: str, post_id: str) -> None: ...
+    def record_completed_event(self, *, joint: Any, actor: Any, target: Any, current: datetime) -> None: ...

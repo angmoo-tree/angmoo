@@ -100,3 +100,7 @@ from app.domains.worlds.contracts import WorldServiceError
 
 class WorldCharacterOwnershipError(WorldServiceError):
     reason_code = "world_character_owner_mismatch"
+
+
+class WorldCharacterSocialScopeError(Exception):
+    """The active WorldCharacter cannot author in the requested canonical scope."""

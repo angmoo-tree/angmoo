@@ -39,7 +39,7 @@ from app.services.direct_llm import (
 )
 from app.services import community as community_service
 from app.services import lore_parser_quota
-from app.services.llm_context import neutralize_context_text
+from app.core.context_text import neutralize_context_text
 
 
 SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt", ".md"}

@@ -69,13 +69,13 @@ def test_l3_current_entrypoints_track_completed_and_pending_migrations() -> None
         APP_ROOT
         / "domains"
         / "routines"
-        / "infrastructure"
-        / "sqlalchemy_daily_activity_plans.py": {
+        / "service"
+        / "plans.py": {
             "prepare_activity_plan",
             "get_activity_plan",
             "update_activity_runtime_mode",
         },
-        APP_ROOT / "domains" / "routines" / "public.py": {
+        APP_ROOT / "domains" / "routines" / "service" / "lifecycle.py": {
             "reconcile_all_elapsed_routines",
         },
         APP_ROOT
@@ -84,7 +84,7 @@ def test_l3_current_entrypoints_track_completed_and_pending_migrations() -> None
         / "sqlalchemy_runtime.py": {
             "run_routine_post_runtime",
         },
-        APP_ROOT / "services" / "community.py": {
+        APP_ROOT / "domains" / "social" / "service" / "timeline.py": {
             "create_post",
             "create_reply",
         },
@@ -120,7 +120,7 @@ def test_activity_plan_route_and_scheduler_use_routines_public_boundary() -> Non
 
     assert "app.domains.routines" in _imports(route)
     assert "app.services.daily_activity_plans" not in _imports(route)
-    assert "app.domains.routines.public" in _imports(agent_runs)
+    assert "app.domains.routines.service.lifecycle" in _imports(agent_runs)
     assert "app.runtime.routine_posts" in _imports(agent_runs)
     assert "app.services.routine_post_runtime" not in _imports(agent_runs)
     assert "app.runtime.routine_posts.sqlalchemy_runtime" in _imports(resident)
@@ -147,9 +147,22 @@ def test_l3_public_package_anchors_have_no_reverse_dependencies() -> None:
         "sqlalchemy",
     )
 
+    paths: list[Path] = []
     for boundary in (*PUBLIC_BOUNDARIES, *L3_5_PUBLIC_BOUNDARIES):
-        relative = Path("contracts/__init__.py") if boundary == "world_packages" else Path("public.py")
-        path = APP_ROOT / "domains" / boundary / relative
+        if boundary == "routine_posts":
+            relatives = (
+                Path("contracts/__init__.py"),
+                Path("contracts/interaction.py"),
+                Path("contracts/context.py"),
+                Path("contracts/generation.py"),
+            )
+        elif boundary == "world_packages":
+            relatives = (Path("contracts/__init__.py"),)
+        else:
+            relatives = (Path("public.py"),)
+        paths.extend(APP_ROOT / "domains" / boundary / relative for relative in relatives)
+
+    for path in paths:
         assert path.is_file(), path
         imports = _imports(path)
         assert not {

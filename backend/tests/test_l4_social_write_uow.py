@@ -15,7 +15,7 @@ from app.domains.social.application import (
     create_owner_post,
     create_owner_reply,
 )
-from app.domains.social.domain import (
+from app.domains.social.contracts import (
     OwnerPostCommand,
     OwnerReplyCommand,
     SocialWriteNotFoundError,

@@ -1,4 +1,4 @@
-from app.services.llm_context import neutralize_context_text
+from app.core.context_text import neutralize_context_text
 
 
 def test_neutralize_context_text_trims_spaces_around_newlines() -> None:

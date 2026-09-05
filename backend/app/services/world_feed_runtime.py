@@ -13,7 +13,7 @@ from app.runtime.social.observations import observe_source
 from app.core import unit_of_work
 from app.cruds import agent_runs as agent_run_crud
 from app.domains.social.public import SocialObservationError, SocialSearchUnavailable
-from app.domains.social.domain.subjective_context import (
+from app.domains.social.contracts.subjective_context import (
     ActionEmotionLabel,
     ActionSubjectiveContextV1,
 )
@@ -35,7 +35,7 @@ from app.services.feed_reaction_planner import (
     FeedReactionValidationError,
     validate_reaction_decision,
 )
-from app.services.resident_contracts import LangGraphResidentContext
+from app.runtime.resident.context import LangGraphResidentContext
 from app.services.world_feed_search import (
     KeywordClaim,
     ReadySearchProfile,

@@ -239,7 +239,7 @@
     },
     "GET /api/v1/characters/{character_id}/worlds/{world_id}/activity-plan": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.world_activity_runtime",
+      "module": "app.domains.routines.router",
       "endpoint": "get_daily_activity_plan"
     },
     "GET /api/v1/characters/{character_id}/worlds/{world_id}/relationship-graph": {
@@ -559,7 +559,7 @@
     },
     "PATCH /api/v1/characters/{character_id}/worlds/{world_id}/activity-runtime-mode": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.world_activity_runtime",
+      "module": "app.domains.routines.router",
       "endpoint": "update_world_character_activity_runtime_mode"
     },
     "PATCH /api/v1/messages/settings": {
@@ -769,7 +769,7 @@
     },
     "POST /api/v1/characters/{character_id}/worlds/{world_id}/activity-plan/prepare": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.world_activity_runtime",
+      "module": "app.domains.routines.router",
       "endpoint": "prepare_daily_activity_plan"
     },
     "POST /api/v1/messages/threads": {

@@ -1,3 +1,4 @@
+from app.domains.memory.service.daypart import record_action_memory as _record_daypart_action_memory
 import asyncio
 import hashlib
 import json
@@ -18,7 +19,7 @@ from app.cruds import community as community_crud
 from app.services.agent_briefs import PREPARED_CREATE_POST_BRIEF_SENTINEL
 from app.services import character_lore as character_lore_service
 from app.services import community as community_service
-from app.services.llm_context import neutralize_context_text
+from app.core.context_text import neutralize_context_text
 from app.services.runtime_boundary import OpenClawGatewayClient, OpenClawGatewayError
 
 
@@ -211,40 +212,6 @@ def _build_compact_action_memory(
     }
 
 
-def _record_daypart_action_memory(
-    db: Session, *, run: models.AgentRun, action_memory: dict[str, Any]
-) -> None:
-    gateway_result = run.gateway_result if isinstance(run.gateway_result, dict) else {}
-    session_context = gateway_result.get("session_context")
-    if not isinstance(session_context, dict) or not session_context.get("daypart_persistent"):
-        return
-    memory_session_key = session_context.get("memory_session_key")
-    daypart_start_date = session_context.get("daypart_start_date")
-    activity_daypart = session_context.get("activity_daypart")
-    if not (
-        isinstance(memory_session_key, str)
-        and isinstance(daypart_start_date, str)
-        and isinstance(activity_daypart, str)
-    ):
-        return
-    try:
-        parsed_daypart_start = datetime.fromisoformat(daypart_start_date).date()
-    except ValueError:
-        return
-    event = models.AgentDaypartMemoryEvent(
-        character_id=run.character_id,
-        memory_session_key=memory_session_key,
-        daypart_start_date=parsed_daypart_start,
-        activity_daypart=activity_daypart,
-        event_type=f"action_{action_memory.get('action_type') or 'public'}",
-        source_post_id=action_memory.get("source_post") or action_memory.get("post_id"),
-        run_id=run.id,
-        summary=str(action_memory.get("public_result_summary") or "")[:2000],
-        payload=action_memory,
-        topic_signature=str(action_memory.get("topic") or "")[:300] or None,
-    )
-    db.add(event)
-    db.commit()
 
 
 def reply_agent_tool_post_from_brief(

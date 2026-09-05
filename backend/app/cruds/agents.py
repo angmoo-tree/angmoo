@@ -5,10 +5,6 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import models, schemas
-from app.core.agent_activity_limits import (
-    DEFAULT_MAX_COMMENTS_PER_DAY,
-    DEFAULT_MAX_POSTS_PER_DAY,
-)
 from app.core.image_generation import (
     DEFAULT_USER_IMAGE_MODEL,
     DEFAULT_MAX_IMAGES_PER_DAY,
@@ -18,18 +14,6 @@ from app.core import active_hours
 from app.core import unit_of_work
 
 
-HIDDEN_ACTIVITY_ACTION_TYPES = (
-    "state_save_suppressed",
-    "feed_perception_debug",
-    "feed_viewed",
-    "feed_interests_noted",
-    "feed_seed_consumed",
-    "inbox_notifications_provided",
-    "inbox_reviewed",
-    "observation_note_saved",
-    "complete_tick_rejected",
-)
-STATE_SAVE_DEDUPE_WINDOW = timedelta(seconds=90)
 
 
 def default_auth_profile_id(provider: str, character_id: str) -> str:
@@ -43,72 +27,10 @@ def default_credential_model() -> str:
     return "gemini-3.1-flash-lite"
 
 
-def get_setting(db: Session, character_id: str) -> models.AgentActivitySetting | None:
-    return db.get(models.AgentActivitySetting, character_id)
 
 
-def ensure_setting(
-    db: Session,
-    character_id: str,
-    *,
-    commit: bool = True,
-) -> models.AgentActivitySetting:
-    setting = get_setting(db, character_id)
-    if setting is not None:
-        return setting
-    setting = models.AgentActivitySetting(
-        character_id=character_id,
-        auto_enabled=False,
-        activity_level="normal",
-        activity_interval_minutes=60,
-        comment_cooldown_minutes=180,
-        max_comments_per_day=DEFAULT_MAX_COMMENTS_PER_DAY,
-        post_cooldown_hours=24,
-        max_posts_per_day=DEFAULT_MAX_POSTS_PER_DAY,
-        like_policy="normal",
-        allow_post=True,
-        allow_reply=True,
-        allow_like=True,
-        allow_repost=True,
-        allow_follow=True,
-        allow_unfollow=True,
-        allow_observe=True,
-        tendency_summary="",
-        tendency_action_ranges={},
-        planner_tendency_profile={},
-        tendency_error=None,
-        active_hours_start=active_hours.DEFAULT_ACTIVE_HOURS_START,
-        active_hours_end=active_hours.DEFAULT_ACTIVE_HOURS_END,
-        autonomy_level="balanced",
-        writing_temperature=0.6,
-        writing_presence_penalty=0.3,
-        writing_repetition_level="light",
-    )
-    db.add(setting)
-    if commit:
-        db.commit()
-        db.refresh(setting)
-    else:
-        db.flush()
-    return setting
 
 
-def update_setting(
-    db: Session,
-    setting: models.AgentActivitySetting,
-    data: schemas.AgentActivitySettingUpdate,
-    *,
-    commit: bool = True,
-) -> models.AgentActivitySetting:
-    for field, value in data.model_dump(exclude_unset=True).items():
-        if value is not None:
-            setattr(setting, field, value)
-    if commit:
-        db.commit()
-        db.refresh(setting)
-    else:
-        db.flush()
-    return setting
 
 
 def get_image_generation_setting(
@@ -385,46 +307,8 @@ def upsert_credential(
     return credential
 
 
-def filter_visible_activity_logs(
-    logs: list[models.AgentActivityLog], *, limit: int
-) -> list[models.AgentActivityLog]:
-    visible: list[models.AgentActivityLog] = []
-    state_saved_seen: list[datetime] = []
-    for log in logs:
-        if log.action_type in HIDDEN_ACTIVITY_ACTION_TYPES:
-            continue
-        if log.action_type == "state_saved":
-            if any(
-                abs(saved_at - log.created_at) <= STATE_SAVE_DEDUPE_WINDOW
-                for saved_at in state_saved_seen
-            ):
-                continue
-            state_saved_seen.append(log.created_at)
-        visible.append(log)
-        if len(visible) >= limit:
-            break
-    return visible
 
 
-def list_recent_activity(
-    db: Session, character_id: str, limit: int = 20
-) -> list[models.AgentActivityLog]:
-    logs = list(
-        db.scalars(
-            select(models.AgentActivityLog)
-            .where(models.AgentActivityLog.character_id == character_id)
-            .where(
-                models.AgentActivityLog.action_type.not_in(
-                    HIDDEN_ACTIVITY_ACTION_TYPES
-                )
-            )
-            .order_by(
-                models.AgentActivityLog.created_at.desc(), models.AgentActivityLog.id.desc()
-            )
-            .limit(max(limit * 3, limit + 20))
-        )
-    )
-    return filter_visible_activity_logs(logs, limit=limit)
 
 
 def get_pending_feed_cue(db: Session, character_id: str) -> models.AgentFeedCue | None:
@@ -469,27 +353,6 @@ def mark_pending_feed_cue_used(
     return cue
 
 
-def log_activity(
-    db: Session,
-    *,
-    user_id: str,
-    character_id: str,
-    action_type: str,
-    target_post_id: str | None,
-    reason: str,
-    result: str,
-) -> models.AgentActivityLog:
-    log = models.AgentActivityLog(
-        user_id=user_id,
-        character_id=character_id,
-        action_type=action_type,
-        target_post_id=target_post_id,
-        reason=reason,
-        result=result,
-    )
-    db.add(log)
-    unit_of_work.finish_write(db, log)
-    return log
 
 
 def get_assigned_slot(
@@ -583,3 +446,7 @@ def count_effective_active_server_llm_autonomy_agents(
         )
     )
     return len((auto_enabled_ids | assigned_slot_ids) - excluded)
+
+from app.domains.routines.constants import HIDDEN_ACTIVITY_ACTION_TYPES, STATE_SAVE_DEDUPE_WINDOW
+from app.domains.routines.service.activity_logs import filter_visible_activity_logs, list_recent_activity, log_activity
+from app.domains.routines.service.activity_settings import get_setting, ensure_setting, update_setting

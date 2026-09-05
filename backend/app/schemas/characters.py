@@ -3,7 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.schemas.community import CommentRead
+from app.domains.social.schemas.community import CommentRead
 
 
 PublicCharacterActivityAction = Literal[
