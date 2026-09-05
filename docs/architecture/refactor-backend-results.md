@@ -1139,3 +1139,12 @@ Source `5fb092b2f97b7027f19e8c1d1653929d9ffeec8e`는 실제3 ORM/응답/설정�
 추출한 query/call 인수를 원래 AST로 펼쳐 전체62개 정의·상수·account 함수가 동일함을 확인했다. 기존 관련150 테스트 PASS/2 datetime warnings/13.11s, 경계749modules/2482edges/188exact legacy, L4와 ER0 inventory PASS다. 원래 source/split/assertion/suppression/APIORM/node6진단은0오류/protected2201/current2255다. 새 test node는 없다. 삭제된11개 exact legacy edge만 제거하고 아직 이전 중인 실제 Routines/Social 호출2개는 owner·제거조건이 있는 exact bridge로 기록했다. Global model/schema 별칭은 G5에서 제거한다.
 
 선행 실제 source/node 원장 통합 전이므로 이 결과는 source 준비 검증이며 B8 전체 PR/merge/Installer PASS가 아니다.
+
+
+### AR-B8 Character image A1 실제 설정·키 정책·저장 책임
+
+Source `940ef7896fb414d18b703d20d118dbea918ed2df`는 마지막 Character image ORM을 기존 `characters/models.py`로, 입력2개/모델선택type1개를 기존 schemas로 옮겼다. `repository/image_settings.py`는 실제 get/ensure/clear와 같은 Session의 Character 조회·commit/refresh를, `service/image_settings.py`는 실제 secret scope·암호화/삭제/모드 동기화·수동 외형 프롬프트 정책을 소유한다. 원래39개 전체 정의는 실제 query/commit 호출을 펼친 AST와 동일하다. 옛 model 파일은 제거했고 실제 호출4개 파일을 새 정의로 연결했다.
+
+최초 집중검사는64 PASS/15 FAIL이었다. 실패15개는14개 기존 monkeypatch가 삭제된 `post_image_generation.agent_crud.get_image_generation_setting`을 가리킨 결과였고 실제 `image_setting_repository`로 fixture target만 전환했다. 원래 assertions/예외검사를 보존하고 최종79 PASS/9.79초다. 최초 파일명 오기로 선택한 미존재 test 경로는 수집0개로 종료했으며 실제 `identity/test_l1_local_v2_credentials.py`를 확인하여 검증했다.
+
+경계751/2489/187legacy, L4/ER0 PASS, 원래 source/split/assertions/suppression/APIORM/node6진단0(protected2201/current2255)이다. 기존 split 증거에 이미 옮겨진 Routines·Character 정의도 모두 유지하고 실제 최종 model 경로를 반영했다. 새 node는 없다. 상위 owner HTTP/media workflow와 Social visual-identity write 연결 및 G5 aliases는 후속 작업이다. 전체 B8/설치/merge 종료를 뜻하지 않는다.
