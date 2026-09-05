@@ -493,3 +493,11 @@ Setup slice의 최종 현재 API·ORM 및 전체 split evidence 검사도 PASS�
 - 경계 **639 modules / 2,041 internal edges / legacy exact 281 PASS**; routines의 실제 새 **21개 module**만 부분 scope다. Public route **196**, L4 parity **97**, ER0 **76 PostgreSQL 파일 / 87 migration / 24 Neo4j / 44 Next route / 7 workload**, Memory batch 현재 inventory를 확인했다. 살아 있는 이전 source의 정확 bridge와 제거 단계를 policy에 기록한다.
 
 이 source는 일일 계획 전환의 로컬 검증이며 B4 전체·Hosted CI·설치 앱·PR/merge 종료가 아니다. source 도입 기록은 root의 선형 capture로 이어진다. 이후 claim/lifecycle·provider/result·resident 전환에서도 오류/권한/commit 의미가 다른 기존 함수를 이름만 보고 합치지 않는다.
+
+### AR-B4-A3 선행 hotfix — 만료 소비 기록의 캐릭터 scope
+
+구조 이전 전 실제 복구 경로를 조사하다 기존 guarded `routines.public.recover_expired_claims`가 만료된 `ActivityEventConsumption`을 `row.world_character_id`로 검사하는 오류를 확인했다. 이 ORM의 실제 필드는 `consumer_world_character_id`다. 기존 restart fixture의 최종 복구 호출만 legacy에서 guarded public으로 바꾸고 새 SQLite 파일로 실행하면 `AttributeError`가 재현됐다. 새 autonomous/owner-controlled 회귀 2개도 수정 전 모두 같은 오류로 실패했다.
+
+제품 변경은 해당 참조 **한 줄**이며 기존 `_require_autonomous`와 commit 순서·오류 의미를 유지한다. 만료 consumption과 아직 유효한 beat를 분리한 실제 SQLite 재시작 검증에서, 자율 캐릭터의 consumption은 한 번만 released·version 증가되고 claim 필드가 정리된다. 사용자 조종 캐릭터는 기존 validation 오류로 거부되며 caller rollback 후 원래 claim이 남는다. 두 경우 모두 아직 유효한 beat, Post/AgentRun/SocialEvent 개수를 보존한다. 기존 guarded와 legacy lifecycle을 하나로 합치거나 guarded 경로에 legacy의 약한 admission을 적용하지 않았다.
+
+Hotfix·계획·공동 활동·게시 실행·scheduler/활동 한도 집중 결과는 **121 passed / 1 기존 PostgreSQL skip / 2 기존 SQLite datetime warnings / 29.57초**다. 수정 전 두 실패는 `guarded-recovery-before.log`에 남겼으며, 원본 assertion·frozen checkpoint·API·ORM은 수정하지 않았다. 현재 ER0 source hash만 한 줄 변경에 맞췄다. 이 신규 회귀의 최초 도입 capture는 source 고정 이후 root가 수행한다. 이후 A3 구조 이전은 이 정상 scope 동작을 보존한다.

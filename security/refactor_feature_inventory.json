@@ -1518,7 +1518,7 @@
       ],
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
-        "backend": "A2b:96 passed/1 existing PG skip; same-Session mode/owner commit and rollback; API/ORM/assertion/node loss0; protected2129/current2169; split and partial boundary pass. Source capture, lifecycle/provider/resident and integration remain.",
+        "backend": "A2b:96 passed/1 existing PG skip; same-Session mode/owner commit and rollback; API/ORM/assertion/node loss0; protected2129/current2169; split and partial boundary pass. Source capture, lifecycle/provider/resident and integration remain. A3 pre-move guarded consumption hotfix:121 passed/1 existing PG skip; actual SQLite before-fail/after-pass owner scope and claim preservation.",
         "item_status": "MAPPED; test association is navigation, not a claim every branch is covered",
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },

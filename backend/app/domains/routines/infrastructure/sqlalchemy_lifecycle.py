@@ -60,7 +60,7 @@ def recover_expired_claims(
         )
     )
     for row in consumptions:
-        _require_autonomous(db, row.world_character_id)
+        _require_autonomous(db, row.consumer_world_character_id)
         row.status = "released"
         row.claim_run_id = None
         row.claim_expires_at = None

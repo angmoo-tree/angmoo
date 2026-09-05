@@ -18129,6 +18129,17 @@
         "architecture": "639 modules /2041 edges /legacy exact281;21 routines partial roles",
         "inventories": "Public196;L4 parity97;ER0 76/87/24/44/7;Memory batch current"
       }
+    },
+    "AR-B4-A3-consumption-recovery-hotfix": {
+      "status": "SOURCE IMPLEMENTED — 121 passed / 1 existing PostgreSQL skip; before fix 2 reproduced AttributeErrors",
+      "change_kind": "Separate behavior hotfix before lifecycle role move",
+      "source": "backend/app/domains/routines/infrastructure/sqlalchemy_lifecycle.py::recover_expired_claims",
+      "change": "Use ActivityEventConsumption.consumer_world_character_id in the existing _require_autonomous call. No schema, predicate, permission relaxation, commit or retry changes.",
+      "test_nodes": [
+        "tests/routines/test_guarded_claim_recovery.py::test_guarded_recovery_uses_consumption_owner_and_preserves_admission[autonomous]",
+        "tests/routines/test_guarded_claim_recovery.py::test_guarded_recovery_uses_consumption_owner_and_preserves_admission[owner-controlled]"
+      ],
+      "evidence": "Existing restart fixture on isolated SQLite reproduced AttributeError through guarded public. Both new nodes failed before the one-line fix, then passed with scheduler/claim/public-action checks; unexpired beat remains claimed."
     }
   }
 }

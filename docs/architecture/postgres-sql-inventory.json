@@ -530,7 +530,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/routines/infrastructure/sqlalchemy_lifecycle.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "7544f2dacf16fe5a8213abeec6479ae077df6a3d905e26ddbdb4c37279d2c4c6",
+      "source_sha256": "101a1e1596f64d0634b6f8311c0ec1105288c2736fb3dba4f5b0b7ee622609e9",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
